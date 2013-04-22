@@ -83,7 +83,7 @@ $(function() {
 			});
 
 			// TODO: move info window to a new view
-			var markerContent = $("#marker-content-template .info-window").clone();
+			var markerContent = $($("#marker-content-template").html());
 			markerContent.width(400).height(300);
 			markerContent.find(".title").text(model.get("title"));
 			markerContent.find(".description").text(model.get("description"));
@@ -91,30 +91,43 @@ $(function() {
 			markerContent.find(".type").text(TYPE_STRING[model.get("type")]);
 			markerContent.find(".added-by").text("נוסף על ידי " + model.get("user").first_name + " " + model.get("user").last_name);
 
+			var $followButton = markerContent.find(".follow-button");
+			var $unfollowButton = markerContent.find(".unfollow-button");
+			var $shareButton = markerContent.find(".share-button");
 			var $followerList = markerContent.find(".followers");
-			for (var i = 0; i < model.get("followers").length; i++) {
-				var follower = model.get("followers")[i].facebook_id;
-				var image = "https://graph.facebook.com/" + follower + "/picture";
-				$followerList.append($("<img>").attr("src", image));
-			}
 
-			markerContent.find(".follow-button").click(function() {
-				console.log("setting model following", model);
-				model.set("following", true);
-				model.save();
+			$followButton.click(function() {
+				model.save({following: true}, {wait:true});
 			});
 
-			markerContent.find(".unfollow-button").click(function() {
-				console.log("setting model not following", model);
-				model.set("following", false);
-				model.save();
+			$unfollowButton.click(function() {
+				model.save({following: false}, {wait:true});
 			});
 
-			markerContent.find(".share-button").click(function() {
+			var updateFollowing = function() {
+				if (model.get("following")) {
+					$followButton.hide();
+					$unfollowButton.show();
+				} else {
+					$followButton.show();
+					$unfollowButton.hide();
+				}
+
+				$followerList.empty();
+				for (var i = 0; i < model.get("followers").length; i++) {
+					var follower = model.get("followers")[i].facebook_id;
+					var image = "https://graph.facebook.com/" + follower + "/picture";
+					$followerList.append($("<img>").attr("src", image));
+				}
+			};
+			updateFollowing();
+			model.bind("change:following", updateFollowing, model);
+
+			$shareButton.click(function() {
 				FB.ui({
 					method: "feed",
 					name: model.get("title"),
-					link: "http://any-way.co.il/" + model.get("id"),
+					link: document.location.href,
 					description: model.get("description"),
 					caption: TYPE_STRING[model.get("type")]
 					// picture
@@ -139,7 +152,7 @@ $(function() {
 
 			}, this));
 
-			model.set("markerView", marker);
+			model.set("markerView", this.markerList.length);
 			this.markerList.push(marker);
 
 			this.chooseMarker(model.get("id"));
@@ -162,7 +175,7 @@ $(function() {
 				return;
 			}
 			console.log("choosing marker", currentMarker);
-			var markerView = this.markers.get(currentMarker).get("markerView");
+			var markerView = this.markerList[this.markers.get(currentMarker).get("markerView")];
 			new google.maps.event.trigger( markerView, 'click' );
 		},
 		contextMenuMap : function(e) {

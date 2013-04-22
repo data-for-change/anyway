@@ -1,4 +1,5 @@
 from google.appengine.ext import db
+import time
 
 class User(db.Model):
 	email = db.StringProperty()

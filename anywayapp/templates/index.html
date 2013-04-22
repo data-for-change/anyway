@@ -7,51 +7,16 @@
     <script src="/js/libs/underscore.js"></script>
     <script src="/js/libs/backbone.js"></script>
     <script src="/js/libs/bootstrap.js"></script>
+    <script src="/js/libs/date.js"></script>
+    <script src="/js/libs/daterangepicker.js"></script>
     <script src="/js/markerdialog.js"></script>
     <script src="/js/sidebar.js"></script>
     <script src="/js/contextmenu.js"></script>
     <script src="/js/app.js"></script>
+
     <link rel="stylesheet" href="/css/bootstrap.rtl.css"/>
-
-    <style>
-        .context-menu {
-            position: absolute;
-            width: 150px;
-            background: white;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            margin: 0;
-            border: 0;
-            list-style: none;
-            cursor: pointer;
-        }
-
-        .context-menu li {
-            line-height: 25px;
-            border-top: 1px solid #f8f8f8;
-            border-bottom: 1px solid #eee;
-            padding: 2px 5px;
-            box-sizing: border-box;
-        }
-
-        .context-menu li:hover {
-            background: #f2f2f2;
-        }
-
-        .sidebar-container ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-        .sidebar-container ul li {
-            padding: 5px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .followers img {
-            height: 16px;
-            padding: 2px;
-        }
-    </style>
+    <link rel="stylesheet" href="/css/style.css"/>
+    <link rel="stylesheet" href="/css/daterangepicker.css"/>
 </head>
 <body style="width: 100%; height: 100%">
 <div id="app">
@@ -134,7 +99,24 @@
     </a></li>
 </div>
 <div id="sidebar-template" style="display: none">
+    <div class="sidebar-title">סנן לפי שכבה</div>
+    <ul>
+        <li><input type="checkbox" class="show-bills" checked/> הראה הצעות חוק</li>
+        <li><input type="checkbox" class="show-petitions" checked/> הראה עצומות</li>
+    </ul>
+    <div class="sidebar-title">סנן לפי טווח תאריכים</div>
+    <ul>
+        <li>
+            <div class="input-prepend">
+                <span class="add-on"><i class="icon-calendar"></i></span><input type="text" class="input-medium date-range"/>
+            </div>
+
+        </li>
+
+    </ul>
+    <div class="sidebar-title">הצעות נוכחיות</div>
     <ul class="current-view"></ul>
+
 </div>
 <div id="fb-root"></div>
 <script>

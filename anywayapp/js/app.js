@@ -64,6 +64,40 @@ $(function() {
 			this.sidebar = new SidebarView({ map: this.map }).render();
 			this.$el.find(".sidebar-container").append(this.sidebar.$el);
 
+			this.$el.find(".date-range").daterangepicker({
+					ranges: {
+						'היום': ['today', 'today'],
+						'אתמול': ['yesterday', 'yesterday'],
+						'שבוע אחרון': [Date.today().add({ days: -6 }), 'today'],
+						'חודש אחרון': [Date.today().add({ days: -29 }), 'today'],
+						'החודש הזה': [Date.today().moveToFirstDayOfMonth(), Date.today().moveToLastDayOfMonth()],
+						'החודש שעבר': [Date.today().moveToFirstDayOfMonth().add({ months: -1 }), Date.today().moveToFirstDayOfMonth().add({ days: -1 })]
+					},
+					opens: 'left',
+					format: 'dd/MM/yyyy',
+					separator: ' עד ',
+					startDate: Date.today().add({ days: -29 }),
+					endDate: Date.today(),
+					minDate: '01/01/2013',
+					maxDate: '12/31/2023',
+					locale: {
+						applyLabel: 'בחר',
+						fromLabel: 'מ',
+						toLabel: 'עד',
+						customRangeLabel: 'בחר תאריך',
+						daysOfWeek: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr','Sa'],
+						monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+						firstDay: 1
+					},
+					showWeekNumbers: true,
+					buttonClasses: ['btn-danger']
+				},
+				_.bind(function(start, end) {
+					this.startRange = start;
+					this.endRange = end;
+				}, this)
+			);
+
 			this.router = new AppRouter();
 			Backbone.history.start({pushState: true});
 
@@ -161,7 +195,7 @@ $(function() {
 			console.log("loading markers", this.markers);
 			if (this.markerList) {
 				_(this.markerList).each(function(marker) {
-					marker.remove();
+					this.map.removeOverlay(marker);
 				});
 			}
 			this.markerList = [];

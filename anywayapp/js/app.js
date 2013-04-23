@@ -32,7 +32,7 @@ $(function() {
 			"click #map_canvas" : "clickMap",
 			"click .fb-login" : "requireLogin",
 			"click .fb-logout" : "logout",
-			"change input[type=checkbox]" : "updateCheckbox"
+			"change input[type=checkbox]" : "updateCheckbox",
 		},
 		initialize : function() {
 			_.bindAll(this, "clickContext");
@@ -42,11 +42,13 @@ $(function() {
 			this.markerList = [];
 
 			this.markers.bind("reset", this.loadMarkers, this);
+			this.markers.bind("destroy", this.loadMarkers, this);
 			this.markers.bind("add", this.loadMarker, this);
 			this.markers.bind("change:currentModel", this.chooseMarker, this);
 			//this.markers.bind("change", this.loadMarker, this);
 			this.model.bind("change:user", this.updateUser, this);
 			this.model.bind("change:layers", this.loadMarkers, this);
+			this.model.bind("change:dateRange", this.loadMarkers, this);
 			this.login();
 
 		},
@@ -98,8 +100,7 @@ $(function() {
 					buttonClasses: ['btn-danger']
 				},
 				_.bind(function(start, end) {
-					this.startRange = start;
-					this.endRange = end;
+					this.model.set("dateRange", [start, end]);
 				}, this)
 			);
 
@@ -121,9 +122,21 @@ $(function() {
 		loadMarker : function(model) {
 			console.log("loading marker", ICONS[model.get("type")]);
 
-			if (model.get("layers") && !model.get("layers")[model.get("type")]) {
+			if (this.model.get("layers") && !this.model.get("layers")[model.get("type")]) {
 				console.log("skipping marker because the layer is not chosen");
 				return;
+			}
+
+			if (this.model.get("dateRange")) {
+				var createdDate = new Date(model.get("created"));
+				var start = this.model.get("dateRange")[0];
+				var end = this.model.get("dateRange")[1];
+
+				if (createdDate < start || createdDate > end) {
+					console.log("skipping marker becuase the date is not in the range");
+					return;
+				}
+
 			}
 
 			var markerView = new MarkerView({model: model, map: this.map}).render();
@@ -157,6 +170,9 @@ $(function() {
 				return;
 			}
 
+			if (!this.markers.get(currentMarker)) {
+				return;
+			}
 			var markerView = this.markerList[this.markers.get(currentMarker).get("markerView")];
 			new google.maps.event.trigger(markerView.marker , "click");
 		},

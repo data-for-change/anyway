@@ -14,11 +14,14 @@ var TYPE_STRING = [
 $(function() {
 	var AppRouter = Backbone.Router.extend({
 		routes: {
+			"" : "navigateEmpty",
 			":id" : "navigate"
 		},
 		navigate: function(id) {
-			console.log(id);
-			app.model.set("currentMarker", parseInt(id))
+			app.model.set("currentMarker", parseInt(id));
+		},
+		navigateEmpty: function() {
+			app.model.set("currentMarker", null);
 		}
 	});
 
@@ -175,6 +178,11 @@ $(function() {
 				return;
 			}
 			var markerView = this.markerList[this.markers.get(currentMarker).get("markerView")];
+			if (!markerView) {
+				this.model.set("currentMarker", null);
+				return;
+			}
+
 			new google.maps.event.trigger(markerView.marker , "click");
 		},
 		contextMenuMap : function(e) {

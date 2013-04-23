@@ -50,11 +50,11 @@ var MarkerView = Backbone.View.extend({
 			}
 			markerWindow.open(this.map, this.marker);
 			app.infowindow = markerWindow;
-			Backbone.history.navigate("/" + this.model.get("id"), false);
+			Backbone.history.navigate("/" + this.model.get("id"), true);
 		}, this));
 
 		google.maps.event.addListener(markerWindow,"closeclick",function(){
-			Backbone.history.navigate("/", false);
+			Backbone.history.navigate("/", true);
 		});
 
 		return this;

@@ -21,11 +21,12 @@ var SidebarView = Backbone.View.extend({
 		for(var i = 0; i < app.markerList.length; i++) {
 			if( bounds.contains(app.markerList[i].marker.getPosition()) ){
 				var marker = app.markerList[i].marker;
+				var markerModel = app.markerList[i].model;
 
 				var entry = $("#list-entry li").clone();
 
-				entry.find(".type").text(TYPE_STRING[0]);
-				entry.find(".text").text(marker.title);
+				entry.find(".type").text(TYPE_STRING[markerModel.get("type")]);
+				entry.find(".text").text(markerModel.get("title"));
 				entry.data("marker", marker);
 				this.$currentViewList.append(entry);
 

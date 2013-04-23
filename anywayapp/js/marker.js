@@ -22,7 +22,7 @@ var MarkerView = Backbone.View.extend({
 
 		this.$el.html($("#marker-content-template").html());
 
-		this.$el.width(400).height(300);
+		this.$el.width(400);
 		this.$el.find(".title").text(this.model.get("title"));
 		this.$el.find(".description").text(this.model.get("description"));
 		this.$el.find(".profile-image").attr("src", "https://graph.facebook.com/" + user.facebook_id + "/picture");

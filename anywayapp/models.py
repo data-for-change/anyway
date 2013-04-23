@@ -49,7 +49,7 @@ class Marker(db.Model):
 			"longitude" : self.location.lon,
 			"type" : self.type,
 			"user" : self.user.serialize(),
-			"followers" : [x.user.serialize() for x in Follower.all().filter("marker", self)],
+			"followers" : [x.user.serialize() for x in Follower.all().filter("marker", self).fetch(100)],
 			"following" : Follower.all().filter("user", current_user).filter("marker", self).filter("user", current_user).get() is not None if current_user else None,
 			"created" : self.created.isoformat(),
 			"modified" : self.modified.isoformat()

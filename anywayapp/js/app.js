@@ -59,6 +59,7 @@ $(function() {
 				center: new google.maps.LatLng(INIT_LAT, INIT_LON),
 				zoom: INIT_ZOOM,
 				mapTypeId: google.maps.MapTypeId.ROADMAP,
+				mapTypeControl: false,
 				zoomControl: true,
 				panControl: true
 			};

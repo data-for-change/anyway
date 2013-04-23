@@ -44,15 +44,18 @@ var MarkerView = Backbone.View.extend({
 			content: this.el
 		});
 
-		google.maps.event.addListener(this.marker, 'click', _.bind(function() {
+		google.maps.event.addListener(this.marker, "click", _.bind(function() {
 			if (app.infowindow) {
 				app.infowindow.close();
 			}
 			markerWindow.open(this.map, this.marker);
 			app.infowindow = markerWindow;
 			Backbone.history.navigate("/" + this.model.get("id"), false);
-
 		}, this));
+
+		google.maps.event.addListener(markerWindow,"closeclick",function(){
+			Backbone.history.navigate("/", false);
+		});
 
 		return this;
 

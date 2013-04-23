@@ -48,3 +48,4 @@ class BaseHandler(webapp2.RequestHandler):
 
 	def logout(self):
 		self.session["user_id"] = None
+

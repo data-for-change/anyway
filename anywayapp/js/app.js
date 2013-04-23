@@ -2,7 +2,7 @@ var ADD_MARKER_OFFER = "הוסף הצעה";
 var ADD_MARKER_PETITION = "הוסף עצומה";
 var INIT_LAT = 32.0833;
 var INIT_LON = 34.8000;
-var INIT_ZOOM = 14;
+var INIT_ZOOM = 9;
 var ICONS = [
 	"/img/exclamation.png",
 	"/img/events.png"
@@ -31,7 +31,8 @@ $(function() {
 		events : {
 			"click #map_canvas" : "clickMap",
 			"click .fb-login" : "requireLogin",
-			"click .fb-logout" : "logout"
+			"click .fb-logout" : "logout",
+			"change input[type=checkbox]" : "updateCheckbox"
 		},
 		initialize : function() {
 			_.bindAll(this, "clickContext");
@@ -45,17 +46,19 @@ $(function() {
 			this.markers.bind("change:currentModel", this.chooseMarker, this);
 			//this.markers.bind("change", this.loadMarker, this);
 			this.model.bind("change:user", this.updateUser, this);
+			this.model.bind("change:layers", this.loadMarkers, this);
 			this.login();
 
 		},
 		render : function() {
-			//this.markers.fetch({add: false, reset: true});
 			this.markers.fetch();
 
 			var mapOptions = {
 				center: new google.maps.LatLng(INIT_LAT, INIT_LON),
 				zoom: INIT_ZOOM,
-				mapTypeId: google.maps.MapTypeId.ROADMAP
+				mapTypeId: google.maps.MapTypeId.ROADMAP,
+				zoomControl: true,
+				panControl: true
 			};
 			this.map = new google.maps.Map(this.$el.find("#map_canvas").get(0), mapOptions);
 
@@ -63,6 +66,8 @@ $(function() {
 
 			this.sidebar = new SidebarView({ map: this.map }).render();
 			this.$el.find(".sidebar-container").append(this.sidebar.$el);
+
+			//this.updateCheckbox();
 
 			this.$el.find(".date-range").daterangepicker({
 					ranges: {
@@ -106,97 +111,36 @@ $(function() {
 		clickMap : function(e) {
 			console.log("clickd map");
 		},
+		updateCheckbox : function() {
+			var layers = [];
+			this.$el.find("input[type=checkbox]").each(function() {
+				layers[parseInt($(this).data("type"))] = $(this).prop("checked");
+			});
+			this.model.set("layers", layers);
+		},
 		loadMarker : function(model) {
-			console.log("loading marker", model, ICONS[this.model.get("type")]);
-			var markerPosition = new google.maps.LatLng(model.get("latitude"), model.get("longitude"));
-			var marker = new google.maps.Marker({
-				position: markerPosition,
-				map: this.map,
-				icon: ICONS[model.get("type")],
-				title: model.get("title")
-			});
+			console.log("loading marker", ICONS[model.get("type")]);
 
-			// TODO: move info window to a new view
-			var markerContent = $($("#marker-content-template").html());
-			markerContent.width(400).height(300);
-			markerContent.find(".title").text(model.get("title"));
-			markerContent.find(".description").text(model.get("description"));
-			markerContent.find(".profile-image").attr("src", "https://graph.facebook.com/" + model.get("user").facebook_id + "/picture");
-			markerContent.find(".type").text(TYPE_STRING[model.get("type")]);
-			markerContent.find(".added-by").text("נוסף על ידי " + model.get("user").first_name + " " + model.get("user").last_name);
+			if (model.get("layers") && !model.get("layers")[model.get("type")]) {
+				console.log("skipping marker because the layer is not chosen");
+				return;
+			}
 
-			var $followButton = markerContent.find(".follow-button");
-			var $unfollowButton = markerContent.find(".unfollow-button");
-			var $shareButton = markerContent.find(".share-button");
-			var $followerList = markerContent.find(".followers");
+			var markerView = new MarkerView({model: model, map: this.map}).render();
 
-			$followButton.click(function() {
-				model.save({following: true}, {wait:true});
-			});
-
-			$unfollowButton.click(function() {
-				model.save({following: false}, {wait:true});
-			});
-
-			var updateFollowing = function() {
-				if (model.get("following")) {
-					$followButton.hide();
-					$unfollowButton.show();
-				} else {
-					$followButton.show();
-					$unfollowButton.hide();
-				}
-
-				$followerList.empty();
-				for (var i = 0; i < model.get("followers").length; i++) {
-					var follower = model.get("followers")[i].facebook_id;
-					var image = "https://graph.facebook.com/" + follower + "/picture";
-					$followerList.append($("<img>").attr("src", image));
-				}
-			};
-			updateFollowing();
-			model.bind("change:following", updateFollowing, model);
-
-			$shareButton.click(function() {
-				FB.ui({
-					method: "feed",
-					name: model.get("title"),
-					link: document.location.href,
-					description: model.get("description"),
-					caption: TYPE_STRING[model.get("type")]
-					// picture
-				}, function(response) {
-					if (response && response.post_id) {
-						console.log("published");
-					}
-				});
-			});
-
-			var markerWindow = new google.maps.InfoWindow({
-				content: markerContent.get(0)
-			});
-
-			google.maps.event.addListener(marker, 'click', _.bind(function() {
-				if (this.infowindow) {
-					this.infowindow.close();
-				}
-				markerWindow.open(this.map, marker);
-				this.infowindow = markerWindow;
-				Backbone.history.navigate("/" + model.get("id"), false);
-
-			}, this));
 
 			model.set("markerView", this.markerList.length);
-			this.markerList.push(marker);
+			this.markerList.push(markerView);
 
 			this.chooseMarker(model.get("id"));
+
 		},
 		loadMarkers : function() {
 			console.log("loading markers", this.markers);
 			if (this.markerList) {
-				_(this.markerList).each(function(marker) {
-					this.map.removeOverlay(marker);
-				});
+				_(this.markerList).each(_.bind(function(marker) {
+					marker.marker.setMap(null);
+				}, this));
 			}
 			this.markerList = [];
 			this.markers.each(_.bind(this.loadMarker, this));
@@ -209,8 +153,12 @@ $(function() {
 				return;
 			}
 			console.log("choosing marker", currentMarker);
+			if (!this.markerList.length) {
+				return;
+			}
+
 			var markerView = this.markerList[this.markers.get(currentMarker).get("markerView")];
-			new google.maps.event.trigger( markerView, 'click' );
+			new google.maps.event.trigger(markerView.marker , "click");
 		},
 		contextMenuMap : function(e) {
 			if (this.menu) {

@@ -1,4 +1,5 @@
 var SidebarView = Backbone.View.extend({
+	className: "info-window",
 	events: {
 		"click .current-view li" : "clickEntry"
 	},
@@ -18,8 +19,8 @@ var SidebarView = Backbone.View.extend({
 
 
 		for(var i = 0; i < app.markerList.length; i++) {
-			if( bounds.contains(app.markerList[i].getPosition()) ){
-				var marker = app.markerList[i];
+			if( bounds.contains(app.markerList[i].marker.getPosition()) ){
+				var marker = app.markerList[i].marker;
 
 				var entry = $("#list-entry li").clone();
 

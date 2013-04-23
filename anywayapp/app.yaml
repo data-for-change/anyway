@@ -21,6 +21,10 @@ handlers:
 - url: /font
   static_dir: font
 
+- url: /make_admin
+  script: main.app
+  login: admin
+
 - url: .*
   script: main.app
 

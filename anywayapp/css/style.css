@@ -46,3 +46,15 @@
 .sidebar-container input[type=checkbox] {
 	margin-top: 0;
 }
+
+#map_canvas img {
+	max-width: none;
+}
+/* Bootstrap Css Map Fix*/
+#map_canvas label {
+	width: auto; display:inline;
+}
+
+.info-window {
+	position: relative;
+}

@@ -28,7 +28,7 @@ window.ContextMenuView = Backbone.View.extend({
 		*/
 		this.$el.css({
 			top : e.pixel.y + 40,
-			left : e.pixel.x - 400
+			left : e.pixel.x
 		});
 
 

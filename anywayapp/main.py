@@ -107,17 +107,26 @@ class UnfollowHandler(BaseHandler):
 		if follower:
 			follower.delete()
 
+class MakeAdminHandler(webapp2.RequestHandler):
+	def get(self):
+		user = User.all().filter("email", self.request.get("email")).get()
+
+		if user:
+			self.response.write("User with email %s is now admin" % user.email)
+			user.is_admin = True
+			user.put()
 
 
 app = webapp2.WSGIApplication([
-  ("/", MainHandler),
-  ("/(\d+)", MainHandler),
-  ("/login", LoginHandler),
-  ("/logout", LogoutHandler),
-  ("/markers", MarkersHandler),
-  ("/markers/(\d+)", MarkerHandler),
-  ("/follow/(\d+)", FollowHandler),
-  ("/unfollow/(\d+)", UnfollowHandler),
+	("/", MainHandler),
+	("/(\d+)", MainHandler),
+	("/login", LoginHandler),
+	("/logout", LogoutHandler),
+	("/markers", MarkersHandler),
+	("/markers/(\d+)", MarkerHandler),
+	("/follow/(\d+)", FollowHandler),
+	("/unfollow/(\d+)", UnfollowHandler),
+	("/make_admin", MakeAdminHandler),
 ], debug=True, config={
 	"webapp2_extras.sessions": {
 		"secret_key": "f0dd2949d6422150343dfa262cb15eafc536085cba624",

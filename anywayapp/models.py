@@ -19,6 +19,7 @@ class User(db.Model):
 			"username" : self.username,
 			"facebook_id" : self.facebook_id,
 			"facebook_url" : self.facebook_url,
+			"is_admin" : self.is_admin,
 		}
 
 class Marker(db.Model):

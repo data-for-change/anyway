@@ -10,6 +10,7 @@
     <script src="/js/libs/date.js"></script>
     <script src="/js/libs/daterangepicker.js"></script>
     <script src="/js/markerdialog.js"></script>
+    <script src="/js/marker.js"></script>
     <script src="/js/sidebar.js"></script>
     <script src="/js/contextmenu.js"></script>
     <script src="/js/app.js"></script>
@@ -33,8 +34,8 @@
             <a class="brand" href="#">Any-way</a>
         </div>
     </div>
-    <div class="main" style="position: fixed; width: 100%; height: 100%; padding-top: 40px; padding-right: 250px;">
-        <div id="map_canvas" style="width: 100%; height: 100%"></div>
+    <div class="main" style="position: fixed; width: 100%; height: 100%; padding-top: 40px; padding-right: 250px; box-sizing: border-box">
+        <div id="map_canvas" style="width: 100%; height: 100%; box-sizing: border-box"></div>
     </div>
     <div class="sidebar-container" style="position: fixed; right: 0; top: 0; bottom: 0; width: 250px; background: white; padding-top: 40px">
         <!--
@@ -76,22 +77,20 @@
     </div>
 </div>
 <div id="marker-content-template" style="display: none">
-    <div class="info-window" style="position: relative">
-        <img class="profile-image" style="float: left"/>
-        <h4 class="title"></h4>
-        <h5 class="type"></h5>
-        <p class="added-by"></p>
-        <p class="description"></p>
-        <h5>תומכים</h5>
-        <p class="followers"></p>
-        <div class="buttons" style="position: absolute; bottom: 0">
-            <button class="btn btn-success follow-button">תמוך בנקודה זו</button>
-            <button class="btn btn-danger unfollow-button" style="display: none">הפסק תמיכה</button>
-            <button class="btn btn-primary share-button">שתף</button>
-        </div>
-
-
+    <img class="profile-image" style="float: left"/>
+    <h4 class="title"></h4>
+    <h5 class="type"></h5>
+    <p class="added-by"></p>
+    <p class="description"></p>
+    <h5>תומכים</h5>
+    <p class="followers"></p>
+    <div class="buttons" style="position: absolute; bottom: 0">
+        <button class="btn btn-success follow-button">תמוך בנקודה זו</button>
+        <button class="btn btn-danger unfollow-button" style="display: none">הפסק תמיכה</button>
+        <button class="btn btn-primary share-button">שתף</button>
+        <button class="btn btn-primary delete-button" style="display: none">מחק</button>
     </div>
+
 </div>
 <div id="list-entry" style="display: none">
     <li><a>
@@ -101,8 +100,8 @@
 <div id="sidebar-template" style="display: none">
     <div class="sidebar-title">סנן לפי שכבה</div>
     <ul>
-        <li><input type="checkbox" class="show-bills" checked/> הראה הצעות חוק</li>
-        <li><input type="checkbox" class="show-petitions" checked/> הראה עצומות</li>
+        <li><input type="checkbox" data-type="0" checked/> הראה הצעות חוק</li>
+        <li><input type="checkbox" data-type="1" checked/> הראה עצומות</li>
     </ul>
     <div class="sidebar-title">סנן לפי טווח תאריכים</div>
     <ul>

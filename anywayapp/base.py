@@ -14,7 +14,7 @@ def user_required(handler):
 		user = self.get_user()
 		if not user:
 			self.session["last_page_before_login"] = self.request.path + "?" + self.request.query_string
-			self.redirect("/login")
+			self.redirect("/")
 		else:
 			self.user = user
 			return handler(self, *args, **kwargs)

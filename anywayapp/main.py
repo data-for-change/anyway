@@ -3,9 +3,11 @@ import jinja2
 import os
 import json
 import urllib
+from data import process
 
 from models import *
 from base import *
+from geo import geotypes
 
 FACEBOOK_KEY = "157028231131213"
 FACEBOOK_SECRET = "0437ee70207dca46609219b990be0614"
@@ -22,7 +24,25 @@ class MainHandler(BaseHandler):
 class MarkersHandler(BaseHandler):
 	@user_optional
 	def get(self):
-		markers = [marker.serialize(self.user) for marker in Marker.all()]
+		ne_lat = float(self.request.get("ne_lat"))
+		ne_lng = float(self.request.get("ne_lng"))
+		sw_lat = float(self.request.get("sw_lat"))
+		sw_lng = float(self.request.get("sw_lng"))
+
+		start_time = self.request.get("start_time")
+		end_time = self.request.get("end_time")
+
+		query = Marker.all()
+
+		if start_time:
+			query = query.filter("created >=", start_time)
+
+		if end_time:
+			query = query.filter("created <=", end_time)
+
+		results = Marker.bounding_box_fetch(ne_lat, ne_lng, sw_lat, sw_lng)
+
+		markers = [marker.serialize(self.user) for marker in results]
 		self.response.write(json.dumps(markers))
 
 	@user_required
@@ -30,6 +50,7 @@ class MarkersHandler(BaseHandler):
 		data = json.loads(self.request.body)
 		marker = Marker.parse(data)
 		marker.user = self.user
+		marker.update_location()
 		marker.put()
 		self.response.write(json.dumps(marker.serialize(self.user)))
 
@@ -116,6 +137,25 @@ class MakeAdminHandler(webapp2.RequestHandler):
 			user.is_admin = True
 			user.put()
 
+class ImportHandler(BaseHandler):
+	@user_required
+	def get(self):
+		for data in process.import_data():
+			marker = Marker.get_or_insert(
+				str(data["id"]),
+				user = self.user,
+				title = "Accident",
+				description = data["description"].decode("utf8"),
+				location = db.GeoPt(data["lat"], data["lng"]),
+				type = Marker.MARKER_TYPE_ACCIDENT,
+				subtype = data["severity"],
+				created = data["date"],
+				modified = data["date"],
+			)
+			marker.put()
+			marker.update_location()
+			break
+
 
 app = webapp2.WSGIApplication([
 	("/", MainHandler),
@@ -127,6 +167,7 @@ app = webapp2.WSGIApplication([
 	("/follow/(\d+)", FollowHandler),
 	("/unfollow/(\d+)", UnfollowHandler),
 	("/make_admin", MakeAdminHandler),
+	("/import", ImportHandler),
 ], debug=True, config={
 	"webapp2_extras.sessions": {
 		"secret_key": "f0dd2949d6422150343dfa262cb15eafc536085cba624",

@@ -55,9 +55,25 @@ $(function() {
 			this.login();
 
 		},
-		render : function() {
-			this.markers.fetch();
+		fetchMarkers : function() {
+			var bounds = this.map.getBounds();
 
+			var params = {};
+
+			if (!bounds) {
+				return;
+			}
+
+			if (bounds) {
+				params["ne_lat"] = bounds.getNorthEast().lat();
+				params["ne_lng"] = bounds.getNorthEast().lng();
+				params["sw_lat"] = bounds.getSouthWest().lat();
+				params["sw_lng"] = bounds.getSouthWest().lng();
+			}
+
+			this.markers.fetch({ data : $.param(params) });
+		},
+		render : function() {
 			var mapOptions = {
 				center: new google.maps.LatLng(INIT_LAT, INIT_LON),
 				zoom: INIT_ZOOM,
@@ -69,6 +85,12 @@ $(function() {
 			this.map = new google.maps.Map(this.$el.find("#map_canvas").get(0), mapOptions);
 
 			google.maps.event.addListener( this.map, "rightclick", _.bind(this.contextMenuMap, this) );
+			google.maps.event.addListener( this.map, "mouseup", _.bind(this.fetchMarkers, this) );
+
+			this.fetchMarkers();
+
+
+
 
 			this.sidebar = new SidebarView({ map: this.map }).render();
 			this.$el.find(".sidebar-container").append(this.sidebar.$el);

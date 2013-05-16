@@ -1,5 +1,5 @@
 from google.appengine.ext import db
-import time
+from google.appengine.api import search
 
 class User(db.Model):
 	email = db.StringProperty()
@@ -35,10 +35,11 @@ class Marker(db.Model):
 	user = db.ReferenceProperty(User)
 	title = db.StringProperty()
 	description = db.TextProperty()
-	location = db.GeoPtProperty()
 	type = db.IntegerProperty()
+	subtype = db.IntegerProperty()
 	created = db.DateTimeProperty(auto_now=True)
 	modified = db.DateTimeProperty(auto_now_add=True)
+	location = db.GeoPtProperty()
 
 	def serialize(self, current_user):
 		return {
@@ -68,7 +69,42 @@ class Marker(db.Model):
 			if follower:
 				follower.delete()
 
+		self.update_location()
 		self.put()
+
+	def update_location(self):
+		index = search.Index(name="markers")
+		index.put(search.Document(
+			doc_id=str(self.key()), fields=[
+				search.TextField(name="title", value=self.title),
+				search.TextField(name="description", value=self.description),
+				search.DateField(name="modified", value=self.modified),
+				search.DateField(name="created", value=self.created),
+				search.GeoField(name="location", value=search.GeoPoint(self.location.lat, self.location.lon)),
+			]
+		))
+
+
+	@classmethod
+	def bounding_box_fetch(cls, ne_lat, ne_lng, sw_lat, sw_lng):
+		index = search.Index(name="markers")
+
+		center_lat = (ne_lat + sw_lat) / 2
+		center_lng = (ne_lng + sw_lng) / 2
+
+		distance = max(ne_lng - sw_lng, ne_lat - sw_lat) * 1000
+		distance = 100000
+
+		query = "distance(location, geopoint(%(lat)3.4f, %(lng)3.4f)) < %(distance)s" % {
+			"lat" : center_lat,
+			"lng" : center_lng,
+			"distance" : distance,
+		}
+		search_query = search.Query(
+			query_string=query,
+		)
+		results = index.search(search_query)
+		return [Marker.get(result.doc_id) for result in results]
 
 	@classmethod
 	def parse(cls, data):

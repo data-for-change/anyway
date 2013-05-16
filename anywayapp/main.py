@@ -8,6 +8,7 @@ from data import process
 from models import *
 from base import *
 from geo import geotypes
+from google.appengine.api import taskqueue
 
 FACEBOOK_KEY = "157028231131213"
 FACEBOOK_SECRET = "0437ee70207dca46609219b990be0614"
@@ -139,7 +140,7 @@ class MakeAdminHandler(webapp2.RequestHandler):
 
 class ImportHandler(BaseHandler):
 	@user_required
-	def get(self):
+	def post(self):
 		for data in process.import_data():
 			marker = Marker.get_or_insert(
 				str(data["id"]),
@@ -154,8 +155,11 @@ class ImportHandler(BaseHandler):
 			)
 			marker.put()
 			marker.update_location()
-			break
 
+class StartImportHandler(BaseHandler):
+	def get(self):
+		taskqueue.add(url="/import")
+		self.response.write("Import started.")
 
 app = webapp2.WSGIApplication([
 	("/", MainHandler),
@@ -168,6 +172,7 @@ app = webapp2.WSGIApplication([
 	("/unfollow/(\d+)", UnfollowHandler),
 	("/make_admin", MakeAdminHandler),
 	("/import", ImportHandler),
+	("/start_import", StartImportHandler),
 ], debug=True, config={
 	"webapp2_extras.sessions": {
 		"secret_key": "f0dd2949d6422150343dfa262cb15eafc536085cba624",

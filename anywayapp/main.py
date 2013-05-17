@@ -56,20 +56,20 @@ class MarkersHandler(BaseHandler):
 		self.response.write(json.dumps(marker.serialize(self.user)))
 
 class MarkerHandler(BaseHandler):
-	def get(self, id):
-		marker = Marker.get_by_id(int(id))
+	def get(self, key_name):
+		marker = Marker.get_by_key_name(key_name)
 		self.response.write(json.dumps(marker.serialize(self.user)))
 
 	@user_required
-	def put(self, id):
-		marker = Marker.get_by_id(int(id))
+	def put(self, key_name):
+		marker = Marker.get_by_key_name(key_name)
 		data = json.loads(self.request.body)
 		marker.update(data, self.user)
 		self.response.write(json.dumps(marker.serialize(self.user)))
 
 	@user_required
-	def delete(self, id):
-		marker = Marker.get_by_id(int(id))
+	def delete(self, key_name):
+		marker = Marker.get_by_key_name(key_name)
 		marker.delete()
 
 class LoginHandler(BaseHandler):
@@ -115,16 +115,16 @@ class LogoutHandler(BaseHandler):
 
 class FollowHandler(BaseHandler):
 	@user_required
-	def get(self, id):
-		marker = Marker.get_by_id(int(id))
+	def get(self, key_name):
+		marker = Marker.get_by_key_name(key_name)
 		follower = Follower.all().filter("marker", marker).filter("user", self.user).get()
 		if not follower:
-			Follower(marker = marker, user = self.user).put()
+			Follower(parent = marker, marker = marker, user = self.user).put()
 
 class UnfollowHandler(BaseHandler):
 	@user_required
-	def get(self, id):
-		marker = Marker.get_by_id(int(id))
+	def get(self, key_name):
+		marker = Marker.get_by_key_name(key_name)
 		follower = Follower.all().filter("marker", marker).filter("user", self.user).get()
 		if follower:
 			follower.delete()
@@ -139,12 +139,16 @@ class MakeAdminHandler(webapp2.RequestHandler):
 			user.put()
 
 class ImportHandler(BaseHandler):
-	@user_required
-	def post(self):
+	def get(self):
+		my_user = User.all().filter("email", "ron.reiter@gmail.com").get()
 		for data in process.import_data():
-			marker = Marker.get_or_insert(
-				str(data["id"]),
-				user = self.user,
+			old_marker = Marker.get_by_key_name(str(data["id"]))
+			if old_marker:
+				old_marker.delete()
+
+			marker = Marker(
+				key_name=str(data["id"]),
+				user = my_user,
 				title = "Accident",
 				description = data["description"].decode("utf8"),
 				location = db.GeoPt(data["lat"], data["lng"]),
@@ -158,7 +162,7 @@ class ImportHandler(BaseHandler):
 
 class StartImportHandler(BaseHandler):
 	def get(self):
-		taskqueue.add(url="/import")
+		taskqueue.add(url="/import", method="GET")
 		self.response.write("Import started.")
 
 app = webapp2.WSGIApplication([
@@ -167,9 +171,9 @@ app = webapp2.WSGIApplication([
 	("/login", LoginHandler),
 	("/logout", LogoutHandler),
 	("/markers", MarkersHandler),
-	("/markers/(\d+)", MarkerHandler),
-	("/follow/(\d+)", FollowHandler),
-	("/unfollow/(\d+)", UnfollowHandler),
+	("/markers/(.*)", MarkerHandler),
+	("/follow/(.*)", FollowHandler),
+	("/unfollow/(.*)", UnfollowHandler),
 	("/make_admin", MakeAdminHandler),
 	("/import", ImportHandler),
 	("/start_import", StartImportHandler),

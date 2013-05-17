@@ -4,8 +4,8 @@ var INIT_LAT = 32.0833;
 var INIT_LON = 34.8000;
 var INIT_ZOOM = 9;
 var ICONS = [
-	"/img/exclamation.png",
-	"/img/events.png"
+	"/img/petition.svg",
+	"/img/accident.svg"
 ];
 var TYPE_STRING = [
 	"הצעה",

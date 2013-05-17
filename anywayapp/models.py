@@ -13,7 +13,7 @@ class User(db.Model):
 
 	def serialize(self):
 		return {
-			"id" : self.key().id(),
+			"id" : str(self.key()),
 			"first_name" : self.first_name,
 			"last_name" : self.last_name,
 			"username" : self.username,
@@ -43,7 +43,7 @@ class Marker(db.Model):
 
 	def serialize(self, current_user):
 		return {
-			"id" : self.key().id(),
+			"id" : str(self.key()),
 			"title" : self.title,
 			"description" : self.description,
 			"latitude" : self.location.lat,
@@ -92,8 +92,7 @@ class Marker(db.Model):
 		center_lat = (ne_lat + sw_lat) / 2
 		center_lng = (ne_lng + sw_lng) / 2
 
-		distance = max(ne_lng - sw_lng, ne_lat - sw_lat) * 1000
-		distance = 100000
+		distance = max(ne_lng - sw_lng, ne_lat - sw_lat) * 10000
 
 		query = "distance(location, geopoint(%(lat)3.4f, %(lng)3.4f)) < %(distance)s" % {
 			"lat" : center_lat,
@@ -102,6 +101,7 @@ class Marker(db.Model):
 		}
 		search_query = search.Query(
 			query_string=query,
+			options=search.QueryOptions(limit=20)
 		)
 		results = index.search(search_query)
 		return [Marker.get(result.doc_id) for result in results]

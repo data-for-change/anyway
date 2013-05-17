@@ -73,7 +73,6 @@ TABLES = {
 		2 : "דו סיטרי+קו הפרדה רצוף",
 		3 : "דו סיטרי אין קו הפרדה רצוף",
 		4 : "אחר",
-		9 : "לא ידוע מספר מסלולים",
 	},
 	"RAV_MASLUL" : {
 		1 : "מיפרדה מסומנת בצבע",
@@ -108,7 +107,6 @@ TABLES = {
 		2 : "תימרור לקוי/חסר",
 		3 : "אין ליקוי",
 		4 : "לא נדרש תמרור",
-		5 : "לא ידוע",
 	},
 	"TEURA" : {
 		1 : "אור יום רגיל",
@@ -116,7 +114,6 @@ TABLES = {
 		3 : "לילה פעלה תאורה",
 		4 : "קיימת תאורה בלתי תקינה/לא פועלת",
 		5 : "לילה לא קיימת תאורה",
-		6 : "לילה לא ידוע",
 	},
 	"BAKARA" : {
 		1 : "אין בקרה",
@@ -133,7 +130,6 @@ TABLES = {
 		3 : "שרבי",
 		4 : "ערפילי",
 		5 : "אחר",
-		9 : "לא ידוע",
 	},
 	"PNE_KVISH" : {
 		1 : "יבש",
@@ -142,7 +138,6 @@ TABLES = {
 		4 : "מכוסה בבוץ",
 		5 : "חול או חצץ על הכביש",
 		6 : "אחר",
-		9 : "לא ידוע",
 	},
 	"SUG_EZEM" : {
 		1 : "עץ",
@@ -153,14 +148,12 @@ TABLES = {
 		6 : "גדר בטיחות לרכב",
 		7 : "חבית",
 		8 : "אחר",
-		9 : "לא ידוע",
 	},
 	"MERHAK_EZEM" : {
 		1 : "עד מטר",
 		2 : "1-3 מטר",
 		3 : "על הכביש",
 		4 : "על שטח הפרדה",
-		9 : "לא ידוע",
 	},
 	"LO_HAZA" : {
 		1 : "הלך בכיוון התנועה",
@@ -170,7 +163,6 @@ TABLES = {
 		5 : "היה על אי הפרדה",
 		6 : "היה על שוליים/מדרכה",
 		7 : "אחר",
-		9 : "לא ידוע",
 	},
 	"OFEN_HAZIYA" : {
 		1 : "התפרץ אל הכביש",
@@ -183,12 +175,10 @@ TABLES = {
 		2 : "לא במעבר חציה לא ליד צומת",
 		3 : "במעבר חציה בלי רמזור",
 		4 : "במעבר חציה עם רמזור",
-		9 : "לא ידוע מקום חציה",
 	},
 	"KIVUN_HAZIYA" : {
 		1 : "מימין לשמאל",
 		2 : "משמאל לימין",
-		9 : "לא ידוע",
 	},
 	"STATUS_IGUN" : {
 		1 : "עיגון מדויק",
@@ -201,13 +191,13 @@ TABLES = {
 
 
 def number(param, value):
-	return int(value) if value else 0
+	return int(value) if value else None
 
 def fixed_table(param, value):
 	return TABLES[param][int(value)] if value and int(value) in TABLES[param] else None
 
 def dictionary(param, value):
-	return "a"
+	return  None
 
 def boolean(param, value):
 	return True if value == 1 else False
@@ -289,7 +279,8 @@ def import_data():
 		for field in FIELD_LIST:
 			field_name, processor, parameter = FIELD_FUNCTIONS[field]
 			output_line[field] = processor(parameter, accident[field])
-			description_strings.append("%s: %s" % (field_name, output_line[field]))
+			if output_line[field]:
+				description_strings.append("%s: %s" % (field_name, output_line[field]))
 
 		if not accident["X"] or not accident["Y"]:
 			continue

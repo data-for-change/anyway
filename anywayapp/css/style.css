@@ -62,3 +62,7 @@
 .followers {
 	padding-bottom: 40px;
 }
+
+.description {
+	white-space: pre;
+}

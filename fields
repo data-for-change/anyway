@@ -1,0 +1,44 @@
+pk_teuna_fikt
+SUG_DEREH - check table
+SEMEL_YISHUV - from dictionary
+REHOV1 - from dicstreets (with SEMEL_YISHUV)
+REHOV2 - from dicstreets (with SEMEL_YISHUV)
+BAYIT
+ZOMET_IRONI - from intersect urban dictionary
+KVISH1 - from intersect urban dictionary
+KVISH2 - from intersect urban dictionary
+KM - exact km of road
+ZOMET_LO_IRONI - from non urban dictionary
+YEHIDA - check table
+SHNAT_TEUNA
+HODESH_TEUNA
+YOM_BE_HODESH
+SHAA
+SUG_YOM - check table
+RAMZOR - 0 no 1 yes
+HUMRAT_TEUNA - check table
+SUG_TEUNA - check table
+ZURAT_DEREH - check table
+HAD_MASLUL - check table
+RAV_MASLUL - check table
+MEHIRUT_MUTERET
+TKINUT - check table
+ROHAV - check table
+SIMUN_TIMRUR - check table
+TEURA - check table
+BAKARA - check table
+MEZEG_AVIR - check table
+PNE_KVISH - check table
+SUG_EZEM - check table
+MERHAK_EZEM - check table
+LO_HAZA - reason - check table
+OFEN_HAZIYA - how did he cross the road - check table
+MEKOM_HAZIYA - check table
+KIVUN_HAZIYA - check table
+MAHOZ - dictionary 77
+NAFA - dictionary 79
+EZOR_TIVI - dictionary 80
+MAAMAD_MINIZIPALI - dictionary 78
+ZURAT_ISHUV - dictionary 81
+X - convert to lat lng
+Y - convert to lat lng

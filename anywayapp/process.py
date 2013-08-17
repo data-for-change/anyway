@@ -352,6 +352,7 @@ def import_to_datastore():
             user = my_user,
             title = "Accident",
             description = data["description"].decode("utf8"),
+            address = data["address"].decode("utf8"),
             location = db.GeoPt(data["lat"], data["lng"]),
             type = Marker.MARKER_TYPE_ACCIDENT,
             subtype = data["severity"],

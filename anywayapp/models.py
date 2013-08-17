@@ -40,12 +40,14 @@ class Marker(db.Model):
     created = db.DateTimeProperty(auto_now=True)
     modified = db.DateTimeProperty(auto_now_add=True)
     location = db.GeoPtProperty()
+    address = db.StringProperty()
 
     def serialize(self, current_user):
         return {
             "id" : str(self.key()),
             "title" : self.title,
             "description" : self.description,
+            "address" : self.address,
             "latitude" : self.location.lat,
             "longitude" : self.location.lon,
             "type" : self.type,
@@ -78,6 +80,7 @@ class Marker(db.Model):
             doc_id=str(self.key()), fields=[
                 search.TextField(name="title", value=self.title),
                 search.TextField(name="description", value=self.description),
+                search.TextField(name="address", value=self.address),
                 search.DateField(name="modified", value=self.modified),
                 search.DateField(name="created", value=self.created),
                 search.GeoField(name="location", value=search.GeoPoint(self.location.lat, self.location.lon)),

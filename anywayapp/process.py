@@ -3,6 +3,7 @@
 import csv
 import datetime
 import json
+import sys
 
 TABLES = {
     "SUG_DEREH" : {
@@ -363,4 +364,15 @@ def import_to_datastore():
         print marker.key().name()
 
 if __name__ == "__main__":
+    sys.path.append("/usr/local/google_appengine")
+    import dev_appserver
+    dev_appserver.fix_sys_path()
+    from google.appengine.ext.remote_api import remote_api_stub
+
+    def auth_func():
+        return "ron.reiter@gmail.com", "iyuevjpnrrtdbyjf"
+
+    #remote_api_stub.ConfigureRemoteApi(None, '/_ah/remote_api', auth_func, 'anywayapp.appspot.com')
+    remote_api_stub.ConfigureRemoteApi(None, '/_ah/remote_api', auth_func, 'localhost:8080')
+
     import_to_datastore()

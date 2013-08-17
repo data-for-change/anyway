@@ -335,8 +335,32 @@ def import_data():
         yield output_fields
 
 
-if __name__ == "__main__":
-    for data in import_data():
-        print data["description"]
-        print
+def import_to_datastore():
+    from models import User, Marker
+    from google.appengine.ext import db
 
+    my_user = User.all().filter("email", "ron.reiter@gmail.com").get()
+    i = 0
+    for data in import_data():
+        old_marker = Marker.get_by_key_name(str(data["id"]))
+        if old_marker:
+            old_marker.delete()
+
+        marker = Marker(
+            key_name=str(data["id"]),
+            user = my_user,
+            title = "Accident",
+            description = data["description"].decode("utf8"),
+            location = db.GeoPt(data["lat"], data["lng"]),
+            type = Marker.MARKER_TYPE_ACCIDENT,
+            subtype = data["severity"],
+            created = data["date"],
+            modified = data["date"],
+        )
+        marker.put()
+        marker.update_location()
+
+        print marker.key().name()
+
+if __name__ == "__main__":
+    import_to_datastore()

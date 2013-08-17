@@ -140,28 +140,7 @@ class MakeAdminHandler(webapp2.RequestHandler):
 
 class ImportHandler(BaseHandler):
     def get(self):
-        my_user = User.all().filter("email", "ron.reiter@gmail.com").get()
-        i = 0
-        for data in process.import_data():
-            old_marker = Marker.get_by_key_name(str(data["id"]))
-            if old_marker:
-                old_marker.delete()
-
-            marker = Marker(
-                key_name=str(data["id"]),
-                user = my_user,
-                title = "Accident",
-                description = data["description"].decode("utf8"),
-                location = db.GeoPt(data["lat"], data["lng"]),
-                type = Marker.MARKER_TYPE_ACCIDENT,
-                subtype = data["severity"],
-                created = data["date"],
-                modified = data["date"],
-            )
-            marker.put()
-            marker.update_location()
-            if i == 100:
-                break
+        process.import_to_datastore()
 
 class StartImportHandler(BaseHandler):
     def get(self):

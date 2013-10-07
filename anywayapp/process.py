@@ -342,10 +342,11 @@ def import_to_datastore():
 
     my_user = User.all().filter("email", "ron.reiter@gmail.com").get()
     i = 0
+    markers = []
     for data in import_data():
-        old_marker = Marker.get_by_key_name(str(data["id"]))
-        if old_marker:
-            old_marker.delete()
+        #old_marker = Marker.get_by_key_name(str(data["id"]))
+        #if old_marker:
+        #    old_marker.delete()
 
         marker = Marker(
             key_name=str(data["id"]),
@@ -359,10 +360,15 @@ def import_to_datastore():
             created = data["date"],
             modified = data["date"],
         )
-        marker.put()
-        marker.update_location()
+        #marker.put()
+        #marker.update_location()
+        markers.append(marker)
 
         print marker.key().name()
+        if len(markers) == 100:
+            print "Writing to datastore..."
+            db.put(markers)
+            markers = []
 
 if __name__ == "__main__":
     sys.path.append("/usr/local/google_appengine")
@@ -373,7 +379,9 @@ if __name__ == "__main__":
     def auth_func():
         return "ron.reiter@gmail.com", "iyuevjpnrrtdbyjf"
 
-    #remote_api_stub.ConfigureRemoteApi(None, '/_ah/remote_api', auth_func, 'anywayapp.appspot.com')
-    remote_api_stub.ConfigureRemoteApi(None, '/_ah/remote_api', auth_func, 'localhost:8080')
+    if sys.argv[1] == "remote":
+        remote_api_stub.ConfigureRemoteApi(None, '/_ah/remote_api', auth_func, 'anywayapp.appspot.com')
+    elif sys.argv[1] == "local":
+        remote_api_stub.ConfigureRemoteApi(None, '/_ah/remote_api', auth_func, 'localhost:8080')
 
     import_to_datastore()

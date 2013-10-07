@@ -2,7 +2,7 @@ application: anywayapp
 version: 2
 runtime: python27
 api_version: 1
-threadsafe: yes
+threadsafe: no
 
 handlers:
 - url: /favicon\.ico

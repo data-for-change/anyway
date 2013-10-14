@@ -75,13 +75,13 @@ def marker(self, key_name):
 
 @app.route("/login", methods=["POST"])
 @user_optional
-def login(self):
-    if self.user:
-        self.response.out.write(json.dumps(self.user.serialize()))
-        return
+def login():
+    user = get_user()
+    if user:
+        return make_response(json.dumps(user.serialize()))
 
-    if self.request.body:
-        facebook_data = json.loads(self.request.body)
+    if request.data:
+        facebook_data = json.loads(request.data)
         user_id = facebook_data["userID"]
         access_token = facebook_data["accessToken"]
         user_details = json.loads(urllib.urlopen("https://graph.facebook.com/me?access_token=" + access_token).read())
@@ -102,8 +102,8 @@ def login(self):
                 user.access_token = facebook_data["accessToken"]
 
             user.put()
-            self.set_user(user)
-            self.response.out.write(json.dumps(user.serialize()))
+            set_user(user)
+            make_response(json.dumps(user.serialize()))
         else:
             raise Exception("Error in logging in.")
     else:
@@ -112,12 +112,12 @@ def login(self):
 
 @app.route("/logout")
 @user_required
-def get(self):
-    self.logout()
+def do_logout():
+    logout()
 
 @app.route("/follow/(.*)")
 @user_required
-def follow(self, key_name):
+def follow(key_name):
     marker = Marker.get_by_key_name(key_name)
     follower = Follower.all().filter("marker", marker).filter("user", self.user).get()
     if not follower:
@@ -125,15 +125,15 @@ def follow(self, key_name):
 
 @app.route("/unfollow/(.*)")
 @user_required
-def unfollow(self, key_name):
+def unfollow(key_name):
     marker = Marker.get_by_key_name(key_name)
     follower = Follower.all().filter("marker", marker).filter("user", self.user).get()
     if follower:
         follower.delete()
 
 @app.route("/make_admin")
-def make_admin(self):
-    user = User.all().filter("email", self.request.get("email")).get()
+def make_admin():
+    user = User.all().filter("email", request.get("email")).get()
 
     if user:
 
@@ -147,4 +147,4 @@ def import_handler():
     process.import_to_datastore()
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)

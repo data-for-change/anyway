@@ -4,6 +4,9 @@ from flask import request
 from models import *
 from functools import wraps
 
+def set_user(user):
+	session["user"] = user
+
 def get_user():
 	if "user" in session:
 		return session["user"]

@@ -8,3 +8,4 @@ itsdangerous
 wsgiref
 Flask-SQLAlchemy
 mysql-connector-python
+MySQL-python

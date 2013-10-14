@@ -288,7 +288,7 @@ FIELD_LIST = [
 
 def import_data():
     accidents_csv = csv.DictReader(open(accidents_file))
-    accidents_gps_coordinates = json.loads(open("data/gps.json").read())
+    accidents_gps_coordinates = json.loads(open("data/anywayapp/data/gps.json").read())
 
     # oh dear.
     i = -1

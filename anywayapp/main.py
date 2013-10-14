@@ -2,12 +2,14 @@ import os
 import json
 import urllib
 
-import webapp2
 import jinja2
-from google.appengine.api import taskqueue
 
+import webapp2
+from google.appengine.api import taskqueue
 from models import *
 from base import *
+import process
+
 
 FACEBOOK_KEY = "157028231131213"
 FACEBOOK_SECRET = "0437ee70207dca46609219b990be0614"
@@ -139,7 +141,6 @@ class MakeAdminHandler(webapp2.RequestHandler):
 
 class ImportHandler(BaseHandler):
     def get(self):
-        import process
         process.import_to_datastore()
 
 class StartImportHandler(BaseHandler):

@@ -1,15 +1,21 @@
-from google.appengine.ext import db
-from google.appengine.api import search
+from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime
+from sqlalchemy.orm import relationship
 
-class User(db.Model):
-    email = db.StringProperty()
-    access_token = db.StringProperty()
-    first_name = db.StringProperty()
-    last_name = db.StringProperty()
-    username = db.StringProperty()
-    facebook_id = db.StringProperty()
-    facebook_url = db.StringProperty()
-    is_admin = db.BooleanProperty(default=False)
+from database import Base, db_session
+import datetime
+
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True)
+    email = Column(String(120), unique=True)
+    first_name = Column(String(50))
+    last_name = Column(String(50))
+    access_token = Column(String(100))
+    username = Column(String(50))
+    facebook_id = Column(String(50))
+    facebook_url = Column(String(100))
+    is_admin = Column(Boolean(), default=False)
+    markers = relationship("Marker", backref="user")
 
     def serialize(self):
         return {
@@ -22,7 +28,9 @@ class User(db.Model):
             "is_admin" : self.is_admin,
         }
 
-class Marker(db.Model):
+class Marker(Base):
+    __tablename__ = "markers"
+
     MARKER_TYPE_ACCIDENT = 1
     MARKER_TYPE_HAZARD = 2
     MARKER_TYPE_OFFER = 3
@@ -32,15 +40,16 @@ class Marker(db.Model):
     MARKER_TYPE_CITY = 7
     MARKER_TYPE_OR_YAROK = 8
 
-    user = db.ReferenceProperty(User)
-    title = db.StringProperty()
-    description = db.TextProperty()
-    type = db.IntegerProperty()
-    subtype = db.IntegerProperty()
-    created = db.DateTimeProperty(auto_now=True)
-    modified = db.DateTimeProperty(auto_now_add=True)
-    location = db.GeoPtProperty()
-    address = db.StringProperty()
+    id = Column(Integer, primary_key=True)
+    user = Column(Integer, ForeignKey("user.id"))
+    title = Column(String(100))
+    description = Column(String)
+    type = Column(Integer)
+    subtype = Column(Integer)
+    created = Column(DateTime, default=datetime.datetime.utcnow)
+    latitude = Column(Float())
+    longitude = Column(Float())
+    address = Column(String)
 
     def serialize(self, current_user):
         return {
@@ -48,66 +57,43 @@ class Marker(db.Model):
             "title" : self.title,
             "description" : self.description,
             "address" : self.address,
-            "latitude" : self.location.lat,
-            "longitude" : self.location.lon,
+            "latitude" : self.latitude,
+            "longitude" : self.longitude,
             "type" : self.type,
+
+            # TODO: fix relationship
             "user" : self.user.serialize(),
+
+            # TODO: fix query
             "followers" : [x.user.serialize() for x in Follower.all().filter("marker", self).fetch(100)],
+
+            # TODO: fix query
             "following" : Follower.all().filter("user", current_user).filter("marker", self).filter("user", current_user).get() is not None if current_user else None,
             "created" : self.created.isoformat(),
-            "modified" : self.modified.isoformat()
         }
 
     def update(self, data, current_user):
         self.title = data["title"]
         self.description = data["description"]
         self.type = data["type"]
-        self.location = db.GeoPt(data["latitude"], data["longitude"])
-        follower = Follower.all().filter("marker", self).filter("user", current_user).get()
+        self.latitude = data["latitude"]
+        self.longitude = data["longitude"]
+
+        follower = db_session.query(Follower).filter(Follower.marker == self.id).filter(Follower.user == current_user).get(1)
+
         if data["following"]:
             if not follower:
-                Follower(marker = self, user = current_user).put()
+                Follower(marker = self.id, user = current_user)
         else:
             if follower:
-                follower.delete()
+                follower[0].delete()
 
-        self.update_location()
         self.put()
-
-    def update_location(self):
-        index = search.Index(name="markers")
-        index.put(search.Document(
-            doc_id=str(self.key()), fields=[
-                search.TextField(name="title", value=self.title),
-                search.TextField(name="description", value=self.description),
-                search.TextField(name="address", value=self.address),
-                search.DateField(name="modified", value=self.modified),
-                search.DateField(name="created", value=self.created),
-                search.GeoField(name="location", value=search.GeoPoint(self.location.lat, self.location.lon)),
-            ]
-        ))
-
 
     @classmethod
     def bounding_box_fetch(cls, ne_lat, ne_lng, sw_lat, sw_lng):
-        index = search.Index(name="markers")
-
-        center_lat = (ne_lat + sw_lat) / 2
-        center_lng = (ne_lng + sw_lng) / 2
-
-        distance = max(ne_lng - sw_lng, ne_lat - sw_lat) * 50000
-
-        query = "distance(location, geopoint(%(lat)3.4f, %(lng)3.4f)) < %(distance)s" % {
-            "lat" : center_lat,
-            "lng" : center_lng,
-            "distance" : distance,
-        }
-        search_query = search.Query(
-            query_string=query,
-            options=search.QueryOptions(limit=20)
-        )
-        results = index.search(search_query)
-        return [Marker.get(result.doc_id) for result in results]
+        # TODO: implement query
+        pass
 
     @classmethod
     def parse(cls, data):
@@ -115,9 +101,12 @@ class Marker(db.Model):
             title = data["title"],
             description = data["description"],
             type = data["type"],
-            location = db.GeoPt(data["latitude"], data["longitude"]),
+            latitude = data["latitude"],
+            longitude = data["longitude"]
         )
 
-class Follower(db.Model):
-    user = db.ReferenceProperty(User)
-    marker = db.ReferenceProperty(Marker)
+class Follower(Base):
+    __tablename__ = "followers"
+    
+    user = Column(Integer, ForeignKey("user.id"), primary_key=True)
+    marker = Column(Integer, ForeignKey("marker.id"), primary_key=True)

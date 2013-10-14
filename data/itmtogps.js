@@ -1,5 +1,5 @@
 var fs = require("fs");
-require("/Users/ron/Dropbox/Ron/src/anyway/anywayapp/js/libs/js-itm.js");
+require("js-itm.js");
 var data = JSON.parse(fs.readFileSync("coordinates.js"));
 
 var results = [];

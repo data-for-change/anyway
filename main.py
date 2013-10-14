@@ -136,9 +136,10 @@ def make_admin(self):
     user = User.all().filter("email", self.request.get("email")).get()
 
     if user:
-        return make_response("User with email %s is now admin" % user.email)
+
         user.is_admin = True
         user.put()
+        return make_response("User with email %s is now admin" % user.email)
 
 @app.route("/import")
 def import_handler():

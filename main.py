@@ -3,9 +3,6 @@ from flask import Flask, request, make_response
 
 app = Flask(__name__)
 
-if __name__ == "__main__":
-    app.run()
-
 import json
 import urllib
 import jinja2
@@ -148,4 +145,5 @@ def import_handler():
     import process
     process.import_to_datastore()
 
-
+if __name__ == "__main__":
+    app.run()

@@ -7,3 +7,4 @@ gunicorn
 itsdangerous
 wsgiref
 Flask-SQLAlchemy
+mysql-connector-python

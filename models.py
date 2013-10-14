@@ -1,7 +1,8 @@
-from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text
 from sqlalchemy.orm import relationship
+from flask.ext.sqlalchemy import SQLAlchemy
 
-from database import Base, db_session
+from database import Base, db_session, engine
 import datetime
 
 class User(Base):
@@ -15,7 +16,8 @@ class User(Base):
     facebook_id = Column(String(50))
     facebook_url = Column(String(100))
     is_admin = Column(Boolean(), default=False)
-    markers = relationship("Marker", backref="user")
+    markers = relationship("Marker", backref="users")
+    followers = relationship("Follower", backref="users")
 
     def serialize(self):
         return {
@@ -41,15 +43,16 @@ class Marker(Base):
     MARKER_TYPE_OR_YAROK = 8
 
     id = Column(Integer, primary_key=True)
-    user = Column(Integer, ForeignKey("user.id"))
+    user = Column(Integer, ForeignKey("users.id"))
     title = Column(String(100))
-    description = Column(String)
+    description = Column(Text)
     type = Column(Integer)
     subtype = Column(Integer)
     created = Column(DateTime, default=datetime.datetime.utcnow)
     latitude = Column(Float())
     longitude = Column(Float())
-    address = Column(String)
+    address = Column(Text)
+    followers = relationship("Follower", backref="markers")
 
     def serialize(self, current_user):
         return {
@@ -108,5 +111,19 @@ class Marker(Base):
 class Follower(Base):
     __tablename__ = "followers"
     
-    user = Column(Integer, ForeignKey("user.id"), primary_key=True)
-    marker = Column(Integer, ForeignKey("marker.id"), primary_key=True)
+    user = Column(Integer, ForeignKey("users.id"), primary_key=True)
+    marker = Column(Integer, ForeignKey("markers.id"), primary_key=True)
+
+
+
+def init_db():
+    # import all modules here that might define models so that
+    # they will be registered properly on the metadata.  Otherwise
+    # you will have to import them first before calling init_db()
+    print "Importing models"
+
+    print "Creating all tables"
+    Base.metadata.create_all(bind=engine)
+
+if __name__ == "__main__":
+    init_db()

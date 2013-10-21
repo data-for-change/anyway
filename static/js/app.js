@@ -275,6 +275,8 @@ $(function() {
 				url: "/login",
 				type: "post",
 				data: JSON.stringify(authResponse),
+				contentType: "application/json",
+				traditional: true,
 				dataType: "json",
 				success: _.bind(function(user) {
 					if (user) {

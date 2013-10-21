@@ -80,14 +80,14 @@ def login():
     if user:
         return make_response(json.dumps(user.serialize()))
 
-    if request.data:
-        facebook_data = json.loads(request.data)
+    if request.json:
+        facebook_data = request.json
         user_id = facebook_data["userID"]
         access_token = facebook_data["accessToken"]
         user_details = json.loads(urllib.urlopen("https://graph.facebook.com/me?access_token=" + access_token).read())
         # login successful
         if user_details["id"] == user_id:
-            user = User.all().filter("email", user_details["email"]).get()
+            user = User.query.all().filter("email", user_details["email"]).get()
             if not user:
                 user = User(
                     email = user_details["email"],

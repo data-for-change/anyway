@@ -1,3 +1,7 @@
+# local env
+local.db
+
+# compiled code
 *.py[cod]
 
 # C extensions

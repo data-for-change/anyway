@@ -45,7 +45,7 @@ def markets(self, methods=["GET", "POST"]):
 
         results = Marker.bounding_box_fetch(ne_lat, ne_lng, sw_lat, sw_lng)
 
-        markers = [marker.serialize(self.user) for marker in results]
+        markers = [marker.serialize(self.user) for marker in results.all()]
         return make_response(json.dumps(markers))
 
     else:

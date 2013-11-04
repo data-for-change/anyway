@@ -4,6 +4,19 @@ import csv
 import datetime
 import json
 import sys
+from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text
+from sqlalchemy.orm import relationship
+from flask.ext.sqlalchemy import SQLAlchemy
+from database import Base, db_session, engine
+
+
+def show_progress_spinner():
+    d = show_progress_spinner.counter%4
+    chars = ('|','/','-','\\')
+    s = chars[d]
+    sys.stderr.write("\r%s"%s)
+    show_progress_spinner.counter +=1
+show_progress_spinner.counter=0
 
 TABLES = {
     "SUG_DEREH" : {
@@ -192,12 +205,13 @@ TABLES = {
     }
 }
 
-accidents_file = "data/H20101042AccData.csv"
-cities_file = "data/cities.csv"
-streets_file = "data/H20101042DicStreets.csv"
-dictionary_file = "data/H20101042Dictionary.csv"
-urban_intersection_file = "data/H20101042IntersectUrban.csv"
-non_urban_intersection_file = "data/H20101042IntersectNonUrban.csv"
+data_path = "static/data/"
+accidents_file = data_path + "H20101042AccData.csv"
+cities_file = data_path + "cities.csv"
+streets_file = data_path + "H20101042DicStreets.csv"
+dictionary_file = data_path + "H20101042Dictionary.csv"
+urban_intersection_file = data_path + "H20101042IntersectUrban.csv"
+non_urban_intersection_file = data_path + "H20101042IntersectNonUrban.csv"
 
 cities = [x for x in csv.DictReader(open(cities_file))]
 streets = [x for x in csv.DictReader(open(streets_file))]
@@ -288,7 +302,7 @@ FIELD_LIST = [
 
 def import_data():
     accidents_csv = csv.DictReader(open(accidents_file))
-    accidents_gps_coordinates = json.loads(open("static/data/anywayapp/data/gps.json").read())
+    accidents_gps_coordinates = json.loads(open(data_path+"gps.json").read())
 
     # oh dear.
     i = -1
@@ -338,50 +352,27 @@ def import_data():
 
 def import_to_datastore():
     from models import User, Marker
-    from google.appengine.ext import db
 
-    my_user = User.all().filter("email", "ron.reiter@gmail.com").get()
     i = 0
-    markers = []
-    for data in import_data():
-        #old_marker = Marker.get_by_key_name(str(data["id"]))
-        #if old_marker:
-        #    old_marker.delete()
+    from sqlalchemy.orm import scoped_session, sessionmaker
 
+    session = scoped_session(sessionmaker(autocommit=True, autoflush=True, bind=engine))
+
+    for data in import_data():
+        show_progress_spinner()
         marker = Marker(
-            key_name=str(data["id"]),
-            user = my_user,
+            user = None,
             title = "Accident",
             description = data["description"].decode("utf8"),
             address = data["address"].decode("utf8"),
-            location = db.GeoPt(data["lat"], data["lng"]),
+            latitude = data["lat"],
+            longitude = data["lng"],
             type = Marker.MARKER_TYPE_ACCIDENT,
             subtype = data["severity"],
             created = data["date"],
-            modified = data["date"],
         )
-        #marker.put()
-        #marker.update_location()
-        markers.append(marker)
-
-        print marker.key().name()
-        if len(markers) == 100:
-            print "Writing to datastore..."
-            db.put(markers)
-            markers = []
+        session.add(marker)
+    # session.commit()
 
 if __name__ == "__main__":
-    sys.path.append("/usr/local/google_appengine")
-    import dev_appserver
-    dev_appserver.fix_sys_path()
-    from google.appengine.ext.remote_api import remote_api_stub
-
-    def auth_func():
-        return "ron.reiter@gmail.com", "iyuevjpnrrtdbyjf"
-
-    if sys.argv[1] == "remote":
-        remote_api_stub.ConfigureRemoteApi(None, '/_ah/remote_api', auth_func, 'anywayapp.appspot.com')
-    elif sys.argv[1] == "local":
-        remote_api_stub.ConfigureRemoteApi(None, '/_ah/remote_api', auth_func, 'localhost:8080')
-
     import_to_datastore()

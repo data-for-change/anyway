@@ -2,8 +2,11 @@ Flask==0.10.1
 Flask-SQLAlchemy==1.0
 Jinja2==2.7.1
 MarkupSafe==0.18
+MySQL-python==1.2.4
 SQLAlchemy==0.8.2
 Werkzeug==0.9.4
+distribute==0.6.28
 gunicorn==18.0
 itsdangerous==0.23
+mysql-connector-python==1.0.12
 wsgiref==0.1.2

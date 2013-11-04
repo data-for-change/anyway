@@ -5,11 +5,11 @@ from models import *
 from functools import wraps
 
 def set_user(user):
-	session["user"] = user
+	session["user"] = user.id
 
 def get_user():
 	if "user" in session:
-		return session["user"]
+		return db_session.query(User).filter(User.id == session["user"]).scalar()
 	else:
 		return None
 

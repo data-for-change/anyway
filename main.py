@@ -2,6 +2,7 @@ import os
 from flask import Flask, request, make_response
 
 app = Flask(__name__)
+app.secret_key = 'aiosdjsaodjoidjioewnioewfnoeijfoisdjf'
 
 import json
 import urllib
@@ -25,7 +26,7 @@ def main(*args):
 
 @app.route("/markers")
 @user_optional
-def markets(self, methods=["GET", "POST"]):
+def markers(self, methods=["GET", "POST"]):
     if request.method == "GET":
         ne_lat = float(self.request.get("ne_lat"))
         ne_lng = float(self.request.get("ne_lng"))
@@ -80,14 +81,14 @@ def login():
     if user:
         return make_response(json.dumps(user.serialize()))
 
-    if request.data:
-        facebook_data = json.loads(request.data)
+    if request.json:
+        facebook_data = request.json
         user_id = facebook_data["userID"]
         access_token = facebook_data["accessToken"]
         user_details = json.loads(urllib.urlopen("https://graph.facebook.com/me?access_token=" + access_token).read())
         # login successful
         if user_details["id"] == user_id:
-            user = User.all().filter("email", user_details["email"]).get()
+            user = db_session.query(User).filter(User.email == user_details["email"]).scalar()
             if not user:
                 user = User(
                     email = user_details["email"],
@@ -101,9 +102,9 @@ def login():
             else:
                 user.access_token = facebook_data["accessToken"]
 
-            user.put()
+            db_session.add(user)
             set_user(user)
-            make_response(json.dumps(user.serialize()))
+            return make_response(json.dumps(user.serialize()))
         else:
             raise Exception("Error in logging in.")
     else:

@@ -111,7 +111,7 @@ $(function() {
 					separator: ' עד ',
 					startDate: Date.today().add({ days: -29 }),
 					endDate: Date.today(),
-					minDate: '01/01/2013',
+					minDate: '01/01/2005',
 					maxDate: '12/31/2023',
 					locale: {
 						applyLabel: 'בחר',
@@ -155,6 +155,7 @@ $(function() {
 
 			if (this.model.get("dateRange")) {
 				var createdDate = new Date(model.get("created"));
+				
 				var start = this.model.get("dateRange")[0];
 				var end = this.model.get("dateRange")[1];
 
@@ -274,6 +275,8 @@ $(function() {
 				url: "/login",
 				type: "post",
 				data: JSON.stringify(authResponse),
+				contentType: "application/json",
+				traditional: true,
 				dataType: "json",
 				success: _.bind(function(user) {
 					if (user) {

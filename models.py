@@ -21,7 +21,7 @@ class User(Base):
 
     def serialize(self):
         return {
-            "id" : str(self.key()),
+            "id" : str(self.id),
             "first_name" : self.first_name,
             "last_name" : self.last_name,
             "username" : self.username,

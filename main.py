@@ -26,27 +26,23 @@ def main(*args):
 
 @app.route("/markers")
 @user_optional
-def markers(self, methods=["GET", "POST"]):
+def markers(methods=["GET", "POST"]):
     if request.method == "GET":
-        ne_lat = float(self.request.get("ne_lat"))
-        ne_lng = float(self.request.get("ne_lng"))
-        sw_lat = float(self.request.get("sw_lat"))
-        sw_lng = float(self.request.get("sw_lng"))
+        ne_lat = float(request.values['ne_lat'])
+        ne_lng = float(request.values['ne_lng'])
+        sw_lat = float(request.values['sw_lat'])
+        sw_lng = float(request.values['sw_lng'])
 
-        start_time = self.request.get("start_time")
-        end_time = self.request.get("end_time")
+        # query = Marker.all()
 
-        query = Marker.all()
-
-        if start_time:
-            query = query.filter("created >=", start_time)
-
-        if end_time:
-            query = query.filter("created <=", end_time)
+        # if 'start_time' in request.values:
+        #     query = query.filter("created >=", request.values["start_time"])
+        # if 'start_time' in request.values:
+        #     query = query.filter("created <=", request.values["end_time"])
 
         results = Marker.bounding_box_fetch(ne_lat, ne_lng, sw_lat, sw_lng)
 
-        markers = [marker.serialize(self.user) for marker in results.all()]
+        markers = [marker.serialize() for marker in results.all()]
         return make_response(json.dumps(markers))
 
     else:

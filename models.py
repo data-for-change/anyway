@@ -54,9 +54,10 @@ class Marker(Base):
     address = Column(Text)
     followers = relationship("Follower", backref="markers")
 
-    def serialize(self, current_user):
+    def serialize(self, current_user=None):
+        val = self.id
         return {
-            "id" : str(self.key()),
+            "id" : str(self.id),
             "title" : self.title,
             "description" : self.description,
             "address" : self.address,
@@ -65,13 +66,13 @@ class Marker(Base):
             "type" : self.type,
 
             # TODO: fix relationship
-            "user" : self.user.serialize(),
+            "user" : self.user.serialize() if self.user else "",
 
             # TODO: fix query
-            "followers" : [x.user.serialize() for x in Follower.all().filter("marker", self).fetch(100)],
+            "followers" : [], # [x.user.serialize() for x in Follower.all().filter("marker", self).fetch(100)],
 
             # TODO: fix query
-            "following" : Follower.all().filter("user", current_user).filter("marker", self).filter("user", current_user).get() is not None if current_user else None,
+            "following" : None, # Follower.all().filter("user", current_user).filter("marker", self).filter("user", current_user).get() is not None if current_user else None,
             "created" : self.created.isoformat(),
         }
 

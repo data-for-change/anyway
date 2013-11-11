@@ -167,11 +167,8 @@ def import_data():
 def import_to_datastore():
     from models import User, Marker
 
-<<<<<<< HEAD
-=======
-    my_user = User.query.filter_by(email="ron.reiter@gmail.com").first()
+    #my_user = User.query.filter_by(email="ron.reiter@gmail.com").first()
 
->>>>>>> 459962aff80c11fe43f1b7b8498f782ce0765507
     i = 0
     from sqlalchemy.orm import scoped_session, sessionmaker
 

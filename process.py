@@ -191,11 +191,7 @@ def import_to_datastore():
     # session.commit()
 
 if __name__ == "__main__":
-<<<<<<< HEAD
-=======
-
 #    if sys.argv[1] == "remote":
 #    elif sys.argv[1] == "local":
-
->>>>>>> 459962aff80c11fe43f1b7b8498f782ce0765507
-    import_to_datastore()
+#    import_to_datastore()
+    pass

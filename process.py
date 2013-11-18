@@ -168,11 +168,9 @@ def import_to_datastore():
     from models import User, Marker
 
     i = 0
-    from sqlalchemy.orm import scoped_session, sessionmaker
-
-    session = scoped_session(sessionmaker(autocommit=True, autoflush=True, bind=engine))
-
-    for data in import_data():
+    session = db_session()
+    commit_every = 1000
+    for irow, data in enumerate(import_data()):
         show_progress_spinner()
         marker = Marker(
             user = None,
@@ -186,7 +184,11 @@ def import_to_datastore():
             created = data["date"],
         )
         session.add(marker)
-    # session.commit()
+        if irow>0 and irow%commit_every == 0:
+            print "committing..."
+            session.commit()
+            session.flush()
+            print "done."
 
 if __name__ == "__main__":
     import_to_datastore()

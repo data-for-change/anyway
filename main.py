@@ -32,17 +32,21 @@ def markers(methods=["GET", "POST"]):
         ne_lng = float(request.values['ne_lng'])
         sw_lat = float(request.values['sw_lat'])
         sw_lng = float(request.values['sw_lng'])
+        zoom = int(request.values['zoom'])
+        min_zoom_level = 16
+        if zoom < min_zoom_level:
+            markers = []
+        else:
+            # query = Marker.all()
 
-        # query = Marker.all()
+            # if 'start_time' in request.values:
+            #     query = query.filter("created >=", request.values["start_time"])
+            # if 'start_time' in request.values:
+            #     query = query.filter("created <=", request.values["end_time"])
 
-        # if 'start_time' in request.values:
-        #     query = query.filter("created >=", request.values["start_time"])
-        # if 'start_time' in request.values:
-        #     query = query.filter("created <=", request.values["end_time"])
+            results = Marker.bounding_box_fetch(ne_lat, ne_lng, sw_lat, sw_lng)
 
-        results = Marker.bounding_box_fetch(ne_lat, ne_lng, sw_lat, sw_lng)
-
-        markers = [marker.serialize() for marker in results.all()]
+            markers = [marker.serialize() for marker in results.all()]
         return make_response(json.dumps(markers))
 
     else:

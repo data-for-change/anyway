@@ -57,6 +57,7 @@ $(function() {
         },
         fetchMarkers : function() {
             var bounds = this.map.getBounds();
+            var zoom = this.map.zoom;
 
             var params = {};
 
@@ -69,6 +70,7 @@ $(function() {
                 params["ne_lng"] = bounds.getNorthEast().lng();
                 params["sw_lat"] = bounds.getSouthWest().lat();
                 params["sw_lng"] = bounds.getSouthWest().lng();
+                params["zoom"] = zoom;
             }
 
             this.markers.fetch({ data : $.param(params) });

@@ -167,11 +167,6 @@ def import_data():
 def import_to_datastore():
     from models import User, Marker
 
-<<<<<<< HEAD
-=======
-    my_user = User.query.filter_by(email="ron.reiter@gmail.com").first()
-
->>>>>>> 459962aff80c11fe43f1b7b8498f782ce0765507
     i = 0
     from sqlalchemy.orm import scoped_session, sessionmaker
 
@@ -194,11 +189,4 @@ def import_to_datastore():
     # session.commit()
 
 if __name__ == "__main__":
-<<<<<<< HEAD
-=======
-
-#    if sys.argv[1] == "remote":
-#    elif sys.argv[1] == "local":
-
->>>>>>> 459962aff80c11fe43f1b7b8498f782ce0765507
     import_to_datastore()

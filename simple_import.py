@@ -2,11 +2,12 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+import datetime
 
 db_connection_string = os.environ.get('CLEARDB_DATABASE_URL')
 print "using connection string: %s"%db_connection_string
 engine = create_engine(db_connection_string, convert_unicode=True, echo=True)
-autocommit = False
+autocommit = False # Autocommit does not seem to work
 db_session = sessionmaker(autocommit=autocommit, autoflush=True, bind=engine)
 Base = declarative_base()
 session = db_session()
@@ -16,11 +17,11 @@ marker = Marker(
             title = "Accident",
             description = "sample accident",
             address = "sample address",
-            latitude = "00.44",
+            latitude = "00.33",
             longitude = "00.22",
             type = Marker.MARKER_TYPE_ACCIDENT,
             subtype = "",
-            created = "",
+            created = datetime.datetime.now(),
         )
 session.add(marker)
 if not autocommit:

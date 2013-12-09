@@ -7,6 +7,9 @@ var ICONS = [
     "/img/petition.svg",
     "/img/accident.svg"
 ];
+
+// dummy
+
 var TYPE_STRING = [
     "הצעה",
     "עצומה"

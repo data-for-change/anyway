@@ -4,8 +4,15 @@ var INIT_LAT = 32.0833;
 var INIT_LON = 34.8000;
 var INIT_ZOOM = 14;
 var ICONS = [
-    "/img/petition.svg",
-    "/img/accident.svg"
+    "/img/icons/vehicle_object_lethal.png",
+    "/img/icons/vehicle_object_medium.png",
+    "/img/icons/vehicle_object_severe.png",
+    "/img/icons/vehicle_person_lethal.png",
+    "/img/icons/vehicle_person_medium.png",
+    "/img/icons/vehicle_person_severe.png",
+    "/img/icons/vehicle_vehicle_lethal.png",
+    "/img/icons/vehicle_vehicle_medium.png",
+    "/img/icons/vehicle_vehicle_severe.png"
 ];
 
 // dummy
@@ -370,7 +377,7 @@ $(function() {
             this.model.set("layers", layers);
         },
         loadMarker : function(model) {
-            console.log("loading marker", ICONS[model.get("type")]);
+            console.log("loading marker", ICONS[model.get("subtype")]);
 
             if (this.model.get("layers") && !this.model.get("layers")[model.get("type")]) {
                 console.log("skipping marker because the layer is not chosen");

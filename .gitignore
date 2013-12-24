@@ -40,3 +40,6 @@ nosetests.xml
 .idea
 
 venv
+
+# vagrant
+.vagrant

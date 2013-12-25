@@ -1,10 +1,6 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-%w(vagrant-berkshelf vagrant-butcher vagrant-omnibus).each do |plugin|
-  Vagrant.require_plugin plugin
-end
-
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 

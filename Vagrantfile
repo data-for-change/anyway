@@ -5,8 +5,8 @@
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = "precise-server-cloudimg-amd64"
-  config.vm.box_url = "http://cloud-images.ubuntu.com/vagrant/precise/current/precise-server-cloudimg-amd64-vagrant-disk1.box"
+  config.vm.box = "precise64"
+  config.vm.box_url = "http://files.vagrantup.com/precise64.box"
 
   config.vm.network :forwarded_port, guest: 5000, host: 5000
 
@@ -22,6 +22,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         export DEBIAN_FRONTEND=noninteractive
         debconf-set-selections <<< 'mysql-server mysql-server/root_password password'
         debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password'
+
+        apt-get update -y -q
 
         apt-get install -y -q python python-pip python-dev mysql-server libmysqlclient-dev
         wget -qO- https://toolbelt.heroku.com/install-ubuntu.sh | sh

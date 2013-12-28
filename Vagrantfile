@@ -30,9 +30,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
         pip install virtualenv
         cd /vagrant
-        rm -rf venv
-        virtualenv venv
-        source venv/bin/activate
+        rm -rf ~/venv
+        virtualenv ~/venv
+        source ~/venv/bin/activate
         pip install -r requirements.txt
 
         mysqladmin create anyway
@@ -50,7 +50,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       [ -f /var/lock/provision ] || exit 1
 
       cd /vagrant
-      source venv/bin/activate
+      source ~/venv/bin/activate
       export CLEARDB_DATABASE_URL=mysql://localhost/anyway
       killall gunicorn 2>/dev/null
       foreman start

@@ -10,6 +10,7 @@ from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, Date
 from sqlalchemy.orm import relationship
 from flask.ext.sqlalchemy import SQLAlchemy
 from database import Base, db_session, engine
+from retry import retries, example_exc_handler
 
 def show_progress_spinner():
     d = show_progress_spinner.counter%4
@@ -163,13 +164,18 @@ def import_data():
         output_fields["lng"] = accidents_gps_coordinates[i]["lng"]
         yield output_fields
 
+@retries(3, delay=1800, hook=example_exc_handler)
+def flush_and_commit(session):
+    session.commit()
+    session.flush()
+    print "committed successfully"
 
 def import_to_datastore():
     from models import User, Marker
 
     i = 0
     session = db_session()
-    commit_every = 1000
+    commit_every = 500
     for irow, data in enumerate(import_data()):
         show_progress_spinner()
         marker = Marker(
@@ -185,10 +191,7 @@ def import_to_datastore():
         )
         session.add(marker)
         if irow>0 and irow%commit_every == 0:
-            print "committing..."
-            session.commit()
-            session.flush()
-            print "done."
+            flush_and_commit(session)
 
 if __name__ == "__main__":
     import_to_datastore()

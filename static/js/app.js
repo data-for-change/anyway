@@ -2,10 +2,18 @@ var ADD_MARKER_OFFER = "הוסף הצעה";
 var ADD_MARKER_PETITION = "הוסף עצומה";
 var INIT_LAT = 32.0833;
 var INIT_LON = 34.8000;
-var INIT_ZOOM = 14;
+var INIT_ZOOM = 17;
 var ICONS = [
-    "/img/petition.svg",
-    "/img/accident.svg"
+    null,
+    "/static/img/icons/vehicle_object_lethal.png",
+    "/static/img/icons/vehicle_object_medium.png",
+    "/static/img/icons/vehicle_object_severe.png",
+    "/static/img/icons/vehicle_person_lethal.png",
+    "/static/img/icons/vehicle_person_medium.png",
+    "/static/img/icons/vehicle_person_severe.png",
+    "/static/img/icons/vehicle_vehicle_lethal.png",
+    "/static/img/icons/vehicle_vehicle_medium.png",
+    "/static/img/icons/vehicle_vehicle_severe.png",
 ];
 
 // dummy

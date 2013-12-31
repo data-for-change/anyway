@@ -64,6 +64,7 @@ class Marker(Base):
             "latitude" : self.latitude,
             "longitude" : self.longitude,
             "type" : self.type,
+            "subtype" : self.subtype,
 
             # TODO: fix relationship
             "user" : self.user.serialize() if self.user else "",

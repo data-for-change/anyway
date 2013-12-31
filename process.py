@@ -4,6 +4,7 @@ import csv
 import datetime
 import json
 import sys
+import argparse
 from tables_lms import *
 
 from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text
@@ -164,31 +165,55 @@ def import_data():
         yield output_fields
 
 
-def import_to_datastore():
+def import_to_datastore(ratio=1):
     from models import User, Marker
 
     i = 0
     session = db_session()
-    commit_every = 1000
+
+    # wipe all the Markers first
+    session.query(Marker).delete()
+    session.flush()
+
+    commit_every = 100
     for irow, data in enumerate(import_data()):
         show_progress_spinner()
-        marker = Marker(
-            user = None,
-            title = "Accident",
-            description = data["description"].decode("utf8"),
-            address = data["address"].decode("utf8"),
-            latitude = data["lat"],
-            longitude = data["lng"],
-            type = Marker.MARKER_TYPE_ACCIDENT,
-            subtype = data["severity"],
-            created = data["date"],
-        )
-        session.add(marker)
-        if irow>0 and irow%commit_every == 0:
-            print "committing..."
-            session.commit()
-            session.flush()
-            print "done."
+        if irow % ratio == 0:
+            marker = Marker(
+                user = None,
+                title = "Accident",
+                description = data["description"].decode("utf8"),
+                address = data["address"].decode("utf8"),
+                latitude = data["lat"],
+                longitude = data["lng"],
+                type = Marker.MARKER_TYPE_ACCIDENT,
+                subtype = data["severity"],
+                created = data["date"],
+            )
+            session.add(marker)
+            i += 1
+
+            if i % commit_every == 0:
+                print "committing..."
+                session.commit()
+                session.flush()
+                print "done."
+
+    if i % commit_every != 0: # we still have data in our transaction, flush it
+        print "committing..."
+        session.commit()
+        session.flush()
+        print "done."
+
+    print "imported %d items" % (i,)
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--ratio', type=int, metavar='n', default=1,
+                        help='Import ratio 1:n')
+    args = parser.parse_args()
+
+    import_to_datastore(args.ratio)
 
 if __name__ == "__main__":
-    import_to_datastore()
+    main()

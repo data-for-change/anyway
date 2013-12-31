@@ -35,7 +35,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         source ~/venv/bin/activate
         pip install -r requirements.txt
 
-        mysqladmin create anyway
+        mysqladmin create anyway  || :
         export CLEARDB_DATABASE_URL=mysql://localhost/anyway
         python models.py # create the DB schema
         python process.py # load the CSV into the DB

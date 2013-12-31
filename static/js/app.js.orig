@@ -2,6 +2,13 @@ var ADD_MARKER_OFFER = "הוסף הצעה";
 var ADD_MARKER_PETITION = "הוסף עצומה";
 var INIT_LAT = 32.0833;
 var INIT_LON = 34.8000;
+<<<<<<< HEAD
+var INIT_ZOOM = 16;
+var ICONS = [
+    "/static/img/icons/vehicle_object_lethal.png",
+    "/static/img/icons/vehicle_object_medium.png",
+    "/static/img/icons/vehicle_object_severe.png"
+=======
 var INIT_ZOOM = 17;
 var ICONS = [
     null,
@@ -14,6 +21,7 @@ var ICONS = [
     "/static/img/icons/vehicle_vehicle_lethal.png",
     "/static/img/icons/vehicle_vehicle_medium.png",
     "/static/img/icons/vehicle_vehicle_severe.png",
+>>>>>>> 6fa6aca9d47b67b3332ebd9d4bd00cbefe1e545f
 ];
 
 var TYPE_STRING = [

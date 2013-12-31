@@ -2,18 +2,18 @@ var ADD_MARKER_OFFER = "הוסף הצעה";
 var ADD_MARKER_PETITION = "הוסף עצומה";
 var INIT_LAT = 32.0833;
 var INIT_LON = 34.8000;
-var INIT_ZOOM = 14;
+var INIT_ZOOM = 16;
 var ICONS = [
-    "/img/petition.svg",
-    "/img/accident.svg"
+    "/static/img/icons/vehicle_object_lethal.png",
+    "/static/img/icons/vehicle_object_medium.png",
+    "/static/img/icons/vehicle_object_severe.png"
 ];
-
-// dummy
 
 var TYPE_STRING = [
     "הצעה",
     "עצומה"
 ];
+
 $(function() {
     var AppRouter = Backbone.Router.extend({
         routes: {
@@ -56,6 +56,7 @@ $(function() {
             this.model.bind("change:layers", this.loadMarkers, this);
             this.model.bind("change:dateRange", this.loadMarkers, this);
             this.login();
+
 
         },
         fetchMarkers : function() {
@@ -310,10 +311,12 @@ $(function() {
 
             google.maps.event.addListener( this.map, "rightclick", _.bind(this.contextMenuMap, this) );
             google.maps.event.addListener( this.map, "mouseup", _.bind(this.fetchMarkers, this) );
+            google.maps.event.addListener( this.map, "zoom_changed", _.bind(this.fetchMarkers, this) );
 
-            this.fetchMarkers();
-
-
+            var self = this;
+            setTimeout(function(){ 
+                console.log('Deferred fetch markers');
+                self.fetchMarkers(); }, 3000);
 
 
             this.sidebar = new SidebarView({ map: this.map }).render();
@@ -360,7 +363,7 @@ $(function() {
             return this;
         },
         clickMap : function(e) {
-            console.log("clickd map");
+            console.log("clicked map");
         },
         updateCheckbox : function() {
             var layers = [];
@@ -370,7 +373,7 @@ $(function() {
             this.model.set("layers", layers);
         },
         loadMarker : function(model) {
-            console.log("loading marker", ICONS[model.get("type")]);
+            // console.log("loading marker", ICONS[model.get("type")]);
 
             if (this.model.get("layers") && !this.model.get("layers")[model.get("type")]) {
                 console.log("skipping marker because the layer is not chosen");
@@ -384,7 +387,7 @@ $(function() {
                 var end = this.model.get("dateRange")[1];
 
                 if (createdDate < start || createdDate > end) {
-                    console.log("skipping marker becuase the date is not in the range");
+                    console.log("skipping marker because the date is not in the range");
                     return;
                 }
 
@@ -416,7 +419,7 @@ $(function() {
             if (typeof markerId == "number" && currentMarker != markerId) {
                 return;
             }
-            console.log("choosing marker", currentMarker);
+            // console.log("choosing marker", currentMarker);
             if (!this.markerList.length) {
                 return;
             }

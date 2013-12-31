@@ -13,10 +13,11 @@ var MarkerView = Backbone.View.extend({
 		var user = this.model.get("user");
 
 		var markerPosition = new google.maps.LatLng(this.model.get("latitude"), this.model.get("longitude"));
+		
 		this.marker = new google.maps.Marker({
 			position: markerPosition,
 			map: this.map,
-			//icon: ICONS[this.model.get("type")],
+			icon: ICONS[this.model.get("type")],
 			title: this.model.get("title")
 		});
 

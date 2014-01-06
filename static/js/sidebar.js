@@ -25,7 +25,7 @@ var SidebarView = Backbone.View.extend({
 
 				var entry = $("#list-entry li").clone();
 
-				entry.find(".type").text(TYPE_STRING[markerModel.get("type")]);
+				entry.find(".type").text(SUBTYPE_STRING[markerModel.get("subtype")]);
 				entry.find(".text").text(markerModel.get("title"));
 				entry.data("marker", marker);
 				this.$currentViewList.append(entry);

@@ -2,7 +2,7 @@ import os
 import logging
 from flask import Flask, request, make_response
 
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
 app.secret_key = 'aiosdjsaodjoidjioewnioewfnoeijfoisdjf'
@@ -38,7 +38,6 @@ def markers(methods=["GET", "POST"]):
         sw_lng = float(request.values['sw_lng'])
         zoom = int(request.values['zoom'])
         min_zoom_level = 16
-        logging.debug('got params')
         if zoom < min_zoom_level:
             markers = []
         else:

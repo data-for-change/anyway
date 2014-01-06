@@ -92,7 +92,7 @@ var MarkerView = Backbone.View.extend({
 			name: this.model.get("title"),
 			link: document.location.href,
 			description: this.model.get("description"),
-			caption: TYPE_STRING[this.model.get("type")]
+			caption: SUBTYPE_STRING[this.model.get("subtype")]
 			// picture
 		}, function(response) {
 			if (response && response.post_id) {

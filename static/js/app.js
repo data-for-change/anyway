@@ -21,6 +21,18 @@ var TYPE_STRING = [
     "עצומה"
 ];
 
+var SUBTYPE_STRING = [
+    "aaa",
+    "bbb",
+    "ccc",
+    "ddd",
+    "eee",
+    "fff",
+    "ggg",
+    "hhh"
+];
+
+
 $(function() {
     var AppRouter = Backbone.Router.extend({
         routes: {
@@ -67,8 +79,16 @@ $(function() {
 
         },
         fetchMarkers : function() {
+            var MINIMAL_ZOOM = 16;
             var bounds = this.map.getBounds();
             var zoom = this.map.zoom;
+            console.log('zoom is ' + zoom);
+            if (zoom < MINIMAL_ZOOM) {
+                // abort
+                // show message and abort
+                $.notify("התקרב על מנת לראות ארועים");
+                return;
+            }
 
             var params = {};
 
@@ -314,7 +334,6 @@ $(function() {
 
             }
             this.map=init_map;
-
 
             google.maps.event.addListener( this.map, "rightclick", _.bind(this.contextMenuMap, this) );
             google.maps.event.addListener( this.map, "mouseup", _.bind(this.fetchMarkers, this) );

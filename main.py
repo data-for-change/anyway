@@ -138,20 +138,5 @@ def unfollow(key_name):
     if follower:
         follower.delete()
 
-@app.route("/make_admin")
-def make_admin():
-    user = User.all().filter("email", request.get("email")).get()
-
-    if user:
-
-        user.is_admin = True
-        user.put()
-        return make_response("User with email %s is now admin" % user.email)
-
-@app.route("/import")
-def import_handler():
-    import process
-    process.import_to_datastore()
-
 if __name__ == "__main__":
     app.run(debug=True)

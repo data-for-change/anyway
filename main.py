@@ -1,5 +1,8 @@
 import os
+import logging
 from flask import Flask, request, make_response
+
+logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
 app.secret_key = 'aiosdjsaodjoidjioewnioewfnoeijfoisdjf'
@@ -27,6 +30,7 @@ def main(*args):
 @app.route("/markers")
 @user_optional
 def markers(methods=["GET", "POST"]):
+    logging.debug('getting markers')
     if request.method == "GET":
         ne_lat = float(request.values['ne_lat'])
         ne_lng = float(request.values['ne_lng'])
@@ -34,6 +38,7 @@ def markers(methods=["GET", "POST"]):
         sw_lng = float(request.values['sw_lng'])
         zoom = int(request.values['zoom'])
         min_zoom_level = 16
+        logging.debug('got params')
         if zoom < min_zoom_level:
             markers = []
         else:
@@ -43,9 +48,10 @@ def markers(methods=["GET", "POST"]):
             #     query = query.filter("created >=", request.values["start_time"])
             # if 'start_time' in request.values:
             #     query = query.filter("created <=", request.values["end_time"])
-
+            print ""
+            logging.debug('querying markers in bouding box')
             results = Marker.bounding_box_fetch(ne_lat, ne_lng, sw_lat, sw_lng)
-
+            logging.debug('serializing markers')
             markers = [marker.serialize() for marker in results.all()]
         return make_response(json.dumps(markers))
 

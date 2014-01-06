@@ -4,6 +4,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 
 from database import Base, db_session, engine
 import datetime
+import logging
 
 class User(Base):
     __tablename__ = "users"
@@ -103,6 +104,7 @@ class Marker(Base):
         # >>> m.count()
         # 250
         markers = db_session.query(Marker).filter(Marker.longitude<=ne_lng).filter(Marker.longitude>=sw_lng).filter(Marker.latitude<=ne_lat).filter(Marker.latitude>=sw_lat)
+        logging.debug('got %d markers from db' % markers.count())
         return markers
 
     @classmethod

@@ -194,7 +194,7 @@ def import_to_datastore(ratio=1):
             i += 1
 
             if i % commit_every == 0:
-                print "committing..."
+                print "committing (%d items done)..." % (i,)
                 session.commit()
                 session.flush()
                 print "done."

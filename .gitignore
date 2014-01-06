@@ -1,5 +1,6 @@
 # local env
 local.db
+envit.sh
 
 # compiled code
 *.py[cod]
@@ -43,3 +44,5 @@ venv
 
 # vagrant
 .vagrant
+
+

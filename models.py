@@ -1,12 +1,21 @@
-from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text
-from sqlalchemy.orm import relationship
-from flask.ext.sqlalchemy import SQLAlchemy
-
-from database import Base, db_session, engine
 import datetime
 import logging
+import os
+from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text
+from sqlalchemy.orm import relationship
+from flask import Flask, request, make_response
+from flask.ext.sqlalchemy import SQLAlchemy
 
-class User(Base):
+logging.basicConfig(level=logging.DEBUG)
+
+if __name__ == '__main__':
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('CLEARDB_DATABASE_URL')
+    db = SQLAlchemy(app)
+else:
+    from main import db
+
+class User(db.Model):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
     email = Column(String(120), unique=True)
@@ -31,7 +40,7 @@ class User(Base):
             "is_admin" : self.is_admin,
         }
 
-class Marker(Base):
+class Marker(db.Model):
     __tablename__ = "markers"
 
     MARKER_TYPE_ACCIDENT = 1
@@ -85,7 +94,7 @@ class Marker(Base):
         self.latitude = data["latitude"]
         self.longitude = data["longitude"]
 
-        follower = db_session.query(Follower).filter(Follower.marker == self.id).filter(Follower.user == current_user).get(1)
+        follower = db.session.query(Follower).filter(Follower.marker == self.id).filter(Follower.user == current_user).get(1)
 
         if data["following"]:
             if not follower:
@@ -103,7 +112,7 @@ class Marker(Base):
         # >>>  m = Marker.bounding_box_fetch(32.36, 35.088, 32.292, 34.884)
         # >>> m.count()
         # 250
-        markers = db_session.query(Marker).filter(Marker.longitude<=ne_lng).filter(Marker.longitude>=sw_lng).filter(Marker.latitude<=ne_lat).filter(Marker.latitude>=sw_lat)
+        markers = db.session.query(Marker).filter(Marker.longitude<=ne_lng).filter(Marker.longitude>=sw_lng).filter(Marker.latitude<=ne_lat).filter(Marker.latitude>=sw_lat)
         logging.debug('got %d markers from db' % markers.count())
         return markers
 
@@ -117,7 +126,7 @@ class Marker(Base):
             longitude = data["longitude"]
         )
 
-class Follower(Base):
+class Follower(db.Model):
     __tablename__ = "followers"
     
     user = Column(Integer, ForeignKey("users.id"), primary_key=True)
@@ -132,7 +141,7 @@ def init_db():
     print "Importing models"
 
     print "Creating all tables"
-    Base.metadata.create_all(bind=engine)
+    db.create_all()
 
 if __name__ == "__main__":
     init_db()

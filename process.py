@@ -179,7 +179,7 @@ def import_to_datastore(ratio=1):
     db.session.query(Marker).delete()
     db.session.commit()
 
-    commit_every = 1000
+    commit_every = 100
 
     for irow, data in enumerate(import_data()):
         show_progress_spinner()

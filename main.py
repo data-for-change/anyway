@@ -1,18 +1,19 @@
 import os
 import logging
-from flask import Flask, request, make_response
-
-# logging.basicConfig(level=logging.DEBUG)
-
-app = Flask(__name__)
-app.secret_key = 'aiosdjsaodjoidjioewnioewfnoeijfoisdjf'
-
 import json
 import urllib
 import jinja2
 
-from models import *
-from base import *
+from flask import Flask, request, make_response
+from flask.ext.sqlalchemy import SQLAlchemy
+
+# logging.basicConfig(level=logging.DEBUG)
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('CLEARDB_DATABASE_URL')
+db = SQLAlchemy(app)
+
+app.secret_key = 'aiosdjsaodjoidjioewnioewfnoeijfoisdjf'
 
 FACEBOOK_KEY = "157028231131213"
 FACEBOOK_SECRET = "0437ee70207dca46609219b990be0614"
@@ -20,6 +21,9 @@ FACEBOOK_SECRET = "0437ee70207dca46609219b990be0614"
 jinja_environment = jinja2.Environment(
     autoescape=True,
     loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), "templates")))
+
+from models import *
+from base import *
 
 @app.route("/")
 @app.route("/(\d+)")

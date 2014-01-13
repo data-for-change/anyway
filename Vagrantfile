@@ -35,8 +35,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         source ~/venv/bin/activate
         pip install -r requirements.txt
 
-        mysqladmin create anyway  || :
-        export CLEARDB_DATABASE_URL=mysql://localhost/anyway
+        mysql -u root <<< 'CREATE DATABASE `anyway` CHARSET=utf8' || :
+        export CLEARDB_DATABASE_URL="mysql://localhost/anyway?charset=utf8"
         python models.py # create the DB schema
         python process.py # load the CSV into the DB
 
@@ -51,7 +51,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
       cd /vagrant
       source ~/venv/bin/activate
-      export CLEARDB_DATABASE_URL=mysql://localhost/anyway
+      export CLEARDB_DATABASE_URL="mysql://localhost/anyway?charset=utf8"
       killall gunicorn 2>/dev/null
       foreman start
     EOS

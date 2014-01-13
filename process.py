@@ -4,13 +4,19 @@ import csv
 import datetime
 import json
 import sys
+import os
 import argparse
 from tables_lms import *
 
 from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text
 from sqlalchemy.orm import relationship
+from flask import Flask, request, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
-from database import Base, db_session, engine
+
+app = Flask(__name__)
+#app.config['SQLALCHEMY_ECHO'] = True
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('CLEARDB_DATABASE_URL')
+db = SQLAlchemy(app)
 
 def show_progress_spinner():
     d = show_progress_spinner.counter%4
@@ -169,13 +175,12 @@ def import_to_datastore(ratio=1):
     from models import User, Marker
 
     i = 0
-    session = db_session()
-
     # wipe all the Markers first
-    session.query(Marker).delete()
-    session.flush()
+    db.session.query(Marker).delete()
+    db.session.commit()
 
-    commit_every = 100
+    commit_every = 1000
+
     for irow, data in enumerate(import_data()):
         show_progress_spinner()
         if irow % ratio == 0:
@@ -190,19 +195,18 @@ def import_to_datastore(ratio=1):
                 subtype = data["severity"],
                 created = data["date"],
             )
-            session.add(marker)
+
+            db.session.add(marker)
             i += 1
 
             if i % commit_every == 0:
                 print "committing (%d items done)..." % (i,)
-                session.commit()
-                session.flush()
+                db.session.commit()
                 print "done."
 
     if i % commit_every != 0: # we still have data in our transaction, flush it
         print "committing..."
-        session.commit()
-        session.flush()
+        db.session.commit()
         print "done."
 
     print "imported %d items" % (i,)

@@ -3,34 +3,110 @@ var ADD_MARKER_PETITION = "הוסף עצומה";
 var INIT_LAT = 32.0833;
 var INIT_LON = 34.8000;
 var INIT_ZOOM = 17;
-var ICONS = [
-    null,
-    "/static/img/icons/vehicle_object_lethal.png",
-    "/static/img/icons/vehicle_object_medium.png",
-    "/static/img/icons/vehicle_object_severe.png",
-    "/static/img/icons/vehicle_person_lethal.png",
-    "/static/img/icons/vehicle_person_medium.png",
-    "/static/img/icons/vehicle_person_severe.png",
-    "/static/img/icons/vehicle_vehicle_lethal.png",
-    "/static/img/icons/vehicle_vehicle_medium.png",
-    "/static/img/icons/vehicle_vehicle_severe.png",
-];
+
+
+var SEVERITY_FATAL = 1;
+var SEVERITY_SEVERE = 2;
+var SEVERITY_LIGHT = 3;
+
+var ACCIDENT_TYPE_CAR_TO_CAR =-1; // Synthetic type
+var ACCIDENT_TYPE_CAR_TO_OBJECT = -2; // Synthetic type
+var ACCIDENT_TYPE_CAR_TO_PEDESTRIAN = 1;
+var ACCIDENT_TYPE_FRONT_TO_SIDE = 2;
+var ACCIDENT_TYPE_FRONT_TO_REAR = 3;
+var ACCIDENT_TYPE_SIDE_TO_SIDE = 4;
+var ACCIDENT_TYPE_FRONT_TO_FRONT = 5;
+var ACCIDENT_TYPE_WITH_STOPPED_CAR_NO_PARKING = 6;
+var ACCIDENT_TYPE_WITH_STOPPED_CAR_PARKING = 7;
+var ACCIDENT_TYPE_WITH_STILL_OBJECT = 8;
+var ACCIDENT_TYPE_OFF_ROAD_OR_SIDEWALK = 9;
+var ACCIDENT_TYPE_ROLLOVER = 10;
+var ACCIDENT_TYPE_SKID = 11;
+var ACCIDENT_TYPE_HIT_PASSSENGER_IN_CAR = 12;
+var ACCIDENT_TYPE_FALLING_OFF_MOVING_VEHICLE = 13;
+var ACCIDENT_TYPE_FIRE = 14;
+var ACCIDENT_TYPE_OTHER = 15;
+var ACCIDENT_TYPE_BACK_TO_FRONT = 17;
+var ACCIDENT_TYPE_BACK_TO_SIDE = 18;
+var ACCIDENT_TYPE_WITH_ANIMAL = 19;
+var ACCIDENT_TYPE_WITH_VEHICLE_LOAD = 20;
+
+var ICONS = {};
+ICONS[SEVERITY_FATAL] = {};
+ICONS[SEVERITY_SEVERE] = {};
+ICONS[SEVERITY_LIGHT] = {};
+
+ICONS[SEVERITY_FATAL][ACCIDENT_TYPE_CAR_TO_PEDESTRIAN] = "/static/img/icons/vehicle_person_lethal.png"
+ICONS[SEVERITY_SEVERE][ACCIDENT_TYPE_CAR_TO_PEDESTRIAN] = "/static/img/icons/vehicle_person_severe.png"
+ICONS[SEVERITY_LIGHT][ACCIDENT_TYPE_CAR_TO_PEDESTRIAN] = "/static/img/icons/vehicle_person_medium.png"
+ICONS[SEVERITY_FATAL][ACCIDENT_TYPE_CAR_TO_CAR] = "/static/img/icons/vehicle_vehicle_lethal.png"
+ICONS[SEVERITY_SEVERE][ACCIDENT_TYPE_CAR_TO_CAR] = "/static/img/icons/vehicle_vehicle_severe.png"
+ICONS[SEVERITY_LIGHT][ACCIDENT_TYPE_CAR_TO_CAR] = "/static/img/icons/vehicle_vehicle_medium.png"
+ICONS[SEVERITY_FATAL][ACCIDENT_TYPE_CAR_TO_OBJECT] = "/static/img/icons/vehicle_object_lethal.png"
+ICONS[SEVERITY_SEVERE][ACCIDENT_TYPE_CAR_TO_OBJECT] = "/static/img/icons/vehicle_object_severe.png"
+ICONS[SEVERITY_LIGHT][ACCIDENT_TYPE_CAR_TO_OBJECT] = "/static/img/icons/vehicle_object_medium.png"
+
+var ACCIDENT_MINOR_TYPE_TO_TYPE = { };
+ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_CAR_TO_PEDESTRIAN]=ACCIDENT_TYPE_CAR_TO_PEDESTRIAN;
+ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_FRONT_TO_SIDE]=ACCIDENT_TYPE_CAR_TO_CAR;
+ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_FRONT_TO_REAR ]=ACCIDENT_TYPE_CAR_TO_CAR;
+ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_SIDE_TO_SIDE]=ACCIDENT_TYPE_CAR_TO_CAR;
+ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_FRONT_TO_FRONT]=ACCIDENT_TYPE_CAR_TO_CAR;
+ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_WITH_STOPPED_CAR_NO_PARKING]=ACCIDENT_TYPE_CAR_TO_CAR;
+ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_WITH_STOPPED_CAR_PARKING]=ACCIDENT_TYPE_CAR_TO_CAR;
+ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_WITH_STILL_OBJECT]=ACCIDENT_TYPE_CAR_TO_OBJECT;
+ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_OFF_ROAD_OR_SIDEWALK]=ACCIDENT_TYPE_CAR_TO_OBJECT;
+ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_ROLLOVER]=ACCIDENT_TYPE_CAR_TO_OBJECT;
+ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_SKID]=ACCIDENT_TYPE_CAR_TO_OBJECT;
+ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_HIT_PASSSENGER_IN_CAR]=ACCIDENT_TYPE_CAR_TO_CAR;
+ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_FALLING_OFF_MOVING_VEHICLE]=ACCIDENT_TYPE_CAR_TO_OBJECT;
+ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_FIRE]=ACCIDENT_TYPE_CAR_TO_OBJECT;
+ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_OTHER]=ACCIDENT_TYPE_CAR_TO_OBJECT;
+ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_BACK_TO_FRONT]=ACCIDENT_TYPE_CAR_TO_CAR;
+ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_BACK_TO_SIDE]=ACCIDENT_TYPE_CAR_TO_CAR;
+ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_WITH_ANIMAL]=ACCIDENT_TYPE_CAR_TO_PEDESTRIAN;
+ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_WITH_VEHICLE_LOAD]=ACCIDENT_TYPE_CAR_TO_CAR;
+
+var DEFAULT_ICON = ICONS[1][1];
+
+function getIcon(accidentType, severity) {
+    var icon = DEFAULT_ICON;
+    try {
+        icon = ICONS[severity][ACCIDENT_MINOR_TYPE_TO_TYPE[accidentType]];
+    } catch (err) {
+        // stick to default icon
+    }
+    return icon;
+}
 
 var TYPE_STRING = [
+    "",
+    "תאונה",
     "הצעה",
     "עצומה"
 ];
 
 var SUBTYPE_STRING = [
-    "aaa",
-    "bbb",
-    "ccc",
-    "ddd",
-    "eee",
-    "fff",
-    "ggg",
-    "hhh"
-];
+    "פגיעה בהולך רגל",
+    "התנגשות חזית אל צד",
+    "התנגשות חזית באחור",
+    "התנגשות צד בצד",
+    "התנגשות חזית אל חזית",
+    "התנגשות עם רכב שנעצר ללא חניה",
+    "התנגשות עם רכב חונה",
+    "התנגשות עם עצם דומם",
+    "ירידה מהכביש או עלייה למדרכה",
+    "התהפכות",
+    "החלקה",
+    "פגיעה בנוסע בתוך כלי רכב",
+    "נפילה ברכב נע",
+    "שריפה",
+    "אחר",
+    "התנגשות אחור אל חזית",
+    "התנגשות אחור אל צד",
+    "התנגשות עם בעל חיים",
+    "פגיעה ממטען של רכב"
+    ];
 
 
 $(function() {

@@ -17,7 +17,7 @@ var MarkerView = Backbone.View.extend({
 		this.marker = new google.maps.Marker({
 			position: markerPosition,
 			map: this.map,
-			icon: ICONS[this.model.get("subtype")],
+			icon: getIcon(this.model.get("subtype"), this.model.get("severity")),
 			title: this.model.get("title")
 		});
 

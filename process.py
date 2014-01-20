@@ -104,7 +104,7 @@ FIELD_FUNCTIONS = {
     "LO_HAZA" :  ("לא חצה", fixed_table, "LO_HAZA"),
     "OFEN_HAZIYA" : ("אופן חציה", fixed_table, "OFEN_HAZIYA"),
     "MEKOM_HAZIYA" : ("מקום חציה", fixed_table, "MEKOM_HAZIYA"),
-    "KIVUN_HAZIYA" : ("כיוון חציה", fixed_table, "MEKOM_HAZIYA"),
+    "KIVUN_HAZIYA" : ("כיוון חציה", fixed_table, "KIVUN_HAZIYA"),
     "STATUS_IGUN" : ("עיגון", fixed_table, "STATUS_IGUN"),
     "MAHOZ" : ("מחוז", dictionary, 77),
     "NAFA" : ("נפה", dictionary, 79),
@@ -113,13 +113,7 @@ FIELD_FUNCTIONS = {
     "ZURAT_ISHUV" : ("צורת יישוב", dictionary, 81),
 }
 
-FIELD_LIST = [
-    "SUG_DEREH", "SEMEL_YISHUV", "REHOV1", "REHOV2", "BAYIT", "ZOMET_IRONI", "KVISH1", "KVISH2",
-    "ZOMET_LO_IRONI", "YEHIDA", "SUG_YOM", "RAMZOR",
-    "HUMRAT_TEUNA", "SUG_TEUNA", "ZURAT_DEREH", "HAD_MASLUL", "RAV_MASLUL", "MEHIRUT_MUTERET", "TKINUT", "ROHAV",
-    "SIMUN_TIMRUR", "TEURA","BAKARA", "MEZEG_AVIR", "PNE_KVISH", "SUG_EZEM", "MERHAK_EZEM", "LO_HAZA", "OFEN_HAZIYA",
-    "MEKOM_HAZIYA", "KIVUN_HAZIYA", "MAHOZ", "NAFA", "EZOR_TIVI", "MAAMAD_MINIZIPALI", "ZURAT_ISHUV", 
-]
+FIELD_LIST = FIELD_FUNCTIONS.keys()
 
 def import_data():
     accidents_csv = csv.DictReader(open(accidents_file))
@@ -146,7 +140,6 @@ def import_data():
                         "REHOV2",
                         "BAYIT",
                         "SEMEL_YISHUV",
-                        "HUMRAT_TEUNA",
                         "X",
                         "Y"]:
                     continue
@@ -164,6 +157,7 @@ def import_data():
         output_fields["description"] = description
         output_fields["id"] = int(accident["pk_teuna_fikt"])
         output_fields["severity"] = int(accident["HUMRAT_TEUNA"])
+        output_fields["subType"] = int(accident["SUG_TEUNA"])
         output_fields["address"] = address
 
         output_fields["lat"] = accidents_gps_coordinates[i]["lat"]
@@ -192,7 +186,8 @@ def import_to_datastore(ratio=1):
                 latitude = data["lat"],
                 longitude = data["lng"],
                 type = Marker.MARKER_TYPE_ACCIDENT,
-                subtype = data["severity"],
+                subtype = data["subType"],
+                severity = data["severity"],
                 created = data["date"],
             )
 

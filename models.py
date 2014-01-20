@@ -58,6 +58,7 @@ class Marker(db.Model):
     description = Column(Text)
     type = Column(Integer)
     subtype = Column(Integer)
+    severity = Column(Integer)
     created = Column(DateTime, default=datetime.datetime.utcnow)
     latitude = Column(Float())
     longitude = Column(Float())
@@ -75,6 +76,7 @@ class Marker(db.Model):
             "longitude" : self.longitude,
             "type" : self.type,
             "subtype" : self.subtype,
+            "severity" : self.severity,
 
             # TODO: fix relationship
             "user" : self.user.serialize() if self.user else "",

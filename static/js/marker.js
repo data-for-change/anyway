@@ -24,12 +24,22 @@ var MarkerView = Backbone.View.extend({
 		this.$el.html($("#marker-content-template").html());
 
 		this.$el.width(400);
-		this.$el.find(".title").text(this.model.get("title"));
+		this.$el.find(".title").text(TYPES_MAP[this.model.get("title")]);
 		this.$el.find(".description").text(this.model.get("description"));
-		this.$el.find(".profile-image").attr("src", "https://graph.facebook.com/" + user.facebook_id + "/picture");
+		if (user) {
+		    this.$el.find(".profile-image").attr("src", "https://graph.facebook.com/" + user.facebook_id + "/picture");
+		} else {
+			this.$el.find(".profile-image").attr("src", "/static/img/lamas.png");
+			this.$el.find(".profile-image").attr("width", "50px");
+		}
 		this.$el.find(".type").text(TYPE_STRING[this.model.get("type")]);
-		this.$el.find(".added-by").text("נוסף על ידי " + user.first_name + " " + user.last_name);
-
+		var display_user = "";
+		if (user.first_name && user.last_name) {
+			display_user = user.first_name + " " + user.last_name;
+		} else {
+			display_user = 'הלשכה המרכזית לסטטיסטיקה';
+		}
+		this.$el.find(".added-by").text("נוסף על ידי " + display_user);
 		this.$followButton = this.$el.find(".follow-button");
 		this.$unfollowButton = this.$el.find(".unfollow-button");
 		this.$followerList = this.$el.find(".followers");

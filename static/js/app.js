@@ -86,6 +86,9 @@ var TYPE_STRING = [
     "עצומה"
 ];
 
+var TYPES_MAP = {};
+TYPES_MAP['Accident'] = TYPE_STRING[1];
+
 var SUBTYPE_STRING = [
     "פגיעה בהולך רגל",
     "התנגשות חזית אל צד",
@@ -107,7 +110,6 @@ var SUBTYPE_STRING = [
     "התנגשות עם בעל חיים",
     "פגיעה ממטען של רכב"
     ];
-
 
 $(function() {
     var AppRouter = Backbone.Router.extend({
@@ -477,7 +479,7 @@ $(function() {
         loadMarker : function(model) {
             // console.log("loading marker", ICONS[model.get("type")]);
 
-            if (this.model.get("layers") && !this.model.get("layers")[model.get("type")]) {
+            if (this.model.get("layers") && !this.model.get("layers")[model.get("severity")]) {
                 console.log("skipping marker because the layer is not chosen");
                 return;
             }

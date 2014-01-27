@@ -166,6 +166,7 @@ def import_data():
 
 
 def import_to_datastore(ratio=1):
+    print "importing with ratio = %s"%(ratio,)
     from models import User, Marker
 
     i = 0

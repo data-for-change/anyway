@@ -26,11 +26,6 @@ jinja_environment = jinja2.Environment(
 from models import *
 from base import *
 
-@app.route("/")
-@app.route("/(\d+)")
-def main(*args):
-    template = jinja_environment.get_template("index.html")
-    return make_response(template.render({}))
 
 @app.route("/markers")
 @user_optional
@@ -141,6 +136,13 @@ def unfollow(key_name):
     follower = Follower.all().filter("marker", marker).filter("user", self.user).get()
     if follower:
         follower.delete()
+
+@app.route('/', defaults={'marker_id': None})
+@app.route('/<int:marker_id>')
+def main(marker_id):
+    template = jinja_environment.get_template("index.html")
+    return make_response(template.render({}))
+
 
 if __name__ == "__main__":
     app.run(debug=True)

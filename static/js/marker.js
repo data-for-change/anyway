@@ -26,6 +26,7 @@ var MarkerView = Backbone.View.extend({
 		this.$el.width(400);
 		this.$el.find(".title").text(TYPES_MAP[this.model.get("title")]);
 		this.$el.find(".description").text(this.model.get("description"));
+		this.$el.find(".creation-date").text("תאריך " + this.model.get("created") );
 		if (user) {
 		    this.$el.find(".profile-image").attr("src", "https://graph.facebook.com/" + user.facebook_id + "/picture");
 		} else {

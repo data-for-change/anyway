@@ -41,7 +41,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         mysql -u root <<< 'CREATE DATABASE `anyway` CHARSET=utf8' || :
         export CLEARDB_DATABASE_URL="mysql://localhost/anyway?charset=utf8"
         python models.py # create the DB schema
-        python process.py # load the CSV into the DB
+        python process.py --truncate # load the CSV into the DB
 
         touch /var/lock/provision # mark provisioning as completed
       fi

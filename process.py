@@ -165,14 +165,15 @@ def import_data():
         yield output_fields
 
 
-def import_to_datastore(ratio=1):
+def import_to_datastore(ratio=1, truncate=True):
     print "importing with ratio = %s"%(ratio,)
     from models import User, Marker
 
     i = 0
-    # wipe all the Markers first
-    db.session.query(Marker).delete()
-    db.session.commit()
+    if truncate:
+        # wipe all the Markers first
+        db.session.query(Marker).delete()
+        db.session.commit()
 
     commit_every = 100
 
@@ -211,9 +212,11 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--ratio', type=int, metavar='n', default=1,
                         help='Import ratio 1:n')
+    parser.add_argument('--truncate', action='store_true', default=False,
+                        help="Truncate the markers table prior to loading the data")
     args = parser.parse_args()
 
-    import_to_datastore(args.ratio)
+    import_to_datastore(args.ratio, args.truncate)
 
 if __name__ == "__main__":
     main()

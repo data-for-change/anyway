@@ -186,209 +186,6 @@ $(function() {
         },
         render : function() {
 
-
-            var styles = [
-
-              {
-
-                "featureType": "water",
-
-                "elementType": "geometry",
-
-                "stylers": [
-
-                  { "color": "#9ecfec" }
-
-                ]
-
-              },{
-
-                "featureType": "landscape.natural",
-
-                "elementType": "geometry",
-
-                "stylers": [
-
-                  { "color": "#f2eeee" }
-
-                ]
-
-              },{
-
-                "featureType": "landscape.man_made",
-
-                "elementType": "geometry",
-
-                "stylers": [
-
-                  { "color": "#eae6e6" }
-
-                ]
-
-              },{
-
-                "featureType": "poi",
-
-                "elementType": "poi",
-
-                "stylers": [
-
-                  { "visibility": "off" }
-
-                ]
-
-              },{
-
-                "featureType": "poi.park",
-
-                "elementType": "geometry",
-
-                "stylers": [
-
-                  { "visibility": "on" },
-
-                  { "color": "#d3e0bf" }
-
-                ]
-
-              },{
-
-                "featureType": "road.highway",
-
-                "elementType": "geometry.fill",
-
-                "stylers": [
-
-                  { "color": "#ffffff" }
-
-                ]
-
-              },{
-
-                "featureType": "road.arterial",
-
-                "elementType": "geometry.fill",
-
-                "stylers": [
-
-                  { "color": "#ffffff" }
-
-                ]
-
-              },{
-
-                "featureType": "road.local",
-
-                "elementType": "geometry.fill",
-
-                "stylers": [
-
-                  { "color": "#ffffff" }
-
-                ]
-
-              },{
-
-                "featureType": "road.local",
-
-                "elementType": "geometry.stroke",
-
-                "stylers": [
-
-                  { "color": "#c8c8c8" }
-
-                ]
-
-              },{
-
-                "featureType": "road.arterial",
-
-                "elementType": "geometry.stroke",
-
-                "stylers": [
-
-                  { "color": "#aaaaaa" }
-
-                ]
-
-              },{
-
-                "featureType": "road.highway",
-
-                "elementType": "geometry.stroke",
-
-                "stylers": [
-
-                  { "color": "#969696" }
-
-                ]
-
-              },{
-
-                "featureType": "road.highway",
-
-                "elementType": "labels.text.fill",
-
-                "stylers": [
-
-                  { "color": "#1e1e1e" }
-
-                ]
-
-              },{
-
-                "featureType": "road.arterial",
-
-                "elementType": "labels.text.fill",
-
-                "stylers": [
-
-                  { "color": "#1e1e1e" }
-
-                ]
-
-              },{
-
-                "featureType": "road.local",
-
-                "elementType": "labels.text.fill",
-
-                "stylers": [
-
-                  { "color": "#1e1e1e" }
-
-                ]
-
-              },{
-
-                "featureType": "administrative",
-
-                "elementType": "labels.text.fill",
-
-                "stylers": [
-
-                  { "color": "#505050" }
-
-                ]
-
-              },{
-
-                "featureType": "transit.line",
-
-                "stylers": [
-
-                  { "color": "#4e99fe" }
-
-                ]
-
-              },{
-
-                "featureType": "landscape"  }
-
-            ];
-
-
-
             var geolocpoint=new google.maps.LatLng(INIT_LAT, INIT_LON);
 
             var mapOptions = {
@@ -398,7 +195,7 @@ $(function() {
                 mapTypeControl: false,
                 zoomControl: true,
                 panControl: true,
-                styles: styles
+                styles: MAP_STYLE
             };
             var init_map = new google.maps.Map(this.$el.find("#map_canvas").get(0), mapOptions);
 
@@ -457,7 +254,11 @@ $(function() {
                     buttonClasses: ['btn-danger']
                 },
                 _.bind(function(start, end) {
-                    this.model.set("dateRange", [start, end]);
+                    if (start || end) {
+                        this.model.set("dateRange", [start, end]);
+                    } else {
+                        this.model.unset("dateRange");
+                    }
                 }, this)
             );
 

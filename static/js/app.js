@@ -350,12 +350,14 @@ $(function() {
                         icon : "plus-sign",
                         text : ADD_MARKER_OFFER,
                         callback : this.clickContext
-                    },
+                    }
+                    /*,
                     {
                         icon : "plus-sign",
                         text : ADD_MARKER_PETITION,
                         callback : this.clickContext
                     }
+                    */
                 ]}).render(e);
         },
         clickContext : function(item, event) {

@@ -162,10 +162,14 @@ $(function() {
             var zoom = this.map.zoom;
             console.log('zoom is ' + zoom);
             if (zoom < MINIMAL_ZOOM) {
-                // abort
-                // show message and abort
-                $.notify("התקרב על מנת לראות ארועים");
+                if ($('.notifyjs-container').length==0) {
+                    // abort
+                    // show message and abort
+                    $.notify("התקרב על מנת לראות ארועים");
+                }
                 return;
+            } else {
+                $('.notifyjs-container').trigger('notify-hide');
             }
 
             var params = {};

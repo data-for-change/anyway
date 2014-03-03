@@ -140,6 +140,13 @@ def unfollow(key_name):
 @app.route('/', defaults={'marker_id': None})
 @app.route('/<int:marker_id>')
 def main(marker_id):
+    # at this point the marker id is just a running number, and the 
+    # LMS is in the description and needs to be promoted to a DB
+    # field so we can query it. We also need to add a provider id.
+    if request.values['marker']:
+        logging.debug('I have a marker %s'%request.values['marker'])
+        markers = Marker.get_marker(request.values['marker'])
+        logging.debug('I found markers %d'%markers.count())
     template = jinja_environment.get_template("index.html")
     return make_response(template.render({}))
 

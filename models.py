@@ -118,6 +118,10 @@ class Marker(db.Model):
         logging.debug('got %d markers from db' % markers.count())
         return markers
 
+    @staticmethod
+    def get_marker(marker_id):
+        return db.session.query(Marker).filter_by(id = marker_id)
+
     @classmethod
     def parse(cls, data):
         return Marker(

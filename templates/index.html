@@ -8,7 +8,7 @@
     <script src="/static/js/libs/backbone.js"></script>
     <script src="/static/js/libs/bootstrap.js"></script>
     <script src="/static/js/libs/notify-combined.min.js"></script>
-
+    <script src="/static/js/libs/moment-with-langs.min.js"></script>
     <script src="/static/js/libs/date.js"></script>
     <script src="/static/js/libs/daterangepicker.js"></script>
     <script src="/static/js/libs/js-itm.js"></script>
@@ -115,7 +115,7 @@
     <div class="sidebar-title">סנן לפי טווח תאריכים</div>
     <ul>
         <li>
-            <div class="input-prepend">
+            <div class="input-prepend" id="calendar-control">
                 <span class="add-on"><i class="icon-calendar"></i></span><input type="text" class="date-range" style="width: 200px"/>
             </div>
 
@@ -128,6 +128,7 @@
 </div>
 <div id="fb-root"></div>
 <script>
+moment.lang('he');
         window.fbAsyncInit = function() {
           FB.init({
             appId      : '157028231131213', // App ID

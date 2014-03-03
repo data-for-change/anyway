@@ -265,7 +265,8 @@ $(function() {
                     }
                 }, this)
             );
-
+            this.$el.find("#calendar-control").click(
+                this.$el.find(".date-range").daterangepicker("open"));
             this.router = new AppRouter();
             Backbone.history.start({pushState: true});
 

@@ -25,22 +25,14 @@ Heroku deployment
 -----------------
 * Create an account on [Heroku](http://heroku.com/)
 * Follow the [quickstart instructions](https://devcenter.heroku.com/articles/quickstart). On step #4, read the [Python introduction](https://devcenter.heroku.com/articles/getting-started-with-python)
-* Create an app
-* Sign up for free tier ClearDB (MySQL). Note that you'll have to enter your credit card details to be eliable for the free MySQL usage.
-* Tweak your Heroku app configurations:
-	* Remove `?reconnect=true` from your CLEARDB config: `heroku config:set CLEARDB_DATABASE_URL=$(heroku config:get CLEARDB_DATABASE_URL | cut -d '?' -f 1)`
-	* Set BUILDPACK_URL: `heroku config:set BUILDPACK_URL="https://github.com/omribahumi/heroku-buildpack-python.git"`
-* Load the data:
-    * Run vagrant
-    * In `vagrant ssh`:
-    	* `sudo -i`
-    	* `source ~/venv/bin/activate`
-    	* `cd /vagrant`
-    	* `export CLEARDB_DATABASE_URL="your_app_cleardb_database_url"`
-    	* `python models.py`
-    	* `python process.py --ratio 10`
+* Create an app, e.g. anyway-mydev
+* Sign up for free tier ClearDB (MySQL). Note that you'll have to enter your credit card details to be eligible for the free MySQL usage.
 * Deploy your git repo to heroku
-
+* Loading the database with our data:
+    * Tweak your Heroku app configurations, by removing `?reconnect=true` from your CLEARDB config (if you have several apps, specify the relevant one with the option --app anyway mydev):<br/>
+	 `heroku config:set CLEARDB_DATABASE_URL=$(heroku config:get CLEARDB_DATABASE_URL | cut -d '?' -f 1)`
+    * Create tables: `heroku run --app ./models.py`
+    * Populate data: `heroku run --app anyway-dev ./process.py --ratio 10`
 
 Bugs & Feature Requests
 -----------------------

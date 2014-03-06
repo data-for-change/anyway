@@ -29,10 +29,10 @@ Heroku deployment
 * Sign up for free tier ClearDB (MySQL). Note that you'll have to enter your credit card details to be eligible for the free MySQL usage.
 * Deploy your git repo to heroku
 * Loading the database with our data:
-    * Tweak your Heroku app configurations, by removing `?reconnect=true` from your CLEARDB config (if you have several apps, specify the relevant one with the option --app anyway mydev):<br/>
+    * Tweak your Heroku app configurations, by removing `?reconnect=true` from your CLEARDB config (if you have several apps, specify the relevant one with the option --app <anyway-mydev> for all following heroku commands):<br/>
 	 `heroku config:set CLEARDB_DATABASE_URL=$(heroku config:get CLEARDB_DATABASE_URL | cut -d '?' -f 1)`
-    * Create tables: `heroku run --app ./models.py`
-    * Populate data: `heroku run --app anyway-dev ./process.py --ratio 10`
+    * Create tables: `heroku run ./models.py`
+    * Populate data: `heroku run ./process.py --ratio 10`
 
 Bugs & Feature Requests
 -----------------------

@@ -143,12 +143,16 @@ def main(marker_id):
     # at this point the marker id is just a running number, and the 
     # LMS is in the description and needs to be promoted to a DB
     # field so we can query it. We also need to add a provider id.
+    context = {}
     if 'marker' in request.values:
         logging.debug('I have a marker %s'%request.values['marker'])
         markers = Marker.get_marker(request.values['marker'])
         logging.debug('I found markers %d'%markers.count())
+        if markers.count() == 1:
+            marker = markers[0]
+            context['coordinates'] = (marker.latitude, marker.longitude)
     template = jinja_environment.get_template("index.html")
-    return make_response(template.render({}))
+    return make_response(template.render(context))
 
 
 if __name__ == "__main__":

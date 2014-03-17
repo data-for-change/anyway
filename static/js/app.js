@@ -203,14 +203,18 @@ $(function() {
             };
             var init_map = new google.maps.Map(this.$el.find("#map_canvas").get(0), mapOptions);
 
-            if(navigator.geolocation){
+            if(MARKER_SPECIFIED) {
+                geolocpoint=new google.maps.LatLng(
+                    MARKER_LATITUDE, 
+                    MARKER_LONGITUDE);
+                init_map.setCenter(geolocpoint);
+            } else if(navigator.geolocation){
                 navigator.geolocation.getCurrentPosition(function(position){
                     var latitude=position.coords.latitude;
                     var longitude=position.coords.longitude;
                     geolocpoint=new google.maps.LatLng(latitude,longitude);
                     init_map.setCenter(geolocpoint);
                 });
-
             }
             this.map=init_map;
 

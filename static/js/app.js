@@ -192,10 +192,10 @@ $(function() {
         },
         render : function() {
 
-            var geolocpoint=new google.maps.LatLng(INIT_LAT, INIT_LON);
+            var myloc=new google.maps.LatLng(INIT_LAT, INIT_LON);
 
             var mapOptions = {
-                center: geolocpoint,
+                center: myloc,
                 zoom: INIT_ZOOM,
                 mapTypeId: google.maps.MapTypeId.ROADMAP,
                 mapTypeControl: false,
@@ -203,26 +203,37 @@ $(function() {
                 panControl: true,
                 styles: MAP_STYLE
             };
-            var init_map = new google.maps.Map(this.$el.find("#map_canvas").get(0), mapOptions);
+            this.map = new google.maps.Map(this.$el.find("#map_canvas").get(0), mapOptions);
 
             if(MARKER_SPECIFIED) {
-                geolocpoint=new google.maps.LatLng(
+                markerloc=new google.maps.LatLng(
                     MARKER_LATITUDE, 
                     MARKER_LONGITUDE);
-                init_map.setCenter(geolocpoint);
+                this.map.setCenter(markerloc);
                 // need to find the specified marker
                 // need to wait till all markers are loaded to give it a fair try
                 // _.find(app.markerList, function(m) { return m.marker.id = "632"; });
-            } else if(navigator.geolocation){
+            }
+
+            if(navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function(position){
                     var latitude=position.coords.latitude;
                     var longitude=position.coords.longitude;
-                    geolocpoint=new google.maps.LatLng(latitude,longitude);
-                    init_map.setCenter(geolocpoint);
-                });
-            }
+                    myloc=new google.maps.LatLng(latitude,longitude);
 
-            this.map=init_map;
+                    resetMapDiv = document.createElement('div');
+                    resetMapDiv.innerHTML = $("#reset-map-control").html()
+                    google.maps.event.addDomListener(resetMapDiv, 'click', function() {
+                        this.map.panTo(myloc);
+                        console.log("reset map");
+                    }.bind(this));
+                    this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(resetMapDiv);
+
+                    if(!MARKER_SPECIFIED) {
+                      this.map.setCenter(myloc);
+                    }
+                }.bind(this));
+            }
 
             google.maps.event.addListener( this.map, "rightclick", _.bind(this.contextMenuMap, this) );
             google.maps.event.addListener( this.map, "mouseup", _.bind(this.fetchMarkers, this) );

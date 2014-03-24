@@ -137,6 +137,7 @@ $(function() {
             "click #map_canvas" : "clickMap",
             "click .fb-login" : "requireLogin",
             "click .fb-logout" : "logout",
+            "click .reset-map" : "resetMap",
             "change input[type=checkbox]" : "updateCheckbox"
         },
         initialize : function() {
@@ -223,6 +224,7 @@ $(function() {
             }
 
             this.map=init_map;
+            this.initialPosition = geolocpoint;
 
             google.maps.event.addListener( this.map, "rightclick", _.bind(this.contextMenuMap, this) );
             google.maps.event.addListener( this.map, "mouseup", _.bind(this.fetchMarkers, this) );
@@ -284,6 +286,10 @@ $(function() {
         },
         clickMap : function(e) {
             console.log("clicked map");
+        },
+        resetMap : function(e) {
+            this.map.panTo(this.initialPosition);
+            console.log("reset map");
         },
         updateCheckbox : function() {
             var layers = [];

@@ -151,6 +151,7 @@ def main(marker_id):
         if markers.count() == 1:
             marker = markers[0]
             context['coordinates'] = (marker.latitude, marker.longitude)
+            context['marker'] = marker.id;
     template = jinja_environment.get_template("index.html")
     return make_response(template.render(context))
 

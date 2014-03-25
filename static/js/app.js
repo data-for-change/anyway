@@ -115,9 +115,11 @@ $(function() {
     var AppRouter = Backbone.Router.extend({
         routes: {
             "" : "navigateEmpty",
-            ":id" : "navigate"
+            ":id" : "navigate",
+            "/?marker=:id" : "navigate"
         },
         navigate: function(id) {
+            console.log('navigate to ', id);
             app.model.set("currentMarker", parseInt(id));
         },
         navigateEmpty: function() {
@@ -208,6 +210,9 @@ $(function() {
                     MARKER_LATITUDE, 
                     MARKER_LONGITUDE);
                 init_map.setCenter(geolocpoint);
+                // need to find the specified marker
+                // need to wait till all markers are loaded to give it a fair try
+                // _.find(app.markerList, function(m) { return m.marker.id = "632"; });
             } else if(navigator.geolocation){
                 navigator.geolocation.getCurrentPosition(function(position){
                     var latitude=position.coords.latitude;
@@ -216,6 +221,7 @@ $(function() {
                     init_map.setCenter(geolocpoint);
                 });
             }
+
             this.map=init_map;
 
             google.maps.event.addListener( this.map, "rightclick", _.bind(this.contextMenuMap, this) );
@@ -230,8 +236,6 @@ $(function() {
 
             this.sidebar = new SidebarView({ map: this.map }).render();
             this.$el.find(".sidebar-container").append(this.sidebar.$el);
-
-            //this.updateCheckbox();
 
             this.$el.find(".date-range").daterangepicker({
                     ranges: {
@@ -288,7 +292,7 @@ $(function() {
         },
         loadMarker : function(model) {
             // console.log("loading marker", ICONS[model.get("type")]);
-
+            // markers are loaded immediately as they are fetched
             if (this.model.get("layers") && !this.model.get("layers")[model.get("severity")]) {
                 console.log("skipping marker because the layer is not chosen");
                 return;
@@ -304,7 +308,6 @@ $(function() {
                     console.log("skipping marker because the date is not in the range");
                     return;
                 }
-
             }
 
             var markerView = new MarkerView({model: model, map: this.map}).render();
@@ -317,7 +320,7 @@ $(function() {
 
         },
         loadMarkers : function() {
-            console.log("loading markers", this.markers);
+            console.log("-->> loading markers", this.markers);
             if (this.markerList) {
                 _(this.markerList).each(_.bind(function(marker) {
                     marker.marker.setMap(null);
@@ -327,13 +330,16 @@ $(function() {
             this.markers.each(_.bind(this.loadMarker, this));
             this.sidebar.updateMarkerList();
             this.chooseMarker();
+            console.log('done loading markers now...');
+
         },
         chooseMarker: function(markerId) {
             var currentMarker = this.model.get("currentMarker");
+            console.log("choosing marker", currentMarker);
             if (typeof markerId == "number" && currentMarker != markerId) {
                 return;
             }
-            // console.log("choosing marker", currentMarker);
+            
             if (!this.markerList.length) {
                 return;
             }
@@ -343,11 +349,12 @@ $(function() {
             }
             var markerView = this.markerList[this.markers.get(currentMarker).get("markerView")];
             if (!markerView) {
-                this.model.set("currentMarker", null);
+                // this.model.set("currentMarker", null);
                 return;
             }
 
             new google.maps.event.trigger(markerView.marker , "click");
+            this.model.set("currentMarker", null);
         },
         contextMenuMap : function(e) {
             if (this.menu) {

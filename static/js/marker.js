@@ -58,7 +58,7 @@ var MarkerView = Backbone.View.extend({
 		});
 
 		google.maps.event.addListener(this.marker, "click", _.bind(function() {
-			console.log('open da dialog');
+			// console.log('open da dialog');
 			if (app.infowindow) {
 				app.infowindow.close();
 			}
@@ -92,7 +92,7 @@ var MarkerView = Backbone.View.extend({
 		this.model.save({following: true}, {wait:true});
 	},
 	openDialog: function() {
-		console.log('clicked!!!');
+		// console.log('clicked!!!');
 		this.markerWindow.open(this.map, this.marker);
 		app.infowindow = this.markerWindow;
 	},
@@ -112,7 +112,7 @@ var MarkerView = Backbone.View.extend({
 			// picture
 		}, function(response) {
 			if (response && response.post_id) {
-				console.log("published");
+				// console.log("published");
 			}
 		});
 	}

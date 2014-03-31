@@ -119,7 +119,7 @@ $(function() {
             "/?marker=:id" : "navigate"
         },
         navigate: function(id) {
-            console.log('navigate to ', id);
+            // console.log('navigate to ', id);
             app.model.set("currentMarker", parseInt(id));
         },
         navigateEmpty: function() {
@@ -162,7 +162,7 @@ $(function() {
             var MINIMAL_ZOOM = 16;
             var bounds = this.map.getBounds();
             var zoom = this.map.zoom;
-            console.log('zoom is ' + zoom);
+            // console.log('zoom is ' + zoom);
             if (zoom < MINIMAL_ZOOM) {
                 if ($('.notifyjs-container').length==0) {
                     // abort
@@ -229,10 +229,6 @@ $(function() {
             google.maps.event.addListener( this.map, "zoom_changed", _.bind(this.fetchMarkers, this) );
 
             var self = this;
-            setTimeout(function(){ 
-                console.log('Deferred fetch markers');
-                self.fetchMarkers(); }, 3000);
-
 
             this.sidebar = new SidebarView({ map: this.map }).render();
             this.$el.find(".sidebar-container").append(this.sidebar.$el);
@@ -277,7 +273,11 @@ $(function() {
                 this.$el.find(".date-range").daterangepicker("open"));
             this.router = new AppRouter();
             Backbone.history.start({pushState: true});
-
+            setTimeout(function(){ 
+                // somehow fetching markers does not work when done immediately
+                // console.log('Deferred fetch markers');
+                self.fetchMarkers(); }, 3000);
+            
             return this;
         },
         clickMap : function(e) {
@@ -305,7 +305,7 @@ $(function() {
                 var end = this.model.get("dateRange")[1];
 
                 if (createdDate < start || createdDate > end) {
-                    console.log("skipping marker because the date is not in the range");
+                    // console.log("skipping marker because the date is not in the range");
                     return;
                 }
             }
@@ -320,7 +320,7 @@ $(function() {
 
         },
         loadMarkers : function() {
-            console.log("-->> loading markers", this.markers);
+            // console.log("-->> loading markers", this.markers);
             if (this.markerList) {
                 _(this.markerList).each(_.bind(function(marker) {
                     marker.marker.setMap(null);
@@ -330,12 +330,12 @@ $(function() {
             this.markers.each(_.bind(this.loadMarker, this));
             this.sidebar.updateMarkerList();
             this.chooseMarker();
-            console.log('done loading markers now...');
+            // console.log('done loading markers now...');
 
         },
         chooseMarker: function(markerId) {
             var currentMarker = this.model.get("currentMarker");
-            console.log("choosing marker", currentMarker);
+            // console.log("choosing marker", currentMarker);
             if (typeof markerId == "number" && currentMarker != markerId) {
                 return;
             }
@@ -377,9 +377,9 @@ $(function() {
                 ]}).render(e);
         },
         clickContext : function(item, event) {
-            console.log("clicked item, require login");
+            // console.log("clicked item, require login");
             this.requireLogin(_.bind(function() {
-                console.log("clicked item", item, event);
+                // console.log("clicked item", item, event);
                 this.openCreateDialog(item, event);
             }, this));
         },
@@ -412,7 +412,7 @@ $(function() {
                         if (response.authResponse) {
                             this.login(response.authResponse, callback);
                         } else {
-                            console.log('User cancelled login or did not fully authorize.');
+                            // console.log('User cancelled login or did not fully authorize.');
                         }
                     }, this), {scope:"email"});
                 }

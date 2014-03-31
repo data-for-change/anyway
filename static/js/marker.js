@@ -21,6 +21,8 @@ var MarkerView = Backbone.View.extend({
 			title: this.model.get("title")
 		});
 
+        app.oms.addMarker(this.marker);
+
 		this.$el.html($("#marker-content-template").html());
 
 		this.$el.width(400);
@@ -56,7 +58,7 @@ var MarkerView = Backbone.View.extend({
 			content: this.el
 		});
 
-		google.maps.event.addListener(this.marker, "click", _.bind(function() {
+		app.oms.addListener(this.marker, "click", _.bind(function() {
 			if (app.infowindow) {
 				app.infowindow.close();
 			}

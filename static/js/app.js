@@ -222,6 +222,8 @@ $(function() {
             google.maps.event.addListener( this.map, "mouseup", _.bind(this.fetchMarkers, this) );
             google.maps.event.addListener( this.map, "zoom_changed", _.bind(this.fetchMarkers, this) );
 
+            this.oms = new OverlappingMarkerSpiderfier(this.map, {markersWontMove: true, markersWontHide: true});
+
             var self = this;
             setTimeout(function(){ 
                 console.log('Deferred fetch markers');
@@ -306,6 +308,7 @@ $(function() {
                 }
 
             }
+
 
             var markerView = new MarkerView({model: model, map: this.map}).render();
 

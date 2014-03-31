@@ -13,12 +13,13 @@ var MarkerView = Backbone.View.extend({
 		var user = this.model.get("user");
 
 		var markerPosition = new google.maps.LatLng(this.model.get("latitude"), this.model.get("longitude"));
-		
+
 		this.marker = new google.maps.Marker({
 			position: markerPosition,
 			map: this.map,
 			icon: getIcon(this.model.get("subtype"), this.model.get("severity")),
-			title: this.model.get("title")
+			title: this.model.get("title"),
+			id: this.model.get("id")
 		});
 
         app.oms.addMarker(this.marker);
@@ -54,25 +55,25 @@ var MarkerView = Backbone.View.extend({
 			this.$deleteButton.show();
 		}
 
-		var markerWindow = new google.maps.InfoWindow({
+		this.markerWindow = new google.maps.InfoWindow({
 			content: this.el
 		});
 
 		app.oms.addListener(this.marker, "click", _.bind(function() {
-			if (app.infowindow) {
-				app.infowindow.close();
-			}
-			markerWindow.open(this.map, this.marker);
-			app.infowindow = markerWindow;
-			Backbone.history.navigate("/" + this.model.get("id"), true);
-		}, this));
+            google.maps.event.addListener(this.marker, "click", _.bind(function() {
+                if (app.infowindow) {
+                    app.infowindow.close();
+                }
+                this.markerWindow.open(this.map, this.marker);
+                app.infowindow = this.markerWindow;
+                Backbone.history.navigate("/?marker=" + this.model.get("id"), true);
+            }, this));
 
-		google.maps.event.addListener(markerWindow,"closeclick",function(){
-			Backbone.history.navigate("/", true);
-		});
-
+            google.maps.event.addListener(this.markerWindow,"closeclick",function(){
+                Backbone.history.navigate("/", true);
+            });
+        }));
 		return this;
-
 	},
 	updateFollowing : function() {
 		if (this.model.get("following")) {
@@ -93,6 +94,11 @@ var MarkerView = Backbone.View.extend({
 	clickFollow : function() {
 		this.model.save({following: true}, {wait:true});
 	},
+	openDialog: function() {
+		// console.log('clicked!!!');
+		this.markerWindow.open(this.map, this.marker);
+		app.infowindow = this.markerWindow;
+	},
 	clickUnfollow : function() {
 		this.model.save({following: false}, {wait:true});
 	},
@@ -109,7 +115,7 @@ var MarkerView = Backbone.View.extend({
 			// picture
 		}, function(response) {
 			if (response && response.post_id) {
-				console.log("published");
+				// console.log("published");
 			}
 		});
 	}

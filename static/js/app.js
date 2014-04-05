@@ -109,7 +109,7 @@ var SUBTYPE_STRING = [
     "התנגשות אחור אל צד",
     "התנגשות עם בעל חיים",
     "פגיעה ממטען של רכב"
-    ];
+];
 
 $(function() {
     var AppRouter = Backbone.Router.extend({
@@ -154,7 +154,7 @@ $(function() {
             this.model.bind("change:user", this.updateUser, this);
             this.model.bind("change:layers", this.loadMarkers, this);
             this.model.bind("change:dateRange", this.loadMarkers, this);
-            this.login();
+            //    this.login();
 
 
         },
@@ -207,7 +207,7 @@ $(function() {
 
             if(MARKER_SPECIFIED) {
                 geolocpoint=new google.maps.LatLng(
-                    MARKER_LATITUDE, 
+                    MARKER_LATITUDE,
                     MARKER_LONGITUDE);
                 init_map.setCenter(geolocpoint);
                 // need to find the specified marker
@@ -275,11 +275,11 @@ $(function() {
                 this.$el.find(".date-range").daterangepicker("open"));
             this.router = new AppRouter();
             Backbone.history.start({pushState: true});
-            setTimeout(function(){ 
+            setTimeout(function(){
                 // somehow fetching markers does not work when done immediately
                 // console.log('Deferred fetch markers');
                 self.fetchMarkers(); }, 3000);
-            
+
             return this;
         },
         clickMap : function(e) {
@@ -342,7 +342,7 @@ $(function() {
             if (typeof markerId == "number" && currentMarker != markerId) {
                 return;
             }
-            
+
             if (!this.markerList.length) {
                 return;
             }
@@ -371,12 +371,12 @@ $(function() {
                         callback : this.clickContext
                     }
                     /*,
-                    {
-                        icon : "plus-sign",
-                        text : ADD_MARKER_PETITION,
-                        callback : this.clickContext
-                    }
-                    */
+                     {
+                     icon : "plus-sign",
+                     text : ADD_MARKER_PETITION,
+                     callback : this.clickContext
+                     }
+                     */
                 ]}).render(e);
         },
         clickContext : function(item, event) {
@@ -423,7 +423,8 @@ $(function() {
 
         },
         login : function(authResponse, callback) {
-            console.log("Logging in...");
+          // Old Login function
+            /* console.log("Logging in...");
             $.ajax({
                 url: "/login",
                 type: "post",
@@ -440,7 +441,7 @@ $(function() {
                 error: _.bind(function() {
 
                 }, this)
-            });
+            });*/
         },
         logout : function() {
             this.model.set("user", null);

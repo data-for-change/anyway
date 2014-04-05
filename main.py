@@ -16,8 +16,8 @@ db = SQLAlchemy(app)
 
 app.secret_key = 'aiosdjsaodjoidjioewnioewfnoeijfoisdjf'
 
-FACEBOOK_KEY = "157028231131213"
-FACEBOOK_SECRET = "0437ee70207dca46609219b990be0614"
+FACEBOOK_KEY = "440070049429017"                            # old_key: 157028231131213
+FACEBOOK_SECRET = "b6acaff8106262a0eba2ccd36cceba62"        # old_secret: 0437ee70207dca46609219b990be0614
 
 jinja_environment = jinja2.Environment(
     autoescape=True,

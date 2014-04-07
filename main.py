@@ -145,9 +145,7 @@ def main(marker_id):
     # field so we can query it. We also need to add a provider id.
     context = {}
     if 'marker' in request.values:
-        logging.debug('I have a marker %s'%request.values['marker'])
         markers = Marker.get_marker(request.values['marker'])
-        logging.debug('I found markers %d'%markers.count())
         if markers.count() == 1:
             marker = markers[0]
             context['coordinates'] = (marker.latitude, marker.longitude)

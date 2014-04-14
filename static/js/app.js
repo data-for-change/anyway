@@ -235,6 +235,22 @@ $(function() {
                 }.bind(this));
             }
 
+            //this.map=init_map;
+
+            // search box:
+            // Create the search box and link it to the UI element.
+            var input = document.getElementById('pac-input');
+            this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+            this.searchBox = new google.maps.places.SearchBox(input);
+
+            google.maps.event.addListener(this.searchBox, 'places_changed', function() {
+                self.handleSearchBox();
+                });
+
+            // Listen for the event fired when the user selects an item from the
+            // pick list. Retrieve the matching places for that item.
+
             google.maps.event.addListener( this.map, "rightclick", _.bind(this.contextMenuMap, this) );
             google.maps.event.addListener( this.map, "mouseup", _.bind(this.fetchMarkers, this) );
             google.maps.event.addListener( this.map, "zoom_changed", _.bind(this.fetchMarkers, this) );
@@ -472,6 +488,14 @@ $(function() {
                 this.$el.find(".user-details").hide();
 
             }
-        }
+        },
+        handleSearchBox : function() {
+            var places = this.searchBox.getPlaces();
+            if (places && places.length > 0) {
+              var place = places[0];
+              this.map.setCenter(place.geometry.location);
+            }
+         }
     });
 });
+

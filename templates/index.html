@@ -3,7 +3,7 @@
 <head>
     <title>Anyway - תאונות דרכים</title>
     <script src="/static/js/libs/jquery-1.8.2.min.js"></script>
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBpOmft-UskZsAQth9vNl0fN6EXaRR6dZc&sensor=true&language=iw"></script>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBpOmft-UskZsAQth9vNl0fN6EXaRR6dZc&sensor=true&libraries=places&language=iw"></script>
     <script src="/static/js/libs/oms.min.js"></script>
     <script src="/static/js/libs/underscore.js"></script>
     <script src="/static/js/libs/backbone.js"></script>
@@ -43,6 +43,7 @@
         </div>
     </div>
     <div class="main" style="position: fixed; width: 100%; height: 100%; padding-top: 40px; padding-right: 250px; box-sizing: border-box">
+        <input id="pac-input" class="controls" type="text" placeholder="חפש מיקום">
         <div id="map_canvas" style="width: 100%; height: 100%; box-sizing: border-box"></div>
     </div>
     <div class="sidebar-container" style="position: fixed; right: 0; top: 0; bottom: 0; width: 250px; background: white; padding-top: 40px">

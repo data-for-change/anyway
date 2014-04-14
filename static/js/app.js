@@ -235,7 +235,7 @@ $(function() {
                 }.bind(this));
             }
 
-            this.map=init_map;
+            //this.map=init_map;
 
             // search box:
             // Create the search box and link it to the UI element.

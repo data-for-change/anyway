@@ -27,12 +27,12 @@ def show_progress_spinner():
 show_progress_spinner.counter=0
 
 data_path = "static/data/"
-accidents_file = data_path + "H20101042AccData.csv"
+accidents_file = data_path + "2010_10_42_AccData.csv"
 cities_file = data_path + "cities.csv"
-streets_file = data_path + "H20101042DicStreets.csv"
-dictionary_file = data_path + "H20101042Dictionary.csv"
-urban_intersection_file = data_path + "H20101042IntersectUrban.csv"
-non_urban_intersection_file = data_path + "H20101042IntersectNonUrban.csv"
+streets_file = data_path + "2010_10_42_DicStreets.csv"
+dictionary_file = data_path + "2010_10_42_Dictionary.csv"
+urban_intersection_file = data_path + "2010_10_42_IntersectUrban.csv"
+non_urban_intersection_file = data_path + "2010_10_42_IntersectNonUrban.csv"
 
 cities = [x for x in csv.DictReader(open(cities_file))]
 streets = [x for x in csv.DictReader(open(streets_file))]

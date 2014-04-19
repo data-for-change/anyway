@@ -256,7 +256,9 @@ $(function() {
             google.maps.event.addListener( this.map, "zoom_changed", _.bind(this.fetchMarkers, this) );
 
             this.oms = new OverlappingMarkerSpiderfier(this.map, {markersWontMove: true, markersWontHide: true});
-
+            this.oms.addListener("click", function(marker, event) {
+                marker.view.clickMarker();
+            });
             var self = this;
 
             this.sidebar = new SidebarView({ map: this.map }).render();

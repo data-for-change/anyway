@@ -8,6 +8,7 @@ var MarkerView = Backbone.View.extend({
 	initialize : function(options) {
 		this.map = options.map;
 		this.model.bind("change:following", this.updateFollowing, this);
+        _.bindAll(this, "clickMarker");
 	},
 	render : function() {
 		var user = this.model.get("user");
@@ -23,6 +24,7 @@ var MarkerView = Backbone.View.extend({
 		});
 
         app.oms.addMarker(this.marker);
+        this.marker.view = this;
 
 		this.$el.html($("#marker-content-template").html());
 
@@ -55,26 +57,25 @@ var MarkerView = Backbone.View.extend({
 			this.$deleteButton.show();
 		}
 
-		this.markerWindow = new google.maps.InfoWindow({
-			content: this.el
-		});
-
-		app.oms.addListener(this.marker, "click", _.bind(function() {
-            google.maps.event.addListener(this.marker, "click", _.bind(function() {
-                if (app.infowindow) {
-                    app.infowindow.close();
-                }
-                this.markerWindow.open(this.map, this.marker);
-                app.infowindow = this.markerWindow;
-                Backbone.history.navigate("/?marker=" + this.model.get("id"), true);
-            }, this));
-
-            google.maps.event.addListener(this.markerWindow,"closeclick",function(){
-                Backbone.history.navigate("/", true);
-            });
-        }));
 		return this;
 	},
+    clickMarker : function() {
+        if (app.infoWindow) {
+            Backbone.history.navigate("/", true);
+            app.infoWindow.close();
+        }
+
+        app.infoWindow = new google.maps.InfoWindow({
+            content: this.el
+        });
+
+        app.infoWindow.open(this.map, this.marker);
+        Backbone.history.navigate("/?marker=" + this.model.get("id"), true);
+
+        google.maps.event.addListener(app.infoWindow,"closeclick",function(){
+            Backbone.history.navigate("/", true);
+        });
+    },
 	updateFollowing : function() {
 		if (this.model.get("following")) {
 			this.$followButton.hide();
@@ -93,11 +94,6 @@ var MarkerView = Backbone.View.extend({
 	},
 	clickFollow : function() {
 		this.model.save({following: true}, {wait:true});
-	},
-	openDialog: function() {
-		// console.log('clicked!!!');
-		this.markerWindow.open(this.map, this.marker);
-		app.infowindow = this.markerWindow;
 	},
 	clickUnfollow : function() {
 		this.model.save({following: false}, {wait:true});

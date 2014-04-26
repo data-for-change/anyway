@@ -89,6 +89,11 @@ var TYPE_STRING = [
 var TYPES_MAP = {};
 TYPES_MAP['Accident'] = TYPE_STRING[1];
 
+var SEVERITY_MAP = {}
+SEVERITY_MAP[SEVERITY_FATAL] = 'קטלנית';
+SEVERITY_MAP[SEVERITY_SEVERE] = 'קשה';
+SEVERITY_MAP[SEVERITY_LIGHT] = 'קלה';
+
 var SUBTYPE_STRING = [
     "פגיעה בהולך רגל",
     "התנגשות חזית אל צד",

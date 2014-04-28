@@ -87,7 +87,6 @@ html {
         background-color: #fff;
         padding: 0 11px 0 13px;
         width: 400px;
-        font-family: Roboto;
         font-size: 15px;
         font-weight: 300;
         text-overflow: ellipsis;
@@ -101,5 +100,4 @@ html {
       }
 
       .pac-container {
-        font-family: Roboto;
       }

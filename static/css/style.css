@@ -1,4 +1,8 @@
-html {
+body {
+    font-family: 'Alef', 'sans-serif';
+}
+
+input, button, select, textarea {
     font-family: 'Alef', 'sans-serif';
 }
 
@@ -87,8 +91,9 @@ html {
         background-color: #fff;
         padding: 0 11px 0 13px;
         width: 400px;
+        height: 30px;
         font-size: 15px;
-        font-weight: 300;
+        font-weight: 400;
         text-overflow: ellipsis;
       }
 

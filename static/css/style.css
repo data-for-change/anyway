@@ -1,3 +1,7 @@
+html {
+    font-family: 'Alef', 'sans-serif';
+}
+
 .context-menu {
 	position: absolute;
 	width: 150px;

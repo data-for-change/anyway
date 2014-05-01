@@ -368,6 +368,7 @@ $(function() {
         },
         clickMap : function(e) {
             console.log("clickd map");
+            console.log("nachum4");
         },
         updateCheckbox : function() {
             var layers = [];

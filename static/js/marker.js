@@ -1,8 +1,8 @@
 var MarkerView = Backbone.View.extend({
 	events : {
-		"click .follow-button" : "clickFollow",
-		"click .unfollow-button" : "clickUnfollow",
-		"click .share-button" : "clickShare",
+		//"click .follow-button" : "clickFollow",
+		//"click .unfollow-button" : "clickUnfollow",
+		//"click .share-button" : "clickShare",
 		"click .delete-button" : "clickDelete"
 	},
 	initialize : function(options) {

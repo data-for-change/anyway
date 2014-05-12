@@ -145,6 +145,7 @@ ANYWAY היא הדרך שלנו למנוע את התאונה הבאה. ביחד,
     </div>
 </div>
 <div id="sidebar-template" style="display: none">
+  <div style="height: 100%">
     <div class="sidebar-title">סנן לפי חומרה</div>
     <ul>
         <li><img class="checkbox-image" data-type="1" data-checked="true"/> תאונות קטלניות</li>
@@ -163,8 +164,13 @@ ANYWAY היא הדרך שלנו למנוע את התאונה הבאה. ביחד,
 
     </ul>
     <div class="sidebar-title">תאונות המוצגות על המפה</div>
-    <ul class="current-view"></ul>
-
+    <div style="overflow-y: scroll; height: 200px">
+      <ul class="current-view"></ul>
+    </div>
+    <div style="vertical-align: bottom">
+      <a class="btn download-csv-button" onClick="self.location='/markers?format=csv'">נתוני התאונות (להורדה בקובץ CSV)</a>
+    </div>
+  </div>
 </div>
 <div id="fb-root"></div>
 <script>

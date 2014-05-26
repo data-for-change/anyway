@@ -17,19 +17,24 @@ var SidebarView = Backbone.View.extend({
 		var bounds = this.map.getBounds();
 		this.$currentViewList.empty();
 
+ 
+    var sortedMarkerList = app.markerList.slice(0);
+    sortedMarkerList.sort( // sort by date in descending order
+        function(a,b){
+          return (moment(a.model.get("created")) < moment(b.model.get("created")) ? 1 : -1);
+        });
 
-		for(var i = 0; i < app.markerList.length; i++) {
-			if( bounds.contains(app.markerList[i].marker.getPosition()) ){
-				var marker = app.markerList[i].marker;
-				var markerModel = app.markerList[i].model;
+		for(var i = 0; i < sortedMarkerList.length; i++) {
+			if( bounds.contains(sortedMarkerList[i].marker.getPosition()) ){
+				var marker = sortedMarkerList[i].marker;
+				var markerModel = sortedMarkerList[i].model;
 
 				var entry = $("#list-entry li").clone();
 
+				entry.find(".date").text(moment(markerModel.get("created")).format("LLLL"));
 				entry.find(".type").text(SUBTYPE_STRING[markerModel.get("subtype")]);
-				entry.find(".text").text(TYPES_MAP[markerModel.get("title")]);
 				entry.data("marker", marker);
 				this.$currentViewList.append(entry);
-
 			}
 		}
 	},

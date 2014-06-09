@@ -155,7 +155,7 @@ def import_data():
 
         output_fields["date"] = accident_date    
         output_fields["description"] = description
-        output_fields["id"] = int(accident["pk_teuna_fikt"])
+        output_fields["id"] = accident["pk_teuna_fikt"]
         output_fields["severity"] = int(accident["HUMRAT_TEUNA"])
         output_fields["subType"] = int(accident["SUG_TEUNA"])
         output_fields["address"] = address
@@ -165,7 +165,7 @@ def import_data():
         yield output_fields
 
 
-def import_to_datastore(ratio=1):
+def import_to_datastore(provider_code, ratio=1):
     print "importing with ratio = %s"%(ratio,)
     from models import User, Marker
 
@@ -181,6 +181,7 @@ def import_to_datastore(ratio=1):
         if irow % ratio == 0:
             marker = Marker(
                 user = None,
+                id = provider_code + data['id'],
                 title = "Accident",
                 description = data["description"].decode("utf8"),
                 address = data["address"].decode("utf8"),
@@ -207,13 +208,14 @@ def import_to_datastore(ratio=1):
 
     print "imported %d items" % (i,)
 
-def main():
+def main(provider_code):
     parser = argparse.ArgumentParser()
     parser.add_argument('--ratio', type=int, metavar='n', default=1,
                         help='Import ratio 1:n')
     args = parser.parse_args()
 
-    import_to_datastore(args.ratio)
+    import_to_datastore(provider_code, args.ratio)
 
+PROVIDER_CODE = '100' # CBS
 if __name__ == "__main__":
-    main()
+    main(PROVIDER_CODE)

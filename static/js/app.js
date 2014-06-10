@@ -501,6 +501,7 @@ $(function() {
             if (places && places.length > 0) {
               var place = places[0];
               this.map.setCenter(place.geometry.location);
+              this.map.setZoom(INIT_ZOOM);
             }
          }
     });

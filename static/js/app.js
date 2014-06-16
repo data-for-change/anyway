@@ -170,7 +170,9 @@ $(function() {
             // console.log('zoom is ' + zoom);
             if (zoom < MINIMAL_ZOOM) {
                 if ($('.notifyjs-container').length==0) {
-                    // abort
+                    // remove existing markers
+                    this.clearMarkers();
+                    this.sidebar.updateMarkerList();
                     // show message and abort
                     $.notify("התקרב על מנת לראות ארועים");
                 }
@@ -358,17 +360,20 @@ $(function() {
         },
         loadMarkers : function() {
             // console.log("-->> loading markers", this.markers);
+            this.clearMarkers();
+            this.markers.each(_.bind(this.loadMarker, this));
+            this.sidebar.updateMarkerList();
+            this.chooseMarker();
+            // console.log('done loading markers now...');
+
+        },
+        clearMarkers : function() {
             if (this.markerList) {
                 _(this.markerList).each(_.bind(function(marker) {
                     marker.marker.setMap(null);
                 }, this));
             }
             this.markerList = [];
-            this.markers.each(_.bind(this.loadMarker, this));
-            this.sidebar.updateMarkerList();
-            this.chooseMarker();
-            // console.log('done loading markers now...');
-
         },
         chooseMarker: function(markerId) {
             var currentMarker = this.model.get("currentMarker");

@@ -195,7 +195,21 @@ $(function() {
                 params["zoom"] = zoom;
             }
 
-            this.markers.fetch({ data : $.param(params) });
+            this.markers.fetch({ 
+                data : $.param(params),
+                success: function() {
+                    console.log('success on fetch ' + (new Date()));
+                    this.handleOverlappingMarkers();
+                }.bind(this)
+            });
+            console.log('fetching markers' + (new Date()));
+        },
+        handleOverlappingMarkers : function() { 
+            // console.log('nearby markers');
+            _.each(this.oms.markersNearAnyOtherMarker(), function(marker){
+                // console.log(marker.title);
+                marker.icon = '/static/img/icons/multiple_markers.png';
+            });
         },
         render : function() {
 
@@ -265,6 +279,16 @@ $(function() {
             this.oms = new OverlappingMarkerSpiderfier(this.map, {markersWontMove: true, markersWontHide: true});
             this.oms.addListener("click", function(marker, event) {
                 marker.view.clickMarker();
+            });
+            this.oms.addListener("spiderfy", function(markers) {
+                _.each(markers, function(marker){
+                    marker.icon = getIcon(marker.view.model.get("subtype"), marker.view.model.get("severity"));
+                });
+            });
+            this.oms.addListener("unspiderfy", function(markers) {
+                _.each(markers, function(marker){
+                    marker.icon = '/static/img/icons/multiple_markers.png';
+                });
             });
             var self = this;
 
@@ -363,10 +387,10 @@ $(function() {
             this.clearMarkers();
             this.markers.each(_.bind(this.loadMarker, this));
             console.log('done loading markers');
+            this.handleOverlappingMarkers();
             this.sidebar.updateMarkerList();
             this.chooseMarker();
             console.log('done loading markers now...');
-
         },
         clearMarkers : function() {
             if (this.markerList) {

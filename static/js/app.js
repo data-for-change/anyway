@@ -359,12 +359,13 @@ $(function() {
 
         },
         loadMarkers : function() {
-            // console.log("-->> loading markers", this.markers);
+            console.log("-->> loading markers", this.markers);
             this.clearMarkers();
             this.markers.each(_.bind(this.loadMarker, this));
+            console.log('done loading markers');
             this.sidebar.updateMarkerList();
             this.chooseMarker();
-            // console.log('done loading markers now...');
+            console.log('done loading markers now...');
 
         },
         clearMarkers : function() {

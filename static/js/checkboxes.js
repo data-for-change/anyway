@@ -2,7 +2,7 @@ var prefix = "/static/img/menu icons/";
 var imgNames = [
   ["deadly-unchecked.png", "severe-unchecked.png", "medium-unchecked.png"],
   ["deadly-checked.png",   "severe-checked.png",   "medium-checked.png"],
-  ["severe-hover.png",     "deadly-hover.png",     "medium-hover.png"]
+  ["deadly-hover.png",     "severe-hover.png",     "medium-hover.png"]
 ];
 
 function getImg(o, checked) {

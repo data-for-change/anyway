@@ -44,13 +44,15 @@ def show_progress_spinner():
     show_progress_spinner.counter +=1
 show_progress_spinner.counter=0
 
-data_path = "static/data/"
-accidents_file = data_path + "2010_10_42_AccData.csv"
-cities_file = data_path + "cities.csv"
-streets_file = data_path + "2010_10_42_DicStreets.csv"
-dictionary_file = data_path + "2010_10_42_Dictionary.csv"
-urban_intersection_file = data_path + "2010_10_42_IntersectUrban.csv"
-non_urban_intersection_file = data_path + "2010_10_42_IntersectNonUrban.csv"
+data_path = "static/data/lms/Accidents Type 3/H20131161/"
+general_path = "static/data/"
+year_file = "H20131161"
+accidents_file = data_path + year_file + "AccData.csv"
+cities_file = general_path + "cities.csv"
+streets_file = data_path + year_file + "DicStreets.csv"
+dictionary_file = data_path + year_file + "Dictionary.csv"
+urban_intersection_file = data_path + year_file + "IntersectUrban.csv"
+non_urban_intersection_file = data_path + year_file + "IntersectNonUrban.csv"
 
 cities = [x for x in csv.DictReader(open(cities_file))]
 streets = [x for x in csv.DictReader(open(streets_file))]
@@ -135,7 +137,8 @@ FIELD_LIST = FIELD_FUNCTIONS.keys()
 
 def import_data():
     accidents_csv = csv.DictReader(open(accidents_file))
-    accidents_gps_coordinates = json.loads(open(data_path+"gps.json").read())
+    #accidents_gps_coordinates = json.loads(open(general_path+"gps.json").read())
+    gps = ItmToGpsConverter()
 
     # oh dear.
     i = -1
@@ -178,8 +181,9 @@ def import_data():
         output_fields["subType"] = int(accident["SUG_TEUNA"])
         output_fields["address"] = address
 
-        output_fields["lat"] = accidents_gps_coordinates[i]["lat"]
-        output_fields["lng"] = accidents_gps_coordinates[i]["lng"]
+        converted = gps.convert(accident['X'], accident['Y'])
+        output_fields["lat"] = converted['lat']
+        output_fields["lng"] = converted['lng']
         yield output_fields
 
 
@@ -202,7 +206,7 @@ def import_to_datastore(provider_code, ratio=1):
                 id = provider_code + data['id'],
                 title = "Accident",
                 description = data["description"].decode("utf8"),
-                address = data["address"].decode("utf8"),
+                address = data["address"].decode("cp1255"),
                 latitude = data["lat"],
                 longitude = data["lng"],
                 type = Marker.MARKER_TYPE_ACCIDENT,

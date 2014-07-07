@@ -6,12 +6,30 @@ import json
 import sys
 import os
 import argparse
+import subprocess
 from tables_lms import *
 
 from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text
 from sqlalchemy.orm import relationship
 from flask import Flask, request, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
+
+class ItmToGpsConverter(object):
+    def __init__(self):
+        self.process = subprocess.Popen(['node', 'static/data/input.js'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+
+    def convert(self, x, y):
+        """
+        Convert ITM to GPS coordinates
+
+        :type x: float
+        :type y: float
+        :rtype: dict
+        :return: {u'lat': 26.06199702841902, u'lng': 33.01173637265791, u'alt': 0, u'precision': 5}
+        """
+
+        self.process.stdin.write(json.dumps({'x': x, 'y': y}))
+        return json.loads(self.process.stdout.readline())
 
 app = Flask(__name__)
 #app.config['SQLALCHEMY_ECHO'] = True

@@ -201,9 +201,11 @@ def import_to_datastore(provider_code, ratio=1):
     for irow, data in enumerate(import_data()):
         show_progress_spinner()
         if irow % ratio == 0:
+            id = int(provider_code + data['id'])
+
             marker = Marker(
                 user = None,
-                id = provider_code + data['id'],
+                id = id,
                 title = "Accident",
                 description = data["description"].decode("utf8"),
                 address = data["address"].decode("cp1255"),
@@ -238,6 +240,6 @@ def main(provider_code):
 
     import_to_datastore(provider_code, args.ratio)
 
-PROVIDER_CODE = '100' # CBS
+PROVIDER_CODE = '1' # CBS
 if __name__ == "__main__":
     main(PROVIDER_CODE)

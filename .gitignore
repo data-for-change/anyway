@@ -1,5 +1,6 @@
 # local env
 local.db
+new_local.db
 envit.sh
 
 # compiled code

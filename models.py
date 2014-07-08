@@ -2,7 +2,7 @@
 import datetime
 import logging
 import os
-from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text
+from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, BigInteger
 from sqlalchemy.orm import relationship
 from flask import Flask, request, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -53,7 +53,7 @@ class Marker(db.Model):
     MARKER_TYPE_CITY = 7
     MARKER_TYPE_OR_YAROK = 8
 
-    id = Column(Integer, primary_key=True)
+    id = Column(BigInteger, primary_key=True)
     user = Column(Integer, ForeignKey("users.id"))
     title = Column(String(100))
     description = Column(Text)
@@ -137,7 +137,7 @@ class Follower(db.Model):
     __tablename__ = "followers"
     
     user = Column(Integer, ForeignKey("users.id"), primary_key=True)
-    marker = Column(Integer, ForeignKey("markers.id"), primary_key=True)
+    marker = Column(BigInteger, ForeignKey("markers.id"), primary_key=True)
 
 
 

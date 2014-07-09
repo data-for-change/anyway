@@ -142,7 +142,6 @@ $(function() {
             "click #map_canvas" : "clickMap",
             "click .fb-login" : "requireLogin",
             "click .fb-logout" : "logout",
-            "change input[type=checkbox]" : "updateCheckbox"
         },
         initialize : function() {
             _.bindAll(this, "clickContext");
@@ -198,11 +197,9 @@ $(function() {
             this.markers.fetch({ 
                 data : $.param(params),
                 success: function() {
-                    console.log('success on fetch ' + (new Date()));
                     this.handleOverlappingMarkers();
                 }.bind(this)
             });
-            console.log('fetching markers' + (new Date()));
         },
         handleOverlappingMarkers : function() { 
             // console.log('nearby markers');
@@ -292,7 +289,7 @@ $(function() {
             });
             var self = this;
 
-            this.sidebar = new SidebarView({ map: this.map }).render();
+            this.sidebar = new SidebarView({ app: this }).render();
             this.$el.find(".sidebar-container").append(this.sidebar.$el);
 
             this.$el.find(".date-range").daterangepicker({
@@ -345,13 +342,6 @@ $(function() {
         clickMap : function(e) {
             console.log("clicked map");
         },
-        updateCheckbox : function() {
-            var layers = [];
-            this.$el.find("input[type=checkbox]").each(function() {
-                layers[parseInt($(this).data("type"))] = $(this).prop("checked");
-            });
-            this.model.set("layers", layers);
-        },
         loadMarker : function(model) {
             // console.log("loading marker", ICONS[model.get("type")]);
             // markers are loaded immediately as they are fetched
@@ -386,11 +376,9 @@ $(function() {
             console.log("-->> loading markers", this.markers);
             this.clearMarkers();
             this.markers.each(_.bind(this.loadMarker, this));
-            console.log('done loading markers');
             this.handleOverlappingMarkers();
             this.sidebar.updateMarkerList();
             this.chooseMarker();
-            console.log('done loading markers now...');
         },
         clearMarkers : function() {
             if (this.markerList) {

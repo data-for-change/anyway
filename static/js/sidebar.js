@@ -5,28 +5,10 @@ var CHECKBOX_ICONS = [
     ["deadly-hover.png",     "severe-hover.png",     "medium-hover.png"]
 ];
 
-function getCheckbox(img) {
-    return $("#" + img.attr("id").replace(/^checkboxImage/, ""))
-}
-
-function updateCheckboxIcon(img, hover) {
-    var o = getCheckbox(img);
-    var checked;
-    if (hover == undefined) {
-        checked = o.prop("checked") ? 1 : 0;
-    } else {
-        checked = 2;
-    }
-    var dataType = o.attr("data-type");
-    var icon = ICONS_PREFIX + CHECKBOX_ICONS[checked][dataType-1];
-    img.attr("src", icon);
-}
-
 var SidebarView = Backbone.View.extend({
     className: "info-window",
     events: {
         "click .current-view li" : "clickEntry",
-        "change input[type=checkbox]" : "updateCheckbox"
     },
     initialize: function(options) {
         this.map = options.app.map;
@@ -35,28 +17,29 @@ var SidebarView = Backbone.View.extend({
 
     },
     render: function() {
-        $("input[type=checkbox]").each(this.replaceCheckbox);
-        this.$el.on("click", "img.checkboxImage", function(e) {
-            img = $(e.target);
-            updateCheckboxIcon(img);
-            var o = getCheckbox(img);
-            o.prop("checked", !o.prop("checked"));
-            o.trigger("change");
-        });
-        this.$el.on("mouseover", "img.checkboxImage", function(e) {
-            updateCheckboxIcon($(e.target), "hover");
-        });
-        this.$el.on("mouseout", "img.checkboxImage", function(e) {
-            updateCheckboxIcon($(e.target));
-        });
         this.$el.append($("#sidebar-template").html());
         this.$currentViewList = this.$el.find(".current-view");
+        var self = this;
+        this.$el.find("img.checkbox-image")
+            .each(function() {
+                self.updateCheckboxIcon($(this));
+            })
+            .click(function() {
+                $(this).data("checked", !$(this).data("checked"));
+                self.updateCheckboxIcon($(this));
+                self.updateLayers();
+            })
+            .mouseover(function() {
+                self.updateCheckboxIcon($(this), "hover");
+            })
+            .mouseout(function() {
+                self.updateCheckboxIcon($(this));
+            });
         return this;
     },
     updateMarkerList: function() {
         var bounds = this.map.getBounds();
         this.$currentViewList.empty();
-
 
         var sortedMarkerList = app.markerList.slice(0);
         sortedMarkerList.sort( // sort by date in descending order
@@ -78,20 +61,21 @@ var SidebarView = Backbone.View.extend({
             }
         }
     },
-    replaceCheckbox: function() {
-        var id = $(this).attr("id");
-        var img = $("<img></img>")
-            .attr("id", "checkboxImage" + id)
-            .addClass("checkboxImage");
-        updateCheckboxIcon(img);
-        $(this).hide()
-            .parent()
-            .prepend(img);
+    updateCheckboxIcon: function(img, hover) {
+        var checked;
+        if (hover == undefined) {
+            checked = img.data("checked") ? 1 : 0;
+        } else {
+            checked = 2;
+        }
+        var dataType = img.data("type");
+        var icon = ICONS_PREFIX + CHECKBOX_ICONS[checked][dataType-1];
+        img.attr("src", icon);
     },
-    updateCheckbox: function() {
+    updateLayers: function() {
         var layers = [];
-        this.$el.find("input[type=checkbox]").each(function() {
-            layers[parseInt($(this).data("type"))] = $(this).prop("checked");
+        this.$el.find("img.checkbox-image").each(function() {
+            layers[parseInt($(this).data("type"))] = $(this).data("checked");
         });
         this.appModel.set("layers", layers);
     },

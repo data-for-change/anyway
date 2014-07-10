@@ -11,8 +11,8 @@ var SidebarView = Backbone.View.extend({
         "click .current-view li" : "clickEntry",
     },
     initialize: function(options) {
-        this.app = options.app;
-        google.maps.event.addListener(this.app.map, "center_changed", _.bind(this.updateMarkerList, this));
+        this.map = options.map;
+        google.maps.event.addListener(this.map, "center_changed", _.bind(this.updateMarkerList, this));
 
     },
     render: function() {
@@ -37,10 +37,10 @@ var SidebarView = Backbone.View.extend({
         return this;
     },
     updateMarkerList: function() {
-        var bounds = this.app.map.getBounds();
+        var bounds = this.map.getBounds();
         this.$currentViewList.empty();
 
-        var sortedMarkerList = this.app.markerList.slice(0);
+        var sortedMarkerList = app.markerList.slice(0);
         sortedMarkerList.sort( // sort by date in descending order
             function(a,b){
                 return (moment(a.model.get("created")) < moment(b.model.get("created")) ? 1 : -1);
@@ -76,11 +76,10 @@ var SidebarView = Backbone.View.extend({
         this.$el.find("img.checkbox-image").each(function() {
             layers[parseInt($(this).data("type"))] = $(this).data("checked");
         });
-        this.app.model.set("layers", layers);
+        app.model.set("layers", layers);
     },
     clickEntry: function(e) {
         var marker = $(e.target).data("marker") || $(e.target).parents("li").data("marker");
-        new google.maps.event.trigger( marker, "click" );
-
+        marker.view.choose();
     }
 });

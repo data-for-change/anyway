@@ -202,6 +202,7 @@ $(function() {
                 success: function() {
                     this.handleOverlappingMarkers();
                     this.sidebar.updateMarkerList();
+                    this.chooseMarker();
                 }.bind(this)
             });
         },
@@ -282,17 +283,20 @@ $(function() {
             this.oms = new OverlappingMarkerSpiderfier(this.map, {markersWontMove: true, markersWontHide: true, keepSpiderfied: true});
             this.oms.addListener("click", function(marker, event) {
                 marker.view.clickMarker();
-            });
+                this.clickedMarker = true;
+            }.bind(this));
             this.oms.addListener("spiderfy", function(markers) {
+                this.closeInfoWindow();
                 _.each(markers, function(marker){
                     marker.icon = marker.view.getIcon();
                     marker.title = marker.view.getTitle();
                 });
-            });
+                this.clickedMarker = true;
+            }.bind(this));
             this.oms.addListener("unspiderfy", this.setMultipleMarkersIcon.bind(this));
             var self = this;
 
-            this.sidebar = new SidebarView({ app: this }).render();
+            this.sidebar = new SidebarView({ map: this.map }).render();
             this.$el.find(".sidebar-container").append(this.sidebar.$el);
 
             this.$el.find(".date-range").daterangepicker({
@@ -342,8 +346,18 @@ $(function() {
             
             return this;
         },
+        closeInfoWindow: function() {
+            if (app.infoWindow) {
+                Backbone.history.navigate("/", true);
+                app.infoWindow.close();
+            }
+        },
         clickMap : function(e) {
-            console.log("clicked map");
+            if (this.clickedMarker) {
+                this.clickedMarker = false;
+            } else {
+                this.closeInfoWindow();
+            }
         },
         loadMarker : function(model) {
             // console.log("loading marker", ICONS[model.get("type")]);
@@ -371,8 +385,6 @@ $(function() {
             model.set("markerView", this.markerList.length);
             this.markerList.push(markerView);
 
-            this.chooseMarker(model.get("id"));
-
         },
         loadMarkers : function() {
             console.log("-->> loading markers", this.markers);
@@ -390,16 +402,12 @@ $(function() {
             }
             this.markerList = [];
         },
-        chooseMarker: function(markerId) {
-            var currentMarker = this.model.get("currentMarker");
-            if (typeof markerId == "number" && currentMarker != markerId) {
-                return;
-            }
-            
+        chooseMarker: function() {
             if (!this.markerList.length) {
                 return;
             }
 
+            var currentMarker = this.model.get("currentMarker");
             if (!this.markers.get(currentMarker)) {
                 return;
             }
@@ -409,10 +417,7 @@ $(function() {
                 return;
             }
 
-            if (this.oms.markersNearMarker(markerView.marker).length) {
-                new google.maps.event.trigger(markerView.marker, "click");
-            }
-            new google.maps.event.trigger(markerView.marker, "click");
+            markerView.choose();
             this.model.set("currentMarker", null);
         },
         contextMenuMap : function(e) {

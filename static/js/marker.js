@@ -68,11 +68,14 @@ var MarkerView = Backbone.View.extend({
             " תאונה " + SEVERITY_MAP[this.model.get("severity")] +
             ": " + SUBTYPE_STRING[this.model.get("subtype")];
     },
-    clickMarker : function() {
-        if (app.infoWindow) {
-            Backbone.history.navigate("/", true);
-            app.infoWindow.close();
+    choose : function() {
+        if (app.oms.markersNearMarker(this.marker).length) {
+            new google.maps.event.trigger(this.marker, "click");
         }
+        new google.maps.event.trigger(this.marker, "click");
+    },
+    clickMarker : function() {
+        app.closeInfoWindow();
 
         app.infoWindow = new google.maps.InfoWindow({
             content: this.el

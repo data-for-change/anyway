@@ -196,7 +196,10 @@ $(function() {
 
             this.markers.fetch({ 
                 data : $.param(params),
-                success: this.handleOverlappingMarkers.bind(this)
+                success: function() {
+                    this.handleOverlappingMarkers();
+                    this.sidebar.updateMarkerList();
+                }.bind(this)
             });
         },
         handleOverlappingMarkers : function() { 
@@ -331,8 +334,8 @@ $(function() {
             Backbone.history.start({pushState: true});
             setTimeout(function(){ 
                 // somehow fetching markers does not work when done immediately
-                // console.log('Deferred fetch markers');
-                self.fetchMarkers(); }, 3000);
+                self.fetchMarkers();
+            }, 3000);
             
             return this;
         },
@@ -354,7 +357,6 @@ $(function() {
                 var end = this.model.get("dateRange")[1];
 
                 if (createdDate < start || createdDate > end) {
-                    // console.log("skipping marker because the date is not in the range");
                     return;
                 }
             }
@@ -387,7 +389,6 @@ $(function() {
         },
         chooseMarker: function(markerId) {
             var currentMarker = this.model.get("currentMarker");
-            // console.log("choosing marker", currentMarker);
             if (typeof markerId == "number" && currentMarker != markerId) {
                 return;
             }
@@ -429,9 +430,7 @@ $(function() {
                 ]}).render(e);
         },
         clickContext : function(item, event) {
-            // console.log("clicked item, require login");
             this.requireLogin(_.bind(function() {
-                // console.log("clicked item", item, event);
                 this.openCreateDialog(item, event);
             }, this));
         },

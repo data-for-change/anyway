@@ -168,7 +168,7 @@ $(function() {
             var zoom = this.map.zoom;
             // console.log('zoom is ' + zoom);
             if (zoom < MINIMAL_ZOOM) {
-                if ($('.notifyjs-container').length==0) {
+                if (!$('.notifyjs-container').length) {
                     // remove existing markers
                     this.clearMarkers();
                     this.sidebar.updateMarkerList();
@@ -178,6 +178,9 @@ $(function() {
                 return;
             } else {
                 $('.notifyjs-container').trigger('notify-hide');
+                if (!this.markerList.length) {
+                    this.loadMarkers();
+                }
             }
 
             var params = {};

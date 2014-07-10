@@ -283,7 +283,7 @@ $(function() {
                     marker.title = marker.view.getTitle();
                 });
             });
-            this.oms.addListener("unspiderfy", this.setMultipleMarkersIcon);
+            this.oms.addListener("unspiderfy", this.setMultipleMarkersIcon.bind(this));
             var self = this;
 
             this.sidebar = new SidebarView({ app: this }).render();

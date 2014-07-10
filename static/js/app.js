@@ -279,7 +279,7 @@ $(function() {
             google.maps.event.addListener( this.map, "mouseup", _.bind(this.fetchMarkers, this) );
             google.maps.event.addListener( this.map, "zoom_changed", _.bind(this.fetchMarkers, this) );
 
-            this.oms = new OverlappingMarkerSpiderfier(this.map, {markersWontMove: true, markersWontHide: true});
+            this.oms = new OverlappingMarkerSpiderfier(this.map, {markersWontMove: true, markersWontHide: true, keepSpiderfied: true});
             this.oms.addListener("click", function(marker, event) {
                 marker.view.clickMarker();
             });

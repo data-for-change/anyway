@@ -12,16 +12,14 @@ var MarkerView = Backbone.View.extend({
 	},
 	render : function() {
 		var user = this.model.get("user");
-		var created = moment(this.model.get("created"));
-		var subtype = this.model.get("subtype");
 
 		var markerPosition = new google.maps.LatLng(this.model.get("latitude"), this.model.get("longitude"));
 
 		this.marker = new google.maps.Marker({
 			position: markerPosition,
 			map: this.map,
-			icon: getIcon(this.model.get("subtype"), this.model.get("severity")),
-			title: created.format("l") + " תאונה " + SEVERITY_MAP[this.model.get("severity")] + ": " + SUBTYPE_STRING[subtype],
+			icon: this.getIcon(),
+			title: this.getTitle(),
 			id: this.model.get("id")
 		});
 
@@ -33,7 +31,8 @@ var MarkerView = Backbone.View.extend({
 		this.$el.width(400);
 		this.$el.find(".title").text(TYPES_MAP[this.model.get("title")]);
 		this.$el.find(".description").text(this.model.get("description"));
-		this.$el.find(".creation-date").text("תאריך: " + created.format("LLLL"));
+		this.$el.find(".creation-date").text("תאריך: " +
+                moment(this.model.get("created")).format("LLLL"));
 		if (user) {
 		    this.$el.find(".profile-image").attr("src", "https://graph.facebook.com/" + user.facebook_id + "/picture");
 		} else {
@@ -61,6 +60,14 @@ var MarkerView = Backbone.View.extend({
 
 		return this;
 	},
+    getIcon : function() {
+        return getIcon(this.model.get("subtype"), this.model.get("severity"));
+    },
+    getTitle : function() {
+        return moment(this.model.get("created")).format("l") +
+            " תאונה " + SEVERITY_MAP[this.model.get("severity")] +
+            ": " + SUBTYPE_STRING[this.model.get("subtype")];
+    },
     clickMarker : function() {
         if (app.infoWindow) {
             Backbone.history.navigate("/", true);

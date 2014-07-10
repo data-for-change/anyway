@@ -196,16 +196,16 @@ $(function() {
 
             this.markers.fetch({ 
                 data : $.param(params),
-                success: function() {
-                    this.handleOverlappingMarkers();
-                }.bind(this)
+                success: this.handleOverlappingMarkers.bind(this)
             });
         },
         handleOverlappingMarkers : function() { 
-            // console.log('nearby markers');
-            _.each(this.oms.markersNearAnyOtherMarker(), function(marker){
-                // console.log(marker.title);
+            this.setMultipleMarkersIcon(this.oms.markersNearAnyOtherMarker());
+        },
+        setMultipleMarkersIcon: function(markers) {
+            _.each(this.oms.markersNearAnyOtherMarker(), function(marker) {
                 marker.icon = '/static/img/icons/multiple_markers.png';
+                marker.title = 'מספר תאונות בנקודה זו';
             });
         },
         render : function() {
@@ -279,14 +279,11 @@ $(function() {
             });
             this.oms.addListener("spiderfy", function(markers) {
                 _.each(markers, function(marker){
-                    marker.icon = getIcon(marker.view.model.get("subtype"), marker.view.model.get("severity"));
+                    marker.icon = marker.view.getIcon();
+                    marker.title = marker.view.getTitle();
                 });
             });
-            this.oms.addListener("unspiderfy", function(markers) {
-                _.each(markers, function(marker){
-                    marker.icon = '/static/img/icons/multiple_markers.png';
-                });
-            });
+            this.oms.addListener("unspiderfy", this.setMultipleMarkersIcon);
             var self = this;
 
             this.sidebar = new SidebarView({ app: this }).render();

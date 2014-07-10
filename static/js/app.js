@@ -409,7 +409,10 @@ $(function() {
                 return;
             }
 
-            new google.maps.event.trigger(markerView.marker , "click");
+            if (this.oms.markersNearMarker(markerView.marker).length) {
+                new google.maps.event.trigger(markerView.marker, "click");
+            }
+            new google.maps.event.trigger(markerView.marker, "click");
             this.model.set("currentMarker", null);
         },
         contextMenuMap : function(e) {

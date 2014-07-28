@@ -142,6 +142,7 @@ $(function() {
             "click #map_canvas" : "clickMap",
             "click .fb-login" : "requireLogin",
             "click .fb-logout" : "logout",
+            "click .download-csv" : "downloadCsv",
         },
         initialize : function() {
             _.bindAll(this, "clickContext");
@@ -163,11 +164,8 @@ $(function() {
 
         },
         fetchMarkers : function() {
-            var MINIMAL_ZOOM = 16;
-            var bounds = this.map.getBounds();
-            var zoom = this.map.zoom;
-            // console.log('zoom is ' + zoom);
-            if (zoom < MINIMAL_ZOOM) {
+            params = this.buildMarkersParams();
+            if (!params) {
                 if (!$('.notifyjs-container').length) {
                     // remove existing markers
                     this.clearMarkers();
@@ -183,20 +181,6 @@ $(function() {
                 }
             }
 
-            var params = {};
-
-            if (!bounds) {
-                return;
-            }
-
-            if (bounds) {
-                params["ne_lat"] = bounds.getNorthEast().lat();
-                params["ne_lng"] = bounds.getNorthEast().lng();
-                params["sw_lat"] = bounds.getSouthWest().lat();
-                params["sw_lng"] = bounds.getSouthWest().lng();
-                params["zoom"] = zoom;
-            }
-
             this.markers.fetch({ 
                 data : $.param(params),
                 success: function() {
@@ -206,6 +190,23 @@ $(function() {
                 }.bind(this)
             });
         },
+        buildMarkersParams : function() {
+            var MINIMAL_ZOOM = 16;
+            var bounds = this.map.getBounds();
+            var zoom = this.map.zoom;
+            // console.log('zoom is ' + zoom);
+            if (zoom < MINIMAL_ZOOM || !bounds) {
+                return null;
+            }
+
+            var params = {};
+            params["ne_lat"] = bounds.getNorthEast().lat();
+            params["ne_lng"] = bounds.getNorthEast().lng();
+            params["sw_lat"] = bounds.getSouthWest().lat();
+            params["sw_lng"] = bounds.getSouthWest().lng();
+            params["zoom"] = zoom;
+            return params;
+        },
         handleOverlappingMarkers : function() { 
             this.setMultipleMarkersIcon(this.oms.markersNearAnyOtherMarker());
         },
@@ -214,6 +215,12 @@ $(function() {
                 marker.icon = '/static/img/icons/multiple_markers.png';
                 marker.title = 'מספר תאונות בנקודה זו';
             });
+        },
+        downloadCsv: function() {
+          params = this.buildMarkersParams();
+          params["format"] = "csv";
+
+          window.location = this.markers.url + "?" + $.param(params);
         },
         render : function() {
 

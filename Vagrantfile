@@ -28,7 +28,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
         apt-get update -y -q
 
-        apt-get install -y -q python python-pip python-dev mysql-server libmysqlclient-dev
+        apt-get install -y -q python python-pip python-dev mysql-server libmysqlclient-dev python-software-properties
+
+        apt-add-repository -y ppa:chris-lea/node.js
+        apt-get update -y -q
+        apt-get install -y -q nodejs
+
         wget -qO- https://toolbelt.heroku.com/install-ubuntu.sh | sh
 
         pip install virtualenv

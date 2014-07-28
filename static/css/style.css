@@ -1,5 +1,9 @@
-body {
+body, html {
     font-family: 'Alef', 'sans-serif';
+    position: relative;
+    height: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 input, button, select, textarea {
@@ -69,6 +73,7 @@ div.gm-style {
 
 .info-window {
 	position: relative;
+  height: 100%;
 }
 
 .followers {

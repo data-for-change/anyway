@@ -69,8 +69,8 @@ def markers(methods=["GET", "POST"]):
                 output.writerow(row)
 
             return make_response((output_file.getvalue(),
-                'test',
-                {u'Content-Disposition', u'attachment; filename="data.csv"'}))
+                200,
+                {u'Content-Disposition': u'attachment; filename="data.csv"'}))
 
         else: # defaults to json
             return make_response(json.dumps(markers))

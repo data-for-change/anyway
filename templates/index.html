@@ -25,7 +25,7 @@
     <link rel="stylesheet" href="/static/css/style.css"/>
     <link rel="stylesheet" href="/static/css/daterangepicker.css"/>
 </head>
-<body style="width: 100%; height: 100%">
+<body style="margin: 0; position: relative; width: 100%; height: 100%">
 <div class='notifications top-left' id="notification"></div>
 <div id="app">
     
@@ -52,9 +52,8 @@
         <input id="pac-input" class="controls" type="text" placeholder="חפש מיקום">
         <div id="map_canvas" style="width: 100%; height: 100%; box-sizing: border-box"></div>
     </div>
-    <div class="sidebar-container" style="position: fixed; right: 0; top: 0;
-        bottom: 0; width: 250px; background: white; padding-top: 40px;
-        overflow-y: auto; overflow-x: hidden">
+    <div class="sidebar-container" style="position: absolute; right: 0; top: 0;
+        bottom: 0; width: 250px; background: white; padding-top: 40px;">
         <!--
         <ul class="nav nav-list">
           <li class="active"><a href="#"><i class="icon-home icon-white"></i> Home</a></li>
@@ -145,31 +144,29 @@ ANYWAY היא הדרך שלנו למנוע את התאונה הבאה. ביחד,
     </div>
 </div>
 <div id="sidebar-template" style="display: none">
-  <div style="height: 100%">
-    <div class="sidebar-title">סנן לפי חומרה</div>
-    <ul>
-        <li><img class="checkbox-image" data-type="1" data-checked="true"/> תאונות קטלניות</li>
-        <li><img class="checkbox-image" data-type="2" data-checked="true"/> תאונות קשות</li>
-        <li><img class="checkbox-image" data-type="3" data-checked="true"/> תאונות קלות</li>
+  <div class="sidebar-title">סנן לפי חומרה</div>
+  <ul>
+      <li><img class="checkbox-image" data-type="1" data-checked="true"/> תאונות קטלניות</li>
+      <li><img class="checkbox-image" data-type="2" data-checked="true"/> תאונות קשות</li>
+      <li><img class="checkbox-image" data-type="3" data-checked="true"/> תאונות קלות</li>
 
-    </ul>
-    <div class="sidebar-title">סנן לפי טווח תאריכים</div>
-    <ul>
-        <li>
-            <div class="input-prepend" id="calendar-control">
-                <span class="add-on"><i class="icon-calendar date-range"></i></span><input type="text" class="date-range" style="width: 200px"/>
-            </div>
+  </ul>
+  <div class="sidebar-title">סנן לפי טווח תאריכים</div>
+  <ul>
+      <li>
+          <div class="input-prepend" id="calendar-control">
+              <span class="add-on"><i class="icon-calendar date-range"></i></span><input type="text" class="date-range" style="width: 200px"/>
+          </div>
 
-        </li>
+      </li>
 
-    </ul>
-    <div class="sidebar-title">תאונות המוצגות על המפה</div>
-    <div style="overflow-y: scroll; height: 200px">
-      <ul class="current-view"></ul>
-    </div>
-    <div style="vertical-align: bottom">
-      <a class="btn download-csv-button" onClick="self.location='/markers?format=csv'">נתוני התאונות (להורדה בקובץ CSV)</a>
-    </div>
+  </ul>
+  <div class="sidebar-title">תאונות המוצגות על המפה</div>
+  <div style="overflow-y: scroll; position: absolute; top: 233px; bottom: 0">
+    <ul class="current-view"></ul>
+  </div>
+  <div style="position: absolute; bottom: 0px">
+    <a class="btn download-csv">נתוני התאונות (להורדה בקובץ CSV)</a>
   </div>
 </div>
 <div id="fb-root"></div>

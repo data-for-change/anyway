@@ -50,7 +50,7 @@ def markers(methods=["GET", "POST"]):
             # if 'start_time' in request.values:
             #     query = query.filter("created <=", request.values["end_time"])
             print ""
-            logging.debug('querying markers in bouding box')
+            logging.debug('querying markers in bounding box')
             results = Marker.bounding_box_fetch(ne_lat, ne_lng, sw_lat, sw_lng)
             logging.debug('serializing markers')
             markers = [marker.serialize() for marker in results.all()]

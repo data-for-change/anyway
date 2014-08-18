@@ -70,7 +70,8 @@ def markers(methods=["GET", "POST"]):
 
             return make_response((output_file.getvalue(),
                 200,
-                {u'Content-Disposition': u'attachment; filename="data.csv"'}))
+                {u'Content-Type': 'text/csv',
+                 u'Content-Disposition': u'attachment; filename="data.csv"'}))
 
         else: # defaults to json
             return make_response(json.dumps(markers))

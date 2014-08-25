@@ -367,6 +367,11 @@ $(function() {
             }
         },
         loadMarker : function(model) {
+            for (var i = 0; i < this.markerList.length; i++) {
+                if (this.markerList[i].model.attributes.id == model.attributes.id) {
+                    return; // avoid adding duplicates
+                }
+            }
             // console.log("loading marker", ICONS[model.get("type")]);
             // markers are loaded immediately as they are fetched
             if (this.model.get("layers") && !this.model.get("layers")[model.get("severity")]) {
@@ -385,9 +390,7 @@ $(function() {
                 }
             }
 
-
             var markerView = new MarkerView({model: model, map: this.map}).render();
-
 
             model.set("markerView", this.markerList.length);
             this.markerList.push(markerView);

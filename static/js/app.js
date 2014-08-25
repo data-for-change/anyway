@@ -8,6 +8,7 @@ var INIT_ZOOM = 17;
 var SEVERITY_FATAL = 1;
 var SEVERITY_SEVERE = 2;
 var SEVERITY_LIGHT = 3;
+var SEVERITY_VARIOUS = 4;
 
 var ACCIDENT_TYPE_CAR_TO_CAR =-1; // Synthetic type
 var ACCIDENT_TYPE_CAR_TO_OBJECT = -2; // Synthetic type
@@ -45,6 +46,12 @@ ICONS[SEVERITY_LIGHT][ACCIDENT_TYPE_CAR_TO_CAR] = "/static/img/icons/vehicle_veh
 ICONS[SEVERITY_FATAL][ACCIDENT_TYPE_CAR_TO_OBJECT] = "/static/img/icons/vehicle_object_lethal.png"
 ICONS[SEVERITY_SEVERE][ACCIDENT_TYPE_CAR_TO_OBJECT] = "/static/img/icons/vehicle_object_severe.png"
 ICONS[SEVERITY_LIGHT][ACCIDENT_TYPE_CAR_TO_OBJECT] = "/static/img/icons/vehicle_object_medium.png"
+
+var MULTIPLE_ICONS = {};
+MULTIPLE_ICONS[SEVERITY_FATAL] = "/static/img/icons/multiple_lethal.png"
+MULTIPLE_ICONS[SEVERITY_SEVERE] = "/static/img/icons/multiple_severe.png"
+MULTIPLE_ICONS[SEVERITY_LIGHT] = "/static/img/icons/multiple_medium.png"
+MULTIPLE_ICONS[SEVERITY_VARIOUS] = "/static/img/icons/multiple_various.png"
 
 var ACCIDENT_MINOR_TYPE_TO_TYPE = { };
 ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_CAR_TO_PEDESTRIAN]=ACCIDENT_TYPE_CAR_TO_PEDESTRIAN;
@@ -212,7 +219,7 @@ $(function() {
         },
         setMultipleMarkersIcon: function(markers) {
             _.each(this.oms.markersNearAnyOtherMarker(), function(marker) {
-                marker.icon = '/static/img/icons/multiple_markers.png';
+                marker.icon = MULTIPLE_ICONS[SEVERITY_VARIOUS];
                 marker.title = 'מספר תאונות בנקודה זו';
             });
         },

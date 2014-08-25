@@ -191,7 +191,7 @@ $(function() {
             this.markers.fetch({ 
                 data : $.param(params),
                 success: function() {
-                    this.handleOverlappingMarkers();
+                    this.setMultipleMarkersIcon();
                     this.sidebar.updateMarkerList();
                     this.chooseMarker();
                 }.bind(this)
@@ -214,10 +214,7 @@ $(function() {
             params["zoom"] = zoom;
             return params;
         },
-        handleOverlappingMarkers : function() { 
-            this.setMultipleMarkersIcon(this.oms.markersNearAnyOtherMarker());
-        },
-        setMultipleMarkersIcon: function(markers) {
+        setMultipleMarkersIcon: function() {
             _.each(this.oms.markersNearAnyOtherMarker(), function(marker) {
                 marker.icon = MULTIPLE_ICONS[SEVERITY_VARIOUS];
                 marker.title = 'מספר תאונות בנקודה זו';
@@ -407,7 +404,7 @@ $(function() {
             console.log("-->> loading markers", this.markers);
             this.clearMarkers();
             this.markers.each(_.bind(this.loadMarker, this));
-            this.handleOverlappingMarkers();
+            this.setMultipleMarkersIcon();
             this.sidebar.updateMarkerList();
             this.chooseMarker();
         },

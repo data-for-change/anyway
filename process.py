@@ -177,6 +177,7 @@ def import_data():
         output_fields["severity"] = int(accident["HUMRAT_TEUNA"])
         output_fields["subType"] = int(accident["SUG_TEUNA"])
         output_fields["address"] = address
+        output_fields["locationAccuracy"] = int(accident["STATUS_IGUN"])
 
         converted = gps.convert(accident['X'], accident['Y'])
         output_fields["lat"] = converted['lat']
@@ -212,6 +213,7 @@ def import_to_datastore(provider_code, ratio=1):
                 subtype = data["subType"],
                 severity = data["severity"],
                 created = data["date"],
+                locationAccuracy = data["locationAccuracy"],
             )
 
             db.session.add(marker)

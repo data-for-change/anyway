@@ -44,9 +44,13 @@ def show_progress_spinner():
     show_progress_spinner.counter +=1
 show_progress_spinner.counter=0
 
-data_path = "static/data/lms/Accidents Type 3/H20131161/"
+# data_path = "static/data/2013/3/"
+# year_file = "H20131161"
+
+data_path = "static/data/2013/1/"
+year_file = "H20131041"
+
 general_path = "static/data/"
-year_file = "H20131161"
 accidents_file = data_path + year_file + "AccData.csv"
 cities_file = general_path + "cities.csv"
 streets_file = data_path + year_file + "DicStreets.csv"
@@ -136,8 +140,9 @@ FIELD_FUNCTIONS = {
 FIELD_LIST = FIELD_FUNCTIONS.keys()
 
 def import_data():
+    print "reading accidents from file %s"%(accidents_file,)
     accidents_csv = csv.DictReader(open(accidents_file))
-    #accidents_gps_coordinates = json.loads(open(general_path+"gps.json").read())
+    # accidents_gps_coordinates = json.loads(open(general_path+"gps.json").read())
     gps = ItmToGpsConverter()
 
     # oh dear.
@@ -187,14 +192,15 @@ def import_data():
         yield output_fields
 
 
-def import_to_datastore(provider_code, ratio=1):
-    print "importing with ratio = %s"%(ratio,)
+def import_to_datastore(provider_code, ratio=1, delete_all=True):
+    print "importing with ratio = %s, delete_all = %s"%(ratio,delete_all)
     from models import User, Marker
 
     i = 0
     # wipe all the Markers first
-    db.session.query(Marker).delete()
-    db.session.commit()
+    if delete_all:
+        db.session.query(Marker).delete()
+        db.session.commit()
 
     commit_every = 100
 
@@ -236,9 +242,14 @@ def main(provider_code):
     parser = argparse.ArgumentParser()
     parser.add_argument('--ratio', type=int, metavar='n', default=1,
                         help='Import ratio 1:n')
+    parser.add_argument('--delete_all', dest='delete_all', action='store_true')
+    parser.add_argument('--no_delete_all', dest='delete_all', action='store_false',
+                        help='Load markers on top of existing markers (no update, just add)')
+    parser.set_defaults(delete_all=True)
+
     args = parser.parse_args()
 
-    import_to_datastore(provider_code, args.ratio)
+    import_to_datastore(provider_code, args.ratio, args.delete_all)
 
 PROVIDER_CODE = '1' # CBS
 if __name__ == "__main__":

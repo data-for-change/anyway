@@ -140,11 +140,7 @@ def import_data():
     #accidents_gps_coordinates = json.loads(open(general_path+"gps.json").read())
     gps = ItmToGpsConverter()
 
-    # oh dear.
-    i = -1
-
     for accident in accidents_csv:
-        i += 1
         output_line = {}
         output_fields = {}
         description_strings = []
@@ -174,7 +170,7 @@ def import_data():
 
         description = "\n".join(description_strings)
 
-        output_fields["date"] = accident_date    
+        output_fields["date"] = accident_date
         output_fields["description"] = description
         output_fields["id"] = accident["pk_teuna_fikt"]
         output_fields["severity"] = int(accident["HUMRAT_TEUNA"])

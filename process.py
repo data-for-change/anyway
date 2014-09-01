@@ -137,6 +137,19 @@ FIELD_FUNCTIONS = {
     "ZURAT_ISHUV" : ("צורת יישוב", dictionary, 81),
 }
 
+FIELDS_NOT_IN_DESCRIPTION = [
+    "SHNAT_TEUNA",
+    "HODESH_TEUNA",
+    "YOM_BE_HODESH",
+    "SHAA",
+    "REHOV1",
+    "REHOV2",
+    "BAYIT",
+    "SEMEL_YISHUV",
+    "X",
+    "Y",
+]
+
 FIELD_LIST = FIELD_FUNCTIONS.keys()
 
 def import_data():
@@ -145,30 +158,14 @@ def import_data():
     # accidents_gps_coordinates = json.loads(open(general_path+"gps.json").read())
     gps = ItmToGpsConverter()
 
-    # oh dear.
-    i = -1
-
     for accident in accidents_csv:
-        i += 1
         output_line = {}
         output_fields = {}
         description_strings = []
         for field in FIELD_LIST:
             field_name, processor, parameter = FIELD_FUNCTIONS[field]
             output_line[field] = processor(parameter, accident[field], accident)
-            if output_line[field]:
-                if field in [
-                        "SHNAT_TEUNA",
-                        "HODESH_TEUNA",
-                        "YOM_BE_HODESH",
-                        "SHAA",
-                        "REHOV1",
-                        "REHOV2",
-                        "BAYIT",
-                        "SEMEL_YISHUV",
-                        "X",
-                        "Y"]:
-                    continue
+            if not output_line[field] and not field in FIELDS_NOT_IN_DESCRIPTION:
                 description_strings.append("%s: %s" % (field_name, output_line[field]))
 
         if not accident["X"] or not accident["Y"]:
@@ -179,12 +176,13 @@ def import_data():
 
         description = "\n".join(description_strings)
 
-        output_fields["date"] = accident_date    
+        output_fields["date"] = accident_date
         output_fields["description"] = description
         output_fields["id"] = accident["pk_teuna_fikt"]
         output_fields["severity"] = int(accident["HUMRAT_TEUNA"])
         output_fields["subType"] = int(accident["SUG_TEUNA"])
         output_fields["address"] = address
+        output_fields["locationAccuracy"] = int(accident["STATUS_IGUN"])
 
         converted = gps.convert(accident['X'], accident['Y'])
         output_fields["lat"] = converted['lat']
@@ -221,6 +219,7 @@ def import_to_datastore(provider_code, ratio=1, delete_all=True):
                 subtype = data["subType"],
                 severity = data["severity"],
                 created = data["date"],
+                locationAccuracy = data["locationAccuracy"],
             )
 
             db.session.add(marker)

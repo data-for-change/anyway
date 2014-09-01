@@ -64,6 +64,7 @@ class Marker(db.Model):
     latitude = Column(Float())
     longitude = Column(Float())
     address = Column(Text)
+    locationAccuracy = Column(Integer)
     followers = relationship("Follower", backref="markers")
 
     def serialize(self, current_user=None):
@@ -78,6 +79,7 @@ class Marker(db.Model):
             "type" : self.type,
             "subtype" : self.subtype,
             "severity" : self.severity,
+            "locationAccuracy" : self.locationAccuracy,
 
             # TODO: fix relationship
             "user" : self.user.serialize() if self.user else "",
@@ -135,7 +137,7 @@ class Marker(db.Model):
 
 class Follower(db.Model):
     __tablename__ = "followers"
-    
+
     user = Column(Integer, ForeignKey("users.id"), primary_key=True)
     marker = Column(BigInteger, ForeignKey("markers.id"), primary_key=True)
 

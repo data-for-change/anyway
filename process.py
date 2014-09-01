@@ -133,6 +133,19 @@ FIELD_FUNCTIONS = {
     "ZURAT_ISHUV" : ("צורת יישוב", dictionary, 81),
 }
 
+FIELDS_NOT_IN_DESCRIPTION = [
+    "SHNAT_TEUNA",
+    "HODESH_TEUNA",
+    "YOM_BE_HODESH",
+    "SHAA",
+    "REHOV1",
+    "REHOV2",
+    "BAYIT",
+    "SEMEL_YISHUV",
+    "X",
+    "Y",
+]
+
 FIELD_LIST = FIELD_FUNCTIONS.keys()
 
 def import_data():
@@ -147,19 +160,7 @@ def import_data():
         for field in FIELD_LIST:
             field_name, processor, parameter = FIELD_FUNCTIONS[field]
             output_line[field] = processor(parameter, accident[field], accident)
-            if output_line[field]:
-                if field in [
-                        "SHNAT_TEUNA",
-                        "HODESH_TEUNA",
-                        "YOM_BE_HODESH",
-                        "SHAA",
-                        "REHOV1",
-                        "REHOV2",
-                        "BAYIT",
-                        "SEMEL_YISHUV",
-                        "X",
-                        "Y"]:
-                    continue
+            if not output_line[field] and not field in FIELDS_NOT_IN_DESCRIPTION:
                 description_strings.append("%s: %s" % (field_name, output_line[field]))
 
         if not accident["X"] or not accident["Y"]:

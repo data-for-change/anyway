@@ -47,8 +47,8 @@ show_progress_spinner.counter=0
 # data_path = "static/data/2013/3/"
 # year_file = "H20131161"
 
-data_path = "static/data/2013/1/"
-year_file = "H20131041"
+data_path = "static/data/lms/Accidents Type 3/H20131161/"
+year_file = "H20131161"
 
 general_path = "static/data/"
 accidents_file = data_path + year_file + "AccData.csv"

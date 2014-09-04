@@ -20,7 +20,8 @@ var MarkerView = Backbone.View.extend({
 			map: this.map,
 			icon: this.getIcon(),
 			title: this.getTitle(),
-			id: this.model.get("id")
+			id: this.model.get("id"),
+			opacity: this.model.get("locationAccuracy") ? 0.25 : 1.0
 		});
 
         app.oms.addMarker(this.marker);

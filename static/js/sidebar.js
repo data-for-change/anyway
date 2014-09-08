@@ -19,7 +19,7 @@ var SidebarView = Backbone.View.extend({
         this.$el.append($("#sidebar-template").html());
         this.$currentViewList = this.$el.find(".current-view");
         var self = this;
-        this.$el.find("img.checkbox-image")
+        this.$el.find("img.checkbox-severity")
             .each(function() {
                 self.updateCheckboxIcon($(this));
             })
@@ -33,6 +33,11 @@ var SidebarView = Backbone.View.extend({
             })
             .mouseout(function() {
                 self.updateCheckboxIcon($(this));
+            });
+        this.$el.find("input.checkbox-accuracy:checkbox")
+            .click(function() {
+                $(this).data("checked", !$(this).data("checked"));
+                self.updateShowByAccuracy();
             });
         return this;
     },
@@ -73,7 +78,7 @@ var SidebarView = Backbone.View.extend({
     },
     updateLayers: function() {
         var layers = [];
-        this.$el.find("img.checkbox-image").each(function() {
+        this.$el.find("img.checkbox-severity").each(function() {
             layers[parseInt($(this).data("type"))] = $(this).data("checked");
         });
         app.model.set("layers", layers);
@@ -81,5 +86,10 @@ var SidebarView = Backbone.View.extend({
     clickEntry: function(e) {
         var marker = $(e.target).data("marker") || $(e.target).parents("li").data("marker");
         marker.view.choose();
+    },
+    updateShowByAccuracy: function() {
+        this.$el.find("input.checkbox-accuracy:checkbox").each(function() {
+            app.model.set("showInaccurateMarkers", $(this).data("checked"));
+        });
     }
 });

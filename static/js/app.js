@@ -165,6 +165,7 @@ $(function() {
             //this.markers.bind("change", this.loadMarker, this);
             this.model.bind("change:user", this.updateUser, this);
             this.model.bind("change:layers", this.loadMarkers, this);
+            this.model.bind("change:showInaccurateMarkers", this.loadMarkers, this);
             this.model.bind("change:dateRange", this.loadMarkers, this);
             this.login();
 
@@ -188,7 +189,7 @@ $(function() {
                 }
             }
 
-            this.markers.fetch({ 
+            this.markers.fetch({
                 data : $.param(params),
                 success: function() {
                     this.setMultipleMarkersIcon();
@@ -243,7 +244,7 @@ $(function() {
 
             if(MARKER_SPECIFIED) {
                 markerloc=new google.maps.LatLng(
-                    MARKER_LATITUDE, 
+                    MARKER_LATITUDE,
                     MARKER_LONGITUDE);
                 this.map.setCenter(markerloc);
                 // need to find the specified marker
@@ -350,11 +351,11 @@ $(function() {
                 this.$el.find(".date-range").daterangepicker("open"));
             this.router = new AppRouter();
             Backbone.history.start({pushState: true});
-            setTimeout(function(){ 
+            setTimeout(function(){
                 // somehow fetching markers does not work when done immediately
                 self.fetchMarkers();
             }, 3000);
-            
+
             return this;
         },
         closeInfoWindow: function() {
@@ -380,6 +381,11 @@ $(function() {
             // markers are loaded immediately as they are fetched
             if (this.model.get("layers") && !this.model.get("layers")[model.get("severity")]) {
                 console.log("skipping marker because the layer is not chosen");
+                return;
+            }
+
+            if (!this.model.get("showInaccurateMarkers") && model.get("locationAccuracy") != 1) {
+                console.log("skipping marker because location is not accurate");
                 return;
             }
 

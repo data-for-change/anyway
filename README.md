@@ -15,7 +15,7 @@ Contributing
 * Commit and send pull request
 * Have fun!
 
-Develpment/Staging/Production Worflow
+Develpment/Staging/Production Workflow
 -------------------------------------
 * Make some changes
 * Refresh your browser
@@ -44,4 +44,17 @@ Developer Documentation
 * [Manual setup](https://github.com/hasadna/anyway/wiki/Setup) of our development stack
 * We try to follow the process of other Hasadna projects, e.g. [Open-Knesset](https://oknesset-devel.readthedocs.org/en/latest/)
 
-
+Loading the Data After a Schema Change
+-----------------------
+* After setting up Heroku access to the anyway app, run `heroku config --app anyway` and copy the value of `CLEARDB_DATABASE_URL`.
+* Install `mysql-workbench` on your computer and run it.
+* Run `mysql-workbench` and add a new connection with the credentials from the value of `CLEARDB_DATABASE_URL`: the part until the `:` is the username; after that is the password; after the `@` and before the `/` is the hostname. Leave the port as it is.
+* Connect to the newly added connection, and in the sidebar select all entries under `Tables`, right click and drop all tables.
+* Back in your shell, run `export `CLEARDB_DATABASE_URL=&lt;the value you got from heroku&gt;`
+* Run `python models.py` to create the tables.
+* Get the latest data and extract it to a directory `static/data/`.
+* Edit `process.py` and change the variables `data_path` and `year_file` according to the new data. If the data resides in multiple directories, set it to one of them.
+* Run `python process.py --delete_all` to add the first part of the data to the tables.
+* Edit `process.py` again to change the variables according to the next part of the data.
+* Run `python process.py --no_delete_all` to add the next part of the data to the tables.
+* Repeat until all the data is loaded.

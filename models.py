@@ -2,7 +2,7 @@
 import datetime
 import logging
 import os
-from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, BigInteger
+from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, BigInteger, Index, desc
 from sqlalchemy.orm import relationship
 from flask import Flask, request, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -43,6 +43,9 @@ class User(db.Model):
 
 class Marker(db.Model):
     __tablename__ = "markers"
+    __table_args__ = (
+        Index('long_lat_idx', 'latitude', 'longitude'),
+    )
 
     MARKER_TYPE_ACCIDENT = 1
     MARKER_TYPE_HAZARD = 2
@@ -117,7 +120,13 @@ class Marker(db.Model):
         # >>>  m = Marker.bounding_box_fetch(32.36, 35.088, 32.292, 34.884)
         # >>> m.count()
         # 250
-        markers = db.session.query(Marker).filter(Marker.longitude<=ne_lng).filter(Marker.longitude>=sw_lng).filter(Marker.latitude<=ne_lat).filter(Marker.latitude>=sw_lat)
+        markers = db.session.query(Marker)\
+                    .filter(Marker.longitude<=ne_lng)\
+                    .filter(Marker.longitude>=sw_lng)\
+                    .filter(Marker.latitude<=ne_lat)\
+                    .filter(Marker.latitude>=sw_lat)\
+                    .order_by(desc(Marker.created))
+
         logging.debug('got %d markers from db' % markers.count())
         return markers
 

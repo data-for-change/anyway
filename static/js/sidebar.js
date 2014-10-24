@@ -12,6 +12,8 @@ var SidebarView = Backbone.View.extend({
     },
     initialize: function(options) {
         this.map = options.map;
+        this.sidebarItemTemplate = _.template($("#sidebarItemTemplate").text());
+
         google.maps.event.addListener(this.map, "center_changed", _.bind(this.updateMarkerList, this));
 
     },
@@ -43,27 +45,27 @@ var SidebarView = Backbone.View.extend({
     },
     updateMarkerList: function() {
         var bounds = this.map.getBounds();
-        this.$currentViewList.empty();
 
-        var sortedMarkerList = app.markerList.slice(0);
-        sortedMarkerList.sort( // sort by date in descending order
-            function(a,b){
-                return (moment(a.model.get("created")) < moment(b.model.get("created")) ? 1 : -1);
-            });
+        var $viewList = $('<ul/>');
 
-        for (var i = 0; i < sortedMarkerList.length; i++) {
-            if (bounds.contains(sortedMarkerList[i].marker.getPosition()) ){
-                var marker = sortedMarkerList[i].marker;
-                var markerModel = sortedMarkerList[i].model;
+        for (var i = 0; i < app.markerList.length; i++) {
+            var marker = app.markerList[i].marker;
 
-                var entry = $("#list-entry li").clone();
+            if (bounds.contains(marker.getPosition()) ){
+                var markerModel = app.markerList[i].model;
 
-                entry.find(".date").text(moment(markerModel.get("created")).format("LLLL"));
-                entry.find(".type").text(SUBTYPE_STRING[markerModel.get("subtype")]);
-                entry.data("marker", marker);
-                this.$currentViewList.append(entry);
+                var entryHtml = this.sidebarItemTemplate({
+                    created: moment(markerModel.get("created")).format("LLLL"),
+                    type: SUBTYPE_STRING[markerModel.get("subtype")]
+                });
+
+                var $entry = $(entryHtml);
+                $entry.data("marker", marker);
+                $viewList.append($entry);
             }
         }
+
+        this.$currentViewList.html($viewList.html());
     },
     updateCheckboxIcon: function(img, hover) {
         var checked;

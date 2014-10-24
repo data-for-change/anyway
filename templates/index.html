@@ -171,6 +171,11 @@ ANYWAY היא הדרך שלנו למנוע את התאונה הבאה. ביחד,
   </div>
 </div>
 <div id="fb-root"></div>
+<script type="text/html" id="sidebarItemTemplate">
+    <li><a>
+        <span class="date"><%- created %></span> - <span class="type"><%- type %></span>
+    </a></li>
+</script>
 <script>
     {% if coordinates %}
     MARKER_SPECIFIED = true;

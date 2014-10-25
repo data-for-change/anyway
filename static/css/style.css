@@ -84,10 +84,6 @@ div.gm-style {
 	white-space: pre;
 }
 
-.current-view li {
-    cursor: pointer;
-}
-
 /* for search box: */
 .controls {
         margin-top: 16px;

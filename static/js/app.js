@@ -172,7 +172,6 @@ $(function() {
 
         },
         fetchMarkers : function() {
-            console.log("fetching markers");
             var params = this.buildMarkersParams();
             if (!params) {
                 if (!$('.notifyjs-container').length) {
@@ -364,7 +363,6 @@ $(function() {
             this.router = new AppRouter();
             Backbone.history.start({pushState: true});
             setTimeout(function(){
-                console.log("fetching markers");
                 // somehow fetching markers does not work when done immediately
                 self.fetchMarkers();
             }, 3000);

@@ -70,7 +70,7 @@ def number(param, value, accident):
     return int(value) if value else None
 
 def fixed_table(param, value, accident):
-    return TABLES[param][int(value)] if value and int(value) in TABLES[param] else None
+    return "!%s" % value if value and int(value) in TABLES[param] else None
 
 def dictionary(param, value, accident):
     for item in dictionary_data:
@@ -147,7 +147,7 @@ FIELDS_NOT_IN_DESCRIPTION = [
     "BAYIT",
     "SEMEL_YISHUV",
     "X",
-    "Y",
+    "Y"
 ]
 
 FIELD_LIST = FIELD_FUNCTIONS.keys()
@@ -161,23 +161,20 @@ def import_data():
     for accident in accidents_csv:
         output_line = {}
         output_fields = {}
-        description_strings = []
+        extra_fields = {}
         for field in FIELD_LIST:
             field_name, processor, parameter = FIELD_FUNCTIONS[field]
             output_line[field] = processor(parameter, accident[field], accident)
-            if not output_line[field] and not field in FIELDS_NOT_IN_DESCRIPTION:
-                description_strings.append("%s: %s" % (field_name, output_line[field]))
+            if output_line[field] and parameter and field and not field in FIELDS_NOT_IN_DESCRIPTION:
+                extra_fields[field] = output_line[field]
 
         if not accident["X"] or not accident["Y"]:
             continue
 
         accident_date = datetime.datetime(int(accident["SHNAT_TEUNA"]), int(accident["HODESH_TEUNA"]), int(accident["YOM_BE_HODESH"]), int(accident["SHAA"]) % 24, 0, 0)
         address = "%s%s, %s" % (output_line["REHOV1"], " %s" % output_line["BAYIT"] if output_line["BAYIT"] != 9999 else "", output_line["SEMEL_YISHUV"])
-
-        description = "\n".join(description_strings)
-
         output_fields["date"] = accident_date
-        output_fields["description"] = description
+        output_fields["description"] = json.dumps(extra_fields,encoding='utf-8')
         output_fields["id"] = accident["pk_teuna_fikt"]
         output_fields["severity"] = int(accident["HUMRAT_TEUNA"])
         output_fields["subType"] = int(accident["SUG_TEUNA"])

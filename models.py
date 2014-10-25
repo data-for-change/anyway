@@ -1,11 +1,16 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+from __builtin__ import enumerate
 import datetime
+import json
 import logging
 import os
 from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, BigInteger, Index, desc
 from sqlalchemy.orm import relationship
 from flask import Flask, request, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
+from localization import FIELDS
+from tables_lms import TABLES
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -15,6 +20,7 @@ if __name__ == '__main__':
     db = SQLAlchemy(app)
 else:
     from main import db
+
 
 class User(db.Model):
     __tablename__ = "users"
@@ -32,14 +38,15 @@ class User(db.Model):
 
     def serialize(self):
         return {
-            "id" : str(self.id),
-            "first_name" : self.first_name,
-            "last_name" : self.last_name,
-            "username" : self.username,
-            "facebook_id" : self.facebook_id,
-            "facebook_url" : self.facebook_url,
-            "is_admin" : self.is_admin,
+            "id": str(self.id),
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "username": self.username,
+            "facebook_id": self.facebook_id,
+            "facebook_url": self.facebook_url,
+            "is_admin": self.is_admin,
         }
+
 
 class Marker(db.Model):
     __tablename__ = "markers"
@@ -70,29 +77,41 @@ class Marker(db.Model):
     locationAccuracy = Column(Integer)
     followers = relationship("Follower", backref="markers")
 
+    def get_field_value(self, field, value):
+        if value.startswith("!"):
+            _, num = value.split("!")
+            return TABLES[field][int(num)]
+        return value
+
+    def json_to_description(self, msg):
+        description = json.loads(msg, encoding='utf-8')
+        description_format = lambda field, value: "{0}: {1}".format(FIELDS[field], self.get_field_value(field, value))
+        return "\n".join([description_format(field, value) for field, value in description.iteritems()])
+
     def serialize(self, current_user=None):
         val = self.id
         return {
-            "id" : str(self.id),
-            "title" : self.title,
-            "description" : self.description,
-            "address" : self.address,
-            "latitude" : self.latitude,
-            "longitude" : self.longitude,
-            "type" : self.type,
-            "subtype" : self.subtype,
-            "severity" : self.severity,
-            "locationAccuracy" : self.locationAccuracy,
+            "id": str(self.id),
+            "title": self.title,
+            "description": self.json_to_description(self.description),
+            "address": self.address,
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+            "type": self.type,
+            "subtype": self.subtype,
+            "severity": self.severity,
+            "locationAccuracy": self.locationAccuracy,
 
             # TODO: fix relationship
-            "user" : self.user.serialize() if self.user else "",
+            "user": self.user.serialize() if self.user else "",
 
             # TODO: fix query
-            "followers" : [], # [x.user.serialize() for x in Follower.all().filter("marker", self).fetch(100)],
+            "followers": [],  # [x.user.serialize() for x in Follower.all().filter("marker", self).fetch(100)],
 
             # TODO: fix query
-            "following" : None, # Follower.all().filter("user", current_user).filter("marker", self).filter("user", current_user).get() is not None if current_user else None,
-            "created" : self.created.isoformat(),
+            "following": None,
+            # Follower.all().filter("user", current_user).filter("marker", self).filter("user", current_user).get() is not None if current_user else None,
+            "created": self.created.isoformat(),
         }
 
     def update(self, data, current_user):
@@ -102,11 +121,12 @@ class Marker(db.Model):
         self.latitude = data["latitude"]
         self.longitude = data["longitude"]
 
-        follower = db.session.query(Follower).filter(Follower.marker == self.id).filter(Follower.user == current_user).get(1)
+        follower = db.session.query(Follower).filter(Follower.marker == self.id).filter(
+            Follower.user == current_user).get(1)
 
         if data["following"]:
             if not follower:
-                Follower(marker = self.id, user = current_user)
+                Follower(marker=self.id, user=current_user)
         else:
             if follower:
                 follower[0].delete()
@@ -126,30 +146,29 @@ class Marker(db.Model):
                     .filter(Marker.latitude<=ne_lat)\
                     .filter(Marker.latitude>=sw_lat)\
                     .order_by(desc(Marker.created))
-
         logging.debug('got %d markers from db' % markers.count())
         return markers
 
     @staticmethod
     def get_marker(marker_id):
-        return db.session.query(Marker).filter_by(id = marker_id)
+        return db.session.query(Marker).filter_by(id=marker_id)
 
     @classmethod
     def parse(cls, data):
         return Marker(
-            title = data["title"],
-            description = data["description"],
-            type = data["type"],
-            latitude = data["latitude"],
-            longitude = data["longitude"]
+            title=data["title"],
+            description=data["description"],
+            type=data["type"],
+            latitude=data["latitude"],
+            longitude=data["longitude"]
         )
+
 
 class Follower(db.Model):
     __tablename__ = "followers"
 
     user = Column(Integer, ForeignKey("users.id"), primary_key=True)
     marker = Column(BigInteger, ForeignKey("markers.id"), primary_key=True)
-
 
 
 def init_db():
@@ -160,6 +179,7 @@ def init_db():
 
     print "Creating all tables"
     db.create_all()
+
 
 if __name__ == "__main__":
     init_db()

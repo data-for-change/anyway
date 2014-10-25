@@ -49,14 +49,16 @@ var SidebarView = Backbone.View.extend({
         var $viewList = $('<ul/>');
 
         for (var i = 0; i < app.markerList.length; i++) {
-            var marker = app.markerList[i].marker;
+            var markerView = app.markerList[i];
+            var marker = markerView.marker;
 
             if (bounds.contains(marker.getPosition()) ){
-                var markerModel = app.markerList[i].model;
+                var markerModel = markerView.model;
 
                 var entryHtml = this.sidebarItemTemplate({
                     created: moment(markerModel.get("created")).format("LLLL"),
-                    type: SUBTYPE_STRING[markerModel.get("subtype")]
+                    type: SUBTYPE_STRING[markerModel.get("subtype")],
+                    icon: markerView.getIcon()
                 });
 
                 var $entry = $(entryHtml);

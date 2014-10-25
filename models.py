@@ -77,16 +77,23 @@ class Marker(db.Model):
     locationAccuracy = Column(Integer)
     followers = relationship("Follower", backref="markers")
 
+
     def get_field_value(self, field, value):
+        """
+        takes a field and value and converts them to proper ui elements.
+        if the field values starts with '!' it means it's a lms localized string.
+        """
         if value.startswith("!"):
             _, num = value.split("!")
             return TABLES[field][int(num)]
         return value
 
+    def format_description(self, field, value):
+        return "{0}: {1}".format(FIELDS[field], self.get_field_value(field, value))
+
     def json_to_description(self, msg):
         description = json.loads(msg, encoding='utf-8')
-        description_format = lambda field, value: "{0}: {1}".format(FIELDS[field], self.get_field_value(field, value))
-        return "\n".join([description_format(field, value) for field, value in description.iteritems()])
+        return "\n".join([self.format_description(field, value) for field, value in description.iteritems()])
 
     def serialize(self, current_user=None):
         val = self.id
@@ -140,12 +147,12 @@ class Marker(db.Model):
         # >>>  m = Marker.bounding_box_fetch(32.36, 35.088, 32.292, 34.884)
         # >>> m.count()
         # 250
-        markers = db.session.query(Marker)\
-                    .filter(Marker.longitude<=ne_lng)\
-                    .filter(Marker.longitude>=sw_lng)\
-                    .filter(Marker.latitude<=ne_lat)\
-                    .filter(Marker.latitude>=sw_lat)\
-                    .order_by(desc(Marker.created))
+        markers = db.session.query(Marker) \
+            .filter(Marker.longitude <= ne_lng) \
+            .filter(Marker.longitude >= sw_lng) \
+            .filter(Marker.latitude <= ne_lat) \
+            .filter(Marker.latitude >= sw_lat) \
+            .order_by(desc(Marker.created))
         logging.debug('got %d markers from db' % markers.count())
         return markers
 

@@ -61,11 +61,12 @@ var SidebarView = Backbone.View.extend({
 
                 var $entry = $(entryHtml);
                 $entry.data("marker", marker);
+
                 $viewList.append($entry);
             }
         }
 
-        this.$currentViewList.html($viewList.html());
+        this.$currentViewList.empty().append($viewList);
     },
     updateCheckboxIcon: function(img, hover) {
         var checked;

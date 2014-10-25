@@ -54,9 +54,5 @@ Loading the Data After a Schema Change
 * Connect to the newly added connection, and in the sidebar select all entries under `Tables`, right click and drop all tables.
 * Back in your shell, run `export `CLEARDB_DATABASE_URL=&lt;the value you got from heroku&gt;`
 * Run `python models.py` to create the tables.
-* Get the latest data and extract it to a directory `static/data/`.
-* Edit `process.py` and change the variables `data_path` and `year_file` according to the new data. If the data resides in multiple directories, set it to one of them.
-* Run `python process.py --delete_all` to add the first part of the data to the tables.
-* Edit `process.py` again to change the variables according to the next part of the data.
-* Run `python process.py --no_delete_all` to add the next part of the data to the tables.
-* Repeat until all the data is loaded.
+* Get the latest data and extract it to a directory `static/data/lms/`.
+* Run `python process.py` to add the data to the tables.

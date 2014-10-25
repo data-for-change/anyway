@@ -47,3 +47,4 @@ venv
 .vagrant
 
 
+./static/data/lms

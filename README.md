@@ -10,8 +10,10 @@ Contributing
 ------------
 * Install [Virtualbox](http://virtualbox.org) and [Vagrant](http://vagrantup.com/)
 * Clone this repo
+* Extract the accidents file into /static/data/lms
 * Run `vagrant up` in your shell
 * Open [http://127.0.0.1:5000](http://127.0.0.1:5000) in your browser
+
 * Commit and send pull request
 * Have fun!
 

@@ -24,18 +24,22 @@ var SidebarView = Backbone.View.extend({
         this.$el.find("img.checkbox-severity")
             .each(function() {
                 self.updateCheckboxIcon($(this));
-            })
-            .click(function() {
-                $(this).data("checked", !$(this).data("checked"));
-                self.updateCheckboxIcon($(this));
-                self.updateLayers();
-            })
+            });
+
+        this.$el.find("img.checkbox-severity").parent()
             .mouseover(function() {
-                self.updateCheckboxIcon($(this), "hover");
+                self.updateCheckboxIcon($("img", this), "hover");
             })
             .mouseout(function() {
-                self.updateCheckboxIcon($(this));
+                self.updateCheckboxIcon($("img", this));
+            })
+            .click(function() {
+                var checkboxImg = $("img", this);
+                checkboxImg.data("checked", !checkboxImg.data("checked"));
+                self.updateCheckboxIcon(checkboxImg);
+                self.updateLayers();
             });
+
         this.$el.find("input.checkbox-accuracy:checkbox")
             .click(function() {
                 $(this).data("checked", !$(this).data("checked"));
@@ -57,15 +61,17 @@ var SidebarView = Backbone.View.extend({
 
         var $viewList = $('<ul/>');
 
-        for (var i = 0; i < markersList.length; i++) {
-            var marker = markersList[i].marker;
+        for (var i = 0; i < app.markerList.length; i++) {
+            var markerView = app.markerList[i];
+            var marker = markerView.marker;
 
             if (bounds.contains(marker.getPosition()) ){
-                var markerModel = markersList[i].model;
+                var markerModel = markerView.model;
 
                 var entryHtml = this.sidebarItemTemplate({
                     created: moment(markerModel.get("created")).format("LLLL"),
                     type: SUBTYPE_STRING[markerModel.get("subtype")],
+                    icon: markerView.getIcon()
                 });
 
                 var $entry = $(entryHtml);

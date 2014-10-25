@@ -1,3 +1,5 @@
+var INACCURATE_MARKER_OPACITY = 0.5;
+
 var MarkerView = Backbone.View.extend({
 	events : {
 		//"click .follow-button" : "clickFollow",
@@ -21,7 +23,7 @@ var MarkerView = Backbone.View.extend({
 			icon: this.getIcon(),
 			title: this.getTitle(),
 			id: this.model.get("id"),
-			opacity: this.model.get("locationAccuracy") == 1 ? 1.0 : 0.25
+			opacity: this.model.get("locationAccuracy") == 1 ? 1.0 : INACCURATE_MARKER_OPACITY
 		});
 
         app.oms.addMarker(this.marker);

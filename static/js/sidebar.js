@@ -47,13 +47,22 @@ var SidebarView = Backbone.View.extend({
             });
         return this;
     },
-    updateMarkerList: function() {
+    updateMarkerList: function(markersList) {
+        // Set the marker list to empty array if it's not defined
+        markersList = markersList || [];
+
         var bounds = this.map.getBounds();
+
+        // Sort by decending order the marker list
+        markersList = _.sortBy(markersList, function(marker) {
+            return -1 * moment(marker.model.get("created")).unix();
+        });
+
 
         var $viewList = $('<ul/>');
 
-        for (var i = 0; i < app.markerList.length; i++) {
-            var markerView = app.markerList[i];
+        for (var i = 0; i < markersList.length; i++) {
+            var markerView = markersList[i];
             var marker = markerView.marker;
 
             if (bounds.contains(marker.getPosition()) ){
@@ -72,7 +81,8 @@ var SidebarView = Backbone.View.extend({
             }
         }
 
-        this.$currentViewList.empty().append($viewList);
+        this.$currentViewList.empty().append($viewList.find("li"));
+
     },
     updateCheckboxIcon: function(img, hover) {
         var checked;

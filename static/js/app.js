@@ -172,12 +172,12 @@ $(function() {
 
         },
         fetchMarkers : function() {
-            params = this.buildMarkersParams();
+            var params = this.buildMarkersParams();
             if (!params) {
                 if (!$('.notifyjs-container').length) {
                     // remove existing markers
                     this.clearMarkers();
-                    this.sidebar.updateMarkerList();
+                    this.sidebar.updateMarkerList(this.markerList);
                     // show message and abort
                     $.notify("התקרב על מנת לראות ארועים");
                 }
@@ -193,7 +193,7 @@ $(function() {
                 data : $.param(params),
                 success: function() {
                     this.setMultipleMarkersIcon();
-                    this.sidebar.updateMarkerList();
+                    this.sidebar.updateMarkerList(this.markerList);
                     this.chooseMarker();
                 }.bind(this)
             });
@@ -269,6 +269,9 @@ $(function() {
                     if(!MARKER_SPECIFIED) {
                       this.map.setCenter(myloc);
                     }
+
+                    // Maybe this fix the geolocation problem
+                    this.fetchMarkers();
                 }.bind(this));
             }
 
@@ -385,6 +388,7 @@ $(function() {
                     return; // avoid adding duplicates
                 }
             }
+
             // console.log("loading marker", ICONS[model.get("type")]);
             // markers are loaded immediately as they are fetched
             if (this.model.get("layers") && !this.model.get("layers")[model.get("severity")]) {
@@ -412,14 +416,14 @@ $(function() {
 
             model.set("markerView", this.markerList.length);
             this.markerList.push(markerView);
-
         },
+
         loadMarkers : function() {
             console.log("-->> loading markers", this.markers);
             this.clearMarkers();
             this.markers.each(_.bind(this.loadMarker, this));
             this.setMultipleMarkersIcon();
-            this.sidebar.updateMarkerList();
+            this.sidebar.updateMarkerList(this.markerList);
             this.chooseMarker();
         },
         clearMarkers : function() {

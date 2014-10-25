@@ -1,8 +1,8 @@
 var ICONS_PREFIX = "/static/img/menu icons/";
 var CHECKBOX_ICONS = [
-    ["deadly-unchecked.png", "severe-unchecked.png", "medium-unchecked.png"],
-    ["deadly-checked.png",   "severe-checked.png",   "medium-checked.png"],
-    ["deadly-hover.png",     "severe-hover.png",     "medium-hover.png"]
+    ["deadly-unchecked.png", "severe-unchecked.png", "medium-unchecked.png", "location-acc-unchecked.png"],
+    ["deadly-checked.png",   "severe-checked.png",   "medium-checked.png",   "location-acc-checked.png"],
+    ["deadly-hover.png",     "severe-hover.png",     "medium-hover.png",     "location-acc-unchecked.png"]
 ];
 
 var SidebarView = Backbone.View.extend({
@@ -21,28 +21,34 @@ var SidebarView = Backbone.View.extend({
         this.$el.append($("#sidebar-template").html());
         this.$currentViewList = this.$el.find(".current-view");
         var self = this;
-        this.$el.find("img.checkbox-severity")
+
+        this.$el.find("img.checkbox-severity, img.checkbox-accuracy")
             .each(function() {
                 self.updateCheckboxIcon($(this));
             });
 
-        this.$el.find("img.checkbox-severity").parent()
+        this.$el.find("img.checkbox-severity, img.checkbox-accuracy").parent()
             .mouseover(function() {
                 self.updateCheckboxIcon($("img", this), "hover");
             })
             .mouseout(function() {
                 self.updateCheckboxIcon($("img", this));
-            })
-            .click(function() {
+            });
+
+        this.$el.find("img.checkbox-severity").parent().click(function() {
                 var checkboxImg = $("img", this);
                 checkboxImg.data("checked", !checkboxImg.data("checked"));
                 self.updateCheckboxIcon(checkboxImg);
                 self.updateLayers();
             });
 
-        this.$el.find("input.checkbox-accuracy:checkbox")
+        this.$el.find("img.checkbox-accuracy").parent()
             .click(function() {
-                $(this).data("checked", !$(this).data("checked"));
+                var checkboxImg = $("img", this);
+                checkboxImg.data("checked", !checkboxImg.data("checked"));
+                self.updateCheckboxIcon(checkboxImg);
+
+
                 self.updateShowByAccuracy();
             });
         return this;
@@ -107,7 +113,7 @@ var SidebarView = Backbone.View.extend({
         marker.view.choose();
     },
     updateShowByAccuracy: function() {
-        this.$el.find("input.checkbox-accuracy:checkbox").each(function() {
+        this.$el.find("img.checkbox-accuracy").each(function() {
             app.model.set("showInaccurateMarkers", $(this).data("checked"));
         });
     }

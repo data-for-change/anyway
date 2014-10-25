@@ -24,18 +24,22 @@ var SidebarView = Backbone.View.extend({
         this.$el.find("img.checkbox-severity")
             .each(function() {
                 self.updateCheckboxIcon($(this));
-            })
-            .click(function() {
-                $(this).data("checked", !$(this).data("checked"));
-                self.updateCheckboxIcon($(this));
-                self.updateLayers();
-            })
+            });
+
+        this.$el.find("img.checkbox-severity").parent()
             .mouseover(function() {
-                self.updateCheckboxIcon($(this), "hover");
+                self.updateCheckboxIcon($("img", this), "hover");
             })
             .mouseout(function() {
-                self.updateCheckboxIcon($(this));
+                self.updateCheckboxIcon($("img", this));
+            })
+            .click(function() {
+                var checkboxImg = $("img", this);
+                checkboxImg.data("checked", !checkboxImg.data("checked"));
+                self.updateCheckboxIcon(checkboxImg);
+                self.updateLayers();
             });
+
         this.$el.find("input.checkbox-accuracy:checkbox")
             .click(function() {
                 $(this).data("checked", !$(this).data("checked"));

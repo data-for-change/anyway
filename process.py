@@ -15,6 +15,9 @@ import field_names
 from models import Marker
 
 directories_not_processes = []
+import re
+
+accident_type_regex = re.compile("Accidents Type (?P<type>\d)")
 
 
 class ItmToGpsConverter(object):
@@ -275,7 +278,7 @@ def import_to_datastore(directory, provider_code, ratio=1):
     for irow, data in enumerate(import_data(directory)):
         show_progress_spinner()
         if irow % ratio == 0:
-            id = int(provider_code + data['id'])
+            id = int("{0}{1}".format(provider_code, data['id']))
 
             marker = Marker(
                 user=None,
@@ -308,7 +311,20 @@ def import_to_datastore(directory, provider_code, ratio=1):
     print "imported %d items" % (i,)
 
 
-def main(provider_code):
+def get_provider_code(directory_name=None):
+    if directory_name:
+        match = accident_type_regex.match(directory_name)
+        if match:
+            return int(match.groupdict()['type'])
+
+    ans = ""
+    while not ans.isdigit():
+        ans = raw_input("directory provider code is invalid, please enter a valid code: ")
+        if ans.isdigit():
+            return int(ans)
+
+
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--path', type=str, default=None)
     parser.add_argument('--ratio', type=int, metavar='n', default=1,
@@ -316,6 +332,7 @@ def main(provider_code):
     parser.add_argument('--delete_all', dest='delete_all', action='store_true')
     parser.add_argument('--no_delete_all', dest='delete_all', action='store_false',
                         help='Load markers on top of existing markers (no update, just add)')
+    parser.add_argument('--provider_code', dest='provider_code', type=int)
     parser.set_defaults(delete_all=True)
 
     args = parser.parse_args()
@@ -330,13 +347,19 @@ def main(provider_code):
             db.session.query(Marker).delete()
             db.session.commit()
 
-    if not args.path:
+    if args.path:
+        if not args.provider_code:
+            print "provider code is mandatory when using a specific directory"
+            return
+        import_to_datastore(args.path, args.provider_code, args.ratio)
+    else:
         for directory in glob.glob("static/data/lms/*/*"):
+            parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
+            provider_code = args.provider_code if args.provider_code else get_provider_code(parent_directory)
             import_to_datastore(directory, provider_code, args.ratio)
 
     print("finished processing all directories, except: %s" % directories_not_processes)
 
 
-PROVIDER_CODE = '1'  # CBS
 if __name__ == "__main__":
-    main(PROVIDER_CODE)
+    main()

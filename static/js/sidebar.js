@@ -2,7 +2,7 @@ var ICONS_PREFIX = "/static/img/menu icons/";
 var CHECKBOX_ICONS = [
     ["deadly-unchecked.png", "severe-unchecked.png", "medium-unchecked.png", "location-acc-unchecked.png"],
     ["deadly-checked.png",   "severe-checked.png",   "medium-checked.png",   "location-acc-checked.png"],
-    ["deadly-hover.png",     "severe-hover.png",     "medium-hover.png",     "location-acc-unchecked.png"]
+    ["deadly-hover.png",     "severe-hover.png",     "medium-hover.png"]
 ];
 
 var SidebarView = Backbone.View.extend({
@@ -27,7 +27,7 @@ var SidebarView = Backbone.View.extend({
                 self.updateCheckboxIcon($(this));
             });
 
-        this.$el.find("img.checkbox-severity, img.checkbox-accuracy").parent()
+        this.$el.find("img.checkbox-severity").parent()
             .mouseover(function() {
                 self.updateCheckboxIcon($("img", this), "hover");
             })

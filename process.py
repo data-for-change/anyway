@@ -13,6 +13,7 @@ import datetime
 from tables_lms import *
 import field_names
 from models import Marker
+import pyproj
 
 directories_not_processes = []
 import re
@@ -20,23 +21,24 @@ import re
 accident_type_regex = re.compile("Accidents Type (?P<type>\d)")
 
 
-class ItmToGpsConverter(object):
+class ItmToWGS84(object):
     def __init__(self):
-        self.process = subprocess.Popen(['node', 'static/data/input.js'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        # initializing WGS84 (epsg: 4326) and Israeli TM Grid (epsg: 2039) projections.
+        # for more info: http://spatialreference.org/ref/epsg/<epsg_num>/
+        self.wgs84 = pyproj.Proj(init='epsg:4326')
+        self.itm = pyproj.Proj(init='epsg:2039')
 
     def convert(self, x, y):
         """
-        Convert ITM to GPS coordinates
-
+        converts ITM to WGS84 coordinates
         :type x: float
         :type y: float
         :rtype: dict
-        :return: {u'lat': 26.06199702841902, u'lng': 33.01173637265791, u'alt': 0, u'precision': 5}
+        :return: {'lat': 26.06199702841902, 'lng': 33.01173637265791}
         """
-
-        self.process.stdin.write(json.dumps({'x': x, 'y': y}))
-        return json.loads(self.process.stdout.readline())
-
+        longitude, latitude = pyproj.transform(self.itm, self.wgs84, x, y)
+        return {"lat": latitude, "lng": longitude}
+6
 
 app = Flask(__name__)
 # app.config['SQLALCHEMY_ECHO'] = True
@@ -193,7 +195,7 @@ def import_accident(files):
     print "reading accidents from file %s" % (files[ACCIDENTS].name,)
     accidents_csv = csv.DictReader(files[ACCIDENTS])
     # accidents_gps_coordinates = json.loads(open(general_path+"gps.json").read())
-    gps = ItmToGpsConverter()
+    gps = ItmToWGS84()
     for accident in accidents_csv:
         output_line = {}
         output_fields = {}

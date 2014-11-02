@@ -1,22 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __builtin__ import enumerate
-import datetime
 import json
 import logging
-import os
+
 from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, BigInteger, Index, desc
 from sqlalchemy.orm import relationship
-from flask import Flask, request, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
-from localization import FIELDS
-from tables_lms import TABLES
+import datetime
+import localization
+import utilities
+
+db_encoding = 'utf-8'
 
 logging.basicConfig(level=logging.DEBUG)
 
 if __name__ == '__main__':
-    app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('CLEARDB_DATABASE_URL')
+    app = utilities.init_flask(__name__)
     db = SQLAlchemy(app)
 else:
     from main import db
@@ -77,22 +76,15 @@ class Marker(db.Model):
     locationAccuracy = Column(Integer)
     followers = relationship("Follower", backref="markers")
 
-
-    def get_field_value(self, field, value):
-        """
-        takes a field and value and converts them to proper ui elements.
-        if the field values starts with '!' it means it's a lms localized string.
-        """
-        if value.startswith("!"):
-            _, num = value.split("!")
-            return TABLES[field][int(num)]
-        return value
-
     def format_description(self, field, value):
-        return "{0}: {1}".format(FIELDS[field], self.get_field_value(field, value))
+        # if the field's value is a static localizable field, fetch it.
+        if field in localization.get_supported_tables():
+            value = localization.get_field(field, value).decode(db_encoding)
+        name = localization.get_field(field).decode(db_encoding)
+        return u"{0}: {1}".format(name, value)
 
     def json_to_description(self, msg):
-        description = json.loads(msg, encoding='utf-8')
+        description = json.loads(msg, encoding=db_encoding)
         return "\n".join([self.format_description(field, value) for field, value in description.iteritems()])
 
     def serialize(self, current_user=None):
@@ -117,7 +109,6 @@ class Marker(db.Model):
 
             # TODO: fix query
             "following": None,
-            # Follower.all().filter("user", current_user).filter("marker", self).filter("user", current_user).get() is not None if current_user else None,
             "created": self.created.isoformat(),
         }
 

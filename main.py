@@ -2,14 +2,21 @@ import os
 import logging
 import json
 import urllib
-import jinja2
 import csv
 from StringIO import StringIO
 
-from flask import Flask, request, make_response
+import jinja2
+from flask import Flask, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
 
+from database import db_session
+from models import *
+from base import *
+
+
+
 # logging.basicConfig(level=logging.DEBUG)
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('CLEARDB_DATABASE_URL')
@@ -25,8 +32,7 @@ jinja_environment = jinja2.Environment(
     autoescape=True,
     loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), "templates")))
 
-from models import *
-from base import *
+
 
 
 @app.route("/markers")

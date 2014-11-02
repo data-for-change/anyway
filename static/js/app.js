@@ -123,6 +123,9 @@ var SUBTYPE_STRING = [
     "פגיעה ממטען של רכב"
     ];
 
+var INITIAL_START_DATE = new Date(2013, 0, 1);
+var INITIAL_END_DATE = new Date(2014, 0, 1);
+
 $(function() {
     var AppRouter = Backbone.Router.extend({
         routes: {
@@ -326,16 +329,16 @@ $(function() {
                         'החודש שעבר': [Date.today().moveToFirstDayOfMonth().add({ months: -1 }), Date.today().moveToFirstDayOfMonth().add({ days: -1 })]
                         */
                         // FIXME change this hard-coded array into a table, see #122
-                        'שנת 2013': ['01/01/2013', '31/12/2013'],
-                        'שנת 2012': ['01/01/2012', '31/12/2012'],
-                        'שנת 2011': ['01/01/2011', '31/12/2011'],
-                        'שנת 2010': ['01/01/2010', '31/12/2010'],
+                        'שנת 2013': ['01/01/2013', '01/01/2014'],
+                        'שנת 2012': ['01/01/2012', '01/01/2013'],
+                        'שנת 2011': ['01/01/2011', '01/01/2012'],
+                        'שנת 2010': ['01/01/2010', '01/01/2011'],
                     },
                     opens: 'left',
                     format: 'dd/MM/yyyy',
                     separator: ' עד ',
-                    startDate: '01/01/2013',
-                    endDate: '31/12/2013',
+                    startDate: INITIAL_START_DATE,
+                    endDate: INITIAL_END_DATE,
                     minDate: '01/01/2005',
                     maxDate: '31/12/2023',
                     locale: {
@@ -360,6 +363,7 @@ $(function() {
             );
             this.$el.find("#calendar-control").click(
                 this.$el.find(".date-range").daterangepicker("open"));
+            this.model.set("dateRange", [INITIAL_START_DATE, INITIAL_END_DATE]);
             this.router = new AppRouter();
             Backbone.history.start({pushState: true});
             setTimeout(function(){

@@ -5,9 +5,13 @@ from flask import Flask
 import pyproj
 import threading
 import sys
-
+import re
 
 def init_flask(name):
+    """
+    initializes a Flask instance with default values
+    :param name: the name of the instance
+    """
     app = Flask(name)
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('CLEARDB_DATABASE_URL')
     return app
@@ -19,14 +23,22 @@ class ProgressSpinner(object):
         self.chars = ['|', '/', '-', '\\']
 
     def show(self):
+        """
+        prints a rotating spinner
+        """
         current_char = self.counter % len(self.chars)
         sys.stderr.write("\r%s" % self.chars[current_char])
         self.counter += 1
 
 
 class CsvReader(object):
+    """
+    loads and handles csv files
+    """
+    _digit_pattern = re.compile('^-?\d*(\.\d+)?$')
+
     def __init__(self, filename):
-        self.file = open(filename)
+        self._file = open(filename)
         self._lock = threading.RLock()
         self._closed = False
 
@@ -36,26 +48,33 @@ class CsvReader(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         with self._lock:
             if not self._closed:
-                self.file.close()
+                self._file.close()
 
     def name(self):
-        return self.file.name
+        """
+        the filename of the csv file
+        :return:
+        """
+        return self._file.name
 
     def close(self):
         with self._lock:
             if not self._closed:
-                self.file.close()
+                self._file.close()
 
     def _convert(self, value):
-        if value.isdigit():
-            return int(value)
-        if value == "":
+        """
+        converts an str value to a typed one
+        """
+        if value == '':
             return None
-
+        # the isdigit function doesn't match negative numbers
+        if CsvReader._digit_pattern.match(value):
+            return int(value)
         return value
 
     def __iter__(self):
-        for line in DictReader(self.file):
+        for line in DictReader(self._file):
             converted = dict([(key.upper(), self._convert(val)) for key, val in line.iteritems()])
             yield converted
 

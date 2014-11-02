@@ -10,6 +10,7 @@ import datetime
 import localization
 import utilities
 
+db_encoding = 'utf-8'
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -76,11 +77,14 @@ class Marker(db.Model):
     followers = relationship("Follower", backref="markers")
 
     def format_description(self, field, value):
-        name = localization.get_field(field).decode('utf-8')
+        # if the field's value is a static localizable field, fetch it.
+        if field in localization.get_supported_tables():
+            value = localization.get_field(field, value).decode(db_encoding)
+        name = localization.get_field(field).decode(db_encoding)
         return u"{0}: {1}".format(name, value)
 
     def json_to_description(self, msg):
-        description = json.loads(msg, encoding='utf-8')
+        description = json.loads(msg, encoding=db_encoding)
         return "\n".join([self.format_description(field, value) for field, value in description.iteritems()])
 
     def serialize(self, current_user=None):

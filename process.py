@@ -4,22 +4,22 @@ import glob
 import os
 import argparse
 import json
-
 from flask.ext.sqlalchemy import SQLAlchemy
-
-import datetime
 import field_names
 from models import Marker
+import models
 from utilities import ProgressSpinner, ItmToWGS84, init_flask, CsvReader
 import itertools
 import localization
+import re
+from datetime import datetime
 
 directories_not_processes = {}
-import re
 
 progress_wheel = ProgressSpinner()
 content_encoding = 'cp1255'
 accident_type_regex = re.compile("Accidents Type (?P<type>\d)")
+
 ACCIDENTS = 'accidents'
 CITIES = 'cities'
 STREETS = 'streets'
@@ -41,65 +41,102 @@ db = SQLAlchemy(app)
 
 
 def get_street(settlement_sign, street_sign, streets):
+    """
+    extracts the street name using the settlement id and street id
+    """
     if settlement_sign not in streets:
         return None
-    data = [x[field_names.street_name].decode(content_encoding) for x in streets[settlement_sign] if
-            x[field_names.street_sign] == street_sign]
-    return data[0] if len(data) == 1 else None
-
-
-def get_home_number(accident):
-    return accident[field_names.home] if accident[field_names.home] != 9999 else None
+    street_name = [x[field_names.street_name].decode(content_encoding) for x in streets[settlement_sign] if
+                   x[field_names.street_sign] == street_sign]
+    # there should be only one street name, or none if it wasn't found.
+    return street_name[0] if len(street_name) == 1 else None
 
 
 def get_address(accident, streets):
+    """
+    extracts the address of the main street.
+    tries to build the full address: <street_name> <street_number>, <settlement>,
+    but might return a partial one if unsuccessful.
+    """
     street = get_street(accident[field_names.settlement_sign], accident[field_names.street1], streets)
-    home = get_home_number(accident)
+    if not street:
+        return u""
+
+    # the home field is invalid if it's empty or if it contains 9999
+    home = accident[field_names.home] if accident[field_names.home] != 9999 else None
     settlement = localization.get_city_name(accident[field_names.settlement_sign])
-    address = u"{} {}, {}".format(street, home, settlement) if home else u"{}, {}".format(street, settlement)
-    return address
+
+    if not home and not settlement:
+        return street
+    if not home and settlement:
+        return u"{}, {}".format(street, settlement)
+    if home and not settlement:
+        return u"{} {}".format(street, home)
+
+    return u"{} {}, {}".format(street, home, settlement)
 
 
-def handle_street(accident, streets):
-    street1 = get_street(accident[field_names.settlement_sign], accident[field_names.street1], streets)
-    if street1:
-        home = get_home_number(accident)
-        street1 = u"{0}, {1}".format(street1, home) if home else street1
+def get_streets(accident, streets):
+    """
+    extracts the streets the accident occurred in.
+    every accident has a main street and a secondary street.
+    :return: a tuple containing both streets.
+    """
+    main_street = get_address(accident, streets)
+    secondary_street = get_street(accident[field_names.settlement_sign], accident[field_names.street2], streets)
+    return main_street, secondary_street
 
-    street2 = get_street(accident[field_names.settlement_sign], accident[field_names.street2], streets)
-    return street1, street2
 
-
-def handle_road(accident, roads):
+def get_junction(accident, roads):
+    """
+    extracts the junction from an accident
+    :return: returns the junction or None if it wasn't found
+    """
     key = accident[field_names.road1], accident[field_names.road2]
     junction = roads.get(key, None)
     return junction.decode(content_encoding) if junction else None
 
 
 def parse_date(accident):
+    """
+    parses an accident's date
+    """
     year = accident[field_names.accident_year]
     month = accident[field_names.accident_month]
     day = accident[field_names.accident_day]
     hour = accident[field_names.accident_hour] % 24
-    accident_date = datetime.datetime(year, month, day, hour, 0, 0)
+    accident_date = datetime(year, month, day, hour, 0, 0)
     return accident_date
 
 
-def accident_extra_data(accident, streets, roads):
+def load_extra_data(accident, streets, roads):
+    """
+    loads more data about the accident
+    :return: a dictionary containing all the extra fields and their values
+    :rtype: dict
+    """
     extra_fields = {}
+    # if the accident occurred in an urban setting
     if bool(accident[field_names.urban_intersection]):
-        extra_fields[field_names.street1], extra_fields[field_names.street2] = handle_street(accident, streets)
+        main_street, secondary_street = get_streets(accident, streets)
+        if main_street:
+            extra_fields[field_names.street1] = main_street
+        if secondary_street:
+            extra_fields[field_names.street2] = secondary_street
 
+    # if the accident occurred in a non urban setting (highway, etc')
     if bool(accident[field_names.non_urban_intersection]):
-        junction = handle_road(accident, roads)
+        junction = get_junction(accident, roads)
         if junction:
             extra_fields[field_names.junction_name] = junction
 
-    for table in localization.get_supported_tables():
-        if accident[table]:
-            localized = localization.get_field(table, accident[table])
-            if localized:
-                extra_fields[table] = localized
+    # localize static accident values
+    for field in localization.get_supported_tables():
+        if accident[field]:
+            # if we have a localized field for that particular field, save the field value
+            # it will be fetched we deserialized
+            if localization.get_field(field, accident[field]):
+                extra_fields[field] = accident[field]
 
     return extra_fields
 
@@ -107,17 +144,15 @@ def accident_extra_data(accident, streets, roads):
 def import_accidents(provider_code, accidents, streets, roads):
     print("reading accidents from file %s" % (accidents.name(),))
     for accident in accidents:
-
         if not accident[field_names.x_coordinate] or not accident[field_names.y_coordinate]:
             continue
-
         lng, lat = coordinates_converter.convert(accident[field_names.x_coordinate], accident[field_names.y_coordinate])
 
         marker = Marker(
             user=None,
             id=int("{0}{1}".format(provider_code, accident[field_names.id])),
             title="Accident",
-            description=json.dumps(accident_extra_data(accident, streets, roads), encoding='utf-8'),
+            description=json.dumps(load_extra_data(accident, streets, roads), encoding=models.db_encoding),
             address=get_address(accident, streets),
             latitude=lat,
             longitude=lng,
@@ -169,21 +204,28 @@ def get_files(directory):
             yield name, csv
 
 
-def import_directory(provider_code, directory):
+def load_needed_files(directory):
+    files = {}
     try:
         files = dict(get_files(directory))
     except ValueError as e:
         directories_not_processes[directory] = e.message
-        return
-
-    for accident in import_accidents(provider_code=provider_code, **files):
-        if accident:
-            yield accident
+    finally:
+        return files
 
 
 def import_to_datastore(directory, provider_code, batch_size):
+    """
+    goes through all the files in a given directory, parses and commits them
+    """
     imported = 0
-    for i, marker in enumerate(import_directory(provider_code, directory)):
+    files_from_lms = load_needed_files(directory)
+    if len(files_from_lms) == 0:
+        return
+
+    print("importing data from directory: {}".format(directory))
+    now = datetime.now()
+    for i, marker in enumerate(import_accidents(provider_code=provider_code, **files_from_lms)):
         imported = i
         progress_wheel.show()
         db.session.add(marker)
@@ -192,9 +234,12 @@ def import_to_datastore(directory, provider_code, batch_size):
             db.session.commit()
             print("commited.")
 
-    # commit any left sessions
-    db.session.commit()
-    print("imported {0} items".format(imported))
+    # commit any left sessions, if any were imported
+    if imported > 0:
+        db.session.commit()
+
+    took = int((datetime.now() - now).total_seconds())
+    print("imported {0} items from directory: {1} in {2} seconds".format(imported, directory, took))
 
 
 def get_provider_code(directory_name=None):
@@ -213,7 +258,7 @@ def get_provider_code(directory_name=None):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--path', type=str, default="static/data/lms")
-    parser.add_argument('--batch_size', type=int, default=1000)
+    parser.add_argument('--batch_size', type=int, default=100)
     parser.add_argument('--delete_all', dest='delete_all', action='store_true', default=True)
     parser.add_argument('--provider_code', type=int)
     args = parser.parse_args()

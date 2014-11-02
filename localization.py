@@ -201,7 +201,7 @@ _fields = {
     "REHOV2": "רחוב 2",  # from dicstreets (with SEMEL_YISHUV)
     "BAYIT": "מספר בית",
     "ZOMET_IRONI": "צומת עירוני",  # from intersect urban dictionary
-    "KVISH1": "כביש 1",  #from intersect urban dictionary
+    "KVISH1": "כביש 1",  # from intersect urban dictionary
     "KVISH2": "כביש 2",  #from intersect urban dictionary
     "ZOMET_LO_IRONI": "צומת לא עירוני",  #from non urban dictionary
     "YEHIDA": "יחידה",
@@ -245,8 +245,10 @@ def get_field(field, value=None):
 
     return _fields.get(field, None)
 
+
 def get_supported_tables():
     return _tables.keys()
+
 
 def get_city_name(symbol_id):
     return _cities_names.get(symbol_id, None)

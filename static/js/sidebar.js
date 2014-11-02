@@ -76,7 +76,7 @@ var SidebarView = Backbone.View.extend({
 
                 var entryHtml = this.sidebarItemTemplate({
                     created: moment(markerModel.get("created")).format("LLLL"),
-                    type: SUBTYPE_STRING[markerModel.get("subtype")],
+                    type: SUBTYPE_STRING[markerModel.get("subtype") - 1],
                     icon: markerView.getIcon()
                 });
 

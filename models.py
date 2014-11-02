@@ -1,22 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __builtin__ import enumerate
-import datetime
 import json
 import logging
-import os
+
 from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, BigInteger, Index, desc
 from sqlalchemy.orm import relationship
-from flask import Flask, request, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
-from localization import FIELDS
-from tables_lms import TABLES
+import datetime
+import localization
+import utilities
+
 
 logging.basicConfig(level=logging.DEBUG)
 
 if __name__ == '__main__':
-    app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('CLEARDB_DATABASE_URL')
+    app = utilities.init_flask(__name__)
     db = SQLAlchemy(app)
 else:
     from main import db
@@ -77,19 +75,9 @@ class Marker(db.Model):
     locationAccuracy = Column(Integer)
     followers = relationship("Follower", backref="markers")
 
-
-    def get_field_value(self, field, value):
-        """
-        takes a field and value and converts them to proper ui elements.
-        if the field values starts with '!' it means it's a lms localized string.
-        """
-        if value.startswith("!"):
-            _, num = value.split("!")
-            return TABLES[field][int(num)]
-        return value
-
     def format_description(self, field, value):
-        return "{0}: {1}".format(FIELDS[field], self.get_field_value(field, value))
+        name = localization.get_field(field).decode('utf-8')
+        return u"{0}: {1}".format(name, value)
 
     def json_to_description(self, msg):
         description = json.loads(msg, encoding='utf-8')
@@ -117,7 +105,6 @@ class Marker(db.Model):
 
             # TODO: fix query
             "following": None,
-            # Follower.all().filter("user", current_user).filter("marker", self).filter("user", current_user).get() is not None if current_user else None,
             "created": self.created.isoformat(),
         }
 

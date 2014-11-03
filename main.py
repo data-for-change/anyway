@@ -9,6 +9,11 @@ import jinja2
 from flask import Flask, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
 
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('CLEARDB_DATABASE_URL')
+app.config['SQLALCHEMY_POOL_RECYCLE'] = 60
+db = SQLAlchemy(app)
+
 from database import db_session
 from models import *
 from base import *
@@ -17,11 +22,6 @@ from base import *
 
 # logging.basicConfig(level=logging.DEBUG)
 
-
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('CLEARDB_DATABASE_URL')
-app.config['SQLALCHEMY_POOL_RECYCLE'] = 60
-db = SQLAlchemy(app)
 
 app.secret_key = 'aiosdjsaodjoidjioewnioewfnoeijfoisdjf'
 

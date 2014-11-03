@@ -6,7 +6,7 @@ from StringIO import StringIO
 import datetime
 
 import jinja2
-from flask import  make_response
+from flask import  Flask, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)

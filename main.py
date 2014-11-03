@@ -18,12 +18,12 @@ db = SQLAlchemy(app)
 from database import db_session
 from models import *
 from base import *
+import utilities
 
 # logging.basicConfig(level=logging.DEBUG)
 
 
-app = Flask(__name__)
-app.config.from_object('config')
+app = utilities.init_flask(__name__)
 db = SQLAlchemy(app)
 
 

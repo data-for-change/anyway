@@ -10,3 +10,4 @@ db_session = scoped_session(sessionmaker(autocommit=False, autoflush=True, bind=
 Base = declarative_base()
 Base.query = db_session.query_property()
 
+

@@ -29,7 +29,9 @@ jinja_environment = jinja2.Environment(
     autoescape=True,
     loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), "templates")))
 
-
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db_session.remove()
 
 
 @app.route("/markers")
@@ -122,7 +124,7 @@ def login():
         user_details = json.loads(urllib.urlopen("https://graph.facebook.com/me?access_token=" + access_token).read())
         # login successful
         if user_details["id"] == user_id:
-            user = db_session.query(User).filter(User.email == user_details["email"]).scalar()
+            user = User.query.filter(User.email == user_details["email"]).scalar()
             if not user:
                 user = User(
                     email = user_details["email"],

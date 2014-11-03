@@ -1,6 +1,6 @@
 from flask import session, redirect
 from flask import request
-from models import *
+from models import User
 from functools import wraps
 
 def set_user(user):
@@ -8,7 +8,7 @@ def set_user(user):
 
 def get_user():
 	if "user" in session:
-		return db_session.query(User).filter(User.id == session["user"]).scalar()
+		return User.query.filter(User.id == session["user"]).scalar()
 	else:
 		return None
 

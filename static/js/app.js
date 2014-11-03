@@ -166,10 +166,14 @@ $(function() {
             this.model.bind("change:user", this.updateUser, this);
             this.model.bind("change:layers", this.loadMarkers, this);
             this.model.bind("change:showInaccurateMarkers", this.loadMarkers, this);
-            this.model.bind("change:dateRange", this.loadMarkers, this);
+            this.model.bind("change:dateRange", this.reloadMarkers, this);
             this.login();
 
 
+        },
+        reloadMarkers: function() {
+            this.clearMarkers();
+            this.fetchMarkers();
         },
         fetchMarkers : function() {
             var params = this.buildMarkersParams();
@@ -206,6 +210,7 @@ $(function() {
             if (zoom < MINIMAL_ZOOM || !bounds) {
                 return null;
             }
+            var dateRange = this.model.get("dateRange");
 
             var params = {};
             params["ne_lat"] = bounds.getNorthEast().lat();
@@ -213,6 +218,9 @@ $(function() {
             params["sw_lat"] = bounds.getSouthWest().lat();
             params["sw_lng"] = bounds.getSouthWest().lng();
             params["zoom"] = zoom;
+            // Pass start and end dates as unix time (in seconds)
+            params["start_date"] = dateRange[0].getTime() / 1000;
+            params["end_date"] = dateRange[1].getTime() / 1000;
             return params;
         },
         setMultipleMarkersIcon: function() {

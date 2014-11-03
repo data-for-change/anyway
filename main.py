@@ -4,6 +4,7 @@ import json
 import urllib
 import csv
 from StringIO import StringIO
+import datetime
 
 import jinja2
 from flask import Flask, make_response
@@ -45,6 +46,9 @@ def markers(methods=["GET", "POST"]):
         sw_lat = float(request.values['sw_lat'])
         sw_lng = float(request.values['sw_lng'])
         zoom = int(request.values['zoom'])
+        start_date = datetime.date.fromtimestamp(int(request.values['start_date']))
+        end_date = datetime.date.fromtimestamp(int(request.values['end_date']))
+        logging.debug('start: %s, end: %s' % (start_date, end_date))
         min_zoom_level = 16
         if zoom < min_zoom_level:
             markers = []
@@ -57,7 +61,8 @@ def markers(methods=["GET", "POST"]):
             #     query = query.filter("created <=", request.values["end_time"])
             print ""
             logging.debug('querying markers in bounding box')
-            results = Marker.bounding_box_fetch(ne_lat, ne_lng, sw_lat, sw_lng)
+            results = Marker.bounding_box_fetch(ne_lat, ne_lng, sw_lat, sw_lng,
+                                                start_date, end_date)
             logging.debug('serializing markers')
             markers = [marker.serialize() for marker in results.all()]
 
@@ -168,7 +173,7 @@ def unfollow(key_name):
 @app.route('/', defaults={'marker_id': None})
 @app.route('/<int:marker_id>')
 def main(marker_id):
-    # at this point the marker id is just a running number, and the 
+    # at this point the marker id is just a running number, and the
     # LMS is in the description and needs to be promoted to a DB
     # field so we can query it. We also need to add a provider id.
     context = {}

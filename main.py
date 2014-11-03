@@ -19,15 +19,13 @@ from database import db_session
 from models import *
 from base import *
 
-
-
 # logging.basicConfig(level=logging.DEBUG)
 
 
-app.secret_key = 'aiosdjsaodjoidjioewnioewfnoeijfoisdjf'
+app = Flask(__name__)
+app.config.from_object('config')
+db = SQLAlchemy(app)
 
-FACEBOOK_KEY = "157028231131213"
-FACEBOOK_SECRET = "0437ee70207dca46609219b990be0614"
 
 jinja_environment = jinja2.Environment(
     autoescape=True,

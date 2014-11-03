@@ -359,11 +359,12 @@ $(function() {
                     buttonClasses: ['btn-danger']
                 },
                 _.bind(function(start, end) {
-                    if (start || end) {
-                        this.model.set("dateRange", [start, end]);
-                    } else {
-                        this.model.unset("dateRange");
-                    }
+                    var daterangepicker = this.$el.find("input.date-range").data("daterangepicker");
+                    if (!start)
+                        start = daterangepicker.minDate;
+                    if (!end)
+                        end = daterangepicker.maxDate;
+                    this.model.set("dateRange", [start, end]);
                 }, this)
             );
             this.$el.find("#calendar-control").click(

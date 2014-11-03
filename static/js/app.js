@@ -123,9 +123,6 @@ var SUBTYPE_STRING = [
     "פגיעה ממטען של רכב"
     ];
 
-var INITIAL_START_DATE = new Date(2013, 0, 1);
-var INITIAL_END_DATE = new Date(2014, 0, 1);
-
 $(function() {
     var AppRouter = Backbone.Router.extend({
         routes: {
@@ -337,8 +334,8 @@ $(function() {
                     opens: 'left',
                     format: 'dd/MM/yyyy',
                     separator: ' עד ',
-                    startDate: INITIAL_START_DATE,
-                    endDate: INITIAL_END_DATE,
+                    startDate: '01/01/2013',
+                    endDate: '01/01/2014',
                     minDate: '01/01/2005',
                     maxDate: '31/12/2023',
                     locale: {
@@ -363,7 +360,7 @@ $(function() {
             );
             this.$el.find("#calendar-control").click(
                 this.$el.find(".date-range").daterangepicker("open"));
-            this.model.set("dateRange", [INITIAL_START_DATE, INITIAL_END_DATE]);
+            this.$el.find("input.date-range").data("daterangepicker").notify();
             this.router = new AppRouter();
             Backbone.history.start({pushState: true});
             setTimeout(function(){

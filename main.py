@@ -1,13 +1,12 @@
 import os
 import logging
-import json
 import urllib
 import csv
 from StringIO import StringIO
 import datetime
 
 import jinja2
-from flask import Flask, make_response
+from flask import  make_response
 from flask.ext.sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -20,7 +19,6 @@ from models import *
 from base import *
 import utilities
 
-# logging.basicConfig(level=logging.DEBUG)
 
 
 app = utilities.init_flask(__name__)
@@ -186,4 +184,5 @@ def main(marker_id):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     app.run(debug=True)

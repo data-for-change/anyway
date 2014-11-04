@@ -1,13 +1,12 @@
 import os
 import logging
-import json
 import urllib
 import csv
 from StringIO import StringIO
 import datetime
 
 import jinja2
-from flask import Flask, make_response
+from flask import  Flask, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -18,22 +17,21 @@ db = SQLAlchemy(app)
 from database import db_session
 from models import *
 from base import *
+import utilities
 
 
 
-# logging.basicConfig(level=logging.DEBUG)
+app = utilities.init_flask(__name__)
+db = SQLAlchemy(app)
 
-
-app.secret_key = 'aiosdjsaodjoidjioewnioewfnoeijfoisdjf'
-
-FACEBOOK_KEY = "157028231131213"
-FACEBOOK_SECRET = "0437ee70207dca46609219b990be0614"
 
 jinja_environment = jinja2.Environment(
     autoescape=True,
     loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), "templates")))
 
-
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db_session.remove()
 
 
 @app.route("/markers")
@@ -126,7 +124,7 @@ def login():
         user_details = json.loads(urllib.urlopen("https://graph.facebook.com/me?access_token=" + access_token).read())
         # login successful
         if user_details["id"] == user_id:
-            user = db_session.query(User).filter(User.email == user_details["email"]).scalar()
+            user = User.query.filter(User.email == user_details["email"]).scalar()
             if not user:
                 user = User(
                     email = user_details["email"],
@@ -188,4 +186,5 @@ def main(marker_id):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     app.run(debug=True)

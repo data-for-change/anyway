@@ -9,19 +9,14 @@ from flask.ext.sqlalchemy import SQLAlchemy
 import datetime
 import localization
 import utilities
+from database import Base
 
 db_encoding = 'utf-8'
 
 logging.basicConfig(level=logging.DEBUG)
 
-if __name__ == '__main__':
-    app = utilities.init_flask(__name__)
-    db = SQLAlchemy(app)
-else:
-    from main import db
 
-
-class User(db.Model):
+class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
     email = Column(String(120), unique=True)
@@ -47,7 +42,7 @@ class User(db.Model):
         }
 
 
-class Marker(db.Model):
+class Marker(Base):
     __tablename__ = "markers"
     __table_args__ = (
         Index('long_lat_idx', 'latitude', 'longitude'),
@@ -119,7 +114,7 @@ class Marker(db.Model):
         self.latitude = data["latitude"]
         self.longitude = data["longitude"]
 
-        follower = db.session.query(Follower).filter(Follower.marker == self.id).filter(
+        follower = Follower.query.filter(Follower.marker == self.id).filter(
             Follower.user == current_user).get(1)
 
         if data["following"]:
@@ -138,7 +133,8 @@ class Marker(db.Model):
         # >>>  m = Marker.bounding_box_fetch(32.36, 35.088, 32.292, 34.884)
         # >>> m.count()
         # 250
-        markers = db.session.query(Marker) \
+
+        markers = Marker.query \
             .filter(Marker.longitude <= ne_lng) \
             .filter(Marker.longitude >= sw_lng) \
             .filter(Marker.latitude <= ne_lat) \
@@ -151,7 +147,7 @@ class Marker(db.Model):
 
     @staticmethod
     def get_marker(marker_id):
-        return db.session.query(Marker).filter_by(id=marker_id)
+        return Marker.query.filter_by(id=marker_id)
 
     @classmethod
     def parse(cls, data):
@@ -164,21 +160,23 @@ class Marker(db.Model):
         )
 
 
-class Follower(db.Model):
+class Follower(Base):
     __tablename__ = "followers"
 
     user = Column(Integer, ForeignKey("users.id"), primary_key=True)
     marker = Column(BigInteger, ForeignKey("markers.id"), primary_key=True)
 
 
+
 def init_db():
+    from database import engine
     # import all modules here that might define models so that
     # they will be registered properly on the metadata.  Otherwise
     # you will have to import them first before calling init_db()
     print "Importing models"
 
     print "Creating all tables"
-    db.create_all()
+    Base.metadata.create_all(bind=engine)
 
 
 if __name__ == "__main__":

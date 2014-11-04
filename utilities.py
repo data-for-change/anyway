@@ -7,13 +7,14 @@ import threading
 import sys
 import re
 
+
 def init_flask(name):
     """
     initializes a Flask instance with default values
     :param name: the name of the instance
     """
     app = Flask(name)
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('CLEARDB_DATABASE_URL')
+    app.config.from_object('config')
     return app
 
 

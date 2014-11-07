@@ -48,3 +48,8 @@ venv
 
 
 ./static/data/lms
+
+# webassets cache file
+./static/.webassets-cache
+./static/static/app.min.css
+./static/static/app.min.js

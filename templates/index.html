@@ -4,30 +4,13 @@
     <title>Anyway - תאונות דרכים</title>
     <link href='http://fonts.googleapis.com/css?family=Alef:400,700' rel='stylesheet' type='text/css'>
 
-    <link rel="stylesheet" href="/static/css/bootstrap.rtl.css"/>
-    <link rel="stylesheet" href="/static/css/style.css"/>
-    <link rel="stylesheet" href="/static/css/daterangepicker.css"/>
-
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBpOmft-UskZsAQth9vNl0fN6EXaRR6dZc&sensor=true&libraries=places&language=iw"></script>
-    {% assets filters="closure_js", output="static/app.min.js",
-        "js/libs/jquery-1.8.2.min.js",
-        "js/libs/oms.min.js",
-        "js/libs/underscore.js",
-        "js/libs/backbone.js",
-        "js/libs/bootstrap.js",
-        "js/libs/notify-combined.min.js",
-        "js/libs/moment-with-langs.min.js",
-        "js/libs/date.js",
-        "js/libs/daterangepicker.js",
-        "js/libs/js-itm.js",
-        "js/markerdialog.js",
-        "js/marker.js",
-        "js/sidebar.js",
-        "js/contextmenu.js",
-        "js/map_style.js",
-        "js/app.js" %}
-        <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+    {% assets filters="yui_css", output="static/app.min.css",
+        "css/bootstrap.rtl.css",
+        "css/style.css",
+        "css/daterangepicker.css" %}
+        <link rel="stylesheet" href="{{ ASSET_URL }}" />
     {% endassets %}
+
 </head>
 <body style="margin: 0; position: relative; width: 100%; height: 100%">
 <div class='notifications top-left' id="notification"></div>
@@ -181,6 +164,29 @@ ANYWAY היא הדרך שלנו למנוע את התאונה הבאה. ביחד,
         <span class="date"><%- created %></span> - <span class="type"><%- type %></span>
     </a></li>
 </script>
+
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBpOmft-UskZsAQth9vNl0fN6EXaRR6dZc&sensor=true&libraries=places&language=iw"></script>
+{% assets filters="closure_js", output="static/app.min.js",
+    "js/libs/jquery-1.8.2.min.js",
+    "js/libs/oms.min.js",
+    "js/libs/underscore.js",
+    "js/libs/backbone.js",
+    "js/libs/bootstrap.js",
+    "js/libs/notify-combined.min.js",
+    "js/libs/moment-with-langs.min.js",
+    "js/libs/date.js",
+    "js/libs/daterangepicker.js",
+    "js/libs/js-itm.js",
+    "js/markerdialog.js",
+    "js/marker.js",
+    "js/sidebar.js",
+    "js/contextmenu.js",
+    "js/map_style.js",
+    "js/app.js" %}
+    <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
+
+
 <script>
     {% if coordinates %}
     MARKER_SPECIFIED = true;

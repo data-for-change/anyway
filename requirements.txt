@@ -12,3 +12,4 @@ itsdangerous==0.23
 pyproj==1.9.3
 webassets==0.10.1
 wsgiref==0.1.2
+yuicompressor==2.4.8

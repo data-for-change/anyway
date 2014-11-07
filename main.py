@@ -6,8 +6,12 @@ from StringIO import StringIO
 import datetime
 
 import jinja2
-from flask import  Flask, make_response
+from flask import Flask, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
+import flask.ext.assets
+from webassets.ext.jinja2 import AssetsExtension
+from webassets import Environment as AssetsEnvironment
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('CLEARDB_DATABASE_URL')
@@ -20,14 +24,19 @@ from base import *
 import utilities
 
 
-
 app = utilities.init_flask(__name__)
+assets = flask.ext.assets.Environment()
+assets.init_app(app)
 db = SQLAlchemy(app)
 
 
+assets_env = AssetsEnvironment('./static/', '/static')
 jinja_environment = jinja2.Environment(
     autoescape=True,
-    loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), "templates")))
+    loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), "templates")),
+    extensions=[AssetsExtension])
+jinja_environment.assets_environment = assets_env
+
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):

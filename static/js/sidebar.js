@@ -8,7 +8,7 @@ var CHECKBOX_ICONS = [
 var SidebarView = Backbone.View.extend({
     className: "info-window",
     events: {
-        "click .current-view li" : "clickEntry",
+        "click .current-view li" : "clickEntry"
     },
     initialize: function(options) {
         this.map = options.map;

@@ -1,230 +1,250 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Anyway - תאונות דרכים</title>
-    <link href='http://fonts.googleapis.com/css?family=Alef:400,700' rel='stylesheet' type='text/css'>
-    <script src="/static/js/libs/jquery-1.8.2.min.js"></script>
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBpOmft-UskZsAQth9vNl0fN6EXaRR6dZc&sensor=true&libraries=places&language=iw"></script>
-    <script src="/static/js/libs/oms.min.js"></script>
-    <script src="/static/js/libs/underscore.js"></script>
-    <script src="/static/js/libs/backbone.js"></script>
-    <script src="/static/js/libs/bootstrap.js"></script>
-    <script src="/static/js/libs/notify-combined.min.js"></script>
-    <script src="/static/js/libs/moment-with-langs.min.js"></script>
-    <script src="/static/js/libs/date.js"></script>
-    <script src="/static/js/libs/daterangepicker.js"></script>
-    <script src="/static/js/libs/js-itm.js"></script>
-    <script src="/static/js/markerdialog.js"></script>
-    <script src="/static/js/marker.js"></script>
-    <script src="/static/js/sidebar.js"></script>
-    <script src="/static/js/contextmenu.js"></script>
-    <script src="/static/js/map_style.js"></script>
-    <script src="/static/js/app.js"></script>
+    <head>
+        <title>Anyway - תאונות דרכים</title>
 
-    <link rel="stylesheet" href="/static/css/bootstrap.rtl.css"/>
-    <link rel="stylesheet" href="/static/css/style.css"/>
-    <link rel="stylesheet" href="/static/css/daterangepicker.css"/>
-</head>
-<body style="margin: 0; position: relative; width: 100%; height: 100%">
-<div class='notifications top-left' id="notification"></div>
-<div id="app">
+        <link href='http://fonts.googleapis.com/css?family=Alef:400,700' rel='stylesheet' type='text/css'>
+        {% assets filters="yui_css", output="static/app.min.css",
+            "css/bootstrap.rtl.css",
+            "css/style.css",
+            "css/daterangepicker.css" %}
+            <link rel="stylesheet" href="{{ ASSET_URL }}" />
+        {% endassets %}
 
-    <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner" style="padding-right: 10px">
-            <div style="float: left; padding: 5px">
-                <a class="fb-login" style="cursor: pointer"><img src="/static/img/facebook_login.png" style="padding: 3px"/></a>
-                <a href="mailto:anyway@hasadna.org.il/?subject=משוב%20על%20אתר%20anyway.co.il" target="new">צרו קשר</a>
-                &#124;
-                <a href="" data-toggle="modal" data-target="#about-dialog">אודות</a>
-                <a href="http://www.hasadna.org.il/" title="לדעת להשפיע - מבית הסדנא לידע ציבורי"><img src="/static/img/sadna-logo.png" style="width: 25px; height: 25px; padding: 3px"/></a>
-                <div class="user-details" style="display: none">
-                    <span class="profile-name"></span>
-                    <img class="profile-picture" style="height: 30px"/>
-                    <span class="fb-logout"><a class="btn" style="margin-top: 0">יציאה</a></span>
+    </head>
+    <body style="margin: 0; position: relative; width: 100%; height: 100%">
+        <div class='notifications top-left' id="notification"></div>
+        <div id="app">
+
+            <div class="navbar navbar-fixed-top">
+                <div class="navbar-inner" style="padding-right: 10px">
+                    <div style="float: left; padding: 5px">
+                        <a class="fb-login" style="cursor: pointer"><img src="/static/img/facebook_login.png" style="padding: 3px" />
+                        </a>
+                        <a href="mailto:anyway@hasadna.org.il/?subject=משוב%20על%20אתר%20anyway.co.il" target="new">צרו קשר</a> &#124;
+                        <a href="" data-toggle="modal" data-target="#about-dialog">אודות</a>
+                        <a href="http://www.hasadna.org.il/" title="לדעת להשפיע - מבית הסדנא לידע ציבורי"><img src="/static/img/sadna-logo.png" style="width: 25px; height: 25px; padding: 3px" />
+                        </a>
+                        <div class="user-details" style="display: none">
+                            <span class="profile-name"></span>
+                            <img class="profile-picture" style="height: 30px" />
+                            <span class="fb-logout"><a class="btn" style="margin-top: 0">יציאה</a></span>
+                        </div>
+                    </div>
+
+                    <a class="brand" href="/"> beta <img src="/static/img/anyway.png" style="height: 26px">
+                </a>
                 </div>
             </div>
-
-            <a class="brand" href="/"> beta <img src="/static/img/anyway.png" style="height: 26px">
-            </a>
+            <div class="main" style="position: fixed; width: 100%; height: 100%; padding-top: 40px; padding-right: 250px; box-sizing: border-box">
+                <input id="pac-input" class="controls" type="text" placeholder="חפש מיקום">
+                <div id="map_canvas" style="width: 100%; height: 100%; box-sizing: border-box"></div>
+            </div>
+            <div class="sidebar-container" style="position: absolute; right: 0; top: 0;
+            bottom: 0; width: 250px; background: white; padding-top: 40px;">
+                <!--
+            <ul class="nav nav-list">
+              <li class="active"><a href="#"><i class="icon-home icon-white"></i> Home</a></li>
+              <li><a href="#"><i class="icon-book"></i> Library</a></li>
+              <li><a href="#"><i class="icon-pencil"></i> Applications</a></li>
+              <li><a href="#"><i class="i"></i> Misc</a></li>
+            </ul>
+            -->
+            </div>
         </div>
-    </div>
-    <div class="main" style="position: fixed; width: 100%; height: 100%; padding-top: 40px; padding-right: 250px; box-sizing: border-box">
-        <input id="pac-input" class="controls" type="text" placeholder="חפש מיקום">
-        <div id="map_canvas" style="width: 100%; height: 100%; box-sizing: border-box"></div>
-    </div>
-    <div class="sidebar-container" style="position: absolute; right: 0; top: 0;
-        bottom: 0; width: 250px; background: white; padding-top: 40px;">
-        <!--
-        <ul class="nav nav-list">
-          <li class="active"><a href="#"><i class="icon-home icon-white"></i> Home</a></li>
-          <li><a href="#"><i class="icon-book"></i> Library</a></li>
-          <li><a href="#"><i class="icon-pencil"></i> Applications</a></li>
-          <li><a href="#"><i class="i"></i> Misc</a></li>
-        </ul>
-        -->
-    </div>
-</div>
 
-<div class="modal hide fade" id="about-dialog">
-    <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3>אודות anyway</h3>
-    </div>
-    <div class="modal-body">
-ANYWAY היא הדרך שלנו למנוע את התאונה הבאה. ביחד, נהגים, הולכי רגל, אזרחים ומקבלי החלטות נאבק בתאונות הדרכים. ANYWAY מציגה על גבי מפה אינטראקטיבית מיקומים ומידע (שמקורו בנתוני הלשכה המרכזית לסטטיסטיקה) על תאונות דרכים עם נפגעים באופן בהיר ונוח.
-
-בהמשך ANYWAY תאפשר לגולשים לפתח דיון בפתרונות אפשריים באזור המגורים או הנסיעה שלהם.
-
-באמצעות ידע זמין ונגיש אנו שואפים להעלות את המודעות לנושא תאונות הדרכים ולהעצים את יכולת ההשפעה של כל אחד ואחת על הסביבה הקרובה- הבית, השכונה, בית הספר של הילדים, מקום העבודה ועוד- על ידי פעולה משותפת בקהילה.
-
-אנחנו מאמינים שבעזרת ידע ציבורי קיים המוצג באתר יווצרו ידע ותובנות חדשים. שיתוף הידע הזה יאפשר לחברה האזרחית להתארגן לפעולה אקטיבית ולהזרים הצעות, רעיונות והתראות בחזרה אל הרשויות.
-    </div>
-    <div class="modal-footer">
-        <a class="btn close-button" data-dismiss="modal" aria-hidden="true">סגור</a>
-    </div>
-</div>
-
-
-
-<div id="marker-dialog-template" style="display: none">
-    <div class="modal hide fade">
-        <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h3>הוסף סימון</h3>
+        <div class="modal hide fade" id="about-dialog">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3>אודות anyway</h3>
+            </div>
+            <div class="modal-body">
+                ANYWAY היא הדרך שלנו למנוע את התאונה הבאה. ביחד, נהגים, הולכי רגל, אזרחים ומקבלי החלטות נאבק בתאונות הדרכים. ANYWAY מציגה על גבי מפה אינטראקטיבית מיקומים ומידע (שמקורו בנתוני הלשכה המרכזית לסטטיסטיקה) על תאונות דרכים עם נפגעים באופן בהיר ונוח. בהמשך ANYWAY תאפשר לגולשים לפתח דיון בפתרונות אפשריים באזור המגורים או הנסיעה שלהם. באמצעות ידע זמין ונגיש אנו שואפים להעלות את המודעות לנושא תאונות הדרכים ולהעצים את יכולת ההשפעה של כל אחד ואחת על הסביבה הקרובה- הבית, השכונה, בית הספר של הילדים, מקום העבודה ועוד- על ידי פעולה משותפת בקהילה. אנחנו מאמינים שבעזרת ידע ציבורי קיים המוצג באתר יווצרו ידע ותובנות חדשים. שיתוף הידע הזה יאפשר לחברה האזרחית להתארגן לפעולה אקטיבית ולהזרים הצעות, רעיונות והתראות בחזרה אל הרשויות.
+            </div>
+            <div class="modal-footer">
+                <a class="btn close-button" data-dismiss="modal" aria-hidden="true">סגור</a>
+            </div>
         </div>
-        <div class="modal-body">
-            <form class="form-horizontal">
-                <div class="control-group">
-                    <label class="control-label" for="title">כותרת</label>
-                    <div class="controls">
-                        <input type="text" id="title" name="title" placeholder="הכנס כותרת">
-                    </div>
+
+
+
+        <div id="marker-dialog-template" style="display: none">
+            <div class="modal hide fade">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h3>הוסף סימון</h3>
                 </div>
-                <div class="control-group">
-                    <label class="control-label" for="description">תיאור</label>
-                    <div class="controls">
-                        <textarea class="input-large" id="description" name="description"></textarea>
-                    </div>
+                <div class="modal-body">
+                    <form class="form-horizontal">
+                        <div class="control-group">
+                            <label class="control-label" for="title">כותרת</label>
+                            <div class="controls">
+                                <input type="text" id="title" name="title" placeholder="הכנס כותרת">
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="description">תיאור</label>
+                            <div class="controls">
+                                <textarea class="input-large" id="description" name="description"></textarea>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-            </form>
+                <div class="modal-footer">
+                    <a class="btn close-button">סגור</a>
+                    <a class="btn btn-primary save-button">שמור סימון</a>
+                </div>
+            </div>
         </div>
-        <div class="modal-footer">
-            <a class="btn close-button">סגור</a>
-            <a class="btn btn-primary save-button">שמור סימון</a>
+        <div id="marker-content-template" style="display: none">
+            <img class="profile-image" style="float: left" />
+            <h4 class="title"></h4>
+            <h5 class="type"></h5>
+            <p class="added-by"></p>
+            <p class="creation-date"></p>
+            <p class="description"></p>
+            <h5>תומכים</h5>
+            <p class="followers"></p>
+            <div class="buttons" style="position: absolute; bottom: 0">
+                <!--
+            <button class="btn btn-success follow-button">תמוך בנקודה זו</button>
+            <button class="btn btn-danger unfollow-button" style="display: none">הפסק תמיכה</button>
+            <button class="btn btn-primary share-button">שתף</button>
+          -->
+                <button class="btn btn-danger delete-button" style="display: none">מחק</button>
+            </div>
+
         </div>
-    </div>
-</div>
-<div id="marker-content-template" style="display: none">
-    <img class="profile-image" style="float: left"/>
-    <h4 class="title"></h4>
-    <h5 class="type"></h5>
-    <p class="added-by"></p>
-    <p class="creation-date"></p>
-    <p class="description"></p>
-    <h5>תומכים</h5>
-    <p class="followers"></p>
-    <div class="buttons" style="position: absolute; bottom: 0">
-      <!--
-        <button class="btn btn-success follow-button">תמוך בנקודה זו</button>
-        <button class="btn btn-danger unfollow-button" style="display: none">הפסק תמיכה</button>
-        <button class="btn btn-primary share-button">שתף</button>
-      -->
-        <button class="btn btn-danger delete-button" style="display: none">מחק</button>
-    </div>
+        <div id="list-entry" style="display: none">
+            <li>
+                <a>
+                    <span class="date"></span> - <span class="type"></span>
+                </a>
+            </li>
+        </div>
+        <div id="reset-map-control" style="padding: 5px; display: none">
+            <div title="חזור למיקום שלי" style="background-color: white; border: 2px solid black; cursor: pointer; boxShadow: 1px 1px 5px black">
+                <img src="/static/img/my_location.png" />
+            </div>
+        </div>
+        <div id="sidebar-template" style="display: none">
+            <div class="sidebar-title">סינון לפי חומרה</div>
+            <ul>
+                <li><img class="checkbox-severity" data-type="1" data-checked="true" /> תאונות קטלניות</li>
+                <li><img class="checkbox-severity" data-type="2" data-checked="true" /> תאונות קשות</li>
+                <li><img class="checkbox-severity" data-type="3" data-checked="true" /> תאונות קלות</li>
+                <li><img class="checkbox-accuracy" data-type="4" data-checked="false" /> תאונות שמיקומן משוער</li>
 
-</div>
-<div id="list-entry" style="display: none">
-    <li><a>
-        <span class="date"></span> - <span class="type"></span>
-    </a></li>
-</div>
-<div id="reset-map-control" style="padding: 5px; display: none">
-    <div title="חזור למיקום שלי" style="background-color: white; border: 2px solid black; cursor: pointer; boxShadow: 1px 1px 5px black">
-         <img src="/static/img/my_location.png"/>
-    </div>
-</div>
-<div id="sidebar-template" style="display: none">
-  <div class="sidebar-title">סינון לפי חומרה</div>
-  <ul>
-      <li><img class="checkbox-severity" data-type="1" data-checked="true" /> תאונות קטלניות</li>
-      <li><img class="checkbox-severity" data-type="2" data-checked="true" /> תאונות קשות</li>
-      <li><img class="checkbox-severity" data-type="3" data-checked="true" /> תאונות קלות</li>
-      <li><img class="checkbox-accuracy" data-type="4" data-checked="false" /> תאונות שמיקומן משוער</li>
+            </ul>
+            <div class="sidebar-title">סינון לפי טווח תאריכים</div>
+            <ul>
+                <li>
+                    <div class="input-prepend" id="calendar-control">
+                        <span class="add-on"><i class="icon-calendar date-range"></i></span>
+                        <input type="text" class="date-range" style="width: 200px" />
+                    </div>
 
-  </ul>
-  <div class="sidebar-title">סינון לפי טווח תאריכים</div>
-  <ul>
-      <li>
-          <div class="input-prepend" id="calendar-control">
-              <span class="add-on"><i class="icon-calendar date-range"></i></span><input type="text" class="date-range" style="width: 200px"/>
-          </div>
+                </li>
 
-      </li>
+            </ul>
+            <div class="sidebar-title">תאונות המוצגות על המפה</div>
+            <div style="overflow-y: scroll; position: absolute; top: 255px; bottom: 30px">
+                <ul class="current-view"></ul>
+            </div>
+            <div style="position: absolute; bottom: 0px">
+                <a class="btn download-csv">נתוני התאונות (להורדה בקובץ CSV)</a>
+            </div>
+        </div>
+        <div id="fb-root"></div>
+        <script type="text/html" id="sidebarItemTemplate">
+            <li>
+                <a>
+                    <span class="icon"><img src="<%- icon %>" style="height: 2em;"/></span>
+                    <span class="date"><%- created %></span> - <span class="type"><%- type %></span>
+                </a>
+            </li>
+        </script>
 
-  </ul>
-  <div class="sidebar-title">תאונות המוצגות על המפה</div>
-  <div style="overflow-y: scroll; position: absolute; top: 255px; bottom: 30px">
-    <ul class="current-view"></ul>
-  </div>
-  <div style="position: absolute; bottom: 0px">
-    <a class="btn download-csv">נתוני התאונות (להורדה בקובץ CSV)</a>
-  </div>
-</div>
-<div id="fb-root"></div>
-<script type="text/html" id="sidebarItemTemplate">
-    <li><a>
-        <span class="icon"><img src="<%- icon %>" style="height: 2em;"/></span>
-        <span class="date"><%- created %></span> - <span class="type"><%- type %></span>
-    </a></li>
-</script>
-<script>
-    {% if coordinates %}
-    MARKER_SPECIFIED = true;
-    MARKER_LATITUDE = {{coordinates[0]}};
-    MARKER_LONGITUDE = {{coordinates[1]}};
-    {% else %}
-    MARKER_SPECIFIED = false;
-    {% endif %}
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBpOmft-UskZsAQth9vNl0fN6EXaRR6dZc&sensor=true&libraries=places&language=iw"></script>
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBpOmft-UskZsAQth9vNl0fN6EXaRR6dZc&sensor=true&libraries=places&language=iw"></script>
+        {% assets filters="closure_js", output="static/app.min.js",
+            "js/libs/jquery-1.8.2.min.js",
+            "js/libs/oms.min.js",
+            "js/libs/underscore.js",
+            "js/libs/backbone.js",
+            "js/libs/bootstrap.js",
+            "js/libs/notify-combined.min.js",
+            "js/libs/moment-with-langs.min.js",
+            "js/libs/date.js",
+            "js/libs/daterangepicker.js",
+            "js/libs/js-itm.js",
+            "js/markerdialog.js",
+            "js/marker.js",
+            "js/sidebar.js",
+            "js/contextmenu.js",
+            "js/map_style.js",
+            "js/app.js" %}
+            <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+        {% endassets %}
+
+        <script type="text/javascript">
+            {% if coordinates %}
+            MARKER_SPECIFIED = true;
+            MARKER_LATITUDE = {{coordinates[0]}};
+            MARKER_LONGITUDE = {{coordinates[1]}};
+            {% else %}
+            MARKER_SPECIFIED = false;
+            {% endif %}
 
 
-    {% if marker %}
-    MARKER_ID = {{marker}};
-    {% else %}
-    MARKER_ID = null;
-    {% endif %}
-    moment.lang('he');
+            {% if marker %}
+            MARKER_ID = {{marker}};
+            {% else %}
+            MARKER_ID = null;
+            {% endif %}
+            moment.lang('he');
 
-    window.fbAsyncInit = function() {
-          FB.init({
-            appId      : '157028231131213', // App ID
-            status     : true, // check login status
-            cookie     : true, // enable cookies to allow the server to access the session
-            xfbml      : true  // parse XFBML
-          });
-            window.app = new AppView();
-            window.app.render();
-            if (MARKER_ID) {
-                console.log('setting marker');
-                app.model.set("currentMarker", MARKER_ID);
-            }
-        };
-        // Load the SDK Asynchronously
-        (function(d, s, id){
-           var js, fjs = d.getElementsByTagName(s)[0];
-           if (d.getElementById(id)) {return;}
-           js = d.createElement(s); js.id = id;
-           js.src = "//connect.facebook.net/en_US/all.js";
-           fjs.parentNode.insertBefore(js, fjs);
-         }(document, 'script', 'facebook-jssdk'));
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+            window.fbAsyncInit = function() {
+                FB.init({
+                    appId: '157028231131213', // App ID
+                    status: true, // check login status
+                    cookie: true, // enable cookies to allow the server to access the session
+                    xfbml: true // parse XFBML
+                });
+                window.app = new AppView();
+                window.app.render();
+                if (MARKER_ID) {
+                    console.log('setting marker');
+                    app.model.set("currentMarker", MARKER_ID);
+                }
+            };
+            // Load the SDK Asynchronously
+            (function(d, s, id) {
+                var js, fjs = d.getElementsByTagName(s)[0];
+                if (d.getElementById(id)) {
+                    return;
+                }
+                js = d.createElement(s);
+                js.id = id;
+                js.src = "//connect.facebook.net/en_US/all.js";
+                fjs.parentNode.insertBefore(js, fjs);
+            }(document, 'script', 'facebook-jssdk'));
+            (function(i, s, o, g, r, a, m) {
+                i['GoogleAnalyticsObject'] = r;
+                i[r] = i[r] || function() {
+                    (i[r].q = i[r].q || []).push(arguments)
+                }, i[r].l = 1 * new Date();
+                a = s.createElement(o),
+                    m = s.getElementsByTagName(o)[0];
+                a.async = 1;
+                a.src = g;
+                m.parentNode.insertBefore(a, m)
+            })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
 
-  ga('create', 'UA-48606400-1', 'anyway.herokuapp.com');
-  ga('send', 'pageview');
-  console.log('get coordinates: {{ coordinates }}')
-</script>
-</body>
+            ga('create', 'UA-48606400-1', 'anyway.herokuapp.com');
+            ga('send', 'pageview');
+            console.log('get coordinates: {{ coordinates }}')
+        </script>
+    </body>
 
 </html>

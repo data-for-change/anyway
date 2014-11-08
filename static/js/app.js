@@ -149,7 +149,7 @@ $(function() {
             "click #map_canvas" : "clickMap",
             "click .fb-login" : "requireLogin",
             "click .fb-logout" : "logout",
-            "click .download-csv" : "downloadCsv",
+            "click .download-csv" : "downloadCsv"
         },
         initialize : function() {
             _.bindAll(this, "clickContext");
@@ -337,7 +337,7 @@ $(function() {
                         'שנת 2013': ['01/01/2013', '01/01/2014'],
                         'שנת 2012': ['01/01/2012', '01/01/2013'],
                         'שנת 2011': ['01/01/2011', '01/01/2012'],
-                        'שנת 2010': ['01/01/2010', '01/01/2011'],
+                        'שנת 2010': ['01/01/2010', '01/01/2011']
                     },
                     opens: 'left',
                     format: 'dd/MM/yyyy',

@@ -6,7 +6,7 @@ from StringIO import StringIO
 import datetime
 
 import jinja2
-from flask import make_response
+from flask import make_response, jsonify, render_template
 import flask.ext.assets
 from webassets.ext.jinja2 import AssetsExtension
 from webassets import Environment as AssetsEnvironment
@@ -87,7 +87,7 @@ def markers(methods=["GET", "POST"]):
                  u'Content-Disposition': u'attachment; filename="data.csv"'}))
 
         else: # defaults to json
-            return make_response(json.dumps(markers))
+            return jsonify(markers=markers)
 
     else:
         data = json.loads(self.request.body)

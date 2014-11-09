@@ -140,7 +140,11 @@ $(function() {
     });
 
     window.MarkerCollection = Backbone.Collection.extend({
-        url : "/markers"
+        url : "/markers",
+
+        parse: function(response, options) {
+            return response.markers;
+        }
     });
 
     window.AppView = Backbone.View.extend({

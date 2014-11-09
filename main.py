@@ -185,8 +185,7 @@ def main(marker_id):
             marker = markers[0]
             context['coordinates'] = (marker.latitude, marker.longitude)
             context['marker'] = marker.id;
-    template = jinja_environment.get_template("index.html")
-    return make_response(template.render(context))
+    return render_template('index.html', **context)
 
 
 if __name__ == "__main__":

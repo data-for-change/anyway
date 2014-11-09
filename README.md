@@ -1,7 +1,7 @@
 Anyway
 ======
 
-Any-way.co.il (soon...) - Crowd-sourced road hazard reporting website.
+anyway.co.il - Crowd-sourced road hazard reporting website.
 
 Feel free to contribute to the project. It is currently hosted on Heroku:
 http://anyway.herokuapp.com/

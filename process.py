@@ -144,6 +144,8 @@ def load_extra_data(accident, streets, roads):
 def import_accidents(provider_code, accidents, streets, roads):
     print("reading accidents from file %s" % (accidents.name(),))
     for accident in accidents:
+        if field_names.x_coordinate not in accident or field_names.y_coordinate not in accident:
+            raise ValueError("x and y coordinates are missing from the accidents file!")
         if not accident[field_names.x_coordinate] or not accident[field_names.y_coordinate]:
             continue
         lng, lat = coordinates_converter.convert(accident[field_names.x_coordinate], accident[field_names.y_coordinate])
@@ -204,42 +206,34 @@ def get_files(directory):
             yield name, csv
 
 
-def load_needed_files(directory):
-    files = {}
-    try:
-        files = dict(get_files(directory))
-    except ValueError as e:
-        directories_not_processes[directory] = e.message
-    finally:
-        return files
-
-
 def import_to_datastore(directory, provider_code, batch_size):
     """
     goes through all the files in a given directory, parses and commits them
     """
-    imported = 0
-    files_from_lms = load_needed_files(directory)
-    if len(files_from_lms) == 0:
-        return
+    try:
+        imported = 0
+        files_from_lms = dict(get_files(directory))
+        if len(files_from_lms) == 0:
+            return
+        print("importing data from directory: {}".format(directory))
+        now = datetime.now()
+        for i, marker in enumerate(import_accidents(provider_code=provider_code, **files_from_lms)):
+            imported = i
+            progress_wheel.show()
+            db.session.add(marker)
+            if i % batch_size == 0 and i > 0:
+                print("\rcommitting ({0} items done)...".format(i))
+                db.session.commit()
+                print("commited.")
 
-    print("importing data from directory: {}".format(directory))
-    now = datetime.now()
-    for i, marker in enumerate(import_accidents(provider_code=provider_code, **files_from_lms)):
-        imported = i
-        progress_wheel.show()
-        db.session.add(marker)
-        if i % batch_size == 0 and i > 0:
-            print("\rcommitting ({0} items done)...".format(i))
+        # commit any left sessions, if any were imported
+        if imported > 0:
             db.session.commit()
-            print("commited.")
 
-    # commit any left sessions, if any were imported
-    if imported > 0:
-        db.session.commit()
-
-    took = int((datetime.now() - now).total_seconds())
-    print("imported {0} items from directory: {1} in {2} seconds".format(imported, directory, took))
+        took = int((datetime.now() - now).total_seconds())
+        print("imported {0} items from directory: {1} in {2} seconds".format(imported, directory, took))
+    except Exception as e:
+        directories_not_processes[directory] = e.message
 
 
 def get_provider_code(directory_name=None):

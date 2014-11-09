@@ -6,17 +6,12 @@ from StringIO import StringIO
 import datetime
 
 import jinja2
-from flask import Flask, make_response
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask import make_response, jsonify, render_template
 import flask.ext.assets
 from webassets.ext.jinja2 import AssetsExtension
 from webassets import Environment as AssetsEnvironment
 
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('CLEARDB_DATABASE_URL')
-app.config['SQLALCHEMY_POOL_RECYCLE'] = 60
-db = SQLAlchemy(app)
 
 from database import db_session
 from models import *
@@ -27,7 +22,7 @@ import utilities
 app = utilities.init_flask(__name__)
 assets = flask.ext.assets.Environment()
 assets.init_app(app)
-db = SQLAlchemy(app)
+
 
 
 assets_env = AssetsEnvironment('./static/', '/static')
@@ -92,7 +87,7 @@ def markers(methods=["GET", "POST"]):
                  u'Content-Disposition': u'attachment; filename="data.csv"'}))
 
         else: # defaults to json
-            return make_response(json.dumps(markers))
+            return jsonify(markers=markers)
 
     else:
         data = json.loads(self.request.body)
@@ -190,8 +185,7 @@ def main(marker_id):
             marker = markers[0]
             context['coordinates'] = (marker.latitude, marker.longitude)
             context['marker'] = marker.id;
-    template = jinja_environment.get_template("index.html")
-    return make_response(template.render(context))
+    return render_template('index.html', **context)
 
 
 if __name__ == "__main__":

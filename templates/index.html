@@ -245,10 +245,11 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
 
             window.fbAsyncInit = function() {
                 FB.init({
-                    appId: '157028231131213', // App ID
+                    appId: '440070049429017', // App ID
                     status: true, // check login status
                     cookie: true, // enable cookies to allow the server to access the session
-                    xfbml: true // parse XFBML
+                    xfbml: true, // parse XFBML
+                    version: 'v2.0'
                 });
                 window.app = new AppView();
                 window.app.render();
@@ -265,7 +266,7 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
                 }
                 js = d.createElement(s);
                 js.id = id;
-                js.src = "//connect.facebook.net/en_US/all.js";
+                js.src = "//connect.facebook.net/en_US/sdk.js";
                 fjs.parentNode.insertBefore(js, fjs);
             }(document, 'script', 'facebook-jssdk'));
             (function(i, s, o, g, r, a, m) {

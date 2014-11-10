@@ -71,7 +71,7 @@ class CsvReader(object):
             return None
         # the isdigit function doesn't match negative numbers
         if CsvReader._digit_pattern.match(value):
-            return int(value)
+            return int(float(value))
         return value
 
     def __iter__(self):

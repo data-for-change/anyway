@@ -180,6 +180,7 @@ def main(marker_id):
     # LMS is in the description and needs to be promoted to a DB
     # field so we can query it. We also need to add a provider id.
     context = {}
+    marker = None
     if 'marker' in request.values:
         markers = Marker.get_marker(request.values['marker'])
         if markers.count() == 1:
@@ -188,12 +189,19 @@ def main(marker_id):
             context['marker'] = marker.id
     if 'start_date' in request.values:
         context['start_date'] = string2timestamp(request.values['start_date'])
+    elif marker:
+        context['start_date'] = year2timestamp(marker.created.year)
     if 'end_date' in request.values:
         context['end_date'] = string2timestamp(request.values['end_date'])
+    elif marker:
+        context['end_date'] = year2timestamp(marker.created.year + 1)
     return render_template('index.html', **context)
 
 def string2timestamp(s):
     return time.mktime(datetime.datetime.strptime(s, "%Y-%m-%d").timetuple())
+
+def year2timestamp(y):
+    return time.mktime(datetime.date(y, 1, 1).timetuple())
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)

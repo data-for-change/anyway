@@ -85,7 +85,11 @@ var MarkerView = Backbone.View.extend({
         });
 
         app.infoWindow.open(this.map, this.marker);
-        Backbone.history.navigate("/?marker=" + this.model.get("id"), true);
+        var dateRange = app.model.get("dateRange");
+        Backbone.history.navigate("/?marker=" + this.model.get("id") +
+            "&start_date=" + moment(dateRange[0]).format("YYYY-MM-DD") +
+            "&end_date=" + moment(dateRange[1]).format("YYYY-MM-DD"),
+            true);
 
         google.maps.event.addListener(app.infoWindow,"closeclick",function(){
             Backbone.history.navigate("/", true);

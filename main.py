@@ -4,6 +4,7 @@ import urllib
 import csv
 from StringIO import StringIO
 import datetime
+import time
 
 import jinja2
 from flask import make_response, jsonify, render_template
@@ -184,9 +185,15 @@ def main(marker_id):
         if markers.count() == 1:
             marker = markers[0]
             context['coordinates'] = (marker.latitude, marker.longitude)
-            context['marker'] = marker.id;
+            context['marker'] = marker.id
+    if 'start_date' in request.values:
+        context['start_date'] = string2timestamp(request.values['start_date'])
+    if 'end_date' in request.values:
+        context['end_date'] = string2timestamp(request.values['end_date'])
     return render_template('index.html', **context)
 
+def string2timestamp(s):
+    return time.mktime(datetime.datetime.strptime(s, "%Y-%m-%d").timetuple())
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)

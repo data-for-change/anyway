@@ -127,12 +127,13 @@ $(function() {
     var AppRouter = Backbone.Router.extend({
         routes: {
             "" : "navigateEmpty",
-            ":id" : "navigate",
-            "/?marker=:id" : "navigate"
+//             ":id" : "navigate",
+            "/?marker=:id&start_date=:start&end_date=:end" : "navigate"
         },
-        navigate: function(id) {
+        navigate: function(id, start, end) {
             // console.log('navigate to ', id);
             app.model.set("currentMarker", parseInt(id));
+            app.model.set("dateRange", [new Date(start), new Date(end)]);
         },
         navigateEmpty: function() {
             app.model.set("currentMarker", null);
@@ -326,7 +327,12 @@ $(function() {
             this.sidebar = new SidebarView({ map: this.map }).render();
             this.$el.find(".sidebar-container").append(this.sidebar.$el);
 
-
+            if (!START_DATE) {
+                START_DATE = '01/01/2013';
+            }
+            if (!END_DATE) {
+                END_DATE = '01/01/2014';
+            }
             this.$el.find(".date-range").daterangepicker({
                     ranges: {
                       /* These ranges are irrelevant as long as no recent data is loaded:
@@ -346,8 +352,8 @@ $(function() {
                     opens: 'left',
                     format: 'dd/MM/yyyy',
                     separator: ' עד ',
-                    startDate: '01/01/2013',
-                    endDate: '01/01/2014',
+                    startDate: START_DATE,
+                    endDate: END_DATE,
                     minDate: '01/01/2005',
                     maxDate: '31/12/2023',
                     locale: {

@@ -274,13 +274,12 @@ $(function() {
                     resetMapDiv = document.createElement('div');
                     resetMapDiv.innerHTML = $("#reset-map-control").html()
                     google.maps.event.addDomListener(resetMapDiv, 'click', function() {
-                        this.map.panTo(myloc);
-                        console.log("reset map");
+                        this.setCenterWithMarker(myloc);
                     }.bind(this));
                     this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(resetMapDiv);
 
                     if(!MARKER_SPECIFIED) {
-                      this.map.setCenter(myloc);
+                        this.setCenterWithMarker(myloc);
                     }
 
                     // Maybe this fix the geolocation problem
@@ -580,10 +579,20 @@ $(function() {
             var places = this.searchBox.getPlaces();
             if (places && places.length > 0) {
               var place = places[0];
-              this.map.setCenter(place.geometry.location);
+              this.setCenterWithMarker(place.geometry.location);
               this.map.setZoom(INIT_ZOOM);
             }
-         }
+         },
+         setCenterWithMarker: function(loc) {
+            this.map.setCenter(loc);
+            if (this.locationMarker) {
+                this.locationMarker.setMap(null);
+            }
+            this.locationMarker = new google.maps.Marker({
+              position: loc,
+              map: this.map
+            });
+          }
     });
 });
 

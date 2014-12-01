@@ -333,7 +333,7 @@ $(function() {
             if (!END_DATE) {
                 END_DATE = '01/01/2014';
             }
-            this.$el.find(".date-range").daterangepicker({
+            this.$el.find("input.date-range").daterangepicker({
                     ranges: {
                       /* These ranges are irrelevant as long as no recent data is loaded:
                         'היום': ['today', 'today'],
@@ -368,17 +368,20 @@ $(function() {
                     showWeekNumbers: true,
                     buttonClasses: ['btn-danger']
                 },
-                _.bind(function(start, end) {
+                function(start, end) {
                     var daterangepicker = this.$el.find("input.date-range").data("daterangepicker");
                     if (!start)
                         start = daterangepicker.minDate;
                     if (!end)
                         end = daterangepicker.maxDate;
                     this.model.set("dateRange", [start, end]);
-                }, this)
+                }.bind(this)
             );
-            this.$el.find("#calendar-control").click(
-                this.$el.find(".date-range").daterangepicker("open"));
+            this.$el.find("#calendar-control").click( // only applies to <i>
+                function() {
+                    self.$el.find("input.date-range").data('daterangepicker').show();
+                }.bind(this)
+            );
             this.$el.find("input.date-range").data("daterangepicker").notify();
             this.router = new AppRouter();
             Backbone.history.start({pushState: true});

@@ -188,7 +188,7 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
 
             </ul>
             <div class="sidebar-title">תאונות המוצגות על המפה</div>
-            <div style="overflow-y: scroll; position: absolute; top: 255px; bottom: 30px">
+            <div style="overflow-y: scroll; position: absolute; top: 255px; bottom: 30px; width: 100%">
                 <ul class="current-view"></ul>
             </div>
             <div style="position: absolute; bottom: 0px">
@@ -208,6 +208,8 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBpOmft-UskZsAQth9vNl0fN6EXaRR6dZc&sensor=true&libraries=places&language=iw"></script>
         {% assets filters="closure_js", output="static/app.min.js",
             "js/libs/jquery-1.8.2.min.js",
+            "js/libs/spin.min.js",
+            "js/libs/jquery.spin.js",
             "js/libs/oms.min.js",
             "js/libs/underscore.js",
             "js/libs/backbone.js",

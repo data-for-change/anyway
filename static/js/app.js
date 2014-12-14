@@ -37,21 +37,21 @@ ICONS[SEVERITY_FATAL] = {};
 ICONS[SEVERITY_SEVERE] = {};
 ICONS[SEVERITY_LIGHT] = {};
 
-ICONS[SEVERITY_FATAL][ACCIDENT_TYPE_CAR_TO_PEDESTRIAN] = "/static/img/icons/vehicle_person_lethal.png"
-ICONS[SEVERITY_SEVERE][ACCIDENT_TYPE_CAR_TO_PEDESTRIAN] = "/static/img/icons/vehicle_person_severe.png"
-ICONS[SEVERITY_LIGHT][ACCIDENT_TYPE_CAR_TO_PEDESTRIAN] = "/static/img/icons/vehicle_person_medium.png"
-ICONS[SEVERITY_FATAL][ACCIDENT_TYPE_CAR_TO_CAR] = "/static/img/icons/vehicle_vehicle_lethal.png"
-ICONS[SEVERITY_SEVERE][ACCIDENT_TYPE_CAR_TO_CAR] = "/static/img/icons/vehicle_vehicle_severe.png"
-ICONS[SEVERITY_LIGHT][ACCIDENT_TYPE_CAR_TO_CAR] = "/static/img/icons/vehicle_vehicle_medium.png"
-ICONS[SEVERITY_FATAL][ACCIDENT_TYPE_CAR_TO_OBJECT] = "/static/img/icons/vehicle_object_lethal.png"
-ICONS[SEVERITY_SEVERE][ACCIDENT_TYPE_CAR_TO_OBJECT] = "/static/img/icons/vehicle_object_severe.png"
-ICONS[SEVERITY_LIGHT][ACCIDENT_TYPE_CAR_TO_OBJECT] = "/static/img/icons/vehicle_object_medium.png"
+ICONS[SEVERITY_FATAL][ACCIDENT_TYPE_CAR_TO_PEDESTRIAN] = "/static/img/icons/vehicle_person_lethal.png";
+ICONS[SEVERITY_SEVERE][ACCIDENT_TYPE_CAR_TO_PEDESTRIAN] = "/static/img/icons/vehicle_person_severe.png";
+ICONS[SEVERITY_LIGHT][ACCIDENT_TYPE_CAR_TO_PEDESTRIAN] = "/static/img/icons/vehicle_person_medium.png";
+ICONS[SEVERITY_FATAL][ACCIDENT_TYPE_CAR_TO_CAR] = "/static/img/icons/vehicle_vehicle_lethal.png";
+ICONS[SEVERITY_SEVERE][ACCIDENT_TYPE_CAR_TO_CAR] = "/static/img/icons/vehicle_vehicle_severe.png";
+ICONS[SEVERITY_LIGHT][ACCIDENT_TYPE_CAR_TO_CAR] = "/static/img/icons/vehicle_vehicle_medium.png";
+ICONS[SEVERITY_FATAL][ACCIDENT_TYPE_CAR_TO_OBJECT] = "/static/img/icons/vehicle_object_lethal.png";
+ICONS[SEVERITY_SEVERE][ACCIDENT_TYPE_CAR_TO_OBJECT] = "/static/img/icons/vehicle_object_severe.png";
+ICONS[SEVERITY_LIGHT][ACCIDENT_TYPE_CAR_TO_OBJECT] = "/static/img/icons/vehicle_object_medium.png";
 
 var MULTIPLE_ICONS = {};
-MULTIPLE_ICONS[SEVERITY_FATAL] = "/static/img/icons/multiple_lethal.png"
-MULTIPLE_ICONS[SEVERITY_SEVERE] = "/static/img/icons/multiple_severe.png"
-MULTIPLE_ICONS[SEVERITY_LIGHT] = "/static/img/icons/multiple_medium.png"
-MULTIPLE_ICONS[SEVERITY_VARIOUS] = "/static/img/icons/multiple_various.png"
+MULTIPLE_ICONS[SEVERITY_FATAL] = "/static/img/icons/multiple_lethal.png";
+MULTIPLE_ICONS[SEVERITY_SEVERE] = "/static/img/icons/multiple_severe.png";
+MULTIPLE_ICONS[SEVERITY_LIGHT] = "/static/img/icons/multiple_medium.png";
+MULTIPLE_ICONS[SEVERITY_VARIOUS] = "/static/img/icons/multiple_various.png";
 
 var ACCIDENT_MINOR_TYPE_TO_TYPE = { };
 ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_CAR_TO_PEDESTRIAN]=ACCIDENT_TYPE_CAR_TO_PEDESTRIAN;
@@ -96,7 +96,7 @@ var TYPE_STRING = [
 var TYPES_MAP = {};
 TYPES_MAP['Accident'] = TYPE_STRING[1];
 
-var SEVERITY_MAP = {}
+var SEVERITY_MAP = {};
 SEVERITY_MAP[SEVERITY_FATAL] = 'קטלנית';
 SEVERITY_MAP[SEVERITY_SEVERE] = 'קשה';
 SEVERITY_MAP[SEVERITY_LIGHT] = 'קלה';
@@ -382,6 +382,20 @@ $(function() {
                 }.bind(this)
             );
             this.$el.find("input.date-range").data("daterangepicker").notify();
+
+            $(document).ajaxStart(function() {
+                this.spinner = $('<li/>');
+                this.spinner.height('20px');
+                this.sidebar.$currentViewList.prepend(this.spinner);
+                this.spinner.spin();
+            }.bind(this))
+
+            $(document).ajaxStop(function() {
+                if (this.spinner) {
+                    this.spinner.spin(false);
+                }
+            }.bind(this))
+
             this.router = new AppRouter();
             Backbone.history.start({pushState: true});
             setTimeout(function(){

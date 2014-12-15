@@ -128,8 +128,7 @@ $(function() {
         routes: {
             "" : "navigateEmpty",
 //             ":id" : "navigate",
-            "/?marker=:id&start_date=:start&end_date=:end" +
-            "&inaccurate=:showInaccurate" : "navigate"
+            "/?marker=:id&start_date=:start&end_date=:end&inaccurate=:showInaccurate" : "navigate"
         },
         navigate: function(id, start, end, showInaccurate) {
             // console.log('navigate to ', id);
@@ -217,7 +216,6 @@ $(function() {
             if (zoom < MINIMAL_ZOOM || !bounds) {
                 return null;
             }
-            var dateRange = this.model.get("dateRange");
 
             var params = {};
             params["ne_lat"] = bounds.getNorthEast().lat();
@@ -226,8 +224,10 @@ $(function() {
             params["sw_lng"] = bounds.getSouthWest().lng();
             params["zoom"] = zoom;
             // Pass start and end dates as unix time (in seconds)
-            params["start_date"] = dateRange[0].getTime() / 1000;
-            params["end_date"] = dateRange[1].getTime() / 1000;
+            if (this.model.get("dateRange")) {
+                params["start_date"] = this.model.get("dateRange")[0].getTime() / 1000;
+                params["end_date"] = this.model.get("dateRange")[1].getTime() / 1000;
+            }
             return params;
         },
         setMultipleMarkersIcon: function() {

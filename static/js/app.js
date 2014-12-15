@@ -128,13 +128,13 @@ $(function() {
         routes: {
             "" : "navigateEmpty",
 //             ":id" : "navigate",
-            "/?marker=:id&start_date=:start&end_date=:end&inaccurate=:showInaccurate" : "navigate"
+            "/?marker=:id&start_date=:start&end_date=:end&show_inaccurate=:showInaccurate" : "navigate"
         },
         navigate: function(id, start, end, showInaccurate) {
             // console.log('navigate to ', id);
             app.model.set("currentMarker", parseInt(id));
             app.model.set("dateRange", [new Date(start), new Date(end)]);
-            app.model.set("showInaccurate", parseInt(showInaccurate));
+            app.model.set("showInaccurateMarkers", showInaccurate);
         },
         navigateEmpty: function() {
             app.model.set("currentMarker", null);
@@ -289,10 +289,6 @@ $(function() {
                 }.bind(this));
             }
 
-            // Set Show Inaccurate
-            this.model.set("showInaccurateMarkers", SHOW_INACCURATE);
-            
-
             // search box:
             // Create the search box and link it to the UI element.
             var input = document.getElementById('pac-input');
@@ -399,6 +395,9 @@ $(function() {
                     this.spinner.spin(false);
                 }
             }.bind(this))
+
+            // Set Show Inaccurate
+            this.model.set("showInaccurateMarkers", SHOW_INACCURATE);
 
             this.router = new AppRouter();
             Backbone.history.start({pushState: true});

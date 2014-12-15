@@ -48,8 +48,6 @@ var SidebarView = Backbone.View.extend({
                 var checkboxImg = $("img", this);
                 checkboxImg.data("checked", !checkboxImg.data("checked"));
                 self.updateCheckboxIcon(checkboxImg);
-
-
                 self.updateShowByAccuracy();
             });
         return this;

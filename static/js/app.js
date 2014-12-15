@@ -128,12 +128,14 @@ $(function() {
         routes: {
             "" : "navigateEmpty",
 //             ":id" : "navigate",
-            "/?marker=:id&start_date=:start&end_date=:end" : "navigate"
+            "/?marker=:id&start_date=:start&end_date=:end" +
+            "&inaccurate=:showInaccurate" : "navigate"
         },
-        navigate: function(id, start, end) {
+        navigate: function(id, start, end, showInaccurate) {
             // console.log('navigate to ', id);
             app.model.set("currentMarker", parseInt(id));
             app.model.set("dateRange", [new Date(start), new Date(end)]);
+            app.model.set("showInaccurate", parseInt(showInaccurate));
         },
         navigateEmpty: function() {
             app.model.set("currentMarker", null);
@@ -287,7 +289,9 @@ $(function() {
                 }.bind(this));
             }
 
-            //this.map=init_map;
+            // Set Show Inaccurate
+            this.model.set("showInaccurateMarkers", SHOW_INACCURATE);
+            
 
             // search box:
             // Create the search box and link it to the UI element.

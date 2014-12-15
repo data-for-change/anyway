@@ -254,6 +254,12 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
             END_DATE = null;
             {% endif %}
 
+            {% if show_inaccurate %}
+            SHOW_INACCURATE = Boolean({{show_inaccurate}});
+            {% else %}
+            SHOW_INACCURATE = false;
+            {% endif %}
+
             {% if marker %}
             MARKER_ID = {{marker}};
             {% else %}

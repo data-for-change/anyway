@@ -18,6 +18,7 @@ var SidebarView = Backbone.View.extend({
 
     },
     render: function() {
+
         this.$el.append($("#sidebar-template").html());
         this.$currentViewList = this.$el.find(".current-view");
         var self = this;
@@ -88,6 +89,8 @@ var SidebarView = Backbone.View.extend({
         }
 
         this.$currentViewList.empty().append($viewList.find("li"));
+
+        this.$el.find(".sidebar-title-list").text("תאונות המוצגות על המפה " + markersList.length + ":");
 
     },
     updateCheckboxIcon: function(img, hover) {

@@ -131,10 +131,10 @@ $(function() {
             "/?marker=:id&start_date=:start&end_date=:end&show_inaccurate=:showInaccurate" : "navigate"
         },
         navigate: function(id, start, end, showInaccurate) {
-            // console.log('navigate to ', id);
+            console.log('navigate to ', id);
             app.model.set("currentMarker", parseInt(id));
             app.model.set("dateRange", [new Date(start), new Date(end)]);
-            app.model.set("showInaccurateMarkers", showInaccurate);
+            app.model.set("showInaccurateMarkers", showInaccurate != 0);
         },
         navigateEmpty: function() {
             app.model.set("currentMarker", null);
@@ -216,6 +216,7 @@ $(function() {
             if (zoom < MINIMAL_ZOOM || !bounds) {
                 return null;
             }
+            var dateRange = this.model.get("dateRange");
 
             var params = {};
             params["ne_lat"] = bounds.getNorthEast().lat();
@@ -224,10 +225,8 @@ $(function() {
             params["sw_lng"] = bounds.getSouthWest().lng();
             params["zoom"] = zoom;
             // Pass start and end dates as unix time (in seconds)
-            if (this.model.get("dateRange")) {
-                params["start_date"] = this.model.get("dateRange")[0].getTime() / 1000;
-                params["end_date"] = this.model.get("dateRange")[1].getTime() / 1000;
-            }
+            params["start_date"] = dateRange[0].getTime() / 1000;
+            params["end_date"] = dateRange[1].getTime() / 1000;
             return params;
         },
         setMultipleMarkersIcon: function() {
@@ -396,9 +395,6 @@ $(function() {
                 }
             }.bind(this))
 
-            // Set Show Inaccurate
-            this.model.set("showInaccurateMarkers", SHOW_INACCURATE);
-
             this.router = new AppRouter();
             Backbone.history.start({pushState: true});
             setTimeout(function(){
@@ -435,7 +431,12 @@ $(function() {
                 return;
             }
 
-            if (!this.model.get("showInaccurateMarkers") && model.get("locationAccuracy") != 1) {
+            var showInaccurate = this.model.get("showInaccurateMarkers");
+            if (typeof showInaccurate == 'undefined') {
+                this.model.set("showInaccurateMarkers", SHOW_INACCURATE);
+                showInaccurate = SHOW_INACCURATE;
+            }
+            if (!showInaccurate && model.get("locationAccuracy") != 1) {
                 console.log("skipping marker because location is not accurate");
                 return;
             }

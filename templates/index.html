@@ -255,9 +255,9 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
             {% endif %}
 
             {% if show_inaccurate %}
-            SHOW_INACCURATE = Boolean({{show_inaccurate}});
+            SHOW_INACCURATE = {{show_inaccurate}};
             {% else %}
-            SHOW_INACCURATE = false;
+            SHOW_INACCURATE = 0;
             {% endif %}
 
             {% if marker %}

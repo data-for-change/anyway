@@ -90,7 +90,7 @@ var SidebarView = Backbone.View.extend({
 
         this.$currentViewList.empty().append($viewList.find("li"));
 
-        this.$el.find(".current-view-title").text("תאונות המוצגות על המפה (" + markersList.length + "):");
+        this.$el.find(".current-view-count").text(markersList.length);
 
     },
     updateCheckboxIcon: function(img, hover) {

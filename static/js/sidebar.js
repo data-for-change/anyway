@@ -69,6 +69,7 @@ var SidebarView = Backbone.View.extend({
 
 
         var $viewList = $('<ul/>');
+        var markerCount = 0;
 
         for (var i = 0; i < markersList.length; i++) {
             var markerView = markersList[i];
@@ -87,12 +88,13 @@ var SidebarView = Backbone.View.extend({
                 $entry.data("marker", marker);
 
                 $viewList.append($entry);
+                markerCount++;
             }
         }
 
         this.$currentViewList.empty().append($viewList.find("li"));
 
-        this.$el.find(".current-view-count").text(markersList.length);
+        this.$el.find(".current-view-count").text(markerCount);
 
     },
     updateCheckboxIcon: function(img, hover) {

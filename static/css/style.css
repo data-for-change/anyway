@@ -59,13 +59,6 @@ div.gm-style {
 	font-weight: bold;
 }
 
-.sidebar-title-title {
-	padding: 5px;
-	border-bottom: 1px solid #ddd;
-	background: #eee;
-	font-weight: bold;
-}
-
 .sidebar-container input[type=checkbox] {
 	margin-top: 0;
 }

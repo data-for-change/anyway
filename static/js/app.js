@@ -10,6 +10,11 @@ var SEVERITY_SEVERE = 2;
 var SEVERITY_LIGHT = 3;
 var SEVERITY_VARIOUS = 4;
 
+var SEVERITY_ATTRIBUTES = {};
+SEVERITY_ATTRIBUTES[SEVERITY_FATAL] = "showFatal";
+SEVERITY_ATTRIBUTES[SEVERITY_SEVERE] = "showSevere";
+SEVERITY_ATTRIBUTES[SEVERITY_LIGHT] = "showLight";
+
 var ACCIDENT_TYPE_CAR_TO_CAR =-1; // Synthetic type
 var ACCIDENT_TYPE_CAR_TO_OBJECT = -2; // Synthetic type
 var ACCIDENT_TYPE_CAR_TO_PEDESTRIAN = 1;
@@ -128,12 +133,15 @@ $(function() {
         routes: {
             "" : "navigateEmpty",
 //             ":id" : "navigate",
-            "/?marker=:id&start_date=:start&end_date=:end&show_inaccurate=:showInaccurate" : "navigate"
+            "/?marker=:id&start_date=:start&end_date=:end&show_fatal=:showFatal&show_severe=:showSevere&show_light=:showLight&show_inaccurate=:showInaccurate" : "navigate"
         },
-        navigate: function(id, start, end, showInaccurate) {
+        navigate: function(id, start, end, showFatal, showSevere, showLight, showInaccurate) {
             console.log('navigate to ', id);
             app.model.set("currentMarker", parseInt(id));
             app.model.set("dateRange", [new Date(start), new Date(end)]);
+            app.model.set("showFatal", showFatal);
+            app.model.set("showSevere", showSevere);
+            app.model.set("showLight", showLight);
             app.model.set("showInaccurateMarkers", showInaccurate != 0);
         },
         navigateEmpty: function() {
@@ -164,21 +172,29 @@ $(function() {
             this.model = new Backbone.Model();
             this.markerList = [];
 
-            this.markers.bind("reset", this.loadMarkers, this);
-            this.markers.bind("destroy", this.loadMarkers, this);
-            this.markers.bind("add", this.loadMarker, this);
-            this.markers.bind("change:currentModel", this.chooseMarker, this);
+            this.markers
+                .bind("reset", this.loadMarkers, this)
+                .bind("destroy", this.loadMarkers, this)
+                .bind("add", this.loadMarker, this)
+                .bind("change:currentModel", this.chooseMarker, this);
             //this.markers.bind("change", this.loadMarker, this);
-            this.model.bind("change:user", this.updateUser, this);
-            this.model.bind("change:layers", this.loadMarkers, this);
-            this.model.bind("change:showInaccurateMarkers", this.reloadMarkersIfNeeded, this);
-            this.model.bind("change:dateRange", this.reloadMarkers, this);
+            this.model
+                .bind("change:user", this.updateUser, this)
+                .bind("change:showFatal",
+                    _.bind(this.reloadMarkersIfNeeded, this, "showFatal"))
+                .bind("change:showSevere",
+                    _.bind(this.reloadMarkersIfNeeded, this, "showSevere"))
+                .bind("change:showLight",
+                    _.bind(this.reloadMarkersIfNeeded, this, "showLight"))
+                .bind("change:showInaccurateMarkers",
+                    _.bind(this.reloadMarkersIfNeeded, this, "showInaccurateMarkers"))
+                .bind("change:dateRange", this.reloadMarkers, this);
             this.login();
 
 
         },
-        reloadMarkersIfNeeded: function() {
-            if (this.model.get("showInaccurateMarkers")) {
+        reloadMarkersIfNeeded: function(attr) {
+            if (this.model.get(attr)) {
                 this.reloadMarkers();
             } else {
                 this.loadMarkers();
@@ -434,7 +450,14 @@ $(function() {
 
             // console.log("loading marker", ICONS[model.get("type")]);
             // markers are loaded immediately as they are fetched
-            if (this.model.get("layers") && !this.model.get("layers")[model.get("severity")]) {
+            var severity = model.get("severity");
+            var attr = SEVERITY_ATTRIBUTES[severity];
+            var layer = this.model.get(attr);
+            if (typeof layer == 'undefined') {
+                this.model.set(attr, LAYERS[severity]);
+                layer = LAYERS[severity];
+            }
+            if (!layer) {
                 console.log("skipping marker because the layer is not chosen");
                 return;
             }
@@ -489,6 +512,7 @@ $(function() {
 
             var currentMarker = this.model.get("currentMarker");
             if (!this.markers.get(currentMarker)) {
+                Backbone.history.navigate("/", true);
                 return;
             }
             var markerView = this.markerList[this.markers.get(currentMarker).get("markerView")];

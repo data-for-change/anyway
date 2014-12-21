@@ -26,6 +26,12 @@ var SidebarView = Backbone.View.extend({
         this.$el.find("img.checkbox-accuracy")
             .data("checked", SHOW_INACCURATE);
 
+        this.$el.find("img.checkbox-severity")
+            .each(function() {
+                    $(this).data("checked", LAYERS[$(this).data("type")]);
+                }
+            );
+
         this.$el.find("img.checkbox-severity, img.checkbox-accuracy")
             .each(function() {
                 self.updateCheckboxIcon($(this));
@@ -109,11 +115,10 @@ var SidebarView = Backbone.View.extend({
         img.attr("src", icon);
     },
     updateLayers: function() {
-        var layers = [];
         this.$el.find("img.checkbox-severity").each(function() {
-            layers[parseInt($(this).data("type"))] = $(this).data("checked");
+            attr = SEVERITY_ATTRIBUTES[parseInt($(this).data("type"))];
+            app.model.set(attr, $(this).data("checked"));
         });
-        app.model.set("layers", layers);
     },
     clickEntry: function(e) {
         var marker = $(e.target).data("marker") || $(e.target).parents("li").data("marker");

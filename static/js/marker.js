@@ -77,7 +77,16 @@ var MarkerView = Backbone.View.extend({
         }
         new google.maps.event.trigger(this.marker, "click");
     },
-    clickMarker : function() {
+    getUrl: function () {
+        var dateRange = app.model.get("dateRange");
+        return "/?marker=" + this.model.get("id") +
+            "&start_date=" + moment(dateRange[0]).format("YYYY-MM-DD") +
+            "&end_date=" + moment(dateRange[1]).format("YYYY-MM-DD") +
+            "&show_fatal=" + (app.model.get("showFatal") ? 1 : 0) +
+            "&show_severe=" + (app.model.get("showSevere") ? 1 : 0) +
+            "&show_light=" + (app.model.get("showLight") ? 1 : 0) +
+            "&show_inaccurate=" + (app.model.get("showInaccurateMarkers") ? 1 : 0);
+    }, clickMarker : function() {
         app.closeInfoWindow();
 
         app.infoWindow = new google.maps.InfoWindow({
@@ -85,13 +94,7 @@ var MarkerView = Backbone.View.extend({
         });
 
         app.infoWindow.open(this.map, this.marker);
-        var dateRange = app.model.get("dateRange");
-        var showInaccurate = app.model.get("showInaccurateMarkers") ? 1 : 0;
-        Backbone.history.navigate("/?marker=" + this.model.get("id") +
-            "&start_date=" + moment(dateRange[0]).format("YYYY-MM-DD") +
-            "&end_date=" + moment(dateRange[1]).format("YYYY-MM-DD") +
-            "&show_inaccurate=" + showInaccurate,
-            true);
+        Backbone.history.navigate(this.getUrl(), true);
 
         google.maps.event.addListener(app.infoWindow,"closeclick",function(){
             Backbone.history.navigate("/", true);

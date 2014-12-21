@@ -195,8 +195,9 @@ def main(marker_id):
         context['end_date'] = string2timestamp(request.values['end_date'])
     elif marker:
         context['end_date'] = year2timestamp(marker.created.year + 1)
-    if 'show_inaccurate' in request.values:
-        context['show_inaccurate'] = request.values['show_inaccurate']
+    for attr in 'show_fatal', 'show_severe', 'show_light', 'show_inaccurate':
+        if attr in request.values:
+            context[attr] = request.values[attr]
     return render_template('index.html', **context)
 
 def string2timestamp(s):

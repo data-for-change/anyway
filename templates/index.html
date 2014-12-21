@@ -260,6 +260,26 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
             SHOW_INACCURATE = 0;
             {% endif %}
 
+            LAYERS = [];
+
+            {% if show_fatal %}
+            LAYERS[SEVERITY_FATAL] = {{show_fatal}};
+            {% else %}
+            LAYERS[SEVERITY_FATAL] = 1;
+            {% endif %}
+
+            {% if show_severe %}
+            LAYERS[SEVERITY_SEVERE] = {{show_severe}};
+            {% else %}
+            LAYERS[SEVERITY_SEVERE] = 1;
+            {% endif %}
+
+            {% if show_light %}
+            LAYERS[SEVERITY_LIGHT] = {{show_light}};
+            {% else %}
+            LAYERS[SEVERITY_LIGHT] = 1;
+            {% endif %}
+
             {% if marker %}
             MARKER_ID = {{marker}};
             {% else %}

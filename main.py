@@ -51,6 +51,9 @@ def markers(methods=["GET", "POST"]):
         zoom = int(request.values['zoom'])
         start_date = datetime.date.fromtimestamp(int(request.values['start_date']))
         end_date = datetime.date.fromtimestamp(int(request.values['end_date']))
+        fatal = request.values['show_fatal']
+        severe = request.values['show_severe']
+        light = request.values['show_light']
         inaccurate = request.values['show_inaccurate']
         min_zoom_level = 16
         if zoom < min_zoom_level:
@@ -65,7 +68,8 @@ def markers(methods=["GET", "POST"]):
             print ""
             logging.debug('querying markers in bounding box')
             results = Marker.bounding_box_fetch(ne_lat, ne_lng, sw_lat, sw_lng,
-                                                start_date, end_date, inaccurate)
+                                                start_date, end_date,
+                                                fatal, severe, light, inaccurate)
             logging.debug('serializing markers')
             markers = [marker.serialize() for marker in results.all()]
 

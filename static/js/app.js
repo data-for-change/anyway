@@ -250,6 +250,11 @@ $(function() {
             // Pass start and end dates as unix time (in seconds)
             params["start_date"] = dateRange[0].getTime() / 1000;
             params["end_date"] = dateRange[1].getTime() / 1000;
+            this.initLayers("all");
+            params["show_fatal"] = this.model.get("showFatal");
+            params["show_severe"] = this.model.get("showSevere");
+            params["show_light"] = this.model.get("showLight");
+            this.initShowInaccurate();
             params["show_inaccurate"] = this.model.get("showInaccurateMarkers");
             return params;
         },
@@ -441,7 +446,29 @@ $(function() {
                 this.closeInfoWindow();
             }
         },
-        loadMarker : function(model) {
+        initShowInaccurate: function () {
+            var showInaccurate = this.model.get("showInaccurateMarkers");
+            if (typeof showInaccurate == 'undefined') {
+                this.model.set("showInaccurateMarkers", SHOW_INACCURATE);
+                showInaccurate = SHOW_INACCURATE;
+            }
+            return showInaccurate;
+        }, initLayers: function (severity) {
+            if (severity == "all") {
+                severities = [SEVERITY_FATAL, SEVERITY_SEVERE, SEVERITY_LIGHT];
+            } else {
+                severities = [severity];
+            }
+            for (var i = 0; i < severities.length; i++) {
+                var attr = SEVERITY_ATTRIBUTES[severities[i]];
+                var layer = this.model.get(attr);
+                if (typeof layer == 'undefined') {
+                    this.model.set(attr, LAYERS[severities[i]]);
+                    layer = LAYERS[severities[i]];
+                }
+            }
+            return layer;
+        }, loadMarker : function(model) {
             for (var i = 0; i < this.markerList.length; i++) {
                 if (this.markerList[i].model.attributes.id == model.attributes.id) {
                     return; // avoid adding duplicates
@@ -450,23 +477,13 @@ $(function() {
 
             // console.log("loading marker", ICONS[model.get("type")]);
             // markers are loaded immediately as they are fetched
-            var severity = model.get("severity");
-            var attr = SEVERITY_ATTRIBUTES[severity];
-            var layer = this.model.get(attr);
-            if (typeof layer == 'undefined') {
-                this.model.set(attr, LAYERS[severity]);
-                layer = LAYERS[severity];
-            }
+            var layer = this.initLayers(model.get("severity"));
             if (!layer) {
                 console.log("skipping marker because the layer is not chosen");
                 return;
             }
 
-            var showInaccurate = this.model.get("showInaccurateMarkers");
-            if (typeof showInaccurate == 'undefined') {
-                this.model.set("showInaccurateMarkers", SHOW_INACCURATE);
-                showInaccurate = SHOW_INACCURATE;
-            }
+            var showInaccurate = this.initShowInaccurate();
             if (!showInaccurate && model.get("locationAccuracy") != 1) {
                 console.log("skipping marker because location is not accurate");
                 return;

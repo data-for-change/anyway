@@ -127,7 +127,7 @@ class Marker(Base):
         self.put()
 
     @staticmethod
-    def bounding_box_fetch(ne_lat, ne_lng, sw_lat, sw_lng, start_date, end_date):
+    def bounding_box_fetch(ne_lat, ne_lng, sw_lat, sw_lng, start_date, end_date, inaccurate):
         # example:
         # ne_lat=32.36292402647484&ne_lng=35.08873443603511&sw_lat=32.29257266524761&sw_lng=34.88445739746089
         # >>>  m = Marker.bounding_box_fetch(32.36, 35.088, 32.292, 34.884)
@@ -142,6 +142,8 @@ class Marker(Base):
             .filter(Marker.created >= start_date) \
             .filter(Marker.created < end_date) \
             .order_by(desc(Marker.created))
+        if not inaccurate:
+            markers = markers.filter(Marker.locationAccuracy == 1)
         logging.debug('got %d markers from db' % markers.count())
         return markers
 

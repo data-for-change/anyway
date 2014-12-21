@@ -171,11 +171,18 @@ $(function() {
             //this.markers.bind("change", this.loadMarker, this);
             this.model.bind("change:user", this.updateUser, this);
             this.model.bind("change:layers", this.loadMarkers, this);
-            this.model.bind("change:showInaccurateMarkers", this.loadMarkers, this);
+            this.model.bind("change:showInaccurateMarkers", this.reloadMarkersIfNeeded, this);
             this.model.bind("change:dateRange", this.reloadMarkers, this);
             this.login();
 
 
+        },
+        reloadMarkersIfNeeded: function() {
+            if (this.model.get("showInaccurateMarkers")) {
+                this.reloadMarkers();
+            } else {
+                this.loadMarkers();
+            }
         },
         reloadMarkers: function() {
             this.clearMarkers();
@@ -227,6 +234,7 @@ $(function() {
             // Pass start and end dates as unix time (in seconds)
             params["start_date"] = dateRange[0].getTime() / 1000;
             params["end_date"] = dateRange[1].getTime() / 1000;
+            params["show_inaccurate"] = this.model.get("showInaccurateMarkers");
             return params;
         },
         setMultipleMarkersIcon: function() {

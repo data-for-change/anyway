@@ -86,9 +86,11 @@ var MarkerView = Backbone.View.extend({
 
         app.infoWindow.open(this.map, this.marker);
         var dateRange = app.model.get("dateRange");
+        var showInaccurate = app.model.get("showInaccurateMarkers") ? 1 : 0;
         Backbone.history.navigate("/?marker=" + this.model.get("id") +
             "&start_date=" + moment(dateRange[0]).format("YYYY-MM-DD") +
-            "&end_date=" + moment(dateRange[1]).format("YYYY-MM-DD"),
+            "&end_date=" + moment(dateRange[1]).format("YYYY-MM-DD") +
+            "&show_inaccurate=" + showInaccurate,
             true);
 
         google.maps.event.addListener(app.infoWindow,"closeclick",function(){

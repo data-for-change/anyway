@@ -23,6 +23,9 @@ var SidebarView = Backbone.View.extend({
         this.$currentViewList = this.$el.find(".current-view");
         var self = this;
 
+        this.$el.find("img.checkbox-accuracy")
+            .data("checked", SHOW_INACCURATE);
+
         this.$el.find("img.checkbox-severity, img.checkbox-accuracy")
             .each(function() {
                 self.updateCheckboxIcon($(this));
@@ -48,10 +51,9 @@ var SidebarView = Backbone.View.extend({
                 var checkboxImg = $("img", this);
                 checkboxImg.data("checked", !checkboxImg.data("checked"));
                 self.updateCheckboxIcon(checkboxImg);
-
-
                 self.updateShowByAccuracy();
             });
+
         return this;
     },
     updateMarkerList: function(markersList) {

@@ -128,12 +128,13 @@ $(function() {
         routes: {
             "" : "navigateEmpty",
 //             ":id" : "navigate",
-            "/?marker=:id&start_date=:start&end_date=:end" : "navigate"
+            "/?marker=:id&start_date=:start&end_date=:end&show_inaccurate=:showInaccurate" : "navigate"
         },
-        navigate: function(id, start, end) {
-            // console.log('navigate to ', id);
+        navigate: function(id, start, end, showInaccurate) {
+            console.log('navigate to ', id);
             app.model.set("currentMarker", parseInt(id));
             app.model.set("dateRange", [new Date(start), new Date(end)]);
+            app.model.set("showInaccurateMarkers", showInaccurate != 0);
         },
         navigateEmpty: function() {
             app.model.set("currentMarker", null);
@@ -287,8 +288,6 @@ $(function() {
                 }.bind(this));
             }
 
-            //this.map=init_map;
-
             // search box:
             // Create the search box and link it to the UI element.
             var input = document.getElementById('pac-input');
@@ -432,7 +431,12 @@ $(function() {
                 return;
             }
 
-            if (!this.model.get("showInaccurateMarkers") && model.get("locationAccuracy") != 1) {
+            var showInaccurate = this.model.get("showInaccurateMarkers");
+            if (typeof showInaccurate == 'undefined') {
+                this.model.set("showInaccurateMarkers", SHOW_INACCURATE);
+                showInaccurate = SHOW_INACCURATE;
+            }
+            if (!showInaccurate && model.get("locationAccuracy") != 1) {
                 console.log("skipping marker because location is not accurate");
                 return;
             }

@@ -79,6 +79,8 @@ var MarkerView = Backbone.View.extend({
     },
     getUrl: function () {
         var dateRange = app.model.get("dateRange");
+        var center = app.map.getCenter();
+        console.log(center);
         return "/?marker=" + this.model.get("id") +
             "&start_date=" + moment(dateRange[0]).format("YYYY-MM-DD") +
             "&end_date=" + moment(dateRange[1]).format("YYYY-MM-DD") +
@@ -86,7 +88,7 @@ var MarkerView = Backbone.View.extend({
             "&show_severe=" + (app.model.get("showSevere") ? 1 : 0) +
             "&show_light=" + (app.model.get("showLight") ? 1 : 0) +
             "&show_inaccurate=" + (app.model.get("showInaccurateMarkers") ? 1 : 0) +
-            "&zoom=" + app.map.zoom;
+            "&zoom=" + app.map.zoom + "&lat=" + center.lat() + "&lon=" + center.lng();
     }, clickMarker : function() {
         app.closeInfoWindow();
 

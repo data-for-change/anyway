@@ -286,6 +286,18 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
             INIT_ZOOM = 17;
             {% endif %}
 
+            {% if lat %}
+            INIT_LAT = {{lat}};
+            {% else %}
+            INIT_LAT = 32.0833;
+            {% endif %}
+
+            {% if lon %}
+            INIT_LON = {{lon}};
+            {% else %}
+            INIT_LON = 34.8000;
+            {% endif %}
+
             {% if marker %}
             MARKER_ID = {{marker}};
             {% else %}

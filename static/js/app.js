@@ -1,7 +1,5 @@
 var ADD_MARKER_OFFER = "הוסף הצעה";
 var ADD_MARKER_PETITION = "הוסף עצומה";
-var INIT_LAT = 32.0833;
-var INIT_LON = 34.8000;
 
 
 var SEVERITY_FATAL = 1;
@@ -132,9 +130,9 @@ $(function() {
         routes: {
             "" : "navigateEmpty",
 //             ":id" : "navigate",
-            "/?marker=:id&start_date=:start&end_date=:end&show_fatal=:showFatal&show_severe=:showSevere&show_light=:showLight&show_inaccurate=:showInaccurate" : "navigate"
+            "/?marker=:id&start_date=:start&end_date=:end&show_fatal=:showFatal&show_severe=:showSevere&show_light=:showLight&show_inaccurate=:showInaccurate&zoom=:zoom&lat=:lat&lon=:lon" : "navigate"
         },
-        navigate: function(id, start, end, showFatal, showSevere, showLight, showInaccurate) {
+        navigate: function(id, start, end, showFatal, showSevere, showLight, showInaccurate, zoom, lat, lon) {
             console.log('navigate to ', id);
             app.model.set("currentMarker", parseInt(id));
             app.model.set("dateRange", [new Date(start), new Date(end)]);
@@ -142,6 +140,8 @@ $(function() {
             app.model.set("showSevere", showSevere);
             app.model.set("showLight", showLight);
             app.model.set("showInaccurateMarkers", showInaccurate != 0);
+            app.map.setZoom(zoom);
+            app.map.setCenter(new google.maps.LatLng(lat, lon));
         },
         navigateEmpty: function() {
             app.model.set("currentMarker", null);

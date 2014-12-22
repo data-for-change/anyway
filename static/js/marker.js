@@ -85,7 +85,8 @@ var MarkerView = Backbone.View.extend({
             "&show_fatal=" + (app.model.get("showFatal") ? 1 : 0) +
             "&show_severe=" + (app.model.get("showSevere") ? 1 : 0) +
             "&show_light=" + (app.model.get("showLight") ? 1 : 0) +
-            "&show_inaccurate=" + (app.model.get("showInaccurateMarkers") ? 1 : 0);
+            "&show_inaccurate=" + (app.model.get("showInaccurateMarkers") ? 1 : 0) +
+            "&zoom=" + app.map.zoom;
     }, clickMarker : function() {
         app.closeInfoWindow();
 

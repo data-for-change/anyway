@@ -199,7 +199,8 @@ def main(marker_id):
         context['end_date'] = string2timestamp(request.values['end_date'])
     elif marker:
         context['end_date'] = year2timestamp(marker.created.year + 1)
-    for attr in 'show_fatal', 'show_severe', 'show_light', 'show_inaccurate':
+    for attr in 'show_fatal', 'show_severe', 'show_light', 'show_inaccurate',\
+                'zoom':
         if attr in request.values:
             context[attr] = request.values[attr]
     return render_template('index.html', **context)

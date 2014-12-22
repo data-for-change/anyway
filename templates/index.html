@@ -280,6 +280,12 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
             LAYERS[SEVERITY_LIGHT] = 1;
             {% endif %}
 
+            {% if zoom %}
+            INIT_ZOOM = {{zoom}};
+            {% else %}
+            INIT_ZOOM = 17;
+            {% endif %}
+
             {% if marker %}
             MARKER_ID = {{marker}};
             {% else %}

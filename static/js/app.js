@@ -2,7 +2,6 @@ var ADD_MARKER_OFFER = "הוסף הצעה";
 var ADD_MARKER_PETITION = "הוסף עצומה";
 var INIT_LAT = 32.0833;
 var INIT_LON = 34.8000;
-var INIT_ZOOM = 17;
 
 
 var SEVERITY_FATAL = 1;

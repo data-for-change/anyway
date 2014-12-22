@@ -10,9 +10,6 @@ input, button, select, textarea {
     font-family: 'Alef', 'sans-serif';
 }
 
-div.gm-style {
-    font-family: 'Alef', 'sans-serif';
-}
 
 .context-menu {
 	position: absolute;
@@ -115,114 +112,101 @@ div.gm-style {
 
       .pac-container {
       }
-
       
-      		#marker-content-template h1,h2,h3,h4,h5 {
-			margin-right:10px;
-		}
-	.gm-style-iw {
+      .gm-style-iw{
+      width:300px;
+          position:absolute;
+      
+      
+      }
+div.gm-style {
+    font-family: 'Alef', 'sans-serif';
+}
 
-	min-height: 500px;
-	min-width: 400px;
+ 	#marker-content-template h1,h2,h3,h4,h5 {
+		margin-right:10px;
+	}
+	
 
+ .headerPart{
+ 
+	    width:100%;
+	
+	    background-color:white;
+	    line-height:1.8;
+	
+	   
+	}
+ .headerPart .added-by{
+		position:relative;
+	    float:left;
+	    top:-35px;
+	    margin-left:8px;
+	   
+	}
+	 .headerPart .profile-image{
+	float: left;
+	height:30px;
+	z-index:0;
+	margin-left:21px;
+	 
+	}
+	
+.headerPart .title{
+	     font-size:16px;
+	     position:relative;
+	     display:inline;
+	}
+	
+ .whatHappend{
+		padding-top:8px;
+		 font-size:16px;
+		position:relative;
+		margin-top:0px;
+	
+	}
+ .rodeConddition{
+	font-size:16px;
+	
+	 }
+	.headerPart .creation-date{
+	display: block; 
+	margin:0;
+	padding-right:10px;
+	
+	}
+	
+	 .headerPart p,.type,.description{
+	    color:#ADADAD;
+	    font-size:12px;
+	    display:inline;
+	}
+	
 
-		}
-		#marker-content-template {
-			margin: 0 0 0 0;
-			padding:0 0 0 0;
-			min-height:400px;
-			direction:rtl;
-		  display: flex;
-		flex-flow: row wrap;
-		align-content:center;
-			  display: flex;
-		flex-flow: row wrap;
-		align-content:center;
-
-		}
-
-		.headerPart{
-			background-color:white;
-		 margin-bottom:10px;
-
-
-		}
-		.headerPart .added-by{
-			position:relative;
-			float:left;
-			margin-left:8px;
-			top:-40px;
-
-
-		}
-		.headerPart .profile-image{
-		float: left;
-		height:30px;
-		z-index:0;
-		margin-left:21px;
-
-		}
-
-		.headerPart .title{
-			 font-size:16px;
-			 position:relative;
-			 display:inline;
-		}
-
-		.whatHappend{
-			padding-top:8px;
-			 font-size:16px;
-			margin-top:0px;
-
-		}
-		.rodeConddition{
-		font-size:16px;
-		padding-top: 8px;
-		margin-top: 0;
-
-		 }
-		.headerPart .creation-date{
-		display: block;
-		margin:0;
-		padding-right:10px;
-
-		}
-
-		.headerPart p,.type,.description{
-			color:#767171;
-			font-size:13px;
-			padding:10px;
-		}
-
-
-
-		.descriptionPart{
-			width:100%;
-			line-height:1;
-		background-color:#D9D9D9;
-		border: 15px solid #D9D9D9;
-         outline: #D9D9D9 solid thick;
-         margin-bottom:10px;
-		}
-
-
-		.rodeStatusPart{
-			width:100%;
-			min-height:100px;
-			background-color:#F3F3F3;
-			border: 15px solid #F3F3F3;
-            outline: #F3F3F3 solid thick;
-            margin-bottom:10px;
-            margin-right:0px;
-
-
-		}
-		.moreInfoPart{
-			width:100%;
-			min-height:100px;
-			line-height:0.8;
-			background-color:#FFFFFF;
-
-
-		}
-		
+	
+	  .descriptionPart{
+	  
+	    width:100%;
+	   
+	    line-height:0.8;
+	    background-color:#D9D9D9;
+	    margin-bottom:3px;
+	    
+	}
+	
+	
+	 .rodeStatusPart{
+	    width:100%;
+	    
+	    background-color:#F3F3F3;
+	    margin-bottom:3px;
+	      
+	    
+	}
+	.moreInfoPart{
+		width:100%;
+	    line-height:0.8;
+	    background-color:#FFFFFF;
+	    
+	    
+	}		

@@ -91,7 +91,8 @@ var MarkerView = Backbone.View.extend({
         app.closeInfoWindow();
 
         app.infoWindow = new google.maps.InfoWindow({
-            content: this.el
+            content: this.el,
+            maxWidth: 100
         });
 
         app.infoWindow.open(this.map, this.marker);

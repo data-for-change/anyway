@@ -47,7 +47,7 @@ var MarkerView = Backbone.View.extend({
 		} else {
 			display_user = 'הלמס';
 		}
-		this.$el.find(".added-by").text("נוסף על ידי " + display_user);
+		this.$el.find(".added-by").text("מקור: " + display_user);
 		this.$followButton = this.$el.find(".follow-button");
 		this.$unfollowButton = this.$el.find(".unfollow-button");
 		this.$followerList = this.$el.find(".followers");
@@ -92,7 +92,7 @@ var MarkerView = Backbone.View.extend({
 
         app.infoWindow = new google.maps.InfoWindow({
             content: this.el,
-            maxWidth: 100
+            maxWidth: 400
         });
 
         app.infoWindow.open(this.map, this.marker);

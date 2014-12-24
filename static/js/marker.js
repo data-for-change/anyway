@@ -31,8 +31,8 @@ var MarkerView = Backbone.View.extend({
 
 		this.$el.html($("#marker-content-template").html());
 
-		this.$el.find(".headerPart .title").text(TYPES_MAP[this.model.get("title")]);
-		this.$el.find(".descriptionPart .description").text(this.model.get("description"));
+		this.$el.find(".header-part .title").text(TYPES_MAP[this.model.get("title")]);
+		this.$el.find(".description-part .description").text(this.model.get("description"));
 		this.$el.find(".creation-date").text(
                 moment(this.model.get("created")).format("LLLL"));
 		if (user) {

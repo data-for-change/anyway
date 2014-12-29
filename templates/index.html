@@ -234,6 +234,13 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
         {% endassets %}
 
         <script type="text/javascript">
+
+            {% if minimal_zoom %}
+            MINIMAL_ZOOM = {{minimal_zoom}};
+            {% else %}
+            MINIMAL_ZOOM = 16;
+            {% endif %}
+
             {% if coordinates %}
             MARKER_SPECIFIED = true;
             MARKER_LATITUDE = {{coordinates[0]}};

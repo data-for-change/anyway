@@ -33,6 +33,7 @@ jinja_environment = jinja2.Environment(
     extensions=[AssetsExtension])
 jinja_environment.assets_environment = assets_env
 
+MINIMAL_ZOOM = 13
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
@@ -55,8 +56,8 @@ def markers(methods=["GET", "POST"]):
         severe = request.values['show_severe']
         light = request.values['show_light']
         inaccurate = request.values['show_inaccurate']
-        min_zoom_level = 16
-        if zoom < min_zoom_level:
+
+        if zoom < MINIMAL_ZOOM:
             markers = []
         else:
             # query = Marker.all()
@@ -184,6 +185,7 @@ def main(marker_id):
     # LMS is in the description and needs to be promoted to a DB
     # field so we can query it. We also need to add a provider id.
     context = {}
+    context['minimal_zoom'] = MINIMAL_ZOOM
     marker = None
     if 'marker' in request.values:
         markers = Marker.get_marker(request.values['marker'])

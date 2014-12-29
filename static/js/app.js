@@ -231,7 +231,6 @@ $(function() {
             });
         },
         buildMarkersParams : function() {
-            var MINIMAL_ZOOM = 16;
             var bounds = this.map.getBounds();
             var zoom = this.map.zoom;
             // console.log('zoom is ' + zoom);

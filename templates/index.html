@@ -7,10 +7,10 @@
         {% assets filters="yui_css", output="css/app.min.css",
             "css/bootstrap.rtl.css",
             "css/style.css",
-            "css/daterangepicker.css" %}
-            <link rel="stylesheet" href="{{ ASSET_URL }}" />
+            "css/daterangepicker.css"
+        %}
+            <link rel="stylesheet" href="{{ ASSET_URL }}" >
         {% endassets %}
-
     </head>
     <body style="margin: 0; position: relative; width: 100%; height: 100%">
         <div class='notifications top-left' id="notification"></div>
@@ -136,25 +136,35 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
                 </div>
             </div>
         </div>
-        <div id="marker-content-template" style="display: none">
-            <img class="profile-image" style="float: left" />
-            <h4 class="title"></h4>
-            <h5 class="type"></h5>
-            <p class="added-by"></p>
-            <p class="creation-date"></p>
-            <p class="description"></p>
-            <!--h5>תומכים</h5-->
-            <!--p class="followers"></p-->
-            <div class="buttons" style="position: absolute; bottom: 0">
-                <!--
-            <button class="btn btn-success follow-button">תמוך בנקודה זו</button>
-            <button class="btn btn-danger unfollow-button" style="display: none">הפסק תמיכה</button>
-            <button class="btn btn-primary share-button">שתף</button>
-          -->
-                <button class="btn btn-danger delete-button" style="display: none">מחק</button>
-            </div>
+      
+	        <div id="marker-content-template"  style="display: none">
+	        	<div class="header-part">
+	            <img class="profile-image">
 
-        </div>
+	            <h4 class="title"></h4>
+	            <h5 class="type"></h5>
+	            <p class="creation-date"></p>
+	            <p class="added-by"></p>
+
+	            
+
+	            </div>
+
+
+	            <div class="description-part">
+	            <h5 class="what-happend">מה קרה</h5>
+	            <p class="description"> </p>
+	            </div>
+
+	            <div class="rode-statusPart">
+	            <h5 class="rode-conddition">תנאי הדרך</h5>
+	            </div>
+	            <div class="more-infoPart">
+	            	 <h5 class="rode-conddition">מידע נוסף</h5>
+
+	            </div>
+
+	        </div>
         <div id="list-entry" style="display: none">
             <li>
                 <a>
@@ -248,13 +258,11 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
             {% else %}
             MARKER_SPECIFIED = false;
             {% endif %}
-
             {% if start_date %}
             START_DATE = new Date({{start_date}}*1000);
             {% else %}
             START_DATE = null;
             {% endif %}
-
             {% if end_date %}
             END_DATE = new Date({{end_date}}*1000);
             {% else %}
@@ -311,7 +319,6 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
             MARKER_ID = null;
             {% endif %}
             moment.lang('he');
-
             window.fbAsyncInit = function() {
                 FB.init({
                     appId: '440070049429017', // App ID
@@ -349,7 +356,6 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
                 a.src = g;
                 m.parentNode.insertBefore(a, m)
             })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
-
             ga('create', 'UA-48606400-1', 'anyway.herokuapp.com');
             ga('send', 'pageview');
             console.log('get coordinates: {{ coordinates }}')

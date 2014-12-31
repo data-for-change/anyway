@@ -1,24 +1,20 @@
 body, html {
-    font-family: 'Alef', 'sans-serif';
-    position: relative;
-    height: 100%;
-    margin: 0;
-    padding: 0;
+	font-family: 'Alef', 'sans-serif';
+	position: relative;
+	height: 100%;
+	margin: 0;
+	padding: 0;
 }
 
 input, button, select, textarea {
-    font-family: 'Alef', 'sans-serif';
-}
-
-div.gm-style {
-    font-family: 'Alef', 'sans-serif';
+	font-family: 'Alef', 'sans-serif';
 }
 
 .context-menu {
 	position: absolute;
 	width: 150px;
 	background: white;
-	box-shadow: 0 0 10px rgba(0,0,0,0.5);
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 	margin: 0;
 	border: 0;
 	list-style: none;
@@ -42,6 +38,7 @@ div.gm-style {
 	margin: 0;
 	padding: 0;
 }
+
 .sidebar-container ul li {
 	padding: 5px;
 	border-bottom: 1px solid #eee;
@@ -68,12 +65,13 @@ div.gm-style {
 }
 /* Bootstrap Css Map Fix*/
 #map_canvas label {
-	width: auto; display:inline;
+	width: auto;
+	display: inline;
 }
 
 .info-window {
 	position: relative;
-  height: 100%;
+	height: 100%;
 }
 
 .followers {
@@ -86,32 +84,152 @@ div.gm-style {
 
 /* for search box: */
 .controls {
-        margin-top: 16px;
-        border: 1px solid transparent;
-        border-radius: 2px 0 0 2px;
-        box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        height: 32px;
-        outline: none;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-      }
+	margin-top: 16px;
+	border: 1px solid transparent;
+	border-radius: 2px 0 0 2px;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	height: 32px;
+	outline: none;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
 
-      #pac-input {
-        background-color: #fff;
-        padding: 0 11px 0 13px;
-        width: 400px;
-        height: 30px;
-        font-size: 15px;
-        font-weight: 400;
-        text-overflow: ellipsis;
-      }
+#pac-input {
+	background-color: #fff;
+	padding: 0 11px 0 13px;
+	width: 400px;
+	height: 30px;
+	font-size: 15px;
+	font-weight: 400;
+	text-overflow: ellipsis;
+}
 
-      #pac-input:focus {
-        border-color: #4d90fe;
-        margin-left: -1px;
-        padding-left: 14px;  /* Regular padding-left + 1. */
-        width: 401px;
-      }
+#pac-input:focus {
+	border-color: #4d90fe;
+	margin-left: -1px;
+	padding-left: 14px; /* Regular padding-left + 1. */
+	width: 401px;
+}
 
-      .pac-container {
-      }
+.pac-container {
+	
+}
+
+#marker-content-template h1, h2, h3, h4, h5 {
+	margin-right: 10px;
+}
+
+.gm-style-iw {
+	font-family: 'Alef', 'sans-serif';
+	min-height: 400px;
+	min-width: 250px;
+	right: 1px;
+	left: -10px;
+	overflow-y: auto;
+	direction: rtl;
+	overflow-x: hidden!important;;
+		
+}
+
+.gm-style-iw::-webkit-scrollbar {
+	width: 8px;
+	background-color: #F3F3F3;
+direction: ltr;
+      unicode-bidi:bidi-override;
+}
+
+.gm-style-iw::-webkit-scrollbar-thumb {
+	background-color: #408080;
+	border-radius: 10px;
+}
+
+.gm-style-iw::-webkit-scrollbar-track {
+	border: 1px gray solid;
+	border-radius: 10px;
+	-webkit-box-shadow: 0 0 6px gray inset;
+}
+
+#marker-content-template {
+	direction: rtl;
+	float: right;
+	display: flex;
+	align-content: right;
+	flex: 1 1 auto;
+}
+
+.header-part {
+	background-color: white;
+	margin-bottom: 25px;
+}
+
+.header-part .added-by {
+	position: relative;
+	float: left;
+	top: -40px;
+}
+
+.header-part .profile-image {
+	float: left;
+	height: 30px;
+	z-index: 0;
+	margin-left: 18px;
+}
+
+.header-part .title {
+	font-size: 16px;
+	position: relative;
+	display: inline;
+}
+
+.type {
+	font-size: 10px;
+	display: inline;
+	color: #767171;
+}
+
+.what-happend {
+	padding-top: 5px;
+	font-size: 16px;
+	margin-top: 0px;
+}
+
+.rode-conddition {
+	font-size: 16px;
+	padding-top: 8px;
+	margin-top: 0;
+}
+
+.header-part .creation-date {
+	display: block;
+	margin: 0;
+	width: 45%;
+}
+
+.header-part p, .description {
+	color: #767171;
+	font-size: 13px;
+	font-weight: 700;
+}
+
+.description-part {
+	
+	line-height: 1.2;
+	background-color: #D9D9D9;
+	border: 12px solid #D9D9D9;
+	outline: #D9D9D9 solid thick;
+	margin-bottom: 13px;
+}
+
+.rode-statusPart {
+	
+	background-color: #F3F3F3;
+	border: 12px solid #F3F3F3;
+	outline: #F3F3F3 solid thick;
+	margin-bottom: 10px;
+	margin-right: 0px;
+}
+
+.moreInfoPart {
+	
+	background-color: #FFFFFF;
+}

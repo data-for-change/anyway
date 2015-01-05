@@ -4,7 +4,7 @@ import json
 import logging
 
 from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, BigInteger, Index, desc
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, load_only
 from flask.ext.sqlalchemy import SQLAlchemy
 import datetime
 import localization
@@ -82,30 +82,33 @@ class Marker(Base):
         description = json.loads(msg, encoding=db_encoding)
         return "\n".join([self.format_description(field, value) for field, value in description.iteritems()])
 
-    def serialize(self, current_user=None):
-        val = self.id
-        return {
+    def serialize(self, is_thin=False):
+        fields = {
             "id": str(self.id),
-            "title": self.title,
-            "description": self.json_to_description(self.description),
-            "address": self.address,
             "latitude": self.latitude,
             "longitude": self.longitude,
-            "type": self.type,
-            "subtype": self.subtype,
             "severity": self.severity,
             "locationAccuracy": self.locationAccuracy,
-
-            # TODO: fix relationship
-            "user": self.user.serialize() if self.user else "",
-
-            # TODO: fix query
-            "followers": [],  # [x.user.serialize() for x in Follower.all().filter("marker", self).fetch(100)],
-
-            # TODO: fix query
-            "following": None,
             "created": self.created.isoformat(),
         }
+        if not is_thin:
+            fields.update({
+                "title": self.title,
+                "description": self.json_to_description(self.description),
+                "address": self.address,
+                "type": self.type,
+                "subtype": self.subtype,
+
+                # TODO: fix relationship
+                "user": self.user.serialize() if self.user else "",
+
+                # TODO: fix query
+                "followers": [],  # [x.user.serialize() for x in Follower.all().filter("marker", self).fetch(100)],
+
+                # TODO: fix query
+                "following": None,
+            })
+        return fields
 
     def update(self, data, current_user):
         self.title = data["title"]
@@ -127,13 +130,14 @@ class Marker(Base):
         self.put()
 
     @staticmethod
-    def bounding_box_fetch(ne_lat, ne_lng, sw_lat, sw_lng, start_date, end_date, fatal, severe, light, inaccurate):
+    def bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng, start_date, end_date,
+                           fatal, severe, light, inaccurate, is_thin=False):
         # example:
         # ne_lat=32.36292402647484&ne_lng=35.08873443603511&sw_lat=32.29257266524761&sw_lng=34.88445739746089
-        # >>>  m = Marker.bounding_box_fetch(32.36, 35.088, 32.292, 34.884)
+        # >>>  m = Marker.bounding_box_query(32.36, 35.088, 32.292, 34.884)
         # >>> m.count()
         # 250
-
+        accurate = not inaccurate
         markers = Marker.query \
             .filter(Marker.longitude <= ne_lng) \
             .filter(Marker.longitude >= sw_lng) \
@@ -142,7 +146,7 @@ class Marker(Base):
             .filter(Marker.created >= start_date) \
             .filter(Marker.created < end_date) \
             .order_by(desc(Marker.created))
-        if not inaccurate:
+        if accurate:
             markers = markers.filter(Marker.locationAccuracy == 1)
         if not fatal:
             markers = markers.filter(Marker.severity != 1)
@@ -151,6 +155,9 @@ class Marker(Base):
         if not light:
             markers = markers.filter(Marker.severity != 3)
         logging.debug('got %d markers from db' % markers.count())
+        if is_thin:
+            markers = markers.options(load_only("id", "longitude", "latitude",
+                                                "created", "severity", "locationAccuracy"))
         return markers
 
     @staticmethod

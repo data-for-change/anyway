@@ -203,36 +203,39 @@ $(function() {
         updateUrl: function() {
             Backbone.history.navigate("/?" + this.getCurrentUrlParams(), true);
         },
+        zoomChanged: function() {
+            var reset = this.map.zoom >= MINIMAL_ZOOM && this.previousZoom < MINIMAL_ZOOM;
+            if (reset) {
+                // zoomed back in from far away
+                this.resetMarkers();
+            }
+            this.fetchMarkers(reset);
+            this.previousZoom = this.map.zoom;
+        },
         reloadMarkers: function() {
-            this.clearMarkers();
+            this.clearMarkersFromMap();
             this.fetchMarkers();
         },
-        fetchMarkers : function() {
+        fetchMarkers : function(reset) {
             this.updateUrl();
             var params = this.buildMarkersParams();
-            if (!params) {
-                if (!$('.notifyjs-container').length) {
-                    // remove existing markers
-                    this.clearMarkers();
-                    this.sidebar.updateMarkerList(this.markerList);
-                    if (!MAP_ONLY) {
-                      // show message and abort
-                      $.notify("התקרב על מנת לראות ארועים");
-                    }
-                }
-                return;
-            } else {
-                $('.notifyjs-container').trigger('notify-hide');
-                if (!this.markerList.length) {
-                    this.loadMarkers();
-                }
+
+            if (!this.markerList.length) {
+                this.loadMarkers();
             }
 
             this.markers.fetch({
                 data : $.param(params),
+                reset: typeof reset !== 'undefined' && reset,
                 success: function() {
-                    this.setMultipleMarkersIcon();
-                    this.sidebar.updateMarkerList(this.markerList);
+                    var sidebarMarkers;
+                    if (this.map.zoom >= MINIMAL_ZOOM) { // close enough
+                        this.setMultipleMarkersIcon();
+                        sidebarMarkers = this.markerList;
+                    } else {
+                        sidebarMarkers = [];
+                    }
+                    this.sidebar.updateMarkerList(sidebarMarkers);
                     this.chooseMarker();
                 }.bind(this)
             });
@@ -240,10 +243,6 @@ $(function() {
         buildMarkersParams : function() {
             var bounds = this.map.getBounds();
             var zoom = this.map.zoom;
-            // console.log('zoom is ' + zoom);
-            if (zoom < MINIMAL_ZOOM || !bounds) {
-                return null;
-            }
             var dateRange = this.model.get("dateRange");
 
             var params = {};
@@ -252,6 +251,7 @@ $(function() {
             params["sw_lat"] = bounds.getSouthWest().lat();
             params["sw_lng"] = bounds.getSouthWest().lng();
             params["zoom"] = zoom;
+            params["thin_markers"] = (zoom < MINIMAL_ZOOM || !bounds);
             // Pass start and end dates as unix time (in seconds)
             params["start_date"] = dateRange[0].getTime() / 1000;
             params["end_date"] = dateRange[1].getTime() / 1000;
@@ -329,7 +329,7 @@ $(function() {
 
             google.maps.event.addListener( this.map, "rightclick", _.bind(this.contextMenuMap, this) );
             google.maps.event.addListener( this.map, "mouseup", _.bind(this.fetchMarkers, this) );
-            google.maps.event.addListener( this.map, "zoom_changed", _.bind(this.fetchMarkers, this) );
+            google.maps.event.addListener( this.map, "zoom_changed", _.bind(this.zoomChanged, this) );
 
             this.oms = new OverlappingMarkerSpiderfier(this.map, {markersWontMove: true, markersWontHide: true, keepSpiderfied: true});
             this.oms.addListener("click", function(marker, event) {
@@ -346,6 +346,9 @@ $(function() {
             }.bind(this));
             this.oms.addListener("unspiderfy", this.setMultipleMarkersIcon.bind(this));
             var self = this;
+
+            var mcOptions = {maxZoom: MINIMAL_ZOOM - 1, minimumClusterSize: 1};
+            this.clusterer = new MarkerClusterer(this.map, [], mcOptions);
 
             this.sidebar = new SidebarView({ map: this.map }).render();
             this.$el.find(".sidebar-container").append(this.sidebar.$el);
@@ -420,6 +423,8 @@ $(function() {
                 }
             }.bind(this))
 
+            this.previousZoom = this.map.zoom;
+
             this.router = new AppRouter();
             Backbone.history.start({pushState: true});
             setTimeout(function(){
@@ -471,17 +476,9 @@ $(function() {
                 }
             }
 
-            // console.log("loading marker", ICONS[model.get("type")]);
             // markers are loaded immediately as they are fetched
             var layer = this.initLayers(model.get("severity"));
             if (!layer) {
-                console.log("skipping marker because the layer is not chosen");
-                return;
-            }
-
-            var showInaccurate = this.initShowInaccurate();
-            if (!showInaccurate && model.get("locationAccuracy") != 1) {
-                console.log("skipping marker because location is not accurate");
                 return;
             }
 
@@ -496,6 +493,11 @@ $(function() {
                 }
             }
 
+            var showInaccurate = this.initShowInaccurate();
+            if (!showInaccurate && model.get("locationAccuracy") != 1) {
+                return;
+            }
+
             var markerView = new MarkerView({model: model, map: this.map}).render();
 
             model.set("markerView", this.markerList.length);
@@ -503,20 +505,27 @@ $(function() {
         },
 
         loadMarkers : function() {
-            console.log("-->> loading markers", this.markers);
-            this.clearMarkers();
+            this.clearMarkersFromMap();
             this.markers.each(_.bind(this.loadMarker, this));
-            this.setMultipleMarkersIcon();
+
+            if (this.map.zoom >= MINIMAL_ZOOM)
+                this.setMultipleMarkersIcon();
+
             this.sidebar.updateMarkerList(this.markerList);
             this.chooseMarker();
         },
-        clearMarkers : function() {
+        clearMarkersFromMap : function() {
             if (this.markerList) {
                 _(this.markerList).each(_.bind(function(marker) {
                     marker.marker.setMap(null);
                 }, this));
             }
             this.markerList = [];
+            this.clusterer.clearMarkersFromMap();
+        },
+        resetMarkers : function() {
+            this.clearMarkersFromMap();
+            this.markers.reset();
         },
         chooseMarker: function() {
             if (!this.markerList.length) {

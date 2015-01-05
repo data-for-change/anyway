@@ -19,15 +19,21 @@ var MarkerView = Backbone.View.extend({
 
 		this.marker = new google.maps.Marker({
 			position: markerPosition,
-			map: this.map,
-			icon: this.getIcon(),
-			title: this.getTitle(),
-			id: this.model.get("id"),
-			opacity: this.model.get("locationAccuracy") == 1 ? 1.0 : INACCURATE_MARKER_OPACITY
+			id: this.model.get("id")
 		});
 
-        app.oms.addMarker(this.marker);
+        app.clusterer.addMarker(this.marker);
+        if (app.map.zoom < MINIMAL_ZOOM) {
+            return this;
+        }
+
+        this.marker.setOpacity(this.model.get("locationAccuracy") == 1 ? 1.0 : INACCURATE_MARKER_OPACITY);
+        this.marker.setIcon(this.getIcon());
+		this.marker.setTitle(this.getTitle());
+        this.marker.setMap(this.map);
         this.marker.view = this;
+
+        app.oms.addMarker(this.marker);
 
 		this.$el.html($("#marker-content-template").html());
 

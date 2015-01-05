@@ -33,7 +33,7 @@ jinja_environment = jinja2.Environment(
     extensions=[AssetsExtension])
 jinja_environment.assets_environment = assets_env
 
-MINIMAL_ZOOM = 13
+MINIMAL_ZOOM = 16
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
@@ -55,24 +55,15 @@ def markers(methods=["GET", "POST"]):
         fatal = request.values['show_fatal']
         severe = request.values['show_severe']
         light = request.values['show_light']
-        inaccurate = request.values['show_inaccurate']
+        inaccurate = int(request.values['show_inaccurate'])
 
-        if zoom < MINIMAL_ZOOM:
-            markers = []
-        else:
-            # query = Marker.all()
-
-            # if 'start_time' in request.values:
-            #     query = query.filter("created >=", request.values["start_time"])
-            # if 'start_time' in request.values:
-            #     query = query.filter("created <=", request.values["end_time"])
-            print ""
-            logging.debug('querying markers in bounding box')
-            results = Marker.bounding_box_fetch(ne_lat, ne_lng, sw_lat, sw_lng,
-                                                start_date, end_date,
-                                                fatal, severe, light, inaccurate)
-            logging.debug('serializing markers')
-            markers = [marker.serialize() for marker in results.all()]
+        logging.debug('querying markers in bounding box')
+        is_thin = (zoom < MINIMAL_ZOOM)
+        results = Marker.bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng,
+                                            start_date, end_date,
+                                            fatal, severe, light, inaccurate,
+                                            is_thin)
+        markers = [marker.serialize(is_thin) for marker in results.all()]
 
         if request.values.get('format') == 'csv':
             if not markers:
@@ -216,5 +207,5 @@ def year2timestamp(y):
     return time.mktime(datetime.date(y, 1, 1).timetuple())
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')
     app.run(debug=True)

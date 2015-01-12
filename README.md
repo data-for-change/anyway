@@ -54,7 +54,7 @@ Contributing
   * bash: `export CLEARDB_DATABASE_URL='sqlite:///local.db'`
   * windows shell: `set CLEARDB_DATABASE_URL="sqlite:///local.db"`
 2. First time, create tables: `python models.py`
-3. Extract the [accidents file](http://drive.google.com/file/d/0B0um3CJU_4MjMkY4WXNicTlfMjA/view?usp=sharing_eid&invite=CO668sIM) into `/static/data/lms`
+3. Extract the [accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTdWdPMXV5c2gycW8/view?usp=sharing) into `/static/data/lms`
 4. Populate the data (markers etc.): `python process.py`
 5. Run app: `python main.py` (or: `foreman start` if you installed the [Heroku toolbelt](https://toolbelt.heroku.com))
 6. Browse to http://127.0.0.1:5000

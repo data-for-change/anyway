@@ -51,8 +51,8 @@ Contributing
 
 ## Local First Run
 1. Define connection string:
-  * bash: `export CLEARDB_DATABASE_URL='sqlite:///local.db'`
-  * windows shell: `set CLEARDB_DATABASE_URL="sqlite:///local.db"`
+  * bash: `export DATABASE_URL='sqlite:///local.db'`
+  * windows shell: `set DATABASE_URL="sqlite:///local.db"`
 2. First time, create tables: `python models.py`
 3. Extract the [accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTdWdPMXV5c2gycW8/view?usp=sharing) into `/static/data/lms`
 4. Populate the data (markers etc.): `python process.py`
@@ -72,19 +72,7 @@ Heroku deployment
 5. Deploy your git repo to heroku
 6. Load the database with our data:
     1. Tweak your Heroku app configurations, by removing `?reconnect=true` from your CLEARDB config (if you have several apps, specify the relevant one with the option `--app <anyway-mydev>` for all following heroku commands):
-    2. `heroku config:set CLEARDB_DATABASE_URL=$(heroku config:get CLEARDB_DATABASE_URL | cut -d '?' -f 1)`
+    2. `heroku config:set DATABASE_URL=$(heroku config:get DATABASE_URL | cut -d '?' -f 1)`
     2. Create tables: `heroku run ./models.py`
     3. Populate data: `heroku run ./process.py`
 7. Browse to http://anyway-*you*.herokuapp.com
-
-
-Loading the Data After a Schema Change
------------------------
-* After setting up Heroku access to the anyway app, run `heroku config --app anyway` and copy the value of `CLEARDB_DATABASE_URL`.
-* Install `mysql-workbench` on your computer and run it.
-* Run `mysql-workbench` and add a new connection with the credentials from the value of `CLEARDB_DATABASE_URL`: the part until the `:` is the username; after that is the password; after the `@` and before the `/` is the hostname. Leave the port as it is.
-* Connect to the newly added connection, and in the sidebar select all entries under `Tables`, right click and drop all tables.
-* Back in your shell, run `export CLEARDB_DATABASE_URL=*the value you got from heroku*`
-* Run `python models.py` to create the tables.
-* Get the latest data and extract it to a directory `static/data/lms/`.
-* Run `python process.py` to add the data to the tables.

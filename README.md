@@ -28,8 +28,7 @@ Contributing
 
 ### OS X
 1. `sudo easy_install pip setuptools`
-2. Install mysql connector source [instructions](http://dev.mysql.com/doc/refman/5.0/en/connector-odbc-installation-binary-macosx.html)
-  1. This [script](http://www.macminivault.com/mysql-mavericks/) might help too, and also installing [full django stack](http://bitnami.com/stack/django)
+2. Install postgresql: `brew install postgresql`
 
 ### virtualenv setup (both Ubuntu and OS X)
 1. `sudo pip install virtualenvwrapper`

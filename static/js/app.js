@@ -196,14 +196,19 @@ $(function() {
             if (this.model.get(attr)) {
                 this.reloadMarkers();
             } else {
+                this.updateUrl();
                 this.loadMarkers();
             }
+        },
+        updateUrl: function() {
+            Backbone.history.navigate("/?" + this.getCurrentUrlParams(), true);
         },
         reloadMarkers: function() {
             this.clearMarkers();
             this.fetchMarkers();
         },
         fetchMarkers : function() {
+            this.updateUrl();
             var params = this.buildMarkersParams();
             if (!params) {
                 if (!$('.notifyjs-container').length) {
@@ -657,7 +662,18 @@ $(function() {
               position: loc,
               map: this.map
             });
-          }
+          }, getCurrentUrlParams: function () {
+                var dateRange = app.model.get("dateRange");
+                var center = app.map.getCenter();
+                console.log(center);
+                return "start_date=" + moment(dateRange[0]).format("YYYY-MM-DD") +
+                    "&end_date=" + moment(dateRange[1]).format("YYYY-MM-DD") +
+                    "&show_fatal=" + (app.model.get("showFatal") ? 1 : 0) +
+                    "&show_severe=" + (app.model.get("showSevere") ? 1 : 0) +
+                    "&show_light=" + (app.model.get("showLight") ? 1 : 0) +
+                    "&show_inaccurate=" + (app.model.get("showInaccurateMarkers") ? 1 : 0) +
+                    "&zoom=" + app.map.zoom + "&lat=" + center.lat() + "&lon=" + center.lng();
+		}
     });
 });
 

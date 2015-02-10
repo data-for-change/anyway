@@ -441,7 +441,7 @@ $(function() {
         },
         closeInfoWindow: function() {
             if (app.infoWindow) {
-                Backbone.history.navigate("/", true);
+                this.updateUrl();
                 app.infoWindow.close();
             }
         },
@@ -535,7 +535,7 @@ $(function() {
 
             var currentMarker = this.model.get("currentMarker");
             if (!this.markers.get(currentMarker)) {
-                Backbone.history.navigate("/", true);
+                this.updateUrl();
                 return;
             }
             var markerView = this.markerList[this.markers.get(currentMarker).get("markerView")];

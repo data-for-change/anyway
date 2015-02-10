@@ -16,8 +16,8 @@
         <div class='notifications top-left' id="notification"></div>
         <div id="app">
 
-            <div class="navbar navbar-fixed-top">
-                <div class="navbar-inner" style="padding-right: 10px">
+          <div class="navbar navbar-fixed-top">
+                <div class="navbar-inner" style="padding-right: 10px{{ '; display: none' if map_only }}">
                     <div style="float: left; padding: 5px">
                         <a class="fb-login" style="cursor: pointer"><img src="/static/img/facebook_login.png" style="padding: 3px" />
                         </a>
@@ -37,12 +37,13 @@
                 </a>
                 </div>
             </div>
-            <div class="main" style="position: fixed; width: 100%; height: 100%; padding-top: 40px; padding-right: 250px; box-sizing: border-box">
-                <input id="pac-input" class="controls" type="text" placeholder="חפש מיקום">
+            <div class="main" style="position: fixed; width: 100%; height: 100%; box-sizing: border-box{{ 'padding-top: 40px; padding-right: 250px; ' if not map_only }}">
+              <input id="pac-input" class="controls" type="text" placeholder="חפש מיקום" style="{{ 'display: none' if map_only }}">
                 <div id="map_canvas" style="width: 100%; height: 100%; box-sizing: border-box"></div>
             </div>
             <div class="sidebar-container" style="position: absolute; right: 0; top: 0;
-            bottom: 0; width: 250px; background: white; padding-top: 40px;">
+            bottom: 0; width: 250px; background: white; padding-top: 40px;
+            {{ 'display: none' if map_only }}">
                 <!--
             <ul class="nav nav-list">
               <li class="active"><a href="#"><i class="icon-home icon-white"></i> Home</a></li>
@@ -163,7 +164,7 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
             </li>
         </div>
         <div id="reset-map-control" style="padding: 5px; display: none">
-            <div title="חזור למיקום שלי" style="background-color: white; border: 2px solid black; cursor: pointer; boxShadow: 1px 1px 5px black">
+            <div title="חזור למיקום שלי" style="background-color: white; border: 2px solid black; cursor: pointer; boxShadow: 1px 1px 5px black {{ '; display: none' if map_only }}">
                 <img src="/static/img/my_location.png" />
             </div>
         </div>
@@ -303,6 +304,12 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
             INIT_LON = {{lon}};
             {% else %}
             INIT_LON = 34.8000;
+            {% endif %}
+
+            {% if map_only %}
+            MAP_ONLY = {{map_only}};
+            {% else %}
+            MAP_ONLY = false;
             {% endif %}
 
             {% if marker %}

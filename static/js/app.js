@@ -215,8 +215,10 @@ $(function() {
                     // remove existing markers
                     this.clearMarkers();
                     this.sidebar.updateMarkerList(this.markerList);
-                    // show message and abort
-                    $.notify("התקרב על מנת לראות ארועים");
+                    if (!MAP_ONLY) {
+                      // show message and abort
+                      $.notify("התקרב על מנת לראות ארועים");
+                    }
                 }
                 return;
             } else {
@@ -282,8 +284,9 @@ $(function() {
                 zoom: INIT_ZOOM,
                 mapTypeId: google.maps.MapTypeId.ROADMAP,
                 mapTypeControl: false,
-                zoomControl: true,
-                panControl: true,
+                zoomControl: !MAP_ONLY,
+                panControl: !MAP_ONLY,
+                streetViewControl: !MAP_ONLY,
                 styles: MAP_STYLE
             };
             this.map = new google.maps.Map(this.$el.find("#map_canvas").get(0), mapOptions);

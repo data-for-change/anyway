@@ -291,16 +291,6 @@ $(function() {
             };
             this.map = new google.maps.Map(this.$el.find("#map_canvas").get(0), mapOptions);
 
-            if(MARKER_SPECIFIED) {
-                markerloc=new google.maps.LatLng(
-                    MARKER_LATITUDE,
-                    MARKER_LONGITUDE);
-                this.map.setCenter(markerloc);
-                // need to find the specified marker
-                // need to wait till all markers are loaded to give it a fair try
-                // _.find(app.markerList, function(m) { return m.marker.id = "632"; });
-            }
-
             if(navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function(position){
                     var latitude=position.coords.latitude;
@@ -314,7 +304,7 @@ $(function() {
                     }.bind(this));
                     this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(resetMapDiv);
 
-                    if(!MARKER_SPECIFIED) {
+                    if(!LOCATION_SPECIFIED) {
                         this.setCenterWithMarker(myloc);
                     }
 

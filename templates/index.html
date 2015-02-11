@@ -243,11 +243,13 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
             {% endif %}
 
             {% if coordinates %}
-            MARKER_SPECIFIED = true;
-            MARKER_LATITUDE = {{coordinates[0]}};
-            MARKER_LONGITUDE = {{coordinates[1]}};
+            LOCATION_SPECIFIED = true;
+            INIT_LAT = {{coordinates[0]}};
+            INIT_LON = {{coordinates[1]}};
             {% else %}
-            MARKER_SPECIFIED = false;
+            LOCATION_SPECIFIED = false;
+            INIT_LAT = 32.0833;
+            INIT_LON = 34.8000;
             {% endif %}
 
             {% if start_date %}
@@ -292,18 +294,6 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
             INIT_ZOOM = {{zoom}};
             {% else %}
             INIT_ZOOM = 17;
-            {% endif %}
-
-            {% if lat %}
-            INIT_LAT = {{lat}};
-            {% else %}
-            INIT_LAT = 32.0833;
-            {% endif %}
-
-            {% if lon %}
-            INIT_LON = {{lon}};
-            {% else %}
-            INIT_LON = 34.8000;
             {% endif %}
 
             {% if map_only %}

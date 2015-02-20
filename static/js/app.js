@@ -129,11 +129,9 @@ $(function() {
     var AppRouter = Backbone.Router.extend({
         routes: {
             "" : "navigateEmpty",
-//             ":id" : "navigate",
             "/?marker=:id&start_date=:start&end_date=:end&show_fatal=:showFatal&show_severe=:showSevere&show_light=:showLight&show_inaccurate=:showInaccurate&zoom=:zoom&lat=:lat&lon=:lon" : "navigate"
         },
         navigate: function(id, start, end, showFatal, showSevere, showLight, showInaccurate, zoom, lat, lon) {
-            console.log('navigate to ', id);
             app.model.set("currentMarker", parseInt(id));
             app.model.set("dateRange", [new Date(start), new Date(end)]);
             app.model.set("showFatal", showFatal);
@@ -176,7 +174,6 @@ $(function() {
                 .bind("destroy", this.loadMarkers, this)
                 .bind("add", this.loadMarker, this)
                 .bind("change:currentModel", this.chooseMarker, this);
-            //this.markers.bind("change", this.loadMarker, this);
             this.model
                 .bind("change:user", this.updateUser, this)
                 .bind("change:showFatal",
@@ -188,9 +185,7 @@ $(function() {
                 .bind("change:showInaccurateMarkers",
                     _.bind(this.reloadMarkersIfNeeded, this, "showInaccurateMarkers"))
                 .bind("change:dateRange", this.reloadMarkers, this);
-            this.login();
-
-
+//            this.login(); // FIXME causes exceptions, but might be required for discussion
         },
         reloadMarkersIfNeeded: function(attr) {
             if (this.model.get(attr)) {
@@ -200,8 +195,11 @@ $(function() {
                 this.loadMarkers();
             }
         },
-        updateUrl: function() {
-            Backbone.history.navigate("/?" + this.getCurrentUrlParams(), true);
+        updateUrl: function(url) {
+            if (typeof url == 'undefined') {
+                url = "/?" + this.getCurrentUrlParams();
+            }
+            Backbone.history.navigate(url, true);
         },
         zoomChanged: function() {
             var reset = this.map.zoom >= MINIMAL_ZOOM && this.previousZoom < MINIMAL_ZOOM;
@@ -217,6 +215,7 @@ $(function() {
             this.fetchMarkers();
         },
         fetchMarkers : function(reset) {
+            if (!this.isReady) return;
             this.updateUrl();
             var params = this.buildMarkersParams();
 
@@ -276,6 +275,7 @@ $(function() {
           window.location = this.markers.url + "?" + $.param(params);
         },
         render : function() {
+            this.isReady = false;
 
             var myloc=new google.maps.LatLng(INIT_LAT, INIT_LON);
 
@@ -298,7 +298,7 @@ $(function() {
                     myloc=new google.maps.LatLng(latitude,longitude);
 
                     resetMapDiv = document.createElement('div');
-                    resetMapDiv.innerHTML = $("#reset-map-control").html()
+                    resetMapDiv.innerHTML = $("#reset-map-control").html();
                     google.maps.event.addDomListener(resetMapDiv, 'click', function() {
                         this.setCenterWithMarker(myloc);
                     }.bind(this));
@@ -308,8 +308,7 @@ $(function() {
                         this.setCenterWithMarker(myloc);
                     }
 
-                    // Maybe this fix the geolocation problem
-                    this.fetchMarkers();
+                    console.log('Set location to ' + latitude + ", " + longitude);
                 }.bind(this));
             }
 
@@ -321,8 +320,8 @@ $(function() {
             this.searchBox = new google.maps.places.SearchBox(input);
 
             google.maps.event.addListener(this.searchBox, 'places_changed', function() {
-                self.handleSearchBox();
-                });
+                this.handleSearchBox();
+            }.bind(this));
 
             // Listen for the event fired when the user selects an item from the
             // pick list. Retrieve the matching places for that item.
@@ -330,6 +329,7 @@ $(function() {
             google.maps.event.addListener( this.map, "rightclick", _.bind(this.contextMenuMap, this) );
             google.maps.event.addListener( this.map, "mouseup", _.bind(this.fetchMarkers, this) );
             google.maps.event.addListener( this.map, "zoom_changed", _.bind(this.zoomChanged, this) );
+            google.maps.event.addListenerOnce( this.map, 'idle', _.bind(this.fetchMarkers, this) );
 
             this.oms = new OverlappingMarkerSpiderfier(this.map, {markersWontMove: true, markersWontHide: true, keepSpiderfied: true});
             this.oms.addListener("click", function(marker, event) {
@@ -345,13 +345,15 @@ $(function() {
                 this.clickedMarker = true;
             }.bind(this));
             this.oms.addListener("unspiderfy", this.setMultipleMarkersIcon.bind(this));
-            var self = this;
+            console.log('Loaded OverlappingMarkerSpiderfier');
 
             var mcOptions = {maxZoom: MINIMAL_ZOOM - 1, minimumClusterSize: 1};
             this.clusterer = new MarkerClusterer(this.map, [], mcOptions);
+            console.log('Loaded MarkerClusterer');
 
             this.sidebar = new SidebarView({ map: this.map }).render();
             this.$el.find(".sidebar-container").append(this.sidebar.$el);
+            console.log('Loaded SidebarView');
 
             if (!START_DATE) {
                 START_DATE = '01/01/2013';
@@ -405,32 +407,32 @@ $(function() {
             );
             this.$el.find("#calendar-control").click( // only applies to <i>
                 function() {
-                    self.$el.find("input.date-range").data('daterangepicker').show();
+                    this.$el.find("input.date-range").data('daterangepicker').show();
                 }.bind(this)
             );
             this.$el.find("input.date-range").data("daterangepicker").notify();
+            console.log('Loaded daterangepicker');
 
             $(document).ajaxStart(function() {
                 this.spinner = $('<li/>');
                 this.spinner.height('20px');
                 this.sidebar.$currentViewList.prepend(this.spinner);
                 this.spinner.spin();
-            }.bind(this))
-
+            }.bind(this));
             $(document).ajaxStop(function() {
                 if (this.spinner) {
                     this.spinner.spin(false);
                 }
-            }.bind(this))
+            }.bind(this));
+            console.log('Loaded spinner');
 
             this.previousZoom = this.map.zoom;
 
             this.router = new AppRouter();
             Backbone.history.start({pushState: true});
-            setTimeout(function(){
-                // somehow fetching markers does not work when done immediately
-                self.fetchMarkers();
-            }, 3000);
+            console.log('Loaded AppRouter');
+
+            this.isReady = true;
 
             return this;
         },

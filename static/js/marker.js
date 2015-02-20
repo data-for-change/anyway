@@ -96,10 +96,10 @@ var MarkerView = Backbone.View.extend({
         });
 
         app.infoWindow.open(this.map, this.marker);
-        Backbone.history.navigate(this.getUrl(), true);
+        app.updateUrl(this.getUrl());
 
         google.maps.event.addListener(app.infoWindow,"closeclick",function(){
-            Backbone.history.navigate("/", true);
+            app.fetchMarkers();
         });
     },
 	updateFollowing : function() {

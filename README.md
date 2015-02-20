@@ -28,7 +28,7 @@ Contributing
 
 ### OS X
 1. `sudo easy_install pip setuptools`
-2. Install postgresql: `brew install postgresql`
+2. Install postgresql: `brew install postgresql` (after installing [brew](http://brew.sh))
 
 ### virtualenv setup (both Ubuntu and OS X)
 1. `sudo pip install virtualenvwrapper`

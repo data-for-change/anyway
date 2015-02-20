@@ -53,7 +53,7 @@ Contributing
   * bash: `export DATABASE_URL='sqlite:///local.db'`
   * windows shell: `set DATABASE_URL="sqlite:///local.db"`
 2. First time, create tables: `python models.py`
-3. Extract the [accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTdWdPMXV5c2gycW8/view?usp=sharing) into `/static/data/lms`
+3. Extract the [example accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTSjNMUXYyeW4yQkk/view?usp=sharing) into `/static/data/lms` (or ask permission and get the [complete accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTdWdPMXV5c2gycW8/view?usp=sharing)).
 4. Populate the data (markers etc.): `python process.py`
 5. Run app: `python main.py` (or: `foreman start` if you installed the [Heroku toolbelt](https://toolbelt.heroku.com))
 6. Browse to http://127.0.0.1:5000

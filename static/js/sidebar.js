@@ -47,7 +47,7 @@ var SidebarView = Backbone.View.extend({
 
         this.$el.find("img.checkbox-severity").parent().click(function() {
                 var checkboxImg = $("img", this);
-                checkboxImg.data("checked", !checkboxImg.data("checked"));
+                checkboxImg.data("checked", 1 - checkboxImg.data("checked"));
                 self.updateCheckboxIcon(checkboxImg);
                 self.updateLayers();
             });
@@ -55,7 +55,7 @@ var SidebarView = Backbone.View.extend({
         this.$el.find("img.checkbox-accuracy").parent()
             .click(function() {
                 var checkboxImg = $("img", this);
-                checkboxImg.data("checked", !checkboxImg.data("checked"));
+                checkboxImg.data("checked", 1 - checkboxImg.data("checked"));
                 self.updateCheckboxIcon(checkboxImg);
                 self.updateShowByAccuracy();
             });
@@ -106,7 +106,7 @@ var SidebarView = Backbone.View.extend({
     updateCheckboxIcon: function(img, hover) {
         var checked;
         if (hover == undefined) {
-            checked = img.data("checked") ? 1 : 0;
+            checked = img.data("checked");
         } else {
             checked = 2;
         }

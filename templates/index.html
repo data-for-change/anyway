@@ -19,13 +19,17 @@
           <div class="navbar navbar-fixed-top">
                 <div class="navbar-inner" style="padding-right: 10px{{ '; display: none' if map_only }}">
                     <div style="float: left; padding: 5px">
+                        <a data-toggle="modal" data-target="#embed">צור קישור</a> &#124;
+
                         <a class="fb-login" style="cursor: pointer"><img src="/static/img/facebook_login.png" style="padding: 3px" />
                         </a>
+
                         <a href="mailto:feedback.anyway@gmail.com/?subject=משוב%20על%20אתר%20anyway.co.il" target="new">צרו קשר</a> &#124;
                         <a href="" data-toggle="modal" data-target="#credit-dialog">תודות</a> &#124;
                         <a href="" data-toggle="modal" data-target="#about-dialog">אודות</a>
                         <a href="http://www.hasadna.org.il/" title="לדעת להשפיע - מבית הסדנא לידע ציבורי"><img src="/static/img/sadna-logo.png" style="width: 25px; height: 25px; padding: 3px" />
                         </a>
+
                         <div class="user-details" style="display: none">
                             <span class="profile-name"></span>
                             <img class="profile-picture" style="height: 30px" />
@@ -52,6 +56,28 @@
               <li><a href="#"><i class="i"></i> Misc</a></li>
             </ul>
             -->
+            </div>
+        </div>
+
+        <div class="modal hide fade" id="embed">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3>שיתוף המפה ומאפייניה</h3>
+            </div>
+            <div class="modal-body">
+                <div class="embed-code">
+                    <label for="map_link">קישור לאיזור המוצג</label>
+                    <input  id="map_link" type="text" class="form-control form-control-wide" value="hello" placeholder="">
+                    <button class="btn btn-default js-btn-copytoclipboard" data-copy="map_link" style="float: left;" type="button">העתק</button>
+                </div>
+                <div class="embed-code">
+                    <label for="iframe_link">קוד לשילוב המפה בדפי אינטרנט</label>
+                    <textarea  id="iframe_link" class="form-control form-control-wide"></textarea>
+                    <button class="btn btn-default js-btn-copytoclipboard" data-copy="iframe_link" style="float: left;" type="button">העתק</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a class="btn close-button" data-dismiss="modal" aria-hidden="true">סגור</a>
             </div>
         </div>
 
@@ -231,6 +257,7 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
             "js/sidebar.js",
             "js/contextmenu.js",
             "js/map_style.js",
+            "js/clipboard.js",
             "js/app.js" %}
             <script type="text/javascript" src="{{ ASSET_URL }}"></script>
         {% endassets %}

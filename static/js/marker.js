@@ -89,10 +89,10 @@ var MarkerView = Backbone.View.extend({
         console.log(center);
         return "/?marker=" + this.model.get("id") + "&" + app.getCurrentUrlParams();
     }, clickMarker : function() {
-        this.marker.setAnimation(google.maps.Animation.BOUNCE);
+        this.highlight();
         app.closeInfoWindow();
 
-        app.selectedMarker = this.marker;
+        app.selectedMarker = this;
         app.infoWindow = new google.maps.InfoWindow({
             content: this.el
         });
@@ -103,6 +103,12 @@ var MarkerView = Backbone.View.extend({
         google.maps.event.addListener(app.infoWindow,"closeclick",function(){
             app.fetchMarkers();
         });
+    },
+    highlight : function() {
+        this.marker.setAnimation(google.maps.Animation.BOUNCE);
+    },
+    unhighlight : function() {
+        this.marker.setAnimation(null);
     },
 	updateFollowing : function() {
 		if (this.model.get("following")) {

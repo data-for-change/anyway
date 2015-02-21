@@ -8,7 +8,9 @@ var CHECKBOX_ICONS = [
 var SidebarView = Backbone.View.extend({
     className: "info-window",
     events: {
-        "click .current-view li" : "clickEntry"
+        "click .current-view li" : "clickEntry",
+        "mouseover .current-view li" : "hoverEntry",
+        "mouseout .current-view li" : "unhoverEntry"
     },
     initialize: function(options) {
         this.map = options.map;
@@ -121,8 +123,16 @@ var SidebarView = Backbone.View.extend({
         });
     },
     clickEntry: function(e) {
-        var marker = $(e.target).data("marker") || $(e.target).parents("li").data("marker");
-        marker.view.choose();
+        this.getMarker(e).view.choose();
+    },
+    hoverEntry: function(e) {
+        this.getMarker(e).view.highlight();
+    },
+    unhoverEntry: function(e) {
+        this.getMarker(e).view.unhighlight();
+    },
+    getMarker: function(e) {
+        return $(e.target).data("marker") || $(e.target).parents("li").data("marker");
     },
     updateShowByAccuracy: function() {
         this.$el.find("img.checkbox-accuracy").each(function() {

@@ -448,7 +448,7 @@ $(function() {
         },
         closeInfoWindow: function() {
             if (app.infoWindow) {
-                this.selectedMarker.setAnimation(null);
+                this.selectedMarker.unhighlight();
                 this.selectedMarker = null;
                 app.infoWindow.close();
                 app.infoWindow = null;

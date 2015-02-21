@@ -89,8 +89,10 @@ var MarkerView = Backbone.View.extend({
         console.log(center);
         return "/?marker=" + this.model.get("id") + "&" + app.getCurrentUrlParams();
     }, clickMarker : function() {
+        this.marker.setAnimation(google.maps.Animation.BOUNCE);
         app.closeInfoWindow();
 
+        app.selectedMarker = this.marker;
         app.infoWindow = new google.maps.InfoWindow({
             content: this.el
         });

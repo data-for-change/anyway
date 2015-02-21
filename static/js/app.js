@@ -448,7 +448,8 @@ $(function() {
         },
         closeInfoWindow: function() {
             if (app.infoWindow) {
-                this.updateUrl();
+                this.selectedMarker.setAnimation(null);
+                this.selectedMarker = null;
                 app.infoWindow.close();
                 app.infoWindow = null;
                 this.updateUrl();

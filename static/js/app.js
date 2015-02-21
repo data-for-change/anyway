@@ -197,6 +197,7 @@ $(function() {
         },
         updateUrl: function(url) {
             if (typeof url == 'undefined') {
+                if (app.infoWindow) return;
                 url = "/?" + this.getCurrentUrlParams();
             }
             Backbone.history.navigate(url, true);
@@ -277,10 +278,10 @@ $(function() {
         render : function() {
             this.isReady = false;
 
-            var myloc=new google.maps.LatLng(INIT_LAT, INIT_LON);
+            this.defaultLocation = new google.maps.LatLng(INIT_LAT, INIT_LON);
 
             var mapOptions = {
-                center: myloc,
+                center: this.defaultLocation,
                 zoom: INIT_ZOOM,
                 mapTypeId: google.maps.MapTypeId.ROADMAP,
                 mapTypeControl: false,
@@ -291,25 +292,19 @@ $(function() {
             };
             this.map = new google.maps.Map(this.$el.find("#map_canvas").get(0), mapOptions);
 
-            if(navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position){
-                    var latitude=position.coords.latitude;
-                    var longitude=position.coords.longitude;
-                    myloc=new google.maps.LatLng(latitude,longitude);
+            var resetMapDiv = document.createElement('div');
+            resetMapDiv.innerHTML = $("#reset-map-control").html();
+            google.maps.event.addDomListener(resetMapDiv, 'click', function() {
+                this.goToMyLocation();
+            }.bind(this));
+            this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(resetMapDiv);
 
-                    resetMapDiv = document.createElement('div');
-                    resetMapDiv.innerHTML = $("#reset-map-control").html();
-                    google.maps.event.addDomListener(resetMapDiv, 'click', function() {
-                        this.setCenterWithMarker(myloc);
-                    }.bind(this));
-                    this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(resetMapDiv);
-
-                    if(!LOCATION_SPECIFIED) {
-                        this.setCenterWithMarker(myloc);
-                    }
-
-                    console.log('Set location to ' + latitude + ", " + longitude);
-                }.bind(this));
+            if (LOCATION_SPECIFIED) {
+                if (!MARKER_ID) {
+                    this.setCenterWithMarker(this.defaultLocation);
+                }
+            } else {
+                this.goToMyLocation();
             }
 
             // search box:
@@ -436,10 +431,26 @@ $(function() {
 
             return this;
         },
+        goToMyLocation: function() {
+            if (typeof this.myLocation !== 'undefined') {
+                this.setCenterWithMarker(this.myLocation);
+            } else if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var latitude = position.coords.latitude;
+                    var longitude = position.coords.longitude;
+                    this.myLocation = new google.maps.LatLng(latitude, longitude);
+                    this.setCenterWithMarker(this.myLocation);
+                }.bind(this));
+            } else {
+                this.myLocation = this.defaultLocation;
+                this.setCenterWithMarker(this.myLocation);
+            }
+        },
         closeInfoWindow: function() {
             if (app.infoWindow) {
                 this.updateUrl();
                 app.infoWindow.close();
+                app.infoWindow = null;
             }
         },
         clickMap : function(e) {
@@ -658,7 +669,9 @@ $(function() {
             }
          },
          setCenterWithMarker: function(loc) {
+            this.closeInfoWindow();
             this.map.setCenter(loc);
+            this.fetchMarkers();
             if (this.locationMarker) {
                 this.locationMarker.setMap(null);
             }

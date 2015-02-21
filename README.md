@@ -12,7 +12,7 @@ Contributing
 -----------------------
 * We try to follow the process of other Hasadna projects, e.g. [Open-Knesset](https://oknesset-devel.readthedocs.org/en/latest/)
 
-## Dev. Env. Setup Notes 
+## Development Environment Setup Notes 
 
 ## Getting the code
 1. [Fork](https://github.com/hasadna/anyway/fork) this repository on GitHub
@@ -38,15 +38,14 @@ Contributing
 5. `pip install -r requirements.txt`
 6. `workon anyway` (each time you start working)
 
-### Windows 7 64 bit
+### Windows
 1. Install [Python 2.7](http://www.python.org/getit)
 2. Install [setuptools](http://www.lfd.uci.edu/~gohlke/pythonlibs/#setuptools) & [pip](http://www.lfd.uci.edu/~gohlke/pythonlibs/#pip)(package manager) and update PATH to python and python/scripts directories (e.g. `PATH=%PATH%;C:\Python27\Scripts`)
-3. Install [mysql connector binaries](http://dev.mysql.com/downloads/connector/c/6.0.html#downloads)
-4. Install [VC2008 Express](http://download.microsoft.com/download/A/5/4/A54BADB6-9C3F-478D-8657-93B3FC9FE62D/vcsetup.exe) (alt: mingw)
-5. Install [GitHub for windows](http://windows.github.com/) and get the code
-6. cd to the anyway directory (e.g. `> cd C:\Users\Admin\Documents\PycharmProjects\anyway`).
-7. `> "C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\Tools\vsvars32.bat"`
-8. `> pip install -r requirements.txt`
+3. Install [VC2008 Express](http://download.microsoft.com/download/A/5/4/A54BADB6-9C3F-478D-8657-93B3FC9FE62D/vcsetup.exe) (alt: mingw)
+4. Install [GitHub for windows](http://windows.github.com/) and get the code
+5. `cd` to the anyway directory
+7. `pip install -r requirements.txt`
+8. If any package fails to install, download it from [here](http://www.lfd.uci.edu/~gohlke/pythonlibs) and install it using `pip install <package>`. If this fails, you might have to download the `win32` package, even if you are on a 64-bit platform.
 
 ## Local First Run
 1. Define connection string:

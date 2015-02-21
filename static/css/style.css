@@ -45,6 +45,7 @@ div.gm-style {
 .sidebar-container ul li {
 	padding: 5px;
 	border-bottom: 1px solid #eee;
+    cursor: pointer;
 }
 
 .followers img {

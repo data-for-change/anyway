@@ -451,6 +451,7 @@ $(function() {
                 this.updateUrl();
                 app.infoWindow.close();
                 app.infoWindow = null;
+                this.updateUrl();
             }
         },
         clickMap : function(e) {

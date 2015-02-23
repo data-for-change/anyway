@@ -51,7 +51,6 @@ def generate_json(results, is_thin):
             prefix = ','
         yield prefix + json.dumps(marker.serialize(is_thin))
     yield ']}'
-    print 'ADDI END MARKERS #2', datetime.datetime.now()
 
 
 def generate_csv(results, is_thin):

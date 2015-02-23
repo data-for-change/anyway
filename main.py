@@ -7,7 +7,7 @@ import datetime
 import time
 
 import jinja2
-from flask import make_response, jsonify, render_template
+from flask import make_response, jsonify, render_template, Response
 import flask.ext.assets
 from webassets.ext.jinja2 import AssetsExtension
 from webassets import Environment as AssetsEnvironment
@@ -40,6 +40,38 @@ def shutdown_session(exception=None):
     db_session.remove()
 
 
+def generate_json(results, is_thin):
+    yield '{"markers": ['
+    is_first = True
+    for marker in results.all():
+        if is_first:
+            is_first = False
+            prefix = ''
+        else:
+            prefix = ','
+        yield prefix + json.dumps(marker.serialize(is_thin))
+    yield ']}'
+
+
+def generate_csv(results, is_thin):
+    output_file = StringIO()
+    yield output_file.getvalue()
+    output_file.truncate(0)
+    output = None
+    for marker in results.all():
+        serialized = marker.serialize(is_thin)
+        if not output:
+            output = csv.DictWriter(output_file, serialized.keys())
+            output.writeheader()
+
+        row = {k: v.encode('utf8')
+               if type(v) is unicode else v
+               for k, v in serialized.iteritems()}
+        output.writerow(row)
+        yield output_file.getvalue()
+        output_file.truncate(0)
+
+
 @app.route("/markers")
 @user_optional
 def markers(methods=["GET", "POST"]):
@@ -62,29 +94,17 @@ def markers(methods=["GET", "POST"]):
         results = Marker.bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng,
                                             start_date, end_date,
                                             fatal, severe, light, inaccurate,
-                                            is_thin)
-        markers = [marker.serialize(is_thin) for marker in results.all()]
-
+                                            is_thin, yield_per=50)
         if request.values.get('format') == 'csv':
             if not markers:
                 raise Exception("No markers available.")
-
-            output_file = StringIO()
-            output = csv.DictWriter(output_file, markers[0].keys())
-            output.writeheader()
-            for marker in markers:
-                row = {k: v.encode('utf8')
-                       if type(v) is unicode else v
-                       for k, v in marker.iteritems()}
-                output.writerow(row)
-
-            return make_response((output_file.getvalue(),
-                200,
-                {u'Content-Type': 'text/csv',
-                 u'Content-Disposition': u'attachment; filename="data.csv"'}))
+            return Response(generate_csv(results, is_thin), headers={
+                "Content-Type": "text/csv",
+                "Content-Disposition": 'attachment; filename="data.csv"'
+            })
 
         else: # defaults to json
-            return jsonify(markers=markers)
+            return Response(generate_json(results, is_thin), mimetype="application/json")
 
     else:
         data = json.loads(self.request.body)

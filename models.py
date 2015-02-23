@@ -131,7 +131,7 @@ class Marker(Base):
 
     @staticmethod
     def bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng, start_date, end_date,
-                           fatal, severe, light, inaccurate, is_thin=False):
+                           fatal, severe, light, inaccurate, is_thin=False, yield_per=None):
         # example:
         # ne_lat=32.36292402647484&ne_lng=35.08873443603511&sw_lat=32.29257266524761&sw_lng=34.88445739746089
         # >>>  m = Marker.bounding_box_query(32.36, 35.088, 32.292, 34.884)
@@ -146,6 +146,8 @@ class Marker(Base):
             .filter(Marker.created >= start_date) \
             .filter(Marker.created < end_date) \
             .order_by(desc(Marker.created))
+        if yield_per:
+            markers = markers.yield_per(yield_per)
         if accurate:
             markers = markers.filter(Marker.locationAccuracy == 1)
         if not fatal:
@@ -154,7 +156,6 @@ class Marker(Base):
             markers = markers.filter(Marker.severity != 2)
         if not light:
             markers = markers.filter(Marker.severity != 3)
-        logging.debug('got %d markers from db' % markers.count())
         if is_thin:
             markers = markers.options(load_only("id", "longitude", "latitude",
                                                 "created", "severity", "locationAccuracy"))

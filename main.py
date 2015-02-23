@@ -52,9 +52,9 @@ def markers(methods=["GET", "POST"]):
         zoom = int(request.values['zoom'])
         start_date = datetime.date.fromtimestamp(int(request.values['start_date']))
         end_date = datetime.date.fromtimestamp(int(request.values['end_date']))
-        fatal = request.values['show_fatal']
-        severe = request.values['show_severe']
-        light = request.values['show_light']
+        fatal = int(request.values['show_fatal'])
+        severe = int(request.values['show_severe'])
+        light = int(request.values['show_light'])
         inaccurate = int(request.values['show_inaccurate'])
 
         logging.debug('querying markers in bounding box')

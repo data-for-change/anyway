@@ -81,7 +81,11 @@ var DEFAULT_ICON = ICONS[1][1];
 function getIcon(accidentType, severity) {
     var icon = DEFAULT_ICON;
     try {
-        icon = ICONS[severity][ACCIDENT_MINOR_TYPE_TO_TYPE[accidentType]];
+        if (accidentType == "multiple") {
+            icon = MULTIPLE_ICONS[severity];
+        } else {
+            icon = ICONS[severity][ACCIDENT_MINOR_TYPE_TO_TYPE[accidentType]];
+        }
     } catch (err) {
         // stick to default icon
     }
@@ -265,7 +269,7 @@ $(function() {
         },
         setMultipleMarkersIcon: function() {
             _.each(this.oms.markersNearAnyOtherMarker(), function(marker) {
-                marker.icon = MULTIPLE_ICONS[SEVERITY_VARIOUS];
+                marker.icon = getIcon("multiple", SEVERITY_VARIOUS);
                 marker.title = 'מספר תאונות בנקודה זו';
             });
         },

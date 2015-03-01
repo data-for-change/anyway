@@ -16,7 +16,7 @@ var SidebarView = Backbone.View.extend({
         this.map = options.map;
         this.sidebarItemTemplate = _.template($("#sidebarItemTemplate").text());
 
-        google.maps.event.addListener(this.map, "center_changed", _.bind(this.updateMarkerList, this));
+//        google.maps.event.addListener(this.map, "center_changed", _.bind(this.updateMarkerList, this));
 
     },
     render: function() {
@@ -64,14 +64,15 @@ var SidebarView = Backbone.View.extend({
 
         return this;
     },
-    updateMarkerList: function(markersList) {
+    updateMarkerList: function(markerList) {
         // Set the marker list to empty array if it's not defined
-        markersList = markersList || [];
+        markerList = markerList || [];
+        console.log('got a call with ' + markerList.length + ' markers');
 
         var bounds = this.map.getBounds();
 
         // Sort by decending order the marker list
-        markersList = _.sortBy(markersList, function(marker) {
+        markerList = _.sortBy(markerList, function(marker) {
             return -1 * moment(marker.model.get("created")).unix();
         });
 
@@ -79,8 +80,8 @@ var SidebarView = Backbone.View.extend({
         var $viewList = $('<ul/>');
         var markerCount = 0;
 
-        for (var i = 0; i < markersList.length; i++) {
-            var markerView = markersList[i];
+        for (var i = 0; i < markerList.length; i++) {
+            var markerView = markerList[i];
             var marker = markerView.marker;
 
             if (bounds.contains(marker.getPosition()) ){

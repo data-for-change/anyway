@@ -192,7 +192,7 @@ $(function() {
 //            this.login(); // FIXME causes exceptions, but might be required for discussion
         },
         reloadMarkersIfNeeded: function(attr) {
-            if (this.model.get(attr)) {
+            if (this.clusterMode() || this.model.get(attr)) {
                 this.reloadMarkers();
             } else {
                 this.updateUrl();
@@ -206,12 +206,11 @@ $(function() {
             }
             Backbone.history.navigate(url, true);
         },
+        clusterMode: function () {
+            return this.map.zoom < MINIMAL_ZOOM;
+        },
         zoomChanged: function() {
-            var reset = this.map.zoom >= MINIMAL_ZOOM && this.previousZoom < MINIMAL_ZOOM;
-            if (reset) {
-                // zoomed back in from far away
-                this.resetMarkers();
-            }
+            var reset = this.previousZoom < MINIMAL_ZOOM;
             this.fetchMarkers(reset);
             this.previousZoom = this.map.zoom;
         },
@@ -224,20 +223,25 @@ $(function() {
             this.updateUrl();
             var params = this.buildMarkersParams();
 
+            reset = this.clusterMode() || (typeof reset !== 'undefined' && reset);
+            if (reset) {
+                this.resetMarkers();
+            }
+
             if (!this.markerList.length) {
                 this.loadMarkers();
             }
 
             this.markers.fetch({
                 data : $.param(params),
-                reset: typeof reset !== 'undefined' && reset,
+                reset: reset,
                 success: function() {
                     var sidebarMarkers;
-                    if (this.map.zoom >= MINIMAL_ZOOM) { // close enough
+                    if (this.clusterMode()) {
+                        sidebarMarkers = [];
+                    } else { // close enough
                         this.setMultipleMarkersIcon();
                         sidebarMarkers = this.markerList;
-                    } else {
-                        sidebarMarkers = [];
                     }
                     this.sidebar.updateMarkerList(sidebarMarkers);
                     this.chooseMarker();
@@ -496,9 +500,19 @@ $(function() {
             }
 
             // markers are loaded immediately as they are fetched
+            if (!this.clusterMode() && !this.fitsFilters(model)) {
+                return;
+            }
+
+            var markerView = new MarkerView({model: model, map: this.map}).render();
+
+            model.set("markerView", this.markerList.length);
+            this.markerList.push(markerView);
+        },
+        fitsFilters : function(model) {
             var layer = this.initLayers(model.get("severity"));
             if (!layer) {
-                return;
+                return false;
             }
 
             if (this.model.get("dateRange")) {
@@ -508,26 +522,22 @@ $(function() {
                 var end = this.model.get("dateRange")[1];
 
                 if (createdDate < start || createdDate > end) {
-                    return;
+                    return false;
                 }
             }
 
             var showInaccurate = this.initShowInaccurate();
             if (!showInaccurate && model.get("locationAccuracy") != 1) {
-                return;
+                return false;
             }
 
-            var markerView = new MarkerView({model: model, map: this.map}).render();
-
-            model.set("markerView", this.markerList.length);
-            this.markerList.push(markerView);
+            return true;
         },
-
         loadMarkers : function() {
             this.clearMarkersFromMap();
             this.markers.each(_.bind(this.loadMarker, this));
 
-            if (this.map.zoom >= MINIMAL_ZOOM)
+            if (!this.clusterMode())
                 this.setMultipleMarkersIcon();
 
             this.sidebar.updateMarkerList(this.markerList);

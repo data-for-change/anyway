@@ -156,7 +156,8 @@ class Marker(Base):
             markers = markers.filter(Marker.severity != 3)
         logging.debug('got %d markers from db' % markers.count())
         if is_thin:
-            markers = markers.options(load_only("id", "longitude", "latitude"))
+            markers = markers.options(load_only("id", "longitude", "latitude",
+                                                "created", "severity", "locationAccuracy"))
         return markers
 
     @staticmethod

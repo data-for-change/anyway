@@ -537,11 +537,10 @@ $(function() {
             this.clearMarkersFromMap();
             this.markers.each(_.bind(this.loadMarker, this));
 
-            if (!this.clusterMode()) {
+            if (!this.clusterMode())
                 this.setMultipleMarkersIcon();
-                this.sidebar.updateMarkerList(this.markerList);
-            }
 
+            this.sidebar.updateMarkerList(this.markerList);
             this.chooseMarker();
         },
         clearMarkersFromMap : function() {

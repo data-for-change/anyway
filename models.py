@@ -157,8 +157,7 @@ class Marker(Base):
         if not light:
             markers = markers.filter(Marker.severity != 3)
         if is_thin:
-            markers = markers.options(load_only("id", "longitude", "latitude",
-                                                "created", "severity", "locationAccuracy"))
+            markers = markers.options(load_only("id", "longitude", "latitude"))
         return markers
 
     @staticmethod

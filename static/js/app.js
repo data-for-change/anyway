@@ -192,7 +192,7 @@ $(function() {
 //            this.login(); // FIXME causes exceptions, but might be required for discussion
         },
         reloadMarkersIfNeeded: function(attr) {
-            if (this.model.get(attr)) {
+            if (this.clusterMode() || this.model.get(attr)) {
                 this.reloadMarkers();
             } else {
                 this.updateUrl();
@@ -206,12 +206,12 @@ $(function() {
             }
             Backbone.history.navigate(url, true);
         },
+        clusterMode: function () {
+            return this.map.zoom < MINIMAL_ZOOM;
+        },
         zoomChanged: function() {
-            var reset = this.map.zoom >= MINIMAL_ZOOM && this.previousZoom < MINIMAL_ZOOM;
-            if (reset) {
-                // zoomed back in from far away
-                this.resetMarkers();
-            }
+            this.resetOnMouseUp = true;
+            var reset = this.previousZoom < MINIMAL_ZOOM;
             this.fetchMarkers(reset);
             this.previousZoom = this.map.zoom;
         },
@@ -224,20 +224,28 @@ $(function() {
             this.updateUrl();
             var params = this.buildMarkersParams();
 
+            reset = this.clusterMode() || (typeof reset !== 'undefined' && reset);
+            reset &= this.resetOnMouseUp;
+            google.maps.event.clearListeners(this.map, "mousemove");
+            this.resetOnMouseUp = false;
+            if (reset) {
+                this.resetMarkers();
+            }
+
             if (!this.markerList.length) {
                 this.loadMarkers();
             }
 
             this.markers.fetch({
                 data : $.param(params),
-                reset: typeof reset !== 'undefined' && reset,
+                reset: reset,
                 success: function() {
                     var sidebarMarkers;
-                    if (this.map.zoom >= MINIMAL_ZOOM) { // close enough
+                    if (this.clusterMode()) {
+                        sidebarMarkers = [];
+                    } else { // close enough
                         this.setMultipleMarkersIcon();
                         sidebarMarkers = this.markerList;
-                    } else {
-                        sidebarMarkers = [];
                     }
                     this.sidebar.updateMarkerList(sidebarMarkers);
                     this.chooseMarker();
@@ -321,14 +329,6 @@ $(function() {
             google.maps.event.addListener(this.searchBox, 'places_changed', function() {
                 this.handleSearchBox();
             }.bind(this));
-
-            // Listen for the event fired when the user selects an item from the
-            // pick list. Retrieve the matching places for that item.
-
-            google.maps.event.addListener( this.map, "rightclick", _.bind(this.contextMenuMap, this) );
-            google.maps.event.addListener( this.map, "mouseup", _.bind(this.fetchMarkers, this) );
-            google.maps.event.addListener( this.map, "zoom_changed", _.bind(this.zoomChanged, this) );
-            google.maps.event.addListenerOnce( this.map, 'idle', _.bind(this.fetchMarkers, this) );
 
             this.oms = new OverlappingMarkerSpiderfier(this.map, {markersWontMove: true, markersWontHide: true, keepSpiderfied: true});
             this.oms.addListener("click", function(marker, event) {
@@ -432,6 +432,11 @@ $(function() {
             console.log('Loaded AppRouter');
 
             this.isReady = true;
+            google.maps.event.addListener( this.map, "rightclick", _.bind(this.contextMenuMap, this) );
+            google.maps.event.addListener( this.map, "mouseup", _.bind(this.fetchMarkers, this) );
+            google.maps.event.addListener( this.map, "mousedown", _.bind(this.trackDrag, this) );
+            google.maps.event.addListener( this.map, "zoom_changed", _.bind(this.zoomChanged, this) );
+            google.maps.event.addListenerOnce( this.map, 'idle', _.bind(this.fetchMarkers, this) );
 
             return this;
         },
@@ -466,6 +471,11 @@ $(function() {
                 this.closeInfoWindow();
             }
         },
+        trackDrag: function() {
+            google.maps.event.addListener( this.map, "mousemove", function() {
+                this.resetOnMouseUp = true;
+            });
+        },
         initShowInaccurate: function () {
             var showInaccurate = this.model.get("showInaccurateMarkers");
             if (typeof showInaccurate == 'undefined') {
@@ -496,9 +506,16 @@ $(function() {
             }
 
             // markers are loaded immediately as they are fetched
+            if (this.clusterMode() || this.fitsFilters(model)) {
+                var markerView = new MarkerView({model: model, map: this.map}).render();
+                model.set("markerView", this.markerList.length);
+                this.markerList.push(markerView);
+            }
+        },
+        fitsFilters : function(model) {
             var layer = this.initLayers(model.get("severity"));
             if (!layer) {
-                return;
+                return false;
             }
 
             if (this.model.get("dateRange")) {
@@ -508,29 +525,26 @@ $(function() {
                 var end = this.model.get("dateRange")[1];
 
                 if (createdDate < start || createdDate > end) {
-                    return;
+                    return false;
                 }
             }
 
             var showInaccurate = this.initShowInaccurate();
             if (!showInaccurate && model.get("locationAccuracy") != 1) {
-                return;
+                return false;
             }
 
-            var markerView = new MarkerView({model: model, map: this.map}).render();
-
-            model.set("markerView", this.markerList.length);
-            this.markerList.push(markerView);
+            return true;
         },
-
         loadMarkers : function() {
             this.clearMarkersFromMap();
             this.markers.each(_.bind(this.loadMarker, this));
 
-            if (this.map.zoom >= MINIMAL_ZOOM)
+            if (!this.clusterMode()) {
                 this.setMultipleMarkersIcon();
+                this.sidebar.updateMarkerList(this.markerList);
+            }
 
-            this.sidebar.updateMarkerList(this.markerList);
             this.chooseMarker();
         },
         clearMarkersFromMap : function() {

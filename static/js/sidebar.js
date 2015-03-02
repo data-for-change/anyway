@@ -67,7 +67,6 @@ var SidebarView = Backbone.View.extend({
     updateMarkerList: function(markerList) {
         // Set the marker list to empty array if it's not defined
         markerList = markerList || [];
-        console.log('got a call with ' + markerList.length + ' markers');
 
         var bounds = this.map.getBounds();
 

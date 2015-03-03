@@ -51,6 +51,8 @@ Contributing
 1. Define connection string:
   * bash: `export DATABASE_URL='sqlite:///local.db'`
   * windows shell: `set DATABASE_URL="sqlite:///local.db"`
+  
+ Comment: you'll need the raw data accident files as input, alternatively ask us for the production connection string and goto step 5
 2. First time, create tables: `python models.py`
 3. Extract the [example accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTSjNMUXYyeW4yQkk/view?usp=sharing) into `/static/data/lms` (or ask permission and get the [complete accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTdWdPMXV5c2gycW8/view?usp=sharing)).
 4. Populate the data (markers etc.): `python process.py`

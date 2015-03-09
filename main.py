@@ -213,9 +213,12 @@ def main(marker_id):
     elif marker:
         context['end_date'] = year2timestamp(marker.created.year + 1)
     for attr in 'show_fatal', 'show_severe', 'show_light', 'show_inaccurate',\
-                'zoom', 'map_only':
+                'zoom':
         if attr in request.values:
             context[attr] = request.values[attr]
+    if 'map_only' in request.values:
+        if request.values['map_only'] in ('1', 'true'):
+            context['map_only'] = 1
     if 'lat' in request.values and 'lon' in request.values:
         context['coordinates'] = (request.values['lat'], request.values['lon'])
     return render_template('index.html', **context)

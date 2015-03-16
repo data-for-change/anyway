@@ -433,8 +433,8 @@ $(function() {
 
             this.isReady = true;
             google.maps.event.addListener( this.map, "rightclick", _.bind(this.contextMenuMap, this) );
-            google.maps.event.addListener( this.map, "mouseup", _.bind(this.fetchMarkers, this) );
             google.maps.event.addListener( this.map, "mousedown", _.bind(this.trackDrag, this) );
+            google.maps.event.addListener( this.map, "center_changed", _.bind(this.fetchMarkers, this) );
             google.maps.event.addListener( this.map, "zoom_changed", _.bind(this.zoomChanged, this) );
             google.maps.event.addListenerOnce( this.map, 'idle', _.bind(this.fetchMarkers, this) );
 

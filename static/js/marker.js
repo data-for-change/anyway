@@ -87,7 +87,8 @@ var MarkerView = Backbone.View.extend({
         var dateRange = app.model.get("dateRange");
         var center = app.map.getCenter();
         return "/?marker=" + this.model.get("id") + "&" + app.getCurrentUrlParams();
-    }, clickMarker : function() {
+    },
+    clickMarker : function() {
         this.highlight();
         app.closeInfoWindow();
 

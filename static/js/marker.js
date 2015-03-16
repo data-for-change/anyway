@@ -104,10 +104,47 @@ var MarkerView = Backbone.View.extend({
         });
     },
     highlight : function() {
+    	if (app.oms.markersNearMarker(this.marker, true)[0]){
+    		this.marker.setIcon(this.getIcon());
+    	}
         this.marker.setAnimation(google.maps.Animation.BOUNCE);
+
+
+        // ##############################
+        // # Another option, if we don't want the somewhat unintuitive experience where an icon start's bouncing,
+        // # but other icons in the same place stay still, will be to do like so: (option 2)
+        // ##############################
+
+        // _.each(app.oms.markersNearMarker(this.marker), function (marker){
+
+        //     marker.setAnimation(google.maps.Animation.BOUNCE);
+
+        // });
+        // this.marker.setAnimation(google.maps.Animation.BOUNCE);
+
+        // ## END (option 2)
+
     },
     unhighlight : function() {
+    	if (app.oms.markersNearMarker(this.marker, true)[0]){
+    		this.marker.setIcon(this.getIcon("multiple", SEVERITY_VARIOUS));
+    	}
         this.marker.setAnimation(null);
+
+
+        // ##############################
+        // # Option 2
+        // ##############################
+
+        // _.each(app.oms.markersNearMarker(this.marker), function (marker){
+
+        //     marker.setAnimation(null);
+
+        // });
+        // this.marker.setAnimation(null);
+
+        // ## END (option 2)
+
     },
 	updateFollowing : function() {
 		if (this.model.get("following")) {

@@ -96,8 +96,6 @@ def markers(methods=["GET", "POST"]):
                                             fatal, severe, light, inaccurate,
                                             is_thin, yield_per=50)
         if request.values.get('format') == 'csv':
-            if not markers:
-                raise Exception("No markers available.")
             return Response(generate_csv(results, is_thin), headers={
                 "Content-Type": "text/csv",
                 "Content-Disposition": 'attachment; filename="data.csv"'

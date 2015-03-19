@@ -282,10 +282,14 @@ $(function() {
             });
         },
         downloadCsv: function() {
-          params = this.buildMarkersParams();
-          params["format"] = "csv";
+            if (this.markers.length > 0) {
+                params = this.buildMarkersParams();
+                params["format"] = "csv";
 
-          window.location = this.markers.url + "?" + $.param(params);
+                window.location = this.markers.url + "?" + $.param(params);
+            }else {
+            $('#empty-csv-dialog').modal('show');
+          }
         },
         render : function() {
             this.isReady = false;

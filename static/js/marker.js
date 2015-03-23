@@ -50,7 +50,7 @@ var MarkerView = Backbone.View.extend({
 		}
 		this.$el.find(".type").text(TYPE_STRING[this.model.get("type")]);
 		var display_user = "";
-		if (user.first_name && user.last_name) {
+		if (user && user.first_name && user.last_name) {
 			display_user = user.first_name + " " + user.last_name;
 		} else {
 			display_user = 'הלשכה המרכזית לסטטיסטיקה';

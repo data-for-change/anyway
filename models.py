@@ -27,7 +27,7 @@ class User(Base):
     facebook_id = Column(String(50))
     facebook_url = Column(String(100))
     is_admin = Column(Boolean(), default=False)
-    markers = relationship("Marker", backref="users")
+    discussions = relationship("DiscussionMarker", backref="users")
     followers = relationship("Follower", backref="users")
 
     def serialize(self):
@@ -42,10 +42,26 @@ class User(Base):
         }
 
 
-class Marker(Base):
+class MarkerMixin(object):
+    id = Column(BigInteger, primary_key=True)
+    title = Column(String(100))
+    created = Column(DateTime, default=datetime.datetime.utcnow)
+    latitude = Column(Float())
+    longitude = Column(Float())
+
+    @staticmethod
+    def format_description(field, value):
+        # if the field's value is a static localizable field, fetch it.
+        if field in localization.get_supported_tables():
+            value = localization.get_field(field, value).decode(db_encoding)
+        name = localization.get_field(field).decode(db_encoding)
+        return u"{0}: {1}".format(name, value)
+
+
+class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
     __tablename__ = "markers"
     __table_args__ = (
-        Index('long_lat_idx', 'latitude', 'longitude'),
+        Index('acc_long_lat_idx', 'latitude', 'longitude'),
     )
 
     MARKER_TYPE_ACCIDENT = 1
@@ -57,30 +73,17 @@ class Marker(Base):
     MARKER_TYPE_CITY = 7
     MARKER_TYPE_OR_YAROK = 8
 
-    id = Column(BigInteger, primary_key=True)
-    user = Column(Integer, ForeignKey("users.id"))
-    title = Column(String(100))
     description = Column(Text)
     type = Column(Integer)
     subtype = Column(Integer)
     severity = Column(Integer)
-    created = Column(DateTime, default=datetime.datetime.utcnow)
-    latitude = Column(Float())
-    longitude = Column(Float())
     address = Column(Text)
     locationAccuracy = Column(Integer)
-    followers = relationship("Follower", backref="markers")
 
-    def format_description(self, field, value):
-        # if the field's value is a static localizable field, fetch it.
-        if field in localization.get_supported_tables():
-            value = localization.get_field(field, value).decode(db_encoding)
-        name = localization.get_field(field).decode(db_encoding)
-        return u"{0}: {1}".format(name, value)
-
-    def json_to_description(self, msg):
+    @staticmethod
+    def json_to_description(msg):
         description = json.loads(msg, encoding=db_encoding)
-        return "\n".join([self.format_description(field, value) for field, value in description.iteritems()])
+        return "\n".join([Marker.format_description(field, value) for field, value in description.iteritems()])
 
     def serialize(self, is_thin=False):
         fields = {
@@ -94,13 +97,10 @@ class Marker(Base):
         if not is_thin:
             fields.update({
                 "title": self.title,
-                "description": self.json_to_description(self.description),
+                "description": Marker.json_to_description(self.description),
                 "address": self.address,
                 "type": self.type,
                 "subtype": self.subtype,
-
-                # TODO: fix relationship
-                "user": self.user.serialize() if self.user else "",
 
                 # TODO: fix query
                 "followers": [],  # [x.user.serialize() for x in Follower.all().filter("marker", self).fetch(100)],
@@ -175,11 +175,39 @@ class Marker(Base):
         )
 
 
+class DiscussionMarker(MarkerMixin, Base):
+    __tablename__ = "discussions"
+    __table_args__ = (
+        Index('disc_long_lat_idx', 'latitude', 'longitude'),
+    )
+
+    user = Column(Integer, ForeignKey("users.id"))
+    followers = relationship("Follower", backref="markers")
+
+    def serialize(self):
+        fields = {
+            "id": str(self.id),
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+            "created": self.created.isoformat(),
+            "title": self.title,
+            "user": self.user.serialize() if self.user else "",
+
+            # TODO: fix query
+            "followers": [],  # [x.user.serialize() for x in Follower.all().filter("marker", self).fetch(100)],
+
+            # TODO: fix query
+            "following": None,
+        }
+        return fields
+
+
+
 class Follower(Base):
     __tablename__ = "followers"
 
     user = Column(Integer, ForeignKey("users.id"), primary_key=True)
-    marker = Column(BigInteger, ForeignKey("markers.id"), primary_key=True)
+    marker = Column(BigInteger, ForeignKey("discussions.id"), primary_key=True)
 
 
 

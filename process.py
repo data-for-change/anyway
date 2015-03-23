@@ -151,7 +151,6 @@ def import_accidents(provider_code, accidents, streets, roads):
         lng, lat = coordinates_converter.convert(accident[field_names.x_coordinate], accident[field_names.y_coordinate])
 
         marker = Marker(
-            user=None,
             id=int("{0}{1}".format(provider_code, accident[field_names.id])),
             title="Accident",
             description=json.dumps(load_extra_data(accident, streets, roads), encoding=models.db_encoding),

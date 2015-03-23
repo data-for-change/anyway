@@ -208,35 +208,30 @@
             </div>
         </div>
 
+        <div class="modal hide fade" id="discussion-dialog">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3>יצירת דיון</h3>
+            </div>
+            <div class="modal-body">
+                <div id="disqus_thread"></div>
+                <script type="text/javascript">
+                    /* * * CONFIGURATION VARIABLES * * */
+                    var disqus_shortname = 'oway';
 
-        <div id="marker-dialog-template" style="display: none">
-            <div class="modal hide fade">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h3>הוסף סימון</h3>
-                </div>
-                <div class="modal-body">
-                    <form class="form-horizontal">
-                        <div class="control-group">
-                            <label class="control-label" for="title">כותרת</label>
-                            <div class="controls">
-                                <input type="text" id="title" name="title" placeholder="הכנס כותרת">
-                            </div>
-                        </div>
-                        <div class="control-group">
-                            <label class="control-label" for="description">תיאור</label>
-                            <div class="controls">
-                                <textarea class="input-large" id="description" name="description"></textarea>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <a class="btn close-button">סגור</a>
-                    <a class="btn btn-primary save-button">שמור סימון</a>
-                </div>
+                    /* * * DON'T EDIT BELOW THIS LINE * * */
+                    (function() {
+                        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                    })();
+                </script>
+            </div>
+            <div class="modal-footer">
+                <a class="btn close-button" data-dismiss="modal" aria-hidden="true">סגור</a>
             </div>
         </div>
+
         <div id="marker-content-template" style="display: none">
             <img class="profile-image" style="float: left" />
             <h4 class="title"></h4>
@@ -318,7 +313,6 @@
             "js/libs/date.js",
             "js/libs/daterangepicker.js",
             "js/libs/js-itm.js",
-            "js/markerdialog.js",
             "js/marker.js",
             "js/sidebar.js",
             "js/contextmenu.js",

@@ -1,5 +1,4 @@
-var ADD_MARKER_OFFER = "הוסף הצעה";
-var ADD_MARKER_PETITION = "הוסף עצומה";
+var ADD_DISCUSSION = "צרו דיון";
 
 
 var SEVERITY_FATAL = 1;
@@ -197,8 +196,6 @@ $(function() {
             "click .download-csv" : "downloadCsv"
         },
         initialize : function() {
-            _.bindAll(this, "openCreateDialog");
-
             this.markers = new MarkerCollection();
             this.model = new Backbone.Model();
             this.markerList = [];
@@ -668,25 +665,10 @@ $(function() {
                 items : [
                     {
                         icon : "plus-sign",
-                        text : ADD_MARKER_OFFER,
-                        callback : this.openCreateDialog
+                        text : ADD_DISCUSSION,
+                        href : "#discussion-dialog"
                     }
-                    /*,
-                    {
-                        icon : "plus-sign",
-                        text : ADD_MARKER_PETITION,
-                        callback : this.openCreateDialog
-                    }
-                    */
                 ]}).render(e);
-        },
-        openCreateDialog : function(type, event) {
-            if (this.createDialog) this.createDialog.close();
-            this.createDialog = new MarkerDialog({
-                type: type,
-                event: event,
-                markers: this.markers
-            }).render();
         },
         handleSearchBox : function() {
             var places = this.searchBox.getPlaces();

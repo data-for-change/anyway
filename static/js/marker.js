@@ -157,11 +157,13 @@ var MarkerView = Backbone.View.extend({
 		}
 
 		this.$followerList.empty();
-		for (var i = 0; i < this.model.get("followers").length; i++) {
-			var follower = this.model.get("followers")[i].facebook_id;
-			var image = "https://graph.facebook.com/" + follower + "/picture";
-			this.$followerList.append($("<img>").attr("src", image));
-		}
+        var followers = this.model.get('followers');
+        for (var i = 0; followers && i < followers.length; i++) {
+            var follower = this.model.get("followers")[i].facebook_id;
+            var image = "https://graph.facebook.com/" + follower + "/picture";
+            this.$followerList.append($("<img>").attr("src", image));
+        }
+
 	},
 	clickFollow : function() {
 		this.model.save({following: true}, {wait:true});

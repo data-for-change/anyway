@@ -128,7 +128,8 @@ var MarkerView = Backbone.View.extend({
     },
     unhighlight : function() {
     	if (app.oms.markersNearMarker(this.marker, true)[0]){
-    		this.marker.setIcon(this.getIcon("multiple", SEVERITY_VARIOUS));
+    		var group = this.marker.view.model.get("groupID") -1;
+    		this.marker.setIcon(MULTIPLE_ICONS[app.groupsSeverities[group]]);
     	}
         this.marker.setAnimation(null);
 

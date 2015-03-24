@@ -275,9 +275,33 @@ $(function() {
             return params;
         },
         setMultipleMarkersIcon: function() {
+            var groupID = 1;
+            var groupsSeverities = this.groupsSeverities = [];
+
             _.each(this.oms.markersNearAnyOtherMarker(), function(marker) {
-                marker.icon = getIcon("multiple", SEVERITY_VARIOUS);
+                marker.view.model.unset("groupID");
+            });
+
+            _.each(this.oms.markersNearAnyOtherMarker(), function(marker) {
                 marker.title = 'מספר תאונות בנקודה זו';
+                var groupHead = marker.view.model;
+                if(!groupHead.get("groupID")){
+                    var groupHeadSeverity = groupHead.get('severity');
+                    groupHead.set("groupID",groupID);
+                    groupsSeverities.push(groupHeadSeverity);
+                    _.each(this.oms.markersNearMarker(marker), function(markerNear){
+                        var markerNearModel = markerNear.view.model;
+                        markerNearModel.set("groupID",groupID);
+                        if ((groupHeadSeverity != markerNearModel.get('severity'))){
+                            groupsSeverities[groupsSeverities.length -1] = SEVERITY_VARIOUS;
+                        }
+                    });
+                    groupID++;
+                }
+            },this);
+
+            _.each(this.oms.markersNearAnyOtherMarker(), function(marker){
+                marker.icon = MULTIPLE_ICONS[groupsSeverities[marker.view.model.get("groupID") -1]];
             });
         },
         downloadCsv: function() {

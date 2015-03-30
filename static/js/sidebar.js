@@ -5,6 +5,8 @@ var CHECKBOX_ICONS = [
     ["deadly-hover.png",     "severe-hover.png",     "medium-hover.png"]
 ];
 
+var CLUSTER_MODE_SIDEBAR_TEXT = 'התקרב על מנת לצפות ברשימת התאונות';
+
 var SidebarView = Backbone.View.extend({
     className: "info-window",
     events: {
@@ -64,7 +66,12 @@ var SidebarView = Backbone.View.extend({
 
         return this;
     },
-    updateMarkerList: function(markerList) {
+    showClusterMessage: function() {
+        this.$currentViewList.empty();
+        this.$el.find(".current-view-count").text('');
+        this.$el.find(".current-view").append('<li>' + CLUSTER_MODE_SIDEBAR_TEXT +'</li>');
+    },
+    reloadMarkerList: function(markerList) {
         // Set the marker list to empty array if it's not defined
         markerList = markerList || [];
 
@@ -74,7 +81,6 @@ var SidebarView = Backbone.View.extend({
         markerList = _.sortBy(markerList, function(marker) {
             return -1 * moment(marker.model.get("created")).unix();
         });
-
 
         var $viewList = $('<ul/>');
         var markerCount = 0;
@@ -103,7 +109,6 @@ var SidebarView = Backbone.View.extend({
         this.$currentViewList.empty().append($viewList.find("li"));
 
         this.$el.find(".current-view-count").text(markerCount);
-
     },
     updateCheckboxIcon: function(img, hover) {
         var checked;

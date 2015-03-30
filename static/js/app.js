@@ -239,18 +239,17 @@ $(function() {
             this.markers.fetch({
                 data : $.param(params),
                 reset: reset,
-                success: function() {
-                    var sidebarMarkers;
-                    if (this.clusterMode()) {
-                        sidebarMarkers = [];
-                    } else { // close enough
-                        this.setMultipleMarkersIcon();
-                        sidebarMarkers = this.markerList;
-                    }
-                    this.sidebar.updateMarkerList(sidebarMarkers);
-                    this.chooseMarker();
-                }.bind(this)
+                success: this.reloadSidebar.bind(this)
             });
+        },
+        reloadSidebar: function() {
+            if (this.clusterMode()) {
+                this.sidebar.showClusterMessage();
+            } else { // close enough
+                this.setMultipleMarkersIcon();
+                this.sidebar.reloadMarkerList(this.markerList);
+            }
+            this.chooseMarker();
         },
         buildMarkersParams : function() {
             var bounds = this.map.getBounds();
@@ -544,12 +543,7 @@ $(function() {
             this.clearMarkersFromMap();
             this.markers.each(_.bind(this.loadMarker, this));
 
-            if (!this.clusterMode()) {
-                this.setMultipleMarkersIcon();
-                this.sidebar.updateMarkerList(this.markerList);
-            }
-
-            this.chooseMarker();
+            this.reloadSidebar();
         },
         clearMarkersFromMap : function() {
             if (this.markerList) {

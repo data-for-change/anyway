@@ -216,6 +216,7 @@ $(function() {
             this.previousZoom = this.map.zoom;
         },
         reloadMarkers: function() {
+            this.oms.unspiderfy();
             this.clearMarkersFromMap();
             this.fetchMarkers();
         },
@@ -540,6 +541,7 @@ $(function() {
             return true;
         },
         loadMarkers : function() {
+            this.oms.unspiderfy();
             this.clearMarkersFromMap();
             this.markers.each(_.bind(this.loadMarker, this));
 

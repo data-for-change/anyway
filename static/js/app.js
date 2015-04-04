@@ -367,10 +367,16 @@ $(function() {
                 _.each(markers, function(marker){
                     marker.icon = marker.view.getIcon();
                     marker.title = marker.view.getTitle();
+                    marker.view.model.set("currentlySpiderfied",true);
                 });
                 this.clickedMarker = true;
             }.bind(this));
             this.oms.addListener("unspiderfy", this.setMultipleMarkersIcon.bind(this));
+            this.oms.addListener("unspiderfy", function(markers){
+                _.each(markers, function(marker){
+                    marker.view.model.unset("currentlySpiderfied");
+                });
+            }.bind(this));
             console.log('Loaded OverlappingMarkerSpiderfier');
 
             var mcOptions = {maxZoom: MINIMAL_ZOOM - 1, minimumClusterSize: 1};

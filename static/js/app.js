@@ -276,9 +276,33 @@ $(function() {
             return params;
         },
         setMultipleMarkersIcon: function() {
+            var groupID = 1;
+            var groupsSeverities = this.groupsSeverities = [];
+
             _.each(this.oms.markersNearAnyOtherMarker(), function(marker) {
-                marker.icon = getIcon("multiple", SEVERITY_VARIOUS);
+                marker.view.model.unset("groupID");
+            });
+
+            _.each(this.oms.markersNearAnyOtherMarker(), function(marker) {
                 marker.title = 'מספר תאונות בנקודה זו';
+                var groupHead = marker.view.model;
+                if(!groupHead.get("groupID")){
+                    var groupHeadSeverity = groupHead.get('severity');
+                    groupHead.set("groupID",groupID);
+                    groupsSeverities.push(groupHeadSeverity);
+                    _.each(this.oms.markersNearMarker(marker), function(markerNear){
+                        var markerNearModel = markerNear.view.model;
+                        markerNearModel.set("groupID",groupID);
+                        if ((groupHeadSeverity != markerNearModel.get('severity'))){
+                            groupsSeverities[groupsSeverities.length -1] = SEVERITY_VARIOUS;
+                        }
+                    });
+                    groupID++;
+                }
+            },this);
+
+            _.each(this.oms.markersNearAnyOtherMarker(), function(marker){
+                marker.icon = MULTIPLE_ICONS[groupsSeverities[marker.view.model.get("groupID") -1]];
             });
         },
         downloadCsv: function() {
@@ -344,10 +368,16 @@ $(function() {
                 _.each(markers, function(marker){
                     marker.icon = marker.view.getIcon();
                     marker.title = marker.view.getTitle();
+                    marker.view.model.set("currentlySpiderfied",true);
                 });
                 this.clickedMarker = true;
             }.bind(this));
             this.oms.addListener("unspiderfy", this.setMultipleMarkersIcon.bind(this));
+            this.oms.addListener("unspiderfy", function(markers){
+                _.each(markers, function(marker){
+                    marker.view.model.unset("currentlySpiderfied");
+                });
+            }.bind(this));
             console.log('Loaded OverlappingMarkerSpiderfier');
 
             var mcOptions = {maxZoom: MINIMAL_ZOOM - 1, minimumClusterSize: 1};

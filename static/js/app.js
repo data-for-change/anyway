@@ -178,6 +178,7 @@ $(function() {
                 .bind("destroy", this.loadMarkers, this)
                 .bind("add", this.loadMarker, this)
                 .bind("change:currentModel", this.chooseMarker, this);
+
             this.model
                 .bind("change:user", this.updateUser, this)
                 .bind("change:showFatal",
@@ -267,7 +268,7 @@ $(function() {
             // Pass start and end dates as unix time (in seconds)
             params["start_date"] = dateRange[0].getTime() / 1000;
             params["end_date"] = dateRange[1].getTime() / 1000;
-            this.initLayers("all");
+            this.initLayers();
             params["show_fatal"] = this.model.get("showFatal");
             params["show_severe"] = this.model.get("showSevere");
             params["show_light"] = this.model.get("showLight");
@@ -518,10 +519,10 @@ $(function() {
             }
             return showInaccurate;
         }, initLayers: function (severity) {
-            if (severity == "all") {
-                severities = [SEVERITY_FATAL, SEVERITY_SEVERE, SEVERITY_LIGHT];
-            } else {
+            if (severity) {
                 severities = [severity];
+            } else {
+                severities = [SEVERITY_FATAL, SEVERITY_SEVERE, SEVERITY_LIGHT];
             }
             for (var i = 0; i < severities.length; i++) {
                 var attr = SEVERITY_ATTRIBUTES[severities[i]];

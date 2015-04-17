@@ -106,7 +106,7 @@ var MarkerView = Backbone.View.extend({
     },
     highlight : function() {
     	if (app.oms.markersNearMarker(this.marker, true)[0]  && !this.model.get("currentlySpiderfied")){
-    		this.marker.setIcon(this.getIcon());
+            this.resetOpacitySeverity();
     	}
         this.marker.setAnimation(google.maps.Animation.BOUNCE);
 
@@ -128,8 +128,7 @@ var MarkerView = Backbone.View.extend({
     },
     unhighlight : function() {
     	if (app.oms.markersNearMarker(this.marker, true)[0] && !this.model.get("currentlySpiderfied")){
-            var group = this.model.get("groupID") -1;
-            this.marker.setIcon(MULTIPLE_ICONS[app.groupsSeverities[group]]);
+            this.opacitySeverityForGroup();
     	}
         this.marker.setAnimation(null);
 
@@ -188,5 +187,16 @@ var MarkerView = Backbone.View.extend({
 				// console.log("published");
 			}
 		});
-	}
+	},
+    resetOpacitySeverity : function() {
+        this.marker.icon = this.getIcon();
+        this.marker.opacity = this.model.get("locationAccuracy") == 1 ? 1.0 : INACCURATE_MARKER_OPACITY;
+    },
+    opacitySeverityForGroup : function() {
+        var group = this.model.get("groupID") -1;
+        this.marker.icon = MULTIPLE_ICONS[app.groupsData[group].severity];
+        if (app.groupsData[group].opacity != 'opaque'){
+            this.marker.opacity = INACCURATE_MARKER_OPACITY / app.groupsData[group].opacity;
+        }
+    }
 });

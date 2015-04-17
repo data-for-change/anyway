@@ -277,7 +277,7 @@ $(function() {
         },
         setMultipleMarkersIcon: function() {
             var groupID = 1;
-            var groupsSeverities = this.groupsSeverities = [];
+            var groupsData = [];
 
             _.each(this.oms.markersNearAnyOtherMarker(), function(marker) {
                 marker.view.model.unset("groupID");
@@ -287,22 +287,32 @@ $(function() {
                 marker.title = 'מספר תאונות בנקודה זו';
                 var groupHead = marker.view.model;
                 if(!groupHead.get("groupID")){
-                    var groupHeadSeverity = groupHead.get('severity');
                     groupHead.set("groupID",groupID);
-                    groupsSeverities.push(groupHeadSeverity);
+                    var groupHeadSeverity = groupHead.get('severity');
+                    var groupsHeadOpacity = groupHead.get("locationAccuracy") == 1 ? 'opaque' : 1;
+                    groupsData.push({severity: groupHeadSeverity, opacity: groupsHeadOpacity});
+
                     _.each(this.oms.markersNearMarker(marker), function(markerNear){
                         var markerNearModel = markerNear.view.model;
                         markerNearModel.set("groupID",groupID);
                         if ((groupHeadSeverity != markerNearModel.get('severity'))){
-                            groupsSeverities[groupsSeverities.length -1] = SEVERITY_VARIOUS;
+                            groupsData[groupsData.length -1].severity = SEVERITY_VARIOUS;
+                        }
+                        if (groupsData[groupsData.length -1].opacity != 'opaque'){
+                            if (markerNearModel.get("locationAccuracy") == 1){
+                                groupsData[groupsData.length -1].opacity = 'opaque';
+                            }else {
+                                groupsData[groupsData.length -1].opacity++;
+                            }
                         }
                     });
                     groupID++;
                 }
             },this);
+            this.groupsData = groupsData;
 
             _.each(this.oms.markersNearAnyOtherMarker(), function(marker){
-                marker.icon = MULTIPLE_ICONS[groupsSeverities[marker.view.model.get("groupID") -1]];
+                marker.view.opacitySeverityForGroup();
             });
         },
         downloadCsv: function() {
@@ -366,8 +376,8 @@ $(function() {
             this.oms.addListener("spiderfy", function(markers) {
                 this.closeInfoWindow();
                 _.each(markers, function(marker){
-                    marker.icon = marker.view.getIcon();
                     marker.title = marker.view.getTitle();
+                    marker.view.resetOpacitySeverity();
                     marker.view.model.set("currentlySpiderfied",true);
                 });
                 this.clickedMarker = true;

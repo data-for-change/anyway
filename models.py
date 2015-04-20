@@ -3,7 +3,7 @@
 import json
 import logging
 
-from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, BigInteger, Index, desc
+from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, BigInteger, Index, desc, event
 from sqlalchemy.orm import relationship, load_only
 from flask.ext.sqlalchemy import SQLAlchemy
 import datetime
@@ -12,6 +12,7 @@ import utilities
 from database import Base
 
 db_encoding = 'utf-8'
+markerIndexTableName = 'marker_index'
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -41,7 +42,7 @@ class User(Base):
             "is_admin": self.is_admin,
         }
 
-
+		
 class MarkerMixin(object):
     id = Column(BigInteger, primary_key=True)
     title = Column(String(100))
@@ -175,6 +176,12 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         )
 
 
+@event.listens_for(Marker, 'after_insert')
+def receive_after_insert(mapper, connection, target):
+	markerIndex = Table(markerIndexTableName, Baes.metadata)
+	markerIndex.insert().values(id=target.id, longitude=target.longitude, latitude=target.latitude)
+
+
 class DiscussionMarker(MarkerMixin, Base):
     __tablename__ = "discussions"
     __table_args__ = (
@@ -208,8 +215,14 @@ class Follower(Base):
 
     user = Column(Integer, ForeignKey("users.id"), primary_key=True)
     marker = Column(BigInteger, ForeignKey("discussions.id"), primary_key=True)
+	
 
 
+	
+def init_marker_index_table(tableName, metadata, engine)
+	return Table(tableName, metadata, autoload=True, autoload_with=engine)
+
+def updatae_marker_index_table(
 
 def init_db():
     from database import engine
@@ -220,6 +233,9 @@ def init_db():
 
     print "Creating all tables"
     Base.metadata.create_all(bind=engine)
+	markerIndex = init_marker_index_table(markerIndexTableName, Base.metadata, engine)
+	
+
 
 
 if __name__ == "__main__":

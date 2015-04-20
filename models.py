@@ -5,10 +5,8 @@ import logging
 
 from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, BigInteger, Index, desc
 from sqlalchemy.orm import relationship, load_only
-from flask.ext.sqlalchemy import SQLAlchemy
 import datetime
 import localization
-import utilities
 from database import Base
 
 db_encoding = 'utf-8'
@@ -41,11 +39,11 @@ class User(Base):
             "is_admin": self.is_admin,
         }
 
-
+		
 class MarkerMixin(object):
     id = Column(BigInteger, primary_key=True)
     title = Column(String(100))
-    created = Column(DateTime, default=datetime.datetime.utcnow)
+    created = Column(DateTime, default=datetime.datetime.utcnow, index=True)
     latitude = Column(Float())
     longitude = Column(Float())
 
@@ -202,13 +200,11 @@ class DiscussionMarker(MarkerMixin, Base):
         return fields
 
 
-
 class Follower(Base):
     __tablename__ = "followers"
 
     user = Column(Integer, ForeignKey("users.id"), primary_key=True)
     marker = Column(BigInteger, ForeignKey("discussions.id"), primary_key=True)
-
 
 
 def init_db():
@@ -220,6 +216,8 @@ def init_db():
 
     print "Creating all tables"
     Base.metadata.create_all(bind=engine)
+	
+
 
 
 if __name__ == "__main__":

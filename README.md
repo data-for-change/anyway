@@ -24,8 +24,6 @@ Contributing
 
 ## Installing dependencies
 
-* Make sure you have the latest [JDK](www.oracle.com/technetwork/java/javase/downloads) installed.
-
 ### Ubuntu
 1. `sudo apt-get install python-pip python-dev libpq-dev`
 

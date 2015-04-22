@@ -44,9 +44,6 @@ nosetests.xml
 
 venv
 
-# vagrant
-/.vagrant
-
 # data files
 /static/data/lms
 

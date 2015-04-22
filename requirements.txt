@@ -6,7 +6,6 @@ MarkupSafe==0.18
 SQLAlchemy==0.9
 Werkzeug==0.9.4
 blinker==1.3
-closure==20140110
 newrelic==2.36.0.30
 pyproj==1.9.4
 webassets==0.10.1

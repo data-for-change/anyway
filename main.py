@@ -193,7 +193,7 @@ def main(marker_id):
     # at this point the marker id is just a running number, and the
     # LMS is in the description and needs to be promoted to a DB
     # field so we can query it. We also need to add a provider id.
-    context = {'minimal_zoom': MINIMAL_ZOOM}
+    context = {'minimal_zoom': MINIMAL_ZOOM, 'url': request.host}
     marker = None
     if 'marker' in request.values:
         markers = Marker.get_marker(request.values['marker'])

@@ -213,26 +213,18 @@ $(function() {
         clusterMode: function () {
             return this.map.zoom < MINIMAL_ZOOM;
         },
-        zoomChanged: function() {
-            this.resetOnMouseUp = true;
-            var reset = this.previousZoom < MINIMAL_ZOOM;
-            this.fetchMarkers(reset);
-            this.previousZoom = this.map.zoom;
-        },
         reloadMarkers: function() {
             this.oms.unspiderfy();
             this.clearMarkersFromMap();
             this.fetchMarkers();
         },
-        fetchMarkers : function(reset) {
+        fetchMarkers : function() {
             if (!this.isReady) return;
             this.updateUrl();
             var params = this.buildMarkersParams();
 
-            reset = this.clusterMode() || (typeof reset !== 'undefined' && reset);
-            reset &= this.resetOnMouseUp;
-            google.maps.event.clearListeners(this.map, "mousemove");
-            this.resetOnMouseUp = false;
+            var reset = this.clusterMode() || this.previousZoom < MINIMAL_ZOOM;
+            this.previousZoom = this.map.zoom;
             if (reset) {
                 this.resetMarkers();
             }
@@ -479,10 +471,8 @@ $(function() {
 
             this.isReady = true;
             google.maps.event.addListener( this.map, "rightclick", _.bind(this.contextMenuMap, this) );
-            google.maps.event.addListener( this.map, "mousedown", _.bind(this.trackDrag, this) );
-            google.maps.event.addListener( this.map, "mouseup", _.bind(this.fetchMarkers, this) );
+            google.maps.event.addListener( this.map, "idle", _.bind(this.fetchMarkers, this) );
             google.maps.event.addListener( this.map, "zoom_changed", _.bind(this.zoomChanged, this) );
-            google.maps.event.addListenerOnce( this.map, 'idle', _.bind(this.fetchMarkers, this) );
 
             return this;
         },
@@ -517,11 +507,7 @@ $(function() {
                 this.closeInfoWindow();
             }
         },
-        trackDrag: function() {
-            google.maps.event.addListener( this.map, "mousemove", function() {
-                this.resetOnMouseUp = true;
-            });
-        }, initShowInaccurate: function () {
+        initShowInaccurate: function () {
             var showInaccurate = this.model.get("showInaccurateMarkers");
             if (typeof showInaccurate == 'undefined') {
                 this.model.set("showInaccurateMarkers", SHOW_INACCURATE);

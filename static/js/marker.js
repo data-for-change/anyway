@@ -13,7 +13,7 @@ var MarkerView = Backbone.View.extend({
         _.bindAll(this, "clickMarker");
 	},
 	render : function() {
-		var user = this.model.get("user");
+//		var user = this.model.get("user");
 
 		var markerPosition = new google.maps.LatLng(this.model.get("latitude"), this.model.get("longitude"));
 
@@ -42,30 +42,30 @@ var MarkerView = Backbone.View.extend({
 		this.$el.find(".description").text(this.model.get("description"));
 		this.$el.find(".creation-date").text("תאריך: " +
                 moment(this.model.get("created")).format("LLLL"));
-		if (user) {
-		    this.$el.find(".profile-image").attr("src", "https://graph.facebook.com/" + user.facebook_id + "/picture");
-		} else {
+//		if (user) {
+//		    this.$el.find(".profile-image").attr("src", "https://graph.facebook.com/" + user.facebook_id + "/picture");
+//		} else {
 			this.$el.find(".profile-image").attr("src", "/static/img/lamas.png");
 			this.$el.find(".profile-image").attr("width", "50px");
-		}
+//		}
 		this.$el.find(".type").text(TYPE_STRING[this.model.get("type")]);
-		var display_user = "";
-		if (user && user.first_name && user.last_name) {
-			display_user = user.first_name + " " + user.last_name;
-		} else {
+//		var display_user = "";
+//		if (user && user.first_name && user.last_name) {
+//			display_user = user.first_name + " " + user.last_name;
+//		} else {
 			display_user = 'הלשכה המרכזית לסטטיסטיקה';
-		}
+//		}
 		this.$el.find(".added-by").text("נוסף על ידי " + display_user);
-		this.$followButton = this.$el.find(".follow-button");
-		this.$unfollowButton = this.$el.find(".unfollow-button");
-		this.$followerList = this.$el.find(".followers");
-		this.$deleteButton = this.$el.find(".delete-button");
-
-		this.updateFollowing();
-
-		if (app.model.get("user") && app.model.get("user").is_admin) {
-			this.$deleteButton.show();
-		}
+//		this.$followButton = this.$el.find(".follow-button");
+//		this.$unfollowButton = this.$el.find(".unfollow-button");
+//		this.$followerList = this.$el.find(".followers");
+//		this.$deleteButton = this.$el.find(".delete-button");
+//
+//		this.updateFollowing();
+//
+//		if (app.model.get("user") && app.model.get("user").is_admin) {
+//			this.$deleteButton.show();
+//		}
 
 		return this;
 	},
@@ -147,33 +147,33 @@ var MarkerView = Backbone.View.extend({
         // ## END (option 2)
 
     },
-	updateFollowing : function() {
-		if (this.model.get("following")) {
-			this.$followButton.hide();
-			this.$unfollowButton.show();
-		} else {
-			this.$followButton.show();
-			this.$unfollowButton.hide();
-		}
-
-		this.$followerList.empty();
-        var followers = this.model.get('followers');
-        for (var i = 0; followers && i < followers.length; i++) {
-            var follower = this.model.get("followers")[i].facebook_id;
-            var image = "https://graph.facebook.com/" + follower + "/picture";
-            this.$followerList.append($("<img>").attr("src", image));
-        }
-
-	},
-	clickFollow : function() {
-		this.model.save({following: true}, {wait:true});
-	},
-	clickUnfollow : function() {
-		this.model.save({following: false}, {wait:true});
-	},
-	clickDelete : function() {
-		this.model.destroy();
-	},
+//	updateFollowing : function() {
+//		if (this.model.get("following")) {
+//			this.$followButton.hide();
+//			this.$unfollowButton.show();
+//		} else {
+//			this.$followButton.show();
+//			this.$unfollowButton.hide();
+//		}
+//
+//		this.$followerList.empty();
+//        var followers = this.model.get('followers');
+//        for (var i = 0; followers && i < followers.length; i++) {
+//            var follower = this.model.get("followers")[i].facebook_id;
+//            var image = "https://graph.facebook.com/" + follower + "/picture";
+//            this.$followerList.append($("<img>").attr("src", image));
+//        }
+//
+//	},
+//	clickFollow : function() {
+//		this.model.save({following: true}, {wait:true});
+//	},
+//	clickUnfollow : function() {
+//		this.model.save({following: false}, {wait:true});
+//	},
+//	clickDelete : function() {
+//		this.model.destroy();
+//	},
 	clickShare : function() {
 		FB.ui({
 			method: "feed",

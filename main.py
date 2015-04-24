@@ -129,63 +129,63 @@ def marker(self, key_name):
         marker = Marker.get_by_key_name(key_name)
         marker.delete()
 
-@app.route("/login", methods=["POST"])
-@user_optional
-def login():
-    user = get_user()
-    if user:
-        return make_response(json.dumps(user.serialize()))
-
-    if request.json:
-        facebook_data = request.json
-        user_id = facebook_data["userID"]
-        access_token = facebook_data["accessToken"]
-        user_details = json.loads(urllib.urlopen("https://graph.facebook.com/me?access_token=" + access_token).read())
-        # login successful
-        if user_details["id"] == user_id:
-            user = User.query.filter(User.email == user_details["email"]).scalar()
-            if not user:
-                user = User(
-                    email = user_details["email"],
-                    first_name = user_details["first_name"],
-                    last_name = user_details["last_name"],
-                    username = user_details["username"],
-                    facebook_id = user_details["id"],
-                    facebook_url = user_details["link"],
-                    access_token = facebook_data["accessToken"]
-                )
-            else:
-                user.access_token = facebook_data["accessToken"]
-
-            db_session.add(user)
-            set_user(user)
-            return make_response(json.dumps(user.serialize()))
-        else:
-            raise Exception("Error in logging in.")
-    else:
-        raise Exception("No login data or user logged in.")
-
-
-@app.route("/logout")
-@user_required
-def do_logout():
-    logout()
-
-@app.route("/follow/(.*)")
-@user_required
-def follow(key_name):
-    marker = Marker.get_by_key_name(key_name)
-    follower = Follower.all().filter("marker", marker).filter("user", self.user).get()
-    if not follower:
-        Follower(parent = marker, marker = marker, user = self.user).put()
-
-@app.route("/unfollow/(.*)")
-@user_required
-def unfollow(key_name):
-    marker = Marker.get_by_key_name(key_name)
-    follower = Follower.all().filter("marker", marker).filter("user", self.user).get()
-    if follower:
-        follower.delete()
+# @app.route("/login", methods=["POST"])
+# @user_optional
+# def login():
+#     user = get_user()
+#     if user:
+#         return make_response(json.dumps(user.serialize()))
+#
+#     if request.json:
+#         facebook_data = request.json
+#         user_id = facebook_data["userID"]
+#         access_token = facebook_data["accessToken"]
+#         user_details = json.loads(urllib.urlopen("https://graph.facebook.com/me?access_token=" + access_token).read())
+#         # login successful
+#         if user_details["id"] == user_id:
+#             user = User.query.filter(User.email == user_details["email"]).scalar()
+#             if not user:
+#                 user = User(
+#                     email = user_details["email"],
+#                     first_name = user_details["first_name"],
+#                     last_name = user_details["last_name"],
+#                     username = user_details["username"],
+#                     facebook_id = user_details["id"],
+#                     facebook_url = user_details["link"],
+#                     access_token = facebook_data["accessToken"]
+#                 )
+#             else:
+#                 user.access_token = facebook_data["accessToken"]
+#
+#             db_session.add(user)
+#             set_user(user)
+#             return make_response(json.dumps(user.serialize()))
+#         else:
+#             raise Exception("Error in logging in.")
+#     else:
+#         raise Exception("No login data or user logged in.")
+#
+#
+# @app.route("/logout")
+# @user_required
+# def do_logout():
+#     logout()
+#
+# @app.route("/follow/(.*)")
+# @user_required
+# def follow(key_name):
+#     marker = Marker.get_by_key_name(key_name)
+#     follower = Follower.all().filter("marker", marker).filter("user", self.user).get()
+#     if not follower:
+#         Follower(parent = marker, marker = marker, user = self.user).put()
+#
+# @app.route("/unfollow/(.*)")
+# @user_required
+# def unfollow(key_name):
+#     marker = Marker.get_by_key_name(key_name)
+#     follower = Follower.all().filter("marker", marker).filter("user", self.user).get()
+#     if follower:
+#         follower.delete()
 
 @app.route('/', defaults={'marker_id': None})
 @app.route('/<int:marker_id>')

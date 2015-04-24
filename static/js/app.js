@@ -162,12 +162,10 @@ $(function() {
         el : $("#app"),
         events : {
             "click #map_canvas" : "clickMap",
-            "click .fb-login" : "requireLogin",
-            "click .fb-logout" : "logout",
             "click .download-csv" : "downloadCsv"
         },
         initialize : function() {
-            _.bindAll(this, "clickContext");
+            _.bindAll(this, "openCreateDialog");
 
             this.markers = new MarkerCollection();
             this.model = new Backbone.Model();
@@ -193,7 +191,6 @@ $(function() {
                 .bind("change:showInaccurateMarkers",
                     _.bind(this.reloadMarkersIfNeeded, this, "showInaccurateMarkers"))
                 .bind("change:dateRange", this.reloadMarkers, this);
-//            this.login(); // FIXME causes exceptions, but might be required for discussion
         },
         reloadMarkersIfNeeded: function(attr) {
             if (this.clusterMode() || this.model.get(attr)) {
@@ -610,21 +607,16 @@ $(function() {
                     {
                         icon : "plus-sign",
                         text : ADD_MARKER_OFFER,
-                        callback : this.clickContext
+                        callback : this.openCreateDialog
                     }
                     /*,
                     {
                         icon : "plus-sign",
                         text : ADD_MARKER_PETITION,
-                        callback : this.clickContext
+                        callback : this.openCreateDialog
                     }
                     */
                 ]}).render(e);
-        },
-        clickContext : function(item, event) {
-            this.requireLogin(_.bind(function() {
-                this.openCreateDialog(item, event);
-            }, this));
         },
         openCreateDialog : function(type, event) {
             if (this.createDialog) this.createDialog.close();
@@ -633,74 +625,6 @@ $(function() {
                 event: event,
                 markers: this.markers
             }).render();
-
-        },
-        requireLogin : function(callback) {
-            if (this.model.get("user")) {
-                if (typeof callback == "function") callback();
-                return;
-            }
-
-            FB.getLoginStatus(_.bind(function(response) {
-                if (response.status === 'connected') {
-                    var uid = response.authResponse.userID;
-                    var accessToken = response.authResponse.accessToken;
-
-                    this.login(response.authResponse, callback);
-
-                } else {
-                    // the user is logged in to Facebook,
-                    // but has not authenticated your app
-                    FB.login(_.bind(function(response) {
-                        if (response.authResponse) {
-                            this.login(response.authResponse, callback);
-                        } else {
-                            // console.log('User cancelled login or did not fully authorize.');
-                        }
-                    }, this), {scope:"email"});
-                }
-            }, this));
-
-        },
-        login : function(authResponse, callback) {
-            console.log("Logging in...");
-            $.ajax({
-                url: "/login",
-                type: "post",
-                data: JSON.stringify(authResponse),
-                contentType: "application/json",
-                traditional: true,
-                dataType: "json",
-                success: _.bind(function(user) {
-                    if (user) {
-                        this.model.set("user", user);
-                        if (typeof callback == "function") callback();
-                    }
-                }, this),
-                error: _.bind(function() {
-
-                }, this)
-            });
-        },
-        logout : function() {
-            this.model.set("user", null);
-            FB.logout();
-        },
-        updateUser : function() {
-            var user = this.model.get("user");
-
-            if (user) {
-                this.$el.find(".fb-login").hide();
-
-                this.$el.find(".user-details").show();
-                this.$el.find(".profile-picture").attr("src", 'https://graph.facebook.com/' + user.facebook_id + '/picture');
-                this.$el.find(".profile-name").text(user.first_name);
-
-            } else {
-                this.$el.find(".fb-login").show();
-                this.$el.find(".user-details").hide();
-
-            }
         },
         handleSearchBox : function() {
             var places = this.searchBox.getPlaces();

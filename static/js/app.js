@@ -472,7 +472,6 @@ $(function() {
             this.isReady = true;
             google.maps.event.addListener( this.map, "rightclick", _.bind(this.contextMenuMap, this) );
             google.maps.event.addListener( this.map, "idle", _.bind(this.fetchMarkers, this) );
-            google.maps.event.addListener( this.map, "zoom_changed", _.bind(this.zoomChanged, this) );
 
             return this;
         },

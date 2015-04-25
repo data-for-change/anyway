@@ -496,6 +496,7 @@ $(function() {
                 app.infoWindow.close();
                 app.infoWindow = null;
                 this.updateUrl();
+                $(document).off('keydown',app.ESCinfoWindow);
             }
         },
         clickMap : function(e) {
@@ -658,7 +659,13 @@ $(function() {
                 "&show_light=" + (app.model.get("showLight") ? 1 : 0) +
                 "&show_inaccurate=" + (app.model.get("showInaccurateMarkers") ? 1 : 0) +
                 "&zoom=" + app.map.zoom + "&lat=" + center.lat() + "&lon=" + center.lng();
-		}
+		},
+        ESCinfoWindow: function(event) {
+            if (event.keyCode == 27) {
+                app.closeInfoWindow();
+                console.log('ESC pressed');
+            }
+        }
     });
 });
 

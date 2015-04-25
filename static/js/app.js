@@ -303,7 +303,9 @@ $(function() {
             this.groupsData = groupsData;
 
             _.each(this.oms.markersNearAnyOtherMarker(), function(marker){
-                marker.view.opacitySeverityForGroup();
+                if (!marker.view.model.get("currentlySpiderfied")){
+                    marker.view.opacitySeverityForGroup();
+                }
             });
         },
         downloadCsv: function() {
@@ -373,12 +375,12 @@ $(function() {
                 });
                 this.clickedMarker = true;
             }.bind(this));
-            this.oms.addListener("unspiderfy", this.setMultipleMarkersIcon.bind(this));
             this.oms.addListener("unspiderfy", function(markers){
                 _.each(markers, function(marker){
                     marker.view.model.unset("currentlySpiderfied");
                 });
             }.bind(this));
+            this.oms.addListener("unspiderfy", this.setMultipleMarkersIcon.bind(this));
             console.log('Loaded OverlappingMarkerSpiderfier');
 
             var mcOptions = {maxZoom: MINIMAL_ZOOM - 1, minimumClusterSize: 1};

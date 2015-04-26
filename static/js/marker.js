@@ -103,6 +103,9 @@ var MarkerView = Backbone.View.extend({
         google.maps.event.addListener(app.infoWindow,"closeclick",function(){
             app.fetchMarkers();
         });
+
+        $(document).keydown(app.ESCinfoWindow);
+
     },
     highlight : function() {
     	if (app.oms.markersNearMarker(this.marker, true)[0]  && !this.model.get("currentlySpiderfied")){

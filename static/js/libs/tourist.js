@@ -42,9 +42,9 @@
 
     Base.prototype.skipButtonTemplate = '<button class="btn btn-default btn-sm pull-right tour-next">Skip this step →</button>';
 
-    Base.prototype.nextButtonTemplate = '<button class="btn btn-primary btn-sm pull-right tour-next">Next step →</button>';
+    Base.prototype.nextButtonTemplate = '<button class="btn btn-primary btn-sm pull-right tour-next">הבא</button>';
 
-    Base.prototype.finalButtonTemplate = '<button class="btn btn-primary btn-sm pull-right tour-next">Finish up</button>';
+    Base.prototype.finalButtonTemplate = '<button class="btn btn-primary btn-sm pull-right tour-next">סיום</button>';
 
     Base.prototype.closeButtonTemplate = '<a class="btn btn-close tour-close" href="#"><i class="icon icon-remove"></i></a>';
 

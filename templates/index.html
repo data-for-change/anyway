@@ -14,17 +14,20 @@
         {% assets filters="yui_css", output="css/app.min.css",
             "css/bootstrap.rtl.css",
             "css/style.css",
-            "css/daterangepicker.css" %}
+            "css/daterangepicker.css",
+	    "css/tourist.css"	 %}
             <link rel="stylesheet" href="{{ ASSET_URL }}" />
         {% endassets %}
-
     </head>
-    <body style="margin: 0; position: relative; width: 100%; height: 100%">
+
+     <body style="margin: 0; position: relative; width: 100%; height: 100%">
+        
+	
         <div class='notifications top-left' id="notification"></div>
         <div id="app">
-
-          <div class="navbar navbar-fixed-top">
-                <div class="navbar-inner" style="padding-right: 10px{{ '; display: none' if map_only }}">
+		
+	       <div class="navbar navbar-fixed-top">
+                <div class="navbar-inner" id="step1Component" style="padding-right: 10px{{ '; display: none' if map_only }}">
                     <div style="float: left; padding: 5px">
                         <div class="fb-like" data-layout="standard" data-action="like" data-show-faces="true" data-share="true" style="vertical-align: bottom"></div>
                         <a id="js-embed-link" class="btn" style="height: 10px; line-height: 10px; vertical-align: top" data-toggle="modal" data-target="#embed">קישור לתצוגה הנוכחית</a>
@@ -46,11 +49,13 @@
                 </a>
                 </div>
             </div>
+
+
             <div class="main" style="position: fixed; width: 100%; height: 100%; box-sizing: border-box{{ '; padding-top: 40px; padding-right: 250px' if not map_only }}">
               <input id="pac-input" class="controls" type="text" placeholder="חפש מיקום" style="{{ 'display: none' if map_only }}">
                 <div id="map_canvas" style="width: 100%; height: 100%; box-sizing: border-box"></div>
             </div>
-            <div class="sidebar-container" style="position: absolute; right: 0; top: 0;
+            <div id="step2Component" class="sidebar-container" style="position: absolute; right: 0; top: 0;
             bottom: 0; width: 250px; background: white; padding-top: 40px;
             {{ 'display: none' if map_only }}">
                 <!--
@@ -209,7 +214,7 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
         <div id="sidebar-template" style="display: none">
             <div class="sidebar-title">סינון לפי חומרה</div>
             <ul>
-                <li><img class="checkbox-severity" data-type="1" data-checked="true" /> תאונות קטלניות</li>
+                <li><img class="checkbox-severity" data-type="1" data-checked="true"/> תאונות קטלניות</li>
                 <li><img class="checkbox-severity" data-type="2" data-checked="true" /> תאונות קשות</li>
                 <li><img class="checkbox-severity" data-type="3" data-checked="true" /> תאונות קלות</li>
                 <li><img class="checkbox-accuracy" data-type="4" data-checked="false" /> תאונות שמיקומן משוער</li>
@@ -270,6 +275,7 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
             "js/contextmenu.js",
             "js/map_style.js",
             "js/clipboard.js",
+            "js/libs/tourist.js",
             "js/app.js" %}
             <script type="text/javascript" src="{{ ASSET_URL }}"></script>
         {% endassets %}
@@ -390,6 +396,12 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
             ga('create', 'UA-48606400-1', 'anyway.herokuapp.com');
             ga('send', 'pageview');
         </script>
+	
+	<script type="text/javascript" src="../static/js/tutorial.js"> </script>
     </body>
+	
+	
 
 </html>
+
+

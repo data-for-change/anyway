@@ -383,7 +383,33 @@ $(function() {
             this.oms.addListener("unspiderfy", this.setMultipleMarkersIcon.bind(this));
             console.log('Loaded OverlappingMarkerSpiderfier');
 
-            var mcOptions = {maxZoom: MINIMAL_ZOOM - 1, minimumClusterSize: 1};
+            var clusterStyle = [
+                {
+                    textColor: 'black',
+                    url: '/static/img/icons/cluster_1.png',
+                    height: 42,
+                    width: 42
+                },
+                {
+                    textColor: 'black',
+                    url: '/static/img/icons/cluster_2.png',
+                    height: 52,
+                    width: 52
+                },
+                {
+                    textColor: 'black',
+                    url: '/static/img/icons/cluster_3.png',
+                    height: 62,
+                    width: 62
+                },
+                {
+                    textColor: 'black',
+                    url: '/static/img/icons/cluster_4.png',
+                    height: 72,
+                    width: 72
+                }
+            ];
+            var mcOptions = {maxZoom: MINIMAL_ZOOM - 1, minimumClusterSize: 1, styles: clusterStyle};
             this.clusterer = new MarkerClusterer(this.map, [], mcOptions);
             console.log('Loaded MarkerClusterer');
 

@@ -215,7 +215,8 @@ def import_to_datastore(directory, provider_code, batch_size):
             return
         print("importing data from directory: {}".format(directory))
         now = datetime.now()
-        acc = [ac for ac in import_accidents(provider_code=provider_code, **files_from_lms)]
+        acc = list(import_accidents(provider_code=provider_code, **files_from_lms))
+        print(int((datetime.now() - now).total_seconds()))
         db.session.execute(Marker.__table__.insert(), acc)
         db.session.commit()
         took = int((datetime.now() - now).total_seconds())

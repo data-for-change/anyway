@@ -1,5 +1,4 @@
 from __future__ import print_function
-import os
 from csv import DictReader
 from flask import Flask
 import pyproj

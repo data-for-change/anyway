@@ -3,8 +3,8 @@
 import json
 import logging
 
-from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, Text, BigInteger, Index, desc
-from sqlalchemy.orm import load_only
+from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc
+from sqlalchemy.orm import relationship, load_only
 import datetime
 import localization
 from database import Base
@@ -61,16 +61,15 @@ class User(Base):
 MARKER_TYPE_ACCIDENT = 1
 MARKER_TYPE_DISCUSSION = 2
 
-        
-class MarkerMixin(object):
-
-    id = Column(BigInteger, primary_key=True)
-    type = Column(Integer)
-    title = Column(String(100))
-    created = Column(DateTime, default=datetime.datetime.utcnow, index=True)
+class Point(object):
+    id = Column(Integer, primary_key=True)
     latitude = Column(Float())
     longitude = Column(Float())
-
+        
+class MarkerMixin(Point):
+    type = Column(Integer)
+    title = Column(String(100))
+    created = Column(DateTime, default=datetime.datetime.now, index=True)
 
     __mapper_args__ = {
         'polymorphic_on': type
@@ -84,6 +83,38 @@ class MarkerMixin(object):
         name = localization.get_field(field).decode(db_encoding)
         return u"{0}: {1}".format(name, value)
 
+class HighlightPoint(Point, Base):
+    __tablename__ = "highlight_markers"
+    __table_args__ = (
+        Index('highlight_long_lat_idx', 'latitude', 'longitude'),
+    )
+
+    HIGHLIGHT_TYPE_USER_SEARCH = 1
+    HIGHLIGHT_TYPE_USER_GPS = 2
+
+    created = Column(DateTime, default=datetime.datetime.now)
+    type = Column(Integer)
+
+    def serialize(self):
+        return {
+            "id": str(self.id),
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+            "type": self.type,
+        }
+
+    def update(self, data):
+        self.type = data["type"]
+        self.latitude = data["latitude"]
+        self.longitude = data["longitude"]
+
+    @classmethod
+    def parse(cls, data):
+        return cls(
+            type=data["type"],
+            latitude=data["latitude"],
+            longitude=data["longitude"]
+        )
 
 class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
     __tablename__ = "markers"

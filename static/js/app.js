@@ -4,6 +4,9 @@ var NEW_FEATURES = "עדכן אותי לגבי תכונות חדשות"
 var MARKER_TYPE_ACCIDENT = 1
 var MARKER_TYPE_DISCUSSION = 2
 
+var HIGHLIGHT_TYPE_USER_SEARCH = 1;
+var HIGHLIGHT_TYPE_USER_GPS = 2;
+
 var SEVERITY_FATAL = 1;
 var SEVERITY_SEVERE = 2;
 var SEVERITY_LIGHT = 3;
@@ -142,16 +145,21 @@ $(function() {
     var AppRouter = Backbone.Router.extend({
         routes: {
             "" : "navigateEmpty",
-            "/?marker=:id&start_date=:start&end_date=:end&show_fatal=:showFatal&show_severe=:showSevere&show_light=:showLight&show_inaccurate=:showInaccurate&zoom=:zoom&lat=:lat&lon=:lon" : "navigate"
+            "start_date=:start&end_date=:end&show_fatal=:showFatal&show_severe=:showSevere&show_light=:showLight&show_inaccurate=:showInaccurate&zoom=:zoom&lat=:lat&lon=:lon" : "navigateNoMarker",
+            "marker=:id&start_date=:start&end_date=:end&show_fatal=:showFatal&show_severe=:showSevere&show_light=:showLight&show_inaccurate=:showInaccurate&zoom=:zoom&lat=:lat&lon=:lon" : "navigateSelectedMarker"
         },
-        navigate: function(id, start, end, showFatal, showSevere, showLight, showInaccurate, zoom, lat, lon) {
-            app.model.set("currentMarker", parseInt(id));
+        navigateNoMarker: function(start, end, showFatal, showSevere, showLight, showInaccurate, zoom, lat, lon) {
+            this.navigateSelectedMarker(null ,start, end, showFatal, showSevere, showLight, showInaccurate, zoom, lat, lon);
+        },
+        navigateSelectedMarker: function(id, start, end, showFatal, showSevere, showLight, showInaccurate, zoom, lat, lon) {
+            if (id)
+                app.model.set("currentMarker", parseInt(id));
             app.model.set("dateRange", [new Date(start), new Date(end)]);
             app.model.set("showFatal", showFatal);
             app.model.set("showSevere", showSevere);
             app.model.set("showLight", showLight);
-            app.model.set("showInaccurateMarkers", showInaccurate != 0);
-            app.map.setZoom(zoom);
+            app.model.set("showInaccurateMarkers", showInaccurate);
+            app.map.setZoom(parseInt(zoom));
             app.map.setCenter(new google.maps.LatLng(lat, lon));
         },
         navigateEmpty: function() {
@@ -200,7 +208,7 @@ $(function() {
                 .bind("change:showInaccurateMarkers",
                     _.bind(this.reloadMarkersIfNeeded, this, "showInaccurateMarkers"))
                 .bind("change:dateRange", this.reloadMarkers, this);
-        },
+        },  
         reloadMarkersIfNeeded: function(attr) {
             if (this.clusterMode() || this.model.get(attr)) {
                 this.reloadMarkers();
@@ -212,7 +220,7 @@ $(function() {
         updateUrl: function(url) {
             if (typeof url == 'undefined') {
                 if (app.infoWindow) return;
-                url = "/?" + this.getCurrentUrlParams();
+                url = "/#" + this.getCurrentUrlParams();
             }
             Backbone.history.navigate(url, true);
         },
@@ -226,7 +234,7 @@ $(function() {
         },
         fetchMarkers : function() {
             if (!this.isReady) return;
-            this.updateUrl();
+
             var params = this.buildMarkersParams();
             if (!params) return;
 
@@ -518,6 +526,7 @@ $(function() {
                     var longitude = position.coords.longitude;
                     this.myLocation = new google.maps.LatLng(latitude, longitude);
                     this.setCenterWithMarker(this.myLocation);
+                    this.createHighlightPoint(latitude, longitude, HIGHLIGHT_TYPE_USER_GPS);
                 }.bind(this));
             } else {
                 this.myLocation = this.defaultLocation;
@@ -545,7 +554,7 @@ $(function() {
         initShowInaccurate: function () {
             var showInaccurate = this.model.get("showInaccurateMarkers");
             if (typeof showInaccurate == 'undefined') {
-                this.model.set("showInaccurateMarkers", SHOW_INACCURATE);
+                this.model.set("showInaccurateMarkers", SHOW_INACCURATE ? 1 : 0);
                 showInaccurate = SHOW_INACCURATE;
             }
             return showInaccurate;
@@ -707,11 +716,20 @@ $(function() {
             var places = this.searchBox.getPlaces();
             if (places && places.length > 0) {
               var place = places[0];
+              this.createHighlightPoint(place.geometry.location.lat(), place.geometry.location.lng(), HIGHLIGHT_TYPE_USER_SEARCH);
               this.setCenterWithMarker(place.geometry.location);
               this.map.setZoom(INIT_ZOOM);
             }
          },
-         setCenterWithMarker: function(loc) {
+        createHighlightPoint : function(lat, lng, highlightPointType) {
+            if (isNaN(lat) || isNaN(lng) || isNaN(highlightPointType)) return;
+            $.post("highlightpoints", JSON.stringify({
+                    "latitude": lat,
+                    "longitude": lng,
+                    "type": highlightPointType
+                }));
+        },
+        setCenterWithMarker: function(loc) {
             this.closeInfoWindow();
             this.map.setCenter(loc);
             this.fetchMarkers();
@@ -751,10 +769,10 @@ $(function() {
             var center = app.map.getCenter();
             return "start_date=" + moment(dateRange[0]).format("YYYY-MM-DD") +
                 "&end_date=" + moment(dateRange[1]).format("YYYY-MM-DD") +
-                "&show_fatal=" + (app.model.get("showFatal") ? 1 : 0) +
-                "&show_severe=" + (app.model.get("showSevere") ? 1 : 0) +
-                "&show_light=" + (app.model.get("showLight") ? 1 : 0) +
-                "&show_inaccurate=" + (app.model.get("showInaccurateMarkers") ? 1 : 0) +
+                "&show_fatal=" + (parseInt(app.model.get("showFatal")) || 0) +
+                "&show_severe=" + (parseInt(app.model.get("showSevere")) || 0) +
+                "&show_light=" + (parseInt(app.model.get("showLight")) || 0) +
+                "&show_inaccurate=" + (parseInt(app.model.get("showInaccurateMarkers")) || 0) +
                 "&zoom=" + app.map.zoom + "&lat=" + center.lat() + "&lon=" + center.lng();
 		},
         ESCinfoWindow: function(event) {

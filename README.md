@@ -71,6 +71,11 @@ Then you can simply start working by running the `anyway` command.
 ## IDE
 [PyCharm](https://www.jetbrains.com/pycharm) is recommended for development.
 
+## Testing
+Server side testing cand be done by adding python tests under `tests` folder, using a `test_*.py` file name pattern.
+
+To run tests: `python -m unittest discover ./tests`.
+
 
 Heroku deployment
 -----------------

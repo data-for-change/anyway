@@ -150,19 +150,19 @@ def import_accidents(provider_code, accidents, streets, roads):
             continue
         lng, lat = coordinates_converter.convert(accident[field_names.x_coordinate], accident[field_names.y_coordinate])
 
-        marker = Marker(
-            id=int("{0}{1}".format(provider_code, accident[field_names.id])),
-            title="Accident",
-            description=json.dumps(load_extra_data(accident, streets, roads), encoding=models.db_encoding),
-            address=get_address(accident, streets),
-            latitude=lat,
-            longitude=lng,
-            type=Marker.MARKER_TYPE_ACCIDENT,
-            subtype=int(accident[field_names.accident_type]),
-            severity=int(accident[field_names.accident_severity]),
-            created=parse_date(accident),
-            locationAccuracy=int(accident[field_names.igun]),
-        )
+        marker = {
+            "id":int("{0}{1}".format(provider_code, accident[field_names.id])),
+            "title":"Accident",
+            "description":json.dumps(load_extra_data(accident, streets, roads), encoding=models.db_encoding),
+            "address":get_address(accident, streets),
+            "latitude":lat,
+            "longitude":lng,
+            "type":Marker.MARKER_TYPE_ACCIDENT,
+            "subtype":int(accident[field_names.accident_type]),
+            "severity":int(accident[field_names.accident_severity]),
+            "created":parse_date(accident),
+            "locationAccuracy":int(accident[field_names.igun])
+        }
 
         yield marker
     accidents.close()
@@ -210,27 +210,16 @@ def import_to_datastore(directory, provider_code, batch_size):
     goes through all the files in a given directory, parses and commits them
     """
     try:
-        imported = 0
         files_from_lms = dict(get_files(directory))
         if len(files_from_lms) == 0:
             return
         print("importing data from directory: {}".format(directory))
         now = datetime.now()
-        for i, marker in enumerate(import_accidents(provider_code=provider_code, **files_from_lms)):
-            imported = i
-            progress_wheel.show()
-            db.session.add(marker)
-            if i % batch_size == 0 and i > 0:
-                print("\rcommitting ({0} items done)...".format(i))
-                db.session.commit()
-                print("commited.")
-
-        # commit any left sessions, if any were imported
-        if imported > 0:
-            db.session.commit()
-
+        accidents = list(import_accidents(provider_code=provider_code, **files_from_lms))
+        db.session.execute(Marker.__table__.insert(), accidents)
+        db.session.commit()
         took = int((datetime.now() - now).total_seconds())
-        print("imported {0} items from directory: {1} in {2} seconds".format(imported, directory, took))
+        print("imported {0} items from directory: {1} in {2} seconds".format(len(accidents), directory, took))
     except Exception as e:
         directories_not_processes[directory] = e.message
 

@@ -129,7 +129,39 @@ var SUBTYPE_STRING = [
     "פגיעה ממטען של רכב"
     ];
 
+//agamadd- infowindow to use as tour
+var infowindow;
+function step2next(){
+    infowindow.close();
+    tour1.init();
+    tour1.start();
+}
+function step2prev(){
+    infowindow.close();
+    tour.prev();
+}
+
+//agam add- add default val to search input
+var tourLocation =0;
+function tourAddInput(){
+    var a = document.getElementById('pac-input');
+        a.value="זבוטנסקי 74, פתח תקווה";
+    }
+function tourClickInput(){
+    var a = document.getElementById('pac-input');
+        a.value="זבוטנסקי 74, פתח תקווה";
+        google.maps.event.trigger( a, 'focus');
+        google.maps.event.trigger( a, 'keydown', {keyCode:13});
+        tourLocation = 2;
+    }
 $(function() {
+    //agam add- tour button On Click trigger
+    $('#tourOnClick').on('click', function () {
+        //clear cache
+        tour.restart()
+        // Start the tour
+        tour.start();
+    });
     var AppRouter = Backbone.Router.extend({
         routes: {
             "" : "navigateEmpty",
@@ -349,12 +381,10 @@ $(function() {
             } else {
                 this.goToMyLocation();
             }
-
             // search box:
             // Create the search box and link it to the UI element.
             var input = document.getElementById('pac-input');
             this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
-
             this.searchBox = new google.maps.places.SearchBox(input);
 
             google.maps.event.addListener(this.searchBox, 'places_changed', function() {
@@ -674,6 +704,29 @@ $(function() {
               position: loc,
               map: this.map
             });
+             //agam add- tour find location for step 2
+            if (tourLocation == 2)
+            {
+                var location = this.locationMarker;
+                var contentString = '<p>המיקום שחיפשת יסומן באיקון הזה </br> מסביבו תוכלו לראות אייקונים שמייצגים תאונות עם נפגעים.  </p>';
+                var titleString = ' המיקום שחיפשת ';
+                var htmlTourString =
+                '<div class ="scrollFix" id="step-2" role="tooltip">'+
+                    '<h3 class="popover-title">'+titleString+'</h3>'+
+                    '<div class="popover-content">'+contentString+'</div>'+
+                    '<nav class="popover-navigation-rtl">'+
+                        '<div class="btn-group" role="group">'+
+                            '<button onclick="step2prev()" class="btn btn-default" data-role="prev"><< הקודם'+'</button>'+
+                            '<span data-role="separator"> | '+'</span>'+
+                            '<button onclick="step2next()" class="btn btn-default" data-role="next">הבא >>'+'</button>'+
+                        '</div>'+
+                    '</nav>'+
+                '</div>';
+                infowindow = new google.maps.InfoWindow({
+                    content: htmlTourString
+                });
+                infowindow.open(this.map, location);
+            }
           },
           getCurrentUrlParams: function () {
             var dateRange = app.model.get("dateRange");

@@ -16,7 +16,7 @@
             "css/bootstrap.rtl.css",
             "css/style.css",
             "css/daterangepicker.css",
-	    "css/tourist.css"	 %}
+	    "css/bootstrap-tour.min.css"	 %}
             <link rel="stylesheet" href="{{ ASSET_URL }}" />
         {% endassets %}
     </head>
@@ -29,6 +29,7 @@
 		
 	       <div class="navbar navbar-fixed-top">
                 <div class="navbar-inner" id="step1Component" style="padding-right: 10px{{ '; display: none' if map_only }}">
+                    <button class="btn btn-default" id="tourOnClick">הדרכה</button>
                     <div style="float: left; padding: 5px">
                         <div class="fb-like" data-layout="standard" data-action="like" data-show-faces="false" data-share="true" style="vertical-align: bottom"></div>
                         <a href="https://play.google.com/store/apps/details?id=il.co.anyway.app">
@@ -59,7 +60,7 @@
 
 
             <div class="main" style="position: fixed; width: 100%; height: 100%; box-sizing: border-box{{ '; padding-top: 40px; padding-right: 250px' if not map_only }}">
-              <input id="pac-input" class="controls" type="text" placeholder="חפש מיקום" style="{{ 'display: none' if map_only }}">
+              <input id="pac-input" class="controls" type="text" placeholder="חפש מיקום" style="{{ 'display: block' if map_only }}">
                 <div id="map_canvas" style="width: 100%; height: 100%; box-sizing: border-box"></div>
             </div>
             <div id="step2Component" class="sidebar-container" style="position: absolute; right: 0; top: 0;
@@ -311,7 +312,7 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
             "js/contextmenu.js",
             "js/map_style.js",
             "js/clipboard.js",
-            "js/libs/tourist.js",
+            "js/libs/bootstrap-tour.min.js",
             "js/app.js" %}
             <script type="text/javascript" src="{{ ASSET_URL }}"></script>
         {% endassets %}
@@ -431,9 +432,11 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
 
             ga('create', 'UA-48606400-1', 'anyway.herokuapp.com');
             ga('send', 'pageview');
+
+
         </script>
 	
-	<script type="text/javascript" src="../static/js/tutorial.js"> </script>
+    <script type="text/javascript" src="../static/js/tour.js"> </script>
     </body>
 	
 	

@@ -10,8 +10,6 @@ var tour = new Tour({
     <div class='popover-content'></div> \
     <nav class='popover-navigation-rtl'> \
         <div class='btn-group' role='group'> \
-            <button class='btn btn-default' data-role='prev'><< הקודם</button> \
-            <span data-role='separator'>|</span>\
             <button class='btn btn-default' data-role='next'>הבא >></button> \
         </div> \
     </nav> \
@@ -55,8 +53,6 @@ var tour1 = new Tour({
     <div class='popover-content'></div> \
     <nav class='popover-navigation-rtl'> \
         <div class='btn-group' role='group'> \
-            <button class='btn btn-default' data-role='prev'><< הקודם</button> \
-            <span data-role='separator'>|</span>\
             <button class='btn btn-default' data-role='next'>הבא >></button> \
         </div> \
     </nav> \

@@ -44,6 +44,9 @@ var tour = new Tour({
 tour.init();
 // Start the tour
 tour.start();
+$("#tourOnClick").click(function(){
+  tour.start();
+});
 var tour1 = new Tour({
     template: "<div class='popover tour' role='tooltip' > \
     <div class='arrow'></div>\

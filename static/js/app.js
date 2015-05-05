@@ -708,8 +708,8 @@ $(function() {
             if (tourLocation == 2)
             {
                 var location = this.locationMarker;
-                var contentString = '<p>המיקום שחיפשת יסומן באיקון הזה </br> מסביבו תוכלו לראות אייקונים שמייצגים תאונות עם נפגעים.  </p>';
-                var titleString = ' המיקום שחיפשת ';
+                var contentString = '<p>המיקום שחיפשתם יסומן באיקון הזה. </br> מסביבו תוכלו לראות אייקונים שמייצגים תאונות עם נפגעים.  </p>';
+                var titleString = ' המיקום שחיפשתם ';
                 var htmlTourString =
                 '<div class ="scrollFix" id="step-2" role="tooltip">'+
                     '<h3 class="popover-title">'+titleString+'</h3>'+

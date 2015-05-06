@@ -1,6 +1,10 @@
 /**
  * Created by root on 30/04/15.
  */
+//agam add - var for infowindow,checkStepsAdd,tourLocation to use as tour
+var infowindow;
+var checkStepsAdd = false;
+var tourLocation = 0;
 var tour1 = new Tour({
     storage: window.localStorage,
     template: "<div class='popover tour' role='tooltip' > \
@@ -21,7 +25,7 @@ var tour1 = new Tour({
     animation: true,
     title: "ברוכים הבאים!",
     placement: 'bottom',
-    content: '<p>ברוכים הבאים ל-ANYWAY, על גבי המפה ניתן לראות היכן התרחשו תאונות דרכים עם נפגעים.</p>',
+    content: '<p>ברוכים הבאים ל-ANYWAY. על גבי המפה ניתן לראות היכן התרחשו תאונות דרכים עם נפגעים.</p>',
     onNext: function(){
         tourAddInput();
     }
@@ -31,7 +35,7 @@ var tour1 = new Tour({
     title: "חיפוש כתובת",
     animation: true,
     placement: 'bottom',
-    content: '<p>כאן תוכלו להזין את כתובתכם או כתובת שאתם נוהגים לבקר בה.</p></br>'+'<p> לחיצה על ENTER תיקח אותכם אל הכתובת לדוגמא :</br>זבוטנסקי 74 פתח תקווה</p>',
+    content: '<p>כאן תוכלו להזין את כתובתכם או כתובת שאתם נוהגים לבקר בה.</p></br>'+'<p> לחיצה על ENTER תיקח אתכם אל הכתובת. לדוגמא:</br>ז\'בוטנסקי 74 פתח תקווה</p>',
     onNext: function ()
     {
         tourClickInput();
@@ -41,7 +45,7 @@ var tour1 = new Tour({
     element:  '#step3tour',
     title: "סינון לפי חומרה",
     placement: 'bottom',
-    content: '<p>כאן ניתן להציג או להסתיר תאונות ברמות חומרה שונות. </br>לצורך הדוגמא נבטל את הצגתן של תאונות קלות עך ידי ביטול הסימון.</br> במידה ותבחרו להציג תאונות שמיקומן מוערך שימו לב שמידת ההערכה תופיע בשדה "עיגון" בפרטי התאונה ואייקון התאונה יהיה שקוף. </p>',
+    content: '<p>כאן ניתן להציג או להסתיר תאונות ברמות חומרה שונות. </br>לצורך הדוגמא נבטל את הצגתן של תאונות קלות על ידי ביטול הסימון.</br> במידה ותבחרו להציג תאונות שמיקומן מוערך שימו לב שמידת ההערכה תופיע בשדה "עיגון" בפרטי התאונה ואייקון התאונה יהיה שקוף. </p>',
     onPrev: function(){
         step3prev();
     }
@@ -50,9 +54,10 @@ var tour1 = new Tour({
     element:  '#step4tour',
     title: "סינון לפי טווח תאריכים ",
     placement: 'bottom',
-    content: '<p>באמצעות התפריט ניתן לבחור טווח תאריכים ולהציג תאונות מרמות חומרה שונות</br>לנוחותכם ישנם קיצורי דרך לשנה ספציפית וכן אפשרות לבחור כל טווח תאריכים באופן ידני.</br> לצורך הדוגמא נבחר להציג תאונות מיאנור 2006 עד ינואר 2014.</p>'
+    content: '<p>כאן ניתן לבחור טווח תאריכים להצגת תאונות.</br>לנוחותכם ישנם קיצורי דרך לשנה ספציפית וכן אפשרות לבחור כל טווח תאריכים באופן ידני.</br> לצורך הדוגמא נבחר להציג תאונות מינואר 2006 עד ינואר 2014.</p>'
+
 },
-]});
+  ]});
 // Initialize the tour
 tour1.init();
 resetTour();// Start the tour
@@ -80,7 +85,7 @@ function step2next() {
         tour.addStep(tour1.getStep(2));
         tour.addStep(tour1.getStep(3));
         checkStepsAdd = true;
-        }
+    }
     tour.goTo(2);
 }
 function step2prev() {
@@ -96,18 +101,14 @@ function step3prev() {
 }
 function tourAddInput() {
     var a = document.getElementById('pac-input');
-    a.value = "זבוטנסקי 74, פתח תקווה";
+    a.value = "ז'בוטנסקי 74, פתח תקווה";
 }
 
 function tourClickInput() {
     var a = document.getElementById('pac-input');
-    a.value = "זבוטנסקי 74, פתח תקווה";
+    a.value = "ז'בוטנסק 74, פתח תקווה";
     google.maps.event.trigger(a, 'focus');
     google.maps.event.trigger(a, 'keydown', {keyCode: 13});
     tourLocation = 2;
 }
-//agam add- tour find location for step 2
-function tourOnMapStep2()
-{
 
-}

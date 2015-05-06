@@ -129,7 +129,7 @@ var SUBTYPE_STRING = [
     "פגיעה ממטען של רכב"
     ];
 
-//agam add - var for infowindow,checkStepsAdd,tourLocation to use as tour
+//agam add - var for infowindow, checkStepsAdd, tourLocation to use as tours
 
     $(function () {
         //agam add- tour button On Click trigger

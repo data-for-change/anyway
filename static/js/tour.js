@@ -1,7 +1,8 @@
 /**
  * Created by root on 30/04/15.
  */
-//agam add - var for infowindow,checkStepsAdd,tourLocation to use as tour
+//agam add -var for infowindow ,checkStepsAdd,tourLocation to use as tours
+
 var infowindow;
 var checkStepsAdd = false;
 var tourLocation = 0;

@@ -544,6 +544,7 @@ $(function() {
                 this.myLocation = this.defaultLocation;
                 this.setCenterWithMarker(this.myLocation);
             }
+            this.map.setZoom(INIT_ZOOM);
         },
         closeInfoWindow: function() {
             if (app.infoWindow) {

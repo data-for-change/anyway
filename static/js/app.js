@@ -251,6 +251,7 @@ $(function() {
             if (!this.isReady) return;
             this.updateUrl();
             var params = this.buildMarkersParams();
+            if (!params) return;
 
             var reset = this.clusterMode() || this.previousZoom < MINIMAL_ZOOM;
             this.previousZoom = this.map.zoom;
@@ -279,6 +280,7 @@ $(function() {
         },
         buildMarkersParams : function() {
             var bounds = this.map.getBounds();
+            if (!bounds) return null;
             var zoom = this.map.zoom;
             var dateRange = this.model.get("dateRange");
 

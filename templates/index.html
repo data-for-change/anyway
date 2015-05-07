@@ -401,6 +401,14 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
                 xfbml      : true,
                 version    : 'v2.3'
               });
+
+              // Load the app
+              window.app = new AppView();
+              window.app.render();
+              if (MARKER_ID) {
+                console.log('setting marker');
+                app.model.set("currentMarker", MARKER_ID);
+              }
             };
 
             (function(d, s, id){
@@ -428,7 +436,6 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
             ga('create', 'UA-48606400-1', 'anyway.herokuapp.com');
             ga('send', 'pageview');
             // end Google Analytics API
-
 
         </script>
 	

@@ -8,6 +8,8 @@ http://anyway.herokuapp.com
 
 To report bugs and feature requests, please [open an issue](https://github.com/hasadna/anyway/issues) on GitHub.
 
+See also [our Android app](https://github.com/hasadna/anywayAndroidApp) on GitHub.
+
 Contributing
 -----------------------
 * We try to follow the process of other Hasadna projects, e.g. [Open-Knesset](https://oknesset-devel.readthedocs.org/en/latest/)

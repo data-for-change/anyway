@@ -129,38 +129,10 @@ var SUBTYPE_STRING = {
         20: "פגיעה ממטען של רכב",
     };
 
-//agamadd- infowindow to use as tour
-var infowindow;
-function step2next(){
-    infowindow.close();
-    tour1.init();
-    tour1.start();
-}
-function step2prev(){
-    infowindow.close();
-    tour.prev();
-}
-
-//agam add- add default val to search input
-var tourLocation =0;
-function tourAddInput(){
-    var a = document.getElementById('pac-input');
-        a.value="זבוטנסקי 74, פתח תקווה";
-    }
-function tourClickInput(){
-    var a = document.getElementById('pac-input');
-        a.value="זבוטנסקי 74, פתח תקווה";
-        google.maps.event.trigger( a, 'focus');
-        google.maps.event.trigger( a, 'keydown', {keyCode:13});
-        tourLocation = 2;
-    }
 $(function() {
     //agam add- tour button On Click trigger
     $('#tourOnClick').on('click', function () {
-        //clear cache
-        tour.restart()
-        // Start the tour
-        tour.start();
+        onClick();
     });
     var AppRouter = Backbone.Router.extend({
         routes: {
@@ -718,10 +690,9 @@ $(function() {
                     '<h3 class="popover-title">'+titleString+'</h3>'+
                     '<div class="popover-content">'+contentString+'</div>'+
                     '<nav class="popover-navigation-rtl">'+
-                        '<div class="btn-group" role="group">'+
-                            '<button onclick="step2prev()" class="btn btn-default" data-role="prev"><< הקודם'+'</button>'+
-                            '<span data-role="separator"> | '+'</span>'+
-                            '<button onclick="step2next()" class="btn btn-default" data-role="next">הבא >>'+'</button>'+
+                        '<div class="modal-footer" role="group">'+
+                            '<button onclick="step2prev()" class="btn btn-default btn-small pull-right" data-role="prev"><<הקודם'+'</button>'+
+                            '<button onclick="step2next()" class="btn btn-default btn-small pull-left" data-role="next">הבא>>'+'</button>'+
                         '</div>'+
                     '</nav>'+
                 '</div>';

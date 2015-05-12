@@ -54,6 +54,9 @@ MULTIPLE_ICONS[SEVERITY_SEVERE] = "/static/img/icons/multiple_severe.png";
 MULTIPLE_ICONS[SEVERITY_LIGHT] = "/static/img/icons/multiple_medium.png";
 MULTIPLE_ICONS[SEVERITY_VARIOUS] = "/static/img/icons/multiple_various.png";
 
+var USER_LOCATION_ICON = "/static/img/icons/you_are_Here.png";
+var DISCUSSION_ICON = "/static/img/icons/discussion.png";
+
 var ACCIDENT_MINOR_TYPE_TO_TYPE = { };
 ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_CAR_TO_PEDESTRIAN]=ACCIDENT_TYPE_CAR_TO_PEDESTRIAN;
 ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_FRONT_TO_SIDE]=ACCIDENT_TYPE_CAR_TO_CAR;
@@ -687,7 +690,8 @@ $(function() {
             }
             this.locationMarker = new google.maps.Marker({
               position: loc,
-              map: this.map
+              map: this.map,
+              icon: USER_LOCATION_ICON
             });
              //agam add- tour find location for step 2
             if (tourLocation == 2)

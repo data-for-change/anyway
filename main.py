@@ -56,13 +56,13 @@ def generate_json(accidents, discussions, is_thin):
     yield ']}'
 
 
-def generate_csv(results, is_thin):
+def generate_csv(results):
     output_file = StringIO()
     yield output_file.getvalue()
     output_file.truncate(0)
     output = None
     for marker in results.all():
-        serialized = marker.serialize(is_thin)
+        serialized = marker.serialize()
         if not output:
             output = csv.DictWriter(output_file, serialized.keys())
             output.writeheader()
@@ -100,7 +100,7 @@ def markers():
     discussions = DiscussionMarker.bounding_box_query(ne_lat, ne_lng,
                                                       sw_lat, sw_lng)
     if request.values.get('format') == 'csv':
-        return Response(generate_csv(accidents, is_thin), headers={
+        return Response(generate_csv(accidents), headers={
             "Content-Type": "text/csv",
             "Content-Disposition": 'attachment; filename="data.csv"'
         })

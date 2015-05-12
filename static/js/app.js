@@ -1,5 +1,7 @@
 var ADD_DISCUSSION = "צרו דיון";
 
+var MARKER_TYPE_ACCIDENT = 1
+var MARKER_TYPE_DISCUSSION = 2
 
 var SEVERITY_FATAL = 1;
 var SEVERITY_SEVERE = 2;
@@ -585,13 +587,15 @@ $(function() {
             });
         }, loadMarker : function(model) {
             for (var i = 0; i < this.markerList.length; i++) {
-                if (this.markerList[i].model.attributes.id == model.attributes.id) {
+                if (this.markerList[i].model.get("type") == model.get("type") &&
+                    this.markerList[i].model.attributes.id == model.attributes.id) {
                     return; // avoid adding duplicates
                 }
             }
 
             // markers are loaded immediately as they are fetched
-            if (this.clusterMode() || this.fitsFilters(model)) {
+            if (this.clusterMode() || this.fitsFilters(model) ||
+                !this.clusterMode() && model.get("type") == MARKER_TYPE_DISCUSSION) {
                 var markerView = new MarkerView({model: model, map: this.map}).render();
                 model.set("markerView", this.markerList.length);
                 this.markerList.push(markerView);
@@ -683,7 +687,13 @@ $(function() {
                     icon: DISCUSSION_ICON
                 });
                 google.maps.event.addListener(marker, "click", _.bind(this.showDiscussion, this, marker) );
-                // TODO send ajax to create the marker in the DB
+                var data = {
+                    "latitude": marker.getPosition().lat(),
+                    "longitude": marker.getPosition().lng(),
+                    "title": "(" + marker.getPosition().lat() + ", "
+                                 + marker.getPosition().lng() + ")"
+                };
+                $.post("discussion", JSON.stringify(data));
             }
         },
         showDiscussion : function(marker) {
@@ -693,9 +703,9 @@ $(function() {
                 var params = "?lat=" + this.clickLocation.lat() + "&lon=" + this.clickLocation.lng();
                 var title = this.clickLocation;
             } else {
-                var identifier = marker.position;
-                var params = "?lat=" + marker.position.lat() + "&lon=" + marker.position.lng();
-                var title = marker.position;
+                var identifier = marker.getPosition();
+                var params = "?lat=" + marker.getPosition().lat() + "&lon=" + marker.getPosition().lng();
+                var title = marker.getPosition();
                 $("#discussion-dialog").modal("show");
             }
             var url = window.location.protocol + "//" + window.location.host + "/discussion" + params;

@@ -40,10 +40,13 @@ def shutdown_session(exception=None):
     db_session.remove()
 
 
-def generate_json(results, is_thin):
+def generate_json(accidents, discussions, is_thin):
+    markers = accidents.all()
+    if not is_thin:
+        markers += discussions.all()
     yield '{"markers": ['
     is_first = True
-    for marker in results.all():
+    for marker in markers:
         if is_first:
             is_first = False
             prefix = ''
@@ -72,127 +75,57 @@ def generate_csv(results, is_thin):
         output_file.truncate(0)
 
 
-@app.route("/markers")
+@app.route("/markers", methods=["GET"])
 @user_optional
-def markers(methods=["GET", "POST"]):
+def markers():
     logging.debug('getting markers')
-    if request.method == "GET":
-        ne_lat = float(request.values['ne_lat'])
-        ne_lng = float(request.values['ne_lng'])
-        sw_lat = float(request.values['sw_lat'])
-        sw_lng = float(request.values['sw_lng'])
-        zoom = int(request.values['zoom'])
-        start_date = datetime.date.fromtimestamp(int(request.values['start_date']))
-        end_date = datetime.date.fromtimestamp(int(request.values['end_date']))
-        fatal = int(request.values['show_fatal'])
-        severe = int(request.values['show_severe'])
-        light = int(request.values['show_light'])
-        inaccurate = int(request.values['show_inaccurate'])
+    ne_lat = float(request.values['ne_lat'])
+    ne_lng = float(request.values['ne_lng'])
+    sw_lat = float(request.values['sw_lat'])
+    sw_lng = float(request.values['sw_lng'])
+    zoom = int(request.values['zoom'])
+    start_date = datetime.date.fromtimestamp(int(request.values['start_date']))
+    end_date = datetime.date.fromtimestamp(int(request.values['end_date']))
+    fatal = int(request.values['show_fatal'])
+    severe = int(request.values['show_severe'])
+    light = int(request.values['show_light'])
+    inaccurate = int(request.values['show_inaccurate'])
 
-        logging.debug('querying markers in bounding box')
-        is_thin = (zoom < MINIMAL_ZOOM)
-        results = Marker.bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng,
-                                            start_date, end_date,
-                                            fatal, severe, light, inaccurate,
-                                            is_thin, yield_per=50)
-        if request.values.get('format') == 'csv':
-            return Response(generate_csv(results, is_thin), headers={
-                "Content-Type": "text/csv",
-                "Content-Disposition": 'attachment; filename="data.csv"'
-            })
+    logging.debug('querying markers in bounding box')
+    is_thin = (zoom < MINIMAL_ZOOM)
+    accidents = Marker.bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng,
+                                          start_date, end_date,
+                                          fatal, severe, light, inaccurate,
+                                          is_thin, yield_per=50)
+    discussions = DiscussionMarker.bounding_box_query(ne_lat, ne_lng,
+                                                      sw_lat, sw_lng)
+    if request.values.get('format') == 'csv':
+        return Response(generate_csv(accidents, is_thin), headers={
+            "Content-Type": "text/csv",
+            "Content-Disposition": 'attachment; filename="data.csv"'
+        })
 
-        else: # defaults to json
-            return Response(generate_json(results, is_thin), mimetype="application/json")
+    else: # defaults to json
+        return Response(generate_json(accidents, discussions, is_thin),
+                        mimetype="application/json")
 
-    else:
-        data = json.loads(self.request.body)
-        marker = Marker.parse(data)
-        marker.user = self.user
-        marker.update_location()
-        marker.put()
-        return make_response(json.dumps(marker.serialize(self.user)))
-
-@app.route("/markers/(.*)", methods=["GET", "PUT", "DELETE"])
+@app.route("/markers/(.*)", methods=["GET"])
 @user_required
 def marker(self, key_name):
-    if request.method == "GET":
-        marker = Marker.get_by_key_name(key_name)
-        return make_response(json.dumps(marker.serialize(self.user)))
+    marker = Marker.get_by_key_name(key_name)
+    return make_response(json.dumps(marker.serialize(self.user)))
 
-    elif request.method == "PUT":
-        marker = Marker.get_by_key_name(key_name)
-        data = json.loads(self.request.body)
-        marker.update(data, self.user)
-        return make_response(json.dumps(marker.serialize(self.user)))
-
-    elif request.method == "DELETE":
-        marker = Marker.get_by_key_name(key_name)
-        marker.delete()
-
-# @app.route("/login", methods=["POST"])
-# @user_optional
-# def login():
-#     user = get_user()
-#     if user:
-#         return make_response(json.dumps(user.serialize()))
-#
-#     if request.json:
-#         facebook_data = request.json
-#         user_id = facebook_data["userID"]
-#         access_token = facebook_data["accessToken"]
-#         user_details = json.loads(urllib.urlopen("https://graph.facebook.com/me?access_token=" + access_token).read())
-#         # login successful
-#         if user_details["id"] == user_id:
-#             user = User.query.filter(User.email == user_details["email"]).scalar()
-#             if not user:
-#                 user = User(
-#                     email = user_details["email"],
-#                     first_name = user_details["first_name"],
-#                     last_name = user_details["last_name"],
-#                     username = user_details["username"],
-#                     facebook_id = user_details["id"],
-#                     facebook_url = user_details["link"],
-#                     access_token = facebook_data["accessToken"]
-#                 )
-#             else:
-#                 user.access_token = facebook_data["accessToken"]
-#
-#             db_session.add(user)
-#             set_user(user)
-#             return make_response(json.dumps(user.serialize()))
-#         else:
-#             raise Exception("Error in logging in.")
-#     else:
-#         raise Exception("No login data or user logged in.")
-#
-#
-# @app.route("/logout")
-# @user_required
-# def do_logout():
-#     logout()
-#
-# @app.route("/follow/(.*)")
-# @user_required
-# def follow(key_name):
-#     marker = Marker.get_by_key_name(key_name)
-#     follower = Follower.all().filter("marker", marker).filter("user", self.user).get()
-#     if not follower:
-#         Follower(parent = marker, marker = marker, user = self.user).put()
-#
-# @app.route("/unfollow/(.*)")
-# @user_required
-# def unfollow(key_name):
-#     marker = Marker.get_by_key_name(key_name)
-#     follower = Follower.all().filter("marker", marker).filter("user", self.user).get()
-#     if follower:
-#         follower.delete()
+@app.route("/discussion", methods=["POST"])
+@user_optional
+def discussion():
+    marker = DiscussionMarker.parse(request.get_json(force=True))
+    db_session.add(marker)
+    db_session.commit()
+    return make_response(json.dumps(marker.serialize()))
 
 @app.route('/', defaults={'marker_id': None})
 @app.route('/<int:marker_id>')
 def main(marker_id):
-    # at this point the marker id is just a running number, and the
-    # LMS is in the description and needs to be promoted to a DB
-    # field so we can query it. We also need to add a provider id.
     context = {'minimal_zoom': MINIMAL_ZOOM, 'url': request.url_root}
     marker = None
     if 'marker' in request.values:

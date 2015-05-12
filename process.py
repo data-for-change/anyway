@@ -157,7 +157,6 @@ def import_accidents(provider_code, accidents, streets, roads):
             "address":get_address(accident, streets),
             "latitude":lat,
             "longitude":lng,
-            "type":Marker.MARKER_TYPE_ACCIDENT,
             "subtype":int(accident[field_names.accident_type]),
             "severity":int(accident[field_names.accident_severity]),
             "created":parse_date(accident),

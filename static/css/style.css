@@ -46,11 +46,6 @@ div.gm-style {
     cursor: pointer;
 }
 
-.followers img {
-	height: 16px;
-	padding: 2px;
-}
-
 .sidebar-title {
 	padding: 5px;
 	border-bottom: 1px solid #ddd;
@@ -73,10 +68,6 @@ div.gm-style {
 .info-window {
 	position: relative;
   height: 100%;
-}
-
-.followers {
-	padding-bottom: 40px;
 }
 
 .description {

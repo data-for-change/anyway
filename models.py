@@ -25,8 +25,6 @@ class User(Base):
     facebook_id = Column(String(50))
     facebook_url = Column(String(100))
     is_admin = Column(Boolean(), default=False)
-    discussions = relationship("DiscussionMarker", backref="users")
-    followers = relationship("Follower", backref="users")
 
     def serialize(self):
         return {
@@ -39,13 +37,23 @@ class User(Base):
             "is_admin": self.is_admin,
         }
 
-		
+
+MARKER_TYPE_ACCIDENT = 1
+MARKER_TYPE_DISCUSSION = 2
+
 class MarkerMixin(object):
+
     id = Column(BigInteger, primary_key=True)
+    type = Column(Integer)
     title = Column(String(100))
     created = Column(DateTime, default=datetime.datetime.utcnow, index=True)
     latitude = Column(Float())
     longitude = Column(Float())
+
+
+    __mapper_args__ = {
+        'polymorphic_on': type
+    }
 
     @staticmethod
     def format_description(field, value):
@@ -62,17 +70,11 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         Index('acc_long_lat_idx', 'latitude', 'longitude'),
     )
 
-    MARKER_TYPE_ACCIDENT = 1
-    MARKER_TYPE_HAZARD = 2
-    MARKER_TYPE_OFFER = 3
-    MARKER_TYPE_PLEDGE = 4
-    MARKER_TYPE_BILL = 5
-    MARKER_TYPE_ENGINEERING_PLAN = 6
-    MARKER_TYPE_CITY = 7
-    MARKER_TYPE_OR_YAROK = 8
+    __mapper_args__ = {
+        'polymorphic_identity': MARKER_TYPE_ACCIDENT
+    }
 
     description = Column(Text)
-    type = Column(Integer)
     subtype = Column(Integer)
     severity = Column(Integer)
     address = Column(Text)
@@ -99,12 +101,6 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
                 "address": self.address,
                 "type": self.type,
                 "subtype": self.subtype,
-
-                # TODO: fix query
-                "followers": [],  # [x.user.serialize() for x in Follower.all().filter("marker", self).fetch(100)],
-
-                # TODO: fix query
-                "following": None,
             })
         return fields
 
@@ -114,16 +110,6 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         self.type = data["type"]
         self.latitude = data["latitude"]
         self.longitude = data["longitude"]
-
-        follower = Follower.query.filter(Follower.marker == self.id).filter(
-            Follower.user == current_user).get(1)
-
-        if data["following"]:
-            if not follower:
-                Follower(marker=self.id, user=current_user)
-        else:
-            if follower:
-                follower[0].delete()
 
         self.put()
 
@@ -165,9 +151,9 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
     @classmethod
     def parse(cls, data):
         return Marker(
+            type=MARKER_TYPE_ACCIDENT,
             title=data["title"],
             description=data["description"],
-            type=data["type"],
             latitude=data["latitude"],
             longitude=data["longitude"]
         )
@@ -179,32 +165,42 @@ class DiscussionMarker(MarkerMixin, Base):
         Index('disc_long_lat_idx', 'latitude', 'longitude'),
     )
 
-    user = Column(Integer, ForeignKey("users.id"))
-    followers = relationship("Follower", backref="markers")
+    __mapper_args__ = {
+        'polymorphic_identity': MARKER_TYPE_DISCUSSION
+    }
 
-    def serialize(self):
+    def serialize(self, is_thin=False):
         fields = {
             "id": str(self.id),
             "latitude": self.latitude,
             "longitude": self.longitude,
             "created": self.created.isoformat(),
             "title": self.title,
-            "user": self.user.serialize() if self.user else "",
-
-            # TODO: fix query
-            "followers": [],  # [x.user.serialize() for x in Follower.all().filter("marker", self).fetch(100)],
-
-            # TODO: fix query
-            "following": None,
+            "type": self.type
         }
         return fields
 
+    @classmethod
+    def parse(cls, data):
+      return DiscussionMarker(
+          # FIXME the id should be generated automatically, but isn't
+          id=DiscussionMarker.query.order_by('-id').first().id + 1,
+          type=MARKER_TYPE_DISCUSSION,
+          title=data["title"],
+          latitude=data["latitude"],
+          longitude=data["longitude"],
+          created=datetime.datetime.now()
+      )
 
-class Follower(Base):
-    __tablename__ = "followers"
-
-    user = Column(Integer, ForeignKey("users.id"), primary_key=True)
-    marker = Column(BigInteger, ForeignKey("discussions.id"), primary_key=True)
+    @staticmethod
+    def bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng):
+        markers = DiscussionMarker.query \
+            .filter(DiscussionMarker.longitude <= ne_lng) \
+            .filter(DiscussionMarker.longitude >= sw_lng) \
+            .filter(DiscussionMarker.latitude <= ne_lat) \
+            .filter(DiscussionMarker.latitude >= sw_lat) \
+            .order_by(desc(DiscussionMarker.created))
+        return markers
 
 
 def init_db():
@@ -213,7 +209,6 @@ def init_db():
     # they will be registered properly on the metadata.  Otherwise
     # you will have to import them first before calling init_db()
     print "Importing models"
-
     print "Creating all tables"
     Base.metadata.create_all(bind=engine)
 	

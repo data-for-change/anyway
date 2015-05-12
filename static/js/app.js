@@ -661,6 +661,7 @@ $(function() {
             this.model.set("currentMarker", null);
         },
         contextMenuMap : function(e) {
+            this.clickLocation = e.latLng;
             if (this.menu) {
                 this.menu.remove();
             }
@@ -669,9 +670,43 @@ $(function() {
                     {
                         icon : "plus-sign",
                         text : ADD_DISCUSSION,
-                        href : "#discussion-dialog"
+                        href : "#discussion-dialog",
+                        callback : _.bind(this.showDiscussion, this)
                     }
                 ]}).render(e);
+        },
+        addDiscussionMarker : function(comment) {
+            if (typeof this.currentMarker == 'undefined') {
+                var marker = new google.maps.Marker({
+                    position: this.clickLocation,
+                    map: this.map,
+                    icon: DISCUSSION_ICON
+                });
+                google.maps.event.addListener(marker, "click", _.bind(this.showDiscussion, this, marker) );
+                // TODO send ajax to create the marker in the DB
+            }
+        },
+        showDiscussion : function(marker) {
+            this.currentMarker = marker;
+            if (typeof marker == 'undefined') {
+                var identifier = this.clickLocation;
+                var params = "?lat=" + this.clickLocation.lat() + "&lon=" + this.clickLocation.lng();
+                var title = this.clickLocation;
+            } else {
+                var identifier = marker.position;
+                var params = "?lat=" + marker.position.lat() + "&lon=" + marker.position.lng();
+                var title = marker.position;
+                $("#discussion-dialog").modal("show");
+            }
+            var url = window.location.protocol + "//" + window.location.host + "/discussion" + params;
+            DISQUS.reset({
+                reload: true,
+                config: function () {
+                    this.page.identifier = identifier;
+                    this.page.url = url;
+                    this.page.title = title;
+                }
+            });
         },
         handleSearchBox : function() {
             var places = this.searchBox.getPlaces();

@@ -211,13 +211,20 @@
         <div class="modal hide fade" id="discussion-dialog">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h3>יצירת דיון</h3>
+                <h3>דיון</h3>
             </div>
             <div class="modal-body">
                 <div id="disqus_thread"></div>
                 <script type="text/javascript">
                     /* * * CONFIGURATION VARIABLES * * */
-                    var disqus_shortname = 'oway';
+                    var disqus_shortname = 'anyway-feedback';
+                    function disqus_config() {
+                        this.callbacks.onNewComment = [
+                            function(comment) {
+                                app.addDiscussionMarker(comment);
+                            }
+                        ];
+                    }
 
                     /* * * DON'T EDIT BELOW THIS LINE * * */
                     (function() {

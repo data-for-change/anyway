@@ -14,6 +14,8 @@ import localization
 import re
 from datetime import datetime
 
+
+
 directories_not_processes = {}
 
 progress_wheel = ProgressSpinner()
@@ -137,8 +139,17 @@ def load_extra_data(accident, streets, roads):
             # it will be fetched we deserialized
             if localization.get_field(field, accident[field]):
                 extra_fields[field] = accident[field]
-
+    # print (extra_fields)
     return extra_fields
+
+
+# Addition required to split description (Omer):
+def localize_value(field, value):
+    try:
+        return u"{0}: {1}".format(localization.get_field(field).decode('utf-8'),
+                                  localization.get_field(field, value).decode('utf-8'))
+    except AttributeError:
+        return None
 
 
 def import_accidents(provider_code, accidents, streets, roads):
@@ -161,7 +172,17 @@ def import_accidents(provider_code, accidents, streets, roads):
             "subtype":int(accident[field_names.accident_type]),
             "severity":int(accident[field_names.accident_severity]),
             "created":parse_date(accident),
-            "locationAccuracy":int(accident[field_names.igun])
+            "locationAccuracy":int(accident[field_names.igun]),
+
+            # Addition required to split description (Omer):
+            "roadType":localize_value(field_names.road_type, accident[field_names.road_type]),
+            "accidentType":localize_value(field_names.accident_type, accident[field_names.accident_type]),
+            "roadShape":localize_value(field_names.road_shape, accident[field_names.road_shape]),
+            "severityText":localize_value(field_names.accident_severity, accident[field_names.accident_severity]),
+            "dayType":localize_value(field_names.day_type, accident[field_names.day_type]),
+            "igun":localize_value(field_names.igun, accident[field_names.igun]),
+            "unit":localize_value(field_names.unit, accident[field_names.unit]),
+
         }
 
         yield marker

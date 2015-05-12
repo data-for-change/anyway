@@ -39,7 +39,7 @@ class User(Base):
             "is_admin": self.is_admin,
         }
 
-		
+
 class MarkerMixin(object):
     id = Column(BigInteger, primary_key=True)
     title = Column(String(100))
@@ -56,7 +56,7 @@ class MarkerMixin(object):
         return u"{0}: {1}".format(name, value)
 
 
-class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
+class Marker(MarkerMixin, Base):  # TODO rename to AccidentMarker
     __tablename__ = "markers"
     __table_args__ = (
         Index('acc_long_lat_idx', 'latitude', 'longitude'),
@@ -77,6 +77,16 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
     severity = Column(Integer)
     address = Column(Text)
     locationAccuracy = Column(Integer)
+
+    # Addition required to split description (Omer):
+    roadType = Column(Text)
+    accidentType = Column(Text)
+    roadShape = Column(Text)
+    severityText = Column(Text)
+    dayType = Column(Text)
+    igun = Column(Text)
+    unit = Column(Text)
+
 
     @staticmethod
     def json_to_description(msg):
@@ -99,6 +109,15 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
                 "address": self.address,
                 "type": self.type,
                 "subtype": self.subtype,
+
+                # Addition required to split description (Omer):
+                "roadType": self.roadType,
+                "accidentType": self.accidentType,
+                "roadShape": self.roadShape,
+                "severityText": self.severityText,
+                "dayType": self.dayType,
+                "igun": self.igun,
+                "unit": self.unit,
 
                 # TODO: fix query
                 "followers": [],  # [x.user.serialize() for x in Follower.all().filter("marker", self).fetch(100)],
@@ -216,8 +235,6 @@ def init_db():
 
     print "Creating all tables"
     Base.metadata.create_all(bind=engine)
-	
-
 
 
 if __name__ == "__main__":

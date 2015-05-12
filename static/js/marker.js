@@ -39,7 +39,15 @@ var MarkerView = Backbone.View.extend({
 
 		this.$el.width(400);
 		this.$el.find(".title").text(TYPES_MAP[this.model.get("title")]);
-		this.$el.find(".description").text(this.model.get("description"));
+		this.$el.find(".roadType").text(this.model.get("roadType"));
+		this.$el.find(".accidentType").text(this.model.get("accidentType"));
+		this.$el.find(".roadShape").text(this.model.get("roadShape"));
+		this.$el.find(".severityText").text(this.model.get("severityText"));
+		this.$el.find(".dayType").text(this.model.get("dayType"));
+		this.$el.find(".igun").text(this.model.get("igun"));
+		this.$el.find(".unit").text(this.model.get("unit"));
+
+
 		this.$el.find(".creation-date").text("תאריך: " +
                 moment(this.model.get("created")).format("LLLL"));
 //		if (user) {

@@ -20,4 +20,5 @@
     "heroku-postgresql",
     "newrelic"
   ]
+
 }

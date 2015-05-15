@@ -47,11 +47,12 @@ def get_street(settlement_sign, street_sign, streets):
     extracts the street name using the settlement id and street id
     """
     if settlement_sign not in streets:
-        return None
+        # Changed to return blank string instead of None for correct presentation (Omer)
+        return u""
     street_name = [x[field_names.street_name].decode(content_encoding) for x in streets[settlement_sign] if
                    x[field_names.street_sign] == street_sign]
     # there should be only one street name, or none if it wasn't found.
-    return street_name[0] if len(street_name) == 1 else None
+    return street_name[0] if len(street_name) == 1 else u""
 
 
 def get_address(accident, streets):
@@ -96,7 +97,7 @@ def get_junction(accident, roads):
     """
     key = accident[field_names.road1], accident[field_names.road2]
     junction = roads.get(key, None)
-    return junction.decode(content_encoding) if junction else None
+    return junction.decode(content_encoding) if junction else u""
 
 
 def parse_date(accident):
@@ -116,6 +117,9 @@ def load_extra_data(accident, streets, roads):
     loads more data about the accident
     :return: a dictionary containing all the extra fields and their values
     :rtype: dict
+
+    OMER:   I merged this function into import_accidents so that the extra fields would each be presented alone
+            This function is irrelevant after this fix
     """
     extra_fields = {}
     # if the accident occurred in an urban setting
@@ -160,11 +164,12 @@ def import_accidents(provider_code, accidents, streets, roads):
         if not accident[field_names.x_coordinate] or not accident[field_names.y_coordinate]:
             continue
         lng, lat = coordinates_converter.convert(accident[field_names.x_coordinate], accident[field_names.y_coordinate])
+        main_street, secondary_street = get_streets(accident, streets)
 
         marker = {
             "id":int("{0}{1}".format(provider_code, accident[field_names.id])),
             "title":"Accident",
-            "description":json.dumps(load_extra_data(accident, streets, roads), encoding=models.db_encoding),
+            # "description":json.dumps(load_extra_data(accident, streets, roads), encoding=models.db_encoding),
             "address":get_address(accident, streets),
             "latitude":lat,
             "longitude":lng,
@@ -174,15 +179,25 @@ def import_accidents(provider_code, accidents, streets, roads):
             "created":parse_date(accident),
             "locationAccuracy":int(accident[field_names.igun]),
 
-            # Addition required to split description (Omer):
-            "roadType":localize_value(field_names.road_type, accident[field_names.road_type]),
-            "accidentType":localize_value(field_names.accident_type, accident[field_names.accident_type]),
-            "roadShape":localize_value(field_names.road_shape, accident[field_names.road_shape]),
-            "severityText":localize_value(field_names.accident_severity, accident[field_names.accident_severity]),
-            "dayType":localize_value(field_names.day_type, accident[field_names.day_type]),
-            "igun":localize_value(field_names.igun, accident[field_names.igun]),
-            "unit":localize_value(field_names.unit, accident[field_names.unit]),
+            "roadType": int(accident[field_names.road_type]),
+            # subtype
+            "roadShape": int(accident[field_names.road_shape]),
+            # severity
+            "dayType": int(accident[field_names.day_type]),
+            # locationAccuracy
+            "unit": int(accident[field_names.igun]),
+            "mainStreet": main_street,
+            "secondaryStreet": secondary_street,
+            "junction": get_junction(accident, roads),
 
+            # Addition required to split description (Omer):
+            # "roadType":localize_value(field_names.road_type, accident[field_names.road_type]),
+            # "accidentType":localize_value(field_names.accident_type, accident[field_names.accident_type]),
+            # "roadShape":localize_value(field_names.road_shape, accident[field_names.road_shape]),
+            # "severityText":localize_value(field_names.accident_severity, accident[field_names.accident_severity]),
+            # "dayType":localize_value(field_names.day_type, accident[field_names.day_type]),
+            # "igun":localize_value(field_names.igun, accident[field_names.igun]),
+            # "unit":localize_value(field_names.unit, accident[field_names.unit]),
         }
 
         yield marker

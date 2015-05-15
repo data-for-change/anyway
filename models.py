@@ -71,7 +71,7 @@ class Marker(MarkerMixin, Base):  # TODO rename to AccidentMarker
     MARKER_TYPE_CITY = 7
     MARKER_TYPE_OR_YAROK = 8
 
-    description = Column(Text)
+    # description = Column(Text)
     type = Column(Integer)
     subtype = Column(Integer)
     severity = Column(Integer)
@@ -79,14 +79,16 @@ class Marker(MarkerMixin, Base):  # TODO rename to AccidentMarker
     locationAccuracy = Column(Integer)
 
     # Addition required to split description (Omer):
-    roadType = Column(Text)
-    accidentType = Column(Text)
-    roadShape = Column(Text)
-    severityText = Column(Text)
-    dayType = Column(Text)
-    igun = Column(Text)
-    unit = Column(Text)
-
+    roadType = Column(Integer)
+    # accidentType = Column(Integer)  # To be removed / Use subtype
+    roadShape = Column(Integer)
+    # severityText = Column(Text)     # To be removed / Use severity
+    dayType = Column(Integer)
+    # igun = Column(Integer)          # To be removed / Use locationAccuracy
+    unit = Column(Integer)
+    mainStreet = Column(Text)
+    secondaryStreet = Column(Text)
+    junction = Column(Text)
 
     @staticmethod
     def json_to_description(msg):
@@ -105,19 +107,21 @@ class Marker(MarkerMixin, Base):  # TODO rename to AccidentMarker
         if not is_thin:
             fields.update({
                 "title": self.title,
-                "description": Marker.json_to_description(self.description),
+                # "description": Marker.json_to_description(self.description),
                 "address": self.address,
                 "type": self.type,
                 "subtype": self.subtype,
 
-                # Addition required to split description (Omer):
                 "roadType": self.roadType,
-                "accidentType": self.accidentType,
+                # "accidentType": self.accidentType,    # Not required / Can be pulled from subtype=accident_type
                 "roadShape": self.roadShape,
-                "severityText": self.severityText,
+                # "severityText": self.severityText,    # Not required / Can be pulled from severity
                 "dayType": self.dayType,
-                "igun": self.igun,
+                # "igun": self.igun,                    # Not required / Can be pulled from locationAccuracy
                 "unit": self.unit,
+                "mainStreet": self.mainStreet,
+                "secondaryStreet": self.secondaryStreet,
+                "junction": self.junction,
 
                 # TODO: fix query
                 "followers": [],  # [x.user.serialize() for x in Follower.all().filter("marker", self).fetch(100)],

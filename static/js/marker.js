@@ -1,6 +1,7 @@
 var INACCURATE_MARKER_OPACITY = 0.5;
 
 var MarkerView = Backbone.View.extend({
+
 	events : {
 		//"click .follow-button" : "clickFollow",
 		//"click .unfollow-button" : "clickUnfollow",
@@ -38,8 +39,26 @@ var MarkerView = Backbone.View.extend({
 		this.$el.html($("#marker-content-template").html());
 
 		this.$el.width(400);
-		this.$el.find(".title").text(SUBTYPE_STRING[this.model.get("subtype")]);
-		this.$el.find(".description").text(this.model.get("description"));
+		this.$el.find(".title").text(TYPES_MAP[this.model.get("title")]);
+
+		// Omer JS addition
+        $.getJSON('localize.json', function(data) {
+            alert(data.SUG_DEREH[0][1]);
+        //document.getElementById("roadType").innerHTML=data.SUG_DEREH[0][1];
+        })
+
+		this.$el.find(".roadType").text(this.model.get("roadType"));
+		this.$el.find(".accidentType").text(this.model.get("sybtype"));
+		this.$el.find(".roadShape").text(this.model.get("roadShape"));
+		this.$el.find(".severityText").text(this.model.get("severity"));
+		this.$el.find(".dayType").text(this.model.get("dayType"));
+		this.$el.find(".igun").text(this.model.get("locationAccuracy"));
+		this.$el.find(".unit").text(this.model.get("unit"));
+		this.$el.find(".mainStreet").text(this.model.get("mainStreet"));
+		this.$el.find(".secondaryStreet").text(this.model.get("secondaryStreet"));
+		this.$el.find(".junction").text(this.model.get("junction"));
+
+
 		this.$el.find(".creation-date").text("תאריך: " +
                 moment(this.model.get("created")).format("LLLL"));
 //		if (user) {
@@ -48,14 +67,14 @@ var MarkerView = Backbone.View.extend({
 			this.$el.find(".profile-image").attr("src", "/static/img/lamas.png");
 			this.$el.find(".profile-image").attr("width", "50px");
 //		}
-//  	this.$el.find(".type").text(TYPE_STRING[this.model.get("type")]);
+		this.$el.find(".type").text(TYPE_STRING[this.model.get("type")]);
 //		var display_user = "";
 //		if (user && user.first_name && user.last_name) {
 //			display_user = user.first_name + " " + user.last_name;
 //		} else {
 			display_user = 'הלשכה המרכזית לסטטיסטיקה';
 //		}
-		this.$el.find(".added-by").text("מקור: " + display_user);
+		this.$el.find(".added-by").text("נוסף על ידי " + display_user);
 //		this.$followButton = this.$el.find(".follow-button");
 //		this.$unfollowButton = this.$el.find(".unfollow-button");
 //		this.$followerList = this.$el.find(".followers");

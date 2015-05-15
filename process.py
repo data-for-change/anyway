@@ -112,50 +112,6 @@ def parse_date(accident):
     return accident_date
 
 
-def load_extra_data(accident, streets, roads):
-    """
-    loads more data about the accident
-    :return: a dictionary containing all the extra fields and their values
-    :rtype: dict
-
-    OMER:   I merged this function into import_accidents so that the extra fields would each be presented alone
-            This function is irrelevant after this fix
-    """
-    extra_fields = {}
-    # if the accident occurred in an urban setting
-    if bool(accident[field_names.urban_intersection]):
-        main_street, secondary_street = get_streets(accident, streets)
-        if main_street:
-            extra_fields[field_names.street1] = main_street
-        if secondary_street:
-            extra_fields[field_names.street2] = secondary_street
-
-    # if the accident occurred in a non urban setting (highway, etc')
-    if bool(accident[field_names.non_urban_intersection]):
-        junction = get_junction(accident, roads)
-        if junction:
-            extra_fields[field_names.junction_name] = junction
-
-    # localize static accident values
-    for field in localization.get_supported_tables():
-        if accident[field]:
-            # if we have a localized field for that particular field, save the field value
-            # it will be fetched we deserialized
-            if localization.get_field(field, accident[field]):
-                extra_fields[field] = accident[field]
-    # print (extra_fields)
-    return extra_fields
-
-
-# Addition required to split description (Omer):
-def localize_value(field, value):
-    try:
-        return u"{0}: {1}".format(localization.get_field(field).decode('utf-8'),
-                                  localization.get_field(field, value).decode('utf-8'))
-    except AttributeError:
-        return None
-
-
 def import_accidents(provider_code, accidents, streets, roads):
     print("reading accidents from file %s" % (accidents.name(),))
     for accident in accidents:
@@ -169,7 +125,6 @@ def import_accidents(provider_code, accidents, streets, roads):
         marker = {
             "id":int("{0}{1}".format(provider_code, accident[field_names.id])),
             "title":"Accident",
-            # "description":json.dumps(load_extra_data(accident, streets, roads), encoding=models.db_encoding),
             "address":get_address(accident, streets),
             "latitude":lat,
             "longitude":lng,
@@ -178,7 +133,6 @@ def import_accidents(provider_code, accidents, streets, roads):
             "severity":int(accident[field_names.accident_severity]),
             "created":parse_date(accident),
             "locationAccuracy":int(accident[field_names.igun]),
-
             "roadType": int(accident[field_names.road_type]),
             # subtype
             "roadShape": int(accident[field_names.road_shape]),
@@ -189,15 +143,6 @@ def import_accidents(provider_code, accidents, streets, roads):
             "mainStreet": main_street,
             "secondaryStreet": secondary_street,
             "junction": get_junction(accident, roads),
-
-            # Addition required to split description (Omer):
-            # "roadType":localize_value(field_names.road_type, accident[field_names.road_type]),
-            # "accidentType":localize_value(field_names.accident_type, accident[field_names.accident_type]),
-            # "roadShape":localize_value(field_names.road_shape, accident[field_names.road_shape]),
-            # "severityText":localize_value(field_names.accident_severity, accident[field_names.accident_severity]),
-            # "dayType":localize_value(field_names.day_type, accident[field_names.day_type]),
-            # "igun":localize_value(field_names.igun, accident[field_names.igun]),
-            # "unit":localize_value(field_names.unit, accident[field_names.unit]),
         }
 
         yield marker

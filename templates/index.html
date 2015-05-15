@@ -314,7 +314,7 @@
                 </a>
             </li>
         </script>
-        <script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBpOmft-UskZsAQth9vNl0fN6EXaRR6dZc&sensor=true&libraries=places&language=iw"></script>
         {% assets filters="rjsmin", output="js/app.min.js",
             "js/libs/jquery-1.8.2.min.js",
@@ -336,6 +336,7 @@
             "js/map_style.js",
             "js/clipboard.js",
             "js/libs/bootstrap-tour.min.js",
+
             "js/app.js" %}
             <script type="text/javascript" src="{{ ASSET_URL }}"></script>
         {% endassets %}

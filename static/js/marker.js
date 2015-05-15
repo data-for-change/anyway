@@ -42,10 +42,10 @@ var MarkerView = Backbone.View.extend({
 		this.$el.find(".title").text(TYPES_MAP[this.model.get("title")]);
 
 		// Omer JS addition
-        $.getJSON('localize.json', function(data) {
-            alert(data.SUG_DEREH[0][1]);
+       // $.getJSON('js/localize.json', function(data) {
+         //   alert(data.SUG_DEREH[0][1]);
         //document.getElementById("roadType").innerHTML=data.SUG_DEREH[0][1];
-        })
+        //})
 
 		this.$el.find(".roadType").text(this.model.get("roadType"));
 		this.$el.find(".accidentType").text(this.model.get("sybtype"));

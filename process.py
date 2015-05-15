@@ -185,7 +185,7 @@ def import_accidents(provider_code, accidents, streets, roads):
             # severity
             "dayType": int(accident[field_names.day_type]),
             # locationAccuracy
-            "unit": int(accident[field_names.igun]),
+            "unit": int(accident[field_names.unit]),
             "mainStreet": main_street,
             "secondaryStreet": secondary_street,
             "junction": get_junction(accident, roads),

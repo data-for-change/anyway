@@ -29,6 +29,8 @@ div.gm-style {
 	border-bottom: 1px solid #eee;
 	padding: 2px 5px;
 	box-sizing: border-box;
+    display:table-row;
+    text-align: right;
 }
 
 .context-menu li:hover {

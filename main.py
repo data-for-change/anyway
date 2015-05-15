@@ -11,7 +11,7 @@ from flask import make_response, jsonify, render_template, Response
 import flask.ext.assets
 from webassets.ext.jinja2 import AssetsExtension
 from webassets import Environment as AssetsEnvironment
-
+from sqlalchemy import and_
 
 
 from database import db_session
@@ -160,6 +160,37 @@ def string2timestamp(s):
 def year2timestamp(y):
     return time.mktime(datetime.date(y, 1, 1).timetuple())
 
+@app.route("/new-features", methods=["POST"])
+def updatebyemail():
+    jsonData = request.get_json(force=True)
+    emailaddress = str(jsonData['address'])
+    fname = (jsonData['fname']).encode("utf8")
+    lname = (jsonData['lname']).encode("utf8")
+
+    if len(fname)>40:
+        return  jsonify(respo='First name to long')
+    if len(lname)>40:
+        return  jsonify(respo='Last name to long')
+    if len(emailaddress)>40:
+        return jsonify(respo='Email too long', emailaddress = emailaddress)
+    user_exists = db_session.query(User).filter(User.email == emailaddress)
+    if user_exists.count()==0:
+        user = User(email = emailaddress, first_name = fname.decode("utf8"), last_name = lname.decode("utf8"), new_features_subscription=True)
+        db_session.add(user)
+        db_session.commit()
+        return jsonify(respo='Subscription saved', )
+    else:
+        user_exists = user_exists.first()
+        if user_exists.new_features_subscription==False:
+            user_exists.new_features_subscription = True
+            db_session.add(user_exists)
+            db_session.commit()
+            return jsonify(respo='Subscription saved', )
+        else:
+            return jsonify(respo='Subscription already exist', )
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')
     app.run(debug=True)
+
+

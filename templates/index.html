@@ -247,6 +247,41 @@
             <p class="description"></p>
 
         </div>
+
+
+        <div id="feature-dialog-template" style="display: none">
+            <div class="modal hide fade">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h3>עדכן אותי כשתכונות חדשות יהיו זמינות</h3>
+                    <h5> אנו מפתחים תכונות חדשות לאתר. הנך מוזמנ/ת להשאיר פרטים על מנת שנוכל לעדכן אותך ברגע שתכונות חדשות יהיו זמינות </h5>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal">
+                        <div class="control-group">
+                            <div class="controls">
+                                שם פרטי:
+                                <input type="text" id="fName" name="fName" placeholder="שם פרטי">
+                            </div>
+                            <div class="controls">
+                                שם משפחה:
+                                <input type="text" id="lName" name="lName" placeholder="שם משפחה">
+                            </div>
+                            <div class="controls">
+                                דואר אלקטרוני:
+                                <input type="email" id="emailAddress" name="emailAddress" placeholder="דואר אלקטרוני">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn close-button">סגור</a>
+                    <a class="btn btn-primary save-button">שליחה</a>
+                </div>
+            </div>
+        </div>
+
+
         <div id="reset-map-control" style="padding: 5px; display: none">
             <div title="חזור למיקום שלי" style="background-color: white; border: 2px solid black; cursor: pointer; boxShadow: 1px 1px 5px black {{ '; display: none' if map_only }}">
                 <img src="/static/img/my_location.png" />
@@ -311,6 +346,7 @@
             "js/libs/daterangepicker.js",
             "js/libs/js-itm.js",
             "js/marker.js",
+            "js/featuredialog.js",
             "js/sidebar.js",
             "js/contextmenu.js",
             "js/map_style.js",

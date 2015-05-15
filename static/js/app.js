@@ -1,4 +1,5 @@
 var ADD_DISCUSSION = "צרו דיון";
+var NEW_FEATURES = "עדכן אותי לגבי תכונות חדשות"
 
 var MARKER_TYPE_ACCIDENT = 1
 var MARKER_TYPE_DISCUSSION = 2
@@ -676,6 +677,11 @@ $(function() {
                         text : ADD_DISCUSSION,
                         href : "#discussion-dialog",
                         callback : _.bind(this.showDiscussion, this)
+                    },
+                    {
+                        icon : "plus-sign",
+                        text : NEW_FEATURES,
+                        callback : _.bind(this.featuresSubscriptionDialog, this)
                     }
                 ]}).render(e);
         },
@@ -717,6 +723,14 @@ $(function() {
                     this.page.title = title;
                 }
             });
+        },
+         featuresSubscriptionDialog : function(type, event) {
+            if (this.createDialog) this.createDialog.close();
+            this.createDialog = new FeatureDialog({
+                type: type,
+                event: event,
+                markers: this.markers
+            }).render();
         },
         handleSearchBox : function() {
             var places = this.searchBox.getPlaces();

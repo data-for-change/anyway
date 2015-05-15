@@ -25,7 +25,8 @@ class User(Base):
     facebook_id = Column(String(50))
     facebook_url = Column(String(100))
     is_admin = Column(Boolean(), default=False)
-
+    new_features_subscription = Column(Boolean(), default=False)
+	
     def serialize(self):
         return {
             "id": str(self.id),
@@ -35,12 +36,13 @@ class User(Base):
             "facebook_id": self.facebook_id,
             "facebook_url": self.facebook_url,
             "is_admin": self.is_admin,
+            "new_features_subscription": self.new_features_subscription
         }
-
 
 MARKER_TYPE_ACCIDENT = 1
 MARKER_TYPE_DISCUSSION = 2
 
+        
 class MarkerMixin(object):
 
     id = Column(BigInteger, primary_key=True)

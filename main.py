@@ -7,11 +7,10 @@ import datetime
 import time
 
 import jinja2
-from flask import make_response, jsonify, render_template, Response
+from flask import make_response, jsonify, render_template, Response, url_for
 import flask.ext.assets
 from webassets.ext.jinja2 import AssetsExtension
 from webassets import Environment as AssetsEnvironment
-from sqlalchemy import and_
 
 
 from database import db_session
@@ -19,12 +18,16 @@ from models import *
 from base import *
 import utilities
 
+from wtforms import form, fields, validators
+import flask_admin as admin
+import flask_login as login
+from flask_admin.contrib import sqla
+from flask_admin import helpers, expose, BaseView
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = utilities.init_flask(__name__)
 assets = flask.ext.assets.Environment()
 assets.init_app(app)
-
-
 
 assets_env = AssetsEnvironment('./static/', '/static')
 jinja_environment = jinja2.Environment(
@@ -188,6 +191,121 @@ def updatebyemail():
             return jsonify(respo='Subscription saved', )
         else:
             return jsonify(respo='Subscription already exist', )
+
+
+class LoginForm(form.Form):
+    login = fields.TextField(validators=[validators.required()])
+    password = fields.PasswordField(validators=[validators.required()])
+
+    def validate_login(self, field):
+        user = self.get_user()
+
+        if user is None:
+            raise validators.ValidationError('Invalid user')
+
+        if not check_password_hash(user.password, self.password.data):
+            raise validators.ValidationError('Invalid password')
+
+    def get_user(self):
+        return db_session.query(User).filter_by(login=self.login.data).first()
+
+
+class RegistrationForm(form.Form):
+    login = fields.TextField(validators=[validators.required()])
+    email = fields.TextField()
+    password = fields.PasswordField(validators=[validators.required()])
+
+    def validate_login(self, field):
+        if db_session.query(User).filter_by(login=self.login.data).count() > 0:
+            raise validators.ValidationError('Duplicate username')
+
+
+def init_login():
+    login_manager = login.LoginManager()
+    login_manager.init_app(app)
+
+    # Create user loader function
+    @login_manager.user_loader
+    def load_user(user_id):
+        return db_session.query(User).get(user_id)
+
+
+class AdminView(sqla.ModelView):
+
+    def is_accessible(self):
+        return login.current_user.is_authenticated()
+
+
+class AdminIndexView(admin.AdminIndexView):
+
+    @expose('/')
+    def index(self):
+        if not login.current_user.is_authenticated():
+            return redirect(url_for('.login_view'))
+        return super(AdminIndexView, self).index()
+
+    @expose('/login/', methods=('GET', 'POST'))
+    def login_view(self):
+        # handle user login
+        form = LoginForm(request.form)
+        if helpers.validate_form_on_submit(form):
+            user = form.get_user()
+            login.login_user(user)
+
+        if login.current_user.is_authenticated():
+            return redirect(url_for('.index'))
+        #link = '<p>Don\'t have an account? <a href="' + url_for('.register_view') + '">Click here to register.</a></p>'
+        self._template_args['form'] = form
+        #self._template_args['link'] = link
+        return super(AdminIndexView, self).index()
+
+    # @expose('/register/', methods=('GET', 'POST'))
+    # def register_view(self):
+    #    form = RegistrationForm(request.form)
+    #    if helpers.validate_form_on_submit(form):
+    #        user = User()
+    #
+    #        form.populate_obj(user)
+    #        # we hash the users password to avoid saving it as plaintext in the db,
+    #        # remove to use plain text:
+    #        user.password = generate_password_hash(form.password.data)
+    #        user.is_admin = True
+    #
+    #        db_session.add(user)
+    #        db_session.commit()
+    #
+    #        login.login_user(user)
+    #        return redirect(url_for('.index'))
+    #    link = '<p>Already have an account? <a href="' + url_for('.login_view') + '">Click here to log in.</a></p>'
+    #    self._template_args['form'] = form
+    #    self._template_args['link'] = link
+    #    return super(MyAdminIndexView, self).index()
+
+    @expose('/logout/')
+    def logout_view(self):
+        login.logout_user()
+        return redirect(url_for('.index'))
+
+class SendToSubscribersView(BaseView):
+    @login.login_required
+    @expose('/')
+    def index(self):
+        return self.render('sendemail.html')
+
+    def is_visible(self):
+        return login.current_user.is_authenticated()
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+
+init_login()
+
+admin = admin.Admin(app, 'Anyway Administration Panel', index_view=AdminIndexView(), base_template='admin_master.html')
+
+admin.add_view(AdminView(User, db_session))
+admin.add_view(SendToSubscribersView(name='Send To Subscribers'))
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')

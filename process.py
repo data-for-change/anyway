@@ -45,11 +45,12 @@ def get_street(settlement_sign, street_sign, streets):
     extracts the street name using the settlement id and street id
     """
     if settlement_sign not in streets:
-        return None
+        # Changed to return blank string instead of None for correct presentation (Omer)
+        return u""
     street_name = [x[field_names.street_name].decode(content_encoding) for x in streets[settlement_sign] if
                    x[field_names.street_sign] == street_sign]
     # there should be only one street name, or none if it wasn't found.
-    return street_name[0] if len(street_name) == 1 else None
+    return street_name[0] if len(street_name) == 1 else u""
 
 
 def get_address(accident, streets):
@@ -94,7 +95,7 @@ def get_junction(accident, roads):
     """
     key = accident[field_names.road1], accident[field_names.road2]
     junction = roads.get(key, None)
-    return junction.decode(content_encoding) if junction else None
+    return junction.decode(content_encoding) if junction else u""
 
 
 def parse_date(accident):
@@ -109,38 +110,6 @@ def parse_date(accident):
     return accident_date
 
 
-def load_extra_data(accident, streets, roads):
-    """
-    loads more data about the accident
-    :return: a dictionary containing all the extra fields and their values
-    :rtype: dict
-    """
-    extra_fields = {}
-    # if the accident occurred in an urban setting
-    if bool(accident[field_names.urban_intersection]):
-        main_street, secondary_street = get_streets(accident, streets)
-        if main_street:
-            extra_fields[field_names.street1] = main_street
-        if secondary_street:
-            extra_fields[field_names.street2] = secondary_street
-
-    # if the accident occurred in a non urban setting (highway, etc')
-    if bool(accident[field_names.non_urban_intersection]):
-        junction = get_junction(accident, roads)
-        if junction:
-            extra_fields[field_names.junction_name] = junction
-
-    # localize static accident values
-    for field in localization.get_supported_tables():
-        if accident[field]:
-            # if we have a localized field for that particular field, save the field value
-            # it will be fetched we deserialized
-            if localization.get_field(field, accident[field]):
-                extra_fields[field] = accident[field]
-
-    return extra_fields
-
-
 def import_accidents(provider_code, accidents, streets, roads):
     print("reading accidents from file %s" % (accidents.name(),))
     for accident in accidents:
@@ -149,18 +118,28 @@ def import_accidents(provider_code, accidents, streets, roads):
         if not accident[field_names.x_coordinate] or not accident[field_names.y_coordinate]:
             continue
         lng, lat = coordinates_converter.convert(accident[field_names.x_coordinate], accident[field_names.y_coordinate])
+        main_street, secondary_street = get_streets(accident, streets)
 
         marker = {
             "id":int("{0}{1}".format(provider_code, accident[field_names.id])),
             "title":"Accident",
-            "description":json.dumps(load_extra_data(accident, streets, roads), encoding=models.db_encoding),
             "address":get_address(accident, streets),
             "latitude":lat,
             "longitude":lng,
             "subtype":int(accident[field_names.accident_type]),
             "severity":int(accident[field_names.accident_severity]),
             "created":parse_date(accident),
-            "locationAccuracy":int(accident[field_names.igun])
+            "locationAccuracy":int(accident[field_names.igun]),
+            "roadType": int(accident[field_names.road_type]),
+            # subtype
+            "roadShape": int(accident[field_names.road_shape]),
+            # severity
+            "dayType": int(accident[field_names.day_type]),
+            # locationAccuracy
+            "unit": int(accident[field_names.unit]),
+            "mainStreet": main_street,
+            "secondaryStreet": secondary_street,
+            "junction": get_junction(accident, roads),
         }
 
         yield marker

@@ -95,11 +95,20 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         'polymorphic_identity': MARKER_TYPE_ACCIDENT
     }
 
-    description = Column(Text)
     subtype = Column(Integer)
     severity = Column(Integer)
     address = Column(Text)
     locationAccuracy = Column(Integer)
+    roadType = Column(Integer)
+    # accidentType
+    roadShape = Column(Integer)
+    # severityText
+    dayType = Column(Integer)
+    # igun
+    unit = Column(Integer)
+    mainStreet = Column(Text)
+    secondaryStreet = Column(Text)
+    junction = Column(Text)
 
     @staticmethod
     def json_to_description(msg):
@@ -118,10 +127,19 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         if not is_thin:
             fields.update({
                 "title": self.title,
-                "description": Marker.json_to_description(self.description),
                 "address": self.address,
                 "type": self.type,
                 "subtype": self.subtype,
+                "roadType": self.roadType,
+                # "accidentType"
+                "roadShape": self.roadShape,
+                # "severityText"
+                "dayType": self.dayType,
+                # "igun"
+                "unit": self.unit,
+                "mainStreet": self.mainStreet,
+                "secondaryStreet": self.secondaryStreet,
+                "junction": self.junction,
             })
         return fields
 

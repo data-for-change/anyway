@@ -127,9 +127,8 @@ def discussion():
     db_session.commit()
     return make_response(json.dumps(marker.serialize()))
 
-@app.route('/', defaults={'marker_id': None})
-@app.route('/<int:marker_id>')
-def main(marker_id):
+@app.route('/')
+def index():
     context = {'minimal_zoom': MINIMAL_ZOOM, 'url': request.base_url}
     marker = None
     if 'marker' in request.values:
@@ -294,10 +293,6 @@ class SendToSubscribersView(BaseView):
 
     def is_visible(self):
         return login.current_user.is_authenticated()
-
-@app.route('/')
-def index():
-    return render_template('index.html')
 
 
 init_login()

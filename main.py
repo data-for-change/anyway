@@ -130,7 +130,7 @@ def discussion():
 @app.route('/', defaults={'marker_id': None})
 @app.route('/<int:marker_id>')
 def main(marker_id):
-    context = {'minimal_zoom': MINIMAL_ZOOM, 'url': request.url_root}
+    context = {'minimal_zoom': MINIMAL_ZOOM, 'url': request.base_url}
     marker = None
     if 'marker' in request.values:
         markers = Marker.get_marker(request.values['marker'])

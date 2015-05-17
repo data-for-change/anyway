@@ -119,18 +119,21 @@ def marker(self, key_name):
     marker = Marker.get_by_key_name(key_name)
     return make_response(json.dumps(marker.serialize(self.user)))
 
-@app.route("/discussion", methods=["POST"])
+@app.route("/discussion", methods=["GET", "POST"])
 @user_optional
 def discussion():
-    marker = DiscussionMarker.parse(request.get_json(force=True))
-    db_session.add(marker)
-    db_session.commit()
-    return make_response(json.dumps(marker.serialize()))
+    if request.method == "GET":
+        # TODO get DiscussionMarker by request.values["lat"] and request.values["lon"] and pass to index()
+        return index()
+    else:
+        marker = DiscussionMarker.parse(request.get_json(force=True))
+        db_session.add(marker)
+        db_session.commit()
+        return make_response(json.dumps(marker.serialize()))
 
 @app.route('/')
-def index():
+def index(marker=None):
     context = {'minimal_zoom': MINIMAL_ZOOM, 'url': request.base_url}
-    marker = None
     if 'marker' in request.values:
         markers = Marker.get_marker(request.values['marker'])
         if markers.count() == 1:

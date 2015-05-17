@@ -43,10 +43,10 @@ def shutdown_session(exception=None):
     db_session.remove()
 
 
-def generate_json(accidents, is_thin):#discussions, is_thin):
+def generate_json(accidents, discussions, is_thin):
     markers = accidents.all()
-    #if not is_thin:
-    #    markers += discussions.all()
+    if not is_thin:
+        markers += discussions.all()
     yield '{"markers": ['
     is_first = True
     for marker in markers:
@@ -100,8 +100,8 @@ def markers():
                                           start_date, end_date,
                                           fatal, severe, light, inaccurate,
                                           is_thin, yield_per=50)
-    #discussions = DiscussionMarker.bounding_box_query(ne_lat, ne_lng,
-    #                                                  sw_lat, sw_lng)
+    discussions = DiscussionMarker.bounding_box_query(ne_lat, ne_lng,
+                                                      sw_lat, sw_lng)
     if request.values.get('format') == 'csv':
         return Response(generate_csv(accidents), headers={
             "Content-Type": "text/csv",
@@ -109,7 +109,7 @@ def markers():
         })
 
     else: # defaults to json
-        return Response(generate_json(accidents, #discussions, 
+        return Response(generate_json(accidents, discussions, 
                                       is_thin),
                         mimetype="application/json")
 

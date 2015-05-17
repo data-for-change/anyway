@@ -203,9 +203,10 @@ class DiscussionMarker(MarkerMixin, Base):
 
     @classmethod
     def parse(cls, data):
+      last = DiscussionMarker.query.order_by('-id').first()
       return DiscussionMarker(
           # FIXME the id should be generated automatically, but isn't
-          id=DiscussionMarker.query.order_by('-id').first().id + 1,
+          id=last.id + 1 if last else 0,
           type=MARKER_TYPE_DISCUSSION,
           title=data["title"],
           latitude=data["latitude"],

@@ -680,13 +680,16 @@ $(function() {
                 var identifier = this.clickLocation;
                 var params = "?lat=" + this.clickLocation.lat() + "&lon=" + this.clickLocation.lng();
                 var title = this.clickLocation;
+                var desc = "new";
             } else {
                 var identifier = marker.getPosition();
                 var params = "?lat=" + marker.getPosition().lat() + "&lon=" + marker.getPosition().lng();
                 var title = marker.getPosition();
+                var desc = "existing";
                 $("#discussion-dialog").modal("show");
             }
             var url = window.location.protocol + "//" + window.location.host + "/discussion" + params;
+            console.log("Loading " + desc + " discussion " + identifier);
             DISQUS.reset({
                 reload: true,
                 config: function () {

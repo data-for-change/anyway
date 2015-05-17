@@ -26,6 +26,8 @@ class User(Base):
     facebook_url = Column(String(100))
     is_admin = Column(Boolean(), default=False)
     new_features_subscription = Column(Boolean(), default=False)
+    login = Column(String(80), unique=True)
+    password = Column(String(256))
 	
     def serialize(self):
         return {
@@ -38,6 +40,23 @@ class User(Base):
             "is_admin": self.is_admin,
             "new_features_subscription": self.new_features_subscription
         }
+
+    # Flask-Login integration
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.id
+
+    # Required for administrative interface
+    def __unicode__(self):
+        return self.username
 
 MARKER_TYPE_ACCIDENT = 1
 MARKER_TYPE_DISCUSSION = 2

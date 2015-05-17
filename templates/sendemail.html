@@ -1,0 +1,33 @@
+{% extends 'admin/master.html' %}
+{% block body %}
+{{ super() }}
+<div class="row-fluid">
+
+        {% if current_user.is_authenticated() %}
+            <div dir="rtl" style="
+             display: inline-block;
+             position: fixed;
+              left: 0;
+              right: 0;
+              width: 200px;
+              height: 100px;
+              margin: auto;">
+        <h1>שליחת אימייל למשתמשים רשומים:</h1>
+        <p class="lead">
+
+        </p>
+        <form>
+            נושא:<br>
+                <input type="text" name="subject" id="subject">
+                <br/>
+            תוכן:<br/>
+                <textarea name="message" rows="10" cols="30">
+
+                </textarea>
+                <br/>
+                <input type="submit" value="שלח">
+         </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock body %}

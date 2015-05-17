@@ -1,6 +1,5 @@
 import os
 import logging
-import urllib
 import csv
 from StringIO import StringIO
 import datetime
@@ -12,7 +11,6 @@ import flask.ext.assets
 from webassets.ext.jinja2 import AssetsExtension
 from webassets import Environment as AssetsEnvironment
 
-
 from database import db_session
 from models import *
 from base import *
@@ -23,7 +21,7 @@ import flask_admin as admin
 import flask_login as login
 from flask_admin.contrib import sqla
 from flask_admin import helpers, expose, BaseView
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import check_password_hash
 
 app = utilities.init_flask(__name__)
 assets = flask.ext.assets.Environment()
@@ -123,8 +121,19 @@ def marker(self, key_name):
 @user_optional
 def discussion():
     if request.method == "GET":
-        # TODO get DiscussionMarker by request.values["lat"] and request.values["lon"] and pass to index()
-        return index()
+        if 'lat' not in request.values or 'lon' not in request.values:
+            return index()
+        (lat, lon) = (request.values["lat"], request.values["lon"])
+        markers = db_session.query(DiscussionMarker).filter(DiscussionMarker.latitude==lat,
+                                                            DiscussionMarker.longitude==lon)
+        if markers.count() == 0:
+            return index()
+        else:
+            marker = markers.first()
+            context = {'title': marker.title,
+                       'coordinates': (marker.latitude, marker.longitude)}
+            return render_template('disqus.html', **context)
+
     else:
         marker = DiscussionMarker.parse(request.get_json(force=True))
         db_session.add(marker)

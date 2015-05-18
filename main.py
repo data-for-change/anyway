@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import logging
 import csv
@@ -127,8 +128,10 @@ def discussion():
                         request.values['identifier']).first()
             context = {'identifier': marker.identifier, 'title': marker.title}
             return render_template('disqus.html', **context)
-        except (KeyError, AttributeError):
-            return index() # TODO show message "discussion not found"
+        except AttributeError:
+            return index(message=u"הדיון לא נמצא: " + request.values['identifier'])
+        except KeyError:
+            return index(message=u"דיון לא חוקי")
     else:
         marker = DiscussionMarker.parse(request.get_json(force=True))
         db_session.add(marker)
@@ -136,7 +139,7 @@ def discussion():
         return make_response(json.dumps(marker.serialize()))
 
 @app.route('/')
-def index(marker=None):
+def index(marker=None, message=None):
     context = {'minimal_zoom': MINIMAL_ZOOM, 'url': request.base_url}
     if 'marker' in request.values:
         markers = Marker.get_marker(request.values['marker'])
@@ -161,6 +164,8 @@ def index(marker=None):
             context['map_only'] = 1
     if 'lat' in request.values and 'lon' in request.values:
         context['coordinates'] = (request.values['lat'], request.values['lon'])
+    if message:
+        context['message'] = message
     return render_template('index.html', **context)
 
 def string2timestamp(s):

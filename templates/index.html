@@ -429,6 +429,11 @@
             {% else %}
             MARKER_ID = null;
             {% endif %}
+
+            {% if message %}
+            $.notify("{{message}}");
+            {% endif %}
+
             moment.lang('he');
 
             // begin Facebook API

@@ -125,7 +125,7 @@ def discussion():
             marker = db_session.query(DiscussionMarker)\
                 .filter(DiscussionMarker.identifier == \
                         request.values['identifier']).first()
-            context = {'identifier': identifier, 'title': marker.title}
+            context = {'identifier': marker.identifier, 'title': marker.title}
             return render_template('disqus.html', **context)
         except (KeyError, AttributeError):
             return index() # TODO show message "discussion not found"

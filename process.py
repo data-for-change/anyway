@@ -110,6 +110,14 @@ def parse_date(accident):
     return accident_date
 
 
+def get_data_value(value):
+    """
+    :returns: value for parameters which are not mandatory in an accident data
+    OR an empty string if the parameter value don't exist
+    """
+    return int(value) if value else u""
+
+
 def import_accidents(provider_code, accidents, streets, roads):
     print("reading accidents from file %s" % (accidents.name(),))
     for accident in accidents:
@@ -140,6 +148,22 @@ def import_accidents(provider_code, accidents, streets, roads):
             "mainStreet": main_street,
             "secondaryStreet": secondary_street,
             "junction": get_junction(accident, roads),
+            "one_lane": get_data_value(accident[field_names.one_lane]),
+            "multi_lane": get_data_value(accident[field_names.multi_lane]),
+            "speed_limit": get_data_value(accident[field_names.speed_limit]),
+            "intactness": get_data_value(accident[field_names.intactness]),
+            "road_width": get_data_value(accident[field_names.road_width]),
+            "road_sign": get_data_value(accident[field_names.road_sign]),
+            "road_light": get_data_value(accident[field_names.road_light]),
+            "road_control": get_data_value(accident[field_names.road_control]),
+            "weather": get_data_value(accident[field_names.weather]),
+            "road_surface": get_data_value(accident[field_names.road_surface]),
+            "road_object": get_data_value(accident[field_names.road_object]),
+            "object_distance": get_data_value(accident[field_names.object_distance]),
+            "didnt_cross": get_data_value(accident[field_names.didnt_cross]),
+            "cross_mode": get_data_value(accident[field_names.cross_mode]),
+            "cross_location": get_data_value(accident[field_names.cross_location]),
+            "cross_direction": get_data_value(accident[field_names.cross_direction]),
         }
 
         yield marker

@@ -109,6 +109,22 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
     mainStreet = Column(Text)
     secondaryStreet = Column(Text)
     junction = Column(Text)
+    one_lane = Column(Integer)
+    multi_lane = Column(Integer)
+    speed_limit = Column(Integer)
+    intactness = Column(Integer)
+    road_width = Column(Integer)
+    road_sign = Column(Integer)
+    road_light = Column(Integer)
+    road_control = Column(Integer)
+    weather = Column(Integer)
+    road_surface = Column(Integer)
+    road_object = Column(Integer)
+    object_distance = Column(Integer)
+    didnt_cross = Column(Integer)
+    cross_mode = Column(Integer)
+    cross_location = Column(Integer)
+    cross_direction = Column(Integer)
 
     @staticmethod
     def json_to_description(msg):
@@ -140,6 +156,22 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
                 "mainStreet": self.mainStreet,
                 "secondaryStreet": self.secondaryStreet,
                 "junction": self.junction,
+                "one_lane": self.one_lane,
+                "multi_lane": self.multi_lane,
+                "speed_limit": self.speed_limit,
+                "intactness": self.intactness,
+                "road_width": self.road_width,
+                "road_sign": self.road_sign,
+                "road_light": self.road_light,
+                "road_control": self.road_control,
+                "weather": self.weather,
+                "road_surface": self.road_surface,
+                "road_object": self.road_object,
+                "object_distance": self.object_distance,
+                "didnt_cross": self.didnt_cross,
+                "cross_mode": self.cross_mode,
+                "cross_location": self.cross_location,
+                "cross_direction": self.cross_direction,
             })
         return fields
 

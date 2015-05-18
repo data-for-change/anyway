@@ -1,30 +1,25 @@
 import os
-import logging
 import urllib
 import csv
 from StringIO import StringIO
-import datetime
 import time
 
 import jinja2
-from flask import make_response, jsonify, render_template, Response
+from flask import make_response, render_template, Response
 import flask.ext.assets
 from webassets.ext.jinja2 import AssetsExtension
 from webassets import Environment as AssetsEnvironment
-
-
+from clusters_calculator import retrieve_clusters
 
 from database import db_session
 from models import *
 from base import *
 import utilities
-
+from constants import *
 
 app = utilities.init_flask(__name__)
 assets = flask.ext.assets.Environment()
 assets.init_app(app)
-
-
 
 assets_env = AssetsEnvironment('./static/', '/static')
 jinja_environment = jinja2.Environment(
@@ -33,7 +28,6 @@ jinja_environment = jinja2.Environment(
     extensions=[AssetsExtension])
 jinja_environment.assets_environment = assets_env
 
-MINIMAL_ZOOM = 16
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
@@ -65,7 +59,7 @@ def generate_csv(results, is_thin):
             output.writeheader()
 
         row = {k: v.encode('utf8')
-               if type(v) is unicode else v
+        if type(v) is unicode else v
                for k, v in serialized.iteritems()}
         output.writerow(row)
         yield output_file.getvalue()
@@ -101,7 +95,7 @@ def markers(methods=["GET", "POST"]):
                 "Content-Disposition": 'attachment; filename="data.csv"'
             })
 
-        else: # defaults to json
+        else:  # defaults to json
             return Response(generate_json(results, is_thin), mimetype="application/json")
 
     else:
@@ -111,6 +105,7 @@ def markers(methods=["GET", "POST"]):
         marker.update_location()
         marker.put()
         return make_response(json.dumps(marker.serialize(self.user)))
+
 
 @app.route("/markers/(.*)", methods=["GET", "PUT", "DELETE"])
 @user_required
@@ -129,6 +124,7 @@ def marker(self, key_name):
         marker = Marker.get_by_key_name(key_name)
         marker.delete()
 
+
 @app.route("/login", methods=["POST"])
 @user_optional
 def login():
@@ -146,13 +142,13 @@ def login():
             user = User.query.filter(User.email == user_details["email"]).scalar()
             if not user:
                 user = User(
-                    email = user_details["email"],
-                    first_name = user_details["first_name"],
-                    last_name = user_details["last_name"],
-                    username = user_details["username"],
-                    facebook_id = user_details["id"],
-                    facebook_url = user_details["link"],
-                    access_token = facebook_data["accessToken"]
+                    email=user_details["email"],
+                    first_name=user_details["first_name"],
+                    last_name=user_details["last_name"],
+                    username=user_details["username"],
+                    facebook_id=user_details["id"],
+                    facebook_url=user_details["link"],
+                    access_token=facebook_data["accessToken"]
                 )
             else:
                 user.access_token = facebook_data["accessToken"]
@@ -171,13 +167,15 @@ def login():
 def do_logout():
     logout()
 
+
 @app.route("/follow/(.*)")
 @user_required
 def follow(key_name):
     marker = Marker.get_by_key_name(key_name)
     follower = Follower.all().filter("marker", marker).filter("user", self.user).get()
     if not follower:
-        Follower(parent = marker, marker = marker, user = self.user).put()
+        Follower(parent=marker, marker=marker, user=self.user).put()
+
 
 @app.route("/unfollow/(.*)")
 @user_required
@@ -186,6 +184,31 @@ def unfollow(key_name):
     follower = Follower.all().filter("marker", marker).filter("user", self.user).get()
     if follower:
         follower.delete()
+
+
+@app.route("/clusters")
+@user_optional
+def clusters(methods=["GET"]):
+    start_time = time.time()
+    if request.method == "GET":
+        ne_lat = float(request.values['ne_lat'])
+        ne_lng = float(request.values['ne_lng'])
+        sw_lat = float(request.values['sw_lat'])
+        sw_lng = float(request.values['sw_lng'])
+        start_date = datetime.date.fromtimestamp(int(request.values['start_date']))
+        end_date = datetime.date.fromtimestamp(int(request.values['end_date']))
+        fatal = int(request.values['show_fatal'])
+        severe = int(request.values['show_severe'])
+        light = int(request.values['show_light'])
+        inaccurate = int(request.values['show_inaccurate'])
+        zoom = int(request.values['zoom'])
+
+        results = retrieve_clusters(ne_lat, ne_lng, sw_lat, sw_lng,
+                                    start_date, end_date,
+                                    fatal, severe, light, inaccurate, zoom)
+
+        logging.debug('calculating clusters took ' + str(time.time() - start_time))
+        return Response(json.dumps(results), mimetype="application/json")
 
 @app.route('/', defaults={'marker_id': None})
 @app.route('/<int:marker_id>')
@@ -209,7 +232,7 @@ def main(marker_id):
         context['end_date'] = string2timestamp(request.values['end_date'])
     elif marker:
         context['end_date'] = year2timestamp(marker.created.year + 1)
-    for attr in 'show_fatal', 'show_severe', 'show_light', 'show_inaccurate',\
+    for attr in 'show_fatal', 'show_severe', 'show_light', 'show_inaccurate', \
                 'zoom':
         if attr in request.values:
             context[attr] = request.values[attr]
@@ -220,11 +243,14 @@ def main(marker_id):
         context['coordinates'] = (request.values['lat'], request.values['lon'])
     return render_template('index.html', **context)
 
+
 def string2timestamp(s):
     return time.mktime(datetime.datetime.strptime(s, "%Y-%m-%d").timetuple())
 
+
 def year2timestamp(y):
     return time.mktime(datetime.date(y, 1, 1).timetuple())
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')

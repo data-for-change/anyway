@@ -9,7 +9,8 @@ var MarkerView = Backbone.View.extend({
         _.bindAll(this, "clickMarker");
     },
     render : function() {
-        var markerPosition = new google.maps.LatLng(this.model.get("latitude"), this.model.get("longitude"));
+        var markerPosition = new google.maps.LatLng(this.model.get("latitude"),
+                                                    this.model.get("longitude"));
 
         this.marker = new google.maps.Marker({
             position: markerPosition,
@@ -21,7 +22,8 @@ var MarkerView = Backbone.View.extend({
             this.marker.setTitle("דיון"); //this.model.get("title"));
             this.marker.setMap(this.map);
             this.marker.view = this;
-            google.maps.event.addListener(this.marker, "click", _.bind(app.showDiscussion, app, this.marker) );
+            google.maps.event.addListener(this.marker, "click",
+                _.bind(app.showDiscussion, app, this.model.get("identifier")) );
             return this;
         }
       

@@ -121,19 +121,14 @@ def marker(self, key_name):
 @user_optional
 def discussion():
     if request.method == "GET":
-        if 'lat' not in request.values or 'lon' not in request.values:
-            return index()
-        (lat, lon) = (request.values["lat"], request.values["lon"])
-        markers = db_session.query(DiscussionMarker).filter(DiscussionMarker.latitude==lat,
-                                                            DiscussionMarker.longitude==lon)
-        if markers.count() == 0:
-            return index()
-        else:
-            marker = markers.first()
-            context = {'title': marker.title,
-                       'coordinates': (marker.latitude, marker.longitude)}
+        try:
+            marker = db_session.query(DiscussionMarker)\
+                .filter(DiscussionMarker.identifier == \
+                        request.values['identifier']).first()
+            context = {'identifier': identifier, 'title': marker.title}
             return render_template('disqus.html', **context)
-
+        except (KeyError, AttributeError):
+            return index() # TODO show message "discussion not found"
     else:
         marker = DiscussionMarker.parse(request.get_json(force=True))
         db_session.add(marker)

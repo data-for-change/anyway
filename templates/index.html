@@ -221,7 +221,7 @@
                     function disqus_config() {
                         this.callbacks.onNewComment = [
                             function(comment) {
-                                app.addDiscussionMarker(comment);
+                                app.addDiscussionMarker();
                             }
                         ];
                     }
@@ -455,6 +455,11 @@
             {% else %}
             MARKER_ID = null;
             {% endif %}
+
+            {% if message %}
+            $.notify("{{message}}");
+            {% endif %}
+
             moment.lang('he');
 
             // begin Facebook API
@@ -484,19 +489,12 @@
             // end Facebook API
 
             // begin Google Analytics API
-            (function(i, s, o, g, r, a, m) {
-                i['GoogleAnalyticsObject'] = r;
-                i[r] = i[r] || function() {
-                    (i[r].q = i[r].q || []).push(arguments)
-                }, i[r].l = 1 * new Date();
-                a = s.createElement(o),
-                    m = s.getElementsByTagName(o)[0];
-                a.async = 1;
-                a.src = g;
-                m.parentNode.insertBefore(a, m)
-            })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-            ga('create', 'UA-48606400-1', 'anyway.herokuapp.com');
+            ga('create', 'UA-63147752-1', 'auto');
             ga('send', 'pageview');
             // end Google Analytics API
 

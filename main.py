@@ -1,6 +1,6 @@
+# -*- coding: utf-8 -*-
 import os
 import logging
-import urllib
 import csv
 from StringIO import StringIO
 import datetime
@@ -12,7 +12,6 @@ import flask.ext.assets
 from webassets.ext.jinja2 import AssetsExtension
 from webassets import Environment as AssetsEnvironment
 
-
 from database import db_session
 from models import *
 from base import *
@@ -23,7 +22,7 @@ import flask_admin as admin
 import flask_login as login
 from flask_admin.contrib import sqla
 from flask_admin import helpers, expose, BaseView
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import check_password_hash
 
 app = utilities.init_flask(__name__)
 assets = flask.ext.assets.Environment()
@@ -123,8 +122,16 @@ def marker(self, key_name):
 @user_optional
 def discussion():
     if request.method == "GET":
-        # TODO get DiscussionMarker by request.values["lat"] and request.values["lon"] and pass to index()
-        return index()
+        try:
+            marker = db_session.query(DiscussionMarker)\
+                .filter(DiscussionMarker.identifier == \
+                        request.values['identifier']).first()
+            context = {'identifier': marker.identifier, 'title': marker.title}
+            return render_template('disqus.html', **context)
+        except AttributeError:
+            return index(message=u"הדיון לא נמצא: " + request.values['identifier'])
+        except KeyError:
+            return index(message=u"דיון לא חוקי")
     else:
         marker = DiscussionMarker.parse(request.get_json(force=True))
         db_session.add(marker)
@@ -132,7 +139,7 @@ def discussion():
         return make_response(json.dumps(marker.serialize()))
 
 @app.route('/')
-def index(marker=None):
+def index(marker=None, message=None):
     context = {'minimal_zoom': MINIMAL_ZOOM, 'url': request.base_url}
     if 'marker' in request.values:
         markers = Marker.get_marker(request.values['marker'])
@@ -157,6 +164,8 @@ def index(marker=None):
             context['map_only'] = 1
     if 'lat' in request.values and 'lon' in request.values:
         context['coordinates'] = (request.values['lat'], request.values['lon'])
+    if message:
+        context['message'] = message
     return render_template('index.html', **context)
 
 def string2timestamp(s):

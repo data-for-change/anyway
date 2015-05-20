@@ -159,6 +159,8 @@ $(function() {
         }
     });
 
+    var Discussion = Backbone.Model.extend({});
+
     window.MarkerCollection = Backbone.Collection.extend({
         url : "/markers",
 
@@ -647,7 +649,6 @@ $(function() {
                     {
                         icon : "plus-sign",
                         text : ADD_DISCUSSION,
-                        href : "#discussion-dialog",
                         callback : _.bind(this.showDiscussion, this)
                     },
                     {
@@ -657,49 +658,44 @@ $(function() {
                     }
                 ]}).render(e);
         },
-        addDiscussionMarker : function(comment) {
-            if (typeof this.currentMarker == 'undefined') {
-                var marker = new google.maps.Marker({
-                    position: this.clickLocation,
-                    map: this.map,
-                    icon: DISCUSSION_ICON
-                });
-                google.maps.event.addListener(marker, "click", _.bind(this.showDiscussion, this, marker) );
-                var data = {
-                    "latitude": marker.getPosition().lat(),
-                    "longitude": marker.getPosition().lng(),
-                    "title": "(" + marker.getPosition().lat() + ", "
-                                 + marker.getPosition().lng() + ")"
-                };
-                $.post("discussion", JSON.stringify(data));
-            }
+        addDiscussionMarker : function() { // called once a comment is posted
+            var identifier = this.newDiscussionIdentifier;
+            if (typeof identifier == 'undefined') return true; // marker already exists
+            var model = new Discussion({
+                identifier: identifier,
+                latitude: this.clickLocation.lat(),
+                longitude: this.clickLocation.lng(),
+                type: MARKER_TYPE_DISCUSSION
+            });
+            var view = new MarkerView({model: model, map: this.map}).render();
+            $.post("discussion", JSON.stringify({
+                    "latitude"  : model.get("latitude"),
+                    "longitude" : model.get("longitude"),
+                    "identifier": identifier,
+                    "title"     : identifier
+                }));
+            return true;
         },
-        showDiscussion : function(marker) {
-            this.currentMarker = marker;
-            if (typeof marker == 'undefined') {
-                var identifier = this.clickLocation;
-                var params = "?lat=" + this.clickLocation.lat() + "&lon=" + this.clickLocation.lng();
-                var title = this.clickLocation;
-                var desc = "new";
-            } else {
-                var identifier = marker.getPosition();
-                var params = "?lat=" + marker.getPosition().lat() + "&lon=" + marker.getPosition().lng();
-                var title = marker.getPosition();
-                var desc = "existing";
-                $("#discussion-dialog").modal("show");
+        showDiscussion : function(identifier) { // called when clicking add, or on marker
+            if (typeof identifier == 'undefined') { // new discussion from context menu
+                identifier = this.clickLocation.toString(); // (lat, lon)
+                this.newDiscussionIdentifier = identifier;
+            } else { // clicked existing discussion marker
+                this.newDiscussionIdentifier = undefined;
             }
-            var url = window.location.protocol + "//" + window.location.host + "/discussion" + params;
-            console.log("Loading " + desc + " discussion " + identifier);
+            $("#discussion-dialog").modal("show");
+            var url = window.location.protocol + "//" + window.location.host +
+                      "/discussion?identifier=" + identifier;
             DISQUS.reset({
                 reload: true,
                 config: function () {
                     this.page.identifier = identifier;
                     this.page.url = url;
-                    this.page.title = title;
+                    this.page.title = identifier;
                 }
             });
         },
-         featuresSubscriptionDialog : function(type, event) {
+        featuresSubscriptionDialog : function(type, event) {
             if (this.createDialog) this.createDialog.close();
             this.createDialog = new FeatureDialog({
                 type: type,

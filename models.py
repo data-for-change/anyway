@@ -240,28 +240,31 @@ class DiscussionMarker(MarkerMixin, Base):
         'polymorphic_identity': MARKER_TYPE_DISCUSSION
     }
 
+    identifier = Column(String(50), unique=True)
+
     def serialize(self, is_thin=False):
-        fields = {
-            "id": str(self.id),
-            "latitude": self.latitude,
-            "longitude": self.longitude,
-            "created": self.created.isoformat(),
-            "title": self.title,
-            "type": self.type
-        }
-        return fields
+        return {
+                "id": str(self.id),
+                "latitude": self.latitude,
+                "longitude": self.longitude,
+                "created": self.created.isoformat(),
+                "title": self.title,
+                "identifier": self.identifier,
+                "type": self.type
+                }
 
     @classmethod
     def parse(cls, data):
+        # FIXME the id should be generated automatically, but isn't
       last = DiscussionMarker.query.order_by('-id').first()
       return DiscussionMarker(
-          # FIXME the id should be generated automatically, but isn't
           id=last.id + 1 if last else 0,
-          type=MARKER_TYPE_DISCUSSION,
-          title=data["title"],
           latitude=data["latitude"],
           longitude=data["longitude"],
-          created=datetime.datetime.now()
+          created=datetime.datetime.now(),
+          title=data["title"],
+          identifier=data["identifier"],
+          type=MARKER_TYPE_DISCUSSION
       )
 
     @staticmethod

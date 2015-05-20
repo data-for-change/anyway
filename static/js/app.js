@@ -752,9 +752,9 @@ $(function() {
                     '<h3 class="popover-title">'+titleString+'</h3>'+
                     '<div class="popover-content">'+contentString+'</div>'+
                     '<nav class="popover-navigation-rtl">'+
-                        '<div class="modal-footer" role="group">'+
-                            '<button onclick="step2prev()" class="btn btn-default btn-small pull-right" data-role="prev"><<הקודם'+'</button>'+
-                            '<button onclick="step2next()" class="btn btn-default btn-small pull-left" data-role="next">הבא>>'+'</button>'+
+                        '<div class="btn-group" role="group">'+
+                            '<button onclick="step2prev()" class="btn btn-default" data-role="prev"><< הקודם'+'</button>'+
+                            '<button onclick="step2next()" class="btn btn-default" data-role="next">הבא >>'+'</button>'+
                         '</div>'+
                     '</nav>'+
                 '</div>';

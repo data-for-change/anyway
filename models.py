@@ -95,6 +95,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         'polymorphic_identity': MARKER_TYPE_ACCIDENT
     }
 
+    description = Column(Text)
     subtype = Column(Integer)
     severity = Column(Integer)
     address = Column(Text)
@@ -143,6 +144,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         if not is_thin:
             fields.update({
                 "title": self.title,
+                "description": Marker.json_to_description(self.description),
                 "address": self.address,
                 "type": self.type,
                 "subtype": self.subtype,

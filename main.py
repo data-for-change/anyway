@@ -23,10 +23,14 @@ import flask_login as login
 from flask_admin.contrib import sqla
 from flask_admin import helpers, expose, BaseView
 from werkzeug.security import check_password_hash
+from flask_mail import Mail,Message
 
 app = utilities.init_flask(__name__)
+app.config.from_object(__name__)
+
 assets = flask.ext.assets.Environment()
 assets.init_app(app)
+mail = Mail(app)
 
 assets_env = AssetsEnvironment('./static/', '/static')
 jinja_environment = jinja2.Environment(
@@ -299,9 +303,25 @@ class AdminIndexView(admin.AdminIndexView):
 
 class SendToSubscribersView(BaseView):
     @login.login_required
-    @expose('/')
+    @expose('/', methods=('GET', 'POST'))
     def index(self):
-        return self.render('sendemail.html')
+        if request.method=='GET':
+            return self.render('sendemail.html')
+        else:
+            jsondata = request.get_json(force=True)
+            email_subject = jsondata['subject'].encode("utf8")
+            email_content = jsondata['message'].encode("utf8")
+            users_send_email_to = db_session.query(User).filter(User.new_features_subscription == True)
+            with mail.connect() as conn:
+                for user in users_send_email_to:
+                    message = '...'
+                    subject = email_subject
+                    msg = Message(bcc=[user.email],
+                      body=email_content,
+                      subject=email_subject)
+
+                    conn.send(msg)
+            return "O.K"
 
     def is_visible(self):
         return login.current_user.is_authenticated()
@@ -309,7 +329,7 @@ class SendToSubscribersView(BaseView):
 
 init_login()
 
-admin = admin.Admin(app, 'Anyway Administration Panel', index_view=AdminIndexView(), base_template='admin_master.html')
+admin = admin.Admin(app, 'ANYWAY Administration Panel', index_view=AdminIndexView(), base_template='admin_master.html')
 
 admin.add_view(AdminView(User, db_session))
 admin.add_view(SendToSubscribersView(name='Send To Subscribers'))

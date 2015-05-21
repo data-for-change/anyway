@@ -45,11 +45,12 @@ def get_street(settlement_sign, street_sign, streets):
     extracts the street name using the settlement id and street id
     """
     if settlement_sign not in streets:
-        return None
+        # Changed to return blank string instead of None for correct presentation (Omer)
+        return u""
     street_name = [x[field_names.street_name].decode(content_encoding) for x in streets[settlement_sign] if
                    x[field_names.street_sign] == street_sign]
     # there should be only one street name, or none if it wasn't found.
-    return street_name[0] if len(street_name) == 1 else None
+    return street_name[0] if len(street_name) == 1 else u""
 
 
 def get_address(accident, streets):
@@ -94,7 +95,7 @@ def get_junction(accident, roads):
     """
     key = accident[field_names.road1], accident[field_names.road2]
     junction = roads.get(key, None)
-    return junction.decode(content_encoding) if junction else None
+    return junction.decode(content_encoding) if junction else u""
 
 
 def parse_date(accident):
@@ -141,6 +142,14 @@ def load_extra_data(accident, streets, roads):
     return extra_fields
 
 
+def get_data_value(value):
+    """
+    :returns: value for parameters which are not mandatory in an accident data
+    OR an empty string if the parameter value don't exist
+    """
+    return int(value) if value else u""
+
+
 def import_accidents(provider_code, accidents, streets, roads):
     print("reading accidents from file %s" % (accidents.name(),))
     for accident in accidents:
@@ -149,6 +158,7 @@ def import_accidents(provider_code, accidents, streets, roads):
         if not accident[field_names.x_coordinate] or not accident[field_names.y_coordinate]:
             continue
         lng, lat = coordinates_converter.convert(accident[field_names.x_coordinate], accident[field_names.y_coordinate])
+        main_street, secondary_street = get_streets(accident, streets)
 
         marker = {
             "id":int("{0}{1}".format(provider_code, accident[field_names.id])),
@@ -160,7 +170,33 @@ def import_accidents(provider_code, accidents, streets, roads):
             "subtype":int(accident[field_names.accident_type]),
             "severity":int(accident[field_names.accident_severity]),
             "created":parse_date(accident),
-            "locationAccuracy":int(accident[field_names.igun])
+            "locationAccuracy":int(accident[field_names.igun]),
+            "roadType": int(accident[field_names.road_type]),
+            # subtype
+            "roadShape": int(accident[field_names.road_shape]),
+            # severity
+            "dayType": int(accident[field_names.day_type]),
+            # locationAccuracy
+            "unit": int(accident[field_names.unit]),
+            "mainStreet": main_street,
+            "secondaryStreet": secondary_street,
+            "junction": get_junction(accident, roads),
+            "one_lane": get_data_value(accident[field_names.one_lane]),
+            "multi_lane": get_data_value(accident[field_names.multi_lane]),
+            "speed_limit": get_data_value(accident[field_names.speed_limit]),
+            "intactness": get_data_value(accident[field_names.intactness]),
+            "road_width": get_data_value(accident[field_names.road_width]),
+            "road_sign": get_data_value(accident[field_names.road_sign]),
+            "road_light": get_data_value(accident[field_names.road_light]),
+            "road_control": get_data_value(accident[field_names.road_control]),
+            "weather": get_data_value(accident[field_names.weather]),
+            "road_surface": get_data_value(accident[field_names.road_surface]),
+            "road_object": get_data_value(accident[field_names.road_object]),
+            "object_distance": get_data_value(accident[field_names.object_distance]),
+            "didnt_cross": get_data_value(accident[field_names.didnt_cross]),
+            "cross_mode": get_data_value(accident[field_names.cross_mode]),
+            "cross_location": get_data_value(accident[field_names.cross_location]),
+            "cross_direction": get_data_value(accident[field_names.cross_direction]),
         }
 
         yield marker

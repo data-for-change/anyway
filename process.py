@@ -213,9 +213,8 @@ def get_files(directory):
         amount = len(files)
         if amount == 0:
             raise ValueError(
-                "file doesn't exist directory, cannot parse it; directory: {0};filename: {1}".format(directory,
-                                                                                                     filename))
-        if amount > 1:
+                "no files in directory, cannot parse it; directory: {0};filename: {1}".format(directory, filename))
+        elif amount > 1:
             raise ValueError("there are too many files in the directory, cannot parse!;directory: {0};filename: {1}"
                              .format(directory, filename))
 

@@ -3,8 +3,8 @@
 import json
 import logging
 
-from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, BigInteger, Index, desc
-from sqlalchemy.orm import relationship, load_only
+from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, Text, BigInteger, Index, desc
+from sqlalchemy.orm import load_only
 import datetime
 import localization
 from database import Base
@@ -158,6 +158,8 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
                 "mainStreet": self.mainStreet,
                 "secondaryStreet": self.secondaryStreet,
                 "junction": self.junction,
+            })
+            optional = {
                 "one_lane": self.one_lane,
                 "multi_lane": self.multi_lane,
                 "speed_limit": self.speed_limit,
@@ -174,7 +176,10 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
                 "cross_mode": self.cross_mode,
                 "cross_location": self.cross_location,
                 "cross_direction": self.cross_direction,
-            })
+            }
+            for name, value in optional.iteritems():
+                if value != 0:
+                    fields[name] = value
         return fields
 
     def update(self, data, current_user):

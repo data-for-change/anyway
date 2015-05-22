@@ -10,7 +10,8 @@ var MarkerView = Backbone.View.extend({
     },
     localize : function(field,value) {
         //localizes non-mandatory data (which has the same consistent html and python field names)
-            if (this.model.get(value)!="" && localization[field][this.model.get(value)]!=undefined) {
+            if (this.model.has(value) && this.model.get(value)!="" &&
+                    localization[field][this.model.get(value)]!=undefined) {
                 this.$el.find("." + value).text(fields[field] + ": " + localization[field][this.model.get(value)]);
         }
     },

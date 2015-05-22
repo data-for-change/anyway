@@ -145,9 +145,9 @@ def load_extra_data(accident, streets, roads):
 def get_data_value(value):
     """
     :returns: value for parameters which are not mandatory in an accident data
-    OR an empty string if the parameter value don't exist
+    OR zero if the parameter value does not exist
     """
-    return int(value) if value else u""
+    return int(value) if value else 0
 
 
 def import_accidents(provider_code, accidents, streets, roads):
@@ -212,11 +212,9 @@ def get_files(directory):
         files = filter(lambda path: filename.lower() in path.lower(), os.listdir(directory))
         amount = len(files)
         if amount == 0:
-            raise ValueError(
-                "no files in directory, cannot parse it; directory: {0};filename: {1}".format(directory, filename))
-        elif amount > 1:
-            raise ValueError("there are too many files in the directory, cannot parse!;directory: {0};filename: {1}"
-                             .format(directory, filename))
+            raise ValueError("file not found in directory: " + filename)
+        if amount > 1:
+            raise ValueError("there are too many matches: " + filename)
 
         csv = CsvReader(os.path.join(directory, files[0]))
 

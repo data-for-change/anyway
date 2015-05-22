@@ -7,7 +7,7 @@ import datetime
 import time
 
 import jinja2
-from flask import make_response, jsonify, render_template, Response, url_for
+from flask import make_response, jsonify, render_template, Response, url_for, session
 import flask.ext.assets
 from webassets.ext.jinja2 import AssetsExtension
 from webassets import Environment as AssetsEnvironment
@@ -40,6 +40,7 @@ jinja_environment = jinja2.Environment(
 jinja_environment.assets_environment = assets_env
 
 MINIMAL_ZOOM = 16
+SESSION_HIGHLIGHTPOINT_KEY = 'gps_highlightpoint_created'
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
@@ -137,10 +138,61 @@ def discussion():
         except KeyError:
             return index(message=u"דיון לא חוקי")
     else:
-        marker = DiscussionMarker.parse(request.get_json(force=True))
-        db_session.add(marker)
+        disscuss = parse_data(DiscussionMarker, get_json_object(request))
+        if disscuss is None:
+            log_bad_request(request)
+            return make_response("")
+        return make_response(post_handler(disscuss))
+
+@app.route("/highlightpoints", methods=['POST'])
+@user_optional
+def highlightpoint():
+    highlight = parse_data(HighlightPoint, get_json_object(request))
+    if highlight is None:
+        log_bad_request(request)
+        return make_response("")
+
+    # if it's a user gps type (user location), only handle a single post request per session
+    if int(highlight.type) == HighlightPoint.HIGHLIGHT_TYPE_USER_GPS:
+        if not SESSION_HIGHLIGHTPOINT_KEY in session:
+            session[SESSION_HIGHLIGHTPOINT_KEY] = "saved"
+        else:
+            return make_response("")
+
+    return make_response(post_handler(highlight))
+
+# Post handler for a generic REST API
+def post_handler(obj):
+    try:
+        db_session.add(obj)
         db_session.commit()
-        return make_response(json.dumps(marker.serialize()))
+        return jsonify(obj.serialize())
+    except Exception as e:
+        logging.debug("could not handle a post for object:{0}, error:{1}".format(obj, e.message))
+        return ""
+
+# Safely parsing an object
+# cls: the ORM Model class that implement a parse method
+def parse_data(cls, data):
+    try:
+        return cls.parse(data) if data is not None else None
+    except Exception as e:
+        logging.debug("Could not parse the requested data, for class:{0}, data:{1}. Error:{2}".format(cls, data, e.message))
+        return
+
+def get_json_object(request):
+    try:
+        return request.get_json(force=True)
+    except Exception as e:
+        logging.debug("Could not get json from a request. request:{0}. Error:{1}".format(request, e.message))
+        return
+
+def log_bad_request(request):
+    try:
+        logging.debug("Bad {0} Request over {1}. Values: {2} {3}".format(request.method, request.url, request.form, request.args))
+    except AttributeError:
+        logging.debug("Bad request:{0}".format(str(request)))
+
 
 @app.route('/')
 def index(marker=None, message=None):
@@ -337,5 +389,4 @@ admin.add_view(SendToSubscribersView(name='Send To Subscribers'))
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')
     app.run(debug=True)
-
 

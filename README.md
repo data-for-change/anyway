@@ -49,12 +49,12 @@ Contributing
 4. Install [GitHub for windows](http://windows.github.com/) and get the code
 5. `cd` to the anyway directory
 7. `pip install -r requirements.txt`
-8. If any package fails to install, download it from [here](http://www.lfd.uci.edu/~gohlke/pythonlibs) and install it using `pip install <package>`. If this fails, you might have to download the `win32` package, even if you are on a 64-bit platform.
+8. If any package fails to install, download it from [here](http://www.lfd.uci.edu/~gohlke/pythonlibs) and install it using `pip install <package>`. If this fails, you might have to download the `win32` package, even if you are on a 64-bit platform. Currently, the package pyproj and psycopg2 are failing to install so for both of them, you need to download and install the cp27 win32 version, even if you have a windows 64 bit version installed.
 
 ## Local first run (all platforms)
 1. Define connection string (needs to be defined whenever you start working):
   * bash: `export DATABASE_URL='sqlite:///local.db'`
-  * windows shell: `set DATABASE_URL="sqlite:///local.db"`
+  * windows shell: `set DATABASE_URL=sqlite:///local.db`
   
 2. First time, create tables: `python models.py`
 3. Optionally, get the [complete accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTdWdPMXV5c2gycW8/view?usp=sharing) after sending a permission request, and extract it into `/static/data/lms`. Otherwise you'll use the [example accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTSjNMUXYyeW4yQkk/view?usp=sharing) that you already got with the code, so no need to get it again.

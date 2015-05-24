@@ -12,10 +12,10 @@ var tour1 = new Tour({
     <button type='button' class='close' data-role='end'><span>×</span></button> \
     <h3 class='popover-title'></h3> \
     <div class='popover-content'></div> \
-    <nav class='popover-navigation-rtl'> \
-        <div class='modal-footer'> \
-            <button type='button' class='btn btn-default btn-small pull-right' data-role='prev'><< הקודם</button> \
-            <button type='button' class='btn btn-default btn-small pull-left' data-role='next'> הבא >></button> \
+    <nav class='popover-navigation'> \
+        <div class='btn-group center-block'> \
+            <button type='button' class='btn btn-default' data-role='prev'><< הקודם</button> \
+            <button type='button' class='btn btn-default' data-role='next'> הבא >></button> \
         </div> \
     </nav> \
     </div>",
@@ -48,18 +48,14 @@ var tour1 = new Tour({
     title: "סינון לפי חומרה",
     placement: 'left',
     content: '<p>כאן ניתן להציג או להסתיר תאונות ברמות חומרה שונות. </br>לצורך הדוגמא נבטל את הצגתן של תאונות קלות על ידי ביטול הסימון.</br> במידה ותבחרו להציג תאונות שמיקומן מוערך שימו לב שמידת ההערכה תופיע בשדה "עיגון" בפרטי התאונה ואייקון התאונה יהיה שקוף. </p>',
-    onShow: function(){
-     // if ($('*[data-type="3"]').attr('data-tourClick') == "false") {
-          $('*[data-type="3"]').click();
-    //  }
-    },
+   // onShow: function() {
+ //   },
     onPrev: function(){
-      //  if ($('*[data-type="3"]').attr('data-onClick') == "true") {
-            $('*[data-type="3"]').click();
-   //     }
-        step3prev();
         $('*[data-type="3"]').click();
-
+        step3prev();
+    },
+    onNext: function(){
+        tour4next();
     }
   },
 {
@@ -100,6 +96,7 @@ function step2next() {
         checkStepsAdd = true;
     }
     tour.goTo(2);
+    $('*[data-type="3"]').click();
 }
 function step2prev() {
     infowindow.close();
@@ -124,4 +121,8 @@ function tourClickInput() {
     google.maps.event.trigger(a, 'keydown', {keyCode: 13});
     tourLocation = 2;
 }
-
+function tour4next(){
+   // var a = document.getElementById('step4tourInput');
+  //  var a = $('input *name = "daterangepicker_start"')
+  //  a.value = '01/01/2006 עד 01/01/2014'
+}

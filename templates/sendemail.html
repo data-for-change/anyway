@@ -37,8 +37,8 @@
                  var subj = $("#subject").val();
                  var msg = $("#message").val();
                  var data = JSON.stringify({'subject': subj, 'message': msg});
-                 $.post("", data, function () {
-                     $.notify("הדואר האלקטרוני נשלח בהצלחה!");
+                 $.post("", data, function (reply) {
+                     $.notify(reply);
                      $("#subject").val("");
                      $("#message").val("");
                  });

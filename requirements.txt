@@ -17,4 +17,4 @@ yuicompressor==2.4.8
 Flask-Admin==1.1.0
 Flask-Login==0.2.11
 WTForms==2.0.2
-Flask-Mail==0.9.1
+sendgrid==1.4.0

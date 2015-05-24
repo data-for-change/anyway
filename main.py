@@ -23,14 +23,14 @@ import flask_login as login
 from flask_admin.contrib import sqla
 from flask_admin import helpers, expose, BaseView
 from werkzeug.security import check_password_hash
-from flask_mail import Mail,Message
+from sendgrid import sendgrid, SendGridClientError, SendGridServerError
 
 app = utilities.init_flask(__name__)
 app.config.from_object(__name__)
 
 assets = flask.ext.assets.Environment()
 assets.init_app(app)
-mail = Mail(app)
+sg = sendgrid.SendGridClient('anywaytest', 'anyway987', raise_errors=True)
 
 assets_env = AssetsEnvironment('./static/', '/static')
 jinja_environment = jinja2.Environment(
@@ -346,7 +346,7 @@ class AdminIndexView(admin.AdminIndexView):
     #    link = '<p>Already have an account? <a href="' + url_for('.login_view') + '">Click here to log in.</a></p>'
     #    self._template_args['form'] = form
     #    self._template_args['link'] = link
-    #    return super(MyAdminIndexView, self).index()
+    #    return super(AdminIndexView, self).index()
 
     @expose('/logout/')
     def logout_view(self):
@@ -361,18 +361,19 @@ class SendToSubscribersView(BaseView):
             return self.render('sendemail.html')
         else:
             jsondata = request.get_json(force=True)
-            email_subject = jsondata['subject'].encode("utf8")
-            email_content = jsondata['message'].encode("utf8")
             users_send_email_to = db_session.query(User).filter(User.new_features_subscription == True)
-            with mail.connect() as conn:
-                for user in users_send_email_to:
-                    message = '...'
-                    subject = email_subject
-                    msg = Message(bcc=[user.email],
-                      body=email_content,
-                      subject=email_subject)
-
-                    conn.send(msg)
+            message = sendgrid.Mail()
+            message.set_subject(jsondata['subject'].encode("utf8"))
+            message.set_text(jsondata['message'].encode("utf8"))
+            message.set_from('ANYWAY Team <anywaytest@sendgrid.com>')
+            for user in users_send_email_to:
+                message.add_bcc(user.email)
+            try:
+                status, msg = sg.send(message)
+            except SendGridClientError:
+                return "Error occurred while trying to send the emails"
+            except SendGridServerError:
+                return "Error occurred while trying to send the emails"
             return "O.K"
 
     def is_visible(self):

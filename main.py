@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 import os
 import urllib
+import logging
 import csv
 from StringIO import StringIO
 import time
@@ -17,9 +19,20 @@ from base import *
 import utilities
 from constants import *
 
+from wtforms import form, fields, validators
+import flask_admin as admin
+import flask_login as login
+from flask_admin.contrib import sqla
+from flask_admin import helpers, expose, BaseView
+from werkzeug.security import check_password_hash
+from sendgrid import sendgrid, SendGridClientError, SendGridServerError
+
 app = utilities.init_flask(__name__)
+app.config.from_object(__name__)
+
 assets = flask.ext.assets.Environment()
 assets.init_app(app)
+sg = sendgrid.SendGridClient('anywaytest', 'anyway987', raise_errors=True)
 
 assets_env = AssetsEnvironment('./static/', '/static')
 jinja_environment = jinja2.Environment(
@@ -28,16 +41,21 @@ jinja_environment = jinja2.Environment(
     extensions=[AssetsExtension])
 jinja_environment.assets_environment = assets_env
 
+MINIMAL_ZOOM = 16
+SESSION_HIGHLIGHTPOINT_KEY = 'gps_highlightpoint_created'
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     db_session.remove()
 
 
-def generate_json(results, is_thin):
+def generate_json(accidents, discussions, is_thin):
+    markers = accidents.all()
+    if not is_thin:
+        markers += discussions.all()
     yield '{"markers": ['
     is_first = True
-    for marker in results.all():
+    for marker in markers:
         if is_first:
             is_first = False
             prefix = ''
@@ -47,13 +65,13 @@ def generate_json(results, is_thin):
     yield ']}'
 
 
-def generate_csv(results, is_thin):
+def generate_csv(results):
     output_file = StringIO()
     yield output_file.getvalue()
     output_file.truncate(0)
     output = None
     for marker in results.all():
-        serialized = marker.serialize(is_thin)
+        serialized = marker.serialize()
         if not output:
             output = csv.DictWriter(output_file, serialized.keys())
             output.writeheader()
@@ -66,107 +84,67 @@ def generate_csv(results, is_thin):
         output_file.truncate(0)
 
 
-@app.route("/markers")
+@app.route("/markers", methods=["GET"])
 @user_optional
-def markers(methods=["GET", "POST"]):
+def markers():
     logging.debug('getting markers')
-    if request.method == "GET":
-        ne_lat = float(request.values['ne_lat'])
-        ne_lng = float(request.values['ne_lng'])
-        sw_lat = float(request.values['sw_lat'])
-        sw_lng = float(request.values['sw_lng'])
-        zoom = int(request.values['zoom'])
-        start_date = datetime.date.fromtimestamp(int(request.values['start_date']))
-        end_date = datetime.date.fromtimestamp(int(request.values['end_date']))
-        fatal = int(request.values['show_fatal'])
-        severe = int(request.values['show_severe'])
-        light = int(request.values['show_light'])
-        inaccurate = int(request.values['show_inaccurate'])
+    ne_lat = float(request.values['ne_lat'])
+    ne_lng = float(request.values['ne_lng'])
+    sw_lat = float(request.values['sw_lat'])
+    sw_lng = float(request.values['sw_lng'])
+    zoom = int(request.values['zoom'])
+    start_date = datetime.date.fromtimestamp(int(request.values['start_date']))
+    end_date = datetime.date.fromtimestamp(int(request.values['end_date']))
+    fatal = int(request.values['show_fatal'])
+    severe = int(request.values['show_severe'])
+    light = int(request.values['show_light'])
+    inaccurate = int(request.values['show_inaccurate'])
 
-        logging.debug('querying markers in bounding box')
-        is_thin = (zoom < MINIMAL_ZOOM)
-        results = Marker.bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng,
-                                            start_date, end_date,
-                                            fatal, severe, light, inaccurate,
-                                            is_thin, yield_per=50)
-        if request.values.get('format') == 'csv':
-            return Response(generate_csv(results, is_thin), headers={
-                "Content-Type": "text/csv",
-                "Content-Disposition": 'attachment; filename="data.csv"'
-            })
+    logging.debug('querying markers in bounding box')
+    is_thin = (zoom < MINIMAL_ZOOM)
+    accidents = Marker.bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng,
+                                          start_date, end_date,
+                                          fatal, severe, light, inaccurate,
+                                          is_thin, yield_per=50)
+    discussions = DiscussionMarker.bounding_box_query(ne_lat, ne_lng,
+                                                      sw_lat, sw_lng)
+    if request.values.get('format') == 'csv':
+        return Response(generate_csv(accidents), headers={
+            "Content-Type": "text/csv",
+            "Content-Disposition": 'attachment; filename="data.csv"'
+        })
 
-        else:  # defaults to json
-            return Response(generate_json(results, is_thin), mimetype="application/json")
+    else: # defaults to json
+        return Response(generate_json(accidents, discussions, 
+                                      is_thin),
+                        mimetype="application/json")
 
-    else:
-        data = json.loads(self.request.body)
-        marker = Marker.parse(data)
-        marker.user = self.user
-        marker.update_location()
-        marker.put()
-        return make_response(json.dumps(marker.serialize(self.user)))
-
-
-@app.route("/markers/(.*)", methods=["GET", "PUT", "DELETE"])
+@app.route("/markers/(.*)", methods=["GET"])
 @user_required
 def marker(self, key_name):
-    if request.method == "GET":
-        marker = Marker.get_by_key_name(key_name)
-        return make_response(json.dumps(marker.serialize(self.user)))
+    marker = Marker.get_by_key_name(key_name)
+    return make_response(json.dumps(marker.serialize(self.user)))
 
-    elif request.method == "PUT":
-        marker = Marker.get_by_key_name(key_name)
-        data = json.loads(self.request.body)
-        marker.update(data, self.user)
-        return make_response(json.dumps(marker.serialize(self.user)))
-
-    elif request.method == "DELETE":
-        marker = Marker.get_by_key_name(key_name)
-        marker.delete()
-
-
-@app.route("/login", methods=["POST"])
+@app.route("/discussion", methods=["GET", "POST"])
 @user_optional
-def login():
-    user = get_user()
-    if user:
-        return make_response(json.dumps(user.serialize()))
-
-    if request.json:
-        facebook_data = request.json
-        user_id = facebook_data["userID"]
-        access_token = facebook_data["accessToken"]
-        user_details = json.loads(urllib.urlopen("https://graph.facebook.com/me?access_token=" + access_token).read())
-        # login successful
-        if user_details["id"] == user_id:
-            user = User.query.filter(User.email == user_details["email"]).scalar()
-            if not user:
-                user = User(
-                    email=user_details["email"],
-                    first_name=user_details["first_name"],
-                    last_name=user_details["last_name"],
-                    username=user_details["username"],
-                    facebook_id=user_details["id"],
-                    facebook_url=user_details["link"],
-                    access_token=facebook_data["accessToken"]
-                )
-            else:
-                user.access_token = facebook_data["accessToken"]
-
-            db_session.add(user)
-            set_user(user)
-            return make_response(json.dumps(user.serialize()))
-        else:
-            raise Exception("Error in logging in.")
+def discussion():
+    if request.method == "GET":
+        try:
+            marker = db_session.query(DiscussionMarker)\
+                .filter(DiscussionMarker.identifier == \
+                        request.values['identifier']).first()
+            context = {'identifier': marker.identifier, 'title': marker.title}
+            return render_template('disqus.html', **context)
+        except AttributeError:
+            return index(message=u"הדיון לא נמצא: " + request.values['identifier'])
+        except KeyError:
+            return index(message=u"דיון לא חוקי")
     else:
-        raise Exception("No login data or user logged in.")
-
-
-@app.route("/logout")
-@user_required
-def do_logout():
-    logout()
-
+        disscuss = parse_data(DiscussionMarker, get_json_object(request))
+        if disscuss is None:
+            log_bad_request(request)
+            return make_response("")
+        return make_response(post_handler(disscuss))
 
 @app.route("/follow/(.*)")
 @user_required
@@ -218,6 +196,60 @@ def main(marker_id):
     # field so we can query it. We also need to add a provider id.
     context = {'minimal_zoom': MINIMAL_ZOOM}
     marker = None
+
+@app.route("/highlightpoints", methods=['POST'])
+@user_optional
+def highlightpoint():
+    highlight = parse_data(HighlightPoint, get_json_object(request))
+    if highlight is None:
+        log_bad_request(request)
+        return make_response("")
+
+    # if it's a user gps type (user location), only handle a single post request per session
+    if int(highlight.type) == HighlightPoint.HIGHLIGHT_TYPE_USER_GPS:
+        if not SESSION_HIGHLIGHTPOINT_KEY in session:
+            session[SESSION_HIGHLIGHTPOINT_KEY] = "saved"
+        else:
+            return make_response("")
+
+    return make_response(post_handler(highlight))
+
+# Post handler for a generic REST API
+def post_handler(obj):
+    try:
+        db_session.add(obj)
+        db_session.commit()
+        return jsonify(obj.serialize())
+    except Exception as e:
+        logging.debug("could not handle a post for object:{0}, error:{1}".format(obj, e.message))
+        return ""
+
+# Safely parsing an object
+# cls: the ORM Model class that implement a parse method
+def parse_data(cls, data):
+    try:
+        return cls.parse(data) if data is not None else None
+    except Exception as e:
+        logging.debug("Could not parse the requested data, for class:{0}, data:{1}. Error:{2}".format(cls, data, e.message))
+        return
+
+def get_json_object(request):
+    try:
+        return request.get_json(force=True)
+    except Exception as e:
+        logging.debug("Could not get json from a request. request:{0}. Error:{1}".format(request, e.message))
+        return
+
+def log_bad_request(request):
+    try:
+        logging.debug("Bad {0} Request over {1}. Values: {2} {3}".format(request.method, request.url, request.form, request.args))
+    except AttributeError:
+        logging.debug("Bad request:{0}".format(str(request)))
+
+
+@app.route('/')
+def index(marker=None, message=None):
+    context = {'minimal_zoom': MINIMAL_ZOOM, 'url': request.base_url}
     if 'marker' in request.values:
         markers = Marker.get_marker(request.values['marker'])
         if markers.count() == 1:
@@ -241,6 +273,8 @@ def main(marker_id):
             context['map_only'] = 1
     if 'lat' in request.values and 'lon' in request.values:
         context['coordinates'] = (request.values['lat'], request.values['lon'])
+    if message:
+        context['message'] = message
     return render_template('index.html', **context)
 
 
@@ -251,7 +285,164 @@ def string2timestamp(s):
 def year2timestamp(y):
     return time.mktime(datetime.date(y, 1, 1).timetuple())
 
+@app.route("/new-features", methods=["POST"])
+def updatebyemail():
+    jsonData = request.get_json(force=True)
+    emailaddress = str(jsonData['address'])
+    fname = (jsonData['fname']).encode("utf8")
+    lname = (jsonData['lname']).encode("utf8")
+
+    if len(fname)>40:
+        return  jsonify(respo='First name to long')
+    if len(lname)>40:
+        return  jsonify(respo='Last name to long')
+    if len(emailaddress)>40:
+        return jsonify(respo='Email too long', emailaddress = emailaddress)
+    user_exists = db_session.query(User).filter(User.email == emailaddress)
+    if user_exists.count()==0:
+        user = User(email = emailaddress, first_name = fname.decode("utf8"), last_name = lname.decode("utf8"), new_features_subscription=True)
+        db_session.add(user)
+        db_session.commit()
+        return jsonify(respo='Subscription saved', )
+    else:
+        user_exists = user_exists.first()
+        if user_exists.new_features_subscription==False:
+            user_exists.new_features_subscription = True
+            db_session.add(user_exists)
+            db_session.commit()
+            return jsonify(respo='Subscription saved', )
+        else:
+            return jsonify(respo='Subscription already exist', )
+
+
+class LoginForm(form.Form):
+    login = fields.TextField(validators=[validators.required()])
+    password = fields.PasswordField(validators=[validators.required()])
+
+    def validate_login(self, field):
+        user = self.get_user()
+
+        if user is None:
+            raise validators.ValidationError('Invalid user')
+
+        if not check_password_hash(user.password, self.password.data):
+            raise validators.ValidationError('Invalid password')
+
+    def get_user(self):
+        return db_session.query(User).filter_by(login=self.login.data).first()
+
+
+class RegistrationForm(form.Form):
+    login = fields.TextField(validators=[validators.required()])
+    email = fields.TextField()
+    password = fields.PasswordField(validators=[validators.required()])
+
+    def validate_login(self, field):
+        if db_session.query(User).filter_by(login=self.login.data).count() > 0:
+            raise validators.ValidationError('Duplicate username')
+
+
+def init_login():
+    login_manager = login.LoginManager()
+    login_manager.init_app(app)
+
+    # Create user loader function
+    @login_manager.user_loader
+    def load_user(user_id):
+        return db_session.query(User).get(user_id)
+
+
+class AdminView(sqla.ModelView):
+
+    def is_accessible(self):
+        return login.current_user.is_authenticated()
+
+
+class AdminIndexView(admin.AdminIndexView):
+
+    @expose('/')
+    def index(self):
+        if not login.current_user.is_authenticated():
+            return redirect(url_for('.login_view'))
+        return super(AdminIndexView, self).index()
+
+    @expose('/login/', methods=('GET', 'POST'))
+    def login_view(self):
+        # handle user login
+        form = LoginForm(request.form)
+        if helpers.validate_form_on_submit(form):
+            user = form.get_user()
+            login.login_user(user)
+
+        if login.current_user.is_authenticated():
+            return redirect(url_for('.index'))
+        #link = '<p>Don\'t have an account? <a href="' + url_for('.register_view') + '">Click here to register.</a></p>'
+        self._template_args['form'] = form
+        #self._template_args['link'] = link
+        return super(AdminIndexView, self).index()
+
+    # @expose('/register/', methods=('GET', 'POST'))
+    # def register_view(self):
+    #    form = RegistrationForm(request.form)
+    #    if helpers.validate_form_on_submit(form):
+    #        user = User()
+    #
+    #        form.populate_obj(user)
+    #        # we hash the users password to avoid saving it as plaintext in the db,
+    #        # remove to use plain text:
+    #        user.password = generate_password_hash(form.password.data)
+    #        user.is_admin = True
+    #
+    #        db_session.add(user)
+    #        db_session.commit()
+    #
+    #        login.login_user(user)
+    #        return redirect(url_for('.index'))
+    #    link = '<p>Already have an account? <a href="' + url_for('.login_view') + '">Click here to log in.</a></p>'
+    #    self._template_args['form'] = form
+    #    self._template_args['link'] = link
+    #    return super(AdminIndexView, self).index()
+
+    @expose('/logout/')
+    def logout_view(self):
+        login.logout_user()
+        return redirect(url_for('.index'))
+
+class SendToSubscribersView(BaseView):
+    @login.login_required
+    @expose('/', methods=('GET', 'POST'))
+    def index(self):
+        if request.method=='GET':
+            return self.render('sendemail.html')
+        else:
+            jsondata = request.get_json(force=True)
+            users_send_email_to = db_session.query(User).filter(User.new_features_subscription == True)
+            message = sendgrid.Mail()
+            message.set_subject(jsondata['subject'].encode("utf8"))
+            message.set_text(jsondata['message'].encode("utf8"))
+            message.set_from('ANYWAY Team <anywaytest@sendgrid.com>')
+            for user in users_send_email_to:
+                message.add_bcc(user.email)
+            try:
+                status, msg = sg.send(message)
+            except SendGridClientError:
+                return "Error occurred while trying to send the emails"
+            except SendGridServerError:
+                return "Error occurred while trying to send the emails"
+            return "O.K"
+
+    def is_visible(self):
+        return login.current_user.is_authenticated()
+
+
+init_login()
+
+admin = admin.Admin(app, 'ANYWAY Administration Panel', index_view=AdminIndexView(), base_template='admin_master.html')
+
+admin.add_view(AdminView(User, db_session))
+admin.add_view(SendToSubscribersView(name='Send To Subscribers'))
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')
     app.run(debug=True)
+

@@ -16,8 +16,6 @@ div.gm-style {
 
 .context-menu {
 	position: absolute;
-	width: 150px;
-	background: white;
 	box-shadow: 0 0 10px rgba(0,0,0,0.5);
 	margin: 0;
 	border: 0;
@@ -31,6 +29,8 @@ div.gm-style {
 	border-bottom: 1px solid #eee;
 	padding: 2px 5px;
 	box-sizing: border-box;
+    display:table-row;
+    text-align: right;
 }
 
 .context-menu li:hover {
@@ -46,11 +46,6 @@ div.gm-style {
 	padding: 5px;
 	border-bottom: 1px solid #eee;
     cursor: pointer;
-}
-
-.followers img {
-	height: 16px;
-	padding: 2px;
 }
 
 .sidebar-title {
@@ -75,10 +70,6 @@ div.gm-style {
 .info-window {
 	position: relative;
   height: 100%;
-}
-
-.followers {
-	padding-bottom: 40px;
 }
 
 .description {
@@ -133,3 +124,4 @@ div.gm-style {
 textarea.form-control-wide {
     height: 100px;
 }
+.popover{width:350px;max-width:400px;}

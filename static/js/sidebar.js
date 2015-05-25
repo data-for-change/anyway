@@ -91,10 +91,13 @@ var SidebarView = Backbone.View.extend({
 
             if (bounds.contains(marker.getPosition()) ){
                 var markerModel = markerView.model;
+                if (markerModel.get("type") == MARKER_TYPE_DISCUSSION) {
+                    continue;
+                }
 
                 var entryHtml = this.sidebarItemTemplate({
                     created: moment(markerModel.get("created")).format("LLLL"),
-                    type: SUBTYPE_STRING[markerModel.get("subtype") - 1],
+                    type: SUBTYPE_STRING[markerModel.get("subtype")],
                     icon: markerView.getIcon()
                 });
 

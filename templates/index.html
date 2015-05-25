@@ -1,30 +1,50 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Anyway - משפיעים בכל דרך</title>
+        <title>ANYWAY - משפיעים בכל דרך</title>
 
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="ANYWAY" />
+        <meta property="og:image" content="{{ url }}static/img/logo.png" />
+        <meta property="og:image" content="{{ url }}static/img/icons/vehicle_vehicle_medium.png" />
+        <meta property="og:title" content="ANYWAY - משפיעים בכל דרך" />
+        <meta property="og:description" content="ANYWAY היא הדרך שלנו למנוע את התאונה הבאה. ביחד, נהגים, הולכי רגל, אזרחים ומקבלי החלטות נאבק בתאונות הדרכים." />
+        <meta property="og:url" content="{{ url }}" />
+        <meta property="og:locale" content="he_IL" />
+        <meta property="fb:app_id" content="362934167237010" />
+        <meta property="fb:admins" content="685901228" />
+
+        <link href="{{ url }}static/img/icon.png" rel="icon" />
         <link href='http://fonts.googleapis.com/css?family=Alef:400,700' rel='stylesheet' type='text/css'>
         {% assets filters="yui_css", output="css/app.min.css",
             "css/bootstrap.rtl.css",
             "css/style.css",
-            "css/daterangepicker.css" %}
+            "css/daterangepicker.css",
+	    "css/bootstrap-tour.min.css"	 %}
             <link rel="stylesheet" href="{{ ASSET_URL }}" />
         {% endassets %}
-
     </head>
-    <body style="margin: 0; position: relative; width: 100%; height: 100%">
+
+     <body style="margin: 0; position: relative; width: 100%; height: 100%">
+        
+	
         <div class='notifications top-left' id="notification"></div>
         <div id="app">
-
-          <div class="navbar navbar-fixed-top">
-                <div class="navbar-inner" style="padding-right: 10px{{ '; display: none' if map_only }}">
+		
+	       <div class="navbar navbar-fixed-top">
+                <div class="navbar-inner" id="step1Component" style="padding-right: 10px{{ '; display: none' if map_only }}">
+                    <button class="btn btn-default" id="tourOnClick">הדרכה</button>
                     <div style="float: left; padding: 5px">
-                        <a id="js-embed-link" class="btn" style="height: 10px; line-height: 10px; vertical-align: top" data-toggle="modal" data-target="#embed">צרו קישור</a>
-
-                        <a class="fb-login" style="cursor: pointer"><img src="/static/img/facebook_login.png" style="padding: 3px" />
+                        <div class="fb-like" data-href="{{ url }}" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true" style="vertical-align: middle"></div>
+                        <a href="https://play.google.com/store/apps/details?id=il.co.anyway.app">
+                          <img alt="Android app on Google Play"
+                               src="https://developer.android.com/images/brand/en_app_rgb_wo_45.png"
+                               style="height: 25px; padding: 3px"/>
                         </a>
-
-                        <a href="mailto:feedback.anyway@gmail.com/?subject=משוב%20על%20אתר%20anyway.co.il" target="new">צרו קשר</a> &#124;
+                        <a id="js-embed-link" class="btn" style="height: 10px; line-height: 10px; vertical-align: top" data-toggle="modal" data-target="#embed">קישור לתצוגה הנוכחית</a>
+                        <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=F274PRUT6VSAA" target="new">תרמו לנו</a> &#124;
+			<a href="" data-toggle="modal" data-target="#developer-dialog">מפתחים</a> &#124;
+                        <a href="mailto:feedback@anyway.co.il?subject=ANYWAY%20Feedback" target="new">צרו קשר</a> &#124;
                         <a href="" data-toggle="modal" data-target="#credit-dialog">תודות</a> &#124;
                         <a href="" data-toggle="modal" data-target="#about-dialog">אודות</a>
                         <a href="http://www.hasadna.org.il/" title="לדעת להשפיע - מבית הסדנא לידע ציבורי"><img src="/static/img/sadna-logo.png" style="width: 25px; height: 25px; padding: 3px" />
@@ -41,11 +61,13 @@
                 </a>
                 </div>
             </div>
+
+
             <div class="main" style="position: fixed; width: 100%; height: 100%; box-sizing: border-box{{ '; padding-top: 40px; padding-right: 250px' if not map_only }}">
-              <input id="pac-input" class="controls" type="text" placeholder="חפש מיקום" style="{{ 'display: none' if map_only }}">
+              <input id="pac-input" class="controls" type="text" placeholder="חפש מיקום" style="{{ 'display: block' if map_only }}">
                 <div id="map_canvas" style="width: 100%; height: 100%; box-sizing: border-box"></div>
             </div>
-            <div class="sidebar-container" style="position: absolute; right: 0; top: 0;
+            <div id="step2Component" class="sidebar-container" style="position: absolute; right: 0; top: 0;
             bottom: 0; width: 250px; background: white; padding-top: 40px;
             {{ 'display: none' if map_only }}">
                 <!--
@@ -66,7 +88,7 @@
             </div>
             <div class="modal-body">
                 <div class="embed-code">
-                    <label for="map_link">קישור לאיזור המוצג</label>
+                    <label for="map_link">קישור לתצוגה הנוכחית</label>
                     <input id="map_link" type="text" class="form-control form-control-wide" value="" placeholder="">
                     <button class="btn btn-default js-btn-copytoclipboard" data-copy="map_link" style="float: left;" type="button">העתק</button>
                 </div>
@@ -81,26 +103,23 @@
             </div>
         </div>
 
-        <div class="modal hide fade" id="about-dialog">
+        <div class="modal hide fade" id="developer-dialog">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h3>אודות anyway</h3>
+                <h3>הצטרפו לצוות הפיתוח!</h3>
             </div>
             <div class="modal-body">
-ANYWAY היא הדרך שלנו למנוע את התאונה הבאה. ביחד, נהגים, הולכי רגל, אזרחים ומקבלי החלטות נאבק בתאונות הדרכים.
+            ANYWAY הוא פרויקט שנכתב בקוד פתוח ואנו שמחים להרחיב את משפחת המפתחים שלנו.
+
+אנחנו משתמשים ב-Python עם Flask, ו-Javascript עם Backbone.js ו-jQuery. 
 <br/>
 <br/>
-ANYWAY מציגה על גבי מפה תאונות דרכים עם נפגעים (ע״פ נתוני הלשכה המרכזית לסטטיסטיקה). בהמשך, יתווסף מידע נוסף למפה וכן תתאפשר יכולת לפתח דיונים מבוססי מיקום על פתרונות אפשריים והתארגנות אזרחית. באמצעות ידע זמין, נגיש ושקוף אנו שואפים להעלות את המודעות לנושא תאונות הדרכים ולהעצים את יכולת ההשפעה של כל אחד ואחת על הסביבה הקרובה- הבית, השכונה, בית הספר של הילדים, מקום העבודה ועוד- על ידי פעולה משותפת בקהילה. אנחנו מאמינים שבעזרת ידע ציבורי קיים המוצג באתר יווצרו ידע ותובנות חדשים. שיתוף הידע הזה יאפשר לחברה האזרחית להתארגן לפעולה אקטיבית ולהזרים הצעות, רעיונות והתראות בחזרה אל הרשויות.
+<a href="https://github.com/hasadna/anyway">הקוד שלנו</a> נמצא ב-GitHub,
+וגם של <a href="https://github.com/hasadna/anywayAndroidApp">אפליקציית האנדרואיד שלנו</a>.
 <br/>
-<br/>
-ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לידע ציבורי ונבנה על ידי מתנדבים.
-<br/>
-<br/>
-חברי הצוות:
-שגיא סמולרסקי, דניאל הרשקוביץ, מיכל טננברג, ראובן יגל, יוסי אטיאס, עומרי בהומי, עודד לזר, דרור ברן, נחום קשב, אושרי וייס ומשה אבאייב.
-<br/>
-<br/>
-<a href="http://www.hasadna.org.il/%D7%94%D7%9E%D7%A2%D7%91%D7%93%D7%94-%D7%A9%D7%9C%D7%A0%D7%95/anyway-%D7%9E%D7%A9%D7%A4%D7%99%D7%A2%D7%99%D7%9D-%D7%A2%D7%9C-%D7%94%D7%93%D7%A8%D7%9A/">למידע נוסף: העמוד שלנו באתר הסדנה לידע ציבורי</a>
+מוזמנים ליצור קשר
+<a href="mailto:gal@anyway.co.il?subject=Developers" target="new">במייל</a>
+לפרטים נוספים ולהצטרפות לצוות.
 </div>
             <div class="modal-footer">
                 <a class="btn close-button" data-dismiss="modal" aria-hidden="true">סגור</a>
@@ -121,18 +140,59 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
 <br/>
 אומרי באומר - על עזרתו ועל עצות יקרות ערך
 <br/>
-הנס שקור- על תרומתו הנדיבה של הדומיין anyway.co.il
+אריאל הלוי - על ייעוץ אסטרטגי יקר ערך
 <br/>
 ליאור צורף - על תמיכתו בשלבים הקריטיים של הפרויקט ותרומתו המקצועית
 <br/>
+הנס שקור - על תרומתו הנדיבה של הדומיין www.anyway.co.il
+<br/>
 המרכז הבינתחומי הרצליה
 <br/>
-שגיא מנשה, גיא חרץ, לביא מלמן
+<br/>
+שגיא מנשה, גיא חרץ, טל יפה, לביא מלמן, גיל לופו, ח״כ תמר זנדברג, עוזי בלומר, תומר סלוצקי
             </div>
             <div class="modal-footer">
                 <a class="btn close-button" data-dismiss="modal" aria-hidden="true">סגור</a>
             </div>
         </div>
+
+        <div class="modal hide fade" id="about-dialog" style="overflow-x: hidden;">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3>אודות ANYWAY</h3>
+            </div>
+            <div class="modal-body row-fluid">
+              <div class="span8">
+                ANYWAY היא הדרך שלנו למנוע את התאונה הבאה. ביחד, נהגים, הולכי רגל, אזרחים ומקבלי החלטות נאבק בתאונות הדרכים.
+                <br/>
+                <br/>
+                ANYWAY מציגה על גבי מפה תאונות דרכים עם נפגעים (ע״פ נתוני הלשכה המרכזית לסטטיסטיקה). בהמשך, יתווסף מידע נוסף למפה וכן תתאפשר יכולת לפתח דיונים מבוססי מיקום על פתרונות אפשריים והתארגנות אזרחית. באמצעות ידע זמין, נגיש ושקוף אנו שואפים להעלות את המודעות לנושא תאונות הדרכים ולהעצים את יכולת ההשפעה של כל אחד ואחת על הסביבה הקרובה- הבית, השכונה, בית הספר של הילדים, מקום העבודה ועוד- על ידי פעולה משותפת בקהילה. אנחנו מאמינים שבעזרת ידע ציבורי קיים המוצג באתר יווצרו ידע ותובנות חדשים. שיתוף הידע הזה יאפשר לחברה האזרחית להתארגן לפעולה אקטיבית ולהזרים הצעות, רעיונות והתראות בחזרה אל הרשויות.
+                <br/>
+                <br/>
+                ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לידע ציבורי ונבנה על ידי מתנדבים.
+                <br/>
+                <br/>
+                חברי הצוות:
+                רון רייטר, שגיא סמולרסקי, דניאל הרשקוביץ, מיכל טננברג, ראובן יגל, יוסי אטיאס, עומרי בהומי, עודד לזר, עומר שכטר, דרור ברן, יבגני נמזר, יוני לימור, משה נחמיאס, שי בר לב, עדי הורביץ, נחום קשב, אושרי וייס, שמואל רגב, אגם אלוני, אבי קליימן.
+                <br/>
+                <br/>
+                <a href="http://www.hasadna.org.il/%D7%94%D7%9E%D7%A2%D7%91%D7%93%D7%94-%D7%A9%D7%9C%D7%A0%D7%95/anyway-%D7%9E%D7%A9%D7%A4%D7%99%D7%A2%D7%99%D7%9D-%D7%A2%D7%9C-%D7%94%D7%93%D7%A8%D7%9A/">למידע נוסף: העמוד שלנו באתר הסדנה לידע ציבורי</a>
+              </div>
+              <div class="span3 pagination-centered">
+                <!-- Facebook Badge START --><a href="https://www.facebook.com/anywayisrael" title="Anyway - &#x5e9;&#x5d9;&#x5e0;&#x5d5;&#x5d9; &#x5d1;&#x5db;&#x5dc; &#x5d3;&#x5e8;&#x5da;" style="font-family: &quot;lucida grande&quot;,tahoma,verdana,arial,sans-serif; font-size: 11px; font-variant: normal; font-style: normal; font-weight: normal; color: #3B5998; text-decoration: none;" target="_TOP">Anyway - שינוי בכל דרך</a><br /><a href="https://www.facebook.com/anywayisrael" title="Anyway - &#x5e9;&#x5d9;&#x5e0;&#x5d5;&#x5d9; &#x5d1;&#x5db;&#x5dc; &#x5d3;&#x5e8;&#x5da;" target="_TOP"><img class="img" src="https://badge.facebook.com/badge/170360636482927.286.469049763.png" style="border: 0px;" alt="" /></a><br /><!-- Facebook Badge END -->
+                <br/>
+                <a href="https://play.google.com/store/apps/details?id=il.co.anyway.app">
+                  <img alt="Android app on Google Play"
+                       src="https://developer.android.com/images/brand/en_app_rgb_wo_60.png"
+                       style="height: 40px; padding: 3px"/>
+                </a>
+              </div>
+            </div>
+            <div class="modal-footer">
+                <a class="btn close-button" data-dismiss="modal" aria-hidden="true">סגור</a>
+            </div>
+        </div>
+
 
         <div class="modal hide fade" id="empty-csv-dialog">
             <div class="modal-header">
@@ -148,54 +208,105 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
             </div>
         </div>
 
+        <div class="modal hide fade" id="discussion-dialog">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3>דיון</h3>
+            </div>
+            <div class="modal-body">
+                <div id="disqus_thread"></div>
+                <script type="text/javascript">
+                    /* * * CONFIGURATION VARIABLES * * */
+                    var disqus_shortname = 'anyway-feedback';
+                    function disqus_config() {
+                        this.callbacks.onNewComment = [
+                            function(comment) {
+                                app.addDiscussionMarker();
+                            }
+                        ];
+                    }
 
-        <div id="marker-dialog-template" style="display: none">
+                    /* * * DON'T EDIT BELOW THIS LINE * * */
+                    (function() {
+                        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                    })();
+                </script>
+            </div>
+            <div class="modal-footer">
+                <a class="btn close-button" data-dismiss="modal" aria-hidden="true">סגור</a>
+            </div>
+        </div>
+
+        <div id="marker-content-template" style="display: none">
+            <img class="profile-image" style="float: left" />
+            <h4 class="title"></h4>
+            <p class="added-by"></p>
+            <p class="creation-date"></p>
+            <p class="roadType" style="margin:0"></p>
+            <p class="accidentType" style="margin:0"></p>
+            <p class="roadShape" style="margin:0"></p>
+            <p class="severityText" style="margin:0"></p>
+            <p class="dayType" style="margin:0"></p>
+            <p class="igun" style="margin:0"></p>
+            <p class="unit" style="margin:0"></p>
+            <p class="one_lane" style="margin:0"></p>
+            <p class="multi_lane" style="margin:0"></p>
+            <p class="speed_limit" style="margin:0"></p>
+            <p class="intactness" style="margin:0"></p>
+            <p class="road_width" style="margin:0"></p>
+            <p class="road_sign" style="margin:0"></p>
+            <p class="road_light" style="margin:0"></p>
+            <p class="road_control" style="margin:0"></p>
+            <p class="weather" style="margin:0"></p>
+            <p class="road_surface" style="margin:0"></p>
+            <p class="road_object" style="margin:0"></p>
+            <p class="object_distance" style="margin:0"></p>
+            <p class="didnt_cross" style="margin:0"></p>
+            <p class="cross_mode" style="margin:0"></p>
+            <p class="cross_location" style="margin:0"></p>
+            <p class="cross_direction" style="margin:0"></p>
+            <p class="mainStreet" style="margin:0"></p>
+            <p class="secondaryStreet" style="margin:0"></p>
+            <p class="junction" style="margin:0"></p>
+            
+        </div>
+
+
+        <div id="feature-dialog-template" style="display: none">
             <div class="modal hide fade">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h3>הוסף סימון</h3>
+                    <h3>עדכן אותי כשתכונות חדשות יהיו זמינות</h3>
+                    <h5> אנו מפתחים תכונות חדשות לאתר. הנך מוזמנ/ת להשאיר פרטים על מנת שנוכל לעדכן אותך ברגע שתכונות חדשות יהיו זמינות </h5>
                 </div>
                 <div class="modal-body">
                     <form class="form-horizontal">
                         <div class="control-group">
-                            <label class="control-label" for="title">כותרת</label>
                             <div class="controls">
-                                <input type="text" id="title" name="title" placeholder="הכנס כותרת">
+                                שם פרטי:
+                                <input type="text" id="fName" name="fName" placeholder="שם פרטי">
                             </div>
-                        </div>
-                        <div class="control-group">
-                            <label class="control-label" for="description">תיאור</label>
                             <div class="controls">
-                                <textarea class="input-large" id="description" name="description"></textarea>
+                                שם משפחה:
+                                <input type="text" id="lName" name="lName" placeholder="שם משפחה">
+                            </div>
+                            <div class="controls">
+                                דואר אלקטרוני:
+                                <input type="email" id="emailAddress" name="emailAddress" placeholder="דואר אלקטרוני">
                             </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <a class="btn close-button">סגור</a>
-                    <a class="btn btn-primary save-button">שמור סימון</a>
+                    <a class="btn btn-primary save-button">שליחה</a>
                 </div>
             </div>
         </div>
-        <div id="marker-content-template" style="display: none">
-            <img class="profile-image" style="float: left" />
-            <h4 class="title"></h4>
-            <h5 class="type"></h5>
-            <p class="added-by"></p>
-            <p class="creation-date"></p>
-            <p class="description"></p>
-            <!--h5>תומכים</h5-->
-            <!--p class="followers"></p-->
-            <div class="buttons" style="position: absolute; bottom: 0">
-                <!--
-            <button class="btn btn-success follow-button">תמוך בנקודה זו</button>
-            <button class="btn btn-danger unfollow-button" style="display: none">הפסק תמיכה</button>
-            <button class="btn btn-primary share-button">שתף</button>
-          -->
-                <button class="btn btn-danger delete-button" style="display: none">מחק</button>
-            </div>
 
-        </div>
+
         <div id="reset-map-control" style="padding: 5px; display: none">
             <div title="חזור למיקום שלי" style="background-color: white; border: 2px solid black; cursor: pointer; boxShadow: 1px 1px 5px black {{ '; display: none' if map_only }}">
                 <img src="/static/img/my_location.png" />
@@ -203,19 +314,19 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
         </div>
         <div id="sidebar-template" style="display: none">
             <div class="sidebar-title">סינון לפי חומרה</div>
-            <ul>
-                <li><img class="checkbox-severity" data-type="1" data-checked="true" /> תאונות קטלניות</li>
+            <ul id="step3tour">
+                <li><img class="checkbox-severity" data-type="1" data-checked="true"/> תאונות קטלניות</li>
                 <li><img class="checkbox-severity" data-type="2" data-checked="true" /> תאונות קשות</li>
                 <li><img class="checkbox-severity" data-type="3" data-checked="true" /> תאונות קלות</li>
                 <li><img class="checkbox-accuracy" data-type="4" data-checked="false" /> תאונות שמיקומן משוער</li>
 
             </ul>
             <div class="sidebar-title">סינון לפי טווח תאריכים</div>
-            <ul>
+            <ul id="step4tour">
                 <li>
                     <div class="input-prepend" id="calendar-control">
                         <span class="add-on"><i class="icon-calendar date-range"></i></span>
-                        <input type="text" class="date-range" style="width: 200px" />
+                        <input id="step4tourInput" type="text" class="date-range" style="width: 200px" />
                     </div>
 
                 </li>
@@ -245,7 +356,7 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
         </script>
 
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBpOmft-UskZsAQth9vNl0fN6EXaRR6dZc&sensor=true&libraries=places&language=iw"></script>
-        {% assets filters="closure_js", output="js/app.min.js",
+        {% assets filters="rjsmin", output="js/app.min.js",
             "js/libs/jquery-1.8.2.min.js",
             "js/libs/spin.min.js",
             "js/libs/jquery.spin.js",
@@ -261,14 +372,16 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
             "js/libs/daterangepicker.js",
             "js/libs/js-itm.js",
             "js/constants.js",
-            "js/markerdialog.js",
             "js/marker.js",
             "js/clusterView.js",
+            "js/featuredialog.js",
             "js/sidebar.js",
             "js/contextmenu.js",
             "js/map_style.js",
             "js/clipboard.js",
-            "js/app.js" %}
+            "js/libs/bootstrap-tour.min.js",
+            "js/app.js",
+            "js/localization.js" %}
             <script type="text/javascript" src="{{ ASSET_URL }}"></script>
         {% endassets %}
 
@@ -345,49 +458,56 @@ ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לי�
             {% else %}
             MARKER_ID = null;
             {% endif %}
+
+            {% if message %}
+            $.notify("{{message}}");
+            {% endif %}
+
             moment.lang('he');
 
+            // begin Facebook API
             window.fbAsyncInit = function() {
-                FB.init({
-                    appId: '440070049429017', // App ID
-                    status: true, // check login status
-                    cookie: true, // enable cookies to allow the server to access the session
-                    xfbml: true, // parse XFBML
-                    version: 'v2.0'
-                });
-                window.app = new AppView();
-                window.app.render();
-                if (MARKER_ID) {
-                    console.log('setting marker');
-                    app.model.set("currentMarker", MARKER_ID);
-                }
-            };
-            // Load the SDK Asynchronously
-            (function(d, s, id) {
-                var js, fjs = d.getElementsByTagName(s)[0];
-                if (d.getElementById(id)) {
-                    return;
-                }
-                js = d.createElement(s);
-                js.id = id;
-                js.src = "//connect.facebook.net/en_US/sdk.js";
-                fjs.parentNode.insertBefore(js, fjs);
-            }(document, 'script', 'facebook-jssdk'));
-            (function(i, s, o, g, r, a, m) {
-                i['GoogleAnalyticsObject'] = r;
-                i[r] = i[r] || function() {
-                    (i[r].q = i[r].q || []).push(arguments)
-                }, i[r].l = 1 * new Date();
-                a = s.createElement(o),
-                    m = s.getElementsByTagName(o)[0];
-                a.async = 1;
-                a.src = g;
-                m.parentNode.insertBefore(a, m)
-            })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+              FB.init({
+                appId      : '362934167237010',
+                xfbml      : true,
+                version    : 'v2.3'
+              });
 
-            ga('create', 'UA-48606400-1', 'anyway.herokuapp.com');
+              // Load the app
+              window.app = new AppView();
+              window.app.render();
+              if (MARKER_ID) {
+                console.log('setting marker');
+                app.model.set("currentMarker", MARKER_ID);
+              }
+            };
+
+            (function(d, s, id){
+               var js, fjs = d.getElementsByTagName(s)[0];
+               if (d.getElementById(id)) {return;}
+               js = d.createElement(s); js.id = id;
+               js.src = "//connect.facebook.net/en_US/sdk.js";
+               fjs.parentNode.insertBefore(js, fjs);
+             }(document, 'script', 'facebook-jssdk'));
+            // end Facebook API
+
+            // begin Google Analytics API
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+            ga('create', 'UA-63147752-1', 'auto');
             ga('send', 'pageview');
+            // end Google Analytics API
+
         </script>
+	
+    <script type="text/javascript" src="../static/js/tour.js"> </script>
     </body>
+	
+	
 
 </html>
+
+

@@ -10,14 +10,16 @@ $(function () {
             app.model.set("showFatal", showFatal);
             app.model.set("showSevere", showSevere);
             app.model.set("showLight", showLight);
-            app.model.set("showInaccurateMarkers", showInaccurate != 0);
-            app.map.setZoom(zoom);
+            app.model.set("showInaccurateMarkers", showInaccurate);
+            app.map.setZoom(parseInt(zoom));
             app.map.setCenter(new google.maps.LatLng(lat, lon));
         },
         navigateEmpty: function () {
             app.model.set("currentMarker", null);
         }
     });
+
+    var Discussion = Backbone.Model.extend({});
 
     window.MarkerCollection = Backbone.Collection.extend({
         url: "/markers",
@@ -36,16 +38,12 @@ $(function () {
     });
 
     window.AppView = Backbone.View.extend({
-        el: $("#app"),
-        events: {
-            "click #map_canvas": "clickMap",
-            "click .fb-login": "requireLogin",
-            "click .fb-logout": "logout",
-            "click .download-csv": "downloadCsv"
+        el : $("#app"),
+        events : {
+            "click #map_canvas" : "clickMap",
+            "click .download-csv" : "downloadCsv"
         },
-        initialize: function () {
-            _.bindAll(this, "clickContext");
-
+        initialize : function() {
             this.markers = new MarkerCollection();
             this.clusters = new ClusterCollection();
             this.model = new Backbone.Model();
@@ -76,9 +74,8 @@ $(function () {
                 .bind("change:showInaccurateMarkers",
                 _.bind(this.reloadMarkersIfNeeded, this, "showInaccurateMarkers"))
                 .bind("change:dateRange", this.reloadMarkers, this);
-//            this.login(); // FIXME causes exceptions, but might be required for discussion
-        },
-        reloadMarkersIfNeeded: function (attr) {
+        },  
+        reloadMarkersIfNeeded: function(attr) {
             if (this.clusterMode() || this.model.get(attr)) {
                 this.reloadMarkers();
             } else {
@@ -89,7 +86,7 @@ $(function () {
         updateUrl: function (url) {
             if (typeof url == 'undefined') {
                 if (app.infoWindow) return;
-                url = "/?" + this.getCurrentUrlParams();
+                url = "/#" + this.getCurrentUrlParams();
             }
             Backbone.history.navigate(url, true);
         },
@@ -109,13 +106,12 @@ $(function () {
         },
         fetchMarkers: function (reset) {
             if (!this.isReady) return;
-            this.updateUrl();
-            var params = this.buildMarkersParams();
 
-            reset = this.clusterMode() || (typeof reset !== 'undefined' && reset);
-            reset &= this.resetOnMouseUp;
-            google.maps.event.clearListeners(this.map, "mousemove");
-            this.resetOnMouseUp = false;
+            var params = this.buildMarkersParams();
+            if (!params) return;
+
+            var reset = this.clusterMode() || this.previousZoom < MINIMAL_ZOOM;
+            this.previousZoom = this.map.zoom;
             if (reset) {
                 this.resetMarkers();
             }
@@ -186,6 +182,7 @@ $(function () {
         },
         buildMarkersParams: function () {
             var bounds = this.map.getBounds();
+            if (!bounds) return null;
             var zoom = this.map.zoom;
             var dateRange = this.model.get("dateRange");
 
@@ -241,8 +238,10 @@ $(function () {
             }, this);
             this.groupsData = groupsData;
 
-            _.each(this.oms.markersNearAnyOtherMarker(), function (marker) {
-                marker.view.opacitySeverityForGroup();
+            _.each(this.oms.markersNearAnyOtherMarker(), function(marker){
+                if (!marker.view.model.get("currentlySpiderfied")){
+                    marker.view.opacitySeverityForGroup();
+                }
             });
         },
         downloadCsv: function () {
@@ -286,12 +285,10 @@ $(function () {
             } else {
                 this.goToMyLocation();
             }
-
             // search box:
             // Create the search box and link it to the UI element.
             var input = document.getElementById('pac-input');
             this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
-
             this.searchBox = new google.maps.places.SearchBox(input);
 
             google.maps.event.addListener(this.searchBox, 'places_changed', function () {
@@ -316,15 +313,41 @@ $(function () {
                 });
                 this.clickedMarker = true;
             }.bind(this));
-            this.oms.addListener("unspiderfy", this.setMultipleMarkersIcon.bind(this));
-            this.oms.addListener("unspiderfy", function (markers) {
-                _.each(markers, function (marker) {
+            this.oms.addListener("unspiderfy", function(markers){
+                _.each(markers, function(marker){
                     marker.view.model.unset("currentlySpiderfied");
                 });
             }.bind(this));
+            this.oms.addListener("unspiderfy", this.setMultipleMarkersIcon.bind(this));
             console.log('Loaded OverlappingMarkerSpiderfier');
 
-            var mcOptions = {maxZoom: MINIMAL_ZOOM - 1, minimumClusterSize: 1};
+            var clusterStyle = [
+                {
+                    textColor: 'black',
+                    url: '/static/img/icons/cluster_1.png',
+                    height: 42,
+                    width: 42
+                },
+                {
+                    textColor: 'black',
+                    url: '/static/img/icons/cluster_2.png',
+                    height: 52,
+                    width: 52
+                },
+                {
+                    textColor: 'black',
+                    url: '/static/img/icons/cluster_3.png',
+                    height: 62,
+                    width: 62
+                },
+                {
+                    textColor: 'black',
+                    url: '/static/img/icons/cluster_4.png',
+                    height: 72,
+                    width: 72
+                }
+            ];
+            var mcOptions = {maxZoom: MINIMAL_ZOOM - 1, minimumClusterSize: 1, styles: clusterStyle};
             this.clusterer = new MarkerClusterer(this.map, [], mcOptions);
             console.log('Loaded MarkerClusterer');
 
@@ -410,11 +433,8 @@ $(function () {
             console.log('Loaded AppRouter');
 
             this.isReady = true;
-            google.maps.event.addListener(this.map, "rightclick", _.bind(this.contextMenuMap, this));
-            google.maps.event.addListener(this.map, "mousedown", _.bind(this.trackDrag, this));
-            google.maps.event.addListener(this.map, "mouseup", _.bind(this.fetchData, this));
-            google.maps.event.addListener(this.map, "zoom_changed", _.bind(this.zoomChanged, this));
-            google.maps.event.addListenerOnce(this.map, 'idle', _.bind(this.fetchData, this));
+            google.maps.event.addListener( this.map, "rightclick", _.bind(this.contextMenuMap, this) );
+            google.maps.event.addListener( this.map, "idle", _.bind(this.fetchMarkers, this) );
 
             return this;
         },
@@ -427,11 +447,13 @@ $(function () {
                     var longitude = position.coords.longitude;
                     this.myLocation = new google.maps.LatLng(latitude, longitude);
                     this.setCenterWithMarker(this.myLocation);
+                    this.createHighlightPoint(latitude, longitude, HIGHLIGHT_TYPE_USER_GPS);
                 }.bind(this));
             } else {
                 this.myLocation = this.defaultLocation;
                 this.setCenterWithMarker(this.myLocation);
             }
+            this.map.setZoom(INIT_ZOOM);
         },
         closeInfoWindow: function () {
             if (app.infoWindow) {
@@ -440,6 +462,7 @@ $(function () {
                 app.infoWindow.close();
                 app.infoWindow = null;
                 this.updateUrl();
+                $(document).off('keydown',app.ESCinfoWindow);
             }
         },
         clickMap: function (e) {
@@ -456,7 +479,7 @@ $(function () {
         }, initShowInaccurate: function () {
             var showInaccurate = this.model.get("showInaccurateMarkers");
             if (typeof showInaccurate == 'undefined') {
-                this.model.set("showInaccurateMarkers", SHOW_INACCURATE);
+                this.model.set("showInaccurateMarkers", SHOW_INACCURATE ? 1 : 0);
                 showInaccurate = SHOW_INACCURATE;
             }
             return showInaccurate;
@@ -474,13 +497,15 @@ $(function () {
         },
         loadMarker: function (model) {
             for (var i = 0; i < this.markerList.length; i++) {
-                if (this.markerList[i].model.attributes.id == model.attributes.id) {
+                if (this.markerList[i].model.get("type") == model.get("type") &&
+                    this.markerList[i].model.attributes.id == model.attributes.id) {
                     return; // avoid adding duplicates
                 }
             }
 
             // markers are loaded immediately as they are fetched
-            if (this.clusterMode() || this.fitsFilters(model)) {
+            if (this.clusterMode() || this.fitsFilters(model) ||
+                !this.clusterMode() && model.get("type") == MARKER_TYPE_DISCUSSION) {
                 var markerView = new MarkerView({model: model, map: this.map}).render();
                 model.set("markerView", this.markerList.length);
                 this.markerList.push(markerView);
@@ -572,117 +597,88 @@ $(function () {
             markerView.choose();
             this.model.set("currentMarker", null);
         },
-        contextMenuMap: function (e) {
+        contextMenuMap : function(e) {
+            this.clickLocation = e.latLng;
             if (this.menu) {
                 this.menu.remove();
             }
             this.menu = new ContextMenuView({
                 items: [
                     {
-                        icon: "plus-sign",
-                        text: ADD_MARKER_OFFER,
-                        callback: this.clickContext
+                        icon : "plus-sign",
+                        text : ADD_DISCUSSION,
+                        callback : _.bind(this.showDiscussion, this)
+                    },
+                    {
+                        icon : "plus-sign",
+                        text : NEW_FEATURES,
+                        callback : _.bind(this.featuresSubscriptionDialog, this)
                     }
-                    /*,
-                     {
-                     icon : "plus-sign",
-                     text : ADD_MARKER_PETITION,
-                     callback : this.clickContext
-                     }
-                     */
-                ]
-            }).render(e);
+                ]}).render(e);
         },
-        clickContext: function (item, event) {
-            this.requireLogin(_.bind(function () {
-                this.openCreateDialog(item, event);
-            }, this));
+        addDiscussionMarker : function() { // called once a comment is posted
+            var identifier = this.newDiscussionIdentifier;
+            if (typeof identifier == 'undefined') return true; // marker already exists
+            var model = new Discussion({
+                identifier: identifier,
+                latitude: this.clickLocation.lat(),
+                longitude: this.clickLocation.lng(),
+                type: MARKER_TYPE_DISCUSSION
+            });
+            var view = new MarkerView({model: model, map: this.map}).render();
+            $.post("discussion", JSON.stringify({
+                    "latitude"  : model.get("latitude"),
+                    "longitude" : model.get("longitude"),
+                    "identifier": identifier,
+                    "title"     : identifier
+                }));
+            return true;
         },
-        openCreateDialog: function (type, event) {
+        showDiscussion : function(identifier) { // called when clicking add, or on marker
+            if (typeof identifier == 'undefined') { // new discussion from context menu
+                identifier = this.clickLocation.toString(); // (lat, lon)
+                this.newDiscussionIdentifier = identifier;
+            } else { // clicked existing discussion marker
+                this.newDiscussionIdentifier = undefined;
+            }
+            $("#discussion-dialog").modal("show");
+            var url = window.location.protocol + "//" + window.location.host +
+                      "/discussion?identifier=" + identifier;
+            DISQUS.reset({
+                reload: true,
+                config: function () {
+                    this.page.identifier = identifier;
+                    this.page.url = url;
+                    this.page.title = identifier;
+                }
+            });
+        },
+        featuresSubscriptionDialog : function(type, event) {
             if (this.createDialog) this.createDialog.close();
-            this.createDialog = new MarkerDialog({
+            this.createDialog = new FeatureDialog({
                 type: type,
                 event: event,
                 markers: this.markers
             }).render();
-
-        },
-        requireLogin: function (callback) {
-            if (this.model.get("user")) {
-                if (typeof callback == "function") callback();
-                return;
-            }
-
-            FB.getLoginStatus(_.bind(function (response) {
-                if (response.status === 'connected') {
-                    var uid = response.authResponse.userID;
-                    var accessToken = response.authResponse.accessToken;
-
-                    this.login(response.authResponse, callback);
-
-                } else {
-                    // the user is logged in to Facebook,
-                    // but has not authenticated your app
-                    FB.login(_.bind(function (response) {
-                        if (response.authResponse) {
-                            this.login(response.authResponse, callback);
-                        } else {
-                            // console.log('User cancelled login or did not fully authorize.');
-                        }
-                    }, this), {scope: "email"});
-                }
-            }, this));
-
-        },
-        login: function (authResponse, callback) {
-            console.log("Logging in...");
-            $.ajax({
-                url: "/login",
-                type: "post",
-                data: JSON.stringify(authResponse),
-                contentType: "application/json",
-                traditional: true,
-                dataType: "json",
-                success: _.bind(function (user) {
-                    if (user) {
-                        this.model.set("user", user);
-                        if (typeof callback == "function") callback();
-                    }
-                }, this),
-                error: _.bind(function () {
-
-                }, this)
-            });
-        },
-        logout: function () {
-            this.model.set("user", null);
-            FB.logout();
-        },
-        updateUser: function () {
-            var user = this.model.get("user");
-
-            if (user) {
-                this.$el.find(".fb-login").hide();
-
-                this.$el.find(".user-details").show();
-                this.$el.find(".profile-picture").attr("src", 'https://graph.facebook.com/' + user.facebook_id + '/picture');
-                this.$el.find(".profile-name").text(user.first_name);
-
-            } else {
-                this.$el.find(".fb-login").show();
-                this.$el.find(".user-details").hide();
-
-            }
         },
         handleSearchBox: function () {
             var places = this.searchBox.getPlaces();
             if (places && places.length > 0) {
-                var place = places[0];
-                this.setCenterWithMarker(place.geometry.location);
-                this.map.setZoom(INIT_ZOOM);
+              var place = places[0];
+              this.createHighlightPoint(place.geometry.location.lat(), place.geometry.location.lng(), HIGHLIGHT_TYPE_USER_SEARCH);
+              this.setCenterWithMarker(place.geometry.location);
+              this.map.setZoom(INIT_ZOOM);
             }
+         },
+        createHighlightPoint : function(lat, lng, highlightPointType) {
+            if (isNaN(lat) || isNaN(lng) || isNaN(highlightPointType)) return;
+            $.post("highlightpoints", JSON.stringify({
+                    "latitude": lat,
+                    "longitude": lng,
+                    "type": highlightPointType
+                }));
         },
-        setCenterWithMarker: function (loc) {
+        setCenterWithMarker: function(loc) {
             this.closeInfoWindow();
             this.map.setCenter(loc);
             this.fetchMarkers();
@@ -690,20 +686,49 @@ $(function () {
                 this.locationMarker.setMap(null);
             }
             this.locationMarker = new google.maps.Marker({
-                position: loc,
-                map: this.map
+              position: loc,
+              map: this.map,
+              icon: USER_LOCATION_ICON
             });
-        },
-        getCurrentUrlParams: function () {
+             //agam add- tour find location for step 2
+            if (tourLocation == 2)
+            {
+                var location = this.locationMarker;
+                var contentString = '<p>המיקום שחיפשתם יסומן באיקון הזה. </br> מסביבו תוכלו לראות אייקונים שמייצגים תאונות עם נפגעים.  </p>';
+                var titleString = ' המיקום שחיפשתם ';
+                var htmlTourString =
+                '<div class ="scrollFix" id="step-2" role="tooltip">'+
+                    '<h3 class="popover-title">'+titleString+'</h3>'+
+                    '<div class="popover-content">'+contentString+'</div>'+
+                    '<nav class="popover-navigation-rtl">'+
+                        '<div class="btn-group" role="group">'+
+                            '<button onclick="step2prev()" class="btn btn-default" data-role="prev"><< הקודם'+'</button>'+
+                            '<button onclick="step2next()" class="btn btn-default" data-role="next">הבא >>'+'</button>'+
+                        '</div>'+
+                    '</nav>'+
+                '</div>';
+                infowindow = new google.maps.InfoWindow({
+                    content: htmlTourString
+                });
+                infowindow.open(this.map, location);
+            }
+          },
+          getCurrentUrlParams: function () {
             var dateRange = app.model.get("dateRange");
             var center = app.map.getCenter();
             return "start_date=" + moment(dateRange[0]).format("YYYY-MM-DD") +
                 "&end_date=" + moment(dateRange[1]).format("YYYY-MM-DD") +
-                "&show_fatal=" + (app.model.get("showFatal") ? 1 : 0) +
-                "&show_severe=" + (app.model.get("showSevere") ? 1 : 0) +
-                "&show_light=" + (app.model.get("showLight") ? 1 : 0) +
-                "&show_inaccurate=" + (app.model.get("showInaccurateMarkers") ? 1 : 0) +
+                "&show_fatal=" + (parseInt(app.model.get("showFatal")) || 0) +
+                "&show_severe=" + (parseInt(app.model.get("showSevere")) || 0) +
+                "&show_light=" + (parseInt(app.model.get("showLight")) || 0) +
+                "&show_inaccurate=" + (parseInt(app.model.get("showInaccurateMarkers")) || 0) +
                 "&zoom=" + app.map.zoom + "&lat=" + center.lat() + "&lon=" + center.lng();
+		},
+        ESCinfoWindow: function(event) {
+            if (event.keyCode == 27) {
+                app.closeInfoWindow();
+                console.log('ESC pressed');
+            }
         }
     });
 });

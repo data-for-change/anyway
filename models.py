@@ -3,12 +3,10 @@
 import json
 import logging
 
-from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, BigInteger, Index, desc
+from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc
 from sqlalchemy.orm import relationship, load_only
-from flask.ext.sqlalchemy import SQLAlchemy
 import datetime
 import localization
-import utilities
 from database import Base
 
 db_encoding = 'utf-8'
@@ -27,9 +25,10 @@ class User(Base):
     facebook_id = Column(String(50))
     facebook_url = Column(String(100))
     is_admin = Column(Boolean(), default=False)
-    discussions = relationship("DiscussionMarker", backref="users")
-    followers = relationship("Follower", backref="users")
-
+    new_features_subscription = Column(Boolean(), default=False)
+    login = Column(String(80), unique=True)
+    password = Column(String(256))
+	
     def serialize(self):
         return {
             "id": str(self.id),
@@ -39,15 +38,42 @@ class User(Base):
             "facebook_id": self.facebook_id,
             "facebook_url": self.facebook_url,
             "is_admin": self.is_admin,
+            "new_features_subscription": self.new_features_subscription
         }
 
+    # Flask-Login integration
+    def is_authenticated(self):
+        return True
 
-class MarkerMixin(object):
-    id = Column(BigInteger, primary_key=True)
-    title = Column(String(100))
-    created = Column(DateTime, default=datetime.datetime.utcnow)
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.id
+
+    # Required for administrative interface
+    def __unicode__(self):
+        return self.username
+
+MARKER_TYPE_ACCIDENT = 1
+MARKER_TYPE_DISCUSSION = 2
+
+class Point(object):
+    id = Column(Integer, primary_key=True)
     latitude = Column(Float())
     longitude = Column(Float())
+        
+class MarkerMixin(Point):
+    type = Column(Integer)
+    title = Column(String(100))
+    created = Column(DateTime, default=datetime.datetime.now, index=True)
+
+    __mapper_args__ = {
+        'polymorphic_on': type
+    }
 
     @staticmethod
     def format_description(field, value):
@@ -57,6 +83,38 @@ class MarkerMixin(object):
         name = localization.get_field(field).decode(db_encoding)
         return u"{0}: {1}".format(name, value)
 
+class HighlightPoint(Point, Base):
+    __tablename__ = "highlight_markers"
+    __table_args__ = (
+        Index('highlight_long_lat_idx', 'latitude', 'longitude'),
+    )
+
+    HIGHLIGHT_TYPE_USER_SEARCH = 1
+    HIGHLIGHT_TYPE_USER_GPS = 2
+
+    created = Column(DateTime, default=datetime.datetime.now)
+    type = Column(Integer)
+
+    def serialize(self):
+        return {
+            "id": str(self.id),
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+            "type": self.type,
+        }
+
+    def update(self, data):
+        self.type = data["type"]
+        self.latitude = data["latitude"]
+        self.longitude = data["longitude"]
+
+    @classmethod
+    def parse(cls, data):
+        return cls(
+            type=data["type"],
+            latitude=data["latitude"],
+            longitude=data["longitude"]
+        )
 
 class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
     __tablename__ = "markers"
@@ -64,21 +122,41 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         Index('acc_long_lat_idx', 'latitude', 'longitude'),
     )
 
-    MARKER_TYPE_ACCIDENT = 1
-    MARKER_TYPE_HAZARD = 2
-    MARKER_TYPE_OFFER = 3
-    MARKER_TYPE_PLEDGE = 4
-    MARKER_TYPE_BILL = 5
-    MARKER_TYPE_ENGINEERING_PLAN = 6
-    MARKER_TYPE_CITY = 7
-    MARKER_TYPE_OR_YAROK = 8
+    __mapper_args__ = {
+        'polymorphic_identity': MARKER_TYPE_ACCIDENT
+    }
 
     description = Column(Text)
-    type = Column(Integer)
     subtype = Column(Integer)
     severity = Column(Integer)
     address = Column(Text)
     locationAccuracy = Column(Integer)
+    roadType = Column(Integer)
+    # accidentType
+    roadShape = Column(Integer)
+    # severityText
+    dayType = Column(Integer)
+    # igun
+    unit = Column(Integer)
+    mainStreet = Column(Text)
+    secondaryStreet = Column(Text)
+    junction = Column(Text)
+    one_lane = Column(Integer)
+    multi_lane = Column(Integer)
+    speed_limit = Column(Integer)
+    intactness = Column(Integer)
+    road_width = Column(Integer)
+    road_sign = Column(Integer)
+    road_light = Column(Integer)
+    road_control = Column(Integer)
+    weather = Column(Integer)
+    road_surface = Column(Integer)
+    road_object = Column(Integer)
+    object_distance = Column(Integer)
+    didnt_cross = Column(Integer)
+    cross_mode = Column(Integer)
+    cross_location = Column(Integer)
+    cross_direction = Column(Integer)
 
     @staticmethod
     def json_to_description(msg):
@@ -101,13 +179,38 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
                 "address": self.address,
                 "type": self.type,
                 "subtype": self.subtype,
-
-                # TODO: fix query
-                "followers": [],  # [x.user.serialize() for x in Follower.all().filter("marker", self).fetch(100)],
-
-                # TODO: fix query
-                "following": None,
+                "roadType": self.roadType,
+                # "accidentType"
+                "roadShape": self.roadShape,
+                # "severityText"
+                "dayType": self.dayType,
+                # "igun"
+                "unit": self.unit,
+                "mainStreet": self.mainStreet,
+                "secondaryStreet": self.secondaryStreet,
+                "junction": self.junction,
             })
+            optional = {
+                "one_lane": self.one_lane,
+                "multi_lane": self.multi_lane,
+                "speed_limit": self.speed_limit,
+                "intactness": self.intactness,
+                "road_width": self.road_width,
+                "road_sign": self.road_sign,
+                "road_light": self.road_light,
+                "road_control": self.road_control,
+                "weather": self.weather,
+                "road_surface": self.road_surface,
+                "road_object": self.road_object,
+                "object_distance": self.object_distance,
+                "didnt_cross": self.didnt_cross,
+                "cross_mode": self.cross_mode,
+                "cross_location": self.cross_location,
+                "cross_direction": self.cross_direction,
+            }
+            for name, value in optional.iteritems():
+                if value != 0:
+                    fields[name] = value
         return fields
 
     def update(self, data, current_user):
@@ -116,16 +219,6 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         self.type = data["type"]
         self.latitude = data["latitude"]
         self.longitude = data["longitude"]
-
-        follower = Follower.query.filter(Follower.marker == self.id).filter(
-            Follower.user == current_user).get(1)
-
-        if data["following"]:
-            if not follower:
-                Follower(marker=self.id, user=current_user)
-        else:
-            if follower:
-                follower[0].delete()
 
         self.put()
 
@@ -167,9 +260,9 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
     @classmethod
     def parse(cls, data):
         return Marker(
+            type=MARKER_TYPE_ACCIDENT,
             title=data["title"],
             description=data["description"],
-            type=data["type"],
             latitude=data["latitude"],
             longitude=data["longitude"]
         )
@@ -181,34 +274,46 @@ class DiscussionMarker(MarkerMixin, Base):
         Index('disc_long_lat_idx', 'latitude', 'longitude'),
     )
 
-    user = Column(Integer, ForeignKey("users.id"))
-    followers = relationship("Follower", backref="markers")
+    __mapper_args__ = {
+        'polymorphic_identity': MARKER_TYPE_DISCUSSION
+    }
 
-    def serialize(self):
-        fields = {
-            "id": str(self.id),
-            "latitude": self.latitude,
-            "longitude": self.longitude,
-            "created": self.created.isoformat(),
-            "title": self.title,
-            "user": self.user.serialize() if self.user else "",
+    identifier = Column(String(50), unique=True)
 
-            # TODO: fix query
-            "followers": [],  # [x.user.serialize() for x in Follower.all().filter("marker", self).fetch(100)],
+    def serialize(self, is_thin=False):
+        return {
+                "id": str(self.id),
+                "latitude": self.latitude,
+                "longitude": self.longitude,
+                "created": self.created.isoformat(),
+                "title": self.title,
+                "identifier": self.identifier,
+                "type": self.type
+                }
 
-            # TODO: fix query
-            "following": None,
-        }
-        return fields
+    @classmethod
+    def parse(cls, data):
+        # FIXME the id should be generated automatically, but isn't
+      last = DiscussionMarker.query.order_by('-id').first()
+      return DiscussionMarker(
+          id=last.id + 1 if last else 0,
+          latitude=data["latitude"],
+          longitude=data["longitude"],
+          created=datetime.datetime.now(),
+          title=data["title"],
+          identifier=data["identifier"],
+          type=MARKER_TYPE_DISCUSSION
+      )
 
-
-
-class Follower(Base):
-    __tablename__ = "followers"
-
-    user = Column(Integer, ForeignKey("users.id"), primary_key=True)
-    marker = Column(BigInteger, ForeignKey("discussions.id"), primary_key=True)
-
+    @staticmethod
+    def bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng):
+        markers = DiscussionMarker.query \
+            .filter(DiscussionMarker.longitude <= ne_lng) \
+            .filter(DiscussionMarker.longitude >= sw_lng) \
+            .filter(DiscussionMarker.latitude <= ne_lat) \
+            .filter(DiscussionMarker.latitude >= sw_lat) \
+            .order_by(desc(DiscussionMarker.created))
+        return markers
 
 
 def init_db():
@@ -217,9 +322,10 @@ def init_db():
     # they will be registered properly on the metadata.  Otherwise
     # you will have to import them first before calling init_db()
     print "Importing models"
-
     print "Creating all tables"
     Base.metadata.create_all(bind=engine)
+	
+
 
 
 if __name__ == "__main__":

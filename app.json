@@ -1,0 +1,23 @@
+{
+  "name":"anyway",
+  "description":"Interactive map for road accidents in Israel, to motivate the local community members to take collective action and fight road accidents.",
+  "scripts":{},
+  "env":{
+    "BUILDPACK_URL":{
+      "required":true
+    },
+    "DATABASE_URL":{
+      "required":true
+    },
+    "FACEBOOK_KEY":{
+      "required":true
+    },
+    "FACEBOOK_SECRET":{
+      "required":true
+    }
+  },
+  "addons":[
+    "heroku-postgresql",
+    "newrelic"
+  ]
+}

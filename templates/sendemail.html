@@ -9,13 +9,22 @@
              position: fixed;
               left: 0;
               right: 0;
-              width: 200px;
+              width: 300px;
               height: 100px;
               margin: auto;">
         <h1>שליחת אימייל למשתמשים רשומים:</h1>
         <p class="lead">
 
         </p>
+            כתובות אימייל:
+            <br>
+             <textarea name="emails" id="emails" rows="5" cols="30" readonly dir="ltr">
+              {%- for item in user_emails -%}
+                 {{item}}
+             {%- endfor -%}
+            </textarea>
+            <br/>
+
             נושא:<br>
                 <input type="text" name="subject" id="subject">
                 <br/>
@@ -38,7 +47,7 @@
                  var msg = $("#message").val();
                  var data = JSON.stringify({'subject': subj, 'message': msg});
                  $.post("", data, function (reply) {
-                     $.notify(reply);
+                     alert(reply);
                      $("#subject").val("");
                      $("#message").val("");
                  });

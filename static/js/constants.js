@@ -1,5 +1,5 @@
-var ADD_MARKER_OFFER = "הוסף הצעה";
-var ADD_MARKER_PETITION = "הוסף עצומה";
+var ADD_DISCUSSION = "צרו דיון";
+var NEW_FEATURES = "עדכן אותי לגבי תכונות חדשות"
 
 var MARKER_TYPE_ACCIDENT = 1
 var MARKER_TYPE_DISCUSSION = 2

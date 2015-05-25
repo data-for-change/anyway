@@ -1,5 +1,5 @@
 MarkerClusterer.prototype.addCluster = function (clat, clng, csize) {
-    this.setZoomOnClick(false);
+    this.setZoomOnClick(true);
     if (typeof this.aAddClusterIcons == "undefined") {
         this.aAddClusterIcons = [];
     }
@@ -24,6 +24,9 @@ MarkerClusterer.prototype.addCluster = function (clat, clng, csize) {
         backgroundPosition_: '0 0'
     });
     CI.setCenter(clusterlocation);
+    CI.cluster_.center_ = clusterlocation;
+    CI.cluster_.calculateBounds_();
+
     CI.setMap(this.activeMap_);
     CI.show();
 

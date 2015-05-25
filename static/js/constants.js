@@ -97,6 +97,14 @@ function getIcon(accidentType, severity) {
     } catch (err) {
         // stick to default icon
     }
+    if (isRetina){
+        var googleIcon = {
+            url: icon,
+            scaledSize: new google.maps.Size(30, 50)
+        };
+        icon = googleIcon;
+    }
+
     return icon;
 }
 

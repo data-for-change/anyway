@@ -107,7 +107,7 @@ var MarkerView = Backbone.View.extend({
     getUrl: function () {
         var dateRange = app.model.get("dateRange");
         var center = app.map.getCenter();
-        return "/#marker=" + this.model.get("id") + "&" + app.getCurrentUrlParams();
+        return "/?marker=" + this.model.get("id") + "&" + app.getCurrentUrlParams();
     },
     clickMarker : function() {
         this.highlight();

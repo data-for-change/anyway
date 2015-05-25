@@ -1,6 +1,11 @@
 var ADD_MARKER_OFFER = "הוסף הצעה";
 var ADD_MARKER_PETITION = "הוסף עצומה";
 
+var MARKER_TYPE_ACCIDENT = 1
+var MARKER_TYPE_DISCUSSION = 2
+
+var HIGHLIGHT_TYPE_USER_SEARCH = 1;
+var HIGHLIGHT_TYPE_USER_GPS = 2;
 
 var SEVERITY_FATAL = 1;
 var SEVERITY_SEVERE = 2;
@@ -54,6 +59,9 @@ MULTIPLE_ICONS[SEVERITY_FATAL] = "/static/img/icons/multiple_lethal.png";
 MULTIPLE_ICONS[SEVERITY_SEVERE] = "/static/img/icons/multiple_severe.png";
 MULTIPLE_ICONS[SEVERITY_LIGHT] = "/static/img/icons/multiple_medium.png";
 MULTIPLE_ICONS[SEVERITY_VARIOUS] = "/static/img/icons/multiple_various.png";
+
+var USER_LOCATION_ICON = "/static/img/icons/you_are_Here.png";
+var DISCUSSION_ICON = "/static/img/icons/discussion.png";
 
 var ACCIDENT_MINOR_TYPE_TO_TYPE = {};
 ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_CAR_TO_PEDESTRIAN] = ACCIDENT_TYPE_CAR_TO_PEDESTRIAN;

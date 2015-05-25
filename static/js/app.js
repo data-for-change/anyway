@@ -86,7 +86,7 @@ $(function () {
         updateUrl: function (url) {
             if (typeof url == 'undefined') {
                 if (app.infoWindow) return;
-                url = "/#" + this.getCurrentUrlParams();
+                url = "/?" + this.getCurrentUrlParams();
             }
             Backbone.history.navigate(url, true);
         },

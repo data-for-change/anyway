@@ -38,7 +38,7 @@
                  var msg = $("#message").val();
                  var data = JSON.stringify({'subject': subj, 'message': msg});
                  $.post("", data, function (reply) {
-                     $.notify(reply);
+                     alert(reply);
                      $("#subject").val("");
                      $("#message").val("");
                  });

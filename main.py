@@ -413,7 +413,13 @@ class SendToSubscribersView(BaseView):
     @expose('/', methods=('GET', 'POST'))
     def index(self):
         if request.method=='GET':
-            return self.render('sendemail.html')
+            user_emails = db_session.query(User).filter(User.new_features_subscription == True)
+            email_list = []
+            for user in user_emails:
+                email_list.append(user.email)
+                email_list.append(';')
+            context = {'user_emails': email_list}
+            return self.render('sendemail.html', **context)
         else:
             jsondata = request.get_json(force=True)
             users_send_email_to = db_session.query(User).filter(User.new_features_subscription == True)

@@ -121,10 +121,6 @@ var MarkerView = Backbone.View.extend({
         app.infoWindow.open(this.map, this.marker);
         app.updateUrl(this.getUrl());
 
-        google.maps.event.addListener(app.infoWindow,"closeclick",function(){
-            app.fetchMarkers();
-        });
-
         $(document).keydown(app.ESCinfoWindow);
 
     },

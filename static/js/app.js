@@ -117,6 +117,7 @@ $(function () {
             }
 
             if (this.clusterMode()) {
+                this.closeInfoWindow();
                 this.clusters.fetch({
                     data: $.param(params),
                     reset: reset,

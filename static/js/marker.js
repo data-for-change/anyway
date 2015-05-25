@@ -35,7 +35,7 @@ var MarkerView = Backbone.View.extend({
             return this;
         }
 
-        app.clusterer.addMarker(this.marker);
+        //app.clusterer.addMarker(this.marker);
         if (app.map.zoom < MINIMAL_ZOOM) {
             return this;
         }

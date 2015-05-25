@@ -1,21 +1,23 @@
 # -*- coding: utf-8 -*-
 import os
+import urllib
 import logging
 import csv
 from StringIO import StringIO
-import datetime
 import time
 
 import jinja2
-from flask import make_response, jsonify, render_template, Response, url_for, session
+from flask import make_response, render_template, Response
 import flask.ext.assets
 from webassets.ext.jinja2 import AssetsExtension
 from webassets import Environment as AssetsEnvironment
+from clusters_calculator import retrieve_clusters
 
 from database import db_session
 from models import *
 from base import *
 import utilities
+from constants import *
 
 from wtforms import form, fields, validators
 import flask_admin as admin
@@ -75,7 +77,7 @@ def generate_csv(results):
             output.writeheader()
 
         row = {k: v.encode('utf8')
-               if type(v) is unicode else v
+        if type(v) is unicode else v
                for k, v in serialized.iteritems()}
         output.writerow(row)
         yield output_file.getvalue()
@@ -144,6 +146,57 @@ def discussion():
             return make_response("")
         return make_response(post_handler(disscuss))
 
+@app.route("/follow/(.*)")
+@user_required
+def follow(key_name):
+    marker = Marker.get_by_key_name(key_name)
+    follower = Follower.all().filter("marker", marker).filter("user", self.user).get()
+    if not follower:
+        Follower(parent=marker, marker=marker, user=self.user).put()
+
+
+@app.route("/unfollow/(.*)")
+@user_required
+def unfollow(key_name):
+    marker = Marker.get_by_key_name(key_name)
+    follower = Follower.all().filter("marker", marker).filter("user", self.user).get()
+    if follower:
+        follower.delete()
+
+
+@app.route("/clusters")
+@user_optional
+def clusters(methods=["GET"]):
+    start_time = time.time()
+    if request.method == "GET":
+        ne_lat = float(request.values['ne_lat'])
+        ne_lng = float(request.values['ne_lng'])
+        sw_lat = float(request.values['sw_lat'])
+        sw_lng = float(request.values['sw_lng'])
+        start_date = datetime.date.fromtimestamp(int(request.values['start_date']))
+        end_date = datetime.date.fromtimestamp(int(request.values['end_date']))
+        fatal = int(request.values['show_fatal'])
+        severe = int(request.values['show_severe'])
+        light = int(request.values['show_light'])
+        inaccurate = int(request.values['show_inaccurate'])
+        zoom = int(request.values['zoom'])
+
+        results = retrieve_clusters(ne_lat, ne_lng, sw_lat, sw_lng,
+                                    start_date, end_date,
+                                    fatal, severe, light, inaccurate, zoom)
+
+        logging.debug('calculating clusters took ' + str(time.time() - start_time))
+        return Response(json.dumps(results), mimetype="application/json")
+
+@app.route('/', defaults={'marker_id': None})
+@app.route('/<int:marker_id>')
+def main(marker_id):
+    # at this point the marker id is just a running number, and the
+    # LMS is in the description and needs to be promoted to a DB
+    # field so we can query it. We also need to add a provider id.
+    context = {'minimal_zoom': MINIMAL_ZOOM}
+    marker = None
+
 @app.route("/highlightpoints", methods=['POST'])
 @user_optional
 def highlightpoint():
@@ -211,7 +264,7 @@ def index(marker=None, message=None):
         context['end_date'] = string2timestamp(request.values['end_date'])
     elif marker:
         context['end_date'] = year2timestamp(marker.created.year + 1)
-    for attr in 'show_fatal', 'show_severe', 'show_light', 'show_inaccurate',\
+    for attr in 'show_fatal', 'show_severe', 'show_light', 'show_inaccurate', \
                 'zoom':
         if attr in request.values:
             context[attr] = request.values[attr]
@@ -224,8 +277,10 @@ def index(marker=None, message=None):
         context['message'] = message
     return render_template('index.html', **context)
 
+
 def string2timestamp(s):
     return time.mktime(datetime.datetime.strptime(s, "%Y-%m-%d").timetuple())
+
 
 def year2timestamp(y):
     return time.mktime(datetime.date(y, 1, 1).timetuple())

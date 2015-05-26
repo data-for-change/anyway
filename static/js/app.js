@@ -49,6 +49,10 @@ $(function () {
             this.model = new Backbone.Model();
             this.markerList = [];
             this.clusterList = [];
+            this.firstLoadDelay = true;
+            setTimeout(function(){
+                this.firstLoadDelay = false
+            }.bind(this), 2200);
 
             this.markers
                 .bind("reset", this.loadMarkers, this)
@@ -100,9 +104,11 @@ $(function () {
             this.previousZoom = this.map.zoom;
         },
         reloadMarkers: function () {
-            this.oms.unspiderfy();
-            this.clearMarkersFromMap();
-            this.fetchMarkers();
+            if (!this.firstLoadDelay){
+                this.oms.unspiderfy();
+                this.clearMarkersFromMap();
+                this.fetchMarkers();
+            }
         },
         fetchMarkers: function (reset) {
             if (!this.isReady) return;
@@ -435,7 +441,11 @@ $(function () {
 
             this.isReady = true;
             google.maps.event.addListener( this.map, "rightclick", _.bind(this.contextMenuMap, this) );
-            google.maps.event.addListener( this.map, "idle", _.bind(this.fetchMarkers, this) );
+            google.maps.event.addListener( this.map, "idle", function(){
+                if (!this.firstLoadDelay){
+                    this.fetchMarkers();
+                }
+            }.bind(this) );
 
             return this;
         },

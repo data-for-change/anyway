@@ -2,14 +2,21 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
+import os
 
-from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc
+from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, event
 from sqlalchemy.orm import relationship, load_only
+from flask.ext.sqlalchemy import SQLAlchemy
+from sqlalchemy.schema import Table
 import datetime
 import localization
-from database import Base
+from utilities import File
+from database import Base, insert_table, delete_table
+
 
 db_encoding = 'utf-8'
+
+build_marker_index_sql_file = os.path.join('./static/data/sql/buildrtreeindex.sql')
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -231,14 +238,23 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         # >>> m.count()
         # 250
         accurate = not inaccurate
+        from database import db_session, engine
+
+        # Get the ids of the bounding markers from the R*Tree index first
+        markerIndex = Table(MarkerIndex.MARKER_INDEX_TABLE_NAME, Base.metadata, autoload=True, autoload_with=engine)
+        
+        result = db_session.query(markerIndex).with_entities(markerIndex.c.id) \
+            .filter(markerIndex.c.minLng <= ne_lng) \
+            .filter(markerIndex.c.maxLng >= sw_lng) \
+            .filter(markerIndex.c.minLat <= ne_lat) \
+            .filter(markerIndex.c.maxLat >= sw_lat)
+
         markers = Marker.query \
-            .filter(Marker.longitude <= ne_lng) \
-            .filter(Marker.longitude >= sw_lng) \
-            .filter(Marker.latitude <= ne_lat) \
-            .filter(Marker.latitude >= sw_lat) \
+            .filter(Marker.id.in_(result)) \
             .filter(Marker.created >= start_date) \
             .filter(Marker.created < end_date) \
             .order_by(desc(Marker.created))
+
         if yield_per:
             markers = markers.yield_per(yield_per)
         if accurate:
@@ -251,6 +267,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
             markers = markers.filter(Marker.severity != 3)
         if is_thin:
             markers = markers.options(load_only("id", "longitude", "latitude"))
+
         return markers
 
     @staticmethod
@@ -267,6 +284,21 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
             longitude=data["longitude"]
         )
 
+# Keep the Rtree marker_index table update along marker table respectively
+@event.listens_for(Marker, 'after_insert')
+def receive_after_insert(mapper, connection, target):
+    insert_marker_rtree_index(conn, target.id, target.longitude, target.latitude)
+
+class MarkerIndex(object):
+    MARKER_INDEX_TABLE_NAME = 'marker_index'
+
+    @staticmethod
+    def insert_indexes(indexes):
+        insert_table(MarkerIndex.MARKER_INDEX_TABLE_NAME, indexes)
+
+    @staticmethod
+    def delete_indexes():
+        delete_table(MarkerIndex.MARKER_INDEX_TABLE_NAME)
 
 class DiscussionMarker(MarkerMixin, Base):
     __tablename__ = "discussions"
@@ -315,7 +347,6 @@ class DiscussionMarker(MarkerMixin, Base):
             .order_by(desc(DiscussionMarker.created))
         return markers
 
-
 def init_db():
     from database import engine
     # import all modules here that might define models so that
@@ -324,7 +355,10 @@ def init_db():
     print "Importing models"
     print "Creating all tables"
     Base.metadata.create_all(bind=engine)
-	
+
+    print "Creating marker index table"
+    sql = File.read(build_marker_index_sql_file)
+    engine.execute(sql)	
 
 
 

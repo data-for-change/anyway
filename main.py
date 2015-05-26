@@ -140,11 +140,11 @@ def discussion():
         except KeyError:
             return index(message=u"דיון לא חוקי")
     else:
-        disscuss = parse_data(DiscussionMarker, get_json_object(request))
-        if disscuss is None:
+        marker = parse_data(DiscussionMarker, get_json_object(request))
+        if marker is None:
             log_bad_request(request)
             return make_response("")
-        return make_response(post_handler(disscuss))
+        return make_response(post_handler(marker))
 
 @app.route("/follow/(.*)")
 @user_required

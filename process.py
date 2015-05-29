@@ -155,11 +155,12 @@ def get_data_value(value):
 def create_years_list():
     """
     Edits 'years.js', a years structure ready to be presented in app.js
-    as user's year filter choices
+    as user's last-4-years filter choices.
     """
     acc_years_dict = OrderedDict()
-    for year in acc_years:
-        acc_years_dict["שנת" + " %s" % year] = ["01/01/%s" % year, "31/12/%s" % year]
+    for i, year in enumerate(reversed(acc_years)):
+        if i < 4:
+            acc_years_dict["שנת" + " %s" % year] = ["01/01/%s" % year, "31/12/%s" % year]
     with open('static/js/years.js', 'w') as outfile:
         outfile.write("var ACCYEARS = ")
         json.dump(acc_years_dict, outfile, encoding='utf-8')

@@ -34,6 +34,7 @@
 	       <div class="navbar navbar-fixed-top">
                 <div class="navbar-inner" id="step1Component" style="padding-right: 10px{{ '; display: none' if map_only }}">
                     <button class="btn btn-default" id="tourOnClick">הדרכה</button>
+                    <a id="js-embed-link" class="btn btn-default"  data-toggle="modal" data-target="#embed">קישור לתצוגה הנוכחית</a>
                     <div style="float: left; padding: 5px">
                         <div class="fb-like" data-href="{{ url }}" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true" style="vertical-align: middle"></div>
                         <a href="https://play.google.com/store/apps/details?id=il.co.anyway.app">
@@ -41,7 +42,6 @@
                                src="https://developer.android.com/images/brand/en_app_rgb_wo_45.png"
                                style="height: 25px; padding: 3px"/>
                         </a>
-                        <a id="js-embed-link" class="btn" style="height: 10px; line-height: 10px; vertical-align: top" data-toggle="modal" data-target="#embed">קישור לתצוגה הנוכחית</a>
                         <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=F274PRUT6VSAA" target="new">תרמו לנו</a> &#124;
 			<a href="" data-toggle="modal" data-target="#developer-dialog">מפתחים</a> &#124;
                         <a href="mailto:feedback@anyway.co.il?subject=ANYWAY%20Feedback" target="new">צרו קשר</a> &#124;
@@ -338,7 +338,7 @@
                     <div class="sidebar-title current-view-count" style="display: table-cell"></div>
                 </div>
             </div>
-            <div style="overflow-y: scroll; position: absolute; top: 255px; bottom: 30px; width: 100%">
+            <div style="overflow-y: scroll; position: absolute; top: 255px; bottom: 30px; width: 100%" id="step6tour">
                 <ul class="current-view"></ul>
             </div>
             <div style="position: absolute; bottom: 0px">

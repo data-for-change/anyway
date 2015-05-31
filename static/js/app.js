@@ -74,7 +74,7 @@ $(function () {
                 .bind("change:showInaccurateMarkers",
                 _.bind(this.reloadMarkersIfNeeded, this, "showInaccurateMarkers"))
                 .bind("change:dateRange", this.reloadMarkers, this);
-        },  
+        },
         reloadMarkersIfNeeded: function(attr) {
             if (this.clusterMode() || this.model.get(attr)) {
                 this.reloadMarkers();
@@ -235,15 +235,38 @@ $(function () {
                         }
                     });
                     groupID++;
+
                 }
-            }, this);
+
+            },this);
             this.groupsData = groupsData;
+              // agam
+            if(tourLocation == 5) {
+               var myLatlng = new google.maps.LatLng(32.09170,34.86435);
+               var location1 = new google.maps.Marker({
+              position: myLatlng,
+              map: this.map,
+              icon: MULTIPLE_ICONS[SEVERITY_VARIOUS]
+            });
+                tourLocation = 6 ;
+                console.log("inside the group id "+tourLocation+"new2");
+                contentString = '<p>בנקודה זו התרחשו מספר תאונות, לחיצה על האייקון תציג אותן בנפרד ותאפשר בחירה</br> בתאונה בודדת.</p>';
+                titleString = 'אייקון של מספר התאונות באותו מקום';
+                defInfoWindows();
+                infowindow = new google.maps.InfoWindow({
+                    content: htmlTourString,
+                    maxWidth: 350
+                });
+                infowindow.open(this.map, location1);
+                tourStyle(infowindow);
+            }
 
             _.each(this.oms.markersNearAnyOtherMarker(), function(marker){
                 if (!marker.view.model.get("currentlySpiderfied")){
                     marker.view.opacitySeverityForGroup();
                 }
             });
+
         },
         downloadCsv: function () {
             if (this.markers.length > 0) {
@@ -321,7 +344,6 @@ $(function () {
             }.bind(this));
             this.oms.addListener("unspiderfy", this.setMultipleMarkersIcon.bind(this));
             console.log('Loaded OverlappingMarkerSpiderfier');
-
             var clusterStyle = [
                 {
                     textColor: 'black',
@@ -357,7 +379,7 @@ $(function () {
             console.log('Loaded SidebarView');
 
             if (!START_DATE) {
-                START_DATE = '01/01/2013';
+                START_DATE = '01/01/2006';
             }
             if (!END_DATE) {
                 END_DATE = '01/01/2014';
@@ -694,24 +716,17 @@ $(function () {
              //agam add- tour find location for step 2
             if (tourLocation == 2)
             {
+                tourLocation = 3;
                 var location = this.locationMarker;
-                var contentString = '<p>המיקום שחיפשתם יסומן באיקון הזה. </br> מסביבו תוכלו לראות אייקונים שמייצגים תאונות עם נפגעים.  </p>';
-                var titleString = ' המיקום שחיפשתם ';
-                var htmlTourString =
-                '<div class ="scrollFix" id="step-2" role="tooltip">'+
-                    '<h3 class="popover-title">'+titleString+'</h3>'+
-                    '<div class="popover-content">'+contentString+'</div>'+
-                    '<nav class="popover-navigation-rtl">'+
-                        '<div class="btn-group" role="group">'+
-                            '<button onclick="step2prev()" class="btn btn-default" data-role="prev"><< הקודם'+'</button>'+
-                            '<button onclick="step2next()" class="btn btn-default" data-role="next">הבא >>'+'</button>'+
-                        '</div>'+
-                    '</nav>'+
-                '</div>';
+                contentString = '<p>המיקום שחיפשתם יסומן באיקון הזה. </br> מסביבו תוכלו לראות אייקונים שמייצגים תאונות עם נפגעים.  </p>';
+                titleString = ' המיקום שחיפשתם ';
+                defInfoWindows();
                 infowindow = new google.maps.InfoWindow({
-                    content: htmlTourString
+                    content: htmlTourString,
+                    maxWidth: 350
                 });
                 infowindow.open(this.map, location);
+                tourStyle(infowindow);
             }
           },
           getCurrentUrlParams: function () {
@@ -733,4 +748,5 @@ $(function () {
         }
     });
 });
+
 

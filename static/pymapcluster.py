@@ -34,8 +34,7 @@ def latlng_to_zoompixels(mercator, lat, lng, zoom):
     return pix
 
 def in_cluster(center, radius, point):
-    return (point[0] >= center[0] - radius) and (point[0] <= center[0] + radius) \
-       and (point[1] >= center[1] - radius) and (point[1] <= center[1] + radius)
+    return sqrt((point[0] - center[0])**2 + (point[1] - center[1])**2) <= radius
 
 def cluster_markers(mercator, latlngs, zoom, gridsize=50):
     """

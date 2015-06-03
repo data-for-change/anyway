@@ -91,9 +91,20 @@ def get_streets(accident, streets):
 def get_junction(accident, roads):
     """
     extracts the junction from an accident
+    omerxx: added "km" parameter to the calculation to only show the right junction,
+    and *only* if the accident is under 10 km's away from the designated junction.
     :return: returns the junction or None if it wasn't found
     """
-    key = accident[field_names.road1], accident[field_names.road2]
+    if accident["KM"] is not None:
+        dist = 10
+        key = (), ()
+        for option in roads:
+            if accident[field_names.road1] == option[0] and accident[field_names.road2] == option[1] and \
+               abs(accident["KM"]-option[2]) < dist:
+                key = accident[field_names.road1], accident[field_names.road2], option[2]
+                dist = abs(accident["KM"]-option[2])
+    else:
+        key = accident[field_names.road1], accident[field_names.road2]
     junction = roads.get(key, None)
     return junction.decode(content_encoding) if junction else u""
 
@@ -229,7 +240,7 @@ def get_files(directory):
             csv.close()
             yield name, streets_map
         elif name == NON_URBAN_INTERSECTION:
-            roads = {(x[field_names.road1], x[field_names.road2]): x[field_names.junction_name] for x in csv if
+            roads = {(x[field_names.road1], x[field_names.road2], x["KM"]): x[field_names.junction_name] for x in csv if
                      field_names.road1 in x and field_names.road2 in x}
             csv.close()
             yield ROADS, roads

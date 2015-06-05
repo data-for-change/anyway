@@ -1,0 +1,41 @@
+{% extends 'admin/master.html' %}
+{% block body %}
+{{ super() }}
+<div class="row-fluid">
+
+        {% if current_user.is_authenticated() %}
+            <div dir="rtl" style="
+             display: inline-block;
+             position: fixed;
+              left: 0;
+              right: 0;
+              width: 300px;
+              height: 100px;
+              margin: auto;">
+        <h1>מרקרים שגולשים לחצו עליהם:</h1>
+        <p class="lead">
+
+        </p>
+        <table class="table table-bordered" dir="ltr">
+            <tr>
+                <td>id</td>
+                <td>latitude</td>
+                <td>longitude</td>
+                <td>created</td>
+                <td>type</td>
+              </tr>
+            {%- for item in points -%}
+              <tr>
+                <td>{{item.id}}</td>
+                <td>{{item.latitude}}</td>
+                <td>{{item.longitude}}</td>
+                <td>{{item.created}}</td>
+                <td>{{item.type}}</td>
+              </tr>
+            {%- endfor -%}
+        </table>
+
+        {% endif %}
+    </div>
+</div>
+{% endblock body %}

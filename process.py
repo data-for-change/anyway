@@ -96,17 +96,26 @@ def get_junction(accident, roads):
     :return: returns the junction or None if it wasn't found
     """
     if accident["KM"] is not None:
-        dist = 10
+        min_dist = 100000
         key = (), ()
+        junc_km = 0
         for option in roads:
             if accident[field_names.road1] == option[0] and accident[field_names.road2] == option[1] and \
-               abs(accident["KM"]-option[2]) < dist:
+               abs(accident["KM"]-option[2]) < min_dist:
+                min_dist = abs(accident["KM"]-option[2])
                 key = accident[field_names.road1], accident[field_names.road2], option[2]
-                dist = abs(accident["KM"]-option[2])
+                junc_km = option[2]
+        junction = roads.get(key, None)
+        if accident["KM"] - junc_km > 0:
+            direction = u"מזרח" if accident[field_names.road1] % 2 == 0 else u"צפון"
+        else:
+            direction = u"מערב" if accident[field_names.road1] % 2 == 0 else u"דרום"
+
+        return (accident["km"]/10) + " " + direction + u" ל:" + junction.decode(content_encoding) if junction else u""
     else:
         key = accident[field_names.road1], accident[field_names.road2]
-    junction = roads.get(key, None)
-    return junction.decode(content_encoding) if junction else u""
+        junction = roads.get(key, None)
+        return junction.decode(content_encoding) if junction else u""
 
 
 def parse_date(accident):

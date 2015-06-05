@@ -1,4 +1,7 @@
 $(function () {
+    $('#tourOnClick').on('click', function () {
+        onClick();
+    });
     var AppRouter = Backbone.Router.extend({
         routes: {
             "": "navigateEmpty",

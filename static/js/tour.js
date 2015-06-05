@@ -1,7 +1,6 @@
 /**
  * Created by root on 30/04/15.
  */
-
 var infowindow,checkStepsAdd = false,checkStepsAdd2 = false, tourLocation = 0,stepId,iwOuter,iwBackground,iwCloseBtn;
 var tour1 = new Tour({
     storage: window.localStorage,
@@ -59,7 +58,7 @@ var tour1 = new Tour({
     element:  '#step4tour',
     title: "סינון לפי טווח תאריכים ",
     placement: 'left',
-    content: '<p>כאן ניתן לבחור טווח תאריכים להצגת תאונות.</br>לנוחותכם ישנם קיצורי דרך לשנה ספציפית וכן אפשרות לבחור כל טווח תאריכים באופן ידני.</br> לצורך הדוגמא נבחר להציג תאונות מינואר 2006 עד ינואר 2014.</p>',
+    content: '<p>כאן ניתן לבחור טווח תאריכים להצגת תאונות.</br>לנוחותכם ישנם קיצורי דרך לשנה ספציפית וכן אפשרות לבחור כל טווח תאריכים באופן ידני.</br> לצורך הדוגמא נבחר להציג תאונות מינואר 2013 עד ינואר 2014.</p>',
     onNext: function(){
         tour4next();
     }
@@ -68,7 +67,7 @@ var tour1 = new Tour({
     element:  '#step6tour',
     title: "רשימת התאונות המוצגות על המפה",
     placement: 'left',
-    content: '<p>כאן תתעדכן רשימת המצגות על גבי המפה לפי תאריך בסדר יורד, מעבר על פריט ברשימה תקפיץ אותו על המפה, ולחיצה תפתח את פרטיו על גבי המפה.</p>',
+    content: '<p>כאן תתעדכן רשימת התאונות המוצגות על גבי המפה לפי תאריך בסדר יורד, מעבר על פריט ברשימה תקפיץ אותו על המפה, ולחיצה תפתח את פרטיו על גבי המפה.</p>',
     onPrev: function(){
         tour6prev();
     }
@@ -76,10 +75,9 @@ var tour1 = new Tour({
     element:  '#js-embed-link',
     title: "קישור לתצוגה הנוכחית",
     placement: 'bottom',
-    content: '<p>כאן תתעדכן רשימת המצגות על גבי המפה לפי תאריך בסדר יורד, מעבר על פריט ברשימה תקפיץ אותו על המפה, ולחיצה תפתח את פרטיו על גבי המפה.</p>'
-},
+    content: '<p>לחיצה כאן תפתח חלונית בה יופיע קישור לתצוגת המפה הנוכחית תוך שמירה על המאפיינים שבחרת: סינון לפי חומרה ותאריך.</p>'},
   ]});
-// Initialize the tour
+//Initialize the tour
 tour1.init();
 resetTour();// Start the tour
 tour.addStep(tour1.getStep(0));

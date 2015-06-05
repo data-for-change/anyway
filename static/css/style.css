@@ -125,3 +125,17 @@ textarea.form-control-wide {
     height: 100px;
 }
 .popover{width:350px;max-width:400px;}
+
+.navbar-fixed-top{
+    position: absolute !important;
+}
+
+#app{
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.sb-button{
+    min-height: initial !important;
+}

@@ -40,7 +40,6 @@ $(function () {
     window.AppView = Backbone.View.extend({
         el : $("#app"),
         events : {
-            "click #map_canvas" : "clickMap",
             "click .download-csv" : "downloadCsv"
         },
         initialize : function() {
@@ -436,6 +435,7 @@ $(function () {
             this.isReady = true;
             google.maps.event.addListener( this.map, "rightclick", _.bind(this.contextMenuMap, this) );
             google.maps.event.addListener( this.map, "idle", _.bind(this.fetchMarkers, this) );
+            google.maps.event.addListener( this.map, "click", _.bind(this.clickMap, this) );
 
             return this;
         },
@@ -467,11 +467,7 @@ $(function () {
             }
         },
         clickMap: function (e) {
-            if (this.clickedMarker) {
-                this.clickedMarker = false;
-            } else {
-                this.closeInfoWindow();
-            }
+            this.closeInfoWindow();
         },
         trackDrag: function () {
             google.maps.event.addListener(this.map, "mousemove", function () {

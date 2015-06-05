@@ -124,4 +124,28 @@ div.gm-style {
 textarea.form-control-wide {
     height: 100px;
 }
-.popover{width:350px;max-width:400px;}
+.popover{
+    width:350px !important;
+    max-width:350px !important;}
+/* agam */
+.popover-title{
+    font-weight: bold;
+}
+.popover-navigation{
+    padding: 8px 14px;
+}
+.gm-style-iwtour {
+   font-family: 'Alef','sans-serif';
+   font-size: 14px;
+   line-height: 20px;
+   width: 300px !important;
+   max-width: 300px !important;
+   top: 15px !important;
+   right: 0px !important;
+   left: 0px !important;
+   background-color: #fff;
+   box-shadow: 0.5px 0.5px 0.5px 1px #bbbbbb;
+   border: 1.5px solid #fff;/*rgba(72, 181, 233, 0.6);*/
+   border-radius: 5px 5px 5px 5px;
+
+}

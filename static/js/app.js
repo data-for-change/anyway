@@ -378,7 +378,7 @@ $(function () {
             console.log('Loaded SidebarView');
 
             if (!START_DATE) {
-                START_DATE = '01/01/2006';
+                START_DATE = '01/01/2013';
             }
             if (!END_DATE) {
                 END_DATE = '01/01/2014';

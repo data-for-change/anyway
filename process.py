@@ -6,7 +6,7 @@ import argparse
 import json
 from flask.ext.sqlalchemy import SQLAlchemy
 import field_names
-from models import Marker
+from models import Marker, MarkerIndex
 import models
 from utilities import ProgressSpinner, ItmToWGS84, init_flask, CsvReader
 import itertools
@@ -252,6 +252,7 @@ def import_to_datastore(directory, provider_code, batch_size):
         db.session.commit()
         took = int((datetime.now() - now).total_seconds())
         print("imported {0} items from directory: {1} in {2} seconds".format(len(accidents), directory, took))
+        return accidents;
     except Exception as e:
         directories_not_processes[directory] = e.message
 
@@ -268,6 +269,34 @@ def get_provider_code(directory_name=None):
         if ans.isdigit():
             return int(ans)
 
+# update the RTree, marker index table, for given markers
+# markers: if None, pulls all markers from the DB, and update by them. else - a list of id, lat, lng objects, or list of Markers, generation handles both 
+def update_markers_index_table(markers=None):
+    from sqlalchemy.orm import load_only
+
+    if not markers:
+        markers = Marker.query.options(load_only("id", "longitude", "latitude")).all()
+        MarkerIndex.delete_indexes()
+
+    marker_indexes = list(_generate_marker_index_list(markers))
+    MarkerIndex.insert_indexes(marker_indexes)
+
+def _generate_marker_index_list(markers):
+    try:
+        for i, marker in enumerate(markers):
+            marker_index = {
+                # getting the marker data as: marker.id or marker["id"], for Marker object and raw object respectively 
+                "id": getattr(marker, "id", marker["id"]),
+                "minLng": getattr(marker, "longitude", marker["longitude"]),
+                "maxLng": getattr(marker, "longitude", marker["longitude"]),
+                "minLat": getattr(marker, "latitude", marker["latitude"]),
+                "maxLat": getattr(marker, "latitude", marker["latitude"])
+            }
+            yield marker_index
+    except AttributeError:
+        print ("Could not generate marker indexes, unappropriate marker object struture!")
+        raise
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -280,17 +309,22 @@ def main():
     if args.delete_all:
         print("deleting the entire db!")
         db.session.query(Marker).delete()
-
         db.session.commit()
+        MarkerIndex.delete_indexes()
 
+    accidents = []
     for directory in glob.glob("{0}/*/*".format(args.path)):
         parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
         provider_code = args.provider_code if args.provider_code else get_provider_code(parent_directory)
-        import_to_datastore(directory, provider_code, args.batch_size)
+        imported_accidents = import_to_datastore(directory, provider_code, args.batch_size)
+        if imported_accidents != None:
+         accidents += imported_accidents 
 
     failed = ["{0}: {1}".format(directory, fail_reason) for directory, fail_reason in
               directories_not_processes.iteritems()]
     print("finished processing all directories, except: %s" % "\n".join(failed))
+    print("creating the respective marker index table using the imported data")
+    update_markers_index_table(accidents);
 
 
 if __name__ == "__main__":

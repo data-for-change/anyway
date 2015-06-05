@@ -362,21 +362,16 @@ $(function () {
                 END_DATE = '01/01/2014';
             }
             this.$el.find("input.date-range").daterangepicker({
-                    ranges: {
-                        /* These ranges are irrelevant as long as no recent data is loaded:
+                    /*
+                         These ranges are irrelevant as long as no recent data is loaded:
                          'היום': ['today', 'today'],
                          'אתמול': ['yesterday', 'yesterday'],
                          'שבוע אחרון': [Date.today().add({ days: -6 }), 'today'],
                          'חודש אחרון': [Date.today().add({ days: -29 }), 'today'],
                          'החודש הזה': [Date.today().moveToFirstDayOfMonth(), Date.today().moveToLastDayOfMonth()],
                          'החודש שעבר': [Date.today().moveToFirstDayOfMonth().add({ months: -1 }), Date.today().moveToFirstDayOfMonth().add({ days: -1 })]
-                         */
-                        // FIXME change this hard-coded array into a table, see #122
-                        'שנת 2013': ['01/01/2013', '01/01/2014'],
-                        'שנת 2012': ['01/01/2012', '01/01/2013'],
-                        'שנת 2011': ['01/01/2011', '01/01/2012'],
-                        'שנת 2010': ['01/01/2010', '01/01/2011']
-                    },
+                    */
+                    ranges: ACCYEARS,
                     opens: 'left',
                     format: 'dd/MM/yyyy',
                     separator: ' עד ',

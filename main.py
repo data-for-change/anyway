@@ -186,7 +186,7 @@ def clusters(methods=["GET"]):
                                     fatal, severe, light, inaccurate, zoom)
 
         logging.debug('calculating clusters took ' + str(time.time() - start_time))
-        return Response(json.dumps(results), mimetype="application/json")
+        return Response(json.dumps({'clusters': results}), mimetype="application/json")
 
 @app.route('/', defaults={'marker_id': None})
 @app.route('/<int:marker_id>')

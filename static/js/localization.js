@@ -241,7 +241,7 @@ var localization =
         "EMZAE_BETIHUT": "אמצעי בטיחות",
         "HUMRAT_PGIA": "חומרת פגיעה",
         "SUG_NIFGA_LMS": "סוג נפגע",
-        "PEULAT_NIFGA_LMS": "פעולת נפגע",
+        "PEULAT_NIFGA_LMS": "מיקום פצוע",
         "KVUTZAT_OHLUSIYA_LMS": "קבוצת אוכלוסיה",
         "MAHOZ_MEGURIM": "מחוז מגורים",
         "NAFA_MEGURIM": "נפת מגורים",

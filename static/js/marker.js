@@ -79,6 +79,20 @@ var MarkerView = Backbone.View.extend({
         this.localize("OFEN_HAZIYA","cross_mode");
         this.localize("MEKOM_HAZIYA","cross_location");
         this.localize("KIVUN_HAZIYA","cross_direction");
+        // Involved fields:
+        this.localize("SUG_MEORAV","involved_type");
+        this.localize("SHNAT_HOZAA","license_aquiring_date");
+        this.localize("KVUZA_GIL","age_group");
+        this.localize("MIN","sex");
+        this.localize("SUG_REHEV_NASA_LMS","car_type");
+        this.localize("EMZAE_BETIHUT","safety_measures");
+        this.localize("SEMEL_YISHUV_MEGURIM","home_city");
+        this.localize("HUMRAT_PGIA","injured_severity");
+        this.localize("SUG_NIFGA_LMS","injured_type");
+        this.localize("PEULAT_NIFGA_LMS","injured_position");
+        this.localize("KVUTZAT_OHLUSIYA_LMS","population_type");
+        // Vehicles fields:
+
 
         this.$el.find(".creation-date").text("תאריך: " +
                     moment(this.model.get("created")).format("LLLL"));

@@ -316,6 +316,114 @@ class DiscussionMarker(MarkerMixin, Base):
         return markers
 
 
+class Involved(Base):
+    __tablename__ = "involved"
+    id = Column(Integer, primary_key=True)
+    accident_id = Column(Integer, ForeignKey("markers.id"))
+    involved_type = Column(Integer)
+    license_acquiring_date = Column(Integer)
+    age_group = Column(Integer)
+    sex = Column(Integer)
+    car_type = Column(Integer)
+    safety_measures = Column(Integer)
+    home_city = Column(Integer)
+    injury_severity = Column(Integer)
+    injured_type = Column(Integer)
+    injured_position = Column(Integer)
+    population_type = Column(Integer)
+    home_district = Column(Integer)
+    home_nafa = Column(Integer)
+    home_area = Column(Integer)
+    home_municipal_status = Column(Integer)
+    home_residence_type = Column(Integer)
+    hospital_time = Column(Integer)
+    medical_type = Column(Integer)
+    release_dest = Column(Integer)
+    safety_measures_use = Column(Integer)
+    late_deceased = Column(Integer)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "accident_id": self.accident_id,
+            "involved_type": self.involved_type,
+            "license_aquiring_date": self.license_aquiring_date,
+            "age_group": self.age_group,
+            "sex": self.sex,
+            "car_type": self.car_type,
+            "safety_measures": self.safety_measures,
+            "home_city": self.home_city,
+            "injury_severity": self.injury_severity,
+            "injured_type": self.injured_type,
+            "injured_position": self.injured_position,
+            "population_type": self.population_type,
+            "home_district": self.home_district,
+            "home_nafa": self.home_nafa,
+            "home_area": self.home_area,
+            "home_municipal_status": self.home_municipal_status,
+            "home_residence_type": self.home_residence_type,
+            "hospital_time": self.hospital_time,
+            "medical_type": self.medical_type,
+            "release_dest": self.release_dest,
+            "safety_measures_use": self.safety_measures_use,
+            "late_deceased": self.late_deceased
+        }
+
+    # Flask-Login integration
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.id
+
+
+class Vehicle(Base):
+    __tablename__ = "vehicles"
+    id = Column(Integer, primary_key=True)
+    accident_id = Column(Integer, ForeignKey("markers.id"))
+    engine_volume = Column(Integer)
+    manufacturing_year = Column(Integer)
+    driving_directions = Column(Integer)
+    vehicle_status = Column(Integer)
+    vehicle_attribution = Column(Integer)
+    vehicle_type = Column(Integer)
+    seats = Column(Integer)
+    total_weight = Column(Integer)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "accident_id": self.accident_id,
+            "engine_volume": self.engine_volume,
+            "manufacturing_year": self.manufacturing_year,
+            "driving_directions": self.driving_directions,
+            "vehicle_status": self.vehicle_status,
+            "vehicle_attribution": self.vehicle_attribution,
+            "vehicle_type": self.vehicle_type,
+            "seats": self.seats,
+            "total_weight": self.total_weight
+        }
+
+    # Flask-Login integration
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.id
+
+
 def init_db():
     from database import engine
     # import all modules here that might define models so that

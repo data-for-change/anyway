@@ -227,12 +227,6 @@ var localization =
         "MAAMAD_MINIZIPALI": "מעמד מוניציפלי",
         "ZURAT_ISHUV": "צורת יישוב",
 
-        "PK_TEUNA_FIKT": "מספר תאונה פיקטיבי",
-        "MISPAR_REHEV_FIKT": "מספר רכב פיקטיבי בו נסע",
-        "ZEHUT_FIKT": "מספר זהות פיקטיבי",
-        "SHNAT_TEUNA": "שנת תאונה",
-        "HODESH_TEUNA": "חודש תאונה",
-
         "SUG_MEORAV": "סוג מעורב",
         "SHNAT_HOZAA": "שנת הוצאת רשיון נהיגה",
         "KVUZA_GIL": "קבוצת גיל",
@@ -248,11 +242,19 @@ var localization =
         "EZOR_TIVI_MEGURIM": "אזור טבעי מגורים",
         "MAAMAD_MINIZIPALI_MEGURIM": "מעמד מוניצפלי מגורים",
         "ZURAT_ISHUV_MEGURIM": "צורת ישוב מגורים",
-        "SUG_TIK": "סוג תיק",
+
         "PAZUA_USHPAZ": "משך אשפוז",
         "MADAD_RAFUI": "מדד רפואי לחומרת הפציעה - ISS",
         "YAAD_SHIHRUR": "יעד שחרור",
         "SHIMUSH_BE_AVIZAREY_BETIHOT": "שימוש באביזרי בטיחות",
-        "PTIRA_MEUHERET": "מועד הפטירה"
+        "PTIRA_MEUHERET": "מועד הפטירה",
 
+        "NEFAH": "נפח מנוע",
+        "SHNAT_YITZUR": "שנת ייצור",
+        "KIVUNE_NESIA": "כיוון נסיעה",
+        "MATZAV_REHEV": "מצב רכב",
+        "SHIYUH_REHEV_LMS": "שיוך רכב",
+        "SUG_REHEV_LMS": "סוג רכב",
+        "MEKOMOT_YESHIVA_LMS": "מקומות ישיבה",
+        "MISHKAL_KOLEL_LMS": "משקל כולל"
         }

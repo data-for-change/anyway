@@ -225,5 +225,36 @@ var localization =
         "NAFA": "נפה",
         "EZOR_TIVI": "אזור טבעי",
         "MAAMAD_MINIZIPALI": "מעמד מוניציפלי",
-        "ZURAT_ISHUV": "צורת יישוב"
+        "ZURAT_ISHUV": "צורת יישוב",
+
+        "SUG_MEORAV": "סוג מעורב",
+        "SHNAT_HOZAA": "שנת הוצאת רשיון נהיגה",
+        "KVUZA_GIL": "קבוצת גיל",
+        "MIN": "מין",
+        "SUG_REHEV_NASA_LMS": "סוג רכב בו נסע",
+        "EMZAE_BETIHUT": "אמצעי בטיחות",
+        "HUMRAT_PGIA": "חומרת פגיעה",
+        "SUG_NIFGA_LMS": "סוג נפגע",
+        "PEULAT_NIFGA_LMS": "מיקום פצוע",
+        "KVUTZAT_OHLUSIYA_LMS": "קבוצת אוכלוסיה",
+        "MAHOZ_MEGURIM": "מחוז מגורים",
+        "NAFA_MEGURIM": "נפת מגורים",
+        "EZOR_TIVI_MEGURIM": "אזור טבעי מגורים",
+        "MAAMAD_MINIZIPALI_MEGURIM": "מעמד מוניצפלי מגורים",
+        "ZURAT_ISHUV_MEGURIM": "צורת ישוב מגורים",
+
+        "PAZUA_USHPAZ": "משך אשפוז",
+        "MADAD_RAFUI": "מדד רפואי לחומרת הפציעה - ISS",
+        "YAAD_SHIHRUR": "יעד שחרור",
+        "SHIMUSH_BE_AVIZAREY_BETIHOT": "שימוש באביזרי בטיחות",
+        "PTIRA_MEUHERET": "מועד הפטירה",
+
+        "NEFAH": "נפח מנוע",
+        "SHNAT_YITZUR": "שנת ייצור",
+        "KIVUNE_NESIA": "כיוון נסיעה",
+        "MATZAV_REHEV": "מצב רכב",
+        "SHIYUH_REHEV_LMS": "שיוך רכב",
+        "SUG_REHEV_LMS": "סוג רכב",
+        "MEKOMOT_YESHIVA_LMS": "מקומות ישיבה",
+        "MISHKAL_KOLEL_LMS": "משקל כולל"
         }

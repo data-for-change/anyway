@@ -26,6 +26,9 @@ from flask_admin.contrib import sqla
 from flask_admin import helpers, expose, BaseView
 from werkzeug.security import check_password_hash
 from sendgrid import sendgrid, SendGridClientError, SendGridServerError, Mail
+import argparse
+import glob
+from utilities import CsvReader
 
 app = utilities.init_flask(__name__)
 app.config.from_object(__name__)
@@ -43,6 +46,14 @@ jinja_environment.assets_environment = assets_env
 
 MINIMAL_ZOOM = 16
 SESSION_HIGHLIGHTPOINT_KEY = 'gps_highlightpoint_created'
+
+DICTIONARY = "Dictionary"
+DICTCOLUMN1 = "MS_TAVLA"
+DICTCOLUMN2 = "KOD"
+DICTCOLUMN3 = "TEUR"
+lms_dict_files = {DICTIONARY: "Dictionary.csv"}
+content_encoding = 'cp1255'
+
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
@@ -448,7 +459,50 @@ admin = admin.Admin(app, 'ANYWAY Administration Panel', index_view=AdminIndexVie
 admin.add_view(AdminView(User, db_session))
 admin.add_view(SendToSubscribersView(name='Send To Subscribers'))
 
+
+lmsDictionary = {}
+def ReadDictionaries():
+    global dict0
+    global dict1
+    global dict2
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--path', type=str, default="static/data/lms")
+    args = parser.parse_args()
+    for directory in glob.glob("{0}/*/*".format(args.path)):
+        mainDict = dict(get_dict_file(directory))
+        if len(mainDict) == 0:
+            return
+        elif len(mainDict) == 1:
+            for dic in mainDict['Dictionary']:
+                if type(dic[DICTCOLUMN3]) is str:
+                    lmsDictionary[(int(dic[DICTCOLUMN1]),int(dic[DICTCOLUMN2]))] = dic[DICTCOLUMN3].decode(content_encoding)
+                else:
+                    lmsDictionary[(int(dic[DICTCOLUMN1]),int(dic[DICTCOLUMN2]))] = int(dic[DICTCOLUMN3])
+            return
+
+
+def get_dict_file(directory):
+    for name, filename in lms_dict_files.iteritems():
+
+        if name not in [DICTIONARY]:
+            continue
+        files = filter(lambda path: filename.lower() in path.lower(), os.listdir(directory))
+        amount = len(files)
+        if amount == 0:
+            raise ValueError("file not found in directory: " + filename)
+        if amount > 1:
+            raise ValueError("there are too many matches: " + filename)
+        csv = CsvReader(os.path.join(directory, files[0]))
+        if name == DICTIONARY:
+            yield name, csv
+
+
+
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')
+    ReadDictionaries()
     app.run(debug=True)
+
 

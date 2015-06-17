@@ -6,7 +6,7 @@ import argparse
 import json
 from flask.ext.sqlalchemy import SQLAlchemy
 import field_names
-from models import Marker
+from models import Marker,Involved,Vehicle
 import models
 from utilities import ProgressSpinner, ItmToWGS84, init_flask, CsvReader
 import itertools
@@ -27,12 +27,16 @@ ROADS = "roads"
 URBAN_INTERSECTION = 'urban_intersection'
 NON_URBAN_INTERSECTION = 'non_urban_intersection'
 DICTIONARY = "dictionary"
+INVOLVED = "involved"
+VEHICLES = "vehicles"
 
 lms_files = {ACCIDENTS: "AccData.csv",
              URBAN_INTERSECTION: "IntersectUrban.csv",
              NON_URBAN_INTERSECTION: "IntersectNonUrban.csv",
              STREETS: "DicStreets.csv",
              DICTIONARY: "Dictionary.csv",
+             INVOLVED: "InvData.csv",
+             VEHICLES: "VehData.csv"
 }
 
 coordinates_converter = ItmToWGS84()
@@ -150,7 +154,7 @@ def get_data_value(value):
     return int(value) if value else 0
 
 
-def import_accidents(provider_code, accidents, streets, roads):
+def import_accidents(provider_code, accidents, streets, roads, involved, vehicles):
     print("reading accidents from file %s" % (accidents.name(),))
     for accident in accidents:
         if field_names.x_coordinate not in accident or field_names.y_coordinate not in accident:
@@ -202,11 +206,58 @@ def import_accidents(provider_code, accidents, streets, roads):
         yield marker
     accidents.close()
 
+def import_involved(provider_code, accidents, streets, roads, involved, vehicles):
+    print("reading involved data from file %s" % (involved.name(),))
+    for involve in involved:
+        involved_item = {
+            "accident_id": int("{0}{1}".format(provider_code, involve[field_names.id])),
+            "involved_type": int(involve[field_names.involved_type]),
+            "license_acquiring_date": int(involve[field_names.license_acquiring_date]),
+            "age_group": int(involve[field_names.age_group]),
+            "sex": int(involve[field_names.sex]),
+            "car_type": get_data_value(involve[field_names.car_type]),
+            "safety_measures": get_data_value(involve[field_names.safety_measures]),
+            "home_city": get_data_value(involve[field_names.home_city]),
+            "injury_severity": get_data_value(involve[field_names.injury_severity]),
+            "injured_type": get_data_value(involve[field_names.injured_type]),
+            "Injured_position": get_data_value(involve[field_names.injured_position]),
+            "population_type": get_data_value(involve[field_names.population_type]),
+            "home_district": get_data_value(involve[field_names.home_district]),
+            "home_nafa": get_data_value(involve[field_names.home_nafa]),
+            "home_area": get_data_value(involve[field_names.home_area]),
+            "home_municipal_status": get_data_value(involve[field_names.home_municipal_status]),
+            "home_residence_type":  get_data_value(involve[field_names.home_residence_type]),
+            "hospital_time":  get_data_value(involve[field_names.hospital_time]),
+            "medical_type":  get_data_value(involve[field_names.medical_type]),
+            "release_dest":  get_data_value(involve[field_names.release_dest]),
+            "safety_measures_use":  get_data_value(involve[field_names.safety_measures_use]),
+            "late_deceased":  get_data_value(involve[field_names.late_deceased]),
+        }
+        yield involved_item
+    involved.close()
+
+
+def import_vehicles(provider_code, accidents, streets, roads, involved, vehicles):
+    print("reading involved data from file %s" % (vehicles.name(),))
+    for vehicle in vehicles:
+        vehicle_item = {
+            "accident_id": int("{0}{1}".format(provider_code, vehicle[field_names.id])),
+            "engine_volume": int(vehicle[field_names.engine_volume]),
+            "manufacturing_year": get_data_value(vehicle[field_names.manufacturing_year]),
+            "driving_directions": get_data_value(vehicle[field_names.driving_directions]),
+            "vehicle_status": get_data_value(vehicle[field_names.vehicle_status]),
+            "vehicle_attribution": get_data_value(vehicle[field_names.vehicle_attribution]),
+            "vehicle_type": get_data_value(vehicle[field_names.vehicle_type]),
+            "seats": get_data_value(vehicle[field_names.seats]),
+            "total_weight": get_data_value(vehicle[field_names.total_weight]),
+        }
+        yield vehicle_item
+    vehicles.close()
 
 def get_files(directory):
     for name, filename in lms_files.iteritems():
 
-        if name not in [STREETS, NON_URBAN_INTERSECTION, ACCIDENTS]:
+        if name not in [STREETS, NON_URBAN_INTERSECTION, ACCIDENTS, INVOLVED, VEHICLES]:
             continue
 
         files = filter(lambda path: filename.lower() in path.lower(), os.listdir(directory))
@@ -235,6 +286,10 @@ def get_files(directory):
             yield ROADS, roads
         elif name == ACCIDENTS:
             yield name, csv
+        elif name == INVOLVED:
+            yield name, csv
+        elif name == VEHICLES:
+            yield  name, csv
 
 
 def import_to_datastore(directory, provider_code, batch_size):
@@ -250,8 +305,14 @@ def import_to_datastore(directory, provider_code, batch_size):
         accidents = list(import_accidents(provider_code=provider_code, **files_from_lms))
         db.session.execute(Marker.__table__.insert(), accidents)
         db.session.commit()
+        involved = list(import_involved(provider_code=provider_code, **files_from_lms))
+        db.session.execute(Involved.__table__.insert(), involved)
+        db.session.commit()
+        vehicles = list(import_vehicles(provider_code=provider_code, **files_from_lms))
+        db.session.execute(Vehicle.__table__.insert(), vehicles)
+        db.session.commit()
         took = int((datetime.now() - now).total_seconds())
-        print("imported {0} items from directory: {1} in {2} seconds".format(len(accidents), directory, took))
+        print("imported {0} items from directory: {1} in {2} seconds".format(len(accidents)+len(involved)+len(vehicles), directory, took))
     except Exception as e:
         directories_not_processes[directory] = e.message
 
@@ -276,11 +337,14 @@ def main():
     parser.add_argument('--delete_all', dest='delete_all', action='store_true', default=True)
     parser.add_argument('--provider_code', type=int)
     args = parser.parse_args()
-    # wipe all the Markers first
+    # wipe all the Markers and Involved data first
     if args.delete_all:
         print("deleting the entire db!")
+        db.session.query(Vehicle).delete()
+        db.session.commit()
+        db.session.query(Involved).delete()
+        db.session.commit()
         db.session.query(Marker).delete()
-
         db.session.commit()
 
     for directory in glob.glob("{0}/*/*".format(args.path)):

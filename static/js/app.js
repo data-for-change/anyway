@@ -704,7 +704,11 @@ $(function () {
               map: this.map,
               icon: USER_LOCATION_ICON
             });
-             //agam add- tour find location for step 2
+            if (isRetina){
+                
+                this.locationMarker.setIcon({url: USER_LOCATION_ICON, scaledSize: new google.maps.Size(30, 50)});
+            }
+             // agam add- tour find location for step 2
             if (tourLocation == 2)
             {
                 tourLocation = 3;

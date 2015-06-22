@@ -154,6 +154,9 @@ var MarkerView = Backbone.View.extend({
         return "/?marker=" + this.model.get("id") + "&" + app.getCurrentUrlParams();
     },
     clickMarker : function() {
+        $.get("/markers/" + this.model.get("id"), function (data) {
+            //alert(data);
+        });
         this.highlight();
         app.closeInfoWindow();
 

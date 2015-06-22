@@ -95,11 +95,19 @@ var SidebarView = Backbone.View.extend({
                     continue;
                 }
 
-                var entryHtml = this.sidebarItemTemplate({
-                    created: moment(markerModel.get("created")).format("LLLL"),
-                    type: SUBTYPE_STRING[markerModel.get("subtype")],
-                    icon: markerView.getIcon()
-                });
+                if (isRetina){
+                    var entryHtml = this.sidebarItemTemplate({
+                        created: moment(markerModel.get("created")).format("LLLL"),
+                        type: SUBTYPE_STRING[markerModel.get("subtype")],
+                        icon: markerView.getIcon().url
+                    });
+                } else {
+                    var entryHtml = this.sidebarItemTemplate({
+                        created: moment(markerModel.get("created")).format("LLLL"),
+                        type: SUBTYPE_STRING[markerModel.get("subtype")],
+                        icon: markerView.getIcon()
+                    });
+                }
 
                 var $entry = $(entryHtml);
                 $entry.data("marker", marker);

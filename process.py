@@ -13,6 +13,7 @@ import itertools
 import localization
 import re
 from datetime import datetime
+from collections import OrderedDict
 
 directories_not_processes = {}
 
@@ -37,8 +38,9 @@ lms_files = {ACCIDENTS: "AccData.csv",
              DICTIONARY: "Dictionary.csv",
              INVOLVED: "InvData.csv",
              VEHICLES: "VehData.csv"
-}
+             }
 
+acc_years = []
 coordinates_converter = ItmToWGS84()
 app = init_flask(__name__)
 db = SQLAlchemy(app)
@@ -154,7 +156,23 @@ def get_data_value(value):
     return int(value) if value else 0
 
 
+def create_years_list():
+    """
+    Edits 'years.js', a years structure ready to be presented in app.js
+    as user's last-4-years filter choices.
+    """
+    acc_years_dict = OrderedDict()
+    for i, year in enumerate(reversed(acc_years)):
+        if i < 4:
+            acc_years_dict["שנת" + " %s" % year] = ["01/01/%s" % year, "31/12/%s" % year]
+    with open('static/js/years.js', 'w') as outfile:
+        outfile.write("var ACCYEARS = ")
+        json.dump(acc_years_dict, outfile, encoding='utf-8')
+        outfile.write(";\n")
+
+
 def import_accidents(provider_code, accidents, streets, roads, involved, vehicles):
+    global acc_years
     print("reading accidents from file %s" % (accidents.name(),))
     for accident in accidents:
         if field_names.x_coordinate not in accident or field_names.y_coordinate not in accident:
@@ -163,6 +181,8 @@ def import_accidents(provider_code, accidents, streets, roads, involved, vehicle
             continue
         lng, lat = coordinates_converter.convert(accident[field_names.x_coordinate], accident[field_names.y_coordinate])
         main_street, secondary_street = get_streets(accident, streets)
+        if accident[field_names.accident_year] not in acc_years:
+            acc_years.append(accident[field_names.accident_year])
 
         marker = {
             "id":int("{0}{1}".format(provider_code, accident[field_names.id])),
@@ -176,11 +196,8 @@ def import_accidents(provider_code, accidents, streets, roads, involved, vehicle
             "created":parse_date(accident),
             "locationAccuracy":int(accident[field_names.igun]),
             "roadType": int(accident[field_names.road_type]),
-            # subtype
             "roadShape": int(accident[field_names.road_shape]),
-            # severity
             "dayType": int(accident[field_names.day_type]),
-            # locationAccuracy
             "unit": int(accident[field_names.unit]),
             "mainStreet": main_street,
             "secondaryStreet": secondary_street,
@@ -355,6 +372,7 @@ def main():
     failed = ["{0}: {1}".format(directory, fail_reason) for directory, fail_reason in
               directories_not_processes.iteritems()]
     print("finished processing all directories, except: %s" % "\n".join(failed))
+    create_years_list()
 
 
 if __name__ == "__main__":

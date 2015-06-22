@@ -95,10 +95,15 @@ var SidebarView = Backbone.View.extend({
                     continue;
                 }
 
+                var iconUrl = markerView.getIcon();
+                if (isRetina){
+                    iconUrl = markerView.getIcon().url;
+                }
+
                 var entryHtml = this.sidebarItemTemplate({
                     created: moment(markerModel.get("created")).format("LLLL"),
                     type: SUBTYPE_STRING[markerModel.get("subtype")],
-                    icon: markerView.getIcon()
+                    icon: iconUrl
                 });
 
                 var $entry = $(entryHtml);

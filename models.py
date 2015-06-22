@@ -347,7 +347,7 @@ class Involved(Base):
             "id": self.id,
             "accident_id": self.accident_id,
             "involved_type": self.involved_type,
-            "license_aquiring_date": self.license_aquiring_date,
+            "license_acquiring_date": self.license_acquiring_date,
             "age_group": self.age_group,
             "sex": self.sex,
             "car_type": self.car_type,

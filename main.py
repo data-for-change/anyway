@@ -130,11 +130,37 @@ def markers():
                                       is_thin),
                         mimetype="application/json")
 
-@app.route("/markers/(.*)", methods=["GET"])
-@user_required
-def marker(self, key_name):
-    marker = Marker.get_by_key_name(key_name)
-    return make_response(json.dumps(marker.serialize(self.user)))
+@app.route("/markers/<int:marker_id>", methods=["GET"])
+def marker(marker_id):
+    involved = db_session.query(Involved).filter(Involved.accident_id == marker_id)
+    vehicles = db_session.query(Vehicle).filter(Vehicle.accident_id == marker_id)
+    list_to_return = list()
+    for inv in involved:
+        obj = inv.serialize()
+        if (92,obj["age_group"]) in lmsDictionary:
+            obj["age_group"] = lmsDictionary[92,obj["age_group"]]
+        if (66,obj["population_type"]) in lmsDictionary:
+            obj["population_type"] = lmsDictionary[66,obj["population_type"]]
+        if (77,obj["home_district"]) in lmsDictionary:
+            obj["home_district"] = lmsDictionary[77,obj["home_district"]]
+        if (79,obj["home_nafa"]) in lmsDictionary:
+            obj["home_nafa"] = lmsDictionary[79,obj["home_nafa"]]
+        if (80,obj["home_area"]) in lmsDictionary:
+            obj["home_area"] = lmsDictionary[80,obj["home_area"]]
+        if (78,obj["home_municipal_status"]) in lmsDictionary:
+            obj["home_municipal_status"] = lmsDictionary[78,obj["home_municipal_status"]]
+        if (81,obj["home_residence_type"]) in lmsDictionary:
+            obj["home_residence_type"] = lmsDictionary[81,obj["home_residence_type"]]
+        list_to_return.append(obj)
+    for veh in vehicles:
+        obj = veh.serialize()
+        if (111,obj["engine_volume"]) in lmsDictionary:
+            obj["engine_volume"] = lmsDictionary[111,obj["engine_volume"]]
+        if (112,obj["total_weight"]) in lmsDictionary:
+            obj["total_weight"] = lmsDictionary[112,obj["total_weight"]]
+        list_to_return.append(obj)
+    return make_response(json.dumps(list_to_return, ensure_ascii=False))
+
 
 @app.route("/discussion", methods=["GET", "POST"])
 @user_optional
@@ -462,9 +488,7 @@ admin.add_view(SendToSubscribersView(name='Send To Subscribers'))
 
 lmsDictionary = {}
 def ReadDictionaries():
-    global dict0
-    global dict1
-    global dict2
+    global lmsDictionary
     parser = argparse.ArgumentParser()
     parser.add_argument('--path', type=str, default="static/data/lms")
     args = parser.parse_args()

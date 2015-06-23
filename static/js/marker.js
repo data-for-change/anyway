@@ -15,27 +15,6 @@ var MarkerView = Backbone.View.extend({
                 this.$el.find("." + value).text(fields[field] + ": " + localization[field][this.model.get(value)]);
         }
     },
-    localize_inv : function(field,value) {
-        // localizes involved data
-            if (this.model.has(value) && this.model.get(value)!="" &&
-                    inv_dict[field][this.model.get(value)]!=undefined) {
-                this.$el.find("." + value).text(fields[field] + ": " + inv_dict[field][this.model.get(value)]);
-        }
-    },
-    localize_veh : function(field,value) {
-        // localizes vehicles data
-            if (this.model.has(value) && this.model.get(value)!="" &&
-                    veh_dict[field][this.model.get(value)]!=undefined) {
-                this.$el.find("." + value).text(fields[field] + ": " + veh_dict[field][this.model.get(value)]);
-        }
-    },
-    localize_num : function(field,value) {
-        // localizes interger data values
-            if (this.model.has(value) && this.model.get(value)!="" &&
-                    fields[field]!=undefined) {
-                this.$el.find("." + value).text(fields[field] + ": " + this.model.get(value));
-        }
-    },
 
     render : function() {
 
@@ -101,28 +80,6 @@ var MarkerView = Backbone.View.extend({
         this.localize("OFEN_HAZIYA","cross_mode");
         this.localize("MEKOM_HAZIYA","cross_location");
         this.localize("KIVUN_HAZIYA","cross_direction");
-        // Involved fields: TODO: add AJAX calls to get dictionary required fields (INVOLVED + VEHICLES)
-        this.localize_inv("SUG_MEORAV","involved_type");
-        this.localize_num("SHNAT_HOZAA","license_aquiring_date");
-        this.localize_num("KVUZA_GIL","age_group");                   // Dictionary.csv - Table 92
-        this.localize_inv("MIN","sex");
-        this.localize_inv("SUG_REHEV_NASA_LMS","car_type");
-        this.localize_inv("EMZAE_BETIHUT","safety_measures");
-        this.localize_num("SEMEL_YISHUV_MEGURIM","home_city");        // Cities.csv - "SEMEL"
-        this.localize_inv("HUMRAT_PGIA","injured_severity");
-        this.localize_inv("SUG_NIFGA_LMS","injured_type");
-        this.localize_inv("PEULAT_NIFGA_LMS","injured_position");
-        this.localize_num("KVUTZAT_OHLUSIYA_LMS","population_type");  // Dictionary.csv - Table 66
-        // Vehicles fields:
-        this.localize_num("NEFAH","engine_volume");                   // Dictionary.csv - Table 111
-        this.localize_num("SHNAT_YITZUR","manufacturing_year");
-        this.localize_num("KIVUNE_NESIA","driving_directions");       // Dictionary.csv - Table 28
-        this.localize_veh("MATZAV_REHEV","vehicle_status");
-        this.localize_veh("SHIYUH_REHEV_LMS","vehicle_attribution");
-        this.localize_veh("SUG_REHEV_LMS","vehicle_type");
-        this.localize_num("MEKOMOT_YESHIVA_LMS","seats");             // Dictionary.csv - Table 112
-        this.localize_num("MISHKAL_KOLEL_LMS","total_weight");
-
 
         this.$el.find(".creation-date").text("תאריך: " +
                     moment(this.model.get("created")).format("LLLL"));
@@ -154,8 +111,54 @@ var MarkerView = Backbone.View.extend({
         return "/?marker=" + this.model.get("id") + "&" + app.getCurrentUrlParams();
     },
     clickMarker : function() {
+        that = this;
         $.get("/markers/" + this.model.get("id"), function (data) {
-            //alert(data);
+            data = JSON.parse(data);
+
+            var localize_invs = function(field,value) {
+            // Localizing fields which have values in inv_dict
+                if (inv_dict[field] != undefined && inv_dict[field][data[i][value]] != undefined) {
+                        that.$el.find("." + value).text(fields[field] + ": " + inv_dict[field][data[i][value]]);
+                }
+            }
+            var localize_nums = function(field,value) {
+            // Localizing fields which do not have values in the dictionaries (strings and integers)
+                if ([data[i][value]] != 0) {
+                        that.$el.find("." + value).text(fields[field] + ": " + [data[i][value]]);
+                }
+            }
+            var localize_vehs = function(field,value) {
+            // Localizing fields which have values in veh_dict
+                if (veh_dict[field] != undefined && veh_dict[field][data[i][value]] != undefined) {
+                        that.$el.find("." + value).text(fields[field] + ": " + veh_dict[field][data[i][value]]);
+                }
+            }
+
+            // TODO: create new HTML fields with every iteration on data to present multiple invs & vehs
+
+            for (i in data) {
+                if (data[i]["sex"] != undefined) {
+                    localize_invs("SUG_MEORAV","involved_type");
+                    localize_nums("SHNAT_HOZAA","license_acquiring_date");
+                    localize_nums("KVUZA_GIL","age_group");
+                    localize_invs("MIN","sex");
+                    localize_invs("SUG_REHEV_NASA_LMS","car_type");
+                    localize_invs("EMZAE_BETIHUT","safety_measures");
+                    localize_invs("HUMRAT_PGIA","injured_severity");
+                    localize_invs("SUG_NIFGA_LMS","injured_type");
+                    localize_invs("PEULAT_NIFGA_LMS","injured_position");
+                    localize_nums("KVUTZAT_OHLUSIYA_LMS","population_type");
+                }else{
+                    localize_vehs("SUG_REHEV_LMS","vehicle_type");
+                    localize_nums("NEFAH","engine_volume");
+                    localize_nums("SHNAT_YITZUR","manufacturing_year");
+                    localize_nums("KIVUNE_NESIA","driving_directions");
+                    localize_vehs("MATZAV_REHEV","vehicle_status");
+                    localize_vehs("SHIYUH_REHEV_LMS","vehicle_attribution");
+                    localize_nums("MEKOMOT_YESHIVA_LMS","seats");
+                    localize_nums("MISHKAL_KOLEL_LMS","total_weight");
+                }
+            }
         });
         this.highlight();
         app.closeInfoWindow();

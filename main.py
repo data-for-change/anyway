@@ -135,7 +135,6 @@ def marker(marker_id):
     involved = db_session.query(Involved).filter(Involved.accident_id == marker_id)
     vehicles = db_session.query(Vehicle).filter(Vehicle.accident_id == marker_id)
     list_to_return = list()
-    list_to_return.append("Involved: ")
     for inv in involved:
         obj = inv.serialize()
         if (92,obj["age_group"]) in lmsDictionary:
@@ -153,8 +152,6 @@ def marker(marker_id):
         if (81,obj["home_residence_type"]) in lmsDictionary:
             obj["home_residence_type"] = lmsDictionary[81,obj["home_residence_type"]]
         list_to_return.append(obj)
-    list_to_return.append("]")
-    list_to_return.append("Vehicles: ")
     for veh in vehicles:
         obj = veh.serialize()
         if (111,obj["engine_volume"]) in lmsDictionary:

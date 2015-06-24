@@ -115,50 +115,63 @@ var MarkerView = Backbone.View.extend({
         $.get("/markers/" + this.model.get("id"), function (data) {
             data = JSON.parse(data);
 
-            var localize_invs = function(field,value) {
-            // Localizing fields which have values in inv_dict
-                if (inv_dict[field] != undefined && inv_dict[field][data[i][value]] != undefined) {
-                        that.$el.find("." + value).text(fields[field] + ": " + inv_dict[field][data[i][value]]);
+            var localize_data = function(field,value,dataType) {
+                if (dataType === "invs") {
+                    if (inv_dict[field] != undefined && inv_dict[field][data[i][value]] != undefined) {
+                        text_line = "<p style=margin:0>" + fields[field] + ": " + inv_dict[field][data[i][value]] + "</p>";
+                        that.$el.append(text_line);
+                    }
+                }else if (dataType === "vehs"){
+                    if (veh_dict[field] != undefined && veh_dict[field][data[i][value]] != undefined) {
+                    text_line = "<p style=margin:0>" + fields[field] + ": " + veh_dict[field][data[i][value]] + "</p>";
+                    that.$el.append(text_line);
+                    }
+                }else if (dataType === "nums") {
+                    if ([data[i][value]] != 0) {
+                    text_line = "<p style=margin:0>" + fields[field] + ": " + data[i][value] + "</p>";
+                    that.$el.append(text_line);
+                    }
                 }
             }
-            var localize_nums = function(field,value) {
-            // Localizing fields which do not have values in the dictionaries (strings and integers)
-                if ([data[i][value]] != 0) {
-                        that.$el.find("." + value).text(fields[field] + ": " + [data[i][value]]);
-                }
-            }
-            var localize_vehs = function(field,value) {
-            // Localizing fields which have values in veh_dict
-                if (veh_dict[field] != undefined && veh_dict[field][data[i][value]] != undefined) {
-                        that.$el.find("." + value).text(fields[field] + ": " + veh_dict[field][data[i][value]]);
-                }
-            }
-
-            // TODO: create new HTML fields with every iteration on data to present multiple invs & vehs
-
+                // TODO: Workout the table issues to present the marker in a more decent way
+            var j = 1;
+            that.$el.append("<table whitespace-wrap: nowrap><tr>");
             for (i in data) {
                 if (data[i]["sex"] != undefined) {
-                    localize_invs("SUG_MEORAV","involved_type");
-                    localize_nums("SHNAT_HOZAA","license_acquiring_date");
-                    localize_nums("KVUZA_GIL","age_group");
-                    localize_invs("MIN","sex");
-                    localize_invs("SUG_REHEV_NASA_LMS","car_type");
-                    localize_invs("EMZAE_BETIHUT","safety_measures");
-                    localize_invs("HUMRAT_PGIA","injured_severity");
-                    localize_invs("SUG_NIFGA_LMS","injured_type");
-                    localize_invs("PEULAT_NIFGA_LMS","injured_position");
-                    localize_nums("KVUTZAT_OHLUSIYA_LMS","population_type");
+                    that.$el.append("<td>");
+                    text_line = "<p style=margin:0><strong>פרטי אדם מעורב" + " " + (i*1+1) + "</strong></p>"
+                    that.$el.append(text_line);
+                    localize_data("SUG_MEORAV","involved_type","invs");
+                    localize_data("SHNAT_HOZAA","license_acquiring_date","nums");
+                    localize_data("KVUZA_GIL","age_group","nums");
+                    localize_data("MIN","sex","invs");
+                    localize_data("SUG_REHEV_NASA_LMS","car_type","invs");
+                    localize_data("EMZAE_BETIHUT","safety_measures","invs");
+                    localize_data("HUMRAT_PGIA","injured_severity","invs");
+                    localize_data("SUG_NIFGA_LMS","injured_type","invs");
+                    localize_data("PEULAT_NIFGA_LMS","injured_position","invs");
+                    localize_data("KVUTZAT_OHLUSIYA_LMS","population_type","nums");
+                    that.$el.append("<p></p></td>");
                 }else{
-                    localize_vehs("SUG_REHEV_LMS","vehicle_type");
-                    localize_nums("NEFAH","engine_volume");
-                    localize_nums("SHNAT_YITZUR","manufacturing_year");
-                    localize_nums("KIVUNE_NESIA","driving_directions");
-                    localize_vehs("MATZAV_REHEV","vehicle_status");
-                    localize_vehs("SHIYUH_REHEV_LMS","vehicle_attribution");
-                    localize_nums("MEKOMOT_YESHIVA_LMS","seats");
-                    localize_nums("MISHKAL_KOLEL_LMS","total_weight");
+                    if (j===1){
+                        that.$el.append("</tr><tr>");
+                    }
+                    that.$el.append("<td>");
+                    text_line = "<p style=margin:0><strong>פרטי רכב מעורב" + " " + (j) + "</strong></p>"
+                    that.$el.append(text_line);
+                    localize_data("SUG_REHEV_LMS","vehicle_type","vehs");
+                    localize_data("NEFAH","engine_volume","nums");
+                    localize_data("SHNAT_YITZUR","manufacturing_year","nums");
+                    localize_data("KIVUNE_NESIA","driving_directions","nums");
+                    localize_data("MATZAV_REHEV","vehicle_status","vehs");
+                    localize_data("SHIYUH_REHEV_LMS","vehicle_attribution","vehs");
+                    localize_data("MEKOMOT_YESHIVA_LMS","seats","nums");
+                    localize_data("MISHKAL_KOLEL_LMS","total_weight","nums");
+                    that.$el.append("<p></p></td>");
+                    j++;
                 }
             }
+            that.$el.append("</tr></table>");
         });
         this.highlight();
         app.closeInfoWindow();

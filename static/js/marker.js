@@ -133,12 +133,9 @@ var MarkerView = Backbone.View.extend({
                     }
                 }
             }
-                // TODO: Workout the table issues to present the marker in a more decent way
             var j = 1;
-            that.$el.append("<table whitespace-wrap: nowrap><tr>");
             for (i in data) {
                 if (data[i]["sex"] != undefined) {
-                    that.$el.append("<td>");
                     text_line = "<p style=margin:0><strong>פרטי אדם מעורב" + " " + (i*1+1) + "</strong></p>"
                     that.$el.append(text_line);
                     localize_data("SUG_MEORAV","involved_type","invs");
@@ -151,12 +148,8 @@ var MarkerView = Backbone.View.extend({
                     localize_data("SUG_NIFGA_LMS","injured_type","invs");
                     localize_data("PEULAT_NIFGA_LMS","injured_position","invs");
                     localize_data("KVUTZAT_OHLUSIYA_LMS","population_type","nums");
-                    that.$el.append("<p></p></td>");
+                    that.$el.append("<p></p>");
                 }else{
-                    if (j===1){
-                        that.$el.append("</tr><tr>");
-                    }
-                    that.$el.append("<td>");
                     text_line = "<p style=margin:0><strong>פרטי רכב מעורב" + " " + (j) + "</strong></p>"
                     that.$el.append(text_line);
                     localize_data("SUG_REHEV_LMS","vehicle_type","vehs");
@@ -167,11 +160,10 @@ var MarkerView = Backbone.View.extend({
                     localize_data("SHIYUH_REHEV_LMS","vehicle_attribution","vehs");
                     localize_data("MEKOMOT_YESHIVA_LMS","seats","nums");
                     localize_data("MISHKAL_KOLEL_LMS","total_weight","nums");
-                    that.$el.append("<p></p></td>");
+                    that.$el.append("<p></p>");
                     j++;
                 }
             }
-            that.$el.append("</tr></table>");
         });
         this.highlight();
         app.closeInfoWindow();

@@ -25,6 +25,12 @@
 	        "css/bootstrap-tour.min.css"	 %}
             <link rel="stylesheet" href="{{ ASSET_URL }}" />
         {% endassets %}
+
+        <!--// font awesome-->
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+        <!--// material design-->
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
     </head>
 
      <body style="margin: 0; position: relative; width: 100%; height: 100%">
@@ -328,10 +334,7 @@
         </div>
 
 
-        <div id="reset-map-control" style="padding: 5px; display: none">
-            <div title="חזור למיקום שלי" style="background-color: white; border: 2px solid black; cursor: pointer; boxShadow: 1px 1px 5px black {{ '; display: none' if map_only }}">
-                <img src="/static/img/my_location.png" />
-            </div>
+        <div id="reset-map-control">
         </div>
         <div id="sidebar-template" style="display: none">
             <div class="sidebar-title">סינון לפי חומרה</div>

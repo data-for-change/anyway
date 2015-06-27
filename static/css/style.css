@@ -59,6 +59,26 @@ div.gm-style {
 	margin-top: 0;
 }
 
+.resetMapControl{
+    height: 30px;
+    width: 30px;
+    background-color: white;
+    text-align: center;
+    line-height: 30px;
+    margin: 16px;
+    border-radius: 50%;
+    border-color: #ccc;
+    border-style: solid;
+    border-width: 1px;
+}
+
+.resetMapControl:after{
+    font-size: 20px;
+    color: #ccc;
+    font-family: 'Material Icons';
+    content: '\e1b3';
+}
+
 #map_canvas img {
 	max-width: none;
 }

@@ -279,7 +279,9 @@ $(function () {
             this.map = new google.maps.Map(this.$el.find("#map_canvas").get(0), mapOptions);
 
             var resetMapDiv = document.createElement('div');
+            resetMapDiv.className = "resetMapControl";
             resetMapDiv.innerHTML = $("#reset-map-control").html();
+
             google.maps.event.addDomListener(resetMapDiv, 'click', function () {
                 this.goToMyLocation();
             }.bind(this));

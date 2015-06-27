@@ -332,7 +332,7 @@ $(function () {
             // search box:
             // Create the search box and link it to the UI element.
             var input = document.getElementById('pac-input');
-            this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+            this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(input);
             this.searchBox = new google.maps.places.SearchBox(input);
 
             google.maps.event.addListener(this.searchBox, 'places_changed', function () {

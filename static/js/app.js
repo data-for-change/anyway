@@ -255,11 +255,13 @@ $(function () {
             if (this.markers.length > 0) {
                 params = this.buildMarkersParams();
                 params["format"] = "csv";
-
                 window.location = this.markers.url + "?" + $.param(params);
             } else {
                 $('#empty-csv-dialog').modal('show');
             }
+        },
+        linkMap: function () {
+            $('#embed').modal('show');
         },
         render: function () {
             this.isReady = false;
@@ -278,14 +280,47 @@ $(function () {
             };
             this.map = new google.maps.Map(this.$el.find("#map_canvas").get(0), mapOptions);
 
-            var resetMapDiv = document.createElement('div');
-            resetMapDiv.className = "resetMapControl";
-            resetMapDiv.innerHTML = $("#reset-map-control").html();
+            var mapControlDiv = document.createElement('div');
+            mapControlDiv.className = "map-control";
+            mapControlDiv.innerHTML = $("#map-control").html();
 
+            var resetMapDiv = document.createElement('div');
+            resetMapDiv.className = "map-button reset-map-control";
+            resetMapDiv.title = 'Reset Location';
+            resetMapDiv.innerHTML = $("#reset-map-control").html();
             google.maps.event.addDomListener(resetMapDiv, 'click', function () {
                 this.goToMyLocation();
             }.bind(this));
-            this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(resetMapDiv);
+
+            var downloadCsvDiv = document.createElement('div');
+            downloadCsvDiv.className = "map-button download-csv-control";
+            downloadCsvDiv.title = 'Download CSV';
+            downloadCsvDiv.innerHTML = $("#download-csv-control").html();
+            google.maps.event.addDomListener(downloadCsvDiv, 'click', function () {
+                this.downloadCsv();
+            }.bind(this));
+
+            var linkMapDiv = document.createElement('div');
+            linkMapDiv.className = "map-button link-map-control ";
+            linkMapDiv.title = 'Link/Embed Map';
+            linkMapDiv.innerHTML = $("#link-map-control").html();
+            google.maps.event.addDomListener(linkMapDiv, 'click', function () {
+                var url = document.URL,
+                $map_link = $("#map_link"),
+                $iframe_link = $("#iframe_link"),
+                $embed_link = $("#js-embed-link");
+                $map_link.val(url);
+                $iframe_link.html('<iframe src="' + url + '&map_only=true"></iframe>');
+                $(".js-btn-copytoclipboard").on("click", function(){
+                    $("#" + $(this).data("copy")).select();
+                });
+                this.linkMap();
+            }.bind(this));
+
+            mapControlDiv.appendChild(resetMapDiv);
+            mapControlDiv.appendChild(downloadCsvDiv);
+            mapControlDiv.appendChild(linkMapDiv);
+            this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(mapControlDiv);
 
             if (LOCATION_SPECIFIED) {
                 if (!MARKER_ID) {

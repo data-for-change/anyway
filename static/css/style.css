@@ -59,7 +59,12 @@ div.gm-style {
 	margin-top: 0;
 }
 
-.resetMapControl{
+.map-control{
+    width: 62px;
+    height: auto;
+}
+
+.map-button{
     height: 30px;
     width: 30px;
     background-color: white;
@@ -72,11 +77,29 @@ div.gm-style {
     border-width: 1px;
 }
 
-.resetMapControl:after{
+.map-button:hover{
+    background-color: #ECF6FB;
+]}
+
+.reset-map-control:after{
     font-size: 20px;
     color: #ccc;
     font-family: 'Material Icons';
     content: '\e1b3';
+}
+
+.download-csv-control:after{
+    font-size: 20px;
+    color: #ccc;
+    font-family: 'Material Icons';
+    content: '\e2c4';
+}
+
+.link-map-control:after{
+    font-size: 20px;
+    color: #ccc;
+    font-family: 'Material Icons';
+    content: '\e157';
 }
 
 #map_canvas img {

@@ -149,7 +149,7 @@ def get_data_value(value):
     :returns: value for parameters which are not mandatory in an accident data
     OR zero if the parameter value does not exist
     """
-    return int(value) if value else 0
+    return int(value) if value else -1
 
 
 def create_years_list():

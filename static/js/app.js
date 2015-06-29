@@ -301,7 +301,10 @@ $(function () {
             }.bind(this));
 
             var linkMapDiv = document.createElement('div');
-            linkMapDiv.className = "map-button link-map-control ";
+            var linkMapLabel = document.createElement('div');
+            linkMapLabel.innerHTML += 'Label';
+            linkMapLabel.className = 'linklabel';
+            linkMapDiv.className = 'map-button link-map-control';
             linkMapDiv.title = 'Link/Embed Map';
             linkMapDiv.innerHTML = $("#link-map-control").html();
             google.maps.event.addDomListener(linkMapDiv, 'click', function () {
@@ -328,6 +331,7 @@ $(function () {
             mapControlDiv.appendChild(resetMapDiv);
             mapControlDiv.appendChild(downloadCsvDiv);
             mapControlDiv.appendChild(linkMapDiv);
+            linkMapDiv.appendChild(linkMapLabel);
             mapControlDiv.appendChild(guideDiv);
             this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(mapControlDiv);
 

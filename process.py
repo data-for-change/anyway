@@ -44,6 +44,7 @@ acc_years = []
 coordinates_converter = ItmToWGS84()
 app = init_flask(__name__)
 db = SQLAlchemy(app)
+acc_years = []
 
 
 def get_street(settlement_sign, street_sign, streets):
@@ -373,7 +374,6 @@ def main():
               directories_not_processes.iteritems()]
     print("finished processing all directories, except: %s" % "\n".join(failed))
     create_years_list()
-
 
 if __name__ == "__main__":
     main()

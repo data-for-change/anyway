@@ -36,6 +36,7 @@
 	       <div class="navbar navbar-fixed-top">
                 <div class="navbar-inner" id="step1Component" style="padding-right: 10px{{ '; display: none' if map_only }}">
                     <button class="btn btn-default" id="tourOnClick">הדרכה</button>
+                    <a id="js-embed-link" class="btn btn-default"  data-toggle="modal" data-target="#embed">קישור לתצוגה הנוכחית</a>
                     <div style="float: left; padding: 5px">
                         <div class="fb-like" data-href="{{ url }}" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true" style="vertical-align: middle"></div>
                         <a href="https://play.google.com/store/apps/details?id=il.co.anyway.app">
@@ -43,7 +44,6 @@
                                src="https://developer.android.com/images/brand/en_app_rgb_wo_45.png"
                                style="height: 25px; padding: 3px"/>
                         </a>
-                        <a id="js-embed-link" class="btn" style="height: 10px; line-height: 10px; vertical-align: top" data-toggle="modal" data-target="#embed">קישור לתצוגה הנוכחית</a>
                         <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=F274PRUT6VSAA" target="new">תרמו לנו</a> &#124;
 			<a href="" data-toggle="modal" data-target="#developer-dialog">מפתחים</a> &#124;
                         <a href="mailto:feedback@anyway.co.il?subject=ANYWAY%20Feedback" target="new">צרו קשר</a> &#124;
@@ -336,9 +336,9 @@
         <div id="sidebar-template" style="display: none">
             <div class="sidebar-title">סינון לפי חומרה</div>
             <ul id="step3tour">
-                <li><img class="checkbox-severity" data-type="1" data-checked="true"/> תאונות קטלניות</li>
-                <li><img class="checkbox-severity" data-type="2" data-checked="true" /> תאונות קשות</li>
-                <li><img class="checkbox-severity" data-type="3" data-checked="true" /> תאונות קלות</li>
+                <li data-toggle="tooltip" data-placement="left" title="תאונות דרכים שנהרג בהן אדם אחד לפחות או נפצע בהן אדם אחד לפחות ונפטר מפצעיו תוך 30 יום."><img class="checkbox-severity" data-type="1" data-checked="true" /> תאונות קטלניות</li>
+                <li data-toggle="tooltip" data-placement="left" title="תאונות דרכים שנפצע בהן קשה אדם אחד לפחות, ושלא נהרג בהן שום אדם."><img class="checkbox-severity" data-type="2" data-checked="true" /> תאונות קשות</li>
+                <li data-toggle="tooltip" data-placement="left" title="תאונות דרכים שנפצע בהן קל אדם אחד לפחות, ושלא נהרג בהן או נפצע בהן קשה שום אדם."><img class="checkbox-severity" data-type="3" data-checked="true" /> תאונות קלות</li>
                 <li><img class="checkbox-accuracy" data-type="4" data-checked="false" /> תאונות שמיקומן משוער</li>
 
             </ul>
@@ -359,7 +359,7 @@
                     <div class="sidebar-title current-view-count" style="display: table-cell"></div>
                 </div>
             </div>
-            <div style="overflow-y: scroll; position: absolute; top: 255px; bottom: 30px; width: 100%">
+            <div style="overflow-y: scroll; position: absolute; top: 255px; bottom: 30px; width: 100%" id="step6tour">
                 <ul class="current-view"></ul>
             </div>
             <div style="position: absolute; bottom: 0px">
@@ -405,7 +405,8 @@
             "js/localization.js",
             "js/years.js",
             "js/inv_dict.js",
-            "js/veh_dict.js"
+            "js/veh_dict.js",
+            "js/retina.js"
              %}
             <script type="text/javascript" src="{{ ASSET_URL }}"></script>
         {% endassets %}

@@ -1,8 +1,8 @@
 var ADD_DISCUSSION = "צרו דיון";
 var NEW_FEATURES = "עדכן אותי לגבי תכונות חדשות"
 
-var MARKER_TYPE_ACCIDENT = 1
-var MARKER_TYPE_DISCUSSION = 2
+var MARKER_TYPE_ACCIDENT = 1;
+var MARKER_TYPE_DISCUSSION = 2;
 
 var HIGHLIGHT_TYPE_USER_SEARCH = 1;
 var HIGHLIGHT_TYPE_USER_GPS = 2;
@@ -97,6 +97,14 @@ function getIcon(accidentType, severity) {
     } catch (err) {
         // stick to default icon
     }
+    if (isRetina){
+        var googleIcon = {
+            url: icon,
+            scaledSize: new google.maps.Size(30, 50)
+        };
+        icon = googleIcon;
+    }
+
     return icon;
 }
 

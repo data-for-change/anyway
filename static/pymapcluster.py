@@ -48,7 +48,6 @@ def cluster_markers(mercator, latlngs, zoom, gridsize=50):
         clusters: list of same length as latlngs giving assigning each point to
                   a cluster
     """
-    start_time = time.time()
     centers = []
     clusters = []
     sizes = []
@@ -74,7 +73,6 @@ def cluster_markers(mercator, latlngs, zoom, gridsize=50):
             sizes.append(1)
             clusters.append(len(centers) - 1)
 
-    print('time for cluster_markers: ' + str(time.time() - start_time))
     return centers, clusters, sizes
 
 def create_clusters_centers(markers, zoom, radius):
@@ -95,16 +93,14 @@ def get_cluster_size(index, clusters):
     #TODO: don't call Counter for every cluster in the array
     return Counter(clusters)[index]
 
-def generate_clusters_json(markers, zoom, radius=50):
+def calculate_clusters(markers, zoom, radius=50):
     centers, clusters, sizes = create_clusters_centers(markers, zoom, radius)
     json_clusts=[]
 
     for i, point in enumerate(centers):
         json_clusts.append(get_cluster_json(point, sizes[i]))
 
-    return {
-        'clusters': json_clusts
-    }
+    return json_clusts
 
 ##
 if __name__ == '__main__':

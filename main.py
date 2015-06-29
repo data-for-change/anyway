@@ -7,7 +7,7 @@ from StringIO import StringIO
 import time
 
 import jinja2
-from flask import make_response, render_template, Response
+from flask import make_response, render_template, Response, url_for
 import flask.ext.assets
 from webassets.ext.jinja2 import AssetsExtension
 from webassets import Environment as AssetsEnvironment
@@ -223,7 +223,7 @@ def clusters(methods=["GET"]):
                                     fatal, severe, light, inaccurate, zoom)
 
         logging.debug('calculating clusters took ' + str(time.time() - start_time))
-        return Response(json.dumps(results), mimetype="application/json")
+        return Response(json.dumps({'clusters': results}), mimetype="application/json")
 
 @app.route('/', defaults={'marker_id': None})
 @app.route('/<int:marker_id>')
@@ -362,7 +362,7 @@ class LoginForm(form.Form):
         if user is None:
             raise validators.ValidationError('Invalid user')
 
-        if not check_password_hash(user.password, self.password.data):
+        if not check_password_hash(user.password.encode("utf8"), self.password.data.encode("utf8")):
             raise validators.ValidationError('Invalid password')
 
     def get_user(self):
@@ -477,6 +477,27 @@ class SendToSubscribersView(BaseView):
     def is_visible(self):
         return login.current_user.is_authenticated()
 
+class ViewHighlightedMarkers(BaseView):
+    @login.login_required
+    @expose('/')
+    def index(self):
+        highlightedpoints = db_session.query(HighlightPoint).options(load_only("id", "latitude", "longitude", "type"))
+        points = []
+        point_id_list = []
+        for point in highlightedpoints:
+            p = HighlightPoint()
+            p.id = point.id
+            p.latitude = point.latitude
+            p.longitude = point.longitude
+            p.created = point.created
+            p.type = point.type
+            points.append(p)
+        context = {'points': points}
+        return self.render('viewhighlighted.html', **context)
+
+    def is_visible(self):
+        return login.current_user.is_authenticated()
+
 
 init_login()
 
@@ -484,6 +505,7 @@ admin = admin.Admin(app, 'ANYWAY Administration Panel', index_view=AdminIndexVie
 
 admin.add_view(AdminView(User, db_session))
 admin.add_view(SendToSubscribersView(name='Send To Subscribers'))
+admin.add_view(ViewHighlightedMarkers(name='View Highlighted Markers'))
 
 
 lmsDictionary = {}

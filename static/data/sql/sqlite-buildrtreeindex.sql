@@ -1,0 +1,1 @@
+CREATE VIRTUAL TABLE IF NOT EXISTS marker_index USING rtree(id, minLng, maxLng, minLat, maxLat);

@@ -6,6 +6,7 @@ install: pip install -r requirements.txt
 # command to prepare for tests
 before_script:
   - export DATABASE_URL='sqlite:///local.db'
+  - export BUILD_MARKER_INDEX_SQL_FILE='./static/data/sql/postgresql-buildrtreeindex.sql'
   - python models.py
 # command to run tests
 script: python -m unittest discover tests

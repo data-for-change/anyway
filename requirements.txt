@@ -1,6 +1,6 @@
 Flask==0.10.1
 Flask-Assets==0.10
-Flask-SQLAlchemy==1.0
+Flask-SQLAlchemy==2.0
 Jinja2==2.7.1
 MarkupSafe==0.18
 SQLAlchemy==0.9
@@ -18,3 +18,4 @@ Flask-Admin==1.1.0
 Flask-Login==0.2.11
 WTForms==2.0.2
 sendgrid==1.4.0
+GeoAlchemy2==0.2.5

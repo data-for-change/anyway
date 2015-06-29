@@ -1,0 +1,1 @@
+CREATE INDEX marker_index ON markers IF NOT EXISTS USING rtree(id, minLng, maxLng, minLat, maxLat);

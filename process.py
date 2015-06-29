@@ -6,7 +6,7 @@ import argparse
 import json
 from flask.ext.sqlalchemy import SQLAlchemy
 import field_names
-from models import Marker,Involved,Vehicle
+from models import Marker, Involved, Vehicle, MarkerIndex
 import models
 from utilities import ProgressSpinner, ItmToWGS84, init_flask, CsvReader
 import itertools
@@ -185,7 +185,7 @@ def import_accidents(provider_code, accidents, streets, roads, involved, vehicle
             acc_years.append(accident[field_names.accident_year])
 
         marker = {
-            "id":int("{0}{1}".format(provider_code, accident[field_names.id])),
+            #"id":int("{0}{1}".format(provider_code, accident[field_names.id])),
             "title":"Accident",
             "description":json.dumps(load_extra_data(accident, streets, roads), encoding=models.db_encoding),
             "address":get_address(accident, streets),
@@ -223,6 +223,7 @@ def import_accidents(provider_code, accidents, streets, roads, involved, vehicle
         yield marker
     accidents.close()
 
+
 def import_involved(provider_code, accidents, streets, roads, involved, vehicles):
     print("reading involved data from file %s" % (involved.name(),))
     for involve in involved:
@@ -243,12 +244,12 @@ def import_involved(provider_code, accidents, streets, roads, involved, vehicles
             "home_nafa": get_data_value(involve[field_names.home_nafa]),
             "home_area": get_data_value(involve[field_names.home_area]),
             "home_municipal_status": get_data_value(involve[field_names.home_municipal_status]),
-            "home_residence_type":  get_data_value(involve[field_names.home_residence_type]),
-            "hospital_time":  get_data_value(involve[field_names.hospital_time]),
-            "medical_type":  get_data_value(involve[field_names.medical_type]),
-            "release_dest":  get_data_value(involve[field_names.release_dest]),
-            "safety_measures_use":  get_data_value(involve[field_names.safety_measures_use]),
-            "late_deceased":  get_data_value(involve[field_names.late_deceased]),
+            "home_residence_type": get_data_value(involve[field_names.home_residence_type]),
+            "hospital_time": get_data_value(involve[field_names.hospital_time]),
+            "medical_type": get_data_value(involve[field_names.medical_type]),
+            "release_dest": get_data_value(involve[field_names.release_dest]),
+            "safety_measures_use": get_data_value(involve[field_names.safety_measures_use]),
+            "late_deceased": get_data_value(involve[field_names.late_deceased]),
         }
         yield involved_item
     involved.close()
@@ -270,6 +271,7 @@ def import_vehicles(provider_code, accidents, streets, roads, involved, vehicles
         }
         yield vehicle_item
     vehicles.close()
+
 
 def get_files(directory):
     for name, filename in lms_files.iteritems():
@@ -306,7 +308,7 @@ def get_files(directory):
         elif name == INVOLVED:
             yield name, csv
         elif name == VEHICLES:
-            yield  name, csv
+            yield name, csv
 
 
 def import_to_datastore(directory, provider_code, batch_size):
@@ -330,6 +332,7 @@ def import_to_datastore(directory, provider_code, batch_size):
         db.session.commit()
         took = int((datetime.now() - now).total_seconds())
         print("imported {0} items from directory: {1} in {2} seconds".format(len(accidents)+len(involved)+len(vehicles), directory, took))
+        return accidents
     except Exception as e:
         directories_not_processes[directory] = e.message
 
@@ -345,6 +348,25 @@ def get_provider_code(directory_name=None):
         ans = raw_input("directory provider code is invalid, please enter a valid code: ")
         if ans.isdigit():
             return int(ans)
+
+
+# Initialize marker index (RTree) table, for markers table
+def reinitialize_markers_index_table():
+    markers = Marker.get_all_markers_id_lat_lng()
+    # TODO: fix this unexpected side effect, could harm future use of function.
+    MarkerIndex.delete_table()
+    marker_indexes = list(_generate_marker_index_list(markers, MarkerIndex.create_index))
+    MarkerIndex.insert_indexes(marker_indexes)
+
+
+def _generate_marker_index_list(markers, creator):
+    try:
+        for i, marker in enumerate(markers):
+            marker_index = creator(marker)
+            yield marker_index
+    except AttributeError:
+        print ("Could not generate marker indexes, unappropriate marker object struture!")
+        raise
 
 
 def main():
@@ -363,16 +385,22 @@ def main():
         db.session.commit()
         db.session.query(Marker).delete()
         db.session.commit()
+        MarkerIndex.delete_table()
 
+    accidents = []
     for directory in glob.glob("{0}/*/*".format(args.path)):
         parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
         provider_code = args.provider_code if args.provider_code else get_provider_code(parent_directory)
-        import_to_datastore(directory, provider_code, args.batch_size)
+        imported_accidents = import_to_datastore(directory, provider_code, args.batch_size)
+        if imported_accidents is not None:
+            accidents += imported_accidents
 
     failed = ["{0}: {1}".format(directory, fail_reason) for directory, fail_reason in
               directories_not_processes.iteritems()]
     print("finished processing all directories, except: %s" % "\n".join(failed))
     create_years_list()
+    print("creating the respective marker index table (R-Tree) using the imported data")
+    reinitialize_markers_index_table()
 
 
 if __name__ == "__main__":

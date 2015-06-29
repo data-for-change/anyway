@@ -96,3 +96,11 @@ class ItmToWGS84(object):
         """
         longitude, latitude = pyproj.transform(self.itm, self.wgs84, x, y)
         return longitude, latitude
+		
+		
+class File(object):
+    @staticmethod
+    def read(filename):
+        with open(filename) as file:
+            data = file.read()
+            return data

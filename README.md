@@ -39,6 +39,8 @@ Contributing
 3. `mkvirtualenv anyway`
 4. `cd anyway`
 5. `pip install -r requirements.txt`
+	* In case you're getting an error as 'Command "python setup.py egg_info" failed with error code 1 in', try to run `sudo apt-get install libpq-dev python-dev`
+6. `workon anyway` (each time you start working)
 
 * Each time you start working: `workon anyway`
 

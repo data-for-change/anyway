@@ -21,7 +21,7 @@ var tour1 = new Tour({
     </div>",
   steps: [
   {
-    element:  '#tourOnClick',
+    element:  '#guide-control',
     animation: true,
     title: "ברוכים הבאים!",
     placement: 'bottom',

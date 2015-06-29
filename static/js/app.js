@@ -286,7 +286,6 @@ $(function () {
 
             var resetMapDiv = document.createElement('div');
             resetMapDiv.className = "map-button reset-map-control";
-            resetMapDiv.title = 'Reset Location';
             resetMapDiv.innerHTML = $("#reset-map-control").html();
             google.maps.event.addDomListener(resetMapDiv, 'click', function () {
                 this.goToMyLocation();
@@ -294,18 +293,13 @@ $(function () {
 
             var downloadCsvDiv = document.createElement('div');
             downloadCsvDiv.className = "map-button download-csv-control";
-            downloadCsvDiv.title = 'Download CSV';
             downloadCsvDiv.innerHTML = $("#download-csv-control").html();
             google.maps.event.addDomListener(downloadCsvDiv, 'click', function () {
                 this.downloadCsv();
             }.bind(this));
 
             var linkMapDiv = document.createElement('div');
-            var linkMapLabel = document.createElement('div');
-            linkMapLabel.innerHTML += 'Label';
-            linkMapLabel.className = 'linklabel';
             linkMapDiv.className = 'map-button link-map-control';
-            linkMapDiv.title = 'Link/Embed Map';
             linkMapDiv.innerHTML = $("#link-map-control").html();
             google.maps.event.addDomListener(linkMapDiv, 'click', function () {
                 var url = document.URL,
@@ -325,14 +319,29 @@ $(function () {
             guideDiv.title = 'Start Tour';
             guideDiv.innerHTML = $("#guide-control").html();
             google.maps.event.addDomListener(guideDiv, 'click', function () {
-//                resetTour();
+                onClick();
             }.bind(this));
 
             mapControlDiv.appendChild(resetMapDiv);
             mapControlDiv.appendChild(downloadCsvDiv);
             mapControlDiv.appendChild(linkMapDiv);
-            linkMapDiv.appendChild(linkMapLabel);
             mapControlDiv.appendChild(guideDiv);
+
+            var linkLabel = document.createElement('div');
+            linkLabel.className = 'control-label';
+            linkLabel.innerHTML = 'קישור לתצוגה נוכחית';
+            linkMapDiv.appendChild(linkLabel);
+
+            var downloadLabel = document.createElement('div');
+            downloadLabel.className = 'control-label';
+            downloadLabel.innerHTML = 'הורד נתוני תאונות (CSV)';
+            downloadCsvDiv.appendChild(downloadLabel);
+
+            var guideLabel = document.createElement('div');
+            guideLabel.className = 'control-label';
+            guideLabel.innerHTML = 'התחל הדרכה';
+            guideDiv.appendChild(guideLabel);
+
             this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(mapControlDiv);
 
             if (LOCATION_SPECIFIED) {

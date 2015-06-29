@@ -317,9 +317,18 @@ $(function () {
                 this.linkMap();
             }.bind(this));
 
+            var guideDiv = document.createElement('div');
+            guideDiv.className = "map-button guide-control blink";
+            guideDiv.title = 'Start Tour';
+            guideDiv.innerHTML = $("#guide-control").html();
+            google.maps.event.addDomListener(guideDiv, 'click', function () {
+//                resetTour();
+            }.bind(this));
+
             mapControlDiv.appendChild(resetMapDiv);
             mapControlDiv.appendChild(downloadCsvDiv);
             mapControlDiv.appendChild(linkMapDiv);
+            mapControlDiv.appendChild(guideDiv);
             this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(mapControlDiv);
 
             if (LOCATION_SPECIFIED) {

@@ -126,6 +126,10 @@ div.gm-style {
     text-align: left;
 }
 
+h4 {
+    max-width:340px
+}
+
 textarea.form-control-wide {
     height: 100px;
 }

@@ -56,7 +56,7 @@ var MarkerView = Backbone.View.extend({
         this.$el.html($("#marker-content-template").html());
 
         this.$el.width(400);
-        this.$el.find(".title").text(localization.SUG_TEUNA[this.model.get("subtype")]);
+        this.$el.find(".title").text(this.marker.get("title"));
         this.$el.find(".roadType").text(fields.SUG_DEREH + ": " + localization.SUG_DEREH[this.model.get("roadType")]);
         this.$el.find(".accidentType").text(fields.SUG_TEUNA+ ": " + localization.SUG_TEUNA[this.model.get("subtype")]);
         this.$el.find(".roadShape").text(fields.ZURAT_DEREH+ ": " + localization.ZURAT_DEREH[this.model.get("roadShape")]);
@@ -99,9 +99,20 @@ var MarkerView = Backbone.View.extend({
         return getIcon(this.model.get("subtype"), this.model.get("severity"));
     },
     getTitle : function() {
-        return moment(this.model.get("created")).format("l")
+        if (this.model.get("junction") !== "") {
+        loc = this.model.get("junction")
+        }
+        else if (this.model.get("secondaryStreet") !== "") {
+            loc = "ברחוב " + this.model.get("secondaryStreet") + " פינת " + this.model.get("mainStreet");
+        }
+        else {
+            loc = "ברחוב " + this.model.get("mainStreet");
+        }
+        return "ביום " + moment(this.model.get("created")).format("dddd") + ", ה-"
+        + moment(this.model.get("created")).format("LL")
         + " תאונה " + SEVERITY_MAP[this.model.get("severity")]
-        + ": " + SUBTYPE_STRING[this.model.get("subtype")];
+        + " מסוג " + localization.SUG_TEUNA[this.model.get("subtype")] + " "
+        + loc
     },
     choose : function() {
         if (app.oms.markersNearMarker(this.marker).length) {

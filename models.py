@@ -3,7 +3,7 @@
 import json
 import logging
 
-from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc
+from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql
 from sqlalchemy.orm import relationship, load_only
 import datetime
 import localization
@@ -224,12 +224,15 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
 
     @staticmethod
     def bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng, start_date, end_date,
-                           fatal, severe, light, inaccurate, is_thin=False, yield_per=None):
+                           fatal, severe, light, inaccurate, mark_on=True, is_thin=False, yield_per=None):
         # example:
         # ne_lat=32.36292402647484&ne_lng=35.08873443603511&sw_lat=32.29257266524761&sw_lng=34.88445739746089
         # >>>  m = Marker.bounding_box_query(32.36, 35.088, 32.292, 34.884)
         # >>> m.count()
         # 250
+
+        if not mark_on:
+            return Marker.query.filter(sql.false())
         accurate = not inaccurate
         markers = Marker.query \
             .filter(Marker.longitude <= ne_lng) \
@@ -306,7 +309,9 @@ class DiscussionMarker(MarkerMixin, Base):
       )
 
     @staticmethod
-    def bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng):
+    def bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng, disc_on):
+        if not disc_on:
+            return Marker.query.filter(sql.false())
         markers = DiscussionMarker.query \
             .filter(DiscussionMarker.longitude <= ne_lng) \
             .filter(DiscussionMarker.longitude >= sw_lng) \

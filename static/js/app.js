@@ -122,6 +122,7 @@ $(function () {
             }
 
             if (this.clusterMode()) {
+                $("#view-filter").prop('disabled', true);
                 this.closeInfoWindow();
                 this.clusters.fetch({
                     data: $.param(params),
@@ -129,6 +130,7 @@ $(function () {
                     success: this.reloadSidebar.bind(this)
                 });
             } else {
+                $("#view-filter").prop('disabled', false);
                 if (!this.markerList.length) {
                     this.loadMarkers();
                 }
@@ -206,6 +208,8 @@ $(function () {
             params["show_severe"] = this.model.get("showSevere");
             params["show_light"] = this.model.get("showLight");
             params["show_inaccurate"] = this.model.get("showInaccurateMarkers");
+            params["mark_on"] = mark_on;
+            params["disc_on"] = disc_on;
             return params;
         },
         setMultipleMarkersIcon: function () {
@@ -753,5 +757,32 @@ $(function () {
         }
     });
 });
+
+var mark_on='1';
+var disc_on='1';
+
+function load(li) {
+    switch (li) {
+        case 1:
+            mark_on='1';disc_on='1';
+            document.getElementById("view-filter").value = "הצג הכל";
+            window.app.fetchMarkers();
+            break;
+
+        case 2:
+            mark_on='1';disc_on='';
+            document.getElementById("view-filter").value = "הצג תאונות בלבד";
+            window.app.resetMarkers();
+            window.app.fetchMarkers();
+            break;
+
+        case 3:
+            mark_on='';disc_on='1';
+            document.getElementById("view-filter").value = "הצג דיונים בלבד";
+            window.app.resetMarkers();
+            window.app.fetchMarkers();
+        break;
+    }
+}
 
 

@@ -115,24 +115,31 @@ var MarkerView = Backbone.View.extend({
         $.get("/markers/" + this.model.get("id"), function (data) {
             data = JSON.parse(data);
 
-            var localize_data = function(field,value,dataType) {
-                if (dataType === "invs") {
-                    if (inv_dict[field] != undefined && inv_dict[field][data[i][value]] != undefined) {
-                        text_line = "<p style=margin:0>" + fields[field] + ": " + inv_dict[field][data[i][value]] + "</p>";
+            function localize_data(field,value,dataType) {
+                switch (dataType) {
+                    case "invs":
+                        if (inv_dict[field] != undefined && inv_dict[field][data[i][value]] != undefined) {
+                            text_line = "<p style=margin:0>" + fields[field] + ": " + inv_dict[field][data[i][value]] + "</p>";
+                            that.$el.append(text_line);
+                        }
+                        break;
+
+                    case "vehs":
+                        if (veh_dict[field] != undefined && veh_dict[field][data[i][value]] != undefined) {
+                        text_line = "<p style=margin:0>" + fields[field] + ": " + veh_dict[field][data[i][value]] + "</p>";
                         that.$el.append(text_line);
-                    }
-                }else if (dataType === "vehs"){
-                    if (veh_dict[field] != undefined && veh_dict[field][data[i][value]] != undefined) {
-                    text_line = "<p style=margin:0>" + fields[field] + ": " + veh_dict[field][data[i][value]] + "</p>";
-                    that.$el.append(text_line);
-                    }
-                }else if (dataType === "nums") {
-                    if ([data[i][value]] != 0) {
-                    text_line = "<p style=margin:0>" + fields[field] + ": " + data[i][value] + "</p>";
-                    that.$el.append(text_line);
-                    }
+                        }
+                        break;
+                        
+                    case "nums":
+                        if ([data[i][value]] != 0) {
+                        text_line = "<p style=margin:0>" + fields[field] + ": " + data[i][value] + "</p>";
+                        that.$el.append(text_line);
+                        }
+                        break;
                 }
             }
+
             var j = 1;
             for (i in data) {
                 if (data[i]["sex"] != undefined) {

@@ -98,11 +98,43 @@ def get_streets(accident, streets):
 def get_junction(accident, roads):
     """
     extracts the junction from an accident
+    omerxx: added "km" parameter to the calculation to only show the right junction,
+    every non-urban accident shows nearest junction with distance and direction
     :return: returns the junction or None if it wasn't found
     """
-    key = accident[field_names.road1], accident[field_names.road2]
-    junction = roads.get(key, None)
-    return junction.decode(content_encoding) if junction else u""
+    if accident["KM"] is not None and accident[field_names.non_urban_intersection] is None:
+        min_dist = 100000
+        key = (), ()
+        junc_km = 0
+        for option in roads:
+            if accident[field_names.road1] == option[0] and abs(accident["KM"]-option[2]) < min_dist:
+                min_dist = abs(accident["KM"]-option[2])
+                key = accident[field_names.road1], option[1], option[2]
+                junc_km = option[2]
+        junction = roads.get(key, None)
+        if junction:
+            if accident["KM"] - junc_km > 0:
+                direction = u"צפונית" if accident[field_names.road1] % 2 == 0 else u"מזרחית"
+            else:
+                direction = u"דרומית" if accident[field_names.road1] % 2 == 0 else u"מערבית"
+            if abs(float(accident["KM"] - junc_km)/10) >= 1:
+                string = str(abs(float(accident["KM"])-junc_km)/10) + u" ק״מ " + direction + u" ל" + \
+                    junction.decode(content_encoding)
+            elif 0 < abs(float(accident["KM"] - junc_km)/10) < 1:
+                string = str(int((abs(float(accident["KM"])-junc_km)/10)*1000)) + u" מטרים " + direction + u" ל" + \
+                    junction.decode(content_encoding)
+            else:
+                string = junction.decode(content_encoding)
+            return string
+        else:
+            return u""
+
+    elif accident[field_names.non_urban_intersection] is not None:
+        key = accident[field_names.road1], accident[field_names.road2], accident["KM"]
+        junction = roads.get(key, None)
+        return junction.decode(content_encoding) if junction else u""
+    else:
+        return u""
 
 
 def parse_date(accident):
@@ -298,7 +330,7 @@ def get_files(directory):
             csv.close()
             yield name, streets_map
         elif name == NON_URBAN_INTERSECTION:
-            roads = {(x[field_names.road1], x[field_names.road2]): x[field_names.junction_name] for x in csv if
+            roads = {(x[field_names.road1], x[field_names.road2], x["KM"]): x[field_names.junction_name] for x in csv if
                      field_names.road1 in x and field_names.road2 in x}
             csv.close()
             yield ROADS, roads

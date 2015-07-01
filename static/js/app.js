@@ -351,28 +351,16 @@ $(function () {
             console.log('Loaded OverlappingMarkerSpiderfier');
             var clusterStyle = [
                 {
-                    textColor: 'black',
-                    url: '/static/img/icons/cluster_1.png',
-                    height: 42,
-                    width: 42
+                    width: 5
                 },
                 {
-                    textColor: 'black',
-                    url: '/static/img/icons/cluster_2.png',
-                    height: 52,
-                    width: 52
+                    width: 10
                 },
                 {
-                    textColor: 'black',
-                    url: '/static/img/icons/cluster_3.png',
-                    height: 62,
-                    width: 62
+                    width: 20
                 },
                 {
-                    textColor: 'black',
-                    url: '/static/img/icons/cluster_4.png',
-                    height: 72,
-                    width: 72
+                    width: 40
                 }
             ];
             var mcOptions = {maxZoom: MINIMAL_ZOOM - 1, minimumClusterSize: 1, styles: clusterStyle};

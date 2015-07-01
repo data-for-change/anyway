@@ -243,30 +243,23 @@ ClusterIcon.prototype.show = function () {
   if (this.div_) {
     var img = "";
     // NOTE: values must be specified in px units
-    var bp = this.backgroundPosition_.split(" ");
-    var spriteH = parseInt(bp[0].replace(/^\s+|\s+$/g, ""), 10);
-    var spriteV = parseInt(bp[1].replace(/^\s+|\s+$/g, ""), 10);
     var pos = this.getPosFromLatLng_(this.center_);
     this.div_.style.cssText = this.createCss(pos);
-    img = "<img src='" + this.url_ + "' style='position: absolute; top: " + spriteV + "px; left: " + spriteH + "px; ";
-    if (!this.cluster_.getMarkerClusterer().enableRetinaIcons_) {
-      img += "clip: rect(" + (-1 * spriteV) + "px, " + ((-1 * spriteH) + this.width_) + "px, " +
-          ((-1 * spriteV) + this.height_) + "px, " + (-1 * spriteH) + "px);";
-    }
-    img += "'>";
     this.div_.innerHTML = img + "<div style='" +
+        "background-color:" + "white;" +
+        "opacity:" + "0.7;" +
+        "border-radius:" + "50%;" +
+        "border-width:" + this.width_ + "px;" +
+        "border-style:" + "solid;" +
+        "border-color:" + "#D63230;" +
         "position: absolute;" +
-        "top: " + this.anchorText_[0] + "px;" +
-        "left: " + this.anchorText_[1] + "px;" +
-        "color: " + this.textColor_ + ";" +
-        "font-size: " + this.textSize_ + "px;" +
-        "font-family: " + this.fontFamily_ + ";" +
-        "font-weight: " + this.fontWeight_ + ";" +
-        "font-style: " + this.fontStyle_ + ";" +
-        "text-decoration: " + this.textDecoration_ + ";" +
+        "color: " + "black;" +
+        "font-weight:" + "bold;" +
+        "font-size: 10px;" +
+        "font-family: " + "Alef, sans-serif;" +
         "text-align: center;" +
-        "width: " + this.width_ + "px;" +
-        "line-height:" + this.height_ + "px;" +
+        "width: " + "30px;" +
+        "line-height:" + "30px;" +
         "'>" + this.sums_.text + "</div>";
     if (typeof this.sums_.title === "undefined" || this.sums_.title === "") {
       this.div_.title = this.cluster_.getMarkerClusterer().getTitle();
@@ -289,7 +282,7 @@ ClusterIcon.prototype.useStyle = function (sums) {
   var index = Math.max(0, sums.index - 1);
   index = Math.min(this.styles_.length - 1, index);
   var style = this.styles_[index];
-  this.url_ = style.url;
+//  this.url_ = style.url;
   this.height_ = style.height;
   this.width_ = style.width;
   this.anchorText_ = style.anchorText || [0, 0];

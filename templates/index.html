@@ -25,6 +25,12 @@
 	        "css/bootstrap-tour.min.css"	 %}
             <link rel="stylesheet" href="{{ ASSET_URL }}" />
         {% endassets %}
+
+        <!--// font awesome-->
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+        <!--// material design-->
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
     </head>
 
      <body style="margin: 0; position: relative; width: 100%; height: 100%">
@@ -35,8 +41,6 @@
 		
 	       <div class="navbar navbar-fixed-top">
                 <div class="navbar-inner" id="step1Component" style="padding-right: 10px{{ '; display: none' if map_only }}">
-                    <button class="btn btn-default" id="tourOnClick">הדרכה</button>
-                    <a id="js-embed-link" class="btn btn-default"  data-toggle="modal" data-target="#embed">קישור לתצוגה הנוכחית</a>
                     <div style="float: left; padding: 5px">
                         <div class="fb-like" data-href="{{ url }}" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true" style="vertical-align: middle"></div>
                         <a href="https://play.google.com/store/apps/details?id=il.co.anyway.app">
@@ -66,8 +70,14 @@
 
 
             <div class="main" style="position: fixed; width: 100%; height: 100%; box-sizing: border-box{{ '; padding-top: 40px; padding-right: 250px' if not map_only }}">
-              <input id="pac-input" class="controls" type="text" placeholder="חפש מיקום" style="{{ 'display: block' if map_only }}">
                 <div id="map_canvas" style="width: 100%; height: 100%; box-sizing: border-box"></div>
+                <input id="pac-input" class="controls" type="text" placeholder="חפש מיקום" style="{{ 'display: block' if map_only }}">
+                <div id="map-control">
+                    <div id="reset-map-control"></div>
+                    <div id="download-csv-control"></div>
+                    <div id="link-map-control"></div>
+                    <div id="guide-control"></div>
+                </div>
             </div>
             <div id="step2Component" class="sidebar-container" style="position: absolute; right: 0; top: 0;
             bottom: 0; width: 250px; background: white; padding-top: 40px;

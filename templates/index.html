@@ -342,14 +342,14 @@
                     <div class="input-append dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                             <span class="add-on" style="border: 1px solid #ccc; border-radius: 3px 3px 0 0; margin-left:-1px"><i class="icon-filter"></i></span>
-                            <input id="view-filter" value="הצג את כלל התאונות והדיונים" style="padding-right:7px; border: 1px solid #ccc; height:26px; width:204px; border-radius: 0 0 3px 3px; position:absolute;"/>
+                            <input id="view-filter" value="הצג תאונות ודיונים" style="padding-right:7px; border: 1px solid #ccc; height:26px; width:204px; border-radius: 0 0 3px 3px; position:absolute;"/>
                         </a>
                         <div class="daterangepicker dropdown-menu opensleft" style="right: 26px; left: auto; top:auto;">
                             <div class="ranges" style="margin-bottom: -4px !important">
                                 <ul style="list-style: none; margin: 0; padding: 0; direction:rtl">
-                                    <li onclick="load(1)">הצג הכל</li>
-                                    <li onclick="load(2)">הצג תאונות בלבד</li>
-                                    <li onclick="load(3)">הצג דיונים בלבד</li>
+                                    <li onclick="load('all')">הצג הכל</li>
+                                    <li onclick="load('accidents_only')">הצג תאונות בלבד</li>
+                                    <li onclick="load('discussions_only')">הצג דיונים בלבד</li>
                                 </ul>
                             </div>
                         </div>

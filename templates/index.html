@@ -335,13 +335,35 @@
                 </li>
 
             </ul>
+
+            <div class="sidebar-title">סינון דיונים ותאונות</div>
+            <ul>
+                <li style="height: 30px">
+                    <div class="input-append dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            <span class="add-on" style="border: 1px solid #ccc; border-radius: 3px 3px 0 0; margin-left:-1px"><i class="icon-filter"></i></span>
+                            <input id="view-filter" value="הצג תאונות ודיונים" style="padding-right:7px; border: 1px solid #ccc; height:26px; width:204px; border-radius: 0 0 3px 3px; position:absolute;"/>
+                        </a>
+                        <div class="daterangepicker dropdown-menu opensleft" style="right: 26px; left: auto; top:auto;">
+                            <div class="ranges" style="margin-bottom: -4px !important">
+                                <ul style="list-style: none; margin: 0; padding: 0; direction:rtl">
+                                    <li onclick="load('all')">הצג הכל</li>
+                                    <li onclick="load('accidents_only')">הצג תאונות בלבד</li>
+                                    <li onclick="load('discussions_only')">הצג דיונים בלבד</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+
             <div style="width: 100%; display: table">
                 <div style="display: table-row">
                     <div class="sidebar-title" style="display: table-cell">תאונות המוצגות על המפה</div>
                     <div class="sidebar-title current-view-count" style="display: table-cell"></div>
                 </div>
             </div>
-            <div style="overflow-y: scroll; position: absolute; top: 255px; bottom: 30px; width: 100%" id="step6tour">
+            <div style="overflow-y: scroll; position: absolute; top: 340px; bottom: 30px; width: 100%" id="step6tour">
                 <ul class="current-view"></ul>
             </div>
             <div style="position: absolute; bottom: 0px">

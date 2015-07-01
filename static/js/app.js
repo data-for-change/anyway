@@ -122,6 +122,7 @@ $(function () {
             }
 
             if (this.clusterMode()) {
+                $("#view-filter").prop('disabled', true);
                 this.closeInfoWindow();
                 this.clusters.fetch({
                     data: $.param(params),
@@ -129,6 +130,7 @@ $(function () {
                     success: this.reloadSidebar.bind(this)
                 });
             } else {
+                $("#view-filter").prop('disabled', false);
                 if (!this.markerList.length) {
                     this.loadMarkers();
                 }
@@ -206,6 +208,8 @@ $(function () {
             params["show_severe"] = this.model.get("showSevere");
             params["show_light"] = this.model.get("showLight");
             params["show_inaccurate"] = this.model.get("showInaccurateMarkers");
+            params["show_markers"] = show_markers;
+            params["show_discussions"] = show_discussions;
             return params;
         },
         setMultipleMarkersIcon: function () {
@@ -741,5 +745,32 @@ $(function () {
         }
     });
 });
+
+var show_markers='1';
+var show_discussions='1';
+
+function load(li) {
+    switch (li) {
+        case "all":
+            $("#view-filter").val("הצג הכל");
+            show_markers='1';show_discussions='1';
+            window.app.fetchMarkers();
+            break;
+
+        case "accidents_only":
+            show_markers='1';show_discussions='';
+            $("#view-filter").val("הצג תאונות בלבד");
+            window.app.resetMarkers();
+            window.app.fetchMarkers();
+            break;
+
+        case "discussions_only":
+            show_markers='';show_discussions='1';
+            $("#view-filter").val("הצג דיונים בלבד");
+            window.app.resetMarkers();
+            window.app.fetchMarkers();
+        break;
+    }
+}
 
 

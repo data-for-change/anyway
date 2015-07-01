@@ -110,15 +110,17 @@ def markers():
     severe = int(request.values['show_severe'])
     light = int(request.values['show_light'])
     inaccurate = int(request.values['show_inaccurate'])
+    show_markers = bool(request.values['show_markers'])
+    show_discussions = bool(request.values['show_discussions'])
 
     logging.debug('querying markers in bounding box')
     is_thin = (zoom < MINIMAL_ZOOM)
     accidents = Marker.bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng,
                                           start_date, end_date,
                                           fatal, severe, light, inaccurate,
-                                          is_thin, yield_per=50)
+                                          show_markers, is_thin, yield_per=50)
     discussions = DiscussionMarker.bounding_box_query(ne_lat, ne_lng,
-                                                      sw_lat, sw_lng)
+                                                      sw_lat, sw_lng, show_discussions)
     if request.values.get('format') == 'csv':
         return Response(generate_csv(accidents), headers={
             "Content-Type": "text/csv",

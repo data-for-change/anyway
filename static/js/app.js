@@ -40,8 +40,7 @@ $(function () {
     window.AppView = Backbone.View.extend({
         el : $("#app"),
         events : {
-            "click #map_canvas" : "clickMap",
-            "click .download-csv" : "downloadCsv"
+            "click #map_canvas" : "clickMap"
         },
         initialize : function() {
             this.markers = new MarkerCollection();

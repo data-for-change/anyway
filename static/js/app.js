@@ -40,6 +40,7 @@ $(function () {
     window.AppView = Backbone.View.extend({
         el : $("#app"),
         events : {
+            "click #map_canvas" : "clickMap",
             "click .download-csv" : "downloadCsv"
         },
         initialize : function() {
@@ -287,6 +288,9 @@ $(function () {
                 $('#empty-csv-dialog').modal('show');
             }
         },
+        linkMap: function () {
+            $('#embed').modal('show');
+        },
         render: function () {
             this.isReady = false;
 
@@ -304,12 +308,69 @@ $(function () {
             };
             this.map = new google.maps.Map(this.$el.find("#map_canvas").get(0), mapOptions);
 
+            var mapControlDiv = document.createElement('div');
+            mapControlDiv.className = "map-control";
+            mapControlDiv.innerHTML = $("#map-control").html();
+
             var resetMapDiv = document.createElement('div');
+            resetMapDiv.className = "map-button reset-map-control";
             resetMapDiv.innerHTML = $("#reset-map-control").html();
             google.maps.event.addDomListener(resetMapDiv, 'click', function () {
                 this.goToMyLocation();
             }.bind(this));
-            this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(resetMapDiv);
+
+            var downloadCsvDiv = document.createElement('div');
+            downloadCsvDiv.className = "map-button download-csv-control";
+            downloadCsvDiv.innerHTML = $("#download-csv-control").html();
+            google.maps.event.addDomListener(downloadCsvDiv, 'click', function () {
+                this.downloadCsv();
+            }.bind(this));
+
+            var linkMapDiv = document.createElement('div');
+            linkMapDiv.className = 'map-button link-map-control';
+            linkMapDiv.innerHTML = $("#link-map-control").html();
+            google.maps.event.addDomListener(linkMapDiv, 'click', function () {
+                var url = document.URL,
+                $map_link = $("#map_link"),
+                $iframe_link = $("#iframe_link"),
+                $embed_link = $("#js-embed-link");
+                $map_link.val(url);
+                $iframe_link.html('<iframe src="' + url + '&map_only=true"></iframe>');
+                $(".js-btn-copytoclipboard").on("click", function(){
+                    $("#" + $(this).data("copy")).select();
+                });
+                this.linkMap();
+            }.bind(this));
+
+            var guideDiv = document.createElement('div');
+            guideDiv.className = "map-button guide-control blink";
+            guideDiv.title = 'Start Tour';
+            guideDiv.innerHTML = $("#guide-control").html();
+            google.maps.event.addDomListener(guideDiv, 'click', function () {
+                onClick();
+            }.bind(this));
+
+            mapControlDiv.appendChild(resetMapDiv);
+            mapControlDiv.appendChild(downloadCsvDiv);
+            mapControlDiv.appendChild(linkMapDiv);
+            mapControlDiv.appendChild(guideDiv);
+
+            var linkLabel = document.createElement('div');
+            linkLabel.className = 'control-label';
+            linkLabel.innerHTML = 'קישור לתצוגה נוכחית';
+            linkMapDiv.appendChild(linkLabel);
+
+            var downloadLabel = document.createElement('div');
+            downloadLabel.className = 'control-label';
+            downloadLabel.innerHTML = 'הורד נתוני תאונות (CSV)';
+            downloadCsvDiv.appendChild(downloadLabel);
+
+            var guideLabel = document.createElement('div');
+            guideLabel.className = 'control-label';
+            guideLabel.innerHTML = 'התחל הדרכה';
+            guideDiv.appendChild(guideLabel);
+
+            this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(mapControlDiv);
 
             if (LOCATION_SPECIFIED) {
                 if (!MARKER_ID) {
@@ -321,7 +382,7 @@ $(function () {
             // search box:
             // Create the search box and link it to the UI element.
             var input = document.getElementById('pac-input');
-            this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+            this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(input);
             this.searchBox = new google.maps.places.SearchBox(input);
 
             google.maps.event.addListener(this.searchBox, 'places_changed', function () {
@@ -486,7 +547,11 @@ $(function () {
             }
         },
         clickMap: function (e) {
-            this.closeInfoWindow();
+            if (this.clickedMarker) {
+                this.clickedMarker = false;
+            } else {
+                this.closeInfoWindow();
+            }
         },
         trackDrag: function () {
             google.maps.event.addListener(this.map, "mousemove", function () {

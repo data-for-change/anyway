@@ -27,11 +27,7 @@ var MarkerView = Backbone.View.extend({
         });
 
         if (this.model.get("type") == MARKER_TYPE_DISCUSSION) {
-            if (isRetina){
-                this.marker.setIcon({url: DISCUSSION_ICON, scaledSize: new google.maps.Size(30, 50)});
-            } else {
-                this.marker.setIcon(DISCUSSION_ICON);
-            }
+            this.marker.setIcon( app.retinaIconsResize(DISCUSSION_ICON) );
             this.marker.setTitle("דיון"); //this.model.get("title"));
             this.marker.setMap(this.map);
             this.marker.view = this;
@@ -264,11 +260,7 @@ var MarkerView = Backbone.View.extend({
     },
     opacitySeverityForGroup : function() {
         var group = this.model.get("groupID") -1;
-        if (isRetina){
-            this.marker.icon = { url: MULTIPLE_ICONS[app.groupsData[group].severity], scaledSize: new google.maps.Size(30, 50) };
-        } else {
-            this.marker.icon = MULTIPLE_ICONS[app.groupsData[group].severity];
-        }
+        this.marker.icon = app.retinaIconsResize(MULTIPLE_ICONS[app.groupsData[group].severity]);
         if (app.groupsData[group].opacity != 'opaque'){
             this.marker.opacity = INACCURATE_MARKER_OPACITY / app.groupsData[group].opacity;
         }

@@ -218,16 +218,17 @@ def import_accidents(provider_code, accidents, streets, roads, involved, vehicle
             acc_years.append(accident[field_names.accident_year])
 
         marker = {
-            "id":int("{0}{1}".format(provider_code, accident[field_names.id])),
-            "title":"Accident",
-            "description":json.dumps(load_extra_data(accident, streets, roads), encoding=models.db_encoding),
-            "address":get_address(accident, streets),
-            "latitude":lat,
-            "longitude":lng,
-            "subtype":int(accident[field_names.accident_type]),
-            "severity":int(accident[field_names.accident_severity]),
-            "created":parse_date(accident),
-            "locationAccuracy":int(accident[field_names.igun]),
+            "id": int(accident[field_names.id]),
+            "provider_code": int(provider_code),
+            "title": "Accident",
+            "description": json.dumps(load_extra_data(accident, streets, roads), encoding=models.db_encoding),
+            "address": get_address(accident, streets),
+            "latitude": lat,
+            "longitude": lng,
+            "subtype": int(accident[field_names.accident_type]),
+            "severity": int(accident[field_names.accident_severity]),
+            "created": parse_date(accident),
+            "locationAccuracy": int(accident[field_names.igun]),
             "roadType": int(accident[field_names.road_type]),
             "roadShape": int(accident[field_names.road_shape]),
             "dayType": int(accident[field_names.day_type]),
@@ -260,7 +261,8 @@ def import_involved(provider_code, accidents, streets, roads, involved, vehicles
     print("reading involved data from file %s" % (involved.name(),))
     for involve in involved:
         involved_item = {
-            "accident_id": int("{0}{1}".format(provider_code, involve[field_names.id])),
+            "accident_id": int(involve[field_names.id]),
+            "provider_code": int(provider_code),
             "involved_type": int(involve[field_names.involved_type]),
             "license_acquiring_date": int(involve[field_names.license_acquiring_date]),
             "age_group": int(involve[field_names.age_group]),
@@ -291,7 +293,8 @@ def import_vehicles(provider_code, accidents, streets, roads, involved, vehicles
     print("reading involved data from file %s" % (vehicles.name(),))
     for vehicle in vehicles:
         vehicle_item = {
-            "accident_id": int("{0}{1}".format(provider_code, vehicle[field_names.id])),
+            "accident_id": int(vehicle[field_names.id]),
+            "provider_code": int(provider_code),
             "engine_volume": int(vehicle[field_names.engine_volume]),
             "manufacturing_year": get_data_value(vehicle[field_names.manufacturing_year]),
             "driving_directions": get_data_value(vehicle[field_names.driving_directions]),

@@ -126,17 +126,15 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         'polymorphic_identity': MARKER_TYPE_ACCIDENT
     }
 
+    provider_code = Column(Integer)
     description = Column(Text)
     subtype = Column(Integer)
     severity = Column(Integer)
     address = Column(Text)
     locationAccuracy = Column(Integer)
     roadType = Column(Integer)
-    # accidentType
     roadShape = Column(Integer)
-    # severityText
     dayType = Column(Integer)
-    # igun
     unit = Column(Integer)
     mainStreet = Column(Text)
     secondaryStreet = Column(Text)
@@ -166,6 +164,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
     def serialize(self, is_thin=False):
         fields = {
             "id": str(self.id),
+            "provider_code": self.provider_code,
             "latitude": self.latitude,
             "longitude": self.longitude,
             "severity": self.severity,
@@ -180,11 +179,8 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
                 "type": self.type,
                 "subtype": self.subtype,
                 "roadType": self.roadType,
-                # "accidentType"
                 "roadShape": self.roadShape,
-                # "severityText"
                 "dayType": self.dayType,
-                # "igun"
                 "unit": self.unit,
                 "mainStreet": self.mainStreet,
                 "secondaryStreet": self.secondaryStreet,
@@ -324,6 +320,7 @@ class DiscussionMarker(MarkerMixin, Base):
 class Involved(Base):
     __tablename__ = "involved"
     id = Column(Integer, primary_key=True)
+    provider_code = Column(Integer)
     accident_id = Column(Integer, ForeignKey("markers.id"))
     involved_type = Column(Integer)
     license_acquiring_date = Column(Integer)
@@ -350,6 +347,7 @@ class Involved(Base):
     def serialize(self):
         return {
             "id": self.id,
+            "provider_code": self.provider_code,
             "accident_id": self.accident_id,
             "involved_type": self.involved_type,
             "license_acquiring_date": self.license_acquiring_date,
@@ -391,6 +389,7 @@ class Involved(Base):
 class Vehicle(Base):
     __tablename__ = "vehicles"
     id = Column(Integer, primary_key=True)
+    provider_code = Column(Integer)
     accident_id = Column(Integer, ForeignKey("markers.id"))
     engine_volume = Column(Integer)
     manufacturing_year = Column(Integer)
@@ -404,6 +403,7 @@ class Vehicle(Base):
     def serialize(self):
         return {
             "id": self.id,
+            "provider_code": self.provider_code,
             "accident_id": self.accident_id,
             "engine_volume": self.engine_volume,
             "manufacturing_year": self.manufacturing_year,

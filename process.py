@@ -144,8 +144,16 @@ def parse_date(accident):
     year = accident[field_names.accident_year]
     month = accident[field_names.accident_month]
     day = accident[field_names.accident_day]
-    hour = accident[field_names.accident_hour] % 24
-    accident_date = datetime(year, month, day, hour, 0, 0)
+
+    '''
+    hours claculation explanation - The value of the hours is between 1 to 96.
+    These values represent 15 minutes each that start at 00:00 so 1 equals 00:00, 2 equals 00:15, 3 equals 00:30 and so on. .
+    '''
+    minutes = accident[field_names.accident_hour] * 15 - 15
+    hours = int(minutes // 60)
+    if minutes>=60:
+        minutes = minutes % 60
+    accident_date = datetime(year, month, day, hours, minutes, 0)
     return accident_date
 
 

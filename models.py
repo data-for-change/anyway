@@ -3,16 +3,22 @@
 import json
 import logging
 
-from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql
-from sqlalchemy.orm import relationship, load_only
+from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table
+from sqlalchemy.orm import relationship, load_only, backref
+
 import datetime
 import localization
 from database import Base
+from flask.ext.security import Security, SQLAlchemyUserDatastore, \
+    UserMixin, RoleMixin, login_required
 
 db_encoding = 'utf-8'
 
 logging.basicConfig(level=logging.DEBUG)
 
+roles_users = Table('roles_users', Base.metadata,
+        Column('user_id', Integer(), ForeignKey('users.id')),
+        Column('role_id', Integer(), ForeignKey('roles.id')))
 
 class User(Base):
     __tablename__ = "users"
@@ -28,6 +34,10 @@ class User(Base):
     new_features_subscription = Column(Boolean(), default=False)
     login = Column(String(80), unique=True)
     password = Column(String(256))
+    active = Column(Boolean())
+    confirmed_at = Column(DateTime())
+    roles = relationship('Role', secondary=roles_users,
+                            backref=backref('users', lazy='dynamic'))
 	
     def serialize(self):
         return {
@@ -60,6 +70,12 @@ class User(Base):
 
 MARKER_TYPE_ACCIDENT = 1
 MARKER_TYPE_DISCUSSION = 2
+
+class Role(Base, RoleMixin):
+    __tablename__ = "roles"
+    id = Column(Integer(), primary_key=True)
+    name = Column(String(80), unique=True)
+    description = Column(String(255))
 
 class Point(object):
     id = Column(Integer, primary_key=True)
@@ -438,8 +454,5 @@ def init_db():
     print "Creating all tables"
     Base.metadata.create_all(bind=engine)
 	
-
-
-
 if __name__ == "__main__":
     init_db()

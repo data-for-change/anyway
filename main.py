@@ -7,7 +7,7 @@ from StringIO import StringIO
 import time
 
 import jinja2
-from flask import make_response, render_template, Response, url_for
+from flask import make_response, render_template, Response, jsonify, url_for
 import flask.ext.assets
 from webassets.ext.jinja2 import AssetsExtension
 from webassets import Environment as AssetsEnvironment
@@ -21,7 +21,7 @@ from constants import *
 
 from wtforms import form, fields, validators
 import flask_admin as admin
-import flask_login as login
+import flask.ext.login as login
 from flask_admin.contrib import sqla
 from flask_admin import helpers, expose, BaseView
 from werkzeug.security import check_password_hash
@@ -29,6 +29,10 @@ from sendgrid import sendgrid, SendGridClientError, SendGridServerError, Mail
 import argparse
 import glob
 from utilities import CsvReader
+from flask.ext.sqlalchemy import SQLAlchemy
+from flask.ext.principal import Principal, Permission, RoleNeed
+from flask.ext.security import Security, SQLAlchemyUserDatastore, \
+     UserMixin, RoleMixin
 
 app = utilities.init_flask(__name__)
 app.config.from_object(__name__)
@@ -545,7 +549,29 @@ def get_dict_file(directory):
             yield name, csv
 
 
+user_datastore = SQLAlchemyUserDatastore(SQLAlchemy(app), User, Role)
+security = Security(app, user_datastore)
+principals = Principal(app)
 
+@app.route('/testroles')
+@login_required
+def TestLogin():
+   return render_template('testroles.html')
+
+@app.route('/login/', methods=['GET', 'POST'])
+def login2():
+    if request.method == "POST":
+        uname = request.values["username"]
+        passw = request.values["password"]
+        users_query = db_session.query(User).filter(User.login==uname).first()
+        if users_query is not None:
+            if check_password_hash(users_query.password, passw):
+                login.login_user(users_query)
+
+    if login.current_user.is_authenticated():
+        return render_template('index.html')
+    else:
+        return render_template('login.html')
 
 
 if __name__ == "__main__":

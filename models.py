@@ -3,7 +3,8 @@
 import json
 import logging
 
-from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table
+from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table, \
+    ForeignKeyConstraint
 from sqlalchemy.orm import relationship, load_only, backref
 
 import datetime
@@ -142,7 +143,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         'polymorphic_identity': MARKER_TYPE_ACCIDENT
     }
 
-    provider_code = Column(Integer)
+    provider_code = Column(Integer, primary_key=True)
     description = Column(Text)
     subtype = Column(Integer)
     severity = Column(Integer)
@@ -337,7 +338,8 @@ class Involved(Base):
     __tablename__ = "involved"
     id = Column(Integer, primary_key=True)
     provider_code = Column(Integer)
-    accident_id = Column(Integer, ForeignKey("markers.id"))
+    accident_id = Column(Integer)
+    ForeignKeyConstraint(['accident_id', 'provider_code'], ['markers.id', 'markers.provider_code'])
     involved_type = Column(Integer)
     license_acquiring_date = Column(Integer)
     age_group = Column(Integer)
@@ -406,7 +408,8 @@ class Vehicle(Base):
     __tablename__ = "vehicles"
     id = Column(Integer, primary_key=True)
     provider_code = Column(Integer)
-    accident_id = Column(Integer, ForeignKey("markers.id"))
+    accident_id = Column(Integer)
+    ForeignKeyConstraint(['accident_id', 'provider_code'], ['markers.id', 'markers.provider_code'])
     engine_volume = Column(Integer)
     manufacturing_year = Column(Integer)
     driving_directions = Column(Integer)

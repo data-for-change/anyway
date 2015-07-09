@@ -339,7 +339,6 @@ class Involved(Base):
     id = Column(Integer, primary_key=True)
     provider_code = Column(Integer)
     accident_id = Column(Integer)
-    ForeignKeyConstraint(['accident_id', 'provider_code'], ['markers.id', 'markers.provider_code'])
     involved_type = Column(Integer)
     license_acquiring_date = Column(Integer)
     age_group = Column(Integer)
@@ -361,6 +360,9 @@ class Involved(Base):
     release_dest = Column(Integer)
     safety_measures_use = Column(Integer)
     late_deceased = Column(Integer)
+    __table_args__ = (ForeignKeyConstraint([accident_id, provider_code],
+                                           [Marker.id, Marker.provider_code]),
+                      {})
 
     def serialize(self):
         return {
@@ -409,7 +411,6 @@ class Vehicle(Base):
     id = Column(Integer, primary_key=True)
     provider_code = Column(Integer)
     accident_id = Column(Integer)
-    ForeignKeyConstraint(['accident_id', 'provider_code'], ['markers.id', 'markers.provider_code'])
     engine_volume = Column(Integer)
     manufacturing_year = Column(Integer)
     driving_directions = Column(Integer)
@@ -418,6 +419,9 @@ class Vehicle(Base):
     vehicle_type = Column(Integer)
     seats = Column(Integer)
     total_weight = Column(Integer)
+    __table_args__ = (ForeignKeyConstraint([accident_id, provider_code],
+                                           [Marker.id, Marker.provider_code]),
+                      {})
 
     def serialize(self):
         return {

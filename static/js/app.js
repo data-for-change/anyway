@@ -40,7 +40,6 @@ $(function () {
     window.AppView = Backbone.View.extend({
         el : $("#app"),
         events : {
-            "click #map_canvas" : "clickMap"
         },
         initialize : function() {
             this.markers = new MarkerCollection();
@@ -549,11 +548,7 @@ $(function () {
             }
         },
         clickMap: function (e) {
-            if (this.clickedMarker) {
-                this.clickedMarker = false;
-            } else {
-                this.closeInfoWindow();
-            }
+            this.closeInfoWindow();
         },
         trackDrag: function () {
             google.maps.event.addListener(this.map, "mousemove", function () {

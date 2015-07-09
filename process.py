@@ -5,6 +5,7 @@ import os
 import argparse
 import json
 from flask.ext.sqlalchemy import SQLAlchemy
+from sqlalchemy import and_, or_
 import field_names
 from models import Marker,Involved,Vehicle
 import models
@@ -217,9 +218,11 @@ def import_accidents(provider_code, accidents, streets, roads, **kwargs):
     for accident in accidents:
         if field_names.x_coordinate not in accident or field_names.y_coordinate not in accident:
             raise ValueError("x and y coordinates are missing from the accidents file!")
-        if not accident[field_names.x_coordinate] or not accident[field_names.y_coordinate]:
-            continue
-        lng, lat = coordinates_converter.convert(accident[field_names.x_coordinate], accident[field_names.y_coordinate])
+        if accident[field_names.x_coordinate] and accident[field_names.y_coordinate]:
+            lng, lat = coordinates_converter.convert(accident[field_names.x_coordinate],
+                                                     accident[field_names.y_coordinate])
+        else:
+            lng, lat = None, None   # Must insert everything to avoid foreign key failure
         main_street, secondary_street = get_streets(accident, streets)
         if accident[field_names.accident_year] not in acc_years:
             acc_years.append(accident[field_names.accident_year])
@@ -379,6 +382,15 @@ def import_to_datastore(directory, provider_code, batch_size):
     except ValueError as e:
         directories_not_processes[directory] = e.message
 
+def delete_invalid_entries():
+    """
+    deletes all markers in the database with null latitude or longitude, and cascade
+    """
+    db.session.execute(Marker.__table__.delete().
+                       where(or_((Marker.longitude is None),
+                                 (Marker.latitude is None))))
+    db.session.commit()
+
 
 def get_provider_code(directory_name=None):
     if directory_name:
@@ -412,6 +424,8 @@ def main():
         parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
         provider_code = args.provider_code if args.provider_code else get_provider_code(parent_directory)
         import_to_datastore(directory, provider_code, args.batch_size)
+
+    delete_invalid_entries()
 
     failed = ["{0}: {1}".format(directory, fail_reason) for directory, fail_reason in
               directories_not_processes.iteritems()]

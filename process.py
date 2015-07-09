@@ -31,14 +31,15 @@ DICTIONARY = "dictionary"
 INVOLVED = "involved"
 VEHICLES = "vehicles"
 
-lms_files = {ACCIDENTS: "AccData.csv",
-             URBAN_INTERSECTION: "IntersectUrban.csv",
-             NON_URBAN_INTERSECTION: "IntersectNonUrban.csv",
-             STREETS: "DicStreets.csv",
-             DICTIONARY: "Dictionary.csv",
-             INVOLVED: "InvData.csv",
-             VEHICLES: "VehData.csv"
-             }
+lms_files = {
+    ACCIDENTS: "AccData.csv",
+    URBAN_INTERSECTION: "IntersectUrban.csv",
+    NON_URBAN_INTERSECTION: "IntersectNonUrban.csv",
+    STREETS: "DicStreets.csv",
+    DICTIONARY: "Dictionary.csv",
+    INVOLVED: "InvData.csv",
+    VEHICLES: "VehData.csv"
+}
 
 acc_years = []
 coordinates_converter = ItmToWGS84()
@@ -146,13 +147,12 @@ def parse_date(accident):
     day = accident[field_names.accident_day]
 
     '''
-    hours claculation explanation - The value of the hours is between 1 to 96.
+    hours calculation explanation - The value of the hours is between 1 to 96.
     These values represent 15 minutes each that start at 00:00 so 1 equals 00:00, 2 equals 00:15, 3 equals 00:30 and so on. .
     '''
     minutes = accident[field_names.accident_hour] * 15 - 15
     hours = int(minutes // 60)
-    if minutes>=60:
-        minutes = minutes % 60
+    minutes %= 60
     accident_date = datetime(year, month, day, hours, minutes, 0)
     return accident_date
 
@@ -180,11 +180,10 @@ def load_extra_data(accident, streets, roads):
 
     # localize static accident values
     for field in localization.get_supported_tables():
-        if accident[field]:
-            # if we have a localized field for that particular field, save the field value
-            # it will be fetched we deserialized
-            if localization.get_field(field, accident[field]):
-                extra_fields[field] = accident[field]
+        # if we have a localized field for that particular field, save the field value
+        # it will be fetched we deserialized
+        if accident[field] and localization.get_field(field, accident[field]):
+            extra_fields[field] = accident[field]
 
     return extra_fields
 
@@ -192,7 +191,7 @@ def load_extra_data(accident, streets, roads):
 def get_data_value(value):
     """
     :returns: value for parameters which are not mandatory in an accident data
-    OR zero if the parameter value does not exist
+    OR -1 if the parameter value does not exist
     """
     return int(value) if value else -1
 
@@ -212,7 +211,7 @@ def create_years_list():
         outfile.write(";\n")
 
 
-def import_accidents(provider_code, accidents, streets, roads, involved, vehicles):
+def import_accidents(provider_code, accidents, streets, roads, **kwargs):
     global acc_years
     print("reading accidents from file %s" % (accidents.name(),))
     for accident in accidents:
@@ -265,16 +264,18 @@ def import_accidents(provider_code, accidents, streets, roads, involved, vehicle
         yield marker
     accidents.close()
 
-def import_involved(provider_code, accidents, streets, roads, involved, vehicles):
+def import_involved(provider_code, involved, **kwargs):
     print("reading involved data from file %s" % (involved.name(),))
     for involve in involved:
+        if not involve[field_names.id]:
+            continue
         involved_item = {
             "accident_id": int(involve[field_names.id]),
             "provider_code": int(provider_code),
             "involved_type": int(involve[field_names.involved_type]),
             "license_acquiring_date": int(involve[field_names.license_acquiring_date]),
             "age_group": int(involve[field_names.age_group]),
-            "sex": int(involve[field_names.sex]),
+            "sex": get_data_value(involve[field_names.sex]),
             "car_type": get_data_value(involve[field_names.car_type]),
             "safety_measures": get_data_value(involve[field_names.safety_measures]),
             "home_city": get_data_value(involve[field_names.home_city]),
@@ -297,7 +298,7 @@ def import_involved(provider_code, accidents, streets, roads, involved, vehicles
     involved.close()
 
 
-def import_vehicles(provider_code, accidents, streets, roads, involved, vehicles):
+def import_vehicles(provider_code, vehicles, **kwargs):
     print("reading involved data from file %s" % (vehicles.name(),))
     for vehicle in vehicles:
         vehicle_item = {
@@ -318,7 +319,7 @@ def import_vehicles(provider_code, accidents, streets, roads, involved, vehicles
 def get_files(directory):
     for name, filename in lms_files.iteritems():
 
-        if name not in [STREETS, NON_URBAN_INTERSECTION, ACCIDENTS, INVOLVED, VEHICLES]:
+        if name not in (STREETS, NON_URBAN_INTERSECTION, ACCIDENTS, INVOLVED, VEHICLES):
             continue
 
         files = filter(lambda path: filename.lower() in path.lower(), os.listdir(directory))
@@ -350,7 +351,7 @@ def get_files(directory):
         elif name == INVOLVED:
             yield name, csv
         elif name == VEHICLES:
-            yield  name, csv
+            yield name, csv
 
 
 def import_to_datastore(directory, provider_code, batch_size):
@@ -373,8 +374,9 @@ def import_to_datastore(directory, provider_code, batch_size):
         db.session.execute(Vehicle.__table__.insert(), vehicles)
         db.session.commit()
         took = int((datetime.now() - now).total_seconds())
-        print("imported {0} items from directory: {1} in {2} seconds".format(len(accidents)+len(involved)+len(vehicles), directory, took))
-    except Exception as e:
+        print("imported {0} items from directory: {1} in {2} seconds".format(len(accidents)+len(involved)+len(vehicles),
+                                                                             directory, took))
+    except ValueError as e:
         directories_not_processes[directory] = e.message
 
 
@@ -400,13 +402,11 @@ def main():
     args = parser.parse_args()
     # wipe all the Markers and Involved data first
     if args.delete_all:
-        print("deleting the entire db!")
-        db.session.query(Vehicle).delete()
-        db.session.commit()
-        db.session.query(Involved).delete()
-        db.session.commit()
-        db.session.query(Marker).delete()
-        db.session.commit()
+        tables = (Vehicle, Involved, Marker)
+        for table in tables:
+            print("deleting table: " + table.__name__)
+            db.session.query(table).delete()
+            db.session.commit()
 
     for directory in glob.glob("{0}/*/*".format(args.path)):
         parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))

@@ -14,7 +14,6 @@ import itertools
 import localization
 import re
 from datetime import datetime
-from collections import OrderedDict
 
 directories_not_processes = {}
 
@@ -42,11 +41,9 @@ lms_files = {
     VEHICLES: "VehData.csv"
 }
 
-acc_years = []
 coordinates_converter = ItmToWGS84()
 app = init_flask(__name__)
 db = SQLAlchemy(app)
-acc_years = []
 
 
 def get_street(settlement_sign, street_sign, streets):
@@ -197,23 +194,21 @@ def get_data_value(value):
     return int(value) if value else -1
 
 
-def create_years_list():
+def find_years():
     """
-    Edits 'years.js', a years structure ready to be presented in app.js
-    as user's last-4-years filter choices.
+    :returns: a list of distinct year (4 digits) from the DB
+    Being used py main.py - 'create_years_list()'
     """
-    acc_years_dict = OrderedDict()
-    for i, year in enumerate(reversed(acc_years)):
-        if i < 4:
-            acc_years_dict["שנת" + " %s" % year] = ["01/01/%s" % year, "31/12/%s" % year]
-    with open('static/js/years.js', 'w') as outfile:
-        outfile.write("var ACCYEARS = ")
-        json.dump(acc_years_dict, outfile, encoding='utf-8')
-        outfile.write(";\n")
+    acc_years = []
+    year_col = db.session.query(Marker.created)
+    for year in year_col:
+        y = str(year)[19:23]
+        if y not in acc_years:
+            acc_years.append(y)
+    return acc_years
 
 
 def import_accidents(provider_code, accidents, streets, roads, **kwargs):
-    global acc_years
     print("reading accidents from file %s" % (accidents.name(),))
     for accident in accidents:
         if field_names.x_coordinate not in accident or field_names.y_coordinate not in accident:
@@ -224,8 +219,6 @@ def import_accidents(provider_code, accidents, streets, roads, **kwargs):
         else:
             lng, lat = None, None   # Must insert everything to avoid foreign key failure
         main_street, secondary_street = get_streets(accident, streets)
-        if accident[field_names.accident_year] not in acc_years:
-            acc_years.append(accident[field_names.accident_year])
 
         marker = {
             "id": int(accident[field_names.id]),
@@ -430,7 +423,6 @@ def main():
     failed = ["{0}: {1}".format(directory, fail_reason) for directory, fail_reason in
               directories_not_processes.iteritems()]
     print("finished processing all directories, except: %s" % "\n".join(failed))
-    create_years_list()
 
 if __name__ == "__main__":
     main()

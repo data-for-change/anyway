@@ -33,6 +33,9 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.principal import Principal, Permission, RoleNeed
 from flask.ext.security import Security, SQLAlchemyUserDatastore, \
      UserMixin, RoleMixin
+from collections import OrderedDict
+from process import find_years
+
 
 app = utilities.init_flask(__name__)
 app.config.from_object(__name__)
@@ -574,9 +577,27 @@ def login2():
         return render_template('login.html')
 
 
+def create_years_list():
+    """
+    Edits 'years.js', a years structure ready to be presented in app.js
+    as user's last-4-years filter choices.
+    """
+    acc_years = find_years()
+    acc_years_dict = OrderedDict()
+    for i, year in enumerate(reversed(acc_years)):
+        if i < 4:
+            acc_years_dict["שנת" + " %s" % year] = ["01/01/%s" % year, "31/12/%s" % year]
+    with open('static/js/years.js', 'w') as outfile:
+        outfile.write("var ACCYEARS = ")
+        json.dump(acc_years_dict, outfile, encoding='utf-8')
+        outfile.write(";\n")
+
+create_years_list()
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')
     ReadDictionaries()
     app.run(debug=True)
+
 
 

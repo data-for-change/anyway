@@ -34,9 +34,11 @@ from flask.ext.principal import Principal, Permission, RoleNeed
 from flask.ext.security import Security, SQLAlchemyUserDatastore, \
      UserMixin, RoleMixin
 from collections import OrderedDict
-from process import find_years
+from sqlalchemy import distinct, func
 
 
+app = utilities.init_flask(__name__)
+db = SQLAlchemy(app)
 app = utilities.init_flask(__name__)
 app.config.from_object(__name__)
 
@@ -582,8 +584,16 @@ def create_years_list():
     Edits 'years.js', a years structure ready to be presented in app.js
     as user's last-4-years filter choices.
     """
-    acc_years = find_years()
+    acc_years = []
+    year_col = db.session.query(distinct(func.substr(Marker.created, 1, 4)))
+
+    for year in year_col:
+        y = str(year)[3:7]
+        if y not in acc_years:
+            acc_years.append(y)
+
     acc_years_dict = OrderedDict()
+
     for i, year in enumerate(reversed(acc_years)):
         if i < 4:
             acc_years_dict["שנת" + " %s" % year] = ["01/01/%s" % year, "31/12/%s" % year]
@@ -593,6 +603,7 @@ def create_years_list():
         outfile.write(";\n")
 
 create_years_list()
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')

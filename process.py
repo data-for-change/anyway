@@ -194,20 +194,6 @@ def get_data_value(value):
     return int(value) if value else -1
 
 
-def find_years():
-    """
-    :returns: a list of distinct year (4 digits) from the DB
-    Being used py main.py - 'create_years_list()'
-    """
-    acc_years = []
-    year_col = db.session.query(Marker.created)
-    for year in year_col:
-        y = str(year)[19:23]
-        if y not in acc_years:
-            acc_years.append(y)
-    return acc_years
-
-
 def import_accidents(provider_code, accidents, streets, roads, **kwargs):
     print("reading accidents from file %s" % (accidents.name(),))
     for accident in accidents:

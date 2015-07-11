@@ -540,8 +540,6 @@ def read_dictionaries():
 
 def get_dict_file(directory):
     for name, filename in lms_dict_files.iteritems():
-        if name != DICTIONARY:
-            continue
         files = filter(lambda path: filename.lower() in path.lower(), os.listdir(directory))
         amount = len(files)
         if amount == 0:
@@ -588,7 +586,7 @@ def create_years_list():
     year_col = db.session.query(distinct(func.extract("year", Marker.created)))
     years = OrderedDict({"שנת" + " %s" % year: year_range(year)
                          for year in sorted(year_col[:4], reverse=True)})
-    with open('static/js/years.js', 'w') as outfile:
+    with open(os.path.join(app.static_folder, 'js/years.js'), 'w') as outfile:
         outfile.write("var ACCYEARS = ")
         json.dump(years, outfile, encoding='utf-8')
         outfile.write(";\n")

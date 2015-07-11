@@ -66,7 +66,7 @@ class CsvReader(object):
         """
         converts an str value to a typed one
         """
-        if value == '':
+        if value == '' or value is None:
             return None
         # the isdigit function doesn't match negative numbers
         if CsvReader._digit_pattern.match(value):

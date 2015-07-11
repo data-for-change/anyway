@@ -123,6 +123,10 @@ var MarkerView = Backbone.View.extend({
     },
     clickMarker : function() {
         that = this;
+        this.highlight();
+        app.closeInfoWindow();
+        app.selectedMarker = this;
+
         if (!this.marker_clicked) {
             this.marker_clicked = true;
             $.get("/markers/" + this.model.get("id"), function (data) {
@@ -184,22 +188,22 @@ var MarkerView = Backbone.View.extend({
                         j++;
                     }
                 }
+                app.infoWindow = new google.maps.InfoWindow({
+                    content: that.el
+                });
+                app.infoWindow.open(that.map, that.marker);
+                app.updateUrl(that.getUrl());
             })
-        };
 
-        this.highlight();
-        app.closeInfoWindow();
-
-        app.selectedMarker = this;
-        app.infoWindow = new google.maps.InfoWindow({
-            content: this.el
-        });
-
-        app.infoWindow.open(this.map, this.marker);
-        app.updateUrl(this.getUrl());
+        } else {
+            app.infoWindow = new google.maps.InfoWindow({
+                content: that.el
+            });
+            app.infoWindow.open(that.map, that.marker);
+            app.updateUrl(that.getUrl());
+        }
 
         $(document).keydown(app.ESCinfoWindow);
-
     },
     highlight : function() {
         if (app.oms.markersNearMarker(this.marker, true)[0]  && !this.model.get("currentlySpiderfied")){

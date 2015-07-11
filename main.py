@@ -520,12 +520,10 @@ admin.add_view(ViewHighlightedMarkers(name='View Highlighted Markers'))
 
 
 lms_dictionary = {}
+
 def read_dictionaries():
     global lms_dictionary
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--path', type=str, default="static/data/lms")
-    args = parser.parse_args()
-    for directory in glob.glob("{0}/*/*".format(args.path)):
+    for directory in glob.glob("{0}/{1}/*/*".format(app.static_folder, 'data/lms')):
         main_dict = dict(get_dict_file(directory))
         if len(main_dict) == 0:
             return
@@ -594,10 +592,11 @@ def create_years_list():
     logging.debug("wrote '%s'" % years_file)
 
 
+create_years_list()
+read_dictionaries()
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')
-    create_years_list()
-    read_dictionaries()
     app.run(debug=True)
 
 

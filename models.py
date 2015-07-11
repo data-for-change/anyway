@@ -21,7 +21,7 @@ roles_users = Table('roles_users', Base.metadata,
         Column('user_id', Integer(), ForeignKey('users.id')),
         Column('role_id', Integer(), ForeignKey('roles.id')))
 
-class User(Base):
+class User(Base, UserMixin):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
     email = Column(String(120), unique=True)

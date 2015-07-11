@@ -574,7 +574,7 @@ def login2():
 
 
 def year_range(year):
-    return ["01/01/%s" % year, "31/12/%s" % year]
+    return ["01/01/%d" % year, "31/12/%d" % year]
 
 def create_years_list():
     """
@@ -582,7 +582,7 @@ def create_years_list():
     as user's last-4-years filter choices.
     """
     year_col = db.session.query(distinct(func.extract("year", Marker.created)))
-    years = OrderedDict({"שנת" + " %s" % year: year_range(year)
+    years = OrderedDict({"שנת" + " %d" % year: year_range(year)
                          for year in sorted(year_col[:4], reverse=True)})
     years_file = os.path.join(app.static_folder, 'js/years.js')
     with open(years_file, 'w') as outfile:
@@ -590,6 +590,7 @@ def create_years_list():
         json.dump(years, outfile, encoding='utf-8')
         outfile.write(";\n")
     logging.debug("wrote '%s'" % years_file)
+    logging.debug("\n".join("\t{0}: {1}".format(k, str(v)) for k, v in years.items()))
 
 
 create_years_list()

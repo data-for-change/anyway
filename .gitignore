@@ -51,3 +51,4 @@ venv
 /static/.webassets-cache
 /static/css/app.min.css
 /static/js/app.min.js
+/static/js/years.js

@@ -521,6 +521,7 @@ admin.add_view(ViewHighlightedMarkers(name='View Highlighted Markers'))
 
 lms_dictionary = {}
 
+@app.before_first_request
 def read_dictionaries():
     global lms_dictionary
     for directory in glob.glob("{0}/{1}/*/*".format(app.static_folder, 'data/lms')):
@@ -576,14 +577,15 @@ def login2():
 def year_range(year):
     return ["01/01/%d" % year, "31/12/%d" % year]
 
+@app.before_first_request
 def create_years_list():
     """
     Edits 'years.js', a years structure ready to be presented in app.js
     as user's last-4-years filter choices.
     """
     year_col = db.session.query(distinct(func.extract("year", Marker.created)))
-    years = OrderedDict({"שנת" + " %d" % year: year_range(year)
-                         for year in sorted(year_col[:4], reverse=True)})
+    years = OrderedDict([("שנת" + " %d" % year, year_range(year))
+                         for year in sorted(year_col, reverse=True)[:4]])
     years_file = os.path.join(app.static_folder, 'js/years.js')
     with open(years_file, 'w') as outfile:
         outfile.write("var ACCYEARS = ")
@@ -592,9 +594,6 @@ def create_years_list():
     logging.debug("wrote '%s'" % years_file)
     logging.debug("\n".join("\t{0}: {1}".format(k, str(v)) for k, v in years.items()))
 
-
-create_years_list()
-read_dictionaries()
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')

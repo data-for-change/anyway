@@ -148,27 +148,27 @@ def marker(marker_id):
     list_to_return = list()
     for inv in involved:
         obj = inv.serialize()
-        if (92,obj["age_group"]) in lmsDictionary:
-            obj["age_group"] = lmsDictionary[92,obj["age_group"]]
-        if (66,obj["population_type"]) in lmsDictionary:
-            obj["population_type"] = lmsDictionary[66,obj["population_type"]]
-        if (77,obj["home_district"]) in lmsDictionary:
-            obj["home_district"] = lmsDictionary[77,obj["home_district"]]
-        if (79,obj["home_nafa"]) in lmsDictionary:
-            obj["home_nafa"] = lmsDictionary[79,obj["home_nafa"]]
-        if (80,obj["home_area"]) in lmsDictionary:
-            obj["home_area"] = lmsDictionary[80,obj["home_area"]]
-        if (78,obj["home_municipal_status"]) in lmsDictionary:
-            obj["home_municipal_status"] = lmsDictionary[78,obj["home_municipal_status"]]
-        if (81,obj["home_residence_type"]) in lmsDictionary:
-            obj["home_residence_type"] = lmsDictionary[81,obj["home_residence_type"]]
+        if (92,obj["age_group"]) in lms_dictionary:
+            obj["age_group"] = lms_dictionary[92,obj["age_group"]]
+        if (66,obj["population_type"]) in lms_dictionary:
+            obj["population_type"] = lms_dictionary[66,obj["population_type"]]
+        if (77,obj["home_district"]) in lms_dictionary:
+            obj["home_district"] = lms_dictionary[77,obj["home_district"]]
+        if (79,obj["home_nafa"]) in lms_dictionary:
+            obj["home_nafa"] = lms_dictionary[79,obj["home_nafa"]]
+        if (80,obj["home_area"]) in lms_dictionary:
+            obj["home_area"] = lms_dictionary[80,obj["home_area"]]
+        if (78,obj["home_municipal_status"]) in lms_dictionary:
+            obj["home_municipal_status"] = lms_dictionary[78,obj["home_municipal_status"]]
+        if (81,obj["home_residence_type"]) in lms_dictionary:
+            obj["home_residence_type"] = lms_dictionary[81,obj["home_residence_type"]]
         list_to_return.append(obj)
     for veh in vehicles:
         obj = veh.serialize()
-        if (111,obj["engine_volume"]) in lmsDictionary:
-            obj["engine_volume"] = lmsDictionary[111,obj["engine_volume"]]
-        if (112,obj["total_weight"]) in lmsDictionary:
-            obj["total_weight"] = lmsDictionary[112,obj["total_weight"]]
+        if (111,obj["engine_volume"]) in lms_dictionary:
+            obj["engine_volume"] = lms_dictionary[111,obj["engine_volume"]]
+        if (112,obj["total_weight"]) in lms_dictionary:
+            obj["total_weight"] = lms_dictionary[112,obj["total_weight"]]
         list_to_return.append(obj)
     return make_response(json.dumps(list_to_return, ensure_ascii=False))
 
@@ -519,29 +519,28 @@ admin.add_view(SendToSubscribersView(name='Send To Subscribers'))
 admin.add_view(ViewHighlightedMarkers(name='View Highlighted Markers'))
 
 
-lmsDictionary = {}
-def ReadDictionaries():
-    global lmsDictionary
+lms_dictionary = {}
+def read_dictionaries():
+    global lms_dictionary
     parser = argparse.ArgumentParser()
     parser.add_argument('--path', type=str, default="static/data/lms")
     args = parser.parse_args()
     for directory in glob.glob("{0}/*/*".format(args.path)):
-        mainDict = dict(get_dict_file(directory))
-        if len(mainDict) == 0:
+        main_dict = dict(get_dict_file(directory))
+        if len(main_dict) == 0:
             return
-        elif len(mainDict) == 1:
-            for dic in mainDict['Dictionary']:
+        if len(main_dict) == 1:
+            for dic in main_dict['Dictionary']:
                 if type(dic[DICTCOLUMN3]) is str:
-                    lmsDictionary[(int(dic[DICTCOLUMN1]),int(dic[DICTCOLUMN2]))] = dic[DICTCOLUMN3].decode(content_encoding)
+                    lms_dictionary[(int(dic[DICTCOLUMN1]),int(dic[DICTCOLUMN2]))] = dic[DICTCOLUMN3].decode(content_encoding)
                 else:
-                    lmsDictionary[(int(dic[DICTCOLUMN1]),int(dic[DICTCOLUMN2]))] = int(dic[DICTCOLUMN3])
+                    lms_dictionary[(int(dic[DICTCOLUMN1]),int(dic[DICTCOLUMN2]))] = int(dic[DICTCOLUMN3])
             return
 
 
 def get_dict_file(directory):
     for name, filename in lms_dict_files.iteritems():
-
-        if name not in [DICTIONARY]:
+        if name != DICTIONARY:
             continue
         files = filter(lambda path: filename.lower() in path.lower(), os.listdir(directory))
         amount = len(files)
@@ -550,8 +549,7 @@ def get_dict_file(directory):
         if amount > 1:
             raise ValueError("there are too many matches: " + filename)
         csv = CsvReader(os.path.join(directory, files[0]))
-        if name == DICTIONARY:
-            yield name, csv
+        yield name, csv
 
 
 user_datastore = SQLAlchemyUserDatastore(SQLAlchemy(app), User, Role)
@@ -595,12 +593,11 @@ def create_years_list():
         json.dump(years, outfile, encoding='utf-8')
         outfile.write(";\n")
 
-create_years_list()
-
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')
-    ReadDictionaries()
+    create_years_list()
+    read_dictionaries()
     app.run(debug=True)
 
 

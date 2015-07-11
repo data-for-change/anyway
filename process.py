@@ -366,8 +366,8 @@ def delete_invalid_entries():
     deletes all markers in the database with null latitude or longitude, and cascade
     """
     db.session.execute(Marker.__table__.delete().
-                       where(or_((Marker.longitude is None),
-                                 (Marker.latitude is None))))
+                       where(or_((Marker.longitude == None),
+                                 (Marker.latitude  == None))))
     db.session.commit()
 
 

@@ -13,6 +13,7 @@ from utilities import ProgressSpinner, ItmToWGS84, init_flask, CsvReader
 import itertools
 import localization
 import re
+import tkFileDialog
 from datetime import datetime
 
 directories_not_processes = {}
@@ -386,11 +387,23 @@ def get_provider_code(directory_name=None):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--specific_folder', dest='specific_folder', action='store_true', default=False)
+    parser.add_argument('--delete_all', dest='delete_all', action='store_true', default=True)
     parser.add_argument('--path', type=str, default="static/data/lms")
     parser.add_argument('--batch_size', type=int, default=100)
-    parser.add_argument('--delete_all', dest='delete_all', action='store_true', default=True)
     parser.add_argument('--provider_code', type=int)
     args = parser.parse_args()
+
+    if args.specific_folder:
+        dirname = tkFileDialog.askdirectory(initialdir=os.path.abspath(args.path),  title='Please select a directory')
+        dir_list = [dirname]
+        if args.delete_all:
+            confirm_delete_all = raw_input("Are you sure you want to delete all the current data? (y/n)\n")
+            if confirm_delete_all.lower() == 'n':
+                args.delete_all = False
+    else:
+        dir_list = glob.glob("{0}/*/*".format(args.path))
+
     # wipe all the Markers and Involved data first
     if args.delete_all:
         tables = (Vehicle, Involved, Marker)
@@ -399,7 +412,7 @@ def main():
             db.session.query(table).delete()
             db.session.commit()
 
-    for directory in glob.glob("{0}/*/*".format(args.path)):
+    for directory in dir_list:
         parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
         provider_code = args.provider_code if args.provider_code else get_provider_code(parent_directory)
         import_to_datastore(directory, provider_code, args.batch_size)

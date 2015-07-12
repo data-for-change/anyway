@@ -250,12 +250,12 @@ $(function () {
             this.groupsData = groupsData;
               // agam
             if(tourLocation == 5) {
-               var myLatlng = new google.maps.LatLng(32.09170,34.86435);
-               var location1 = new google.maps.Marker({
-              position: myLatlng,
-              map: this.map,
-              icon: MULTIPLE_ICONS[SEVERITY_VARIOUS]
-            });
+                var myLatlng = new google.maps.LatLng(32.09170,34.86435);
+                var location1 = new google.maps.Marker({
+                    position: myLatlng,
+                    map: this.map,
+                    icon: MULTIPLE_ICONS[SEVERITY_VARIOUS]
+                });
                 tourLocation = 6 ;
                 console.log("inside the group id "+tourLocation+"new2");
                 contentString = '<p>בנקודה זו התרחשו מספר תאונות, לחיצה על האייקון תציג אותן בנפרד ותאפשר בחירה</br> בתאונה בודדת.</p>';
@@ -340,18 +340,18 @@ $(function () {
                 this.linkMap();
             }.bind(this));
 
-            var guideDiv = document.createElement('div');
-            guideDiv.className = "map-button guide-control blink";
-            guideDiv.title = 'Start Tour';
-            guideDiv.innerHTML = $("#guide-control").html();
-            google.maps.event.addDomListener(guideDiv, 'click', function () {
-                onClick();
+            var tourDiv = document.createElement('div');
+            tourDiv.className = "map-button tour-control blink";
+            tourDiv.title = 'Start Tour';
+            tourDiv.innerHTML = $("#tour-control").html();
+            google.maps.event.addDomListener(tourDiv, 'click', function () {
+                tourClick();
             }.bind(this));
 
             mapControlDiv.appendChild(resetMapDiv);
             mapControlDiv.appendChild(downloadCsvDiv);
             mapControlDiv.appendChild(linkMapDiv);
-            mapControlDiv.appendChild(guideDiv);
+            mapControlDiv.appendChild(tourDiv);
 
             var linkLabel = document.createElement('div');
             linkLabel.className = 'control-label';
@@ -363,10 +363,10 @@ $(function () {
             downloadLabel.innerHTML = 'הורד נתוני תאונות (CSV)';
             downloadCsvDiv.appendChild(downloadLabel);
 
-            var guideLabel = document.createElement('div');
-            guideLabel.className = 'control-label';
-            guideLabel.innerHTML = 'התחל הדרכה';
-            guideDiv.appendChild(guideLabel);
+            var tourLabel = document.createElement('div');
+            tourLabel.className = 'control-label';
+            tourLabel.innerHTML = 'התחל הדרכה';
+            tourDiv.appendChild(tourLabel);
 
             this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(mapControlDiv);
 

@@ -19,7 +19,7 @@ var tour1 = new Tour({
     </div>",
   steps: [
   {
-    element:  '#guide-control',
+    element:  '#tour-control',
     animation: true,
     title: "ברוכים הבאים!",
     placement: 'bottom',
@@ -86,7 +86,7 @@ tour.addStep(tour1.getStep(0));
 tour.addStep(tour1.getStep(1));
 tour.init();
 tour.start();
-function onClick(){
+function tourClick(){
     if (!tour.ended()) {
         tour.end();
         if (infowindow) {

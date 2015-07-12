@@ -18,8 +18,8 @@ from datetime import datetime
 directories_not_processes = {}
 
 progress_wheel = ProgressSpinner()
-content_encoding = 'cp1255'
-accident_type_regex = re.compile("Accidents Type (?P<type>\d)")
+CONTENT_ENCODING = 'cp1255'
+ACCIDENT_TYPE_REGEX = re.compile("Accidents Type (?P<type>\d)")
 
 ACCIDENTS = 'accidents'
 CITIES = 'cities'
@@ -53,7 +53,7 @@ def get_street(settlement_sign, street_sign, streets):
     if settlement_sign not in streets:
         # Changed to return blank string instead of None for correct presentation (Omer)
         return u""
-    street_name = [x[field_names.street_name].decode(content_encoding) for x in streets[settlement_sign] if
+    street_name = [x[field_names.street_name].decode(CONTENT_ENCODING) for x in streets[settlement_sign] if
                    x[field_names.street_sign] == street_sign]
     # there should be only one street name, or none if it wasn't found.
     return street_name[0] if len(street_name) == 1 else u""
@@ -118,12 +118,12 @@ def get_junction(accident, roads):
                 direction = u"דרומית" if accident[field_names.road1] % 2 == 0 else u"מערבית"
             if abs(float(accident["KM"] - junc_km)/10) >= 1:
                 string = str(abs(float(accident["KM"])-junc_km)/10) + u" ק״מ " + direction + u" ל" + \
-                    junction.decode(content_encoding)
+                    junction.decode(CONTENT_ENCODING)
             elif 0 < abs(float(accident["KM"] - junc_km)/10) < 1:
                 string = str(int((abs(float(accident["KM"])-junc_km)/10)*1000)) + u" מטרים " + direction + u" ל" + \
-                    junction.decode(content_encoding)
+                    junction.decode(CONTENT_ENCODING)
             else:
-                string = junction.decode(content_encoding)
+                string = junction.decode(CONTENT_ENCODING)
             return string
         else:
             return u""
@@ -131,7 +131,7 @@ def get_junction(accident, roads):
     elif accident[field_names.non_urban_intersection] is not None:
         key = accident[field_names.road1], accident[field_names.road2], accident["KM"]
         junction = roads.get(key, None)
-        return junction.decode(content_encoding) if junction else u""
+        return junction.decode(CONTENT_ENCODING) if junction else u""
     else:
         return u""
 
@@ -373,7 +373,7 @@ def delete_invalid_entries():
 
 def get_provider_code(directory_name=None):
     if directory_name:
-        match = accident_type_regex.match(directory_name)
+        match = ACCIDENT_TYPE_REGEX.match(directory_name)
         if match:
             return int(match.groupdict()['type'])
 
@@ -408,7 +408,8 @@ def main():
 
     failed = ["{0}: {1}".format(directory, fail_reason) for directory, fail_reason in
               directories_not_processes.iteritems()]
-    print("finished processing all directories, except: %s" % "\n".join(failed))
+    print("finished processing all directories{0}{1}".format(", except: " if failed else "",
+                                                             "\n".join(failed)))
 
 if __name__ == "__main__":
     main()

@@ -19,7 +19,7 @@ from base import *
 import utilities
 from constants import *
 
-from wtforms import form, fields, validators
+from wtforms import form, fields, validators, StringField, PasswordField, Form
 import flask_admin as admin
 import flask.ext.login as login
 from flask_admin.contrib import sqla
@@ -30,7 +30,7 @@ import argparse
 import glob
 from utilities import CsvReader
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.security import Security, SQLAlchemyUserDatastore, roles_required, current_user
+from flask.ext.security import Security, SQLAlchemyUserDatastore, roles_required, current_user, LoginForm
 from collections import OrderedDict
 from sqlalchemy import distinct, func
 
@@ -40,6 +40,7 @@ db = SQLAlchemy(app)
 app = utilities.init_flask(__name__)
 app.config.from_object(__name__)
 app.config['SECURITY_REGISTERABLE'] = False
+app.config['SECURITY_USER_IDENTITY_ATTRIBUTES'] = 'username'
 
 assets = flask.ext.assets.Environment()
 assets.init_app(app)
@@ -362,8 +363,8 @@ def updatebyemail():
             return jsonify(respo='Subscription already exist', )
 
 
-class LoginForm(form.Form):
-    login = fields.StringField(validators=[validators.required()])
+class LoginFormAdmin(form.Form):
+    username = fields.StringField(validators=[validators.required()])
     password = fields.PasswordField(validators=[validators.required()])
 
     def validate_login(self, field):
@@ -376,16 +377,16 @@ class LoginForm(form.Form):
             raise validators.ValidationError('Invalid password')
 
     def get_user(self):
-        return db_session.query(User).filter_by(login=self.login.data).first()
+        return db_session.query(User).filter_by(username=self.username.data).first()
 
 
 class RegistrationForm(form.Form):
-    login = fields.TextField(validators=[validators.required()])
-    email = fields.TextField()
+    username = fields.StringField(validators=[validators.required()])
+    email = fields.StringField()
     password = fields.PasswordField(validators=[validators.required()])
 
     def validate_login(self, field):
-        if db_session.query(User).filter_by(login=self.login.data).count() > 0:
+        if db_session.query(User).filter_by(username=self.username.data).count() > 0:
             raise validators.ValidationError('Duplicate username')
 
 
@@ -409,15 +410,20 @@ class AdminIndexView(admin.AdminIndexView):
 
     @expose('/')
     def index(self):
-        if (login.current_user.is_authenticated() and current_user.has_role('admin')):
-             return super(AdminIndexView, self).index()
-        return redirect(url_for('.login_view'))
+        if login.current_user.is_authenticated():
+            if current_user.has_role('admin'):
+                return super(AdminIndexView, self).index()
+            else:
+                return make_response("Unauthorized User")
+        else:
+            return redirect(url_for('.login_view'))
+
 
 
     @expose('/login/', methods=('GET', 'POST'))
     def login_view(self):
         # handle user login
-        form = LoginForm(request.form)
+        form = LoginFormAdmin(request.form)
         if helpers.validate_form_on_submit(form):
             user = form.get_user()
             login.login_user(user)
@@ -510,12 +516,39 @@ class ViewHighlightedMarkers(BaseView):
     def is_visible(self):
         return login.current_user.is_authenticated()
 
+class OpenAccountForm(Form):
+    username = StringField('Username', validators=[validators.DataRequired()])
+    password = PasswordField('Password', validators=[validators.DataRequired()])
+
+    def validate_on_submit(self):
+        if self.username.data == '':
+            return False
+
+        if self.password.data == '':
+            return False
+        return True
+
+class OpenNewOrgAccount(BaseView):
+    @roles_required('admin')
+    @expose('/', methods=('GET', 'POST'))
+    def index(self):
+       formAccount = OpenAccountForm(request.form)
+       if request.method == "POST" and formAccount.validate_on_submit():
+           user = User(username = formAccount.username.data, password = formAccount.password.data)
+           db_session.add(user)
+           db_session.commit()
+       return self.render('open_account.html', form=formAccount)
+
+    def is_visible(self):
+        return login.current_user.is_authenticated()
+
 
 init_login()
 
 admin = admin.Admin(app, 'ANYWAY Administration Panel', index_view=AdminIndexView(), base_template='admin_master.html')
 
-admin.add_view(AdminView(User, db_session))
+admin.add_view(AdminView(User, db_session, name='Users', endpoint='AllUsers', category='Users'))
+admin.add_view(OpenNewOrgAccount(name='Open new organization account', endpoint='OpenAccount', category='Users'))
 admin.add_view(SendToSubscribersView(name='Send To Subscribers'))
 admin.add_view(ViewHighlightedMarkers(name='View Highlighted Markers'))
 
@@ -549,9 +582,24 @@ def get_dict_file(directory):
         csv = CsvReader(os.path.join(directory, files[0]))
         yield name, csv
 
+class ExtendedLoginForm(LoginForm):
+    username = StringField('User Name', [validators.DataRequired()])
+
+    def validate(self):
+        if not super(LoginForm, self).validate():
+            return False
+        if self.username.data.strip() == '':
+            return False
+        self.user = db_session.query(User).filter(User.username==self.username.data).first()
+        if self.user is None:
+            return False
+        if self.password.data == self.user.password:
+            return True
+        return False
+
 
 user_datastore = SQLAlchemyUserDatastore(SQLAlchemy(app), User, Role)
-security = Security(app, user_datastore)
+security = Security(app, user_datastore, login_form=ExtendedLoginForm)
 
 @login_required
 @roles_required('privileged_user')

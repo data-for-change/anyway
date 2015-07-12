@@ -30,9 +30,7 @@ import argparse
 import glob
 from utilities import CsvReader
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.principal import Principal, Permission, RoleNeed
-from flask.ext.security import Security, SQLAlchemyUserDatastore, \
-     UserMixin, RoleMixin
+from flask.ext.security import Security, SQLAlchemyUserDatastore, roles_required, current_user
 from collections import OrderedDict
 from sqlalchemy import distinct, func
 
@@ -41,6 +39,7 @@ app = utilities.init_flask(__name__)
 db = SQLAlchemy(app)
 app = utilities.init_flask(__name__)
 app.config.from_object(__name__)
+app.config['SECURITY_REGISTERABLE'] = False
 
 assets = flask.ext.assets.Environment()
 assets.init_app(app)
@@ -364,7 +363,7 @@ def updatebyemail():
 
 
 class LoginForm(form.Form):
-    login = fields.TextField(validators=[validators.required()])
+    login = fields.StringField(validators=[validators.required()])
     password = fields.PasswordField(validators=[validators.required()])
 
     def validate_login(self, field):
@@ -410,9 +409,10 @@ class AdminIndexView(admin.AdminIndexView):
 
     @expose('/')
     def index(self):
-        if not login.current_user.is_authenticated():
-            return redirect(url_for('.login_view'))
-        return super(AdminIndexView, self).index()
+        if (login.current_user.is_authenticated() and current_user.has_role('admin')):
+             return super(AdminIndexView, self).index()
+        return redirect(url_for('.login_view'))
+
 
     @expose('/login/', methods=('GET', 'POST'))
     def login_view(self):
@@ -456,8 +456,9 @@ class AdminIndexView(admin.AdminIndexView):
         login.logout_user()
         return redirect(url_for('.index'))
 
+
 class SendToSubscribersView(BaseView):
-    @login.login_required
+    @roles_required('admin')
     @expose('/', methods=('GET', 'POST'))
     def index(self):
         if request.method=='GET':
@@ -489,7 +490,7 @@ class SendToSubscribersView(BaseView):
         return login.current_user.is_authenticated()
 
 class ViewHighlightedMarkers(BaseView):
-    @login.login_required
+    @roles_required('admin')
     @expose('/')
     def index(self):
         highlightedpoints = db_session.query(HighlightPoint).options(load_only("id", "latitude", "longitude", "type"))
@@ -551,28 +552,27 @@ def get_dict_file(directory):
 
 user_datastore = SQLAlchemyUserDatastore(SQLAlchemy(app), User, Role)
 security = Security(app, user_datastore)
-principals = Principal(app)
 
-@app.route('/testroles')
 @login_required
+@roles_required('privileged_user')
+@app.route('/testroles')
 def TestLogin():
-   return render_template('testroles.html')
-
-@app.route('/login/', methods=['GET', 'POST'])
-def login2():
-    if request.method == "POST":
-        uname = request.values["username"]
-        passw = request.values["password"]
-        users_query = db_session.query(User).filter(User.login==uname).first()
-        if users_query is not None:
-            if check_password_hash(users_query.password, passw):
-                login.login_user(users_query)
-
-    if login.current_user.is_authenticated():
-        return render_template('index.html')
+    if current_user.is_authenticated():
+        if current_user.has_role('privileged_user'):
+            context = {'user_name': get_current_user_first_name()}
+            return render_template('testroles.html', **context)
+        else:
+            return  make_response("Unauthorized User")
     else:
-        return render_template('login.html')
+        return redirect('/login')
 
+
+def get_current_user_first_name():
+     cur_id = current_user.get_id()
+     cur_user = db_session.query(User).filter(User.id == cur_id).first()
+     if cur_user is not None:
+        return cur_user.first_name
+     return "User"
 
 def year_range(year):
     return ["01/01/%d" % year, "31/12/%d" % year]

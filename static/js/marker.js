@@ -121,69 +121,74 @@ var MarkerView = Backbone.View.extend({
         var center = app.map.getCenter();
         return "/?marker=" + this.model.get("id") + "&" + app.getCurrentUrlParams();
     },
+    localize_data: function(data,field,value,dataType) {
+        switch (dataType) {
+            case "invs":
+                if (inv_dict[field] != undefined && inv_dict[field][data[i][value]] != undefined) {
+                    text_line = "<p style=margin:0>" + fields[field] + ": " + inv_dict[field][data[i][value]] + "</p>";
+                    that.$el.append(text_line);
+                }
+                break;
+
+            case "vehs":
+                if (veh_dict[field] != undefined && veh_dict[field][data[i][value]] != undefined) {
+                    text_line = "<p style=margin:0>" + fields[field] + ": " + veh_dict[field][data[i][value]] + "</p>";
+                    that.$el.append(text_line);
+                }
+                break;
+
+            case "nums":
+                if ([data[i][value]] != 0) {
+                    text_line = "<p style=margin:0>" + fields[field] + ": " + data[i][value] + "</p>";
+                    that.$el.append(text_line);
+                }
+                break;
+        }
+    },
     clickMarker : function() {
         that = this;
         this.highlight();
         app.closeInfoWindow();
         app.selectedMarker = this;
 
-        if (!this.marker_clicked) {
+        if (this.marker_clicked) {
+            app.infoWindow = new google.maps.InfoWindow({
+                content: that.el
+            });
+            app.infoWindow.open(that.map, that.marker);
+            app.updateUrl(that.getUrl());
+        } else {
             this.marker_clicked = true;
             $.get("/markers/" + this.model.get("id"), function (data) {
                 data = JSON.parse(data);
-
-                function localize_data(field,value,dataType) {
-                    switch (dataType) {
-                        case "invs":
-                            if (inv_dict[field] != undefined && inv_dict[field][data[i][value]] != undefined) {
-                                text_line = "<p style=margin:0>" + fields[field] + ": " + inv_dict[field][data[i][value]] + "</p>";
-                                that.$el.append(text_line);
-                            }
-                            break;
-
-                        case "vehs":
-                            if (veh_dict[field] != undefined && veh_dict[field][data[i][value]] != undefined) {
-                            text_line = "<p style=margin:0>" + fields[field] + ": " + veh_dict[field][data[i][value]] + "</p>";
-                            that.$el.append(text_line);
-                            }
-                            break;
-
-                        case "nums":
-                            if ([data[i][value]] != 0) {
-                            text_line = "<p style=margin:0>" + fields[field] + ": " + data[i][value] + "</p>";
-                            that.$el.append(text_line);
-                            }
-                            break;
-                    }
-                }
 
                 var j = 1;
                 for (i in data) {
                     if (data[i]["sex"] != undefined) {
                         text_line = "<p style=margin:0><strong>פרטי אדם מעורב" + " " + (i*1+1) + "</strong></p>"
                         that.$el.append(text_line);
-                        localize_data("SUG_MEORAV","involved_type","invs");
-                        localize_data("SHNAT_HOZAA","license_acquiring_date","nums");
-                        localize_data("KVUZA_GIL","age_group","nums");
-                        localize_data("MIN","sex","invs");
-                        localize_data("SUG_REHEV_NASA_LMS","car_type","invs");
-                        localize_data("EMZAE_BETIHUT","safety_measures","invs");
-                        localize_data("HUMRAT_PGIA","injured_severity","invs");
-                        localize_data("SUG_NIFGA_LMS","injured_type","invs");
-                        localize_data("PEULAT_NIFGA_LMS","injured_position","invs");
-                        localize_data("KVUTZAT_OHLUSIYA_LMS","population_type","nums");
+                        that.localize_data(data,"SUG_MEORAV","involved_type","invs");
+                        that.localize_data(data,"SHNAT_HOZAA","license_acquiring_date","nums");
+                        that.localize_data(data,"KVUZA_GIL","age_group","nums");
+                        that.localize_data(data,"MIN","sex","invs");
+                        that.localize_data(data,"SUG_REHEV_NASA_LMS","car_type","invs");
+                        that.localize_data(data,"EMZAE_BETIHUT","safety_measures","invs");
+                        that.localize_data(data,"HUMRAT_PGIA","injured_severity","invs");
+                        that.localize_data(data,"SUG_NIFGA_LMS","injured_type","invs");
+                        that.localize_data(data,"PEULAT_NIFGA_LMS","injured_position","invs");
+                        that.localize_data(data,"KVUTZAT_OHLUSIYA_LMS","population_type","nums");
                         that.$el.append("<p></p>");
                     }else{
                         text_line = "<p style=margin:0><strong>פרטי רכב מעורב" + " " + (j) + "</strong></p>"
                         that.$el.append(text_line);
-                        localize_data("SUG_REHEV_LMS","vehicle_type","vehs");
-                        localize_data("NEFAH","engine_volume","nums");
-                        localize_data("SHNAT_YITZUR","manufacturing_year","nums");
-                        localize_data("KIVUNE_NESIA","driving_directions","nums");
-                        localize_data("MATZAV_REHEV","vehicle_status","vehs");
-                        localize_data("SHIYUH_REHEV_LMS","vehicle_attribution","vehs");
-                        localize_data("MEKOMOT_YESHIVA_LMS","seats","nums");
-                        localize_data("MISHKAL_KOLEL_LMS","total_weight","nums");
+                        that.localize_data(data,"SUG_REHEV_LMS","vehicle_type","vehs");
+                        that.localize_data(data,"NEFAH","engine_volume","nums");
+                        that.localize_data(data,"SHNAT_YITZUR","manufacturing_year","nums");
+                        that.localize_data(data,"KIVUNE_NESIA","driving_directions","nums");
+                        that.localize_data(data,"MATZAV_REHEV","vehicle_status","vehs");
+                        that.localize_data(data,"SHIYUH_REHEV_LMS","vehicle_attribution","vehs");
+                        that.localize_data(data,"MEKOMOT_YESHIVA_LMS","seats","nums");
+                        that.localize_data(data,"MISHKAL_KOLEL_LMS","total_weight","nums");
                         that.$el.append("<p></p>");
                         j++;
                     }
@@ -194,13 +199,6 @@ var MarkerView = Backbone.View.extend({
                 app.infoWindow.open(that.map, that.marker);
                 app.updateUrl(that.getUrl());
             })
-
-        } else {
-            app.infoWindow = new google.maps.InfoWindow({
-                content: that.el
-            });
-            app.infoWindow.open(that.map, that.marker);
-            app.updateUrl(that.getUrl());
         }
 
         $(document).keydown(app.ESCinfoWindow);

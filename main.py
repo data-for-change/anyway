@@ -7,7 +7,7 @@ from StringIO import StringIO
 import time
 
 import jinja2
-from flask import make_response, render_template, Response, jsonify, url_for
+from flask import make_response, render_template, Response, jsonify, url_for, flash
 import flask.ext.assets
 from webassets.ext.jinja2 import AssetsExtension
 from webassets import Environment as AssetsEnvironment
@@ -535,8 +535,11 @@ class OpenNewOrgAccount(BaseView):
        formAccount = OpenAccountForm(request.form)
        if request.method == "POST" and formAccount.validate_on_submit():
            user = User(username = formAccount.username.data, password = formAccount.password.data)
+           role = db_session.query(Role).filter(Role.id==2).first()
+           user.roles.append(role)
            db_session.add(user)
            db_session.commit()
+           flash('The user was created successfully')
        return self.render('open_account.html', form=formAccount)
 
     def is_visible(self):

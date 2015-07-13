@@ -1,0 +1,17 @@
+{% extends 'admin/master.html' %}
+{% block body %}
+{{ super() }}
+<div class="row-fluid">
+	<form action="" method="post">
+    {{ form.username.label }} {{ form.username }}
+    <br>
+    {{ form.password.label }} {{ form.password }}
+    <br>
+    {{ form.csrf_token }}
+	<br>
+	<input type="submit" value="Submit">
+</form>
+</div>
+{% endblock body %}
+
+

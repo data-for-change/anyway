@@ -61,6 +61,7 @@ Contributing
 4. Populate the data (markers etc.): `python process.py`: this will take less than an hour if you're using the example files (default), but if you have the complete data it may take several days. Be prepared.
 5. Run the app: `python main.py`: do this whenever you start working and want to try out your code.
 6. Browse to http://127.0.0.1:5000
+7. If the site fails to load properly, make sure you have JDK installed on your machine
 
 It is useful to add the following to your `~/.bashrc` (fixing for the correct path):
 

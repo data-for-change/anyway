@@ -22,7 +22,8 @@
             "css/bootstrap.rtl.css",
             "css/style.css",
             "css/daterangepicker.css",
-	        "css/bootstrap-tour.min.css"	 %}
+            "css/accordion.css",
+	    "css/bootstrap-tour.min.css"	 %}
             <link rel="stylesheet" href="{{ ASSET_URL }}" />
         {% endassets %}
 
@@ -251,40 +252,82 @@
             </div>
         </div>
 
-        <div id="marker-content-template" style="display: none">
-            <img class="profile-image" style="float: left" />
-            <h4 class="title"></h4>
-            <p class="added-by"></p>
-            <p class="creation-date"></p>
-            <p class="roadType" style="margin:0"></p>
-            <p class="accidentType" style="margin:0"></p>
-            <p class="roadShape" style="margin:0"></p>
-            <p class="severityText" style="margin:0"></p>
-            <p class="dayType" style="margin:0"></p>
-            <p class="igun" style="margin:0"></p>
-            <p class="unit" style="margin:0"></p>
-            <p class="one_lane" style="margin:0"></p>
-            <p class="multi_lane" style="margin:0"></p>
-            <p class="speed_limit" style="margin:0"></p>
-            <p class="intactness" style="margin:0"></p>
-            <p class="road_width" style="margin:0"></p>
-            <p class="road_sign" style="margin:0"></p>
-            <p class="road_light" style="margin:0"></p>
-            <p class="road_control" style="margin:0"></p>
-            <p class="weather" style="margin:0"></p>
-            <p class="road_surface" style="margin:0"></p>
-            <p class="road_object" style="margin:0"></p>
-            <p class="object_distance" style="margin:0"></p>
-            <p class="didnt_cross" style="margin:0"></p>
-            <p class="cross_mode" style="margin:0"></p>
-            <p class="cross_location" style="margin:0"></p>
-            <p class="cross_direction" style="margin:0"></p>
-            <p class="mainStreet" style="margin:0"></p>
-            <p class="secondaryStreet" style="margin:0"></p>
-            <p class="junction" style="margin:0"></p>
-            <p></p>
 
-        </div>
+        <div id="marker-content-template" style="display: none">
+            <div class="marker-info-window" style="overflow-y: auto; height: 360px;">
+                <img class="profile-image" style="float: left" />
+                <h4 class="title"></h4>
+                <p class="added-by"></p>
+                <p class="creation-date"></p>
+
+                <div class="accordion-container">
+                    <div>
+                        <input id="ac-1" type="checkbox" />
+                        <label for="ac-1"><i class="material-icons fontIcon">&#xE002;</i>פרטי התאונה</label>
+                        <div class="accordion-roller ac-general">
+                            <p class="severityText" style="margin:0"></p>
+                            <p class="accidentType" style="margin:0"></p>
+                            <p class="road_object" style="margin:0"></p>
+                            <p class="object_distance" style="margin:0"></p>
+                            <p class="didnt_cross" style="margin:0"></p>
+                            <p class="cross_mode" style="margin:0"></p>
+                        </div>
+                    </div>
+                    <div>
+                        <input id="ac-2" type="checkbox" />
+                        <label for="ac-2"><i class="fa fa-road fontIcon" id="fa-road-fix"></i>תנאי הדרך</label>
+                        <div class="accordion-roller ac-general">
+                            <p class="roadType" style="margin:0"></p>
+                            <p class="roadShape" style="margin:0"></p>
+                            <p class="one_lane" style="margin:0"></p>
+                            <p class="multi_lane" style="margin:0"></p>
+                            <p class="speed_limit" style="margin:0"></p>
+                            <p class="intactness" style="margin:0"></p>
+                            <p class="road_width" style="margin:0"></p>
+                            <p class="road_sign" style="margin:0"></p>
+                            <p class="road_light" style="margin:0"></p>
+                            <p class="road_control" style="margin:0"></p>
+                            <p class="weather" style="margin:0"></p>
+                            <p class="road_surface" style="margin:0"></p>
+                            <p class="cross_location" style="margin:0"></p>
+                            <p class="cross_direction" style="margin:0"></p>
+                        </div>
+                    </div>
+                    <div>
+                        <input id="ac-3" type="checkbox" />
+                        <label for="ac-3"><i class="material-icons fontIcon">&#xE55F;</i>מיקום וזמן</label>
+                        <div class="accordion-roller ac-general">
+                            <p class="dayType" style="margin:0"></p>
+                            <p class="mainStreet" style="margin:0"></p>
+                            <p class="secondaryStreet" style="margin:0"></p>
+                            <p class="junction" style="margin:0"></p>
+                        </div>
+                    </div>
+                    <div>
+                        <input id="ac-4" type="checkbox" />
+                        <label for="ac-4"><i class="material-icons fontIcon">&#xE7FB;</i>נפגעים</label>
+                        <div class="accordion-roller ac-general" id="involved">
+                            
+                        </div>
+                    </div>
+                    <div>
+                        <input id="ac-5" type="checkbox" />
+                        <label for="ac-5"><i class="material-icons fontIcon">&#xE531;</i>רכבים מעורבים</label>
+                        <div class="accordion-roller ac-general" id="vehicles">
+
+                        </div>
+                    </div>
+                    <div>
+                        <input id="ac-6" type="checkbox" />
+                        <label for="ac-6"><i class="material-icons fontIcon">&#xE145;</i>מידע נוסף</label>
+                        <div class="accordion-roller ac-general">
+                            <p class="igun" style="margin:0"></p>
+                            <p class="unit" style="margin:0"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+         </div>
 
 
         <div id="feature-dialog-template" style="display: none">

@@ -121,26 +121,26 @@ var MarkerView = Backbone.View.extend({
         var center = app.map.getCenter();
         return "/?marker=" + this.model.get("id") + "&" + app.getCurrentUrlParams();
     },
-    localize_data: function(data,field,value,dataType) {
+    localize_data: function(data,field,value,dataType,involved_or_vehicles) {
         switch (dataType) {
             case "invs":
                 if (inv_dict[field] != undefined && inv_dict[field][data[i][value]] != undefined) {
                     text_line = "<p style=margin:0>" + fields[field] + ": " + inv_dict[field][data[i][value]] + "</p>";
-                    that.$el.append(text_line);
+                    that.$el.find("#" + involved_or_vehicles).append(text_line);
                 }
                 break;
 
             case "vehs":
                 if (veh_dict[field] != undefined && veh_dict[field][data[i][value]] != undefined) {
                     text_line = "<p style=margin:0>" + fields[field] + ": " + veh_dict[field][data[i][value]] + "</p>";
-                    that.$el.append(text_line);
+                    that.$el.find("#" + involved_or_vehicles).append(text_line);
                 }
                 break;
 
             case "nums":
                 if ([data[i][value]] != 0) {
                     text_line = "<p style=margin:0>" + fields[field] + ": " + data[i][value] + "</p>";
-                    that.$el.append(text_line);
+                    that.$el.find("#" + involved_or_vehicles).append(text_line);
                 }
                 break;
         }
@@ -165,31 +165,31 @@ var MarkerView = Backbone.View.extend({
                 var j = 1;
                 for (i in data) {
                     if (data[i]["sex"] != undefined) {
-                        text_line = "<p style=margin:0><strong>פרטי אדם מעורב" + " " + (i*1+1) + "</strong></p>"
-                        that.$el.append(text_line);
-                        that.localize_data(data,"SUG_MEORAV","involved_type","invs");
-                        that.localize_data(data,"SHNAT_HOZAA","license_acquiring_date","nums");
-                        that.localize_data(data,"KVUZA_GIL","age_group","nums");
-                        that.localize_data(data,"MIN","sex","invs");
-                        that.localize_data(data,"SUG_REHEV_NASA_LMS","car_type","invs");
-                        that.localize_data(data,"EMZAE_BETIHUT","safety_measures","invs");
-                        that.localize_data(data,"HUMRAT_PGIA","injured_severity","invs");
-                        that.localize_data(data,"SUG_NIFGA_LMS","injured_type","invs");
-                        that.localize_data(data,"PEULAT_NIFGA_LMS","injured_position","invs");
-                        that.localize_data(data,"KVUTZAT_OHLUSIYA_LMS","population_type","nums");
-                        that.$el.append("<p></p>");
+                        text_line = "<p style=margin:0><strong>פרטי אדם מעורב" + " " + (i*1+1) + "</strong></p>";
+                        that.$el.find("#involved").append(text_line);
+                        that.localize_data(data,"SUG_MEORAV","involved_type","invs","involved");
+                        that.localize_data(data,"SHNAT_HOZAA","license_acquiring_date","nums","involved");
+                        that.localize_data(data,"KVUZA_GIL","age_group","nums","involved");
+                        that.localize_data(data,"MIN","sex","invs","involved");
+                        that.localize_data(data,"SUG_REHEV_NASA_LMS","car_type","invs","involved");
+                        that.localize_data(data,"EMZAE_BETIHUT","safety_measures","invs","involved");
+                        that.localize_data(data,"HUMRAT_PGIA","injured_severity","invs","involved");
+                        that.localize_data(data,"SUG_NIFGA_LMS","injured_type","invs","involved");
+                        that.localize_data(data,"PEULAT_NIFGA_LMS","injured_position","invs","involved");
+                        that.localize_data(data,"KVUTZAT_OHLUSIYA_LMS","population_type","nums","involved");
+                        that.$el.find("#involved").append("<p></p>");
                     }else{
                         text_line = "<p style=margin:0><strong>פרטי רכב מעורב" + " " + (j) + "</strong></p>"
-                        that.$el.append(text_line);
-                        that.localize_data(data,"SUG_REHEV_LMS","vehicle_type","vehs");
-                        that.localize_data(data,"NEFAH","engine_volume","nums");
-                        that.localize_data(data,"SHNAT_YITZUR","manufacturing_year","nums");
-                        that.localize_data(data,"KIVUNE_NESIA","driving_directions","nums");
-                        that.localize_data(data,"MATZAV_REHEV","vehicle_status","vehs");
-                        that.localize_data(data,"SHIYUH_REHEV_LMS","vehicle_attribution","vehs");
-                        that.localize_data(data,"MEKOMOT_YESHIVA_LMS","seats","nums");
-                        that.localize_data(data,"MISHKAL_KOLEL_LMS","total_weight","nums");
-                        that.$el.append("<p></p>");
+                        that.$el.find("#vehicles").append(text_line);
+                        that.localize_data(data,"SUG_REHEV_LMS","vehicle_type","vehs","vehicles");
+                        that.localize_data(data,"NEFAH","engine_volume","nums","vehicles");
+                        that.localize_data(data,"SHNAT_YITZUR","manufacturing_year","nums","vehicles");
+                        that.localize_data(data,"KIVUNE_NESIA","driving_directions","nums","vehicles");
+                        that.localize_data(data,"MATZAV_REHEV","vehicle_status","vehs","vehicles");
+                        that.localize_data(data,"SHIYUH_REHEV_LMS","vehicle_attribution","vehs","vehicles");
+                        that.localize_data(data,"MEKOMOT_YESHIVA_LMS","seats","nums","vehicles");
+                        that.localize_data(data,"MISHKAL_KOLEL_LMS","total_weight","nums","vehicles");
+                        that.$el.find("#vehicles").append("<p></p>");
                         j++;
                     }
                 }
@@ -198,7 +198,7 @@ var MarkerView = Backbone.View.extend({
                 });
                 app.infoWindow.open(that.map, that.marker);
                 app.updateUrl(that.getUrl());
-            })
+            });
         }
 
         $(document).keydown(app.ESCinfoWindow);

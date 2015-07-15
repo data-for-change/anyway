@@ -138,7 +138,8 @@ var MarkerView = Backbone.View.extend({
                 break;
 
             case "nums":
-                if ([data[i][value]] != 0) {
+                if (value == "seats" && data[i]["seats"] == 99) { break };
+                if ([data[i][value]] > 0) {
                     text_line = "<p style=margin:0>" + fields[field] + ": " + data[i][value] + "</p>";
                     that.$el.find("#" + involved_or_vehicles).append(text_line);
                 }
@@ -184,11 +185,11 @@ var MarkerView = Backbone.View.extend({
                         that.localize_data(data,"SUG_REHEV_LMS","vehicle_type","vehs","vehicles");
                         that.localize_data(data,"NEFAH","engine_volume","nums","vehicles");
                         that.localize_data(data,"SHNAT_YITZUR","manufacturing_year","nums","vehicles");
-                        that.localize_data(data,"KIVUNE_NESIA","driving_directions","nums","vehicles");
+                        that.localize_data(data,"KIVUNE_NESIA","driving_directions","vehs","vehicles");
                         that.localize_data(data,"MATZAV_REHEV","vehicle_status","vehs","vehicles");
                         that.localize_data(data,"SHIYUH_REHEV_LMS","vehicle_attribution","vehs","vehicles");
                         that.localize_data(data,"MEKOMOT_YESHIVA_LMS","seats","nums","vehicles");
-                        that.localize_data(data,"MISHKAL_KOLEL_LMS","total_weight","nums","vehicles");
+                        that.localize_data(data,"MISHKAL_KOLEL_LMS","total_weight","vehs","vehicles");
                         that.$el.find("#vehicles").append("<p></p>");
                         j++;
                     }

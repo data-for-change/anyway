@@ -139,7 +139,7 @@ var MarkerView = Backbone.View.extend({
 
             case "nums":
                 if (value == "seats" && data[i]["seats"] == 99) { break };
-                if ([data[i][value]] != 0 && [data[i][value]] != -1) {
+                if ([data[i][value]] != undefined && [data[i][value]] != 0 && [data[i][value]] != -1) {
                     text_line = "<p style=margin:0>" + fields[field] + ": " + data[i][value] + "</p>";
                     that.$el.find("#" + involved_or_vehicles).append(text_line);
                 }
@@ -162,7 +162,7 @@ var MarkerView = Backbone.View.extend({
             this.marker_clicked = true;
             $.get("/markers/" + this.model.get("id"), function (data) {
                 data = JSON.parse(data);
-
+                
                 var j = 1;
                 for (i in data) {
                     if (data[i]["sex"] != undefined) {
@@ -172,6 +172,7 @@ var MarkerView = Backbone.View.extend({
                         that.localize_data(data,"SHNAT_HOZAA","license_acquiring_date","nums","involved");
                         that.localize_data(data,"KVUZA_GIL","age_group","nums","involved");
                         that.localize_data(data,"MIN","sex","invs","involved");
+                        that.localize_data(data,"MAHOZ_MEGURIM","home_district","nums","involved");
                         that.localize_data(data,"SUG_REHEV_NASA_LMS","car_type","invs","involved");
                         that.localize_data(data,"EMZAE_BETIHUT","safety_measures","invs","involved");
                         that.localize_data(data,"HUMRAT_PGIA","injury_severity","invs","involved");

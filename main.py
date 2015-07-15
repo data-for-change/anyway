@@ -169,6 +169,8 @@ def marker(marker_id):
             obj["engine_volume"] = lms_dictionary[111,obj["engine_volume"]]
         if (112,obj["total_weight"]) in lms_dictionary:
             obj["total_weight"] = lms_dictionary[112,obj["total_weight"]]
+        if (28, obj["driving_directions"]) in lms_dictionary:
+            obj["driving_directions"] = lms_dictionary[28, obj["driving_directions"]]
         list_to_return.append(obj)
     return make_response(json.dumps(list_to_return, ensure_ascii=False))
 

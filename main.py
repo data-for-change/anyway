@@ -148,29 +148,20 @@ def marker(marker_id):
     list_to_return = list()
     for inv in involved:
         obj = inv.serialize()
-        if (92,obj["age_group"]) in lms_dictionary:
-            obj["age_group"] = lms_dictionary[92,obj["age_group"]]
-        if (66,obj["population_type"]) in lms_dictionary:
-            obj["population_type"] = lms_dictionary[66,obj["population_type"]]
-        if (77,obj["home_district"]) in lms_dictionary:
-            obj["home_district"] = lms_dictionary[77,obj["home_district"]]
-        if (79,obj["home_nafa"]) in lms_dictionary:
-            obj["home_nafa"] = lms_dictionary[79,obj["home_nafa"]]
-        if (80,obj["home_area"]) in lms_dictionary:
-            obj["home_area"] = lms_dictionary[80,obj["home_area"]]
-        if (78,obj["home_municipal_status"]) in lms_dictionary:
-            obj["home_municipal_status"] = lms_dictionary[78,obj["home_municipal_status"]]
-        if (81,obj["home_residence_type"]) in lms_dictionary:
-            obj["home_residence_type"] = lms_dictionary[81,obj["home_residence_type"]]
+        obj["age_group"] = lms_dictionary.get((92, obj["age_group"]))
+        obj["population_type"] = lms_dictionary.get((66, obj["population_type"]))
+        obj["home_district"] = lms_dictionary.get((77, obj["home_district"]))
+        obj["home_nafa"] = lms_dictionary.get((79, obj["home_nafa"]))
+        obj["home_area"] = lms_dictionary.get((80, obj["home_area"]))
+        obj["home_municipal_status"] = lms_dictionary.get((78, obj["home_municipal_status"]))
+        obj["home_residence_type"] = lms_dictionary.get((81, obj["home_residence_type"]))
         list_to_return.append(obj)
+
     for veh in vehicles:
         obj = veh.serialize()
-        if (111,obj["engine_volume"]) in lms_dictionary:
-            obj["engine_volume"] = lms_dictionary[111,obj["engine_volume"]]
-        if (112,obj["total_weight"]) in lms_dictionary:
-            obj["total_weight"] = lms_dictionary[112,obj["total_weight"]]
-        if (28, obj["driving_directions"]) in lms_dictionary:
-            obj["driving_directions"] = lms_dictionary[28, obj["driving_directions"]]
+        obj["engine_volume"] = lms_dictionary.get((111, obj["engine_volume"]))
+        obj["total_weight"] = lms_dictionary.get((112, obj["total_weight"]))
+        obj["driving_directions"] = lms_dictionary.get((28, obj["driving_directions"]))
         list_to_return.append(obj)
     return make_response(json.dumps(list_to_return, ensure_ascii=False))
 

@@ -101,8 +101,11 @@ var MarkerView = Backbone.View.extend({
         else if (this.model.get("secondaryStreet") !== "") {
             loc = "ברחוב " + this.model.get("secondaryStreet") + " פינת " + this.model.get("mainStreet");
         }
-        else {
+        else if (this.model.get("mainStreet") !== "") {
             loc = "ברחוב " + this.model.get("mainStreet");
+        }
+        else {
+            loc = "";
         }
         return "ביום " + moment(this.model.get("created")).format("dddd") + ", ה-"
         + moment(this.model.get("created")).format("LL")
@@ -162,7 +165,7 @@ var MarkerView = Backbone.View.extend({
             this.marker_clicked = true;
             $.get("/markers/" + this.model.get("id"), function (data) {
                 data = JSON.parse(data);
-                
+
                 var j = 1;
                 for (i in data) {
                     if (data[i]["sex"] != undefined) {

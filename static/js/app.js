@@ -373,13 +373,13 @@ $(function () {
             if (LOCATION_SPECIFIED) {
                 if (!MARKER_ID) {
                     this.setCenterWithMarker(this.defaultLocation);
-                    setTimeout(function(){
-                        this.fetchMarkers();
-                    }.bind(this),2000);
                 }
             } else {
                 this.goToMyLocation();
             }
+            setTimeout(function(){
+                this.fetchMarkers();
+            }.bind(this),2000);
             // search box:
             // Create the search box and link it to the UI element.
             var input = document.getElementById('pac-input');

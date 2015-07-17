@@ -95,12 +95,12 @@ function tourClick(){
     }
     checkStepsAdd = false;
     checkStepsAdd2 = false;
-    tour.restart();
+    //tour.restart();
     resetTour();
     tour.addStep(tour1.getStep(0));
     tour.addStep(tour1.getStep(1));
     tour.init();
-    tour.start(true);
+    tour.restart();
 }
 function resetTour(){
     tourLocation = 0;

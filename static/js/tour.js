@@ -95,7 +95,6 @@ function tourClick(){
     }
     checkStepsAdd = false;
     checkStepsAdd2 = false;
-    //tour.restart();
     resetTour();
     tour.addStep(tour1.getStep(0));
     tour.addStep(tour1.getStep(1));

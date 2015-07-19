@@ -627,7 +627,14 @@ def create_years_list():
     Edits 'years.js', a years structure ready to be presented in app.js
     as user's last-4-years filter choices.
     """
-    year_col = db.session.query(distinct(func.extract("year", Marker.created)))
+    while True:
+        try:
+            year_col = db.session.query(distinct(func.extract("year",
+                                                              Marker.created)))
+            break
+        except OperationalError:
+            time.sleep(1)
+
     years = OrderedDict([("שנת" + " %d" % year, year_range(year))
                          for year in sorted(year_col, reverse=True)[:4]])
     years_file = os.path.join(app.static_folder, 'js/years.js')

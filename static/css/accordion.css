@@ -1,6 +1,6 @@
 .accordion-container{
-	width: 300px;
-	margin: 30px 2px 30px 0px;
+	width: 99%;
+	margin: auto;
 }
 
 .accordion-container label{
@@ -69,7 +69,7 @@
 	z-index: 10;
 	transition: 
 		max-height 0.4s ease-out, 
-		height 0.1s ease-in-out, 
+		height 0.1s ease-in-out,
 		box-shadow 0.6s linear;
 }
 
@@ -79,8 +79,8 @@
 
 .accordion-container input:checked ~ .accordion-roller{
 	transition: 
-		max-height 0.5s ease-in, 
-		height 0.2s ease-in-out, 
+		max-height 0.5s ease-in,
+		height 0.2s ease-in-out,
 		box-shadow 0.1s linear;
 	box-shadow: 0px 0px 0px 1px rgba(155,155,155,0.3);
 }

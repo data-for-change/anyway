@@ -50,9 +50,11 @@ var MarkerView = Backbone.View.extend({
         app.oms.addMarker(this.marker);
 
         this.$el.html($("#marker-content-template").html());
-
+        console.log(this.marker);
         this.$el.width(400);
         this.$el.find(".title").text(this.marker.get("title"));
+        this.$el.find(".id").text(fields.ACC_ID + ": " + this.marker.get("id"));
+        this.$el.find(".provider_code").text(fields.PROVIDER_CODE + ": " + this.model.get("provider_code"));
         this.$el.find(".roadType").text(fields.SUG_DEREH + ": " + localization.SUG_DEREH[this.model.get("roadType")]);
         this.$el.find(".accidentType").text(fields.SUG_TEUNA+ ": " + localization.SUG_TEUNA[this.model.get("subtype")]);
         this.$el.find(".roadShape").text(fields.ZURAT_DEREH+ ": " + localization.ZURAT_DEREH[this.model.get("roadShape")]);

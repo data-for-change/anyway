@@ -4,10 +4,11 @@ import glob
 import os
 import argparse
 import json
+from collections import OrderedDict
 from flask.ext.sqlalchemy import SQLAlchemy
-from sqlalchemy import and_, or_
+from sqlalchemy import or_
 import field_names
-from models import Marker,Involved,Vehicle
+from models import Marker, Involved, Vehicle
 import models
 from utilities import ProgressSpinner, ItmToWGS84, init_flask, CsvReader
 import itertools
@@ -15,10 +16,10 @@ import localization
 import re
 import tkFileDialog
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
-directories_not_processes = {}
+failed_dirs = OrderedDict()
 
-progress_wheel = ProgressSpinner()
 CONTENT_ENCODING = 'cp1255'
 ACCIDENT_TYPE_REGEX = re.compile("Accidents Type (?P<type>\d)")
 
@@ -147,7 +148,8 @@ def parse_date(accident):
 
     '''
     hours calculation explanation - The value of the hours is between 1 to 96.
-    These values represent 15 minutes each that start at 00:00 so 1 equals 00:00, 2 equals 00:15, 3 equals 00:30 and so on. .
+    These values represent 15 minutes each that start at 00:00:
+    1 equals 00:00, 2 equals 00:15, 3 equals 00:30 and so on.
     '''
     minutes = accident[field_names.accident_hour] * 15 - 15
     hours = int(minutes // 60)
@@ -196,10 +198,10 @@ def get_data_value(value):
 
 
 def import_accidents(provider_code, accidents, streets, roads, **kwargs):
-    print("reading accidents from file %s" % (accidents.name(),))
+    print("\tReading accident data from '%s'..." % os.path.basename(accidents.name()))
     for accident in accidents:
         if field_names.x_coordinate not in accident or field_names.y_coordinate not in accident:
-            raise ValueError("x and y coordinates are missing from the accidents file!")
+            raise ValueError("Missing x and y coordinates")
         if accident[field_names.x_coordinate] and accident[field_names.y_coordinate]:
             lng, lat = coordinates_converter.convert(accident[field_names.x_coordinate],
                                                      accident[field_names.y_coordinate])
@@ -247,12 +249,13 @@ def import_accidents(provider_code, accidents, streets, roads, **kwargs):
         yield marker
     accidents.close()
 
+
 def import_involved(provider_code, involved, **kwargs):
-    print("reading involved data from file %s" % (involved.name(),))
+    print("\tReading involved data from '%s'..." % os.path.basename(involved.name()))
     for involve in involved:
-        if not involve[field_names.id]:
+        if not involve[field_names.id]:  # skip lines with no accident id
             continue
-        involved_item = {
+        yield {
             "accident_id": int(involve[field_names.id]),
             "provider_code": int(provider_code),
             "involved_type": int(involve[field_names.involved_type]),
@@ -270,21 +273,20 @@ def import_involved(provider_code, involved, **kwargs):
             "home_nafa": get_data_value(involve[field_names.home_nafa]),
             "home_area": get_data_value(involve[field_names.home_area]),
             "home_municipal_status": get_data_value(involve[field_names.home_municipal_status]),
-            "home_residence_type":  get_data_value(involve[field_names.home_residence_type]),
-            "hospital_time":  get_data_value(involve[field_names.hospital_time]),
-            "medical_type":  get_data_value(involve[field_names.medical_type]),
-            "release_dest":  get_data_value(involve[field_names.release_dest]),
-            "safety_measures_use":  get_data_value(involve[field_names.safety_measures_use]),
-            "late_deceased":  get_data_value(involve[field_names.late_deceased]),
+            "home_residence_type": get_data_value(involve[field_names.home_residence_type]),
+            "hospital_time": get_data_value(involve[field_names.hospital_time]),
+            "medical_type": get_data_value(involve[field_names.medical_type]),
+            "release_dest": get_data_value(involve[field_names.release_dest]),
+            "safety_measures_use": get_data_value(involve[field_names.safety_measures_use]),
+            "late_deceased": get_data_value(involve[field_names.late_deceased]),
         }
-        yield involved_item
     involved.close()
 
 
 def import_vehicles(provider_code, vehicles, **kwargs):
-    print("reading involved data from file %s" % (vehicles.name(),))
+    print("\tReading vehicles data from '%s'..." % os.path.basename(vehicles.name()))
     for vehicle in vehicles:
-        vehicle_item = {
+        yield {
             "accident_id": int(vehicle[field_names.id]),
             "provider_code": int(provider_code),
             "engine_volume": int(vehicle[field_names.engine_volume]),
@@ -296,8 +298,8 @@ def import_vehicles(provider_code, vehicles, **kwargs):
             "seats": get_data_value(vehicle[field_names.seats]),
             "total_weight": get_data_value(vehicle[field_names.total_weight]),
         }
-        yield vehicle_item
     vehicles.close()
+
 
 def get_files(directory):
     for name, filename in lms_files.iteritems():
@@ -308,9 +310,9 @@ def get_files(directory):
         files = filter(lambda path: filename.lower() in path.lower(), os.listdir(directory))
         amount = len(files)
         if amount == 0:
-            raise ValueError("file not found in directory: " + filename)
+            raise ValueError("Not found: '%s'" % filename)
         if amount > 1:
-            raise ValueError("there are too many matches: " + filename)
+            raise ValueError("Ambiguous: '%s'" % filename)
 
         csv = CsvReader(os.path.join(directory, files[0]))
 
@@ -329,12 +331,16 @@ def get_files(directory):
                      field_names.road1 in x and field_names.road2 in x}
             csv.close()
             yield ROADS, roads
-        elif name == ACCIDENTS:
+        elif name in (ACCIDENTS, INVOLVED, VEHICLES):
             yield name, csv
-        elif name == INVOLVED:
-            yield name, csv
-        elif name == VEHICLES:
-            yield name, csv
+
+
+def time_delta(since):
+    delta = relativedelta(datetime.now(), since)
+    attrs = ['years', 'months', 'days', 'hours', 'minutes', 'seconds']
+    return " ".join('%d %s' % (getattr(delta, attr),
+                               getattr(delta, attr) > 1 and attr or attr[:-1])
+                    for attr in attrs if getattr(delta, attr))
 
 
 def import_to_datastore(directory, provider_code, batch_size):
@@ -344,9 +350,10 @@ def import_to_datastore(directory, provider_code, batch_size):
     try:
         files_from_lms = dict(get_files(directory))
         if len(files_from_lms) == 0:
-            return
-        print("importing data from directory: {}".format(directory))
-        now = datetime.now()
+            return 0
+        print("Importing '{}'".format(directory))
+        started = datetime.now()
+
         accidents = list(import_accidents(provider_code=provider_code, **files_from_lms))
         db.session.execute(Marker.__table__.insert(), accidents)
         db.session.commit()
@@ -356,11 +363,14 @@ def import_to_datastore(directory, provider_code, batch_size):
         vehicles = list(import_vehicles(provider_code=provider_code, **files_from_lms))
         db.session.execute(Vehicle.__table__.insert(), vehicles)
         db.session.commit()
-        took = int((datetime.now() - now).total_seconds())
-        print("imported {0} items from directory: {1} in {2} seconds".format(len(accidents)+len(involved)+len(vehicles),
-                                                                             directory, took))
+
+        total = len(accidents) + len(involved) + len(vehicles)
+        print("\t{0} items in {1}".format(total, time_delta(started)))
+        return total
     except ValueError as e:
-        directories_not_processes[directory] = e.message
+        failed_dirs[directory] = e.message
+        return 0
+
 
 def delete_invalid_entries():
     """
@@ -380,7 +390,7 @@ def get_provider_code(directory_name=None):
 
     ans = ""
     while not ans.isdigit():
-        ans = raw_input("directory provider code is invalid, please enter a valid code: ")
+        ans = raw_input("Directory provider code is invalid. Please enter a valid code: ")
         if ans.isdigit():
             return int(ans)
 
@@ -395,8 +405,9 @@ def main():
     args = parser.parse_args()
 
     if args.specific_folder:
-        dirname = tkFileDialog.askdirectory(initialdir=os.path.abspath(args.path),  title='Please select a directory')
-        dir_list = [dirname]
+        dir_name = tkFileDialog.askdirectory(initialdir=os.path.abspath(args.path),
+                                             title='Please select a directory')
+        dir_list = [dir_name]
         if args.delete_all:
             confirm_delete_all = raw_input("Are you sure you want to delete all the current data? (y/n)\n")
             if confirm_delete_all.lower() == 'n':
@@ -407,22 +418,25 @@ def main():
     # wipe all the Markers and Involved data first
     if args.delete_all:
         tables = (Vehicle, Involved, Marker)
+        print("Deleting tables: " + ", ".join(table.__name__ for table in tables))
         for table in tables:
-            print("deleting table: " + table.__name__)
             db.session.query(table).delete()
             db.session.commit()
 
+    started = datetime.now()
+    total = 0L
     for directory in dir_list:
         parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
         provider_code = args.provider_code if args.provider_code else get_provider_code(parent_directory)
-        import_to_datastore(directory, provider_code, args.batch_size)
+        total += import_to_datastore(directory, provider_code, args.batch_size)
 
     delete_invalid_entries()
 
-    failed = ["{0}: {1}".format(directory, fail_reason) for directory, fail_reason in
-              directories_not_processes.iteritems()]
-    print("finished processing all directories{0}{1}".format(", except: " if failed else "",
+    failed = ["\t'{0}' ({1})".format(directory, fail_reason) for directory, fail_reason in
+              failed_dirs.iteritems()]
+    print("Finished processing all directories{0}{1}".format(", except:\n" if failed else "",
                                                              "\n".join(failed)))
+    print("Total: {0} items in {1}".format(total, time_delta(started)))
 
 if __name__ == "__main__":
     main()

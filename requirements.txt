@@ -19,3 +19,4 @@ Flask-Security==1.7.4
 WTForms==2.0.2
 sendgrid==1.4.0
 futures==2.1.6
+python-dateutil==2.4.2

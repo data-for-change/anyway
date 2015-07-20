@@ -438,10 +438,10 @@ $(function () {
             console.log('Loaded SidebarView');
 
             if (!START_DATE) {
-                START_DATE = '01/01/2013';
+                START_DATE = '01/01/2014';
             }
             if (!END_DATE) {
-                END_DATE = '01/01/2014';
+                END_DATE = '01/01/2015';
             }
             this.$el.find("input.date-range").daterangepicker({
                     /*

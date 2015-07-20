@@ -2,7 +2,8 @@ var INACCURATE_MARKER_OPACITY = 0.5;
 
 var MarkerView = Backbone.View.extend({
     events : {
-        "click .delete-button" : "clickDelete"
+        "click .delete-button" : "clickDelete",
+        "click .accordion-container input" : "accordionInputClick"
     },
     initialize : function(options) {
         this.map = options.map;
@@ -88,7 +89,6 @@ var MarkerView = Backbone.View.extend({
         display_user = 'הלשכה המרכזית לסטטיסטיקה';
         this.$el.find(".added-by").text("מקור: " + display_user);
 
-
         return this;
     },
     getIcon : function() {
@@ -96,7 +96,7 @@ var MarkerView = Backbone.View.extend({
     },
     getTitle : function() {
         if (this.model.get("junction") !== "") {
-        loc = this.model.get("junction")
+        loc = this.model.get("junction");
         }
         else if (this.model.get("secondaryStreet") !== "") {
             loc = "ברחוב " + this.model.get("secondaryStreet") + " פינת " + this.model.get("mainStreet");
@@ -111,7 +111,7 @@ var MarkerView = Backbone.View.extend({
         + moment(this.model.get("created")).format("LL")
         + " תאונה " + SEVERITY_MAP[this.model.get("severity")]
         + " מסוג " + localization.SUG_TEUNA[this.model.get("subtype")] + " "
-        + loc
+        + loc;
     },
     choose : function() {
         if (app.oms.markersNearMarker(this.marker).length) {
@@ -141,7 +141,7 @@ var MarkerView = Backbone.View.extend({
                 break;
 
             case "nums":
-                if (value == "seats" && data[i]["seats"] == 99) { break };
+                if (value == "seats" && data[i]["seats"] == 99) { break; };
                 if ([data[i][value]] != undefined && [data[i][value]] != 0 && [data[i][value]] != -1) {
                     text_line = "<p style=margin:0>" + fields[field] + ": " + data[i][value] + "</p>";
                     that.$el.find("#" + involved_or_vehicles).append(text_line);
@@ -184,7 +184,7 @@ var MarkerView = Backbone.View.extend({
                         that.localize_data(data,"KVUTZAT_OHLUSIYA_LMS","population_type","nums","involved");
                         that.$el.find("#involved").append("<p></p>");
                     }else{
-                        text_line = "<p style=margin:0><strong>פרטי רכב מעורב" + " " + (j) + "</strong></p>"
+                        text_line = "<p style=margin:0><strong>פרטי רכב מעורב" + " " + (j) + "</strong></p>";
                         that.$el.find("#vehicles").append(text_line);
                         that.localize_data(data,"SUG_REHEV_LMS","vehicle_type","vehs","vehicles");
                         that.localize_data(data,"NEFAH","engine_volume","nums","vehicles");
@@ -270,6 +270,28 @@ var MarkerView = Backbone.View.extend({
         this.marker.icon = app.retinaIconsResize(MULTIPLE_ICONS[app.groupsData[group].severity]);
         if (app.groupsData[group].opacity != 'opaque'){
             this.marker.opacity = INACCURATE_MARKER_OPACITY / app.groupsData[group].opacity;
+        }
+    },
+    accordionInputClick : function(e) {
+        var input = e.currentTarget;
+        if (input.checked){
+            var infoWindow = $(input).parents(".marker-info-window");
+            var labelTop = $(input).siblings("label").offset().top;
+            var infoWindowPos = infoWindow.offset().top;
+            var IwHalfHeight = infoWindow.height() / 2;
+            var labelPosRelativeToIw = labelTop - infoWindowPos;
+            if (labelPosRelativeToIw > IwHalfHeight) {
+                var curIwScroll = infoWindow.scrollTop();
+                var labelPos = labelTop - infoWindowPos + curIwScroll;
+
+                setTimeout(function(){
+                    var sectionHeightScroll = $(input).siblings(".accordion-roller").height() + curIwScroll;
+                    var bestScrollTo = sectionHeightScroll < labelPos ? sectionHeightScroll : labelPos;
+                    $(infoWindow).animate({
+                        scrollTop: bestScrollTo
+                    }, 1300);
+                }.bind(this),550);
+            }
         }
     }
 });

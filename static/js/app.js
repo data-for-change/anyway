@@ -342,7 +342,6 @@ $(function () {
 
             var tourDiv = document.createElement('div');
             tourDiv.className = "map-button tour-control blink";
-            tourDiv.title = 'Start Tour';
             tourDiv.innerHTML = $("#tour-control").html();
             google.maps.event.addDomListener(tourDiv, 'click', function () {
                 tourClick();

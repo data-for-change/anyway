@@ -1,19 +1,20 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>ANYWAY - משפיעים בכל דרך</title>
+<head>
+    <title>ANYWAY - משפיעים בכל דרך</title>
 
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="ANYWAY" />
-        <meta property="og:image" content="{{ url }}static/img/logo.png" />
-        <meta property="og:image" content="{{ url }}static/img/icons/vehicle_vehicle_medium.png" />
-        <meta property="og:title" content="ANYWAY - משפיעים בכל דרך" />
-        <meta property="og:description" content="ANYWAY היא הדרך שלנו למנוע את התאונה הבאה. ביחד, נהגים, הולכי רגל, אזרחים ומקבלי החלטות נאבק בתאונות הדרכים." />
-        <meta property="og:url" content="{{ url }}" />
-        <meta property="og:locale" content="he_IL" />
-        <meta property="fb:app_id" content="362934167237010" />
-        <meta property="fb:admins" content="685901228" />
-        <meta name="google-play-app" content="app-id=il.co.anyway.app">
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="ANYWAY"/>
+    <meta property="og:image" content="{{ url }}static/img/logo.png"/>
+    <meta property="og:image" content="{{ url }}static/img/icons/vehicle_vehicle_medium.png"/>
+    <meta property="og:title" content="ANYWAY - משפיעים בכל דרך"/>
+    <meta property="og:description"
+          content="ANYWAY היא הדרך שלנו למנוע את התאונה הבאה. ביחד, נהגים, הולכי רגל, אזרחים ומקבלי החלטות נאבק בתאונות הדרכים."/>
+    <meta property="og:url" content="{{ url }}"/>
+    <meta property="og:locale" content="he_IL"/>
+    <meta property="fb:app_id" content="362934167237010"/>
+    <meta property="fb:admins" content="685901228"/>
+    <meta name="google-play-app" content="app-id=il.co.anyway.app">
 
         <link href="{{ url }}static/img/icon.png" rel="icon" />
         <link href='http://fonts.googleapis.com/css?family=Alef:400,700' rel='stylesheet' type='text/css'>
@@ -24,211 +25,204 @@
             "css/daterangepicker.css",
             "css/accordion.css",
 	    "css/bootstrap-tour.min.css"	 %}
-            <link rel="stylesheet" href="{{ ASSET_URL }}" />
-        {% endassets %}
+    <link rel="stylesheet" href="{{ ASSET_URL }}"/>
+    {% endassets %}
+    <!--// font awesome-->
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    <!--// material design-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
 
-        <!--// font awesome-->
-        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
-        <!--// material design-->
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-    </head>
-
-     <body style="margin: 0; position: relative; width: 100%; height: 100%">
-        
-	
-        <div class='notifications top-left' id="notification"></div>
-        <div id="app">
-		
-	       <div class="navbar navbar-fixed-top">
-                <div class="navbar-inner" id="step1Component" style="padding-right: 10px{{ '; display: none' if map_only }}">
-                    <div style="float: left; padding: 5px">
-                        <div class="fb-like" data-href="{{ url }}" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true" style="vertical-align: middle"></div>
-                        <a href="https://play.google.com/store/apps/details?id=il.co.anyway.app">
-                          <img alt="Android app on Google Play"
-                               src="https://developer.android.com/images/brand/en_app_rgb_wo_45.png"
-                               style="height: 25px; padding: 3px"/>
-                        </a>
-                        <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=F274PRUT6VSAA" target="new">תרמו לנו</a> &#124;
-			<a href="" data-toggle="modal" data-target="#developer-dialog">מפתחים</a> &#124;
-                        <a href="mailto:feedback@anyway.co.il?subject=ANYWAY%20Feedback" target="new">צרו קשר</a> &#124;
-                        <a href="" data-toggle="modal" data-target="#credit-dialog">תודות</a> &#124;
-                        <a href="" data-toggle="modal" data-target="#about-dialog">אודות</a>
-                        <a href="http://www.hasadna.org.il/" title="לדעת להשפיע - מבית הסדנא לידע ציבורי"><img src="/static/img/sadna-logo.png" style="width: 25px; height: 25px; padding: 3px" />
-                        </a>
-
-                        <div class="user-details" style="display: none">
-                            <span class="profile-name"></span>
-                            <img class="profile-picture" style="height: 30px" />
-                            <span class="fb-logout"><a class="btn" style="margin-top: 0">יציאה</a></span>
-                        </div>
-                    </div>
-
-                    <a class="brand" href="/"> beta <img src="/static/img/anyway.png" style="height: 26px">
-                </a>
+<body style="margin: 0; position: relative; width: 100%; height: 100%">
+<div class='notifications top-left' id="notification"></div>
+<div id="app">
+    <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner" id="step1Component" style="padding-right: 10px{{ '; display: none' if map_only }}">
+            <div style="float: left">
+                <div class="user-details" style="display: none">
+                    <span class="profile-name"></span>
+                    <img class="profile-picture" style="height: 30px"/>
+                    <span class="fb-logout"><a class="btn" style="margin-top: 0">יציאה</a></span>
                 </div>
             </div>
+            <a class="brand" href="/"> beta <img src="/static/img/anyway.png" style="height: 26px">
+            </a>
+        </div>
+    </div>
 
+    <div class="main"
+         style="position: fixed; width: 100%; height: 100%; box-sizing: border-box{{ '; padding-top: 40px; padding-right: 300px; padding-bottom: 40px' if not map_only }}">
+        <div id="map_canvas" style="width: 100%; height: 100%; box-sizing: border-box"></div>
+        <input id="pac-input" class="controls" type="text" placeholder="חפש מיקום"
+               style="{{ 'display: block' if map_only }}">
 
-            <div class="main" style="position: fixed; width: 100%; height: 100%; box-sizing: border-box{{ '; padding-top: 40px; padding-right: 250px' if not map_only }}">
-                <div id="map_canvas" style="width: 100%; height: 100%; box-sizing: border-box"></div>
-                <input id="pac-input" class="controls" type="text" placeholder="חפש מיקום" style="{{ 'display: block' if map_only }}">
-                <div id="map-control">
-                    <div id="reset-map-control"></div>
-                    <div id="download-csv-control"></div>
-                    <div id="link-map-control"></div>
-                    <div id="tour-control"></div>
-                </div>
-            </div>
-            <div id="step2Component" class="sidebar-container" style="position: absolute; right: 0; top: 0;
-            bottom: 0; width: 250px; background: white; padding-top: 40px;
+        <div id="map-control">
+            <div id="reset-map-control"></div>
+            <div id="download-csv-control"></div>
+            <div id="link-map-control"></div>
+            <div id="tour-control"></div>
+        </div>
+    </div>
+    <div id="step2Component" class="sidebar-container" style="position: absolute; right: 0; top: 0;
+            bottom: 40px; width: 300px; background: white; padding-top: 40px;
             {{ 'display: none' if map_only }}">
-                <!--
-            <ul class="nav nav-list">
-              <li class="active"><a href="#"><i class="icon-home icon-white"></i> Home</a></li>
-              <li><a href="#"><i class="icon-book"></i> Library</a></li>
-              <li><a href="#"><i class="icon-pencil"></i> Applications</a></li>
-              <li><a href="#"><i class="i"></i> Misc</a></li>
-            </ul>
-            -->
-            </div>
-        </div>
-
-        <div class="modal hide fade" id="embed">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h3>שיתוף המפה ומאפייניה</h3>
-            </div>
-            <div class="modal-body">
-                <div class="embed-code">
-                    <label for="map_link">קישור לתצוגה הנוכחית</label>
-                    <input id="map_link" type="text" class="form-control form-control-wide" value="" placeholder="">
-                    <button class="btn btn-default js-btn-copytoclipboard" data-copy="map_link" style="float: left;" type="button">סמן טקסט</button>
-                </div>
-                <div class="embed-code">
-                    <label for="iframe_link">קוד לשילוב המפה בדפי אינטרנט</label>
-                    <textarea id="iframe_link" class="form-control form-control-wide"></textarea>
-                    <button class="btn btn-default js-btn-copytoclipboard" data-copy="iframe_link" style="float: left;" type="button">סמן טקסט</button>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <a class="btn close-button" data-dismiss="modal" aria-hidden="true">סגור</a>
-            </div>
-        </div>
-
-        <div class="modal hide fade" id="developer-dialog">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h3>הצטרפו לצוות הפיתוח!</h3>
-            </div>
-            <div class="modal-body">
-            ANYWAY הוא פרויקט שנכתב בקוד פתוח ואנו שמחים להרחיב את משפחת המפתחים שלנו.
-
-אנחנו משתמשים ב-Python עם Flask, ו-Javascript עם Backbone.js ו-jQuery. 
-<br/>
-<br/>
-<a href="https://github.com/hasadna/anyway">הקוד שלנו</a> נמצא ב-GitHub,
-וגם של <a href="https://github.com/hasadna/anywayAndroidApp">אפליקציית האנדרואיד שלנו</a>.
-<br/>
-מוזמנים ליצור קשר
-<a href="mailto:gal@anyway.co.il?subject=Developers" target="new">במייל</a>
-לפרטים נוספים ולהצטרפות לצוות.
+    </div>
 </div>
-            <div class="modal-footer">
-                <a class="btn close-button" data-dismiss="modal" aria-hidden="true">סגור</a>
-            </div>
+
+<div class="modal hide fade" id="embed">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>שיתוף המפה ומאפייניה</h3>
+    </div>
+    <div class="modal-body">
+        <div class="embed-code">
+            <label for="map_link">קישור לתצוגה הנוכחית</label>
+            <input id="map_link" type="text" class="form-control form-control-wide" value="" placeholder="">
+            <button class="btn btn-default js-btn-copytoclipboard" data-copy="map_link" style="float: left;"
+                    type="button">העתק
+            </button>
         </div>
-
-        <div class="modal hide fade" id="credit-dialog">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h3>תודות</h3>
-            </div>
-            <div class="modal-body">
-תודות:
-<br/>
-עידן אלמוג - שעזר להצמיח כנפיים
-<br/>
-רון רייטר - על כתיבת הקוד הראשוני ועל מסירותו לפרויקט.
-<br/>
-אומרי באומר - על עזרתו ועל עצות יקרות ערך
-<br/>
-אריאל הלוי - על ייעוץ אסטרטגי יקר ערך
-<br/>
-ליאור צורף - על תמיכתו בשלבים הקריטיים של הפרויקט ותרומתו המקצועית
-<br/>
-הנס שקור - על תרומתו הנדיבה של הדומיין www.anyway.co.il
-<br/>
-המרכז הבינתחומי הרצליה
-<br/>
-<br/>
-שגיא מנשה, גיא חרץ, טל יפה, לביא מלמן, גיל לופו, ח״כ תמר זנדברג, עוזי בלומר, תומר סלוצקי
-            </div>
-            <div class="modal-footer">
-                <a class="btn close-button" data-dismiss="modal" aria-hidden="true">סגור</a>
-            </div>
+        <div class="embed-code">
+            <label for="iframe_link">קוד לשילוב המפה בדפי אינטרנט</label>
+            <textarea id="iframe_link" class="form-control form-control-wide"></textarea>
+            <button class="btn btn-default js-btn-copytoclipboard" data-copy="iframe_link" style="float: left;"
+                    type="button">העתק
+            </button>
         </div>
+    </div>
+    <div class="modal-footer">
+        <a class="btn close-button" data-dismiss="modal" aria-hidden="true">סגור</a>
+    </div>
+</div>
 
-        <div class="modal hide fade" id="about-dialog" style="overflow-x: hidden;">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h3>אודות ANYWAY</h3>
-            </div>
-            <div class="modal-body row-fluid">
-              <div class="span8">
-                ANYWAY היא הדרך שלנו למנוע את התאונה הבאה. ביחד, נהגים, הולכי רגל, אזרחים ומקבלי החלטות נאבק בתאונות הדרכים.
-                <br/>
-                <br/>
-                ANYWAY מציגה על גבי מפה תאונות דרכים עם נפגעים (ע״פ נתוני הלשכה המרכזית לסטטיסטיקה). בהמשך, יתווסף מידע נוסף למפה וכן תתאפשר יכולת לפתח דיונים מבוססי מיקום על פתרונות אפשריים והתארגנות אזרחית. באמצעות ידע זמין, נגיש ושקוף אנו שואפים להעלות את המודעות לנושא תאונות הדרכים ולהעצים את יכולת ההשפעה של כל אחד ואחת על הסביבה הקרובה- הבית, השכונה, בית הספר של הילדים, מקום העבודה ועוד- על ידי פעולה משותפת בקהילה. אנחנו מאמינים שבעזרת ידע ציבורי קיים המוצג באתר יווצרו ידע ותובנות חדשים. שיתוף הידע הזה יאפשר לחברה האזרחית להתארגן לפעולה אקטיבית ולהזרים הצעות, רעיונות והתראות בחזרה אל הרשויות.
-                <br/>
-                <br/>
-                ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לידע ציבורי ונבנה על ידי מתנדבים.
-                <br/>
-                <br/>
-                חברי הצוות:
-                רון רייטר, שגיא סמולרסקי, דניאל הרשקוביץ, מיכל טננברג, ראובן יגל, יוסי אטיאס, עומרי בהומי, עודד לזר, עומר שכטר, דרור ברן, יבגני נמזר, יוני לימור, משה נחמיאס, שי בר לב, עדי הורביץ, נחום קשב, אושרי וייס, שמואל רגב, אגם אלוני, אבי קליימן.
-                <br/>
-                <br/>
-                <a href="http://www.hasadna.org.il/%D7%94%D7%9E%D7%A2%D7%91%D7%93%D7%94-%D7%A9%D7%9C%D7%A0%D7%95/anyway-%D7%9E%D7%A9%D7%A4%D7%99%D7%A2%D7%99%D7%9D-%D7%A2%D7%9C-%D7%94%D7%93%D7%A8%D7%9A/">למידע נוסף: העמוד שלנו באתר הסדנה לידע ציבורי</a>
-              </div>
-              <div class="span3 pagination-centered">
-                <!-- Facebook Badge START --><a href="https://www.facebook.com/anywayisrael" title="Anyway - &#x5e9;&#x5d9;&#x5e0;&#x5d5;&#x5d9; &#x5d1;&#x5db;&#x5dc; &#x5d3;&#x5e8;&#x5da;" style="font-family: &quot;lucida grande&quot;,tahoma,verdana,arial,sans-serif; font-size: 11px; font-variant: normal; font-style: normal; font-weight: normal; color: #3B5998; text-decoration: none;" target="_TOP">Anyway - שינוי בכל דרך</a><br /><a href="https://www.facebook.com/anywayisrael" title="Anyway - &#x5e9;&#x5d9;&#x5e0;&#x5d5;&#x5d9; &#x5d1;&#x5db;&#x5dc; &#x5d3;&#x5e8;&#x5da;" target="_TOP"><img class="img" src="https://badge.facebook.com/badge/170360636482927.286.469049763.png" style="border: 0px;" alt="" /></a><br /><!-- Facebook Badge END -->
-                <br/>
-                <a href="https://play.google.com/store/apps/details?id=il.co.anyway.app">
-                  <img alt="Android app on Google Play"
-                       src="https://developer.android.com/images/brand/en_app_rgb_wo_60.png"
-                       style="height: 40px; padding: 3px"/>
-                </a>
-              </div>
-            </div>
-            <div class="modal-footer">
-                <a class="btn close-button" data-dismiss="modal" aria-hidden="true">סגור</a>
-            </div>
+<div class="modal hide fade" id="developer-dialog">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>הצטרפו לצוות הפיתוח!</h3>
+    </div>
+    <div class="modal-body">
+        ANYWAY הוא פרויקט שנכתב בקוד פתוח ואנו שמחים להרחיב את משפחת המפתחים שלנו.
+
+        אנחנו משתמשים ב-Python עם Flask, ו-Javascript עם Backbone.js ו-jQuery.
+        <br/>
+        <br/>
+        <a href="https://github.com/hasadna/anyway">הקוד שלנו</a> נמצא ב-GitHub,
+        וגם של <a href="https://github.com/hasadna/anywayAndroidApp">אפליקציית האנדרואיד שלנו</a>.
+        <br/>
+        מוזמנים ליצור קשר
+        <a href="mailto:gal@anyway.co.il?subject=Developers" target="new">במייל</a>
+        לפרטים נוספים ולהצטרפות לצוות.
+    </div>
+    <div class="modal-footer">
+        <a class="btn close-button" data-dismiss="modal" aria-hidden="true">סגור</a>
+    </div>
+</div>
+
+<div class="modal hide fade" id="credit-dialog">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>תודות</h3>
+    </div>
+    <div class="modal-body">
+        תודות:
+        <br/>
+        עידן אלמוג - שעזר להצמיח כנפיים
+        <br/>
+        רון רייטר - על כתיבת הקוד הראשוני ועל מסירותו לפרויקט.
+        <br/>
+        אומרי באומר - על עזרתו ועל עצות יקרות ערך
+        <br/>
+        אריאל הלוי - על ייעוץ אסטרטגי יקר ערך
+        <br/>
+        ליאור צורף - על תמיכתו בשלבים הקריטיים של הפרויקט ותרומתו המקצועית
+        <br/>
+        הנס שקור - על תרומתו הנדיבה של הדומיין www.anyway.co.il
+        <br/>
+        המרכז הבינתחומי הרצליה
+        <br/>
+        <br/>
+        שגיא מנשה, גיא חרץ, טל יפה, לביא מלמן, גיל לופו, ח״כ תמר זנדברג, עוזי בלומר, תומר סלוצקי
+    </div>
+    <div class="modal-footer">
+        <a class="btn close-button" data-dismiss="modal" aria-hidden="true">סגור</a>
+    </div>
+</div>
+
+<div class="modal hide fade" id="about-dialog" style="overflow-x: hidden;">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>אודות ANYWAY</h3>
+    </div>
+    <div class="modal-body row-fluid">
+        <div class="span8">
+            ANYWAY היא הדרך שלנו למנוע את התאונה הבאה. ביחד, נהגים, הולכי רגל, אזרחים ומקבלי החלטות נאבק בתאונות הדרכים.
+            <br/>
+            <br/>
+            ANYWAY מציגה על גבי מפה תאונות דרכים עם נפגעים (ע״פ נתוני הלשכה המרכזית לסטטיסטיקה). בהמשך, יתווסף מידע נוסף
+            למפה וכן תתאפשר יכולת לפתח דיונים מבוססי מיקום על פתרונות אפשריים והתארגנות אזרחית. באמצעות ידע זמין, נגיש
+            ושקוף אנו שואפים להעלות את המודעות לנושא תאונות הדרכים ולהעצים את יכולת ההשפעה של כל אחד ואחת על הסביבה
+            הקרובה- הבית, השכונה, בית הספר של הילדים, מקום העבודה ועוד- על ידי פעולה משותפת בקהילה. אנחנו מאמינים שבעזרת
+            ידע ציבורי קיים המוצג באתר יווצרו ידע ותובנות חדשים. שיתוף הידע הזה יאפשר לחברה האזרחית להתארגן לפעולה
+            אקטיבית ולהזרים הצעות, רעיונות והתראות בחזרה אל הרשויות.
+            <br/>
+            <br/>
+            ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לידע ציבורי ונבנה על ידי מתנדבים.
+            <br/>
+            <br/>
+            חברי הצוות:
+            רון רייטר, שגיא סמולרסקי, דניאל הרשקוביץ, מיכל טננברג, ראובן יגל, יוסי אטיאס, עומרי בהומי, עודד לזר, עומר
+            שכטר, דרור ברן, יבגני נמזר, יוני לימור, משה נחמיאס, שי בר לב, עדי הורביץ, נחום קשב, אושרי וייס, שמואל רגב,
+            אגם אלוני, אבי קליימן.
+            <br/>
+            <br/>
+            <a href="http://www.hasadna.org.il/%D7%94%D7%9E%D7%A2%D7%91%D7%93%D7%94-%D7%A9%D7%9C%D7%A0%D7%95/anyway-%D7%9E%D7%A9%D7%A4%D7%99%D7%A2%D7%99%D7%9D-%D7%A2%D7%9C-%D7%94%D7%93%D7%A8%D7%9A/">למידע
+                נוסף: העמוד שלנו באתר הסדנה לידע ציבורי</a>
         </div>
-
-
-        <div class="modal hide fade" id="empty-csv-dialog">
-            <div class="modal-header">
-                <h3>אופס</h3>
-            </div>
-            <div class="modal-body">
-                נראה שאין תאונות על המפה כרגע.
-                <br/>
-                יש לגרור את המפה אל אזור המכיל תאונות ולנסות שנית.
-            </div>
-            <div class="modal-footer">
-                <a class="btn close-button" data-dismiss="modal" aria-hidden="true">סגור</a>
-            </div>
+        <div class="span3 pagination-centered">
+            <!-- Facebook Badge START --><a href="https://www.facebook.com/anywayisrael"
+                                            title="Anyway - &#x5e9;&#x5d9;&#x5e0;&#x5d5;&#x5d9; &#x5d1;&#x5db;&#x5dc; &#x5d3;&#x5e8;&#x5da;"
+                                            style="font-family: &quot;lucida grande&quot;,tahoma,verdana,arial,sans-serif; font-size: 11px; font-variant: normal; font-style: normal; font-weight: normal; color: #3B5998; text-decoration: none;"
+                                            target="_TOP">Anyway - שינוי בכל דרך</a><br/><a
+                href="https://www.facebook.com/anywayisrael"
+                title="Anyway - &#x5e9;&#x5d9;&#x5e0;&#x5d5;&#x5d9; &#x5d1;&#x5db;&#x5dc; &#x5d3;&#x5e8;&#x5da;"
+                target="_TOP"><img class="img" src="https://badge.facebook.com/badge/170360636482927.286.469049763.png"
+                                   style="border: 0px;" alt=""/></a><br/><!-- Facebook Badge END -->
+            <br/>
+            <a href="https://play.google.com/store/apps/details?id=il.co.anyway.app">
+                <img alt="Android app on Google Play"
+                     src="https://developer.android.com/images/brand/en_app_rgb_wo_60.png"
+                     style="height: 40px; padding: 3px"/>
+            </a>
         </div>
+    </div>
+    <div class="modal-footer">
+        <a class="btn close-button" data-dismiss="modal" aria-hidden="true">סגור</a>
+    </div>
+</div>
 
-        <div class="modal hide fade" id="discussion-dialog">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h3>דיון</h3>
-            </div>
-            <div class="modal-body">
-                <div id="disqus_thread"></div>
-                <script type="text/javascript">
+
+<div class="modal hide fade" id="empty-csv-dialog">
+    <div class="modal-header">
+        <h3>אופס</h3>
+    </div>
+    <div class="modal-body">
+        נראה שאין תאונות על המפה כרגע.
+        <br/>
+        יש לגרור את המפה אל אזור המכיל תאונות ולנסות שנית.
+    </div>
+    <div class="modal-footer">
+        <a class="btn close-button" data-dismiss="modal" aria-hidden="true">סגור</a>
+    </div>
+</div>
+
+<div class="modal hide fade" id="discussion-dialog">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>דיון</h3>
+    </div>
+    <div class="modal-body">
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
                     /* * * CONFIGURATION VARIABLES * * */
                     var disqus_shortname = 'anyway-feedback';
                     function disqus_config() {
@@ -245,222 +239,395 @@
                         dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
                         (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
                     })();
-                </script>
-            </div>
-            <div class="modal-footer">
-                <a class="btn close-button" data-dismiss="modal" aria-hidden="true">סגור</a>
-            </div>
-        </div>
 
-
-        <div id="marker-content-template" style="display: none">
-            <div class="marker-info-window" style="overflow-y: auto; overflow-x: hidden; height: 370px;">
-                <img class="profile-image" style="float: left" />
-                <h4 class="title"></h4>
-                <p class="added-by"></p>
-                <p class="creation-date"></p>
-
-                <div class="accordion-container">
-                    <div>
-                        <input id="ac-1" type="checkbox" />
-                        <label for="ac-1"><i class="material-icons fontIcon">&#xE002;</i>פרטי התאונה</label>
-                        <div class="accordion-roller ac-general">
-                            <p class="severityText" style="margin:0"></p>
-                            <p class="accidentType" style="margin:0"></p>
-                            <p class="road_object" style="margin:0"></p>
-                            <p class="object_distance" style="margin:0"></p>
-                            <p class="didnt_cross" style="margin:0"></p>
-                            <p class="cross_mode" style="margin:0"></p>
-                        </div>
-                    </div>
-                    <div>
-                        <input id="ac-2" type="checkbox" />
-                        <label for="ac-2"><i class="fa fa-road fontIcon" id="fa-road-fix"></i>תנאי הדרך</label>
-                        <div class="accordion-roller ac-general">
-                            <p class="roadType" style="margin:0"></p>
-                            <p class="roadShape" style="margin:0"></p>
-                            <p class="one_lane" style="margin:0"></p>
-                            <p class="multi_lane" style="margin:0"></p>
-                            <p class="speed_limit" style="margin:0"></p>
-                            <p class="intactness" style="margin:0"></p>
-                            <p class="road_width" style="margin:0"></p>
-                            <p class="road_sign" style="margin:0"></p>
-                            <p class="road_light" style="margin:0"></p>
-                            <p class="road_control" style="margin:0"></p>
-                            <p class="weather" style="margin:0"></p>
-                            <p class="road_surface" style="margin:0"></p>
-                            <p class="cross_location" style="margin:0"></p>
-                            <p class="cross_direction" style="margin:0"></p>
-                        </div>
-                    </div>
-                    <div>
-                        <input id="ac-3" type="checkbox" />
-                        <label for="ac-3"><i class="material-icons fontIcon">&#xE55F;</i>מיקום וזמן</label>
-                        <div class="accordion-roller ac-general">
-                            <p class="dayType" style="margin:0"></p>
-                            <p class="mainStreet" style="margin:0"></p>
-                            <p class="secondaryStreet" style="margin:0"></p>
-                            <p class="junction" style="margin:0"></p>
-                        </div>
-                    </div>
-                    <div>
-                        <input id="ac-4" type="checkbox" />
-                        <label for="ac-4"><i class="material-icons fontIcon">&#xE7FB;</i>נפגעים</label>
-                        <div class="accordion-roller ac-extra-large" id="involved">
-                            
-                        </div>
-                    </div>
-                    <div>
-                        <input id="ac-5" type="checkbox" />
-                        <label for="ac-5"><i class="material-icons fontIcon">&#xE531;</i>רכבים מעורבים</label>
-                        <div class="accordion-roller ac-general" id="vehicles">
-
-                        </div>
-                    </div>
-                    <div>
-                        <input id="ac-6" type="checkbox" />
-                        <label for="ac-6"><i class="material-icons fontIcon">&#xE145;</i>מידע נוסף</label>
-                        <div class="accordion-roller ac-general">
-                            <p class="igun" style="margin:0"></p>
-                            <p class="unit" style="margin:0"></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-         </div>
-
-
-        <div id="feature-dialog-template" style="display: none">
-            <div class="modal hide fade">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h3>עדכן אותי כשתכונות חדשות יהיו זמינות</h3>
-                    <h5> אנו מפתחים תכונות חדשות לאתר. הנך מוזמנ/ת להשאיר פרטים על מנת שנוכל לעדכן אותך ברגע שתכונות חדשות יהיו זמינות </h5>
-                </div>
-                <div class="modal-body">
-                    <form class="form-horizontal">
-                        <div class="control-group">
-                            <div class="controls">
-                                שם פרטי:
-                                <input type="text" id="fName" name="fName" placeholder="שם פרטי">
-                            </div>
-                            <div class="controls">
-                                שם משפחה:
-                                <input type="text" id="lName" name="lName" placeholder="שם משפחה">
-                            </div>
-                            <div class="controls">
-                                דואר אלקטרוני:
-                                <input type="email" id="emailAddress" name="emailAddress" placeholder="דואר אלקטרוני">
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <a class="btn close-button">סגור</a>
-                    <a class="btn btn-primary save-button">שליחה</a>
-                </div>
-            </div>
-        </div>
-
-
-        <div id="sidebar-template" style="display: none">
-            <div class="sidebar-title">סינון לפי חומרה</div>
-            <ul id="step3tour">
-                <li data-toggle="tooltip" data-placement="left" title="תאונות דרכים שנהרג בהן אדם אחד לפחות או נפצע בהן אדם אחד לפחות ונפטר מפצעיו תוך 30 יום."><img class="checkbox-severity" data-type="1" data-checked="true" /> תאונות קטלניות</li>
-                <li data-toggle="tooltip" data-placement="left" title="תאונות דרכים שנפצע בהן קשה אדם אחד לפחות, ושלא נהרג בהן שום אדם."><img class="checkbox-severity" data-type="2" data-checked="true" /> תאונות קשות</li>
-                <li data-toggle="tooltip" data-placement="left" title="תאונות דרכים שנפצע בהן קל אדם אחד לפחות, ושלא נהרג בהן או נפצע בהן קשה שום אדם."><img class="checkbox-severity" data-type="3" data-checked="true" /> תאונות קלות</li>
-                <li><img class="checkbox-accuracy" data-type="4" data-checked="false" /> תאונות שמיקומן משוער</li>
-
-            </ul>
-            <div class="sidebar-title">סינון לפי טווח תאריכים</div>
-            <ul id="step4tour">
-                <li>
-                    <div class="input-prepend" id="calendar-control">
-                        <span class="add-on"><i class="icon-calendar date-range"></i></span>
-                        <input id="step4tourInput" type="text" class="date-range" style="width: 200px" />
-                    </div>
-
-                </li>
-
-            </ul>
-
-            <div class="sidebar-title">סינון דיונים ותאונות</div>
-            <ul>
-                <li style="height: 30px">
-                    <div class="input-append dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                            <span class="add-on" style="border: 1px solid #ccc; border-radius: 3px 3px 0 0; margin-left:-1px"><i class="icon-filter"></i></span>
-                            <input id="view-filter" value="הצג תאונות ודיונים" style="padding-right:7px; border: 1px solid #ccc; height:26px; width:204px; border-radius: 0 0 3px 3px; position:absolute;"/>
-                        </a>
-                        <div class="daterangepicker dropdown-menu opensleft" style="right: 26px; left: auto; top:auto;">
-                            <div class="ranges" style="margin-bottom: -4px !important">
-                                <ul style="list-style: none; margin: 0; padding: 0; direction:rtl">
-                                    <li onclick="load('all')">הצג הכל</li>
-                                    <li onclick="load('accidents_only')">הצג תאונות בלבד</li>
-                                    <li onclick="load('discussions_only')">הצג דיונים בלבד</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </li>
-            </ul>
-
-            <div style="width: 100%; display: table">
-                <div style="display: table-row">
-                    <div class="sidebar-title" style="display: table-cell">תאונות המוצגות על המפה</div>
-                    <div class="sidebar-title current-view-count" style="display: table-cell"></div>
-                </div>
-            </div>
-            <div style="overflow-y: scroll; position: absolute; top: 340px; bottom: 0px; width: 100%" id="step6tour">
-                <ul class="current-view"></ul>
-            </div>
-        </div>
-        <div id="fb-root"></div>
-        <script type="text/html" id="sidebarItemTemplate">
-            <li>
-                <a>
-                    <span class="icon"><img src="<%- icon %>" style="height: 2em;"/></span>
-                    <span class="date"><%- created %></span> - <span class="type"><%- type %></span>
-                </a>
-            </li>
         </script>
+    </div>
+    <div class="modal-footer">
+        <a class="btn close-button" data-dismiss="modal" aria-hidden="true">סגור</a>
+    </div>
+</div>
 
-        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBpOmft-UskZsAQth9vNl0fN6EXaRR6dZc&sensor=true&libraries=places&language=iw"></script>
-        {% assets filters="rjsmin", output="js/app.min.js",
-            "js/libs/jquery-1.8.2.min.js",
-            "js/libs/spin.min.js",
-            "js/libs/jquery.spin.js",
-            "js/libs/oms.min.js",
-            "js/libs/markerclusterer.js",
-            "js/markerClustererAugment.js",
-            "js/libs/underscore.js",
-            "js/libs/backbone.js",
-            "js/libs/bootstrap.js",
-            "js/libs/notify-combined.min.js",
-            "js/libs/moment-with-langs.min.js",
-            "js/libs/date.js",
-            "js/libs/daterangepicker.js",
-            "js/libs/js-itm.js",
-            "js/constants.js",
-            "js/marker.js",
-            "js/clusterView.js",
-            "js/featuredialog.js",
-            "js/sidebar.js",
-            "js/contextmenu.js",
-            "js/map_style.js",
-            "js/clipboard.js",
-            "js/libs/bootstrap-tour.min.js",
-            "js/app.js",
-            "js/localization.js",
-            "js/years.js",
-            "js/inv_dict.js",
-            "js/veh_dict.js",
-            "js/retina.js"
-             %}
-            <script type="text/javascript" src="{{ ASSET_URL }}"></script>
-        {% endassets %}
+<div id="marker-content-template" style="display: none">
+    <img class="profile-image" style="float: left"/>
+    <h4 class="title"></h4>
+    <p class="added-by"></p>
+    <p class="creation-date"></p>
+    <p class="roadType" style="margin:0"></p>
+    <p class="accidentType" style="margin:0"></p>
+    <p class="roadShape" style="margin:0"></p>
+    <p class="severityText" style="margin:0"></p>
+    <p class="dayType" style="margin:0"></p>
+    <p class="igun" style="margin:0"></p>
+    <p class="unit" style="margin:0"></p>
+    <p class="one_lane" style="margin:0"></p>
+    <p class="multi_lane" style="margin:0"></p>
+    <p class="speed_limit" style="margin:0"></p>
+    <p class="intactness" style="margin:0"></p>
+    <p class="road_width" style="margin:0"></p>
+    <p class="road_sign" style="margin:0"></p>
+    <p class="road_light" style="margin:0"></p>
+    <p class="road_control" style="margin:0"></p>
+    <p class="weather" style="margin:0"></p>
+    <p class="road_surface" style="margin:0"></p>
+    <p class="road_object" style="margin:0"></p>
+    <p class="object_distance" style="margin:0"></p>
+    <p class="didnt_cross" style="margin:0"></p>
+    <p class="cross_mode" style="margin:0"></p>
+    <p class="cross_location" style="margin:0"></p>
+    <p class="cross_direction" style="margin:0"></p>
+    <p class="mainStreet" style="margin:0"></p>
+    <p class="secondaryStreet" style="margin:0"></p>
+    <p class="junction" style="margin:0"></p>
+    <p></p>
+</div>
 
-        <script type="text/javascript">
+
+<div id="feature-dialog-template" style="display: none">
+    <div class="modal hide fade">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3>עדכן אותי כשתכונות חדשות יהיו זמינות</h3>
+            <h5> אנו מפתחים תכונות חדשות לאתר. הנך מוזמנ/ת להשאיר פרטים על מנת שנוכל לעדכן אותך ברגע שתכונות חדשות יהיו
+                זמינות </h5>
+        </div>
+        <div class="modal-body">
+            <form class="form-horizontal">
+                <div class="control-group">
+                    <div class="controls">
+                        שם פרטי:
+                        <input type="text" id="fName" name="fName" placeholder="שם פרטי">
+                    </div>
+                    <div class="controls">
+                        שם משפחה:
+                        <input type="text" id="lName" name="lName" placeholder="שם משפחה">
+                    </div>
+                    <div class="controls">
+                        דואר אלקטרוני:
+                        <input type="email" id="emailAddress" name="emailAddress" placeholder="דואר אלקטרוני">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <a class="btn close-button">סגור</a>
+            <a class="btn btn-primary save-button">שליחה</a>
+        </div>
+    </div>
+</div>
+
+<div id="sidebar-template" style="display: none">
+    <!--<div class="filter-description">-->
+        <!--<span class="current-view-count"></span>-->
+    <!--</div>-->
+    <div class="filter-menu">
+         <!-- FILTER MARKERS-->
+        <input id="filter-markers" type="radio" name="grp" checked="checked"/>
+        <label class="filter-button" for="filter-markers">
+            <i class="fa fa-map-marker" style="margin-top: 6px !important;">
+                <p style="font-size: 8px !important; margin: 4px !important">תוצאות</p>
+            </i>
+        </label>
+        <div class="filter-panel" id="step6tour">
+            <div class="btn-wrap separator">
+                <span class="btn-label">מציג:</span>
+                <button class="btn two right">תאונות</button>
+                <button class="btn two left">דיונים</button>
+            </div>
+            <ul class="current-view"></ul>
+            <div class="filter-shadow"></div>
+        </div>
+        <!-- FILTER INFO (HOMRA)-->
+        <input id="filter-info" type="radio" name="grp" checked="checked"/>
+        <label class="filter-button" for="filter-info">
+            <i class="fa fa-warning" style="margin-top: 6px !important;">
+                <p style="font-size: 8px !important; margin: 4px !important">פרטים</p>
+            </i>
+        </label>
+        <div class="filter-panel">
+            <div class="btn-wrap separator">
+                <span class="btn-label">מיקום:</span>
+                <button class="btn two right">מדויק</button>
+                <button class="btn two left">משוער</button>
+            </div>
+            <div class="btn-wrap separator">
+                <span class="btn-label">חומרה:</span>
+                <button class="btn three right fatal">קטלניות</button>
+                <button class="btn three middle severe">קשות</button>
+                <button class="btn three left light">קלות</button>
+            </div>
+            <div class="btn-wrap">
+                <span class="btn-label">דרך:</span>
+                <button class="btn two right">עירוני</button>
+                <button class="btn two left">לא עירוני</button>
+            </div>
+            <div class="btn-wrap center">
+                <button class="btn two right">בצומת</button>
+                <button class="btn two left">לא בצומת</button>
+            </div>
+            <div class="btn-wrap separator center">
+                <button class="btn two right">דו-סטרי</button>
+                <button class="btn two left">חד-סטרי</button>
+            </div>
+        </div>
+        <!-- FILTER TIME (ZMAN)-->
+        <input id="filter-date" type="radio" name="grp" checked="checked"/>
+        <label class="filter-button" for="filter-date">
+            <i class="fa fa-calendar" style="margin-top: 6px !important;">
+                <p style="font-size: 8px !important; margin: 4px !important">תאריך</p>
+            </i>
+        </label>
+        <div class="filter-panel">
+            <div class="btn-wrap">
+                <span class="btn-label">תקופה:</span>
+                <button class="btn one">2015</button>
+                <button class="btn one">2014</button>
+                <button class="btn one">2013</button>
+                <button class="btn one">2012</button>
+                <button class="btn one">2011</button>
+            </div>
+            <div class="btn-wrap separator" style="margin-right: 0;">
+                <input class="btn date" type="date" style="margin-right: 6px;">
+                <span class="btn-label" style="margin-right: 6px;">עד</span>
+                <input class="btn date" type="date">
+            </div>
+            <div class="btn-wrap separator">
+                <span class="btn-label">יום:</span>
+                <button class="btn one">א׳</button>
+                <button class="btn one">ב׳</button>
+                <button class="btn one">ג׳</button>
+                <button class="btn one">ד׳</button>
+                <button class="btn one">ה׳</button>
+                <button class="btn one">ו׳</button>
+                <button class="btn one">ש׳</button>
+            </div>
+            <div class="btn-wrap">
+                <span class="btn-label">זמן:</span>
+                <button class="btn one icon-weather">B</button>
+                <button class="btn one">בוקר</button>
+                <button class="btn one">צהריים</button>
+                <button class="btn one">אחה״צ</button>
+            </div>
+            <div class="btn-wrap" style="margin-right: 28px">
+                <button class="btn one icon-weather">C</button>
+                <button class="btn one">ערב</button>
+                <button class="btn one">לילה</button>
+                <button class="btn one">לפנות בוקר</button>
+            </div>
+            <div class="btn-wrap separator" style="margin-right: 0;">
+                <input class="btn time" type="time" style="margin-right: 6px;">
+                <span class="btn-label" style="margin-right: 6px;">עד</span>
+                <input class="btn time" type="time">
+            </div>
+            <div class="btn-wrap separator">
+                <span class="btn-label">מועד:</span>
+                <button class="btn one">יום חול</button>
+                <button class="btn one">ערב חג</button>
+                <button class="btn one">חג</button>
+                <button class="btn one">חול המועד</button>
+            </div>
+        </div>
+        <!-- FILTER CONDITIONS (TNAIM)-->
+        <input id="filter-conditions" type="radio" name="grp" checked="checked"/>
+        <label class="filter-button" for="filter-conditions">
+            <i class="fa fa-road" style="margin-top: 6px !important;">
+                <p style="font-size: 8px !important; margin: 4px !important">תנאים</p>
+            </i>
+        </label>
+        <div class="filter-panel">
+            <div class="btn-wrap">
+                <span class="btn-label">מזג-אויר:</span>
+                <button class="btn one">הכל</button>
+                <button class="btn one icon-weather">B</button>
+                <button class="btn one icon-weather">H</button>
+                <button class="btn one icon-weather">Y</button>
+                <button class="btn one icon-weather">F</button>
+            </div>
+            <div class="btn-wrap separator center">
+                <button class="btn one icon-weather">R</button>
+                <button class="btn one icon-weather">O</button>
+                <button class="btn one icon-weather">W</button>
+                <button class="btn one icon-weather">X</button>
+                <button class="btn one icon-weather">(</button>
+            </div>
+            <div class="btn-wrap">
+                <span class="btn-label">צורת דרך:</span>
+                <button class="btn one">הכל</button>
+                <button class="btn one">כביש ישר/צומת</button>
+            </div>
+            <div class="btn-wrap center">
+                <button class="btn one">עקום חד</button>
+                <button class="btn one">מ.חניה/ת. דלק</button>
+                <button class="btn one">שיפוע תלול</button>
+            </div>
+            <div class="btn-wrap center">
+                <button class="btn one">על גשר/מנהרה</button>
+                <button class="btn one">מפגש מסילת רכבת</button>
+            </div>
+            <div class="btn-wrap separator center">
+                <button class="btn one">כניסה למחלף</button>
+                <button class="btn one">יציאה ממחלף</button>
+                <button class="btn one">אחר</button>
+            </div>
+            <div class="btn-wrap">
+                <span class="btn-label">הפרדת מסלולים:</span>
+                <button class="btn one">הכל</button>
+                <button class="btn one">מיפרדה עם גדר</button>
+            </div>
+            <div class="btn-wrap center">
+                <button class="btn one">מיפרדה בנויה</button>
+                <button class="btn one">קו רצוף</button>
+                <button class="btn one">ללא קו רצוף</button>
+            </div>
+            <div class="btn-wrap center separator">
+                <button class="btn one">מיפרדה לא בנויה</button>
+                <button class="btn one">מיפרדה מסומנת</button>
+                <button class="btn one">אחר</button>
+            </div>
+        </div>
+        <!-- FILTER INVOLVED (MEORAVIM)-->
+        <input id="filter-involved" type="radio" name="grp" checked="checked"/>
+        <label class="filter-button" for="filter-involved">
+            <i class="fa fa-car" style="margin-top: 6px !important; font-size: 18px !important;">
+                <p style="font-size: 8px !important; margin: 4px !important">מעורבים</p>
+            </i>
+        </label>
+        <div class="filter-panel">
+            involved
+        </div>
+        <!-- FILTER ADVANCED (OD)-->
+        <input id="filter-advanced" type="radio" name="grp" checked="checked"/>
+        <label class="filter-button" for="filter-advanced">
+            <i class="fa fa-plus" style="margin-top: 6px !important; font-size: 18px !important;">
+                <p style="font-size: 8px !important; margin: 4px !important">עוד</p>
+            </i>
+        </label>
+        <div class="filter-panel">
+            advanced
+        </div>
+    </div>
+
+    <div style="width: 300px; visibility: hidden">
+        <div class="current-filter" style="visibility: hidden">
+        </div>
+        <ul id="step3tour" style="visibility: hidden">
+            <li data-toggle="tooltip" data-placement="left"
+                title="תאונות דרכים שנהרג בהן אדם אחד לפחות או נפצע בהן אדם אחד לפחות ונפטר מפצעיו תוך 30 יום."><img
+                    class="checkbox-severity" data-type="1" data-checked="true"/> תאונות קטלניות
+            </li>
+            <li data-toggle="tooltip" data-placement="left"
+                title="תאונות דרכים שנפצע בהן קשה אדם אחד לפחות, ושלא נהרג בהן שום אדם."><img class="checkbox-severity"
+                                                                                              data-type="2"
+                                                                                              data-checked="true"/>
+                תאונות קשות
+            </li>
+            <li data-toggle="tooltip" data-placement="left"
+                title="תאונות דרכים שנפצע בהן קל אדם אחד לפחות, ושלא נהרג בהן או נפצע בהן קשה שום אדם."><img
+                    class="checkbox-severity" data-type="3" data-checked="true"/> תאונות קלות
+            </li>
+            <li><img class="checkbox-accuracy" data-type="4" data-checked="false"/> תאונות שמיקומן משוער</li>
+        </ul>
+        <ul id="step4tour" style="visibility: hidden">
+            <li>
+                <div class="input-prepend" id="calendar-control">
+                    <span class="add-on"><i class="icon-calendar date-range"></i></span>
+                    <input id="step4tourInput" type="text" class="date-range" style="width: 200px"/>
+                </div>
+            </li>
+        </ul>
+        <ul>
+            <li style="height: 30px; visibility: hidden">
+                <div class="input-append dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        <span class="add-on"
+                              style="border: 1px solid #ccc; border-radius: 3px 3px 0 0; margin-left:-1px"><i
+                                class="icon-filter"></i></span>
+                        <input id="view-filter" value="הצג תאונות ודיונים"
+                               style="padding-right:7px; border: 1px solid #ccc; height:26px; width:204px; border-radius: 0 0 3px 3px; position:absolute;"/>
+                    </a>
+
+                    <div class="daterangepicker dropdown-menu opensleft" style="right: 26px; left: auto; top:auto;">
+                        <div class="ranges" style="margin-bottom: -4px !important">
+                            <ul style="list-style: none; margin: 0; padding: 0; direction:rtl">
+                                <li onclick="load('all')">הצג הכל</li>
+                                <li onclick="load('accidents_only')">הצג תאונות בלבד</li>
+                                <li onclick="load('discussions_only')">הצג דיונים בלבד</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="footer">
+    <div style="float: right; padding: 5px">
+        <a href="http://www.hasadna.org.il/" title="לדעת להשפיע - מבית הסדנא לידע ציבורי"><img
+                src="/static/img/sadna-logo.png" style="width: 25px; height: 25px; padding: 3px"/>
+        </a>
+        <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=F274PRUT6VSAA"
+           target="new">תרמו לנו</a> &#124;
+        <a href="" data-toggle="modal" data-target="#developer-dialog">מפתחים</a> &#124;
+        <a href="mailto:feedback@anyway.co.il?subject=ANYWAY%20Feedback" target="new">צרו קשר</a> &#124;
+        <a href="" data-toggle="modal" data-target="#credit-dialog">תודות</a> &#124;
+        <a href="" data-toggle="modal" data-target="#about-dialog">אודות</a>
+    </div>
+    <div class="fb-like" data-href="{{ url }}" data-layout="button_count" data-action="like" data-show-faces="false"
+         data-share="true" style="margin-top: 10px; margin-bottom: 10px; padding-left: 4px"></div>
+    <a href="https://play.google.com/store/apps/details?id=il.co.anyway.app">
+        <img alt="Android app on Google Play"
+             src="https://developer.android.com/images/brand/en_generic_rgb_wo_60.png"
+             style="height: 20px; padding-left: 8px; vertical-align: middle"/>
+    </a>
+</div>
+<div id="fb-root"></div>
+<script type="text/html" id="sidebarItemTemplate">
+    <li>
+        <a>
+            <span class="icon" style="margin: 10px"><img src="<%- icon %>" style="height: 2em;"/></span>
+            <span class="date"><%- created %></span> - <br><span class="type"
+                                                                 style="padding-right:40px"><%- type %></span>
+        </a>
+    </li>
+</script>
+
+<script type="text/javascript"
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBpOmft-UskZsAQth9vNl0fN6EXaRR6dZc&sensor=true&libraries=places&language=iw"></script>
+{% assets filters="rjsmin", output="js/app.min.js",
+"js/libs/jquery-1.8.2.min.js",
+"js/libs/spin.min.js",
+"js/libs/jquery.spin.js",
+"js/libs/oms.min.js",
+"js/libs/markerclusterer.js",
+"js/markerClustererAugment.js",
+"js/libs/underscore.js",
+"js/libs/backbone.js",
+"js/libs/bootstrap.js",
+"js/libs/notify-combined.min.js",
+"js/libs/moment-with-langs.min.js",
+"js/libs/date.js",
+"js/libs/daterangepicker.js",
+"js/libs/js-itm.js",
+"js/constants.js",
+"js/marker.js",
+"js/clusterView.js",
+"js/featuredialog.js",
+"js/sidebar.js",
+"js/contextmenu.js",
+"js/map_style.js",
+"js/clipboard.js",
+"js/libs/bootstrap-tour.min.js",
+"js/app.js",
+"js/localization.js",
+"js/years.js",
+"js/inv_dict.js",
+"js/veh_dict.js",
+"js/retina.js"
+%}
+<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
+
+<script type="text/javascript">
 
             {% if minimal_zoom %}
             MINIMAL_ZOOM = {{minimal_zoom}};
@@ -577,21 +744,20 @@
             ga('send', 'pageview');
             // end Google Analytics API
 
-        </script>
-	
-    <script type="text/javascript" src="../static/js/tour.js"> </script>
-    <script src="static/js/libs/jquery.smartbanner.js"></script>
-    <script type="text/javascript"> $.smartbanner({
+
+</script>
+
+<script type="text/javascript" src="../static/js/tour.js"></script>
+<script src="static/js/libs/jquery.smartbanner.js"></script>
+<script type="text/javascript"> $.smartbanner({
         author: '"Hasadna"',
         icon: 'static/img/logo.png',
         button: 'פתח',
         price: 'חינם',
         inGooglePlay: 'בGoogle play'
-    }); </script>
-    </body>
-	
-	
-
+    });
+</script>
+</body>
 </html>
 
 

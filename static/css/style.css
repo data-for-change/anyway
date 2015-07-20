@@ -1,3 +1,14 @@
+@font-face {
+    font-family: 'MeteoconsRegular';
+    src: url('../font/meteocons-webfont.eot');
+    src: url('../font/meteocons-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../font/meteocons-webfont.woff') format('woff'),
+         url('../font/meteocons-webfont.ttf') format('truetype'),
+         url('../font/meteocons-webfont.svg#MeteoconsRegular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
 body, html {
     font-family: 'Alef', 'sans-serif';
     position: relative;
@@ -12,6 +23,200 @@ input, button, select, textarea {
 
 div.gm-style {
     font-family: 'Alef', 'sans-serif';
+}
+
+.filter-description {
+    width: 300px;
+    background-color: white;
+    height: 150px;
+}
+
+.filter-menu {
+    background-color: white;
+    line-height: 40px !important;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-wrap: wrap;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    width: 292px;
+    padding: 4px 4px 0 0;
+}
+
+.filter-panel {
+    width: 288px;
+    -webkit-order: 1;
+    order: 1;
+}
+
+input[type=radio], .filter-panel {
+    display: none;
+}
+
+input[type=radio]:checked + .filter-button {
+    color: #08c;
+    background: #eee;
+}
+
+input[type=radio]:checked + .filter-button + .filter-panel {
+    display: block;
+}
+
+.filter-button{
+    font-size:20px !important;
+    color: #ccc;
+    cursor: pointer;
+    text-align:center;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    z-index: 1;
+    width: 40px;
+    height: 40px;
+    display: block;
+    vertical-align: middle !important;
+    line-height: 40px !important;
+}
+
+.filter-button:hover{
+    color: #08c;
+    background: #eee;
+}
+
+.filter-button-label{
+    font-size: 10px;
+    padding-top:5px;
+    font-weight: 700;
+}
+
+ .active{
+    color: #08c;
+    /*border-bottom: 1px solid white;*/
+}
+
+.separator{
+    border-bottom: 1px solid #ddd;
+    /*padding: 10px 10px 10px 0 !important;*/
+    /*width: 288px;*/
+}
+
+.center{
+    justify-content: center !important;
+    padding-right: 0 !important;
+    /*width: 300px !important;*/
+}
+
+.btn-wrap{
+    /*width: 290px;*/
+    display: flex;
+    justify-content: flex-start;
+    padding: 10px 10px 6px 0;
+    vertical-align: middle;
+    line-height: 30px;
+}
+
+.btn-label{
+    padding-left: 6px;
+    color: #ccc;
+    cursor: default;
+}
+
+.btn{
+    height: 30px;
+    padding: 0 5px 0 5px;
+    color: #ccc;
+    background: white; border: 1px solid #ddd;
+    cursor: pointer;
+    border-radius: 3px 3px 3px 3px !important;
+}
+
+.btn:hover, .btn:active{
+    color: #08c;
+    background: #f2f2f2;
+}
+
+.one{
+    margin: 0 5px 0 5px;
+}
+
+.two{
+    width:40%;
+}
+
+.three{
+    width:25%;
+}
+
+.left{
+    border-radius: 3px 0 0 3px !important;
+}
+
+.right{
+    border-left: none;
+    border-radius: 0 3px 3px 0 !important;
+}
+
+.middle{
+    border-radius: 0 0 0 0 !important;
+    border-left: none !important;
+}
+
+.fatal:hover{
+    color: #D81C32 !important;
+}
+
+.severe:hover{
+    color: #FF9F1C !important;
+}
+
+.light:hover{
+    color: #FFD82B !important;
+}
+
+.btn .date{
+    width: 36%;
+    font-size: 10px !important;
+}
+
+.time{
+    width: 36%;
+    font-size: 10px !important;
+}
+
+.icon-weather{
+    font-family: 'MeteoconsRegular';
+    font-size: 20px;
+    width: auto;
+}
+
+input[type="date"],input[type="time"]{
+    color:#ccc;
+    border-color: #ddd;
+    margin-bottom: 0;
+}
+
+.current-view-count{
+    padding-left: 10px;
+    font-weight:normal;
+    color: #08c;
+    float: left;
+}
+
+.current-view{
+    overflow-y: scroll;
+    position: absolute;
+    top: 250px;
+    bottom: 0;
+    width: 300px;
+}
+
+.filter-shadow{
+    position: absolute;
+    width: 300px;
+    bottom: 0;
+    height: 15px;
+    border-radius: 50% 50% 0 0;
+    background: linear-gradient(rgba(0,0,0,0) 0,rgba(0,0,0,0.07) 100%);
 }
 
 .context-menu {
@@ -42,14 +247,17 @@ div.gm-style {
 	margin: 0;
 	padding: 0;
 }
+
 .sidebar-container ul li {
-	padding: 5px;
+    width: 300px;
 	border-bottom: 1px solid #eee;
     cursor: pointer;
 }
 
 .sidebar-title {
+    height: 30px;
 	padding: 5px;
+	line-height: 30px;
 	border-bottom: 1px solid #ddd;
 	background: #eee;
 	font-weight: bold;
@@ -69,35 +277,37 @@ div.gm-style {
     width: 30px;
     background-color: white;
     text-align: center;
-    line-height: 30px;
+    vertical-align: middle;
+    line-height: 32px;
     margin: 16px;
     border-radius: 50%;
     border-color: #ccc;
     border-style: solid;
     border-width: 1px;
+    cursor: pointer;
 }
 
 .map-button:hover{
     box-shadow: inset 0 1px 1px rgba(0,0,0,0.075),0 0 8px rgba(82,168,236,0.6);
     border-color: #4d90fe;
-]}
+}
 
 .reset-map-control:after{
-    font-size: 20px;
+    font-size: 17px;
     color: #ccc;
     font-family: 'Material Icons';
     content: '\e1b3';
 }
 
 .download-csv-control:after{
-    font-size: 20px;
+    font-size: 17px;
     color: #ccc;
     font-family: 'Material Icons';
     content: '\e2c4';
 }
 
 .link-map-control:after{
-    font-size: 20px;
+    font-size: 17px;
     color: #ccc;
     font-family: 'Material Icons';
     content: '\e157';
@@ -186,11 +396,21 @@ div.gm-style {
 .info-window{
 	position: relative;
     height: 100%;
-    box-shadow: -10px 0px 16px -7px #333;
+    box-shadow: inset 0 -1px 0 rgba(0,0,0,0.1),0 1px 10px rgba(0,0,0,0.1);
 }
 
 .navbar-inner{
-	  box-shadow: 0px 7px 16px -7px #333 !important;
+}
+
+.footer{
+    position:fixed;
+    height: 40px;
+    bottom:0;
+    width:100%;
+    text-align:
+    left; background: white;
+    box-shadow: inset 0 0 0 -1px rgba(0,0,0,0.1),0 1px 10px rgba(0,0,0,0.1);
+    background-image: linear-gradient(to bottom,#f2f2f2, #fff);
 }
 
 .description {
@@ -212,18 +432,23 @@ div.gm-style {
       #pac-input {
         background-color: #fff;
         padding: 0 11px 0 13px;
-        width: 400px;
+        width: 35%;
         height: 30px;
         font-size: 15px;
         font-weight: 400;
         text-overflow: ellipsis;
       }
 
+      #pac-input:hover{
+        box-shadow: inset 0 1px 1px rgba(0,0,0,0.075),0 0 8px rgba(82,168,236,0.6);
+        border-color: #4d90fe;
+    }
+
       #pac-input:focus {
         border-color: #4d90fe;
         margin-left: -1px;
         padding-left: 14px;  /* Regular padding-left + 1. */
-        width: 401px;
+        width: 35%;
       }
 
       .pac-container {
@@ -250,8 +475,8 @@ textarea.form-control-wide {
     height: 100px;
 }
 .popover{
-    width:350px !important;
-    max-width:350px !important;}
+    width:300px !important;
+    max-width:300px !important;}
 /* agam */
 .popover-title{
     font-weight: bold;
@@ -299,3 +524,4 @@ textarea.form-control-wide {
     background-color: rgba(0, 0, 0, .5);
     -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, .5);
 }
+

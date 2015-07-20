@@ -17,10 +17,10 @@
                 this.callbacks.onNewComment = [
                     function(comment) {
                         $.post("discussion", JSON.stringify({
-                            "latitude"  : {{ latitude }},
-                            "longitude" : {{ longitude }},
-                            "identifier": {{ identifier }},
-                            "title"     : {{ identifier }}
+                            "latitude"  : "{{ latitude }}",
+                            "longitude" : "{{ longitude }}",
+                            "identifier": "{{ identifier }}",
+                            "title"     : "{{ identifier }}"
                         }));
                         return true;
                     }

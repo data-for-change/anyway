@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-import urllib
-import logging
 import csv
 from StringIO import StringIO
 import time
@@ -26,7 +24,6 @@ from flask_admin.contrib import sqla
 from flask_admin import helpers, expose, BaseView
 from werkzeug.security import check_password_hash
 from sendgrid import sendgrid, SendGridClientError, SendGridServerError, Mail
-import argparse
 import glob
 from utilities import CsvReader
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -170,39 +167,28 @@ def marker(marker_id):
 @user_optional
 def discussion():
     if request.method == "GET":
-        try:
-            marker = db_session.query(DiscussionMarker)\
-                .filter(DiscussionMarker.identifier == \
-                        request.values['identifier']).first()
-            context = {'identifier': marker.identifier, 'title': marker.title}
-            return render_template('disqus.html', **context)
-        except AttributeError:
-            return index(message=u"הדיון לא נמצא: " + request.values['identifier'])
-        except KeyError:
-            return index(message=u"דיון לא חוקי")
+        identifier = request.values['identifier']
+        context = {'identifier': identifier, 'title': identifier}
+        lat, lon = request.values.get('lat'), request.values.get('lon')
+        if lat is not None and lon is not None:  # create new discussion
+            context.update({'new': True, 'latitude': lat, 'longitude': lon})
+        else:  # show existing discussion
+            try:
+                marker = db_session.query(DiscussionMarker)\
+                    .filter(DiscussionMarker.identifier == \
+                            identifier).first()
+                context['title'] = marker.title
+            except AttributeError:
+                return index(message=u"הדיון לא נמצא: " + request.values['identifier'])
+            except KeyError:
+                return index(message=u"דיון לא חוקי")
+        return render_template('disqus.html', **context)
     else:
         marker = parse_data(DiscussionMarker, get_json_object(request))
         if marker is None:
             log_bad_request(request)
             return make_response("")
         return make_response(post_handler(marker))
-
-@app.route("/follow/(.*)")
-@user_required
-def follow(key_name):
-    marker = Marker.get_by_key_name(key_name)
-    follower = Follower.all().filter("marker", marker).filter("user", self.user).get()
-    if not follower:
-        Follower(parent=marker, marker=marker, user=self.user).put()
-
-
-@app.route("/unfollow/(.*)")
-@user_required
-def unfollow(key_name):
-    marker = Marker.get_by_key_name(key_name)
-    follower = Follower.all().filter("marker", marker).filter("user", self.user).get()
-    if follower:
-        follower.delete()
 
 
 @app.route("/clusters")

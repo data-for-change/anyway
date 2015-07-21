@@ -16,8 +16,8 @@
     <meta property="fb:admins" content="685901228"/>
     <meta name="google-play-app" content="app-id=il.co.anyway.app">
 
-        <link href="{{ url }}static/img/icon.png" rel="icon" />
-        <link href='http://fonts.googleapis.com/css?family=Alef:400,700' rel='stylesheet' type='text/css'>
+    <link href="{{ url }}static/img/icon.png" rel="icon" />
+    <link href='http://fonts.googleapis.com/css?family=Alef:400,700' rel='stylesheet' type='text/css'>
         {% assets filters="yui_css", output="css/app.min.css",
             "css/jquery.smartbanner.css",
             "css/bootstrap.rtl.css",
@@ -37,15 +37,18 @@
 <div class='notifications top-left' id="notification"></div>
 <div id="app">
     <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner" id="step1Component" style="padding-right: 10px{{ '; display: none' if map_only }}">
+        <div class="navbar-inner" id="step1Component" style="vertical-align:middle; line-height: 40px; {{ '; display: none' if map_only }}">
             <div style="float: left">
+                <span style="border-right: 1px solid #ddd; padding-right: 8px; cursor: pointer">התחבר</span>
+                <i class="fa fa-sign-in" style="margin-left: 8px; font-size: 18px; line-height: 100%; vertical-align: middle"></i>
                 <div class="user-details" style="display: none">
                     <span class="profile-name"></span>
                     <img class="profile-picture" style="height: 30px"/>
                     <span class="fb-logout"><a class="btn" style="margin-top: 0">יציאה</a></span>
                 </div>
             </div>
-            <a class="brand" href="/"> beta <img src="/static/img/anyway.png" style="height: 26px">
+            <i class="fa fa-bars" style="border-right: 1px solid #ddd; padding-right: 8px; border-left: 1px solid #ddd; padding-left: 8px;margin-right: 102px; font-size: 18px; line-height: 100%; vertical-align: middle; cursor: pointer"></i>
+            <a class="brand" href="/" style="cursor: pointer"> beta <img src="/static/img/anyway.png" style="height: 26px; cursor: pointer">
             </a>
         </div>
     </div>
@@ -63,10 +66,7 @@
             <div id="tour-control"></div>
         </div>
     </div>
-    <div id="step2Component" class="sidebar-container" style="position: absolute; right: 0; top: 0;
-            bottom: 40px; width: 300px; background: white; padding-top: 40px;
-            {{ 'display: none' if map_only }}">
-    </div>
+    <div id="step2Component" class="sidebar-container" style="{{ 'display: none' if map_only }}"></div>
 </div>
 
 <div class="modal hide fade" id="embed">
@@ -321,7 +321,7 @@
     <!--</div>-->
     <div class="filter-menu">
          <!-- FILTER MARKERS-->
-        <input id="filter-markers" type="radio" name="grp" checked="checked"/>
+        <input id="filter-markers" type="radio" name="filter-markers" checked="checked"/>
         <label class="filter-button" for="filter-markers">
             <i class="fa fa-map-marker" style="margin-top: 6px !important;">
                 <p style="font-size: 8px !important; margin: 4px !important">תוצאות</p>
@@ -334,10 +334,9 @@
                 <button class="btn two left">דיונים</button>
             </div>
             <ul class="current-view"></ul>
-            <div class="filter-shadow"></div>
         </div>
         <!-- FILTER INFO (HOMRA)-->
-        <input id="filter-info" type="radio" name="grp" checked="checked"/>
+        <input id="filter-info" type="radio" name="filter-info" />
         <label class="filter-button" for="filter-info">
             <i class="fa fa-warning" style="margin-top: 6px !important;">
                 <p style="font-size: 8px !important; margin: 4px !important">פרטים</p>
@@ -370,7 +369,7 @@
             </div>
         </div>
         <!-- FILTER TIME (ZMAN)-->
-        <input id="filter-date" type="radio" name="grp" checked="checked"/>
+        <input id="filter-date" type="radio" name="filter-date"/>
         <label class="filter-button" for="filter-date">
             <i class="fa fa-calendar" style="margin-top: 6px !important;">
                 <p style="font-size: 8px !important; margin: 4px !important">תאריך</p>
@@ -427,7 +426,7 @@
             </div>
         </div>
         <!-- FILTER CONDITIONS (TNAIM)-->
-        <input id="filter-conditions" type="radio" name="grp" checked="checked"/>
+        <input id="filter-conditions" type="radio" name="filter-conditions"/>
         <label class="filter-button" for="filter-conditions">
             <i class="fa fa-road" style="margin-top: 6px !important;">
                 <p style="font-size: 8px !important; margin: 4px !important">תנאים</p>
@@ -485,7 +484,7 @@
             </div>
         </div>
         <!-- FILTER INVOLVED (MEORAVIM)-->
-        <input id="filter-involved" type="radio" name="grp" checked="checked"/>
+        <input id="filter-involved" type="radio" name="filter-involved"/>
         <label class="filter-button" for="filter-involved">
             <i class="fa fa-car" style="margin-top: 6px !important; font-size: 18px !important;">
                 <p style="font-size: 8px !important; margin: 4px !important">מעורבים</p>
@@ -495,7 +494,7 @@
             involved
         </div>
         <!-- FILTER ADVANCED (OD)-->
-        <input id="filter-advanced" type="radio" name="grp" checked="checked"/>
+        <input id="filter-advanced" type="radio" name="filter-advanced"/>
         <label class="filter-button" for="filter-advanced">
             <i class="fa fa-plus" style="margin-top: 6px !important; font-size: 18px !important;">
                 <p style="font-size: 8px !important; margin: 4px !important">עוד</p>

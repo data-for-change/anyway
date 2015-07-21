@@ -21,6 +21,11 @@ input, button, select, textarea {
     font-family: 'Alef', 'sans-serif';
 }
 
+a.brand {
+    padding: 1px !important;
+    margin-right: 8px !important;
+}
+
 div.gm-style {
     font-family: 'Alef', 'sans-serif';
 }
@@ -40,7 +45,7 @@ div.gm-style {
     flex-wrap: wrap;
     justify-content: space-around;
     width: 292px;
-    padding: 4px 4px 0 0;
+    padding: 10px 4px 0 0;
 }
 
 .filter-panel {
@@ -205,18 +210,8 @@ input[type="date"],input[type="time"]{
 .current-view{
     overflow-y: scroll;
     position: absolute;
-    top: 250px;
-    bottom: 0;
-    width: 300px;
-}
-
-.filter-shadow{
-    position: absolute;
-    width: 300px;
-    bottom: 0;
-    height: 15px;
-    border-radius: 50% 50% 0 0;
-    background: linear-gradient(rgba(0,0,0,0) 0,rgba(0,0,0,0.07) 100%);
+    top: 110px;
+    bottom: 90px;
 }
 
 .context-menu {
@@ -242,6 +237,17 @@ input[type="date"],input[type="time"]{
 	background: #f2f2f2;
 }
 
+.sidebar-container{
+    position: fixed;
+    right: 0;
+    top: 0;
+    bottom: 40px;
+    width: 300px;
+    background: white;
+    padding-top: 40px;
+    height: 100%;
+}
+
 .sidebar-container ul {
 	list-style: none;
 	margin: 0;
@@ -249,9 +255,11 @@ input[type="date"],input[type="time"]{
 }
 
 .sidebar-container ul li {
-    width: 300px;
+    width: 288px;
 	border-bottom: 1px solid #eee;
     cursor: pointer;
+    padding-top: 4px;
+    padding-bottom: 4px;
 }
 
 .sidebar-title {

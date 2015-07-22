@@ -3,15 +3,13 @@
 import json
 import logging
 
-from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table, \
-    ForeignKeyConstraint
+from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table, ForeignKeyConstraint
 from sqlalchemy.orm import relationship, load_only, backref
 
 import datetime
 import localization
 from database import Base
-from flask.ext.security import Security, SQLAlchemyUserDatastore, \
-    UserMixin, RoleMixin, login_required
+from flask.ext.security import UserMixin, RoleMixin
 
 db_encoding = 'utf-8'
 
@@ -360,7 +358,8 @@ class Involved(Base):
     safety_measures_use = Column(Integer)
     late_deceased = Column(Integer)
     __table_args__ = (ForeignKeyConstraint([accident_id, provider_code],
-                                           [Marker.id, Marker.provider_code]),
+                                           [Marker.id, Marker.provider_code],
+                                           ondelete="CASCADE"),
                       {})
 
     def serialize(self):
@@ -419,7 +418,8 @@ class Vehicle(Base):
     seats = Column(Integer)
     total_weight = Column(Integer)
     __table_args__ = (ForeignKeyConstraint([accident_id, provider_code],
-                                           [Marker.id, Marker.provider_code]),
+                                           [Marker.id, Marker.provider_code],
+                                           ondelete="CASCADE"),
                       {})
 
     def serialize(self):

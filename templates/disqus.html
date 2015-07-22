@@ -13,6 +13,7 @@
             var disqus_shortname = 'anyway-feedback';
             var disqus_identifier = '{{ identifier }}';
             {%  if new %}
+            var disqus_url = '{{ url }}discussion?identifier={{ identifier }}';
             function disqus_config() {
                 this.callbacks.onNewComment = [
                     function(comment) {

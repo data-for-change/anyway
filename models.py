@@ -2,14 +2,16 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
-
-from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table, ForeignKeyConstraint
+ 
+from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table, \
+        ForeignKeyConstraint
 from sqlalchemy.orm import relationship, load_only, backref
 
 import datetime
 import localization
 from database import Base
-from flask.ext.security import UserMixin, RoleMixin
+from flask.ext.security import Security, SQLAlchemyUserDatastore, \
+        UserMixin, RoleMixin, login_required
 
 db_encoding = 'utf-8'
 

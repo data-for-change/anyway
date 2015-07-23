@@ -39,7 +39,7 @@
     <div class="navbar navbar-fixed-top">
         <div class="navbar-inner" id="step1Component" style="vertical-align:middle; line-height: 40px; {{ '; display: none' if map_only }}">
             <div style="float: left">
-                <span style="border-right: 1px solid #ddd; padding-right: 8px; cursor: pointer">התחבר</span>
+                <span style="border-right: 1px solid #ddd; margin-left: 8px; padding-right: 8px; cursor: pointer">התחבר</span>
                 <i class="fa fa-sign-in" style="margin-left: 8px; font-size: 18px; line-height: 100%; vertical-align: middle"></i>
                 <div class="user-details" style="display: none">
                     <span class="profile-name"></span>
@@ -47,9 +47,27 @@
                     <span class="fb-logout"><a class="btn" style="margin-top: 0">יציאה</a></span>
                 </div>
             </div>
-            <i class="fa fa-bars" style="border-right: 1px solid #ddd; padding-right: 8px; border-left: 1px solid #ddd; padding-left: 8px;margin-right: 102px; font-size: 18px; line-height: 100%; vertical-align: middle; cursor: pointer"></i>
-            <a class="brand" href="/" style="cursor: pointer"> beta <img src="/static/img/anyway.png" style="height: 26px; cursor: pointer">
-            </a>
+            <!--<i class="fa fa-bars" style="border-right: 1px solid #ddd; padding-right: 8px; border-left: 1px solid #ddd; padding-left: 8px;margin-right: 102px; font-size: 18px; line-height: 100%; vertical-align: middle; cursor: pointer"></i>-->
+            <div style="float: right; display: inline-flex; justify-content: flex-end">
+                <a class="brand" href="/" style="cursor: pointer"> beta <img src="/static/img/anyway.png" style="height: 26px; cursor: pointer">
+                </a>
+                <div class="toggle-wrapper">
+                    <div id="toggle" onclick="toggle(this)">
+                        <div class="one"></div>
+                        <div class="two"></div>
+                        <div class="three"></div>
+                    </div>
+                </div>
+                <script>
+                    function toggle(div){
+                        if (div.getAttribute('class') == 'on'){
+                            div.className = '';
+                        }else{
+                            div.className = 'on';
+                        }
+                    }
+                </script>
+            </div>
         </div>
     </div>
 
@@ -321,13 +339,14 @@
     <!--</div>-->
     <div class="filter-menu">
          <!-- FILTER MARKERS-->
-        <input id="filter-markers" type="radio" name="filter-markers" checked="checked"/>
-        <label class="filter-button" for="filter-markers">
+        <input id="filter-markers" type="radio" name="filter" checked="checked"/>
+        <label class="filter-button" for="filter-markers" style="margin-right: 8px">
             <i class="fa fa-map-marker" style="margin-top: 6px !important;">
                 <p style="font-size: 8px !important; margin: 4px !important">תוצאות</p>
             </i>
         </label>
         <div class="filter-panel" id="step6tour">
+            <div style="border-top: 2px solid #ddd; margin-bottom: 0 !important;"></div>
             <div class="btn-wrap separator">
                 <span class="btn-label">מציג:</span>
                 <button class="btn two right">תאונות</button>
@@ -336,13 +355,14 @@
             <ul class="current-view"></ul>
         </div>
         <!-- FILTER INFO (HOMRA)-->
-        <input id="filter-info" type="radio" name="filter-info" />
+        <input id="filter-info" type="radio" name="filter" />
         <label class="filter-button" for="filter-info">
             <i class="fa fa-warning" style="margin-top: 6px !important;">
                 <p style="font-size: 8px !important; margin: 4px !important">פרטים</p>
             </i>
         </label>
         <div class="filter-panel">
+            <div style="border-top: 2px solid #ddd; margin-bottom: 0 !important;"></div>
             <div class="btn-wrap separator">
                 <span class="btn-label">מיקום:</span>
                 <button class="btn two right">מדויק</button>
@@ -369,13 +389,14 @@
             </div>
         </div>
         <!-- FILTER TIME (ZMAN)-->
-        <input id="filter-date" type="radio" name="filter-date"/>
+        <input id="filter-date" type="radio" name="filter"/>
         <label class="filter-button" for="filter-date">
             <i class="fa fa-calendar" style="margin-top: 6px !important;">
                 <p style="font-size: 8px !important; margin: 4px !important">תאריך</p>
             </i>
         </label>
         <div class="filter-panel">
+            <div style="border-top: 2px solid #ddd; margin-bottom: 0 !important;"></div>
             <div class="btn-wrap">
                 <span class="btn-label">תקופה:</span>
                 <button class="btn one">2015</button>
@@ -385,9 +406,9 @@
                 <button class="btn one">2011</button>
             </div>
             <div class="btn-wrap separator" style="margin-right: 0;">
-                <input class="btn date" type="date" style="margin-right: 6px;">
+                <input class="btn date" type="date" style="width: 35% !important; margin-right: 6px;">
                 <span class="btn-label" style="margin-right: 6px;">עד</span>
-                <input class="btn date" type="date">
+                <input class="btn date" style="width: 35% !important; " type="date">
             </div>
             <div class="btn-wrap separator">
                 <span class="btn-label">יום:</span>
@@ -426,13 +447,14 @@
             </div>
         </div>
         <!-- FILTER CONDITIONS (TNAIM)-->
-        <input id="filter-conditions" type="radio" name="filter-conditions"/>
+        <input id="filter-conditions" type="radio" name="filter"/>
         <label class="filter-button" for="filter-conditions">
             <i class="fa fa-road" style="margin-top: 6px !important;">
                 <p style="font-size: 8px !important; margin: 4px !important">תנאים</p>
             </i>
         </label>
         <div class="filter-panel">
+            <div style="border-top: 2px solid #ddd; margin-bottom: 0 !important;"></div>
             <div class="btn-wrap">
                 <span class="btn-label">מזג-אויר:</span>
                 <button class="btn one">הכל</button>
@@ -484,7 +506,7 @@
             </div>
         </div>
         <!-- FILTER INVOLVED (MEORAVIM)-->
-        <input id="filter-involved" type="radio" name="filter-involved"/>
+        <input id="filter-involved" type="radio" name="filter"/>
         <label class="filter-button" for="filter-involved">
             <i class="fa fa-car" style="margin-top: 6px !important; font-size: 18px !important;">
                 <p style="font-size: 8px !important; margin: 4px !important">מעורבים</p>
@@ -494,8 +516,8 @@
             involved
         </div>
         <!-- FILTER ADVANCED (OD)-->
-        <input id="filter-advanced" type="radio" name="filter-advanced"/>
-        <label class="filter-button" for="filter-advanced">
+        <input id="filter-advanced" type="radio" name="filter"/>
+        <label class="filter-button" for="filter-advanced" style="margin-left: 8px">
             <i class="fa fa-plus" style="margin-top: 6px !important; font-size: 18px !important;">
                 <p style="font-size: 8px !important; margin: 4px !important">עוד</p>
             </i>
@@ -560,16 +582,16 @@
 </div>
 
 <div class="footer">
-    <div style="float: right; padding: 5px">
+    <div style="float: right; padding: 5px; cursor: pointer;">
         <a href="http://www.hasadna.org.il/" title="לדעת להשפיע - מבית הסדנא לידע ציבורי"><img
-                src="/static/img/sadna-logo.png" style="width: 25px; height: 25px; padding: 3px"/>
+                src="/static/img/sadna-logo.png" style="width: 20px; height: 20px; padding: 3px"/>
         </a>
-        <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=F274PRUT6VSAA"
-           target="new">תרמו לנו</a> &#124;
-        <a href="" data-toggle="modal" data-target="#developer-dialog">מפתחים</a> &#124;
-        <a href="mailto:feedback@anyway.co.il?subject=ANYWAY%20Feedback" target="new">צרו קשר</a> &#124;
-        <a href="" data-toggle="modal" data-target="#credit-dialog">תודות</a> &#124;
-        <a href="" data-toggle="modal" data-target="#about-dialog">אודות</a>
+        <a style="border-left: 1px solid #ddd; padding-left: 8px;" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=F274PRUT6VSAA"
+           target="new">תרמו לנו</a>
+        <a style="border-left: 1px solid #ddd; padding-left: 8px;" href="" data-toggle="modal" data-target="#developer-dialog">מפתחים</a>
+        <a style="border-left: 1px solid #ddd; padding-left: 8px;" href="mailto:feedback@anyway.co.il?subject=ANYWAY%20Feedback" target="new">צרו קשר</a>
+        <a style="border-left: 1px solid #ddd; padding-left: 8px;" href="" data-toggle="modal" data-target="#credit-dialog">תודות</a>
+        <a style="border-left: 1px solid #ddd; padding-left: 8px;" href="" data-toggle="modal" data-target="#about-dialog">אודות</a>
     </div>
     <div class="fb-like" data-href="{{ url }}" data-layout="button_count" data-action="like" data-show-faces="false"
          data-share="true" style="margin-top: 10px; margin-bottom: 10px; padding-left: 4px"></div>

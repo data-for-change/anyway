@@ -44,14 +44,15 @@ div.gm-style {
     -webkit-flex-wrap: wrap;
     flex-wrap: wrap;
     justify-content: space-around;
-    width: 292px;
-    padding: 10px 4px 0 0;
+    width: 300px;
+    padding-top: 8px;
 }
 
 .filter-panel {
-    width: 288px;
+    width: 300px;
     -webkit-order: 1;
     order: 1;
+    padding-top: 8px;
 }
 
 input[type=radio], .filter-panel {
@@ -81,6 +82,7 @@ input[type=radio]:checked + .filter-button + .filter-panel {
     display: block;
     vertical-align: middle !important;
     line-height: 40px !important;
+    margin: 3px;
 }
 
 .filter-button:hover{
@@ -96,26 +98,21 @@ input[type=radio]:checked + .filter-button + .filter-panel {
 
  .active{
     color: #08c;
-    /*border-bottom: 1px solid white;*/
 }
 
 .separator{
     border-bottom: 1px solid #ddd;
-    /*padding: 10px 10px 10px 0 !important;*/
-    /*width: 288px;*/
 }
 
 .center{
     justify-content: center !important;
     padding-right: 0 !important;
-    /*width: 300px !important;*/
 }
 
 .btn-wrap{
-    /*width: 290px;*/
     display: flex;
     justify-content: flex-start;
-    padding: 10px 10px 6px 0;
+    padding: 8px 10px 8px 0;
     vertical-align: middle;
     line-height: 30px;
 }
@@ -128,7 +125,7 @@ input[type=radio]:checked + .filter-button + .filter-panel {
 
 .btn{
     height: 30px;
-    padding: 0 5px 0 5px;
+    padding: 0 4px 0 4px;
     color: #ccc;
     background: white; border: 1px solid #ddd;
     cursor: pointer;
@@ -212,6 +209,7 @@ input[type="date"],input[type="time"]{
     position: absolute;
     top: 110px;
     bottom: 90px;
+    padding-right: 8px;
 }
 
 .context-menu {
@@ -255,7 +253,7 @@ input[type="date"],input[type="time"]{
 }
 
 .sidebar-container ul li {
-    width: 288px;
+    width: 300px;
 	border-bottom: 1px solid #eee;
     cursor: pointer;
     padding-top: 4px;
@@ -533,3 +531,44 @@ textarea.form-control-wide {
     -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, .5);
 }
 
+.toggle-wrapper {
+    margin-right: 118px;
+    vertical-align: middle;
+    cursor: pointer;
+    line-height: 40px;
+    padding-top: 7px;
+}
+
+#toggle {
+    /*border-right: 1px solid #ddd;*/
+    /*padding-right: 8px;*/
+    border-left: 1px solid #ddd;
+    padding-left: 8px;
+    height: 100%;
+    /*padding-top: 1px;*/
+}
+
+#toggle div {
+    width: 20px;
+    height: 2px;
+    background: #555;
+    margin: 4px auto;
+    transition: all 0.3s;
+    backface-visibility: hidden;
+}
+
+#toggle.on .one {
+    transform: rotate(45deg) translate(4px, 4px);
+}
+
+#toggle.on .two {
+    opacity: 0;
+}
+
+#toggle.on .three {
+    transform: rotate(-45deg) translate(4px, -5px);
+}
+
+input[type='date']{
+    font-size: 10px;
+}

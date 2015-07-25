@@ -49,7 +49,7 @@ $(function () {
             this.clusterList = [];
             this.firstLoadDelay = true;
             setTimeout(function(){
-                this.firstLoadDelay = false
+                this.firstLoadDelay = false;
             }.bind(this), 2200);
 
             this.markers

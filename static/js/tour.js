@@ -80,13 +80,14 @@ var tour1 = new Tour({
         },
     ]});
 // Initialize the tour
-tour1.init();
-resetTour();// Start the tour
-tour.addStep(tour1.getStep(0));
-tour.addStep(tour1.getStep(1));
-tour.init();
-tour.start();
+
 function tourClick(){
+    tour1.init();
+    resetTour();// Start the tour
+    tour.addStep(tour1.getStep(0));
+    tour.addStep(tour1.getStep(1));
+    tour.init();
+    tour.start();
     if (!tour.ended()) {
         tour.end();
         if (infowindow) {

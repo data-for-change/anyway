@@ -717,6 +717,7 @@ $(function () {
                 identifier = this.clickLocation.toString(); // (lat, lon)
                 this.newDiscussionIdentifier = identifier;
             } else { // clicked existing discussion marker
+                this.updateUrl(this.getDiscussionUrl(identifier));
                 this.newDiscussionIdentifier = undefined;
             }
             $("#discussion-dialog").modal("show");
@@ -730,6 +731,9 @@ $(function () {
                     this.page.title = identifier;
                 }
             });
+        },
+        getDiscussionUrl: function (identifier) {
+            return "/?discussion=" + identifier + "&" + app.getCurrentUrlParams();
         },
         featuresSubscriptionDialog : function(type, event) {
             if (this.createDialog) this.createDialog.close();
@@ -785,17 +789,17 @@ $(function () {
                 infowindow.open(this.map, location);
                 tourStyle(infowindow);
             }
-          },
-          getCurrentUrlParams: function () {
-            var dateRange = app.model.get("dateRange");
-            var center = app.map.getCenter();
-            return "start_date=" + moment(dateRange[0]).format("YYYY-MM-DD") +
-                "&end_date=" + moment(dateRange[1]).format("YYYY-MM-DD") +
-                "&show_fatal=" + (parseInt(app.model.get("showFatal")) || 0) +
-                "&show_severe=" + (parseInt(app.model.get("showSevere")) || 0) +
-                "&show_light=" + (parseInt(app.model.get("showLight")) || 0) +
-                "&show_inaccurate=" + (parseInt(app.model.get("showInaccurateMarkers")) || 0) +
-                "&zoom=" + app.map.zoom + "&lat=" + center.lat() + "&lon=" + center.lng();
+        },
+        getCurrentUrlParams: function () {
+          var dateRange = app.model.get("dateRange");
+          var center = app.map.getCenter();
+          return "start_date=" + moment(dateRange[0]).format("YYYY-MM-DD") +
+              "&end_date=" + moment(dateRange[1]).format("YYYY-MM-DD") +
+              "&show_fatal=" + (parseInt(app.model.get("showFatal")) || 0) +
+              "&show_severe=" + (parseInt(app.model.get("showSevere")) || 0) +
+              "&show_light=" + (parseInt(app.model.get("showLight")) || 0) +
+              "&show_inaccurate=" + (parseInt(app.model.get("showInaccurateMarkers")) || 0) +
+              "&zoom=" + app.map.zoom + "&lat=" + center.lat() + "&lon=" + center.lng();
 		},
         ESCinfoWindow: function(event) {
             if (event.keyCode == 27) {

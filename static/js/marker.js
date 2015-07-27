@@ -122,8 +122,6 @@ var MarkerView = Backbone.View.extend({
         new google.maps.event.trigger(this.marker, "click");
     },
     getUrl: function () {
-        var dateRange = app.model.get("dateRange");
-        var center = app.map.getCenter();
         return "/?marker=" + this.model.get("id") + "&" + app.getCurrentUrlParams();
     },
     localize_data: function(data,field,value,dataType,involved_or_vehicles) {

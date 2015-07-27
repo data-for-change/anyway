@@ -87,7 +87,7 @@ $(function () {
         },
         updateUrl: function (url) {
             if (typeof url == 'undefined') {
-                if (app.infoWindow) return;
+                if (app.infoWindow || app.discussionShown) return;
                 url = "/?" + this.getCurrentUrlParams();
             }
             Backbone.history.navigate(url, true);
@@ -721,6 +721,10 @@ $(function () {
                 this.newDiscussionIdentifier = undefined;
             }
             $("#discussion-dialog").modal("show");
+            this.discussionShown = identifier;
+            $("#discussion-dialog").on("hidden", function() {
+                this.discussionShown = null;
+            }.bind(this));
             var url = window.location.protocol + "//" + window.location.host +
                       "/discussion?identifier=" + identifier;
             DISQUS.reset({

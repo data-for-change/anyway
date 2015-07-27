@@ -561,10 +561,10 @@
               window.app = new AppView();
               window.app.render();
               if (MARKER_ID) {
-                console.log('setting marker');
+                console.log('Setting marker: ' + MARKER_ID);
                 app.model.set("currentMarker", MARKER_ID);
               } else if (DISCUSSION_IDENTIFIER) {
-                console.log('setting discussion');
+                console.log('Setting discussion: ' + DISCUSSION_IDENTIFIER);
                 app.showDiscussion(DISCUSSION_IDENTIFIER);
               }
             };

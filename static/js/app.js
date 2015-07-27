@@ -697,6 +697,7 @@ $(function () {
         addDiscussionMarker : function() { // called once a comment is posted
             var identifier = this.newDiscussionIdentifier;
             if (typeof identifier == 'undefined') return true; // marker already exists
+            this.updateUrl(this.getDiscussionUrl(identifier));
             var model = new Discussion({
                 identifier: identifier,
                 latitude: this.clickLocation.lat(),

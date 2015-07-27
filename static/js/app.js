@@ -417,16 +417,20 @@ $(function () {
             console.log('Loaded OverlappingMarkerSpiderfier');
             var clusterStyle = [
                 {
+                    size: 42,
                     width: 5
                 },
                 {
+                    size: 52,
                     width: 10
                 },
                 {
-                    width: 20
+                    size: 62,
+                    width: 15
                 },
                 {
-                    width: 40
+                    size: 72,
+                    width: 20
                 }
             ];
             var mcOptions = {maxZoom: MINIMAL_ZOOM - 1, minimumClusterSize: 1, styles: clusterStyle};

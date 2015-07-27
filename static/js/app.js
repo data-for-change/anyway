@@ -254,12 +254,12 @@ $(function () {
                 var location1 = new google.maps.Marker({
                     position: myLatlng,
                     map: this.map,
-                    icon: MULTIPLE_ICONS[SEVERITY_VARIOUS]
+                    icon: app.retinaIconsResize(MULTIPLE_ICONS[SEVERITY_VARIOUS])
                 });
                 tourLocation = 6 ;
                 console.log("inside the group id "+tourLocation+"new2");
                 contentString = '<p>בנקודה זו התרחשו מספר תאונות, לחיצה על האייקון תציג אותן בנפרד ותאפשר בחירה</br> בתאונה בודדת.</p>';
-                titleString = 'אייקון של מספר התאונות באותו מקום';
+                titleString = 'אייקון של מספר תאונות באותו מקום';
                 defInfoWindows();
                 infowindow = new google.maps.InfoWindow({
                     content: htmlTourString,

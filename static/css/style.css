@@ -93,9 +93,13 @@ input[type=radio]:checked + .filter-button + .filter-panel {
 }
 
 .filter-button-label{
-    font-size: 10px;
-    padding-top:5px;
-    font-weight: 700;
+    font-size: 9px !important;
+    margin-top: 3px !important;
+    font-weight: 700 !important;
+}
+
+.filter-button-icon{
+    margin-top: 5px !important;
 }
 
  .active{
@@ -125,24 +129,25 @@ input[type=radio]:checked + .filter-button + .filter-panel {
     cursor: default;
 }
 
-.btn{
+.btn, input[type='checkbox']:checked:hover + label{
     height: 30px;
     padding: 0 4px 0 4px;
-    color: #ccc;
-    background: white; border: 1px solid #ddd;
+    color: #ccc !important;
+    background: white;
+    border: 1px solid #ddd;
     cursor: pointer;
-    border-radius: 3px 3px 3px 3px !important;
     vertical-align: middle;
     line-height: 30px;
 }
 
 .btn:hover, input[type='checkbox']:checked + label{
     color: #08c !important;
-    background: #f2f2f2 !important;
+    background: #f2f2f2;
 }
 
 .one{
-    margin: 0 5px 0 5px;
+    border-radius: 3px 3px 3px 3px !important;
+    margin: 0 5px 0 5px !important;
 }
 
 .two{
@@ -158,7 +163,7 @@ input[type=radio]:checked + .filter-button + .filter-panel {
 }
 
 .right{
-    border-left: none;
+    border-left: none !important;
     border-radius: 0 3px 3px 0 !important;
 }
 

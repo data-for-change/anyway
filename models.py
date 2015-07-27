@@ -306,6 +306,10 @@ class DiscussionMarker(MarkerMixin, Base):
                 "type": self.type
                 }
 
+    @staticmethod
+    def get_by_identifier(identifier):
+        return DiscussionMarker.query.filter_by(identifier=identifier)
+
     @classmethod
     def parse(cls, data):
         # FIXME the id should be generated automatically, but isn't

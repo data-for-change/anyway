@@ -35,11 +35,11 @@
     </head>
 
      <body style="margin: 0; position: relative; width: 100%; height: 100%">
-        
-	
+
+
         <div class='notifications top-left' id="notification"></div>
         <div id="app">
-		
+
 	       <div class="navbar navbar-fixed-top">
                 <div class="navbar-inner" id="step1Component" style="padding-right: 10px{{ '; display: none' if map_only }}">
                     <div style="float: left; padding: 5px">
@@ -124,7 +124,7 @@
             <div class="modal-body">
             ANYWAY הוא פרויקט שנכתב בקוד פתוח ואנו שמחים להרחיב את משפחת המפתחים שלנו.
 
-אנחנו משתמשים ב-Python עם Flask, ו-Javascript עם Backbone.js ו-jQuery. 
+אנחנו משתמשים ב-Python עם Flask, ו-Javascript עם Backbone.js ו-jQuery.
 <br/>
 <br/>
 <a href="https://github.com/hasadna/anyway">הקוד שלנו</a> נמצא ב-GitHub,
@@ -310,7 +310,7 @@
                         <input id="ac-4" type="checkbox" />
                         <label for="ac-4"><i class="material-icons fontIcon">&#xE7FB;</i>נפגעים</label>
                         <div class="accordion-roller ac-extra-large" id="involved">
-                            
+
                         </div>
                     </div>
                     <div>
@@ -537,6 +537,12 @@
             MARKER_ID = null;
             {% endif %}
 
+            {% if discussion %}
+            DISCUSSION_IDENTIFIER = "{{ discussion }}";
+            {% else %}
+            DISCUSSION_IDENTIFIER = null;
+            {% endif %}
+
             {% if message %}
             $.notify("{{message}}");
             {% endif %}
@@ -557,6 +563,9 @@
               if (MARKER_ID) {
                 console.log('setting marker');
                 app.model.set("currentMarker", MARKER_ID);
+              } else if (DISCUSSION_IDENTIFIER) {
+                console.log('setting discussion');
+                app.showDiscussion(DISCUSSION_IDENTIFIER);
               }
             };
 
@@ -581,7 +590,7 @@
             // end Google Analytics API
 
         </script>
-	
+
     <script type="text/javascript" src="../static/js/tour.js"> </script>
     <script src="static/js/libs/jquery.smartbanner.js"></script>
     <script type="text/javascript"> $.smartbanner({
@@ -592,8 +601,8 @@
         inGooglePlay: 'בGoogle play'
     }); </script>
     </body>
-	
-	
+
+
 
 </html>
 

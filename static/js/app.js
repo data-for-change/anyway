@@ -371,7 +371,7 @@ $(function () {
             this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(mapControlDiv);
 
             if (LOCATION_SPECIFIED) {
-                if (!MARKER_ID) {
+                if (!MARKER_ID && !DISCUSSION_IDENTIFIER) {
                     this.setCenterWithMarker(this.defaultLocation);
                 }
             } else {

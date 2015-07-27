@@ -32,8 +32,9 @@ div.gm-style {
 
 .filter-description {
     width: 300px;
+    border-bottom: 2px solid #ddd; margin-bottom: 0 !important;
     background-color: white;
-    height: 150px;
+    height: 142px;
 }
 
 .filter-menu {
@@ -49,10 +50,11 @@ div.gm-style {
 }
 
 .filter-panel {
+    border-top: 2px solid #ddd; margin-bottom: 0 !important;
+    margin-top: 8px;
     width: 300px;
     -webkit-order: 1;
     order: 1;
-    padding-top: 8px;
 }
 
 input[type=radio], .filter-panel {
@@ -130,11 +132,13 @@ input[type=radio]:checked + .filter-button + .filter-panel {
     background: white; border: 1px solid #ddd;
     cursor: pointer;
     border-radius: 3px 3px 3px 3px !important;
+    vertical-align: middle;
+    line-height: 30px;
 }
 
-.btn:hover, .btn:active{
-    color: #08c;
-    background: #f2f2f2;
+.btn:hover, input[type='checkbox']:checked + label{
+    color: #08c !important;
+    background: #f2f2f2 !important;
 }
 
 .one{
@@ -142,11 +146,11 @@ input[type=radio]:checked + .filter-button + .filter-panel {
 }
 
 .two{
-    width:40%;
+    width:30%;
 }
 
 .three{
-    width:25%;
+    width:20%;
 }
 
 .left{
@@ -163,15 +167,15 @@ input[type=radio]:checked + .filter-button + .filter-panel {
     border-left: none !important;
 }
 
-.fatal:hover{
+.fatal:hover, input[type='checkbox']:checked + label[for="checkbox-fatal"]{
     color: #D81C32 !important;
 }
 
-.severe:hover{
+.severe:hover, input[type='checkbox']:checked + label[for="checkbox-severe"]{
     color: #FF9F1C !important;
 }
 
-.light:hover{
+.light:hover, input[type='checkbox']:checked + label[for="checkbox-light"]{
     color: #FFD82B !important;
 }
 
@@ -207,7 +211,7 @@ input[type="date"],input[type="time"]{
 .current-view{
     overflow-y: scroll;
     position: absolute;
-    top: 110px;
+    top: 270px;
     bottom: 90px;
     padding-right: 8px;
 }
@@ -571,4 +575,8 @@ textarea.form-control-wide {
 
 input[type='date']{
     font-size: 10px;
+}
+
+input[type='checkbox']{
+    display: none;
 }

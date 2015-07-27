@@ -241,25 +241,25 @@ ClusterIcon.prototype.hide = function () {
  */
 ClusterIcon.prototype.show = function () {
   if (this.div_) {
-    var img = "";
     // NOTE: values must be specified in px units
     var pos = this.getPosFromLatLng_(this.center_);
     this.div_.style.cssText = this.createCss(pos);
-    this.div_.innerHTML = img + "<div style='" +
+    this.div_.innerHTML = "<div style='" +
+        "position: absolute;" +
+        "top: " + this.anchorText_[0] + "px;" +
+        "left: " + this.anchorText_[1] + "px;" +
+        "color: black;" +
+        "font-weight: bold;" +
+        "font-size: 15px;" +
+        "font-family: " + "Alef, sans-serif;" +
+        "border: " + this.width_ + "px solid #D63230;" +
+        "border-radius: 50%;" +
+        "text-align: center;" +
+        "width: 32px;" +
+        "line-height: 32px;" +
+        "vertical-align: middle;" +
         "background-color:" + "white;" +
         "opacity:" + "0.7;" +
-        "border-radius:" + "50%;" +
-        "border-width:" + this.width_ + "px;" +
-        "border-style:" + "solid;" +
-        "border-color:" + "#D63230;" +
-        "position: absolute;" +
-        "color: " + "black;" +
-        "font-weight:" + "bold;" +
-        "font-size: 10px;" +
-        "font-family: " + "Alef, sans-serif;" +
-        "text-align: center;" +
-        "width: " + "30px;" +
-        "line-height:" + "30px;" +
         "'>" + this.sums_.text + "</div>";
     if (typeof this.sums_.title === "undefined" || this.sums_.title === "") {
       this.div_.title = this.cluster_.getMarkerClusterer().getTitle();
@@ -282,7 +282,7 @@ ClusterIcon.prototype.useStyle = function (sums) {
   var index = Math.max(0, sums.index - 1);
   index = Math.min(this.styles_.length - 1, index);
   var style = this.styles_[index];
-//  this.url_ = style.url;
+  //this.url_ = style.url;
   this.height_ = style.height;
   this.width_ = style.width;
   this.anchorText_ = style.anchorText || [0, 0];

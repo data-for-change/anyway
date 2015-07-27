@@ -18,7 +18,7 @@ MarkerClusterer.prototype.addCluster = function (clat, clng, csize) {
         sums_: {text: csize, index: index},
         url_: style['url'],
         width_: style['width'],
-        height_: style['height'],
+        size_: style['size'],
         anchorIcon_: [clat, clng],
         anchorText_: [0, 0],
         backgroundPosition_: '0 0'

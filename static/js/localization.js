@@ -256,5 +256,7 @@ var localization =
         "SHIYUH_REHEV_LMS": "שיוך רכב",
         "SUG_REHEV_LMS": "סוג רכב",
         "MEKOMOT_YESHIVA_LMS": "מקומות ישיבה",
-        "MISHKAL_KOLEL_LMS": "משקל כולל"
+        "MISHKAL_KOLEL_LMS": "משקל כולל",
+        "ACC_ID": "מספר סידורי",
+        "PROVIDER_CODE": "סוג תיק"
         }

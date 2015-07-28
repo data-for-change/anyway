@@ -145,6 +145,11 @@ input[type=radio]:checked + .filter-button + .filter-panel {
     background: #f2f2f2;
 }
 
+.btn:hover, input[type='radio']:checked + label{
+    color: #08c !important;
+    background: #f2f2f2;
+}
+
 .one{
     border-radius: 3px 3px 3px 3px !important;
     margin: 0 5px 0 5px !important;

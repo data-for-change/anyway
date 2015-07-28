@@ -236,7 +236,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
 
     @staticmethod
     def bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng, start_date, end_date,
-                           fatal, severe, light, inaccurate, show_markers=True, is_thin=False, yield_per=None):
+                           fatal, severe, light, approx, accurate, show_markers=True, is_thin=False, yield_per=None):
         # example:
         # ne_lat=32.36292402647484&ne_lng=35.08873443603511&sw_lat=32.29257266524761&sw_lng=34.88445739746089
         # >>>  m = Marker.bounding_box_query(32.36, 35.088, 32.292, 34.884)
@@ -245,7 +245,6 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
 
         if not show_markers:
             return Marker.query.filter(sql.false())
-        accurate = not inaccurate
         markers = Marker.query \
             .filter(Marker.longitude <= ne_lng) \
             .filter(Marker.longitude >= sw_lng) \
@@ -256,8 +255,13 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
             .order_by(desc(Marker.created))
         if yield_per:
             markers = markers.yield_per(yield_per)
-        if accurate:
+        if accurate and not approx:
             markers = markers.filter(Marker.locationAccuracy == 1)
+            pass
+        elif approx and not accurate:
+            markers = markers.filter(Marker.locationAccuracy != 1)
+        elif not accurate and not approx:
+            return Marker.query.filter(sql.false())
         if not fatal:
             markers = markers.filter(Marker.severity != 1)
         if not severe:

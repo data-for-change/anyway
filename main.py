@@ -112,10 +112,11 @@ def markers():
     zoom = int(request.values['zoom'])
     start_date = datetime.date.fromtimestamp(int(request.values['start_date']))
     end_date = datetime.date.fromtimestamp(int(request.values['end_date']))
-    fatal = int(request.values['show_fatal'])
-    severe = int(request.values['show_severe'])
-    light = int(request.values['show_light'])
-    inaccurate = int(request.values['show_inaccurate'])
+    fatal = bool(request.values['show_fatal'])
+    severe = bool(request.values['show_severe'])
+    light = bool(request.values['show_light'])
+    approx = bool(request.values['approx'])
+    accurate = bool(request.values['accurate'])
     show_markers = bool(request.values['show_markers'])
     show_discussions = bool(request.values['show_discussions'])
 
@@ -123,7 +124,7 @@ def markers():
     is_thin = (zoom < MINIMAL_ZOOM)
     accidents = Marker.bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng,
                                           start_date, end_date,
-                                          fatal, severe, light, inaccurate,
+                                          fatal, severe, light, approx, accurate,
                                           show_markers, is_thin, yield_per=50)
     discussions = DiscussionMarker.bounding_box_query(ne_lat, ne_lng,
                                                       sw_lat, sw_lng, show_discussions)
@@ -615,8 +616,7 @@ def create_years_list():
     """
     while True:
         try:
-            year_col = db.session.query(distinct(func.extract("year",
-                                                              Marker.created)))
+            year_col = db.session.query(distinct(func.extract("year", Marker.created)))
             break
         except OperationalError:
             time.sleep(1)

@@ -63,7 +63,6 @@ $(function () {
                 .bind("add", this.loadCluster, this);
 
             this.initLayers();
-            this.initShowInaccurate();
 
             this.model
                 .bind("change:user", this.updateUser, this)
@@ -201,12 +200,13 @@ $(function () {
             params["zoom"] = zoom;
             params["thin_markers"] = (zoom < MINIMAL_ZOOM || !bounds);
             // Pass start and end dates as unix time (in seconds)
-            params["start_date"] = dateRange[0].getTime() / 1000;
-            params["end_date"] = dateRange[1].getTime() / 1000;
-            params["show_fatal"] = this.model.get("showFatal");
-            params["show_severe"] = this.model.get("showSevere");
-            params["show_light"] = this.model.get("showLight");
-            params["show_inaccurate"] = this.model.get("showInaccurateMarkers");
+            params["start_date"] = dateRanges[0].getTime() / 1000;
+            params["end_date"] = dateRanges[1].getTime() / 1000;
+            params["show_fatal"] = show_fatal;
+            params["show_severe"] = show_severe;
+            params["show_light"] = show_light;
+            params["approx"] = approx;
+            params["accurate"] = accurate;
             params["show_markers"] = show_markers;
             params["show_discussions"] = show_discussions;
             return params;
@@ -436,59 +436,6 @@ $(function () {
             this.$el.find(".sidebar-container").append(this.sidebar.$el);
             console.log('Loaded SidebarView');
 
-            if (!START_DATE) {
-                START_DATE = '01/01/2014';
-            }
-            if (!END_DATE) {
-                END_DATE = '01/01/2015';
-            }
-            this.$el.find("input.date-range").daterangepicker({
-                    /*
-                         These ranges are irrelevant as long as no recent data is loaded:
-                         'היום': ['today', 'today'],
-                         'אתמול': ['yesterday', 'yesterday'],
-                         'שבוע אחרון': [Date.today().add({ days: -6 }), 'today'],
-                         'חודש אחרון': [Date.today().add({ days: -29 }), 'today'],
-                         'החודש הזה': [Date.today().moveToFirstDayOfMonth(), Date.today().moveToLastDayOfMonth()],
-                         'החודש שעבר': [Date.today().moveToFirstDayOfMonth().add({ months: -1 }), Date.today().moveToFirstDayOfMonth().add({ days: -1 })]
-                    */
-                    ranges: ACCYEARS,
-                    opens: 'left',
-                    format: 'dd/MM/yyyy',
-                    separator: ' עד ',
-                    startDate: START_DATE,
-                    endDate: END_DATE,
-                    minDate: '01/01/2005',
-                    maxDate: '31/12/2023',
-                    locale: {
-                        applyLabel: 'בחר',
-                        fromLabel: 'מ',
-                        toLabel: 'עד',
-                        customRangeLabel: 'בחר תאריך',
-                        daysOfWeek: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
-                        monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-                        firstDay: 1
-                    },
-                    showWeekNumbers: true,
-                    buttonClasses: ['btn-danger']
-                },
-                function (start, end) {
-                    var daterangepicker = this.$el.find("input.date-range").data("daterangepicker");
-                    if (!start)
-                        start = daterangepicker.minDate;
-                    if (!end)
-                        end = daterangepicker.maxDate;
-                    this.model.set("dateRange", [start, end]);
-                }.bind(this)
-            );
-            this.$el.find("#calendar-control").click( // only applies to <i>
-                function () {
-                    this.$el.find("input.date-range").data('daterangepicker').show();
-                }.bind(this)
-            );
-            this.$el.find("input.date-range").data("daterangepicker").notify();
-            console.log('Loaded daterangepicker');
-
             $(document).ajaxStart(function () {
                 this.spinner = $('<li/>');
                 this.spinner.height('20px');
@@ -553,14 +500,8 @@ $(function () {
             google.maps.event.addListener(this.map, "mousemove", function () {
                 this.resetOnMouseUp = true;
             });
-        }, initShowInaccurate: function () {
-            var showInaccurate = this.model.get("showInaccurateMarkers");
-            if (typeof showInaccurate == 'undefined') {
-                this.model.set("showInaccurateMarkers", SHOW_INACCURATE ? 1 : 0);
-                showInaccurate = SHOW_INACCURATE;
-            }
-            return showInaccurate;
-        }, initLayers: function (severity) {
+        },
+        initLayers: function (severity) {
             var severities = [SEVERITY_FATAL, SEVERITY_SEVERE, SEVERITY_LIGHT];
             var self = this;
             severities.forEach(function (severity) {
@@ -603,28 +544,12 @@ $(function () {
             this.clearClustersFromMap();
             this.clusters.each(_.bind(this.loadCluster, this));
         },
+
         fitsFilters: function (model) {
             var layer = this.model.get(SEVERITY_ATTRIBUTES[model.get("severity")]);
             if (!layer) {
                 return false;
             }
-
-            if (this.model.get("dateRange")) {
-                var createdDate = new Date(model.get("created"));
-
-                var start = this.model.get("dateRange")[0];
-                var end = this.model.get("dateRange")[1];
-
-                if (createdDate < start || createdDate > end) {
-                    return false;
-                }
-            }
-
-            var showInaccurate = this.initShowInaccurate();
-            if (!showInaccurate && model.get("locationAccuracy") != 1) {
-                return false;
-            }
-
             return true;
         },
         loadMarkers: function () {
@@ -746,7 +671,7 @@ $(function () {
               this.setCenterWithMarker(place.geometry.location);
               this.map.setZoom(INIT_ZOOM);
             }
-         },
+        },
         createHighlightPoint : function(lat, lng, highlightPointType) {
             if (isNaN(lat) || isNaN(lng) || isNaN(highlightPointType)) return;
             $.post("highlightpoints", JSON.stringify({
@@ -784,12 +709,12 @@ $(function () {
                 infowindow.open(this.map, location);
                 tourStyle(infowindow);
             }
-          },
-          getCurrentUrlParams: function () {
+        },
+        getCurrentUrlParams: function () {
             var dateRange = app.model.get("dateRange");
             var center = app.map.getCenter();
-            return "start_date=" + moment(dateRange[0]).format("YYYY-MM-DD") +
-                "&end_date=" + moment(dateRange[1]).format("YYYY-MM-DD") +
+            return "start_date=" + moment(dateRanges[0]).format("YYYY-MM-DD") +
+                "&end_date=" + moment(dateRanges[1]).format("YYYY-MM-DD") +
                 "&show_fatal=" + (parseInt(app.model.get("showFatal")) || 0) +
                 "&show_severe=" + (parseInt(app.model.get("showSevere")) || 0) +
                 "&show_light=" + (parseInt(app.model.get("showLight")) || 0) +
@@ -815,31 +740,37 @@ $(function () {
     });
 });
 
-var show_markers='1';
-var show_discussions='1';
+var show_markers = '1', show_discussions = '1', accurate = '1', approx = '', show_fatal = '1', show_severe = '1',
+    show_light = '1', dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
 
-function load(li) {
-    switch (li) {
-        case "all":
-            $("#view-filter").val("הצג הכל");
-            show_markers='1';show_discussions='1';
-            window.app.fetchMarkers();
-            break;
-
-        case "accidents_only":
-            show_markers='1';show_discussions='';
-            $("#view-filter").val("הצג תאונות בלבד");
-            window.app.resetMarkers();
-            window.app.fetchMarkers();
-            break;
-
-        case "discussions_only":
-            show_markers='';show_discussions='1';
-            $("#view-filter").val("הצג דיונים בלבד");
-            window.app.resetMarkers();
-            window.app.fetchMarkers();
-        break;
-    }
+function load_filter() {
+    if ($("#checkbox-discussions").is(":checked")) { show_discussions='1' } else { show_discussions='' };
+    if ($("#checkbox-accidents").is(":checked")) { show_markers='1' } else { show_markers='' };
+    if ($("#checkbox-accurate").is(":checked")) { accurate='1' } else { accurate='' };
+    if ($("#checkbox-approx").is(":checked")) { approx='1' } else { approx='' };
+    if ($("#checkbox-fatal").is(":checked")) { show_fatal='1' } else { show_fatal='' };
+    if ($("#checkbox-severe").is(":checked")) { show_severe='1' } else { show_severe='' };
+    if ($("#checkbox-light").is(":checked")) { show_light='1' } else { show_light='' };
+    dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
+    window.app.resetMarkers();
+    window.app.fetchMarkers();
 }
+
+function change_date() {
+    // TODO 1: Change ACCYEARS to conatin the year itself and pull years here from the object
+    // TODO 2: (optional): change years from radios to checkboxes and allow multiple choices forcing sequential periods
+
+    if ($("#checkbox-2014").is(":checked")) { start_date = "2014"; end_date = "2015" }
+    else if ($("#checkbox-2013").is(":checked")) { start_date = "2013"; end_date = "2014" }
+    else if ($("#checkbox-2012").is(":checked")) { start_date = "2012"; end_date = "2013" }
+    else if ($("#checkbox-2011").is(":checked")) { start_date = "2011"; end_date = "2012" }
+    $("#sdate").val(start_date + '-01-01');
+    $("#edate").val(end_date + '-01-01');
+    dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
+    window.app.resetMarkers();
+    window.app.fetchMarkers();
+}
+
+
 
 

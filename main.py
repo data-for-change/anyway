@@ -206,12 +206,13 @@ def clusters(methods=["GET"]):
         fatal = int(request.values['show_fatal'])
         severe = int(request.values['show_severe'])
         light = int(request.values['show_light'])
-        inaccurate = int(request.values['show_inaccurate'])
         zoom = int(request.values['zoom'])
+        approx = bool(request.values['approx'])
+        accurate = bool(request.values['accurate'])
 
         results = retrieve_clusters(ne_lat, ne_lng, sw_lat, sw_lng,
                                     start_date, end_date,
-                                    fatal, severe, light, inaccurate, zoom)
+                                    fatal, severe, light, accurate, approx, zoom)
 
         logging.debug('calculating clusters took ' + str(time.time() - start_time))
         return Response(json.dumps({'clusters': results}), mimetype="application/json")

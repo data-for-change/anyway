@@ -390,9 +390,9 @@
         <div class="filter-panel" id="step6tour">
             <div class="btn-wrap separator">
                 <span class="btn-label">מציג:</span>
-                <input type="checkbox" id="checkbox-accidents" onclick="load_filter()" checked/>
+                <input type="checkbox" id="checkbox-accidents" onclick="app.load_filter()" checked/>
                 <label for="checkbox-accidents" class="btn two right">תאונות</label>
-                <input type="checkbox" id="checkbox-discussions" onclick="load_filter()" checked/>
+                <input type="checkbox" id="checkbox-discussions" onclick="app.load_filter()" checked/>
                 <label for="checkbox-discussions" class="btn two left">דיונים</label>
             </div>
             <ul class="current-view"></ul>
@@ -408,18 +408,18 @@
         <div class="filter-panel">
             <div class="btn-wrap separator">
                 <span class="btn-label">מיקום:</span>
-                <input type="checkbox" id="checkbox-accurate" onclick="load_filter()" checked/>
+                <input type="checkbox" id="checkbox-accurate" onclick="app.load_filter()" checked/>
                 <label for="checkbox-accurate" class="btn two right">מדויק</label>
-                <input type="checkbox" id="checkbox-approx" onclick="load_filter()"/>
+                <input type="checkbox" id="checkbox-approx" onclick="app.load_filter()"/>
                 <label for="checkbox-approx" class="btn two left">משוער</label>
             </div>
             <div class="btn-wrap separator">
                 <span class="btn-label">חומרה:</span>
-                <input type="checkbox" id="checkbox-fatal" onclick="load_filter()" checked/>
+                <input type="checkbox" id="checkbox-fatal" onclick="app.load_filter()" checked/>
                 <label for="checkbox-fatal" class="btn three right fatal" id="fatal">קטלניות</label>
-                <input type="checkbox" id="checkbox-severe" onclick="load_filter()" checked/>
+                <input type="checkbox" id="checkbox-severe" onclick="app.load_filter()" checked/>
                 <label for="checkbox-severe" class="btn three middle severe">קשות</label>
-                <input type="checkbox" id="checkbox-light" onclick="load_filter()" checked/>
+                <input type="checkbox" id="checkbox-light" onclick="app.load_filter()" checked/>
                 <label for="checkbox-light" class="btn three left light">קלות</label>
             </div>
             <!--<div class="btn-wrap">-->
@@ -453,13 +453,13 @@
         <div class="filter-panel">
             <div class="btn-wrap">
                 <span class="btn-label">תקופה:</span>
-                <input type="radio" name="years" id="checkbox-2014" value="2014" onclick="change_date()" checked/>
+                <input type="radio" name="years" id="checkbox-2014" value="2014" onclick="app.change_date()" checked/>
                 <label for="checkbox-2014" class="btn one">2014</label>
-                <input type="radio" name="years" id="checkbox-2013" value="2013" onclick="change_date()" />
+                <input type="radio" name="years" id="checkbox-2013" value="2013" onclick="app.change_date()" />
                 <label for="checkbox-2013" class="btn one">2013</label>
-                <input type="radio" name="years" id="checkbox-2012" value="2012" onclick="change_date()" />
+                <input type="radio" name="years" id="checkbox-2012" value="2012" onclick="app.change_date()" />
                 <label for="checkbox-2012" class="btn one">2012</label>
-                <input type="radio" name="years" id="checkbox-2011" value="2011" onclick="change_date()" />
+                <input type="radio" name="years" id="checkbox-2011" value="2011" onclick="app.change_date()" />
                 <label for="checkbox-2011" class="btn one">2011</label>
             </div>
             <div class="btn-wrap separator" style="margin-right: 0;">

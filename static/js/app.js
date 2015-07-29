@@ -121,6 +121,9 @@ $(function () {
 
             if (this.clusterMode()) {
                 $("#view-filter").prop('disabled', true);
+                // TODO: disable sidebar-template on clustermode (and bring it back when required)
+                //$("#sidebar-template: input").attr('disabled', true);
+                console.log("CLUSTER MODE")
                 this.closeInfoWindow();
                 this.clusters.fetch({
                     data: $.param(params),
@@ -734,8 +737,32 @@ $(function () {
                     scaledSize: new google.maps.Size(30, 50)
                 };
             }
-            
             return image_url;
+        },
+        load_filter: function() {
+            if ($("#checkbox-discussions").is(":checked")) { show_discussions='1' } else { show_discussions='' };
+            if ($("#checkbox-accidents").is(":checked")) { show_markers='1' } else { show_markers='' };
+            if ($("#checkbox-accurate").is(":checked")) { accurate='1' } else { accurate='' };
+            if ($("#checkbox-approx").is(":checked")) { approx='1' } else { approx='' };
+            if ($("#checkbox-fatal").is(":checked")) { show_fatal='1' } else { show_fatal='' };
+            if ($("#checkbox-severe").is(":checked")) { show_severe='1' } else { show_severe='' };
+            if ($("#checkbox-light").is(":checked")) { show_light='1' } else { show_light='' };
+            dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
+            window.app.resetMarkers();
+            window.app.fetchMarkers();
+        },
+        change_date: function() {
+            // TODO 1: Change ACCYEARS to conatin the year itself and pull years here from the object
+            // TODO 2: (optional): change years from radios to checkboxes and allow multiple choices forcing sequential periods
+            if ($("#checkbox-2014").is(":checked")) { start_date = "2014"; end_date = "2015" }
+            else if ($("#checkbox-2013").is(":checked")) { start_date = "2013"; end_date = "2014" }
+            else if ($("#checkbox-2012").is(":checked")) { start_date = "2012"; end_date = "2013" }
+            else if ($("#checkbox-2011").is(":checked")) { start_date = "2011"; end_date = "2012" }
+            $("#sdate").val(start_date + '-01-01');
+            $("#edate").val(end_date + '-01-01');
+            dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
+            window.app.resetMarkers();
+            window.app.fetchMarkers();
         }
     });
 });
@@ -743,33 +770,7 @@ $(function () {
 var show_markers = '1', show_discussions = '1', accurate = '1', approx = '', show_fatal = '1', show_severe = '1',
     show_light = '1', dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
 
-function load_filter() {
-    if ($("#checkbox-discussions").is(":checked")) { show_discussions='1' } else { show_discussions='' };
-    if ($("#checkbox-accidents").is(":checked")) { show_markers='1' } else { show_markers='' };
-    if ($("#checkbox-accurate").is(":checked")) { accurate='1' } else { accurate='' };
-    if ($("#checkbox-approx").is(":checked")) { approx='1' } else { approx='' };
-    if ($("#checkbox-fatal").is(":checked")) { show_fatal='1' } else { show_fatal='' };
-    if ($("#checkbox-severe").is(":checked")) { show_severe='1' } else { show_severe='' };
-    if ($("#checkbox-light").is(":checked")) { show_light='1' } else { show_light='' };
-    dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
-    window.app.resetMarkers();
-    window.app.fetchMarkers();
-}
 
-function change_date() {
-    // TODO 1: Change ACCYEARS to conatin the year itself and pull years here from the object
-    // TODO 2: (optional): change years from radios to checkboxes and allow multiple choices forcing sequential periods
-
-    if ($("#checkbox-2014").is(":checked")) { start_date = "2014"; end_date = "2015" }
-    else if ($("#checkbox-2013").is(":checked")) { start_date = "2013"; end_date = "2014" }
-    else if ($("#checkbox-2012").is(":checked")) { start_date = "2012"; end_date = "2013" }
-    else if ($("#checkbox-2011").is(":checked")) { start_date = "2011"; end_date = "2012" }
-    $("#sdate").val(start_date + '-01-01');
-    $("#edate").val(end_date + '-01-01');
-    dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
-    window.app.resetMarkers();
-    window.app.fetchMarkers();
-}
 
 
 

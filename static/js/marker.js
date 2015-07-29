@@ -54,6 +54,8 @@ var MarkerView = Backbone.View.extend({
 
         this.$el.width(400);
         this.$el.find(".title").text(this.marker.get("title"));
+        this.$el.find(".id").text(fields.ACC_ID + ": " + this.marker.get("id"));
+        this.$el.find(".provider_code").text(fields.PROVIDER_CODE + ": " + this.model.get("provider_code"));
         this.$el.find(".roadType").text(fields.SUG_DEREH + ": " + localization.SUG_DEREH[this.model.get("roadType")]);
         this.$el.find(".accidentType").text(fields.SUG_TEUNA+ ": " + localization.SUG_TEUNA[this.model.get("subtype")]);
         this.$el.find(".roadShape").text(fields.ZURAT_DEREH+ ": " + localization.ZURAT_DEREH[this.model.get("roadShape")]);
@@ -120,8 +122,6 @@ var MarkerView = Backbone.View.extend({
         new google.maps.event.trigger(this.marker, "click");
     },
     getUrl: function () {
-        var dateRange = app.model.get("dateRange");
-        var center = app.map.getCenter();
         return "/?marker=" + this.model.get("id") + "&" + app.getCurrentUrlParams();
     },
     localize_data: function(data,field,value,dataType,involved_or_vehicles) {

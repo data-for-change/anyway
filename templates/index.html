@@ -25,6 +25,7 @@
             "css/daterangepicker.css",
             "css/accordion.css",
 	    "css/bootstrap-tour.min.css"	 %}
+
     <link rel="stylesheet" href="{{ ASSET_URL }}"/>
     {% endassets %}
     <!--// font awesome-->
@@ -277,6 +278,8 @@
                         <input id="ac-1" type="checkbox" />
                         <label for="ac-1"><i class="material-icons fontIcon">&#xE002;</i>פרטי התאונה</label>
                         <div class="accordion-roller ac-general">
+                            <p class="id" style="margin:0"></p>
+                            <p class="provider_code" style="margin:0"></p>
                             <p class="severityText" style="margin:0"></p>
                             <p class="accidentType" style="margin:0"></p>
                             <p class="road_object" style="margin:0"></p>
@@ -309,6 +312,7 @@
                         <input id="ac-3" type="checkbox" />
                         <label for="ac-3"><i class="material-icons fontIcon">&#xE55F;</i>מיקום וזמן</label>
                         <div class="accordion-roller ac-general">
+                            <p class="creation-date" style="margin:0"></p>
                             <p class="dayType" style="margin:0"></p>
                             <p class="mainStreet" style="margin:0"></p>
                             <p class="secondaryStreet" style="margin:0"></p>
@@ -780,6 +784,12 @@
             MARKER_ID = null;
             {% endif %}
 
+            {% if discussion %}
+            DISCUSSION_IDENTIFIER = "{{ discussion }}";
+            {% else %}
+            DISCUSSION_IDENTIFIER = null;
+            {% endif %}
+
             {% if message %}
             $.notify("{{message}}");
             {% endif %}
@@ -798,8 +808,11 @@
               window.app = new AppView();
               window.app.render();
               if (MARKER_ID) {
-                console.log('setting marker');
+                console.log('Setting marker: ' + MARKER_ID);
                 app.model.set("currentMarker", MARKER_ID);
+              } else if (DISCUSSION_IDENTIFIER) {
+                console.log('Setting discussion: ' + DISCUSSION_IDENTIFIER);
+                app.showDiscussion(DISCUSSION_IDENTIFIER);
               }
             };
 
@@ -829,6 +842,7 @@
 <script type="text/javascript" src="../static/js/tour.js"></script>
 <script src="static/js/libs/jquery.smartbanner.js"></script>
 <script type="text/javascript"> $.smartbanner({
+
         author: '"Hasadna"',
         icon: 'static/img/logo.png',
         button: 'פתח',

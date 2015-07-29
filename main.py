@@ -278,13 +278,23 @@ def log_bad_request(request):
 
 @app.route('/')
 def index(marker=None, message=None):
-    context = {'minimal_zoom': MINIMAL_ZOOM, 'url': request.base_url}
+    context = {'minimal_zoom': MINIMAL_ZOOM, 'url': request.base_url, 'index_url': request.url_root}
     if 'marker' in request.values:
         markers = Marker.get_marker(request.values['marker'])
         if markers.count() == 1:
             marker = markers[0]
             context['coordinates'] = (marker.latitude, marker.longitude)
             context['marker'] = marker.id
+        else:
+            message = u"תאונה לא נמצאה: " + request.values['marker']
+    elif 'discussion' in request.values:
+        discussions = DiscussionMarker.get_by_identifier(request.values['discussion'])
+        if discussions.count() == 1:
+            marker = discussions[0]
+            context['coordinates'] = (marker.latitude, marker.longitude)
+            context['discussion'] = marker.identifier
+        else:
+            message = u"דיון לא נמצא: " + request.values['discussion']
     if 'start_date' in request.values:
         context['start_date'] = string2timestamp(request.values['start_date'])
     elif marker:
@@ -293,8 +303,7 @@ def index(marker=None, message=None):
         context['end_date'] = string2timestamp(request.values['end_date'])
     elif marker:
         context['end_date'] = year2timestamp(marker.created.year + 1)
-    for attr in 'show_fatal', 'show_severe', 'show_light', 'show_inaccurate', \
-                'zoom':
+    for attr in 'show_fatal', 'show_severe', 'show_light', 'show_inaccurate', 'zoom':
         if attr in request.values:
             context[attr] = request.values[attr]
     if 'map_only' in request.values:

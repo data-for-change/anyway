@@ -86,7 +86,7 @@ $(function () {
         },
         updateUrl: function (url) {
             if (typeof url == 'undefined') {
-                if (app.infoWindow) return;
+                if (app.infoWindow || app.discussionShown) return;
                 url = "/?" + this.getCurrentUrlParams();
             }
             Backbone.history.navigate(url, true);
@@ -257,12 +257,12 @@ $(function () {
                 var location1 = new google.maps.Marker({
                     position: myLatlng,
                     map: this.map,
-                    icon: MULTIPLE_ICONS[SEVERITY_VARIOUS]
+                    icon: app.retinaIconsResize(MULTIPLE_ICONS[SEVERITY_VARIOUS])
                 });
                 tourLocation = 6 ;
                 console.log("inside the group id "+tourLocation+"new2");
                 contentString = '<p>בנקודה זו התרחשו מספר תאונות, לחיצה על האייקון תציג אותן בנפרד ותאפשר בחירה</br> בתאונה בודדת.</p>';
-                titleString = 'אייקון של מספר התאונות באותו מקום';
+                titleString = 'אייקון של מספר תאונות באותו מקום';
                 defInfoWindows();
                 infowindow = new google.maps.InfoWindow({
                     content: htmlTourString,
@@ -373,7 +373,7 @@ $(function () {
             this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(mapControlDiv);
 
             if (LOCATION_SPECIFIED) {
-                if (!MARKER_ID) {
+                if (!MARKER_ID && !DISCUSSION_IDENTIFIER) {
                     this.setCenterWithMarker(this.defaultLocation);
                 }
             } else {
@@ -419,16 +419,20 @@ $(function () {
             console.log('Loaded OverlappingMarkerSpiderfier');
             var clusterStyle = [
                 {
+                    size: 42,
                     width: 5
                 },
                 {
+                    size: 52,
                     width: 10
                 },
                 {
-                    width: 20
+                    size: 62,
+                    width: 15
                 },
                 {
-                    width: 40
+                    size: 72,
+                    width: 20
                 }
             ];
             var mcOptions = {maxZoom: MINIMAL_ZOOM - 1, minimumClusterSize: 1, styles: clusterStyle};
@@ -624,6 +628,7 @@ $(function () {
         addDiscussionMarker : function() { // called once a comment is posted
             var identifier = this.newDiscussionIdentifier;
             if (typeof identifier == 'undefined') return true; // marker already exists
+            this.updateUrl(this.getDiscussionUrl(identifier));
             var model = new Discussion({
                 identifier: identifier,
                 latitude: this.clickLocation.lat(),
@@ -644,9 +649,14 @@ $(function () {
                 identifier = this.clickLocation.toString(); // (lat, lon)
                 this.newDiscussionIdentifier = identifier;
             } else { // clicked existing discussion marker
+                this.updateUrl(this.getDiscussionUrl(identifier));
                 this.newDiscussionIdentifier = undefined;
             }
             $("#discussion-dialog").modal("show");
+            this.discussionShown = identifier;
+            $("#discussion-dialog").on("hidden", function() {
+                this.discussionShown = null;
+            }.bind(this));
             var url = window.location.protocol + "//" + window.location.host +
                       "/discussion?identifier=" + identifier;
             DISQUS.reset({
@@ -657,6 +667,9 @@ $(function () {
                     this.page.title = identifier;
                 }
             });
+        },
+        getDiscussionUrl: function (identifier) {
+            return "/?discussion=" + identifier + "&" + app.getCurrentUrlParams();
         },
         featuresSubscriptionDialog : function(type, event) {
             if (this.createDialog) this.createDialog.close();

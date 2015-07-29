@@ -17,7 +17,7 @@ class TestQueryFilters(unittest.TestCase):
     def setUp(self):
         self.query = Marker.bounding_box_query(ne_lat=32.36, ne_lng=35.088, sw_lat=32.292, sw_lng=34.884,
                                                start_date=start_date, end_date=end_date,
-                                               fatal=False, severe=True, light=True, inaccurate=False,
+                                               fatal=False, severe=True, light=True, approx=False, accurate=True,
                                                is_thin=False, yield_per=None)
 
     def tearDown(self):
@@ -30,7 +30,7 @@ class TestQueryFilters(unittest.TestCase):
 
     def test_accuracy_filter(self):
         for marker in self.query:
-            self.assertFalse(marker['inaccurate'])
+            self.assertFalse(marker['approx'])
 
     def test_severity_filters(self):
         for marker in self.query:

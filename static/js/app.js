@@ -761,8 +761,8 @@ $(function () {
             if ($("#checkbox-severe").is(":checked")) { show_severe='1' } else { show_severe='' };
             if ($("#checkbox-light").is(":checked")) { show_light='1' } else { show_light='' };
             dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
-            window.app.resetMarkers();
-            window.app.fetchMarkers();
+            this.resetMarkers();
+            this.fetchMarkers();
         },
         change_date: function() {
             // TODO 1: Change ACCYEARS to conatin the year itself and pull years here from the object
@@ -774,8 +774,8 @@ $(function () {
             $("#sdate").val(start_date + '-01-01');
             $("#edate").val(end_date + '-01-01');
             dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
-            window.app.resetMarkers();
-            window.app.fetchMarkers();
+            this.resetMarkers();
+            this.fetchMarkers();
         }
     });
 });

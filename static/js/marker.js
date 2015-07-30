@@ -287,9 +287,16 @@ var MarkerView = Backbone.View.extend({
                 setTimeout(function(){
                     var sectionHeightScroll = $(input).siblings(".accordion-roller").height() + curIwScroll;
                     var bestScrollTo = sectionHeightScroll < labelPos ? sectionHeightScroll : labelPos;
+
+                    $(infoWindow).on("mousewheel keyup mousedown DOMMouseScroll wheel touchmove", function(){
+                        $(infoWindow).stop();
+                    });
+
                     $(infoWindow).animate({
                         scrollTop: bestScrollTo
-                    }, 1300);
+                    }, 1300, function(){
+                        $(infoWindow).off("mousewheel keyup mousedown DOMMouseScroll wheel touchmove");
+                    });
                 }.bind(this),550);
             }
         }

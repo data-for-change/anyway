@@ -286,7 +286,8 @@ var MarkerView = Backbone.View.extend({
 
                 setTimeout(function(){
                     var sectionHeightScroll = $(input).siblings(".accordion-roller").height() + curIwScroll;
-                    var bestScrollTo = sectionHeightScroll < labelPos ? sectionHeightScroll : labelPos;
+                    var bestScrollTo = Math.min(sectionHeightScroll, labelPos);
+                    var scrollAnimationDuration = Math.min((bestScrollTo - curIwScroll) * 9, 1300);
 
                     $(infoWindow).on("mousewheel keyup mousedown DOMMouseScroll wheel touchmove", function(){
                         $(infoWindow).stop();
@@ -294,7 +295,7 @@ var MarkerView = Backbone.View.extend({
 
                     $(infoWindow).animate({
                         scrollTop: bestScrollTo
-                    }, 1300, function(){
+                    }, scrollAnimationDuration, function(){
                         $(infoWindow).off("mousewheel keyup mousedown DOMMouseScroll wheel touchmove");
                     });
                 }.bind(this),550);

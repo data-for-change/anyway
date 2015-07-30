@@ -48,6 +48,15 @@ $(function () {
             this.markerList = [];
             this.clusterList = [];
             this.firstLoadDelay = true;
+            this.show_markers = '1';
+            this.show_discussions = '1';
+            this.accurate = '1';
+            this.approx = '';
+            this.show_fatal = '1';
+            this.show_severe = '1';
+            this.show_light = '1';
+            this.dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
+
             setTimeout(function(){
                 this.firstLoadDelay = false;
             }.bind(this), 2200);
@@ -199,15 +208,15 @@ $(function () {
             params["zoom"] = zoom;
             params["thin_markers"] = (zoom < MINIMAL_ZOOM || !bounds);
             // Pass start and end dates as unix time (in seconds)
-            params["start_date"] = dateRanges[0].getTime() / 1000;
-            params["end_date"] = dateRanges[1].getTime() / 1000;
-            params["show_fatal"] = show_fatal;
-            params["show_severe"] = show_severe;
-            params["show_light"] = show_light;
-            params["approx"] = approx;
-            params["accurate"] = accurate;
-            params["show_markers"] = show_markers;
-            params["show_discussions"] = show_discussions;
+            params["start_date"] = this.dateRanges[0].getTime() / 1000;
+            params["end_date"] = this.dateRanges[1].getTime() / 1000;
+            params["show_fatal"] = this.show_fatal;
+            params["show_severe"] = this.show_severe;
+            params["show_light"] = this.show_light;
+            params["approx"] = this.approx;
+            params["accurate"] = this.accurate;
+            params["show_markers"] = this.show_markers;
+            params["show_discussions"] = this.show_discussions;
             return params;
         },
         setMultipleMarkersIcon: function () {
@@ -725,8 +734,8 @@ $(function () {
         getCurrentUrlParams: function () {
             var dateRange = app.model.get("dateRange");
             var center = app.map.getCenter();
-            return "start_date=" + moment(dateRanges[0]).format("YYYY-MM-DD") +
-                "&end_date=" + moment(dateRanges[1]).format("YYYY-MM-DD") +
+            return "start_date=" + moment(this.dateRanges[0]).format("YYYY-MM-DD") +
+                "&end_date=" + moment(this.dateRanges[1]).format("YYYY-MM-DD") +
                 "&show_fatal=" + (parseInt(app.model.get("showFatal")) || 0) +
                 "&show_severe=" + (parseInt(app.model.get("showSevere")) || 0) +
                 "&show_light=" + (parseInt(app.model.get("showLight")) || 0) +
@@ -749,38 +758,90 @@ $(function () {
             return image_url;
         },
         load_filter: function() {
-            if ($("#checkbox-discussions").is(":checked")) { show_discussions='1' } else { show_discussions='' };
-            if ($("#checkbox-accidents").is(":checked")) { show_markers='1' } else { show_markers='' };
-            if ($("#checkbox-accurate").is(":checked")) { accurate='1' } else { accurate='' };
-            if ($("#checkbox-approx").is(":checked")) { approx='1' } else { approx='' };
-            if ($("#checkbox-fatal").is(":checked")) { show_fatal='1' } else { show_fatal='' };
-            if ($("#checkbox-severe").is(":checked")) { show_severe='1' } else { show_severe='' };
-            if ($("#checkbox-light").is(":checked")) { show_light='1' } else { show_light='' };
-            dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
+            if ($("#checkbox-discussions").is(":checked")) { this.show_discussions='1' } else { this.show_discussions='' }
+            if ($("#checkbox-accidents").is(":checked")) { this.show_markers='1' } else { this.show_markers='' }
+            if ($("#checkbox-accurate").is(":checked")) { this.accurate='1' } else { this.accurate='' }
+            if ($("#checkbox-approx").is(":checked")) { this.approx='1' } else { this.approx='' }
+            if ($("#checkbox-fatal").is(":checked")) { this.show_fatal='1' } else { this.show_fatal='' }
+            if ($("#checkbox-severe").is(":checked")) { this.show_severe='1' } else { this.show_severe='' }
+            if ($("#checkbox-light").is(":checked")) { this.show_light='1' } else { this.show_light='' }
+            this.dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())]
             this.resetMarkers();
             this.fetchMarkers();
+            this.updateFilterString();
         },
         change_date: function() {
             // TODO 1: Change ACCYEARS to conatin the year itself and pull years here from the object
             // TODO 2: (optional): change years from radios to checkboxes and allow multiple choices forcing sequential periods
+            var start_date, end_date;
             if ($("#checkbox-2014").is(":checked")) { start_date = "2014"; end_date = "2015" }
             else if ($("#checkbox-2013").is(":checked")) { start_date = "2013"; end_date = "2014" }
             else if ($("#checkbox-2012").is(":checked")) { start_date = "2012"; end_date = "2013" }
             else if ($("#checkbox-2011").is(":checked")) { start_date = "2011"; end_date = "2012" }
             $("#sdate").val(start_date + '-01-01');
             $("#edate").val(end_date + '-01-01');
-            dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
+            this.dateRanges = [new Date(start_date + '-01-01'), new Date(end_date + '-01-01')];
             this.resetMarkers();
             this.fetchMarkers();
+            this.updateFilterString();
+        },
+        updateFilterString: function() {
+            if (!this.clusterMode()) {
+                var fatal = this.show_fatal, severe = this.show_severe, light = this.show_light, severityText = " בחומרה ";
+                var accurate = this.accurate, approx = this.approx, accuracyText = " ובעיגון ";
+
+                // Severity variables and strings
+                if (fatal == '1') {
+                    fatal = "קטלנית "
+                } else {
+                    fatal = ""
+                }
+                if (severe == '1' && fatal != '' && light == '') {
+                    severe = "וקשה ";
+                } else if (severe == '1') {
+                    severe = "קשה ";
+                } else {
+                    severe = '';
+                }
+                ;
+                if (fatal == '' && severe == '' && light == '') {
+                    severityText = ""
+                }
+
+                if (light == '1' && (fatal != '' || severe != '')) {
+                    light = "וקלה ";
+                } else if (light == '1') {
+                    light = "קלה ";
+                } else {
+                    light = '';
+                }
+
+                // Accuracy variables and strings
+                if (accurate == '1') {
+                    accurate = "מדויק "
+                } else {
+                    accurate = ""
+                }
+                if (approx == '1' && accurate != '') {
+                    approx = "ומשוער ";
+                } else if (approx == '1') {
+                    approx = "משוער ";
+                } else {
+                    approx = "";
+                }
+                if (accurate == '' && approx == '') {
+                    accuracyText = ""
+                }
+
+                $("#filter-string").text(
+                    "" + "מציג " + markerCount + " תאונות בין התאריכים " + moment(this.dateRanges[0]).format('LL')
+                    + " עד " + moment(this.dateRanges[1]).format('LL') + severityText + fatal + severe + light
+                    + accuracyText + accurate + approx
+                );
+            } else {
+                $("#filter-string").text(" התקרב על מנת לקבל נתוני סינון ");
+            }
         }
     });
 });
-
-var show_markers = '1', show_discussions = '1', accurate = '1', approx = '', show_fatal = '1', show_severe = '1',
-    show_light = '1', dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
-
-
-
-
-
 

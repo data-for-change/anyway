@@ -382,6 +382,9 @@
 <div id="sidebar-template" style="display: none">
     <div class="filter-description">
         <span class="current-view-count"></span>
+        <div style="width:80%; padding:5%; font-size: 20px; font-weight: bold;">
+            <p id="filter-string"></p>
+        </div>
     </div>
     <div class="filter-menu">
          <!-- FILTER MARKERS-->
@@ -467,9 +470,9 @@
                 <label for="checkbox-2011" class="btn one">2011</label>
             </div>
             <div class="btn-wrap separator" style="margin-right: 0;">
-                <input id="sdate" class="btn date" type="date" style="width: 38% !important; margin-right: 6px;" value="2014-01-01" onclick="load_filter()">
+                <input id="sdate" class="btn date" type="date" style="width: 38% !important; margin-right: 6px;" value="2014-01-01" oninput="app.load_filter()">
                 <span class="btn-label" style="margin-right: 6px;">עד</span>
-                <input id="edate" class="btn date" style="width: 38% !important; " type="date" value="2015-01-01" onclick="load_filter()">
+                <input id="edate" class="btn date" style="width: 38% !important; " type="date" value="2015-01-01" oninput="app.load_filter()">
             </div>
             <!--<div class="btn-wrap separator">-->
                 <!--<span class="btn-label">יום:</span>-->

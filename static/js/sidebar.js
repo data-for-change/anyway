@@ -1,4 +1,5 @@
 var CLUSTER_MODE_SIDEBAR_TEXT = 'התקרב על מנת לצפות ברשימת התאונות';
+var markerCount = 0;
 
 var SidebarView = Backbone.View.extend({
     className: "info-window",
@@ -12,7 +13,6 @@ var SidebarView = Backbone.View.extend({
         this.sidebarItemTemplate = _.template($("#sidebarItemTemplate").text());
     },
     render: function() {
-
         this.$el.append($("#sidebar-template").html());
         this.$currentViewList = this.$el.find(".current-view");
         var self = this;
@@ -26,7 +26,7 @@ var SidebarView = Backbone.View.extend({
     reloadMarkerList: function(markerList) {
         // Set the marker list to empty array if it's not defined
         markerList = markerList || [];
-
+        markerCount = 0;
         var bounds = this.map.getBounds();
 
         // Sort by decending order the marker list
@@ -35,7 +35,7 @@ var SidebarView = Backbone.View.extend({
         });
 
         var $viewList = $('<ul/>');
-        var markerCount = 0;
+
 
         for (var i = 0; i < markerList.length; i++) {
             var markerView = markerList[i];
@@ -67,8 +67,8 @@ var SidebarView = Backbone.View.extend({
         }
 
         this.$currentViewList.empty().append($viewList.find("li"));
-
         this.$el.find(".current-view-count").text(markerCount);
+        app.updateFilterString();
     },
     updateCheckboxIcon: function(img, hover) {
         var checked;
@@ -98,10 +98,5 @@ var SidebarView = Backbone.View.extend({
     },
     getMarker: function(e) {
         return $(e.target).data("marker") || $(e.target).parents("li").data("marker");
-    },
-    updateShowByAccuracy: function() {
-        this.$el.find("img.checkbox-accuracy").each(function() {
-            app.model.set("showInaccurateMarkers", $(this).data("checked"));
-        });
     }
 });

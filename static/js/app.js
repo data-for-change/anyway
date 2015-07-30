@@ -120,10 +120,6 @@ $(function () {
             }
 
             if (this.clusterMode()) {
-                $("#view-filter").prop('disabled', true);
-                // TODO: disable sidebar-template on clustermode (and bring it back when required)
-                //$("#sidebar-template: input").attr('disabled', true);
-                console.log("CLUSTER MODE")
                 this.closeInfoWindow();
                 this.clusters.fetch({
                     data: $.param(params),

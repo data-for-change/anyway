@@ -168,7 +168,8 @@ def marker(marker_id):
 def discussion():
     if request.method == "GET":
         identifier = request.values['identifier']
-        context = {'identifier': identifier, 'title': identifier, 'url': request.base_url}
+        context = {'identifier': identifier, 'title': identifier,
+                   'url': request.base_url, 'index_url': request.url_root}
         lat, lon = request.values.get('lat'), request.values.get('lon')
         if lat is not None and lon is not None:  # create new discussion
             context.update({'new': True, 'latitude': lat, 'longitude': lon})

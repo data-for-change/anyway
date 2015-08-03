@@ -216,15 +216,6 @@ def clusters(methods=["GET"]):
         logging.debug('calculating clusters took ' + str(time.time() - start_time))
         return Response(json.dumps({'clusters': results}), mimetype="application/json")
 
-@app.route('/', defaults={'marker_id': None})
-@app.route('/<int:marker_id>')
-def main(marker_id):
-    # at this point the marker id is just a running number, and the
-    # LMS is in the description and needs to be promoted to a DB
-    # field so we can query it. We also need to add a provider id.
-    context = {'minimal_zoom': MINIMAL_ZOOM}
-    marker = None
-
 @app.route("/highlightpoints", methods=['POST'])
 @user_optional
 def highlightpoint():
@@ -490,7 +481,6 @@ class ViewHighlightedMarkers(BaseView):
     def index(self):
         highlightedpoints = db_session.query(HighlightPoint).options(load_only("id", "latitude", "longitude", "type"))
         points = []
-        point_id_list = []
         for point in highlightedpoints:
             p = HighlightPoint()
             p.id = point.id

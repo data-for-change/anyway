@@ -423,31 +423,31 @@
             <div class="btn-wrap separator">
                 <span class="btn-label">חומרה:</span>
                 <input type="checkbox" id="checkbox-fatal" onclick="app.load_filter()" checked/>
-                <label for="checkbox-fatal" class="btn three right fatal" id="fatal">קטלניות</label>
+                <label for="checkbox-fatal" class="btn three right fatal">קטלניות</label>
                 <input type="checkbox" id="checkbox-severe" onclick="app.load_filter()" checked/>
                 <label for="checkbox-severe" class="btn three middle severe">קשות</label>
                 <input type="checkbox" id="checkbox-light" onclick="app.load_filter()" checked/>
                 <label for="checkbox-light" class="btn three left light">קלות</label>
             </div>
-            <!--<div class="btn-wrap">-->
-                <!--<span class="btn-label">דרך:</span>-->
-                <!--<input type="checkbox" id="checkbox-met"/>-->
-                <!--<label for="checkbox-met" class="btn two right">עירוני</label>-->
-                <!--<input type="checkbox" id="checkbox-not-met"/>-->
-                <!--<label for="checkbox-not-met" class="btn two left">לא עירוני</label>-->
-            <!--</div>-->
-            <!--<div class="btn-wrap center">-->
-                <!--<input type="checkbox" id="checkbox-inter"/>-->
-                <!--<label for="checkbox-inter" class="btn two right">צומת</label>-->
-                <!--<input type="checkbox" id="checkbox-not-inter"/>-->
-                <!--<label for="checkbox-not-inter" class="btn two left">לא בצומת</label>-->
-            <!--</div>-->
-            <!--<div class="btn-wrap center">-->
-                <!--<input type="checkbox" id="checkbox-two-way"/>-->
-                <!--<label for="checkbox-two-way" class="btn two right">דו-סטרי</label>-->
-                <!--<input type="checkbox" id="checkbox-one-way"/>-->
-                <!--<label for="checkbox-one-way" class="btn two left">חד-סטרי</label>-->
-            <!--</div>-->
+            <div class="btn-wrap separator">
+                <span class="btn-label">דרך:</span>
+                <input type="checkbox" id="checkbox-city" onclick="app.load_filter()" checked/>
+                <label for="checkbox-city" class="btn two right">עירוני</label>
+                <input type="checkbox" id="checkbox-not-city" onclick="app.load_filter()" checked/>
+                <label for="checkbox-not-city" class="btn two left">לא עירוני</label>
+            </div>
+            <div class="btn-wrap separator center">
+                <input type="checkbox" id="checkbox-inter" onclick="app.load_filter()" checked/>
+                <label for="checkbox-inter" class="btn two right">צומת</label>
+                <input type="checkbox" id="checkbox-not-inter" onclick="app.load_filter()" checked/>
+                <label for="checkbox-not-inter" class="btn two left">לא בצומת</label>
+            </div>
+            <div class="btn-wrap center">
+                <input type="checkbox" id="checkbox-double" onclick="app.load_filter()" checked/>
+                <label for="checkbox-double" class="btn two right">דו-סטרי</label>
+                <input type="checkbox" id="checkbox-single" onclick="app.load_filter()" checked/>
+                <label for="checkbox-single" class="btn two left">חד-סטרי</label>
+            </div>
         </div>
 
         <!-- FILTER TIME (ZMAN)-->
@@ -474,41 +474,60 @@
                 <span class="btn-label" style="margin-right: 6px;">עד</span>
                 <input id="edate" class="btn date" style="width: 38% !important; " type="date" value="2015-01-01" oninput="app.load_filter()">
             </div>
-            <!--<div class="btn-wrap separator">-->
-                <!--<span class="btn-label">יום:</span>-->
-                <!--<button class="btn one">א׳</button>-->
-                <!--<button class="btn one">ב׳</button>-->
-                <!--<button class="btn one">ג׳</button>-->
-                <!--<button class="btn one">ד׳</button>-->
-                <!--<button class="btn one">ה׳</button>-->
-                <!--<button class="btn one">ו׳</button>-->
-                <!--<button class="btn one">ש׳</button>-->
-            <!--</div>-->
-            <!--<div class="btn-wrap">-->
-                <!--<span class="btn-label">זמן:</span>-->
-                <!--<button class="btn one icon-weather">B</button>-->
-                <!--<button class="btn one">בוקר</button>-->
-                <!--<button class="btn one">צהריים</button>-->
-                <!--<button class="btn one">אחה״צ</button>-->
-            <!--</div>-->
-            <!--<div class="btn-wrap" style="margin-right: 28px">-->
-                <!--<button class="btn one icon-weather">C</button>-->
-                <!--<button class="btn one">ערב</button>-->
-                <!--<button class="btn one">לילה</button>-->
-                <!--<button class="btn one">לפנות בוקר</button>-->
-            <!--</div>-->
-            <!--<div class="btn-wrap separator" style="margin-right: 0;">-->
-                <!--<input class="btn time" type="time" style="margin-right: 6px;">-->
-                <!--<span class="btn-label" style="margin-right: 6px;">עד</span>-->
-                <!--<input class="btn time" type="time">-->
-            <!--</div>-->
-            <!--<div class="btn-wrap separator">-->
-                <!--<span class="btn-label">מועד:</span>-->
-                <!--<button class="btn one">יום חול</button>-->
-                <!--<button class="btn one">ערב חג</button>-->
-                <!--<button class="btn one">חג</button>-->
-                <!--<button class="btn one">חול המועד</button>-->
-            <!--</div>-->
+            <div class="btn-wrap separator">
+                <span class="btn-label">יום:</span>
+                <input type="radio" name="day" id="checkbox-sun" value="A" onclick="" />
+                <label for="checkbox-sun" class="btn one">א׳</label>
+                <input type="radio" name="day" id="checkbox-mon" value="B" onclick="" />
+                <label for="checkbox-mon" class="btn one">ב׳</label>
+                <input type="radio" name="day" id="checkbox-tue" value="C" onclick="" />
+                <label for="checkbox-tue" class="btn one">ג׳</label>
+                <input type="radio" name="day" id="checkbox-wed" value="D" onclick="" />
+                <label for="checkbox-wed" class="btn one">ד׳</label>
+                <input type="radio" name="day" id="checkbox-thu" value="E" onclick="" />
+                <label for="checkbox-thu" class="btn one">ה׳</label>
+                <input type="radio" name="day" id="checkbox-fri" value="F" onclick="" />
+                <label for="checkbox-fri" class="btn one">ו׳</label>
+                <input type="radio" name="day" id="checkbox-sat" value="G" onclick="" />
+                <label for="checkbox-sat" class="btn one">ש׳</label>
+            </div>
+            <div class="btn-wrap">
+                <span class="btn-label">זמן:</span>
+                <input type="radio" name="weather" id="checkbox-" value="" onclick="" />
+                <label for="checkbox-" class="btn one icon-weather">B</label>
+                <input type="radio" name="time" id="checkbox-morning" value="morning" onclick="" />
+                <label for="checkbox-morning" class="btn one">בוקר</label>
+                <input type="radio" name="time" id="checkbox-lunch" value="lunch" onclick="" />
+                <label for="checkbox-lunch" class="btn one">צהריים</label>
+                <input type="radio" name="time" id="checkbox-afternoon" value="afternoon" onclick="" />
+                <label for="checkbox-afternoon" class="btn one">אחר-הצהריים</label>
+            </div>
+            <div class="btn-wrap center">
+                <input type="radio" name="weather" id="checkbox-" value="" onclick="" />
+                <label for="checkbox-" class="btn one icon-weather">2</label>
+                <input type="radio" name="time" id="checkbox-evening" value="evening" onclick="" />
+                <label for="checkbox-evening" class="btn one">ערב</label>
+                <input type="radio" name="time" id="checkbox-night" value="night" onclick="" />
+                <label for="checkbox-night" class="btn one">לילה</label>
+                <input type="radio" name="time" id="checkbox-dawn" value="dawn" onclick="" />
+                <label for="checkbox-dawn" class="btn one">לפנות בוקר</label>
+            </div>
+            <div class="btn-wrap separator" style="margin-right: 0;">
+                <input class="btn time" type="time" style="margin-right: 6px;">
+                <span class="btn-label" style="margin-right: 6px;">עד</span>
+                <input class="btn time" type="time">
+            </div>
+            <div class="btn-wrap separator">
+                <span class="btn-label">מועד:</span>
+                <input type="radio" name="holiday" id="checkbox-day" value="evening" onclick="" />
+                <label for="checkbox-day" class="btn one">יום חול</label>
+                <input type="radio" name="holiday" id="checkbox-holieve" value="night" onclick="" />
+                <label for="checkbox-holieve" class="btn one">ערב חג</label>
+                <input type="radio" name="holiday" id="checkbox-holiday" value="midnight" onclick="" />
+                <label for="checkbox-holiday" class="btn one">חג</label>
+                <input type="radio" name="holiday" id="checkbox-afterholi" value="afterholi" onclick="" />
+                <label for="checkbox-afterholi" class="btn one">מוצאי חג</label>
+            </div>
         </div>
 
         <!-- FILTER CONDITIONS (TNAIM)-->
@@ -519,56 +538,81 @@
             </i>
         </label>
         <div class="filter-panel">
-            <!--<div style="border-top: 2px solid #ddd; margin-bottom: 0 !important;"></div>-->
-            <!--<div class="btn-wrap">-->
-                <!--<span class="btn-label">מזג-אויר:</span>-->
-                <!--<button class="btn one">הכל</button>-->
-                <!--<button class="btn one icon-weather">B</button>-->
-                <!--<button class="btn one icon-weather">H</button>-->
-                <!--<button class="btn one icon-weather">Y</button>-->
-                <!--<button class="btn one icon-weather">F</button>-->
-            <!--</div>-->
-            <!--<div class="btn-wrap separator center">-->
-                <!--<button class="btn one icon-weather">R</button>-->
-                <!--<button class="btn one icon-weather">O</button>-->
-                <!--<button class="btn one icon-weather">W</button>-->
-                <!--<button class="btn one icon-weather">X</button>-->
-                <!--<button class="btn one icon-weather">(</button>-->
-            <!--</div>-->
-            <!--<div class="btn-wrap">-->
-                <!--<span class="btn-label">צורת דרך:</span>-->
-                <!--<button class="btn one">הכל</button>-->
-                <!--<button class="btn one">כביש ישר/צומת</button>-->
-            <!--</div>-->
-            <!--<div class="btn-wrap center">-->
-                <!--<button class="btn one">עקום חד</button>-->
-                <!--<button class="btn one">מ.חניה/ת. דלק</button>-->
-                <!--<button class="btn one">שיפוע תלול</button>-->
-            <!--</div>-->
-            <!--<div class="btn-wrap center">-->
-                <!--<button class="btn one">על גשר/מנהרה</button>-->
-                <!--<button class="btn one">מפגש מסילת רכבת</button>-->
-            <!--</div>-->
-            <!--<div class="btn-wrap separator center">-->
-                <!--<button class="btn one">כניסה למחלף</button>-->
-                <!--<button class="btn one">יציאה ממחלף</button>-->
-                <!--<button class="btn one">אחר</button>-->
-            <!--</div>-->
-            <!--<div class="btn-wrap">-->
-                <!--<span class="btn-label">הפרדת מסלולים:</span>-->
-                <!--<button class="btn one">הכל</button>-->
-                <!--<button class="btn one">מיפרדה עם גדר</button>-->
-            <!--</div>-->
-            <!--<div class="btn-wrap center">-->
-                <!--<button class="btn one">מיפרדה בנויה</button>-->
-                <!--<button class="btn one">קו רצוף</button>-->
-                <!--<button class="btn one">ללא קו רצוף</button>-->
-            <!--</div>-->
-            <!--<div class="btn-wrap center separator">-->
-                <!--<button class="btn one">מיפרדה לא בנויה</button>-->
-                <!--<button class="btn one">מיפרדה מסומנת</button>-->
-                <!--<button class="btn one">אחר</button>-->
-            <!--</div>-->
+            <div class="btn-wrap">
+                <span class="btn-label">מזג-אויר:</span>
+                <input type="radio" name="weather" id="checkbox-" value="" onclick="" />
+                <label for="checkbox-" class="btn one icon-weather">B</label>
+                <input type="radio" name="weather" id="checkbox-" value="" onclick="" />
+                <label for="checkbox-" class="btn one icon-weather">H</label>
+                <input type="radio" name="weather" id="checkbox-" value="" onclick="" />
+                <label for="checkbox-" class="btn one icon-weather">Y</label>
+                <input type="radio" name="weather" id="checkbox-" value="" onclick="" />
+                <label for="checkbox-" class="btn one icon-weather">F</label>
+            </div>
+            <div class="btn-wrap separator center">
+                <input type="radio" name="weather" id="checkbox-" value="" onclick="" />
+                <label for="checkbox-" class="btn one icon-weather">R</label>
+                <input type="radio" name="weather" id="checkbox-" value="" onclick="" />
+                <label for="checkbox-" class="btn one icon-weather">O</label>
+                <input type="radio" name="weather" id="checkbox-" value="" onclick="" />
+                <label for="checkbox-" class="btn one icon-weather">E</label>
+                <input type="radio" name="weather" id="checkbox-" value="" onclick="" />
+                <label for="checkbox-" class="btn one icon-weather">X</label>
+                <input type="radio" name="weather" id="checkbox-" value="" onclick="" />
+                <label for="checkbox-" class="btn one icon-weather">(</label>
+            </div>
+            <div class="btn-wrap">
+                <span class="btn-label">צורת דרך:</span>
+                <input type="radio" name="road" id="checkbox-all-road" value="all" onclick="" />
+                <label for="checkbox-day" class="btn one">הכל</label>
+                <input type="radio" name="road" id="checkbox-general-road" value="general" onclick="" />
+                <label for="checkbox-general-road" class="btn one">כביש ישר/צומת</label>
+            </div>
+            <div class="btn-wrap center">
+                <input type="radio" name="road" id="checkbox-curve" value="curve" onclick="" />
+                <label for="checkbox-curve" class="btn one">עקום חד</label>
+                <input type="radio" name="road" id="checkbox-misc" value="misc" onclick="" />
+                <label for="checkbox-misc" class="btn one">מ. חניה / ת. דלק</label>
+                <input type="radio" name="road" id="checkbox-steep" value="steep" onclick="" />
+                <label for="checkbox-steep" class="btn one">שיפוע תלול</label>
+            </div>
+            <div class="btn-wrap center">
+                <input type="radio" name="road" id="checkbox-bridge-tunnel" value="bridge" onclick="" />
+                <label for="checkbox-bridge-tunnel" class="btn one">על גשר / מנהרה</label>
+                <input type="radio" name="road" id="checkbox-crossroad" value="crossroad" onclick="" />
+                <label for="checkbox-crossroad" class="btn one">מפגש מסילת רכבת</label>
+            </div>
+            <div class="btn-wrap center separator">
+                <input type="radio" name="road" id="checkbox-inter-enter" value="inter-enter" onclick="" />
+                <label for="checkbox-inter-enter" class="btn one">כניסה למחלף</label>
+                <input type="radio" name="road" id="checkbox-inter-exit" value="inter-exit" onclick="" />
+                <label for="checkbox-inter-exit" class="btn one">יציאה ממחלף</label>
+                <input type="radio" name="road" id="checkbox-other" value="other" onclick="" />
+                <label for="checkbox-other" class="btn one">אחר</label>
+            </div>
+            <div class="btn-wrap">
+                <span class="btn-label">הפרדת מסלולים:</span>
+                <input type="radio" name="sep" id="checkbox-sep-all" value="sep-all" onclick="" />
+                <label for="checkbox-sep-all" class="btn one">הכל</label>
+                <input type="radio" name="sep" id="checkbox-sep-fence" value="sep-fence" onclick="" />
+                <label for="checkbox-sep-fence" class="btn one">מפרדה עם גדר</label>
+            </div>
+            <div class="btn-wrap">
+                <input type="radio" name="sep" id="checkbox-sep-continuous" value="sep-continuous" onclick="" />
+                <label for="checkbox-sep-continuous" class="btn one">קו רצוף</label>
+                <input type="radio" name="sep" id="checkbox-sep-dotted" value="sep-dotted" onclick="" />
+                <label for="checkbox-sep-dotted" class="btn one">קו רצוף</label>
+                <input type="radio" name="sep" id="checkbox-sep-built" value="sep-cement" onclick="" />
+                <label for="checkbox-sep-built" class="btn one">מפרדה בנויה</label>
+            </div>
+            <div class="btn-wrap">
+                <input type="radio" name="sep" id="checkbox-sep-not-built" value="sep-not-built" onclick="" />
+                <label for="checkbox-sep-not-built" class="btn one">מפרדה לא בנויה</label>
+                <input type="radio" name="sep" id="checkbox-sep-marked" value="sep-marked" onclick="" />
+                <label for="checkbox-sep-marked" class="btn one">מפרדה מסומנת</label>
+                <input type="radio" name="sep" id="checkbox-sep-other" value="sep-other" onclick="" />
+                <label for="checkbox-sep-other" class="btn one">אחר</label>
+            </div>
         </div>
 
         <!-- FILTER INVOLVED (MEORAVIM)-->

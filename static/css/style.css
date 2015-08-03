@@ -24,6 +24,12 @@ input, button, select, textarea {
 a.brand {
     padding: 1px !important;
     margin-right: 8px !important;
+    cursor: pointer
+}
+
+.brand-img{
+    height: 26px;
+    cursor: pointer
 }
 
 div.gm-style {
@@ -424,6 +430,10 @@ input[type="date"],input[type="time"]{
 .navbar-inner{
 }
 
+.navbar-brand{
+    float: right; display: inline-flex; justify-content: flex-end
+}
+
 .footer{
     position:fixed;
     height: 40px;
@@ -548,11 +558,11 @@ textarea.form-control-wide {
 }
 
 .toggle-wrapper {
-    margin-right: 118px;
+    margin-right: 108px;
     vertical-align: middle;
     cursor: pointer;
     line-height: 40px;
-    padding-top: 7px;
+    padding-top: 12px;
 }
 
 #toggle {
@@ -592,3 +602,4 @@ input[type='date']{
 input[type='checkbox']{
     display: none;
 }
+

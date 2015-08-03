@@ -55,6 +55,8 @@ div.gm-style {
     width: 300px;
     -webkit-order: 1;
     order: 1;
+    overflow-y: scroll;
+    height: 350px;
 }
 
 input[type=radio], .filter-panel {

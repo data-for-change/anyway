@@ -459,9 +459,11 @@
         <div class="filter-panel">
             <div class="btn-wrap">
                 <span class="btn-label">תקופה:</span>
-                <input type="radio" name="years" id="checkbox-2014" value="2014" onclick="app.change_date()" checked/>
+                <input type="radio" name="years" id="checkbox-years-all" value="all" onclick="app.change_date()" />
+                <label for="checkbox-years-all" class="btn one">הכל</label>
+                <input type="radio" name="years" id="checkbox-2014" value="2014" onclick="app.change_date()" />
                 <label for="checkbox-2014" class="btn one">2014</label>
-                <input type="radio" name="years" id="checkbox-2013" value="2013" onclick="app.change_date()" />
+                <input type="radio" name="years" id="checkbox-2013" value="2013" onclick="app.change_date()" checked />
                 <label for="checkbox-2013" class="btn one">2013</label>
                 <input type="radio" name="years" id="checkbox-2012" value="2012" onclick="app.change_date()" />
                 <label for="checkbox-2012" class="btn one">2012</label>
@@ -475,6 +477,8 @@
             </div>
             <div class="btn-wrap separator">
                 <span class="btn-label">יום:</span>
+                <input type="radio" name="day" id="checkbox-day-all" value="all" onclick="" />
+                <label for="checkbox-day-all" class="btn one">הכל</label>
                 <input type="radio" name="day" id="checkbox-sun" value="A" onclick="" />
                 <label for="checkbox-sun" class="btn one">א׳</label>
                 <input type="radio" name="day" id="checkbox-mon" value="B" onclick="" />
@@ -492,31 +496,33 @@
             </div>
             <div class="btn-wrap">
                 <span class="btn-label">זמן:</span>
-                <input type="radio" name="weather" id="checkbox-" value="" onclick="" />
-                <label for="checkbox-" class="btn one icon-weather">B</label>
+                <input type="radio" name="time" id="checkbox-time-all" value="all" onclick="" />
+                <label for="checkbox-time-all" class="btn one">הכל</label>
                 <input type="radio" name="time" id="checkbox-morning" value="morning" onclick="" />
                 <label for="checkbox-morning" class="btn one">בוקר</label>
                 <input type="radio" name="time" id="checkbox-lunch" value="lunch" onclick="" />
                 <label for="checkbox-lunch" class="btn one">צהריים</label>
                 <input type="radio" name="time" id="checkbox-afternoon" value="afternoon" onclick="" />
-                <label for="checkbox-afternoon" class="btn one">אחר-הצהריים</label>
+                <label for="checkbox-afternoon" class="btn one">אחה״צ</label>
+                <input type="radio" name="weather" id="checkbox-" value="" onclick="" />
+                <label for="checkbox-" class="btn one icon-weather">B</label>
             </div>
             <div class="btn-wrap center">
-                <input type="radio" name="weather" id="checkbox-" value="" onclick="" />
-                <label for="checkbox-" class="btn one icon-weather">2</label>
                 <input type="radio" name="time" id="checkbox-evening" value="evening" onclick="" />
                 <label for="checkbox-evening" class="btn one">ערב</label>
                 <input type="radio" name="time" id="checkbox-night" value="night" onclick="" />
                 <label for="checkbox-night" class="btn one">לילה</label>
                 <input type="radio" name="time" id="checkbox-dawn" value="dawn" onclick="" />
                 <label for="checkbox-dawn" class="btn one">לפנות בוקר</label>
+                <input type="radio" name="weather" id="checkbox-" value="" onclick="" />
+                <label for="checkbox-" class="btn one icon-weather">2</label>
             </div>
             <div class="btn-wrap separator" style="margin-right: 0;">
                 <input class="btn time" type="time" style="margin-right: 6px;">
                 <span class="btn-label" style="margin-right: 6px;">עד</span>
                 <input class="btn time" type="time">
             </div>
-            <div class="btn-wrap separator">
+            <div class="btn-wrap">
                 <span class="btn-label">מועד:</span>
                 <input type="radio" name="holiday" id="checkbox-day" value="evening" onclick="" />
                 <label for="checkbox-day" class="btn one">יום חול</label>
@@ -539,6 +545,8 @@
         <div class="filter-panel">
             <div class="btn-wrap">
                 <span class="btn-label">מזג-אויר:</span>
+                <input type="radio" name="weather" id="checkbox-weather-all" value="" onclick="" />
+                <label for="checkbox-weather-all" class="btn one">הכל</label>
                 <input type="radio" name="weather" id="checkbox-" value="" onclick="" />
                 <label for="checkbox-" class="btn one icon-weather">B</label>
                 <input type="radio" name="weather" id="checkbox-" value="" onclick="" />

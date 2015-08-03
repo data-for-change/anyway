@@ -45,7 +45,9 @@ Contributing
 ### Windows (experimental)
 1. Install [Python 2.7](http://www.python.org/getit)
 2. If Python is already installed and its version is lower than 2.7.9 update to a version >= 2.7.9 OR install [setuptools](http://www.lfd.uci.edu/~gohlke/pythonlibs/#setuptools) & [pip](http://www.lfd.uci.edu/~gohlke/pythonlibs/#pip)(package manager) 
-3. Update the PATH to include a reference to the Python and Python/scripts directories. (Replace C:\Python27 with your path to Python) Command Line: Run this command with Administrator privileges: `SETX /M PATH "%PATH%";C:\Python27;C:\Python27\Scripts`. The new path will be available in the next opened terminal. GUI: Control Panel > System Properties > Advanced > Environment Variables > System Variables > Path > Edit > Add ;C:\Python27;C:\Python27\Scripts to the end of the line.
+3. Update the `PATH` to include a reference to the `Python` and `Python/scripts` directories (replace `C:\Python27` with your path to Python).
+  * Command Line: Run this command with Administrator privileges: `SETX /M PATH "%PATH%";C:\Python27;C:\Python27\Scripts`. The new path will be available in the next opened terminal.
+  * GUI: `Control Panel > System Properties > Advanced > Environment Variables > System Variables > Path > Edit >` Add `;C:\Python27;C:\Python27\Scripts` to the end of the line.
 4. Install [VC2008 Express](http://download.microsoft.com/download/A/5/4/A54BADB6-9C3F-478D-8657-93B3FC9FE62D/vcsetup.exe) (alt: mingw)
 5. Install [GitHub for windows](http://windows.github.com/) and get the code
 6. `cd` to the anyway directory

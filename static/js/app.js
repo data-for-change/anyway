@@ -55,6 +55,10 @@ $(function () {
             this.show_fatal = '1';
             this.show_severe = '1';
             this.show_light = '1';
+            this.show_urban = 3;
+            this.show_intersection = 3;
+            this.show_lane = 3;
+
             this.dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
 
             setTimeout(function(){
@@ -217,6 +221,9 @@ $(function () {
             params["accurate"] = this.accurate;
             params["show_markers"] = this.show_markers;
             params["show_discussions"] = this.show_discussions;
+            params["show_urban"] = this.show_urban;
+            params["show_intersection"] = this.show_intersection;
+            params["show_lane"] = this.show_lane;
             return params;
         },
         setMultipleMarkersIcon: function () {
@@ -732,6 +739,7 @@ $(function () {
             }
         },
         getCurrentUrlParams: function () {
+        // TODO: After the filters a re ready improve that too accordingly
             var dateRange = app.model.get("dateRange");
             var center = app.map.getCenter();
             return "start_date=" + moment(this.dateRanges[0]).format("YYYY-MM-DD") +
@@ -758,6 +766,7 @@ $(function () {
             return image_url;
         },
         load_filter: function() {
+            // TODO: Change to switch which will only go through requested filters
             if ($("#checkbox-discussions").is(":checked")) { this.show_discussions='1' } else { this.show_discussions='' }
             if ($("#checkbox-accidents").is(":checked")) { this.show_markers='1' } else { this.show_markers='' }
             if ($("#checkbox-accurate").is(":checked")) { this.accurate='1' } else { this.accurate='' }
@@ -765,6 +774,36 @@ $(function () {
             if ($("#checkbox-fatal").is(":checked")) { this.show_fatal='1' } else { this.show_fatal='' }
             if ($("#checkbox-severe").is(":checked")) { this.show_severe='1' } else { this.show_severe='' }
             if ($("#checkbox-light").is(":checked")) { this.show_light='1' } else { this.show_light='' }
+            if ($("#checkbox-urban").is(":checked") && $("#checkbox-nonurban").is(":checked")) {
+                this.show_urban = 3;
+            } else if ($("#checkbox-urban").is(":checked")) {
+                this.show_urban = 2;
+            } else if ($("#checkbox-nonurban").is(":checked")) {
+                this.show_urban = 1;
+            } else {
+                this.show_urban = 0;
+            };
+            if ($("#checkbox-intersection").is(":checked") && $("#checkbox-nonintersection").is(":checked")) {
+                this.show_intersection = 3;
+            } else if ($("#checkbox-intersection").is(":checked")) {
+                this.show_intersection = 2;
+            } else if ($("#checkbox-nonintersection").is(":checked")) {
+                this.show_intersection = 1;
+            } else {
+                this.show_intersection = 0;
+            };
+            if ($("#checkbox-multi-lane").is(":checked") && $("#checkbox-one-lane").is(":checked")) {
+                this.show_lane = 3;
+            } else if ($("#checkbox-multi-lane").is(":checked")) {
+                this.show_lane = 2;
+            } else if ($("#checkbox-one-lane").is(":checked")) {
+                this.show_lane = 1;
+            } else {
+                this.show_lane = 0;
+            };
+            //TODO: Stop point 5.8 --> Fix clusters connection when filters complete
+
+
             this.dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())]
             this.resetMarkers();
             this.fetchMarkers();

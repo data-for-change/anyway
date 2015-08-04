@@ -236,7 +236,8 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
 
     @staticmethod
     def bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng, start_date, end_date,
-                           fatal, severe, light, approx, accurate, show_markers=True, is_thin=False, yield_per=None):
+                           fatal, severe, light, approx, accurate, show_urban, show_intersection,
+                           show_lane, show_markers=True, is_thin=False, yield_per=None):
         # example:
         # ne_lat=32.36292402647484&ne_lng=35.08873443603511&sw_lat=32.29257266524761&sw_lng=34.88445739746089
         # >>>  m = Marker.bounding_box_query(32.36, 35.088, 32.292, 34.884)
@@ -268,6 +269,27 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
             markers = markers.filter(Marker.severity != 2)
         if not light:
             markers = markers.filter(Marker.severity != 3)
+        if show_urban != 3:
+            if show_urban == 2:
+                markers = markers.filter(Marker.roadType >= 1).filter(Marker.roadType <= 2)
+            elif show_urban == 1:
+                markers = markers.filter(Marker.roadType >= 3).filter(Marker.roadType <= 4)
+            else:
+                return Marker.query.filter(sql.false())
+        if show_intersection != 3:
+            if show_intersection == 2:
+                markers = markers.filter(Marker.roadType != 2).filter(Marker.roadType != 4)
+            elif show_intersection == 1:
+                markers = markers.filter(Marker.roadType != 1).filter(Marker.roadType != 3)
+            else:
+                return Marker.query.filter(sql.false())
+        if show_lane != 3:
+            if show_lane == 2:
+                markers = markers.filter(Marker.one_lane >= 2).filter(Marker.one_lane <= 3)
+            elif show_lane == 1:
+                markers = markers.filter(Marker.one_lane == 1)
+            else:
+                return Marker.query.filter(sql.false())
         if is_thin:
             markers = markers.options(load_only("id", "longitude", "latitude"))
         return markers

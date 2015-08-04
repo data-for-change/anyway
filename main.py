@@ -119,13 +119,16 @@ def markers():
     accurate = bool(request.values['accurate'])
     show_markers = bool(request.values['show_markers'])
     show_discussions = bool(request.values['show_discussions'])
+    show_urban = int(request.values['show_urban'])
+    show_intersection = int(request.values['show_intersection'])
+    show_lane = int(request.values['show_lane'])
 
     logging.debug('querying markers in bounding box')
     is_thin = (zoom < MINIMAL_ZOOM)
     accidents = Marker.bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng,
                                           start_date, end_date,
-                                          fatal, severe, light, approx, accurate,
-                                          show_markers, is_thin, yield_per=50)
+                                          fatal, severe, light, approx, accurate, show_urban, show_intersection,
+                                          show_lane, show_markers, is_thin, yield_per=50)
     discussions = DiscussionMarker.bounding_box_query(ne_lat, ne_lng,
                                                       sw_lat, sw_lng, show_discussions)
     if request.values.get('format') == 'csv':

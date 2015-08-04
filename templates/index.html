@@ -430,22 +430,22 @@
             </div>
             <div class="btn-wrap separator">
                 <span class="btn-label">דרך:</span>
-                <input type="checkbox" id="checkbox-city" onclick="app.load_filter()" checked/>
-                <label for="checkbox-city" class="btn two right">עירוני</label>
-                <input type="checkbox" id="checkbox-not-city" onclick="app.load_filter()" checked/>
-                <label for="checkbox-not-city" class="btn two left">לא עירוני</label>
+                <input type="checkbox" id="checkbox-urban" onclick="app.load_filter()" checked/>
+                <label for="checkbox-urban" class="btn two right">עירוני</label>
+                <input type="checkbox" id="checkbox-nonurban" onclick="app.load_filter()" checked/>
+                <label for="checkbox-nonurban" class="btn two left">לא עירוני</label>
             </div>
             <div class="btn-wrap separator center">
-                <input type="checkbox" id="checkbox-inter" onclick="app.load_filter()" checked/>
-                <label for="checkbox-inter" class="btn two right">צומת</label>
-                <input type="checkbox" id="checkbox-not-inter" onclick="app.load_filter()" checked/>
-                <label for="checkbox-not-inter" class="btn two left">לא בצומת</label>
+                <input type="checkbox" id="checkbox-intersection" onclick="app.load_filter()" checked/>
+                <label for="checkbox-intersection" class="btn two right">צומת</label>
+                <input type="checkbox" id="checkbox-nonintersection" onclick="app.load_filter()" checked/>
+                <label for="checkbox-nonintersection" class="btn two left">לא בצומת</label>
             </div>
             <div class="btn-wrap center">
-                <input type="checkbox" id="checkbox-double" onclick="app.load_filter()" checked/>
-                <label for="checkbox-double" class="btn two right">דו-סטרי</label>
-                <input type="checkbox" id="checkbox-single" onclick="app.load_filter()" checked/>
-                <label for="checkbox-single" class="btn two left">חד-סטרי</label>
+                <input type="checkbox" id="checkbox-multi-lane" onclick="app.load_filter()" checked/>
+                <label for="checkbox-multi-lane" class="btn two right">דו-סטרי</label>
+                <input type="checkbox" id="checkbox-one-lane" onclick="app.load_filter()" checked/>
+                <label for="checkbox-one-lane" class="btn two left">חד-סטרי</label>
             </div>
         </div>
 
@@ -500,8 +500,8 @@
                 <label for="checkbox-time-all" class="btn one">הכל</label>
                 <input type="radio" name="time" id="checkbox-morning" value="morning" onclick="" />
                 <label for="checkbox-morning" class="btn one">בוקר</label>
-                <input type="radio" name="time" id="checkbox-lunch" value="lunch" onclick="" />
-                <label for="checkbox-lunch" class="btn one">צהריים</label>
+                <input type="radio" name="time" id="checkbox-noon" value="lunch" onclick="" />
+                <label for="checkbox-noon" class="btn one">צהריים</label>
                 <input type="radio" name="time" id="checkbox-afternoon" value="afternoon" onclick="" />
                 <label for="checkbox-afternoon" class="btn one">אחה״צ</label>
                 <input type="radio" name="weather" id="checkbox-" value="" onclick="" />

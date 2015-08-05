@@ -122,13 +122,15 @@ def markers():
     show_urban = int(request.values['show_urban'])
     show_intersection = int(request.values['show_intersection'])
     show_lane = int(request.values['show_lane'])
+    show_day = str(request.values['show_day'])
+    show_holiday = int(request.values['show_holiday'])
 
     logging.debug('querying markers in bounding box')
     is_thin = (zoom < MINIMAL_ZOOM)
-    accidents = Marker.bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng,
-                                          start_date, end_date,
+    accidents = Marker.bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng, start_date, end_date,
                                           fatal, severe, light, approx, accurate, show_urban, show_intersection,
-                                          show_lane, show_markers, is_thin, yield_per=50)
+                                          show_lane, show_day, show_holiday, show_markers, is_thin, yield_per=50)
+
     discussions = DiscussionMarker.bounding_box_query(ne_lat, ne_lng,
                                                       sw_lat, sw_lng, show_discussions)
     if request.values.get('format') == 'csv':

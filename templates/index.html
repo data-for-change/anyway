@@ -459,11 +459,11 @@
         <div class="filter-panel">
             <div class="btn-wrap">
                 <span class="btn-label">תקופה:</span>
-                <input type="radio" name="years" id="checkbox-years-all" value="all" onclick="app.change_date()" />
-                <label for="checkbox-years-all" class="btn one">הכל</label>
-                <input type="radio" name="years" id="checkbox-2014" value="2014" onclick="app.change_date()" />
+                <input type="radio" name="years" id="checkbox-all-years" value="all" onclick="app.change_date()" />
+                <label for="checkbox-all-years" class="btn one">הכל</label>
+                <input type="radio" name="years" id="checkbox-2014" value="2014" onclick="app.change_date()" checked />
                 <label for="checkbox-2014" class="btn one">2014</label>
-                <input type="radio" name="years" id="checkbox-2013" value="2013" onclick="app.change_date()" checked />
+                <input type="radio" name="years" id="checkbox-2013" value="2013" onclick="app.change_date()"  />
                 <label for="checkbox-2013" class="btn one">2013</label>
                 <input type="radio" name="years" id="checkbox-2012" value="2012" onclick="app.change_date()" />
                 <label for="checkbox-2012" class="btn one">2012</label>
@@ -477,21 +477,21 @@
             </div>
             <div class="btn-wrap separator">
                 <span class="btn-label">יום:</span>
-                <input type="radio" name="day" id="checkbox-day-all" value="all" onclick="" checked />
-                <label for="checkbox-day-all" class="btn one">הכל</label>
-                <input type="radio" name="day" id="checkbox-sun" value="A" onclick="" />
+                <input type="radio" name="day" id="checkbox-all-days" value="all" onclick="" checked />
+                <label for="checkbox-all-days" class="btn one">הכל</label>
+                <input type="radio" name="day" id="checkbox-sun" value="A" onclick="app.change_date()" />
                 <label for="checkbox-sun" class="btn one">א׳</label>
-                <input type="radio" name="day" id="checkbox-mon" value="B" onclick="" />
+                <input type="radio" name="day" id="checkbox-mon" value="B" onclick="app.change_date()" />
                 <label for="checkbox-mon" class="btn one">ב׳</label>
-                <input type="radio" name="day" id="checkbox-tue" value="C" onclick="" />
+                <input type="radio" name="day" id="checkbox-tue" value="C" onclick="app.change_date()" />
                 <label for="checkbox-tue" class="btn one">ג׳</label>
-                <input type="radio" name="day" id="checkbox-wed" value="D" onclick="" />
+                <input type="radio" name="day" id="checkbox-wed" value="D" onclick="app.change_date()" />
                 <label for="checkbox-wed" class="btn one">ד׳</label>
-                <input type="radio" name="day" id="checkbox-thu" value="E" onclick="" />
+                <input type="radio" name="day" id="checkbox-thu" value="E" onclick="app.change_date()" />
                 <label for="checkbox-thu" class="btn one">ה׳</label>
-                <input type="radio" name="day" id="checkbox-fri" value="F" onclick="" />
+                <input type="radio" name="day" id="checkbox-fri" value="F" onclick="app.change_date()" />
                 <label for="checkbox-fri" class="btn one">ו׳</label>
-                <input type="radio" name="day" id="checkbox-sat" value="G" onclick="" />
+                <input type="radio" name="day" id="checkbox-sat" value="G" onclick="app.change_date()" />
                 <label for="checkbox-sat" class="btn one">ש׳</label>
             </div>
             <div class="btn-wrap">
@@ -524,14 +524,19 @@
             </div>
             <div class="btn-wrap">
                 <span class="btn-label">מועד:</span>
-                <input type="radio" name="holiday" id="checkbox-day" value="evening" onclick="" />
-                <label for="checkbox-day" class="btn one">יום חול</label>
-                <input type="radio" name="holiday" id="checkbox-holieve" value="night" onclick="" />
-                <label for="checkbox-holieve" class="btn one">ערב חג</label>
-                <input type="radio" name="holiday" id="checkbox-holiday" value="midnight" onclick="" />
+                <input type="radio" name="holiday" id="checkbox-holiday" value="holiday" onclick="app.change_date()" />
                 <label for="checkbox-holiday" class="btn one">חג</label>
-                <input type="radio" name="holiday" id="checkbox-afterholi" value="afterholi" onclick="" />
-                <label for="checkbox-afterholi" class="btn one">מוצאי חג</label>
+                <input type="radio" name="holiday" id="checkbox-holi-eve" value="holi-eve" onclick="app.change_date()" />
+                <label for="checkbox-holi-eve" class="btn one">ערב חג</label>
+                <input type="radio" name="holiday" id="checkbox-holi-weekday" value="holi-weekday" onclick="app.change_date()" />
+                <label for="checkbox-holi-weekday" class="btn one">חול המועד</label>
+                <input type="radio" name="holiday" id="checkbox-weekday" value="weekday" onclick="app.change_date()" />
+                <label for="checkbox-weekday" class="btn one">יום חול</label>
+            </div>
+            <!--TODO: fix button 'all' position -->
+            <div>
+                <input type="radio" name="holiday" id="checkbox-all" value="all" onclick="app.change_date()" />
+                <label for="checkbox-all" class="btn one">הכל</label>
             </div>
         </div>
 

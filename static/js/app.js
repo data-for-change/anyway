@@ -58,6 +58,8 @@ $(function () {
             this.show_urban = 3;
             this.show_intersection = 3;
             this.show_lane = 3;
+            this.show_day = 'all';
+            this.show_holiday = 0;
 
             this.dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
 
@@ -224,6 +226,8 @@ $(function () {
             params["show_urban"] = this.show_urban;
             params["show_intersection"] = this.show_intersection;
             params["show_lane"] = this.show_lane;
+            params["show_day"] = this.show_day;
+            params["show_holiday"] = this.show_holiday;
             return params;
         },
         setMultipleMarkersIcon: function () {
@@ -767,6 +771,7 @@ $(function () {
         },
         load_filter: function() {
             // TODO: Change to switch which will only go through requested filters
+            //TODO: Stop point 5.8 --> Fix clusters connection when filters complete
             if ($("#checkbox-discussions").is(":checked")) { this.show_discussions='1' } else { this.show_discussions='' }
             if ($("#checkbox-accidents").is(":checked")) { this.show_markers='1' } else { this.show_markers='' }
             if ($("#checkbox-accurate").is(":checked")) { this.accurate='1' } else { this.accurate='' }
@@ -774,6 +779,7 @@ $(function () {
             if ($("#checkbox-fatal").is(":checked")) { this.show_fatal='1' } else { this.show_fatal='' }
             if ($("#checkbox-severe").is(":checked")) { this.show_severe='1' } else { this.show_severe='' }
             if ($("#checkbox-light").is(":checked")) { this.show_light='1' } else { this.show_light='' }
+
             if ($("#checkbox-urban").is(":checked") && $("#checkbox-nonurban").is(":checked")) {
                 this.show_urban = 3;
             } else if ($("#checkbox-urban").is(":checked")) {
@@ -783,6 +789,7 @@ $(function () {
             } else {
                 this.show_urban = 0;
             };
+
             if ($("#checkbox-intersection").is(":checked") && $("#checkbox-nonintersection").is(":checked")) {
                 this.show_intersection = 3;
             } else if ($("#checkbox-intersection").is(":checked")) {
@@ -792,6 +799,9 @@ $(function () {
             } else {
                 this.show_intersection = 0;
             };
+
+            // This section only filters one-lane and multi-lane.
+            // Accidents with 'other' setting (which are the majority) Will not be shown
             if ($("#checkbox-multi-lane").is(":checked") && $("#checkbox-one-lane").is(":checked")) {
                 this.show_lane = 3;
             } else if ($("#checkbox-multi-lane").is(":checked")) {
@@ -801,7 +811,8 @@ $(function () {
             } else {
                 this.show_lane = 0;
             };
-            //TODO: Stop point 5.8 --> Fix clusters connection when filters complete
+
+
 
 
             this.dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())]
@@ -812,13 +823,58 @@ $(function () {
         change_date: function() {
             // TODO 1: Change ACCYEARS to conatin the year itself and pull years here from the object
             // TODO 2: (optional): change years from radios to checkboxes and allow multiple choices forcing sequential periods
-            var start_date, end_date;
+            var start_date, end_date, all_years = false;
             if ($("#checkbox-2014").is(":checked")) { start_date = "2014"; end_date = "2015" }
             else if ($("#checkbox-2013").is(":checked")) { start_date = "2013"; end_date = "2014" }
             else if ($("#checkbox-2012").is(":checked")) { start_date = "2012"; end_date = "2013" }
             else if ($("#checkbox-2011").is(":checked")) { start_date = "2011"; end_date = "2012" }
-            $("#sdate").val(start_date + '-01-01');
-            $("#edate").val(end_date + '-01-01');
+            else if ($("#checkbox-all-years").is(":checked")) { start_date = "2005"; end_date = "2025"; all_years = true }
+            if (!all_years) {
+                $("#sdate").val(start_date + '-01-01');
+                $("#edate").val(end_date + '-01-01');
+            } else {
+                $("#sdate").val('');
+                $("#edate").val('');
+            }
+
+            // TODO: keep building when SOF reaches an answer:
+
+            /*
+            switch ($("input[type='radio'][name='day']:checked").val()) {
+                case 'A':
+                    this.show_day = 'sun';
+                    break;
+                case 'B':
+                    this.show_day = 'mon';
+                    break;
+
+                default:
+                    this.show_day = 'all';
+
+            }
+            */
+
+            switch ($("input[type='radio'][name='holiday']:checked").val()) {
+                case 'all':
+                    this.show_holiday = 0;
+                    break;
+                case 'holiday':
+                    this.show_holiday = 1;
+                    break;
+                case 'holi-eve':
+                    this.show_holiday = 2;
+                    break;
+                case 'holi-weekday':
+                    this.show_holiday = 3;
+                    break;
+                case 'weekday':
+                    this.show_holiday = 4;
+                    break;
+
+            }
+
+
+
             this.dateRanges = [new Date(start_date + '-01-01'), new Date(end_date + '-01-01')];
             this.resetMarkers();
             this.fetchMarkers();

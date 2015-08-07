@@ -58,8 +58,9 @@ $(function () {
             this.show_urban = 3;
             this.show_intersection = 3;
             this.show_lane = 3;
-            this.show_day = 'all';
+            this.show_day = 7;
             this.show_holiday = 0;
+            this.show_time = 24;
 
             this.dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
 
@@ -228,6 +229,7 @@ $(function () {
             params["show_lane"] = this.show_lane;
             params["show_day"] = this.show_day;
             params["show_holiday"] = this.show_holiday;
+            params["show_time"] = this.show_time;
             return params;
         },
         setMultipleMarkersIcon: function () {
@@ -813,8 +815,6 @@ $(function () {
             };
 
 
-
-
             this.dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())]
             this.resetMarkers();
             this.fetchMarkers();
@@ -837,43 +837,9 @@ $(function () {
                 $("#edate").val('');
             }
 
-            // TODO: keep building when SOF reaches an answer:
-
-            /*
-            switch ($("input[type='radio'][name='day']:checked").val()) {
-                case 'A':
-                    this.show_day = 'sun';
-                    break;
-                case 'B':
-                    this.show_day = 'mon';
-                    break;
-
-                default:
-                    this.show_day = 'all';
-
-            }
-            */
-
-            switch ($("input[type='radio'][name='holiday']:checked").val()) {
-                case 'all':
-                    this.show_holiday = 0;
-                    break;
-                case 'holiday':
-                    this.show_holiday = 1;
-                    break;
-                case 'holi-eve':
-                    this.show_holiday = 2;
-                    break;
-                case 'holi-weekday':
-                    this.show_holiday = 3;
-                    break;
-                case 'weekday':
-                    this.show_holiday = 4;
-                    break;
-
-            }
-
-
+            this.show_day = $("input[type='radio'][name='day']:checked").val()
+            this.show_holiday = $("input[type='radio'][name='holiday']:checked").val()
+            this.show_time = $("input[type='radio'][name='time']:checked").val()
 
             this.dateRanges = [new Date(start_date + '-01-01'), new Date(end_date + '-01-01')];
             this.resetMarkers();

@@ -125,12 +125,15 @@ def markers():
     show_day = int(request.values['show_day'])
     show_holiday = int(request.values['show_holiday'])
     show_time = int(request.values['show_time'])
+    start_time = (int(request.values['start_time']))
+    end_time = (int(request.values['end_time']))
 
     logging.debug('querying markers in bounding box')
     is_thin = (zoom < MINIMAL_ZOOM)
     accidents = Marker.bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng, start_date, end_date,
                                           fatal, severe, light, approx, accurate, show_urban, show_intersection,
-                                          show_lane, show_day, show_holiday, show_time, show_markers, is_thin, yield_per=50)
+                                          show_lane, show_day, show_holiday, show_time, start_time, end_time,
+                                          show_markers, is_thin, yield_per=50)
 
     discussions = DiscussionMarker.bounding_box_query(ne_lat, ne_lng,
                                                       sw_lat, sw_lng, show_discussions)

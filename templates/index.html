@@ -518,9 +518,9 @@
                 <label for="checkbox-dark" class="btn one icon-weather">2</label>
             </div>
             <div class="btn-wrap separator" style="margin-right: 0;">
-                <input class="btn time" type="time" style="margin-right: 6px;">
+                <input id="stime" class="btn time" type="time" style="margin-right: 6px;" oninput="app.change_date()">
                 <span class="btn-label" style="margin-right: 6px;">עד</span>
-                <input class="btn time" type="time">
+                <input id="etime" class="btn time" type="time" oninput="app.change_date()">
             </div>
             <div class="btn-wrap">
                 <span class="btn-label">מועד:</span>

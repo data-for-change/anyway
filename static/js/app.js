@@ -61,6 +61,8 @@ $(function () {
             this.show_day = 7;
             this.show_holiday = 0;
             this.show_time = 24;
+            this.start_time = 25;
+            this.end_time = 25;
 
             this.dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
 
@@ -230,6 +232,8 @@ $(function () {
             params["show_day"] = this.show_day;
             params["show_holiday"] = this.show_holiday;
             params["show_time"] = this.show_time;
+            params["start_time"] = this.start_time;
+            params["end_time"] = this.end_time;
             return params;
         },
         setMultipleMarkersIcon: function () {
@@ -840,6 +844,12 @@ $(function () {
             this.show_day = $("input[type='radio'][name='day']:checked").val()
             this.show_holiday = $("input[type='radio'][name='holiday']:checked").val()
             this.show_time = $("input[type='radio'][name='time']:checked").val()
+            // TODO: only parses the hour int for now, need to apply the minutes too
+            if (!isNaN(parseInt($("#stime").val())) && !isNaN(parseInt($("#etime").val()))){
+                this.start_time = parseInt($("#stime").val())
+                this.end_time = parseInt($("#etime").val())
+                $("#checkbox-time-all").prop('checked', true);
+            }
 
             this.dateRanges = [new Date(start_date + '-01-01'), new Date(end_date + '-01-01')];
             this.resetMarkers();

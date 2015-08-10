@@ -550,80 +550,64 @@
         <div class="filter-panel">
             <div class="btn-wrap">
                 <span class="btn-label">מזג-אויר:</span>
-                <input type="radio" name="weather" id="checkbox-weather-all" value="" onclick="" checked />
+                <input type="radio" name="weather" id="checkbox-weather-all" value=0 onclick="app.load_filter()" checked />
                 <label for="checkbox-weather-all" class="btn one">הכל</label>
-                <input type="radio" name="weather" id="checkbox-" value="" onclick="" />
-                <label for="checkbox-" class="btn one icon-weather">B</label>
-                <input type="radio" name="weather" id="checkbox-" value="" onclick="" />
-                <label for="checkbox-" class="btn one icon-weather">H</label>
-                <input type="radio" name="weather" id="checkbox-" value="" onclick="" />
-                <label for="checkbox-" class="btn one icon-weather">Y</label>
-                <input type="radio" name="weather" id="checkbox-" value="" onclick="" />
-                <label for="checkbox-" class="btn one icon-weather">F</label>
-            </div>
-            <div class="btn-wrap separator center">
-                <input type="radio" name="weather" id="checkbox-" value="" onclick="" />
-                <label for="checkbox-" class="btn one icon-weather">R</label>
-                <input type="radio" name="weather" id="checkbox-" value="" onclick="" />
-                <label for="checkbox-" class="btn one icon-weather">O</label>
-                <input type="radio" name="weather" id="checkbox-" value="" onclick="" />
-                <label for="checkbox-" class="btn one icon-weather">E</label>
-                <input type="radio" name="weather" id="checkbox-" value="" onclick="" />
-                <label for="checkbox-" class="btn one icon-weather">X</label>
-                <input type="radio" name="weather" id="checkbox-" value="" onclick="" />
-                <label for="checkbox-" class="btn one icon-weather">(</label>
+                <input type="radio" name="weather" id="checkbox-weather-clear" value=1 onclick="app.load_filter()" />
+                <label for="checkbox-weather-clear" class="btn one icon-weather">B</label>
+                <input type="radio" name="weather" id="checkbox-weather-rainy" value=2 onclick="app.load_filter()" />
+                <label for="checkbox-weather-rainy" class="btn one icon-weather">R</label>
+                <input type="radio" name="weather" id="checkbox-weather-heat" value=3 onclick="app.load_filter()" />
+                <label for="checkbox-weather-heat" class="btn one icon-weather">E</label>
+                <input type="radio" name="weather" id="checkbox-weather-cloudy" value=4 onclick="app.load_filter()" />
+                <label for="checkbox-weather-cloudy" class="btn one icon-weather">Y</label>
+                <input type="radio" name="weather" id="checkbox-weather-other" value=5 onclick="app.load_filter()" />
+                <label for="checkbox-weather-other" class="btn one icon-weather">(</label>
             </div>
             <div class="btn-wrap">
                 <span class="btn-label">צורת דרך:</span>
-                <input type="radio" name="road" id="checkbox-all-road" value="all" onclick="" checked />
-                <label for="checkbox-day" class="btn one">הכל</label>
-                <input type="radio" name="road" id="checkbox-general-road" value="general" onclick="" />
+                <input type="radio" name="road" id="checkbox-all-road" value=0 onclick="app.load_filter()" checked />
+                <label for="checkbox-all-road" class="btn one">הכל</label>
+                <input type="radio" name="road" id="checkbox-general-road" value=8 onclick="app.load_filter()" />
                 <label for="checkbox-general-road" class="btn one">כביש ישר/צומת</label>
             </div>
             <div class="btn-wrap center">
-                <input type="radio" name="road" id="checkbox-curve" value="curve" onclick="" />
+                <input type="radio" name="road" id="checkbox-curve" value=5 onclick="app.load_filter()" />
                 <label for="checkbox-curve" class="btn one">עקום חד</label>
-                <input type="radio" name="road" id="checkbox-misc" value="misc" onclick="" />
+                <input type="radio" name="road" id="checkbox-misc" value=3 onclick="app.load_filter()" />
                 <label for="checkbox-misc" class="btn one">מ. חניה / ת. דלק</label>
-                <input type="radio" name="road" id="checkbox-steep" value="steep" onclick="" />
+                <input type="radio" name="road" id="checkbox-steep" value=4 onclick="app.load_filter()" />
                 <label for="checkbox-steep" class="btn one">שיפוע תלול</label>
             </div>
             <div class="btn-wrap center">
-                <input type="radio" name="road" id="checkbox-bridge-tunnel" value="bridge" onclick="" />
+                <input type="radio" name="road" id="checkbox-bridge-tunnel" value=6 onclick="app.load_filter()" />
                 <label for="checkbox-bridge-tunnel" class="btn one">על גשר / מנהרה</label>
-                <input type="radio" name="road" id="checkbox-crossroad" value="crossroad" onclick="" />
+                <input type="radio" name="road" id="checkbox-crossroad" value=7 onclick="app.load_filter()" />
                 <label for="checkbox-crossroad" class="btn one">מפגש מסילת רכבת</label>
             </div>
             <div class="btn-wrap center separator">
-                <input type="radio" name="road" id="checkbox-inter-enter" value="inter-enter" onclick="" />
+                <input type="radio" name="road" id="checkbox-inter-enter" value=1 onclick="app.load_filter()" />
                 <label for="checkbox-inter-enter" class="btn one">כניסה למחלף</label>
-                <input type="radio" name="road" id="checkbox-inter-exit" value="inter-exit" onclick="" />
+                <input type="radio" name="road" id="checkbox-inter-exit" value=2 onclick="app.load_filter()" />
                 <label for="checkbox-inter-exit" class="btn one">יציאה ממחלף</label>
-                <input type="radio" name="road" id="checkbox-other" value="other" onclick="" />
+                <input type="radio" name="road" id="checkbox-other" value=9 onclick="app.load_filter()" />
                 <label for="checkbox-other" class="btn one">אחר</label>
             </div>
             <div class="btn-wrap">
                 <span class="btn-label">הפרדת מסלולים:</span>
-                <input type="radio" name="sep" id="checkbox-sep-all" value="sep-all" onclick="" checked />
+                <input type="radio" name="separation" id="checkbox-sep-all" value=0 onclick="app.load_filter()" checked />
                 <label for="checkbox-sep-all" class="btn one">הכל</label>
-                <input type="radio" name="sep" id="checkbox-sep-fence" value="sep-fence" onclick="" />
+                <input type="radio" name="separation" id="checkbox-sep-fence" value=2 onclick="app.load_filter()" />
                 <label for="checkbox-sep-fence" class="btn one">מפרדה עם גדר</label>
-            </div>
-            <div class="btn-wrap center">
-                <input type="radio" name="sep" id="checkbox-sep-continuous" value="sep-continuous" onclick="" />
-                <label for="checkbox-sep-continuous" class="btn one">קו רצוף</label>
-                <input type="radio" name="sep" id="checkbox-sep-dotted" value="sep-dotted" onclick="" />
-                <label for="checkbox-sep-dotted" class="btn one">קו רצוף</label>
-                <input type="radio" name="sep" id="checkbox-sep-built" value="sep-cement" onclick="" />
-                <label for="checkbox-sep-built" class="btn one">מפרדה בנויה</label>
-            </div>
-            <div class="btn-wrap center">
-                <input type="radio" name="sep" id="checkbox-sep-not-built" value="sep-not-built" onclick="" />
-                <label for="checkbox-sep-not-built" class="btn one">מפרדה לא בנויה</label>
-                <input type="radio" name="sep" id="checkbox-sep-marked" value="sep-marked" onclick="" />
+                <input type="radio" name="separation" id="checkbox-sep-marked" value=1 onclick="app.load_filter()" />
                 <label for="checkbox-sep-marked" class="btn one">מפרדה מסומנת</label>
-                <input type="radio" name="sep" id="checkbox-sep-other" value="sep-other" onclick="" />
-                <label for="checkbox-sep-other" class="btn one">אחר</label>
+            </div>
+            <div class="btn-wrap center">
+                <input type="radio" name="separation" id="checkbox-sep-continuous" value=3 onclick="app.load_filter()" />
+                <label for="checkbox-sep-continuous" class="btn one">מפרדה בנויה</label>
+                <input type="radio" name="separation" id="checkbox-sep-dotted" value=4 onclick="app.load_filter()" />
+                <label for="checkbox-sep-dotted" class="btn one">מפרדה לא בנויה</label>
+                <input type="radio" name="separation" id="checkbox-sep-built" value=5 onclick="app.load_filter()" />
+                <label for="checkbox-sep-built" class="btn one">אחר</label>
             </div>
         </div>
 

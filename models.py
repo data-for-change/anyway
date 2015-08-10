@@ -237,8 +237,9 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
     @staticmethod
     def bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng, start_date, end_date,
                            fatal, severe, light, approx, accurate, show_urban, show_intersection,
-                           show_lane, show_day, show_holiday, show_time, start_time, end_time, show_markers=True,
-                           is_thin=False, yield_per=None):
+                           show_lane, show_day, show_holiday, show_time, start_time, end_time, weather,
+                           separation, road, show_markers=True, is_thin=False, yield_per=None):
+
         # example:
         # ne_lat=32.36292402647484&ne_lng=35.08873443603511&sw_lat=32.29257266524761&sw_lng=34.88445739746089
         # >>>  m = Marker.bounding_box_query(32.36, 35.088, 32.292, 34.884)
@@ -310,6 +311,12 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         elif start_time != 25 and end_time != 25:
             markers = markers.filter(func.extract("hour", Marker.created) >= start_time)\
                              .filter(func.extract("hour", Marker.created) < end_time)
+        if weather != 0:
+            markers = markers.filter(Marker.weather == weather)
+        if road != 0:
+            markers = markers.filter(Marker.roadShape == road)
+        if separation != 0:
+            markers = markers.filter(Marker.multi_lane == separation)
 
         if is_thin:
             markers = markers.options(load_only("id", "longitude", "latitude"))

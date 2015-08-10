@@ -63,6 +63,9 @@ $(function () {
             this.show_time = 24;
             this.start_time = 25;
             this.end_time = 25;
+            this.weather = 0;
+            this.road = 0;
+            this.separation = 0;
 
             this.dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
 
@@ -234,6 +237,9 @@ $(function () {
             params["show_time"] = this.show_time;
             params["start_time"] = this.start_time;
             params["end_time"] = this.end_time;
+            params["weather"] = this.weather;
+            params["road"] = this.road;
+            params["separation"] = this.separation;
             return params;
         },
         setMultipleMarkersIcon: function () {
@@ -817,6 +823,10 @@ $(function () {
             } else {
                 this.show_lane = 0;
             };
+
+            this.weather = $("input[type='radio'][name='weather']:checked").val();
+            this.road = $("input[type='radio'][name='road']:checked").val();
+            this.separation = $("input[type='radio'][name='separation']:checked").val();
 
 
             this.dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())]

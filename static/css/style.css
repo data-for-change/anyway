@@ -57,12 +57,15 @@ div.gm-style {
 
 .filter-panel {
     border-top: 2px solid #ddd; margin-bottom: 0 !important;
-    margin-top: 8px;
+    margin-top: 10px;
     width: 300px;
     -webkit-order: 1;
     order: 1;
     overflow-y: scroll;
-    height: 350px;
+    overflow-x: hidden;
+    height: 340px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 input[type=radio], .filter-panel {
@@ -116,6 +119,7 @@ input[type=radio]:checked + .filter-button + .filter-panel {
 
 .separator{
     border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
 }
 
 .center{
@@ -125,27 +129,28 @@ input[type=radio]:checked + .filter-button + .filter-panel {
 
 .btn-wrap{
     display: flex;
-    justify-content: flex-start;
-    padding: 8px 10px 8px 0;
+    justify-content: center;
     vertical-align: middle;
     line-height: 30px;
+    flex-wrap: wrap;
 }
 
 .btn-label{
-    padding-left: 6px;
     color: #ccc;
     cursor: default;
+    line-height: 35px;
 }
 
 .btn, input[type='checkbox']:checked:hover + label{
-    height: 30px;
-    padding: 0 4px 0 4px;
+    height: 23px;
+    padding: 0 3px 0 3px;
     color: #ccc !important;
     background: white;
     border: 1px solid #ddd;
     cursor: pointer;
     vertical-align: middle;
-    line-height: 30px;
+    line-height: 23px;
+    display: inline-block;
 }
 
 .btn:hover, input[type='checkbox']:checked + label{
@@ -160,7 +165,7 @@ input[type=radio]:checked + .filter-button + .filter-panel {
 
 .one{
     border-radius: 3px 3px 3px 3px !important;
-    margin: 0 5px 0 5px !important;
+    margin: 3px 3px 3px 3px;
 }
 
 .two{

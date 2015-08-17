@@ -130,13 +130,18 @@ def markers():
     weather = (int(request.values['weather']))
     road = (int(request.values['road']))
     separation = (int(request.values['separation']))
+    surface = (int(request.values['surface']))
+    acctype = (int(request.values['acctype']))
+    controlmeasure = (int(request.values['controlmeasure']))
+    district = (int(request.values['district']))
 
     logging.debug('querying markers in bounding box')
     is_thin = (zoom < MINIMAL_ZOOM)
     accidents = Marker.bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng, start_date, end_date,
                                           fatal, severe, light, approx, accurate, show_urban, show_intersection,
                                           show_lane, show_day, show_holiday, show_time, start_time, end_time, weather,
-                                          separation, road, show_markers, is_thin, yield_per=50)
+                                          separation, road, surface, acctype, controlmeasure, district,
+                                          show_markers, is_thin, yield_per=50)
 
     discussions = DiscussionMarker.bounding_box_query(ne_lat, ne_lng,
                                                       sw_lat, sw_lng, show_discussions)
@@ -221,10 +226,27 @@ def clusters(methods=["GET"]):
         zoom = int(request.values['zoom'])
         approx = bool(request.values['approx'])
         accurate = bool(request.values['accurate'])
+        show_urban = int(request.values['show_urban'])
+        show_intersection = int(request.values['show_intersection'])
+        show_lane = int(request.values['show_lane'])
+        show_day = int(request.values['show_day'])
+        show_holiday = int(request.values['show_holiday'])
+        show_time = int(request.values['show_time'])
+        start_time = (int(request.values['start_time']))
+        end_time = (int(request.values['end_time']))
+        weather = (int(request.values['weather']))
+        road = (int(request.values['road']))
+        separation = (int(request.values['separation']))
+        surface = (int(request.values['surface']))
+        acctype = (int(request.values['acctype']))
+        controlmeasure = (int(request.values['controlmeasure']))
+        district = (int(request.values['district']))
 
         results = retrieve_clusters(ne_lat, ne_lng, sw_lat, sw_lng,
                                     start_date, end_date,
-                                    fatal, severe, light, accurate, approx, zoom)
+                                    fatal, severe, light, approx, accurate, show_urban, show_intersection,
+                                    show_lane, show_day, show_holiday, show_time, start_time, end_time, weather,
+                                    separation, road, surface, acctype, controlmeasure, district, zoom)
 
         logging.debug('calculating clusters took ' + str(time.time() - start_time))
         return Response(json.dumps({'clusters': results}), mimetype="application/json")

@@ -6,7 +6,9 @@ import concurrent.futures
 import multiprocessing
 
 
-def retrieve_clusters(ne_lat, ne_lng, sw_lat, sw_lng, start_date, end_date, fatal, severe, light, accurate, approx, zoom):
+def retrieve_clusters(ne_lat, ne_lng, sw_lat, sw_lng, start_date, end_date, fatal, severe, light, approx, accurate,
+                      show_urban, show_intersection, show_lane, show_day, show_holiday, show_time, start_time, end_time,
+                      weather, separation, road, surface, acctype, controlmeasure, district, zoom):
     marker_boxes = divide_to_boxes(ne_lat, ne_lng, sw_lat, sw_lng)
     result_futures = []
     logging.info('number of cores: ' + str(multiprocessing.cpu_count()))
@@ -14,7 +16,10 @@ def retrieve_clusters(ne_lat, ne_lng, sw_lat, sw_lng, start_date, end_date, fata
         for marker_box in marker_boxes:
             markers_in_box = Marker.bounding_box_query(marker_box[0], marker_box[1], marker_box[2], marker_box[3],
                                                        start_date, end_date, fatal,
-                                                       severe, light, approx, accurate).all()
+                                                       severe, light, approx, accurate, show_urban, show_intersection,
+                                                       show_lane, show_day, show_holiday, show_time, start_time,
+                                                       end_time, weather, separation, road, surface, acctype,
+                                                       controlmeasure, district).all()
             result_futures.append(executor.submit(calculate_clusters, markers_in_box, zoom))
 
     completed_futures = concurrent.futures.wait(result_futures)

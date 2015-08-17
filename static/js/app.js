@@ -66,6 +66,10 @@ $(function () {
             this.weather = 0;
             this.road = 0;
             this.separation = 0;
+            this.surface = 0;
+            this.acctype = 0;
+            this.controlmeasure = 0;
+            this.district = 0;
 
             this.dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
 
@@ -240,6 +244,10 @@ $(function () {
             params["weather"] = this.weather;
             params["road"] = this.road;
             params["separation"] = this.separation;
+            params["surface"] = this.surface;
+            params["acctype"] = this.acctype;
+            params["controlmeasure"] = this.controlmeasure;
+            params["district"] = this.district;
             return params;
         },
         setMultipleMarkersIcon: function () {
@@ -827,7 +835,10 @@ $(function () {
             this.weather = $("input[type='radio'][name='weather']:checked").val();
             this.road = $("input[type='radio'][name='road']:checked").val();
             this.separation = $("input[type='radio'][name='separation']:checked").val();
-
+            this.surface = $("input[type='radio'][name='surface']:checked").val();
+            this.acctype = $("input[type='radio'][name='acctype']:checked").val();
+            this.controlmeasure = $("input[type='radio'][name='controlmeasure']:checked").val();
+            this.district = $("input[type='radio'][name='district']:checked").val();
 
             this.dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())]
             this.resetMarkers();

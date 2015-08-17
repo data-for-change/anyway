@@ -8,6 +8,6 @@ before_script:
   - export DATABASE_URL='sqlite:///local.db'
   - python models.py
 # command to run tests
-
-# Removing tests until filter bar is completed and tests are corrected
+script: true
+# # Delete "script: true" when restoring
 # script: python -m unittest discover tests

@@ -51,7 +51,7 @@ $(function () {
             this.show_markers = '1';
             this.show_discussions = '1';
             this.accurate = '1';
-            this.approx = '';
+            this.approx = '1';
             this.show_fatal = '1';
             this.show_severe = '1';
             this.show_light = '1';
@@ -915,9 +915,9 @@ $(function () {
                     accurate = ""
                 }
                 if (approx == '1' && accurate != '') {
-                    approx = "ומשוער ";
+                    approx = "ומרחבי";
                 } else if (approx == '1') {
-                    approx = "משוער ";
+                    approx = "מרחבי ";
                 } else {
                     approx = "";
                 }

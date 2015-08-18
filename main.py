@@ -100,18 +100,24 @@ def generate_csv(results):
         yield output_file.getvalue()
         output_file.truncate(0)
 
+# TODO: if request_marker_values is required finish its calls and delete the comment:
+def request_marker_values(type, value_name):
+    return type(request.values[value_name])
 
 @app.route("/markers", methods=["GET"])
 @user_optional
 def markers():
     logging.debug('getting markers')
+
     ne_lat = float(request.values['ne_lat'])
     ne_lng = float(request.values['ne_lng'])
     sw_lat = float(request.values['sw_lat'])
     sw_lng = float(request.values['sw_lng'])
     zoom = int(request.values['zoom'])
+
     start_date = datetime.date.fromtimestamp(int(request.values['start_date']))
     end_date = datetime.date.fromtimestamp(int(request.values['end_date']))
+
     fatal = bool(request.values['show_fatal'])
     severe = bool(request.values['show_severe'])
     light = bool(request.values['show_light'])
@@ -125,15 +131,15 @@ def markers():
     show_day = int(request.values['show_day'])
     show_holiday = int(request.values['show_holiday'])
     show_time = int(request.values['show_time'])
-    start_time = (int(request.values['start_time']))
-    end_time = (int(request.values['end_time']))
-    weather = (int(request.values['weather']))
-    road = (int(request.values['road']))
-    separation = (int(request.values['separation']))
-    surface = (int(request.values['surface']))
-    acctype = (int(request.values['acctype']))
-    controlmeasure = (int(request.values['controlmeasure']))
-    district = (int(request.values['district']))
+    start_time = int(request.values['start_time'])
+    end_time = int(request.values['end_time'])
+    weather = int(request.values['weather'])
+    road = int(request.values['road'])
+    separation = int(request.values['separation'])
+    surface = int(request.values['surface'])
+    acctype = int(request.values['acctype'])
+    controlmeasure = int(request.values['controlmeasure'])
+    district = int(request.values['district'])
 
     logging.debug('querying markers in bounding box')
     is_thin = (zoom < MINIMAL_ZOOM)

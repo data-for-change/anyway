@@ -261,7 +261,6 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
             markers = markers.yield_per(yield_per)
         if accurate and not approx:
             markers = markers.filter(Marker.locationAccuracy == 1)
-            pass
         elif approx and not accurate:
             markers = markers.filter(Marker.locationAccuracy != 1)
         elif not accurate and not approx:

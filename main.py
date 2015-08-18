@@ -475,7 +475,7 @@ class SendToSubscribersView(BaseView):
     def is_visible(self):
         return login.current_user.is_authenticated()
 
-class ViewHighlightedMarkers(BaseView):
+class ViewHighlightedMarkersData(BaseView):
     @roles_required('admin')
     @expose('/')
     def index(self):
@@ -490,7 +490,16 @@ class ViewHighlightedMarkers(BaseView):
             p.type = point.type
             points.append(p)
         context = {'points': points}
-        return self.render('viewhighlighted.html', **context)
+        return self.render('viewhighlighteddata.html', **context)
+
+    def is_visible(self):
+        return login.current_user.is_authenticated()
+
+class ViewHighlightedMarkersMap(BaseView):
+    @roles_required('admin')
+    @expose('/')
+    def index1(self):
+        return index(marker=None, message=None)
 
     def is_visible(self):
         return login.current_user.is_authenticated()
@@ -532,8 +541,8 @@ admin = admin.Admin(app, 'ANYWAY Administration Panel', index_view=AdminIndexVie
 admin.add_view(AdminView(User, db_session, name='Users', endpoint='AllUsers', category='Users'))
 admin.add_view(OpenNewOrgAccount(name='Open new organization account', endpoint='OpenAccount', category='Users'))
 admin.add_view(SendToSubscribersView(name='Send To Subscribers'))
-admin.add_view(ViewHighlightedMarkers(name='View Highlighted Markers'))
-
+admin.add_view(ViewHighlightedMarkersData(name='View Highlighted Markers Data', endpoint='ViewHighlightedMarkersData', category='View Highlighted Markers'))
+admin.add_view(ViewHighlightedMarkersMap(name='View Highlighted Markers Map', endpoint='ViewHighlightedMarkersMap', category='View Highlighted Markers'))
 
 lms_dictionary = {}
 

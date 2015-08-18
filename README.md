@@ -27,7 +27,7 @@ Contributing
 ## Installing dependencies
 
 ### Ubuntu
-1. `sudo apt-get install python-pip python-dev libpq-dev`
+1. `sudo apt-get install python-pip python-dev python-tk libpq-dev`
 
 ### OS X
 1. `sudo easy_install pip setuptools`

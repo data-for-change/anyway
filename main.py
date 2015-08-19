@@ -100,57 +100,31 @@ def generate_csv(results):
         yield output_file.getvalue()
         output_file.truncate(0)
 
-# TODO: if request_marker_values is required finish its calls and delete the comment:
-def request_marker_values(type, value_name):
-    return type(request.values[value_name])
 
 @app.route("/markers", methods=["GET"])
 @user_optional
 def markers():
     logging.debug('getting markers')
 
-    ne_lat = float(request.values['ne_lat'])
-    ne_lng = float(request.values['ne_lng'])
-    sw_lat = float(request.values['sw_lat'])
-    sw_lng = float(request.values['sw_lng'])
-    zoom = int(request.values['zoom'])
+    kwargs = {'ne_lat': float, 'ne_lng': float, 'sw_lat': float, 'sw_lng': float, 'zoom': int, 'show_fatal': bool,
+              'show_severe': bool, 'show_light': bool, 'approx': bool, 'accurate': bool, 'show_markers': bool,
+              'show_discussions': bool, 'show_urban': int, 'show_intersection': int, 'show_lane': int, 'show_day': int,
+              'show_holiday': int, 'show_time': int, 'start_time': int, 'end_time': int, 'weather': int, 'road': int,
+              'separation': int, 'surface': int, 'acctype': int, 'controlmeasure': int, 'district': int}
 
-    start_date = datetime.date.fromtimestamp(int(request.values['start_date']))
-    end_date = datetime.date.fromtimestamp(int(request.values['end_date']))
-
-    fatal = bool(request.values['show_fatal'])
-    severe = bool(request.values['show_severe'])
-    light = bool(request.values['show_light'])
-    approx = bool(request.values['approx'])
-    accurate = bool(request.values['accurate'])
-    show_markers = bool(request.values['show_markers'])
-    show_discussions = bool(request.values['show_discussions'])
-    show_urban = int(request.values['show_urban'])
-    show_intersection = int(request.values['show_intersection'])
-    show_lane = int(request.values['show_lane'])
-    show_day = int(request.values['show_day'])
-    show_holiday = int(request.values['show_holiday'])
-    show_time = int(request.values['show_time'])
-    start_time = int(request.values['start_time'])
-    end_time = int(request.values['end_time'])
-    weather = int(request.values['weather'])
-    road = int(request.values['road'])
-    separation = int(request.values['separation'])
-    surface = int(request.values['surface'])
-    acctype = int(request.values['acctype'])
-    controlmeasure = int(request.values['controlmeasure'])
-    district = int(request.values['district'])
+    for arg in kwargs:
+        tmp = kwargs[arg](request.values[arg])
+        kwargs[arg] = tmp
+        print kwargs
+    kwargs['start_date'] = datetime.date.fromtimestamp(int(request.values['start_date']))
+    kwargs['end_date'] = datetime.date.fromtimestamp(int(request.values['end_date']))
 
     logging.debug('querying markers in bounding box')
-    is_thin = (zoom < MINIMAL_ZOOM)
-    accidents = Marker.bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng, start_date, end_date,
-                                          fatal, severe, light, approx, accurate, show_urban, show_intersection,
-                                          show_lane, show_day, show_holiday, show_time, start_time, end_time, weather,
-                                          separation, road, surface, acctype, controlmeasure, district,
-                                          show_markers, is_thin, yield_per=50)
+    is_thin = (kwargs['zoom'] < MINIMAL_ZOOM)
+    accidents = Marker.bounding_box_query(is_thin, yield_per=50, **kwargs)
 
-    discussions = DiscussionMarker.bounding_box_query(ne_lat, ne_lng,
-                                                      sw_lat, sw_lng, show_discussions)
+    discussions = DiscussionMarker.bounding_box_query(kwargs['ne_lat'], kwargs['ne_lng'],
+                                                      kwargs['sw_lat'], kwargs['sw_lng'], kwargs['show_discussions'])
     if request.values.get('format') == 'csv':
         return Response(generate_csv(accidents), headers={
             "Content-Type": "text/csv",
@@ -220,41 +194,23 @@ def discussion():
 def clusters(methods=["GET"]):
     start_time = time.time()
     if request.method == "GET":
-        ne_lat = float(request.values['ne_lat'])
-        ne_lng = float(request.values['ne_lng'])
-        sw_lat = float(request.values['sw_lat'])
-        sw_lng = float(request.values['sw_lng'])
-        start_date = datetime.date.fromtimestamp(int(request.values['start_date']))
-        end_date = datetime.date.fromtimestamp(int(request.values['end_date']))
-        fatal = bool(request.values['show_fatal'])
-        severe = bool(request.values['show_severe'])
-        light = bool(request.values['show_light'])
-        zoom = int(request.values['zoom'])
-        approx = bool(request.values['approx'])
-        accurate = bool(request.values['accurate'])
-        show_urban = int(request.values['show_urban'])
-        show_intersection = int(request.values['show_intersection'])
-        show_lane = int(request.values['show_lane'])
-        show_day = int(request.values['show_day'])
-        show_holiday = int(request.values['show_holiday'])
-        show_time = int(request.values['show_time'])
-        start_time = (int(request.values['start_time']))
-        end_time = (int(request.values['end_time']))
-        weather = (int(request.values['weather']))
-        road = (int(request.values['road']))
-        separation = (int(request.values['separation']))
-        surface = (int(request.values['surface']))
-        acctype = (int(request.values['acctype']))
-        controlmeasure = (int(request.values['controlmeasure']))
-        district = (int(request.values['district']))
+        kwargs = {'ne_lat': float, 'ne_lng': float, 'sw_lat': float, 'sw_lng': float, 'zoom': int, 'show_fatal': bool,
+                  'show_severe': bool, 'show_light': bool, 'approx': bool, 'accurate': bool, 'show_markers': bool,
+                  'show_discussions': bool, 'show_urban': int, 'show_intersection': int, 'show_lane': int,
+                  'show_day': int, 'show_holiday': int, 'show_time': int, 'start_time': int, 'end_time': int,
+                  'weather': int, 'road': int, 'separation': int, 'surface': int, 'acctype': int,
+                  'controlmeasure': int, 'district': int}
 
-        results = retrieve_clusters(ne_lat, ne_lng, sw_lat, sw_lng,
-                                    start_date, end_date,
-                                    fatal, severe, light, approx, accurate, show_urban, show_intersection,
-                                    show_lane, show_day, show_holiday, show_time, start_time, end_time, weather,
-                                    separation, road, surface, acctype, controlmeasure, district, zoom)
+        for arg in kwargs:
+            tmp = kwargs[arg](request.values[arg])
+            kwargs[arg] = tmp
+            print kwargs
+        kwargs['start_date'] = datetime.date.fromtimestamp(int(request.values['start_date']))
+        kwargs['end_date'] = datetime.date.fromtimestamp(int(request.values['end_date']))
 
-        logging.debug('calculating clusters took ' + str(time.time() - start_time))
+        results = retrieve_clusters(**kwargs)
+
+        logging.debug('calculating clusters took ' + str(time.time() - kwargs['start_time']))
         return Response(json.dumps({'clusters': results}), mimetype="application/json")
 
 @app.route('/', defaults={'marker_id': None})

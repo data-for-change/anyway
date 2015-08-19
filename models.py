@@ -235,11 +235,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         self.put()
 
     @staticmethod
-    def bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng, start_date, end_date,
-                           fatal, severe, light, approx, accurate, show_urban, show_intersection,
-                           show_lane, show_day, show_holiday, show_time, start_time, end_time, weather,
-                           separation, road, surface, acctype, controlmeasure, district, show_markers=True,
-                           is_thin=False, yield_per=None):
+    def bounding_box_query(is_thin=False, yield_per=None, **kwargs):
 
         # example:
         # ne_lat=32.36292402647484&ne_lng=35.08873443603511&sw_lat=32.29257266524761&sw_lng=34.88445739746089
@@ -247,84 +243,84 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         # >>> m.count()
         # 250
 
-        if not show_markers:
+        if not kwargs['show_markers']:
             return Marker.query.filter(sql.false())
         markers = Marker.query \
-            .filter(Marker.longitude <= ne_lng) \
-            .filter(Marker.longitude >= sw_lng) \
-            .filter(Marker.latitude <= ne_lat) \
-            .filter(Marker.latitude >= sw_lat) \
-            .filter(Marker.created >= start_date) \
-            .filter(Marker.created < end_date) \
+            .filter(Marker.longitude <= kwargs['ne_lng']) \
+            .filter(Marker.longitude >= kwargs['sw_lng']) \
+            .filter(Marker.latitude <= kwargs['ne_lat']) \
+            .filter(Marker.latitude >= kwargs['sw_lat']) \
+            .filter(Marker.created >= kwargs['start_date']) \
+            .filter(Marker.created < kwargs['end_date']) \
             .order_by(desc(Marker.created))
         if yield_per:
             markers = markers.yield_per(yield_per)
-        if accurate and not approx:
+        if kwargs['accurate'] and not kwargs['approx']:
             markers = markers.filter(Marker.locationAccuracy == 1)
-        elif approx and not accurate:
+        elif kwargs['approx'] and not kwargs['accurate']:
             markers = markers.filter(Marker.locationAccuracy != 1)
-        elif not accurate and not approx:
+        elif not kwargs['accurate'] and not kwargs['approx']:
             return Marker.query.filter(sql.false())
-        if not fatal:
+        if not kwargs['show_fatal']:
             markers = markers.filter(Marker.severity != 1)
-        if not severe:
+        if not kwargs['show_severe']:
             markers = markers.filter(Marker.severity != 2)
-        if not light:
+        if not kwargs['show_light']:
             markers = markers.filter(Marker.severity != 3)
-        if show_urban != 3:
-            if show_urban == 2:
+        if kwargs['show_urban'] != 3:
+            if kwargs['show_urban'] == 2:
                 markers = markers.filter(Marker.roadType >= 1).filter(Marker.roadType <= 2)
-            elif show_urban == 1:
+            elif kwargs['show_urban'] == 1:
                 markers = markers.filter(Marker.roadType >= 3).filter(Marker.roadType <= 4)
             else:
                 return Marker.query.filter(sql.false())
-        if show_intersection != 3:
-            if show_intersection == 2:
+        if kwargs['show_intersection'] != 3:
+            if kwargs['show_intersection'] == 2:
                 markers = markers.filter(Marker.roadType != 2).filter(Marker.roadType != 4)
-            elif show_intersection == 1:
+            elif kwargs['show_intersection'] == 1:
                 markers = markers.filter(Marker.roadType != 1).filter(Marker.roadType != 3)
             else:
                 return Marker.query.filter(sql.false())
-        if show_lane != 3:
-            if show_lane == 2:
+        if kwargs['show_lane'] != 3:
+            if kwargs['show_lane'] == 2:
                 markers = markers.filter(Marker.one_lane >= 2).filter(Marker.one_lane <= 3)
-            elif show_lane == 1:
+            elif kwargs['show_lane'] == 1:
                 markers = markers.filter(Marker.one_lane == 1)
             else:
                 return Marker.query.filter(sql.false())
 
-        if show_day != 7:
-            markers = markers.filter(func.extract("dow", Marker.created) == show_day)
-        if show_holiday != 0:
-            markers = markers.filter(Marker.dayType == show_holiday)
+        if kwargs['show_day'] != 7:
+            markers = markers.filter(func.extract("dow", Marker.created) == kwargs['show_day'])
+        if kwargs['show_holiday'] != 0:
+            markers = markers.filter(Marker.dayType == kwargs['show_holiday'])
 
-        if show_time != 24:
-            if show_time == 25:     # Daylight (6-18)
+        if kwargs['show_time'] != 24:
+            if kwargs['show_time'] == 25:     # Daylight (6-18)
                 markers = markers.filter(func.extract("hour", Marker.created) >= 6)\
                                  .filter(func.extract("hour", Marker.created) < 18)
-            elif show_time == 26:   # Darktime (18-6)
+            elif kwargs['show_time'] == 26:   # Darktime (18-6)
                 markers = markers.filter((func.extract("hour", Marker.created) >= 18) |
                                          (func.extract("hour", Marker.created) < 6))
             else:
-                markers = markers.filter(func.extract("hour", Marker.created) >= show_time)\
-                                 .filter(func.extract("hour", Marker.created) < show_time+6)
-        elif start_time != 25 and end_time != 25:
-            markers = markers.filter(func.extract("hour", Marker.created) >= start_time)\
-                             .filter(func.extract("hour", Marker.created) < end_time)
-        if weather != 0:
-            markers = markers.filter(Marker.weather == weather)
-        if road != 0:
-            markers = markers.filter(Marker.roadShape == road)
-        if separation != 0:
-            markers = markers.filter(Marker.multi_lane == separation)
-        if surface != 0:
-            markers = markers.filter(Marker.road_surface == surface)
-        if acctype != 0:
-            markers = markers.filter(Marker.subtype == acctype)
-        if controlmeasure != 0:
-            markers = markers.filter(Marker.road_control == controlmeasure)
-        if district != 0:
-            markers = markers.filter(Marker.unit == district)
+                markers = markers.filter(func.extract("hour", Marker.created) >= kwargs['show_time'])\
+                                 .filter(func.extract("hour", Marker.created) < kwargs['show_time']+6)
+        elif kwargs['start_time'] != 25 and kwargs['end_time'] != 25:
+            markers = markers.filter(func.extract("hour", Marker.created) >= kwargs['start_time'])\
+                             .filter(func.extract("hour", Marker.created) < kwargs['end_time'])
+        if kwargs['weather'] != 0:
+            markers = markers.filter(Marker.weather == kwargs['weather'])
+        if kwargs['road'] != 0:
+            markers = markers.filter(Marker.roadShape == kwargs['road'])
+        if kwargs['separation'] != 0:
+            markers = markers.filter(Marker.multi_lane == kwargs['separation'])
+        if kwargs['surface'] != 0:
+            markers = markers.filter(Marker.road_surface == kwargs['surface'])
+        if kwargs['acctype'] != 0:
+            markers = markers.filter(Marker.subtype == kwargs['acctype'])
+        if kwargs['controlmeasure'] != 0:
+            markers = markers.filter(Marker.road_control == kwargs['controlmeasure'])
+        if kwargs['district'] != 0:
+            markers = markers.filter(Marker.unit == kwargs['district'])
 
         if is_thin:
             markers = markers.options(load_only("id", "longitude", "latitude"))

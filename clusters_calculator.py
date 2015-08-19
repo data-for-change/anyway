@@ -6,21 +6,20 @@ import concurrent.futures
 import multiprocessing
 
 
-def retrieve_clusters(ne_lat, ne_lng, sw_lat, sw_lng, start_date, end_date, fatal, severe, light, approx, accurate,
-                      show_urban, show_intersection, show_lane, show_day, show_holiday, show_time, start_time, end_time,
-                      weather, separation, road, surface, acctype, controlmeasure, district, zoom):
-    marker_boxes = divide_to_boxes(ne_lat, ne_lng, sw_lat, sw_lng)
+def retrieve_clusters(**kwargs):
+    marker_boxes = divide_to_boxes(kwargs['ne_lat'], kwargs['ne_lng'], kwargs['sw_lat'], kwargs['sw_lng'])
     result_futures = []
     logging.info('number of cores: ' + str(multiprocessing.cpu_count()))
     with concurrent.futures.ThreadPoolExecutor(max_workers=multiprocessing.cpu_count()) as executor:
         for marker_box in marker_boxes:
-            markers_in_box = Marker.bounding_box_query(marker_box[0], marker_box[1], marker_box[2], marker_box[3],
-                                                       start_date, end_date, fatal,
-                                                       severe, light, approx, accurate, show_urban, show_intersection,
-                                                       show_lane, show_day, show_holiday, show_time, start_time,
-                                                       end_time, weather, separation, road, surface, acctype,
-                                                       controlmeasure, district).all()
-            result_futures.append(executor.submit(calculate_clusters, markers_in_box, zoom))
+
+            clusters_kwargs = kwargs
+            clusters_kwargs['ne_lat'] = marker_box[0]
+            clusters_kwargs['ne_lng'] = marker_box[1]
+            clusters_kwargs['sw_lat'] = marker_box[2]
+            clusters_kwargs['sw_lng'] = marker_box[3]
+            markers_in_box = Marker.bounding_box_query(**clusters_kwargs).all()
+            result_futures.append(executor.submit(calculate_clusters, markers_in_box, kwargs['zoom']))
 
     completed_futures = concurrent.futures.wait(result_futures)
     result = []

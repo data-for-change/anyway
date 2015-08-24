@@ -763,15 +763,10 @@ $(function () {
             }
         },
         getCurrentUrlParams: function () {
-        // TODO: After the filters a re ready improve that too accordingly
             var dateRange = app.model.get("dateRange");
             var center = app.map.getCenter();
             return "start_date=" + moment(this.dateRanges[0]).format("YYYY-MM-DD") +
                 "&end_date=" + moment(this.dateRanges[1]).format("YYYY-MM-DD") +
-                "&show_fatal=" + (parseInt(app.model.get("showFatal")) || 0) +
-                "&show_severe=" + (parseInt(app.model.get("showSevere")) || 0) +
-                "&show_light=" + (parseInt(app.model.get("showLight")) || 0) +
-                "&show_inaccurate=" + (parseInt(app.model.get("showInaccurateMarkers")) || 0) +
                 "&zoom=" + app.map.zoom + "&lat=" + center.lat() + "&lon=" + center.lng();
 		},
         ESCinfoWindow: function(event) {
@@ -789,9 +784,7 @@ $(function () {
             }
             return image_url;
         },
-        load_filter: function() {
-            // TODO: Change to switch which will only go through requested filters
-            //TODO: Stop point 5.8 --> Fix clusters connection when filters complete
+        loadFilter: function() {
             if ($("#checkbox-discussions").is(":checked")) { this.show_discussions='1' } else { this.show_discussions='' }
             if ($("#checkbox-accidents").is(":checked")) { this.show_markers='1' } else { this.show_markers='' }
             if ($("#checkbox-accurate").is(":checked")) { this.accurate='1' } else { this.accurate='' }
@@ -845,9 +838,7 @@ $(function () {
             this.fetchMarkers();
             this.updateFilterString();
         },
-        change_date: function() {
-            // TODO 1: Change ACCYEARS to conatin the year itself and pull years here from the object
-            // TODO 2: (optional): change years from radios to checkboxes and allow multiple choices forcing sequential periods
+        changeDate: function() {
             var start_date, end_date, all_years = false;
             if ($("#checkbox-2014").is(":checked")) { start_date = "2014"; end_date = "2015" }
             else if ($("#checkbox-2013").is(":checked")) { start_date = "2013"; end_date = "2014" }

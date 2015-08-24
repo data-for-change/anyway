@@ -115,7 +115,6 @@ def markers():
     for arg in kwargs:
         tmp = kwargs[arg](request.values[arg])
         kwargs[arg] = tmp
-        print kwargs
     kwargs['start_date'] = datetime.date.fromtimestamp(int(request.values['start_date']))
     kwargs['end_date'] = datetime.date.fromtimestamp(int(request.values['end_date']))
 
@@ -204,7 +203,6 @@ def clusters(methods=["GET"]):
         for arg in kwargs:
             tmp = kwargs[arg](request.values[arg])
             kwargs[arg] = tmp
-            print kwargs
         kwargs['start_date'] = datetime.date.fromtimestamp(int(request.values['start_date']))
         kwargs['end_date'] = datetime.date.fromtimestamp(int(request.values['end_date']))
 

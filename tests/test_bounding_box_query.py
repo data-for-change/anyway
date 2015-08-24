@@ -8,17 +8,24 @@ import datetime
 
 
 class TestQueryFilters(unittest.TestCase):
+    """
     # cyear = str(datetime.datetime.now().strftime("%Y"))
     global start_date
     start_date = "01/01/2014"     # % cyear
     global end_date
     end_date = "01/01/2015"       # % str(int(cyear)-1)
+    """
 
     def setUp(self):
-        self.query = Marker.bounding_box_query(ne_lat=32.36, ne_lng=35.088, sw_lat=32.292, sw_lng=34.884,
-                                               start_date=start_date, end_date=end_date,
-                                               fatal=False, severe=True, light=True, approx=False, accurate=True,
-                                               is_thin=False, yield_per=None)
+        kwargs = {'approx': True, 'show_day': 7, 'show_discussions': True, 'accurate': True, 'surface': 0, 'weather': 0,
+                  'district': 0, 'show_markers': True, 'show_fatal': True, 'show_time': 24, 'show_intersection': 3,
+                  'show_light': True, 'sw_lat': 32.06711066128336, 'controlmeasure': 0, 'ne_lng': 34.799307929669226,
+                  'show_severe': True, 'start_time': 25, 'acctype': 0, 'separation': 0, 'show_urban': 3, 'show_lane': 3,
+                  'sw_lng': 34.78879367033085, 'zoom': 17, 'show_holiday': 0, 'end_time': 25, 'road': 0,
+                  'ne_lat': 32.07254745790576, 'start_date': "01/01/2014", 'end_date': "01/01/2015"}
+
+        self.query = Marker.bounding_box_query(yield_per=50, **kwargs)
+        print self.query
 
     def tearDown(self):
         self.query = None
@@ -30,7 +37,7 @@ class TestQueryFilters(unittest.TestCase):
 
     def test_accuracy_filter(self):
         for marker in self.query:
-            self.assertFalse(marker['approx'])
+            self.assertTrue(marker['approx'])
 
     def test_severity_filters(self):
         for marker in self.query:

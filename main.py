@@ -100,30 +100,28 @@ def generate_csv(results):
         yield output_file.getvalue()
         output_file.truncate(0)
 
+ARG_TYPES = {'ne_lat': float, 'ne_lng': float, 'sw_lat': float, 'sw_lng': float, 'zoom': int, 'show_fatal': bool,
+             'show_severe': bool, 'show_light': bool, 'approx': bool, 'accurate': bool, 'show_markers': bool,
+             'show_discussions': bool, 'show_urban': int, 'show_intersection': int, 'show_lane': int,
+             'show_day': int, 'show_holiday': int, 'show_time': int, 'start_time': int, 'end_time': int,
+             'weather': int, 'road': int, 'separation': int, 'surface': int, 'acctype': int, 'controlmeasure': int,
+             'district': int}
 
 @app.route("/markers", methods=["GET"])
 @user_optional
 def markers():
     logging.debug('getting markers')
 
-    kwargs = {'ne_lat': float, 'ne_lng': float, 'sw_lat': float, 'sw_lng': float, 'zoom': int, 'show_fatal': bool,
-              'show_severe': bool, 'show_light': bool, 'approx': bool, 'accurate': bool, 'show_markers': bool,
-              'show_discussions': bool, 'show_urban': int, 'show_intersection': int, 'show_lane': int, 'show_day': int,
-              'show_holiday': int, 'show_time': int, 'start_time': int, 'end_time': int, 'weather': int, 'road': int,
-              'separation': int, 'surface': int, 'acctype': int, 'controlmeasure': int, 'district': int}
-
-    for arg in kwargs:
-        tmp = kwargs[arg](request.values[arg])
-        kwargs[arg] = tmp
-    kwargs['start_date'] = datetime.date.fromtimestamp(int(request.values['start_date']))
-    kwargs['end_date'] = datetime.date.fromtimestamp(int(request.values['end_date']))
+    kwargs = {arg: arg_type(request.values[arg]) for (arg, arg_type) in ARG_TYPES.iteritems()}
+    kwargs.update({arg: datetime.date.fromtimestamp(int(request.values[arg])) for arg in ('start_date', 'end_date')})
 
     logging.debug('querying markers in bounding box')
     is_thin = (kwargs['zoom'] < MINIMAL_ZOOM)
     accidents = Marker.bounding_box_query(is_thin, yield_per=50, **kwargs)
 
-    discussions = DiscussionMarker.bounding_box_query(kwargs['ne_lat'], kwargs['ne_lng'],
-                                                      kwargs['sw_lat'], kwargs['sw_lng'], kwargs['show_discussions'])
+    discussion_args = ('ne_lat', 'ne_lng', 'sw_lat', 'sw_lng', 'show_discussions')
+    discussions = DiscussionMarker.bounding_box_query(**{arg: kwargs[arg] for arg in discussion_args})
+
     if request.values.get('format') == 'csv':
         return Response(generate_csv(accidents), headers={
             "Content-Type": "text/csv",
@@ -193,18 +191,8 @@ def discussion():
 def clusters(methods=["GET"]):
     start_time = time.time()
     if request.method == "GET":
-        kwargs = {'ne_lat': float, 'ne_lng': float, 'sw_lat': float, 'sw_lng': float, 'zoom': int, 'show_fatal': bool,
-                  'show_severe': bool, 'show_light': bool, 'approx': bool, 'accurate': bool, 'show_markers': bool,
-                  'show_discussions': bool, 'show_urban': int, 'show_intersection': int, 'show_lane': int,
-                  'show_day': int, 'show_holiday': int, 'show_time': int, 'start_time': int, 'end_time': int,
-                  'weather': int, 'road': int, 'separation': int, 'surface': int, 'acctype': int,
-                  'controlmeasure': int, 'district': int}
-
-        for arg in kwargs:
-            tmp = kwargs[arg](request.values[arg])
-            kwargs[arg] = tmp
-        kwargs['start_date'] = datetime.date.fromtimestamp(int(request.values['start_date']))
-        kwargs['end_date'] = datetime.date.fromtimestamp(int(request.values['end_date']))
+        kwargs = {arg: arg_type(request.values[arg]) for (arg, arg_type) in ARG_TYPES.iteritems()}
+        kwargs.update({arg: datetime.date.fromtimestamp(int(request.values[arg])) for arg in ('start_date', 'end_date')})
 
         results = retrieve_clusters(**kwargs)
 

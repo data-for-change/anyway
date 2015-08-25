@@ -763,7 +763,6 @@ $(function () {
             }
         },
         getCurrentUrlParams: function () {
-            var dateRange = app.model.get("dateRange");
             var center = app.map.getCenter();
             return "start_date=" + moment(this.dateRanges[0]).format("YYYY-MM-DD") +
                 "&end_date=" + moment(this.dateRanges[1]).format("YYYY-MM-DD") +

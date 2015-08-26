@@ -1,3 +1,14 @@
+@font-face {
+    font-family: 'MeteoconsRegular';
+    src: url('../font/meteocons-webfont.eot');
+    src: url('../font/meteocons-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../font/meteocons-webfont.woff') format('woff'),
+         url('../font/meteocons-webfont.ttf') format('truetype'),
+         url('../font/meteocons-webfont.svg#MeteoconsRegular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
 body, html {
     font-family: 'Alef', 'sans-serif';
     position: relative;
@@ -10,8 +21,222 @@ input, button, select, textarea {
     font-family: 'Alef', 'sans-serif';
 }
 
+a.brand {
+    padding: 1px !important;
+    margin-right: 8px !important;
+    cursor: pointer
+}
+
+.brand-img{
+    height: 26px;
+    cursor: pointer
+}
+
 div.gm-style {
     font-family: 'Alef', 'sans-serif';
+}
+
+.filter-description {
+    width: 300px;
+    border-bottom: 2px solid #ddd; margin-bottom: 0 !important;
+    background-color: white;
+    height: 142px;
+}
+
+.filter-menu {
+    background-color: white;
+    line-height: 40px !important;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-wrap: wrap;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    width: 300px;
+    padding-top: 8px;
+}
+
+.filter-panel {
+    border-top: 2px solid #ddd; margin-bottom: 0 !important;
+    margin-top: 10px;
+    width: 300px;
+    -webkit-order: 1;
+    order: 1;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    height: 340px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+input[type=radio], .filter-panel {
+    display: none;
+}
+
+input[type=radio]:checked + .filter-button {
+    color: #08c;
+    background: #eee;
+}
+
+input[type=radio]:checked + .filter-button + .filter-panel {
+    display: block;
+}
+
+.filter-button{
+    font-size:20px !important;
+    color: #ccc;
+    cursor: pointer;
+    text-align:center;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    z-index: 1;
+    width: 40px;
+    height: 40px;
+    display: block;
+    vertical-align: middle !important;
+    line-height: 40px !important;
+    margin: 3px;
+}
+
+.filter-button:hover{
+    color: #08c;
+    background: #eee;
+}
+
+.filter-button-label{
+    font-size: 9px !important;
+    margin-top: 3px !important;
+    font-weight: 700 !important;
+}
+
+.filter-button-icon{
+    margin-top: 5px !important;
+}
+
+ .active{
+    color: #08c;
+}
+
+.separator{
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+
+.center{
+    justify-content: center !important;
+    padding-right: 0 !important;
+}
+
+.btn-wrap{
+    display: flex;
+    justify-content: center;
+    vertical-align: middle;
+    line-height: 30px;
+    flex-wrap: wrap;
+}
+
+.btn-label{
+    color: #ccc;
+    cursor: default;
+    line-height: 35px;
+}
+
+.btn, input[type='checkbox']:checked:hover + label{
+    height: 23px;
+    padding: 0 3px 0 3px;
+    color: #ccc !important;
+    background: white;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    vertical-align: middle;
+    line-height: 23px;
+    display: inline-block;
+}
+
+.btn:hover, input[type='checkbox']:checked + label{
+    color: #08c !important;
+    background: #f2f2f2;
+}
+
+.btn:hover, input[type='radio']:checked + label{
+    color: #08c !important;
+    background: #f2f2f2;
+}
+
+.one{
+    border-radius: 3px 3px 3px 3px !important;
+    margin: 3px 3px 3px 3px;
+}
+
+.two{
+    width:30%;
+}
+
+.three{
+    width:20%;
+}
+
+.left{
+    border-radius: 3px 0 0 3px !important;
+}
+
+.right{
+    border-left: none !important;
+    border-radius: 0 3px 3px 0 !important;
+}
+
+.middle{
+    border-radius: 0 0 0 0 !important;
+    border-left: none !important;
+}
+
+.fatal:hover, input[type='checkbox']:checked + label[for="checkbox-fatal"]{
+    color: #D81C32 !important;
+}
+
+.severe:hover, input[type='checkbox']:checked + label[for="checkbox-severe"]{
+    color: #FF9F1C !important;
+}
+
+.light:hover, input[type='checkbox']:checked + label[for="checkbox-light"]{
+    color: #FFD82B !important;
+}
+
+.btn .date{
+    width: 36%;
+    font-size: 10px !important;
+}
+
+.time{
+    width: 36%;
+    font-size: 10px !important;
+}
+
+.icon-weather{
+    font-family: 'MeteoconsRegular';
+    font-size: 20px;
+    width: auto;
+}
+
+input[type="date"],input[type="time"]{
+    color:#ccc;
+    border-color: #ddd;
+    margin-bottom: 0;
+}
+
+.current-view-count{
+    padding-left: 10px;
+    font-weight:normal;
+    color: #08c;
+    float: left;
+}
+
+.current-view{
+    overflow-y: scroll;
+    position: absolute;
+    top: 270px;
+    bottom: 90px;
+    padding-right: 8px;
 }
 
 .context-menu {
@@ -37,19 +262,35 @@ div.gm-style {
 	background: #f2f2f2;
 }
 
+.sidebar-container{
+    position: fixed;
+    right: 0;
+    top: 0;
+    bottom: 40px;
+    width: 300px;
+    background: white;
+    padding-top: 40px;
+    height: 100%;
+}
+
 .sidebar-container ul {
 	list-style: none;
 	margin: 0;
 	padding: 0;
 }
+
 .sidebar-container ul li {
-	padding: 5px;
+    width: 300px;
 	border-bottom: 1px solid #eee;
     cursor: pointer;
+    padding-top: 4px;
+    padding-bottom: 4px;
 }
 
 .sidebar-title {
+    height: 30px;
 	padding: 5px;
+	line-height: 30px;
 	border-bottom: 1px solid #ddd;
 	background: #eee;
 	font-weight: bold;
@@ -69,35 +310,37 @@ div.gm-style {
     width: 30px;
     background-color: white;
     text-align: center;
-    line-height: 30px;
+    vertical-align: middle;
+    line-height: 32px;
     margin: 16px;
     border-radius: 50%;
     border-color: #ccc;
     border-style: solid;
     border-width: 1px;
+    cursor: pointer;
 }
 
 .map-button:hover{
     box-shadow: inset 0 1px 1px rgba(0,0,0,0.075),0 0 8px rgba(82,168,236,0.6);
     border-color: #4d90fe;
-]}
+}
 
 .reset-map-control:after{
-    font-size: 20px;
+    font-size: 17px;
     color: #ccc;
     font-family: 'Material Icons';
     content: '\e1b3';
 }
 
 .download-csv-control:after{
-    font-size: 20px;
+    font-size: 17px;
     color: #ccc;
     font-family: 'Material Icons';
     content: '\e2c4';
 }
 
 .link-map-control:after{
-    font-size: 20px;
+    font-size: 17px;
     color: #ccc;
     font-family: 'Material Icons';
     content: '\e157';
@@ -186,11 +429,25 @@ div.gm-style {
 .info-window{
 	position: relative;
     height: 100%;
-    box-shadow: -10px 0px 16px -7px #333;
+    box-shadow: inset 0 -1px 0 rgba(0,0,0,0.1),0 1px 10px rgba(0,0,0,0.1);
 }
 
 .navbar-inner{
-	  box-shadow: 0px 7px 16px -7px #333 !important;
+}
+
+.navbar-brand{
+    float: right; display: inline-flex; justify-content: flex-end
+}
+
+.footer{
+    position:fixed;
+    height: 40px;
+    bottom:0;
+    width:100%;
+    text-align:
+    left; background: white;
+    box-shadow: inset 0 0 0 -1px rgba(0,0,0,0.1),0 1px 10px rgba(0,0,0,0.1);
+    background-image: linear-gradient(to bottom,#f2f2f2, #fff);
 }
 
 .description {
@@ -212,18 +469,23 @@ div.gm-style {
       #pac-input {
         background-color: #fff;
         padding: 0 11px 0 13px;
-        width: 400px;
+        width: 35%;
         height: 30px;
         font-size: 15px;
         font-weight: 400;
         text-overflow: ellipsis;
       }
 
+      #pac-input:hover{
+        box-shadow: inset 0 1px 1px rgba(0,0,0,0.075),0 0 8px rgba(82,168,236,0.6);
+        border-color: #4d90fe;
+    }
+
       #pac-input:focus {
         border-color: #4d90fe;
         margin-left: -1px;
         padding-left: 14px;  /* Regular padding-left + 1. */
-        width: 401px;
+        width: 35%;
       }
 
       .pac-container {
@@ -250,8 +512,8 @@ textarea.form-control-wide {
     height: 100px;
 }
 .popover{
-    width:350px !important;
-    max-width:350px !important;}
+    width:300px !important;
+    max-width:300px !important;}
 /* agam */
 .popover-title{
     font-weight: bold;
@@ -299,3 +561,50 @@ textarea.form-control-wide {
     background-color: rgba(0, 0, 0, .5);
     -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, .5);
 }
+
+.toggle-wrapper {
+    margin-right: 108px;
+    vertical-align: middle;
+    cursor: pointer;
+    line-height: 40px;
+    padding-top: 12px;
+}
+
+#toggle {
+    /*border-right: 1px solid #ddd;*/
+    /*padding-right: 8px;*/
+    border-left: 1px solid #ddd;
+    padding-left: 8px;
+    height: 100%;
+    /*padding-top: 1px;*/
+}
+
+#toggle div {
+    width: 20px;
+    height: 2px;
+    background: #555;
+    margin: 4px auto;
+    transition: all 0.3s;
+    backface-visibility: hidden;
+}
+
+#toggle.on .one {
+    transform: rotate(45deg) translate(4px, 4px);
+}
+
+#toggle.on .two {
+    opacity: 0;
+}
+
+#toggle.on .three {
+    transform: rotate(-45deg) translate(4px, -5px);
+}
+
+input[type='date']{
+    font-size: 10px;
+}
+
+input[type='checkbox']{
+    display: none;
+}
+

@@ -100,33 +100,28 @@ def generate_csv(results):
         yield output_file.getvalue()
         output_file.truncate(0)
 
+ARG_TYPES = {'ne_lat': float, 'ne_lng': float, 'sw_lat': float, 'sw_lng': float, 'zoom': int, 'show_fatal': bool,
+             'show_severe': bool, 'show_light': bool, 'approx': bool, 'accurate': bool, 'show_markers': bool,
+             'show_discussions': bool, 'show_urban': int, 'show_intersection': int, 'show_lane': int,
+             'show_day': int, 'show_holiday': int, 'show_time': int, 'start_time': int, 'end_time': int,
+             'weather': int, 'road': int, 'separation': int, 'surface': int, 'acctype': int, 'controlmeasure': int,
+             'district': int}
 
 @app.route("/markers", methods=["GET"])
 @user_optional
 def markers():
     logging.debug('getting markers')
-    ne_lat = float(request.values['ne_lat'])
-    ne_lng = float(request.values['ne_lng'])
-    sw_lat = float(request.values['sw_lat'])
-    sw_lng = float(request.values['sw_lng'])
-    zoom = int(request.values['zoom'])
-    start_date = datetime.date.fromtimestamp(int(request.values['start_date']))
-    end_date = datetime.date.fromtimestamp(int(request.values['end_date']))
-    fatal = int(request.values['show_fatal'])
-    severe = int(request.values['show_severe'])
-    light = int(request.values['show_light'])
-    inaccurate = int(request.values['show_inaccurate'])
-    show_markers = bool(request.values['show_markers'])
-    show_discussions = bool(request.values['show_discussions'])
+
+    kwargs = {arg: arg_type(request.values[arg]) for (arg, arg_type) in ARG_TYPES.iteritems()}
+    kwargs.update({arg: datetime.date.fromtimestamp(int(request.values[arg])) for arg in ('start_date', 'end_date')})
 
     logging.debug('querying markers in bounding box')
-    is_thin = (zoom < MINIMAL_ZOOM)
-    accidents = Marker.bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng,
-                                          start_date, end_date,
-                                          fatal, severe, light, inaccurate,
-                                          show_markers, is_thin, yield_per=50)
-    discussions = DiscussionMarker.bounding_box_query(ne_lat, ne_lng,
-                                                      sw_lat, sw_lng, show_discussions)
+    is_thin = (kwargs['zoom'] < MINIMAL_ZOOM)
+    accidents = Marker.bounding_box_query(is_thin, yield_per=50, **kwargs)
+
+    discussion_args = ('ne_lat', 'ne_lng', 'sw_lat', 'sw_lng', 'show_discussions')
+    discussions = DiscussionMarker.bounding_box_query(**{arg: kwargs[arg] for arg in discussion_args})
+
     if request.values.get('format') == 'csv':
         return Response(generate_csv(accidents), headers={
             "Content-Type": "text/csv",
@@ -197,23 +192,12 @@ def discussion():
 def clusters(methods=["GET"]):
     start_time = time.time()
     if request.method == "GET":
-        ne_lat = float(request.values['ne_lat'])
-        ne_lng = float(request.values['ne_lng'])
-        sw_lat = float(request.values['sw_lat'])
-        sw_lng = float(request.values['sw_lng'])
-        start_date = datetime.date.fromtimestamp(int(request.values['start_date']))
-        end_date = datetime.date.fromtimestamp(int(request.values['end_date']))
-        fatal = int(request.values['show_fatal'])
-        severe = int(request.values['show_severe'])
-        light = int(request.values['show_light'])
-        inaccurate = int(request.values['show_inaccurate'])
-        zoom = int(request.values['zoom'])
+        kwargs = {arg: arg_type(request.values[arg]) for (arg, arg_type) in ARG_TYPES.iteritems()}
+        kwargs.update({arg: datetime.date.fromtimestamp(int(request.values[arg])) for arg in ('start_date', 'end_date')})
 
-        results = retrieve_clusters(ne_lat, ne_lng, sw_lat, sw_lng,
-                                    start_date, end_date,
-                                    fatal, severe, light, inaccurate, zoom)
+        results = retrieve_clusters(**kwargs)
 
-        logging.debug('calculating clusters took ' + str(time.time() - start_time))
+        logging.debug('calculating clusters took ' + str(time.time() - kwargs['start_time']))
         return Response(json.dumps({'clusters': results}), mimetype="application/json")
 
 @app.route("/highlightpoints", methods=['POST'])
@@ -624,8 +608,7 @@ def create_years_list():
     """
     while True:
         try:
-            year_col = db.session.query(distinct(func.extract("year",
-                                                              Marker.created)))
+            year_col = db.session.query(distinct(func.extract("year", Marker.created)))
             break
         except OperationalError:
             time.sleep(1)

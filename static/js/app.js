@@ -48,6 +48,31 @@ $(function () {
             this.markerList = [];
             this.clusterList = [];
             this.firstLoadDelay = true;
+            this.show_markers = '1';
+            this.show_discussions = '1';
+            this.accurate = '1';
+            this.approx = '1';
+            this.show_fatal = '1';
+            this.show_severe = '1';
+            this.show_light = '1';
+            this.show_urban = 3;
+            this.show_intersection = 3;
+            this.show_lane = 3;
+            this.show_day = 7;
+            this.show_holiday = 0;
+            this.show_time = 24;
+            this.start_time = 25;
+            this.end_time = 25;
+            this.weather = 0;
+            this.road = 0;
+            this.separation = 0;
+            this.surface = 0;
+            this.acctype = 0;
+            this.controlmeasure = 0;
+            this.district = 0;
+
+            this.dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
+
             setTimeout(function(){
                 this.firstLoadDelay = false;
             }.bind(this), 2200);
@@ -63,7 +88,6 @@ $(function () {
                 .bind("add", this.loadCluster, this);
 
             this.initLayers();
-            this.initShowInaccurate();
 
             this.model
                 .bind("change:user", this.updateUser, this)
@@ -121,7 +145,6 @@ $(function () {
             }
 
             if (this.clusterMode()) {
-                $("#view-filter").prop('disabled', true);
                 this.closeInfoWindow();
                 this.clusters.fetch({
                     data: $.param(params),
@@ -201,14 +224,30 @@ $(function () {
             params["zoom"] = zoom;
             params["thin_markers"] = (zoom < MINIMAL_ZOOM || !bounds);
             // Pass start and end dates as unix time (in seconds)
-            params["start_date"] = dateRange[0].getTime() / 1000;
-            params["end_date"] = dateRange[1].getTime() / 1000;
-            params["show_fatal"] = this.model.get("showFatal");
-            params["show_severe"] = this.model.get("showSevere");
-            params["show_light"] = this.model.get("showLight");
-            params["show_inaccurate"] = this.model.get("showInaccurateMarkers");
-            params["show_markers"] = show_markers;
-            params["show_discussions"] = show_discussions;
+            params["start_date"] = this.dateRanges[0].getTime() / 1000;
+            params["end_date"] = this.dateRanges[1].getTime() / 1000;
+            params["show_fatal"] = this.show_fatal;
+            params["show_severe"] = this.show_severe;
+            params["show_light"] = this.show_light;
+            params["approx"] = this.approx;
+            params["accurate"] = this.accurate;
+            params["show_markers"] = this.show_markers;
+            params["show_discussions"] = this.show_discussions;
+            params["show_urban"] = this.show_urban;
+            params["show_intersection"] = this.show_intersection;
+            params["show_lane"] = this.show_lane;
+            params["show_day"] = this.show_day;
+            params["show_holiday"] = this.show_holiday;
+            params["show_time"] = this.show_time;
+            params["start_time"] = this.start_time;
+            params["end_time"] = this.end_time;
+            params["weather"] = this.weather;
+            params["road"] = this.road;
+            params["separation"] = this.separation;
+            params["surface"] = this.surface;
+            params["acctype"] = this.acctype;
+            params["controlmeasure"] = this.controlmeasure;
+            params["district"] = this.district;
             return params;
         },
         setMultipleMarkersIcon: function () {
@@ -342,7 +381,6 @@ $(function () {
 
             var tourDiv = document.createElement('div');
             tourDiv.className = "map-button tour-control blink";
-            tourDiv.title = 'Start Tour';
             tourDiv.innerHTML = $("#tour-control").html();
             google.maps.event.addDomListener(tourDiv, 'click', function () {
                 tourClick();
@@ -441,59 +479,6 @@ $(function () {
             this.$el.find(".sidebar-container").append(this.sidebar.$el);
             console.log('Loaded SidebarView');
 
-            if (!START_DATE) {
-                START_DATE = '01/01/2014';
-            }
-            if (!END_DATE) {
-                END_DATE = '01/01/2015';
-            }
-            this.$el.find("input.date-range").daterangepicker({
-                    /*
-                         These ranges are irrelevant as long as no recent data is loaded:
-                         'היום': ['today', 'today'],
-                         'אתמול': ['yesterday', 'yesterday'],
-                         'שבוע אחרון': [Date.today().add({ days: -6 }), 'today'],
-                         'חודש אחרון': [Date.today().add({ days: -29 }), 'today'],
-                         'החודש הזה': [Date.today().moveToFirstDayOfMonth(), Date.today().moveToLastDayOfMonth()],
-                         'החודש שעבר': [Date.today().moveToFirstDayOfMonth().add({ months: -1 }), Date.today().moveToFirstDayOfMonth().add({ days: -1 })]
-                    */
-                    ranges: ACCYEARS,
-                    opens: 'left',
-                    format: 'dd/MM/yyyy',
-                    separator: ' עד ',
-                    startDate: START_DATE,
-                    endDate: END_DATE,
-                    minDate: '01/01/2005',
-                    maxDate: '31/12/2023',
-                    locale: {
-                        applyLabel: 'בחר',
-                        fromLabel: 'מ',
-                        toLabel: 'עד',
-                        customRangeLabel: 'בחר תאריך',
-                        daysOfWeek: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
-                        monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-                        firstDay: 1
-                    },
-                    showWeekNumbers: true,
-                    buttonClasses: ['btn-danger']
-                },
-                function (start, end) {
-                    var daterangepicker = this.$el.find("input.date-range").data("daterangepicker");
-                    if (!start)
-                        start = daterangepicker.minDate;
-                    if (!end)
-                        end = daterangepicker.maxDate;
-                    this.model.set("dateRange", [start, end]);
-                }.bind(this)
-            );
-            this.$el.find("#calendar-control").click( // only applies to <i>
-                function () {
-                    this.$el.find("input.date-range").data('daterangepicker').show();
-                }.bind(this)
-            );
-            this.$el.find("input.date-range").data("daterangepicker").notify();
-            console.log('Loaded daterangepicker');
-
             $(document).ajaxStart(function () {
                 this.spinner = $('<li/>');
                 this.spinner.height('20px');
@@ -558,14 +543,8 @@ $(function () {
             google.maps.event.addListener(this.map, "mousemove", function () {
                 this.resetOnMouseUp = true;
             });
-        }, initShowInaccurate: function () {
-            var showInaccurate = this.model.get("showInaccurateMarkers");
-            if (typeof showInaccurate == 'undefined') {
-                this.model.set("showInaccurateMarkers", SHOW_INACCURATE ? 1 : 0);
-                showInaccurate = SHOW_INACCURATE;
-            }
-            return showInaccurate;
-        }, initLayers: function (severity) {
+        },
+        initLayers: function (severity) {
             var severities = [SEVERITY_FATAL, SEVERITY_SEVERE, SEVERITY_LIGHT];
             var self = this;
             severities.forEach(function (severity) {
@@ -608,28 +587,12 @@ $(function () {
             this.clearClustersFromMap();
             this.clusters.each(_.bind(this.loadCluster, this));
         },
+
         fitsFilters: function (model) {
             var layer = this.model.get(SEVERITY_ATTRIBUTES[model.get("severity")]);
             if (!layer) {
                 return false;
             }
-
-            if (this.model.get("dateRange")) {
-                var createdDate = new Date(model.get("created"));
-
-                var start = this.model.get("dateRange")[0];
-                var end = this.model.get("dateRange")[1];
-
-                if (createdDate < start || createdDate > end) {
-                    return false;
-                }
-            }
-
-            var showInaccurate = this.initShowInaccurate();
-            if (!showInaccurate && model.get("locationAccuracy") != 1) {
-                return false;
-            }
-
             return true;
         },
         loadMarkers: function () {
@@ -760,7 +723,7 @@ $(function () {
               this.setCenterWithMarker(place.geometry.location);
               this.map.setZoom(INIT_ZOOM);
             }
-         },
+        },
         createHighlightPoint : function(lat, lng, highlightPointType) {
             if (isNaN(lat) || isNaN(lng) || isNaN(highlightPointType)) return;
             $.post("highlightpoints", JSON.stringify({
@@ -800,15 +763,10 @@ $(function () {
             }
         },
         getCurrentUrlParams: function () {
-          var dateRange = app.model.get("dateRange");
-          var center = app.map.getCenter();
-          return "start_date=" + moment(dateRange[0]).format("YYYY-MM-DD") +
-              "&end_date=" + moment(dateRange[1]).format("YYYY-MM-DD") +
-              "&show_fatal=" + (parseInt(app.model.get("showFatal")) || 0) +
-              "&show_severe=" + (parseInt(app.model.get("showSevere")) || 0) +
-              "&show_light=" + (parseInt(app.model.get("showLight")) || 0) +
-              "&show_inaccurate=" + (parseInt(app.model.get("showInaccurateMarkers")) || 0) +
-              "&zoom=" + app.map.zoom + "&lat=" + center.lat() + "&lon=" + center.lng();
+            var center = app.map.getCenter();
+            return "start_date=" + moment(this.dateRanges[0]).format("YYYY-MM-DD") +
+                "&end_date=" + moment(this.dateRanges[1]).format("YYYY-MM-DD") +
+                "&zoom=" + app.map.zoom + "&lat=" + center.lat() + "&lon=" + center.lng();
 		},
         ESCinfoWindow: function(event) {
             if (event.keyCode == 27) {
@@ -823,37 +781,149 @@ $(function () {
                     scaledSize: new google.maps.Size(30, 50)
                 };
             }
-            
             return image_url;
+        },
+        loadFilter: function() {
+            if ($("#checkbox-discussions").is(":checked")) { this.show_discussions='1' } else { this.show_discussions='' }
+            if ($("#checkbox-accidents").is(":checked")) { this.show_markers='1' } else { this.show_markers='' }
+            if ($("#checkbox-accurate").is(":checked")) { this.accurate='1' } else { this.accurate='' }
+            if ($("#checkbox-approx").is(":checked")) { this.approx='1' } else { this.approx='' }
+            if ($("#checkbox-fatal").is(":checked")) { this.show_fatal='1' } else { this.show_fatal='' }
+            if ($("#checkbox-severe").is(":checked")) { this.show_severe='1' } else { this.show_severe='' }
+            if ($("#checkbox-light").is(":checked")) { this.show_light='1' } else { this.show_light='' }
+
+            if ($("#checkbox-urban").is(":checked") && $("#checkbox-nonurban").is(":checked")) {
+                this.show_urban = 3;
+            } else if ($("#checkbox-urban").is(":checked")) {
+                this.show_urban = 2;
+            } else if ($("#checkbox-nonurban").is(":checked")) {
+                this.show_urban = 1;
+            } else {
+                this.show_urban = 0;
+            };
+
+            if ($("#checkbox-intersection").is(":checked") && $("#checkbox-nonintersection").is(":checked")) {
+                this.show_intersection = 3;
+            } else if ($("#checkbox-intersection").is(":checked")) {
+                this.show_intersection = 2;
+            } else if ($("#checkbox-nonintersection").is(":checked")) {
+                this.show_intersection = 1;
+            } else {
+                this.show_intersection = 0;
+            };
+
+            // This section only filters one-lane and multi-lane.
+            // Accidents with 'other' setting (which are the majority) Will not be shown
+            if ($("#checkbox-multi-lane").is(":checked") && $("#checkbox-one-lane").is(":checked")) {
+                this.show_lane = 3;
+            } else if ($("#checkbox-multi-lane").is(":checked")) {
+                this.show_lane = 2;
+            } else if ($("#checkbox-one-lane").is(":checked")) {
+                this.show_lane = 1;
+            } else {
+                this.show_lane = 0;
+            };
+
+            this.weather = $("input[type='radio'][name='weather']:checked").val();
+            this.road = $("input[type='radio'][name='road']:checked").val();
+            this.separation = $("input[type='radio'][name='separation']:checked").val();
+            this.surface = $("input[type='radio'][name='surface']:checked").val();
+            this.acctype = $("input[type='radio'][name='acctype']:checked").val();
+            this.controlmeasure = $("input[type='radio'][name='controlmeasure']:checked").val();
+            this.district = $("input[type='radio'][name='district']:checked").val();
+
+            this.dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())]
+            this.resetMarkers();
+            this.fetchMarkers();
+            this.updateFilterString();
+        },
+        changeDate: function() {
+            var start_date, end_date, all_years = false;
+            if ($("#checkbox-2014").is(":checked")) { start_date = "2014"; end_date = "2015" }
+            else if ($("#checkbox-2013").is(":checked")) { start_date = "2013"; end_date = "2014" }
+            else if ($("#checkbox-2012").is(":checked")) { start_date = "2012"; end_date = "2013" }
+            else if ($("#checkbox-2011").is(":checked")) { start_date = "2011"; end_date = "2012" }
+            else if ($("#checkbox-all-years").is(":checked")) { start_date = "2005"; end_date = "2025"; all_years = true }
+            if (!all_years) {
+                $("#sdate").val(start_date + '-01-01');
+                $("#edate").val(end_date + '-01-01');
+            } else {
+                $("#sdate").val('');
+                $("#edate").val('');
+            }
+
+            this.show_day = $("input[type='radio'][name='day']:checked").val()
+            this.show_holiday = $("input[type='radio'][name='holiday']:checked").val()
+            this.show_time = $("input[type='radio'][name='time']:checked").val()
+            // TODO: only parses the hour int for now, need to apply the minutes too
+            if (!isNaN(parseInt($("#stime").val())) && !isNaN(parseInt($("#etime").val()))){
+                this.start_time = parseInt($("#stime").val())
+                this.end_time = parseInt($("#etime").val())
+                $("#checkbox-time-all").prop('checked', true);
+            }
+
+            this.dateRanges = [new Date(start_date + '-01-01'), new Date(end_date + '-01-01')];
+            this.resetMarkers();
+            this.fetchMarkers();
+            this.updateFilterString();
+        },
+        updateFilterString: function() {
+            if (!this.clusterMode()) {
+                var fatal = this.show_fatal, severe = this.show_severe, light = this.show_light, severityText = " בחומרה ";
+                var accurate = this.accurate, approx = this.approx, accuracyText = " ובעיגון ";
+
+                // Severity variables and strings
+                if (fatal == '1') {
+                    fatal = "קטלנית "
+                } else {
+                    fatal = ""
+                }
+                if (severe == '1' && fatal != '' && light == '') {
+                    severe = "וקשה ";
+                } else if (severe == '1') {
+                    severe = "קשה ";
+                } else {
+                    severe = '';
+                }
+                ;
+                if (fatal == '' && severe == '' && light == '') {
+                    severityText = ""
+                }
+
+                if (light == '1' && (fatal != '' || severe != '')) {
+                    light = "וקלה ";
+                } else if (light == '1') {
+                    light = "קלה ";
+                } else {
+                    light = '';
+                }
+
+                // Accuracy variables and strings
+                if (accurate == '1') {
+                    accurate = "מדויק "
+                } else {
+                    accurate = ""
+                }
+                if (approx == '1' && accurate != '') {
+                    approx = "ומרחבי";
+                } else if (approx == '1') {
+                    approx = "מרחבי ";
+                } else {
+                    approx = "";
+                }
+                if (accurate == '' && approx == '') {
+                    accuracyText = ""
+                }
+
+                $("#filter-string").text(
+                    "" + "מציג " + markerCount + " תאונות בין התאריכים " + moment(this.dateRanges[0]).format('LL')
+                    + " עד " + moment(this.dateRanges[1]).format('LL') + severityText + fatal + severe + light
+                    + accuracyText + accurate + approx
+                );
+            } else {
+                $("#filter-string").text(" התקרב על מנת לקבל נתוני סינון ");
+            }
         }
     });
 });
-
-var show_markers='1';
-var show_discussions='1';
-
-function load(li) {
-    switch (li) {
-        case "all":
-            $("#view-filter").val("הצג הכל");
-            show_markers='1';show_discussions='1';
-            window.app.fetchMarkers();
-            break;
-
-        case "accidents_only":
-            show_markers='1';show_discussions='';
-            $("#view-filter").val("הצג תאונות בלבד");
-            window.app.resetMarkers();
-            window.app.fetchMarkers();
-            break;
-
-        case "discussions_only":
-            show_markers='';show_discussions='1';
-            $("#view-filter").val("הצג דיונים בלבד");
-            window.app.resetMarkers();
-            window.app.fetchMarkers();
-        break;
-    }
-}
-
 

@@ -243,6 +243,9 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         # >>> m.count()
         # 250
 
+        approx = kwargs.get('approx', True)
+        accurate = kwargs.get('accurate', True)
+
         if not kwargs.get('show_markers', True):
             return Marker.query.filter(sql.false())
         markers = Marker.query \
@@ -255,11 +258,11 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
             .order_by(desc(Marker.created))
         if yield_per:
             markers = markers.yield_per(yield_per)
-        if kwargs.get('accurate', True) and not kwargs.get('approx', True):
+        if accurate and not approx:
             markers = markers.filter(Marker.locationAccuracy == 1)
-        elif kwargs.get('approx', True) and not kwargs.get('accurate', True):
+        elif approx and not accurate:
             markers = markers.filter(Marker.locationAccuracy != 1)
-        elif not kwargs.get('accurate', True) and not kwargs.get('approx', True):
+        elif not accurate and not approx:
             return Marker.query.filter(sql.false())
         if not kwargs.get('show_fatal', True):
             markers = markers.filter(Marker.severity != 1)

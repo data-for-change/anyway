@@ -426,12 +426,6 @@ input[type="date"],input[type="time"]{
 	width: auto; display:inline;
 }
 
-.info-window{
-	position: relative;
-    height: 100%;
-    box-shadow: inset 0 -1px 0 rgba(0,0,0,0.1),0 1px 10px rgba(0,0,0,0.1);
-}
-
 .navbar-inner{
 }
 
@@ -549,6 +543,19 @@ textarea.form-control-wide {
 
 .sb-button{
     min-height: initial !important;
+}
+
+.info-window{
+	position: relative;
+  height: 100%;
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,0.1),0 1px 10px rgba(0,0,0,0.1);
+}
+
+.marker-info-window{
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 370px;
+  width: 340px;
 }
 
 .marker-info-window::-webkit-scrollbar{

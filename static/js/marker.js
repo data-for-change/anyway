@@ -52,7 +52,6 @@ var MarkerView = Backbone.View.extend({
 
         this.$el.html($("#marker-content-template").html());
 
-        this.$el.width(400);
         this.$el.find(".title").text(this.marker.get("title"));
         this.$el.find(".id").text(fields.ACC_ID + ": " + this.marker.get("id"));
         this.$el.find(".provider_code").text(fields.PROVIDER_CODE + ": " + this.model.get("provider_code"));
@@ -86,10 +85,14 @@ var MarkerView = Backbone.View.extend({
 
         this.$el.find(".creation-date").text("תאריך: " +
                     moment(this.model.get("created")).format("LLLL"));
-        this.$el.find(".profile-image").attr("src", "/static/img/lamas.png");
+        display_user = "הלשכה המרכזית לסטטיסטיקה";
+        display_url = "http://www.cbs.gov.il";
+        display_logo = "lamas.png";
         this.$el.find(".profile-image").attr("width", "50px");
-        display_user = 'הלשכה המרכזית לסטטיסטיקה';
-        this.$el.find(".added-by").text("מקור: " + display_user);
+        this.$el.find(".profile-image").attr("src", "/static/img/" + display_logo);
+        this.$el.find(".profile-image-url").attr("href", display_url);
+        this.$el.find(".added-by").html("מקור: <a href=\'" +
+            display_url + "\' target=\'_blank\'>" + display_user + "</a>");
 
         return this;
     },

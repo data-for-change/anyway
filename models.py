@@ -190,7 +190,9 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         if not is_thin:
             fields.update({
                 "title": self.title,
-                "description": Marker.json_to_description(self.description),
+                # CHANGE FOR UNITED:
+                # "description": Marker.json_to_description(self.description),
+                "description": self.description,
                 "address": self.address,
                 "type": self.type,
                 "subtype": self.subtype,

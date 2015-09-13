@@ -1,6 +1,13 @@
 var ADD_DISCUSSION = "צרו דיון";
 var NEW_FEATURES = "עדכן אותי לגבי תכונות חדשות"
 
+var PROVIDERS = {};
+PROVIDERS[1] = PROVIDERS[3] = {
+  name: "הלשכה המרכזית לסטטיסטיקה",
+  url: "http://www.cbs.gov.il",
+  logo: "lamas.png",
+};
+
 var MARKER_TYPE_ACCIDENT = 1;
 var MARKER_TYPE_DISCUSSION = 2;
 

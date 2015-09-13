@@ -551,6 +551,13 @@ textarea.form-control-wide {
   box-shadow: inset 0 -1px 0 rgba(0,0,0,0.1),0 1px 10px rgba(0,0,0,0.1);
 }
 
+.united-marker-info-window{
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 200px;
+    width: 340px;
+}
+
 .marker-info-window{
   overflow-y: auto;
   overflow-x: hidden;

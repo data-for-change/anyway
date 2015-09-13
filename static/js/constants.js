@@ -5,7 +5,12 @@ var PROVIDERS = {};
 PROVIDERS[1] = PROVIDERS[3] = {
   name: "הלשכה המרכזית לסטטיסטיקה",
   url: "http://www.cbs.gov.il",
-  logo: "logos/cbs.png",
+  logo: "cbs.png",
+};
+PROVIDERS[2] = {
+  name: "איחוד הצלה",
+  url: "http://www.1221.org.il",
+  logo: "united.jpg",
 };
 
 var MARKER_TYPE_ACCIDENT = 1;

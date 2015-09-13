@@ -87,7 +87,7 @@ var MarkerView = Backbone.View.extend({
                     moment(this.model.get("created")).format("LLLL"));
         var provider = PROVIDERS[this.model.get("provider_code")]
         this.$el.find(".profile-image").attr("width", "50px");
-        this.$el.find(".profile-image").attr("src", "/static/img/" + provider.logo);
+        this.$el.find(".profile-image").attr("src", "/static/img/logos/" + provider.logo);
         this.$el.find(".profile-image").attr("title", provider.name);
         this.$el.find(".profile-image-url").attr("href", provider.url);
         this.$el.find(".added-by").html("מקור: <a href=\'" +

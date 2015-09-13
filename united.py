@@ -9,7 +9,7 @@ db = SQLAlchemy(app)
 location = "static/data/united/united_data.csv"
 
 def parse_date(created):
-    time = datetime.strptime(created, '%m/%d/%y %H:%M')
+    time = datetime.strptime(created[:-3], '%m/%d/%Y %I:%M:%S')
     year = int(time.strftime('20%y'))
     month = int(time.strftime('%m'))
     day = int(time.strftime('%d'))
@@ -27,25 +27,29 @@ def import_accidents():
             if header:
                 header = False
                 continue
+            if not accident:
+                break
 
             marker = {
                 "latitude": accident[1],
                 "longitude": accident[2],
                 "created": parse_date(accident[0]),
-                "provider_code": 0,
+                "provider_code": 2,
                 "id": int(''.join(x for x in accident[0] if x.isdigit()) + str(inc)),
                 "title": "Accident",
-                "address": accident[3] + ' ' + accident[5],
+                "address": unicode((accident[3] + ' ' + accident[5]), encoding='utf-8'),
                 "severity": 3,
                 "locationAccuracy": 1,
-                "subtype": 21           # New subtype for United Hatzala
+                "subtype": 21,           # New subtype for United Hatzala
+                "type": unicode(accident[7], encoding='utf-8'),
+                "description": unicode(accident[6], encoding='utf-8')
             }
 
             inc += 1
             yield marker
 
 
-def import_to_datastore():
+def main():
     try:
         accidents = list(import_accidents())
         db.session.execute(Marker.__table__.insert().prefix_with("OR IGNORE"), accidents)
@@ -56,10 +60,6 @@ def import_to_datastore():
     except ValueError as e:
         print e.message
         return 0
-
-
-def main():
-    import_to_datastore()
 
 if __name__ == "__main__":
     main()

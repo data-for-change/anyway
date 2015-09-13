@@ -192,7 +192,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
                 "title": self.title,
                 # CHANGE FOR UNITED:
                 # "description": Marker.json_to_description(self.description),
-                "description": self.description,
+                # "description": self.description,
                 "address": self.address,
                 "type": self.type,
                 "subtype": self.subtype,
@@ -204,6 +204,12 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
                 "secondaryStreet": self.secondaryStreet,
                 "junction": self.junction,
             })
+
+            if self.provider_code == 2:
+                fields.update({"description": self.description})
+            else:
+                fields.update({"description": Marker.json_to_description(self.description)})
+
             optional = {
                 "one_lane": self.one_lane,
                 "multi_lane": self.multi_lane,

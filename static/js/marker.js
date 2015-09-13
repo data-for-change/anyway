@@ -21,6 +21,7 @@ var MarkerView = Backbone.View.extend({
 
         var markerPosition = new google.maps.LatLng(this.model.get("latitude"),
                                                     this.model.get("longitude"));
+        var provider = PROVIDERS[this.model.get("provider_code")]
 
         this.marker = new google.maps.Marker({
             position: markerPosition,
@@ -34,6 +35,32 @@ var MarkerView = Backbone.View.extend({
             this.marker.view = this;
             google.maps.event.addListener(this.marker, "click",
                 _.bind(app.showDiscussion, app, this.model.get("identifier")) );
+            return this;
+        }
+
+        if (this.model.get("provider_code") == 2) {     // United Hatzala accidents marker structue
+            this.marker.setIcon( "/static/img/icons/ambulance.png" );
+            this.marker.setTitle(this.model.get("type"));
+            this.marker.setMap(this.map);
+            this.marker.view = this;
+            app.oms.addMarker(this.marker);
+            this.$el.html($("#united-marker-content-template").html());
+
+            this.$el.find(".title").text(this.marker.get("title"));
+            this.$el.find(".id").text(fields.ACC_ID + ": " + this.marker.get("id"));
+            this.$el.find(".provider_code").text(fields.PROVIDER_CODE + ": " + this.model.get("provider_code"));
+            this.$el.find(".creation-date").text("תאריך: " + moment(this.model.get("created")).format("LLLL"));
+            this.$el.find(".address").text("מיקום: " + this.model.get("address"));
+            if (this.model.get("description") != "") {
+                this.$el.find(".comments").text("הערות: " + this.model.get("description"));
+            }
+            this.$el.find(".profile-image").attr("width", "50px");
+            this.$el.find(".profile-image").attr("src", "/static/img/logos/" + provider.logo);
+            this.$el.find(".profile-image").attr("title", provider.name);
+            this.$el.find(".profile-image-url").attr("href", provider.url);
+            this.$el.find(".added-by").html("מקור: <a href=\'" +
+                provider.url + "\' target=\'_blank\'>" + provider.name + "</a>");
+
             return this;
         }
 
@@ -85,7 +112,7 @@ var MarkerView = Backbone.View.extend({
 
         this.$el.find(".creation-date").text("תאריך: " +
                     moment(this.model.get("created")).format("LLLL"));
-        var provider = PROVIDERS[this.model.get("provider_code")]
+
         this.$el.find(".profile-image").attr("width", "50px");
         this.$el.find(".profile-image").attr("src", "/static/img/logos/" + provider.logo);
         this.$el.find(".profile-image").attr("title", provider.name);

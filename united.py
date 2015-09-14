@@ -9,13 +9,11 @@ app = init_flask(__name__)
 db = SQLAlchemy(app)
 
 def parse_date(created):
-    # TODO: Implement distinction between AM and PM !!
-
     time = datetime.strptime(created[:-3], '%m/%d/%Y %I:%M:%S')
     year = int(time.strftime('20%y'))
     month = int(time.strftime('%m'))
     day = int(time.strftime('%d'))
-    hour = int(time.strftime('%H'))
+    hour = int(time.strftime('%H')) if created[-2:] == 'AM' else int(time.strftime('%H'))+12
     minute = int(time.strftime('%M'))
     return datetime(year, month, day, hour, minute, 0)
 

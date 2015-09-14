@@ -100,6 +100,9 @@ var DEFAULT_ICON = ICONS[1][1];
 
 function getIcon(accidentType, severity) {
     var icon = DEFAULT_ICON;
+    if (accidentType == 21) {
+        return "/static/img/icons/ambulance.png"
+    }
     try {
         if (accidentType == "multiple") {
             icon = MULTIPLE_ICONS[severity];

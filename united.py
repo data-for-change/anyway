@@ -3,12 +3,14 @@ from datetime import datetime
 from flask.ext.sqlalchemy import SQLAlchemy
 from models import Marker
 from utilities import init_flask
+import os
 
 app = init_flask(__name__)
 db = SQLAlchemy(app)
-location = "static/data/united/united_data.csv"
 
 def parse_date(created):
+    # TODO: Implement distinction between AM and PM !!
+
     time = datetime.strptime(created[:-3], '%m/%d/%Y %I:%M:%S')
     year = int(time.strftime('20%y'))
     month = int(time.strftime('%m'))
@@ -17,49 +19,68 @@ def parse_date(created):
     minute = int(time.strftime('%M'))
     return datetime(year, month, day, hour, minute, 0)
 
-def import_accidents():
-    print("\tReading accidents data from '%s'..." % location)
+def create_accidents(file_location):
+    print("\tReading accidents data from '%s'..." % file_location)
     header = True
+    first_line = True
     inc = 1
-    with open(location, 'rU') as f:
+    csvmap = {"time": 0, "lat": 1, "long": 2, "street": 3, "city": 5, "comment": 6, "type": 7, "casualties": 8}
+
+    with open(file_location, 'rU') as f:
         reader = csv.reader(f, delimiter=',', dialect=csv.excel_tab)
+
         for accident in reader:
             if header:
                 header = False
                 continue
+            if first_line:
+                first_line = False
+                if accident[0] == "":
+                    print "\t\tEmpty File!"
+                    continue
             if not accident:
                 break
+            if accident[1] == "" or accident[2] == "":
+                print "\t\tMissing coordinates! moving on.."
+                continue
 
             marker = {
-                "latitude": accident[1],
-                "longitude": accident[2],
-                "created": parse_date(accident[0]),
+                "latitude": accident[csvmap["lat"]],
+                "longitude": accident[csvmap["long"]],
+                "created": parse_date(accident[csvmap["time"]]),
                 "provider_code": 2,
-                "id": int(''.join(x for x in accident[0] if x.isdigit()) + str(inc)),
-                "title": "Accident",
-                "address": unicode((accident[3] + ' ' + accident[5]), encoding='utf-8'),
+                "id": int(''.join(x for x in accident[csvmap["time"]] if x.isdigit()) + str(inc)),
+                "title": unicode(accident[csvmap["type"]], encoding='utf-8'),
+                "address": unicode((accident[csvmap["street"]] + ' ' + accident[csvmap["city"]]), encoding='utf-8'),
                 "severity": 3,
                 "locationAccuracy": 1,
                 "subtype": 21,           # New subtype for United Hatzala
-                "type": unicode(accident[7], encoding='utf-8'),
-                "description": unicode(accident[6], encoding='utf-8')
+                "type": unicode(accident[csvmap["casualties"]], encoding='utf-8'),
+                "description": unicode(accident[csvmap["comment"]], encoding='utf-8')
             }
 
             inc += 1
             yield marker
 
 
-def main():
+def import_to_db(path):
     try:
-        accidents = list(import_accidents())
+        accidents = list(create_accidents(path))
         db.session.execute(Marker.__table__.insert().prefix_with("OR IGNORE"), accidents)
         db.session.commit()
-
-        print("\tImported {0} items".format(len(accidents)))
         return len(accidents)
     except ValueError as e:
         print e.message
         return 0
+
+
+def main():
+    united_path = "static/data/united/"
+    total = 0
+    for united_file in os.listdir(united_path):
+        if united_file.endswith(".csv"):
+            total += import_to_db(united_path + united_file)
+    print("\tImported {0} items".format(total))
 
 if __name__ == "__main__":
     main()

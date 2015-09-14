@@ -40,7 +40,7 @@ var MarkerView = Backbone.View.extend({
 
         if (this.model.get("provider_code") == 2) {     // United Hatzala accidents marker structue
             this.marker.setIcon( "/static/img/icons/ambulance.png" );
-            this.marker.setTitle(this.model.get("type"));
+            this.marker.setTitle(this.model.get("title"));
             this.marker.setMap(this.map);
             this.marker.view = this;
             app.oms.addMarker(this.marker);
@@ -48,11 +48,14 @@ var MarkerView = Backbone.View.extend({
 
             this.$el.find(".title").text(this.marker.get("title"));
             this.$el.find(".id").text(fields.ACC_ID + ": " + this.marker.get("id"));
-            this.$el.find(".provider_code").text(fields.PROVIDER_CODE + ": " + this.model.get("provider_code"));
+            this.$el.find(".content").text("תיאור אירוע: " + this.marker.get("title"));
             this.$el.find(".creation-date").text("תאריך: " + moment(this.model.get("created")).format("LLLL"));
             this.$el.find(".address").text("מיקום: " + this.model.get("address"));
             if (this.model.get("description") != "") {
                 this.$el.find(".comments").text("הערות: " + this.model.get("description"));
+            }
+            if (this.model.get("type") != "") {
+                this.$el.find(".casualties").text("נפגעים: " + this.model.get("type"));
             }
             this.$el.find(".profile-image").attr("width", "50px");
             this.$el.find(".profile-image").attr("src", "/static/img/logos/" + provider.logo);

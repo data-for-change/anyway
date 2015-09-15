@@ -38,8 +38,18 @@ var MarkerView = Backbone.View.extend({
             return this;
         }
 
-        if (this.model.get("provider_code") == 2) {     // United Hatzala accidents marker structue
-            this.marker.setIcon( "/static/img/icons/ambulance.png" );
+        if (this.model.get("provider_code") == 2) {     // United Hatzala accidents marker structure
+            var united_icon;
+            if (this.model.get("severity") == 3) {
+                united_icon = UNITED_HATZALA_ICON_LIGHT;
+            } else {
+                united_icon = UNITED_HATZALA_ICON_SEVERE;
+            }
+            if (isRetina) {
+                this.marker.setIcon( app.retinaIconsResize(addRetinaSuffix(united_icon)) );
+            } else {
+                this.marker.setIcon( UNITED_HATZALA_ICON );
+            }
             this.marker.setTitle(this.model.get("title"));
             this.marker.setMap(this.map);
             this.marker.view = this;

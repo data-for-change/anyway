@@ -74,6 +74,8 @@ MULTIPLE_ICONS[SEVERITY_VARIOUS] = "/static/img/icons/multiple_various.png";
 
 var USER_LOCATION_ICON = "/static/img/icons/you_are_Here.png";
 var DISCUSSION_ICON = "/static/img/icons/discussion.png";
+var UNITED_HATZALA_ICON_LIGHT = "/static/img/icons/vehicle_unknown_medium.png";
+var UNITED_HATZALA_ICON_SEVERE = "/static/img/icons/vehicle_unknown_severe.png";
 
 var ACCIDENT_MINOR_TYPE_TO_TYPE = {};
 ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_CAR_TO_PEDESTRIAN] = ACCIDENT_TYPE_CAR_TO_PEDESTRIAN;
@@ -100,12 +102,16 @@ var DEFAULT_ICON = ICONS[1][1];
 
 function getIcon(accidentType, severity) {
     var icon = DEFAULT_ICON;
-    if (accidentType == 21) {
-        return "/static/img/icons/ambulance.png"
-    }
     try {
         if (accidentType == "multiple") {
             icon = MULTIPLE_ICONS[severity];
+        } else if (accidentType == 21) {
+            if (severity == 3){
+                icon = UNITED_HATZALA_ICON_LIGHT;
+            } else {
+                icon = UNITED_HATZALA_ICON_SEVERE;
+            }
+
         } else {
             icon = ICONS[severity][ACCIDENT_MINOR_TYPE_TO_TYPE[accidentType]];
         }

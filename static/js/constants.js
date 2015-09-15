@@ -13,6 +13,8 @@ PROVIDERS[2] = {
   logo: "united.jpg",
 };
 
+var PROVIDER_CODE_UNITED_HATZALA = 2;
+
 var MARKER_TYPE_ACCIDENT = 1;
 var MARKER_TYPE_DISCUSSION = 2;
 
@@ -50,6 +52,7 @@ var ACCIDENT_TYPE_BACK_TO_FRONT = 17;
 var ACCIDENT_TYPE_BACK_TO_SIDE = 18;
 var ACCIDENT_TYPE_WITH_ANIMAL = 19;
 var ACCIDENT_TYPE_WITH_VEHICLE_LOAD = 20;
+var ACCIDENT_TYPE_UNITED_HATZALA = 21;
 
 var ICONS = {};
 ICONS[SEVERITY_FATAL] = {};
@@ -65,6 +68,8 @@ ICONS[SEVERITY_LIGHT][ACCIDENT_TYPE_CAR_TO_CAR] = "/static/img/icons/vehicle_veh
 ICONS[SEVERITY_FATAL][ACCIDENT_TYPE_CAR_TO_OBJECT] = "/static/img/icons/vehicle_object_lethal.png";
 ICONS[SEVERITY_SEVERE][ACCIDENT_TYPE_CAR_TO_OBJECT] = "/static/img/icons/vehicle_object_severe.png";
 ICONS[SEVERITY_LIGHT][ACCIDENT_TYPE_CAR_TO_OBJECT] = "/static/img/icons/vehicle_object_medium.png";
+ICONS[SEVERITY_LIGHT][ACCIDENT_TYPE_UNITED_HATZALA] = "/static/img/icons/vehicle_unknown_medium.png";
+ICONS[SEVERITY_SEVERE][ACCIDENT_TYPE_UNITED_HATZALA] = "/static/img/icons/vehicle_unknown_severe.png";
 
 var MULTIPLE_ICONS = {};
 MULTIPLE_ICONS[SEVERITY_FATAL] = "/static/img/icons/multiple_lethal.png";
@@ -74,8 +79,6 @@ MULTIPLE_ICONS[SEVERITY_VARIOUS] = "/static/img/icons/multiple_various.png";
 
 var USER_LOCATION_ICON = "/static/img/icons/you_are_Here.png";
 var DISCUSSION_ICON = "/static/img/icons/discussion.png";
-var UNITED_HATZALA_ICON_LIGHT = "/static/img/icons/vehicle_unknown_medium.png";
-var UNITED_HATZALA_ICON_SEVERE = "/static/img/icons/vehicle_unknown_severe.png";
 
 var ACCIDENT_MINOR_TYPE_TO_TYPE = {};
 ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_CAR_TO_PEDESTRIAN] = ACCIDENT_TYPE_CAR_TO_PEDESTRIAN;
@@ -105,13 +108,9 @@ function getIcon(accidentType, severity) {
     try {
         if (accidentType == "multiple") {
             icon = MULTIPLE_ICONS[severity];
-        } else if (accidentType == 21) {
-            if (severity == 3){
-                icon = UNITED_HATZALA_ICON_LIGHT;
-            } else {
-                icon = UNITED_HATZALA_ICON_SEVERE;
-            }
 
+        } else if (accidentType == ACCIDENT_TYPE_UNITED_HATZALA) {
+            icon = ICONS[severity][ACCIDENT_TYPE_UNITED_HATZALA];
         } else {
             icon = ICONS[severity][ACCIDENT_MINOR_TYPE_TO_TYPE[accidentType]];
         }

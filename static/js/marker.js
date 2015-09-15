@@ -28,31 +28,20 @@ var MarkerView = Backbone.View.extend({
             id: this.model.get("id")
         });
 
+        this.marker.setMap(this.map);
+        this.marker.view = this;
+
         if (this.model.get("type") == MARKER_TYPE_DISCUSSION) {
             this.marker.setIcon( app.retinaIconsResize(DISCUSSION_ICON) );
             this.marker.setTitle("דיון"); //this.model.get("title"));
-            this.marker.setMap(this.map);
-            this.marker.view = this;
             google.maps.event.addListener(this.marker, "click",
                 _.bind(app.showDiscussion, app, this.model.get("identifier")) );
             return this;
         }
 
-        if (this.model.get("provider_code") == 2) {     // United Hatzala accidents marker structure
-            var united_icon;
-            if (this.model.get("severity") == 3) {
-                united_icon = UNITED_HATZALA_ICON_LIGHT;
-            } else {
-                united_icon = UNITED_HATZALA_ICON_SEVERE;
-            }
-            if (isRetina) {
-                this.marker.setIcon( app.retinaIconsResize(addRetinaSuffix(united_icon)) );
-            } else {
-                this.marker.setIcon( UNITED_HATZALA_ICON );
-            }
+        if (this.model.get("provider_code") == PROVIDER_CODE_UNITED_HATZALA) {
+            this.marker.setIcon(getIcon(ACCIDENT_TYPE_UNITED_HATZALA, this.model.get("severity")));
             this.marker.setTitle(this.model.get("title"));
-            this.marker.setMap(this.map);
-            this.marker.view = this;
             app.oms.addMarker(this.marker);
             this.$el.html($("#united-marker-content-template").html());
 
@@ -85,8 +74,6 @@ var MarkerView = Backbone.View.extend({
         this.marker.setOpacity(this.model.get("locationAccuracy") == 1 ? 1.0 : INACCURATE_MARKER_OPACITY);
         this.marker.setIcon(this.getIcon());
         this.marker.setTitle(this.getTitle());
-        this.marker.setMap(this.map);
-        this.marker.view = this;
 
         app.oms.addMarker(this.marker);
 

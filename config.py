@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 
 #
@@ -15,3 +16,9 @@ SQLALCHEMY_POOL_RECYCLE = 60
 
 
 SECRET_KEY = 'aiosdjsaodjoidjioewnioewfnoeijfoisdjf'
+
+# available languages
+LANGUAGES = {
+    'en': 'English',
+    'he': 'עברית',
+}

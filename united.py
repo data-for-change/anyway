@@ -7,6 +7,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from models import Marker
 from utilities import init_flask
 import os
+import importmail
 
 ############################################################################################
 # United.py is responsible for the parsing and deployment of "united hatzala" data to the DB
@@ -18,7 +19,8 @@ def parse_date(created):
     :return: Python datetime object
     """
     time = datetime.strptime(created[:-3], '%m/%d/%Y %I:%M:%S')
-    return datetime(time.year, time.month, time.day, time.hour, time.minute, 0)
+    hour = int(time.strftime('%H')) if created[-2:] == 'AM' else int(time.strftime('%H'))+12
+    return datetime(time.year, time.month, time.day, hour, time.minute, 0)
 
 
 def create_accidents(file_location):
@@ -78,15 +80,23 @@ def import_to_db(path):
     db = SQLAlchemy(app)
     try:
         accidents = list(create_accidents(path))
+
+        # TODO: fix this command to a posgesql compatible execution:
+        db.session.merge(Marker.__table__.insert(), accidents)
+    except:
+        print 'Could not UPSERT, trying SQLite way...'
+        accidents = list(create_accidents(path))
         db.session.execute(Marker.__table__.insert().prefix_with("OR IGNORE"), accidents)
-        db.session.commit()
-        return len(accidents)
-    except ValueError as e:
-        print e.message
-        return 0
+
+    db.session.commit()
+    return len(accidents)
 
 
 def main():
+    """
+    Calls importmail.py prior to importing to DB
+    """
+    importmail.main()   # Comment line in order to test the DB import script alone
     united_path = "static/data/united/"
     total = 0
     for united_file in os.listdir(united_path):

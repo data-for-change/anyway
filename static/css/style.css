@@ -346,6 +346,13 @@ input[type="date"],input[type="time"]{
     content: '\e157';
 }
 
+.statistics-control:after{
+    font-size: 20px;
+    color: #ccc;
+    font-family: 'FontAwesome';
+    content: '\f080'
+}
+
 .map-button:hover .control-label{
     visibility: visible !important;
     position: fixed;

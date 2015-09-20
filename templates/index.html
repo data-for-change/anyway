@@ -24,8 +24,9 @@
             "css/style.css",
             "css/daterangepicker.css",
             "css/accordion.css",
-	    "css/bootstrap-tour.min.css"	 %}
-
+	        "css/bootstrap-tour.min.css",
+	        "css/jquery-ui.min.css",
+            "css/jquery.jspanel.min.css"    %}
     <link rel="stylesheet" href="{{ ASSET_URL }}"/>
     {% endassets %}
     <!--// font awesome-->
@@ -83,6 +84,7 @@
             <div id="download-csv-control"></div>
             <div id="link-map-control"></div>
             <div id="tour-control"></div>
+                    <div id="statistics-control"></div>
         </div>
     </div>
     <div id="step2Component" class="sidebar-container" style="{{ 'display: none' if map_only }}"></div>
@@ -821,7 +823,7 @@
 <script type="text/javascript"
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBpOmft-UskZsAQth9vNl0fN6EXaRR6dZc&sensor=true&libraries=places&language=iw"></script>
 {% assets filters="rjsmin", output="js/app.min.js",
-"js/libs/jquery-1.8.2.min.js",
+            "js/libs/jquery-1.11.3.min.js",
 "js/libs/spin.min.js",
 "js/libs/jquery.spin.js",
 "js/libs/oms.min.js",
@@ -849,7 +851,9 @@
 "js/years.js",
 "js/inv_dict.js",
 "js/veh_dict.js",
-"js/retina.js"
+            "js/retina.js",
+            "js/statPanel.js",
+            "js/libs/Chart.min.js"
 %}
 <script type="text/javascript" src="{{ ASSET_URL }}"></script>
 {% endassets %}
@@ -985,6 +989,8 @@
 
 <script type="text/javascript" src="../static/js/tour.js"></script>
 <script src="static/js/libs/jquery.smartbanner.js"></script>
+    <script src="static/js/libs/jquery-ui.min.js"></script>
+    <script src="static/js/libs/jquery.jspanel.min.js"></script>
 <script type="text/javascript"> $.smartbanner({
 
         author: '"Hasadna"',

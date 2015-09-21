@@ -153,13 +153,11 @@ $(function () {
                     success: this.reloadSidebar.bind(this)
                 });
             } else {
+                this.clearClustersFromMap();
                 $("#view-filter").prop('disabled', false);
                 if (!this.markerList.length) {
                     this.loadMarkers();
                 }
-
-                this.clearClustersFromMap();
-
                 this.markers.fetch({
                     data: $.param(params),
                     reset: reset,
@@ -264,14 +262,13 @@ $(function () {
             });
 
             _.each(this.oms.markersNearAnyOtherMarker(), function (marker) {
-                marker.title = 'מספר תאונות בנקודה זו';
+                marker.title = marker.view.getTitle('multiple');
                 var groupHead = marker.view.model;
                 if (!groupHead.get("groupID")) {
                     groupHead.set("groupID", groupID);
                     var groupHeadSeverity = groupHead.get('severity');
                     var groupsHeadOpacity = groupHead.get("locationAccuracy") == 1 ? 'opaque' : 1;
                     groupsData.push({severity: groupHeadSeverity, opacity: groupsHeadOpacity});
-
                     _.each(this.oms.markersNearMarker(marker), function (markerNear) {
                         var markerNearModel = markerNear.view.model;
                         markerNearModel.set("groupID", groupID);
@@ -287,9 +284,7 @@ $(function () {
                         }
                     });
                     groupID++;
-
                 }
-
             },this);
             this.groupsData = groupsData;
               // agam
@@ -531,7 +526,6 @@ $(function () {
             this.router = new AppRouter();
             Backbone.history.start({pushState: true});
             console.log('Loaded AppRouter');
-
             this.isReady = true;
             google.maps.event.addListener( this.map, "rightclick", _.bind(this.contextMenuMap, this) );
             google.maps.event.addListener( this.map, "idle", function(){
@@ -540,7 +534,6 @@ $(function () {
                 }
             }.bind(this) );
             google.maps.event.addListener( this.map, "click", _.bind(this.clickMap, this) );
-
             return this;
         },
         goToMyLocation: function () {
@@ -821,6 +814,7 @@ $(function () {
             this.markerIconType = !this.markerIconType;
             this.resetMarkers();
             this.fetchMarkers();
+            console.log($(".gmnoprint").find());
         },
         loadFilter: function() {
             if ($("#checkbox-discussions").is(":checked")) { this.show_discussions='1' } else { this.show_discussions='' }

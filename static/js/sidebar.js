@@ -55,7 +55,7 @@ var SidebarView = Backbone.View.extend({
                 var entryHtml = this.sidebarItemTemplate({
                     created: moment(markerModel.get("created")).format("LLLL"),
                     type: localization.SUG_TEUNA[markerModel.get("subtype")],
-                    icon: iconUrl
+                    //icon: iconUrl
                 });
 
                 var $entry = $(entryHtml);
@@ -69,17 +69,6 @@ var SidebarView = Backbone.View.extend({
         this.$currentViewList.empty().append($viewList.find("li"));
         this.$el.find(".current-view-count").text(markerCount);
         app.updateFilterString();
-    },
-    updateCheckboxIcon: function(img, hover) {
-        var checked;
-        if (hover == undefined) {
-            checked = img.data("checked");
-        } else {
-            checked = 2;
-        }
-        var dataType = img.data("type");
-        var icon = ICONS_PREFIX + CHECKBOX_ICONS[checked][dataType-1];
-        img.attr("src", icon);
     },
     updateLayers: function() {
         this.$el.find("img.checkbox-severity").each(function() {

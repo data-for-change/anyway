@@ -1,18 +1,22 @@
-.gmnoprint[title*='תאונה']{
+.gmnoprint[title*='תאונה'],.gmnoprint[title*='תאונות']{
     width: 30px !important;
     height: 30px !important;
     opacity: 1 !important;
     -webkit-border-radius: 50% 50% 50% 0 !important;
     border-radius: 50% 50% 50% 0 !important;
-    /*border: 1px solid #ccc;*/
-    /*-webkit-transform: rotate(-45deg);*/
-    /*-moz-transform: rotate(-45deg);*/
-    /*-o-transform: rotate(-45deg);*/
-    /*-ms-transform: rotate(-45deg);*/
     transform: rotate(-45deg) translate(12px,-31px) !important;
 }
 
-.gmnoprint[title*='תאונה']:after {
+.gmnoprint[title*='תאונות']{
+    width: 30px !important;
+    height: 30px !important;
+    opacity: 1 !important;
+    -webkit-border-radius: 50%  !important;
+    border-radius: 50%  !important;
+    transform: rotate(-45deg) translate(12px,-31px) !important;
+}
+
+.gmnoprint[title*='תאונה']:after, .gmnoprint[title*='תאונות']:after {
     content: '';
     color: #ccc;
     font-family: 'Material Icons';
@@ -45,15 +49,28 @@
     visibility: hidden;
 }
 
-.gmnoprint[title*='תאונות']{
-    width: 30px !important;
-    height: 30px !important;
-    opacity: 1 !important;
-    background-color: white;
-    /*border: 1px solid #ccc;*/
-    /*background-clip: content-box;*/
+/*.gmnoprint[title*='תאונות']{*/
+    /*width: 30px !important;*/
+    /*height: 30px !important;*/
+    /*opacity: 1 !important;*/
+    /*background-color: white;*/
+    /*border: 1px solid #D63230;*/
     /*padding: 2px;*/
-    border-radius: 50%;
+    /*border-radius: 50%;*/
+    /*line-height: 30px;*/
+    /*vertical-align: middle;*/
+    /*text-align: center;*/
+    /*transform: translate(-16px,-16px) rotate(90deg)!important;*/
+/*}*/
+
+.gmnoprint[title*='תאונות']{
+    background-color: #ccc;
+}
+
+.gmnoprint[title*='תאונות']:after{
+    content: '\e3e4';
+    color: #ccc;
+    visibility: visible !important;
 }
 
 .gmnoprint[title*='קטלנית']{
@@ -72,12 +89,46 @@
     background-color: blue;
 }
 
+.gmnoprint[title*='קטלנית']:after{
+    color: #D81C32;
+}
+
+.gmnoprint[title*='קשה']:after{
+    color: #FF9F1C;
+}
+
+.gmnoprint[title*='קלה']:after{
+    color: #FFD82B;
+}
+
+.gmnoprint[title^='דיון']:after{
+    color: blue;
+}
+
 .gmnoprint[title*='הולך רגל']:after{
     content: '\e536';
 }
 
-.gmnoprint[title*='התנגשות']:after{
+.gmnoprint[title*='פגיעה']:after,.gmnoprint[title*='החלקה']:after,.gmnoprint[title*='התנגשות']:after{
     content: '\e531';
+}
+
+.gmnoprint[title*='נפילה']:after{
+    transform: rotate(-45deg) !important;
+    content: '\e566';
+}
+
+.gmnoprint[title*='אחר']:after{
+    content: '\e5d3';
+}
+
+.gmnoprint[title*='התהפכות']:after{
+    transform: rotate(-100deg) !important;
+    content: '\e531';
+}
+
+.gmnoprint[title*='ירידה']:after{
+    content: '\e8e3';
 }
 
 .gmnoprint[title*='(מיקום משוער)']{

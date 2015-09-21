@@ -234,9 +234,10 @@ input[type="date"],input[type="time"]{
 .current-view{
     overflow-y: scroll;
     position: absolute;
-    top: 270px;
+    top: 290px;
     bottom: 90px;
     padding-right: 8px;
+    width: 280px !important;
 }
 
 .context-menu {
@@ -267,7 +268,7 @@ input[type="date"],input[type="time"]{
     right: 0;
     top: 0;
     bottom: 40px;
-    width: 300px;
+    width: 280px;
     background: white;
     padding-top: 40px;
     height: 100%;
@@ -280,7 +281,7 @@ input[type="date"],input[type="time"]{
 }
 
 .sidebar-container ul li {
-    width: 300px;
+    width: 280px;
 	border-bottom: 1px solid #eee;
     cursor: pointer;
     padding-top: 4px;
@@ -610,7 +611,7 @@ textarea.form-control-wide {
 }
 
 .toggle-wrapper {
-    margin-right: 108px;
+    margin-right: 118px;
     vertical-align: middle;
     cursor: pointer;
     line-height: 40px;

@@ -8,6 +8,7 @@ from models import Marker
 from utilities import init_flask
 import os
 import importmail
+import argparse
 
 ############################################################################################
 # United.py is responsible for the parsing and deployment of "united hatzala" data to the DB
@@ -96,7 +97,12 @@ def main():
     """
     Calls importmail.py prior to importing to DB
     """
-    importmail.main()   # Comment line in order to test the DB import script alone
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--light', action='store_true', default=False)
+    args = parser.parse_args()
+
+    if not args.light:
+        importmail.main()   # Comment line in order to test the DB import script alone
     united_path = "static/data/united/"
     total = 0
     for united_file in os.listdir(united_path):

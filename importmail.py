@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import time
 from process import time_delta
 import sys
-
+import argparse
 
 ##############################################################################################
 # importmail.py is responsible for extracting and downloading united hatzala email attachments
@@ -14,6 +14,9 @@ import sys
 #       2. If 'detach_dir' is empty the script would download all available files
 #          If it's not, only the last file would be downloaded
 #       3. Consider emptying the mail directory from time to time to speed things up
+#       4. Command line arguments:
+#           --password can provide password via cmd line instead of an env variable
+#           --lasthour is currently set to default True
 ##############################################################################################
 
 
@@ -21,7 +24,20 @@ def main():
     maildir = 'united-hatzala/data'
     detach_dir = 'static/data/united'
     username = 'anyway@anyway.co.il'
-    passwd = os.environ['MAILPASS']     # Set and environment variable MAILPASS with the password
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--password', default='', description='Optional argument for mail password')
+    parser.add_argument('--lastmail', action='store_true', default=False, description='Only imports last hour file')
+    args = parser.parse_args()
+
+    try:
+        if args.password:
+            passwd = args.password
+        else:
+            passwd = os.environ['MAILPASS']     # Set and environment variable MAILPASS with the password
+    except:
+        print "Please set env var MAILPASS, or provide one using importmail.py --password <pass>"
+        exit()
 
     imapsession = imaplib.IMAP4_SSL('imap.gmail.com')
     try:
@@ -39,7 +55,8 @@ def main():
 
     filefound = False
     listdir = os.listdir(detach_dir)
-    isempty = True if not listdir or len(listdir) == 1 else False
+
+    isempty = True if not listdir or len(listdir) == 1 or args.lasthour else False
     total = 0
 
     # Iterating over all emails
@@ -74,7 +91,7 @@ def main():
                 filepath = os.path.join(detach_dir, filename)
                 if os.path.isfile(filepath):
                     break
-
+                total += 1
                 print 'Currently loading: ' + filename
                 sys.stdout.write("\033[F")
                 time.sleep(0.1)

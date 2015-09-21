@@ -31,7 +31,7 @@ body, html {
 }
 
 .main-close{
-    padding-right: 250px !important;
+    padding-right: 300px !important;
     transition: padding-right 1s;
 }
 
@@ -299,7 +299,7 @@ input[type="date"],input[type="time"]{
 }
 
 .sidebar-container-close{
-    right: -250px;
+    right: -300px;
     transition: right 1s;
 }
 
@@ -538,7 +538,7 @@ input[type="date"],input[type="time"]{
       #pac-input {
         background-color: #fff;
         padding: 0 11px 0 13px;
-        width: 35%;
+        width: 400px;
         height: 30px;
         font-size: 15px;
         font-weight: 400;
@@ -554,7 +554,7 @@ input[type="date"],input[type="time"]{
         border-color: #4d90fe;
         margin-left: -1px;
         padding-left: 14px;  /* Regular padding-left + 1. */
-        width: 35%;
+        width: 400px;
       }
 
       .pac-container {

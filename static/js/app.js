@@ -526,14 +526,18 @@ $(function () {
             this.router = new AppRouter();
             Backbone.history.start({pushState: true});
             console.log('Loaded AppRouter');
+            $('#toggle-sidebar').click(function () {
+                $('.main').toggleClass('main-open').toggleClass('main-close');
+                $('.sidebar-container').toggleClass('sidebar-container-open').toggleClass('sidebar-container-close');
+            });
             this.isReady = true;
-            google.maps.event.addListener( this.map, "rightclick", _.bind(this.contextMenuMap, this) );
-            google.maps.event.addListener( this.map, "idle", function(){
+            google.maps.event.addListener(this.map, "rightclick", _.bind(this.contextMenuMap, this) );
+            google.maps.event.addListener(this.map, "idle", function(){
                 if (!this.firstLoadDelay){
                     this.fetchMarkers();
                 }
             }.bind(this) );
-            google.maps.event.addListener( this.map, "click", _.bind(this.clickMap, this) );
+            google.maps.event.addListener(this.map, "click", _.bind(this.clickMap, this) );
             return this;
         },
         goToMyLocation: function () {

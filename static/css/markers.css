@@ -1,0 +1,85 @@
+.gmnoprint[title*='תאונה']{
+    width: 30px !important;
+    height: 30px !important;
+    opacity: 1 !important;
+    -webkit-border-radius: 50% 50% 50% 0 !important;
+    border-radius: 50% 50% 50% 0 !important;
+    /*border: 1px solid #ccc;*/
+    /*-webkit-transform: rotate(-45deg);*/
+    /*-moz-transform: rotate(-45deg);*/
+    /*-o-transform: rotate(-45deg);*/
+    /*-ms-transform: rotate(-45deg);*/
+    transform: rotate(-45deg) translate(12px,-31px) !important;
+}
+
+.gmnoprint[title*='תאונה']:after {
+    content: '';
+    color: #ccc;
+    font-family: 'Material Icons';
+    font-size: 18px;
+    width: 24px;
+    height: 24px;
+    margin: 3px;
+    background: white;
+    display: inline-block;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 24px;
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+    /*border: 1px solid #ccc;*/
+}
+
+.gmnoprint[title$='.']{
+    width: 10px !important;
+    height: 10px !important;
+    border-radius: 50% !important;
+    transform: translate(-4px,-4px);
+}
+
+.gmnoprint[title$='.']:after {
+    visibility: hidden;
+}
+
+.gmnoprint[title*='תאונות']{
+    width: 30px !important;
+    height: 30px !important;
+    opacity: 1 !important;
+    background-color: white;
+    /*border: 1px solid #ccc;*/
+    /*background-clip: content-box;*/
+    /*padding: 2px;*/
+    border-radius: 50%;
+}
+
+.gmnoprint[title*='קטלנית']{
+    background-color: #D81C32;
+}
+
+.gmnoprint[title*='קשה']{
+    background-color: #FF9F1C;
+}
+
+.gmnoprint[title*='קלה']{
+    background-color: #FFD82B;
+}
+
+.gmnoprint[title^='דיון'] {
+    background-color: blue;
+}
+
+.gmnoprint[title*='הולך רגל']:after{
+    content: '\e536';
+}
+
+.gmnoprint[title*='התנגשות']:after{
+    content: '\e531';
+}
+
+.gmnoprint[title*='(מיקום משוער)']{
+    opacity: 0.5 !important;
+}

@@ -17,6 +17,30 @@ body, html {
     padding: 0;
 }
 
+.main{
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding-top: 40px;
+}
+
+.main-open{
+    padding-right: 0 !important;
+    transition: padding-right 1s;
+}
+
+.main-close{
+    padding-right: 250px !important;
+    transition: padding-right 1s;
+}
+
+.map-canvas{
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
 input, button, select, textarea {
     font-family: 'Alef', 'sans-serif';
 }
@@ -267,11 +291,21 @@ input[type="date"],input[type="time"]{
     position: fixed;
     right: 0;
     top: 0;
-    bottom: 40px;
-    width: 280px;
+    bottom: 0;
     background: white;
     padding-top: 40px;
-    height: 100%;
+    width: 300px !important;
+    display: block;
+}
+
+.sidebar-container-close{
+    right: -250px;
+    transition: right 1s;
+}
+
+.sidebar-container-open{
+    right: 0;
+    transition: right 1s;
 }
 
 .sidebar-container ul {
@@ -590,6 +624,7 @@ textarea.form-control-wide {
 	position: relative;
   height: 100%;
   box-shadow: inset 0 -1px 0 rgba(0,0,0,0.1),0 1px 10px rgba(0,0,0,0.1);
+    width: 300px;
 }
 
 .marker-info-window{
@@ -618,7 +653,7 @@ textarea.form-control-wide {
     padding-top: 12px;
 }
 
-#toggle {
+#toggle-sidebar {
     /*border-right: 1px solid #ddd;*/
     /*padding-right: 8px;*/
     border-left: 1px solid #ddd;
@@ -627,7 +662,7 @@ textarea.form-control-wide {
     /*padding-top: 1px;*/
 }
 
-#toggle div {
+#toggle-sidebar div {
     width: 20px;
     height: 2px;
     background: #555;
@@ -636,15 +671,15 @@ textarea.form-control-wide {
     backface-visibility: hidden;
 }
 
-#toggle.on .one {
+#toggle-sidebar.on .one {
     transform: rotate(45deg) translate(4px, 4px);
 }
 
-#toggle.on .two {
+#toggle-sidebar.on .two {
     opacity: 0;
 }
 
-#toggle.on .three {
+#toggle-sidebar.on .three {
     transform: rotate(-45deg) translate(4px, -5px);
 }
 

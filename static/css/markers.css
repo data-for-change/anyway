@@ -35,7 +35,6 @@
     -o-transform: rotate(45deg);
     -ms-transform: rotate(45deg);
     transform: rotate(45deg);
-    /*border: 1px solid #ccc;*/
 }
 
 .gmnoprint[title$='.']{
@@ -45,32 +44,17 @@
     transform: translate(-4px,-4px) !important;
 }
 
-.gmnoprint[title$='.']:after {
-    visibility: hidden;
-}
-
-/*.gmnoprint[title*='תאונות']{*/
-    /*width: 30px !important;*/
-    /*height: 30px !important;*/
-    /*opacity: 1 !important;*/
-    /*background-color: white;*/
-    /*border: 1px solid #D63230;*/
-    /*padding: 2px;*/
-    /*border-radius: 50%;*/
-    /*line-height: 30px;*/
-    /*vertical-align: middle;*/
-    /*text-align: center;*/
-    /*transform: translate(-16px,-16px) rotate(90deg)!important;*/
-/*}*/
-
 .gmnoprint[title*='תאונות']{
-    background-color: #ccc;
+    background-color: darkgray;
 }
 
 .gmnoprint[title*='תאונות']:after{
     content: '\e3e4';
-    color: #ccc;
-    visibility: visible !important;
+    color: darkgray;
+}
+
+.gmnoprint[title$='.']:after {
+    visibility: hidden;
 }
 
 .gmnoprint[title*='קטלנית']{

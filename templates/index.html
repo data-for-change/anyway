@@ -33,6 +33,7 @@
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
     <!--// material design-->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="../static/css/markers.css">
 </head>
 
 <body style="margin: 0; position: relative; width: 100%; height: 100%">
@@ -76,6 +77,7 @@
     <div class="main"
          style="position: fixed; width: 100%; height: 100%; box-sizing: border-box{{ '; padding-top: 40px; padding-right: 300px; padding-bottom: 40px' if not map_only }}">
         <div id="map_canvas" style="width: 100%; height: 100%; box-sizing: border-box"></div>
+        <div id="toggle-control"></div>
         <input id="pac-input" class="controls" type="text" placeholder="חפש מיקום"
                style="{{ 'display: block' if map_only }}">
 
@@ -84,7 +86,7 @@
             <div id="download-csv-control"></div>
             <div id="link-map-control"></div>
             <div id="tour-control"></div>
-                    <div id="statistics-control"></div>
+            <div id="statistics-control"></div>
         </div>
     </div>
     <div id="step2Component" class="sidebar-container" style="{{ 'display: none' if map_only }}"></div>

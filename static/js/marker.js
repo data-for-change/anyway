@@ -7,6 +7,7 @@ var MarkerView = Backbone.View.extend({
     },
     initialize : function(options) {
         this.map = options.map;
+        this.markerIconType = options.markerIconType;
         _.bindAll(this, "clickMarker");
     },
     localize : function(field,value) {
@@ -24,12 +25,13 @@ var MarkerView = Backbone.View.extend({
 
         this.marker = new google.maps.Marker({
             position: markerPosition,
-            id: this.model.get("id")
+            id: this.model.get("id"),
+            class: 'marker'
         });
 
         if (this.model.get("type") == MARKER_TYPE_DISCUSSION) {
-            this.marker.setIcon( app.retinaIconsResize(DISCUSSION_ICON) );
-            this.marker.setTitle("דיון"); //this.model.get("title"));
+            this.marker.setIcon(this.getIcon('discussion'));
+            this.marker.setTitle(this.getTitle('discussion'));
             this.marker.setMap(this.map);
             this.marker.view = this;
             google.maps.event.addListener(this.marker, "click",
@@ -43,8 +45,8 @@ var MarkerView = Backbone.View.extend({
         }
 
         this.marker.setOpacity(this.model.get("locationAccuracy") == 1 ? 1.0 : INACCURATE_MARKER_OPACITY);
-        this.marker.setIcon(this.getIcon());
-        this.marker.setTitle(this.getTitle());
+        this.marker.setIcon(this.getIcon('single'));
+        this.marker.setTitle(this.getTitle('single'));
         this.marker.setMap(this.map);
         this.marker.view = this;
 
@@ -95,27 +97,76 @@ var MarkerView = Backbone.View.extend({
 
         return this;
     },
-    getIcon : function() {
-        return getIcon(this.model.get("subtype"), this.model.get("severity"));
+    getIcon : function(markerType) {
+        var markerIcon ={};
+        switch (markerType){
+            case 'single':
+                markerIcon = {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 0,
+                    fillColor: '#ccc',
+                };
+                break;
+            case 'multiple':
+                markerIcon = {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 0,
+                    fillColor: '#ccc',
+                };
+                break;
+            case 'discussion':
+                markerIcon = {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 0,
+                    fillColor: '#ccc',
+                };
+                break;
+        }
+        return markerIcon;
     },
-    getTitle : function() {
-        if (this.model.get("junction") !== "") {
-        loc = this.model.get("junction");
+    getTitle : function(markerType) {
+        var markerTitle = '';
+        var accuracy = '';
+        var markerIconTypeIdentifier = this.markerIconType ? '' : '.';
+        switch (markerType){
+            case 'single':
+                var loc = '';
+                if (this.model.get("junction") !== "") {
+                    loc = this.model.get("junction");
+                }
+                else if (this.model.get("secondaryStreet") !== "") {
+                    loc = "ברחוב " + this.model.get("secondaryStreet") + " פינת " + this.model.get("mainStreet");
+                }
+                else if (this.model.get("mainStreet") !== "") {
+                    loc = "ברחוב " + this.model.get("mainStreet");
+                }
+                else {
+                    loc = "";
+                }
+                accuracy = !(this.model.get("locationAccuracy") == 1);
+                markerTitle = "ביום " + moment(this.model.get("created")).format("dddd") + ", ה-"
+                    + moment(this.model.get("created")).format("LL")
+                    + " תאונה " + SEVERITY_MAP[this.model.get("severity")]
+                    + " מסוג " + localization.SUG_TEUNA[this.model.get("subtype")] + " "
+                    + loc;
+            break;
+            case 'multiple':
+                accuracy = (this.marker.opacity != 1);
+                markerTitle = 'מספר תאונות בנקודה זו' ;
+                break;
+            case 'discussion':
+                markerTitle = 'דיון';
+                break;
+            default:
+                break;
         }
-        else if (this.model.get("secondaryStreet") !== "") {
-            loc = "ברחוב " + this.model.get("secondaryStreet") + " פינת " + this.model.get("mainStreet");
+
+        if (markerType == 'discussion')
+            return markerTitle;
+        else{
+            accuracy = accuracy ?  ' (מיקום משוער)' : '';
+            return markerTitle + accuracy +  markerIconTypeIdentifier;
         }
-        else if (this.model.get("mainStreet") !== "") {
-            loc = "ברחוב " + this.model.get("mainStreet");
-        }
-        else {
-            loc = "";
-        }
-        return "ביום " + moment(this.model.get("created")).format("dddd") + ", ה-"
-        + moment(this.model.get("created")).format("LL")
-        + " תאונה " + SEVERITY_MAP[this.model.get("severity")]
-        + " מסוג " + localization.SUG_TEUNA[this.model.get("subtype")] + " "
-        + loc;
     },
     choose : function() {
         if (app.oms.markersNearMarker(this.marker).length) {
@@ -214,7 +265,7 @@ var MarkerView = Backbone.View.extend({
         if (app.oms.markersNearMarker(this.marker, true)[0]  && !this.model.get("currentlySpiderfied")){
             this.resetOpacitySeverity();
         }
-        this.marker.setAnimation(google.maps.Animation.BOUNCE);
+        //this.marker.setAnimation(google.maps.Animation.BOUNCE);
 
 
         // ##############################
@@ -264,15 +315,10 @@ var MarkerView = Backbone.View.extend({
         });
     },
     resetOpacitySeverity : function() {
-        this.marker.icon = this.getIcon();
-        this.marker.opacity = this.model.get("locationAccuracy") == 1 ? 1.0 : INACCURATE_MARKER_OPACITY;
+        this.marker.setIcon(this.getIcon('single'));
     },
     opacitySeverityForGroup : function() {
-        var group = this.model.get("groupID") -1;
-        this.marker.icon = app.retinaIconsResize(MULTIPLE_ICONS[app.groupsData[group].severity]);
-        if (app.groupsData[group].opacity != 'opaque'){
-            this.marker.opacity = INACCURATE_MARKER_OPACITY / app.groupsData[group].opacity;
-        }
+        this.marker.setIcon(this.getIcon('multiple'));
     },
     accordionInputClick : function(e) {
         var input = e.currentTarget;
@@ -303,5 +349,5 @@ var MarkerView = Backbone.View.extend({
                 }.bind(this),550);
             }
         }
-    }
+    },
 });

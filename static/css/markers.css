@@ -38,7 +38,7 @@
     width: 10px !important;
     height: 10px !important;
     border-radius: 50% !important;
-    transform: translate(-4px,-4px);
+    transform: translate(-4px,-4px) !important;
 }
 
 .gmnoprint[title$='.']:after {

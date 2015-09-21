@@ -45,6 +45,7 @@ $(function () {
             this.markers = new MarkerCollection();
             this.clusters = new ClusterCollection();
             this.model = new Backbone.Model();
+            this.markerIconType = true;
             this.markerList = [];
             this.clusterList = [];
             this.firstLoadDelay = true;
@@ -132,7 +133,7 @@ $(function () {
                 this.fetchMarkers();
             }
         },
-        fetchMarkers: function (reset) {
+        fetchMarkers: function () {
             if (!this.isReady) return;
 
             var params = this.buildMarkersParams();
@@ -442,6 +443,21 @@ $(function () {
             this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(input);
             this.searchBox = new google.maps.places.SearchBox(input);
 
+            var toggleBGDiv = document.createElement('div');
+            toggleBGDiv.className = "toggle-control-bg";
+            toggleBGDiv.innerHTML = $("#toggle-control").html();
+
+            var toggleDiv = document.createElement('div');
+            toggleDiv.className = "map-button toggle-control pin";
+            google.maps.event.addDomListener(toggleBGDiv, 'click', function () {
+                $(toggleDiv).toggleClass('pin');
+                $(toggleDiv).toggleClass('dot');
+                this.toggleMarkerIconType();
+            }.bind(this));
+
+            toggleBGDiv.appendChild(toggleDiv);
+            this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(toggleBGDiv);
+
             google.maps.event.addListener(this.searchBox, 'places_changed', function () {
                 this.handleSearchBox();
             }.bind(this));
@@ -458,7 +474,7 @@ $(function () {
             this.oms.addListener("spiderfy", function (markers) {
                 this.closeInfoWindow();
                 _.each(markers, function (marker) {
-                    marker.title = marker.view.getTitle();
+                    marker.setTitle(marker.view.getTitle('single'));
                     marker.view.resetOpacitySeverity();
                     marker.view.model.set("currentlySpiderfied", true);
                 });
@@ -585,7 +601,7 @@ $(function () {
             // markers are loaded immediately as they are fetched
             if (this.clusterMode() || this.fitsFilters(model) ||
                 !this.clusterMode() && model.get("type") == MARKER_TYPE_DISCUSSION) {
-                var markerView = new MarkerView({model: model, map: this.map}).render();
+                var markerView = new MarkerView({model: model, map: this.map, markerIconType: this.markerIconType}).render();
                 model.set("markerView", this.markerList.length);
                 this.markerList.push(markerView);
             }
@@ -800,6 +816,11 @@ $(function () {
                 };
             }
             return image_url;
+        },
+        toggleMarkerIconType: function(){
+            this.markerIconType = !this.markerIconType;
+            this.resetMarkers();
+            this.fetchMarkers();
         },
         loadFilter: function() {
             if ($("#checkbox-discussions").is(":checked")) { this.show_discussions='1' } else { this.show_discussions='' }

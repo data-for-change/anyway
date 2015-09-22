@@ -58,15 +58,15 @@ def create_accidents(file_location):
                 "longitude": accident[csvmap["long"]],
                 "created": parse_date(accident[csvmap["time"]]),
                 "provider_code": 2,
-                "id": int(''.join(x for x in accident[csvmap["time"]] if x.isdigit()) + str(inc)),
+                "id": int(''.join(x for x in accident[csvmap["time"]][:-10] if x.isdigit()) + str(inc)),
                 "title": unicode(accident[csvmap["type"]], encoding='utf-8'),
                 "address": unicode((accident[csvmap["street"]] + ' ' + accident[csvmap["city"]]), encoding='utf-8'),
                 "severity": 2 if u"קשה" in unicode(accident[csvmap["type"]], encoding='utf-8') else 3,
                 "locationAccuracy": 1,
                 "subtype": 21,           # New subtype for United Hatzala
-                "type": unicode(accident[csvmap["casualties"]], encoding='utf-8'),
                 "description": unicode(accident[csvmap["comment"]], encoding='utf-8')
             }
+            # "type": unicode(accident[csvmap["casualties"]], encoding='utf-8'),
 
             inc += 1
             yield marker
@@ -98,11 +98,15 @@ def main():
     Calls importmail.py prior to importing to DB
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--light', action='store_true', default=False)
+    parser.add_argument('--light', action='store_true', default=False,
+                        help='Allow importing without downloading any new files')
+    parser.add_argument('--username', default='')
+    parser.add_argument('--password', default='')
+    parser.add_argument('--lastmail', action='store_true', default=False)
     args = parser.parse_args()
 
     if not args.light:
-        importmail.main()   # Comment line in order to test the DB import script alone
+        importmail.main(args.username, args.password, args.lastmail)
     united_path = "static/data/united/"
     total = 0
     for united_file in os.listdir(united_path):

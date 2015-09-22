@@ -21,19 +21,45 @@ var MarkerView = Backbone.View.extend({
 
         var markerPosition = new google.maps.LatLng(this.model.get("latitude"),
                                                     this.model.get("longitude"));
+        var provider = PROVIDERS[this.model.get("provider_code")]
 
         this.marker = new google.maps.Marker({
             position: markerPosition,
             id: this.model.get("id")
         });
 
+        this.marker.setMap(this.map);
+        this.marker.view = this;
+
         if (this.model.get("type") == MARKER_TYPE_DISCUSSION) {
             this.marker.setIcon( app.retinaIconsResize(DISCUSSION_ICON) );
             this.marker.setTitle("דיון"); //this.model.get("title"));
-            this.marker.setMap(this.map);
-            this.marker.view = this;
             google.maps.event.addListener(this.marker, "click",
                 _.bind(app.showDiscussion, app, this.model.get("identifier")) );
+            return this;
+        }
+
+        if (this.model.get("provider_code") == PROVIDER_CODE_UNITED_HATZALA) {
+            this.marker.setIcon(getIcon(ACCIDENT_TYPE_UNITED_HATZALA, this.model.get("severity")));
+            this.marker.setTitle(this.model.get("title"));
+            app.oms.addMarker(this.marker);
+            this.$el.html($("#united-marker-content-template").html());
+
+            this.$el.find(".title").text(this.marker.get("title"));
+            this.$el.find(".id").text(fields.ACC_ID + ": " + this.marker.get("id"));
+            this.$el.find(".content").text("תיאור אירוע: " + this.marker.get("title"));
+            this.$el.find(".creation-date").text("תאריך: " + moment(this.model.get("created")).format("LLLL"));
+            this.$el.find(".address").text("מיקום: " + this.model.get("address"));
+            if (this.model.get("description") != "") {
+                this.$el.find(".comments").text("הערות: " + this.model.get("description"));
+            }
+            this.$el.find(".profile-image").attr("width", "70px");
+            this.$el.find(".profile-image").attr("src", "/static/img/logos/" + provider.logo);
+            this.$el.find(".profile-image").attr("title", provider.name);
+            this.$el.find(".profile-image-url").attr("href", provider.url);
+            this.$el.find(".added-by").html("מקור: <a href=\'" +
+                provider.url + "\' target=\'_blank\'>" + provider.name + "</a>");
+
             return this;
         }
 
@@ -45,8 +71,6 @@ var MarkerView = Backbone.View.extend({
         this.marker.setOpacity(this.model.get("locationAccuracy") == 1 ? 1.0 : INACCURATE_MARKER_OPACITY);
         this.marker.setIcon(this.getIcon());
         this.marker.setTitle(this.getTitle());
-        this.marker.setMap(this.map);
-        this.marker.view = this;
 
         app.oms.addMarker(this.marker);
 
@@ -85,7 +109,7 @@ var MarkerView = Backbone.View.extend({
 
         this.$el.find(".creation-date").text("תאריך: " +
                     moment(this.model.get("created")).format("LLLL"));
-        var provider = PROVIDERS[this.model.get("provider_code")]
+
         this.$el.find(".profile-image").attr("width", "50px");
         this.$el.find(".profile-image").attr("src", "/static/img/logos/" + provider.logo);
         this.$el.find(".profile-image").attr("title", provider.name);

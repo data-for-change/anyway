@@ -70,6 +70,7 @@ class User(Base, UserMixin):
 
 MARKER_TYPE_ACCIDENT = 1
 MARKER_TYPE_DISCUSSION = 2
+UNITED_HATZALA_CODE = 2
 
 class Role(Base, RoleMixin):
     __tablename__ = "roles"
@@ -190,7 +191,6 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         if not is_thin:
             fields.update({
                 "title": self.title,
-                "description": Marker.json_to_description(self.description),
                 "address": self.address,
                 "type": self.type,
                 "subtype": self.subtype,
@@ -202,6 +202,12 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
                 "secondaryStreet": self.secondaryStreet,
                 "junction": self.junction,
             })
+            # United Hatzala accidents description are not json:
+            if self.provider_code == UNITED_HATZALA_CODE:
+                fields.update({"description": self.description})
+            else:
+                fields.update({"description": Marker.json_to_description(self.description)})
+
             optional = {
                 "one_lane": self.one_lane,
                 "multi_lane": self.multi_lane,

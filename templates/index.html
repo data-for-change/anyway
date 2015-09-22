@@ -391,7 +391,7 @@
     </div>
     <div class="filter-menu">
          <!-- FILTER MARKERS-->
-        <input id="filter-markers" type="radio" name="filter" checked="checked"/>
+        <input class="filter-input" id="filter-markers" type="radio" name="filter" checked="checked"/>
         <label class="filter-button" for="filter-markers" style="margin-right: 8px">
             <i class="fa fa-map-marker filter-button-icon">
                 <p class="filter-button-label">תוצאות</p>
@@ -409,7 +409,7 @@
         </div>
 
         <!-- FILTER INFO (HOMRA)-->
-        <input id="filter-info" type="radio" name="filter" />
+        <input class="filter-input" id="filter-info" type="radio" name="filter" />
         <label class="filter-button" for="filter-info">
             <i class="fa fa-warning filter-button-icon">
                 <p class="filter-button-label">פרטים</p>
@@ -452,7 +452,7 @@
         </div>
 
         <!-- FILTER TIME (ZMAN)-->
-        <input id="filter-date" type="radio" name="filter"/>
+        <input class="filter-input" id="filter-date" type="radio" name="filter"/>
         <label class="filter-button" for="filter-date">
             <i class="fa fa-calendar filter-button-icon">
                 <p class="filter-button-label">תאריך</p>
@@ -460,7 +460,7 @@
         </label>
         <div class="filter-panel">
             <div class="btn-label">תקופה:</div>
-            <div class="btn-wrap separator">
+            <div class="btn-wrap ">
                 <input type="radio" name="years" id="checkbox-all-years" value="all" onclick="app.changeDate()" />
                 <label for="checkbox-all-years" class="btn one">הכל</label>
                 <input type="radio" name="years" id="checkbox-2014" value="2014" onclick="app.changeDate()" checked />
@@ -471,6 +471,8 @@
                 <label for="checkbox-2012" class="btn one">2012</label>
                 <input type="radio" name="years" id="checkbox-2011" value="2011" onclick="app.changeDate()" />
                 <label for="checkbox-2011" class="btn one">2011</label>
+            </div>
+            <div class="btn-wrap separator">
                 <input id="sdate" class="btn date" type="date" style="width: 38% !important; margin-top: 10px" value="2014-01-01" oninput="app.loadFilter()">
                 <div class="btn-label" style="margin: 10px">עד</div>
                 <input id="edate" class="btn date" style="width: 38% !important; margin-top: 10px" type="date" value="2015-01-01" oninput="app.loadFilter()">
@@ -497,7 +499,7 @@
             </div>
 
             <div class="btn-label">זמן:</div>
-            <div class="btn-wrap separator">
+            <div class="btn-wrap">
                 <input type="radio" name="time" id="checkbox-time-all" value=24 onclick="app.changeDate()" checked />
                 <label for="checkbox-time-all" class="btn one">הכל</label>
                 <input type="radio" name="time" id="checkbox-daylight" value=25 onclick="app.changeDate()" />
@@ -508,6 +510,8 @@
                 <label for="checkbox-noon" class="btn one">צהריים</label>
                 <!--<input type="radio" name="time" id="checkbox-afternoon" value=1 onclick="" />-->
                 <!--<label for="checkbox-afternoon" class="btn one">אחה״צ</label>-->
+            </div>
+            <div class="btn-wrap">
                 <input type="radio" name="time" id="checkbox-dark" value=26 onclick="app.changeDate()" />
                 <label for="checkbox-dark" class="btn one icon-weather">2</label>
                 <input type="radio" name="time" id="checkbox-evening" value=18 onclick="app.changeDate()" />
@@ -516,6 +520,8 @@
                 <label for="checkbox-night" class="btn one">לילה</label>
                 <!--<input type="radio" name="time" id="checkbox-dawn" value=3 onclick="" />-->
                 <!--<label for="checkbox-dawn" class="btn one">לפנות בוקר</label>-->
+            </div>
+            <div class="btn-wrap separator">
                 <input id="stime" class="btn time" type="time" style="margin-top: 10px;" oninput="app.changeDate()">
                 <span class="btn-label" style="margin: 10px;">עד</span>
                 <input id="etime" class="btn time" type="time" style="margin-top: 10px;" oninput="app.changeDate()">
@@ -537,7 +543,7 @@
         </div>
 
         <!-- FILTER CONDITIONS (TNAIM)-->
-        <input id="filter-conditions" type="radio" name="filter"/>
+        <input class="filter-input" id="filter-conditions" type="radio" name="filter"/>
         <label class="filter-button" for="filter-conditions">
             <i class="fa fa-road filter-button-icon">
                 <p class="filter-button-label">תנאים</p>
@@ -620,7 +626,7 @@
         </div>
 
         <!-- FILTER INVOLVED (MEORAVIM)-->
-        <input id="filter-involved" type="radio" name="filter"/>
+        <input class="filter-input" id="filter-involved" type="radio" name="filter"/>
         <label class="filter-button" for="filter-involved">
             <i class="fa fa-car filter-button-icon">
                 <p class="filter-button-label">מעורבים</p>
@@ -675,7 +681,7 @@
         </div>
 
         <!-- FILTER ADVANCED (OD)-->
-        <input id="filter-advanced" type="radio" name="filter"/>
+        <input class="filter-input" id="filter-advanced" type="radio" name="filter"/>
         <label class="filter-button" for="filter-advanced" style="margin-left: 8px">
             <i class="fa fa-plus filter-button-icon">
                 <p class="filter-button-label">עוד</p>

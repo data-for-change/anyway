@@ -38,7 +38,8 @@ div.gm-style {
 
 .filter-description {
     width: 300px;
-    border-bottom: 2px solid #ddd; margin-bottom: 0 !important;
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 0 !important;
     background-color: white;
     height: 142px;
 }
@@ -47,45 +48,30 @@ div.gm-style {
     background-color: white;
     line-height: 40px !important;
     display: -webkit-flex;
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
+    display: flex !important;
     -webkit-flex-wrap: wrap;
     -ms-flex-wrap: wrap;
     flex-wrap: wrap;
     -webkit-justify-content: space-around;
-    -ms-flex-pack: distribute;
     justify-content: space-around;
     width: 300px;
     padding-top: 8px;
 }
 
 .filter-panel {
-    border-top: 2px solid #ddd; margin-bottom: 0 !important;
+    border-top: 2px solid #ddd;
+    margin-bottom: 0 !important;
     margin-top: 10px;
+    padding-bottom: 50px;
     width: 300px;
     -webkit-order: 1;
-    -webkit-box-ordinal-group: 2;
-    -ms-flex-order: 1;
     order: 1;
     overflow-y: scroll;
     overflow-x: hidden;
     height: 340px;
     padding-left: 10px;
     padding-right: 10px;
-}
-
-input[type=radio], .filter-panel {
-    display: none;
-}
-
-input[type=radio]:checked + .filter-button {
-    color: #08c;
-    background: #eee;
-}
-
-input[type=radio]:checked + .filter-button + .filter-panel {
-    display: block;
+    display: none !important;
 }
 
 .filter-button{
@@ -103,6 +89,20 @@ input[type=radio]:checked + .filter-button + .filter-panel {
     vertical-align: middle !important;
     line-height: 40px !important;
     margin: 3px;
+}
+
+input[type=radio], .filter-input {
+    display: none !important;
+}
+
+.filter-input:checked + .filter-button, .filter-input.checked + .filter-button  {
+    color: #08c;
+    background: #eee;
+}
+
+.filter-input:checked ~ .filter-panel, .filter-input:checked ~ .filter-panel {
+    display: block !important;
+    visibility: visible;
 }
 
 .filter-button:hover{
@@ -159,7 +159,7 @@ input[type=radio]:checked + .filter-button + .filter-panel {
     line-height: 35px;
 }
 
-.btn, input[type='checkbox']:checked:hover + label{
+.btn, input[type='checkbox']:checked:hover + label,  input[type='checkbox'].checked:hover + label{
     height: 23px;
     padding: 0 3px 0 3px;
     color: #ccc !important;
@@ -171,12 +171,12 @@ input[type=radio]:checked + .filter-button + .filter-panel {
     display: inline-block;
 }
 
-.btn:hover, input[type='checkbox']:checked + label{
+.btn:hover, input[type='checkbox']:checked + label, input[type='checkbox'].checked + label{
     color: #08c !important;
     background: #f2f2f2;
 }
 
-.btn:hover, input[type='radio']:checked + label{
+.btn:hover, input[type='radio']:checked + label, input[type='radio'].checked + label{
     color: #08c !important;
     background: #f2f2f2;
 }
@@ -651,4 +651,3 @@ input[type='date']{
 input[type='checkbox']{
     display: none;
 }
-

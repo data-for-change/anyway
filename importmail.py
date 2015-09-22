@@ -10,12 +10,14 @@ import argparse
 ##############################################################################################
 # importmail.py is responsible for extracting and downloading united hatzala email attachments
 # Requirements: Setting an environment variable named MAILPASS containing the password
+#               And another named MAILUSER containing the mail account username
 # Note: 1. This script is being called by united.py prior to DB import
 #       2. If 'detach_dir' is empty the script would download all available files
 #          If it's not, only the last file would be downloaded
 #       3. Consider emptying the mail directory from time to time to speed things up
 #       4. Command line arguments:
-#           --password can provide password via cmd line instead of an env variable
+#           --username can be used to set mail user without env var
+#           --password can be used to set mail password without env var
 #           --lastmail is currently set to default True
 ##############################################################################################
 
@@ -23,12 +25,21 @@ import argparse
 def main():
     maildir = 'united-hatzala/data'
     detach_dir = 'static/data/united'
-    username = 'anyway@anyway.co.il'
 
     parser = argparse.ArgumentParser()
+    parser.add_argument('--username', default='')
     parser.add_argument('--password', default='')
     parser.add_argument('--lastmail', action='store_true', default=False)
     args = parser.parse_args()
+
+    try:
+        if args.username:
+            username = args.username
+        else:
+            username = os.environ['MAILUSER']     # Set and environment variable MAILUSER with the password
+    except:
+        print "Please set env var MAILUSER, or provide one using importmail.py --username <username>"
+        exit()
 
     try:
         if args.password:
@@ -92,7 +103,7 @@ def main():
                 if os.path.isfile(filepath):
                     break
                 total += 1
-                print 'Currently loading: ' + filename
+                print 'Currently loading: ' + filename + '       '
                 sys.stdout.write("\033[F")
                 time.sleep(0.1)
                 fp = open(filepath, 'wb')

@@ -3,16 +3,23 @@
 
 import csv
 from datetime import datetime
+import os
+import argparse
+
 from flask.ext.sqlalchemy import SQLAlchemy
+from sqlalchemy import and_
+
 from models import Marker
 from utilities import init_flask
-import os
 import importmail
-import argparse
+
 
 ############################################################################################
 # United.py is responsible for the parsing and deployment of "united hatzala" data to the DB
 ############################################################################################
+
+PROVIDER_CODE = 2
+
 
 def parse_date(created):
     """
@@ -30,34 +37,27 @@ def create_accidents(file_location):
     :return: Yields a marker object with every iteration
     """
     print("\tReading accidents data from '%s'..." % file_location)
-    header = True
-    first_line = True
     inc = 1
     csvmap = {"time": 0, "lat": 1, "long": 2, "street": 3, "city": 5, "comment": 6, "type": 7, "casualties": 8}
 
     with open(file_location, 'rU') as f:
         reader = csv.reader(f, delimiter=',', dialect=csv.excel_tab)
 
-        for accident in reader:
-            if header:
-                header = False
+        for line, accident in enumerate(reader):
+            if line == 0 or not accident:  # header or empty line
                 continue
-            if not accident:
+            if line == 1 and accident[0] == "":
+                print "\t\tEmpty File!"
                 continue
-            if first_line:
-                first_line = False
-                if accident[0] == "":
-                    print "\t\tEmpty File!"
-                    continue
             if accident[csvmap["lat"]] == "" or accident[csvmap["long"]] == "":
-                print "\t\tMissing coordinates! moving on.."
+                print "\t\tMissing coordinates in line {0}. Moving on...".format(line + 1)
                 continue
 
             marker = {
                 "latitude": accident[csvmap["lat"]],
                 "longitude": accident[csvmap["long"]],
                 "created": parse_date(accident[csvmap["time"]]),
-                "provider_code": 2,
+                "provider_code": PROVIDER_CODE,
                 "id": int(''.join(x for x in accident[csvmap["time"]][:-10] if x.isdigit()) + str(inc)),
                 "title": unicode(accident[csvmap["type"]], encoding='utf-8'),
                 "address": unicode((accident[csvmap["street"]] + ' ' + accident[csvmap["city"]]), encoding='utf-8'),
@@ -79,18 +79,17 @@ def import_to_db(path):
     """
     app = init_flask(__name__)
     db = SQLAlchemy(app)
-    try:
-        accidents = list(create_accidents(path))
-
-        # TODO: fix this command to a posgesql compatible execution:
-        db.session.merge(Marker.__table__.insert(), accidents)
-    except:
-        print 'Could not UPSERT, trying SQLite way...'
-        accidents = list(create_accidents(path))
-        db.session.execute(Marker.__table__.insert().prefix_with("OR IGNORE"), accidents)
+    accidents = list(create_accidents(path))
+    new_ids = [m["id"] for m in accidents
+               if 0 == Marker.query.filter(and_(Marker.id == m["id"],
+                                                Marker.provider_code == m["provider_code"])).count()]
+    if new_ids:
+        db.session.execute(Marker.__table__.insert(), [m for m in accidents if m["id"] in new_ids])
+    else:
+        print "\t\tNothing loaded, all accidents already in DB"
 
     db.session.commit()
-    return len(accidents)
+    return len(new_ids)
 
 
 def main():

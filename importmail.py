@@ -22,32 +22,57 @@ import argparse
 ##############################################################################################
 
 
-def main():
-    maildir = 'united-hatzala/data'
-    detach_dir = 'static/data/united'
-
+def argsparse():
+    global globaluser
+    global globalpass
+    global lastmail
     parser = argparse.ArgumentParser()
     parser.add_argument('--username', default='')
     parser.add_argument('--password', default='')
     parser.add_argument('--lastmail', action='store_true', default=False)
     args = parser.parse_args()
+    globaluser = args.username
+    globalpass = args.password
+    lastmail = args.lastmail
+
+
+def main(userarg='', passarg='', lastmailarg=False):
+    global globaluser, globalpass, lastmail
 
     try:
-        if args.username:
-            username = args.username
+        globaluser
+    except NameError:
+        globaluser = userarg
+
+    try:
+        globalpass
+    except NameError:
+        globalpass = passarg
+
+    try:
+        lastmail
+    except NameError:
+        lastmail = lastmailarg
+
+    maildir = 'united-hatzala/data'
+    detach_dir = 'static/data/united'
+
+    try:
+        if globaluser:
+            username = globaluser
         else:
             username = os.environ['MAILUSER']     # Set and environment variable MAILUSER with the password
     except:
-        print "Please set env var MAILUSER, or provide one using importmail.py --username <username>"
+        print "Please set env var MAILUSER"
         exit()
 
     try:
-        if args.password:
-            passwd = args.password
+        if globalpass:
+            passwd = globalpass
         else:
             passwd = os.environ['MAILPASS']     # Set and environment variable MAILPASS with the password
     except:
-        print "Please set env var MAILPASS, or provide one using importmail.py --password <pass>"
+        print "Please set env var MAILPASS"
         exit()
 
     imapsession = imaplib.IMAP4_SSL('imap.gmail.com')
@@ -61,13 +86,13 @@ def main():
         imapsession.select(maildir)
         typ, data = imapsession.search(None, 'ALL')
     except:
-        print 'Error searching given maibox: %s' % maildir
+        print 'Error searching given mailbox: %s' % maildir
         exit()
 
     filefound = False
     listdir = os.listdir(detach_dir)
 
-    isempty = True if not listdir or len(listdir) == 1 or not args.lastmail else False
+    isempty = True if not listdir or len(listdir) == 1 or not lastmail else False
     total = 0
 
     # Iterating over all emails
@@ -118,4 +143,6 @@ def main():
     imapsession.logout()
 
 if __name__ == "__main__":
+    argsparse()
     main()
+

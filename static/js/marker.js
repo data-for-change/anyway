@@ -53,10 +53,7 @@ var MarkerView = Backbone.View.extend({
             if (this.model.get("description") != "") {
                 this.$el.find(".comments").text("הערות: " + this.model.get("description"));
             }
-            if (this.model.get("type") != "") {
-                this.$el.find(".casualties").text("נפגעים: " + this.model.get("type"));
-            }
-            this.$el.find(".profile-image").attr("width", "50px");
+            this.$el.find(".profile-image").attr("width", "70px");
             this.$el.find(".profile-image").attr("src", "/static/img/logos/" + provider.logo);
             this.$el.find(".profile-image").attr("title", provider.name);
             this.$el.find(".profile-image-url").attr("href", provider.url);

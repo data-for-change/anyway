@@ -30,15 +30,15 @@ var startJSPanelWithChart = function( jsPanel, widthOfPanel, heightOfPanel, char
 	//jsPanel.content.append('<canvas id="myChart" width=chartWidth height=chartHeight></canvas>')
 
 
-    var groupedByMonth = _.countBy(app.markers.pluck("created"), function(item) {
+    var groupedAccidentsByMonth = _.countBy(app.markers.pluck("created"), function(item) {
 		return item.substring(0,7);
 	});
 
-    var jsonMonth = _.map(groupedByMonth, function(group, key) {return {"label": key, "value": group.toString()}});
-	jsonMonth = _.sortBy(jsonMonth, 'label');
+    var jsonAccidentsByMonth = _.map(groupedAccidentsByMonth, function(numOfAccidents, month) {return {"label": month, "value": numOfAccidents.toString()}});
+	jsonAccidentsByMonth = _.sortBy(jsonAccidentsByMonth, 'label');
 
 	FusionCharts.ready(function(){
-		  var revenueChart = new FusionCharts({
+		  var statChart = new FusionCharts({
 			"type": "column2d",
 			"renderAt": "myChart",
 			"width": chartWidth,
@@ -49,13 +49,17 @@ var startJSPanelWithChart = function( jsPanel, widthOfPanel, heightOfPanel, char
 				  "caption": "מספר התאונות בחודש",
 				  "xAxisName": "חודשים",
 				  "yAxisName": "מספר תאונות",
-				  "theme": "fint"
+				  "theme": "fint",
+				  "labelFontSize": "15",
+				  "yAxisNameFontSize": "20",
+				  "xAxisNameFontSize": "20",
+				  "captionFontSize": "25",
 			   },
-			  "data": jsonMonth
+			  "data": jsonAccidentsByMonth
 			 }
 			});
 
-			revenueChart.render();
+			statChart.render();
 		});
 	};
 

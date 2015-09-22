@@ -395,7 +395,7 @@ $(function () {
             statDiv.title = 'Statistics';
             statDiv.innerHTML = $("#statistics-control").html();
             google.maps.event.addDomListener(statDiv, 'click', function () {
-                statPanelClick(500,250,470,200);
+                statPanelClick(700,400,700,400);
             }.bind(this));
 
             mapControlDiv.appendChild(resetMapDiv);

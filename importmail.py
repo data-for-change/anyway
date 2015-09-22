@@ -16,7 +16,7 @@ import argparse
 #       3. Consider emptying the mail directory from time to time to speed things up
 #       4. Command line arguments:
 #           --password can provide password via cmd line instead of an env variable
-#           --lasthour is currently set to default True
+#           --lastmail is currently set to default True
 ##############################################################################################
 
 
@@ -26,8 +26,8 @@ def main():
     username = 'anyway@anyway.co.il'
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--password', default='', description='Optional argument for mail password')
-    parser.add_argument('--lastmail', action='store_true', default=False, description='Only imports last hour file')
+    parser.add_argument('--password', default='')
+    parser.add_argument('--lastmail', action='store_true', default=False)
     args = parser.parse_args()
 
     try:
@@ -56,7 +56,7 @@ def main():
     filefound = False
     listdir = os.listdir(detach_dir)
 
-    isempty = True if not listdir or len(listdir) == 1 or args.lasthour else False
+    isempty = True if not listdir or len(listdir) == 1 or not args.lastmail else False
     total = 0
 
     # Iterating over all emails

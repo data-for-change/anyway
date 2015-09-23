@@ -12,16 +12,16 @@ var MarkerView = Backbone.View.extend({
     },
     localize : function(field,value) {
         //localizes non-mandatory data (which has the same consistent html and python field names)
-            if (this.model.has(value) && this.model.get(value)!="" &&
-                    localization[field][this.model.get(value)]!=undefined) {
-                this.$el.find("." + value).text(fields[field] + ": " + localization[field][this.model.get(value)]);
+        if (this.model.has(value) && this.model.get(value)!="" &&
+            localization[field][this.model.get(value)]!=undefined) {
+            this.$el.find("." + value).text(fields[field] + ": " + localization[field][this.model.get(value)]);
         }
     },
 
     render : function() {
 
         var markerPosition = new google.maps.LatLng(this.model.get("latitude"),
-                                                    this.model.get("longitude"));
+            this.model.get("longitude"));
         var provider = PROVIDERS[this.model.get("provider_code")];
 
         this.marker = new google.maps.Marker({
@@ -111,7 +111,7 @@ var MarkerView = Backbone.View.extend({
         this.localize("KIVUN_HAZIYA","cross_direction");
 
         this.$el.find(".creation-date").text("תאריך: " +
-                    moment(this.model.get("created")).format("LLLL"));
+            moment(this.model.get("created")).format("LLLL"));
         var provider = PROVIDERS[this.model.get("provider_code")];
         this.$el.find(".profile-image").attr("width", "50px");
         this.$el.find(".profile-image").attr("src", "/static/img/logos/" + provider.logo);
@@ -154,7 +154,7 @@ var MarkerView = Backbone.View.extend({
                     + " תאונה " + SEVERITY_MAP[this.model.get("severity")]
                     + " מסוג " + localization.SUG_TEUNA[this.model.get("subtype")] + " "
                     + loc;
-            break;
+                break;
             case 'multiple':
                 accuracy = (this.marker.opacity != 1);
                 markerTitle = 'מספר תאונות בנקודה זו' ;

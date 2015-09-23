@@ -18,111 +18,70 @@ import argparse
 #       4. Command line arguments:
 #           --username can be used to set mail user without env var
 #           --password can be used to set mail password without env var
-#           --lastmail is currently set to default True
+#           --lastmail is currently set to default False
 ##############################################################################################
 
-
-def argsparse():
-    global globaluser
-    global globalpass
-    global lastmail
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--username', default='')
-    parser.add_argument('--password', default='')
-    parser.add_argument('--lastmail', action='store_true', default=False)
-    args = parser.parse_args()
-    globaluser = args.username
-    globalpass = args.password
-    lastmail = args.lastmail
+mail_dir = 'united-hatzala/data'
+detach_dir = 'static/data/united'
 
 
-def main(userarg='', passarg='', lastmailarg=False):
-    global globaluser, globalpass, lastmail
+def main(username=None, password=None, lastmail=False):
 
-    try:
-        globaluser
-    except NameError:
-        globaluser = userarg
-
-    try:
-        globalpass
-    except NameError:
-        globalpass = passarg
-
-    try:
-        lastmail
-    except NameError:
-        lastmail = lastmailarg
-
-    maildir = 'united-hatzala/data'
-    detach_dir = 'static/data/united'
-
-    try:
-        if globaluser:
-            username = globaluser
-        else:
-            username = os.environ['MAILUSER']     # Set and environment variable MAILUSER with the password
-    except:
-        print "Please set env var MAILUSER"
-        exit()
-
-    try:
-        if globalpass:
-            passwd = globalpass
-        else:
-            passwd = os.environ['MAILPASS']     # Set and environment variable MAILPASS with the password
-    except:
-        print "Please set env var MAILPASS"
+    username = username or os.environ.get('MAILUSER')
+    password = password or os.environ.get('MAILPASS')
+    if not username:
+        print "Username not set. Please set env var MAILUSER or use the --username argument"
+    if not password:
+        print "Password not set. Please set env var MAILPASS or use the --password argument"
+    if not username or not password:
         exit()
 
     imapsession = imaplib.IMAP4_SSL('imap.gmail.com')
     try:
-        imapsession.login(username, passwd)
-    except:
-        print 'Bad credentials, Not able to sign in!'
+        imapsession.login(username, password)
+    except imaplib.IMAP4.error:
+        print 'Bad credentials, unable to sign in!'
         exit()
 
     try:
-        imapsession.select(maildir)
+        imapsession.select(mail_dir)
         typ, data = imapsession.search(None, 'ALL')
-    except:
-        print 'Error searching given mailbox: %s' % maildir
+    except imaplib.IMAP4.error:
+        print 'Error searching given mailbox: %s' % mail_dir
         exit()
 
-    filefound = False
+    file_found = False
     listdir = os.listdir(detach_dir)
 
-    isempty = True if not listdir or len(listdir) == 1 or not lastmail else False
+    is_empty = len(listdir) <= 1 or not lastmail
     total = 0
 
     # Iterating over all emails
     started = datetime.now()
     print "Login successful! Importing files, please hold..."
     for msgId in data[0].split():
-        typ, messageparts = imapsession.fetch(msgId, '(RFC822)')
+        typ, message_parts = imapsession.fetch(msgId, '(RFC822)')
         if typ != 'OK':
             print 'Error fetching mail.'
             raise
 
-        emailbody = messageparts[0][1]
-        mail = email.message_from_string(emailbody)
+        email_body = message_parts[0][1]
+        mail = email.message_from_string(email_body)
         mtime = datetime.strptime(mail['Date'][:-6], '%a, %d %b %Y %H:%M:%S')
 
-        if not isempty:
+        if not is_empty:
             # Accident folder is not empty, we only need the latest
             if datetime.now() - mtime < timedelta(hours=4):
-                filefound = True
+                file_found = True
             else:
                 continue
 
         for part in mail.walk():
-            if part.get_content_maintype() == 'multipart':
-                continue
-            if part.get('Content-Disposition') is None:
+            if part.get_content_maintype() == 'multipart' or part.get('Content-Disposition') is None:
                 continue
             filename = part.get_filename()
 
-            if bool(filename) and filename[-3:] == "csv":
+            if bool(filename) and filename.endswith(".csv"):
                 filename = 'UH-{0}_{1}-{2}.csv'.format(mtime.date(), mtime.hour, mtime.minute)
                 filepath = os.path.join(detach_dir, filename)
                 if os.path.isfile(filepath):
@@ -131,11 +90,10 @@ def main(userarg='', passarg='', lastmailarg=False):
                 print 'Currently loading: ' + filename + '       '
                 sys.stdout.write("\033[F")
                 time.sleep(0.1)
-                fp = open(filepath, 'wb')
-                fp.write(part.get_payload(decode=True))
-                fp.close()
+                with open(filepath, 'wb') as fp:
+                    fp.write(part.get_payload(decode=True))
 
-        if filefound:
+        if file_found:
             break
 
     print("Imported {0} file(s) in {1}".format(total, time_delta(started)))
@@ -143,6 +101,11 @@ def main(userarg='', passarg='', lastmailarg=False):
     imapsession.logout()
 
 if __name__ == "__main__":
-    argsparse()
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--username', default='')
+    parser.add_argument('--password', default='')
+    parser.add_argument('--lastmail', action='store_true', default=False)
+    args = parser.parse_args()
+
+    main(args.username, args.password, args.lastmail)
 

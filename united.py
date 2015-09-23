@@ -80,14 +80,17 @@ def import_to_db(path):
     app = init_flask(__name__)
     db = SQLAlchemy(app)
     accidents = list(create_accidents(path))
+    if not accidents:
+        return 0
+
     new_ids = [m["id"] for m in accidents
                if 0 == Marker.query.filter(and_(Marker.id == m["id"],
                                                 Marker.provider_code == m["provider_code"])).count()]
-    if new_ids:
-        db.session.execute(Marker.__table__.insert(), [m for m in accidents if m["id"] in new_ids])
-    else:
+    if not new_ids:
         print "\t\tNothing loaded, all accidents already in DB"
+        return 0
 
+    db.session.execute(Marker.__table__.insert(), [m for m in accidents if m["id"] in new_ids])
     db.session.commit()
     return len(new_ids)
 
@@ -98,7 +101,7 @@ def main():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('--light', action='store_true', default=False,
-                        help='Allow importing without downloading any new files')
+                        help='Import without downloading any new files')
     parser.add_argument('--username', default='')
     parser.add_argument('--password', default='')
     parser.add_argument('--lastmail', action='store_true', default=False)

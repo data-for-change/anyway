@@ -82,46 +82,69 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
             var groupedAccidentsByYear = _.countBy(app.markers.pluck("created"), function(item) {
                 return item.substring(0, 4);
             });
+            var jsonAccidentsByYear = _.map(groupedAccidentsByYear, function(numOfAccidents, year) {
+                return {
+                    "label": year, "value": numOfAccidents.toString()
+                }
+            });
+            jsonAccidentsByYear = _.sortBy(jsonAccidentsByYear, 'label');
             var groupedAccidentsByMonth = _.countBy(app.markers.pluck("created"), function(item) {
                 return item.substring(5, 7);
             });
-            var numberOfYears = Object.keys(groupedAccidentsByYear).length;
+            var numberOfYears = jsonAccidentsByYear.length;
             var jsonAccidentsByMonth = _.map(groupedAccidentsByMonth, function(numOfAccidents, month) {
                 return {
                     "label": month
                 }
             });
             jsonAccidentsByMonth = _.sortBy(jsonAccidentsByMonth, 'label');
-
             var groupedAccidentsForAllYears = _.countBy(app.markers.pluck("created"), function(item) {
                 return item.substring(0, 7);
             });
-
+            var jsonAccidentsByMonthAllYears = _.map(groupedAccidentsForAllYears, function(numOfAccidents, month) {
+                return {
+                    "label": month, "value": numOfAccidents.toString()
+                }
+            });
+            jsonAccidentsByMonthAllYears = _.sortBy(jsonAccidentsByMonthAllYears, 'label');
             var dataPerMonth = [];
             var dataObj = {};
             var dataOfValues = [];
             var dataValue = {};
             var tempProp;
+            var counter;
             for (i = 0; i < numberOfYears; i++) {
-                var numOfMonthTotal = Object.keys(groupedAccidentsForAllYears).length;
+                var numOfMonthTotal = jsonAccidentsByMonthAllYears.length;
                 dataOfValues = [];
-                for (j = numOfMonthTotal - 1; j >= 0; j--) {
-                    if (Object.keys(groupedAccidentsForAllYears)[j].substring(0, 4) === Object.keys(groupedAccidentsByYear)[i]) {
-                        dataValue = new Object();
+                counter = 0;
+                for (j = 0; j < numOfMonthTotal; j++) {
+                    dataValue = new Object();
+                    if (jsonAccidentsByMonthAllYears[j]["label"].substring(0,4) === jsonAccidentsByYear[i]["label"]) {
                         dataValue = {
-                            value: groupedAccidentsForAllYears[Object.keys(groupedAccidentsForAllYears)[j]].toString()
+                            value: jsonAccidentsByMonthAllYears[j]["value"].toString()
                         };
-                        dataOfValues.push(dataValue);
-                        tempProp = Object.keys(groupedAccidentsForAllYears)[j];
-                        delete groupedAccidentsForAllYears[tempProp];
+                        jsonAccidentsByMonthAllYears.splice(j,1);
+                        j--;
+                        numOfMonthTotal--;
+                    }else{
+                        dataValue = {
+                            value: "0"
+                        };
                     }
+                    dataOfValues.push(dataValue);
                 }
                 dataObj = new Object();
                 dataObj = {
-                    seriesname: Object.keys(groupedAccidentsByYear)[i].toString(),
+                    seriesname: jsonAccidentsByYear[i]["label"].toString(),
                     data: dataOfValues
                 };
                 dataPerMonth.push(dataObj);
+                counter++;
+                numOfMonthTotal = jsonAccidentsByMonthAllYears.length;
+                if (counter > 11){
+                    break;
+                }
+
             }
 
             var categories = {

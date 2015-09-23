@@ -7,7 +7,6 @@ import json
 from collections import OrderedDict
 import itertools
 import re
-import tkFileDialog
 from datetime import datetime
 
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -18,6 +17,13 @@ from models import Marker, Involved, Vehicle
 import models
 from utilities import ItmToWGS84, init_flask, CsvReader, time_delta
 import localization
+
+# Headless servers cannot use GUI file dialog and require raw user input
+fileDialog = True
+try:
+    import tkFileDialog
+except ValueError:
+    fileDialog = False
 
 failed_dirs = OrderedDict()
 
@@ -398,8 +404,12 @@ def main():
     args = parser.parse_args()
 
     if args.specific_folder:
-        dir_name = tkFileDialog.askdirectory(initialdir=os.path.abspath(args.path),
-                                             title='Please select a directory')
+        if fileDialog:
+            dir_name = tkFileDialog.askdirectory(initialdir=os.path.abspath(args.path),
+                                                 title='Please select a directory')
+        else:
+            dir_name = raw_input('Please provide the directory path: ')
+            
         dir_list = [dir_name]
         if args.delete_all:
             confirm_delete_all = raw_input("Are you sure you want to delete all the current data? (y/n)\n")

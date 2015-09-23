@@ -210,7 +210,7 @@ $(function () {
             }
             if (jsPanelInst!=null){
                 startJSPanelWithChart(jsPanelInst, $("#statPanel").width(), $("#statPanel").height(),
-					$("#statPanel").width() - 30, $("#statPanel").height() - 50);
+					$("#statPanel").width() - 30, $("#statPanel").height() - 80);
             }
             this.chooseMarker();
         },
@@ -395,7 +395,7 @@ $(function () {
             statDiv.title = 'Statistics';
             statDiv.innerHTML = $("#statistics-control").html();
             google.maps.event.addDomListener(statDiv, 'click', function () {
-                statPanelClick(700,400,700,400);
+                statPanelClick(700,400,700,350);
             }.bind(this));
 
             mapControlDiv.appendChild(resetMapDiv);

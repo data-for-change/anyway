@@ -158,6 +158,9 @@ $(function () {
                 if (!this.markerList.length) {
                     this.loadMarkers();
                 }
+
+                this.clearClustersFromMap();
+
                 this.markers.fetch({
                     data: $.param(params),
                     reset: reset,
@@ -269,6 +272,7 @@ $(function () {
                     var groupHeadSeverity = groupHead.get('severity');
                     var groupsHeadOpacity = groupHead.get("locationAccuracy") == 1 ? 'opaque' : 1;
                     groupsData.push({severity: groupHeadSeverity, opacity: groupsHeadOpacity});
+
                     _.each(this.oms.markersNearMarker(marker), function (markerNear) {
                         var markerNearModel = markerNear.view.model;
                         markerNearModel.set("groupID", groupID);
@@ -284,7 +288,9 @@ $(function () {
                         }
                     });
                     groupID++;
+
                 }
+
             },this);
             this.groupsData = groupsData;
               // agam
@@ -307,13 +313,6 @@ $(function () {
                 infowindow.open(this.map, location1);
                 tourStyle(infowindow);
             }
-
-            _.each(this.oms.markersNearAnyOtherMarker(), function(marker){
-                if (!marker.view.model.get("currentlySpiderfied")){
-                    marker.view.opacitySeverityForGroup();
-                }
-            });
-
         },
         downloadCsv: function () {
             if (this.markers.length > 0) {
@@ -388,10 +387,9 @@ $(function () {
 
             var statDiv = document.createElement('div');
             statDiv.className = "map-button statistics-control";
-            statDiv.title = 'Statistics';
             statDiv.innerHTML = $("#statistics-control").html();
             google.maps.event.addDomListener(statDiv, 'click', function () {
-                statPanelClick(500,250,470,200);
+                statPanelClick(700,400,700,400);
             }.bind(this));
 
             mapControlDiv.appendChild(resetMapDiv);
@@ -444,6 +442,7 @@ $(function () {
 
             var toggleDiv = document.createElement('div');
             toggleDiv.className = "map-button toggle-control pin";
+            toggleDiv.title = 'שנה תצוגת אייקונים';
             google.maps.event.addDomListener(toggleBGDiv, 'click', function () {
                 $(toggleDiv).toggleClass('pin');
                 $(toggleDiv).toggleClass('dot');
@@ -470,7 +469,6 @@ $(function () {
                 this.closeInfoWindow();
                 _.each(markers, function (marker) {
                     marker.setTitle(marker.view.getTitle('single'));
-                    marker.view.resetOpacitySeverity();
                     marker.view.model.set("currentlySpiderfied", true);
                 });
                 this.clickedMarker = true;
@@ -559,7 +557,6 @@ $(function () {
         },
         closeInfoWindow: function () {
             if (app.infoWindow) {
-                this.selectedMarker.unhighlight();
                 this.selectedMarker = null;
                 app.infoWindow.close();
                 app.infoWindow = null;
@@ -774,7 +771,12 @@ $(function () {
             this.locationMarker = new google.maps.Marker({
               position: loc,
               map: this.map,
-              icon: this.retinaIconsResize(USER_LOCATION_ICON)
+              icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 0,
+                    fillColor: 'black'
+              },
+              title: 'מיקום נוכחי'
             });
 
              // agam add- tour find location for step 2
@@ -875,19 +877,14 @@ $(function () {
             this.updateFilterString();
         },
         changeDate: function() {
-            var start_date, end_date, all_years = false;
+            var start_date, end_date;
             if ($("#checkbox-2014").is(":checked")) { start_date = "2014"; end_date = "2015" }
             else if ($("#checkbox-2013").is(":checked")) { start_date = "2013"; end_date = "2014" }
             else if ($("#checkbox-2012").is(":checked")) { start_date = "2012"; end_date = "2013" }
             else if ($("#checkbox-2011").is(":checked")) { start_date = "2011"; end_date = "2012" }
-            else if ($("#checkbox-all-years").is(":checked")) { start_date = "2005"; end_date = "2025"; all_years = true }
-            if (!all_years) {
-                $("#sdate").val(start_date + '-01-01');
-                $("#edate").val(end_date + '-01-01');
-            } else {
-                $("#sdate").val('');
-                $("#edate").val('');
-            }
+            else if ($("#checkbox-all-years").is(":checked")) { start_date = "2005"; end_date = "2025" }
+            $("#sdate").val(start_date + '-01-01');
+            $("#edate").val(end_date + '-01-01');
 
             this.show_day = $("input[type='radio'][name='day']:checked").val()
             this.show_holiday = $("input[type='radio'][name='holiday']:checked").val()

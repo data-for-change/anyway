@@ -1,3 +1,34 @@
+.gmnoprint[title^='דיון'] {
+    width: 30px !important;
+    height: 30px !important;
+    opacity: 1 !important;
+    -webkit-border-radius: 50% !important;
+    border-radius: 50% !important;
+    background-color: #5BC0EB;
+    transform: rotate(-45deg) translate(0px,-18px) !important;
+}
+
+.gmnoprint[title^='דיון']:after{
+    content: '\e0bf';
+    font-family: 'Material Icons';
+    font-size: 18px;
+    width: 24px;
+    height: 24px;
+    margin: 3px;
+    background: white;
+    display: inline-block;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 24px;
+    color: #5BC0EB;
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
 .gmnoprint[title*='תאונה'],.gmnoprint[title*='תאונות']{
     width: 30px !important;
     height: 30px !important;
@@ -17,8 +48,6 @@
 }
 
 .gmnoprint[title*='תאונה']:after, .gmnoprint[title*='תאונות']:after {
-    content: '';
-    color: #ccc;
     font-family: 'Material Icons';
     font-size: 18px;
     width: 24px;
@@ -69,10 +98,6 @@
     background-color: #FFD82B;
 }
 
-.gmnoprint[title^='דיון'] {
-    background-color: blue;
-}
-
 .gmnoprint[title*='קטלנית']:after{
     color: #D81C32;
 }
@@ -83,10 +108,6 @@
 
 .gmnoprint[title*='קלה']:after{
     color: #FFD82B;
-}
-
-.gmnoprint[title^='דיון']:after{
-    color: blue;
 }
 
 .gmnoprint[title*='הולך רגל']:after{
@@ -117,4 +138,35 @@
 
 .gmnoprint[title*='(מיקום משוער)']{
     opacity: 0.5 !important;
+}
+
+.gmnoprint[title*='מיקום נוכחי']{
+    width: 30px !important;
+    height: 30px !important;
+    opacity: 1 !important;
+    -webkit-border-radius: 50% 50% 50% 0 !important;
+    border-radius: 50% 50% 50% 0 !important;
+    transform: rotate(-45deg) !important;
+    background-color: #9BC53D;
+}
+
+.gmnoprint[title*='מיקום נוכחי']:after{
+    content: '\e1b3';
+    color: #9BC53D;
+    font-family: 'Material Icons';
+    font-size: 18px;
+    width: 24px;
+    height: 24px;
+    margin: 3px;
+    background: white;
+    display: inline-block;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 24px;
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
 }

@@ -70,6 +70,7 @@ class User(Base, UserMixin):
 
 MARKER_TYPE_ACCIDENT = 1
 MARKER_TYPE_DISCUSSION = 2
+UNITED_HATZALA_CODE = 2
 
 class Role(Base, RoleMixin):
     __tablename__ = "roles"

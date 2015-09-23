@@ -270,6 +270,23 @@
         </div>
 
 
+        <div id="united-marker-content-template" style="display: none">
+            <div class="united-marker-info-window">
+                <h4 class="title"></h4>
+                <a class="profile-image-url" target="_blank" style="float: left">
+                    <img class="profile-image"/>
+                </a>
+                <p class="added-by"></p>
+                <p class="creation-date"></p>
+                <p class="content" style="margin:0"></p>
+                <p class="address" style="margin:0"></p>
+                <p class="comments" style="margin:0"></p>
+                <p class="casualties" style="margin:0"></p>
+
+            </div>
+        </div>
+
+
         <div id="marker-content-template" style="display: none">
             <div class="marker-info-window">
                 <h4 class="title"></h4>
@@ -851,9 +868,8 @@
 "js/years.js",
 "js/inv_dict.js",
 "js/veh_dict.js",
-            "js/retina.js",
-            "js/statPanel.js",
-            "js/libs/Chart.min.js"
+"js/retina.js",
+"js/statPanel.js"
 %}
 <script type="text/javascript" src="{{ ASSET_URL }}"></script>
 {% endassets %}
@@ -989,8 +1005,11 @@
 
 <script type="text/javascript" src="../static/js/tour.js"></script>
 <script src="static/js/libs/jquery.smartbanner.js"></script>
-    <script src="static/js/libs/jquery-ui.min.js"></script>
-    <script src="static/js/libs/jquery.jspanel.min.js"></script>
+<script src="static/js/libs/jquery-ui.min.js"></script>
+<script src="static/js/libs/jquery.jspanel.min.js"></script>
+<script type="text/javascript" src="static/js/libs/fusioncharts.js"></script>
+<script type="text/javascript" src="static/js/libs/fusioncharts.theme.fint.js"></script>
+
 <script type="text/javascript"> $.smartbanner({
 
         author: '"Hasadna"',
@@ -998,11 +1017,9 @@
         button: 'פתח',
         price: 'חינם',
         inGooglePlay: 'בGoogle play'
-    }); </script>
-
-    </body>
-
-
+    });
+</script>
+</body>
 </html>
 
 

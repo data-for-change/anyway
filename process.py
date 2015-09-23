@@ -5,18 +5,25 @@ import os
 import argparse
 import json
 from collections import OrderedDict
+import itertools
+import re
+from datetime import datetime
+
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy import or_
+
 import field_names
 from models import Marker, Involved, Vehicle
 import models
-from utilities import ProgressSpinner, ItmToWGS84, init_flask, CsvReader
-import itertools
+from utilities import ItmToWGS84, init_flask, CsvReader, time_delta
 import localization
-import re
-import tkFileDialog
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
+
+# Headless servers cannot use GUI file dialog and require raw user input
+fileDialog = True
+try:
+    import tkFileDialog
+except ValueError:
+    fileDialog = False
 
 failed_dirs = OrderedDict()
 
@@ -335,14 +342,6 @@ def get_files(directory):
             yield name, csv
 
 
-def time_delta(since):
-    delta = relativedelta(datetime.now(), since)
-    attrs = ['years', 'months', 'days', 'hours', 'minutes', 'seconds']
-    return " ".join('%d %s' % (getattr(delta, attr),
-                               getattr(delta, attr) > 1 and attr or attr[:-1])
-                    for attr in attrs if getattr(delta, attr))
-
-
 def import_to_datastore(directory, provider_code, batch_size):
     """
     goes through all the files in a given directory, parses and commits them
@@ -405,8 +404,12 @@ def main():
     args = parser.parse_args()
 
     if args.specific_folder:
-        dir_name = tkFileDialog.askdirectory(initialdir=os.path.abspath(args.path),
-                                             title='Please select a directory')
+        if fileDialog:
+            dir_name = tkFileDialog.askdirectory(initialdir=os.path.abspath(args.path),
+                                                 title='Please select a directory')
+        else:
+            dir_name = raw_input('Please provide the directory path: ')
+
         dir_list = [dir_name]
         if args.delete_all:
             confirm_delete_all = raw_input("Are you sure you want to delete all the current data? (y/n)\n")

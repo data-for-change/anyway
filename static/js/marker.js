@@ -22,6 +22,7 @@ var MarkerView = Backbone.View.extend({
 
         var markerPosition = new google.maps.LatLng(this.model.get("latitude"),
                                                     this.model.get("longitude"));
+        var provider = PROVIDERS[this.model.get("provider_code")];
 
         this.marker = new google.maps.Marker({
             position: markerPosition,
@@ -29,13 +30,37 @@ var MarkerView = Backbone.View.extend({
             class: 'marker'
         });
 
+        this.marker.setMap(this.map);
+        this.marker.view = this;
+
         if (this.model.get("type") == MARKER_TYPE_DISCUSSION) {
-            this.marker.setIcon(this.getIcon('discussion'));
-            this.marker.setTitle(this.getTitle('discussion'));
-            this.marker.setMap(this.map);
-            this.marker.view = this;
+            this.marker.setIcon(this.getIcon());
+            this.marker.setTitle(this.getTitle('discussion')); //this.model.get("title"));
             google.maps.event.addListener(this.marker, "click",
                 _.bind(app.showDiscussion, app, this.model.get("identifier")) );
+            return this;
+        }
+
+        if (this.model.get("provider_code") == PROVIDER_CODE_UNITED_HATZALA) {
+            this.marker.setIcon(this.getIcon());
+            this.marker.setTitle(this.getTitle('united'));
+            app.oms.addMarker(this.marker);
+            this.$el.html($("#united-marker-content-template").html());
+
+            this.$el.find(".title").text(this.marker.get("title"));
+            this.$el.find(".content").text("תיאור אירוע: " + this.marker.get("title"));
+            this.$el.find(".creation-date").text("תאריך: " + moment(this.model.get("created")).format("LLLL"));
+            this.$el.find(".address").text("מיקום: " + this.model.get("address"));
+            if (this.model.get("description") != "") {
+                this.$el.find(".comments").text("הערות: " + this.model.get("description"));
+            }
+            this.$el.find(".profile-image").attr("width", "70px");
+            this.$el.find(".profile-image").attr("src", "/static/img/logos/" + provider.logo);
+            this.$el.find(".profile-image").attr("title", provider.name);
+            this.$el.find(".profile-image-url").attr("href", provider.url);
+            this.$el.find(".added-by").html("מקור: <a href=\'" +
+                provider.url + "\' target=\'_blank\'>" + provider.name + "</a>");
+
             return this;
         }
 
@@ -45,7 +70,7 @@ var MarkerView = Backbone.View.extend({
         }
 
         this.marker.setOpacity(this.model.get("locationAccuracy") == 1 ? 1.0 : INACCURATE_MARKER_OPACITY);
-        this.marker.setIcon(this.getIcon('single'));
+        this.marker.setIcon(this.getIcon());
         this.marker.setTitle(this.getTitle('single'));
         this.marker.setMap(this.map);
         this.marker.view = this;
@@ -87,7 +112,7 @@ var MarkerView = Backbone.View.extend({
 
         this.$el.find(".creation-date").text("תאריך: " +
                     moment(this.model.get("created")).format("LLLL"));
-        var provider = PROVIDERS[this.model.get("provider_code")]
+        var provider = PROVIDERS[this.model.get("provider_code")];
         this.$el.find(".profile-image").attr("width", "50px");
         this.$el.find(".profile-image").attr("src", "/static/img/logos/" + provider.logo);
         this.$el.find(".profile-image").attr("title", provider.name);
@@ -97,32 +122,12 @@ var MarkerView = Backbone.View.extend({
 
         return this;
     },
-    getIcon : function(markerType) {
-        var markerIcon ={};
-        switch (markerType){
-            case 'single':
-                markerIcon = {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 0,
-                    fillColor: '#ccc',
-                };
-                break;
-            case 'multiple':
-                markerIcon = {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 0,
-                    fillColor: '#ccc',
-                };
-                break;
-            case 'discussion':
-                markerIcon = {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 0,
-                    fillColor: '#ccc',
-                };
-                break;
-        }
-        return markerIcon;
+    getIcon : function() {
+        return markerIcon = {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 0,
+            fillColor: 'black'
+        };
     },
     getTitle : function(markerType) {
         var markerTitle = '';
@@ -153,16 +158,18 @@ var MarkerView = Backbone.View.extend({
             case 'multiple':
                 accuracy = (this.marker.opacity != 1);
                 markerTitle = 'מספר תאונות בנקודה זו' ;
-                break;
+                break
             case 'discussion':
                 markerTitle = 'דיון';
                 break;
+            case 'united':
+                markerTitle = 'איחוד ההצלה';
             default:
                 break;
         }
 
         if (markerType == 'discussion')
-            return markerTitle;
+            return markerTitle + markerIconTypeIdentifier;
         else{
             accuracy = accuracy ?  ' (מיקום משוער)' : '';
             return markerTitle + accuracy +  markerIconTypeIdentifier;
@@ -204,7 +211,6 @@ var MarkerView = Backbone.View.extend({
     },
     clickMarker : function() {
         that = this;
-        this.highlight();
         app.closeInfoWindow();
         app.selectedMarker = this;
 
@@ -261,49 +267,6 @@ var MarkerView = Backbone.View.extend({
 
         $(document).keydown(app.ESCinfoWindow);
     },
-    highlight : function() {
-        if (app.oms.markersNearMarker(this.marker, true)[0]  && !this.model.get("currentlySpiderfied")){
-            this.resetOpacitySeverity();
-        }
-        //this.marker.setAnimation(google.maps.Animation.BOUNCE);
-
-
-        // ##############################
-        // # Another option, if we don't want the somewhat unintuitive experience where an icon start's bouncing,
-        // # but other icons in the same place stay still, will be to do like so: (option 2)
-        // ##############################
-
-        // _.each(app.oms.markersNearMarker(this.marker), function (marker){
-
-        //     marker.setAnimation(google.maps.Animation.BOUNCE);
-
-        // });
-        // this.marker.setAnimation(google.maps.Animation.BOUNCE);
-
-        // ## END (option 2)
-
-    },
-    unhighlight : function() {
-        if (app.oms.markersNearMarker(this.marker, true)[0] && !this.model.get("currentlySpiderfied")){
-            this.opacitySeverityForGroup();
-        }
-        this.marker.setAnimation(null);
-
-
-        // ##############################
-        // # Option 2
-        // ##############################
-
-        // _.each(app.oms.markersNearMarker(this.marker), function (marker){
-
-        //     marker.setAnimation(null);
-
-        // });
-        // this.marker.setAnimation(null);
-
-        // ## END (option 2)
-
-    },
     clickShare : function() {
         FB.ui({
             method: "feed",
@@ -313,12 +276,6 @@ var MarkerView = Backbone.View.extend({
             caption: SUBTYPE_STRING[this.model.get("subtype")]
             // picture
         });
-    },
-    resetOpacitySeverity : function() {
-        this.marker.setIcon(this.getIcon('single'));
-    },
-    opacitySeverityForGroup : function() {
-        this.marker.setIcon(this.getIcon('multiple'));
     },
     accordionInputClick : function(e) {
         var input = e.currentTarget;

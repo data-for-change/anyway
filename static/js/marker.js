@@ -46,7 +46,6 @@ var MarkerView = Backbone.View.extend({
             this.$el.html($("#united-marker-content-template").html());
 
             this.$el.find(".title").text(this.marker.get("title"));
-            this.$el.find(".id").text(fields.ACC_ID + ": " + this.marker.get("id"));
             this.$el.find(".content").text("תיאור אירוע: " + this.marker.get("title"));
             this.$el.find(".creation-date").text("תאריך: " + moment(this.model.get("created")).format("LLLL"));
             this.$el.find(".address").text("מיקום: " + this.model.get("address"));

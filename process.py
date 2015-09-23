@@ -5,18 +5,19 @@ import os
 import argparse
 import json
 from collections import OrderedDict
-from flask.ext.sqlalchemy import SQLAlchemy
-from sqlalchemy import or_
-import field_names
-from models import Marker, Involved, Vehicle
-import models
-from utilities import ProgressSpinner, ItmToWGS84, init_flask, CsvReader
 import itertools
-import localization
 import re
 import tkFileDialog
 from datetime import datetime
-from dateutil.relativedelta import relativedelta
+
+from flask.ext.sqlalchemy import SQLAlchemy
+from sqlalchemy import or_
+
+import field_names
+from models import Marker, Involved, Vehicle
+import models
+from utilities import ItmToWGS84, init_flask, CsvReader, time_delta
+import localization
 
 failed_dirs = OrderedDict()
 
@@ -333,14 +334,6 @@ def get_files(directory):
             yield ROADS, roads
         elif name in (ACCIDENTS, INVOLVED, VEHICLES):
             yield name, csv
-
-
-def time_delta(since):
-    delta = relativedelta(datetime.now(), since)
-    attrs = ['years', 'months', 'days', 'hours', 'minutes', 'seconds']
-    return " ".join('%d %s' % (getattr(delta, attr),
-                               getattr(delta, attr) > 1 and attr or attr[:-1])
-                    for attr in attrs if getattr(delta, attr))
 
 
 def import_to_datastore(directory, provider_code, batch_size):

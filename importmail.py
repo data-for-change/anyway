@@ -3,7 +3,7 @@ import imaplib
 import os
 from datetime import datetime, timedelta
 import time
-from process import time_delta
+from utilities import time_delta
 import sys
 import argparse
 

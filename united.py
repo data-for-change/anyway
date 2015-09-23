@@ -9,7 +9,7 @@ import argparse
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
 
-from models import Marker
+from models import Marker, MARKER_TYPE_ACCIDENT
 from utilities import init_flask
 import importmail
 
@@ -27,7 +27,8 @@ def parse_date(created):
     :return: Python datetime object
     """
     time = datetime.strptime(created[:-3], '%m/%d/%Y %I:%M:%S')
-    hour = int(time.strftime('%H')) if created[-2:] == 'AM' else int(time.strftime('%H'))+12
+    hour = time.strftime('%H')
+    hour = int(hour) if created.endswith('AM') else int(hour)+12
     return datetime(time.year, time.month, time.day, hour, time.minute, 0)
 
 
@@ -53,22 +54,27 @@ def create_accidents(file_location):
                 print "\t\tMissing coordinates in line {0}. Moving on...".format(line + 1)
                 continue
 
+            created = parse_date(accident[csvmap["time"]])
             marker = {
                 "latitude": accident[csvmap["lat"]],
                 "longitude": accident[csvmap["long"]],
-                "created": parse_date(accident[csvmap["time"]]),
+                "created": created,
                 "provider_code": PROVIDER_CODE,
-                "id": int(''.join(x for x in accident[csvmap["time"]][:-10] if x.isdigit()) + str(inc)),
+                "id": int(created.strftime("%s")[2:-1] + "%02d" % inc),  # must be < 2147483647
                 "title": unicode(accident[csvmap["type"]], encoding='utf-8'),
                 "address": unicode((accident[csvmap["street"]] + ' ' + accident[csvmap["city"]]), encoding='utf-8'),
                 "severity": 2 if u"קשה" in unicode(accident[csvmap["type"]], encoding='utf-8') else 3,
                 "locationAccuracy": 1,
                 "subtype": 21,           # New subtype for United Hatzala
+                "type": MARKER_TYPE_ACCIDENT,
+                "intactness": "".join(x for x in accident[csvmap["casualties"]] if x.isdigit()) or 0,
                 "description": unicode(accident[csvmap["comment"]], encoding='utf-8')
             }
-            # "type": unicode(accident[csvmap["casualties"]], encoding='utf-8'),
 
             inc += 1
+            if inc >= 100:  # id will be too big for PostgreSQL
+                print "\t\tToo many accidents in file..."
+                break
             yield marker
 
 

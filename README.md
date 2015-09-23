@@ -67,9 +67,10 @@ Contributing
 2. First time, create tables: `python models.py`
 3. Optionally, get the [complete accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTdWdPMXV5c2gycW8/view?usp=sharing) after sending a permission request, and extract it into `/static/data/lms`. Otherwise you'll use the [example accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTSjNMUXYyeW4yQkk/view?usp=sharing) that you already got with the code, so no need to get it again.
 4. Populate the data (markers etc.): `python process.py`: this will take less than an hour if you're using the example files (default), but if you have the complete data it may take several days. Be prepared.
-5. Run the app: `python main.py`: do this whenever you start working and want to try out your code.
-6. Browse to http://127.0.0.1:5000
-7. If the site fails to load properly, make sure you have JDK installed on your machine
+5. Populate united hatzala sample data: `python united.py --light` for the complete, or more recent data please contact the Anyway team.
+6. Run the app: `python main.py`: do this whenever you start working and want to try out your code.
+7. Browse to http://127.0.0.1:5000
+8. If the site fails to load properly, make sure you have JDK installed on your machine
 
 It is useful to add the following to your `~/.bashrc` (fixing for the correct path):
 

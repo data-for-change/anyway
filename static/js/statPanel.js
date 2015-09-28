@@ -27,6 +27,7 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
     var str = '<select class="form-control" id="selectTypeOfChart">'
     str += '<option value="accidentsPerMonth" id="accidentsPerMonth">מספר התאונות בחודש על פני כל השנים שנבחרו</option>';
     str += '<option value="accidentsPerMonthStacked" id="accidentsPerMonthStacked">מספר התאונות בחודש - מקובץ לפי חודשים</option>';
+    str += '<option value="severityTotal" id="severityTotal">מספר התאונות לפי דרגת חומרה</option>';
     str += '</select>';
     str += '<div id="myChart" width="';
     str += chartWidth.toString();
@@ -177,38 +178,62 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
 
                 statChart.render();
             });
-
             break;
-            //var groupedAccidentsByMonth = _.countBy(app.markers.pluck("created"), function(item) {
-            //   return item.substring(5,7);
-            //});
-            //var jsonAccidentsByMonth = _.map(groupedAccidentsByMonth, function(numOfAccidents, month) {return {"label": month, "value": numOfAccidents.toString()}});
-            //jsonAccidentsByMonth = _.sortBy(jsonAccidentsByMonth, 'label');
-            //
-            //FusionCharts.ready(function(){
-            // var statChart = new FusionCharts({
-            //   "type": "column2d",
-            //   "renderAt": "myChart",
-            //   "width": chartWidth,
-            //   "height": chartHeight,
-            //   "dataFormat": "json",
-            //   "dataSource": {
-            //   "chart": {
-            //	  "caption": "מספר התאונות בחודש",
-            //	  "xAxisName": "חודשים - מקובץ מכל השנים שנבחרו",
-            //	  "yAxisName": "מספר תאונות",
-            //	  "theme": "fint",
-            //	  "labelFontSize": "15",
-            //	  "yAxisNameFontSize": "20",
-            //	  "xAxisNameFontSize": "20",
-            //	  "captionFontSize": "25",
-            //   },
-            //  "data": jsonAccidentsByMonth
-            //  }
-            //});
-            //
-            //statChart.render();
-            //});
+        case "severityTotal":
+            var groupedAccidentsBySeverity = _.countBy(app.markers.pluck("severity"), function(item) {
+                return item;
+            });
+            var jsonAccidentsBySeverity = _.map(groupedAccidentsBySeverity, function(numOfAccidents, severity) {
+                return {
+                    "label": severity, "value": numOfAccidents.toString()
+                }
+            });
+            jsonAccidentsBySeverity = _.sortBy(jsonAccidentsBySeverity, 'label');
+
+            for (i = 0; i < jsonAccidentsBySeverity.length; i++) {
+                switch(jsonAccidentsBySeverity[i]["label"]) {
+                    case "1":
+                        jsonAccidentsBySeverity[i]["label"] = "קטלנית";
+                        jsonAccidentsBySeverity[i]["color"] = "#d81c32";
+                        break;
+                    case "2":
+                        jsonAccidentsBySeverity[i]["label"] = "קשה";
+                        jsonAccidentsBySeverity[i]["color"] = "#ff9f1c";
+                        break;
+                    case "3":
+                        jsonAccidentsBySeverity[i]["label"]= "קלה";
+                        jsonAccidentsBySeverity[i]["color"] = "#ffd82b";
+                        break;
+                }
+            }
+
+            FusionCharts.ready(function() {
+                var statChart = new FusionCharts({
+                    "type": "column2d",
+                    "renderAt": "myChart",
+                    "width": chartWidth,
+                    "height": chartHeight,
+                    "dataFormat": "json",
+                    "dataSource": {
+                        "chart": {
+                            "caption": "מספר התאונות לפי חומרה",
+                            "xAxisName": "חומרת התאונות",
+                            "yAxisName": "מספר תאונות",
+                            "theme": "fint",
+                            "showSum": "1",
+                            "labelFontSize": "15",
+                            "yAxisNameFontSize": "20",
+                            "xAxisNameFontSize": "20",
+                            "captionFontSize": "25",
+                        },
+                        //"categories": categories,
+                        "data": jsonAccidentsBySeverity
+                    }
+                });
+
+                statChart.render();
+            });
+            break;
     }
 
     $("#selectTypeOfChart").on("change", function() {

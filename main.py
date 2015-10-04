@@ -188,6 +188,7 @@ def discussion():
                             identifier).first()
                 context['title'] = marker.title
             except AttributeError:
+                flask.ext.babel.refresh()
                 return index(message=gettext(u'Discussion not found:') + request.values['identifier'])
             except KeyError:
                 return index(message=gettext(u'Illegal Discussion'))
@@ -281,7 +282,7 @@ def index(marker=None, message=None):
             context['coordinates'] = (marker.latitude, marker.longitude)
             context['discussion'] = marker.identifier
         else:
-            message = u"דיון לא נמצא: " + request.values['discussion']
+            message = gettext(u"Discussion not found:") + request.values['discussion']
     if 'start_date' in request.values:
         context['start_date'] = string2timestamp(request.values['start_date'])
     elif marker:

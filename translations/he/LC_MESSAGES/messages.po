@@ -33,4 +33,3 @@ msgid ""
 "ANYWAY is our way to prevent the next accident. Together we, drivers, "
 "pedestrians, citizens & decision makers, will fight car accidents."
 msgstr "ANYWAY היא הדרך שלנו למנוע את התאונה הבאה. ביחד, נהגים, הולכי רגל, אזרחים ומקבלי החלטות נאבק בתאונות הדרכים."
-

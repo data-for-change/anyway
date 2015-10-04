@@ -33,5 +33,4 @@ msgstr ""
 msgid ""
 "ANYWAY is our way to prevent the next accident. Together we, drivers, "
 "pedestrians, citizens & decision makers, will fight car accidents."
-msgstr ""
-
+msgstr "ANYWAY is our way to prevent the next accident. Together we, drivers, pedestrians, citizens & decision makers, will fight car accidents."

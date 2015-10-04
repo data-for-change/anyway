@@ -188,7 +188,6 @@ def discussion():
                             identifier).first()
                 context['title'] = marker.title
             except AttributeError:
-                flask.ext.babel.refresh()
                 return index(message=gettext(u'Discussion not found:') + request.values['identifier'])
             except KeyError:
                 return index(message=gettext(u'Illegal Discussion'))

@@ -1,5 +1,6 @@
 ﻿var jsPanelInst;
 var currentTypeOfChart = "accidentsPerMonth";
+var currentDataType = "numberType";
 
 function statPanelClick(widthOfPanel, heightOfPanel, chartWidth, chartHeight) {
     jQuery.jsPanel({
@@ -24,64 +25,127 @@ function statPanelClick(widthOfPanel, heightOfPanel, chartWidth, chartHeight) {
 };
 
 var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chartWidth, chartHeight) {
-    var str = '<select class="form-control" id="selectTypeOfChart">'
+    var isClusterMode = false;
+    var str = '<div>';
+    str += '<select class="form-control" id="selectTypeOfChart">';
     str += '<option value="accidentsPerMonth" id="accidentsPerMonth">מספר התאונות בחודש על פני כל השנים שנבחרו</option>';
     str += '<option value="accidentsPerMonthStacked" id="accidentsPerMonthStacked">מספר התאונות בחודש - מקובץ לפי חודשים</option>';
     str += '<option value="severityTotal" id="severityTotal">מספר התאונות לפי דרגת חומרה</option>';
     str += '<option value="severityPerMonth" id="severityPerMonth">מספר התאונות בחודש לפי דרגת חומרה</option>';
     str += '<option value="severityPerMonthStacked" id="severityPerMonthStacked">מספר התאונות בחודש לפי דרגת חומרה - מקובץ לפי חודשים</option>';
     str += '</select>';
+    str += '<select class="form-control" id="selectTypeOfData">';
+    str += '<option value="numberType" id="numberType">מספרים</option>';
+    str += '<option value="percentType" id="percentType">אחוזים</option>';
+    str += '</select>';
+    str += '</div>';
     str += '<div id="myChart" width="';
     str += chartWidth.toString();
     str += '" height="';
-    str += chartHeight.toString();
-    str += '"></div>';
+    str += chartHeight.toString() + '">';
+    if (app.markers.length === 0 && app.clusters.length > 0) {
+        isClusterMode = true;
+        str += '<h2> אין נתונים להצגה. אנא הגדל/י את רמת המיקוד במפה </h2>'
+    }
+    str += '</div>';
     jsPanel.content.empty();
     jsPanel.content.append(str);
     //jsPanel.content.append('<canvas id="myChart" width=chartWidth height=chartHeight></canvas>')
     $("#selectTypeOfChart").width(360);
+    $("#selectTypeOfData").width(100);
     $("#" + currentTypeOfChart).prop('selected', true);
+    $("#" + currentDataType).prop('selected', true);
+
+    if (isClusterMode) {
+        return;
+    }
 
     switch (currentTypeOfChart) {
         case "accidentsPerMonth":
+            var sum;
+            var jsonAccidentsByMonth;
             var groupedAccidentsByMonth = _.countBy(app.markers.pluck("created"), function(item) {
                 return item.substring(0, 7);
             });
-            var jsonAccidentsByMonth = _.map(groupedAccidentsByMonth, function(numOfAccidents, month) {
-                return {
-                    "label": month,
-                    "value": numOfAccidents.toString()
-                }
-            });
-            jsonAccidentsByMonth = _.sortBy(jsonAccidentsByMonth, 'label');
 
-            FusionCharts.ready(function() {
-                var statChart = new FusionCharts({
-                    "type": "column2d",
-                    "renderAt": "myChart",
-                    "width": chartWidth,
-                    "height": chartHeight,
-                    "dataFormat": "json",
-                    "dataSource": {
-                        "chart": {
-                            "caption": "מספר התאונות בחודש",
-                            "xAxisName": "חודשים",
-                            "yAxisName": "מספר תאונות",
-                            "theme": "fint",
-                            "labelFontSize": "15",
-                            "yAxisNameFontSize": "20",
-                            "xAxisNameFontSize": "20",
-                            "captionFontSize": "25",
-                        },
-                        "data": jsonAccidentsByMonth
+            if (currentDataType === "percentType") {
+                sum = _.reduce(groupedAccidentsByMonth, function(num1, num2) {
+                    return num1 + num2;
+                }, 0);
+                jsonAccidentsByMonth = _.map(groupedAccidentsByMonth, function(numOfAccidents, month) {
+                    return {
+                        "label": month,
+                        "value": (numOfAccidents / sum).toFixed(2)
                     }
                 });
+            } else {
+                jsonAccidentsByMonth = _.map(groupedAccidentsByMonth, function(numOfAccidents, month) {
+                    return {
+                        "label": month,
+                        "value": numOfAccidents.toString()
+                    }
+                });
+            }
 
-                statChart.render();
-            });
+            jsonAccidentsByMonth = _.sortBy(jsonAccidentsByMonth, 'label');
+
+            if (currentDataType === "percentType") {
+                FusionCharts.ready(function() {
+                    var statChart = new FusionCharts({
+                        "type": "column2d",
+                        "renderAt": "myChart",
+                        "width": chartWidth,
+                        "height": chartHeight,
+                        "dataFormat": "json",
+                        "dataSource": {
+                            "chart": {
+                                "caption": "מספר התאונות בחודש באחוזים",
+                                "xAxisName": "חודשים",
+                                "yAxisName": "אחוז התאונות מסך התאונות",
+                                "theme": "fint",
+                                "labelFontSize": "15",
+                                "yAxisNameFontSize": "20",
+                                "xAxisNameFontSize": "20",
+                                "captionFontSize": "25",
+                                "numberScaleValue": ".01",
+                                "numberScaleUnit": "%",
+                            },
+                            "data": jsonAccidentsByMonth
+                        }
+                    });
+
+                    statChart.render();
+                });
+            } else {
+                FusionCharts.ready(function() {
+                    var statChart = new FusionCharts({
+                        "type": "column2d",
+                        "renderAt": "myChart",
+                        "width": chartWidth,
+                        "height": chartHeight,
+                        "dataFormat": "json",
+                        "dataSource": {
+                            "chart": {
+                                "caption": "מספר התאונות בחודש",
+                                "xAxisName": "חודשים",
+                                "yAxisName": "מספר תאונות",
+                                "theme": "fint",
+                                "labelFontSize": "15",
+                                "yAxisNameFontSize": "20",
+                                "xAxisNameFontSize": "20",
+                                "captionFontSize": "25",
+                            },
+                            "data": jsonAccidentsByMonth
+                        }
+                    });
+
+                    statChart.render();
+                });
+            }
 
             break;
         case "accidentsPerMonthStacked":
+
             var groupedAccidentsByYear = _.countBy(app.markers.pluck("created"), function(item) {
                 return item.substring(0, 4);
             });
@@ -115,7 +179,7 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
             var dataPerMonth = [];
             var dataObj = {};
             var dataOfValues = [];
-            var dataValue = {};        
+            var dataValue = {};
             var counter;
             for (i = 0; i < numberOfYears; i++) {
                 var numOfMonthTotal = jsonAccidentsByMonthAllYears.length;
@@ -124,9 +188,16 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
                 for (j = 0; j < numOfMonthTotal; j++) {
                     dataValue = new Object();
                     if (jsonAccidentsByMonthAllYears[j]["label"].substring(0, 4) === jsonAccidentsByYear[i]["label"]) {
-                        dataValue = {
-                            value: jsonAccidentsByMonthAllYears[j]["value"].toString()
-                        };
+                        if (currentDataType === "percentType") {
+                            dataValue = {
+                                value: (jsonAccidentsByMonthAllYears[j]["value"] /
+                                    groupedAccidentsByMonth[jsonAccidentsByMonthAllYears[j]["label"].substring(5, 7)]).toFixed(2)
+                            };
+                        } else {
+                            dataValue = {
+                                value: jsonAccidentsByMonthAllYears[j]["value"].toString()
+                            };
+                        }
                         jsonAccidentsByMonthAllYears.splice(j, 1);
                         j--;
                         numOfMonthTotal--;
@@ -155,43 +226,92 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
                 category: jsonAccidentsByMonth
             };
 
-            FusionCharts.ready(function() {
-                var statChart = new FusionCharts({
-                    "type": "stackedcolumn2d",
-                    "renderAt": "myChart",
-                    "width": chartWidth,
-                    "height": chartHeight,
-                    "dataFormat": "json",
-                    "dataSource": {
-                        "chart": {
-                            "caption": "מספר התאונות בחודש",
-                            "xAxisName": "חודשים - מקובץ מכל השנים שנבחרו",
-                            "yAxisName": "מספר תאונות",
-                            "theme": "fint",
-                            "showSum": "1",
-                            "labelFontSize": "15",
-                            "yAxisNameFontSize": "20",
-                            "xAxisNameFontSize": "20",
-                            "captionFontSize": "25",
-                        },
-                        "categories": categories,
-                        "dataset": dataPerMonth
-                    }
-                });
+            if (currentDataType === "percentType") {
+                FusionCharts.ready(function() {
+                    var statChart = new FusionCharts({
+                        "type": "stackedcolumn2d",
+                        "renderAt": "myChart",
+                        "width": chartWidth,
+                        "height": chartHeight,
+                        "dataFormat": "json",
+                        "dataSource": {
+                            "chart": {
+                                "caption": "מספר התאונות בחודש באחוזים",
+                                "xAxisName": "חודשים - מקובץ מכל השנים שנבחרו",
+                                "yAxisName": "אחוז התאונות מסך התאונות החודשי",
+                                "theme": "fint",
+                                "labelFontSize": "15",
+                                "yAxisNameFontSize": "20",
+                                "xAxisNameFontSize": "20",
+                                "captionFontSize": "25",
+                                "stack100Percent": "1",
+                                "decimals": "0",
+                            },
+                            "categories": categories,
+                            "dataset": dataPerMonth
+                        }
+                    });
 
-                statChart.render();
-            });
+                    statChart.render();
+                });
+            } else {
+                FusionCharts.ready(function() {
+                    var statChart = new FusionCharts({
+                        "type": "stackedcolumn2d",
+                        "renderAt": "myChart",
+                        "width": chartWidth,
+                        "height": chartHeight,
+                        "dataFormat": "json",
+                        "dataSource": {
+                            "chart": {
+                                "caption": "מספר התאונות בחודש",
+                                "xAxisName": "חודשים - מקובץ מכל השנים שנבחרו",
+                                "yAxisName": "מספר תאונות",
+                                "theme": "fint",
+                                "showSum": "1",
+                                "labelFontSize": "15",
+                                "yAxisNameFontSize": "20",
+                                "xAxisNameFontSize": "20",
+                                "captionFontSize": "25",
+                            },
+                            "categories": categories,
+                            "dataset": dataPerMonth
+                        }
+                    });
+
+                    statChart.render();
+                });
+            }
+
+
             break;
         case "severityTotal":
+            var sum;
+            var jsonAccidentsBySeverity;
             var groupedAccidentsBySeverity = _.countBy(app.markers.pluck("severity"), function(item) {
                 return item;
             });
-            var jsonAccidentsBySeverity = _.map(groupedAccidentsBySeverity, function(numOfAccidents, severity) {
-                return {
-                    "label": severity,
-                    "value": numOfAccidents.toString()
-                }
-            });
+
+            if (currentDataType === "percentType") {
+                sum = _.reduce(groupedAccidentsBySeverity, function(num1, num2) {
+                    return num1 + num2;
+                }, 0);
+                jsonAccidentsBySeverity = _.map(groupedAccidentsBySeverity, function(numOfAccidents, severity) {
+                    return {
+                        "label": severity,
+                        "value": (numOfAccidents / sum).toFixed(2)
+                    }
+                });
+            } else {
+                jsonAccidentsBySeverity = _.map(groupedAccidentsBySeverity, function(numOfAccidents, severity) {
+                    return {
+                        "label": severity,
+                        "value": numOfAccidents.toString()
+                    }
+                });
+            }
+
+
             jsonAccidentsBySeverity = _.sortBy(jsonAccidentsBySeverity, 'label');
 
             for (i = 0; i < jsonAccidentsBySeverity.length; i++) {
@@ -210,33 +330,64 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
                         break;
                 }
             }
+            if (currentDataType === "percentType") {
+                FusionCharts.ready(function() {
+                    var statChart = new FusionCharts({
+                        "type": "column2d",
+                        "renderAt": "myChart",
+                        "width": chartWidth,
+                        "height": chartHeight,
+                        "dataFormat": "json",
+                        "dataSource": {
+                            "chart": {
+                                "caption": "מספר התאונות לפי חומרה באחוזים",
+                                "xAxisName": "חומרת התאונות",
+                                "yAxisName": "אחוז התאונות מסך התאונות",
+                                "theme": "fint",
+                                "showSum": "1",
+                                "labelFontSize": "15",
+                                "yAxisNameFontSize": "20",
+                                "xAxisNameFontSize": "20",
+                                "captionFontSize": "25",
+                                "numberScaleValue": ".01",
+                                "numberScaleUnit": "%",
+                            },
+                            //"categories": categories,
+                            "data": jsonAccidentsBySeverity
+                        }
+                    });
 
-            FusionCharts.ready(function() {
-                var statChart = new FusionCharts({
-                    "type": "column2d",
-                    "renderAt": "myChart",
-                    "width": chartWidth,
-                    "height": chartHeight,
-                    "dataFormat": "json",
-                    "dataSource": {
-                        "chart": {
-                            "caption": "מספר התאונות לפי חומרה",
-                            "xAxisName": "חומרת התאונות",
-                            "yAxisName": "מספר תאונות",
-                            "theme": "fint",
-                            "showSum": "1",
-                            "labelFontSize": "15",
-                            "yAxisNameFontSize": "20",
-                            "xAxisNameFontSize": "20",
-                            "captionFontSize": "25",
-                        },
-                        //"categories": categories,
-                        "data": jsonAccidentsBySeverity
-                    }
+                    statChart.render();
                 });
+            } else {
+                FusionCharts.ready(function() {
+                    var statChart = new FusionCharts({
+                        "type": "column2d",
+                        "renderAt": "myChart",
+                        "width": chartWidth,
+                        "height": chartHeight,
+                        "dataFormat": "json",
+                        "dataSource": {
+                            "chart": {
+                                "caption": "מספר התאונות לפי חומרה",
+                                "xAxisName": "חומרת התאונות",
+                                "yAxisName": "מספר תאונות",
+                                "theme": "fint",
+                                "showSum": "1",
+                                "labelFontSize": "15",
+                                "yAxisNameFontSize": "20",
+                                "xAxisNameFontSize": "20",
+                                "captionFontSize": "25",
+                            },
+                            //"categories": categories,
+                            "data": jsonAccidentsBySeverity
+                        }
+                    });
 
-                statChart.render();
-            });
+                    statChart.render();
+                });
+            }
+
             break;
         case "severityPerMonth":
         case "severityPerMonthStacked":
@@ -338,18 +489,48 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
             PushZeroValues(dataValuesLethal, dataValuesSevere, dataValuesLight, lastDate);
 
             dataValuesLethal = _.sortBy(dataValuesLethal, 'label');
-            for (var index = 0; index < dataValuesLethal.length; index++) {
-                delete dataValuesLethal[index]["label"];
+            dataValuesSevere = _.sortBy(dataValuesSevere, 'label');
+            dataValuesLight = _.sortBy(dataValuesLight, 'label');
+
+            if (currentDataType === "percentType") {
+
+                for (var index = 0; index < dataValuesLethal.length; index++) {
+                    dataValuesLethal[index]["value"] = (parseFloat(dataValuesLethal[index]["value"]) /
+                        (parseFloat(dataValuesLethal[index]["value"]) +
+                            parseFloat(dataValuesSevere[index]["value"]) +
+                            parseFloat(dataValuesLight[index]["value"]))).toFixed(2);
+                    delete dataValuesLethal[index]["label"];
+                }
+
+                for (var index = 0; index < dataValuesSevere.length; index++) {
+                    dataValuesSevere[index]["value"] = (parseFloat(dataValuesSevere[index]["value"]) /
+                        (parseFloat(dataValuesLethal[index]["value"]) +
+                            parseFloat(dataValuesSevere[index]["value"]) +
+                            parseFloat(dataValuesLight[index]["value"]))).toFixed(2);
+                    delete dataValuesSevere[index]["label"];
+                }
+
+                for (var index = 0; index < dataValuesLight.length; index++) {
+                    dataValuesLight[index]["value"] = (parseFloat(dataValuesLight[index]["value"]) /
+                        (parseFloat(dataValuesLethal[index]["value"]) +
+                            parseFloat(dataValuesSevere[index]["value"]) +
+                            parseFloat(dataValuesLight[index]["value"]))).toFixed(2);
+                    delete dataValuesLight[index]["label"];
+                }
+            } else {
+                for (var index = 0; index < dataValuesLethal.length; index++) {
+                    delete dataValuesLethal[index]["label"];
+                }
+
+                for (var index = 0; index < dataValuesSevere.length; index++) {
+                    delete dataValuesSevere[index]["label"];
+                }
+
+                for (var index = 0; index < dataValuesLight.length; index++) {
+                    delete dataValuesLight[index]["label"];
+                }
             }
 
-            dataValuesSevere = _.sortBy(dataValuesSevere, 'label');
-            for (var index = 0; index < dataValuesSevere.length; index++) {
-                delete dataValuesSevere[index]["label"];
-            }
-            dataValuesLight = _.sortBy(dataValuesLight, 'label');
-            for (var index = 0; index < dataValuesLight.length; index++) {
-                delete dataValuesLight[index]["label"];
-            }
 
             dataset.push({
                 seriesname: "קטלנית",
@@ -386,31 +567,61 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
                 category: monthCategories
             };
 
-            FusionCharts.ready(function() {
-                var statChart = new FusionCharts({
-                    "type": "stackedcolumn2d",
-                    "renderAt": "myChart",
-                    "width": chartWidth,
-                    "height": chartHeight,
-                    "dataFormat": "json",
-                    "dataSource": {
-                        "chart": {
-                            "caption": "מספר התאונות בחודש לפי חומרה",
-                            "xAxisName": "חודשים - מקובץ מכל השנים שנבחרו",
-                            "yAxisName": "מספר תאונות לפי חומרה",
-                            "theme": "fint",
-                            "showSum": "1",
-                            "labelFontSize": "15",
-                            "yAxisNameFontSize": "20",
-                            "xAxisNameFontSize": "20",
-                            "captionFontSize": "25",
-                        },
-                        "categories": categories,
-                        "dataset": dataset
-                    }
+            if (currentDataType === "percentType") {
+                FusionCharts.ready(function() {
+                    var statChart = new FusionCharts({
+                        "type": "stackedcolumn2d",
+                        "renderAt": "myChart",
+                        "width": chartWidth,
+                        "height": chartHeight,
+                        "dataFormat": "json",
+                        "dataSource": {
+                            "chart": {
+                                "caption": "מספר התאונות בחודש לפי חומרה באחוזים",
+                                "xAxisName": "חודשים - מקובץ מכל השנים שנבחרו",
+                                "yAxisName": "מספר תאונות לפי חומרה באחוזים",
+                                "theme": "fint",
+                                "labelFontSize": "15",
+                                "yAxisNameFontSize": "20",
+                                "xAxisNameFontSize": "20",
+                                "captionFontSize": "25",
+                                "stack100Percent": "1",
+                                "decimals": "0",
+                            },
+                            "categories": categories,
+                            "dataset": dataset
+                        }
+                    });
+                    statChart.render();
                 });
-                statChart.render();
-            });
+            } else {
+                FusionCharts.ready(function() {
+                    var statChart = new FusionCharts({
+                        "type": "stackedcolumn2d",
+                        "renderAt": "myChart",
+                        "width": chartWidth,
+                        "height": chartHeight,
+                        "dataFormat": "json",
+                        "dataSource": {
+                            "chart": {
+                                "caption": "מספר התאונות בחודש לפי חומרה",
+                                "xAxisName": "חודשים - מקובץ מכל השנים שנבחרו",
+                                "yAxisName": "מספר תאונות לפי חומרה",
+                                "theme": "fint",
+                                "showSum": "1",
+                                "labelFontSize": "15",
+                                "yAxisNameFontSize": "20",
+                                "xAxisNameFontSize": "20",
+                                "captionFontSize": "25",
+                            },
+                            "categories": categories,
+                            "dataset": dataset
+                        }
+                    });
+                    statChart.render();
+                });
+            }
+
             break;
     }
 
@@ -418,7 +629,15 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
         if (jsPanelInst != null) {
             currentTypeOfChart = $("#selectTypeOfChart").val();
             startJSPanelWithChart(jsPanelInst, $("#statPanel").width(), $("#statPanel").height(),
-                $("#statPanel").width() - 30, $("#statPanel").height() - 80, $("#selectTypeOfChart").val());
+                $("#statPanel").width() - 30, $("#statPanel").height() - 80);
+        }
+    });
+
+    $("#selectTypeOfData").on("change", function() {
+        if (jsPanelInst != null) {
+            currentDataType = $("#selectTypeOfData").val();
+            startJSPanelWithChart(jsPanelInst, $("#statPanel").width(), $("#statPanel").height(),
+                $("#statPanel").width() - 30, $("#statPanel").height() - 80);
         }
     });
 

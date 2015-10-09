@@ -76,6 +76,11 @@ def main(username=None, password=None, lastmail=False):
             else:
                 continue
 
+        # Handles Gmail bug which hasn't physically removed some of the deleted files
+        mail_date = datetime(2015, 10, 06, 10)
+        if mtime < mail_date:
+            continue
+
         for part in mail.walk():
             if part.get_content_maintype() == 'multipart' or part.get('Content-Disposition') is None:
                 continue

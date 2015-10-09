@@ -38,8 +38,7 @@ def create_accidents(file_location):
     :return: Yields a marker object with every iteration
     """
     print("\tReading accidents data from '%s'..." % file_location)
-    inc = 1
-    csvmap = {"time": 0, "lat": 1, "long": 2, "street": 3, "city": 5, "comment": 6, "type": 7, "casualties": 8}
+    csvmap = {"id": 0, "time": 1, "lat": 2, "long": 3, "street": 4, "city": 6, "comment": 7, "type": 8, "casualties": 9}
 
     with open(file_location, 'rU') as f:
         reader = csv.reader(f, delimiter=',', dialect=csv.excel_tab)
@@ -56,11 +55,11 @@ def create_accidents(file_location):
 
             created = parse_date(accident[csvmap["time"]])
             marker = {
+                "id": accident[csvmap["id"]],
                 "latitude": accident[csvmap["lat"]],
                 "longitude": accident[csvmap["long"]],
                 "created": created,
                 "provider_code": PROVIDER_CODE,
-                "id": int(created.strftime("%s")[2:-1] + "%02d" % inc),  # must be < 2147483647
                 "title": unicode(accident[csvmap["type"]], encoding='utf-8'),
                 "address": unicode((accident[csvmap["street"]] + ' ' + accident[csvmap["city"]]), encoding='utf-8'),
                 "severity": 2 if u"קשה" in unicode(accident[csvmap["type"]], encoding='utf-8') else 3,
@@ -71,10 +70,6 @@ def create_accidents(file_location):
                 "description": unicode(accident[csvmap["comment"]], encoding='utf-8')
             }
 
-            inc += 1
-            if inc >= 100:  # id will be too big for PostgreSQL
-                print "\t\tToo many accidents in file..."
-                break
             yield marker
 
 

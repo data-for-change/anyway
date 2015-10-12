@@ -34,7 +34,7 @@ pip-log.txt
 nosetests.xml
 
 # Translations
-*.mo
+# *.mo # https://github.com/hasadna/anyway/pull/438
 
 # Mr Developer
 /.mr.developer.cfg

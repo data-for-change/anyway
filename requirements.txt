@@ -1,5 +1,6 @@
 Flask==0.10.1
 Flask-Assets==0.10
+Flask-Babel==0.9
 Flask-SQLAlchemy==2.0
 Jinja2==2.7.1
 MarkupSafe==0.18

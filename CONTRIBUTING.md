@@ -1,0 +1,106 @@
+Contributing to ANYWAY
+======================
+
+OMG. OMG. OMG. We are really glad you are joining the team!  We set up a contributor's guide that explains all about [setting up a Anyway's development environment](http://hasadna.github.io/anyway) - prepare to be amazed. 
+
+![Contributors guide](static/img/anyway.png)
+
+This page contains information about reporting issues as well as some tips and
+guidelines useful to experienced open source contributors. Finally, make sure
+you read our [community guidelines](#docker-community-guidelines) before you
+start participating.
+
+## Topics
+
+* [Issues and Bugs] (#issues-and-bugs)
+* [Feature Requests] (#feature-requests)
+* [Coding Rules](#coding-rules)
+* [Contribution Tips](#contribution-tips)
+
+## Issues and Bugs
+
+As the one of the teams working in the Knowledge Workshop, we put data credibility first. If you find any
+discrepancies between the presented data and the information in the used open-source databases, please let us know.
+Also, if you happen to stumble upon a bug, don't hesitate and raise a flag and we will get it fixed. You can send any your reports to [anyway@anyway.co.il](mailto:anyway@anyway.co.il). 
+Don't forget to mention which operating system and browser you were using, so we can easily track down the issue.
+
+If you are already digging through the code and our [unstable version](http://anyway-unstable.herokuapp.com/) and you happen to find a bug, please go ahead and [open a new issue](https://github.com/hasadna/anyway/issues).
+ Just remember to look through the pre-existing ones to make sure there are no duplicates. Even better if you can take it on yourself, then we encourage you to report the issue, assign yourself and submit a Pull Request with a fix.
+
+**Issue Report Format:**
+
+```[Title]
+``` 
+```
+**Issue** One-liner regarding the issue you discovered
+```
+
+```[Description] 
+```
+```
+Explain why this is a bug, how to reproduce it and on which OS and browser you encounter it. If you can't fix it yourself, try to suggest a fix or any leads you found in the code.
+Add any errors thrown from a non-minified stack trace, if possible. 
+Attach any screenshots that are relevant.
+```
+
+Once you are done with the basics, don't forget to tag it with `bug` and `1 - Ready` and other relevant tags from the following list: `backend`, `frontend`, `easy`
+
+## Feature Requests
+
+New feature requests are more than welcome, just don't forget to pass them by the team and also check the issue list to avoid duplicates.
+We generally submit **major changes** via direct email to our [mail center](mailto:anyway@anyway.co.il) and request **small changes** by [submitting an issue](https://github.com/hasadna/anyway/issues).
+
+```[Title]
+``` 
+```
+**Feature** One-liner on the feature you'd like to implement
+```
+
+```[Description] 
+```
+```
+Elaborate on the feature, why it is needed and the time frame in which you'd like it to be completed. If you have any suggestions or advice, share it with the team.
+Also, mockups are very helpful - so you can try to make a simple screenshot to help us understand the concept.
+```
+
+Now tag it with `enhancement` and `1 - Ready` and other relevant tags from the following list: `backend`, `frontend`, `easy`, 
+
+
+## Coding Rules
+
+**Branch Names**
+
+When working on your own bug fix or feature, make the changes on your forked repository:
+
+* Bug Fix: assign yourself to the [open issue](https://github.com/hasadna/anyway/issues), tag it with '2 - Working', create a new local branch and name it XXXX-something where XXXX is the number of the issue.
+
+* Feature: create an [enhancement issue](#feature-requests) to announce your intentions or assign yourself to existing issue, and name it XXXX-something where XXXX is the number of the issue.
+
+
+**Clean Code**
+See the following python and js format guidelines and stick to them: . Universally formatted code is crucial in open source projects and promotes ease of writing, reading and maintenance. Always run (webstorm/pycharm plugin) 
+
+**Unit Tests**
+
+*TBD* Submit unit tests for your changes or update existing unit tests.
+
+**Pull Requests**
+
+Code review comments may be added to your pull requests, keep an eye out for necessary changes before merge approval. If the maintainer commented with LGTM (Looks Good To Me), it means you are good to go.
+On your pull requests, don't forget to reference to the fixed bug / feature by adding 'Closes #XXXX' or 'Fixed #XXXX' to the body of the requests. Also, shortly summarize the changes made and list any
+known-issues after the future merge (open new issues for them and reference to them as well).
+
+**Squash Comment**
+
+Before you make a pull request, squash your commits into logical units of work using git rebase -i and git push -f.
+A logical unit of work is a consistent set of patches that should be reviewed together:
+for example, upgrading the version of a vendored dependency and taking advantage of its now available new feature constitute two separate units of work.
+Implementing a new function and calling it in another file constitute a single logical unit of work. The very high majority of submissions should have a single commit, so if in doubt: squash down to one.
+
+## Contribution Tips
+
+**Slack**
+
+**Points of Contacts**
+
+**Workshop @GoogleCampusTLV / @GivaatRamJRS**

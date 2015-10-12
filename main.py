@@ -139,7 +139,7 @@ def markers():
     if request.values.get('format') == 'csv':
         return Response(generate_csv(accidents), headers={
             "Content-Type": "text/csv",
-            "Content-Disposition": 'attachment; filename="data.csv"'
+            "Content-Disposition": 'attachment; filename="Anyway-accidents-from-'+kwargs['start_date'].strftime('%Y-%m-%d')+'-to-'+kwargs['end_date'].strftime('%Y-%m-%d')+'.csv"'
         })
 
     else: # defaults to json

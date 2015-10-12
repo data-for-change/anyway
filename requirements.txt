@@ -1,5 +1,6 @@
 Flask==0.10.1
 Flask-Assets==0.10
+Flask-Babel==0.9
 Flask-SQLAlchemy==2.0
 Jinja2==2.7.1
 MarkupSafe==0.18
@@ -20,3 +21,5 @@ WTForms==2.0.2
 sendgrid==1.4.0
 futures==2.1.6
 python-dateutil==2.4.2
+alembic==0.8.2
+apscheduler==2.1.2

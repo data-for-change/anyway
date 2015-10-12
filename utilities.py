@@ -1,5 +1,7 @@
 from __future__ import print_function
 from csv import DictReader
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from flask import Flask
 import pyproj
 import threading
@@ -96,3 +98,11 @@ class ItmToWGS84(object):
         """
         longitude, latitude = pyproj.transform(self.itm, self.wgs84, x, y)
         return longitude, latitude
+
+
+def time_delta(since):
+    delta = relativedelta(datetime.now(), since)
+    attrs = ['years', 'months', 'days', 'hours', 'minutes', 'seconds']
+    return " ".join('%d %s' % (getattr(delta, attr),
+                               getattr(delta, attr) > 1 and attr or attr[:-1])
+                    for attr in attrs if getattr(delta, attr))

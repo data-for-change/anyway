@@ -9,6 +9,7 @@ from flask import make_response, render_template, Response, jsonify, url_for, fl
 import flask.ext.assets
 from webassets.ext.jinja2 import AssetsExtension
 from webassets import Environment as AssetsEnvironment
+from flask.ext.babel import Babel,gettext,ngettext
 from clusters_calculator import retrieve_clusters
 
 from database import db_session
@@ -30,7 +31,8 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.security import Security, SQLAlchemyUserDatastore, roles_required, current_user, LoginForm
 from collections import OrderedDict
 from sqlalchemy import distinct, func
-
+from apscheduler.scheduler import Scheduler
+import united
 
 app = utilities.init_flask(__name__)
 db = SQLAlchemy(app)
@@ -38,12 +40,16 @@ app = utilities.init_flask(__name__)
 app.config.from_object(__name__)
 app.config['SECURITY_REGISTERABLE'] = False
 app.config['SECURITY_USER_IDENTITY_ATTRIBUTES'] = 'username'
+app.config['BABEL_DEFAULT_LOCALE'] = 'he'
 
 assets = flask.ext.assets.Environment()
 assets.init_app(app)
 sg = sendgrid.SendGridClient(app.config['SENDGRID_USERNAME'], app.config['SENDGRID_PASSWORD'], raise_errors=True)
 
 assets_env = AssetsEnvironment('./static/', '/static')
+
+babel = Babel(app)
+
 jinja_environment = jinja2.Environment(
     autoescape=True,
     loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), "templates")),
@@ -100,33 +106,36 @@ def generate_csv(results):
         yield output_file.getvalue()
         output_file.truncate(0)
 
+ARG_TYPES = {'ne_lat': float, 'ne_lng': float, 'sw_lat': float, 'sw_lng': float, 'zoom': int, 'show_fatal': bool,
+             'show_severe': bool, 'show_light': bool, 'approx': bool, 'accurate': bool, 'show_markers': bool,
+             'show_discussions': bool, 'show_urban': int, 'show_intersection': int, 'show_lane': int,
+             'show_day': int, 'show_holiday': int, 'show_time': int, 'start_time': int, 'end_time': int,
+             'weather': int, 'road': int, 'separation': int, 'surface': int, 'acctype': int, 'controlmeasure': int,
+             'district': int}
+
+@babel.localeselector
+def get_locale():
+    lang = request.values.get('lang')
+    if lang is None:
+        return request.accept_languages.best_match(app.config['LANGUAGES'].keys())
+    else:
+        return lang
 
 @app.route("/markers", methods=["GET"])
 @user_optional
 def markers():
     logging.debug('getting markers')
-    ne_lat = float(request.values['ne_lat'])
-    ne_lng = float(request.values['ne_lng'])
-    sw_lat = float(request.values['sw_lat'])
-    sw_lng = float(request.values['sw_lng'])
-    zoom = int(request.values['zoom'])
-    start_date = datetime.date.fromtimestamp(int(request.values['start_date']))
-    end_date = datetime.date.fromtimestamp(int(request.values['end_date']))
-    fatal = int(request.values['show_fatal'])
-    severe = int(request.values['show_severe'])
-    light = int(request.values['show_light'])
-    inaccurate = int(request.values['show_inaccurate'])
-    show_markers = bool(request.values['show_markers'])
-    show_discussions = bool(request.values['show_discussions'])
+
+    kwargs = {arg: arg_type(request.values[arg]) for (arg, arg_type) in ARG_TYPES.iteritems()}
+    kwargs.update({arg: datetime.date.fromtimestamp(int(request.values[arg])) for arg in ('start_date', 'end_date')})
 
     logging.debug('querying markers in bounding box')
-    is_thin = (zoom < MINIMAL_ZOOM)
-    accidents = Marker.bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng,
-                                          start_date, end_date,
-                                          fatal, severe, light, inaccurate,
-                                          show_markers, is_thin, yield_per=50)
-    discussions = DiscussionMarker.bounding_box_query(ne_lat, ne_lng,
-                                                      sw_lat, sw_lng, show_discussions)
+    is_thin = (kwargs['zoom'] < MINIMAL_ZOOM)
+    accidents = Marker.bounding_box_query(is_thin, yield_per=50, **kwargs)
+
+    discussion_args = ('ne_lat', 'ne_lng', 'sw_lat', 'sw_lng', 'show_discussions')
+    discussions = DiscussionMarker.bounding_box_query(**{arg: kwargs[arg] for arg in discussion_args})
+
     if request.values.get('format') == 'csv':
         return Response(generate_csv(accidents), headers={
             "Content-Type": "text/csv",
@@ -180,9 +189,9 @@ def discussion():
                             identifier).first()
                 context['title'] = marker.title
             except AttributeError:
-                return index(message=u"הדיון לא נמצא: " + request.values['identifier'])
+                return index(message=gettext(u'Discussion not found:') + request.values['identifier'])
             except KeyError:
-                return index(message=u"דיון לא חוקי")
+                return index(message=gettext(u'Illegal Discussion'))
         return render_template('disqus.html', **context)
     else:
         marker = parse_data(DiscussionMarker, get_json_object(request))
@@ -197,23 +206,12 @@ def discussion():
 def clusters(methods=["GET"]):
     start_time = time.time()
     if request.method == "GET":
-        ne_lat = float(request.values['ne_lat'])
-        ne_lng = float(request.values['ne_lng'])
-        sw_lat = float(request.values['sw_lat'])
-        sw_lng = float(request.values['sw_lng'])
-        start_date = datetime.date.fromtimestamp(int(request.values['start_date']))
-        end_date = datetime.date.fromtimestamp(int(request.values['end_date']))
-        fatal = int(request.values['show_fatal'])
-        severe = int(request.values['show_severe'])
-        light = int(request.values['show_light'])
-        inaccurate = int(request.values['show_inaccurate'])
-        zoom = int(request.values['zoom'])
+        kwargs = {arg: arg_type(request.values[arg]) for (arg, arg_type) in ARG_TYPES.iteritems()}
+        kwargs.update({arg: datetime.date.fromtimestamp(int(request.values[arg])) for arg in ('start_date', 'end_date')})
 
-        results = retrieve_clusters(ne_lat, ne_lng, sw_lat, sw_lng,
-                                    start_date, end_date,
-                                    fatal, severe, light, inaccurate, zoom)
+        results = retrieve_clusters(**kwargs)
 
-        logging.debug('calculating clusters took ' + str(time.time() - start_time))
+        logging.debug('calculating clusters took ' + str(time.time() - kwargs['start_time']))
         return Response(json.dumps({'clusters': results}), mimetype="application/json")
 
 @app.route("/highlightpoints", methods=['POST'])
@@ -284,7 +282,7 @@ def index(marker=None, message=None):
             context['coordinates'] = (marker.latitude, marker.longitude)
             context['discussion'] = marker.identifier
         else:
-            message = u"דיון לא נמצא: " + request.values['discussion']
+            message = gettext(u"Discussion not found:") + request.values['discussion']
     if 'start_date' in request.values:
         context['start_date'] = string2timestamp(request.values['start_date'])
     elif marker:
@@ -475,7 +473,7 @@ class SendToSubscribersView(BaseView):
     def is_visible(self):
         return login.current_user.is_authenticated()
 
-class ViewHighlightedMarkers(BaseView):
+class ViewHighlightedMarkersData(BaseView):
     @roles_required('admin')
     @expose('/')
     def index(self):
@@ -490,7 +488,16 @@ class ViewHighlightedMarkers(BaseView):
             p.type = point.type
             points.append(p)
         context = {'points': points}
-        return self.render('viewhighlighted.html', **context)
+        return self.render('viewhighlighteddata.html', **context)
+
+    def is_visible(self):
+        return login.current_user.is_authenticated()
+
+class ViewHighlightedMarkersMap(BaseView):
+    @roles_required('admin')
+    @expose('/')
+    def index1(self):
+        return index(marker=None, message=None)
 
     def is_visible(self):
         return login.current_user.is_authenticated()
@@ -532,8 +539,8 @@ admin = admin.Admin(app, 'ANYWAY Administration Panel', index_view=AdminIndexVie
 admin.add_view(AdminView(User, db_session, name='Users', endpoint='AllUsers', category='Users'))
 admin.add_view(OpenNewOrgAccount(name='Open new organization account', endpoint='OpenAccount', category='Users'))
 admin.add_view(SendToSubscribersView(name='Send To Subscribers'))
-admin.add_view(ViewHighlightedMarkers(name='View Highlighted Markers'))
-
+admin.add_view(ViewHighlightedMarkersData(name='View Highlighted Markers Data', endpoint='ViewHighlightedMarkersData', category='View Highlighted Markers'))
+admin.add_view(ViewHighlightedMarkersMap(name='View Highlighted Markers Map', endpoint='ViewHighlightedMarkersMap', category='View Highlighted Markers'))
 
 lms_dictionary = {}
 
@@ -615,8 +622,7 @@ def create_years_list():
     """
     while True:
         try:
-            year_col = db.session.query(distinct(func.extract("year",
-                                                              Marker.created)))
+            year_col = db.session.query(distinct(func.extract("year", Marker.created)))
             break
         except OperationalError:
             time.sleep(1)
@@ -633,8 +639,12 @@ def create_years_list():
 
 
 if __name__ == "__main__":
+    sched = Scheduler()
+
+    @sched.interval_schedule(hours=12)
+    def scheduled_import():
+        united.main()
+    sched.start()
+
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')
     app.run(debug=True)
-
-
-

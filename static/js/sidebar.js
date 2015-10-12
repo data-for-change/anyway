@@ -1,11 +1,5 @@
-var ICONS_PREFIX = "/static/img/menu icons/";
-var CHECKBOX_ICONS = [
-    ["deadly-unchecked.png", "severe-unchecked.png", "medium-unchecked.png", "location-acc-unchecked.png"],
-    ["deadly-checked.png",   "severe-checked.png",   "medium-checked.png",   "location-acc-checked.png"],
-    ["deadly-hover.png",     "severe-hover.png",     "medium-hover.png"]
-];
-
 var CLUSTER_MODE_SIDEBAR_TEXT = 'התקרב על מנת לצפות ברשימת התאונות';
+var markerCount = 0;
 
 var SidebarView = Backbone.View.extend({
     className: "info-window",
@@ -17,53 +11,11 @@ var SidebarView = Backbone.View.extend({
     initialize: function(options) {
         this.map = options.map;
         this.sidebarItemTemplate = _.template($("#sidebarItemTemplate").text());
-
-//        google.maps.event.addListener(this.map, "center_changed", _.bind(this.updateMarkerList, this));
-
     },
     render: function() {
-
         this.$el.append($("#sidebar-template").html());
         this.$currentViewList = this.$el.find(".current-view");
         var self = this;
-
-        this.$el.find("img.checkbox-accuracy")
-            .data("checked", SHOW_INACCURATE);
-
-        this.$el.find("img.checkbox-severity")
-            .each(function() {
-                    $(this).data("checked", LAYERS[$(this).data("type")]);
-                }
-            );
-
-        this.$el.find("img.checkbox-severity, img.checkbox-accuracy")
-            .each(function() {
-                self.updateCheckboxIcon($(this));
-            });
-
-        this.$el.find("img.checkbox-severity").parent()
-            .mouseover(function() {
-                self.updateCheckboxIcon($("img", this), "hover");
-            })
-            .mouseout(function() {
-                self.updateCheckboxIcon($("img", this));
-            });
-
-        this.$el.find("img.checkbox-severity").parent().click(function() {
-                var checkboxImg = $("img", this);
-                checkboxImg.data("checked", 1 - checkboxImg.data("checked"));
-                self.updateCheckboxIcon(checkboxImg);
-                self.updateLayers();
-            });
-
-        this.$el.find("img.checkbox-accuracy").parent()
-            .click(function() {
-                var checkboxImg = $("img", this);
-                checkboxImg.data("checked", 1 - checkboxImg.data("checked"));
-                self.updateCheckboxIcon(checkboxImg);
-                self.updateShowByAccuracy();
-            });
-
         return this;
     },
     showClusterMessage: function() {
@@ -74,7 +26,7 @@ var SidebarView = Backbone.View.extend({
     reloadMarkerList: function(markerList) {
         // Set the marker list to empty array if it's not defined
         markerList = markerList || [];
-
+        markerCount = 0;
         var bounds = this.map.getBounds();
 
         // Sort by decending order the marker list
@@ -83,7 +35,7 @@ var SidebarView = Backbone.View.extend({
         });
 
         var $viewList = $('<ul/>');
-        var markerCount = 0;
+
 
         for (var i = 0; i < markerList.length; i++) {
             var markerView = markerList[i];
@@ -115,8 +67,8 @@ var SidebarView = Backbone.View.extend({
         }
 
         this.$currentViewList.empty().append($viewList.find("li"));
-
         this.$el.find(".current-view-count").text(markerCount);
+        app.updateFilterString();
     },
     updateCheckboxIcon: function(img, hover) {
         var checked;
@@ -146,10 +98,5 @@ var SidebarView = Backbone.View.extend({
     },
     getMarker: function(e) {
         return $(e.target).data("marker") || $(e.target).parents("li").data("marker");
-    },
-    updateShowByAccuracy: function() {
-        this.$el.find("img.checkbox-accuracy").each(function() {
-            app.model.set("showInaccurateMarkers", $(this).data("checked"));
-        });
     }
 });

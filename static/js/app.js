@@ -820,7 +820,6 @@ $(function () {
             this.markerIconType = !this.markerIconType;
             this.resetMarkers();
             this.fetchMarkers();
-            console.log($(".gmnoprint").find());
         },
         loadFilter: function() {
             if ($("#checkbox-discussions").is(":checked")) { this.show_discussions='1' } else { this.show_discussions='' }

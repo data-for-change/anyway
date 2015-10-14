@@ -7,41 +7,43 @@ var MarkerView = Backbone.View.extend({
     },
     initialize : function(options) {
         this.map = options.map;
+        this.markerIconType = options.markerIconType;
         _.bindAll(this, "clickMarker");
     },
     localize : function(field,value) {
         //localizes non-mandatory data (which has the same consistent html and python field names)
-            if (this.model.has(value) && this.model.get(value)!="" &&
-                    localization[field][this.model.get(value)]!=undefined) {
-                this.$el.find("." + value).text(fields[field] + ": " + localization[field][this.model.get(value)]);
+        if (this.model.has(value) && this.model.get(value)!="" &&
+            localization[field][this.model.get(value)]!=undefined) {
+            this.$el.find("." + value).text(fields[field] + ": " + localization[field][this.model.get(value)]);
         }
     },
 
     render : function() {
 
         var markerPosition = new google.maps.LatLng(this.model.get("latitude"),
-                                                    this.model.get("longitude"));
-        var provider = PROVIDERS[this.model.get("provider_code")]
+            this.model.get("longitude"));
+        var provider = PROVIDERS[this.model.get("provider_code")];
 
         this.marker = new google.maps.Marker({
             position: markerPosition,
-            id: this.model.get("id")
+            id: this.model.get("id"),
+            class: 'marker'
         });
 
         this.marker.setMap(this.map);
         this.marker.view = this;
 
         if (this.model.get("type") == MARKER_TYPE_DISCUSSION) {
-            this.marker.setIcon( app.retinaIconsResize(DISCUSSION_ICON) );
-            this.marker.setTitle("דיון"); //this.model.get("title"));
+            this.marker.setIcon(this.getIcon());
+            this.marker.setTitle(this.getTitle('discussion')); //this.model.get("title"));
             google.maps.event.addListener(this.marker, "click",
                 _.bind(app.showDiscussion, app, this.model.get("identifier")) );
             return this;
         }
 
         if (this.model.get("provider_code") == PROVIDER_CODE_UNITED_HATZALA) {
-            this.marker.setIcon(getIcon(ACCIDENT_TYPE_UNITED_HATZALA, this.model.get("severity")));
-            this.marker.setTitle(this.model.get("title"));
+            this.marker.setIcon(this.getIcon());
+            this.marker.setTitle(this.getTitle('united'));
             app.oms.addMarker(this.marker);
             this.$el.html($("#united-marker-content-template").html());
 
@@ -69,7 +71,9 @@ var MarkerView = Backbone.View.extend({
 
         this.marker.setOpacity(this.model.get("locationAccuracy") == 1 ? 1.0 : INACCURATE_MARKER_OPACITY);
         this.marker.setIcon(this.getIcon());
-        this.marker.setTitle(this.getTitle());
+        this.marker.setTitle(this.getTitle('single'));
+        this.marker.setMap(this.map);
+        this.marker.view = this;
 
         app.oms.addMarker(this.marker);
 
@@ -107,8 +111,8 @@ var MarkerView = Backbone.View.extend({
         this.localize("KIVUN_HAZIYA","cross_direction");
 
         this.$el.find(".creation-date").text("תאריך: " +
-                    moment(this.model.get("created")).format("LLLL"));
-
+            moment(this.model.get("created")).format("LLLL"));
+        var provider = PROVIDERS[this.model.get("provider_code")];
         this.$el.find(".profile-image").attr("width", "50px");
         this.$el.find(".profile-image").attr("src", "/static/img/logos/" + provider.logo);
         this.$el.find(".profile-image").attr("title", provider.name);
@@ -119,26 +123,57 @@ var MarkerView = Backbone.View.extend({
         return this;
     },
     getIcon : function() {
-        return getIcon(this.model.get("subtype"), this.model.get("severity"));
+        return markerIcon = {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 0,
+            fillColor: 'black'
+        };
     },
-    getTitle : function() {
-        if (this.model.get("junction") !== "") {
-        loc = this.model.get("junction");
+    getTitle : function(markerType) {
+        var markerTitle = '';
+        var accuracy = '';
+        var markerIconTypeIdentifier = this.markerIconType ? '' : '.';
+        switch (markerType){
+            case 'single':
+                var loc = '';
+                if (this.model.get("junction") !== "") {
+                    loc = this.model.get("junction");
+                }
+                else if (this.model.get("secondaryStreet") !== "") {
+                    loc = "ברחוב " + this.model.get("secondaryStreet") + " פינת " + this.model.get("mainStreet");
+                }
+                else if (this.model.get("mainStreet") !== "") {
+                    loc = "ברחוב " + this.model.get("mainStreet");
+                }
+                else {
+                    loc = "";
+                }
+                accuracy = !(this.model.get("locationAccuracy") == 1);
+                markerTitle = "ביום " + moment(this.model.get("created")).format("dddd") + ", ה-"
+                    + moment(this.model.get("created")).format("LL")
+                    + " תאונה " + SEVERITY_MAP[this.model.get("severity")]
+                    + " מסוג " + localization.SUG_TEUNA[this.model.get("subtype")] + " "
+                    + loc;
+                break;
+            case 'multiple':
+                accuracy = (this.marker.opacity != 1);
+                markerTitle = 'מספר תאונות בנקודה זו' ;
+                break
+            case 'discussion':
+                markerTitle = 'דיון';
+                break;
+            case 'united':
+                markerTitle = 'איחוד ההצלה';
+            default:
+                break;
         }
-        else if (this.model.get("secondaryStreet") !== "") {
-            loc = "ברחוב " + this.model.get("secondaryStreet") + " פינת " + this.model.get("mainStreet");
+
+        if (markerType == 'discussion')
+            return markerTitle + markerIconTypeIdentifier;
+        else{
+            accuracy = accuracy ?  ' (מיקום משוער)' : '';
+            return markerTitle + accuracy +  markerIconTypeIdentifier;
         }
-        else if (this.model.get("mainStreet") !== "") {
-            loc = "ברחוב " + this.model.get("mainStreet");
-        }
-        else {
-            loc = "";
-        }
-        return "ביום " + moment(this.model.get("created")).format("dddd") + ", ה-"
-        + moment(this.model.get("created")).format("LL")
-        + " תאונה " + SEVERITY_MAP[this.model.get("severity")]
-        + " מסוג " + localization.SUG_TEUNA[this.model.get("subtype")] + " "
-        + loc;
     },
     choose : function() {
         if (app.oms.markersNearMarker(this.marker).length) {
@@ -176,7 +211,6 @@ var MarkerView = Backbone.View.extend({
     },
     clickMarker : function() {
         that = this;
-        this.highlight();
         app.closeInfoWindow();
         app.selectedMarker = this;
 
@@ -233,49 +267,6 @@ var MarkerView = Backbone.View.extend({
 
         $(document).keydown(app.ESCinfoWindow);
     },
-    highlight : function() {
-        if (app.oms.markersNearMarker(this.marker, true)[0]  && !this.model.get("currentlySpiderfied")){
-            this.resetOpacitySeverity();
-        }
-        this.marker.setAnimation(google.maps.Animation.BOUNCE);
-
-
-        // ##############################
-        // # Another option, if we don't want the somewhat unintuitive experience where an icon start's bouncing,
-        // # but other icons in the same place stay still, will be to do like so: (option 2)
-        // ##############################
-
-        // _.each(app.oms.markersNearMarker(this.marker), function (marker){
-
-        //     marker.setAnimation(google.maps.Animation.BOUNCE);
-
-        // });
-        // this.marker.setAnimation(google.maps.Animation.BOUNCE);
-
-        // ## END (option 2)
-
-    },
-    unhighlight : function() {
-        if (app.oms.markersNearMarker(this.marker, true)[0] && !this.model.get("currentlySpiderfied")){
-            this.opacitySeverityForGroup();
-        }
-        this.marker.setAnimation(null);
-
-
-        // ##############################
-        // # Option 2
-        // ##############################
-
-        // _.each(app.oms.markersNearMarker(this.marker), function (marker){
-
-        //     marker.setAnimation(null);
-
-        // });
-        // this.marker.setAnimation(null);
-
-        // ## END (option 2)
-
-    },
     clickShare : function() {
         FB.ui({
             method: "feed",
@@ -285,17 +276,6 @@ var MarkerView = Backbone.View.extend({
             caption: SUBTYPE_STRING[this.model.get("subtype")]
             // picture
         });
-    },
-    resetOpacitySeverity : function() {
-        this.marker.icon = this.getIcon();
-        this.marker.opacity = this.model.get("locationAccuracy") == 1 ? 1.0 : INACCURATE_MARKER_OPACITY;
-    },
-    opacitySeverityForGroup : function() {
-        var group = this.model.get("groupID") -1;
-        this.marker.icon = app.retinaIconsResize(MULTIPLE_ICONS[app.groupsData[group].severity]);
-        if (app.groupsData[group].opacity != 'opaque'){
-            this.marker.opacity = INACCURATE_MARKER_OPACITY / app.groupsData[group].opacity;
-        }
     },
     accordionInputClick : function(e) {
         var input = e.currentTarget;
@@ -326,5 +306,5 @@ var MarkerView = Backbone.View.extend({
                 }.bind(this),550);
             }
         }
-    }
+    },
 });

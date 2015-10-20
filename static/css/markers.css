@@ -29,7 +29,7 @@
     transform: rotate(45deg);
 }
 
-.gmnoprint[title*='תאונה'],.gmnoprint[title*='תאונות']{
+.gmnoprint[title*='תאונה'],.gmnoprint[title*='תאונות'],.gmnoprint[title*='איחוד הצלה']{
     width: 30px !important;
     height: 30px !important;
     opacity: 1 !important;
@@ -47,7 +47,7 @@
     transform: rotate(-45deg) translate(12px,-31px) !important;
 }
 
-.gmnoprint[title*='תאונה']:after, .gmnoprint[title*='תאונות']:after {
+.gmnoprint[title*='תאונה']:after, .gmnoprint[title*='תאונות']:after,.gmnoprint[title*='איחוד הצלה']:after {
     font-family: 'Material Icons';
     font-size: 18px;
     width: 24px;
@@ -170,3 +170,29 @@
     -ms-transform: rotate(45deg);
     transform: rotate(45deg);
 }
+
+.gmnoprint[title*='איחוד הצלה']:after {
+    content: 'U';
+    color: pink;
+    font-family: 'Material Icons';
+    font-size: 18px;
+    width: 24px;
+    height: 24px;
+    margin: 3px;
+    background: white;
+    display: inline-block;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 24px;
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+.gmnoprint[title*='איחוד הצלה']{
+    background-color: pink;
+}
+

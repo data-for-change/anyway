@@ -163,7 +163,7 @@ var MarkerView = Backbone.View.extend({
                 markerTitle = 'דיון';
                 break;
             case 'united':
-                markerTitle = 'איחוד ההצלה';
+                markerTitle = 'איחוד הצלה';
             default:
                 break;
         }

@@ -409,7 +409,7 @@ def main():
                                                  title='Please select a directory')
         else:
             dir_name = raw_input('Please provide the directory path: ')
-            
+
         dir_list = [dir_name]
         if args.delete_all:
             confirm_delete_all = raw_input("Are you sure you want to delete all the current data? (y/n)\n")

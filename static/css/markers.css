@@ -1,0 +1,198 @@
+.gmnoprint[title^='דיון'] {
+    width: 30px !important;
+    height: 30px !important;
+    opacity: 1 !important;
+    -webkit-border-radius: 50% !important;
+    border-radius: 50% !important;
+    background-color: #5BC0EB;
+    transform: rotate(-45deg) translate(0px,-18px) !important;
+}
+
+.gmnoprint[title^='דיון']:after{
+    content: '\e0bf';
+    font-family: 'Material Icons';
+    font-size: 18px;
+    width: 24px;
+    height: 24px;
+    margin: 3px;
+    background: white;
+    display: inline-block;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 24px;
+    color: #5BC0EB;
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+.gmnoprint[title*='תאונה'],.gmnoprint[title*='תאונות'],.gmnoprint[title*='איחוד הצלה']{
+    width: 30px !important;
+    height: 30px !important;
+    opacity: 1 !important;
+    -webkit-border-radius: 50% 50% 50% 0 !important;
+    border-radius: 50% 50% 50% 0 !important;
+    transform: rotate(-45deg) translate(12px,-31px) !important;
+}
+
+.gmnoprint[title*='תאונות']{
+    width: 30px !important;
+    height: 30px !important;
+    opacity: 1 !important;
+    -webkit-border-radius: 50%  !important;
+    border-radius: 50%  !important;
+    transform: rotate(-45deg) translate(12px,-31px) !important;
+}
+
+.gmnoprint[title*='תאונה']:after, .gmnoprint[title*='תאונות']:after,.gmnoprint[title*='איחוד הצלה']:after {
+    font-family: 'Material Icons';
+    font-size: 18px;
+    width: 24px;
+    height: 24px;
+    margin: 3px;
+    background: white;
+    display: inline-block;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 24px;
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+.gmnoprint[title$='.']{
+    width: 10px !important;
+    height: 10px !important;
+    border-radius: 50% !important;
+    transform: translate(-4px,-4px) !important;
+}
+
+.gmnoprint[title*='תאונות']{
+    background-color: darkgray;
+}
+
+.gmnoprint[title*='תאונות']:after{
+    content: '\e3e4';
+    color: darkgray;
+}
+
+.gmnoprint[title$='.']:after {
+    visibility: hidden;
+}
+
+.gmnoprint[title*='קטלנית']{
+    background-color: #D81C32;
+}
+
+.gmnoprint[title*='קשה']{
+    background-color: #FF9F1C;
+}
+
+.gmnoprint[title*='קלה']{
+    background-color: #FFD82B;
+}
+
+.gmnoprint[title*='קטלנית']:after{
+    color: #D81C32;
+}
+
+.gmnoprint[title*='קשה']:after{
+    color: #FF9F1C;
+}
+
+.gmnoprint[title*='קלה']:after{
+    color: #FFD82B;
+}
+
+.gmnoprint[title*='הולך רגל']:after{
+    content: '\e536';
+}
+
+.gmnoprint[title*='פגיעה']:after,.gmnoprint[title*='החלקה']:after,.gmnoprint[title*='התנגשות']:after{
+    content: '\e531';
+}
+
+.gmnoprint[title*='נפילה']:after{
+    transform: rotate(-45deg) !important;
+    content: '\e566';
+}
+
+.gmnoprint[title*='אחר']:after{
+    content: '\e5d3';
+}
+
+.gmnoprint[title*='התהפכות']:after{
+    transform: rotate(-100deg) !important;
+    content: '\e531';
+}
+
+.gmnoprint[title*='ירידה']:after{
+    content: '\e8e3';
+}
+
+.gmnoprint[title*='(מיקום משוער)']{
+    opacity: 0.5 !important;
+}
+
+.gmnoprint[title*='מיקום נוכחי']{
+    width: 30px !important;
+    height: 30px !important;
+    opacity: 1 !important;
+    -webkit-border-radius: 50% 50% 50% 0 !important;
+    border-radius: 50% 50% 50% 0 !important;
+    transform: rotate(-45deg) !important;
+    background-color: #9BC53D;
+}
+
+.gmnoprint[title*='מיקום נוכחי']:after{
+    content: '\e1b3';
+    color: #9BC53D;
+    font-family: 'Material Icons';
+    font-size: 18px;
+    width: 24px;
+    height: 24px;
+    margin: 3px;
+    background: white;
+    display: inline-block;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 24px;
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+.gmnoprint[title*='איחוד הצלה']:after {
+    content: 'U';
+    color: pink;
+    font-family: 'Material Icons';
+    font-size: 18px;
+    width: 24px;
+    height: 24px;
+    margin: 3px;
+    background: white;
+    display: inline-block;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 24px;
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+.gmnoprint[title*='איחוד הצלה']{
+    background-color: pink;
+}
+

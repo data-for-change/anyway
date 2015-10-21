@@ -660,7 +660,6 @@ input[type='checkbox']{
 }
 
 .cluster:hover div:first-child  {
-
   position: absolute;
     top: 0px;
     left: 0px;

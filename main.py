@@ -211,7 +211,7 @@ def clusters(methods=["GET"]):
 
         results = retrieve_clusters(**kwargs)
 
-        logging.debug('calculating clusters took ' + str(time.time() - kwargs['start_time']))
+        logging.debug('calculating clusters took %f seconds' % (time.time() - start_time))
         return Response(json.dumps({'clusters': results}), mimetype="application/json")
 
 @app.route("/highlightpoints", methods=['POST'])

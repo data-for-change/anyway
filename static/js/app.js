@@ -45,6 +45,7 @@ $(function () {
             this.markers = new MarkerCollection();
             this.clusters = new ClusterCollection();
             this.model = new Backbone.Model();
+            this.markerIconType = true;
             this.markerList = [];
             this.clusterList = [];
             this.firstLoadDelay = true;
@@ -132,7 +133,7 @@ $(function () {
                 this.fetchMarkers();
             }
         },
-        fetchMarkers: function (reset) {
+        fetchMarkers: function () {
             if (!this.isReady) return;
 
             var params = this.buildMarkersParams();
@@ -152,6 +153,7 @@ $(function () {
                     success: this.reloadSidebar.bind(this)
                 });
             } else {
+                this.clearClustersFromMap();
                 $("#view-filter").prop('disabled', false);
                 if (!this.markerList.length) {
                     this.loadMarkers();
@@ -263,7 +265,7 @@ $(function () {
             });
 
             _.each(this.oms.markersNearAnyOtherMarker(), function (marker) {
-                marker.title = 'מספר תאונות בנקודה זו';
+                marker.title = marker.view.getTitle('multiple');
                 var groupHead = marker.view.model;
                 if (!groupHead.get("groupID")) {
                     groupHead.set("groupID", groupID);
@@ -311,13 +313,6 @@ $(function () {
                 infowindow.open(this.map, location1);
                 tourStyle(infowindow);
             }
-
-            _.each(this.oms.markersNearAnyOtherMarker(), function(marker){
-                if (!marker.view.model.get("currentlySpiderfied")){
-                    marker.view.opacitySeverityForGroup();
-                }
-            });
-
         },
         downloadCsv: function () {
             if (this.markers.length > 0) {
@@ -392,7 +387,6 @@ $(function () {
 
             var statDiv = document.createElement('div');
             statDiv.className = "map-button statistics-control";
-            statDiv.title = 'Statistics';
             statDiv.innerHTML = $("#statistics-control").html();
             google.maps.event.addDomListener(statDiv, 'click', function () {
                 statPanelClick(700,400,700,350);
@@ -442,6 +436,22 @@ $(function () {
             this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(input);
             this.searchBox = new google.maps.places.SearchBox(input);
 
+            var toggleBGDiv = document.createElement('div');
+            toggleBGDiv.className = "toggle-control-bg";
+            toggleBGDiv.innerHTML = $("#toggle-control").html();
+
+            var toggleDiv = document.createElement('div');
+            toggleDiv.className = "map-button toggle-control pin";
+            toggleDiv.title = 'שנה תצוגת אייקונים';
+            google.maps.event.addDomListener(toggleBGDiv, 'click', function () {
+                $(toggleDiv).toggleClass('pin');
+                $(toggleDiv).toggleClass('dot');
+                this.toggleMarkerIconType();
+            }.bind(this));
+
+            toggleBGDiv.appendChild(toggleDiv);
+            this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(toggleBGDiv);
+
             google.maps.event.addListener(this.searchBox, 'places_changed', function () {
                 this.handleSearchBox();
             }.bind(this));
@@ -458,8 +468,7 @@ $(function () {
             this.oms.addListener("spiderfy", function (markers) {
                 this.closeInfoWindow();
                 _.each(markers, function (marker) {
-                    marker.title = marker.view.getTitle();
-                    marker.view.resetOpacitySeverity();
+                    marker.setTitle(marker.view.getTitle('single'));
                     marker.view.model.set("currentlySpiderfied", true);
                 });
                 this.clickedMarker = true;
@@ -515,16 +524,18 @@ $(function () {
             this.router = new AppRouter();
             Backbone.history.start({pushState: true});
             console.log('Loaded AppRouter');
-
+            $('#toggle-sidebar').click(function () {
+                $('.main').toggleClass('main-open').toggleClass('main-close');
+                $('.sidebar-container').toggleClass('sidebar-container-open').toggleClass('sidebar-container-close');
+            });
             this.isReady = true;
-            google.maps.event.addListener( this.map, "rightclick", _.bind(this.contextMenuMap, this) );
-            google.maps.event.addListener( this.map, "idle", function(){
+            google.maps.event.addListener(this.map, "rightclick", _.bind(this.contextMenuMap, this) );
+            google.maps.event.addListener(this.map, "idle", function(){
                 if (!this.firstLoadDelay){
                     this.fetchMarkers();
                 }
             }.bind(this) );
-            google.maps.event.addListener( this.map, "click", _.bind(this.clickMap, this) );
-
+            google.maps.event.addListener(this.map, "click", _.bind(this.clickMap, this) );
             return this;
         },
         goToMyLocation: function () {
@@ -546,7 +557,6 @@ $(function () {
         },
         closeInfoWindow: function () {
             if (app.infoWindow) {
-                this.selectedMarker.unhighlight();
                 this.selectedMarker = null;
                 app.infoWindow.close();
                 app.infoWindow = null;
@@ -585,7 +595,7 @@ $(function () {
             // markers are loaded immediately as they are fetched
             if (this.clusterMode() || this.fitsFilters(model) ||
                 !this.clusterMode() && model.get("type") == MARKER_TYPE_DISCUSSION) {
-                var markerView = new MarkerView({model: model, map: this.map}).render();
+                var markerView = new MarkerView({model: model, map: this.map, markerIconType: this.markerIconType}).render();
                 model.set("markerView", this.markerList.length);
                 this.markerList.push(markerView);
             }
@@ -761,7 +771,12 @@ $(function () {
             this.locationMarker = new google.maps.Marker({
               position: loc,
               map: this.map,
-              icon: this.retinaIconsResize(USER_LOCATION_ICON)
+              icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 0,
+                    fillColor: 'black'
+              },
+              title: 'מיקום נוכחי'
             });
 
              // agam add- tour find location for step 2
@@ -800,6 +815,11 @@ $(function () {
                 };
             }
             return image_url;
+        },
+        toggleMarkerIconType: function(){
+            this.markerIconType = !this.markerIconType;
+            this.resetMarkers();
+            this.fetchMarkers();
         },
         loadFilter: function() {
             if ($("#checkbox-discussions").is(":checked")) { this.show_discussions='1' } else { this.show_discussions='' }

@@ -8,8 +8,6 @@ import multiprocessing
 
 def retrieve_clusters(**kwargs):
     marker_boxes = divide_to_boxes(kwargs['ne_lat'], kwargs['ne_lng'], kwargs['sw_lat'], kwargs['sw_lng'])
-    print "marker boxes: "
-    print marker_boxes
     result_futures = []
     logging.info('number of cores: ' + str(multiprocessing.cpu_count()))
     with concurrent.futures.ThreadPoolExecutor(max_workers=multiprocessing.cpu_count()) as executor:

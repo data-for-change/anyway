@@ -265,7 +265,8 @@ $(function () {
             });
 
             _.each(this.oms.markersNearAnyOtherMarker(), function (marker) {
-                marker.title = marker.view.getTitle('hidden');
+                // hide markers using markers.css
+                marker.title = '';
                 var groupHead = marker.view.model;
                 if (!groupHead.get("groupID")) {
                     groupHead.set("groupID", groupID);

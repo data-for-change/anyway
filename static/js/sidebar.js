@@ -1,4 +1,3 @@
-var CLUSTER_MODE_SIDEBAR_TEXT = 'התקרב על מנת לצפות ברשימת התאונות';
 var markerCount = 0;
 
 var SidebarView = Backbone.View.extend({
@@ -16,10 +15,8 @@ var SidebarView = Backbone.View.extend({
         var self = this;
         return this;
     },
-    showClusterMessage: function() {
+    emptyMarkerList: function() {
         this.$currentViewList.empty();
-        this.$el.find(".current-view-count").text('');
-        this.$el.find(".current-view").append('<li>' + CLUSTER_MODE_SIDEBAR_TEXT +'</li>');
     },
     reloadMarkerList: function(markerList) {
         // Set the marker list to empty array if it's not defined

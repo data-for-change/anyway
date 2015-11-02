@@ -205,7 +205,7 @@ $(function () {
         },
         reloadSidebar: function () {
             if (this.clusterMode()) {
-                this.sidebar.showClusterMessage();
+                this.sidebar.emptyMarkerList();
             } else { // close enough
                 this.setMultipleMarkersIcon();
                 this.sidebar.reloadMarkerList(this.markerList);
@@ -214,6 +214,7 @@ $(function () {
                 startJSPanelWithChart(jsPanelInst, $("#statPanel").width(), $("#statPanel").height(),
 					$("#statPanel").width() - 30, $("#statPanel").height() - 80);
             }
+            this.updateFilterString();
             this.chooseMarker();
         },
         buildMarkersParams: function () {
@@ -265,7 +266,8 @@ $(function () {
             });
 
             _.each(this.oms.markersNearAnyOtherMarker(), function (marker) {
-                marker.title = marker.view.getTitle('multiple');
+                // hide markers using markers.css
+                marker.title = '';
                 var groupHead = marker.view.model;
                 if (!groupHead.get("groupID")) {
                     groupHead.set("groupID", groupID);
@@ -288,10 +290,14 @@ $(function () {
                         }
                     });
                     groupID++;
-
                 }
-
             },this);
+
+            // Set icon only for group heads (optional: add number of accident in title)
+            var groups = _.groupBy(this.oms.markersNearAnyOtherMarker(), function(marker){ return marker.view.model.get("groupID")});
+            var groupHeads = _.map(groups, _.first);
+            _.each(groupHeads, function(groupHead){groupHead.title = groupHead.view.getTitle("multiple")});
+
             this.groupsData = groupsData;
               // agam
             if(tourLocation == 5) {

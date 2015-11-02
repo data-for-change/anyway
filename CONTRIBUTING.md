@@ -1,14 +1,12 @@
 Contributing to ANYWAY
 ======================
 
-OMG. OMG. OMG. We are really glad you are joining the team!  We set up a contributor's guide that explains all about [setting up a Anyway's development environment](http://hasadna.github.io/anyway) - prepare to be amazed. 
+OMG. OMG. OMG. We are really glad you are joining the team!  We set up a contributor's guide that explains all about [setting up ANYWAY's development environment](http://hasadna.github.io/anyway) - prepare to be amazed. 
 
 ![Contributors guide](static/img/anyway.png)
 
 This page contains information about reporting issues as well as some tips and
-guidelines useful to experienced open source contributors. Finally, make sure
-you read our [community guidelines](#docker-community-guidelines) before you
-start participating.
+guidelines useful to experienced open source contributors. 
 
 ## Topics
 
@@ -19,7 +17,7 @@ start participating.
 
 ## Issues and Bugs
 
-As the one of the teams working in the Knowledge Workshop, we put data credibility first. If you find any
+As one of the teams working in the Knowledge Workshop, we put data credibility first. If you find any
 discrepancies between the presented data and the information in the used open-source databases, please let us know.
 Also, if you happen to stumble upon a bug, don't hesitate and raise a flag and we will get it fixed. You can send any your reports to [anyway@anyway.co.il](mailto:anyway@anyway.co.il). 
 Don't forget to mention which operating system and browser you were using, so we can easily track down the issue.
@@ -82,7 +80,11 @@ When working on your own bug fix or feature, make the changes on your forked rep
 
 **Clean Code**
 
-See the following python and js format guidelines and stick to them: . Universally formatted code is crucial in open source projects and promotes ease of writing, reading and maintenance. Always run (webstorm/pycharm plugin) 
+See the following python and js format guidelines and stick to them: 
+* [Airbnb JavaScript Guidlines] (https://github.com/airbnb/javascript)
+* [Python Style Guide] (https://www.python.org/dev/peps/pep-0008/)
+
+Universally formatted code is crucial in open source projects and promotes ease of writing, reading and maintenance.
 
 
 
@@ -103,7 +105,7 @@ Also, if you add an empty file, named `__init__.py` at tests folder, you'll be a
 
 **Pull Requests**
 
-Code review comments may be added to your pull requests, keep an eye out for necessary changes before merge approval. If the maintainer commented with LGTM (Looks Good To Me), it means you are good to go.
+Code review comments may be added to your pull requests, keep an eye out for necessary changes before merge approval. If the maintainer decides that your code is good, it will be merged to ANYWAY's Dev repository.
 On your pull requests, don't forget to reference to the fixed bug / feature by adding `Closes #XXXX` or `Fixes #XXXX` to the body of the requests. Also, shortly summarize the changes made and list any
 known-issues after the future merge (open new issues for them and reference to them as well).
 

@@ -30,8 +30,9 @@ var MarkerView = Backbone.View.extend({
             class: 'marker'
         });
 
-        this.marker.setMap(this.map);
-        this.marker.view = this;
+        if (app.map.zoom < MINIMAL_ZOOM) {
+            return this;
+        }
 
         if (this.model.get("type") == MARKER_TYPE_DISCUSSION) {
             this.marker.setIcon(this.getIcon());
@@ -41,9 +42,11 @@ var MarkerView = Backbone.View.extend({
             return this;
         }
 
+        this.marker.setIcon(this.getIcon());
+        this.marker.setMap(this.map);
+        this.marker.setTitle(this.getTitle('single'));
+
         if (this.model.get("provider_code") == PROVIDER_CODE_UNITED_HATZALA) {
-            this.marker.setIcon(this.getIcon());
-            this.marker.setTitle(this.getTitle('united'));
             app.oms.addMarker(this.marker);
             this.$el.html($("#united-marker-content-template").html());
 
@@ -60,65 +63,54 @@ var MarkerView = Backbone.View.extend({
             this.$el.find(".profile-image-url").attr("href", provider.url);
             this.$el.find(".added-by").html("מקור: <a href=\'" +
                 provider.url + "\' target=\'_blank\'>" + provider.name + "</a>");
+        }else{
+            this.$el.html($("#marker-content-template").html());
 
-            return this;
+            this.$el.find(".title").text(this.marker.get("title"));
+            this.$el.find(".id").text(fields.ACC_ID + ": " + this.marker.get("id"));
+            this.$el.find(".provider_code").text(fields.PROVIDER_CODE + ": " + this.model.get("provider_code"));
+            this.$el.find(".roadType").text(fields.SUG_DEREH + ": " + localization.SUG_DEREH[this.model.get("roadType")]);
+            this.$el.find(".accidentType").text(fields.SUG_TEUNA+ ": " + localization.SUG_TEUNA[this.model.get("subtype")]);
+            this.$el.find(".roadShape").text(fields.ZURAT_DEREH+ ": " + localization.ZURAT_DEREH[this.model.get("roadShape")]);
+            this.$el.find(".severityText").text(fields.HUMRAT_TEUNA + ": " + localization.HUMRAT_TEUNA[this.model.get("severity")]);
+            this.$el.find(".dayType").text(fields.SUG_YOM + ": " + localization.SUG_YOM[this.model.get("dayType")]);
+            this.$el.find(".igun").text(fields.STATUS_IGUN + ": " + localization.STATUS_IGUN[this.model.get("locationAccuracy")]);
+            this.$el.find(".unit").text(fields.YEHIDA + ": " + localization.YEHIDA[this.model.get("unit")]);
+            this.$el.find(".mainStreet").text(this.model.get("mainStreet"));
+            this.$el.find(".secondaryStreet").text(this.model.get("secondaryStreet"));
+            this.$el.find(".junction").text(this.model.get("junction"));
+            // Non-mandatory fields:
+            this.localize("HAD_MASLUL","one_lane");
+            this.localize("RAV_MASLUL","multi_lane");
+            this.localize("MEHIRUT_MUTERET","speed_limit");
+            this.localize("TKINUT","intactness");
+            this.localize("ROHAV","road_width");
+            this.localize("SIMUN_TIMRUR","road_sign");
+            this.localize("TEURA","road_light");
+            this.localize("BAKARA","road_control");
+            this.localize("MEZEG_AVIR","weather");
+            this.localize("PNE_KVISH","road_surface");
+            this.localize("SUG_EZEM","road_object");
+            this.localize("MERHAK_EZEM","object_distance");
+            this.localize("LO_HAZA","didnt_cross");
+            this.localize("OFEN_HAZIYA","cross_mode");
+            this.localize("MEKOM_HAZIYA","cross_location");
+            this.localize("KIVUN_HAZIYA","cross_direction");
+
+            this.$el.find(".creation-date").text("תאריך: " +
+                moment(this.model.get("created")).format("LLLL"));
+            this.$el.find(".profile-image").attr("width", "50px");
+            this.$el.find(".profile-image").attr("src", "/static/img/logos/" + provider.logo);
+            this.$el.find(".profile-image").attr("title", provider.name);
+            this.$el.find(".profile-image-url").attr("href", provider.url);
+            this.$el.find(".added-by").html("מקור: <a href=\'" +
+                provider.url + "\' target=\'_blank\'>" + provider.name + "</a>");
         }
 
-        //app.clusterer.addMarker(this.marker);
-        if (app.map.zoom < MINIMAL_ZOOM) {
-            return this;
-        }
 
-        this.marker.setOpacity(this.model.get("locationAccuracy") == 1 ? 1.0 : INACCURATE_MARKER_OPACITY);
-        this.marker.setIcon(this.getIcon());
-        this.marker.setTitle(this.getTitle('single'));
-        this.marker.setMap(this.map);
         this.marker.view = this;
 
         app.oms.addMarker(this.marker);
-
-        this.$el.html($("#marker-content-template").html());
-
-        this.$el.find(".title").text(this.marker.get("title"));
-        this.$el.find(".id").text(fields.ACC_ID + ": " + this.marker.get("id"));
-        this.$el.find(".provider_code").text(fields.PROVIDER_CODE + ": " + this.model.get("provider_code"));
-        this.$el.find(".roadType").text(fields.SUG_DEREH + ": " + localization.SUG_DEREH[this.model.get("roadType")]);
-        this.$el.find(".accidentType").text(fields.SUG_TEUNA+ ": " + localization.SUG_TEUNA[this.model.get("subtype")]);
-        this.$el.find(".roadShape").text(fields.ZURAT_DEREH+ ": " + localization.ZURAT_DEREH[this.model.get("roadShape")]);
-        this.$el.find(".severityText").text(fields.HUMRAT_TEUNA + ": " + localization.HUMRAT_TEUNA[this.model.get("severity")]);
-        this.$el.find(".dayType").text(fields.SUG_YOM + ": " + localization.SUG_YOM[this.model.get("dayType")]);
-        this.$el.find(".igun").text(fields.STATUS_IGUN + ": " + localization.STATUS_IGUN[this.model.get("locationAccuracy")]);
-        this.$el.find(".unit").text(fields.YEHIDA + ": " + localization.YEHIDA[this.model.get("unit")]);
-        this.$el.find(".mainStreet").text(this.model.get("mainStreet"));
-        this.$el.find(".secondaryStreet").text(this.model.get("secondaryStreet"));
-        this.$el.find(".junction").text(this.model.get("junction"));
-        // Non-mandatory fields:
-        this.localize("HAD_MASLUL","one_lane");
-        this.localize("RAV_MASLUL","multi_lane");
-        this.localize("MEHIRUT_MUTERET","speed_limit");
-        this.localize("TKINUT","intactness");
-        this.localize("ROHAV","road_width");
-        this.localize("SIMUN_TIMRUR","road_sign");
-        this.localize("TEURA","road_light");
-        this.localize("BAKARA","road_control");
-        this.localize("MEZEG_AVIR","weather");
-        this.localize("PNE_KVISH","road_surface");
-        this.localize("SUG_EZEM","road_object");
-        this.localize("MERHAK_EZEM","object_distance");
-        this.localize("LO_HAZA","didnt_cross");
-        this.localize("OFEN_HAZIYA","cross_mode");
-        this.localize("MEKOM_HAZIYA","cross_location");
-        this.localize("KIVUN_HAZIYA","cross_direction");
-
-        this.$el.find(".creation-date").text("תאריך: " +
-            moment(this.model.get("created")).format("LLLL"));
-        var provider = PROVIDERS[this.model.get("provider_code")];
-        this.$el.find(".profile-image").attr("width", "50px");
-        this.$el.find(".profile-image").attr("src", "/static/img/logos/" + provider.logo);
-        this.$el.find(".profile-image").attr("title", provider.name);
-        this.$el.find(".profile-image-url").attr("href", provider.url);
-        this.$el.find(".added-by").html("מקור: <a href=\'" +
-            provider.url + "\' target=\'_blank\'>" + provider.name + "</a>");
 
         return this;
     },
@@ -136,18 +128,19 @@ var MarkerView = Backbone.View.extend({
         switch (markerType){
             case 'single':
                 var loc = '';
-                if (this.model.get("junction") !== "") {
+                if (this.model.get("junction") !== null) {
                     loc = this.model.get("junction");
+                } else {
+                    if (this.model.get("secondaryStreet") !== null) {
+                        loc = "ברחוב " + this.model.get("secondaryStreet") + " פינת " + this.model.get("mainStreet");
+                    }
+                    else {
+                        if (this.model.get("mainStreet") !== null) {
+                            loc = "ברחוב " + this.model.get("mainStreet");
+                        }
+                    }
                 }
-                else if (this.model.get("secondaryStreet") !== "") {
-                    loc = "ברחוב " + this.model.get("secondaryStreet") + " פינת " + this.model.get("mainStreet");
-                }
-                else if (this.model.get("mainStreet") !== "") {
-                    loc = "ברחוב " + this.model.get("mainStreet");
-                }
-                else {
-                    loc = "";
-                }
+
                 accuracy = !(this.model.get("locationAccuracy") == 1);
                 markerTitle = "ביום " + moment(this.model.get("created")).format("dddd") + ", ה-"
                     + moment(this.model.get("created")).format("LL")
@@ -158,12 +151,10 @@ var MarkerView = Backbone.View.extend({
             case 'multiple':
                 accuracy = (this.marker.opacity != 1);
                 markerTitle = 'מספר תאונות בנקודה זו' ;
-                break
+                break;
             case 'discussion':
                 markerTitle = 'דיון';
                 break;
-            case 'united':
-                markerTitle = 'איחוד הצלה';
             default:
                 break;
         }

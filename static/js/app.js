@@ -205,7 +205,7 @@ $(function () {
         },
         reloadSidebar: function () {
             if (this.clusterMode()) {
-                this.sidebar.showClusterMessage();
+                this.sidebar.emptyMarkerList();
             } else { // close enough
                 this.setMultipleMarkersIcon();
                 this.sidebar.reloadMarkerList(this.markerList);
@@ -214,6 +214,7 @@ $(function () {
                 startJSPanelWithChart(jsPanelInst, $("#statPanel").width(), $("#statPanel").height(),
 					$("#statPanel").width() - 30, $("#statPanel").height() - 80);
             }
+            this.updateFilterString();
             this.chooseMarker();
         },
         buildMarkersParams: function () {

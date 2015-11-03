@@ -17,8 +17,9 @@ guidelines useful to experienced open source contributors.
 
 ## Issues and Bugs
 
-As one of the teams working in the Knowledge Workshop, we put data credibility first. If you find any
-discrepancies between the presented data and the information in the used open-source databases, please let us know.
+As one of the teams working in the Public Knowledge Workshop, we put data
+credibility first. If you find any discrepancies between the presented data and
+the information in the used open-source databases, please let us know.
 Also, if you happen to stumble upon a bug, don't hesitate and raise a flag and we will get it fixed. You can send any your reports to [anyway@anyway.co.il](mailto:anyway@anyway.co.il). 
 Don't forget to mention which operating system and browser you were using, so we can easily track down the issue.
 
@@ -27,19 +28,11 @@ If you are already digging through the code and our [unstable version](http://an
 
 **Issue Report Format:**
 
-```[Title]
-``` 
-```
-**Issue** One-liner regarding the issue you discovered
-```
+* **Title** `**Issue** One-liner regarding the issue you discovered`
 
-```[Description] 
-```
-```
-Explain why this is a bug, how to reproduce it and on which OS and browser you encounter it. If you can't fix it yourself, try to suggest a fix or any leads you found in the code.
+* **Description** Explain why this is a bug, how to reproduce it and on which OS and browser you encounter it. If you can't fix it yourself, try to suggest a fix or any leads you found in the code.
 Add any errors thrown from a non-minified stack trace, if possible. 
 Attach any screenshots that are relevant.
-```
 
 Once you are done with the basics, don't forget to tag it with `bug` and `1 - Ready` and other relevant tags from the following list: `backend`, `frontend`, `easy`
 
@@ -50,18 +43,10 @@ We generally submit **major changes** via direct email to our [mail center](mail
 
 **Feature Request Format:**
 
-```[Title]
-``` 
-```
-**Feature** One-liner on the feature you'd like to implement
-```
+* **Title** `**Feature** One-liner on the feature you'd like to implement`
 
-```[Description] 
-```
-```
-Elaborate on the feature, why it is needed and the time frame in which you'd like it to be completed. If you have any suggestions or advice, share it with the team.
+* **Description** Elaborate on the feature, why it is needed and the time frame in which you'd like it to be completed. If you have any suggestions or advice, share it with the team.
 Also, mockups are very helpful - so you can try to make a simple screenshot to help us understand the concept.
-```
 
 Now tag it with `enhancement` and `1 - Ready` and other relevant tags from the following list: `backend`, `frontend`, `easy`, 
 
@@ -80,8 +65,8 @@ When working on your own bug fix or feature, make the changes on your forked rep
 
 **Clean Code**
 
-See the following python and js format guidelines and stick to them: 
-* [Airbnb JavaScript Guidlines] (https://github.com/airbnb/javascript)
+See the following Python and JavaScript format guidelines and stick to them: 
+* [Airbnb JavaScript Guidelines] (https://github.com/airbnb/javascript)
 * [Python Style Guide] (https://www.python.org/dev/peps/pep-0008/)
 
 Universally formatted code is crucial in open source projects and promotes ease of writing, reading and maintenance.
@@ -90,16 +75,21 @@ Universally formatted code is crucial in open source projects and promotes ease 
 
 **Unit Tests**
 
-All unit tests can be found in the "tests" folder. When adding a new test, make sure you follow this pattern: `test_*.py` (i.e: test_bounding_box_query.py).
+All unit tests can be found in the "tests" folder. When adding a new test, make sure you follow this pattern: `test_*.py` (e.g.: `test_bounding_box_query.py`).
 To run the tests, use the following command:
-`python -m unittest discover ./tests/`
+
+    python -m unittest discover tests
 
 Note that you can add a pattern so the discover command will find only your file as such:
-`python -m unittest discover ./tests/ "*bounding*.py"`
+
+    python -m unittest discover tests "*bounding*.py"
 
 
 Also, if you add an empty file, named `__init__.py` at tests folder, you'll be able to run more commands as:
-`python -m unittest test_module.TestClass.test_method` (i.e: `python -m unittest tests.test_bounding_box_query`)
+
+    python -m unittest test_module.TestClass.test_method
+
+(e.g.: `python -m unittest tests.test_bounding_box_query`)
 
 
 
@@ -117,9 +107,9 @@ Before you make a pull request, squash your commits into logical units of work u
 
 ## Contribution Tips
 
-**Workshop @GoogleCampusTLV / @GivaatRamJRS**
+**Workshop @GoogleCampusTLV / @GivatRamJRS**
 
-The team meets each Monday at Google Campus. 
+The team meets each Monday at Google Campus, Tel Aviv. There are also meetings in the Public Library in Jerusalem on some Wednesdays.
 You are more than welcome to join us, ask questions and raise any issues you stumble upon while working on the project.
 
 **Slack**
@@ -131,13 +121,13 @@ Questions are always welcome.
 
 **Points of Contacts**
 
-galraij - Project Manager
-danielhers - Development Team Leader
-aviklai - DB and Statistics
-omerxx - Backend
-OmerSchechter - Frontend
-yosefh - Translations
-LironRS - UI/UX
+* galraij - Project Manager
+* danielhers - Development Team Leader
+* aviklai - DB and Statistics
+* omerxx - Backend
+* OmerSchechter - Frontend
+* yosefh - Translations
+* LironRS - UI/UX
 
 (contributors: feel free to edit the file, add yourselves to the POC list, and share any tips that you find helpful)
 

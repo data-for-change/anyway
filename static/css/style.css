@@ -690,3 +690,28 @@ input[type='date']{
 input[type='checkbox']{
     display: none;
 }
+
+#filter-string{
+    text-align: center;
+    vertical-align: middle;
+    padding: 9%;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#filter-string > p{
+    text-align: center;
+    line-height: 30px;
+    font-size: 30px !important;
+}
+
+#filter-string > span > a{
+    display: inline;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#filter-string > span > a:hover{
+    color: grey !important;
+}
+

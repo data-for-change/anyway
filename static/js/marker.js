@@ -141,6 +141,7 @@ var MarkerView = Backbone.View.extend({
                     }
                 }
 
+                console.log(this.model.get("locationAccuracy"));
                 accuracy = !(this.model.get("locationAccuracy") == 1);
                 markerTitle = "ביום " + moment(this.model.get("created")).format("dddd") + ", ה-"
                     + moment(this.model.get("created")).format("LL")

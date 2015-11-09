@@ -956,19 +956,19 @@ $(function () {
 
                 $("#filter-string").empty()
                     .append("<span>מציג </span>")
-                    .append("<span><a onclick='showFilter(0)'>"+markerCount+"</a></span>")
+                    .append("<span><a onclick='showFilter(FILTER_MARKERS)'>"+markerCount+"</a></span>")
                     .append("<span> תאונות</span>")
                     .append("<span> בין התאריכים </span><br>")
-                    .append("<span><a onclick='showFilter(2)'>"+
+                    .append("<span><a onclick='showFilter(FILTER_DATE)'>"+
                                 moment(this.dateRanges[0]).format('LL') + " עד " +
-                                moment(this.dateRanges[1]).format('LL') +"</a></span>")
+                                moment(this.dateRanges[1]).format('LL') +"</a></span><br>")
                     .append("<span>" + severityText + "</span>")
-                    .append("<span><a onclick='showFilter(1)' style='color: #d81c32;'>" + fatal + "</a></span>")
-                    .append("<span><a onclick='showFilter(1)' style='color: #ff9f1c;'>" + severe + "</a></span>")
-                    .append("<span><a onclick='showFilter(1)' style='color: #ffd82b;'>" + light + "</a></span><br>")
+                    .append("<span><a onclick='showFilter(FILTER_INFO)' style='color: #d81c32;'>" + fatal + "</a></span>")
+                    .append("<span><a onclick='showFilter(FILTER_INFO)' style='color: #ff9f1c;'>" + severe + "</a></span>")
+                    .append("<span><a onclick='showFilter(FILTER_INFO)' style='color: #ffd82b;'>" + light + "</a></span><br>")
                     .append("<span>" + accuracyText + "</span>")
-                    .append("<span><a onclick='showFilter(1)'>" + accurate + "</a></span>")
-                    .append("<span><a onclick='showFilter(1)'>" + approx + "</a></span>")
+                    .append("<span><a onclick='showFilter(FILTER_INFO)'>" + accurate + "</a></span>")
+                    .append("<span><a onclick='showFilter(FILTER_INFO)'>" + approx + "</a></span>")
                 ;
             } else {
                 $("#filter-string").empty()

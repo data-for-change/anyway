@@ -260,4 +260,6 @@ var localization =
         "MISHKAL_KOLEL_LMS": "משקל כולל",
         "ACC_ID": "מספר סידורי",
         "PROVIDER_CODE": "סוג תיק"
+
+
         }

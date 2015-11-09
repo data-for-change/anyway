@@ -204,10 +204,12 @@ var MarkerView = Backbone.View.extend({
         that = this;
         app.closeInfoWindow();
         app.selectedMarker = this;
+        var infoWindowOffset = this.markerIconType ? new google.maps.Size(0,-25) : new google.maps.Size(0,0);
 
         if (this.marker_clicked) {
             app.infoWindow = new google.maps.InfoWindow({
-                content: that.el
+                content: that.el,
+                pixelOffset: infoWindowOffset
             });
             app.infoWindow.open(that.map, that.marker);
             app.updateUrl(that.getUrl());
@@ -249,7 +251,8 @@ var MarkerView = Backbone.View.extend({
                     }
                 }
                 app.infoWindow = new google.maps.InfoWindow({
-                    content: that.el
+                    content: that.el,
+                    pixelOffset: infoWindowOffset
                 });
                 app.infoWindow.open(that.map, that.marker);
                 app.updateUrl(that.getUrl());

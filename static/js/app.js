@@ -71,6 +71,7 @@ $(function () {
             this.acctype = 0;
             this.controlmeasure = 0;
             this.district = 0;
+            this.case_type = 0;
 
             this.dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
 
@@ -255,6 +256,7 @@ $(function () {
             params["acctype"] = this.acctype;
             params["controlmeasure"] = this.controlmeasure;
             params["district"] = this.district;
+            params["case_type"] = this.case_type;
             return params;
         },
         setMultipleMarkersIcon: function () {
@@ -875,6 +877,7 @@ $(function () {
             this.acctype = $("input[type='radio'][name='acctype']:checked").val();
             this.controlmeasure = $("input[type='radio'][name='controlmeasure']:checked").val();
             this.district = $("input[type='radio'][name='district']:checked").val();
+            this.case_type = $("input[type='radio'][name='casetype']:checked").val();
 
             this.dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())]
             this.resetMarkers();

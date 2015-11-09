@@ -331,6 +331,9 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         if kwargs.get('district', 0) != 0:
             markers = markers.filter(Marker.unit == kwargs['district'])
 
+        if kwargs.get('case_type', 0) != 0:
+            markers = markers.filter(Marker.provider_code == kwargs['case_type'])
+
         if is_thin:
             markers = markers.options(load_only("id", "longitude", "latitude"))
         return markers

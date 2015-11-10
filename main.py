@@ -111,7 +111,7 @@ ARG_TYPES = {'ne_lat': float, 'ne_lng': float, 'sw_lat': float, 'sw_lng': float,
              'show_discussions': bool, 'show_urban': int, 'show_intersection': int, 'show_lane': int,
              'show_day': int, 'show_holiday': int, 'show_time': int, 'start_time': int, 'end_time': int,
              'weather': int, 'road': int, 'separation': int, 'surface': int, 'acctype': int, 'controlmeasure': int,
-             'district': int}
+             'district': int, 'case_type': int}
 
 @babel.localeselector
 def get_locale():

@@ -403,8 +403,7 @@
 
 <div id="sidebar-template" style="display: none">
     <div class="filter-description">
-        <div style="width:80%; padding:5%; font-size: 20px; font-weight: bold;">
-            <p id="filter-string"></p>
+        <div id="filter-string">
         </div>
     </div>
     <div class="filter-menu">
@@ -1034,6 +1033,24 @@
         inGooglePlay: 'בGoogle play'
     });
 </script>
+
+<script>
+    // show filter panel on search string click
+    function showFilter(number){
+        switch (number){
+            case FILTER_MARKERS:
+                $('#filter-markers').click();
+                break;
+            case FILTER_INFO:
+                $('#filter-info').click();
+                break;
+            case FILTER_DATE:
+                $('#filter-date').click();
+                break;
+        }
+    }
+</script>
+
 </body>
 </html>
 

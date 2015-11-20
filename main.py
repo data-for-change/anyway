@@ -141,7 +141,7 @@ def markers():
         return Response(generate_csv(accidents), headers={
             "Content-Type": "text/csv",
             "Content-Disposition": 'attachment; '
-                                   'filename="Anyway-accidents-from-{0}-to{1}.csv"'
+                                   'filename="Anyway-accidents-from-{0}-to-{1}.csv"'
                         .format(kwargs["start_date"].strftime(date_format), kwargs["end_date"].strftime(date_format))
         })
 

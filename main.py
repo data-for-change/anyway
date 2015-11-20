@@ -137,9 +137,12 @@ def markers():
     discussions = DiscussionMarker.bounding_box_query(**{arg: kwargs[arg] for arg in discussion_args})
 
     if request.values.get('format') == 'csv':
+        date_format = '%Y-%m-%d'
         return Response(generate_csv(accidents), headers={
             "Content-Type": "text/csv",
-            "Content-Disposition": 'attachment; filename="data.csv"'
+            "Content-Disposition": 'attachment; '
+                                   'filename="Anyway-accidents-from-{0}-to{1}.csv"'
+                        .format(kwargs["start_date"].strftime(date_format), kwargs["end_date"].strftime(date_format))
         })
 
     else: # defaults to json

@@ -381,14 +381,14 @@ def init_login():
 class AdminView(sqla.ModelView):
 
     def is_accessible(self):
-        return login.current_user.is_authenticated()
+        return login.current_user.is_authenticated
 
 
 class AdminIndexView(admin.AdminIndexView):
 
     @expose('/')
     def index(self):
-        if login.current_user.is_authenticated():
+        if login.current_user.is_authenticated:
             if current_user.has_role('admin'):
                 return super(AdminIndexView, self).index()
             else:
@@ -406,7 +406,7 @@ class AdminIndexView(admin.AdminIndexView):
             user = form.get_user()
             login.login_user(user)
 
-        if login.current_user.is_authenticated():
+        if login.current_user.is_authenticated:
             return redirect(url_for('.index'))
         #link = '<p>Don\'t have an account? <a href="' + url_for('.register_view') + '">Click here to register.</a></p>'
         self._template_args['form'] = form
@@ -471,7 +471,7 @@ class SendToSubscribersView(BaseView):
             return "Email/s Sent"
 
     def is_visible(self):
-        return login.current_user.is_authenticated()
+        return login.current_user.is_authenticated
 
 class ViewHighlightedMarkersData(BaseView):
     @roles_required('admin')
@@ -491,7 +491,7 @@ class ViewHighlightedMarkersData(BaseView):
         return self.render('viewhighlighteddata.html', **context)
 
     def is_visible(self):
-        return login.current_user.is_authenticated()
+        return login.current_user.is_authenticated
 
 class ViewHighlightedMarkersMap(BaseView):
     @roles_required('admin')
@@ -500,7 +500,7 @@ class ViewHighlightedMarkersMap(BaseView):
         return index(marker=None, message=None)
 
     def is_visible(self):
-        return login.current_user.is_authenticated()
+        return login.current_user.is_authenticated
 
 class OpenAccountForm(Form):
     username = StringField('Username', validators=[validators.DataRequired()])
@@ -529,7 +529,7 @@ class OpenNewOrgAccount(BaseView):
        return self.render('open_account.html', form=formAccount)
 
     def is_visible(self):
-        return login.current_user.is_authenticated()
+        return login.current_user.is_authenticated
 
 
 init_login()
@@ -594,7 +594,7 @@ security = Security(app, user_datastore, login_form=ExtendedLoginForm)
 @roles_required('privileged_user')
 @app.route('/testroles')
 def TestLogin():
-    if current_user.is_authenticated():
+    if current_user.is_authenticated:
         if current_user.has_role('privileged_user'):
             context = {'user_name': get_current_user_first_name()}
             return render_template('testroles.html', **context)

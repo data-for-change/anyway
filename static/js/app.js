@@ -123,9 +123,7 @@ $(function () {
         },
         zoomChanged: function () {
             this.resetOnMouseUp = true;
-            var reset = this.previousZoom < MINIMAL_ZOOM;
-            this.fetchData(reset);
-            this.previousZoom = this.map.zoom;
+            this.fetchMarkers();
         },
         reloadMarkers: function () {
             if (!this.firstLoadDelay){
@@ -156,41 +154,6 @@ $(function () {
             } else {
                 this.clearClustersFromMap();
                 $("#view-filter").prop('disabled', false);
-                if (!this.markerList.length) {
-                    this.loadMarkers();
-                }
-
-                this.clearClustersFromMap();
-
-                this.markers.fetch({
-                    data: $.param(params),
-                    reset: reset,
-                    success: this.reloadSidebar.bind(this)
-                });
-            }
-        },
-        fetchData: function (reset) {
-            if (!this.isReady) return;
-            this.updateUrl();
-            var params = this.buildMarkersParams();
-
-            reset = this.clusterMode() || (typeof reset !== 'undefined' && reset);
-            reset &= this.resetOnMouseUp;
-            google.maps.event.clearListeners(this.map, "mousemove");
-            this.resetOnMouseUp = false;
-            if (reset) {
-                this.resetMarkers();
-            }
-
-            if (this.clusterMode()) {
-
-                this.clusters.fetch({
-                    data: $.param(params),
-                    reset: reset,
-                    success: this.reloadSidebar.bind(this)
-                });
-
-            } else {
                 if (!this.markerList.length) {
                     this.loadMarkers();
                 }

@@ -628,18 +628,18 @@ textarea.form-control-wide {
 }
 
 .marker-info-window{
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow-y: hidden;
+    overflow-x: hidden;/*
     height: 370px;
-    width: 340px;
+    width: 340px;*/
 }
 
-.marker-info-window::-webkit-scrollbar{
+.gm-style-iw > div::-webkit-scrollbar{
     -webkit-appearance: none;
     width: 7px;
 }
 
-.marker-info-window::-webkit-scrollbar-thumb{
+.gm-style-iw > div::-webkit-scrollbar-thumb{
     border-radius: 4px;
     background-color: rgba(0, 0, 0, .5);
     -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, .5);

@@ -1,5 +1,5 @@
 .accordion-container{
-	width: 300px;
+	width: 100%;
 	margin: 30px 2px 0px 0px;
 }
 
@@ -111,7 +111,7 @@
 
 .accordion-container input:checked ~ .ac-extra-large{
 	max-height: 800px;
-	overflow-y: scroll;
+	overflow-y: auto;
 }
 
 .accordion-container .fontIcon{

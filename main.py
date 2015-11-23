@@ -33,10 +33,10 @@ from collections import OrderedDict
 from sqlalchemy import distinct, func
 from apscheduler.scheduler import Scheduler
 import united
+from flask.ext.compress import Compress
 
 app = utilities.init_flask(__name__)
 db = SQLAlchemy(app)
-app = utilities.init_flask(__name__)
 app.config.from_object(__name__)
 app.config['SECURITY_REGISTERABLE'] = False
 app.config['SECURITY_USER_IDENTITY_ATTRIBUTES'] = 'username'
@@ -66,6 +66,7 @@ DICTCOLUMN3 = "TEUR"
 lms_dict_files = {DICTIONARY: "Dictionary.csv"}
 content_encoding = 'cp1255'
 
+Compress(app)
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):

@@ -4,16 +4,17 @@ $(function () {
             "": "navigateEmpty",
             "/?marker=:id&start_date=:start&end_date=:end&show_fatal=:showFatal&show_severe=:showSevere&show_light=:showLight&show_inaccurate=:showInaccurate&zoom=:zoom&lat=:lat&lon=:lon": "navigate"
         },
-        navigate: function (id, start, end, showFatal, showSevere, showLight, showInaccurate, zoom, lat, lon) {
-            app.model.set("currentMarker", parseInt(id));
-            app.model.set("dateRange", [new Date(start), new Date(end)]);
-            app.model.set("showFatal", showFatal);
-            app.model.set("showSevere", showSevere);
-            app.model.set("showLight", showLight);
-            app.model.set("showInaccurateMarkers", showInaccurate);
-            app.map.setZoom(parseInt(zoom));
-            app.map.setCenter(new google.maps.LatLng(lat, lon));
-        },
+        //removed navigate function because we don't use backbone navigation for now
+        //navigate: function (id, start, end, showFatal, showSevere, showLight, showInaccurate, zoom, lat, lon) {
+        //    app.model.set("currentMarker", parseInt(id));
+        //    app.model.set("dateRange", [new Date(start), new Date(end)]);
+        //    app.model.set("showFatal", showFatal);
+        //    app.model.set("showSevere", showSevere);
+        //    app.model.set("showLight", showLight);
+        //    app.model.set("showInaccurateMarkers", showInaccurate);
+        //    app.map.setZoom(parseInt(zoom));
+        //    app.map.setCenter(new google.maps.LatLng(lat, lon));
+        //},
         navigateEmpty: function () {
             app.model.set("currentMarker", null);
         }
@@ -114,9 +115,17 @@ $(function () {
         updateUrl: function (url) {
             if (typeof url == 'undefined') {
                 if (app.infoWindow || app.discussionShown) return;
-                url = "/?" + this.getCurrentUrlParams();
+                //url = "/?" + this.getCurrentUrlParams();
+                url = "";
+            }else{
+                var questionMarkPlace = url.indexOf('?');
+                if (questionMarkPlace != -1) {
+                    url = url.substring(0, questionMarkPlace);
+                }
             }
-            Backbone.history.navigate(url, true);
+           Backbone.history.navigate(Backbone.history.fragment, false);
+           // Backbone.history.navigate(url, true);
+           window.history.pushState('','','/')
         },
         clusterMode: function () {
             return this.map.zoom < MINIMAL_ZOOM;
@@ -181,22 +190,31 @@ $(function () {
             this.updateFilterString();
             this.chooseMarker();
         },
-        buildMarkersParams: function () {
+        buildMarkersParams: function (isForUrl) {
             var bounds = this.map.getBounds();
             if (!bounds) return null;
             var zoom = this.map.zoom;
             var dateRange = this.model.get("dateRange");
 
             var params = {};
-            params["ne_lat"] = bounds.getNorthEast().lat();
-            params["ne_lng"] = bounds.getNorthEast().lng();
-            params["sw_lat"] = bounds.getSouthWest().lat();
-            params["sw_lng"] = bounds.getSouthWest().lng();
-            params["zoom"] = zoom;
-            params["thin_markers"] = (zoom < MINIMAL_ZOOM || !bounds);
-            // Pass start and end dates as unix time (in seconds)
-            params["start_date"] = this.dateRanges[0].getTime() / 1000;
-            params["end_date"] = this.dateRanges[1].getTime() / 1000;
+            if (typeof isForUrl === 'undefined') {
+                params["ne_lat"] = bounds.getNorthEast().lat();
+                params["ne_lng"] = bounds.getNorthEast().lng();
+                params["sw_lat"] = bounds.getSouthWest().lat();
+                params["sw_lng"] = bounds.getSouthWest().lng();
+                params["zoom"] = zoom;
+                params["thin_markers"] = (zoom < MINIMAL_ZOOM || !bounds);
+                // Pass start and end dates as unix time (in seconds)
+                params["start_date"] = this.dateRanges[0].getTime() / 1000;
+                params["end_date"] = this.dateRanges[1].getTime() / 1000;
+            }else{
+                var center = app.map.getCenter();
+                params["zoom"] = zoom;
+                params["start_date"] = moment(this.dateRanges[0]).format("YYYY-MM-DD");
+                params["end_date"] = moment(this.dateRanges[1]).format("YYYY-MM-DD");
+                params["lat"] = center.lat();
+                params["lon"] = center.lng();
+            }
             params["show_fatal"] = this.show_fatal;
             params["show_severe"] = this.show_severe;
             params["show_light"] = this.show_light;
@@ -337,10 +355,13 @@ $(function () {
             linkMapDiv.className = 'map-button link-map-control';
             linkMapDiv.innerHTML = $("#link-map-control").html();
             google.maps.event.addDomListener(linkMapDiv, 'click', function () {
-                var url = document.URL,
+                var url = document.URL + "?" + this.getCurrentUrlParams();
                 $map_link = $("#map_link"),
                 $iframe_link = $("#iframe_link"),
                 $embed_link = $("#js-embed-link");
+                //if (url.indexOf('?') != -1) {
+                //    url = url.substring(0, url.indexOf('?'));
+                //}
                 $map_link.val(url);
                 $iframe_link.html('<iframe src="' + url + '&map_only=true"></iframe>');
                 $(".js-btn-copytoclipboard").on("click", function(){
@@ -767,10 +788,12 @@ $(function () {
             }
         },
         getCurrentUrlParams: function () {
-            var center = app.map.getCenter();
-            return "start_date=" + moment(this.dateRanges[0]).format("YYYY-MM-DD") +
-                "&end_date=" + moment(this.dateRanges[1]).format("YYYY-MM-DD") +
-                "&zoom=" + app.map.zoom + "&lat=" + center.lat() + "&lon=" + center.lng();
+            var params = this.buildMarkersParams(true);
+            var returnParams = '';
+            $.each(params, function(attr, attr_value) {
+                returnParams += "&" + attr + "=" + attr_value;
+            });
+            return returnParams;
 		},
         ESCinfoWindow: function(event) {
             if (event.keyCode == 27) {
@@ -846,6 +869,95 @@ $(function () {
             this.resetMarkers();
             this.fetchMarkers();
             this.updateFilterString();
+        },
+        loadFilterFromParameters: function() {
+            var bool_atrs = {};
+            bool_atrs["show_discussions"] = this.showDiscussion;
+            bool_atrs["show_markers"] = this.show_markers;
+            bool_atrs["accurate"] = this.accurate;
+            bool_atrs["approx"] = this.approx;
+            bool_atrs["show_fatal"] = this.show_fatal;
+            bool_atrs["show_severe"] = this.show_severe;
+            bool_atrs["show_light"] = this.show_light;
+
+            $.each(bool_atrs, function(attr, attr_value) {
+                if (attr_value == '1'){
+                    $(attr).prop("checked", true);
+                }else{
+                    $(attr).prop("checked", false);
+                }
+            });
+
+            var complex_attrs = {};
+            complex_attrs["show_urban"] = this.show_urban;
+            complex_attrs["show_intersection"] = this.show_intersection;
+            complex_attrs["show_lane"] = this.show_lane;
+
+            $.each(complex_attrs, function(attr, attr_value) {
+                if (attr_value == 3){
+                     $(attr).prop(":checked",true);
+                     $(attr).prop(":checked", true);
+                }else if (attr_value == 2){
+                     $(attr).prop(":checked", true);
+                     $(attr).prop(":checked", false);
+                }else{
+                     $(attr).prop(":checked", false);
+                     $(attr).prop(":checked", false);
+                }
+            });
+
+            $("input[type='radio'][name='weather']").each(function() {
+              if($(this).val()==this.weather) {
+                $(this).prop("checked", true);
+              }
+            });
+
+            $("input[type='radio'][name='road']").each(function() {
+              if($(this).val()==this.road) {
+                $(this).prop("checked", true);
+              }
+            });
+
+            $("input[type='radio'][name='separation']").each(function() {
+              if($(this).val()==this.separation) {
+                $(this).prop("checked", true);
+              }
+            });
+
+            $("input[type='radio'][name='surface']").each(function() {
+              if($(this).val()==this.surface) {
+                $(this).prop("checked", true);
+              }
+            });
+
+            $("input[type='radio'][name='acctype']").each(function() {
+              if($(this).val()==this.acctype) {
+                $(this).prop("checked", true);
+              }
+            });
+
+            $("input[type='radio'][name='controlmeasure']").each(function() {
+              if($(this).val()==this.controlmeasure) {
+                $(this).prop("checked", true);
+              }
+            });
+
+            $("input[type='radio'][name='district']").each(function() {
+              if($(this).val()==this.district) {
+                $(this).prop("checked", true);
+              }
+            });
+
+            $("input[type='radio'][name='case_type']").each(function() {
+              if($(this).val()==this.case_type) {
+                $(this).prop("checked", true);
+              }
+            });
+
+            if (this.dateRanges !== 'undefined') {
+                document.getElementById("sdate").valueAsDate = new Date(this.dateRanges[0]);
+                document.getElementById("edate").valueAsDate = new Date(this.dateRanges[1]);
+            }
         },
         changeDate: function() {
             var start_date, end_date;

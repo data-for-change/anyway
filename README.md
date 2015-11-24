@@ -10,6 +10,8 @@ To report bugs and feature requests, please [open an issue](https://github.com/h
 
 See also [our Android app](https://github.com/hasadna/anywayAndroidApp) on GitHub.
 
+See [documentation for our source dataset](https://docs.google.com/document/d/1xrYAQSQYyVlY8rrlBG4MlE_gI7tdVu5DAeDH7R6mzUs/edit?usp=sharing).
+
 Contributing
 -----------------------
 * We try to follow the process of other Hasadna projects, e.g. [Open-Knesset](https://oknesset-devel.readthedocs.org/en/latest/)

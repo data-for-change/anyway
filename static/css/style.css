@@ -166,14 +166,10 @@ input[type=radio]:checked + .filter-button + .filter-panel {
 }
 
 .btn, input[type='checkbox']:checked:hover + label{
-    height: 23px;
-    padding: 0 3px 0 3px;
     color: #ccc !important;
     background: white;
-    border: 1px solid #ddd;
     cursor: pointer;
     vertical-align: middle;
-    line-height: 23px;
     display: inline-block;
 }
 

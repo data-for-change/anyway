@@ -85,7 +85,6 @@ div.gm-style {
     width: 300px;
     -webkit-order: 1;
     order: 1;
-    overflow-y: scroll;
     overflow-x: hidden;
     height: 340px;
     padding-left: 10px;
@@ -255,9 +254,9 @@ input[type="date"],input[type="time"]{
     overflow-y: scroll;
     position: absolute;
     top: 290px;
-    bottom: 90px;
+    bottom: 40px;
     padding-right: 8px;
-    width: 280px !important;
+    width: 100%;
 }
 
 .context-menu {
@@ -311,7 +310,6 @@ input[type="date"],input[type="time"]{
 }
 
 .sidebar-container ul li {
-    width: 280px;
     border-bottom: 1px solid #eee;
     cursor: pointer;
     padding-top: 4px;
@@ -719,3 +717,10 @@ input[type='checkbox']{
     color: grey !important;
 }
 
+#step6tour{
+    padding: 0px;
+}
+
+#step6tour li, #step6tour .btn-label{
+    padding-right: 10px;
+}

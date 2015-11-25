@@ -295,7 +295,7 @@ def index(marker=None, message=None):
         context['end_date'] = string2timestamp(request.values['end_date'])
     elif marker:
         context['end_date'] = year2timestamp(marker.created.year + 1)
-    for attr in 'show_fatal', 'show_severe', 'show_light', 'show_inaccurate', 'zoom':
+    for attr in 'show_inaccurate', 'zoom':
         if attr in request.values:
             context[attr] = request.values[attr]
     if 'map_only' in request.values:
@@ -303,6 +303,12 @@ def index(marker=None, message=None):
             context['map_only'] = 1
     if 'lat' in request.values and 'lon' in request.values:
         context['coordinates'] = (request.values['lat'], request.values['lon'])
+    for attr in 'approx', 'accurate', 'show_markers', 'show_discussions', 'show_urban', 'show_intersection', 'show_lane',\
+                'show_day', 'show_holiday', 'show_time', 'start_time', 'end_time', 'weather', 'road', 'separation',\
+                'surface', 'acctype', 'controlmeasure', 'district', 'case_type', 'show_fatal', 'show_severe', 'show_light':
+        value = request.values.get(attr)
+        if value is not None:
+            context[attr] = value or '-1'
     if message:
         context['message'] = message
     return render_template('index.html', **context)

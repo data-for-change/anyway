@@ -872,86 +872,76 @@ $(function () {
         },
         loadFilterFromParameters: function() {
             var bool_atrs = {};
-            bool_atrs["show_discussions"] = this.showDiscussion;
-            bool_atrs["show_markers"] = this.show_markers;
-            bool_atrs["accurate"] = this.accurate;
-            bool_atrs["approx"] = this.approx;
-            bool_atrs["show_fatal"] = this.show_fatal;
-            bool_atrs["show_severe"] = this.show_severe;
-            bool_atrs["show_light"] = this.show_light;
+            bool_atrs["checkbox-discussions"] = this.show_discussions;
+            bool_atrs["checkbox-accidents"] = this.show_markers;
+            bool_atrs["checkbox-accurate"] = this.accurate;
+            bool_atrs["checkbox-approx"] = this.approx;
+            bool_atrs["checkbox-fatal"] = this.show_fatal;
+            bool_atrs["checkbox-severe"] = this.show_severe;
+            bool_atrs["checkbox-light"] = this.show_light;
 
-            $.each(bool_atrs, function(attr, attr_value) {
-                if (attr_value == '1'){
-                    $(attr).prop("checked", true);
-                }else{
-                    $(attr).prop("checked", false);
-                }
-            });
+             $.each(bool_atrs, function(attr, attr_value) {
+                 $('#' + attr).prop("checked", attr_value == '1');
+             });
 
-            var complex_attrs = {};
-            complex_attrs["show_urban"] = this.show_urban;
-            complex_attrs["show_intersection"] = this.show_intersection;
-            complex_attrs["show_lane"] = this.show_lane;
+            if (this.show_urban == 3){
+                $("#checkbox-urban").prop("checked", true);
+                $("#checkbox-nonurban").prop("checked", true);
+            }else if( this.show_urban == 2){
+                $("#checkbox-urban").prop("checked", true);
+                $("#checkbox-nonurban").prop("checked", false);
+            }else if( this.show_urban == 1){
+                $("#checkbox-nonurban").prop("checked", true);
+                $("#checkbox-urban").prop("checked", false);
+            }else{
+                $("#checkbox-nonurban").prop("checked", false);
+                $("#checkbox-urban").prop("checked", false);
+            }
 
-            $.each(complex_attrs, function(attr, attr_value) {
-                if (attr_value == 3){
-                     $(attr).prop(":checked",true);
-                     $(attr).prop(":checked", true);
-                }else if (attr_value == 2){
-                     $(attr).prop(":checked", true);
-                     $(attr).prop(":checked", false);
-                }else{
-                     $(attr).prop(":checked", false);
-                     $(attr).prop(":checked", false);
-                }
-            });
+            if (this.show_intersection == 3){
+                $("#checkbox-intersection").prop("checked", true);
+                $("#checkbox-nonintersection").prop("checked", true);
+            }else if( this.show_intersection == 2){
+                $("#checkbox-intersection").prop("checked", true);
+                $("#checkbox-nonintersection").prop("checked", false);
+            }else if( this.show_intersection == 1){
+                $("#checkbox-nonintersection").prop("checked", true);
+                $("#checkbox-intersection").prop("checked", false);
+            }else{
+                $("#checkbox-nonintersection").prop("checked", false);
+                $("#checkbox-intersection").prop("checked", false);
+            }
 
-            $("input[type='radio'][name='weather']").each(function() {
-              if($(this).val()==this.weather) {
-                $(this).prop("checked", true);
-              }
-            });
+            if (this.show_lane == 3){
+                $("#checkbox-multi-lane").prop("checked", true);
+                $("#checkbox-one-lane").prop("checked", true);
+            }else if( this.show_lane == 2){
+                $("#checkbox-multi-lane").prop("checked", true);
+                $("#checkbox-one-lane").prop("checked", false);
+            }else if( this.show_lane == 1){
+                $("#checkbox-one-lane").prop("checked", true);
+                $("#checkbox-multi-lane").prop("checked", false);
+            }else{
+                $("#checkbox-one-lane").prop("checked", false);
+                $("#checkbox-multi-lane").prop("checked", false);
+            }
 
-            $("input[type='radio'][name='road']").each(function() {
-              if($(this).val()==this.road) {
-                $(this).prop("checked", true);
-              }
-            });
+            var radio_attrs = {};
+            radio_attrs["weather"] = this.weather;
+            radio_attrs["road"] = this.road;
+            radio_attrs["separation"] = this.separation;
+            radio_attrs["surface"] = this.surface;
+            radio_attrs["acctype"] = this.acctype;
+            radio_attrs["controlmeasure"] = this.controlmeasure;
+            radio_attrs["district"] = this.district;
+            radio_attrs["case_type"] = this.case_type;
 
-            $("input[type='radio'][name='separation']").each(function() {
-              if($(this).val()==this.separation) {
-                $(this).prop("checked", true);
-              }
-            });
-
-            $("input[type='radio'][name='surface']").each(function() {
-              if($(this).val()==this.surface) {
-                $(this).prop("checked", true);
-              }
-            });
-
-            $("input[type='radio'][name='acctype']").each(function() {
-              if($(this).val()==this.acctype) {
-                $(this).prop("checked", true);
-              }
-            });
-
-            $("input[type='radio'][name='controlmeasure']").each(function() {
-              if($(this).val()==this.controlmeasure) {
-                $(this).prop("checked", true);
-              }
-            });
-
-            $("input[type='radio'][name='district']").each(function() {
-              if($(this).val()==this.district) {
-                $(this).prop("checked", true);
-              }
-            });
-
-            $("input[type='radio'][name='case_type']").each(function() {
-              if($(this).val()==this.case_type) {
-                $(this).prop("checked", true);
-              }
+            $.each(radio_attrs, function(attr, attr_value) {
+                $("input[type='radio'][name='" + attr +"']").each(function() {
+                    if($(this).val() == attr_value) {
+                        $(this).prop("checked", true);
+                    }
+                });
             });
 
             if (this.dateRanges !== 'undefined') {

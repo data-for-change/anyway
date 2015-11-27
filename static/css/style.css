@@ -82,13 +82,14 @@ div.gm-style {
 .filter-panel {
     border-top: 2px solid #ddd; margin-bottom: 0 !important;
     margin-top: 10px;
-    width: 300px;
     -webkit-order: 1;
     order: 1;
     overflow-x: hidden;
-    height: 340px;
-    padding-left: 10px;
-    padding-right: 10px;
+    position: absolute;
+    top: 198px;
+    bottom: 40px;
+    width:100%;
+    right:0px;
 }
 
 input[type=radio], .filter-panel {
@@ -162,6 +163,7 @@ input[type=radio]:checked + .filter-button + .filter-panel {
     color: #ccc;
     cursor: default;
     line-height: 35px;
+    padding: 0px 10px;
 }
 
 .btn, input[type='checkbox']:checked:hover + label{
@@ -253,8 +255,8 @@ input[type="date"],input[type="time"]{
 .current-view{
     overflow-y: scroll;
     position: absolute;
-    top: 290px;
-    bottom: 40px;
+    top: 76px;
+    bottom: 0px;
     padding-right: 8px;
     width: 100%;
 }
@@ -715,10 +717,6 @@ input[type='checkbox']{
 
 #filter-string > span > a:hover{
     color: grey !important;
-}
-
-#step6tour{
-    padding: 0px;
 }
 
 #step6tour li, #step6tour .btn-label{

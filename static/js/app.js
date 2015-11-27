@@ -507,6 +507,7 @@ $(function () {
                 }
             }.bind(this) );
             google.maps.event.addListener(this.map, "click", _.bind(this.clickMap, this) );
+            this.sidebar.setResponsively();
             return this;
         },
         goToMyLocation: function () {

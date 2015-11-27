@@ -76,5 +76,15 @@ var SidebarView = Backbone.View.extend({
     },
     getMarker: function(e) {
         return $(e.target).data("marker") || $(e.target).parents("li").data("marker");
+    },
+    setResponsively: function() {
+        //set .filter-panel after .filter-descriptionand .filter-menu
+        var filterPanelTop = this.$el.find(".filter-description").outerHeight() + this.$el.find(".filter-menu").outerHeight();
+        var filterPanel = this.$el.find(".filter-panel");
+        $(filterPanel).css("top", filterPanelTop);
+        //set .current-view after .btn-label and .btn-wrap
+        var currentViewTop = this.$el.find("#step6tour .btn-label").outerHeight() + this.$el.find("#step6tour .btn-wrap").outerHeight();
+        var currentView = this.$el.find(".current-view");
+        $(currentView).css("top", currentViewTop);
     }
 });

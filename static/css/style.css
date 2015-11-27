@@ -157,6 +157,8 @@ input[type=radio]:checked + .filter-button + .filter-panel {
     vertical-align: middle;
     line-height: 30px;
     flex-wrap: wrap;
+    padding-right: 10px;
+    padding-left: 10px;
 }
 
 .btn-label{

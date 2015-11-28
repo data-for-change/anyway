@@ -82,14 +82,14 @@ div.gm-style {
 .filter-panel {
     border-top: 2px solid #ddd; margin-bottom: 0 !important;
     margin-top: 10px;
-    width: 300px;
     -webkit-order: 1;
     order: 1;
-    overflow-y: scroll;
     overflow-x: hidden;
-    height: 340px;
-    padding-left: 10px;
-    padding-right: 10px;
+    position: absolute;
+    top: 198px;
+    bottom: 40px;
+    width:100%;
+    right:0px;
 }
 
 input[type=radio], .filter-panel {
@@ -157,23 +157,22 @@ input[type=radio]:checked + .filter-button + .filter-panel {
     vertical-align: middle;
     line-height: 30px;
     flex-wrap: wrap;
+    padding-right: 10px;
+    padding-left: 10px;
 }
 
 .btn-label{
     color: #ccc;
     cursor: default;
     line-height: 35px;
+    padding: 0px 10px;
 }
 
 .btn, input[type='checkbox']:checked:hover + label{
-    height: 23px;
-    padding: 0 3px 0 3px;
     color: #ccc !important;
     background: white;
-    border: 1px solid #ddd;
     cursor: pointer;
     vertical-align: middle;
-    line-height: 23px;
     display: inline-block;
 }
 
@@ -258,10 +257,10 @@ input[type="date"],input[type="time"]{
 .current-view{
     overflow-y: scroll;
     position: absolute;
-    top: 290px;
-    bottom: 90px;
+    top: 76px;
+    bottom: 0px;
     padding-right: 8px;
-    width: 280px !important;
+    width: 100%;
 }
 
 .context-menu {
@@ -315,7 +314,6 @@ input[type="date"],input[type="time"]{
 }
 
 .sidebar-container ul li {
-    width: 280px;
     border-bottom: 1px solid #eee;
     cursor: pointer;
     padding-top: 4px;
@@ -723,3 +721,6 @@ input[type='checkbox']{
     color: grey !important;
 }
 
+#step6tour li, #step6tour .btn-label{
+    padding-right: 10px;
+}

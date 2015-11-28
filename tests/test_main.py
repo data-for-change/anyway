@@ -21,7 +21,7 @@ class TestParseData(unittest.TestCase):
     def test_parse_marker(self):
         marker = parse_data(Marker, self.marker_dummy)
         for key, value in self.marker_dummy.iteritems():
-            self.assertEqual(marker.getattr(key), value)
+            self.assertEqual(getattr(marker, key), value)
 
 if __name__ == '__main__':
     unittest.main()

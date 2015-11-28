@@ -18,7 +18,7 @@ class TestParseData(unittest.TestCase):
             self.arg = arg
 
     def test_class_null(self):
-        self.assertEqual(parse_data(None, self.marker_dummy), None)
+        self.assertEqual(parse_data(Marker, self.marker_dummy), None)
 
     def test_data_null(self):
         self.assertEqual(parse_data(Marker, None), None)

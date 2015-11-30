@@ -239,6 +239,7 @@ input[type=radio]:checked + .filter-button + .filter-panel {
     font-family: 'MeteoconsRegular';
     font-size: 20px;
     width: auto;
+    height:20px;
 }
 
 input[type="date"],input[type="time"]{
@@ -723,4 +724,9 @@ input[type='checkbox']{
 
 #step6tour li, #step6tour .btn-label{
     padding-right: 10px;
+}
+
+.gm-style-iw > div > div{
+    height:100%;
+    max-height:380px;
 }

@@ -43,14 +43,11 @@ var SidebarView = Backbone.View.extend({
                 }
 
                 var iconUrl = markerView.getIcon();
-                if (isRetina){
-                    iconUrl = iconUrl.url;
-                }
 
                 var entryHtml = this.sidebarItemTemplate({
                     created: moment(markerModel.get("created")).format("LLLL"),
                     type: localization.SUG_TEUNA[markerModel.get("subtype")],
-                    //icon: iconUrl
+                    icon: markerView.getTitle("single"),
                 });
 
                 var $entry = $(entryHtml);

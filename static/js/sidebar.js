@@ -41,13 +41,8 @@ var SidebarView = Backbone.View.extend({
                 if (markerModel.get("type") == MARKER_TYPE_DISCUSSION) {
                     continue;
                 }
-                console.log(markerModel);
 
                 var iconUrl = markerView.getIcon();
-                console.log(markerView.getIcon());
-                if (isRetina){
-                    iconUrl = iconUrl.url;
-                }
 
                 var entryHtml = this.sidebarItemTemplate({
                     created: moment(markerModel.get("created")).format("LLLL"),

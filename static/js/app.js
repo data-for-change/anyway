@@ -189,6 +189,12 @@ $(function () {
             }
             this.updateFilterString();
             this.chooseMarker();
+            if(this.iconTypeChanged == true){
+                this.$el.find(".current-view").toggleClass("sidebar-pin");
+                this.$el.find(".current-view").toggleClass("sidebar-dot");
+                this.iconTypeChanged = false;
+            }
+
         },
         buildMarkersParams: function (isForUrl) {
             var bounds = this.map.getBounds();
@@ -438,7 +444,10 @@ $(function () {
             google.maps.event.addDomListener(toggleBGDiv, 'click', function () {
                 $(toggleDiv).toggleClass('pin');
                 $(toggleDiv).toggleClass('dot');
+                this.iconTypeChanged = true;
                 this.toggleMarkerIconType();
+                /*this.$el.find(".current-view").toggleClass("sidebar-pin");
+                this.$el.find(".current-view").toggleClass("sidebar-dot");*/
             }.bind(this));
 
             toggleBGDiv.appendChild(toggleDiv);

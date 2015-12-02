@@ -446,8 +446,6 @@ $(function () {
                 $(toggleDiv).toggleClass('dot');
                 this.iconTypeChanged = true;
                 this.toggleMarkerIconType();
-                /*this.$el.find(".current-view").toggleClass("sidebar-pin");
-                this.$el.find(".current-view").toggleClass("sidebar-dot");*/
             }.bind(this));
 
             toggleBGDiv.appendChild(toggleDiv);

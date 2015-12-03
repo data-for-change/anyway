@@ -733,12 +733,27 @@ input[type='checkbox']{
 
 .current-view .gmnoprint{
     position: relative;
+}
+
+.sidebar-pin .gmnoprint{
     top: 33px;
     left: 15px;
+}
+
+.sidebar-dot .gmnoprint{
+    top:5px;
 }
 
 .current-view a > div:first-child{
     float: right;
     display: inline;
+}
+
+.sidebar-pin a > div:first-child{
     margin-left: 7px;
+}
+
+.sidebar-dot a > div:first-child{
+    margin: 15px;
+    margin-right: 0px;
 }

@@ -254,20 +254,33 @@ $(function () {
                 marker.view.model.unset("groupID");
             });
 
+            //make single icons for those who are no longer in a group
+            _.each(this.markerList, function(markerView){
+                var marker = markerView.marker;
+                if(this.map.getBounds().contains(marker.getPosition())){
+                    if(!this.oms.markersNearMarker(marker,true).length){
+                        marker.setTitle(markerView.getTitle("single"));
+                    }
+                }
+            },this);
+
             _.each(this.oms.markersNearAnyOtherMarker(), function (marker) {
-                // hide markers using markers.css
-                marker.title = '';
-                var groupHead = marker.view.model;
-                if (!groupHead.get("groupID")) {
-                    groupHead.set("groupID", groupID);
-                    var groupHeadSeverity = groupHead.get('severity');
-                    var groupsHeadOpacity = groupHead.get("locationAccuracy") == 1 ? 'opaque' : 1;
-                    groupsData.push({severity: groupHeadSeverity, opacity: groupsHeadOpacity});
+                if(marker.view.model.get("currentlySpiderfied")){
+                    marker.setTitle(marker.view.getTitle("single"));
+                }else{
+                    marker.setTitle(marker.view.getTitle("multiple"));
+                }
+                var firstMember = marker.view.model;
+                if (!firstMember.get("groupID")) {
+                    firstMember.set("groupID", groupID);
+                    var firstMemberSeverity = firstMember.get('severity');
+                    var firstMemberOpacity = firstMember.get("locationAccuracy") == 1 ? 'opaque' : 1;
+                    groupsData.push({severity: firstMemberSeverity, opacity: firstMemberOpacity});
 
                     _.each(this.oms.markersNearMarker(marker), function (markerNear) {
                         var markerNearModel = markerNear.view.model;
                         markerNearModel.set("groupID", groupID);
-                        if ((groupHeadSeverity != markerNearModel.get('severity'))) {
+                        if ((firstMemberSeverity != markerNearModel.get('severity'))) {
                             groupsData[groupsData.length - 1].severity = SEVERITY_VARIOUS;
                         }
                         if (groupsData[groupsData.length - 1].opacity != 'opaque') {
@@ -282,13 +295,9 @@ $(function () {
                 }
             },this);
 
-            // Set icon only for group heads (optional: add number of accident in title)
-            var groups = _.groupBy(this.oms.markersNearAnyOtherMarker(), function(marker){ return marker.view.model.get("groupID")});
-            var groupHeads = _.map(groups, _.first);
-            _.each(groupHeads, function(groupHead){groupHead.title = groupHead.view.getTitle("multiple")});
-
             this.groupsData = groupsData;
-              // agam
+
+                          // agam
             if(tourLocation == 5) {
                 var myLatlng = new google.maps.LatLng(32.09170,34.86435);
                 var location1 = new google.maps.Marker({

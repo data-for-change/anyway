@@ -15,7 +15,8 @@ See [documentation for our source dataset](https://docs.google.com/document/d/1x
 Contributing
 -----------------------
 * We try to follow the process of other Hasadna projects, e.g. [Open-Knesset](https://oknesset-devel.readthedocs.org/en/latest/)
-
+* Please take a moment to read our "Contibuting to ANYWAY" manifest at https://github.com/hasadna/anyway/blob/dev/CONTRIBUTING.md
+* 
 ## Development environment setup notes 
 
 ## Getting the code

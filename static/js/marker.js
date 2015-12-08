@@ -274,7 +274,7 @@ var MarkerView = Backbone.View.extend({
     accordionInputClick : function(e) {
         var input = e.currentTarget;
         if (input.checked){
-            var infoWindow = $(input).parents(".marker-info-window");
+            var infoWindow = $(input).parents(".gm-style-iw > div");
             var labelTop = $(input).siblings("label").offset().top;
             var infoWindowPos = infoWindow.offset().top;
             var IwHalfHeight = infoWindow.height() / 2;

@@ -14,10 +14,11 @@ See [documentation for our source dataset](https://docs.google.com/document/d/1x
 
 Contributing
 -----------------------
-* We try to follow the process of other Hasadna projects, e.g. [Open-Knesset](https://oknesset-devel.readthedocs.org/en/latest/)
-* Please take a moment to read our "Contibuting to ANYWAY" manifest at https://github.com/hasadna/anyway/blob/dev/CONTRIBUTING.md
-* 
-## Development environment setup notes 
+* We try to follow the process of other Hasadna projects, e.g. [Open-Knesset](https://oknesset-devel.readthedocs.org/en/latest/).
+* Please take a moment to read our ["Contibuting to ANYWAY" manifest](https://github.com/hasadna/anyway/blob/dev/CONTRIBUTING.md).
+
+Development environment setup notes
+-----------------------
 
 ## Getting the code
 1. [Fork](https://github.com/hasadna/anyway/fork) this repository on GitHub
@@ -36,12 +37,17 @@ Contributing
 1. `sudo easy_install pip setuptools`
 2. Install postgresql: `brew install postgresql` (after installing [brew](http://brew.sh))
 
-### virtualenv setup (both Ubuntu and OS X)
+### Both Ubuntu and OS X: `virtualenv` setup
 1. `sudo pip install virtualenvwrapper`
-2. Add to your `~/.bashrc`: `source /usr/local/bin/virtualenvwrapper.sh`
-3. `mkvirtualenv anyway`
-4. `cd anyway`
-5. `pip install -r requirements.txt`
+2. Add to your `~/.bashrc`:
+
+      `source /usr/local/bin/virtualenvwrapper.sh`
+
+   (Assuming it exists. Otherwise, it might be in `/usr/bin/virtualenvwrapper.sh`, so use that instead in that case.)
+3. `source ~/.bashrc`
+4. `mkvirtualenv anyway`
+5. `cd anyway`
+6. `pip install -r requirements.txt`
 
 * Each time you start working: `workon anyway`
 

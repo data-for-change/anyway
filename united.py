@@ -60,7 +60,7 @@ def create_accidents(file_location):
                 "longitude": accident[csvmap["long"]],
                 "created": created,
                 "provider_code": PROVIDER_CODE,
-                "title": unicode(accident[csvmap["type"]], encoding='utf-8'),
+                "title": unicode(accident[csvmap["type"]], encoding='utf-8')[:100],
                 "address": unicode((accident[csvmap["street"]] + ' ' + accident[csvmap["city"]]), encoding='utf-8'),
                 "severity": 2 if u"קשה" in unicode(accident[csvmap["type"]], encoding='utf-8') else 3,
                 "locationAccuracy": 1,

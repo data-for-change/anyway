@@ -34,6 +34,7 @@ from sqlalchemy import distinct, func
 from apscheduler.scheduler import Scheduler
 import united
 from flask.ext.compress import Compress
+import argparse
 
 app = utilities.init_flask(__name__)
 db = SQLAlchemy(app)
@@ -649,6 +650,10 @@ def create_years_list():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--open', action='store_true', help='Open broadcasting to all local IPs')
+    args = parser.parse_args()
+
     sched = Scheduler()
 
     @sched.interval_schedule(hours=12)
@@ -657,4 +662,8 @@ if __name__ == "__main__":
     sched.start()
 
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')
-    app.run(debug=True)
+
+    if not args.open:
+        app.run(debug=True)
+    else:
+        app.run(debug=True, host='0.0.0.0')

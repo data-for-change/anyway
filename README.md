@@ -25,7 +25,7 @@ Development environment setup notes
 2. `git clone https://github.com/*you*/anyway`
 3. Add the main repository as your upstream remote: `git remote add upstream https://github.com/hasadna/anyway`
 
-* Get updates whenever you start working: `git pull upstream master`
+* Get updates whenever you start working: `git pull upstream dev`
 * Push to your fork when you've committed your changes and tested them: `git push`, and make a pull request from your fork on GitHub
 
 ## Installing dependencies

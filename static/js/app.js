@@ -797,11 +797,11 @@ $(function () {
         },
         getCurrentUrlParams: function () {
             var params = this.buildMarkersParams(true);
-            var returnParams = '';
+            var returnParams = [];
             $.each(params, function(attr, attr_value) {
-                returnParams += "&" + attr + "=" + attr_value;
+                returnParams.push(attr + "=" + attr_value);
             });
-            return returnParams;
+            return returnParams.join("&");
 		},
         ESCinfoWindow: function(event) {
             if (event.keyCode == 27) {

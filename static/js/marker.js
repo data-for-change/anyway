@@ -34,16 +34,16 @@ var MarkerView = Backbone.View.extend({
             return this;
         }
 
+        this.marker.setIcon(this.getIcon());
+        this.marker.setMap(this.map);
+
         if (this.model.get("type") == MARKER_TYPE_DISCUSSION) {
-            this.marker.setIcon(this.getIcon());
             this.marker.setTitle(this.getTitle('discussion')); //this.model.get("title"));
             google.maps.event.addListener(this.marker, "click",
                 _.bind(app.showDiscussion, app, this.model.get("identifier")) );
             return this;
         }
 
-        this.marker.setIcon(this.getIcon());
-        this.marker.setMap(this.map);
         this.marker.setTitle(this.getTitle('single'));
 
         if (this.model.get("provider_code") == PROVIDER_CODE_UNITED_HATZALA) {
@@ -115,7 +115,7 @@ var MarkerView = Backbone.View.extend({
         return this;
     },
     getIcon : function() {
-        return markerIcon = {
+        return {
             path: google.maps.SymbolPath.CIRCLE,
             scale: 0,
             fillColor: 'black'

@@ -9,7 +9,7 @@ from flask import make_response, render_template, Response, jsonify, url_for, fl
 import flask.ext.assets
 from webassets.ext.jinja2 import AssetsExtension
 from webassets import Environment as AssetsEnvironment
-from flask.ext.babel import Babel,gettext,ngettext
+from flask.ext.babel import Babel,gettext
 from clusters_calculator import retrieve_clusters
 
 from database import db_session
@@ -203,6 +203,7 @@ def discussion():
         if marker is None:
             log_bad_request(request)
             return make_response("")
+        logging.debug("Created new discussion with id=%d" % marker.id)
         return make_response(post_handler(marker))
 
 

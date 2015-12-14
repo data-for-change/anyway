@@ -80,6 +80,8 @@ Development environment setup notes
 6. Run the app: `python main.py`: do this whenever you start working and want to try out your code.
 7. Browse to http://127.0.0.1:5000
 8. If the site fails to load properly, make sure you have JDK installed on your machine
+9. If you wish to share your app on the local network you can expose flask by running `python main.py --open`
+    (Please note that this would expose your machine on port 5000 to all local nodes)
 
 It is useful to add the following to your `~/.bashrc` (fixing for the correct path):
 

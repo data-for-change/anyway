@@ -523,10 +523,15 @@ $(function () {
             this.router = new AppRouter();
             Backbone.history.start({pushState: true});
             console.log('Loaded AppRouter');
+
             $('#toggle-sidebar').click(function () {
                 $('.main').toggleClass('main-open').toggleClass('main-close');
                 $('.sidebar-container').toggleClass('sidebar-container-open').toggleClass('sidebar-container-close');
-            });
+                
+                setTimeout(function() {
+                    google.maps.event.trigger(this.map, 'resize');
+                }.bind(this), 500);
+            }.bind(this));
             this.isReady = true;
             google.maps.event.addListener(this.map, "rightclick", _.bind(this.contextMenuMap, this) );
             google.maps.event.addListener(this.map, "idle", function(){

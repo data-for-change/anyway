@@ -36,6 +36,7 @@ var MarkerView = Backbone.View.extend({
 
         this.marker.setIcon(this.getIcon());
         this.marker.setMap(this.map);
+        this.marker.view = this;
 
         if (this.model.get("type") == MARKER_TYPE_DISCUSSION) {
             this.marker.setTitle(this.getTitle('discussion')); //this.model.get("title"));
@@ -106,9 +107,6 @@ var MarkerView = Backbone.View.extend({
             this.$el.find(".added-by").html("מקור: <a href=\'" +
                 provider.url + "\' target=\'_blank\'>" + provider.name + "</a>");
         }
-
-
-        this.marker.view = this;
 
         app.oms.addMarker(this.marker);
 

@@ -26,7 +26,7 @@ Instructions
 
 **2.** Install [Docker toolbox] (https://www.docker.com/docker-toolbox) ([MAC] (https://github.com/docker/toolbox/releases/download/v1.9.1e/DockerToolbox-1.9.1e.pkg) / [Windows] (https://github.com/docker/toolbox/releases/download/v1.9.1e/DockerToolbox-1.9.1e.exe))
 
-**3.** Open "Docker terminal”, go to the **anyway** directory and run:
+**3.** Open "Docker terminal", go to the **anyway** directory and run:
 
     docker run -it --restart="always" -p 80:5000 -v $PWD:/opt/anyway -w /opt/anyway omerxx/anyway-docker /bin/bash -c 'export DATABASE_URL=sqlite:////anyway/local.db && python main.py --open'
 **You're all set!** Access the app at the virtual machine’s IP (usually `192.168.99.100`); <br>
@@ -71,5 +71,4 @@ Deleting an image(from `docker images`):
 
 Questions and ideas
 -----------------
-Talk to Omer by [mail] (omerxx@gmail.com) or by Slack (omerxx)
-
+Talk to Omer on ANYWAY's Slack (omerxx)

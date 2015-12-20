@@ -196,3 +196,7 @@
     background-color: #142B68;
 }
 
+.gm-style .gmnoprint[title*='(נבחר)'], .gm-style .gmnoprint[title]:hover{
+    box-shadow: 0px 0px 25px 12px rgb(160,100,140);
+}
+

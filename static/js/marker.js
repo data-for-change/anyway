@@ -148,7 +148,7 @@ var MarkerView = Backbone.View.extend({
                 break;
             case 'multiple':
                 accuracy = (this.marker.opacity != 1);
-                markerTitle = 'מספר תאונות בנקודה זו' ;
+                markerTitle = 'מספר תאונות בנקודה זו';
                 break;
             case 'discussion':
                 markerTitle = 'דיון';
@@ -165,7 +165,7 @@ var MarkerView = Backbone.View.extend({
         }
     },
     choose : function() {
-        if (app.oms.markersNearMarker(this.marker).length) {
+        if (this.model.get("groupID") && !this.model.get("currentlySpiderfied")) {
             new google.maps.event.trigger(this.marker, "click");
         }
         new google.maps.event.trigger(this.marker, "click");
@@ -298,5 +298,23 @@ var MarkerView = Backbone.View.extend({
                 }.bind(this),550);
             }
         }
+    },
+    select : function(){
+        //unselect all previous selections
+        _.each(app.markerList, function(markerView){
+            markerView.unselect();
+        });
+        //if marker is currently shown
+        this.marker.setTitle(this.marker.getTitle() + SELECTED_MARKER);
+    },
+    unselect : function(){
+        //if was selected and currently displayed as single icon
+        if(this.isSelected()){
+            this.marker.setTitle(this.marker.getTitle().replace(SELECTED_MARKER, ""));
+        }
+    },
+    isSelected : function(){
+        //if shown and selected
+        return this.marker.getTitle().search(SELECTED_MARKER) != -1;
     },
 });

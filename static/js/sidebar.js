@@ -4,6 +4,8 @@ var SidebarView = Backbone.View.extend({
     className: "info-window",
     events: {
         "click .current-view li" : "clickEntry",
+        "mouseover .current-view li" : "mouseOverEntry",
+        "mouseout .current-view li" : "mouseOutEntry",
     },
     initialize: function(options) {
         this.map = options.map;
@@ -35,6 +37,10 @@ var SidebarView = Backbone.View.extend({
         for (var i = 0; i < markerList.length; i++) {
             var markerView = markerList[i];
             var marker = markerView.marker;
+            //take off all selections on current view update
+            if(markerView.isSelected()){
+                markerView.unselect();
+            }
 
             if (bounds.contains(marker.getPosition()) ){
                 var markerModel = markerView.model;
@@ -69,7 +75,10 @@ var SidebarView = Backbone.View.extend({
         });
     },
     clickEntry: function(e) {
-        this.getMarker(e).view.choose();
+        var marker = this.getMarker(e);
+        if(marker){
+            marker.view.choose();
+        }
     },
     getMarker: function(e) {
         return $(e.target).data("marker") || $(e.target).parents("li").data("marker");
@@ -83,5 +92,17 @@ var SidebarView = Backbone.View.extend({
         var currentViewTop = this.$el.find("#step6tour .btn-label").outerHeight() + this.$el.find("#step6tour .btn-wrap").outerHeight();
         var currentView = this.$el.find(".current-view");
         $(currentView).css("top", currentViewTop);
-    }
+    },
+    mouseOverEntry: function(e){
+        var markerOfEntry = this.getMarker(e);
+        if(markerOfEntry){
+            markerOfEntry.view.select();
+        }
+    },
+    mouseOutEntry: function(e){
+        var markerOfEntry = this.getMarker(e);
+        if(markerOfEntry){
+            markerOfEntry.view.unselect();
+        }
+    },
 });

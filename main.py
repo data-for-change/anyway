@@ -128,7 +128,17 @@ def get_locale():
 def markers():
     logging.debug('getting markers')
 
-    kwargs = {arg: arg_type(request.values[arg]) for (arg, arg_type) in ARG_TYPES.iteritems()}
+    # Try and except are for catching exceptions raised from the android app where the filters ar not updated
+    # TODO: Reinstate old kwargs definition once this is not needed.
+
+    kwargs = {}
+    for (arg, arg_type) in ARG_TYPES.iteritems():
+        try:
+            kwargs[arg] = arg_type(request.values[arg])
+        except:
+            kwargs[arg] = 0
+
+
     kwargs.update({arg: datetime.date.fromtimestamp(int(request.values[arg])) for arg in ('start_date', 'end_date')})
 
     logging.debug('querying markers in bounding box')

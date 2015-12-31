@@ -108,12 +108,15 @@ def generate_csv(results):
         yield output_file.getvalue()
         output_file.truncate(0)
 
-ARG_TYPES = {'ne_lat': float, 'ne_lng': float, 'sw_lat': float, 'sw_lng': float, 'zoom': int, 'show_fatal': bool,
-             'show_severe': bool, 'show_light': bool, 'approx': bool, 'accurate': bool, 'show_markers': bool,
-             'show_discussions': bool, 'show_urban': int, 'show_intersection': int, 'show_lane': int,
-             'show_day': int, 'show_holiday': int, 'show_time': int, 'start_time': int, 'end_time': int,
-             'weather': int, 'road': int, 'separation': int, 'surface': int, 'acctype': int, 'controlmeasure': int,
-             'district': int, 'case_type': int}
+ARG_TYPES = {'ne_lat': (float, 32.072427482938345), 'ne_lng': (float, 34.79928962966915),
+             'sw_lat': (float, 34.79928962966915), 'sw_lng': (float, 34.78877537033077), 'zoom': (int, 17),
+             'show_fatal': (bool, True), 'show_severe': (bool, True), 'show_light': (bool, True),
+             'approx': (bool, True), 'accurate': (bool, True), 'show_markers': (bool, True),
+             'show_discussions': (bool, True), 'show_urban': (int, 3), 'show_intersection': (int, 3),
+             'show_lane': (int, 3), 'show_day': (int, 0), 'show_holiday': (int, 0),  'show_time': (int, 24),
+             'start_time': (int, 25), 'end_time': (int, 25), 'weather': (int, 0), 'road': (int, 0),
+             'separation': (int, 0), 'surface': (int, 0), 'acctype': (int, 0), 'controlmeasure': (int, 0),
+             'district': (int, 0), 'case_type': (int, 0)}
 
 @babel.localeselector
 def get_locale():
@@ -128,7 +131,7 @@ def get_locale():
 def markers():
     logging.debug('getting markers')
 
-    kwargs = {arg: arg_type(request.values[arg]) for (arg, arg_type) in ARG_TYPES.iteritems()}
+    kwargs = {arg: arg_type(request.values.get(arg, default_value)) for (arg, (arg_type, default_value)) in ARG_TYPES.iteritems()}
     kwargs.update({arg: datetime.date.fromtimestamp(int(request.values[arg])) for arg in ('start_date', 'end_date')})
 
     logging.debug('querying markers in bounding box')

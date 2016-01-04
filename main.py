@@ -118,6 +118,11 @@ ARG_TYPES = {'ne_lat': (float, 32.072427482938345), 'ne_lng': (float, 34.7992896
              'separation': (int, 0), 'surface': (int, 0), 'acctype': (int, 0), 'controlmeasure': (int, 0),
              'district': (int, 0), 'case_type': (int, 0)}
 
+def get_kwargs():
+    kwargs = {arg: arg_type(request.values.get(arg, default_value)) for (arg, (arg_type, default_value)) in ARG_TYPES.iteritems()}
+    kwargs.update({arg: datetime.date.fromtimestamp(int(request.values[arg])) for arg in ('start_date', 'end_date')})
+    return kwargs
+
 @babel.localeselector
 def get_locale():
     lang = request.values.get('lang')
@@ -130,10 +135,7 @@ def get_locale():
 @user_optional
 def markers():
     logging.debug('getting markers')
-
-    kwargs = {arg: arg_type(request.values.get(arg, default_value)) for (arg, (arg_type, default_value)) in ARG_TYPES.iteritems()}
-    kwargs.update({arg: datetime.date.fromtimestamp(int(request.values[arg])) for arg in ('start_date', 'end_date')})
-
+    kwargs = get_kwargs()
     logging.debug('querying markers in bounding box')
     is_thin = (kwargs['zoom'] < MINIMAL_ZOOM)
     accidents = Marker.bounding_box_query(is_thin, yield_per=50, **kwargs)
@@ -215,9 +217,7 @@ def discussion():
 def clusters(methods=["GET"]):
     start_time = time.time()
     if request.method == "GET":
-        kwargs = {arg: arg_type(request.values[arg]) for (arg, arg_type) in ARG_TYPES.iteritems()}
-        kwargs.update({arg: datetime.date.fromtimestamp(int(request.values[arg])) for arg in ('start_date', 'end_date')})
-
+        kwargs = get_kwargs()
         results = retrieve_clusters(**kwargs)
 
         logging.debug('calculating clusters took %f seconds' % (time.time() - start_time))

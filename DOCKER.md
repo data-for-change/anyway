@@ -24,12 +24,14 @@ Instructions
 
 **1.** [Get the code] (https://github.com/hasadna/anyway#getting-the-code)
 
-**2.** Install [Docker toolbox] (https://www.docker.com/docker-toolbox) ([MAC] (https://github.com/docker/toolbox/releases/download/v1.9.1e/DockerToolbox-1.9.1e.pkg) / [Windows] (https://github.com/docker/toolbox/releases/download/v1.9.1e/DockerToolbox-1.9.1e.exe))
+**2.** Install Docker <br><br>
+*OS X / Windows Users:* Install [Docker toolbox] (https://www.docker.com/docker-toolbox) ([MAC] (https://github.com/docker/toolbox/releases/download/v1.9.1e/DockerToolbox-1.9.1e.pkg) / [Windows] (https://github.com/docker/toolbox/releases/download/v1.9.1e/DockerToolbox-1.9.1e.exe))<br>
+*Linux Users:* `sudo apt-get install docker.io`
 
 **3.** Open "Docker terminal", go to the **anyway** directory and run:
 
     docker run -it --restart="always" -p 80:5000 -v $PWD:/opt/anyway -w /opt/anyway omerxx/anyway-docker /bin/bash -c 'export DATABASE_URL=sqlite:////anyway/local.db && python main.py --open'
-**You're all set!** Access the app at the virtual machine’s IP (usually `192.168.99.100`); <br>
+**You're all set!** Access the app on `localhost` (Linux) or (OS-X/Win) at the virtual machine’s IP (usually `192.168.99.100`); <br>
 To retrieve a docker machine address: `docker-machine ip default` <br>
 (no need for port specification, simply an IP; e.g `192.168.99.100`)
 

@@ -562,7 +562,7 @@ lms_dictionary = {}
 @app.before_first_request
 def read_dictionaries():
     global lms_dictionary
-    for directory in glob.glob("{0}/{1}/*/*".format(app.static_folder, 'data/lms')):
+    for directory in sorted(glob.glob("{0}/{1}/*/*".format(app.static_folder, 'data/lms')),reverse=True):
         main_dict = dict(get_dict_file(directory))
         if len(main_dict) == 0:
             return
@@ -580,7 +580,7 @@ def get_dict_file(directory):
         files = filter(lambda path: filename.lower() in path.lower(), os.listdir(directory))
         amount = len(files)
         if amount == 0:
-            raise ValueError("file not found in directory: " + filename)
+            raise ValueError("file not found: " + filename + " in directory " + directory)
         if amount > 1:
             raise ValueError("there are too many matches: " + filename)
         csv = CsvReader(os.path.join(directory, files[0]))

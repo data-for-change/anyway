@@ -122,6 +122,10 @@ $(function () {
                 if (questionMarkPlace != -1) {
                     url = url.substring(0, questionMarkPlace);
                 }
+                var facebookCallbackPattern = url.indexOf('_=_');
+                if (facebookCallbackPattern != -1) {
+                    url = url.substring(0, facebookCallbackPattern);
+                }
             }
            Backbone.history.navigate(Backbone.history.fragment, false);
            // Backbone.history.navigate(url, true);
@@ -749,6 +753,11 @@ $(function () {
         getDiscussionUrl: function (identifier) {
             return "/?discussion=" + identifier + "&" + app.getCurrentUrlParams();
         },
+        loginDialogLoad: function(){
+            if (this.createDialog) this.createDialog.close();
+            this.createDialog = new LoginDialog().render();
+        },
+
         featuresSubscriptionDialog : function(type, event) {
             if (this.createDialog) this.createDialog.close();
             this.createDialog = new FeatureDialog({

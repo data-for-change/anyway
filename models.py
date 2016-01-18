@@ -36,9 +36,11 @@ class User(Base, UserMixin):
     password = Column(String(256))
     active = Column(Boolean())
     confirmed_at = Column(DateTime())
+    social_id = Column(String(64), nullable=True, unique=True)
+    nickname = Column(String(64), nullable=True)
     roles = relationship('Role', secondary=roles_users,
                             backref=backref('users', lazy='dynamic'))
-	
+
     def serialize(self):
         return {
             "id": str(self.id),

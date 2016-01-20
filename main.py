@@ -35,6 +35,7 @@ from apscheduler.scheduler import Scheduler
 import united
 from flask.ext.compress import Compress
 import argparse
+from oauth import OAuthSignIn
 
 app = utilities.init_flask(__name__)
 db = SQLAlchemy(app)
@@ -42,6 +43,12 @@ app.config.from_object(__name__)
 app.config['SECURITY_REGISTERABLE'] = False
 app.config['SECURITY_USER_IDENTITY_ATTRIBUTES'] = 'username'
 app.config['BABEL_DEFAULT_LOCALE'] = 'he'
+app.config['OAUTH_CREDENTIALS'] = {
+    'facebook': {
+        'id': os.environ.get('FACEBOOK_KEY'),
+        'secret': os.environ.get('FACEBOOK_SECRET')
+    }
+}
 
 assets = flask.ext.assets.Environment()
 assets.init_app(app)
@@ -604,6 +611,8 @@ class ExtendedLoginForm(LoginForm):
 
 user_datastore = SQLAlchemyUserDatastore(SQLAlchemy(app), User, Role)
 security = Security(app, user_datastore, login_form=ExtendedLoginForm)
+lm = login.LoginManager(app)
+lm.login_view = 'index'
 
 @login_required
 @roles_required('privileged_user')
@@ -628,6 +637,46 @@ def get_current_user_first_name():
 
 def year_range(year):
     return ["01/01/%d" % year, "31/12/%d" % year]
+
+
+######## rauth integration (login through facebook) ##################
+
+@lm.user_loader
+def load_user(id):
+    return User.query.get(int(id))
+
+@app.route('/logout')
+def logout():
+    login.logout_user()
+    return redirect(url_for('index'))
+
+
+@app.route('/authorize/<provider>')
+def oauth_authorize(provider):
+    if not current_user.is_anonymous:
+        return redirect(url_for('index'))
+    oauth = OAuthSignIn.get_provider(provider)
+    return oauth.authorize()
+
+
+@app.route('/callback/<provider>')
+def oauth_callback(provider):
+    if not current_user.is_anonymous:
+        return redirect(url_for('index'))
+    oauth = OAuthSignIn.get_provider(provider)
+    social_id, username, email = oauth.callback()
+    if social_id is None:
+        flash('Authentication failed.')
+        return redirect(url_for('index'))
+    user = User.query.filter_by(social_id=social_id).first()
+    if not user:
+        user = User(social_id=social_id, nickname=username, email=email)
+        db.session.add(user)
+        db.session.commit()
+    login.login_user(user, True)
+    return redirect(url_for('index'))
+
+######## end rauth integration
 
 @app.before_first_request
 def create_years_list():

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <title>{{ gettext('ANYWAY - Making a difference in any way') }}</title>
@@ -40,8 +40,14 @@
 <div id="app">
     <div class="navbar navbar-fixed-top">
         <div class="navbar-inner" id="step1Component" style="vertical-align:middle; line-height: 40px; {{ '; display: none' if map_only }}">
-            <div style="float: left; visibility: hidden">
-                <span style="border-right: 1px solid #ddd; margin-left: 8px; padding-right: 8px; cursor: pointer">התחבר</span>
+            <div style="float: left;">
+                <span id="connection_status" style="border-right: 1px solid #ddd; margin-left: 8px; padding-right: 8px; cursor: pointer" onclick="app.loginDialogLoad()">
+                    {% if current_user.is_authenticated %}
+                         {{ gettext('Hi') + ' ' + current_user.nickname }}
+                    {% else %}
+                       {{ gettext('Login') }}
+                    {% endif %}
+                </span>
                 <i class="fa fa-sign-in" style="margin-left: 8px; font-size: 18px; line-height: 100%; vertical-align: middle"></i>
                 <div class="user-details" style="display: none">
                     <span class="profile-name"></span>
@@ -392,6 +398,35 @@
         <div class="modal-footer">
             <a class="btn close-button">סגור</a>
             <a class="btn btn-primary save-button">שליחה</a>
+        </div>
+    </div>
+</div>
+
+<div id="login-dialog-template" style="display: none">
+    <div class="modal hide fade">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3>{{ gettext('Login') }}</h3>
+        </div>
+        <div class="modal-body" style="width: 50%; margin: 0 auto;">
+            <div class="control-group" style="width: 100%; margin: 0 auto;">
+                {% for message in get_flashed_messages() %}
+                    <p><b>Error</b>: {{ message }}</p>
+                {% endfor %}
+                {% if current_user.is_authenticated %}
+                    <h2> {{ gettext('Hi') + ' ' + current_user.nickname }}</h2>
+                    <a class="btn btn-social-icon btn-facebook" href="{{  url_for('logout') }}">{{ gettext('Logout') }}
+                        <span class="fa fa-sign-out"></span>
+                    </a>
+                {% else %}
+                    <a class="btn btn-social-icon btn-facebook" href="{{ url_for('oauth_authorize', provider='facebook') }}">{{ gettext('Login with Facebook') }}
+                        <span class="fa fa-facebook"></span>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a class="btn close-button">סגור</a>
         </div>
     </div>
 </div>
@@ -867,6 +902,7 @@
 "js/marker.js",
 "js/clusterView.js",
 "js/featuredialog.js",
+"js/logindialog.js",
 "js/sidebar.js",
 "js/contextmenu.js",
 "js/map_style.js",

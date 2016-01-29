@@ -170,7 +170,7 @@
     -ms-transform: rotate(45deg);
     transform: rotate(45deg);
 }
-
+	
 .gmnoprint[title*='איחוד הצלה']:after {
     content: '\e32a';
     color: #142B68;
@@ -190,10 +190,6 @@
     -o-transform: rotate(45deg);
     -ms-transform: rotate(45deg);
     transform: rotate(45deg);
-}
-
-.gmnoprint[title*='איחוד הצלה']{
-    background-color: #142B68;
 }
 
 .gm-style .gmnoprint[title*='(נבחר)'], .gm-style .gmnoprint[title]:hover{

@@ -19,8 +19,10 @@ import sqlalchemy as sa
 def upgrade():
     op.add_column('users', sa.Column('social_id', sa.String(64), nullable=True, unique=True))
     op.add_column('users', sa.Column('nickname', sa.String(64), nullable=True))
+    op.add_column('users', sa.Column('provider', sa.String(64), nullable=True))
 
 
 def downgrade():
     op.drop_column('users', 'social_id')
     op.drop_column('users', 'nickname')
+    op.drop_column('users', 'provider')

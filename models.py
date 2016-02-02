@@ -38,6 +38,7 @@ class User(Base, UserMixin):
     confirmed_at = Column(DateTime())
     social_id = Column(String(64), nullable=True, unique=True)
     nickname = Column(String(64), nullable=True)
+    provider = Column(String(64), nullable=True)
     roles = relationship('Role', secondary=roles_users,
                             backref=backref('users', lazy='dynamic'))
 

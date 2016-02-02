@@ -47,6 +47,10 @@ app.config['OAUTH_CREDENTIALS'] = {
     'facebook': {
         'id': os.environ.get('FACEBOOK_KEY'),
         'secret': os.environ.get('FACEBOOK_SECRET')
+    },
+    'google': {
+        'id': os.environ.get('GOOGLE_LOGIN_CLIENT_ID'),
+        'secret': os.environ.get('GOOGLE_LOGIN_CLIENT_SECRET')    
     }
 }
 
@@ -664,15 +668,26 @@ def oauth_callback(provider):
     if not current_user.is_anonymous:
         return redirect(url_for('index'))
     oauth = OAuthSignIn.get_provider(provider)
-    social_id, username, email = oauth.callback()
-    if social_id is None:
-        flash('Authentication failed.')
-        return redirect(url_for('index'))
-    user = User.query.filter_by(social_id=social_id).first()
-    if not user:
-        user = User(social_id=social_id, nickname=username, email=email)
-        db.session.add(user)
-        db.session.commit()
+    if provider == 'google':
+        username, email = oauth.callback()
+        if email is None:        
+            flash('Authentication failed.')
+            return redirect(url_for('index'))    
+        user=User.query.filter_by(email=email).first()
+        if not user:
+            user = User(nickname=username, email=email, provider=provider)
+            db.session.add(user)
+            db.session.commit()
+    else: #facebook authentication
+        social_id, username, email = oauth.callback()
+        if social_id is None:
+            flash('Authentication failed.')
+            return redirect(url_for('index'))
+        user = User.query.filter_by(social_id=social_id).first()
+        if not user:
+            user = User(social_id=social_id, nickname=username, email=email, provider=provider)
+            db.session.add(user)
+            db.session.commit()
     login.login_user(user, True)
     return redirect(url_for('index'))
 

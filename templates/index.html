@@ -421,7 +421,14 @@
                 {% else %}
                     <a class="btn btn-social-icon btn-facebook" href="{{ url_for('oauth_authorize', provider='facebook') }}">{{ gettext('Login with Facebook') }}
                         <span class="fa fa-facebook"></span>
-                    </a>
+                    </a>                    
+                    <br/>
+                    <h3>OR</h3>
+                    <br/>
+                    <a class="btn btn-social-icon btn-google" href="{{ url_for('oauth_authorize', provider='google') }}">
+                        {{ gettext('Login with Google') }}
+                        <span class="fa fa-google"></span>
+                    </a>                
                 {% endif %}
             </div>
         </div>

@@ -126,6 +126,10 @@ $(function () {
                 if (facebookCallbackPattern != -1) {
                     url = url.substring(0, facebookCallbackPattern);
                 }
+                var googleCallbackPattern = url.indexOf('#');
+                if (googleCallbackPattern != -1) {
+                    url = url.substring(0, googleCallbackPattern);
+                }
             }
            Backbone.history.navigate(Backbone.history.fragment, false);
            // Backbone.history.navigate(url, true);

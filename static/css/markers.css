@@ -73,13 +73,8 @@
     transform: translate(-4px,-4px) !important;
 }
 
-.gmnoprint[title*='תאונות']{
-    background-color: darkgray;
-}
-
 .gmnoprint[title*='תאונות']:after{
     content: '\e3e4';
-    color: darkgray;
 }
 
 .gmnoprint[title$='.']:after {

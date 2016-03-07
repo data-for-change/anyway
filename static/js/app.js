@@ -264,37 +264,48 @@ $(function () {
                 }
             },this);
 
+            //goes over all overlapping markers
             _.each(this.oms.markersNearAnyOtherMarker(), function (marker) {
-                if(marker.view.model.get("currentlySpiderfied")){
-                    marker.setTitle(marker.view.getTitle("single"));
-                }else{
-                    marker.setTitle(marker.view.getTitle("multiple"));
-                }
                 var firstMember = marker.view.model;
-                if (!firstMember.get("groupID")) {
-                    firstMember.set("groupID", groupID);
-                    var firstMemberSeverity = firstMember.get('severity');
+                var firstMemberGroupId = firstMember.get("groupID");
+                var firstMemberIndex = firstMemberGroupId -1;
+                if (!firstMemberGroupId) {
+                    firstMemberGroupId = groupID;
+                    firstMemberIndex = firstMemberGroupId -1;
+                    firstMember.set("groupID", firstMemberGroupId);
+                    var groupSeverity = firstMember.get('severity');
                     var firstMemberOpacity = firstMember.get("locationAccuracy") == 1 ? 'opaque' : 1;
-                    groupsData.push({severity: firstMemberSeverity, opacity: firstMemberOpacity});
+                    groupsData.push({severity: groupSeverity, opacity: firstMemberOpacity, quantity: 1});
 
+                    //goes over all markers which overlapping 'firstMember', and get the 'max' severity
                     _.each(this.oms.markersNearMarker(marker), function (markerNear) {
                         var markerNearModel = markerNear.view.model;
-                        markerNearModel.set("groupID", groupID);
-                        if ((firstMemberSeverity != markerNearModel.get('severity'))) {
-                            groupsData[groupsData.length - 1].severity = SEVERITY_VARIOUS;
+                        markerNearModel.set("groupID", firstMemberGroupId);
+                        var currentMarkerNearSeverity = markerNearModel.get('severity');
+                        // severity is an enum, when it's lower then it's more severe
+                        if (currentMarkerNearSeverity < groupSeverity) {
+                            groupsData[firstMemberIndex].severity = currentMarkerNearSeverity;
+                            groupSeverity = currentMarkerNearSeverity;
                         }
-                        if (groupsData[groupsData.length - 1].opacity != 'opaque') {
+                        if (groupsData[firstMemberIndex].opacity != 'opaque') {
                             if (markerNearModel.get("locationAccuracy") == 1) {
-                                groupsData[groupsData.length - 1].opacity = 'opaque';
+                                groupsData[firstMemberIndex].opacity = 'opaque';
                             } else {
-                                groupsData[groupsData.length - 1].opacity++;
+                                groupsData[firstMemberIndex].opacity++;
                             }
                         }
+                        groupsData[firstMemberIndex].quantity++;
                     });
                     groupID++;
                 }
+                if(marker.view.model.get("currentlySpiderfied")){
+                    marker.setTitle(marker.view.getTitle("single"));
+                }else{
+                    groupMarkersCount = groupsData[firstMemberIndex].quantity;
+                    groupSeverityString = SEVERITY_MAP[groupsData[firstMemberIndex].severity];
+                    marker.setTitle( groupMarkersCount + " " + marker.view.getTitle("multiple") + " חומרה מירבית:" + groupSeverityString);
+                }
             },this);
-
             this.groupsData = groupsData;
 
                           // agam

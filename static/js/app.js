@@ -761,7 +761,10 @@ $(function () {
             if (this.createDialog) this.createDialog.close();
             this.createDialog = new LoginDialog().render();
         },
-
+        preferencesDialogLoad: function () {
+            if (this.createDialog) this.createDialog.close();
+            this.createDialog = new PreferencesDialog().render();
+        },
         featuresSubscriptionDialog : function(type, event) {
             if (this.createDialog) this.createDialog.close();
             this.createDialog = new FeatureDialog({

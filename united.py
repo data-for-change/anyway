@@ -13,6 +13,10 @@ from models import Marker, MARKER_TYPE_ACCIDENT
 from utilities import init_flask
 import importmail
 
+import urllib2
+from xml.dom import minidom
+import math
+
 
 ############################################################################################
 # United.py is responsible for the parsing and deployment of "united hatzala" data to the DB
@@ -30,6 +34,72 @@ def parse_date(created):
     hour = time.strftime('%H')
     hour = int(hour) if created.endswith('AM') else int(hour)+12
     return datetime(time.year, time.month, time.day, hour, time.minute, 0)
+
+
+def retrive_ims_xml():
+
+    file = urllib2.urlopen('wwww.ims.gov.il/ims/PublicXML/observ.xml')
+    data = file.read()
+    file.close()
+    xmldoc = minidom.parse(data)
+    collection = xmldoc.documentElement
+    return collection
+
+
+def find_station_by_coordinate(latitude, longitude):
+
+    min_distance = 100000 #initialize big starting
+    station_lon = 0
+    station_lat = 0
+    collection =retrive_ims_xml()
+    stationData = collection.getElementsByTagName('surface_station')
+    i = -1
+
+    for station in stationData:
+        i = i+1 #save the place of the station in the file
+        station_lon = station.getElementsByTagName('station_lon')
+        station_lat = station.getElementsByTagName('station_lat')
+        lat_difference = math.pow(station_lat - latitude, 2)
+        lon_difference = math.pow(station_lon - longitude, 2)
+        temp_dis = math.sqrt(lat_difference + lon_difference)
+        if (temp_dis < min_distance):
+            min_distance = temp_dis
+            station_place_in_xml = i
+
+    return station_place_in_xml
+
+
+
+
+
+
+def processWeatherData(latitude, longitude):
+
+    station = find_station_by_coordinate(latitude, longitude)
+    collection =retrive_ims_xml()
+    weatherData = collection.getElementsByTagName('surface_observation')
+    wind_force = weatherData[station].find('FF')
+    rain = weatherData[station].find('RRR')
+    rain_duration = weatherData[station].find('TR') # the duration of time in which  the rain amount was measured
+    if wind_force is not None:
+        if wind_force > 5 :
+            weather = "חזקות רוחות"
+        if wind_force > 8 :
+            weather = "רוחות סופת"
+    if rain is not None & rain_duration is not None:
+        if rain > 990 & rain <= 995:  # rain amount is between 0.1 and 0.5 millimeter
+            weather = weather + "קל גשם ,"
+
+            # rain_duration is one hour and rain amount is between 0.5 and 4.0 millimeters
+        if ((rain > 0 & rain <= 004) | rain > 995) & rain_duration == 5:
+            weather = weather + "גשם ,"
+
+             # rain_duration is one hour and rain amount is between 4.0 and 8.0 millimeters
+        if rain > 004 & rain <= 008 & rain_duration == 5:
+            weather = weather + "שוטף גשם ,"
+
+
+
 
 
 def create_accidents(file_location):
@@ -67,7 +137,9 @@ def create_accidents(file_location):
                 "subtype": 21,           # New subtype for United Hatzala
                 "type": MARKER_TYPE_ACCIDENT,
                 "intactness": "".join(x for x in accident[csvmap["casualties"]] if x.isdigit()) or 0,
-                "description": unicode(accident[csvmap["comment"]], encoding='utf-8')
+                "description": unicode(accident[csvmap["comment"]], encoding='utf-8'),
+                "weather": processWeatherData(accident[csvmap["lat"]], accident[csvmap["long"]] )
+              
             }
 
             yield marker

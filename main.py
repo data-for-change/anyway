@@ -724,6 +724,8 @@ if __name__ == "__main__":
 
     sched = Scheduler()
 
+
+
     @sched.interval_schedule(hours=12)
     def scheduled_import():
         united.main()

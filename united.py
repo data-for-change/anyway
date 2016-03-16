@@ -48,7 +48,7 @@ def retrive_ims_xml():
 
 def find_station_by_coordinate(latitude, longitude):
 
-    min_distance = 100000 #initialize big starting
+    min_distance = 100000 #initialize big starting value so the distance will always be smaller than the initial
     station_lon = 0
     station_lat = 0
     collection =retrive_ims_xml()
@@ -69,6 +69,48 @@ def find_station_by_coordinate(latitude, longitude):
     return station_place_in_xml
 
 
+def convert_xml_values_toNumbers (rain):
+
+    numConv = rain[:2] # variable to help convert from string to number
+
+    for char in numConv:   # in the xml number are in a three digits format (4-004), we delete the 0es before the number
+        if char == '0':
+            rain.replace(char, '')
+        else:
+            break
+
+    if int(rain) >= 990:
+        #numbers that are higher then 990 in the xml code equals 0.(the last digit) for example 991 = 0.1
+        rain = int(rain) % 100
+        rain = "0." + rain
+        rain_in_millimeters = float(rain) #convert string to numbers
+
+    return rain_in_millimeters
+
+
+def convert_xml_numbers_to_hours (rain_duration):
+
+    #convert the xml code for number of hours, to the actual number of hours
+
+    if rain_duration == 1:
+        rain_duration = 6
+    elif rain_duration == 2:
+        rain_duration = 12
+    elif rain_duration == 3:
+        rain_duration = 18
+    elif rain_duration == 4 |rain_duration == "/":
+        rain_duration = 24
+    elif rain_duration == 5:
+        rain_duration = 1
+    elif rain_duration == 6:
+        rain_duration = 2
+    elif rain_duration == 7:
+        rain_duration = 3
+    elif rain_duration == 8:
+        rain_duration = 9
+    elif rain_duration == 9:
+        rain_duration = 15
+    return rain_duration
 
 
 
@@ -81,25 +123,39 @@ def processWeatherData(latitude, longitude):
     wind_force = weatherData[station].find('FF')
     rain = weatherData[station].find('RRR')
     rain_duration = weatherData[station].find('TR') # the duration of time in which  the rain amount was measured
+    rain_in_millimeters = convert_xml_values_toNumbers (rain)
+    rain_hours = convert_xml_numbers_to_hours (rain_duration)
+
+
     if wind_force is not None:
         if wind_force > 5 :
             weather = "חזקות רוחות"
         if wind_force > 8 :
             weather = "רוחות סופת"
+
+            #right now checking only for hour need to check if they enter duration of more than 1 hour
     if rain is not None & rain_duration is not None:
-        if rain > 990 & rain <= 995:  # rain amount is between 0.1 and 0.5 millimeter
+        if rain_in_millimeters > 0 & rain_in_millimeters <= 0.5:  # rain amount is between 0.1 and 0.5 millimeter
             weather = weather + "קל גשם ,"
 
-            # rain_duration is one hour and rain amount is between 0.5 and 4.0 millimeters
-        if ((rain > 0 & rain <= 004) | rain > 995) & rain_duration == 5:
+            # average rain amount per hour is between 0.5 and 4.0 millimeters
+        if ((rain_in_millimeters / rain_hours > 0.5 & rain_in_millimeters / rain_hours <= 4)):
             weather = weather + "גשם ,"
+            road_surface = "רטוב כביש"
 
-             # rain_duration is one hour and rain amount is between 4.0 and 8.0 millimeters
-        if rain > 004 & rain <= 008 & rain_duration == 5:
+             # average rain amount per hour is between 4.0 and 8.0 millimeters
+        elif rain_in_millimeters / rain_hours > 4 & rain_in_millimeters / rain_hours <= 8:
             weather = weather + "שוטף גשם ,"
+            road_surface = "רטוב כביש"
 
 
+      # average rain amount per hour is more than 8.0 millimeters
+        elif rain_in_millimeters / rain_hours > 8 :
+            weather = weather + "זלעפות גשם ,"
+            road_surface = "רטוב כביש"
 
+
+    return {'weather': weather, 'road_surface': road_surface}
 
 
 def create_accidents(file_location):
@@ -123,6 +179,7 @@ def create_accidents(file_location):
                 print "\t\tMissing coordinates in line {0}. Moving on...".format(line + 1)
                 continue
 
+            weather_road = processWeatherData(accident[csvmap["lat"]], accident[csvmap["long"]])# function returns weather and road surface
             created = parse_date(accident[csvmap["time"]])
             marker = {
                 "id": accident[csvmap["id"]],
@@ -138,7 +195,8 @@ def create_accidents(file_location):
                 "type": MARKER_TYPE_ACCIDENT,
                 "intactness": "".join(x for x in accident[csvmap["casualties"]] if x.isdigit()) or 0,
                 "description": unicode(accident[csvmap["comment"]], encoding='utf-8'),
-                "weather": processWeatherData(accident[csvmap["lat"]], accident[csvmap["long"]] )
+                "weather":weather_road.get('weather'),
+                "road_surface": weather_road.get('road_surface')
               
             }
 
@@ -168,6 +226,7 @@ def import_to_db(path):
     return len(new_ids)
 
 
+
 def main():
     """
     Calls importmail.py prior to importing to DB
@@ -188,6 +247,16 @@ def main():
         if united_file.endswith(".csv"):
             total += import_to_db(united_path + united_file)
     print("\tImported {0} items".format(total))
+
+    united = Marker.query.filter(Marker.provider_code == 2)
+    for accident in united:
+        accident.weather = processWeatherData(accident.latitude, accident.longitude)
+        weat =open('weather.txt', 'w')
+        weat.write(accident)
+
+
+
+
 
 if __name__ == "__main__":
     main()

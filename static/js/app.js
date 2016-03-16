@@ -311,7 +311,7 @@ $(function () {
                 }else{
                     groupMarkersCount = groupsData[firstMemberIndex].quantity;
                     groupSeverityString = SEVERITY_MAP[groupsData[firstMemberIndex].severity];
-                    marker.setTitle( groupMarkersCount + " " + marker.view.getTitle("multiple") + " חומרה מירבית:" + groupSeverityString);
+                    marker.setTitle( groupMarkersCount + " " + marker.view.getTitle("multiple") + " חומרה מירבית: " + groupSeverityString);
                 }
             },this);
             this.groupsData = groupsData;

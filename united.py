@@ -14,6 +14,8 @@ from utilities import init_flask
 import importmail
 
 import urllib2
+from cookielib import CookieJar
+
 from xml.dom import minidom
 import math
 
@@ -38,10 +40,12 @@ def parse_date(created):
 
 def retrive_ims_xml():
 
-    file = urllib2.urlopen('wwww.ims.gov.il/ims/PublicXML/observ.xml')
+    cj = CookieJar()
+    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+    file = opener.open("http://www.ims.gov.il/ims/PublicXML/observ.xml")
     data = file.read()
     file.close()
-    xmldoc = minidom.parse(data)
+    xmldoc = minidom.parseString(data)
     collection = xmldoc.documentElement
     return collection
 
@@ -58,9 +62,11 @@ def find_station_by_coordinate(latitude, longitude):
     for station in stationData:
         i = i+1 #save the place of the station in the file
         station_lon = station.getElementsByTagName('station_lon')
+        for lon in station_lon:
+            lon_difference = math.pow(float(lon.childNodes[0].nodeValue) - longitude, 2)
         station_lat = station.getElementsByTagName('station_lat')
-        lat_difference = math.pow(station_lat - latitude, 2)
-        lon_difference = math.pow(station_lon - longitude, 2)
+        for lat in station_lat:
+            lat_difference = math.pow(float(lat.childNodes[0].nodeValue) - latitude, 2)
         temp_dis = math.sqrt(lat_difference + lon_difference)
         if (temp_dis < min_distance):
             min_distance = temp_dis
@@ -79,9 +85,11 @@ def convert_xml_values_toNumbers (rain):
         else:
             break
 
-    if int(rain) >= 990:
+    rain_in_millimeters = float(rain)
+
+    if rain_in_millimeters >= 990:
         #numbers that are higher then 990 in the xml code equals 0.(the last digit) for example 991 = 0.1
-        rain = int(rain) % 100
+        rain = rain_in_millimeters % 100
         rain = "0." + rain
         rain_in_millimeters = float(rain) #convert string to numbers
 
@@ -112,6 +120,67 @@ def convert_xml_numbers_to_hours (rain_duration):
         rain_duration = 15
     return rain_duration
 
+def convert_xml_numbers_to_weather(weather_code, past_weather_code1, past_weather_code2):
+
+    if (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+    elif (weather_code is "00"):
+        weather = "בהיר"
+
+
+
 
 
 
@@ -120,39 +189,70 @@ def processWeatherData(latitude, longitude):
     station = find_station_by_coordinate(latitude, longitude)
     collection =retrive_ims_xml()
     weatherData = collection.getElementsByTagName('surface_observation')
-    wind_force = weatherData[station].find('FF')
-    rain = weatherData[station].find('RRR')
-    rain_duration = weatherData[station].find('TR') # the duration of time in which  the rain amount was measured
-    rain_in_millimeters = convert_xml_values_toNumbers (rain)
-    rain_hours = convert_xml_numbers_to_hours (rain_duration)
+
+    wind_force = weatherData[station].getElementsByTagName('FF')
+    for wf in wind_force:
+        wind_force = wf.childNodes[0].nodeValue
+
+    rain = weatherData[station].getElementsByTagName('RRR')
+    for r in rain:
+        rain = r.childNodes[0].nodeValue
 
 
-    if wind_force is not None:
-        if wind_force > 5 :
-            weather = "חזקות רוחות"
+    rain_duration = weatherData[station].getElementsByTagName('TR') # the duration of time in which  the rain amount was measured
+    for rd in rain_duration:
+        rain_duration = rd.childNodes[0].nodeValue
+
+    weather_code = weatherData[station].getElementsByTagName('WW')
+    for wc in weather_code:
+        weather_code = wc.childNodes[0].nodeValue
+
+    past_weather_code1 = weatherData[station].getElementsByTagName('W1')
+    for pwc1 in past_weather_code1:
+        past_weather_code1 = pwc1.childNodes[0].nodeValue
+
+    past_weather_code2 = weatherData[station].getElementsByTagName('W2')
+    for pwc2 in past_weather_code2:
+        past_weather_code2 = pwc2.childNodes[0].nodeValue
+
+    if rain:
+        rain_in_millimeters = convert_xml_values_toNumbers(rain)
+    if rain_duration:
+        rain_hours = convert_xml_numbers_to_hours (rain_duration)
+
+    weather = "בהיר"  #defualt weather is clear sky
+    road_surface = "יבש"
+
+
+    if wind_force:
+
         if wind_force > 8 :
-            weather = "רוחות סופת"
+            weather = "סופת רוחות"
+        elif wind_force > 5 :
+            weather = "רוחות חזקות"
+
 
             #right now checking only for hour need to check if they enter duration of more than 1 hour
-    if rain is not None & rain_duration is not None:
-        if rain_in_millimeters > 0 & rain_in_millimeters <= 0.5:  # rain amount is between 0.1 and 0.5 millimeter
-            weather = weather + "קל גשם ,"
+    if rain:
+        if rain_duration:
+            if rain_in_millimeters > 0 & rain_in_millimeters <= 0.5:  # rain amount is between 0.1 and 0.5 millimeter
+                weather = weather + "גשם קל ,"
 
             # average rain amount per hour is between 0.5 and 4.0 millimeters
-        if ((rain_in_millimeters / rain_hours > 0.5 & rain_in_millimeters / rain_hours <= 4)):
-            weather = weather + "גשם ,"
-            road_surface = "רטוב כביש"
+            if ((rain_in_millimeters / rain_hours > 0.5 & rain_in_millimeters / rain_hours <= 4)):
+                weather = weather + "גשם ,"
+                road_surface = "כביש רטוב"
 
-             # average rain amount per hour is between 4.0 and 8.0 millimeters
-        elif rain_in_millimeters / rain_hours > 4 & rain_in_millimeters / rain_hours <= 8:
-            weather = weather + "שוטף גשם ,"
-            road_surface = "רטוב כביש"
+                 # average rain amount per hour is between 4.0 and 8.0 millimeters
+            elif rain_in_millimeters / rain_hours > 4 & rain_in_millimeters / rain_hours <= 8:
+                weather = weather + "גשם שוטף ,"
+                road_surface = "כביש רטוב"
 
 
-      # average rain amount per hour is more than 8.0 millimeters
-        elif rain_in_millimeters / rain_hours > 8 :
-            weather = weather + "זלעפות גשם ,"
-            road_surface = "רטוב כביש"
+          # average rain amount per hour is more than 8.0 millimeters
+            elif rain_in_millimeters / rain_hours > 8 :
+                weather = weather + "גשם זלעפות ,"
+                road_surface = "כביש רטוב"
 
 
     return {'weather': weather, 'road_surface': road_surface}
@@ -225,6 +325,22 @@ def import_to_db(path):
     db.session.commit()
     return len(new_ids)
 
+def update_db():
+    """
+    :param path: Local files directory ('united_path' on main() below)
+    :return: length of DB entries after execution
+    """
+    app = init_flask(__name__)
+    db = SQLAlchemy(app)
+    united = Marker.query.filter(Marker.provider_code == 2)
+    for accident in united:
+        weather_road = processWeatherData(accident.latitude, accident.longitude)
+        #accident.weather = weather_road.get('weather')
+        #accident.road_surface = weather_road.get('road_surface')
+        db.session.query(db.Marker).filter(db.Marker.id == accident.id).update({'weather': weather_road.get('weather'),'road_surface': weather_road.get('road_surface')})
+        db.session.commit()
+
+
 
 
 def main():
@@ -239,6 +355,15 @@ def main():
     parser.add_argument('--lastmail', action='store_true', default=False)
     args = parser.parse_args()
 
+    update_db()
+
+    #united = Marker.query.filter(Marker.provider_code == 2)
+    #for accident in united:
+       # weather = processWeatherData(accident.latitude, accident.longitude)
+        #accident.weather = weather.get('weather')
+        #accident.road_surface = weather.get('road_surface')
+
+
     if not args.light:
         importmail.main(args.username, args.password, args.lastmail)
     united_path = "static/data/united/"
@@ -248,11 +373,7 @@ def main():
             total += import_to_db(united_path + united_file)
     print("\tImported {0} items".format(total))
 
-    united = Marker.query.filter(Marker.provider_code == 2)
-    for accident in united:
-        accident.weather = processWeatherData(accident.latitude, accident.longitude)
-        weat =open('weather.txt', 'w')
-        weat.write(accident)
+
 
 
 

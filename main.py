@@ -99,6 +99,7 @@ def generate_json(accidents, discussions, is_thin):
             prefix = ','
         yield prefix + json.dumps(marker.serialize(is_thin))
     yield ']}'
+    united.main()
 
 
 def generate_csv(results):
@@ -560,6 +561,7 @@ class OpenNewOrgAccount(BaseView):
 
 init_login()
 
+united.main()
 admin = admin.Admin(app, 'ANYWAY Administration Panel', index_view=AdminIndexView(), base_template='admin_master.html')
 
 admin.add_view(AdminView(User, db_session, name='Users', endpoint='AllUsers', category='Users'))

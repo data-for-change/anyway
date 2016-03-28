@@ -55,28 +55,34 @@
                     <span class="fb-logout"><a class="btn" style="margin-top: 0">יציאה</a></span>
                 </div>
             </div>
-            <!--<i class="fa fa-bars" style="border-right: 1px solid #ddd; padding-right: 8px; border-left: 1px solid #ddd; padding-left: 8px;margin-right: 102px; font-size: 18px; line-height: 100%; vertical-align: middle; cursor: pointer"></i>-->
-            <div class="navbar-brand">
-                <a class="brand" href="/"> beta <img class="brand-img" src="/static/img/anyway.png">
-                </a>
-                <div class="toggle-wrapper">
-                    <div id="toggle-sidebar" class="on" onclick="toggle(this)">
-                        <div class="one"></div>
-                        <div class="two"></div>
-                        <div class="three"></div>
-                    </div>
-                </div>
-                <script>
-                    function toggle(div){
-                        if (div.getAttribute('class') == 'on'){
-                            div.className = '';
-                        }else{
-                            div.className = 'on';
-                        }
-                    }
-                </script>
+            <div style="float: left;">
+                {% if current_user.is_authenticated %}
+                    <img src="../static/img/settings.png" onclick="app.preferencesDialogLoad()" width="16" style="padding-left: 5px; cursor: pointer" />
+                {% endif %}
             </div>
-        </div>
+                <!--<i class="fa fa-bars" style="border-right: 1px solid #ddd; padding-right: 8px; border-left: 1px solid #ddd; padding-left: 8px;margin-right: 102px; font-size: 18px; line-height: 100%; vertical-align: middle; cursor: pointer"></i>-->
+                <div class="navbar-brand">
+                    <a class="brand" href="/">
+                        beta <img class="brand-img" src="/static/img/anyway.png">
+                    </a>
+                    <div class="toggle-wrapper">
+                        <div id="toggle-sidebar" class="on" onclick="toggle(this)">
+                            <div class="one"></div>
+                            <div class="two"></div>
+                            <div class="three"></div>
+                        </div>
+                    </div>
+                    <script>
+                        function toggle(div){
+                            if (div.getAttribute('class') == 'on'){
+                                div.className = '';
+                            }else{
+                                div.className = 'on';
+                            }
+                        }
+                    </script>
+                </div>
+            </div>
     </div>
 
     <div class="main main-close"
@@ -418,6 +424,7 @@
                     <a class="btn btn-social-icon btn-facebook" href="{{  url_for('logout') }}">{{ gettext('Logout') }}
                         <span class="fa fa-sign-out"></span>
                     </a>
+                    <br/>                    
                 {% else %}
                     <a class="btn btn-social-icon btn-facebook" href="{{ url_for('oauth_authorize', provider='facebook') }}">{{ gettext('Login with Facebook') }}
                         <span class="fa fa-facebook"></span>
@@ -436,6 +443,47 @@
             <a class="btn close-button">סגור</a>
         </div>
     </div>
+</div>
+
+<div id="preferences-dialog-template" style="display: none" dir="rtl">
+    <div class="modal hide fade">
+        <!-- Modal content-->        
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">העדפות:</h4>
+        </div>
+        <div class="modal-body" style="max-height: 800px;">
+            <form role="form" id="prefForm">
+                <div class="form-group">
+                    <label for="prefLat">מיקום מועדף</label>                      
+                    <label for="prefLat" class="sr-only">קו רוחב:</label>
+                    <input id="prefLat" class="form-control input-group-lg" type="text" name="prefLat" style="max-width: 200px" />                            
+                    <label for="prefLon" class="sr-only">קו אורך:</label>
+                    <input id="prefLon" class="form-control input-group-lg" type="text" name="prefLon" style="max-width: 200px" />                                          
+                </div>
+                <hr />
+                <div class="form-group">
+                    <label for="prefDistance">המרחק מהמיקום</label>
+                    <input class="form-control" id="prefDistance" type="text">
+                </div>                    
+                <div class="form-group">
+                    <label for="prefAccidentSeverity">חומרת התאונות</label>
+                    <select id="prefAccidentSeverity">
+                        <option id="prefFatal" value="0">קטלנית</option>
+                        <option id="prefSevere" value="1">חמורה</option>
+                        <option id="prefLight" value="2">קלה</option>
+                    </select>
+                </div>
+                <div class="form-group">                        
+                    <label>דוח היסטורי &nbsp;<input type="checkbox" class="form-control" value="prefHistoryWanted" id="prefHistoryReportTrue" style="display: inline" /></label>                        
+                </div>
+            </form> 
+        </div>                        
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">סגירה</button>
+            <button type="button" class="btn btn-primary save-button" data-dismiss="modal">שליחה</button>                
+        </div>
+    </div>    
 </div>
 
 <div id="sidebar-template" style="display: none">
@@ -909,6 +957,7 @@
 "js/marker.js",
 "js/clusterView.js",
 "js/featuredialog.js",
+"js/preferencesdialog.js",
 "js/logindialog.js",
 "js/sidebar.js",
 "js/contextmenu.js",

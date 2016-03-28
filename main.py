@@ -365,9 +365,57 @@ def updatebyemail():
             db_session.commit()
             return jsonify(respo='Subscription saved', )
         else:
-            return jsonify(respo='Subscription already exist', )
+            return jsonify(respo='Subscription already exist')
 
+@app.route("/preferences", methods=('GET', 'POST'))
+def update_preferences():
+    if not current_user.is_authenticated:
+        return jsonify(respo='user not authenticated')
+    cur_id = current_user.get_id()
+    cur_user = db_session.query(User).filter(User.id == cur_id).first()
+    if cur_user is None:
+        return jsonify(respo='user not found')
+    cur_report_preferences = db_session.query(ReportPreferences).filter(User.id == cur_id).first()
+    if request.method == "GET":
+        if cur_report_preferences is None:
+            return jsonify(lat='', lon='', distance='', accident_severity='0', history_report=False)
+        else:
+            return jsonify(lat=cur_report_preferences.latitude, lon=cur_report_preferences.longitude, distance=cur_report_preferences.radius, \
+                accident_severity=cur_report_preferences.minimum_severity, history_report=cur_report_preferences.historical_report)
+    else:
+        jsonData = request.get_json(force=True)    
+        lat = jsonData['lat']
+        lon = jsonData['lon']
+        distance = jsonData['distance']
+        accident_severity = jsonData['accident_severity']
+        history_report = jsonData['history_report']
+    
+        cur_general_preferences = db_session.query(GeneralPreferences).filter(User.id == cur_id).first()
+        if cur_general_preferences is None:
+            general_pref = GeneralPreferences(user_id = cur_id, minimum_displayed_severity = accident_severity)
+            db_session.add(general_pref)
+            db_session.commit()
+        else:
+            cur_general_preferences.minimum_displayed_severity = accident_severity  
+            db_session.add(cur_general_preferences)
+            db_session.commit()
+    
+        if cur_report_preferences is None:
+            report_pref = ReportPreferences(user_id = cur_id, line_number=1,historical_report=history_report,\
+                latitude=lat,longitude=lon, radius=distance, minimum_severity=accident_severity)
+            db_session.add(report_pref)
+            db_session.commit()
+        else:
+            cur_report_preferences.historical_report = history_report  
+            cur_report_preferences.latitude = lat  
+            cur_report_preferences.longitude = lon  
+            cur_report_preferences.radius = distance  
+            cur_report_preferences.minimum_severity = accident_severity  
+            db_session.add(cur_general_preferences)
+            db_session.commit()
+        return jsonify(respo='ok', )
 
+    
 class LoginFormAdmin(form.Form):
     username = fields.StringField(validators=[validators.required()])
     password = fields.PasswordField(validators=[validators.required()])

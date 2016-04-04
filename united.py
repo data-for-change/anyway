@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+import calendar
 import csv
-from datetime import datetime
+from datetime import datetime, date
 import os
 import argparse
 
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
 
 from models import Marker, MARKER_TYPE_ACCIDENT
@@ -36,6 +36,39 @@ def parse_date(created):
     hour = time.strftime('%H')
     hour = int(hour) if created.endswith('AM') else int(hour)+12
     return datetime(time.year, time.month, time.day, hour, time.minute, 0)
+
+def is_nth_weekday(nth, daynum, year, month):  # start counting the daynum from monday = 0
+    return calendar.Calendar(nth).monthdatescalendar(
+        year,
+        month
+    )[daynum][0]
+
+def all_station_in_date_frame(created):
+
+    collection =retrive_ims_xml()
+    stationDataInDate = collection.getElementsByTagName('date_selected')
+    accidentDate = parse_date(created)
+    summerClock = is_nth_weekday(4, 4, accidentDate[0], 3)
+    winterClock = is_nth_weekday(4,6,accidentDate[0],10)
+
+    # weather is given in UTC time
+    # therefore in summer clock we deduct 3 hours from the local time and in winter clock 2 hours
+    #[
+    #if accident happend between april and september
+    if accidentDate.month < 10 & accidentDate.month > 3 :
+        accidentDate.hour = accidentDate.hour - 3
+
+    # if accident happend before the last sunday of october at 2:00 o'clock
+    elif accidentDate[1] == 10 & (winterClock[2] > accidentDate[2]|( winterClock[2] == accidentDate[2] & accidentDate[3] < 2)):
+                accidentDate[3] = accidentDate[3] - 3
+
+    # if accident happend after the last friday of march at 2:00 o'clock
+    elif  (accidentDate[1] == 3 & summerClock[2] < accidentDate[2] |( summerClock[2] == accidentDate[2] & accidentDate[3] >= 2)):
+                accidentDate[3] = accidentDate[3]-3
+    else: # winterClock
+        accidentDate[3] = accidentDate[3] - 2
+    #]
+
 
 
 def retrive_ims_xml():
@@ -120,65 +153,198 @@ def convert_xml_numbers_to_hours (rain_duration):
         rain_duration = 15
     return rain_duration
 
-def convert_xml_numbers_to_weather(weather_code, past_weather_code1, past_weather_code2):
+def convert_xml_numbers_to_current_weather(weather_code):
 
-    if (weather_code is "00"):
+    if (weather_code is "00" ):
         weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
-    elif (weather_code is "00"):
-        weather = "בהיר"
+    elif (weather_code is "01"):
+        weather = "עננים מתפזרים"
+    elif (weather_code is "03"):
+        weather = "היערמות עננים"
+    elif (weather_code is "04"):
+        weather = "ראות לקויה כתוצאה מעשן"
+    elif (weather_code is "05"):
+        weather = "אובך"
+    elif any( x in weather_code for x in ("07", "08")):
+        weather = "אבק"
+    elif (weather_code is "09"):
+        weather = "סופת חול"
+    elif (weather_code is "10"):
+        weather = "ראות לקויה"
+    elif (weather_code is "11"):
+        weather = " ערפל קל"
+    elif (weather_code is "12"):
+        weather = "ברקים"
+    elif (weather_code is "17"):
+        weather = "סופת רעמים"
+    elif (weather_code is "18"):
+        weather = "סערה"
+    elif (weather_code is "19"):
+        weather = "סופה באופק"
+    elif (weather_code is "20"):
+        weather = "טפטוף"
+    elif (weather_code is "21"):
+        weather = "גשם"
+    elif (weather_code is "22"):
+        weather = "שלג"
+    elif (weather_code is "23"):
+        weather = "שלג מעורב בגשם"
+    elif (weather_code is "24"):
+        weather = "קרה (גשם קפוא)"
+    elif (weather_code is "25"):
+        weather = "גשם כבד"
+    elif (weather_code is "26"):
+        weather = "שלג כבד"
+    elif (weather_code is "27"):
+        weather = "ברד כבד"
+    elif (weather_code is "28"):
+        weather = "ערפל"
+    elif (weather_code is "29"):
+        weather = "סופת רעמים וגשם"
+    elif any( x in weather_code for x in ("30", "31", "32")):
+        weather = "סופת חול קלה"
+    elif any( x in weather_code for x in ("33", "34", "35")):
+        weather = "סופת חול"
+    elif any( x in weather_code for x in ("36", "37", "38", "39")):
+        weather = "סחף שלג"
+    elif (weather_code is "40"):
+        weather = "ערפל באופק"
+    elif (weather_code is "41" ):
+        weather = "כיסי ערפל"
+    elif (weather_code is "42"):
+        weather = "ערפל קל, מתפוגג"
+    elif (weather_code is "43"):
+        weather = "ערפל כבד מתפוגג"
+    elif (weather_code is "44"):
+        weather = "ערפל קל"
+    elif any( x in weather_code for x in ("45", "46", "47")):
+        weather = "ערפל כבד"
+    elif (weather_code is "48" ):
+        weather = "כפור, ערפל קל"
+    elif (weather_code is "49"):
+        weather = "כפור, ערפל כבד"
+    elif (weather_code is "50"):
+        weather = "טפטוף קל לסירוגין"
+    elif (weather_code is "51"):
+        weather = " טפטוף קל"
+    elif (weather_code is "52"):
+        weather = "טפטוף לסירוגין"
+    elif (weather_code is "53"):
+        weather = "טפטוף"
+    elif (weather_code is "54"):
+        weather = "גשם קל לסירוגין"
+    elif (weather_code is "55"):
+        weather = "גשם קל"
+    elif (weather_code is "56"):
+        weather = "טפטוף קל קופא במגע עם הקרקע"
+    elif (weather_code is "57"):
+        weather = "טפטוף קופא במגע עם הקרקע"
+    elif (weather_code is "58"):
+        weather = "טפטוף כבד"
+    elif any( x in weather_code for x in ("59", "61")):
+        weather = "גשם קל"
+    elif (weather_code is "60"):
+        weather = "גשם קל לסירוגין "
+    elif (weather_code is "62"):
+        weather = "גשם לסירוגין"
+    elif (weather_code is "63"):
+        weather = "גשם"
+    elif (weather_code is "64"):
+        weather = "גשם כבד לסירוגין"
+    elif (weather_code is "65"):
+        weather = "גשם כבד"
+    elif (weather_code is "66"):
+        weather = "גשם קל קופא במגע עם הקרקע"
+    elif (weather_code is "67"):
+        weather = "גשם קופא במגע עם הקרקע"
+    elif (weather_code is "68"):
+        weather = "שלג קל מעורב בגשם"
+    elif (weather_code is "69"):
+        weather = "שלג כבד מעורב בגשם"
+    elif (weather_code is "70"):
+        weather = "שלג קל לסירוגין"
+    elif (weather_code is "71" ):
+        weather = "שלג קל"
+    elif (weather_code is "72"):
+        weather = "שלג לסירוגין"
+    elif (weather_code is "73"):
+        weather = "שלג"
+    elif (weather_code is "74"):
+        weather = "שלג כבד לסירוגין"
+    elif (weather_code is "75"):
+        weather = "שלג כבד"
+    elif (weather_code is "76"):
+        weather = "שלג, שמיים בהירים"
+    elif (weather_code is "77"):
+        weather = " שלג דק"
+    elif (weather_code is "78" ):
+        weather = "שלג עבה"
+    elif (weather_code is "79"):
+        weather = "שלג מעורב בגשם, קרח שחור"
+    elif (weather_code is "80"):
+        weather = "ממטרים קלים"
+    elif (weather_code is "81"):
+        weather = " ממטרים"
+    elif (weather_code is "82"):
+        weather = "ממטרים כבדים"
+    elif (weather_code is "83"):
+        weather = "ממטרים קלים שלג מעורב בגשם"
+    elif (weather_code is "84"):
+        weather = "ממטרים שלג מעורב בגשם"
+    elif (weather_code is "85"):
+        weather = "ממטרי שלג קלים"
+    elif (weather_code is "86"):
+        weather = "ממטרי שלג"
+    elif (weather_code is "87"):
+        weather = "ממטרי שלג/ברד קלים"
+    elif (weather_code is "88"):
+        weather = "ממטרי ברד/שלג"
+    elif (weather_code is "89" ):
+        weather = "ממטרי ברד קלים"
+    elif (weather_code is "90" ):
+        weather = "ממטרי ברד"
+    elif (weather_code is "91"):
+        weather = "סופת רעמים, גשם קל"
+    elif (weather_code is "92"):
+        weather = "גשם, סופת רעמים"
+    elif (weather_code is "93"):
+        weather = "סופת רעמים, שלג קל/שלג קל מעורב בגשם"
+    elif (weather_code is "94"):
+        weather = "סופת רעמים, שלג/ שלג מעורב בגשם"
+    elif (weather_code is "95"):
+        weather = "סופת רעמים"
+    elif (weather_code is "96"):
+        weather = "סופת רעמים, ברד"
+    elif (weather_code is "97"):
+        weather = "סופת רעמים כבדה"
+    elif (weather_code is "98"):
+        weather = "סופת רעמים וחול כבדה"
+    elif (weather_code is "99"):
+        weather = "סופת רעמים כבדה, ברד"
 
+
+def convert_xml_numbers_to_general_weather( past_weather_code1, past_weather_code2):
+
+    if ("0" in x for x in (past_weather_code2, past_weather_code1)):
+        pwc = "שמיים מעוננים חלקית, ראות לקויה "
+    elif ("1" in x for x in (past_weather_code2, past_weather_code1)):
+        pwc = "שמיים מעוננים לפרקים, ראות לקויה"
+    elif ("2" in x for x in (past_weather_code2, past_weather_code1)):
+        pwc = "שמיים מעוננים, ראות לקויה"
+    elif ("3" in x for x in (past_weather_code2, past_weather_code1)):
+        pwc = "סופת חול/אבק/אבק שלג, ראות לקויה מאד"
+    elif ("4" in x for x in (past_weather_code2, past_weather_code1)):
+        pwc = "ערפל כבד"
+    elif ("5" in x for x in (past_weather_code2, past_weather_code1)):
+        pwc = "טפטוף"
+    elif ("6" in x for x in (past_weather_code2, past_weather_code1)):
+        pwc = "גשם"
+    elif ("7" in x for x in (past_weather_code2, past_weather_code1)):
+        pwc = "שלג/שלג מעורב בגשם"
+    elif ("8" in x for x in (past_weather_code2, past_weather_code1)):
+        pwc = "ממטרים"
+    elif ("9" in x for x in (past_weather_code2, past_weather_code1)):
+        pwc = "סופת רעמים"
 
 
 
@@ -214,45 +380,56 @@ def processWeatherData(latitude, longitude):
     past_weather_code2 = weatherData[station].getElementsByTagName('W2')
     for pwc2 in past_weather_code2:
         past_weather_code2 = pwc2.childNodes[0].nodeValue
+    if (weather_code):
+        weather = convert_xml_numbers_to_current_weather(weather_code)
+        if not past_weather_code2 or not past_weather_code1:
+            general_weather = convert_xml_numbers_to_general_weather(past_weather_code1, past_weather_code2)
 
-    if rain:
-        rain_in_millimeters = convert_xml_values_toNumbers(rain)
-    if rain_duration:
-        rain_hours = convert_xml_numbers_to_hours (rain_duration)
+        if (general_weather):
+            if (general_weather not in weather):
+                s = ", "
+                l = (weather, general_weather)
+                weather = s.join(l)
 
-    weather = "בהיר"  #defualt weather is clear sky
-    road_surface = "יבש"
-
-
-    if wind_force:
-
-        if wind_force > 8 :
-            weather = "סופת רוחות"
-        elif wind_force > 5 :
-            weather = "רוחות חזקות"
-
-
-            #right now checking only for hour need to check if they enter duration of more than 1 hour
-    if rain:
+    else:
+        if rain:
+            rain_in_millimeters = convert_xml_values_toNumbers(rain)
         if rain_duration:
-            if rain_in_millimeters > 0 & rain_in_millimeters <= 0.5:  # rain amount is between 0.1 and 0.5 millimeter
-                weather = weather + "גשם קל ,"
+            rain_hours = convert_xml_numbers_to_hours (rain_duration)
 
-            # average rain amount per hour is between 0.5 and 4.0 millimeters
-            if ((rain_in_millimeters / rain_hours > 0.5 & rain_in_millimeters / rain_hours <= 4)):
-                weather = weather + "גשם ,"
-                road_surface = "כביש רטוב"
-
-                 # average rain amount per hour is between 4.0 and 8.0 millimeters
-            elif rain_in_millimeters / rain_hours > 4 & rain_in_millimeters / rain_hours <= 8:
-                weather = weather + "גשם שוטף ,"
-                road_surface = "כביש רטוב"
+        weather = "בהיר"  #defualt weather is clear sky
+        road_surface = "יבש"
 
 
-          # average rain amount per hour is more than 8.0 millimeters
-            elif rain_in_millimeters / rain_hours > 8 :
-                weather = weather + "גשם זלעפות ,"
-                road_surface = "כביש רטוב"
+        if wind_force:
+
+            if wind_force > 8 :
+                weather = "סופת רוחות"
+            elif wind_force > 5 :
+                weather = "רוחות חזקות"
+
+
+                #right now checking only for hour need to check if they enter duration of more than 1 hour
+        if rain:
+            if rain_duration:
+                if rain_in_millimeters > 0 & rain_in_millimeters <= 0.5:  # rain amount is between 0.1 and 0.5 millimeter
+                    weather = weather + "גשם קל ,"
+
+                # average rain amount per hour is between 0.5 and 4.0 millimeters
+                if ((rain_in_millimeters / rain_hours > 0.5 & rain_in_millimeters / rain_hours <= 4)):
+                    weather = weather + "גשם ,"
+                    road_surface = "כביש רטוב"
+
+                     # average rain amount per hour is between 4.0 and 8.0 millimeters
+                elif rain_in_millimeters / rain_hours > 4 & rain_in_millimeters / rain_hours <= 8:
+                    weather = weather + "גשם שוטף ,"
+                    road_surface = "כביש רטוב"
+
+
+              # average rain amount per hour is more than 8.0 millimeters
+                elif rain_in_millimeters / rain_hours > 8 :
+                    weather = weather + "גשם זלעפות ,"
+                    road_surface = "כביש רטוב"
 
 
     return {'weather': weather, 'road_surface': road_surface}
@@ -335,10 +512,15 @@ def update_db():
     united = Marker.query.filter(Marker.provider_code == 2)
     for accident in united:
         weather_road = processWeatherData(accident.latitude, accident.longitude)
-        #accident.weather = weather_road.get('weather')
-        #accident.road_surface = weather_road.get('road_surface')
-        db.session.query(db.Marker).filter(db.Marker.id == accident.id).update({'weather': weather_road.get('weather'),'road_surface': weather_road.get('road_surface')})
+
+        #weather_road.get('road_surface')
+        #change later
+        accident_history = Marker.query.filter_by(id=accident.id).first()
+        weather = weather_road.get('weather')
+        accident_history.weather = unicode(weather, "utf-8")
         db.session.commit()
+
+
 
 
 
@@ -355,14 +537,7 @@ def main():
     parser.add_argument('--lastmail', action='store_true', default=False)
     args = parser.parse_args()
 
-    update_db()
-
-    #united = Marker.query.filter(Marker.provider_code == 2)
-    #for accident in united:
-       # weather = processWeatherData(accident.latitude, accident.longitude)
-        #accident.weather = weather.get('weather')
-        #accident.road_surface = weather.get('road_surface')
-
+   # update_db()
 
     if not args.light:
         importmail.main(args.username, args.password, args.lastmail)

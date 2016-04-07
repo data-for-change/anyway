@@ -27,12 +27,12 @@ Development environment setup notes
     The container is ready to roll with all app dependencies and requirements. It builds up the data models and DB itself. <br> 
     All you have to do is follow [three simple steps] (https://github.com/hasadna/anyway/blob/dev/DOCKER.md#instructions). <br>
 
-2.  **Local installation**:
+1.  **Local installation**:
 
 ## Getting the code
 1. [Fork](https://github.com/hasadna/anyway/fork) this repository on GitHub
-2. `git clone https://github.com/*you*/anyway`
-3. Add the main repository as your upstream remote: `git remote add upstream https://github.com/hasadna/anyway`
+1. `git clone https://github.com/*you*/anyway`
+1. Add the main repository as your upstream remote: `git remote add upstream https://github.com/hasadna/anyway`
 
 * Get updates whenever you start working: `git pull upstream dev`
 * Push to your fork when you've committed your changes and tested them: `git push`, and make a pull request from your fork on GitHub
@@ -40,23 +40,23 @@ Development environment setup notes
 ## Installing dependencies
 
 ### Ubuntu
-1. `sudo apt-get install python-pip python-dev python-tk libpq-dev`
+`sudo apt-get install python-pip python-dev python-tk libpq-dev`
 
 ### OS X
 1. `sudo easy_install pip setuptools`
-2. Install postgresql: `brew install postgresql` (after installing [brew](http://brew.sh))
+1. Install postgresql: `brew install postgresql` (after installing [brew](http://brew.sh))
 
 ### Both Ubuntu and OS X: `virtualenv` setup
 1. `sudo pip install virtualenvwrapper`
-2. Add to your `~/.bashrc`:
+1. Add to your `~/.bashrc`:
 
       `source /usr/local/bin/virtualenvwrapper.sh`
 
    (Assuming it exists. Otherwise, it might be in `/usr/bin/virtualenvwrapper.sh`, so use that instead in that case.)
-3. `source ~/.bashrc`
-4. `mkvirtualenv anyway`
-5. `cd anyway`
-6. `pip install -r requirements.txt`
+1. `source ~/.bashrc`
+1. `mkvirtualenv anyway`
+1. `cd anyway`
+1. `pip install -r requirements.txt`
 
 * Each time you start working: `workon anyway`
 
@@ -82,14 +82,14 @@ Development environment setup notes
   * bash: `export DATABASE_URL='sqlite:///local.db'`
   * windows shell: `set DATABASE_URL=sqlite:///local.db`
   
-2. First time, create tables: `python models.py`
-3. Optionally, get the [complete accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTdWdPMXV5c2gycW8/view?usp=sharing) after sending a permission request, and extract it into `/static/data/lms`. Otherwise you'll use the [example accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTSjNMUXYyeW4yQkk/view?usp=sharing) that you already got with the code, so no need to get it again.
-4. Populate the data (markers etc.): `python process.py`: this will take less than an hour if you're using the example files (default), but if you have the complete data it may take several days. Be prepared.
-5. Populate united hatzala sample data: `python united.py --light` for the complete, or more recent data please contact the Anyway team.
-6. Run the app: `python main.py`: do this whenever you start working and want to try out your code.
-7. Browse to http://127.0.0.1:5000
-8. If the site fails to load properly, make sure you have JDK installed on your machine
-9. If you wish to share your app on the local network you can expose flask by running `python main.py --open`
+1. First time, create tables: `python models.py`
+1. Optionally, get the [complete accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTdWdPMXV5c2gycW8/view?usp=sharing) after sending a permission request, and extract it into `/static/data/lms`. Otherwise you'll use the [example accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTSjNMUXYyeW4yQkk/view?usp=sharing) that you already got with the code, so no need to get it again.
+1. Populate the data (markers etc.): `python process.py`: this will take less than an hour if you're using the example files (default), but if you have the complete data it may take several days. Be prepared.
+1. Populate united hatzala sample data: `python united.py --light` for the complete, or more recent data please contact the Anyway team.
+1. Run the app: `python main.py`: do this whenever you start working and want to try out your code.
+1. Navigate to http://127.0.0.1:5000 in your browser.
+1. If the site fails to load properly, make sure you have JDK installed on your machine
+1. If you wish to share your app on the local network you can expose flask by running `python main.py --open`
     (Please note that this would expose your machine on port 5000 to all local nodes)
 
 It is useful to add the following to your `~/.bashrc` (fixing for the correct path):
@@ -101,6 +101,17 @@ Then you can simply start working by running the `anyway` command.
 ## IDE
 [PyCharm](https://www.jetbrains.com/pycharm) is recommended for development.
 
+You can do most of the setup through PyCharm:
+
+1. After getting the code, open the `anyway` directory in PyCharm.
+1. Set up a virtualenv: File -> Settings -> Project -> Project Interpreter -> Click the cog icon at the top right -> Create VirtualEnv. Name it "anyway" and choose Python 2.7 as the base interpreter.
+1. Restart PyCharm, and when it asks whether to install the packages from `requirements.txt`, answer Yes.
+1. Right click `models.py` and choose Run 'models', then click the dropdown menu at the top that says `models` and click Edit Configurations. Under Environment, click the `...` next to Environment variables and add the variable `DATABASE_URL` with the value `sqlite:///local.db`. Then click OK twice and run `models.py` again.
+1. Run `process.py` the same way (adding the `DATABASE_URL` variable).
+1. Run `united.py` the same way, but in Edit Configurations, also add `--light` in the Script parameters.
+1. Run `main.py` the same way (without `--light`).
+1. Navigate to http://127.0.0.1:5000 in your browser.
+
 ## Testing
 Server side testing can be done by adding python tests under `tests` folder, using a `test_*.py` file name pattern.
 
@@ -110,13 +121,13 @@ To run tests: `python -m unittest discover ./tests`.
 Heroku deployment
 -----------------
 1. Create an account on [Heroku](http://heroku.com)
-2. Install the [Heroku toolbelt](https://toolbelt.heroku.com)
-3. Follow the [quickstart instructions](https://devcenter.heroku.com/articles/quickstart). On step #4, read the [Python introduction](https://devcenter.heroku.com/articles/getting-started-with-python)
-4. Create an app, e.g. anyway-*you*
-5. Sign up for a free Heroku Postgres add-on (note that you'll have to enter your credit card details to be eligible): `heroku addons:add heroku-postgresql:hobby-dev`
-6. Push from your Git repository to Heroku
-7. Populate the database with the data (assuming you have it in your local directory):
+1. Install the [Heroku toolbelt](https://toolbelt.heroku.com)
+1. Follow the [quickstart instructions](https://devcenter.heroku.com/articles/quickstart). On step #4, read the [Python introduction](https://devcenter.heroku.com/articles/getting-started-with-python)
+1. Create an app, e.g. anyway-*you*
+1. Sign up for a free Heroku Postgres add-on (note that you'll have to enter your credit card details to be eligible): `heroku addons:add heroku-postgresql:hobby-dev`
+1. Push from your Git repository to Heroku
+1. Populate the database with the data (assuming you have it in your local directory):
     1. Copy the database URL from your Heroku config: `heroku config:get DATABASE_URL` (if you have several apps, specify the relevant one with the option `--app <anyway-*you*>` for any Heroku command)
-    2. Create tables: `python models.py`
-    3. Populate data: `python process.py`
-8. Browse to http://anyway-*you*.herokuapp.com
+    1. Create tables: `python models.py`
+    1. Populate data: `python process.py`
+1. Navigate to http://anyway-*you*.herokuapp.com

@@ -757,4 +757,23 @@ input[type='checkbox']{
     margin: 15px;
     margin-right: 0px;
 }
+/* for login popup*/
+.modal-header {
+    background-color = gray;
+}
+.modal-header h3 {
+    font-size: 16px;
+}
+.btn-social-icon {
+    width: 160px;
+    border-radius: 0px;
+    color: #fff !important;
+}
+.btn-facebook {
 
+    background-color: blue;
+}
+
+.btn-google {
+    background-color: red;
+}

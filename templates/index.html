@@ -412,7 +412,7 @@
     <div class="modal hide fade">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h3>{{ gettext('Login') }}</h3>
+            <h3>{{ gettext('היכנס') }}</h3>
         </div>
         <div class="modal-body" style="width: 50%; margin: 0 auto;">
             <div class="control-group" style="width: 100%; margin: 0 auto;">
@@ -430,7 +430,7 @@
                         <span class="fa fa-facebook"></span>
                     </a>                    
                     <br/>
-                    <h3>OR</h3>
+                    <!--<h3>OR</h3>-->
                     <br/>
                     <a class="btn btn-social-icon btn-google" href="{{ url_for('oauth_authorize', provider='google') }}">
                         {{ gettext('Login with Google') }}
@@ -439,9 +439,9 @@
                 {% endif %}
             </div>
         </div>
-        <div class="modal-footer">
-            <a class="btn close-button">סגור</a>
-        </div>
+        <!--<div class="modal-footer">-->
+            <!--<a class="btn close-button">סגור</a>-->
+        <!--</div>-->
     </div>
 </div>
 

@@ -5,8 +5,10 @@ import csv
 from datetime import datetime
 import os
 import argparse
+from wsgiref import headers
 from xml.etree import ElementTree
 
+import re
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
 
@@ -24,6 +26,7 @@ import math
 
 import requests
 import logging
+
 
 import Cookie
 
@@ -103,15 +106,17 @@ def all_station_in_date_frame(created):
 
 def retrive_ims_xml():
 
-    global cookie
     logging.basicConfig(level=logging.DEBUG)
     s = requests.session()
     r = s.get('http://www.ims.gov.il/ims/PublicXML/observ.xml')
     txt = r.text
-    for e in ElementTree.fromstring(txt).findall('/html/body/script'):
-        m = e.search("document.cookie='[^']*'")
-        cookie = m.group(1)
+    for e in ElementTree.fromstring(txt).findall('body/script'):
+        m = re.search("document.cookie='[^']*'", e.text)
+        cookie = m.group()
     print cookie
+    C= Cookie.SimpleCookie()
+    C.load(headers['cookie'])
+    print C
     xml_doc = minidom.parseString(r.text)
     collection = xml_doc.documentElement
     return collection

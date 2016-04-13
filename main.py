@@ -99,7 +99,6 @@ def generate_json(accidents, discussions, is_thin):
             prefix = ','
         yield prefix + json.dumps(marker.serialize(is_thin))
     yield ']}'
-    united.main()
 
 
 def generate_csv(results):

@@ -608,7 +608,6 @@ class OpenNewOrgAccount(BaseView):
 
 init_login()
 
-united.main()
 admin = admin.Admin(app, 'ANYWAY Administration Panel', index_view=AdminIndexView(), base_template='admin_master.html')
 
 admin.add_view(AdminView(User, db_session, name='Users', endpoint='AllUsers', category='Users'))

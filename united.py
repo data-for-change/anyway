@@ -17,7 +17,6 @@ from utilities import init_flask
 import importmail
 
 import urllib2
-from cookielib import CookieJar
 
 from xml.dom import minidom
 from xml.dom.minidom import Document
@@ -35,6 +34,17 @@ import Cookie
 ############################################################################################
 
 PROVIDER_CODE = 2
+
+def retrive_ims_xml():
+
+    logging.basicConfig(level=logging.DEBUG)
+    s = requests.session()
+    r = s.get('http://www.ims.gov.il/ims/PublicXML/observ.xml')
+    xml_doc = minidom.parseString(r.text)
+    collection = xml_doc.documentElement
+    return collection
+
+collection = retrive_ims_xml()
 
 
 def parse_date(created):
@@ -63,7 +73,7 @@ def get_parent_object_node(node):
 
 
 def all_station_in_date_frame(created):
-    collection = retrive_ims_xml()
+
     station_data_in_date = collection.getElementsByTagName('date_selected')
     station_data_in_date.sort(key=lambda x: int(x.attributes['Position'].value))
     accident_date = parse_date(created)
@@ -104,25 +114,9 @@ def all_station_in_date_frame(created):
     print doc.toprettyxml(indent="    ", encoding="utf-8")
 
 
-def retrive_ims_xml():
 
-    logging.basicConfig(level=logging.DEBUG)
-    s = requests.session()
-    r = s.get('http://www.ims.gov.il/ims/PublicXML/observ.xml')
-    txt = r.text
-    for e in ElementTree.fromstring(txt).findall('body/script'):
-        m = re.search("document.cookie='[^']*'", e.text)
-        cookie = m.group()
-    print cookie
-    C= Cookie.SimpleCookie()
-    C.load(headers['cookie'])
-    print C
-    xml_doc = minidom.parseString(r.text)
-    collection = xml_doc.documentElement
-    return collection
+def find_station_by_coordinate(latitude, longitude):
 
-
-def find_station_by_coordinate(collection, latitude, longitude):
     station_place_in_xml = -1
     lat_difference = 0
     lon_difference = 0
@@ -168,15 +162,21 @@ def convert_xml_values_to_numbers(rain):
 
 def convert_xml_numbers_to_hours(rain_duration):
     # convert the xml code for number of hours, to the actual number of hours
+    str_duration = str(rain_duration)
+    str_duration = str_duration.strip(' ')
     hours = {"1": 6, "2": 12, "3": 18, "4": 24, "/": 24, "5": 1, "6": 2, "7": 3, "8": 9, "9": 15}
 
-    return hours[str(rain_duration)]
+    return hours[str_duration
+
+
+    ]
 
 
 def convert_xml_numbers_to_current_weather(weather_code):
+    print weather_code
     str_weather = str(weather_code)
     str_weather = str_weather.strip(' ')
-    weather = {"00": 1, "01": 2, "03": 3, "04": 4, "05": 5, "07": 6, "08": 6, "09": 7, "10": 8, "11": 9,
+    weather = {"0": 1, "1": 2, "3": 3, "4": 4, "5": 5, "7": 6, "8": 6, "9": 7, "10": 8, "11": 9,
                "12": 10, "17": 11, "18": 12, "19": 13, "20": 14, "21": 15, "22": 16, "23": 17, "24": 18,
                "25": 19, "26": 20, "27": 21, "28": 22, "29": 23, "30": 24, "31": 24, "32": 24, "33": 7,
                "34": 7, "35": 7, "36": 25, "37": 25, "38": 25, "39": 25, "40": 26, "41": 27, "42": 28,
@@ -190,12 +190,13 @@ def convert_xml_numbers_to_current_weather(weather_code):
     return weather[str_weather]
 
 
-def process_weather_data(collection, latitude, longitude):
+def process_weather_data(latitude, longitude):
+
     weather = 1  # default weather is clear sky
     rain_in_millimeters = 0
     rain_hours = 0
 
-    station = find_station_by_coordinate(collection, latitude, longitude)
+    station = find_station_by_coordinate(latitude, longitude)
     weather_data = collection.getElementsByTagName('surface_observation')
 
     wind_force = weather_data[station].getElementsByTagName('FF')
@@ -234,7 +235,7 @@ def process_weather_data(collection, latitude, longitude):
         if rain:
             if rain_duration:
                 # rain amount is between 0.1 and 0.5 millimeter
-                if rain_in_millimeters > 0 & rain_in_millimeters <= 0.5:
+                if rain_in_millimeters > 0.0 and rain_in_millimeters <= 0.5 or (rain_in_millimeters/rain_hours > 0.0 and rain_in_millimeters/rain_hours <= 0.5):
                     if weather == 76:
                         weather = 80  # סופת רוחות, גשם קל
                     elif weather == 77:
@@ -243,7 +244,7 @@ def process_weather_data(collection, latitude, longitude):
                         weather = 37  # גשם קל
 
                 # average rain amount per hour is between 0.5 and 4.0 millimeters
-                if rain_in_millimeters / rain_hours > 0.5 & rain_in_millimeters / rain_hours <= 4:
+                if rain_in_millimeters / rain_hours > 0.5 and rain_in_millimeters / rain_hours <= 4:
                     if weather == 76:
                         weather = 81  # גשם וסופת רוחות
                     elif weather == 77:
@@ -252,7 +253,7 @@ def process_weather_data(collection, latitude, longitude):
                         weather = 15  # גשם
 
                 # average rain amount per hour is between 4.0 and 8.0 millimeters
-                elif rain_in_millimeters / rain_hours > 4 & rain_in_millimeters / rain_hours <= 8:
+                elif rain_in_millimeters / rain_hours > 4 and rain_in_millimeters / rain_hours <= 8:
                     if 76 == weather:
                         weather = 82  # סופת רוחות, גשם שוטך
                     if weather == 77:
@@ -268,7 +269,6 @@ def process_weather_data(collection, latitude, longitude):
                         weather = 87  # רוחות חזקות, גשם זלעפות
                     else:
                         weather = 79  # גשם זלעפות
-
     return weather
 
 
@@ -279,8 +279,6 @@ def create_accidents(file_location):
     """
     print("\tReading accidents data from '%s'..." % file_location)
     csvmap = {"id": 0, "time": 1, "lat": 2, "long": 3, "street": 4, "city": 6, "comment": 7, "type": 8, "casualties": 9}
-
-    collection = retrive_ims_xml()
 
     with open(file_location, 'rU') as f:
         reader = csv.reader(f, delimiter=',', dialect=csv.excel_tab)
@@ -305,7 +303,7 @@ def create_accidents(file_location):
                           locationAccuracy=1, subtype=21, type=MARKER_TYPE_ACCIDENT,
                           intactness="".join(x for x in accident[csvmap["casualties"]] if x.isdigit()) or 0,
                           description=unicode(accident[csvmap["comment"]], encoding='utf-8'),
-                          weather=process_weather_data(collection, accident[csvmap["lat"]], accident[csvmap["long"]]))
+                          weather=process_weather_data(accident[csvmap["lat"]], accident[csvmap["long"]]))
 
             yield marker
 
@@ -337,13 +335,11 @@ def update_db():
     """
     :return: length of DB entries after execution
     """
-    collection = retrive_ims_xml()
-
     app = init_flask(__name__)
     db = SQLAlchemy(app)
     united = Marker.query.filter(Marker.provider_code == 2)
     for accident in united:
-        weather_road = process_weather_data(collection, accident.latitude, accident.longitude)
+        weather_road = process_weather_data(accident.latitude, accident.longitude)
         accident.weather = weather_road
     db.session.commit()
 
@@ -360,7 +356,6 @@ def main():
     parser.add_argument('--lastmail', action='store_true', default=False)
     args = parser.parse_args()
 
-    update_db()
 
     if not args.light:
         importmail.main(args.username, args.password, args.lastmail)
@@ -370,6 +365,9 @@ def main():
         if united_file.endswith(".csv"):
             total += import_to_db(united_path + united_file)
     print("\tImported {0} items".format(total))
+
+    update_db()
+
 
 
 if __name__ == "__main__":

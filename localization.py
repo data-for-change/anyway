@@ -307,6 +307,7 @@ _fields = {
     "TEURA": "תאורה",
     "BAKARA": "בקרה",
     "MEZEG_AVIR": "מזג אוויר",
+    "MEZEG_AVIR_UNITED": "מזג אוויר",
     "PNE_KVISH": "פני כביש",
     "SUG_EZEM": "סוג עצם",
     "MERHAK_EZEM": "מרחק עצם",

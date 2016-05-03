@@ -779,7 +779,6 @@ if __name__ == "__main__":
 
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')
 
-    if not args.open:
-        app.run(debug=True)
-    else:
-        app.run(debug=True, host='0.0.0.0')
+    default_host = '0.0.0.0' if args.open else '127.0.0.1'
+    app.run(debug=True, host=os.getenv('IP', default_host),
+            port=int(os.getenv('PORT', 5000)))

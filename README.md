@@ -61,8 +61,8 @@ Development environment setup notes
 * Each time you start working: `workon anyway`
 
 ### Windows (experimental)
-1.  Install [Python 2.7](http://www.python.org/getit)
-    *  If Python is already installed and its version is lower than 2.7.9 update to a version >= 2.7.9 OR install [setuptools](http://www.lfd.uci.edu/~gohlke/pythonlibs/#setuptools) & [pip](http://www.lfd.uci.edu/~gohlke/pythonlibs/#pip)(package manager) 
+1.  Install [Python 2.7.11](http://www.python.org/getit)
+    *  If Python is already installed and its version is lower than 2.7.11 update to a version >= 2.7.11 OR install [setuptools](http://www.lfd.uci.edu/~gohlke/pythonlibs/#setuptools) & [pip](http://www.lfd.uci.edu/~gohlke/pythonlibs/#pip)(package manager) 
 1. Update the `PATH` to include a reference to the `Python` and `Python/scripts` directories (replace `C:\Python27` with your path to Python).
     * Command Line: Run this command with Administrator privileges: `SETX /M PATH "%PATH%";C:\Python27;C:\Python27\Scripts`. The new path will be available in the next opened terminal.
     * GUI: `Control Panel > System Properties > Advanced > Environment Variables > System Variables > Path > Edit >` Add `;C:\Python27;C:\Python27\Scripts` to the end of the line.
@@ -104,7 +104,7 @@ Then you can simply start working by running the `anyway` command.
 You can do most of the setup through PyCharm:
 
 1. After getting the code, open the `anyway` directory in PyCharm.
-1. Set up a virtualenv: File -> Settings -> Project -> Project Interpreter -> Click the cog icon at the top right -> Create VirtualEnv. Name it "anyway" and choose Python 2.7 as the base interpreter.
+1. Set up a virtualenv: File -> Settings -> Project -> Project Interpreter -> Click the cog icon at the top right -> Create VirtualEnv. Name it "anyway" and choose Python 2.7.11 as the base interpreter.
 1. Restart PyCharm, and when it asks whether to install the packages from `requirements.txt`, answer Yes.
 1. Right click `models.py` and choose Run 'models', then click the dropdown menu at the top that says `models` and click Edit Configurations. Under Environment, click the `...` next to Environment variables and add the variable `DATABASE_URL` with the value `sqlite:///local.db`. Then click OK twice and run `models.py` again.
 1. Run `process.py` the same way (adding the `DATABASE_URL` variable).

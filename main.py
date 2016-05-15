@@ -327,6 +327,28 @@ def index(marker=None, message=None):
             context[attr] = value or '-1'
     if message:
         context['message'] = message
+    pref_accident_severity = []
+    pref_light = PreferenceObject('prefLight', '2', u"קלה")
+    pref_severe = PreferenceObject('prefSevere', '1', u"חמורה")
+    pref_fatal = PreferenceObject('prefFatal', '0', u"קטלנית")
+    pref_accident_severity.extend([pref_light,pref_severe,pref_fatal])
+    context['pref_accident_severity'] = pref_accident_severity
+    pref_accident_report_severity = []
+    pref_report_light = PreferenceObject('prefReportLight', '2', u"קלה")
+    pref_report_severe = PreferenceObject('prefReportSevere', '1', u"חמורה")
+    pref_report_fatal = PreferenceObject('prefReportFatal', '0', u"קטלנית")
+    pref_accident_report_severity.extend([pref_report_light,pref_report_severe,pref_report_fatal])
+    context['pref_accident_report_severity'] = pref_accident_report_severity
+    pref_historical_report_periods = []
+    month_strings = [u"אפס", u"אחד", u"שניים", u"שלושה", u"ארבעה", u"חמישה", u"שישה", u"שבעה", u"שמונה", u"תשעה", \
+                     u"עשרה", u"אחד עשר", u"שניים עשר"]
+    for x in range(0, 13):
+        pref_historical_report_periods.append(PreferenceObject('prefHistoricalReport' + str(x) + 'Month', str(x), month_strings[x]))
+    context['pref_historical_report_periods'] = pref_historical_report_periods
+    pref_radius = []
+    for x in range(1,5):
+        pref_radius.append(PreferenceObject('prefRadius' + str(x * 500), x * 500, x * 500))
+    context['pref_radius'] = pref_radius
     return render_template('index.html', **context)
 
 
@@ -375,44 +397,80 @@ def update_preferences():
     if cur_user is None:
         return jsonify(respo='user not found')
     cur_report_preferences = db_session.query(ReportPreferences).filter(User.id == cur_id).first()
+    cur_general_preferences = db_session.query(GeneralPreferences).filter(User.id == cur_id).first()
     if request.method == "GET":
-        if cur_report_preferences is None:
-            return jsonify(lat='', lon='', distance='', accident_severity='0', history_report=False)
+        if cur_report_preferences is None and cur_general_preferences is None:
+            return jsonify(accident_severity='0', pref_accidents_lms=True, pref_accidents_ihud=True, produce_accidents_report=False)
         else:
-            return jsonify(lat=cur_report_preferences.latitude, lon=cur_report_preferences.longitude, distance=cur_report_preferences.radius, \
-                accident_severity=cur_report_preferences.minimum_severity, history_report=cur_report_preferences.historical_report)
+            resource_types = cur_general_preferences.resource_type.split(',')
+            if cur_report_preferences is None:
+                return jsonify(accident_severity=cur_general_preferences.minimum_displayed_severity, pref_resource_types=resource_types, produce_accidents_report=False)
+            else:
+                return jsonify(accident_severity=cur_general_preferences.minimum_displayed_severity, pref_resource_types=resource_types, produce_accidents_report=True, \
+                               lat=cur_report_preferences.latitude, lon=cur_report_preferences.longitude, pref_radius=cur_report_preferences.radius, \
+                               pref_accident_severity_for_report=cur_report_preferences.minimum_severity, how_many_months_back=cur_report_preferences.how_many_months_back)
     else:
-        jsonData = request.get_json(force=True)    
-        lat = jsonData['lat']
-        lon = jsonData['lon']
-        distance = jsonData['distance']
-        accident_severity = jsonData['accident_severity']
-        history_report = jsonData['history_report']
-    
+        json_data = request.get_json(force=True)
+        accident_severity = json_data['accident_severity']
+        resources = json_data['pref_resource_types']
+        produce_accidents_report = json_data['produce_accidents_report']
+        lat = json_data['lat']
+        lon = json_data['lon']
+        pref_radius = json_data['pref_radius']
+        pref_accident_severity_for_report = json_data['pref_accident_severity_for_report']
+        history_report = json_data['history_report']
+        is_history_report = (history_report != '0')
+        resource_types = ','.join(resources)
         cur_general_preferences = db_session.query(GeneralPreferences).filter(User.id == cur_id).first()
         if cur_general_preferences is None:
-            general_pref = GeneralPreferences(user_id = cur_id, minimum_displayed_severity = accident_severity)
+            general_pref = GeneralPreferences(user_id = cur_id, minimum_displayed_severity = accident_severity, resource_type = resource_types)
             db_session.add(general_pref)
             db_session.commit()
         else:
-            cur_general_preferences.minimum_displayed_severity = accident_severity  
+            cur_general_preferences.minimum_displayed_severity = accident_severity
+            cur_general_preferences.resource_type = resource_types
             db_session.add(cur_general_preferences)
             db_session.commit()
-    
-        if cur_report_preferences is None:
-            report_pref = ReportPreferences(user_id = cur_id, line_number=1,historical_report=history_report,\
-                latitude=lat,longitude=lon, radius=distance, minimum_severity=accident_severity)
-            db_session.add(report_pref)
-            db_session.commit()
+
+        if produce_accidents_report:
+            if lat == '':
+                lat = None
+            if lon == '':
+                lon = None
+            if cur_report_preferences is None:
+                report_pref = ReportPreferences(user_id = cur_id, line_number=1, historical_report=is_history_report,\
+                                                how_many_months_back=history_report, latitude=lat,longitude=lon,\
+                                                radius=pref_radius, minimum_severity=pref_accident_severity_for_report)
+                db_session.add(report_pref)
+                db_session.commit()
+            else:
+                cur_report_preferences.historical_report = is_history_report
+                cur_report_preferences.latitude = lat
+                cur_report_preferences.longitude = lon
+                cur_report_preferences.radius = pref_radius
+                cur_report_preferences.minimum_severity = pref_accident_severity_for_report
+                cur_report_preferences.how_many_months_back = history_report
+                db_session.add(cur_report_preferences)
+                db_session.commit()
         else:
-            cur_report_preferences.historical_report = history_report  
-            cur_report_preferences.latitude = lat  
-            cur_report_preferences.longitude = lon  
-            cur_report_preferences.radius = distance  
-            cur_report_preferences.minimum_severity = accident_severity  
-            db_session.add(cur_general_preferences)
-            db_session.commit()
+            if cur_report_preferences is not None:
+                db_session.delete(cur_report_preferences)
+                db_session.commit()
         return jsonify(respo='ok', )
+
+
+class PreferenceObject:
+    def __init__(self, id, value, string):
+        self.id = id
+        self.value = value
+        self.string = string
+
+
+class HistoricalReportPeriods:
+    def __init__(self,period_id, period_value, period_string):
+        self.period_id=period_id
+        self.period_value=period_value
+        self.severity_string=severity_string
 
     
 class LoginFormAdmin(form.Form):

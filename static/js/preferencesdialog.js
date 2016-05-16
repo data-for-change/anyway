@@ -8,6 +8,7 @@ var PreferencesDialog = Backbone.View.extend({
         "click .close-button": "close",
         "change .produceAccidentsReport" : "showHideReportPrefereces",
         "change .prefTypeOfAccidents" : "changeTypeOfAccidents",
+        "change .prefDisableHistoricalReport" : "changeSendHistoricalReport"
     },     
     render: function () {
         self = this;
@@ -33,7 +34,14 @@ var PreferencesDialog = Backbone.View.extend({
                 self.$el.find("#prefLon").val(data["lon"]);
                 self.$el.find("#prefRadius").val(data["pref_radius"]);
                 self.$el.find("#prefAccidentSeverityForReport").val(data["pref_accident_severity_for_report"]);
-                self.$el.find("#prefHistoricalReportPeriod").val(data["how_many_months_back"]);       
+                if (data["how_many_months_back"] == '0'){
+                    self.$el.find("#prefDisableHistoricalReport").prop('checked', true);
+                    self.$el.find("#prefHistoricalReportPeriod").attr("disabled", "disabled");
+                }else{
+                    self.$el.find("#prefHistoricalReportPeriod").val(data["how_many_months_back"]);
+                    self.$el.find("#prefDisableHistoricalReport").prop('checked', false);
+                    self.$el.find("#prefHistoricalReportPeriod").removeAttr("disabled");
+                }
             } else {
                 self.$el.find("#produceAccidentsReport").prop('checked', false);
                 $(".prefReportControls *").attr("disabled", "disabled");
@@ -63,7 +71,14 @@ var PreferencesDialog = Backbone.View.extend({
         var lon = this.$el.find("#prefLon").val();
         var prefRadius = this.$el.find("#prefRadius :selected").val(); 
         var prefAccidentSeverityForReport = this.$el.find("#prefAccidentSeverityForReport :selected").val();               
-        var history_report = this.$el.find("#prefHistoricalReportPeriod :selected").val();              
+        var prefDisableHistoricalReport = this.$el.find("#prefDisableHistoricalReport");
+        var history_report;
+        if ($(prefDisableHistoricalReport).is(':checked')){
+            history_report = $(prefDisableHistoricalReport).val();
+        }else{
+            history_report = this.$el.find("#prefHistoricalReportPeriod :selected").val();
+        }
+
         $.post("preferences", JSON.stringify({ 'accident_severity': accident_severity, 'pref_resource_types': resource_types,
                                              'produce_accidents_report': produceAccidentsReport, 'lat': lat, 'lon': lon, 'pref_radius': prefRadius, 'pref_accident_severity_for_report': prefAccidentSeverityForReport,
                                              'history_report': history_report }), 'json');
@@ -83,7 +98,16 @@ var PreferencesDialog = Backbone.View.extend({
         if (!prefAccidentsLms && !prefAccidentsIhud) {
             $(ev.currentTarget).prop('checked', true);
         }
-    }    
+    },
+    changeSendHistoricalReport : function(){
+        var prefDisableHistoricalReport = this.$el.find("#prefDisableHistoricalReport").is(':checked');
+        var prefHistoricalReportPeriod = this.$el.find("#prefHistoricalReportPeriod");
+        if (prefDisableHistoricalReport){
+            $(prefHistoricalReportPeriod).attr("disabled", "disabled");
+        }else{
+            $(prefHistoricalReportPeriod).removeAttr("disabled");
+        }
+    }
 });
 
 

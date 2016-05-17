@@ -340,10 +340,10 @@ def index(marker=None, message=None):
     pref_accident_report_severity.extend([pref_report_light,pref_report_severe,pref_report_fatal])
     context['pref_accident_report_severity'] = pref_accident_report_severity
     pref_historical_report_periods = []
-    month_strings = [u"אפס", u"אחד", u"שניים", u"שלושה", u"ארבעה", u"חמישה", u"שישה", u"שבעה", u"שמונה", u"תשעה", \
+    month_strings = [u"אחד", u"שניים", u"שלושה", u"ארבעה", u"חמישה", u"שישה", u"שבעה", u"שמונה", u"תשעה", \
                      u"עשרה", u"אחד עשר", u"שניים עשר"]
-    for x in range(0, 13):
-        pref_historical_report_periods.append(PreferenceObject('prefHistoricalReport' + str(x) + 'Month', str(x), month_strings[x]))
+    for x in range(0, 12):
+        pref_historical_report_periods.append(PreferenceObject('prefHistoricalReport' + str(x+1) + 'Month', str(x+1), month_strings[x]))
     context['pref_historical_report_periods'] = pref_historical_report_periods
     pref_radius = []
     for x in range(1,5):

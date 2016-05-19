@@ -9,4 +9,6 @@ before_script:
   - export DATABASE_URL='sqlite:///local.db'
   - python models.py
 # command to run tests
-script: python -m unittest discover tests
+script:
+  - python -m unittest discover tests
+  - python process.py

@@ -12,3 +12,4 @@ before_script:
 script:
   - python -m unittest discover tests
   - python process.py
+  - python united.py --light

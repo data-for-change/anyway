@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function
 import glob
 import os
 import argparse
@@ -17,6 +16,7 @@ from models import Marker, Involved, Vehicle
 import models
 from utilities import ItmToWGS84, init_flask, CsvReader, time_delta
 import localization
+import logging
 
 # Headless servers cannot use GUI file dialog and require raw user input
 fileDialog = True
@@ -205,7 +205,7 @@ def get_data_value(value):
 
 
 def import_accidents(provider_code, accidents, streets, roads, **kwargs):
-    print("\tReading accident data from '%s'..." % os.path.basename(accidents.name()))
+    logging.info("\tReading accident data from '%s'..." % os.path.basename(accidents.name()))
     for accident in accidents:
         if field_names.x_coordinate not in accident or field_names.y_coordinate not in accident:
             raise ValueError("Missing x and y coordinates")
@@ -258,7 +258,7 @@ def import_accidents(provider_code, accidents, streets, roads, **kwargs):
 
 
 def import_involved(provider_code, involved, **kwargs):
-    print("\tReading involved data from '%s'..." % os.path.basename(involved.name()))
+    logging.info("\tReading involved data from '%s'..." % os.path.basename(involved.name()))
     for involve in involved:
         if not involve[field_names.id]:  # skip lines with no accident id
             continue
@@ -291,7 +291,7 @@ def import_involved(provider_code, involved, **kwargs):
 
 
 def import_vehicles(provider_code, vehicles, **kwargs):
-    print("\tReading vehicles data from '%s'..." % os.path.basename(vehicles.name()))
+    logging.info("\tReading vehicles data from '%s'..." % os.path.basename(vehicles.name()))
     for vehicle in vehicles:
         yield {
             "accident_id": int(vehicle[field_names.id]),
@@ -350,7 +350,7 @@ def import_to_datastore(directory, provider_code, batch_size):
         files_from_lms = dict(get_files(directory))
         if len(files_from_lms) == 0:
             return 0
-        print("Importing '{}'".format(directory))
+        logging.info("Importing '{}'".format(directory))
         started = datetime.now()
 
         accidents = list(import_accidents(provider_code=provider_code, **files_from_lms))
@@ -364,7 +364,7 @@ def import_to_datastore(directory, provider_code, batch_size):
         db.session.commit()
 
         total = len(accidents) + len(involved) + len(vehicles)
-        print("\t{0} items in {1}".format(total, time_delta(started)))
+        logging.info("\t{0} items in {1}".format(total, time_delta(started)))
         return total
     except ValueError as e:
         failed_dirs[directory] = e.message
@@ -421,7 +421,7 @@ def main():
     # wipe all the Markers and Involved data first
     if args.delete_all:
         tables = (Vehicle, Involved, Marker)
-        print("Deleting tables: " + ", ".join(table.__name__ for table in tables))
+        logging.info("Deleting tables: " + ", ".join(table.__name__ for table in tables))
         for table in tables:
             db.session.query(table).delete()
             db.session.commit()
@@ -437,9 +437,9 @@ def main():
 
     failed = ["\t'{0}' ({1})".format(directory, fail_reason) for directory, fail_reason in
               failed_dirs.iteritems()]
-    print("Finished processing all directories{0}{1}".format(", except:\n" if failed else "",
+    logging.info("Finished processing all directories{0}{1}".format(", except:\n" if failed else "",
                                                              "\n".join(failed)))
-    print("Total: {0} items in {1}".format(total, time_delta(started)))
+    logging.info("Total: {0} items in {1}".format(total, time_delta(started)))
 
 if __name__ == "__main__":
     main()

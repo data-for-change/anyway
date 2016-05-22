@@ -147,7 +147,7 @@ def get_locale():
 def markers():
     logging.debug('getting markers')
     kwargs = get_kwargs()
-    logging.debug('querying markers in bounding box')
+    logging.debug('querying markers in bounding box: %s' % kwargs)
     is_thin = (kwargs['zoom'] < MINIMAL_ZOOM)
     accidents = Marker.bounding_box_query(is_thin, yield_per=50, **kwargs)
 

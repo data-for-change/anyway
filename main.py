@@ -283,6 +283,10 @@ def log_bad_request(request):
     except AttributeError:
         logging.debug("Bad request:{0}".format(str(request)))
 
+@app.route("/test")
+def test():
+    print request
+    return "abc"
 
 @app.route('/')
 def index(marker=None, message=None):
@@ -470,7 +474,7 @@ class HistoricalReportPeriods:
     def __init__(self,period_id, period_value, period_string):
         self.period_id=period_id
         self.period_value=period_value
-        self.severity_string=severity_string
+        self.severity_string=period_string
 
     
 class LoginFormAdmin(form.Form):
@@ -809,7 +813,7 @@ def create_years_list():
         try:
             year_col = db.session.query(distinct(func.extract("year", Marker.created)))
             break
-        except OperationalError:
+        except:
             time.sleep(1)
 
     years = OrderedDict([("שנת" + " %d" % year, year_range(year))

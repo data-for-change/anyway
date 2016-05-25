@@ -90,7 +90,7 @@ After the Clone activity is completed (can take a few minutes) run the following
     * python models.py
     * python process.py
 
-4. Go to configurations page (using the top right configuration icon) go to the Run Configuration part and press Add New config
+4. Go to configurations page (using the top right configuration icon) go to the `Run Configuration` part and press `Add New config`
 
 5. Do the following definitions on the window that just popped up:
     * Definition Name - Anyway
@@ -98,9 +98,9 @@ After the Clone activity is completed (can take a few minutes) run the following
     * Press enter to save the setting.
     * Environment variables  - DATABASE_URL sqlite:///local.db (in two different colums)
 
-6. Set this to be the default by selecting the definitions window and pressing Set As Default
+6. Set this to be the default by selecting the definitions window and pressing `Set As Default`
 
-7. Run the environment by pressing Run Application and see it by pressing Preview and then Preview Running Application
+7. Run the environment by pressing `Run Application` and see it by pressing `Preview` and then `Preview Running Application`
 
 ## Local first run (all platforms)
 1. Define connection string (needs to be defined whenever you start working):

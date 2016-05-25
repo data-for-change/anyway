@@ -77,6 +77,31 @@ Development environment setup notes
     * Currently, the packages `pyproj` and `psycopg2` are failing to install so for both of them, you need to download and install the `cp27 win32` version, even if you have a 64 bit Windows version installed.
         * http://www.stickpeople.com/projects/python/win-psycopg/
 
+### Creating a cloud development environment on c9
+
+1. Create an account at c9.io (preferably with github verification, but can also be done with a simple IP address
+
+2. Create a new public python based project that receives code from   https://github.com/hasadna/anyway repository 
+
+3. Preform git checkout dev
+After the Clone activity is completed (can take a few minutes) run the following:
+sudo pip install -r requirements.txt
+export DATABASE_URL='sqlite:///local.db'
+python models.py
+python process.py
+
+4. Go to configurations page (using the top right configuration icon) go to the Run Configuration part and press Add New config
+
+5. Do the following definitions on the window that just popped up:
+Definition Name - Anyway
+File to be run - main.py
+Press enter to save the setting.
+Environment variables  - DATABASE_URL sqlite:///local.db (in two different colums)
+
+6. Set this to be the default by selecting the definitions window and pressing Set As Default
+
+7. Run the environment by pressing Run Application and see it by pressing Preview and then Preview Running Application
+
 ## Local first run (all platforms)
 1. Define connection string (needs to be defined whenever you start working):
   * bash: `export DATABASE_URL='sqlite:///local.db'`
@@ -131,3 +156,5 @@ Heroku deployment
     1. Create tables: `python models.py`
     1. Populate data: `python process.py`
 1. Navigate to http://anyway-*you*.herokuapp.com
+
+

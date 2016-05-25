@@ -85,18 +85,18 @@ Development environment setup notes
 
 3. Preform git checkout dev
 After the Clone activity is completed (can take a few minutes) run the following:
-sudo pip install -r requirements.txt
-export DATABASE_URL='sqlite:///local.db'
-python models.py
-python process.py
+    * sudo pip install -r requirements.txt
+    * export DATABASE_URL='sqlite:///local.db'
+    * python models.py
+    * python process.py
 
 4. Go to configurations page (using the top right configuration icon) go to the Run Configuration part and press Add New config
 
 5. Do the following definitions on the window that just popped up:
-Definition Name - Anyway
-File to be run - main.py
-Press enter to save the setting.
-Environment variables  - DATABASE_URL sqlite:///local.db (in two different colums)
+    * Definition Name - Anyway
+    * File to be run - main.py
+    * Press enter to save the setting.
+    * Environment variables  - DATABASE_URL sqlite:///local.db (in two different colums)
 
 6. Set this to be the default by selecting the definitions window and pressing Set As Default
 

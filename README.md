@@ -16,6 +16,7 @@ Contributing
 -----------------------
 * We try to follow the process of other Hasadna projects, e.g. [Open-Knesset](https://oknesset-devel.readthedocs.org/en/latest/).
 * Please take a moment to read our ["Contibuting to ANYWAY" manifest](https://github.com/hasadna/anyway/blob/dev/CONTRIBUTING.md).
+* To see our GitHub issues in a nicer interface, take a look at [HuBoard](https://huboard.com/hasadna/anyway).
 
 Development environment setup notes
 -----------------------

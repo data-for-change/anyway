@@ -6,6 +6,7 @@ import time
 from utilities import time_delta
 import sys
 import argparse
+import logging
 
 ##############################################################################################
 # importmail.py is responsible for extracting and downloading united hatzala email attachments
@@ -30,9 +31,9 @@ def main(username=None, password=None, lastmail=False):
     username = username or os.environ.get('MAILUSER')
     password = password or os.environ.get('MAILPASS')
     if not username:
-        print "Username not set. Please set env var MAILUSER or use the --username argument"
+        logging.error("Username not set. Please set env var MAILUSER or use the --username argument")
     if not password:
-        print "Password not set. Please set env var MAILPASS or use the --password argument"
+        logging.error("Password not set. Please set env var MAILPASS or use the --password argument")
     if not username or not password:
         exit()
 
@@ -40,14 +41,14 @@ def main(username=None, password=None, lastmail=False):
     try:
         imapsession.login(username, password)
     except imaplib.IMAP4.error:
-        print 'Bad credentials, unable to sign in!'
+        logging.error('Bad credentials, unable to sign in!')
         exit()
 
     try:
         imapsession.select(mail_dir)
         typ, data = imapsession.search(None, 'ALL')
     except imaplib.IMAP4.error:
-        print 'Error searching given mailbox: %s' % mail_dir
+        logging.error('Error searching given mailbox: %s' % mail_dir)
         exit()
 
     file_found = False
@@ -58,11 +59,11 @@ def main(username=None, password=None, lastmail=False):
 
     # Iterating over all emails
     started = datetime.now()
-    print "Login successful! Importing files, please hold..."
+    logging.info("Login successful! Importing files, please hold...")
     for msgId in data[0].split():
         typ, message_parts = imapsession.fetch(msgId, '(RFC822)')
         if typ != 'OK':
-            print 'Error fetching mail.'
+            logging.error('Error fetching mail.')
             raise
 
         email_body = message_parts[0][1]
@@ -101,7 +102,7 @@ def main(username=None, password=None, lastmail=False):
         if file_found:
             break
 
-    print("Imported {0} file(s) in {1}".format(total, time_delta(started)))
+    logging.info("Imported {0} file(s) in {1}".format(total, time_delta(started)))
     imapsession.close()
     imapsession.logout()
 

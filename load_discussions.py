@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function
 import argparse
 from models import DiscussionMarker
 import re
 from database import db_session
 import sys
+import logging
 
 def main():
     parser = argparse.ArgumentParser()
@@ -17,7 +17,7 @@ def main():
     for identifier in identifiers:
         m = re.match('\((\d+\.\d+),\s*(\d+\.\d+)\)', identifier)
         if not m:
-            print("Failed processing: " + identifier)
+            logging.error("Failed processing: " + identifier)
             continue
         (latitude, longitude) = m.group(1, 2)
         marker = DiscussionMarker.parse({
@@ -29,10 +29,10 @@ def main():
         try:
             db_session.add(marker)
             db_session.commit()
-            print("Added:  " + identifier, end="")
+            logging.info("Added:  " + identifier, end="")
         except:
             db_session.rollback()
-            print("Failed: " + identifier, end="")
+            logging.warn("Failed: " + identifier, end="")
 
 
 if __name__ == "__main__":

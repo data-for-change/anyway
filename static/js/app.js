@@ -74,10 +74,7 @@ $(function () {
             this.district = 0;
             this.case_type = 0;
 
-
-            this.sdate= new Date();
-            this.edate =new Date (this.sdate.getFullYear()+'-12-31');
-            this.dateRanges = [new Date(this.sdate), new Date(this.edate)];
+            this.dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
 
             setTimeout(function(){
                 this.firstLoadDelay = false;
@@ -1073,6 +1070,7 @@ $(function () {
                 if (accurate == '' && approx == '') {
                     accuracyText = ""
                 }
+
                 $("#filter-string").empty()
                     .append("<span>מציג </span>")
                     .append("<span><a onclick='showFilter(FILTER_MARKERS)'>"+markerCount+"</a></span>")

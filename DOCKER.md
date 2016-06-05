@@ -31,9 +31,9 @@ Instructions
 **3.** Open "Docker terminal", go to the **anyway** directory and run:
 
     docker-compose up
-**You're all set!** Access the app on `localhost:5000` (Linux) or (OS-X/Win) at the virtual machine’s IP (usually `192.168.99.100`); <br>
+**You're all set!** Access the app on `localhost` (Linux) or (OS-X/Win) at the virtual machine’s IP (usually `192.168.99.100`); <br>
 To retrieve a docker machine address: `docker-machine ip default` <br>
-(no need for port specification, simply an IP; e.g `192.168.99.100:5000`)
+(no need for port specification, simply an IP; e.g `192.168.99.100`)
 
 
 More

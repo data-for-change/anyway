@@ -283,11 +283,6 @@ def log_bad_request(request):
     except AttributeError:
         logging.debug("Bad request:{0}".format(str(request)))
 
-@app.route("/test")
-def test():
-    print request
-    return "abc"
-
 @app.route('/')
 def index(marker=None, message=None):
     context = {'minimal_zoom': MINIMAL_ZOOM, 'url': request.base_url, 'index_url': request.url_root}

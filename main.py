@@ -809,12 +809,13 @@ def create_years_list():
     while True:
         try:
             year_col = db.session.query(distinct(func.extract("year", Marker.created)))
+            years = OrderedDict([("שנת" + " %d" % year, year_range(year))
+                                 for year in sorted(year_col, reverse=True)[:4]])
             break
         except OperationalError as err:
+            logging.warn(err)
             time.sleep(1)
 
-    years = OrderedDict([("שנת" + " %d" % year, year_range(year))
-                         for year in sorted(year_col, reverse=True)[:4]])
     years_file = os.path.join(app.static_folder, 'js/years.js')
     with open(years_file, 'w') as outfile:
         outfile.write("var ACCYEARS = ")

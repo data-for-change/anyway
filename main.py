@@ -35,6 +35,8 @@ from apscheduler.scheduler import Scheduler
 import united
 from flask.ext.compress import Compress
 import argparse
+from sqlite3 import OperationalError
+
 from oauth import OAuthSignIn
 
 app = utilities.init_flask(__name__)
@@ -466,10 +468,10 @@ class PreferenceObject:
 
 
 class HistoricalReportPeriods:
-    def __init__(self,period_id, period_value, period_string):
+    def __init__(self,period_id, period_value, severity_string):
         self.period_id=period_id
         self.period_value=period_value
-        self.severity_string=period_string
+        self.severity_string=severity_string
 
     
 class LoginFormAdmin(form.Form):
@@ -808,7 +810,7 @@ def create_years_list():
         try:
             year_col = db.session.query(distinct(func.extract("year", Marker.created)))
             break
-        except:
+        except OperationalError as err:
             time.sleep(1)
 
     years = OrderedDict([("שנת" + " %d" % year, year_range(year))

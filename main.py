@@ -35,6 +35,8 @@ from apscheduler.scheduler import Scheduler
 import united
 from flask.ext.compress import Compress
 import argparse
+from sqlalchemy.exc import OperationalError
+
 from oauth import OAuthSignIn
 
 app = utilities.init_flask(__name__)
@@ -283,7 +285,6 @@ def log_bad_request(request):
     except AttributeError:
         logging.debug("Bad request:{0}".format(str(request)))
 
-
 @app.route('/')
 def index(marker=None, message=None):
     context = {'minimal_zoom': MINIMAL_ZOOM, 'url': request.base_url, 'index_url': request.url_root}
@@ -467,7 +468,7 @@ class PreferenceObject:
 
 
 class HistoricalReportPeriods:
-    def __init__(self,period_id, period_value, period_string):
+    def __init__(self,period_id, period_value, severity_string):
         self.period_id=period_id
         self.period_value=period_value
         self.severity_string=severity_string
@@ -808,12 +809,13 @@ def create_years_list():
     while True:
         try:
             year_col = db.session.query(distinct(func.extract("year", Marker.created)))
+            years = OrderedDict([("שנת" + " %d" % year, year_range(year))
+                                 for year in sorted(year_col, reverse=True)[:4]])
             break
-        except OperationalError:
+        except OperationalError as err:
+            logging.warn(err)
             time.sleep(1)
 
-    years = OrderedDict([("שנת" + " %d" % year, year_range(year))
-                         for year in sorted(year_col, reverse=True)[:4]])
     years_file = os.path.join(app.static_folder, 'js/years.js')
     with open(years_file, 'w') as outfile:
         outfile.write("var ACCYEARS = ")

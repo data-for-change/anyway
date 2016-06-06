@@ -35,7 +35,7 @@ from apscheduler.scheduler import Scheduler
 import united
 from flask.ext.compress import Compress
 import argparse
-from sqlite3 import OperationalError
+from sqlalchemy.exc import OperationalError
 
 from oauth import OAuthSignIn
 

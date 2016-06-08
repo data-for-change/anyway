@@ -252,7 +252,7 @@ def create_accidents(collection, file_location):
     :param file_location: local location of .csv
     :return: Yields a marker object with every iteration
     """
-    print("\tReading accidents data from '%s'..." % file_location)
+    logging.info("\tReading accidents data from '%s'..." % file_location)
     csvmap = {"id": 0, "time": 1, "lat": 2, "long": 3, "street": 4, "city": 6, "comment": 7, "type": 8, "casualties": 9}
 
     with open(file_location, 'rU') as f:
@@ -262,10 +262,10 @@ def create_accidents(collection, file_location):
             if line == 0 or not accident:  # header or empty line
                 continue
             if line == 1 and accident[0] == "":
-                print "\t\tEmpty File!"
+                logging.warn("\t\tEmpty File!")
                 continue
             if accident[csvmap["lat"]] == "" or accident[csvmap["long"]] == "":
-                print "\t\tMissing coordinates in line {0}. Moving on...".format(line + 1)
+                logging.warn("\t\tMissing coordinates in line {0}. Moving on...".format(line + 1))
                 continue
 
             created = parse_date(accident[csvmap["time"]])
@@ -298,7 +298,7 @@ def import_to_db(collection, path):
                if 0 == Marker.query.filter(and_(Marker.id == m["id"],
                                                 Marker.provider_code == m["provider_code"])).count()]
     if not new_ids:
-        print "\t\tNothing loaded, all accidents already in DB"
+        logging.info("\t\tNothing loaded, all accidents already in DB")
         return 0
 
     db.session.execute(Marker.__table__.insert(), [m for m in accidents if m["id"] in new_ids])
@@ -334,13 +334,15 @@ def main():
     collection = retrieve_ims_xml()
 
     if not args.light:
+        logging.info("Importing data from mail...")
         importmail.main(args.username, args.password, args.lastmail)
     united_path = "static/data/united/"
     total = 0
+    logging.info("Loading United accidents...")
     for united_file in os.listdir(united_path):
         if united_file.endswith(".csv"):
             total += import_to_db(collection, united_path + united_file)
-    print("\tImported {0} items".format(total))
+    logging.info("\tImported {0} items".format(total))
 
     update_db(collection)
 

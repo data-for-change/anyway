@@ -549,7 +549,12 @@
                         </div> 
                         <div style="float: right;  margin-right: 20px">                     
                             <label style="vertical-align: middle; height: 30px; display: table-cell;">חודשים</label>                                          
-                        </div>    
+                        </div>
+                        <div style="clear: right; float: right;">
+                            <div>
+                                <label style="margin-left: 10px; vertical-align: middle; display: table-cell;" ><input id="prefDisableHistoricalReport" class="prefDisableHistoricalReport" type="checkbox" value="0" style="display: inline" />&nbsp;לא לשלוח דוח היסטורי</label>
+                            </div>
+                        </div>
                      </div>                                    
                 </div>      
                 
@@ -852,7 +857,7 @@
                 <label for="checkbox-fire" class="btn one">שריפה</label>
                 <input type="radio" name="acctype" id="checkbox-type-pedestrian" value=1 onclick="app.loadFilter()" />
                 <label for="checkbox-type-pedestrian" class="btn one">אחר</label>
-                <input type="radio" name="acctype" id="checkbox-type-else" value=5 onclick="app.loadFilter()" />
+                <input type="radio" name="acctype" id="checkbox-type-else" value=1 onclick="app.loadFilter()" />
                 <label for="checkbox-type-else" class="btn one">פגיעה בהולך רגל</label>
             </div>
 

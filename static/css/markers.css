@@ -105,9 +105,6 @@
     color: #FFD82B;
 }
 
-.gmnoprint[title*='הולך רגל']:after{
-    content: '\e536';
-}
 
 .gmnoprint[title*='פגיעה']:after,.gmnoprint[title*='החלקה']:after,.gmnoprint[title*='התנגשות']:after{
     content: '\e531';
@@ -121,6 +118,7 @@
 .gmnoprint[title*='אחר']:after{
     content: '\e5d3';
 }
+
 
 .gmnoprint[title*='התהפכות']:after{
     transform: rotate(-100deg) !important;
@@ -185,6 +183,10 @@
     -o-transform: rotate(45deg);
     -ms-transform: rotate(45deg);
     transform: rotate(45deg);
+}
+
+.gmnoprint[title*='הולך רגל']:after{
+    content: '\e536';
 }
 
 .gm-style .gmnoprint[title*='(נבחר)'], .gm-style .gmnoprint[title]:hover{

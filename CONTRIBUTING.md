@@ -73,6 +73,13 @@ Universally formatted code is crucial in open source projects and promotes ease 
 
 
 
+**Logging**
+
+Do not use `print` for messages in Python code! Instead, use the `logging` class.
+Remember that log messages are very helpful for debugging server issues, so add as much information as you can.
+
+
+
 **Unit Tests**
 
 All unit tests can be found in the "tests" folder. When adding a new test, make sure you follow this pattern: `test_*.py` (e.g.: `test_bounding_box_query.py`).

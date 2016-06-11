@@ -747,9 +747,6 @@ def get_current_user_first_name():
         return cur_user.first_name
      return "User"
 
-def year_range(year):
-    return ["01/01/%d" % year, "31/12/%d" % year]
-
 
 ######## rauth integration (login through facebook) ##################
 
@@ -804,19 +801,17 @@ def oauth_callback(provider):
 @app.before_first_request
 def create_years_list():
     """
-    init app.years field, with last 4 years that used in db
+    init pp.years field, with last 4 years that used in db
     """
     while True:
         try:
             year_col = db.session.query(distinct(func.extract("year", Marker.created)))
-            years = OrderedDict([("שנת" + " %d" % year, year_range(year))
-                                 for year in sorted(year_col, reverse=True)[:4]])
+            app.years = sorted([year[0] for year in year_col], reverse=True)[:4]
             break
         except OperationalError as err:
             logging.warn(err)
             time.sleep(1)
-    app.years = OrderedDict([('%s'%year, year_range(year))
-                             for year in sorted(year_col, reverse=True)[:4]])
+    logging.info("Years for date selection: " + ", ".join(map(str, app.years)))
 
 
 if __name__ == "__main__":

@@ -1043,7 +1043,6 @@
 "js/libs/bootstrap-tour.min.js",
 "js/app.js",
 "js/localization.js",
-"js/years.js",
 "js/inv_dict.js",
 "js/veh_dict.js",
 "js/retina.js",
@@ -1252,11 +1251,7 @@
                 app.case_type = {{case_type}};
             {% endif %}
             {% if years is defined %}
-                app.years = [
-                 {% for year in years %}
-                    {{year}},
-                 {% endfor %}
-                ];
+                app.years = {{ years }};
             {% endif %}
 
             app.render();

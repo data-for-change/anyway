@@ -1000,10 +1000,10 @@ $(function () {
         },
         changeDate: function() {
             var start_date, end_date;
-            if ($("#checkbox-all-years").is(":checked")) { start_date = "2005"; end_date = "2025" }
-            else {
-                for(yearNum in app.years)
-                {
+            if ($("#checkbox-all-years").is(":checked")) {
+              start_date = "2005"; end_date = "2025"
+            } else {
+                for (yearNum in app.years) {
                     year = app.years[yearNum];
                     if($("#checkbox-"+year).is(":checked")) {
                         start_date = year; end_date = year + 1;

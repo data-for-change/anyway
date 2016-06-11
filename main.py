@@ -350,6 +350,7 @@ def index(marker=None, message=None):
     for x in range(1,5):
         pref_radius.append(PreferenceObject('prefRadius' + str(x * 500), x * 500, x * 500))
     context['pref_radius'] = pref_radius
+    context['years'] = app.years
     return render_template('index.html', **context)
 
 
@@ -803,8 +804,7 @@ def oauth_callback(provider):
 @app.before_first_request
 def create_years_list():
     """
-    Edits 'years.js', a years structure ready to be presented in app.js
-    as user's last-4-years filter choices.
+    init app.years field, with last 4 years that used in db
     """
     while True:
         try:
@@ -815,14 +815,8 @@ def create_years_list():
         except OperationalError as err:
             logging.warn(err)
             time.sleep(1)
-
-    years_file = os.path.join(app.static_folder, 'js/years.js')
-    with open(years_file, 'w') as outfile:
-        outfile.write("var ACCYEARS = ")
-        json.dump(years, outfile, encoding='utf-8')
-        outfile.write(";\n")
-    logging.debug("wrote '%s'" % years_file)
-    logging.debug("\n".join("\t{0}: {1}".format(k, str(v)) for k, v in years.items()))
+    app.years = OrderedDict([('%s'%year, year_range(year))
+                             for year in sorted(year_col, reverse=True)[:4]])
 
 
 if __name__ == "__main__":

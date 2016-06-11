@@ -1000,11 +1000,17 @@ $(function () {
         },
         changeDate: function() {
             var start_date, end_date;
-            if ($("#checkbox-2014").is(":checked")) { start_date = "2014"; end_date = "2015" }
-            else if ($("#checkbox-2013").is(":checked")) { start_date = "2013"; end_date = "2014" }
-            else if ($("#checkbox-2012").is(":checked")) { start_date = "2012"; end_date = "2013" }
-            else if ($("#checkbox-2011").is(":checked")) { start_date = "2011"; end_date = "2012" }
-            else if ($("#checkbox-all-years").is(":checked")) { start_date = "2005"; end_date = "2025" }
+            if ($("#checkbox-all-years").is(":checked")) { start_date = "2005"; end_date = "2025" }
+            else {
+                for(yearNum in app.years)
+                {
+                    year = app.years[yearNum];
+                    if($("#checkbox-"+year).is(":checked")) {
+                        start_date = year; end_date = year + 1;
+                        break;
+                    }
+                }
+            }
             $("#sdate").val(start_date + '-01-01');
             $("#edate").val(end_date + '-01-01');
 

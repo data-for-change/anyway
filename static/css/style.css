@@ -759,7 +759,7 @@ input[type='checkbox']{
 }
 /* for login popup*/
 .modal-header {
-    background-color = gray;
+    background-color: gray;
 }
 .modal-header h3 {
     font-size: 16px;

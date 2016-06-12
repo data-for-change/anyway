@@ -387,6 +387,13 @@ input[type="date"],input[type="time"]{
     content: '\f080'
 }
 
+.full-screen-control:after{
+    font-size: 15px;
+    color: #ccc;
+    font-family: 'FontAwesome';
+    content: '\f0b2'
+}
+
 .map-button:hover .control-label{
     visibility: visible !important;
     position: fixed;

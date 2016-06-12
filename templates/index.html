@@ -85,7 +85,7 @@
             </div>
     </div>
 
-    <div class="main main-close"
+    <div class="{{ 'main main-close' if not map_only else 'main' }}"
          style="position: fixed; width: 100%; height: 100%; box-sizing: border-box{{ '; padding-top: 40px; padding-right: 300px; padding-bottom: 40px' if not map_only }}">
         <div id="map_canvas" style="width: 100%; height: 100%; box-sizing: border-box"></div>
         <div id="toggle-control"></div>
@@ -984,7 +984,7 @@
     </div>
 </div>
 
-<div class="footer">
+<div class="footer" style="{{ 'display: none' if map_only }}">
     <div style="float: right; padding: 5px; cursor: pointer;">
         <a href="http://www.hasadna.org.il/" title="לדעת להשפיע - מבית הסדנא לידע ציבורי"><img
                 src="/static/img/logos/hasadna.png" style="width: 20px; height: 20px; padding: 3px"/>

@@ -8,8 +8,9 @@ import os
 # variables
 #
 
-
 SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+if SQLALCHEMY_DATABASE_URI is None:
+    raise Exception('Please, set the DATABASE_URL environment variable to be sqlite:///local.db')
 SQLALCHEMY_TRACK_MODIFICATIONS = True
 SENDGRID_USERNAME = os.environ.get('SENDGRID_USERNAME')
 SENDGRID_PASSWORD = os.environ.get('SENDGRID_PASSWORD')

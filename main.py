@@ -801,12 +801,12 @@ def oauth_callback(provider):
 @app.before_first_request
 def create_years_list():
     """
-    init pp.years field, with last 4 years that used in db
+    init app.years field, with last 4 years that used in db
     """
     while True:
         try:
             year_col = db.session.query(distinct(func.extract("year", Marker.created)))
-            app.years = sorted([year[0] for year in year_col], reverse=True)[:4]
+            app.years = sorted([int(year[0]) for year in year_col], reverse=True)[:4]
             break
         except OperationalError as err:
             logging.warn(err)

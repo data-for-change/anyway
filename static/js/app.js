@@ -350,6 +350,18 @@ $(function () {
         linkMap: function () {
             $('#embed').modal('show');
         },
+        fullScreen: function () {
+            var body = document.body;
+            if (body.requestFullscreen) {
+                body.requestFullscreen();
+            } else if (body.webkitRequestFullscreen) {
+                body.webkitRequestFullscreen();
+            } else if (body.mozRequestFullScreen) {
+                body.mozRequestFullScreen();
+            } else if (body.msRequestFullscreen) {
+                body.msRequestFullscreen();
+            }
+        },
         render: function () {
             this.isReady = false;
 
@@ -418,11 +430,19 @@ $(function () {
                 statPanelClick(700,400,700,350);
             }.bind(this));
 
+            var fullScreenDiv = document.createElement('div');
+            fullScreenDiv.className = "map-button full-screen-control";
+            fullScreenDiv.innerHTML = $("#full-screen-control").html();
+            google.maps.event.addDomListener(fullScreenDiv, 'click', function () {
+                this.fullScreen();
+            }.bind(this));
+
             mapControlDiv.appendChild(resetMapDiv);
             mapControlDiv.appendChild(downloadCsvDiv);
             mapControlDiv.appendChild(linkMapDiv);
             mapControlDiv.appendChild(tourDiv);
             mapControlDiv.appendChild(statDiv);
+            mapControlDiv.appendChild(fullScreenDiv);
             if (MAP_ONLY)
                 mapControlDiv.style = "display:none";
 
@@ -445,6 +465,11 @@ $(function () {
             statLabel.className = 'control-label';
             statLabel.innerHTML = 'גרפים';
             statDiv.appendChild(statLabel);
+
+            var fullScreenLabel = document.createElement('div');
+            fullScreenLabel.className = 'control-label';
+            fullScreenLabel.innerHTML = 'מסך מלא';
+            fullScreenDiv.appendChild(fullScreenLabel);
 
             this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(mapControlDiv);
 

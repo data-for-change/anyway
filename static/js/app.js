@@ -353,14 +353,30 @@ $(function () {
         fullScreen: function () {
             var body = document.body;
 
-            if (body.requestFullscreen) {
-                body.requestFullscreen();
-            } else if (body.webkitRequestFullscreen) {
-                body.webkitRequestFullscreen();
-            } else if (body.mozRequestFullScreen) {
-                body.mozRequestFullScreen();
-            } else if (body.msRequestFullscreen) {
-                body.msRequestFullscreen();
+            if (
+                document.fullscreenElement ||
+                document.webkitFullscreenElement ||
+                document.mozFullScreenElement ||
+                document.msFullscreenElement){
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }else{
+                if (body.requestFullscreen) {
+                    body.requestFullscreen();
+                } else if (body.webkitRequestFullscreen) {
+                    body.webkitRequestFullscreen();
+                } else if (body.mozRequestFullScreen) {
+                    body.mozRequestFullScreen();
+                } else if (body.msRequestFullscreen) {
+                    body.msRequestFullscreen();
+                }
             }
         },
         render: function () {

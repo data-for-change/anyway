@@ -35,6 +35,8 @@ from apscheduler.scheduler import Scheduler
 import united
 from flask.ext.compress import Compress
 import argparse
+from sqlalchemy.exc import OperationalError
+
 from oauth import OAuthSignIn
 
 app = utilities.init_flask(__name__)
@@ -147,7 +149,7 @@ def get_locale():
 def markers():
     logging.debug('getting markers')
     kwargs = get_kwargs()
-    logging.debug('querying markers in bounding box')
+    logging.debug('querying markers in bounding box: %s' % kwargs)
     is_thin = (kwargs['zoom'] < MINIMAL_ZOOM)
     accidents = Marker.bounding_box_query(is_thin, yield_per=50, **kwargs)
 
@@ -283,7 +285,6 @@ def log_bad_request(request):
     except AttributeError:
         logging.debug("Bad request:{0}".format(str(request)))
 
-
 @app.route('/')
 def index(marker=None, message=None):
     context = {'minimal_zoom': MINIMAL_ZOOM, 'url': request.base_url, 'index_url': request.url_root}
@@ -327,6 +328,29 @@ def index(marker=None, message=None):
             context[attr] = value or '-1'
     if message:
         context['message'] = message
+    pref_accident_severity = []
+    pref_light = PreferenceObject('prefLight', '2', u"קלה")
+    pref_severe = PreferenceObject('prefSevere', '1', u"חמורה")
+    pref_fatal = PreferenceObject('prefFatal', '0', u"קטלנית")
+    pref_accident_severity.extend([pref_light,pref_severe,pref_fatal])
+    context['pref_accident_severity'] = pref_accident_severity
+    pref_accident_report_severity = []
+    pref_report_light = PreferenceObject('prefReportLight', '2', u"קלה")
+    pref_report_severe = PreferenceObject('prefReportSevere', '1', u"חמורה")
+    pref_report_fatal = PreferenceObject('prefReportFatal', '0', u"קטלנית")
+    pref_accident_report_severity.extend([pref_report_light,pref_report_severe,pref_report_fatal])
+    context['pref_accident_report_severity'] = pref_accident_report_severity
+    pref_historical_report_periods = []
+    month_strings = [u"אחד", u"שניים", u"שלושה", u"ארבעה", u"חמישה", u"שישה", u"שבעה", u"שמונה", u"תשעה", \
+                     u"עשרה", u"אחד עשר", u"שניים עשר"]
+    for x in range(0, 12):
+        pref_historical_report_periods.append(PreferenceObject('prefHistoricalReport' + str(x+1) + 'Month', str(x+1), month_strings[x]))
+    context['pref_historical_report_periods'] = pref_historical_report_periods
+    pref_radius = []
+    for x in range(1,5):
+        pref_radius.append(PreferenceObject('prefRadius' + str(x * 500), x * 500, x * 500))
+    context['pref_radius'] = pref_radius
+    context['years'] = app.years
     return render_template('index.html', **context)
 
 
@@ -364,9 +388,93 @@ def updatebyemail():
             db_session.commit()
             return jsonify(respo='Subscription saved', )
         else:
-            return jsonify(respo='Subscription already exist', )
+            return jsonify(respo='Subscription already exist')
+
+@app.route("/preferences", methods=('GET', 'POST'))
+def update_preferences():
+    if not current_user.is_authenticated:
+        return jsonify(respo='user not authenticated')
+    cur_id = current_user.get_id()
+    cur_user = db_session.query(User).filter(User.id == cur_id).first()
+    if cur_user is None:
+        return jsonify(respo='user not found')
+    cur_report_preferences = db_session.query(ReportPreferences).filter(User.id == cur_id).first()
+    cur_general_preferences = db_session.query(GeneralPreferences).filter(User.id == cur_id).first()
+    if request.method == "GET":
+        if cur_report_preferences is None and cur_general_preferences is None:
+            return jsonify(accident_severity='0', pref_accidents_lms=True, pref_accidents_ihud=True, produce_accidents_report=False)
+        else:
+            resource_types = cur_general_preferences.resource_type.split(',')
+            if cur_report_preferences is None:
+                return jsonify(accident_severity=cur_general_preferences.minimum_displayed_severity, pref_resource_types=resource_types, produce_accidents_report=False)
+            else:
+                return jsonify(accident_severity=cur_general_preferences.minimum_displayed_severity, pref_resource_types=resource_types, produce_accidents_report=True, \
+                               lat=cur_report_preferences.latitude, lon=cur_report_preferences.longitude, pref_radius=cur_report_preferences.radius, \
+                               pref_accident_severity_for_report=cur_report_preferences.minimum_severity, how_many_months_back=cur_report_preferences.how_many_months_back)
+    else:
+        json_data = request.get_json(force=True)
+        accident_severity = json_data['accident_severity']
+        resources = json_data['pref_resource_types']
+        produce_accidents_report = json_data['produce_accidents_report']
+        lat = json_data['lat']
+        lon = json_data['lon']
+        pref_radius = json_data['pref_radius']
+        pref_accident_severity_for_report = json_data['pref_accident_severity_for_report']
+        history_report = json_data['history_report']
+        is_history_report = (history_report != '0')
+        resource_types = ','.join(resources)
+        cur_general_preferences = db_session.query(GeneralPreferences).filter(User.id == cur_id).first()
+        if cur_general_preferences is None:
+            general_pref = GeneralPreferences(user_id = cur_id, minimum_displayed_severity = accident_severity, resource_type = resource_types)
+            db_session.add(general_pref)
+            db_session.commit()
+        else:
+            cur_general_preferences.minimum_displayed_severity = accident_severity
+            cur_general_preferences.resource_type = resource_types
+            db_session.add(cur_general_preferences)
+            db_session.commit()
+
+        if produce_accidents_report:
+            if lat == '':
+                lat = None
+            if lon == '':
+                lon = None
+            if cur_report_preferences is None:
+                report_pref = ReportPreferences(user_id = cur_id, line_number=1, historical_report=is_history_report,\
+                                                how_many_months_back=history_report, latitude=lat,longitude=lon,\
+                                                radius=pref_radius, minimum_severity=pref_accident_severity_for_report)
+                db_session.add(report_pref)
+                db_session.commit()
+            else:
+                cur_report_preferences.historical_report = is_history_report
+                cur_report_preferences.latitude = lat
+                cur_report_preferences.longitude = lon
+                cur_report_preferences.radius = pref_radius
+                cur_report_preferences.minimum_severity = pref_accident_severity_for_report
+                cur_report_preferences.how_many_months_back = history_report
+                db_session.add(cur_report_preferences)
+                db_session.commit()
+        else:
+            if cur_report_preferences is not None:
+                db_session.delete(cur_report_preferences)
+                db_session.commit()
+        return jsonify(respo='ok', )
 
 
+class PreferenceObject:
+    def __init__(self, id, value, string):
+        self.id = id
+        self.value = value
+        self.string = string
+
+
+class HistoricalReportPeriods:
+    def __init__(self,period_id, period_value, severity_string):
+        self.period_id=period_id
+        self.period_value=period_value
+        self.severity_string=severity_string
+
+    
 class LoginFormAdmin(form.Form):
     username = fields.StringField(validators=[validators.required()])
     password = fields.PasswordField(validators=[validators.required()])
@@ -639,9 +747,6 @@ def get_current_user_first_name():
         return cur_user.first_name
      return "User"
 
-def year_range(year):
-    return ["01/01/%d" % year, "31/12/%d" % year]
-
 
 ######## rauth integration (login through facebook) ##################
 
@@ -696,25 +801,17 @@ def oauth_callback(provider):
 @app.before_first_request
 def create_years_list():
     """
-    Edits 'years.js', a years structure ready to be presented in app.js
-    as user's last-4-years filter choices.
+    init app.years field, with last 10 years that used in db
     """
     while True:
         try:
             year_col = db.session.query(distinct(func.extract("year", Marker.created)))
+            app.years = sorted([int(year[0]) for year in year_col], reverse=True)[:10]
             break
-        except OperationalError:
+        except OperationalError as err:
+            logging.warn(err)
             time.sleep(1)
-
-    years = OrderedDict([("שנת" + " %d" % year, year_range(year))
-                         for year in sorted(year_col, reverse=True)[:4]])
-    years_file = os.path.join(app.static_folder, 'js/years.js')
-    with open(years_file, 'w') as outfile:
-        outfile.write("var ACCYEARS = ")
-        json.dump(years, outfile, encoding='utf-8')
-        outfile.write(";\n")
-    logging.debug("wrote '%s'" % years_file)
-    logging.debug("\n".join("\t{0}: {1}".format(k, str(v)) for k, v in years.items()))
+    logging.info("Years for date selection: " + ", ".join(map(str, app.years)))
 
 
 if __name__ == "__main__":
@@ -731,7 +828,6 @@ if __name__ == "__main__":
 
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')
 
-    if not args.open:
-        app.run(debug=True)
-    else:
-        app.run(debug=True, host='0.0.0.0')
+    default_host = '0.0.0.0' if args.open else '127.0.0.1'
+    app.run(debug=True, host=os.getenv('IP', default_host),
+            port=int(os.getenv('PORT', 5000)))

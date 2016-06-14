@@ -1,6 +1,6 @@
 language: python
 python:
-  - "2.7"
+  - "2.7.11"
 sudo: false
 # command to install dependencies
 install: pip install -r requirements.txt
@@ -9,4 +9,7 @@ before_script:
   - export DATABASE_URL='sqlite:///local.db'
   - python models.py
 # command to run tests
-script: python -m unittest discover tests
+script:
+  - python -m unittest discover tests
+  - python process.py
+  - python united.py --light

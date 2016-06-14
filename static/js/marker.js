@@ -55,6 +55,7 @@ var MarkerView = Backbone.View.extend({
             this.$el.find(".content").text("תיאור אירוע: " + this.marker.get("title"));
             this.$el.find(".creation-date").text("תאריך: " + moment(this.model.get("created")).format("LLLL"));
             this.$el.find(".address").text("מיקום: " + this.model.get("address"));
+            this.localize("MEZEG_AVIR_UNITED","weather");
             if (this.model.get("description") != "") {
                 this.$el.find(".comments").text("הערות: " + this.model.get("description"));
             }
@@ -148,7 +149,7 @@ var MarkerView = Backbone.View.extend({
                 break;
             case 'multiple':
                 accuracy = (this.marker.opacity != 1);
-                markerTitle = 'מספר תאונות בנקודה זו';
+                markerTitle = 'תאונות בנקודה זו'; // the number of the accidents will be chain to the start of the title.
                 break;
             case 'discussion':
                 markerTitle = 'דיון';

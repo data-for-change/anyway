@@ -387,6 +387,13 @@ input[type="date"],input[type="time"]{
     content: '\f080'
 }
 
+.full-screen-control:after{
+    font-size: 15px;
+    color: #ccc;
+    font-family: 'FontAwesome';
+    content: '\f0b2'
+}
+
 .map-button:hover .control-label{
     visibility: visible !important;
     position: fixed;
@@ -757,4 +764,23 @@ input[type='checkbox']{
     margin: 15px;
     margin-right: 0px;
 }
+/* for login popup*/
+.modal-header {
+    background-color: gray;
+}
+.modal-header h3 {
+    font-size: 16px;
+}
+.btn-social-icon {
+    width: 160px;
+    border-radius: 0px;
+    color: #fff !important;
+}
+.btn-facebook {
 
+    background-color: blue;
+}
+
+.btn-google {
+    background-color: red;
+}

@@ -460,6 +460,8 @@ $(function () {
             mapControlDiv.appendChild(tourDiv);
             mapControlDiv.appendChild(statDiv);
             mapControlDiv.appendChild(fullScreenDiv);
+            if (MAP_ONLY)
+                mapControlDiv.style = "display:none";
 
             var linkLabel = document.createElement('div');
             linkLabel.className = 'control-label';
@@ -506,10 +508,14 @@ $(function () {
 
             var toggleBGDiv = document.createElement('div');
             toggleBGDiv.className = "toggle-control-bg";
+            if (MAP_ONLY)
+                toggleBGDiv.style = "display:none";
             toggleBGDiv.innerHTML = $("#toggle-control").html();
 
             var toggleDiv = document.createElement('div');
             toggleDiv.className = "map-button toggle-control pin";
+            if (MAP_ONLY)
+                toggleDiv.style = "display:none";
             toggleDiv.title = 'שנה תצוגת אייקונים';
             google.maps.event.addDomListener(toggleBGDiv, 'click', function () {
                 $(toggleDiv).toggleClass('pin');

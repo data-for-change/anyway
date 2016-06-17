@@ -40,7 +40,7 @@ More
 -----------------------
 To install requirements again, redeploy DB or any requirement involving the dependencies installation, 
 simply rebuild the image; get it from [here] (https://github.com/omerxx/anyway-docker/blob/master/Dockerfile), 
-then go to its local path and `docker build -t omerxx/anyway .`
+then go to its local path and `docker build --no-cache -t omerxx/anyway-docker .`
 
 ## Docker commands
 

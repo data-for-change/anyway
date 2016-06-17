@@ -529,14 +529,51 @@ class Vehicle(Base):
     def get_id(self):
         return self.id
 
+class GeneralPreferences(Base):
+    __tablename__ = "general_preferences"
+    user_id = Column(Integer(), ForeignKey('users.id'), primary_key=True)
+    minimum_displayed_severity = Column(Integer(), nullable=True)
+    resource_type = Column(String(64), nullable=True)
+
+    def serialize(self):
+        return {
+            "user_id": self.user_id,
+            "minimum_displayed_severity": self.minimum_displayed_severity,
+            "resource_type": self.resource_type           
+        }
+
+class ReportPreferences(Base):
+    __tablename__ = "report_preferences"
+    user_id = Column(Integer(), ForeignKey('users.id'), primary_key=True)
+    line_number = Column(Integer(), primary_key=True)
+    historical_report = Column(Boolean(), default=False)
+    how_many_months_back = Column(Integer(), nullable=True)
+    latitude = Column(Float())
+    longitude = Column(Float())
+    radius = Column(Float())
+    minimum_severity = Column(Integer())
+
+    def serialize(self):
+        return {
+            "user_id": self.user_id,
+            "line_number": self.line_number,
+            "historical_report": self.historical_report,
+            "how_many_months_back": self.how_many_months_back,
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+            "radius": self.radius,
+            "minimum_severity": self.minimum_severity                       
+        }
+
+
 
 def init_db():
     from database import engine
     # import all modules here that might define models so that
     # they will be registered properly on the metadata.  Otherwise
     # you will have to import them first before calling init_db()
-    print "Importing models"
-    print "Creating all tables"
+    logging.info("Importing models")
+    logging.info("Creating all tables")
     Base.metadata.create_all(bind=engine)
 	
 if __name__ == "__main__":

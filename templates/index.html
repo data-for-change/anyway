@@ -55,43 +55,50 @@
                     <span class="fb-logout"><a class="btn" style="margin-top: 0">יציאה</a></span>
                 </div>
             </div>
-            <!--<i class="fa fa-bars" style="border-right: 1px solid #ddd; padding-right: 8px; border-left: 1px solid #ddd; padding-left: 8px;margin-right: 102px; font-size: 18px; line-height: 100%; vertical-align: middle; cursor: pointer"></i>-->
-            <div class="navbar-brand">
-                <a class="brand" href="/"> beta <img class="brand-img" src="/static/img/anyway.png">
-                </a>
-                <div class="toggle-wrapper">
-                    <div id="toggle-sidebar" class="on" onclick="toggle(this)">
-                        <div class="one"></div>
-                        <div class="two"></div>
-                        <div class="three"></div>
-                    </div>
-                </div>
-                <script>
-                    function toggle(div){
-                        if (div.getAttribute('class') == 'on'){
-                            div.className = '';
-                        }else{
-                            div.className = 'on';
-                        }
-                    }
-                </script>
+            <div style="float: left;">
+                {% if current_user.is_authenticated %}
+                    <img src="../static/img/settings.png" onclick="app.preferencesDialogLoad()" width="16" style="padding-left: 5px; cursor: pointer" />
+                {% endif %}
             </div>
-        </div>
+                <!--<i class="fa fa-bars" style="border-right: 1px solid #ddd; padding-right: 8px; border-left: 1px solid #ddd; padding-left: 8px;margin-right: 102px; font-size: 18px; line-height: 100%; vertical-align: middle; cursor: pointer"></i>-->
+                <div class="navbar-brand">
+                    <a class="brand" href="/">
+                        beta <img class="brand-img" src="/static/img/anyway.png">
+                    </a>
+                    <div class="toggle-wrapper">
+                        <div id="toggle-sidebar" class="on" onclick="toggle(this)">
+                            <div class="one"></div>
+                            <div class="two"></div>
+                            <div class="three"></div>
+                        </div>
+                    </div>
+                    <script>
+                        function toggle(div){
+                            if (div.getAttribute('class') == 'on'){
+                                div.className = '';
+                            }else{
+                                div.className = 'on';
+                            }
+                        }
+                    </script>
+                </div>
+            </div>
     </div>
 
-    <div class="main main-close"
+    <div class="{{ 'main main-close' if not map_only else 'main' }}"
          style="position: fixed; width: 100%; height: 100%; box-sizing: border-box{{ '; padding-top: 40px; padding-right: 300px; padding-bottom: 40px' if not map_only }}">
         <div id="map_canvas" style="width: 100%; height: 100%; box-sizing: border-box"></div>
         <div id="toggle-control"></div>
         <input id="pac-input" class="controls" type="text" placeholder="חפש מיקום"
-               style="{{ 'display: block' if map_only }}">
+               style="{{ 'display: none' if map_only }}">
 
-        <div id="map-control">
+        <div id="map-control" style="{{ 'display: none' if map_only }}">
             <div id="reset-map-control"></div>
             <div id="download-csv-control"></div>
             <div id="link-map-control"></div>
             <div id="tour-control"></div>
             <div id="statistics-control"></div>
+            <div id="full-screen-control"></div>
         </div>
     </div>
     <div id="step2Component" class="sidebar-container sidebar-container-open" style="{{ 'display: none' if map_only }}"></div>
@@ -282,6 +289,8 @@
                 <p class="address" style="margin:0"></p>
                 <p class="comments" style="margin:0"></p>
                 <p class="casualties" style="margin:0"></p>
+                <p class="weather" style="margin:0"></p>
+
 
             </div>
         </div>
@@ -406,7 +415,7 @@
     <div class="modal hide fade">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h3>{{ gettext('Login') }}</h3>
+            <h3>{{ gettext('היכנס') }}</h3>
         </div>
         <div class="modal-body" style="width: 50%; margin: 0 auto;">
             <div class="control-group" style="width: 100%; margin: 0 auto;">
@@ -418,12 +427,13 @@
                     <a class="btn btn-social-icon btn-facebook" href="{{  url_for('logout') }}">{{ gettext('Logout') }}
                         <span class="fa fa-sign-out"></span>
                     </a>
+                    <br/>                    
                 {% else %}
                     <a class="btn btn-social-icon btn-facebook" href="{{ url_for('oauth_authorize', provider='facebook') }}">{{ gettext('Login with Facebook') }}
                         <span class="fa fa-facebook"></span>
                     </a>                    
                     <br/>
-                    <h3>OR</h3>
+                    <!--<h3>OR</h3>-->
                     <br/>
                     <a class="btn btn-social-icon btn-google" href="{{ url_for('oauth_authorize', provider='google') }}">
                         {{ gettext('Login with Google') }}
@@ -432,10 +442,130 @@
                 {% endif %}
             </div>
         </div>
-        <div class="modal-footer">
-            <a class="btn close-button">סגור</a>
-        </div>
+        <!--<div class="modal-footer">-->
+            <!--<a class="btn close-button">סגור</a>-->
+        <!--</div>-->
     </div>
+</div>
+
+<div id="preferences-dialog-template" style="display: none" dir="rtl">
+    <div class="modal hide fade">
+        <!-- Modal content-->        
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">העדפות:</h4>
+        </div>
+        <div class="modal-body" style="max-height: 800px;">
+            <form role="form" id="prefForm">
+                <div class="form-group">                   
+                    <div style="width: 400px; margin: 0 auto;">
+                        <div style="float: right;  margin-left: 10px">
+                            <label for="prefAccidentSeverity" style="vertical-align: middle; height: 30px; display: table-cell;" >חומרת תאונה מינימלית להצגה</label>
+                        </div>                      
+                        <div style="float: right; margin-right: 10px">
+                            <select id="prefAccidentSeverity" style="width: 80px; vertical-align: middle; display: table-cell;">
+                                {% for accident_type in pref_accident_severity %}
+                                    <option id="{{accident_type.id}}" value="{{accident_type.value}}">{{accident_type.string}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>                                    
+                </div>
+                <div style="clear: both">
+                </div>
+                <div>                   
+                    <div style="width: 400px; margin: 0 auto;">
+                        <div style="float: right;  margin-left: 10px">
+                            <label for="prefAccidentSeverity" style="vertical-align: middle; height: 30px; display: table-cell;" >הצג תאונות</label>
+                        </div>                      
+                        <div style="float: right; margin-right: 10px;">                            
+                            <label style="float: right; margin-left: 10px; vertical-align: middle; display: table-cell;" ><input name="prefAccidentsType" id="prefAccidentsLms" type="checkbox" value="1" style="display: inline" class="prefTypeOfAccidents" />&nbsp;למ"ס</label>
+                            <label style="float: right; vertical-align: middle; display: table-cell;" ><input name="prefAccidentsType" id="prefAccidentsIhud" type="checkbox" value="2" style="display: inline" class="prefTypeOfAccidents" />&nbsp;איחוד הצלה</label>
+                        </div>
+                    </div>                                    
+                </div>
+                <br/>
+                <br/>
+                <br/>
+                <div>                   
+                    <div style="width: 400px; margin: 0 auto;">                        
+                        <label style="margin-left: 10px; vertical-align: middle; display: table-cell;" ><input id="produceAccidentsReport" class="produceAccidentsReport" type="checkbox" value="1" style="display: inline" />&nbsp;הפקת דוח תאונה</label>
+                    </div>                                    
+                </div>       
+                <br/>                     
+                <div style="width: 400px; margin: 0 auto;" class="prefReportControls">
+                    <div style="margin-right: 15px">                        
+                        <div style="clear: right; float: right;  margin-left: 10px">                     
+                            <label style="float: right; margin-left: 10px;" for="prefLat">קו רוחב:</label>
+                            <input style="float: right; margin-left: 10px; width: 80px;" id="prefLat" type="text" name="prefLat"  /> 
+                            <label style="float: right; margin-left: 10px;" for="prefLon">קו אורך:</label>
+                            <input style="float: right; margin-left: 10px; width: 80px;" id="prefLon" type="text" name="prefLon" />  
+                        </div>              
+                    </div>                            
+                </div>   
+                <div style="width: 400px; margin: 0 auto;" class="prefReportControls">    
+                     <div style="margin-right: 15px">                                
+                        <div style="clear: right; float: right;  margin-left: 10px; width: 100px">                     
+                            <label style="vertical-align: middle; height: 30px; display: table-cell;" for="prefRadius">רדיוס:</label>                                          
+                        </div>   
+                        <div style="float: right; margin-right: 10px">
+                            <select id="prefRadius" style="width: 80px; vertical-align: middle; display: table-cell; width: 100px;">
+                                {% for radius in pref_radius %}
+                                    <option id="{{radius.id}}" value="{{radius.value}}">{{radius.value}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div style="float: right;  margin-right: 20px">
+                            <label style="vertical-align: middle; height: 30px; display: table-cell;">מטר</label>
+                        </div>
+                     </div>                                    
+                </div>     
+                
+                <div style="width: 400px; margin: 0 auto;" class="prefReportControls">    
+                     <div style="margin-right: 15px">                                
+                        <div style="clear: right; float: right;  margin-left: 10px; width: 100px">                     
+                            <label style="vertical-align: middle; height: 30px; display: table-cell;" for="prefAccidentSeverityForReport">חומרת תאונה</label>                                          
+                        </div>   
+                        <div style="float: right; margin-right: 10px">
+                            <select id="prefAccidentSeverityForReport" style="width: 80px; vertical-align: middle; display: table-cell; width: 100px;">
+                                {% for accident_report_type in pref_accident_report_severity %}
+                                    <option id="{{accident_report_type.id}}" value="{{accident_report_type.value}}">{{accident_report_type.string}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>  
+                     </div>                                    
+                </div>      
+                         
+                <div style="width: 400px; margin: 0 auto;" class="prefReportControls">    
+                     <div style="margin-right: 15px">                                
+                        <div style="clear: right; float: right;  margin-left: 10px; width: 100px">                     
+                            <label style="vertical-align: middle; height: 30px; display: table-cell;" for="prefHistoricalReportPeriod">דוח היסטורי עבור</label>                                          
+                        </div>   
+                        <div style="float: right; margin-right: 10px">
+                            <select id="prefHistoricalReportPeriod" style="width: 100px; vertical-align: middle; display: table-cell;">
+                                {% for historical_period in pref_historical_report_periods %}
+                                    <option id="{{historical_period.id}}" value="{{historical_period.value}}">{{historical_period.string}}</option>
+                                 {% endfor %}
+                            </select>               
+                        </div> 
+                        <div style="float: right;  margin-right: 20px">                     
+                            <label style="vertical-align: middle; height: 30px; display: table-cell;">חודשים</label>                                          
+                        </div>
+                        <div style="clear: right; float: right;">
+                            <div>
+                                <label style="margin-left: 10px; vertical-align: middle; display: table-cell;" ><input id="prefDisableHistoricalReport" class="prefDisableHistoricalReport" type="checkbox" value="0" style="display: inline" />&nbsp;לא לשלוח דוח היסטורי</label>
+                            </div>
+                        </div>
+                     </div>                                    
+                </div>      
+                
+            </form> 
+        </div>                        
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">סגירה</button>
+            <button type="button" class="btn btn-primary save-button" data-dismiss="modal">שמירה</button>                
+        </div>
+    </div>    
 </div>
 
 <div id="sidebar-template" style="display: none">
@@ -517,14 +647,10 @@
             <div class="btn-wrap ">
                 <input type="radio" name="years" id="checkbox-all-years" value="all" onclick="app.changeDate()" />
                 <label for="checkbox-all-years" class="btn one">הכל</label>
-                <input type="radio" name="years" id="checkbox-2014" value="2014" onclick="app.changeDate()" checked />
-                <label for="checkbox-2014" class="btn one">2014</label>
-                <input type="radio" name="years" id="checkbox-2013" value="2013" onclick="app.changeDate()"  />
-                <label for="checkbox-2013" class="btn one">2013</label>
-                <input type="radio" name="years" id="checkbox-2012" value="2012" onclick="app.changeDate()" />
-                <label for="checkbox-2012" class="btn one">2012</label>
-                <input type="radio" name="years" id="checkbox-2011" value="2011" onclick="app.changeDate()" />
-                <label for="checkbox-2011" class="btn one">2011</label>
+                {% for year in years %}
+                    <input type="radio" name="years" id="checkbox-{{year}}" value="{{year}}" onclick="app.changeDate()" checked />
+                    <label for="checkbox-{{year}}" class="btn one">{{year}}</label>
+                {% endfor %}
             </div>
             <div class="btn-wrap separator">
                 <input id="sdate" class="btn date" type="date" style="width: 38% !important; margin-top: 10px" value="2014-01-01" oninput="app.loadFilter()">
@@ -728,7 +854,7 @@
                 <label for="checkbox-fire" class="btn one">שריפה</label>
                 <input type="radio" name="acctype" id="checkbox-type-pedestrian" value=1 onclick="app.loadFilter()" />
                 <label for="checkbox-type-pedestrian" class="btn one">אחר</label>
-                <input type="radio" name="acctype" id="checkbox-type-else" value=5 onclick="app.loadFilter()" />
+                <input type="radio" name="acctype" id="checkbox-type-else" value=1 onclick="app.loadFilter()" />
                 <label for="checkbox-type-else" class="btn one">פגיעה בהולך רגל</label>
             </div>
 
@@ -859,7 +985,7 @@
     </div>
 </div>
 
-<div class="footer">
+<div class="footer" style="{{ 'display: none' if map_only }}">
     <div style="float: right; padding: 5px; cursor: pointer;">
         <a href="http://www.hasadna.org.il/" title="לדעת להשפיע - מבית הסדנא לידע ציבורי"><img
                 src="/static/img/logos/hasadna.png" style="width: 20px; height: 20px; padding: 3px"/>
@@ -909,6 +1035,7 @@
 "js/marker.js",
 "js/clusterView.js",
 "js/featuredialog.js",
+"js/preferencesdialog.js",
 "js/logindialog.js",
 "js/sidebar.js",
 "js/contextmenu.js",
@@ -917,7 +1044,6 @@
 "js/libs/bootstrap-tour.min.js",
 "js/app.js",
 "js/localization.js",
-"js/years.js",
 "js/inv_dict.js",
 "js/veh_dict.js",
 "js/retina.js",
@@ -1020,7 +1146,7 @@
                     version: 'v2.3'
                 });
             window.app = new AppView();
-
+            
 
               // Load the app
 
@@ -1124,6 +1250,9 @@
             {% endif %}
             {% if case_type is defined and case_type != '-1' %}
                 app.case_type = {{case_type}};
+            {% endif %}
+            {% if years is defined %}
+                app.years = {{ years }};
             {% endif %}
 
             app.render();

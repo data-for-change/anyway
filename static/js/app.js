@@ -272,37 +272,48 @@ $(function () {
                 }
             },this);
 
+            //goes over all overlapping markers
             _.each(this.oms.markersNearAnyOtherMarker(), function (marker) {
-                if(marker.view.model.get("currentlySpiderfied")){
-                    marker.setTitle(marker.view.getTitle("single"));
-                }else{
-                    marker.setTitle(marker.view.getTitle("multiple"));
-                }
                 var firstMember = marker.view.model;
-                if (!firstMember.get("groupID")) {
-                    firstMember.set("groupID", groupID);
-                    var firstMemberSeverity = firstMember.get('severity');
+                var firstMemberGroupId = firstMember.get("groupID");
+                var firstMemberIndex = firstMemberGroupId -1;
+                if (!firstMemberGroupId) {
+                    firstMemberGroupId = groupID;
+                    firstMemberIndex = firstMemberGroupId -1;
+                    firstMember.set("groupID", firstMemberGroupId);
+                    var groupSeverity = firstMember.get('severity');
                     var firstMemberOpacity = firstMember.get("locationAccuracy") == 1 ? 'opaque' : 1;
-                    groupsData.push({severity: firstMemberSeverity, opacity: firstMemberOpacity});
+                    groupsData.push({severity: groupSeverity, opacity: firstMemberOpacity, quantity: 1});
 
+                    //goes over all markers which overlapping 'firstMember', and get the 'max' severity
                     _.each(this.oms.markersNearMarker(marker), function (markerNear) {
                         var markerNearModel = markerNear.view.model;
-                        markerNearModel.set("groupID", groupID);
-                        if ((firstMemberSeverity != markerNearModel.get('severity'))) {
-                            groupsData[groupsData.length - 1].severity = SEVERITY_VARIOUS;
+                        markerNearModel.set("groupID", firstMemberGroupId);
+                        var currentMarkerNearSeverity = markerNearModel.get('severity');
+                        // severity is an enum, when it's lower then it's more severe
+                        if (currentMarkerNearSeverity < groupSeverity) {
+                            groupsData[firstMemberIndex].severity = currentMarkerNearSeverity;
+                            groupSeverity = currentMarkerNearSeverity;
                         }
-                        if (groupsData[groupsData.length - 1].opacity != 'opaque') {
+                        if (groupsData[firstMemberIndex].opacity != 'opaque') {
                             if (markerNearModel.get("locationAccuracy") == 1) {
-                                groupsData[groupsData.length - 1].opacity = 'opaque';
+                                groupsData[firstMemberIndex].opacity = 'opaque';
                             } else {
-                                groupsData[groupsData.length - 1].opacity++;
+                                groupsData[firstMemberIndex].opacity++;
                             }
                         }
+                        groupsData[firstMemberIndex].quantity++;
                     });
                     groupID++;
                 }
+                if(marker.view.model.get("currentlySpiderfied")){
+                    marker.setTitle(marker.view.getTitle("single"));
+                }else{
+                    groupMarkersCount = groupsData[firstMemberIndex].quantity;
+                    groupSeverityString = SEVERITY_MAP[groupsData[firstMemberIndex].severity];
+                    marker.setTitle( groupMarkersCount + " " + marker.view.getTitle("multiple") + " חומרה מירבית: " + groupSeverityString);
+                }
             },this);
-
             this.groupsData = groupsData;
 
                           // agam
@@ -338,6 +349,35 @@ $(function () {
         },
         linkMap: function () {
             $('#embed').modal('show');
+        },
+        fullScreen: function () {
+            var body = document.body;
+
+            if (
+                document.fullscreenElement ||
+                document.webkitFullscreenElement ||
+                document.mozFullScreenElement ||
+                document.msFullscreenElement){
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }else{
+                if (body.requestFullscreen) {
+                    body.requestFullscreen();
+                } else if (body.webkitRequestFullscreen) {
+                    body.webkitRequestFullscreen();
+                } else if (body.mozRequestFullScreen) {
+                    body.mozRequestFullScreen();
+                } else if (body.msRequestFullscreen) {
+                    body.msRequestFullscreen();
+                }
+            }
         },
         render: function () {
             this.isReady = false;
@@ -407,11 +447,21 @@ $(function () {
                 statPanelClick(700,400,700,350);
             }.bind(this));
 
+            var fullScreenDiv = document.createElement('div');
+            fullScreenDiv.className = "map-button full-screen-control";
+            fullScreenDiv.innerHTML = $("#full-screen-control").html();
+            google.maps.event.addDomListener(fullScreenDiv, 'click', function () {
+                this.fullScreen();
+            }.bind(this));
+
             mapControlDiv.appendChild(resetMapDiv);
             mapControlDiv.appendChild(downloadCsvDiv);
             mapControlDiv.appendChild(linkMapDiv);
             mapControlDiv.appendChild(tourDiv);
             mapControlDiv.appendChild(statDiv);
+            mapControlDiv.appendChild(fullScreenDiv);
+            if (MAP_ONLY)
+                mapControlDiv.style = "display:none";
 
             var linkLabel = document.createElement('div');
             linkLabel.className = 'control-label';
@@ -433,6 +483,11 @@ $(function () {
             statLabel.innerHTML = 'גרפים';
             statDiv.appendChild(statLabel);
 
+            var fullScreenLabel = document.createElement('div');
+            fullScreenLabel.className = 'control-label';
+            fullScreenLabel.innerHTML = 'מסך מלא';
+            fullScreenDiv.appendChild(fullScreenLabel);
+
             this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(mapControlDiv);
 
             if (LOCATION_SPECIFIED) {
@@ -453,10 +508,14 @@ $(function () {
 
             var toggleBGDiv = document.createElement('div');
             toggleBGDiv.className = "toggle-control-bg";
+            if (MAP_ONLY)
+                toggleBGDiv.style = "display:none";
             toggleBGDiv.innerHTML = $("#toggle-control").html();
 
             var toggleDiv = document.createElement('div');
             toggleDiv.className = "map-button toggle-control pin";
+            if (MAP_ONLY)
+                toggleDiv.style = "display:none";
             toggleDiv.title = 'שנה תצוגת אייקונים';
             google.maps.event.addDomListener(toggleBGDiv, 'click', function () {
                 $(toggleDiv).toggleClass('pin');
@@ -761,7 +820,10 @@ $(function () {
             if (this.createDialog) this.createDialog.close();
             this.createDialog = new LoginDialog().render();
         },
-
+        preferencesDialogLoad: function () {
+            if (this.createDialog) this.createDialog.close();
+            this.createDialog = new PreferencesDialog().render();
+        },
         featuresSubscriptionDialog : function(type, event) {
             if (this.createDialog) this.createDialog.close();
             this.createDialog = new FeatureDialog({
@@ -986,11 +1048,17 @@ $(function () {
         },
         changeDate: function() {
             var start_date, end_date;
-            if ($("#checkbox-2014").is(":checked")) { start_date = "2014"; end_date = "2015" }
-            else if ($("#checkbox-2013").is(":checked")) { start_date = "2013"; end_date = "2014" }
-            else if ($("#checkbox-2012").is(":checked")) { start_date = "2012"; end_date = "2013" }
-            else if ($("#checkbox-2011").is(":checked")) { start_date = "2011"; end_date = "2012" }
-            else if ($("#checkbox-all-years").is(":checked")) { start_date = "2005"; end_date = "2025" }
+            if ($("#checkbox-all-years").is(":checked")) {
+              start_date = "2005"; end_date = "2025"
+            } else {
+                for (yearNum in app.years) {
+                    year = app.years[yearNum];
+                    if($("#checkbox-"+year).is(":checked")) {
+                        start_date = year; end_date = year + 1;
+                        break;
+                    }
+                }
+            }
             $("#sdate").val(start_date + '-01-01');
             $("#edate").val(end_date + '-01-01');
 

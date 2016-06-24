@@ -70,7 +70,6 @@ jinja_environment = jinja2.Environment(
     extensions=[AssetsExtension])
 jinja_environment.assets_environment = assets_env
 
-MINIMAL_ZOOM = 16
 SESSION_HIGHLIGHTPOINT_KEY = 'gps_highlightpoint_created'
 
 DICTIONARY = "Dictionary"
@@ -287,7 +286,13 @@ def log_bad_request(request):
 
 @app.route('/')
 def index(marker=None, message=None):
-    context = {'minimal_zoom': MINIMAL_ZOOM, 'url': request.base_url, 'index_url': request.url_root}
+    context = {'minimal_zoom': MINIMAL_ZOOM,
+               'marker_type_accident': MARKER_TYPE_ACCIDENT,
+               'marker_type_discussion': MARKER_TYPE_DISCUSSION,
+               'united_hatzala_code': UNITED_HATZALA_CODE,
+               'highlight_type_user_search': HIGHLIGHT_TYPE_USER_SEARCH,
+               'highlight_type_user_gps': HIGHLIGHT_TYPE_USER_GPS,
+               'url': request.base_url, 'index_url': request.url_root}
     if 'marker' in request.values:
         markers = Marker.get_marker(request.values['marker'])
         if markers.count() == 1:

@@ -1059,6 +1059,31 @@
             {% else %}
             MINIMAL_ZOOM = 16;
             {% endif %}
+            {% if marker_type_accident %}
+            MARKER_TYPE_ACCIDENT = {{marker_type_accident}};
+            {% else %}
+            MARKER_TYPE_ACCIDENT = 1;
+            {% endif %}
+            {% if marker_type_discussion %}
+            MARKER_TYPE_DISCUSSION = {{marker_type_discussion}};
+            {% else %}
+            MARKER_TYPE_DISCUSSION = 2;
+            {% endif %}
+            {% if united_hatzala_code %}
+            PROVIDER_CODE_UNITED_HATZALA = {{united_hatzala_code}};
+            {% else %}
+            PROVIDER_CODE_UNITED_HATZALA = 2;
+            {% endif %}
+            {% if  highlight_type_user_search %}
+            HIGHLIGHT_TYPE_USER_SEARCH = {{highlight_type_user_search}};
+            {% else %}
+            HIGHLIGHT_TYPE_USER_SEARCH = 1;
+            {% endif %}
+            {% if highlight_type_user_gps %}
+            HIGHLIGHT_TYPE_USER_GPS = {{highlight_type_user_gps}};
+            {% else %}
+            HIGHLIGHT_TYPE_USER_GPS = 2;
+            {% endif %}
 
             {% if coordinates %}
             LOCATION_SPECIFIED = true;
@@ -1253,6 +1278,8 @@
             {% endif %}
             {% if years is defined %}
                 app.years = {{ years }};
+            {% else %}
+                app.years = [];
             {% endif %}
 
             app.render();

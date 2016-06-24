@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
+from constants import *
+from constants import HIGHLIGHT_TYPE_USER_SEARCH as CONSTANT_HIGHLIGHT_TYPE_USER_SEARCH
+from constants import HIGHLIGHT_TYPE_USER_GPS as CONSTANT_HIGHLIGHT_TYPE_USER_GPS
  
 from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table, \
         ForeignKeyConstraint, func, or_
@@ -71,10 +74,6 @@ class User(Base, UserMixin):
     def __unicode__(self):
         return self.username
 
-MARKER_TYPE_ACCIDENT = 1
-MARKER_TYPE_DISCUSSION = 2
-UNITED_HATZALA_CODE = 2
-
 class Role(Base, RoleMixin):
     __tablename__ = "roles"
     id = Column(Integer(), primary_key=True)
@@ -109,8 +108,8 @@ class HighlightPoint(Point, Base):
         Index('highlight_long_lat_idx', 'latitude', 'longitude'),
     )
 
-    HIGHLIGHT_TYPE_USER_SEARCH = 1
-    HIGHLIGHT_TYPE_USER_GPS = 2
+    HIGHLIGHT_TYPE_USER_SEARCH = CONSTANT_HIGHLIGHT_TYPE_USER_SEARCH
+    HIGHLIGHT_TYPE_USER_GPS = CONSTANT_HIGHLIGHT_TYPE_USER_GPS
 
     created = Column(DateTime, default=datetime.datetime.now)
     type = Column(Integer)

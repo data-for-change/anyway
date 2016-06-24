@@ -20,11 +20,13 @@ import math
 import requests
 import logging
 
+from constants import UNITED_HATZALA_CODE
+
 ############################################################################################
 # United.py is responsible for the parsing and deployment of "united hatzala" data to the DB
 ############################################################################################
 
-PROVIDER_CODE = 2
+PROVIDER_CODE = UNITED_HATZALA_CODE
 TIME_ZONE = 2
 # convert IMS hours code to hours
 RAIN_DURATION_CODE_TO_HOURS = {"1": 6, "2": 12, "3": 18, "4": 24, "/": 24, "5": 1, "6": 2, "7": 3, "8": 9, "9": 15}

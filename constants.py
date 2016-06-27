@@ -1,4 +1,4 @@
-class CONST(object):
+class Constants(object):
 
     # constants that used in javascript and python
     MINIMAL_ZOOM = 16
@@ -19,10 +19,7 @@ class CONST(object):
         pass
 
     def to_dict(self):
-        d = {}
-        for v in [a for a in dir(self) if not a.startswith('__') and not callable(getattr(self,a))]:
-            d[v] = getattr(self,v)
-        return d
+        return {a: getattr(self, a) for a in dir(self) if not a.startswith('__') and not callable(getattr(self,a))}
 
-CONST = CONST()
+CONST = Constants()
 

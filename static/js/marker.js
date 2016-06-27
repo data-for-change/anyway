@@ -47,7 +47,7 @@ var MarkerView = Backbone.View.extend({
 
         this.marker.setTitle(this.getTitle('single'));
 
-        if (this.model.get("provider_code") == PROVIDER_CODE_UNITED_HATZALA) {
+        if (this.model.get("provider_code") == UNITED_HATZALA_CODE) {
             app.oms.addMarker(this.marker);
             this.$el.html($("#united-marker-content-template").html());
 

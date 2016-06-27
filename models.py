@@ -2,9 +2,7 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
-from constants import *
-from constants import HIGHLIGHT_TYPE_USER_SEARCH as CONSTANT_HIGHLIGHT_TYPE_USER_SEARCH
-from constants import HIGHLIGHT_TYPE_USER_GPS as CONSTANT_HIGHLIGHT_TYPE_USER_GPS
+from constants import CONST
  
 from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table, \
         ForeignKeyConstraint, func, or_
@@ -108,9 +106,6 @@ class HighlightPoint(Point, Base):
         Index('highlight_long_lat_idx', 'latitude', 'longitude'),
     )
 
-    HIGHLIGHT_TYPE_USER_SEARCH = CONSTANT_HIGHLIGHT_TYPE_USER_SEARCH
-    HIGHLIGHT_TYPE_USER_GPS = CONSTANT_HIGHLIGHT_TYPE_USER_GPS
-
     created = Column(DateTime, default=datetime.datetime.now)
     type = Column(Integer)
 
@@ -142,7 +137,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
     )
 
     __mapper_args__ = {
-        'polymorphic_identity': MARKER_TYPE_ACCIDENT
+        'polymorphic_identity': CONST.MARKER_TYPE_ACCIDENT
     }
 
     provider_code = Column(Integer, primary_key=True)
@@ -205,7 +200,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
                 "junction": self.junction,
             })
             # United Hatzala accidents description are not json:
-            if self.provider_code == UNITED_HATZALA_CODE:
+            if self.provider_code == CONST.UNITED_HATZALA_CODE:
                 fields.update({"description": self.description})
             else:
                 fields.update({"description": Marker.json_to_description(self.description)})
@@ -347,7 +342,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
     @classmethod
     def parse(cls, data):
         return Marker(
-            type=MARKER_TYPE_ACCIDENT,
+            type=CONST.MARKER_TYPE_ACCIDENT,
             title=data["title"],
             description=data["description"],
             latitude=data["latitude"],
@@ -362,7 +357,7 @@ class DiscussionMarker(MarkerMixin, Base):
     )
 
     __mapper_args__ = {
-        'polymorphic_identity': MARKER_TYPE_DISCUSSION
+        'polymorphic_identity': CONST.MARKER_TYPE_DISCUSSION
     }
 
     identifier = Column(String(50), unique=True)
@@ -393,7 +388,7 @@ class DiscussionMarker(MarkerMixin, Base):
           created=datetime.datetime.now(),
           title=data["title"],
           identifier=data["identifier"],
-          type=MARKER_TYPE_DISCUSSION
+          type=CONST.MARKER_TYPE_DISCUSSION
       )
 
     @staticmethod

@@ -16,7 +16,7 @@ from database import db_session
 from models import *
 from base import *
 import utilities
-from constants import *
+from constants import CONST
 
 from wtforms import form, fields, validators, StringField, PasswordField, Form
 import flask_admin as admin
@@ -70,7 +70,6 @@ jinja_environment = jinja2.Environment(
     extensions=[AssetsExtension])
 jinja_environment.assets_environment = assets_env
 
-MINIMAL_ZOOM = 16
 SESSION_HIGHLIGHTPOINT_KEY = 'gps_highlightpoint_created'
 
 DICTIONARY = "Dictionary"
@@ -150,7 +149,7 @@ def markers():
     logging.debug('getting markers')
     kwargs = get_kwargs()
     logging.debug('querying markers in bounding box: %s' % kwargs)
-    is_thin = (kwargs['zoom'] < MINIMAL_ZOOM)
+    is_thin = (kwargs['zoom'] < CONST.MINIMAL_ZOOM)
     accidents = Marker.bounding_box_query(is_thin, yield_per=50, **kwargs)
 
     discussion_args = ('ne_lat', 'ne_lng', 'sw_lat', 'sw_lng', 'show_discussions')
@@ -245,8 +244,8 @@ def highlightpoint():
         return make_response("")
 
     # if it's a user gps type (user location), only handle a single post request per session
-    if int(highlight.type) == HighlightPoint.HIGHLIGHT_TYPE_USER_GPS:
-        if not SESSION_HIGHLIGHTPOINT_KEY in session:
+    if int(highlight.type) == CONST.HIGHLIGHT_TYPE_USER_GPS:
+        if SESSION_HIGHLIGHTPOINT_KEY not in session:
             session[SESSION_HIGHLIGHTPOINT_KEY] = "saved"
         else:
             return make_response("")
@@ -287,7 +286,9 @@ def log_bad_request(request):
 
 @app.route('/')
 def index(marker=None, message=None):
-    context = {'minimal_zoom': MINIMAL_ZOOM, 'url': request.base_url, 'index_url': request.url_root}
+    context = {'url': request.base_url, 'index_url': request.url_root}
+    context['CONST'] = CONST.to_dict()
+    #logging.debug("Debug CONST:{0}",context['CONST'])
     if 'marker' in request.values:
         markers = Marker.get_marker(request.values['marker'])
         if markers.count() == 1:

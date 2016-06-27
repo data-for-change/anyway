@@ -1054,10 +1054,41 @@
 
 <script type="text/javascript">
 
-            {% if minimal_zoom %}
-            MINIMAL_ZOOM = {{minimal_zoom}};
+            {% if CONST %}
+                {% for key,val in CONST.iteritems() %}
+                   {{key}} = {{val}}
+                {% endfor %}
             {% else %}
-            MINIMAL_ZOOM = 16;
+            console.error("CONST doesn't exists, failed to share constants between python and javascript");
+            {% endif %}
+
+            {% if 'MINIMAL_ZOOM' not in CONST %}
+                console.error("missing constant MINIMAL_ZOOM")
+                MINIMAL_ZOOM = 16;
+            {% endif %}
+            {% if 'MARKER_TYPE_ACCIDENT' not in CONST %}
+                console.error("missing constant MARKER_TYPE_ACCIDENT")
+                MARKER_TYPE_ACCIDENT = 1;
+            {% endif %}
+
+             {% if 'MARKER_TYPE_DISCUSSION' not in CONST %}
+                console.error("missing constant MARKER_TYPE_DISCUSSION")
+                MARKER_TYPE_DISCUSSION = 2;
+            {% endif %}
+
+            {% if 'UNITED_HATZALA_CODE' not in CONST %}
+                console.error("missing constant UNITED_HATZALA_CODE")
+                UNITED_HATZALA_CODE = 2;
+            {% endif %}
+
+            {% if 'HIGHLIGHT_TYPE_USER_SEARCH' not in CONST %}
+                console.error("missing constant HIGHLIGHT_TYPE_USER_SEARCH")
+                HIGHLIGHT_TYPE_USER_SEARCH = 1;
+            {% endif %}
+
+            {% if 'HIGHLIGHT_TYPE_USER_GPS' not in CONST %}
+                console.error("missing constant HIGHLIGHT_TYPE_USER_GPS")
+                HIGHLIGHT_TYPE_USER_GPS = 2;
             {% endif %}
 
             {% if coordinates %}
@@ -1253,6 +1284,8 @@
             {% endif %}
             {% if years is defined %}
                 app.years = {{ years }};
+            {% else %}
+                app.years = [];
             {% endif %}
 
             app.render();

@@ -9,7 +9,8 @@ import argparse
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
 
-from models import Marker, MARKER_TYPE_ACCIDENT
+from constants import CONST
+from models import Marker
 from utilities import init_flask
 import importmail
 
@@ -24,7 +25,7 @@ import logging
 # United.py is responsible for the parsing and deployment of "united hatzala" data to the DB
 ############################################################################################
 
-PROVIDER_CODE = 2
+PROVIDER_CODE = CONST.UNITED_HATZALA_CODE
 TIME_ZONE = 2
 # convert IMS hours code to hours
 RAIN_DURATION_CODE_TO_HOURS = {"1": 6, "2": 12, "3": 18, "4": 24, "/": 24, "5": 1, "6": 2, "7": 3, "8": 9, "9": 15}
@@ -275,7 +276,7 @@ def create_accidents(collection, file_location):
                       'address': unicode((accident[csvmap["street"]] + ' ' + accident[csvmap["city"]]),
                                          encoding='utf-8'),
                       'severity': 2 if u"קשה" in unicode(accident[csvmap["type"]], encoding='utf-8') else 3,
-                      'locationAccuracy': 1, 'subtype': 21, 'type': MARKER_TYPE_ACCIDENT,
+                      'locationAccuracy': 1, 'subtype': 21, 'type': CONST.MARKER_TYPE_ACCIDENT,
                       'intactness': "".join(x for x in accident[csvmap["casualties"]] if x.isdigit()) or 0,
                       'description': unicode(accident[csvmap["comment"]], encoding='utf-8'),
                       'weather': process_weather_data(collection, accident[csvmap["lat"]], accident[csvmap["long"]])}

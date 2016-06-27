@@ -9,8 +9,8 @@ import argparse
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
 
-
 from constants import CONST
+from models import Marker
 from utilities import init_flask
 import importmail
 

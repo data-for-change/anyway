@@ -245,7 +245,7 @@ def highlightpoint():
 
     # if it's a user gps type (user location), only handle a single post request per session
     if int(highlight.type) == CONST.HIGHLIGHT_TYPE_USER_GPS:
-        if not SESSION_HIGHLIGHTPOINT_KEY in session:
+        if SESSION_HIGHLIGHTPOINT_KEY not in session:
             session[SESSION_HIGHLIGHTPOINT_KEY] = "saved"
         else:
             return make_response("")

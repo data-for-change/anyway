@@ -35,7 +35,9 @@ var MarkerView = Backbone.View.extend({
         }
 
         this.marker.setIcon(this.getIcon());
-        this.marker.setMap(this.map);
+        if (!app.heatMapMode){
+            this.marker.setMap(this.map);
+        }
         this.marker.view = this;
 
         if (this.model.get("type") == MARKER_TYPE_DISCUSSION) {

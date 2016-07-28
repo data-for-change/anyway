@@ -46,6 +46,7 @@ $(function () {
             this.markers = new MarkerCollection();
             this.clusters = new ClusterCollection();
             this.model = new Backbone.Model();
+            this.heatMapMode = false;
             this.markerIconType = true;
             this.markerList = [];
             this.clusterList = [];
@@ -185,11 +186,24 @@ $(function () {
             }
         },
         reloadSidebar: function () {
+            // HeatMap action is here because we're waiting for the markers/clusters to fetch from the server (AJAX request) and reloadSidebar() is being called on success.
             if (this.clusterMode()) {
                 this.sidebar.emptyMarkerList();
+                if (this.heatMapMode){
+                    this.heatmap.setMap(null);
+                    // Drawing HeatMap for clusters
+                    this.buildHeatMap("clusters");
+                }
             } else { // close enough
-                this.setMultipleMarkersIcon();
-                this.sidebar.reloadMarkerList(this.markerList);
+                if (this.heatMapMode){
+                    this.heatmap.setMap(null);
+                    // Drawing HeatMap for markers
+                    this.buildHeatMap("markers");
+                }else{
+                    this.setMultipleMarkersIcon();
+                    this.sidebar.reloadMarkerList(this.markerList);
+                }
+
             }
             if (jsPanelInst!=null){
                 startJSPanelWithChart(jsPanelInst, $("#statPanel").width(), $("#statPanel").height(),
@@ -454,12 +468,21 @@ $(function () {
                 this.fullScreen();
             }.bind(this));
 
+            var heatMapDiv = document.createElement('div');
+            heatMapDiv.className = "map-button heat-map-control";
+            heatMapDiv.innerHTML = $("#heat-map-control").html();
+            google.maps.event.addDomListener(heatMapDiv, 'click', function () {
+                this.heatMapMode = !this.heatMapMode;
+                this.toggleHeatmap();
+            }.bind(this));
+
             mapControlDiv.appendChild(resetMapDiv);
             mapControlDiv.appendChild(downloadCsvDiv);
             mapControlDiv.appendChild(linkMapDiv);
             mapControlDiv.appendChild(tourDiv);
             mapControlDiv.appendChild(statDiv);
             mapControlDiv.appendChild(fullScreenDiv);
+            mapControlDiv.appendChild(heatMapDiv);
             if (MAP_ONLY)
                 mapControlDiv.style = "display:none";
 
@@ -487,6 +510,11 @@ $(function () {
             fullScreenLabel.className = 'control-label';
             fullScreenLabel.innerHTML = 'מסך מלא';
             fullScreenDiv.appendChild(fullScreenLabel);
+
+            var heatMapLabel = document.createElement('div');
+            heatMapLabel.className = 'control-label';
+            heatMapLabel.innerHTML = 'מפת חום';
+            heatMapDiv.appendChild(heatMapLabel);
 
             this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(mapControlDiv);
 
@@ -687,7 +715,11 @@ $(function () {
                     && cluster.model.attributes.latitude === model.attributes.latitude;
             });
             if (!clusterExists) {
-                var clusterView = new ClusterView({model: model, map: this.map}).render();
+                var clusterView = new ClusterView({model: model, map: this.map});
+                if (!this.heatMapMode){
+                    clusterView.render();
+                }
+
                 this.clusterList.push(clusterView);
             }
         },
@@ -1076,6 +1108,47 @@ $(function () {
             this.resetMarkers();
             this.fetchMarkers();
             this.updateFilterString();
+        },
+        toggleHeatmap: function() {
+            // Toggle heatMapButton color grey/red
+            $(".heat-map-control").toggleClass('heat-map-control-red');
+            if (this.heatMapMode){
+                this.oms.unspiderfy();
+
+                if (this.clusterMode()){
+                    // Clear clusters from map
+                    this.clusterer.removeClusters();
+                    // Drawing the HeatMap for clusters
+                    this.buildHeatMap("clusters");
+                }else{
+                    this.clearMarkersFromMap();
+                    // Drawing the HeatMap for markers
+                    this.buildHeatMap("markers");
+                }
+            }else{
+                this.heatmap.setMap(null);
+                this.reloadMarkers();
+            }
+        },
+        buildHeatMap: function(markersOrClusters) {
+            var latlngListForHeatMap = [];
+
+            if (markersOrClusters == "markers"){
+                _.each(this.markers.models, function(marker){
+                    latlngListForHeatMap.push(new google.maps.LatLng(marker.get('latitude'),marker.get('longitude')));
+                });
+            }else if (markersOrClusters == "clusters"){
+                _.each(this.clusterList, function(cluster){
+                    latlngListForHeatMap.push({ location: new google.maps.LatLng(cluster.model.get('latitude'),cluster.model.get('longitude')), weight: cluster.model.get('size') });
+                });
+            }
+            
+            this.heatmap = new google.maps.visualization.HeatmapLayer({
+                data: latlngListForHeatMap,
+                maxIntensity: 3,
+                radius: 45,
+                map: this.map
+            });
         },
         updateFilterString: function() {
             if (!this.clusterMode()) {

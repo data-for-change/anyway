@@ -394,6 +394,17 @@ input[type="date"],input[type="time"]{
     content: '\f0b2'
 }
 
+.heat-map-control:after{
+    font-size: 17px;
+    color: #ccc;
+    font-family: 'Material Icons';
+    content: '\e80e'
+}
+
+.heat-map-control-red:after{
+    color: #ef5350;
+}
+
 .map-button:hover .control-label{
     visibility: visible !important;
     position: fixed;

@@ -201,8 +201,8 @@ $(function () {
                     this.buildHeatMap("markers");
                 }else{
                     this.setMultipleMarkersIcon();
-                    this.sidebar.reloadMarkerList(this.markerList);
                 }
+                this.sidebar.reloadMarkerList(this.markerList);
 
             }
             if (jsPanelInst!=null){

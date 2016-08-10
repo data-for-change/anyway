@@ -10,7 +10,7 @@ from sqlalchemy.orm import relationship, load_only, backref
 
 import datetime
 import localization
-from database import Base
+from database import Base, db_session
 from flask.ext.security import Security, SQLAlchemyUserDatastore, \
         UserMixin, RoleMixin, login_required
 
@@ -238,7 +238,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         self.put()
 
     @staticmethod
-    def bounding_box_query(is_thin=False, yield_per=None, **kwargs):
+    def bounding_box_query(is_thin=False, yield_per=None, involved_and_vehicles=False, **kwargs):
 
         # example:
         # ne_lat=32.36292402647484&ne_lng=35.08873443603511&sw_lat=32.29257266524761&sw_lng=34.88445739746089
@@ -333,7 +333,15 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
 
         if is_thin:
             markers = markers.options(load_only("id", "longitude", "latitude"))
-        return markers
+
+        if involved_and_vehicles:
+            markers_ids = [marker.id for marker in markers]
+            markers = db_session.query(Marker).filter(Marker.id.in_(markers_ids))
+            vehicles = db_session.query(Vehicle).filter(Vehicle.accident_id.in_(markers_ids))
+            involved = db_session.query(Involved).filter(Involved.accident_id.in_(markers_ids))
+            return markers.all(), vehicles.all(), involved.all()
+        else:
+            return markers
 
     @staticmethod
     def get_marker(marker_id):

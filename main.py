@@ -150,7 +150,7 @@ def markers():
     kwargs = get_kwargs()
     logging.debug('querying markers in bounding box: %s' % kwargs)
     is_thin = (kwargs['zoom'] < CONST.MINIMAL_ZOOM)
-    accidents = Marker.bounding_box_query(is_thin, yield_per=50, **kwargs)
+    accidents = Marker.bounding_box_query(is_thin, yield_per=50, involved_and_vehicles=False, **kwargs)
 
     discussion_args = ('ne_lat', 'ne_lng', 'sw_lat', 'sw_lng', 'show_discussions')
     discussions = DiscussionMarker.bounding_box_query(**{arg: kwargs[arg] for arg in discussion_args})
@@ -168,6 +168,37 @@ def markers():
         return Response(generate_json(accidents, discussions, 
                                       is_thin),
                         mimetype="application/json")
+
+
+@app.route("/charts-data", methods=["GET"])
+@user_optional
+def charts_data():
+    logging.debug('getting charts data')
+    kwargs = get_kwargs()
+    accidents, vehicles, involved = Marker.bounding_box_query(is_thin=False, yield_per=50, involved_and_vehicles=True, **kwargs)
+    accidents_list = [acc.serialize() for acc in accidents]
+    vehicles_list = [vehicles_data_refinement(veh.serialize()) for veh in vehicles]
+    involved_list = [involved_data_refinement(inv.serialize()) for inv in involved]
+    return Response(json.dumps({'accidents': accidents_list, 'vehicles': vehicles_list, 'involved': involved_list}), mimetype="application/json")
+
+
+def vehicles_data_refinement(vehicle):
+    vehicle["engine_volume"] = lms_dictionary.get((111, vehicle["engine_volume"]))
+    vehicle["total_weight"] = lms_dictionary.get((112, vehicle["total_weight"]))
+    vehicle["driving_directions"] = lms_dictionary.get((28, vehicle["driving_directions"]))
+    return vehicle
+
+
+def involved_data_refinement(involved):
+    involved["age_group"] = lms_dictionary.get((92, involved["age_group"]))
+    involved["population_type"] = lms_dictionary.get((66, involved["population_type"]))
+    involved["home_district"] = lms_dictionary.get((77, involved["home_district"]))
+    involved["home_nafa"] = lms_dictionary.get((79, involved["home_nafa"]))
+    involved["home_area"] = lms_dictionary.get((80, involved["home_area"]))
+    involved["home_municipal_status"] = lms_dictionary.get((78, involved["home_municipal_status"]))
+    involved["home_residence_type"] = lms_dictionary.get((81, involved["home_residence_type"]))
+    return involved
+
 
 @app.route("/markers/<int:marker_id>", methods=["GET"])
 def marker(marker_id):

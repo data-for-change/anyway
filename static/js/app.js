@@ -546,13 +546,21 @@ $(function () {
                 toggleDiv.style = "display:none";
             toggleDiv.title = 'שנה תצוגת אייקונים';
             google.maps.event.addDomListener(toggleBGDiv, 'click', function () {
-                $(toggleDiv).toggleClass('pin');
-                $(toggleDiv).toggleClass('dot');
-                this.iconTypeChanged = true;
-                this.toggleMarkerIconType();
+                if(! ( this.heatMapMode || this.clusterMode() ) ) {
+                    $(toggleDiv).toggleClass('pin');
+                    $(toggleDiv).toggleClass('dot');
+                    this.iconTypeChanged = true;
+                    this.toggleMarkerIconType();
+                }
             }.bind(this));
 
             toggleBGDiv.appendChild(toggleDiv);
+
+            var toggleDivLabel = document.createElement('div');
+            toggleDivLabel.className = 'toggle-control-disabled-label';
+            toggleDivLabel.innerHTML = 'שינוי תצוגת אייקונים אינו זמין במצב זה';
+            toggleBGDiv.appendChild(toggleDivLabel);
+
             this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(toggleBGDiv);
 
             google.maps.event.addListener(this.searchBox, 'places_changed', function () {
@@ -643,6 +651,9 @@ $(function () {
                     this.fetchMarkers();
                 }
             }.bind(this) );
+            google.maps.event.addListener(this.map, "zoom_changed", function(){
+                this.indicatingAvailabilityOfIconsDotsSwitch();
+            }.bind(this));
             google.maps.event.addListener(this.map, "click", _.bind(this.clickMap, this) );
             this.sidebar.setResponsively();
             return this;
@@ -1112,6 +1123,8 @@ $(function () {
         toggleHeatmap: function() {
             // Toggle heatMapButton color grey/red
             $(".heat-map-control").toggleClass('heat-map-control-red');
+            // Indicating switch availability
+            this.indicatingAvailabilityOfIconsDotsSwitch();
             if (this.heatMapMode){
                 this.oms.unspiderfy();
 
@@ -1217,6 +1230,18 @@ $(function () {
             } else {
                 $("#filter-string").empty()
                     .append("<p>התקרב על מנת לקבל נתוני סינון</p>");
+            }
+        },
+        indicatingAvailabilityOfIconsDotsSwitch: function() {
+            if (this.heatMapMode || this.clusterMode()){
+                // Indicating that the icons/dots switch is disabled
+                $(".map-button.toggle-control").addClass("toggle-control-disabled");
+                $(".map-button.toggle-control")[0].title = 'שינוי תצוגת אייקונים אינו זמין במצב זה';
+            } else {
+                // Remove indication that the icons/dots switch is disabled
+                $(".map-button.toggle-control").removeClass("toggle-control-disabled");
+                $(".map-button.toggle-control")[0].title = 'שנה תצוגת אייקונים';
+
             }
         }
     });

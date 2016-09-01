@@ -33,6 +33,7 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
     str += '<option value="severityTotal" id="severityTotal">מספר התאונות לפי דרגת חומרה</option>';
     str += '<option value="severityPerMonth" id="severityPerMonth">מספר התאונות בחודש לפי דרגת חומרה</option>';
     str += '<option value="severityPerMonthStacked" id="severityPerMonthStacked">מספר התאונות בחודש לפי דרגת חומרה - מקובץ לפי חודשים</option>';
+    str += '<option value="ageGroup" id="ageGroup">נפגעים לפי קבוצת גיל</option>';
     str += '</select>';
     str += '<select class="form-control" id="selectTypeOfData">';
     str += '<option value="numberType" id="numberType">מספרים</option>';
@@ -622,6 +623,47 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
                 });
             }
 
+            break;
+        case "ageGroup":
+            var params = app.buildMarkersParams();
+            $.get("charts-data", params, function(data){
+                var involved = data.involved;
+                var age_groups = {};
+                var dataset = [];
+                for (var i = 0; i < involved.length; i++) {
+                    if (age_groups[involved[i].age_group]){
+                        age_groups[involved[i].age_group]++;
+                    }else{
+                        age_groups[involved[i].age_group] = 1;
+                    }                     
+                }
+                for (var key in age_groups) {
+                    if (age_groups.hasOwnProperty(key)) {
+                        dataset.push({ label: key, value: age_groups[key] });
+                    }
+                }
+                FusionCharts.ready(function() {
+                    var statChart = new FusionCharts({
+                        "type": 'pie2d',
+                        "renderAt": "myChart",
+                        "width": chartWidth,
+                        "height": chartHeight,
+                        "dataFormat": "json",
+                        "dataSource": {
+                            "chart": {
+                                "caption": "מספר הנפגעים לפי קבוצת גיל",                                
+                                "theme": "fint",
+                                "showPercentValues": currentDataType === "percentType" ? "1" : "0",
+                                "showPercentInTooltip": currentDataType === "percentType" ? "1" : "0",
+                                "decimals": "1",
+                                "useDataPlotColorForLabels": "1",                                
+                            },                            
+                            "data": dataset
+                        }
+                    });
+                    statChart.render();
+                });
+            });
             break;
     }
 

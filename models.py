@@ -335,11 +335,21 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
             markers = markers.options(load_only("id", "longitude", "latitude"))
 
         if involved_and_vehicles:
+            fetch_markers = kwargs.get('fetch_markers', True)
+            fetch_vehicles = kwargs.get('fetch_vehicles', True)
+            fetch_involved = kwargs.get('fetch_involved', True)
             markers_ids = [marker.id for marker in markers]
-            markers = db_session.query(Marker).filter(Marker.id.in_(markers_ids))
-            vehicles = db_session.query(Vehicle).filter(Vehicle.accident_id.in_(markers_ids))
-            involved = db_session.query(Involved).filter(Involved.accident_id.in_(markers_ids))
-            return markers.all(), vehicles.all(), involved.all()
+            markers = None
+            vehicles = None
+            involved = None
+            if fetch_markers:
+                markers = db_session.query(Marker).filter(Marker.id.in_(markers_ids))
+            if fetch_vehicles:
+                vehicles = db_session.query(Vehicle).filter(Vehicle.accident_id.in_(markers_ids))
+            if fetch_involved:
+                involved = db_session.query(Involved).filter(Involved.accident_id.in_(markers_ids))
+            return markers.all() if markers is not None else [], vehicles.all() if vehicles is not None else [], \
+                   involved.all() if involved is not None else []
         else:
             return markers
 

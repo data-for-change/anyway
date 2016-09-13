@@ -1145,6 +1145,8 @@ $(function () {
         },
         buildHeatMap: function(markersOrClusters) {
             var latlngListForHeatMap = [];
+            var clusterItemsCounter = 0;
+            var heatMapMaxIntensity = 3;
 
             if (markersOrClusters == "markers"){
                 _.each(this.markers.models, function(marker){
@@ -1153,12 +1155,28 @@ $(function () {
             }else if (markersOrClusters == "clusters"){
                 _.each(this.clusterList, function(cluster){
                     latlngListForHeatMap.push({ location: new google.maps.LatLng(cluster.model.get('latitude'),cluster.model.get('longitude')), weight: cluster.model.get('size') });
+                    clusterItemsCounter += cluster.model.get('size');
                 });
+                if (clusterItemsCounter < 1000){
+                    heatMapMaxIntensity = 10;
+                } else if (clusterItemsCounter > 1000 && clusterItemsCounter < 2000){
+                    heatMapMaxIntensity = 30;
+                } else if(clusterItemsCounter > 2000 && clusterItemsCounter < 4000){
+                    heatMapMaxIntensity = 90;
+                } else if(clusterItemsCounter > 4000 && clusterItemsCounter < 6000){
+                    heatMapMaxIntensity = 150;
+                } else if(clusterItemsCounter > 6000){
+                    heatMapMaxIntensity = 250;
+                }
             }
+            console.log("-----------------------------------");
+            console.log("cluster items counter: " + clusterItemsCounter);
+            console.log("Selected MaxIntensity level: " + heatMapMaxIntensity);
+            console.log("Zoom level: " + this.map.zoom);
             
             this.heatmap = new google.maps.visualization.HeatmapLayer({
                 data: latlngListForHeatMap,
-                maxIntensity: 3,
+                maxIntensity: heatMapMaxIntensity,
                 radius: 45,
                 map: this.map
             });

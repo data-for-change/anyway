@@ -145,7 +145,7 @@ var MarkerView = Backbone.View.extend({
                 accuracy = !(this.model.get("locationAccuracy") == 1);
                 markerTitle = "ביום " + moment(this.model.get("created")).format("dddd") + ", ה-"
                     + moment(this.model.get("created")).format("LL")
-                    + " תאונה " + SEVERITY_MAP[this.model.get("severity")]
+                    + " אירעה תאונה " + SEVERITY_MAP[this.model.get("severity")]
                     + " מסוג " + localization.SUG_TEUNA[this.model.get("subtype")] + " "
                     + loc;
                 break;

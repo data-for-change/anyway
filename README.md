@@ -22,12 +22,6 @@ Development environment setup notes
 -----------------------
 ##### Choose one of two environment setup options: <br>
 
-1.  **Docker**: <br>
-    Save time, effort and environment conflicts using [Docker] (https://github.com/hasadna/anyway/blob/dev/DOCKER.md). <br>
-    Docker is a lightweight container, deployed inside Linux (or a linux VM in OSX or Windows). <br>
-    The container is ready to roll with all app dependencies and requirements. It builds up the data models and DB itself. <br> 
-    All you have to do is follow [three simple steps] (https://github.com/hasadna/anyway/blob/dev/DOCKER.md#instructions). <br>
-
 1.  **Local installation**:
 
 ## Getting the code

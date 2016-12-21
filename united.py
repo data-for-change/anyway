@@ -57,16 +57,22 @@ def parse_date(created):
     :return: Python datetime object
     """
     global time
-    DATE_FORMATS = ['%m/%d/%Y %I:%M:%S', '%Y/%m/%d %I:%M:%S', '%d/%m/%Y %I:%M', '%Y/%m/%d %I:%M']
+    global hour
+    DATE_FORMATS = ['%m/%d/%Y %I:%M:%S', '%Y-%m-%d %H:%M:%S', '%Y/%m/%d %I:%M:%S', '%d/%m/%Y %I:%M', '%Y/%m/%d %I:%M']
 
     for date_format in DATE_FORMATS:
         try:
-            time = datetime.strptime(str(created)[:-3], date_format)
+            if date_format == '%Y-%m-%d %H:%M:%S':
+                time = datetime.strptime(str(created)[:-4], date_format)
+                hour = time.strftime('%H')
+                hour = int(hour)
+            else:
+                time = datetime.strptime(str(created)[:-3], date_format)
+                hour = time.strftime('%H')
+                hour = int(hour) if str(created).endswith('AM') else int(hour) + 12
             break
         except ValueError:
             pass
-    hour = time.strftime('%H')
-    hour = int(hour) if str(created).endswith('AM') else int(hour) + 12
     return datetime(time.year, time.month, time.day, hour, time.minute, 0)
 
 
@@ -265,7 +271,9 @@ def create_accidents(collection, file_location):
             if line == 1 and accident[0] == "":
                 logging.warn("\t\tEmpty File!")
                 continue
-            if accident[csvmap["lat"]] == "" or accident[csvmap["long"]] == "":
+            if accident[csvmap["lat"]] == "" or accident[csvmap["long"]] == "" or \
+                            accident[csvmap["lat"]] is None or accident[csvmap["long"]] is None or \
+                            accident[csvmap["lat"]] == "NULL" or accident[csvmap["long"]] == "NULL":
                 logging.warn("\t\tMissing coordinates in line {0}. Moving on...".format(line + 1))
                 continue
 
@@ -277,7 +285,7 @@ def create_accidents(collection, file_location):
                                          encoding='utf-8'),
                       'severity': 2 if u"קשה" in unicode(accident[csvmap["type"]], encoding='utf-8') else 3,
                       'locationAccuracy': 1, 'subtype': 21, 'type': CONST.MARKER_TYPE_ACCIDENT,
-                      'intactness': "".join(x for x in accident[csvmap["casualties"]] if x.isdigit()) or 0,
+                      'intactness': accident[csvmap["casualties"]] if accident[csvmap["casualties"]].isdigit() else 0,
                       'description': unicode(accident[csvmap["comment"]], encoding='utf-8'),
                       'weather': process_weather_data(collection, accident[csvmap["lat"]], accident[csvmap["long"]])}
 
@@ -318,6 +326,7 @@ def update_db(collection):
         if not accident.weather:
             accident.weather = process_weather_data(collection, accident.latitude, accident.longitude)
     db.session.commit()
+    logging.info("\tFinished commiting the changes")
 
 
 def main():

@@ -645,18 +645,12 @@
         </label>
         <div class="filter-panel">
             <div class="btn-label">תקופה:</div>
-            <div class="btn-wrap ">
-                <input type="radio" name="years" id="checkbox-all-years" value="all" onclick="app.changeDate()" />
-                <label for="checkbox-all-years" class="btn one">הכל</label>
-                {% for year in years %}
-                    <input type="radio" name="years" id="checkbox-{{year}}" value="{{year}}" onclick="app.changeDate()" checked />
-                    <label for="checkbox-{{year}}" class="btn one">{{year}}</label>
-                {% endfor %}
-            </div>
             <div class="btn-wrap separator">
-                <input id="sdate" class="btn date" type="date" style="width: 38% !important; margin-top: 10px" value="{{default_start_date_format|default('2014-01-01')}}" oninput="app.loadFilter()">
-                <div class="btn-label" style="margin: 10px">עד</div>
-                <input id="edate" class="btn date" style="width: 38% !important; margin-top: 10px" type="date" value="{{default_end_date_format|default('2016-01-01')}}" oninput="app.loadFilter()">
+                <div class="btn-label" style="margin: 10px">החל מ :</div>
+                <input id="sdate" class="btn date" type="date" style="width: 52% !important; margin-top: 10px" value="{{default_start_date_format|default('2005-01-01')}}" oninput="app.loadFilter()">
+                <div class="btn-label" style="margin: 10px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;עד :</div>
+                
+                <input id="edate" class="btn date" type="date" style="width: 52% !important; margin-top: 10px" value="{{default_end_date_format|default('2025-01-01')}}" oninput="app.loadFilter()">
             </div>
 
             <div class="btn-label">יום:</div>

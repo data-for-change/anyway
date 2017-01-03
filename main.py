@@ -383,7 +383,6 @@ def index(marker=None, message=None):
     for x in range(1,5):
         pref_radius.append(PreferenceObject('prefRadius' + str(x * 500), x * 500, x * 500))
     context['pref_radius'] = pref_radius
-    context['years'] = app.years
     today = datetime.date.today()
     context['default_end_date_format'] = today.strftime('%Y-%m-%d')
     return render_template('index.html', **context)
@@ -832,22 +831,6 @@ def oauth_callback(provider):
     return redirect(url_for('index'))
 
 ######## end rauth integration
-
-@app.before_first_request
-def create_years_list():
-    """
-    init app.years field, with last 10 years that used in db
-    """
-    while True:
-        try:
-            year_col = db.session.query(distinct(func.extract("year", Marker.created)))
-            app.years = sorted([int(year[0]) for year in year_col], reverse=True)[:10]
-            break
-        except OperationalError as err:
-            logging.warn(err)
-            time.sleep(1)
-    logging.info("Years for date selection: " + ", ".join(map(str, app.years)))
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

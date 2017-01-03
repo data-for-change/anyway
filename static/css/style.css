@@ -733,7 +733,10 @@ textarea.form-control-wide {
 }
 
 input[type='date']{
-    font-size: 10px;
+    /*font-size: 13px;*/
+    /*color: red !important;*/
+    color: #08c !important;
+    background: #f2f2f2 !important;
 }
 
 input[type='checkbox']{

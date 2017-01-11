@@ -121,7 +121,7 @@ You are more than welcome to join us, ask questions and raise any issues you stu
 
 **Slack**
 
-Our Slack channel is connected to the relevant git notifications. 
+[Our Slack channel](https://oway.slack.com/) is connected to the relevant git notifications. 
 Ask galraij to add you and use it to keep in touch with the team while off-campus.
 Questions are always welcome.
 

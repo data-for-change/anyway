@@ -3,7 +3,7 @@ Contributing to ANYWAY
 
 OMG. OMG. OMG. We are really glad you are joining the team!  We set up a contributor's guide that explains all about [setting up ANYWAY's development environment](http://hasadna.github.io/anyway) - prepare to be amazed. 
 
-![Contributors guide](static/img/anyway.png)
+![Contributors guide](../static/img/anyway.png)
 
 This page contains information about reporting issues as well as some tips and
 guidelines useful to experienced open source contributors. 

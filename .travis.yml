@@ -10,6 +10,6 @@ before_script:
   - python models.py
 # command to run tests
 script:
-  - python -m unittest discover tests
   - python process.py
   - python united.py --light
+  - python -m unittest discover tests

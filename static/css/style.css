@@ -812,21 +812,38 @@ input[type='checkbox']{
 }
 /* for login popup*/
 .modal-header {
-    background-color: gray;
+    background-color: lightgray;
 }
 .modal-header h3 {
-    font-size: 16px;
+    font-size: 20px;
 }
+
+.modal-header .close {
+    font-size: 40px;
+}
+
 .btn-social-icon {
     width: 160px;
-    border-radius: 0px;
+    /*border-radius: 0px;*/
     color: #fff !important;
 }
 .btn-facebook {
 
-    background-color: blue;
+    /*background-color: #3B5998;*/
+    background-image: linear-gradient(#4C69BA, #3B55A0);
+}
+
+.btn-facebook:hover {
+    background-color: #3B5998;
+    color: #fff !important; 
 }
 
 .btn-google {
-    background-color: red;
+    /*background-color: #EA4335;*/
+    background-color: #EA4335;
+}
+
+.btn-google:hover {
+    background-color: #D94330;
+    color: #fff !important; 
 }

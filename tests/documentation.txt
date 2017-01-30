@@ -1,0 +1,19 @@
+list of GET/POST requests:
+
+* implemented:
+DONE /
+DONE /markers	GET
+DONE /markers/<int:marker_id>	GET
+DONE /clusters
+
+* unimplemented:
+/charts-data	GET	
+/discussion	GET, POST	
+/highlightpoints	POST	
+/new-features	POST	
+/preferences	GET, POST	
+/testroles		
+/logout		
+/authorize/<provider>')		
+/callback/<provider>')		
+

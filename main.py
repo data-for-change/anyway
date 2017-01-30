@@ -90,16 +90,8 @@ def generate_json(accidents, discussions, is_thin):
     markers = accidents.all()
     if not is_thin:
         markers += discussions.all()
-    yield '{"markers": ['
-    is_first = True
-    for marker in markers:
-        if is_first:
-            is_first = False
-            prefix = ''
-        else:
-            prefix = ','
-        yield prefix + json.dumps(marker.serialize(is_thin))
-    yield ']}'
+    entries = [ marker.serialize(is_thin) for marker in markers ]
+    return jsonify({"markers" : entries })
 
 
 def generate_csv(results):
@@ -166,9 +158,7 @@ def markers():
         })
 
     else: # defaults to json
-        return Response(generate_json(accidents, discussions, 
-                                      is_thin),
-                        mimetype="application/json")
+        return generate_json(accidents, discussions, is_thin)
 
 
 @app.route("/charts-data", methods=["GET"])

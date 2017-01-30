@@ -1090,20 +1090,6 @@ $(function () {
             }
         },
         changeDate: function() {
-            var start_date, end_date;
-            if ($("#checkbox-all-years").is(":checked")) {
-              start_date = "2005"; end_date = "2025"
-            } else {
-                for (yearNum in app.years) {
-                    year = app.years[yearNum];
-                    if($("#checkbox-"+year).is(":checked")) {
-                        start_date = year; end_date = year + 1;
-                        break;
-                    }
-                }
-            }
-            $("#sdate").val(start_date + '-01-01');
-            $("#edate").val(end_date + '-01-01');
 
             this.show_day = $("input[type='radio'][name='day']:checked").val()
             this.show_holiday = $("input[type='radio'][name='holiday']:checked").val()
@@ -1115,7 +1101,6 @@ $(function () {
                 $("#checkbox-time-all").prop('checked', true);
             }
 
-            this.dateRanges = [new Date(start_date + '-01-01'), new Date(end_date + '-01-01')];
             this.resetMarkers();
             this.fetchMarkers();
             this.updateFilterString();

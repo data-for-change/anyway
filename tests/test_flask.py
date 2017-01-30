@@ -27,6 +27,7 @@ class TestSite(unittest.TestCase):
     def test_markers(self):
         rv = self.app.get("/markers?ne_lat=32.08656790211843&ne_lng=34.80611543655391&sw_lat=32.08003198103277&sw_lng=34.793884563446&zoom=17&thin_markers=false&start_date=1104537600&end_date=1484697600&show_fatal=1&show_severe=1&show_light=1&approx=1&accurate=1&show_markers=1&show_discussions=1&show_urban=3&show_intersection=3&show_lane=3&show_day=7&show_holiday=0&show_time=24&start_time=25&end_time=25&weather=0&road=0&separation=0&surface=0&acctype=0&controlmeasure=0&district=0&case_type=0")
         self.assertEqual(rv.status, '200 OK')
+        self.assertEqual(rv.headers['Content-Type'], 'application/json')
         #print(rv.data)
         resp = json.loads(rv.data)
         self.assertIn('markers', resp)

@@ -116,7 +116,7 @@ Before you make a pull request, squash your commits into logical units of work u
 
 **Workshop @GoogleCampusTLV / @GivatRamJRS**
 
-The team meets each Monday at Google Campus, Tel Aviv. There are also meetings in the Public Library in Jerusalem on some Wednesdays.
+The team meets each Monday at Google Campus, Tel Aviv. There are also meetings in the Siftech Accelerator in Jerusalem on Tuesdays.
 You are more than welcome to join us, ask questions and raise any issues you stumble upon while working on the project.
 
 **Slack**

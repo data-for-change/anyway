@@ -3,8 +3,7 @@ ANYWAY
 
 oway.org.il - Crowd-sourced road hazard reporting website.
 
-Feel free to contribute to the project. It is currently hosted on Heroku:
-http://anyway.herokuapp.com
+Feel free to contribute to the project.
 
 To report bugs and feature requests, please [open an issue](https://github.com/hasadna/anyway/issues) on GitHub.
 

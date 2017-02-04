@@ -23,7 +23,7 @@ the information in the used open-source databases, please let us know.
 Also, if you happen to stumble upon a bug, don't hesitate and raise a flag and we will get it fixed. You can send any your reports to [anyway@anyway.co.il](mailto:anyway@anyway.co.il). 
 Don't forget to mention which operating system and browser you were using, so we can easily track down the issue.
 
-If you are already digging through the code and our [unstable version](http://anyway-unstable.herokuapp.com/) and you happen to find a bug, please go ahead and [open a new issue](https://github.com/hasadna/anyway/issues).
+If you are already digging through the code and our [website](https://www.anyway.co.il) and you happen to find a bug, please go ahead and [open a new issue](https://github.com/hasadna/anyway/issues).
  Just remember to look through the pre-existing ones to make sure there are no duplicates. Even better if you can take it on yourself, then we encourage you to report the issue, assign yourself and submit a Pull Request with a fix.
 
 **Issue Report Format:**

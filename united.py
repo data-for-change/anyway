@@ -253,27 +253,31 @@ def process_weather_data(collection, latitude, longitude):
                 weather = 79  # גשם זלעפות
     return weather
 
+CSVMAP = [
+        {"id": 0, "time": 1, "lat": 2, "long": 3, "street": 4, "city": 6, "comment": 7, "type": 8, "casualties": 9},
+        {"id": 0, "time": 1, "type": 2, "long": 3, "lat": 4,  "city": 5, "street": 6, "comment": 7, "casualties": 8},
+        ]
 
-def create_accidents(collection, file_location, format_version):
+def create_accidents(collection, file_location):
     """
     :param file_location: local location of .csv
     :return: Yields a marker object with every iteration
     """
     logging.info("\tReading accidents data from '%s'..." % file_location)
-    csvmap = [
-            {"id": 0, "time": 1, "lat": 2, "long": 3, "street": 4, "city": 6, "comment": 7, "type": 8, "casualties": 9},
-            {"id": 0, "time": 1, "type": 2, "long": 3, "lat": 4,  "city": 5, "street": 6, "comment": 7, "casualties": 8},
-            ][format_version]
 
     with open(file_location, 'rU') as f:
         reader = csv.reader(f, delimiter=',', dialect=csv.excel_tab)
 
         for line, accident in enumerate(reader):
-            if line == 0 or not accident:  # header or empty line
+            if line == 0:  # header
+                format_version = 0 if "MissionID" in accident[0] else 1
+                continue
+            if not accident:  # empty line
                 continue
             if line == 1 and accident[0] == "":
                 logging.warn("\t\tEmpty File!")
                 continue
+            csvmap = CSVMAP[format_version]
             if accident[csvmap["lat"]] == "" or accident[csvmap["long"]] == "" or \
                             accident[csvmap["lat"]] is None or accident[csvmap["long"]] is None or \
                             accident[csvmap["lat"]] == "NULL" or accident[csvmap["long"]] == "NULL":
@@ -298,14 +302,14 @@ def create_accidents(collection, file_location, format_version):
             yield marker
 
 
-def import_to_db(collection, path, format_version):
+def import_to_db(collection, path):
     """
     :param path: Local files directory ('united_path' on main() below)
     :return: length of DB entries after execution
     """
     app = init_flask(__name__)
     db = SQLAlchemy(app)
-    accidents = list(create_accidents(collection, path, format_version))
+    accidents = list(create_accidents(collection, path))
     if not accidents:
         return 0
 
@@ -359,7 +363,7 @@ def main():
     logging.info("Loading United accidents...")
     for united_file in os.listdir(united_path):
         if united_file.endswith(".csv"):
-            total += import_to_db(collection, united_path + united_file, format_version=1 if args.newformat else 0)
+            total += import_to_db(collection, united_path + united_file)
     logging.info("\tImported {0} items".format(total))
 
     update_db(collection)

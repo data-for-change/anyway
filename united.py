@@ -58,7 +58,7 @@ def parse_date(created):
     """
     global time
     global hour
-    DATE_FORMATS = ['%m/%d/%Y %I:%M:%S', '%Y-%m-%d %H:%M:%S', '%Y/%m/%d %I:%M:%S', '%d/%m/%Y %I:%M', '%Y/%m/%d %I:%M']
+    DATE_FORMATS = ['%m/%d/%Y %I:%M:%S', '%Y-%m-%d %H:%M:%S', '%Y/%m/%d %I:%M:%S', '%d/%m/%Y %I:%M', '%Y/%m/%d %I:%M', '%m/%d/%Y %I:%M']
 
     for date_format in DATE_FORMATS:
         try:
@@ -254,13 +254,14 @@ def process_weather_data(collection, latitude, longitude):
     return weather
 
 
-def create_accidents(collection, file_location):
+def create_accidents(collection, file_location, newformat):
     """
     :param file_location: local location of .csv
     :return: Yields a marker object with every iteration
     """
     logging.info("\tReading accidents data from '%s'..." % file_location)
     csvmap = {"id": 0, "time": 1, "lat": 2, "long": 3, "street": 4, "city": 6, "comment": 7, "type": 8, "casualties": 9}
+    csvmap_newformat = {"id": 0, "time": 1, "type": 2, "long": 3, "lat": 4,  "city": 5, "street": 6, "comment": 7, "casualties": 8}
 
     with open(file_location, 'rU') as f:
         reader = csv.reader(f, delimiter=',', dialect=csv.excel_tab)
@@ -278,28 +279,41 @@ def create_accidents(collection, file_location):
                 continue
 
             created = parse_date(accident[csvmap["time"]])
-            marker = {'id': accident[csvmap["id"]], 'latitude': accident[csvmap["lat"]],
-                      'longitude': accident[csvmap["long"]], 'created': created, 'provider_code': PROVIDER_CODE,
-                      'title': unicode(accident[csvmap["type"]], encoding='utf-8')[:100],
-                      'address': unicode((accident[csvmap["street"]] + ' ' + accident[csvmap["city"]]),
-                                         encoding='utf-8'),
-                      'severity': 2 if u"קשה" in unicode(accident[csvmap["type"]], encoding='utf-8') else 3,
-                      'locationAccuracy': 1, 'subtype': 21, 'type': CONST.MARKER_TYPE_ACCIDENT,
-                      'intactness': accident[csvmap["casualties"]] if accident[csvmap["casualties"]].isdigit() else 0,
-                      'description': unicode(accident[csvmap["comment"]], encoding='utf-8'),
-                      'weather': process_weather_data(collection, accident[csvmap["lat"]], accident[csvmap["long"]])}
+            if newformat:
+                marker = {'id': accident[csvmap_newformat["id"]], 'latitude': accident[csvmap_newformat["lat"]],
+                          'longitude': accident[csvmap_newformat["long"]], 'created': created, 'provider_code': PROVIDER_CODE,
+                          'title': unicode(accident[csvmap_newformat["type"]], encoding='utf-8')[:100],
+                          'address': unicode((accident[csvmap_newformat["street"]] + ' ' + accident[csvmap_newformat["city"]]),
+                                             encoding='utf-8'),
+                          'severity': 2 if u"קשה" in unicode(accident[csvmap_newformat["type"]], encoding='utf-8') else 3,
+                          'locationAccuracy': 1, 'subtype': 21, 'type': CONST.MARKER_TYPE_ACCIDENT,
+                          'weather': process_weather_data(collection, accident[csvmap_newformat["lat"]],
+                                                          accident[csvmap_newformat["long"]])}
+            else:
+                marker = {'id': accident[csvmap["id"]], 'latitude': accident[csvmap["lat"]],
+                          'longitude': accident[csvmap["long"]], 'created': created, 'provider_code': PROVIDER_CODE,
+                          'title': unicode(accident[csvmap["type"]], encoding='utf-8')[:100],
+                          'address': unicode((accident[csvmap["street"]] + ' ' + accident[csvmap["city"]]),
+                                             encoding='utf-8'),
+                          'severity': 2 if u"קשה" in unicode(accident[csvmap["type"]], encoding='utf-8') else 3,
+                          'locationAccuracy': 1, 'subtype': 21, 'type': CONST.MARKER_TYPE_ACCIDENT,
+                          'intactness': accident[csvmap["casualties"]] if accident[csvmap["casualties"]].isdigit() else 0,
+                          'description': unicode(accident[csvmap["comment"]], encoding='utf-8'),
+                          'weather': process_weather_data(collection, accident[csvmap["lat"]],
+                                                          accident[csvmap["long"]])}
+
 
             yield marker
 
 
-def import_to_db(collection, path):
+def import_to_db(collection, path, newformat):
     """
     :param path: Local files directory ('united_path' on main() below)
     :return: length of DB entries after execution
     """
     app = init_flask(__name__)
     db = SQLAlchemy(app)
-    accidents = list(create_accidents(collection, path))
+    accidents = list(create_accidents(collection, path, newformat))
     if not accidents:
         return 0
 
@@ -339,6 +353,8 @@ def main():
     parser.add_argument('--username', default='')
     parser.add_argument('--password', default='')
     parser.add_argument('--lastmail', action='store_true', default=False)
+    parser.add_argument('--newformat', action='store_true', default=False,
+                        help='Import without downloading any new files - new format')
     args = parser.parse_args()
 
     collection = retrieve_ims_xml()
@@ -351,7 +367,7 @@ def main():
     logging.info("Loading United accidents...")
     for united_file in os.listdir(united_path):
         if united_file.endswith(".csv"):
-            total += import_to_db(collection, united_path + united_file)
+            total += import_to_db(collection, united_path + united_file, args.newformat)
     logging.info("\tImported {0} items".format(total))
 
     update_db(collection)

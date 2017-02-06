@@ -11,6 +11,8 @@ See also [our Android app](https://github.com/hasadna/anywayAndroidApp) on GitHu
 
 See [documentation for our source dataset](docs/DATA_SOURCE.md).
 
+See [Code Directory Tree Structure](docs/CODE.md).
+
 Contributing
 -----------------------
 * We try to follow the process of other Hasadna projects, e.g. [Open-Knesset](https://oknesset-devel.readthedocs.org/en/latest/).

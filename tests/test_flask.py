@@ -68,5 +68,21 @@ class TestSite(unittest.TestCase):
         self.assertIn('markers', resp)
         self.assertEqual(len(resp['markers']), 110)
 
+    def test_clusters(self):
+        rv = self.app.get("/clusters?ne_lat=32.09761071949521&ne_lng=34.81645731850631&sw_lat=32.08274011811594&sw_lng=34.77298407479293&zoom=15&thin_markers=true&start_date=1388534400&end_date=1485734400&show_fatal=1&show_severe=1&show_light=1&approx=1&accurate=1&show_markers=&show_discussions=&show_urban=3&show_intersection=3&show_lane=3&show_day=7&show_holiday=0&show_time=24&start_time=25&end_time=25&weather=0&road=0&separation=0&surface=0&acctype=0&controlmeasure=0&district=0&case_type=0")
+        self.assertEqual(rv.status, '200 OK')
+        #print(rv.data)
+        resp = json.loads(rv.data)
+        self.assertIn('clusters', resp)
+        self.assertEqual(len(resp['clusters']), 0)
+
+    def test_single_marker(self):
+        rv = self.app.get("/markers/2014027147")
+        self.assertEqual(rv.status, '200 OK')
+        #print(rv.data)
+        resp = json.loads(rv.data)
+        #self.assertIn('clusters', resp)
+        self.assertEqual(resp[0]['accident_id'], 2014027147)
+
 # vim: expandtab
 

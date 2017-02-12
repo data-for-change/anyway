@@ -397,7 +397,7 @@ def get_provider_code(directory_name=None):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--specific_folder', dest='specific_folder', action='store_true', default=False)
-    parser.add_argument('--delete_all', dest='delete_all', action='store_true', default=True)
+    parser.add_argument('--delete_all', dest='delete_all', action='store_true', )
     parser.add_argument('--path', type=str, default="static/data/lms")
     parser.add_argument('--batch_size', type=int, default=100)
     parser.add_argument('--provider_code', type=int)

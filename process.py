@@ -22,7 +22,7 @@ import logging
 fileDialog = True
 try:
     import tkFileDialog
-except ValueError:
+except (ValueError, ImportError):
     fileDialog = False
 
 failed_dirs = OrderedDict()

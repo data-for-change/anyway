@@ -9,7 +9,7 @@ To report bugs and feature requests, please [open an issue](https://github.com/h
 
 See also [our Android app](https://github.com/hasadna/anywayAndroidApp) on GitHub.
 
-See [documentation for our source dataset](docs/DATA_SOURCE.md).
+See documentation for our source dataset LAMAS is [here](https://github.com/hasadna/anyway/blob/dev/docs/LMS.md) and United is [here](https://github.com/hasadna/anyway/blob/dev/docs/UNITED.md).
 
 See [Code Directory Tree Structure](docs/CODE.md).
 

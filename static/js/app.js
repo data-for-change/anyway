@@ -74,8 +74,9 @@ $(function () {
             this.controlmeasure = 0;
             this.district = 0;
             this.case_type = 0;
+            this.edate = new Date();
 
-            this.dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
+            this.dateRanges = [new Date($("#sdate").val()), new Date(this.edate)];
 
             setTimeout(function(){
                 this.firstLoadDelay = false;

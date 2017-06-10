@@ -10,3 +10,8 @@ SELECT
 	FROM markers WHERE provider_code = 3 AND address ~ ',';
 
 COMMENT ON COLUMN lamas_markers_by_city_and_date.day_of_week IS 'Sunday = 0 to Saturday = 6';
+
+CREATE OR REPLACE VIEW
+lamas_marker_counts_by_city_year_and_severity AS
+	SELECT city ,year, severity, COUNT(DISTINCT id) FROM lamas_markers_by_city_and_date
+	GROUP BY city, year, severity;

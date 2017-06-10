@@ -375,6 +375,7 @@ def index(marker=None, message=None):
     context['pref_radius'] = pref_radius
     today = datetime.date.today()
     context['default_end_date_format'] = today.strftime('%Y-%m-%d')
+    context['default_start_date_format'] = (today - datetime.timedelta(days=730)).strftime('%Y-%m-%d')
     return render_template('index.html', **context)
 
 

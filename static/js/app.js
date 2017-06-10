@@ -46,6 +46,7 @@ $(function () {
             this.markers = new MarkerCollection();
             this.clusters = new ClusterCollection();
             this.model = new Backbone.Model();
+            this.heatMapMode = false;
             this.markerIconType = true;
             this.markerList = [];
             this.clusterList = [];
@@ -185,11 +186,24 @@ $(function () {
             }
         },
         reloadSidebar: function () {
+            // HeatMap action is here because we're waiting for the markers/clusters to fetch from the server (AJAX request) and reloadSidebar() is being called on success.
             if (this.clusterMode()) {
                 this.sidebar.emptyMarkerList();
+                if (this.heatMapMode){
+                    this.heatmap.setMap(null);
+                    // Drawing HeatMap for clusters
+                    this.buildHeatMap("clusters");
+                }
             } else { // close enough
-                this.setMultipleMarkersIcon();
+                if (this.heatMapMode){
+                    this.heatmap.setMap(null);
+                    // Drawing HeatMap for markers
+                    this.buildHeatMap("markers");
+                }else{
+                    this.setMultipleMarkersIcon();
+                }
                 this.sidebar.reloadMarkerList(this.markerList);
+
             }
             if (jsPanelInst!=null){
                 startJSPanelWithChart(jsPanelInst, $("#statPanel").width(), $("#statPanel").height(),
@@ -454,12 +468,21 @@ $(function () {
                 this.fullScreen();
             }.bind(this));
 
+            var heatMapDiv = document.createElement('div');
+            heatMapDiv.className = "map-button heat-map-control";
+            heatMapDiv.innerHTML = $("#heat-map-control").html();
+            google.maps.event.addDomListener(heatMapDiv, 'click', function () {
+                this.heatMapMode = !this.heatMapMode;
+                this.toggleHeatmap();
+            }.bind(this));
+
             mapControlDiv.appendChild(resetMapDiv);
             mapControlDiv.appendChild(downloadCsvDiv);
             mapControlDiv.appendChild(linkMapDiv);
             mapControlDiv.appendChild(tourDiv);
             mapControlDiv.appendChild(statDiv);
             mapControlDiv.appendChild(fullScreenDiv);
+            mapControlDiv.appendChild(heatMapDiv);
             if (MAP_ONLY)
                 mapControlDiv.style = "display:none";
 
@@ -487,6 +510,11 @@ $(function () {
             fullScreenLabel.className = 'control-label';
             fullScreenLabel.innerHTML = 'מסך מלא';
             fullScreenDiv.appendChild(fullScreenLabel);
+
+            var heatMapLabel = document.createElement('div');
+            heatMapLabel.className = 'control-label';
+            heatMapLabel.innerHTML = 'מפת חום';
+            heatMapDiv.appendChild(heatMapLabel);
 
             this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(mapControlDiv);
 
@@ -518,13 +546,21 @@ $(function () {
                 toggleDiv.style = "display:none";
             toggleDiv.title = 'שנה תצוגת אייקונים';
             google.maps.event.addDomListener(toggleBGDiv, 'click', function () {
-                $(toggleDiv).toggleClass('pin');
-                $(toggleDiv).toggleClass('dot');
-                this.iconTypeChanged = true;
-                this.toggleMarkerIconType();
+                if(! ( this.heatMapMode || this.clusterMode() ) ) {
+                    $(toggleDiv).toggleClass('pin');
+                    $(toggleDiv).toggleClass('dot');
+                    this.iconTypeChanged = true;
+                    this.toggleMarkerIconType();
+                }
             }.bind(this));
 
             toggleBGDiv.appendChild(toggleDiv);
+
+            var toggleDivLabel = document.createElement('div');
+            toggleDivLabel.className = 'toggle-control-disabled-label';
+            toggleDivLabel.innerHTML = 'שינוי תצוגת אייקונים אינו זמין במצב זה';
+            toggleBGDiv.appendChild(toggleDivLabel);
+
             this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(toggleBGDiv);
 
             google.maps.event.addListener(this.searchBox, 'places_changed', function () {
@@ -615,6 +651,9 @@ $(function () {
                     this.fetchMarkers();
                 }
             }.bind(this) );
+            google.maps.event.addListener(this.map, "zoom_changed", function(){
+                this.indicatingAvailabilityOfIconsDotsSwitch();
+            }.bind(this));
             google.maps.event.addListener(this.map, "click", _.bind(this.clickMap, this) );
             this.sidebar.setResponsively();
             return this;
@@ -687,7 +726,11 @@ $(function () {
                     && cluster.model.attributes.latitude === model.attributes.latitude;
             });
             if (!clusterExists) {
-                var clusterView = new ClusterView({model: model, map: this.map}).render();
+                var clusterView = new ClusterView({model: model, map: this.map});
+                if (!this.heatMapMode){
+                    clusterView.render();
+                }
+
                 this.clusterList.push(clusterView);
             }
         },
@@ -1047,20 +1090,6 @@ $(function () {
             }
         },
         changeDate: function() {
-            var start_date, end_date;
-            if ($("#checkbox-all-years").is(":checked")) {
-              start_date = "2005"; end_date = "2025"
-            } else {
-                for (yearNum in app.years) {
-                    year = app.years[yearNum];
-                    if($("#checkbox-"+year).is(":checked")) {
-                        start_date = year; end_date = year + 1;
-                        break;
-                    }
-                }
-            }
-            $("#sdate").val(start_date + '-01-01');
-            $("#edate").val(end_date + '-01-01');
 
             this.show_day = $("input[type='radio'][name='day']:checked").val()
             this.show_holiday = $("input[type='radio'][name='holiday']:checked").val()
@@ -1072,10 +1101,70 @@ $(function () {
                 $("#checkbox-time-all").prop('checked', true);
             }
 
-            this.dateRanges = [new Date(start_date + '-01-01'), new Date(end_date + '-01-01')];
             this.resetMarkers();
             this.fetchMarkers();
             this.updateFilterString();
+        },
+        toggleHeatmap: function() {
+            // Toggle heatMapButton color grey/red
+            $(".heat-map-control").toggleClass('heat-map-control-red');
+            // Indicating switch availability
+            this.indicatingAvailabilityOfIconsDotsSwitch();
+            if (this.heatMapMode){
+                this.oms.unspiderfy();
+
+                if (this.clusterMode()){
+                    // Clear clusters from map
+                    this.clusterer.removeClusters();
+                    // Drawing the HeatMap for clusters
+                    this.buildHeatMap("clusters");
+                }else{
+                    this.clearMarkersFromMap();
+                    // Drawing the HeatMap for markers
+                    this.buildHeatMap("markers");
+                }
+            }else{
+                this.heatmap.setMap(null);
+                this.reloadMarkers();
+            }
+        },
+        buildHeatMap: function(markersOrClusters) {
+            var latlngListForHeatMap = [];
+            var clusterItemsCounter = 0;
+            var heatMapMaxIntensity = 3;
+
+            if (markersOrClusters == "markers"){
+                _.each(this.markers.models, function(marker){
+                    latlngListForHeatMap.push(new google.maps.LatLng(marker.get('latitude'),marker.get('longitude')));
+                });
+            }else if (markersOrClusters == "clusters"){
+                _.each(this.clusterList, function(cluster){
+                    latlngListForHeatMap.push({ location: new google.maps.LatLng(cluster.model.get('latitude'),cluster.model.get('longitude')), weight: cluster.model.get('size') });
+                    clusterItemsCounter += cluster.model.get('size');
+                });
+                if (clusterItemsCounter < 1000){
+                    heatMapMaxIntensity = 10;
+                } else if (clusterItemsCounter > 1000 && clusterItemsCounter < 2000){
+                    heatMapMaxIntensity = 30;
+                } else if(clusterItemsCounter > 2000 && clusterItemsCounter < 4000){
+                    heatMapMaxIntensity = 90;
+                } else if(clusterItemsCounter > 4000 && clusterItemsCounter < 6000){
+                    heatMapMaxIntensity = 150;
+                } else if(clusterItemsCounter > 6000){
+                    heatMapMaxIntensity = 250;
+                }
+            }
+            console.log("-----------------------------------");
+            console.log("cluster items counter: " + clusterItemsCounter);
+            console.log("Selected MaxIntensity level: " + heatMapMaxIntensity);
+            console.log("Zoom level: " + this.map.zoom);
+            
+            this.heatmap = new google.maps.visualization.HeatmapLayer({
+                data: latlngListForHeatMap,
+                maxIntensity: heatMapMaxIntensity,
+                radius: 45,
+                map: this.map
+            });
         },
         updateFilterString: function() {
             if (!this.clusterMode()) {
@@ -1144,6 +1233,18 @@ $(function () {
             } else {
                 $("#filter-string").empty()
                     .append("<p>התקרב על מנת לקבל נתוני סינון</p>");
+            }
+        },
+        indicatingAvailabilityOfIconsDotsSwitch: function() {
+            if (this.heatMapMode || this.clusterMode()){
+                // Indicating that the icons/dots switch is disabled
+                $(".map-button.toggle-control").addClass("toggle-control-disabled");
+                $(".map-button.toggle-control")[0].title = 'שינוי תצוגת אייקונים אינו זמין במצב זה';
+            } else {
+                // Remove indication that the icons/dots switch is disabled
+                $(".map-button.toggle-control").removeClass("toggle-control-disabled");
+                $(".map-button.toggle-control")[0].title = 'שנה תצוגת אייקונים';
+
             }
         }
     });

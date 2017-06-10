@@ -3,30 +3,25 @@ ANYWAY
 
 oway.org.il - Crowd-sourced road hazard reporting website.
 
-Feel free to contribute to the project. It is currently hosted on Heroku:
-http://anyway.herokuapp.com
+Feel free to contribute to the project.
 
 To report bugs and feature requests, please [open an issue](https://github.com/hasadna/anyway/issues) on GitHub.
 
 See also [our Android app](https://github.com/hasadna/anywayAndroidApp) on GitHub.
 
-See [documentation for our source dataset](https://docs.google.com/document/d/1xrYAQSQYyVlY8rrlBG4MlE_gI7tdVu5DAeDH7R6mzUs/edit?usp=sharing).
+See documentation for our source dataset LAMAS is [here](https://github.com/hasadna/anyway/blob/dev/docs/LMS.md) and United is [here](https://github.com/hasadna/anyway/blob/dev/docs/UNITED.md).
+
+See [Code Directory Tree Structure](docs/CODE.md).
 
 Contributing
 -----------------------
 * We try to follow the process of other Hasadna projects, e.g. [Open-Knesset](https://oknesset-devel.readthedocs.org/en/latest/).
-* Please take a moment to read our ["Contibuting to ANYWAY" manifest](https://github.com/hasadna/anyway/blob/dev/CONTRIBUTING.md).
+* Please take a moment to read our ["Contibuting to ANYWAY" manifest](docs/CONTRIBUTING.md).
 * To see our GitHub issues in a nicer interface, take a look at [HuBoard](https://huboard.com/hasadna/anyway). Check out the Ready list to find a task to work on. The Backlog list there contains issues that are still not ready to be started. The Working list contains issues already started by developers (make sure to move your issue there once you start working on it), and the Done list contains completed issues that are waiting to be confirmed done and closed.
 
 Development environment setup notes
 -----------------------
 ##### Choose one of two environment setup options: <br>
-
-1.  **Docker**: <br>
-    Save time, effort and environment conflicts using [Docker] (https://github.com/hasadna/anyway/blob/dev/DOCKER.md). <br>
-    Docker is a lightweight container, deployed inside Linux (or a linux VM in OSX or Windows). <br>
-    The container is ready to roll with all app dependencies and requirements. It builds up the data models and DB itself. <br> 
-    All you have to do is follow [three simple steps] (https://github.com/hasadna/anyway/blob/dev/DOCKER.md#instructions). <br>
 
 1.  **Local installation**:
 
@@ -158,4 +153,11 @@ Heroku deployment
     1. Populate data: `python process.py`
 1. Navigate to http://anyway-*you*.herokuapp.com
 
+Docker
+-------
+See [DOCKER](docs/DOCKER.md)
+
+Translation and Localization
+----------------------------
+See [TRANSLATE](docs/TRANSLATE.md)
 

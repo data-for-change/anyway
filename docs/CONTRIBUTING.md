@@ -3,7 +3,7 @@ Contributing to ANYWAY
 
 OMG. OMG. OMG. We are really glad you are joining the team!  We set up a contributor's guide that explains all about [setting up ANYWAY's development environment](http://hasadna.github.io/anyway) - prepare to be amazed. 
 
-![Contributors guide](static/img/anyway.png)
+![Contributors guide](../static/img/anyway.png)
 
 This page contains information about reporting issues as well as some tips and
 guidelines useful to experienced open source contributors. 
@@ -23,7 +23,7 @@ the information in the used open-source databases, please let us know.
 Also, if you happen to stumble upon a bug, don't hesitate and raise a flag and we will get it fixed. You can send any your reports to [anyway@anyway.co.il](mailto:anyway@anyway.co.il). 
 Don't forget to mention which operating system and browser you were using, so we can easily track down the issue.
 
-If you are already digging through the code and our [unstable version](http://anyway-unstable.herokuapp.com/) and you happen to find a bug, please go ahead and [open a new issue](https://github.com/hasadna/anyway/issues).
+If you are already digging through the code and our [website](https://www.anyway.co.il) and you happen to find a bug, please go ahead and [open a new issue](https://github.com/hasadna/anyway/issues).
  Just remember to look through the pre-existing ones to make sure there are no duplicates. Even better if you can take it on yourself, then we encourage you to report the issue, assign yourself and submit a Pull Request with a fix.
 
 **Issue Report Format:**
@@ -116,12 +116,12 @@ Before you make a pull request, squash your commits into logical units of work u
 
 **Workshop @GoogleCampusTLV / @GivatRamJRS**
 
-The team meets each Monday at Google Campus, Tel Aviv. There are also meetings in the Public Library in Jerusalem on some Wednesdays.
+The team meets each Monday at Google Campus, Tel Aviv. There are also meetings in the Siftech Accelerator in Jerusalem on Tuesdays.
 You are more than welcome to join us, ask questions and raise any issues you stumble upon while working on the project.
 
 **Slack**
 
-Our Slack channel is connected to the relevant git notifications. 
+[Our Slack channel](https://oway.slack.com/) is connected to the relevant git notifications. 
 Ask galraij to add you and use it to keep in touch with the team while off-campus.
 Questions are always welcome.
 

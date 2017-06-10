@@ -9,7 +9,8 @@ import argparse
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
 
-from models import Marker, MARKER_TYPE_ACCIDENT
+from constants import CONST
+from models import Marker
 from utilities import init_flask
 import importmail
 
@@ -24,7 +25,7 @@ import logging
 # United.py is responsible for the parsing and deployment of "united hatzala" data to the DB
 ############################################################################################
 
-PROVIDER_CODE = 2
+PROVIDER_CODE = CONST.UNITED_HATZALA_CODE
 TIME_ZONE = 2
 # convert IMS hours code to hours
 RAIN_DURATION_CODE_TO_HOURS = {"1": 6, "2": 12, "3": 18, "4": 24, "/": 24, "5": 1, "6": 2, "7": 3, "8": 9, "9": 15}
@@ -56,16 +57,22 @@ def parse_date(created):
     :return: Python datetime object
     """
     global time
-    DATE_FORMATS = ['%m/%d/%Y %I:%M:%S', '%Y/%m/%d %I:%M:%S', '%d/%m/%Y %I:%M', '%Y/%m/%d %I:%M']
+    global hour
+    DATE_FORMATS = ['%m/%d/%Y %I:%M:%S', '%Y-%m-%d %H:%M:%S', '%Y/%m/%d %I:%M:%S', '%d/%m/%Y %I:%M', '%Y/%m/%d %I:%M', '%m/%d/%Y %I:%M']
 
     for date_format in DATE_FORMATS:
         try:
-            time = datetime.strptime(str(created)[:-3], date_format)
+            if date_format == '%Y-%m-%d %H:%M:%S':
+                time = datetime.strptime(str(created)[:-4], date_format)
+                hour = time.strftime('%H')
+                hour = int(hour)
+            else:
+                time = datetime.strptime(str(created)[:-3], date_format)
+                hour = time.strftime('%H')
+                hour = int(hour) if str(created).endswith('AM') else int(hour) + 12
             break
         except ValueError:
             pass
-    hour = time.strftime('%H')
-    hour = int(hour) if str(created).endswith('AM') else int(hour) + 12
     return datetime(time.year, time.month, time.day, hour, time.minute, 0)
 
 
@@ -246,6 +253,10 @@ def process_weather_data(collection, latitude, longitude):
                 weather = 79  # גשם זלעפות
     return weather
 
+CSVMAP = [
+        {"id": 0, "time": 1, "lat": 2, "long": 3, "street": 4, "city": 6, "comment": 7, "type": 8, "casualties": 9},
+        {"id": 0, "time": 1, "type": 2, "long": 3, "lat": 4,  "city": 5, "street": 6, "comment": 7, "casualties": 8},
+        ]
 
 def create_accidents(collection, file_location):
     """
@@ -253,18 +264,23 @@ def create_accidents(collection, file_location):
     :return: Yields a marker object with every iteration
     """
     logging.info("\tReading accidents data from '%s'..." % file_location)
-    csvmap = {"id": 0, "time": 1, "lat": 2, "long": 3, "street": 4, "city": 6, "comment": 7, "type": 8, "casualties": 9}
 
     with open(file_location, 'rU') as f:
         reader = csv.reader(f, delimiter=',', dialect=csv.excel_tab)
 
         for line, accident in enumerate(reader):
-            if line == 0 or not accident:  # header or empty line
+            if line == 0:  # header
+                format_version = 0 if "MissionID" in accident[0] else 1
+                continue
+            if not accident:  # empty line
                 continue
             if line == 1 and accident[0] == "":
                 logging.warn("\t\tEmpty File!")
                 continue
-            if accident[csvmap["lat"]] == "" or accident[csvmap["long"]] == "":
+            csvmap = CSVMAP[format_version]
+            if accident[csvmap["lat"]] == "" or accident[csvmap["long"]] == "" or \
+                            accident[csvmap["lat"]] is None or accident[csvmap["long"]] is None or \
+                            accident[csvmap["lat"]] == "NULL" or accident[csvmap["long"]] == "NULL":
                 logging.warn("\t\tMissing coordinates in line {0}. Moving on...".format(line + 1))
                 continue
 
@@ -275,10 +291,13 @@ def create_accidents(collection, file_location):
                       'address': unicode((accident[csvmap["street"]] + ' ' + accident[csvmap["city"]]),
                                          encoding='utf-8'),
                       'severity': 2 if u"קשה" in unicode(accident[csvmap["type"]], encoding='utf-8') else 3,
-                      'locationAccuracy': 1, 'subtype': 21, 'type': MARKER_TYPE_ACCIDENT,
-                      'intactness': "".join(x for x in accident[csvmap["casualties"]] if x.isdigit()) or 0,
+                      'locationAccuracy': 1, 'subtype': 21, 'type': CONST.MARKER_TYPE_ACCIDENT,
                       'description': unicode(accident[csvmap["comment"]], encoding='utf-8'),
-                      'weather': process_weather_data(collection, accident[csvmap["lat"]], accident[csvmap["long"]])}
+                      'weather': process_weather_data(collection, accident[csvmap["lat"]],
+                                                      accident[csvmap["long"]])}
+            if format_version == 0:
+                casualties = accident[csvmap["casualties"]]
+                marker['intactness'] = casualties if casualties.isdigit() else 0
 
             yield marker
 
@@ -317,6 +336,7 @@ def update_db(collection):
         if not accident.weather:
             accident.weather = process_weather_data(collection, accident.latitude, accident.longitude)
     db.session.commit()
+    logging.info("\tFinished commiting the changes")
 
 
 def main():
@@ -324,11 +344,13 @@ def main():
     Calls importmail.py prior to importing to DB
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--light', action='store_true', default=False,
+    parser.add_argument('--light', action='store_true',
                         help='Import without downloading any new files')
     parser.add_argument('--username', default='')
     parser.add_argument('--password', default='')
-    parser.add_argument('--lastmail', action='store_true', default=False)
+    parser.add_argument('--lastmail', action='store_true')
+    parser.add_argument('--newformat', action='store_true',
+                        help='Parse files using new format')
     args = parser.parse_args()
 
     collection = retrieve_ims_xml()

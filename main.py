@@ -16,7 +16,7 @@ from database import db_session
 from models import *
 from base import *
 import utilities
-from constants import *
+from constants import CONST
 
 from wtforms import form, fields, validators, StringField, PasswordField, Form
 import flask_admin as admin
@@ -70,7 +70,6 @@ jinja_environment = jinja2.Environment(
     extensions=[AssetsExtension])
 jinja_environment.assets_environment = assets_env
 
-MINIMAL_ZOOM = 16
 SESSION_HIGHLIGHTPOINT_KEY = 'gps_highlightpoint_created'
 
 DICTIONARY = "Dictionary"
@@ -91,16 +90,8 @@ def generate_json(accidents, discussions, is_thin):
     markers = accidents.all()
     if not is_thin:
         markers += discussions.all()
-    yield '{"markers": ['
-    is_first = True
-    for marker in markers:
-        if is_first:
-            is_first = False
-            prefix = ''
-        else:
-            prefix = ','
-        yield prefix + json.dumps(marker.serialize(is_thin))
-    yield ']}'
+    entries = [ marker.serialize(is_thin) for marker in markers ]
+    return jsonify({"markers" : entries })
 
 
 def generate_csv(results):
@@ -129,7 +120,8 @@ ARG_TYPES = {'ne_lat': (float, 32.072427482938345), 'ne_lng': (float, 34.7992896
              'show_lane': (int, 3), 'show_day': (int, 0), 'show_holiday': (int, 0),  'show_time': (int, 24),
              'start_time': (int, 25), 'end_time': (int, 25), 'weather': (int, 0), 'road': (int, 0),
              'separation': (int, 0), 'surface': (int, 0), 'acctype': (int, 0), 'controlmeasure': (int, 0),
-             'district': (int, 0), 'case_type': (int, 0)}
+             'district': (int, 0), 'case_type': (int, 0), 'fetch_markers': (bool, True), 'fetch_vehicles': (bool, True),
+             'fetch_involved': (bool, True)}
 
 def get_kwargs():
     kwargs = {arg: arg_type(request.values.get(arg, default_value)) for (arg, (arg_type, default_value)) in ARG_TYPES.iteritems()}
@@ -150,8 +142,8 @@ def markers():
     logging.debug('getting markers')
     kwargs = get_kwargs()
     logging.debug('querying markers in bounding box: %s' % kwargs)
-    is_thin = (kwargs['zoom'] < MINIMAL_ZOOM)
-    accidents = Marker.bounding_box_query(is_thin, yield_per=50, **kwargs)
+    is_thin = (kwargs['zoom'] < CONST.MINIMAL_ZOOM)
+    accidents = Marker.bounding_box_query(is_thin, yield_per=50, involved_and_vehicles=False, **kwargs)
 
     discussion_args = ('ne_lat', 'ne_lng', 'sw_lat', 'sw_lng', 'show_discussions')
     discussions = DiscussionMarker.bounding_box_query(**{arg: kwargs[arg] for arg in discussion_args})
@@ -166,9 +158,38 @@ def markers():
         })
 
     else: # defaults to json
-        return Response(generate_json(accidents, discussions, 
-                                      is_thin),
-                        mimetype="application/json")
+        return generate_json(accidents, discussions, is_thin)
+
+
+@app.route("/charts-data", methods=["GET"])
+@user_optional
+def charts_data():
+    logging.debug('getting charts data')
+    kwargs = get_kwargs()
+    accidents, vehicles, involved = Marker.bounding_box_query(is_thin=False, yield_per=50, involved_and_vehicles=True, **kwargs)
+    accidents_list = [acc.serialize() for acc in accidents]
+    vehicles_list = [vehicles_data_refinement(veh.serialize()) for veh in vehicles]
+    involved_list = [involved_data_refinement(inv.serialize()) for inv in involved]
+    return Response(json.dumps({'accidents': accidents_list, 'vehicles': vehicles_list, 'involved': involved_list}), mimetype="application/json")
+
+
+def vehicles_data_refinement(vehicle):
+    vehicle["engine_volume"] = lms_dictionary.get((111, vehicle["engine_volume"]))
+    vehicle["total_weight"] = lms_dictionary.get((112, vehicle["total_weight"]))
+    vehicle["driving_directions"] = lms_dictionary.get((28, vehicle["driving_directions"]))
+    return vehicle
+
+
+def involved_data_refinement(involved):
+    involved["age_group"] = lms_dictionary.get((92, involved["age_group"]))
+    involved["population_type"] = lms_dictionary.get((66, involved["population_type"]))
+    involved["home_district"] = lms_dictionary.get((77, involved["home_district"]))
+    involved["home_nafa"] = lms_dictionary.get((79, involved["home_nafa"]))
+    involved["home_area"] = lms_dictionary.get((80, involved["home_area"]))
+    involved["home_municipal_status"] = lms_dictionary.get((78, involved["home_municipal_status"]))
+    involved["home_residence_type"] = lms_dictionary.get((81, involved["home_residence_type"]))
+    return involved
+
 
 @app.route("/markers/<int:marker_id>", methods=["GET"])
 def marker(marker_id):
@@ -245,8 +266,8 @@ def highlightpoint():
         return make_response("")
 
     # if it's a user gps type (user location), only handle a single post request per session
-    if int(highlight.type) == HighlightPoint.HIGHLIGHT_TYPE_USER_GPS:
-        if not SESSION_HIGHLIGHTPOINT_KEY in session:
+    if int(highlight.type) == CONST.HIGHLIGHT_TYPE_USER_GPS:
+        if SESSION_HIGHLIGHTPOINT_KEY not in session:
             session[SESSION_HIGHLIGHTPOINT_KEY] = "saved"
         else:
             return make_response("")
@@ -287,7 +308,9 @@ def log_bad_request(request):
 
 @app.route('/')
 def index(marker=None, message=None):
-    context = {'minimal_zoom': MINIMAL_ZOOM, 'url': request.base_url, 'index_url': request.url_root}
+    context = {'url': request.base_url, 'index_url': request.url_root}
+    context['CONST'] = CONST.to_dict()
+    #logging.debug("Debug CONST:{0}",context['CONST'])
     if 'marker' in request.values:
         markers = Marker.get_marker(request.values['marker'])
         if markers.count() == 1:
@@ -350,7 +373,8 @@ def index(marker=None, message=None):
     for x in range(1,5):
         pref_radius.append(PreferenceObject('prefRadius' + str(x * 500), x * 500, x * 500))
     context['pref_radius'] = pref_radius
-    context['years'] = app.years
+    today = datetime.date.today()
+    context['default_end_date_format'] = today.strftime('%Y-%m-%d')
     return render_template('index.html', **context)
 
 
@@ -797,22 +821,6 @@ def oauth_callback(provider):
     return redirect(url_for('index'))
 
 ######## end rauth integration
-
-@app.before_first_request
-def create_years_list():
-    """
-    init app.years field, with last 10 years that used in db
-    """
-    while True:
-        try:
-            year_col = db.session.query(distinct(func.extract("year", Marker.created)))
-            app.years = sorted([int(year[0]) for year in year_col], reverse=True)[:10]
-            break
-        except OperationalError as err:
-            logging.warn(err)
-            time.sleep(1)
-    logging.info("Years for date selection: " + ", ".join(map(str, app.years)))
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

@@ -3,6 +3,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import datetime
+from constants import CONST
+
 
 db_connection_string = os.environ.get('CLEARDB_DATABASE_URL')
 print "using connection string: %s"%db_connection_string
@@ -19,7 +21,7 @@ marker = Marker(
             address = "sample address",
             latitude = "00.33",
             longitude = "00.22",
-            type = Marker.MARKER_TYPE_ACCIDENT,
+            type = CONST.MARKER_TYPE_ACCIDENT,
             subtype = "",
             created = datetime.datetime.now(),
         )

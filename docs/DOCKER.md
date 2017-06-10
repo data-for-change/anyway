@@ -30,7 +30,7 @@ Instructions
 
 **3.** Open "Docker terminal", go to the **anyway** directory and run:
 
-    docker run -it --restart="always" -p 80:5000 -v $PWD:/opt/anyway -w /opt/anyway omerxx/anyway-docker /bin/bash -c 'export DATABASE_URL=sqlite:////anyway/local.db && python main.py --open'
+    docker-compose up
 **You're all set!** Access the app on `localhost` (Linux) or (OS-X/Win) at the virtual machine’s IP (usually `192.168.99.100`); <br>
 To retrieve a docker machine address: `docker-machine ip default` <br>
 (no need for port specification, simply an IP; e.g `192.168.99.100`)
@@ -40,7 +40,7 @@ More
 -----------------------
 To install requirements again, redeploy DB or any requirement involving the dependencies installation, 
 simply rebuild the image; get it from [here] (https://github.com/omerxx/anyway-docker/blob/master/Dockerfile), 
-then go to its local path and `docker build --no-cache -t omerxx/anyway-docker .`
+then go to its local path and `docker build --no-cache -t hasdna/anyway .`
 
 ## Docker commands
 

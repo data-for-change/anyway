@@ -1,0 +1,5 @@
+anyway:
+   build: .
+   ports:
+    - "80:5000"
+   command: /bin/bash -c 'export DATABASE_URL=sqlite:////anyway/local.db && python main.py --open'

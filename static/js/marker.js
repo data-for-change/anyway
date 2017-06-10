@@ -35,7 +35,9 @@ var MarkerView = Backbone.View.extend({
         }
 
         this.marker.setIcon(this.getIcon());
-        this.marker.setMap(this.map);
+        if (!app.heatMapMode){
+            this.marker.setMap(this.map);
+        }
         this.marker.view = this;
 
         if (this.model.get("type") == MARKER_TYPE_DISCUSSION) {
@@ -47,7 +49,7 @@ var MarkerView = Backbone.View.extend({
 
         this.marker.setTitle(this.getTitle('single'));
 
-        if (this.model.get("provider_code") == PROVIDER_CODE_UNITED_HATZALA) {
+        if (this.model.get("provider_code") == UNITED_HATZALA_CODE) {
             app.oms.addMarker(this.marker);
             this.$el.html($("#united-marker-content-template").html());
 
@@ -143,7 +145,7 @@ var MarkerView = Backbone.View.extend({
                 accuracy = !(this.model.get("locationAccuracy") == 1);
                 markerTitle = "ביום " + moment(this.model.get("created")).format("dddd") + ", ה-"
                     + moment(this.model.get("created")).format("LL")
-                    + " תאונה " + SEVERITY_MAP[this.model.get("severity")]
+                    + " אירעה תאונה " + SEVERITY_MAP[this.model.get("severity")]
                     + " מסוג " + localization.SUG_TEUNA[this.model.get("subtype")] + " "
                     + loc;
                 break;

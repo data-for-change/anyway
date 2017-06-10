@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
+from constants import CONST
  
 from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table, \
         ForeignKeyConstraint, func, or_
@@ -9,7 +10,7 @@ from sqlalchemy.orm import relationship, load_only, backref
 
 import datetime
 import localization
-from database import Base
+from database import Base, db_session
 from flask.ext.security import Security, SQLAlchemyUserDatastore, \
         UserMixin, RoleMixin, login_required
 
@@ -71,10 +72,6 @@ class User(Base, UserMixin):
     def __unicode__(self):
         return self.username
 
-MARKER_TYPE_ACCIDENT = 1
-MARKER_TYPE_DISCUSSION = 2
-UNITED_HATZALA_CODE = 2
-
 class Role(Base, RoleMixin):
     __tablename__ = "roles"
     id = Column(Integer(), primary_key=True)
@@ -109,9 +106,6 @@ class HighlightPoint(Point, Base):
         Index('highlight_long_lat_idx', 'latitude', 'longitude'),
     )
 
-    HIGHLIGHT_TYPE_USER_SEARCH = 1
-    HIGHLIGHT_TYPE_USER_GPS = 2
-
     created = Column(DateTime, default=datetime.datetime.now)
     type = Column(Integer)
 
@@ -143,7 +137,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
     )
 
     __mapper_args__ = {
-        'polymorphic_identity': MARKER_TYPE_ACCIDENT
+        'polymorphic_identity': CONST.MARKER_TYPE_ACCIDENT
     }
 
     provider_code = Column(Integer, primary_key=True)
@@ -206,7 +200,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
                 "junction": self.junction,
             })
             # United Hatzala accidents description are not json:
-            if self.provider_code == UNITED_HATZALA_CODE:
+            if self.provider_code == CONST.UNITED_HATZALA_CODE:
                 fields.update({"description": self.description})
             else:
                 fields.update({"description": Marker.json_to_description(self.description)})
@@ -244,7 +238,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         self.put()
 
     @staticmethod
-    def bounding_box_query(is_thin=False, yield_per=None, **kwargs):
+    def bounding_box_query(is_thin=False, yield_per=None, involved_and_vehicles=False, **kwargs):
 
         # example:
         # ne_lat=32.36292402647484&ne_lng=35.08873443603511&sw_lat=32.29257266524761&sw_lng=34.88445739746089
@@ -339,7 +333,25 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
 
         if is_thin:
             markers = markers.options(load_only("id", "longitude", "latitude"))
-        return markers
+
+        if involved_and_vehicles:
+            fetch_markers = kwargs.get('fetch_markers', True)
+            fetch_vehicles = kwargs.get('fetch_vehicles', True)
+            fetch_involved = kwargs.get('fetch_involved', True)
+            markers_ids = [marker.id for marker in markers]
+            markers = None
+            vehicles = None
+            involved = None
+            if fetch_markers:
+                markers = db_session.query(Marker).filter(Marker.id.in_(markers_ids))
+            if fetch_vehicles:
+                vehicles = db_session.query(Vehicle).filter(Vehicle.accident_id.in_(markers_ids))
+            if fetch_involved:
+                involved = db_session.query(Involved).filter(Involved.accident_id.in_(markers_ids))
+            return markers.all() if markers is not None else [], vehicles.all() if vehicles is not None else [], \
+                   involved.all() if involved is not None else []
+        else:
+            return markers
 
     @staticmethod
     def get_marker(marker_id):
@@ -348,7 +360,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
     @classmethod
     def parse(cls, data):
         return Marker(
-            type=MARKER_TYPE_ACCIDENT,
+            type=CONST.MARKER_TYPE_ACCIDENT,
             title=data["title"],
             description=data["description"],
             latitude=data["latitude"],
@@ -363,7 +375,7 @@ class DiscussionMarker(MarkerMixin, Base):
     )
 
     __mapper_args__ = {
-        'polymorphic_identity': MARKER_TYPE_DISCUSSION
+        'polymorphic_identity': CONST.MARKER_TYPE_DISCUSSION
     }
 
     identifier = Column(String(50), unique=True)
@@ -394,7 +406,7 @@ class DiscussionMarker(MarkerMixin, Base):
           created=datetime.datetime.now(),
           title=data["title"],
           identifier=data["identifier"],
-          type=MARKER_TYPE_DISCUSSION
+          type=CONST.MARKER_TYPE_DISCUSSION
       )
 
     @staticmethod

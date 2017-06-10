@@ -394,6 +394,17 @@ input[type="date"],input[type="time"]{
     content: '\f0b2'
 }
 
+.heat-map-control:after{
+    font-size: 17px;
+    color: #ccc;
+    font-family: 'Material Icons';
+    content: '\e80e'
+}
+
+.heat-map-control-red:after{
+    color: #ef5350;
+}
+
 .map-button:hover .control-label{
     visibility: visible !important;
     position: fixed;
@@ -441,6 +452,38 @@ input[type="date"],input[type="time"]{
     font-size: 20px;
     color: #ccc;
     font-family: 'Material Icons';
+}
+
+.toggle-control-disabled:hover{
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.075),0 0 8px rgba(236,82,82,0.6) !important;
+    border-color: #F44336 !important;
+}
+
+.toggle-control-disabled-label{
+    position: fixed;
+    visibility: hidden;
+}
+
+.toggle-control-disabled:hover + .toggle-control-disabled-label{
+    visibility: visible !important;
+    position: absolute;
+    top: 0;
+    right: 50px;
+    margin-right: 10px;
+    height: 28px;
+    width: auto;
+    white-space: nowrap;
+    text-align: right;
+    padding-right: 10px;
+    padding-left: 12px;
+    line-height: 28px;
+    font-size: 15px;
+    color: #999999;
+    background-color: white;
+    border-radius: 3px;
+    border-color: #ccc;
+    border-width: 1px;
+    border-style: solid;
 }
 
 .pin:after{
@@ -690,7 +733,10 @@ textarea.form-control-wide {
 }
 
 input[type='date']{
-    font-size: 10px;
+    /*font-size: 13px;*/
+    /*color: red !important;*/
+    color: #08c !important;
+    background: #f2f2f2 !important;
 }
 
 input[type='checkbox']{
@@ -766,21 +812,38 @@ input[type='checkbox']{
 }
 /* for login popup*/
 .modal-header {
-    background-color: gray;
+    background-color: lightgray;
 }
 .modal-header h3 {
-    font-size: 16px;
+    font-size: 20px;
 }
+
+.modal-header .close {
+    font-size: 40px;
+}
+
 .btn-social-icon {
     width: 160px;
-    border-radius: 0px;
+    /*border-radius: 0px;*/
     color: #fff !important;
 }
 .btn-facebook {
 
-    background-color: blue;
+    /*background-color: #3B5998;*/
+    background-image: linear-gradient(#4C69BA, #3B55A0);
+}
+
+.btn-facebook:hover {
+    background-color: #3B5998;
+    color: #fff !important; 
 }
 
 .btn-google {
-    background-color: red;
+    /*background-color: #EA4335;*/
+    background-color: #EA4335;
+}
+
+.btn-google:hover {
+    background-color: #D94330;
+    color: #fff !important; 
 }

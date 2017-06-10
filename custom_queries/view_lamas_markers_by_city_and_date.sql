@@ -11,7 +11,24 @@ SELECT
 
 COMMENT ON COLUMN lamas_markers_by_city_and_date.day_of_week IS 'Sunday = 0 to Saturday = 6';
 
+CREATE OR REPLACE FUNCTION severity_to_weight(INTEGER) RETURNS INTEGER
+AS $$
+BEGIN
+	CASE ($1)
+	WHEN 1 THEN -- Fatal
+		RETURN 7;
+	WHEN 2 THEN -- Serious injury
+		RETURN 5;
+	ELSE
+		RETURN 1;
+	END CASE;
+END
+$$ LANGUAGE plpgsql IMMUTABLE;
+
 CREATE OR REPLACE VIEW
 lamas_marker_counts_by_city_year_and_severity AS
-	SELECT city ,year, severity, COUNT(DISTINCT id) FROM lamas_markers_by_city_and_date
+	SELECT city ,year, severity,
+	COUNT(DISTINCT id) AS count,
+	severity_to_weight(severity) * COUNT(DISTINCT id) AS weighted_count
+	FROM lamas_markers_by_city_and_date
 	GROUP BY city, year, severity;

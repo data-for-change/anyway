@@ -3,6 +3,7 @@ lamas_markers_by_city_and_date AS
 SELECT
 	id,
 	trim(both '* ' FROM (regexp_split_to_array(address, ',\s*'))[2]) AS city,
+	severity,
 	CAST(date_part('year',  created) AS INTEGER) AS year,
 	CAST(date_part('month', created) AS INTEGER) AS month,
 	CAST(date_part('dow',   created) AS INTEGER) AS day_of_week

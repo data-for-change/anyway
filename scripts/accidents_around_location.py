@@ -122,7 +122,7 @@ if __name__ == "__main__":
 
     #TODO: augment to any CSV that contains relevant data
     #TODO: add argument to date
-    parser.add_argument('--distance', default=0.5, help= 'float In KM. Default is 0.5 (500m)')
+    parser.add_argument('--distance', default=0.5, help= 'float In KM. Default is 0.5 (500m)', type=float)
     parser.add_argument('--output_file', default='output.csv', help='output file of the results. Default is output.csv')
     parser.add_argument('--pedestrians_only', action='store_true', default=False,
                         help='use the flag for pedestrian only results')

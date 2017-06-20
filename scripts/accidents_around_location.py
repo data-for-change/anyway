@@ -8,22 +8,32 @@ python accidents_around_location.py <input_file> [flags]
 """
 import argparse
 import io
-
 import math
-
 import requests
+from datetime import datetime
 
 DEFAULT_NAME_COL = 4
 DEFAULT_CITY_COL = 3
 DEFAULT_LON_COL = 10
 DEFAULT_LAT_COL = 11
-START_DATE_EPOCH = 1325376000
-END_DATE_EPOCH = 1735689600
-START_DATE = "2012-01-01"
-END_DATE = "2025-01-01"
+DATE_INPUT_FORMAT = '%d-%m-%Y'
+DATE_URL_FORMAT = '%Y-%m-%d'
 
-ANYWAY_MARKERS_FORMAT = "https://www.anyway.co.il/markers?ne_lat={lat_max}&ne_lng={lon_max}&sw_lat={lat_min}&sw_lng={lon_min}&zoom=17&thin_markers=false&start_date={start_date}&end_date={end_date}&show_fatal=1&show_severe=1&show_light=1&approx=1&accurate=1&show_markers=1&show_discussions=1&show_urban=3&show_intersection=3&show_lane=3&show_day=7&show_holiday=0&show_time=24&start_time=25&end_time=25&weather=0&road=0&separation=0&surface=0&acctype={acc_type}&controlmeasure=0&district=0&case_type=0"
-ANYWAY_UI_FORMAT = "https://www.anyway.co.il/?zoom=17&start_date={start_date}&end_date={end_date}&lat={lat}&lon={lon}&show_fatal=1&show_severe=1&show_light=1&approx=1&accurate=1&show_markers=1&show_discussions=1&show_urban=3&show_intersection=3&show_lane=3&show_day=7&show_holiday=0&show_time=24&start_time=25&end_time=25&weather=0&road=0&separation=0&surface=0&acctype={acc_type}&controlmeasure=0&district=0&case_type=0"
+ANYWAY_MARKERS_FORMAT = "https://www.anyway.co.il/markers?ne_lat={lat_max}&ne_lng={lon_max}&sw_lat={lat_min}&sw_lng={lon_min}&zoom=17&thin_markers=false&start_date={start_date}&end_date={end_date}&show_fatal=1&show_severe=1&show_light=1&approx=1&accurate=1&show_markers=1&show_discussions=&show_urban=3&show_intersection=3&show_lane=3&show_day=7&show_holiday=0&show_time=24&start_time=25&end_time=25&weather=0&road=0&separation=0&surface=0&acctype={acc_type}&controlmeasure=0&district=0&case_type=0"
+ANYWAY_UI_FORMAT = "https://www.anyway.co.il/?zoom={zoom}&start_date={start_date}&end_date={end_date}&lat={lat}&lon={lon}&show_fatal=1&show_severe=1&show_light=1&approx=1&accurate=1&show_markers=1&show_discussions=&show_urban=3&show_intersection=3&show_lane=3&show_day=7&show_holiday=0&show_time=24&start_time=25&end_time=25&weather=0&road=0&separation=0&surface=0&acctype={acc_type}&controlmeasure=0&district=0&case_type=0"
+
+
+def get_timestamp_since_epoch_in_seconds(dt):
+    (dt - datetime(1970, 1, 1)).total_seconds()
+    return int((dt - datetime(1970, 1, 1)).total_seconds())
+
+
+def valid_date(date_string):
+    try:
+        return datetime.strptime(date_string, DATE_INPUT_FORMAT)
+    except ValueError:
+        msg = "Not a valid date: '{0}'.".format(date_string)
+        raise argparse.ArgumentTypeError(msg)
 
 
 def get_bounding_box(lat, lon, distance_in_km):
@@ -70,61 +80,85 @@ def calc_markers(markers):
             }
 
 
-def get_accidents_around(city, name, lat, lon, distance, pedestrians_only, file_obj):
+def get_accidents_around(city, name, lat, lon, start_date, end_date, distance, pedestrians_only):
     lat_min, lon_min, lat_max, lon_max = get_bounding_box(lat, lon, distance)
     acc_type = 0
     if pedestrians_only:
         acc_type = 1
+    zoom = 17
+    if distance <= 0.1:
+        zoom = 18
+
     markers_url = ANYWAY_MARKERS_FORMAT.format(lat_min=lat_min,
                                                lat_max=lat_max,
                                                lon_min=lon_min,
                                                lon_max=lon_max,
-                                               start_date=START_DATE_EPOCH,
-                                               end_date=END_DATE_EPOCH,
+                                               start_date=get_timestamp_since_epoch_in_seconds(start_date),
+                                               end_date=get_timestamp_since_epoch_in_seconds(end_date),
                                                acc_type=acc_type)
     ui_url = ANYWAY_UI_FORMAT.format(lat=lat,
                                      lon=lon,
-                                     start_date=START_DATE,
-                                     end_date=END_DATE,
-                                     acc_type=acc_type)
+                                     start_date=start_date.strftime(DATE_URL_FORMAT),
+                                     end_date=end_date.strftime(DATE_URL_FORMAT),
+                                     acc_type=acc_type,
+                                     zoom=zoom)
     markers_res = requests.get(markers_url)
     try:
         markers = markers_res.json()['markers']
+
     except Exception as e:
         print 'failed to parse:', markers_res.text
         raise e
+    markers = [x for x in markers if x['locationAccuracy'] not in (2, 9)]
     markers_data = calc_markers(markers)
-    file_obj.write(u'{city},{name},{grade},{deadly},{hard},{light},{ui_url}\n'.format(city=city,
-                                                                                      name=name,
-                                                                                      grade=markers_data['grade'],
-                                                                                      ui_url=ui_url,
-                                                                                      deadly=markers_data['deadly'],
-                                                                                      hard=markers_data['hard'],
-                                                                                      light=markers_data['light']))
+
+    accidents_details = dict()
+    accidents_details['CITY'] = city
+    accidents_details['NAME'] = name
+    accidents_details['GRADE'] = markers_data['grade']
+    accidents_details['DEADLY'] = markers_data['deadly']
+    accidents_details['HARD'] = markers_data['hard']
+    accidents_details['LIGHT'] = markers_data['light']
+    accidents_details['UI_URL'] = ui_url
+    return accidents_details
 
 
-def main(csv_filename, distance, pedestrian_only, output_filename):
-    with io.open(csv_filename, 'r', encoding='utf-8') as csvfile:
-        with io.open(output_filename, 'w', encoding='utf-8') as out_file:
-            out_file.write(u'CITY,NAME,GRADE,DEADLY,HARD,LIGHT,UI_URL\n')
-            i = 0
-            for row in csvfile:
-                (city, name, lat, lon) = parse_csv_line(row.strip())
-                print u'{0} working on {1}'.format(i, name)
-                i += 1
-                if lat is None or lon is None:
-                    continue
-                get_accidents_around(city, name, lat, lon, distance, pedestrian_only, out_file)
+def main(input_csv_filename, start_date, end_date, distance, pedestrian_only, output_filename):
+    headers = ['INDEX BY GRADE', 'CITY', 'NAME', 'GRADE', 'DEADLY', 'HARD', 'LIGHT', 'UI_URL']
+    accidents_list = []
+    with io.open(input_csv_filename, 'r', encoding='utf-8') as csvfile:
+        i = 0
+        for row in csvfile:
+            (city, name, lat, lon) = parse_csv_line(row.strip())
+            print u'{0} working on {1}'.format(i, name)
+            i += 1
+            if lat is None or lon is None:
+                continue
+            accidents_list.append(get_accidents_around(city, name, lat, lon, start_date, end_date, distance, pedestrian_only))
+    accidents_list = sorted(accidents_list, key=lambda x: x['GRADE'], reverse=True)
+    for idx in range(1,len(accidents_list) + 1):
+        accidents_list[idx - 1]['INDEX BY GRADE'] = idx
+    with io.open(output_filename, 'w', encoding='utf-16') as out_file:
+        out_file.write(unicode('\t'.join(headers) + '\n'))
+        for accidents_details in accidents_list:
+            out_file.write(u'{index}\t{city}\t{name}\t{grade}\t{deadly}\t{hard}\t{light}\t{ui_url}\n'.format(
+                index=accidents_details['INDEX BY GRADE'],
+                city=accidents_details['CITY'],
+                name=accidents_details['NAME'],
+                grade=accidents_details['GRADE'],
+                deadly=accidents_details['DEADLY'],
+                hard=accidents_details['HARD'],
+                light=accidents_details['LIGHT'],
+                ui_url=accidents_details['UI_URL']))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('csv_filename', metavar='csv_filename', type=str, help='input csv file path')
-
-    #TODO: augment to any CSV that contains relevant data
-    #TODO: add argument to date
-    parser.add_argument('--distance', default=0.5, help= 'float In KM. Default is 0.5 (500m)', type=float)
-    parser.add_argument('--output_file', default='output.csv', help='output file of the results. Default is output.csv')
+    parser.add_argument('--input_csv_filename', default='schools.csv', type=str, help='input csv file path')
+    parser.add_argument('--start_date', default='01-01-2012', type=valid_date, help='The Start Date - format DD-MM-YYYY')
+    parser.add_argument('--end_date', default='01-01-2025', type=valid_date, help='The End Date - format DD-MM-YYYY')
+    parser.add_argument('--distance', default=0.5, help='float In KM. Default is 0.5 (500m)', type=float)
     parser.add_argument('--pedestrians_only', action='store_true', default=False,
                         help='use the flag for pedestrian only results')
+    parser.add_argument('--output_file', default='output.csv', help='output file of the results. Default is output.csv')
     args = parser.parse_args()
-    main(args.csv_filename, args.distance, args.pedestrians_only, args.output_file)
+    main(args.input_csv_filename, args.start_date, args.end_date, args.distance, args.pedestrians_only, args.output_file)

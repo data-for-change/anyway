@@ -9,7 +9,7 @@ import re
 from datetime import datetime
 
 from flask.ext.sqlalchemy import SQLAlchemy
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 
 import field_names
 from models import Marker, Involved, Vehicle
@@ -22,7 +22,7 @@ import logging
 fileDialog = True
 try:
     import tkFileDialog
-except ValueError:
+except (ValueError, ImportError):
     fileDialog = False
 
 failed_dirs = OrderedDict()
@@ -354,13 +354,21 @@ def import_to_datastore(directory, provider_code, batch_size):
         started = datetime.now()
 
         accidents = list(import_accidents(provider_code=provider_code, **files_from_lms))
-        db.session.execute(Marker.__table__.insert(), accidents)
+
+        new_ids = [m["id"] for m in accidents
+                   if 0 == Marker.query.filter(and_(Marker.id == m["id"],
+                                                    Marker.provider_code == m["provider_code"])).count()]
+        if not new_ids:
+            logging.info("\t\tNothing loaded, all accidents already in DB")
+            return 0
+
+        db.session.execute(Marker.__table__.insert(), [m for m in accidents if m["id"] in new_ids])
         db.session.commit()
         involved = list(import_involved(provider_code=provider_code, **files_from_lms))
-        db.session.execute(Involved.__table__.insert(), involved)
+        db.session.execute(Involved.__table__.insert(), [i for i in involved if i["accident_id"] in new_ids])
         db.session.commit()
         vehicles = list(import_vehicles(provider_code=provider_code, **files_from_lms))
-        db.session.execute(Vehicle.__table__.insert(), vehicles)
+        db.session.execute(Vehicle.__table__.insert(), [v for v in vehicles if v["accident_id"] in new_ids])
         db.session.commit()
 
         total = len(accidents) + len(involved) + len(vehicles)
@@ -397,7 +405,7 @@ def get_provider_code(directory_name=None):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--specific_folder', dest='specific_folder', action='store_true', default=False)
-    parser.add_argument('--delete_all', dest='delete_all', action='store_true', default=True)
+    parser.add_argument('--delete_all', dest='delete_all', action='store_true', )
     parser.add_argument('--path', type=str, default="static/data/lms")
     parser.add_argument('--batch_size', type=int, default=100)
     parser.add_argument('--provider_code', type=int)

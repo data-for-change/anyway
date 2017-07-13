@@ -86,7 +86,7 @@
     </div>
 
     <div class="{{ 'main main-close' if not map_only else 'main' }}"
-         style="{{ 'margin-top:-40px;' if map_only }}position: fixed; width: 100%; height: 100%; box-sizing: border-box{{ '; padding-top: 40px; padding-right: 300px; padding-bottom: 40px' if not map_only }}">
+         style="{{ 'padding-top:0px;' if map_only }}position: fixed; width: 100%; height: 100%; box-sizing: border-box{{ '; padding-top: 40px; padding-right: 300px; padding-bottom: 40px' if not map_only }}">
         <div id="map_canvas" style="width: 100%; height: 100%; box-sizing: border-box"></div>
         <div id="toggle-control"></div>
         <input id="pac-input" class="controls" type="text" placeholder="חפש מיקום"
@@ -647,7 +647,7 @@
             <div class="btn-label">תקופה:</div>
             <div class="btn-wrap separator">
                 <div class="btn-label" style="margin: 10px">החל מ :</div>
-                <input id="sdate" class="btn date" type="date" style="width: 52% !important; margin-top: 10px" value="{{default_start_date_format|default('2005-01-01')}}" oninput="app.loadFilter()">
+                <input id="sdate" class="btn date" type="date" style="width: 52% !important; margin-top: 10px" value="{{default_start_date_format|default('2011-01-01')}}" oninput="app.loadFilter()">
                 <div class="btn-label" style="margin: 10px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;עד :</div>
                 
                 <input id="edate" class="btn date" type="date" style="width: 52% !important; margin-top: 10px" value="{{default_end_date_format|default('2025-01-01')}}" oninput="app.loadFilter()">
@@ -869,9 +869,11 @@
                 <input type="radio" name="casetype" id="checkbox-case-all" value=0 onclick="app.loadFilter()" checked/>
                 <label for="checkbox-case-all" class="btn one">הכל</label>
                 <input type="radio" name="casetype" id="checkbox-case-1" value=1 onclick="app.loadFilter()" />
-                <label for="checkbox-case-1" class="btn one" style="padding-right: 10px !important; padding-left:  10px !important;">1</label>
+                <label for="checkbox-case-1" class="btn one" style="padding-right: 10px !important; padding-left:  10px !important;">LAMAS 1</label>
                 <input type="radio" name="casetype" id="checkbox-case-3" value=3 onclick="app.loadFilter()" />
-                <label for="checkbox-case-3" class="btn one" style="padding-right: 10px !important; padding-left:  10px !important;">3</label>
+                <label for="checkbox-case-3" class="btn one" style="padding-right: 10px !important; padding-left:  10px !important;">LAMAS 3</label>
+                <input type="radio" name="casetype" id="checkbox-case-2" value=2 onclick="app.loadFilter()" />
+                <label for="checkbox-case-2" class="btn one" style="padding-right: 10px !important; padding-left:  10px !important;">United Hazalah</label>
             </div>
 
             <div class="btn-label">אמצעי בקרה:</div>

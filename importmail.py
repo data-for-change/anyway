@@ -68,7 +68,10 @@ def main(username=None, password=None, lastmail=False):
 
         email_body = message_parts[0][1]
         mail = email.message_from_string(email_body)
-        mtime = datetime.strptime(mail['Date'][:-6], '%a, %d %b %Y %H:%M:%S')
+        try:
+            mtime = datetime.strptime(mail['Date'][:-6], '%a, %d %b %Y %H:%M:%S')
+        except:
+            mtime = datetime.strptime(mail['Date'][:-12], '%a, %d %b %Y %H:%M:%S')
 
         if not is_empty:
             # Accident folder is not empty, we only need the latest

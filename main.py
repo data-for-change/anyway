@@ -374,8 +374,8 @@ def index(marker=None, message=None):
         pref_radius.append(PreferenceObject('prefRadius' + str(x * 500), x * 500, x * 500))
     context['pref_radius'] = pref_radius
     today = datetime.date.today()
-    context['default_end_date_format'] = today.strftime('%Y-%m-%d')
-    context['default_start_date_format'] = (today - datetime.timedelta(days=730)).strftime('%Y-%m-%d')
+    context['default_end_date_format'] = request.values.get('end_date', today.strftime('%Y-%m-%d'))
+    context['default_start_date_format'] = request.values.get('start_date', (today - datetime.timedelta(days=1095)).strftime('%Y-%m-%d'))
     return render_template('index.html', **context)
 
 

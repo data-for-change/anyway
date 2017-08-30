@@ -64,7 +64,7 @@ def main(username=None, password=None, lastmail=False):
         typ, message_parts = imapsession.fetch(msgId, '(RFC822)')
         if typ != 'OK':
             logging.error('Error fetching mail.')
-            raise
+            raise Exception('Error fetching mail')
 
         email_body = message_parts[0][1]
         mail = email.message_from_string(email_body)

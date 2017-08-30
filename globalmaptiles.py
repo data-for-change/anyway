@@ -336,6 +336,7 @@ class GlobalGeodetic(object):
 		return 180 / 256.0 / 2**zoom
 		#return 180 / float( 1 << (8+zoom) )
 
+	@staticmethod
 	def TileBounds(tx, ty, zoom):
 		"Returns bounds of the given tile"
 		res = 180 / 256.0 / 2**zoom

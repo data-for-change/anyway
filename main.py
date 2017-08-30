@@ -734,7 +734,7 @@ class ExtendedLoginForm(LoginForm):
     username = StringField('User Name', [validators.DataRequired()])
 
     def validate(self):
-        if not super(LoginForm, self).validate():
+        if not super(ExtendedLoginForm, self).validate():
             return False
         if self.username.data.strip() == '':
             return False

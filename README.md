@@ -138,6 +138,10 @@ Server side testing can be done by adding python tests under `tests` folder, usi
 
 To run tests: `python -m unittest discover ./tests`.
 
+The code is also checked with Pylint in Travis. In order to run pylint locally you should first
+install it in your virtualenv by executing `pip install pylint` and then `pylint -j $(nproc) *.py`
+in order to check the entire repository. Note that the `-j` flag is optional.
+
 
 Heroku deployment
 -----------------

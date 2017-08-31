@@ -5,14 +5,13 @@ import logging
 from constants import CONST
  
 from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table, \
-        ForeignKeyConstraint, func, or_
+        ForeignKeyConstraint, func
 from sqlalchemy.orm import relationship, load_only, backref
 
 import datetime
 import localization
 from database import Base, db_session
-from flask.ext.security import Security, SQLAlchemyUserDatastore, \
-        UserMixin, RoleMixin, login_required
+from flask.ext.security import UserMixin, RoleMixin
 
 db_encoding = 'utf-8'
 

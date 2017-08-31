@@ -348,7 +348,7 @@ class GlobalGeodetic(object):
 		)
 
 if __name__ == "__main__":
-	import sys, os
+	import sys
 		
 	def Usage(s = ""):
 		print "Usage: globalmaptiles.py [-profile 'mercator'|'geodetic'] zoomlevel lat lon [latmax lonmax]"

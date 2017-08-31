@@ -11,10 +11,13 @@ from webassets.ext.jinja2 import AssetsExtension
 from webassets import Environment as AssetsEnvironment
 from flask.ext.babel import Babel,gettext
 from clusters_calculator import retrieve_clusters
+from sqlalchemy.orm import load_only
 
 from database import db_session
-from models import *
-from base import *
+from flask import request, redirect, session
+import logging
+import datetime
+import json
 import utilities
 from constants import CONST
 
@@ -28,16 +31,18 @@ from sendgrid import sendgrid, SendGridClientError, SendGridServerError, Mail
 import glob
 from utilities import CsvReader
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.security import Security, SQLAlchemyUserDatastore, roles_required, current_user, LoginForm
-from collections import OrderedDict
-from sqlalchemy import distinct, func
+from flask.ext.security import Security, SQLAlchemyUserDatastore, roles_required, current_user, LoginForm, login_required
 from apscheduler.scheduler import Scheduler
 import united
 from flask.ext.compress import Compress
 import argparse
-from sqlalchemy.exc import OperationalError
 
 from oauth import OAuthSignIn
+
+from base import user_optional
+from models import (Marker, DiscussionMarker, HighlightPoint, Involved, User, ReportPreferences,
+                     Vehicle, Role, GeneralPreferences)
+
 
 app = utilities.init_flask(__name__)
 db = SQLAlchemy(app)
@@ -374,8 +379,8 @@ def index(marker=None, message=None):
         pref_radius.append(PreferenceObject('prefRadius' + str(x * 500), x * 500, x * 500))
     context['pref_radius'] = pref_radius
     today = datetime.date.today()
-    context['default_end_date_format'] = today.strftime('%Y-%m-%d')
-    context['default_start_date_format'] = (today - datetime.timedelta(days=730)).strftime('%Y-%m-%d')
+    context['default_end_date_format'] = request.values.get('end_date', today.strftime('%Y-%m-%d'))
+    context['default_start_date_format'] = request.values.get('start_date', (today - datetime.timedelta(days=1095)).strftime('%Y-%m-%d'))
     return render_template('index.html', **context)
 
 
@@ -734,7 +739,7 @@ class ExtendedLoginForm(LoginForm):
     username = StringField('User Name', [validators.DataRequired()])
 
     def validate(self):
-        if not super(LoginForm, self).validate():
+        if not super(ExtendedLoginForm, self).validate():
             return False
         if self.username.data.strip() == '':
             return False

@@ -1,0 +1,15 @@
+[MESSAGES CONTROL]
+disable=R,C,W
+enable=unused-import,wildcard-import
+
+[REPORTS]
+reports=no
+score=no
+output-format=parseable
+
+[TYPECHECK]
+ignored-modules=flask.ext
+ignored-classes=scoped_session
+
+[FORMAT]
+max-line-length=120

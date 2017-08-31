@@ -28,14 +28,11 @@ from sendgrid import sendgrid, SendGridClientError, SendGridServerError, Mail
 import glob
 from utilities import CsvReader
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.security import Security, SQLAlchemyUserDatastore, roles_required, current_user, LoginForm
-from collections import OrderedDict
-from sqlalchemy import distinct, func
+from flask.ext.security import Security, SQLAlchemyUserDatastore, roles_required, current_user, LoginForm, login_required
 from apscheduler.scheduler import Scheduler
 import united
 from flask.ext.compress import Compress
 import argparse
-from sqlalchemy.exc import OperationalError
 
 from oauth import OAuthSignIn
 

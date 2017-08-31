@@ -1,5 +1,6 @@
 [MESSAGES CONTROL]
 disable=R,C,W
+enable=unused-import
 
 [REPORTS]
 reports=no

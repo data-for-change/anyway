@@ -1,6 +1,6 @@
 [MESSAGES CONTROL]
 disable=R,C,W
-enable=unused-import
+enable=unused-import,wildcard-import
 
 [REPORTS]
 reports=no

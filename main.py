@@ -11,10 +11,13 @@ from webassets.ext.jinja2 import AssetsExtension
 from webassets import Environment as AssetsEnvironment
 from flask.ext.babel import Babel,gettext
 from clusters_calculator import retrieve_clusters
+from sqlalchemy.orm import load_only
 
 from database import db_session
-from models import *
-from base import *
+from flask import request, redirect, session
+import logging
+import datetime
+import json
 import utilities
 from constants import CONST
 
@@ -35,6 +38,11 @@ from flask.ext.compress import Compress
 import argparse
 
 from oauth import OAuthSignIn
+
+from base import user_optional
+from models import (Marker, DiscussionMarker, HighlightPoint, Involved, User, ReportPreferences,
+                     Vehicle, Role, GeneralPreferences)
+
 
 app = utilities.init_flask(__name__)
 db = SQLAlchemy(app)

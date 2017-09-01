@@ -251,16 +251,16 @@ def discussion():
         return make_response(post_handler(marker))
 
 
-@app.route("/clusters")
+@app.route("/clusters", methods=["GET"])
 @user_optional
-def clusters(methods=["GET"]):
+def clusters():
     start_time = time.time()
-    if request.method == "GET":
-        kwargs = get_kwargs()
-        results = retrieve_clusters(**kwargs)
+    kwargs = get_kwargs()
+    results = retrieve_clusters(**kwargs)
 
-        logging.debug('calculating clusters took %f seconds' % (time.time() - start_time))
-        return Response(json.dumps({'clusters': results}), mimetype="application/json")
+    logging.debug('calculating clusters took %f seconds' % (time.time() - start_time))
+    return Response(json.dumps({'clusters': results}), mimetype="application/json")
+
 
 @app.route("/highlightpoints", methods=['POST'])
 @user_optional

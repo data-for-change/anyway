@@ -26,7 +26,7 @@ class TestQueryFilters(unittest.TestCase):
                   'end_time': 25, 'road': 0, 'ne_lat': 32.072427482938345}
 
         self.query_args = kwargs
-        self.query = Marker.bounding_box_query(yield_per=50, **kwargs)
+        self.query = Marker.bounding_box_query(yield_per=50, **kwargs)[0]
 
     def tearDown(self):
         self.query = None
@@ -39,35 +39,35 @@ class TestQueryFilters(unittest.TestCase):
     def test_accurate_filter(self):
         kwargs = self.query_args.copy()
         kwargs['approx'] = False
-        markers = Marker.bounding_box_query(yield_per=50, **kwargs)
+        markers = Marker.bounding_box_query(yield_per=50, **kwargs)[0]
         for marker in markers:
             self.assertTrue(marker.locationAccuracy == 1)
 
     def test_approx_filter(self):
         kwargs = self.query_args.copy()
         kwargs['accurate'] = False
-        markers = Marker.bounding_box_query(yield_per=50, **kwargs)
+        markers = Marker.bounding_box_query(yield_per=50, **kwargs)[0]
         for marker in markers:
             self.assertTrue(marker.locationAccuracy != 1)
 
     def test_fatal_severity_filter(self):
         kwargs = self.query_args.copy()
         kwargs['show_fatal'] = False
-        markers = Marker.bounding_box_query(yield_per=50, **kwargs)
+        markers = Marker.bounding_box_query(yield_per=50, **kwargs)[0]
         for marker in markers:
             self.assertTrue(marker.severity != 1)
     
     def test_severe_severity_filter(self):
         kwargs = self.query_args.copy()
         kwargs['show_severe'] = False
-        markers = Marker.bounding_box_query(yield_per=50, **kwargs)
+        markers = Marker.bounding_box_query(yield_per=50, **kwargs)[0]
         for marker in markers:
             self.assertTrue(marker.severity != 2)
 
     def test_light_severity_filter(self):
         kwargs = self.query_args.copy()
         kwargs['show_light'] = False
-        markers = Marker.bounding_box_query(yield_per=50, **kwargs)
+        markers = Marker.bounding_box_query(yield_per=50, **kwargs)[0]
         for marker in markers:
             self.assertTrue(marker.severity != 3)
 

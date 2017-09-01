@@ -3,7 +3,7 @@
 import json
 import logging
 from constants import CONST
- 
+from collections import namedtuple
 from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table, \
         ForeignKeyConstraint, func
 from sqlalchemy.orm import relationship, load_only, backref
@@ -12,6 +12,9 @@ import datetime
 import localization
 from database import Base, db_session
 from flask.ext.security import UserMixin, RoleMixin
+
+
+MarkerResult = namedtuple('MarkerResult', ['markers', 'total_records'])
 
 db_encoding = 'utf-8'
 
@@ -247,6 +250,8 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
 
         approx = kwargs.get('approx', True)
         accurate = kwargs.get('accurate', True)
+        page = kwargs.get('page')
+        per_page = kwargs.get('per_page')
 
         if not kwargs.get('show_markers', True):
             return Marker.query.filter(sql.false())
@@ -333,6 +338,10 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         if is_thin:
             markers = markers.options(load_only("id", "longitude", "latitude"))
 
+        total_records = markers.count()
+        if page and per_page:
+            markers = markers.offset((page - 1 ) * per_page).limit(per_page)
+
         if involved_and_vehicles:
             fetch_markers = kwargs.get('fetch_markers', True)
             fetch_vehicles = kwargs.get('fetch_vehicles', True)
@@ -350,7 +359,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
             return markers.all() if markers is not None else [], vehicles.all() if vehicles is not None else [], \
                    involved.all() if involved is not None else []
         else:
-            return markers
+            return MarkerResult(markers=markers, total_records=total_records)
 
     @staticmethod
     def get_marker(marker_id):

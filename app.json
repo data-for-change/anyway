@@ -3,9 +3,6 @@
   "description":"Interactive map for road accidents in Israel, to motivate the local community members to take collective action and fight road accidents.",
   "scripts":{},
   "env":{
-    "BUILDPACK_URL":{
-      "required":true
-    },
     "DATABASE_URL":{
       "required":true
     },
@@ -19,5 +16,13 @@
   "addons":[
     "heroku-postgresql",
     "newrelic"
+  ],
+  "buildpacks": [
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-jvm-common"
+    },
+    {
+      "url": "heroku/python"
+    }
   ]
 }

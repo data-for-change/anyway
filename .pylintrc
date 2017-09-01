@@ -1,6 +1,6 @@
 [MESSAGES CONTROL]
 disable=R,C,W
-enable=unused-import,wildcard-import
+enable=unused-import,wildcard-import,dangerous-default-value
 
 [REPORTS]
 reports=no

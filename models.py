@@ -254,7 +254,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         per_page = kwargs.get('per_page')
 
         if not kwargs.get('show_markers', True):
-            return Marker.query.filter(sql.false())
+            return MarkerResult(markers=Marker.query.filter(sql.false()), total_records=0)
         markers = Marker.query \
             .filter(Marker.longitude <= kwargs['ne_lng']) \
             .filter(Marker.longitude >= kwargs['sw_lng']) \
@@ -270,7 +270,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         elif approx and not accurate:
             markers = markers.filter(Marker.locationAccuracy != 1)
         elif not accurate and not approx:
-            return Marker.query.filter(sql.false())
+            return MarkerResult(markers=Marker.query.filter(sql.false()), total_records=0)
         if not kwargs.get('show_fatal', True):
             markers = markers.filter(Marker.severity != 1)
         if not kwargs.get('show_severe', True):
@@ -283,21 +283,21 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
             elif kwargs['show_urban'] == 1:
                 markers = markers.filter(Marker.roadType >= 3).filter(Marker.roadType <= 4)
             else:
-                return Marker.query.filter(sql.false())
+                return MarkerResult(markers=Marker.query.filter(sql.false()), total_records=0)
         if kwargs.get('show_intersection', 3) != 3:
             if kwargs['show_intersection'] == 2:
                 markers = markers.filter(Marker.roadType != 2).filter(Marker.roadType != 4)
             elif kwargs['show_intersection'] == 1:
                 markers = markers.filter(Marker.roadType != 1).filter(Marker.roadType != 3)
             else:
-                return Marker.query.filter(sql.false())
+                return MarkerResult(markers=Marker.query.filter(sql.false()), total_records=0)
         if kwargs.get('show_lane', 3) != 3:
             if kwargs['show_lane'] == 2:
                 markers = markers.filter(Marker.one_lane >= 2).filter(Marker.one_lane <= 3)
             elif kwargs['show_lane'] == 1:
                 markers = markers.filter(Marker.one_lane == 1)
             else:
-                return Marker.query.filter(sql.false())
+                return MarkerResult(markers=Marker.query.filter(sql.false()), total_records=0)
 
         if kwargs.get('show_day', 7) != 7:
             markers = markers.filter(func.extract("dow", Marker.created) == kwargs['show_day'])
@@ -356,8 +356,9 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
                 vehicles = db_session.query(Vehicle).filter(Vehicle.accident_id.in_(markers_ids))
             if fetch_involved:
                 involved = db_session.query(Involved).filter(Involved.accident_id.in_(markers_ids))
-            return markers.all() if markers is not None else [], vehicles.all() if vehicles is not None else [], \
+            result = markers.all() if markers is not None else [], vehicles.all() if vehicles is not None else [], \
                    involved.all() if involved is not None else []
+            return MarkerResult(markers=result, total_records=len(result))
         else:
             return MarkerResult(markers=markers, total_records=total_records)
 

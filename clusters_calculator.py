@@ -13,7 +13,7 @@ def retrieve_clusters(**kwargs):
         for marker_box in marker_boxes:
 
             kwargs.update(marker_box)
-            markers_in_box = Marker.bounding_box_query(**kwargs).all()
+            markers_in_box = Marker.bounding_box_query(**kwargs).markers.all()
             result_futures.append(executor.submit(calculate_clusters, markers_in_box, kwargs['zoom']))
 
     completed_futures = concurrent.futures.wait(result_futures)

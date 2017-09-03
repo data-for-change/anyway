@@ -1006,7 +1006,7 @@
 <script type="text/html" id="sidebarItemTemplate">
     <li>
         <a>
-            <div><div class="gmnoprint" title="<%- icon %>" ></div></div><span class="date"><%- created %></span> -<br> <span class="type"><%- type %></span>
+          <div><div class="gmnoprint" title="<%- icon %>" ></div></div><span class="date"><%- created %></span> -<br> <span class="type"><%- type %></span>
         </a>
     </li>
 </script>
@@ -1014,7 +1014,7 @@
 <script type="text/javascript"
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBpOmft-UskZsAQth9vNl0fN6EXaRR6dZc&libraries=places,visualization&language=iw"></script>
 {% assets filters="rjsmin", output="js/app.min.js",
-            "js/libs/jquery-1.11.3.min.js",
+"js/libs/jquery-1.11.3.min.js",
 "js/libs/spin.min.js",
 "js/libs/jquery.spin.js",
 "js/libs/oms.min.js",
@@ -1022,6 +1022,7 @@
 "js/markerClustererAugment.js",
 "js/libs/underscore.js",
 "js/libs/backbone.js",
+"js/libs/backbone.paginator.min.js",
 "js/libs/bootstrap.js",
 "js/libs/notify-combined.min.js",
 "js/libs/moment-with-langs.min.js",
@@ -1163,6 +1164,8 @@
             {% if message %}
             $.notify("{{message}}");
             {% endif %}
+
+            ENTRIES_PER_PAGE = {{ entries_per_page }};
 
             moment.lang('he');
 

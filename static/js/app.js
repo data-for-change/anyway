@@ -22,11 +22,19 @@ $(function () {
 
     var Discussion = Backbone.Model.extend({});
 
-    window.MarkerCollection = Backbone.Collection.extend({
+    window.MarkerCollection = Backbone.PageableCollection.extend({
         url: "/markers",
 
-        parse: function (response, options) {
+        state: {
+            pageSize: ENTRIES_PER_PAGE
+        },
+
+        parseRecords: function (response) {
             return response.markers;
+        },
+
+        parseState: function (response) {
+            return response.pagination;
         }
     });
 
@@ -167,7 +175,7 @@ $(function () {
                 this.clusters.fetch({
                     data: $.param(params),
                     reset: reset,
-                    success: this.reloadSidebar.bind(this)
+                    success: this.markersFetched(this)
                 });
             } else {
                 this.clearClustersFromMap();
@@ -178,10 +186,20 @@ $(function () {
 
                 this.clearClustersFromMap();
 
-                this.markers.fetch({
-                    data: $.param(params),
+                this.markers.getFirstPage({
+                    data: params,
                     reset: reset,
-                    success: this.reloadSidebar.bind(this)
+                    success: this.markersFetched.bind(this, params, reset)
+                });
+            }
+        },
+        markersFetched: function(params, reset) {
+            this.reloadSidebar(this);
+            if (this.markers.hasNextPage()) {
+                delete params.page;
+                this.markers.getNextPage({
+                    data: params,
+                    success: this.markersFetched.bind(this, params, reset)
                 });
             }
         },

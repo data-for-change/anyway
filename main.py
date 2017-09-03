@@ -42,6 +42,7 @@ from oauth import OAuthSignIn
 from base import user_optional
 from models import (Marker, DiscussionMarker, HighlightPoint, Involved, User, ReportPreferences,
                      Vehicle, Role, GeneralPreferences)
+from config import ENTRIES_PER_PAGE
 
 
 app = utilities.init_flask(__name__)
@@ -91,12 +92,17 @@ def shutdown_session(exception=None):
     db_session.remove()
 
 
-def generate_json(accidents, discussions, is_thin):
+def generate_json(accidents, discussions, is_thin, total_records=None):
     markers = accidents.all()
+
     if not is_thin:
         markers += discussions.all()
+
+    if total_records is None:
+        total_records = len(accidents)
+
     entries = [ marker.serialize(is_thin) for marker in markers ]
-    return jsonify({"markers" : entries })
+    return jsonify({"markers" : entries , 'pagination': {'totalRecords': total_records}})
 
 
 def generate_csv(results):
@@ -126,7 +132,9 @@ ARG_TYPES = {'ne_lat': (float, 32.072427482938345), 'ne_lng': (float, 34.7992896
              'start_time': (int, 25), 'end_time': (int, 25), 'weather': (int, 0), 'road': (int, 0),
              'separation': (int, 0), 'surface': (int, 0), 'acctype': (int, 0), 'controlmeasure': (int, 0),
              'district': (int, 0), 'case_type': (int, 0), 'fetch_markers': (bool, True), 'fetch_vehicles': (bool, True),
-             'fetch_involved': (bool, True)}
+             'fetch_involved': (bool, True),
+             'page': (int, 0),
+             'per_page': (int, 0)}
 
 def get_kwargs():
     kwargs = {arg: arg_type(request.values.get(arg, default_value)) for (arg, (arg_type, default_value)) in ARG_TYPES.iteritems()}
@@ -148,14 +156,14 @@ def markers():
     kwargs = get_kwargs()
     logging.debug('querying markers in bounding box: %s' % kwargs)
     is_thin = (kwargs['zoom'] < CONST.MINIMAL_ZOOM)
-    accidents = Marker.bounding_box_query(is_thin, yield_per=50, involved_and_vehicles=False, **kwargs)
+    result = Marker.bounding_box_query(is_thin, yield_per=50, involved_and_vehicles=False, **kwargs)
 
     discussion_args = ('ne_lat', 'ne_lng', 'sw_lat', 'sw_lng', 'show_discussions')
     discussions = DiscussionMarker.bounding_box_query(**{arg: kwargs[arg] for arg in discussion_args})
 
     if request.values.get('format') == 'csv':
         date_format = '%Y-%m-%d'
-        return Response(generate_csv(accidents), headers={
+        return Response(generate_csv(result.markers), headers={
             "Content-Type": "text/csv",
             "Content-Disposition": 'attachment; '
                                    'filename="Anyway-accidents-from-{0}-to-{1}.csv"'
@@ -163,7 +171,7 @@ def markers():
         })
 
     else: # defaults to json
-        return generate_json(accidents, discussions, is_thin)
+         return generate_json(result.markers, discussions, is_thin, total_records=result.total_records)
 
 
 @app.route("/charts-data", methods=["GET"])
@@ -381,6 +389,7 @@ def index(marker=None, message=None):
     today = datetime.date.today()
     context['default_end_date_format'] = request.values.get('end_date', today.strftime('%Y-%m-%d'))
     context['default_start_date_format'] = request.values.get('start_date', (today - datetime.timedelta(days=1095)).strftime('%Y-%m-%d'))
+    context['entries_per_page'] = ENTRIES_PER_PAGE
     return render_template('index.html', **context)
 
 

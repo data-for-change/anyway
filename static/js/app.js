@@ -197,6 +197,14 @@ $(function () {
             this.reloadSidebar(this);
             if (this.markers.hasNextPage()) {
                 delete params.page;
+                delete params.per_page;
+                delete params.total_entries;
+                delete params.total_pages;
+
+                if (!_.isEqual(params, this.buildMarkersParams())) {
+                    return;
+                }
+
                 this.markers.getNextPage({
                     data: params,
                     success: this.markersFetched.bind(this, params, reset)

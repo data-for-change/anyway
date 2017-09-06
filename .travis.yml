@@ -16,7 +16,7 @@ services:
 sudo: false
 
 install:
-  - pip install -r requirements.txt pylint
+  - pip install -r requirements.txt -r test_requirements.txt
   - yarn global add eslint
 
 before_script:
@@ -29,4 +29,4 @@ script:
   - eslint static/js --ignore-path=static/js/.eslintignore
   - python process.py
   - python united.py --light
-  - python -m unittest discover tests
+  - pytest tests

@@ -41,7 +41,7 @@ environment](https://www.youtube.com/watch?v=N5vscPTWKOk) is highly recommended.
 1. Install postgresql: `brew install postgresql` (after installing [brew](http://brew.sh))
 
 ### Both Ubuntu and OS X: 
-1. Activate your virtualenv and run `pip install -r requirements.txt`
+1. Activate your virtualenv and run `pip install -r requirements.txt -r test_requirements.txt`
 
 ### Windows (experimental)
 See the Wiki.
@@ -68,18 +68,11 @@ It is useful to add the following to your `~/.bashrc` (fixing for the correct pa
 Then you can simply start working by running the `anyway` command.
 
 ## Testing
-Server side testing can be done by adding python tests under `tests` folder, using a `test_*.py` file name pattern.
+To run tests: `pylint -j $(nproc) *.py && pytest ./tests`.
 
-To run tests: `python -m unittest discover ./tests`.
+## Docker
+See [DOCKER](docs/DOCKER.md)
 
-The code is also checked with Pylint in Travis. In order to run pylint locally you should first
-install it in your virtualenv by executing `pip install pylint` and then `pylint -j $(nproc) *.py`
-in order to check the entire repository. Note that the `-j` flag is optional.
-
-
-Docker ------- See [DOCKER](docs/DOCKER.md)
-
-Translation and Localization
-----------------------------
+## Translation and Localization
 See [TRANSLATE](docs/TRANSLATE.md)
 

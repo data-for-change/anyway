@@ -1,4 +1,4 @@
-import unittest
+import pytest
 from models import Marker  # for Marker.bounding_box_query
 import datetime
 
@@ -7,72 +7,54 @@ import datetime
 # and change both 2014 and 2015 to: %s
 
 
-class TestQueryFilters(unittest.TestCase):
-    """
-    # cyear = str(datetime.datetime.now().strftime("%Y"))
-    global start_date
-    start_date = "01/01/2014"     # % cyear
-    global end_date
-    end_date = "01/01/2015"       # % str(int(cyear)-1)
-    """
-
-    def setUp(self):
-        kwargs = {'approx': True, 'show_day': 7, 'show_discussions': True, 'accurate': True, 'surface': 0, 
-                  'weather': 0, 'district': 0, 'show_markers': True, 'show_fatal': True, 'show_time': 24, 
-                  'show_intersection': 3, 'show_light': True, 'sw_lat': 32.067363446951944, 'controlmeasure': 0, 
-                  'start_date': datetime.date(2014, 1, 1), 'ne_lng': 34.79928962966915, 'show_severe': True, 
-                  'end_date': datetime.date(2016, 1, 1), 'start_time': 25, 'acctype': 0, 'separation': 0, 
-                  'show_urban': 3, 'show_lane': 3, 'sw_lng': 34.78877537033077, 'zoom': 17, 'show_holiday': 0, 
-                  'end_time': 25, 'road': 0, 'ne_lat': 32.072427482938345}
-
-        self.query_args = kwargs
-        self.query = Marker.bounding_box_query(yield_per=50, **kwargs)[0]
-
-    def tearDown(self):
-        self.query = None
-
-    def test_location_filters(self):
-        for marker in self.query:
-            self.assertTrue(self.query_args['sw_lat'] <= marker.latitude  <= self.query_args['ne_lat'])
-            self.assertTrue(self.query_args['sw_lng'] <= marker.longitude <= self.query_args['ne_lng'])
-
-    def test_accurate_filter(self):
-        kwargs = self.query_args.copy()
-        kwargs['approx'] = False
-        markers = Marker.bounding_box_query(yield_per=50, **kwargs)[0]
-        for marker in markers:
-            self.assertTrue(marker.locationAccuracy == 1)
-
-    def test_approx_filter(self):
-        kwargs = self.query_args.copy()
-        kwargs['accurate'] = False
-        markers = Marker.bounding_box_query(yield_per=50, **kwargs)[0]
-        for marker in markers:
-            self.assertTrue(marker.locationAccuracy != 1)
-
-    def test_fatal_severity_filter(self):
-        kwargs = self.query_args.copy()
-        kwargs['show_fatal'] = False
-        markers = Marker.bounding_box_query(yield_per=50, **kwargs)[0]
-        for marker in markers:
-            self.assertTrue(marker.severity != 1)
-    
-    def test_severe_severity_filter(self):
-        kwargs = self.query_args.copy()
-        kwargs['show_severe'] = False
-        markers = Marker.bounding_box_query(yield_per=50, **kwargs)[0]
-        for marker in markers:
-            self.assertTrue(marker.severity != 2)
-
-    def test_light_severity_filter(self):
-        kwargs = self.query_args.copy()
-        kwargs['show_light'] = False
-        markers = Marker.bounding_box_query(yield_per=50, **kwargs)[0]
-        for marker in markers:
-            self.assertTrue(marker.severity != 3)
+@pytest.fixture
+def base_kwargs():
+    return {'approx': True, 'show_day': 7, 'show_discussions': True, 'accurate': True, 'surface': 0,
+            'weather': 0, 'district': 0, 'show_markers': True, 'show_fatal': True, 'show_time': 24,
+            'show_intersection': 3, 'show_light': True, 'sw_lat': 32.067363446951944, 'controlmeasure': 0,
+            'start_date': datetime.date(2014, 1, 1), 'ne_lng': 34.79928962966915, 'show_severe': True,
+            'end_date': datetime.date(2016, 1, 1), 'start_time': 25, 'acctype': 0, 'separation': 0,
+            'show_urban': 3, 'show_lane': 3, 'sw_lng': 34.78877537033077, 'zoom': 17, 'show_holiday': 0,
+            'end_time': 25, 'road': 0, 'ne_lat': 32.072427482938345}
 
 
-if __name__ == '__main__':
-    unittest.main()
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestQueryFilters)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+def test_location_filters(base_kwargs):
+    query = Marker.bounding_box_query(yield_per=50, **base_kwargs)[0]
+    for marker in query:
+        assert base_kwargs['sw_lat'] <= marker.latitude  <= base_kwargs['ne_lat']
+        assert base_kwargs['sw_lng'] <= marker.longitude <= base_kwargs['ne_lng']
+
+
+def test_accurate_filter(base_kwargs):
+    base_kwargs['approx'] = False
+    markers = Marker.bounding_box_query(yield_per=50, **base_kwargs)[0]
+    for marker in markers:
+        assert marker.locationAccuracy == 1
+
+
+def test_approx_filter(base_kwargs):
+    base_kwargs['accurate'] = False
+    markers = Marker.bounding_box_query(yield_per=50, **base_kwargs)[0]
+    for marker in markers:
+        assert marker.locationAccuracy != 1
+
+
+def test_fatal_severity_filter(base_kwargs):
+    base_kwargs['show_fatal'] = False
+    markers = Marker.bounding_box_query(yield_per=50, **base_kwargs)[0]
+    for marker in markers:
+        assert marker.severity != 1
+
+
+def test_severe_severity_filter(base_kwargs):
+    base_kwargs['show_severe'] = False
+    markers = Marker.bounding_box_query(yield_per=50, **base_kwargs)[0]
+    for marker in markers:
+        assert marker.severity != 2
+
+
+def test_light_severity_filter(base_kwargs):
+    base_kwargs['show_light'] = False
+    markers = Marker.bounding_box_query(yield_per=50, **base_kwargs)[0]
+    for marker in markers:
+        assert marker.severity != 3

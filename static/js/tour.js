@@ -38,7 +38,7 @@ var tour1 = new Tour({
             placement: 'bottom',
             content: '<p>כאן תוכלו להזין את כתובתכם או כתובת שאתם נוהגים לבקר בה.</p></br>'+'<p> לחיצה על ENTER תיקח אתכם אל הכתובת. לדוגמא:</br>ז\'בוטנסקי 74 פתח תקווה</p>',
             onNext: function () {
-                stepId = 'step-2'
+                stepId = 'step-2';
                 tourClickInput();
             }
         },
@@ -132,7 +132,7 @@ function step2next() {
                 tour.addStep(tour1.getStep(i));
             }
             tour.init();
-            tour.restart()
+            tour.restart();
         }
         else{
             tour.addStep(tour1.getStep(4));

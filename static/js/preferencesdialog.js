@@ -11,7 +11,7 @@ var PreferencesDialog = Backbone.View.extend({
         "change .prefDisableHistoricalReport" : "changeSendHistoricalReport"
     },     
     render: function () {
-        self = this;
+        var self = this;
         self.$el.append($("#preferences-dialog-template").html());
         $(document.body).append(self.$el);
         $.get("preferences", function (data) {
@@ -87,7 +87,7 @@ var PreferencesDialog = Backbone.View.extend({
     showHideReportPrefereces: function () {
         var produceAccidentsReport = this.$el.find("#produceAccidentsReport");
         if ($(produceAccidentsReport).is(':checked')) {
-            $(".prefReportControls *").removeAttr("disabled")
+            $(".prefReportControls *").removeAttr("disabled");
         }else{
             $(".prefReportControls *").attr("disabled", "disabled");
         }

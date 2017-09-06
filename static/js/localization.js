@@ -275,7 +275,7 @@ var localization =
         "4" : "מרכז קילומטר",
         "9" : "לא עוגן",
     }
-}
+};
 
  var fields = {
         "pk_teuna_fikt": "מזהה",
@@ -353,4 +353,4 @@ var localization =
         "PROVIDER_CODE": "סוג תיק"
 
 
-        }
+        };

@@ -65,8 +65,8 @@ var MarkerView = Backbone.View.extend({
             this.$el.find(".profile-image").attr("src", "/static/img/logos/" + provider.logo);
             this.$el.find(".profile-image").attr("title", provider.name);
             this.$el.find(".profile-image-url").attr("href", provider.url);
-            this.$el.find(".added-by").html("מקור: <a href=\'" +
-                provider.url + "\' target=\'_blank\'>" + provider.name + "</a>");
+            this.$el.find(".added-by").html("מקור: <a href='" +
+                provider.url + "' target='blank'>" + provider.name + "</a>");
         }else{
             this.$el.html($("#marker-content-template").html());
 
@@ -107,8 +107,8 @@ var MarkerView = Backbone.View.extend({
             this.$el.find(".profile-image").attr("src", "/static/img/logos/" + provider.logo);
             this.$el.find(".profile-image").attr("title", provider.name);
             this.$el.find(".profile-image-url").attr("href", provider.url);
-            this.$el.find(".added-by").html("מקור: <a href=\'" +
-                provider.url + "\' target=\'_blank\'>" + provider.name + "</a>");
+            this.$el.find(".added-by").html("מקור: <a href='" +
+                provider.url + "' target='blank'>" + provider.name + "</a>");
         }
 
         app.oms.addMarker(this.marker);
@@ -193,7 +193,7 @@ var MarkerView = Backbone.View.extend({
                 break;
 
             case "nums":
-                if (value == "seats" && data[i]["seats"] == 99) { break; };
+                if (value == "seats" && data[i]["seats"] == 99) { break; }
                 if ([data[i][value]] != undefined && [data[i][value]] != 0 && [data[i][value]] != -1) {
                     text_line = "<p style=margin:0>" + fields[field] + ": " + data[i][value] + "</p>";
                     that.$el.find("#" + involved_or_vehicles).append(text_line);

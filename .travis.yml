@@ -2,13 +2,19 @@ language: python
 
 cache:
   - pip
+  - yarn
 
 python:
   - "2.7.11"
 
+node_js:
+  - "6"
+
 sudo: false
 
-install: pip install -r requirements.txt pylint
+install:
+  - pip install -r requirements.txt pylint
+  - yarn global add eslint
 
 before_script:
   - export DATABASE_URL='sqlite:///local.db'
@@ -16,6 +22,7 @@ before_script:
 
 script:
   - pylint -j $(nproc) *.py tests
+  - eslint static/js --ignore-path=static/js/.eslintignore
   - python process.py
   - python united.py --light
   - python -m unittest discover tests

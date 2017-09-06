@@ -22,7 +22,7 @@ function statPanelClick(widthOfPanel, heightOfPanel, chartWidth, chartHeight) {
             startJSPanelWithChart(jsPanel, widthOfPanel, heightOfPanel, chartWidth, chartHeight);
         }
     });
-};
+}
 
 var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chartWidth, chartHeight) {
     var isClusterMode = false;
@@ -47,7 +47,7 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
     str += chartHeight.toString() + '">';
     if (app.markers.length === 0 && app.clusters.length > 0) {
         isClusterMode = true;
-        str += '<h2> אין נתונים להצגה. אנא הגדל/י את רמת המיקוד במפה </h2>'
+        str += '<h2> אין נתונים להצגה. אנא הגדל/י את רמת המיקוד במפה </h2>';
     }
     str += '</div>';
     jsPanel.content.empty();
@@ -84,14 +84,14 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
                     return {
                         "label": month,
                         "value": (numOfAccidents / sum).toFixed(2)
-                    }
+                    };
                 });
             } else {
                 jsonAccidentsByMonth = _.map(groupedAccidentsByMonth, function(numOfAccidents, month) {
                     return {
                         "label": month,
                         "value": numOfAccidents.toString()
-                    }
+                    };
                 });
             }
 
@@ -161,7 +161,7 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
                 return {
                     "label": year,
                     "value": numOfAccidents.toString()
-                }
+                };
             });
             jsonAccidentsByYear = _.sortBy(jsonAccidentsByYear, 'label');
             var groupedAccidentsByMonth = _.countBy(app.markers.pluck("created"), function(item) {
@@ -171,7 +171,7 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
             var jsonAccidentsByMonth = _.map(groupedAccidentsByMonth, function(numOfAccidents, month) {
                 return {
                     "label": month
-                }
+                };
             });
             jsonAccidentsByMonth = _.sortBy(jsonAccidentsByMonth, 'label');
             var groupedAccidentsForAllYears = _.countBy(app.markers.pluck("created"), function(item) {
@@ -181,7 +181,7 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
                 return {
                     "label": month,
                     "value": numOfAccidents.toString()
-                }
+                };
             });
             jsonAccidentsByMonthAllYears = _.sortBy(jsonAccidentsByMonthAllYears, 'label');
             var dataPerMonth = [];
@@ -308,14 +308,14 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
                     return {
                         "label": severity,
                         "value": (numOfAccidents / sum).toFixed(2)
-                    }
+                    };
                 });
             } else {
                 jsonAccidentsBySeverity = _.map(groupedAccidentsBySeverity, function(numOfAccidents, severity) {
                     return {
                         "label": severity,
                         "value": numOfAccidents.toString()
-                    }
+                    };
                 });
             }
 

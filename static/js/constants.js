@@ -1,5 +1,5 @@
 var ADD_DISCUSSION = "צרו דיון";
-var NEW_FEATURES = "עדכן אותי לגבי תכונות חדשות"
+var NEW_FEATURES = "עדכן אותי לגבי תכונות חדשות";
 
 var PROVIDERS = {};
 PROVIDERS[1] = PROVIDERS[3] = {

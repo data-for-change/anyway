@@ -10,6 +10,9 @@ python:
 node_js:
   - "6"
 
+services:
+  - postgresql
+
 sudo: false
 
 install:
@@ -17,7 +20,8 @@ install:
   - yarn global add eslint
 
 before_script:
-  - export DATABASE_URL='sqlite:///local.db'
+  - psql -c 'create database anyway;' -U postgres
+  - export DATABASE_URL='postgresql://postgres@localhost/anyway'
   - python models.py
 
 script:

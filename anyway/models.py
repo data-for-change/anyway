@@ -338,6 +338,9 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         if is_thin:
             markers = markers.options(load_only("id", "longitude", "latitude"))
 
+        if kwargs.get('age_groups'):
+            markers = markers.join(Involved).filter(Involved.age_group.in_(kwargs.get('age_groups')))
+
         total_records = markers.count()
         if page and per_page:
             markers = markers.offset((page - 1 ) * per_page).limit(per_page)

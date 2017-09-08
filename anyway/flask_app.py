@@ -130,12 +130,20 @@ ARG_TYPES = {'ne_lat': (float, 32.072427482938345), 'ne_lng': (float, 34.7992896
              'start_time': (int, 25), 'end_time': (int, 25), 'weather': (int, 0), 'road': (int, 0),
              'separation': (int, 0), 'surface': (int, 0), 'acctype': (int, 0), 'controlmeasure': (int, 0),
              'district': (int, 0), 'case_type': (int, 0), 'fetch_markers': (bool, True), 'fetch_vehicles': (bool, True),
-             'fetch_involved': (bool, True),
+             'fetch_involved': (bool, True), 'age_groups': (str, ""),
              'page': (int, 0),
              'per_page': (int, 0)}
 
 def get_kwargs():
     kwargs = {arg: arg_type(request.values.get(arg, default_value)) for (arg, (arg_type, default_value)) in ARG_TYPES.iteritems()}
+
+    if kwargs['age_groups']:
+        try:
+            kwargs['age_groups'] = [int(value) for value in kwargs['age_groups'].split(',')]
+        except ValueError:
+            raise Exception("bad")
+
+
     kwargs.update({arg: datetime.date.fromtimestamp(int(request.values[arg])) for arg in ('start_date', 'end_date')})
     return kwargs
 

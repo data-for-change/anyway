@@ -28,7 +28,7 @@ except (ValueError, ImportError):
 failed_dirs = OrderedDict()
 
 CONTENT_ENCODING = 'cp1255'
-ACCIDENT_TYPE_REGEX = re.compile("Accidents Type (?P<type>\d)")
+ACCIDENT_TYPE_REGEX = re.compile(r"Accidents Type (?P<type>\d)")
 
 ACCIDENTS = 'accidents'
 CITIES = 'cities'

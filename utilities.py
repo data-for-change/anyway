@@ -37,7 +37,7 @@ class CsvReader(object):
     """
     loads and handles csv files
     """
-    _digit_pattern = re.compile('^-?\d*(\.\d+)?$')
+    _digit_pattern = re.compile(r'^-?\d*(\.\d+)?$')
 
     def __init__(self, filename):
         self._file = open(filename)

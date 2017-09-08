@@ -15,7 +15,7 @@ def main():
     identifiers = args.identifiers if args.identifiers else sys.stdin
 
     for identifier in identifiers:
-        m = re.match('\((\d+\.\d+),\s*(\d+\.\d+)\)', identifier)
+        m = re.match(r'\((\d+\.\d+),\s*(\d+\.\d+)\)', identifier)
         if not m:
             logging.error("Failed processing: " + identifier)
             continue

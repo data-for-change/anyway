@@ -171,7 +171,7 @@ def markers():
         })
 
     else: # defaults to json
-         return generate_json(result.markers, discussions, is_thin, total_records=result.total_records)
+        return generate_json(result.markers, discussions, is_thin, total_records=result.total_records)
 
 
 @app.route("/charts-data", methods=["GET"])
@@ -691,15 +691,15 @@ class OpenNewOrgAccount(BaseView):
     @roles_required('admin')
     @expose('/', methods=('GET', 'POST'))
     def index(self):
-       formAccount = OpenAccountForm(request.form)
-       if request.method == "POST" and formAccount.validate_on_submit():
-           user = User(username = formAccount.username.data, password = formAccount.password.data)
-           role = db_session.query(Role).filter(Role.id==2).first()
-           user.roles.append(role)
-           db_session.add(user)
-           db_session.commit()
-           flash('The user was created successfully')
-       return self.render('open_account.html', form=formAccount)
+        formAccount = OpenAccountForm(request.form)
+        if request.method == "POST" and formAccount.validate_on_submit():
+            user = User(username = formAccount.username.data, password = formAccount.password.data)
+            role = db_session.query(Role).filter(Role.id==2).first()
+            user.roles.append(role)
+            db_session.add(user)
+            db_session.commit()
+            flash('The user was created successfully')
+        return self.render('open_account.html', form=formAccount)
 
     def is_visible(self):
         return login.current_user.is_authenticated
@@ -780,11 +780,11 @@ def TestLogin():
 
 
 def get_current_user_first_name():
-     cur_id = current_user.get_id()
-     cur_user = db_session.query(User).filter(User.id == cur_id).first()
-     if cur_user is not None:
+    cur_id = current_user.get_id()
+    cur_user = db_session.query(User).filter(User.id == cur_id).first()
+    if cur_user is not None:
         return cur_user.first_name
-     return "User"
+    return "User"
 
 
 ######## rauth integration (login through facebook) ##################

@@ -64,7 +64,7 @@ def test_markers_fatal_only_response(app):
     assert 'markers' in resp
     #assert len(resp['markers']) == 16
     for i in range(0,len(resp['markers'])):
-      assert resp['markers'][i]['severity'] == 1
+        assert resp['markers'][i]['severity'] == 1
 
 
 def test_markers_severe_only(app):
@@ -84,7 +84,7 @@ def test_markers_severve_only_response(app):
     assert 'markers' in resp
     #assert len(resp['markers']) == 16
     for i in range(0,len(resp['markers'])):
-      assert resp['markers'][i]['severity'] == 2
+        assert resp['markers'][i]['severity'] == 2
 
 
 def test_markers_light_only(app):
@@ -104,7 +104,7 @@ def test_markers_light_only_response(app):
     assert 'markers' in resp
     #assert len(resp['markers']) == 16
     for i in range(0,len(resp['markers'])):
-      assert resp['markers'][i]['severity'] == 3
+        assert resp['markers'][i]['severity'] == 3
 
 
 def test_markers_accurate_only(app):
@@ -115,7 +115,7 @@ def test_markers_accurate_only(app):
     assert 'markers' in resp
     #assert len(resp['markers']) == 16
     for i in range(0,len(resp['markers'])):
-      assert resp['markers'][i]['locationAccuracy'] == 1
+        assert resp['markers'][i]['locationAccuracy'] == 1
 
 
 def test_markers_approx_only(app):
@@ -126,7 +126,7 @@ def test_markers_approx_only(app):
     assert 'markers' in resp
     #assert len(resp['markers']) == 16
     for i in range(0,len(resp['markers'])):
-      assert resp['markers'][i]['locationAccuracy'] in (2,3)
+        assert resp['markers'][i]['locationAccuracy'] in (2,3)
 
 
 def test_clusters(app):

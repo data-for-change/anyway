@@ -407,16 +407,16 @@ class DiscussionMarker(MarkerMixin, Base):
     @classmethod
     def parse(cls, data):
         # FIXME the id should be generated automatically, but isn't
-      last = DiscussionMarker.query.order_by('-id').first()
-      return DiscussionMarker(
-          id=last.id + 1 if last else 0,
-          latitude=data["latitude"],
-          longitude=data["longitude"],
-          created=datetime.datetime.now(),
-          title=data["title"],
-          identifier=data["identifier"],
-          type=CONST.MARKER_TYPE_DISCUSSION
-      )
+        last = DiscussionMarker.query.order_by('-id').first()
+        return DiscussionMarker(
+            id=last.id + 1 if last else 0,
+            latitude=data["latitude"],
+            longitude=data["longitude"],
+            created=datetime.datetime.now(),
+            title=data["title"],
+            identifier=data["identifier"],
+            type=CONST.MARKER_TYPE_DISCUSSION
+        )
 
     @staticmethod
     def bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng, show_discussions):

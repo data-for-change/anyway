@@ -1,6 +1,6 @@
 [MESSAGES CONTROL]
 disable=R,C,W
-enable=unused-import,wildcard-import,dangerous-default-value,anomalous-backslash-in-string
+enable=unused-import,wildcard-import,dangerous-default-value,anomalous-backslash-in-string,bad-indentation,mixed-indentation
 
 [REPORTS]
 reports=no

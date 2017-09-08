@@ -16,7 +16,7 @@ See [Code Directory Tree Structure](docs/CODE.md).
 Contributing
 -----------------------
 * We try to follow the process of other Hasadna projects, e.g. [Open-Knesset](https://oknesset-devel.readthedocs.org/en/latest/).
-* Please take a moment to read our ["Contibuting to ANYWAY" manifest](docs/CONTRIBUTING.md).
+* Please take a moment to read our ["Contributing to ANYWAY" manifest](docs/CONTRIBUTING.md).
 * To see our GitHub issues in a nicer interface, take a look at [HuBoard](https://huboard.com/hasadna/anyway). Check out the Ready list to find a task to work on. The Backlog list there contains issues that are still not ready to be started. The Working list contains issues already started by developers (make sure to move your issue there once you start working on it), and the Done list contains completed issues that are waiting to be confirmed done and closed.
 
 ## Getting the code
@@ -29,7 +29,7 @@ Contributing
 
 ## Installing dependencies
 
-You should be fimilar with setting up Python in your computer. You can consult the wiki for
+You should be familiar with setting up Python in your computer. You can consult the wiki for
 platform specific tutorials. Developing by using a [virtual
 environment](https://www.youtube.com/watch?v=N5vscPTWKOk) is highly recommended.
 
@@ -40,7 +40,7 @@ environment](https://www.youtube.com/watch?v=N5vscPTWKOk) is highly recommended.
 1. `sudo easy_install pip setuptools`
 1. Install postgresql: `brew install postgresql` (after installing [brew](http://brew.sh))
 
-### Both Ubuntu and OS X: 
+### Both Ubuntu and OS X:
 1. Activate your virtualenv and run `pip install -r requirements.txt -r test_requirements.txt`
 
 ### Windows (experimental)
@@ -52,13 +52,13 @@ See the Wiki.
   * windows shell: `set DATABASE_URL=sqlite:///local.db`
   
 1. First time, create tables: `python models.py`
-1. Optionally, get the [complete accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTdWdPMXV5c2gycW8/view?usp=sharing) after sending a permission request, and extract it into `/static/data/lms`. Otherwise you'll use the [example accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTSjNMUXYyeW4yQkk/view?usp=sharing) that you already got with the code, so no need to get it again.
+1. Optionally, get the [complete accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTdWdPMXV5c2gycW8/view?usp=sharing) after sending a permission request, and extract it into `/static/data/lms`. Otherwise, you'll use the [example accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTSjNMUXYyeW4yQkk/view?usp=sharing) that you already got with the code, so no need to get it again.
 1. Populate the data (markers etc.): `python process.py`: this will take less than an hour if you're using the example files (default), but if you have the complete data it may take several days. Be prepared.
 1. Populate united hatzala sample data: `python united.py --light` for the complete, or more recent data please contact the Anyway team.
 1. Run the app: `python main.py`: do this whenever you start working and want to try out your code.
 1. Navigate to http://127.0.0.1:5000 in your browser.
 1. If the site fails to load properly, make sure you have JDK installed on your machine
-1. If you wish to share your app on the local network you can expose flask by running `python main.py --open`
+1. If you wish to share your app on the local network, you can expose flask by running `python main.py --open`
     (Please note that this would expose your machine on port 5000 to all local nodes)
 
 It is useful to add the following to your `~/.bashrc` (fixing for the correct path):

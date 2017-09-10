@@ -1,7 +1,6 @@
 ##
-import globalmaptiles as globaltiles
+from . import globalmaptiles as globaltiles
 from math import cos, sin, atan2, sqrt
-import time
 ##
  
 def center_geolocation(geolocations):
@@ -107,5 +106,5 @@ if __name__ == '__main__':
     ##
     mercator = globaltiles.GlobalMercator()
     latlngs = [(28.43, 8), (28.43, 8), (28.44, 8), (35, 8)]
-    centers, clusters = cluster_markers(mercator, latlngs, 21)
+    centers, clusters, _ = cluster_markers(mercator, latlngs, 21)
     ##

@@ -51,15 +51,19 @@ See the Wiki.
   * bash: `export DATABASE_URL='sqlite:///local.db'`
   * windows shell: `set DATABASE_URL=sqlite:///local.db`
   
-1. First time, create tables: `python models.py`
+1. First time, create tables: `python main.py init_db`
 1. Optionally, get the [complete accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTdWdPMXV5c2gycW8/view?usp=sharing) after sending a permission request, and extract it into `/static/data/lms`. Otherwise, you'll use the [example accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTSjNMUXYyeW4yQkk/view?usp=sharing) that you already got with the code, so no need to get it again.
-1. Populate the data (markers etc.): `python process.py`: this will take less than an hour if you're using the example files (default), but if you have the complete data it may take several days. Be prepared.
-1. Populate united hatzala sample data: `python united.py --light` for the complete, or more recent data please contact the Anyway team.
-1. Run the app: `python main.py`: do this whenever you start working and want to try out your code.
+1. Populate the data (markers etc.): `python main.py process_data`: this will take less than an hour if you're
+   using the example files (default), but if you have the complete data it may take several days. Be
+   prepared.
+1. Populate united hatzala sample data: `python main.py import_united_data --light` for the
+   complete, or more recent data please contact the Anyway team.
+1. Run the app: `python main.py testserver`: do this whenever you start working and want to try out your code.
 1. Navigate to http://127.0.0.1:5000 in your browser.
 1. If the site fails to load properly, make sure you have JDK installed on your machine
-1. If you wish to share your app on the local network, you can expose flask by running `python main.py --open`
-    (Please note that this would expose your machine on port 5000 to all local nodes)
+1. If you wish to share your app on the local network, you can expose flask by running `python
+    main.py testserver --open` (Please note that this would expose your machine on port 5000 to all
+    local nodes)
 
 It is useful to add the following to your `~/.bashrc` (fixing for the correct path):
 
@@ -68,7 +72,7 @@ It is useful to add the following to your `~/.bashrc` (fixing for the correct pa
 Then you can simply start working by running the `anyway` command.
 
 ## Testing
-To run tests: `pylint -j $(nproc) *.py && pytest ./tests`.
+To run tests: `pylint -j $(nproc) anyway tests && pytest ./tests`.
 
 ## Docker
 See [DOCKER](docs/DOCKER.md)

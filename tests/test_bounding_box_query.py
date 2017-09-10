@@ -1,5 +1,5 @@
 import pytest
-from models import Marker  # for Marker.bounding_box_query
+from anyway.models import Marker  # for Marker.bounding_box_query
 import datetime
 
 # This tests year 2014 accidents as this is the current example git data for testing

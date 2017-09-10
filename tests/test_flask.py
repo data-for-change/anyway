@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-import main
+from anyway import app as flask_app
 import json
 import pytest
 
 @pytest.fixture
 def app():
-    return main.app.test_client()
+    return flask_app.test_client()
 
 
 def test_main(app):

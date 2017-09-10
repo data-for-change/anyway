@@ -2,20 +2,28 @@ from __future__ import print_function
 from csv import DictReader
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from . import config
 from flask import Flask
+import os
 import pyproj
 import threading
 import sys
 import re
 
 
+_PROJECT_ROOT = os.path.join(os.path.dirname(__file__), '..')
+
 def init_flask(name):
     """
     initializes a Flask instance with default values
     :param name: the name of the instance
     """
-    app = Flask(name)
-    app.config.from_object('config')
+    app = Flask(
+        name,
+        template_folder=os.path.join(_PROJECT_ROOT, 'templates'),
+        static_folder=os.path.join(_PROJECT_ROOT, 'static'),)
+    app.config.from_object(config)
+    app.config['BABEL_TRANSLATION_DIRECTORIES'] = os.path.join(_PROJECT_ROOT, 'translations')
     return app
 
 

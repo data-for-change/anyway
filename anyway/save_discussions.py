@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from models import DiscussionMarker
+from .models import DiscussionMarker
 from sqlalchemy.orm import load_only
 
 def main():

@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import datetime
-from constants import CONST
+from .constants import CONST
 
 
 db_connection_string = os.environ.get('CLEARDB_DATABASE_URL')

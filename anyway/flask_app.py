@@ -10,16 +10,16 @@ import flask.ext.assets
 from webassets.ext.jinja2 import AssetsExtension
 from webassets import Environment as AssetsEnvironment
 from flask.ext.babel import Babel,gettext
-from clusters_calculator import retrieve_clusters
+from .clusters_calculator import retrieve_clusters
 from sqlalchemy.orm import load_only
 
-from database import db_session
+from .database import db_session
 from flask import request, redirect, session
 import logging
 import datetime
 import json
-import utilities
-from constants import CONST
+from . import utilities
+from .constants import CONST
 
 from wtforms import form, fields, validators, StringField, PasswordField, Form
 import flask_admin as admin
@@ -29,12 +29,12 @@ from flask_admin import helpers, expose, BaseView
 from werkzeug.security import check_password_hash
 from sendgrid import sendgrid, SendGridClientError, SendGridServerError, Mail
 import glob
-from utilities import CsvReader
+from .utilities import CsvReader
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.security import Security, SQLAlchemyUserDatastore, roles_required, current_user, LoginForm, login_required
 from flask.ext.compress import Compress
 
-from oauth import OAuthSignIn
+from .oauth import OAuthSignIn
 
 from .base import user_optional
 from .models import (Marker, DiscussionMarker, HighlightPoint, Involved, User, ReportPreferences,

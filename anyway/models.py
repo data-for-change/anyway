@@ -9,7 +9,7 @@ from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, Date
 from sqlalchemy.orm import relationship, load_only, backref
 
 import datetime
-import localization
+from . import localization
 from .database import Base, db_session
 from flask.ext.security import UserMixin, RoleMixin
 
@@ -589,7 +589,7 @@ class ReportPreferences(Base):
 
 
 def init_db():
-    from database import engine
+    from .database import engine
     # import all modules here that might define models so that
     # they will be registered properly on the metadata.  Otherwise
     # you will have to import them first before calling init_db()

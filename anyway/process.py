@@ -10,11 +10,10 @@ from datetime import datetime
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy import or_, and_
 
-import field_names
+from . import field_names, localization
 from .models import Marker, Involved, Vehicle
 from . import models
 from .utilities import ItmToWGS84, init_flask, CsvReader, time_delta
-import localization
 import logging
 
 # Headless servers cannot use GUI file dialog and require raw user input

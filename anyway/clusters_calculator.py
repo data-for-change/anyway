@@ -1,27 +1,19 @@
 from .models import Marker
 from .pymapcluster import calculate_clusters
-import logging
-import concurrent.futures
+from .task_queue import task_queue, map_task, task_signature
 import multiprocessing
+
+
+@task_queue.task
+def calculate_marker_box(marker_box, kwargs):
+    kwargs.update(marker_box)
+    markers_in_box = Marker.bounding_box_query(**kwargs).markers.all()
+    return calculate_clusters(markers_in_box, kwargs['zoom'])
 
 
 def retrieve_clusters(**kwargs):
     marker_boxes = divide_to_boxes(kwargs['ne_lat'], kwargs['ne_lng'], kwargs['sw_lat'], kwargs['sw_lng'])
-    result_futures = []
-    logging.info('number of cores: ' + str(multiprocessing.cpu_count()))
-    with concurrent.futures.ThreadPoolExecutor(max_workers=multiprocessing.cpu_count()) as executor:
-        for marker_box in marker_boxes:
-
-            kwargs.update(marker_box)
-            markers_in_box = Marker.bounding_box_query(**kwargs).markers.all()
-            result_futures.append(executor.submit(calculate_clusters, markers_in_box, kwargs['zoom']))
-
-    completed_futures = concurrent.futures.wait(result_futures)
-    result = []
-    for future in completed_futures.done:
-        result.extend(future.result())
-
-    return result
+    return map_task(task_signature(calculate_marker_box, kwargs), marker_boxes)
 
 
 def divide_to_boxes(ne_lat, ne_lng, sw_lat, sw_lng):

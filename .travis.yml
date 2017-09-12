@@ -31,6 +31,7 @@ env:
 
 services:
   - postgresql
+  - rabbitmq
 
 sudo: false
 
@@ -41,6 +42,7 @@ install:
 before_script:
   - psql -c 'create database anyway;' -U postgres
   - alembic upgrade head
+  - celery worker -A anyway.clusters_calculator -D
 
 script:
   - pylint -j $(nproc) anyway tests main.py

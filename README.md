@@ -43,19 +43,17 @@ platform specific tutorials. Developing by using a [virtual
 environment](https://www.youtube.com/watch?v=N5vscPTWKOk) is highly recommended.
 
 ### Ubuntu
-`sudo apt-get install python2-pip python2-dev libpq-dev`
+1. `sudo apt-get install python2-pip python2-dev libpq-dev rabbitmq-server`
+1. `systemctl enable --now rabbitmq-server`
 
 ### Fedora
 1. `sudo dnf upgrade python-setuptools`
-1. `sudo dnf install python-pip`
-
-### CentOS
-1. `sudo yum upgrade python-setuptools`
-1. `sudo yum install python-pip`
+1. `sudo dnf install python-pip rabbitmq-server`
+1. `systemctl enable --now rabbitmq-server`
 
 ### OS X
 1. `sudo easy_install pip setuptools`
-1. Install postgresql: `brew install postgresql` (after installing [brew](http://brew.sh))
+1. Install and activate [RabbitMQ](https://www.rabbitmq.com/install-standalone-mac.html)
 
 ### For all platforms:
 1. Activate your virtualenv (in case of using one): `source *env-name*/bin/activate`
@@ -79,6 +77,7 @@ See the [Wiki](https://github.com/hasadna/anyway/wiki/Setting-up-a-Python-develo
 1. Run the app: `python main.py testserver`: do this whenever you start working and want to try out your code.
 1. Navigate to http://127.0.0.1:5000 in your browser.
 1. If the site fails to load properly, make sure you have JDK installed on your machine
+1. If your platform supports RabbitMQ, you should lunch a Celery worker by running `celery worker -A anyway.clusters_calculator -D`. Otherwise, export the environment variable `ANYWAY_DISABLE_CELERY` to disable the use of Celery.
 1. If you wish to share your app on the local network, you can expose flask by running `python
     main.py testserver --open` (Please note that this would expose your machine on port 5000 to all
     local nodes)

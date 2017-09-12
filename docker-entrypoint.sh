@@ -1,6 +1,5 @@
 #!/bin/bash
-
-cd /anyway
+set -u
 
 alembic upgrade head
 python main.py process cbs

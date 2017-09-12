@@ -15,6 +15,12 @@ The datasets Anyway uses are documented here:
 
 See [Code Directory Tree Structure](docs/CODE.md).
 
+About
+-----------------------
+Anyway's main goal is raising awareness of road accidents and act to avoid them, by showing road accidents with casualties over map.<br>
+The shown data based on reports supplied by the Israeli Central Bureau of Statistics (CBS) and real time reports from United Hatzalah of Israel.<br>
+Anyway is an open source project, sponsored by The Public Knowledge Workshop (“Hasadna”).
+
 Contributing
 -----------------------
 * We try to follow the process of other Hasadna projects, e.g. [Open-Knesset](https://oknesset-devel.readthedocs.org/en/latest/).

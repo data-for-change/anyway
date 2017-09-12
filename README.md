@@ -1,15 +1,17 @@
 ANYWAY [![Build Status](https://travis-ci.org/hasadna/anyway.png)](https://travis-ci.org/hasadna/anyway)
 ======
 
-oway.org.il - Crowd-sourced road hazard reporting website.
+[anyway.co.il](https://www.anyway.co.il/) - Crowd-sourced road hazard reporting website.
 
-Feel free to contribute to the project.
+Feel free to contribute the project.
 
 To report bugs and feature requests, please [open an issue](https://github.com/hasadna/anyway/issues) on GitHub.
 
 See also [our Android app](https://github.com/hasadna/anywayAndroidApp) on GitHub.
 
-See documentation for our source dataset LAMAS is [here](https://github.com/hasadna/anyway/blob/dev/docs/LMS.md) and United is [here](https://github.com/hasadna/anyway/blob/dev/docs/UNITED.md).
+The datasets Anyway uses are documented here:
+* [CBS (Central Bureau of Statistics, למ"ס)](https://github.com/hasadna/anyway/blob/dev/docs/LMS.md)
+* [United Hatzalah (איחוד הצלה)](https://github.com/hasadna/anyway/blob/dev/docs/UNITED.md)
 
 See [Code Directory Tree Structure](docs/CODE.md).
 
@@ -29,34 +31,43 @@ Contributing
 
 ## Installing dependencies
 
-You should be familiar with setting up Python in your computer. You can consult the wiki for
+You should be familiar with setting up Python in your computer. You can consult the [wiki](https://github.com/hasadna/anyway/wiki/Setup) for
 platform specific tutorials. Developing by using a [virtual
 environment](https://www.youtube.com/watch?v=N5vscPTWKOk) is highly recommended.
 
 ### Ubuntu
 `sudo apt-get install python2-pip python2-dev libpq-dev`
 
+### Fedora
+1. `sudo dnf upgrade python-setuptools`
+1. `sudo dnf install python-pip`
+
+## CentOS
+1. `sudo yum upgrade python-setuptools`
+1. `sudo yum install python-pip`
+
 ### OS X
 1. `sudo easy_install pip setuptools`
 1. Install postgresql: `brew install postgresql` (after installing [brew](http://brew.sh))
 
-### Both Ubuntu and OS X:
-1. Activate your virtualenv and run `pip install -r requirements.txt -r test_requirements.txt`
+### For all platforms:
+1. Activate your virtualenv (in case of using one): `source *env-name*/bin/activate`
+1. Run `pip install -r requirements.txt -r test_requirements.txt`
 
 ### Windows (experimental)
-See the Wiki.
+See the [Wiki](https://github.com/hasadna/anyway/wiki/Setting-up-a-Python-development-environment-in-Windows).
 
 ## Local first run (all platforms)
 1. Define connection string (needs to be defined whenever you start working):
   * bash: `export DATABASE_URL='sqlite:///local.db'`
   * windows shell: `set DATABASE_URL=sqlite:///local.db`
-  
+
 1. First time, create tables: `python main.py init_db`
 1. Optionally, get the [complete accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTdWdPMXV5c2gycW8/view?usp=sharing) after sending a permission request, and extract it into `/static/data/lms`. Otherwise, you'll use the [example accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTSjNMUXYyeW4yQkk/view?usp=sharing) that you already got with the code, so no need to get it again.
 1. Populate the data (markers etc.): `python main.py process_data`: this will take less than an hour if you're
    using the example files (default), but if you have the complete data it may take several days. Be
    prepared.
-1. Populate united hatzala sample data: `python main.py import_united_data --light` for the
+1. Populate United Hatzalah sample data: `python main.py import_united_data --light` for the
    complete, or more recent data please contact the Anyway team.
 1. Run the app: `python main.py testserver`: do this whenever you start working and want to try out your code.
 1. Navigate to http://127.0.0.1:5000 in your browser.
@@ -72,11 +83,10 @@ It is useful to add the following to your `~/.bashrc` (fixing for the correct pa
 Then you can simply start working by running the `anyway` command.
 
 ## Testing
-To run tests: `pylint -j $(nproc) anyway tests && pytest ./tests`.
+To run tests: `pylint -j $(nproc) anyway tests && pytest ./tests`
 
 ## Docker
 See [DOCKER](docs/DOCKER.md)
 
 ## Translation and Localization
 See [TRANSLATE](docs/TRANSLATE.md)
-

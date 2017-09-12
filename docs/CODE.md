@@ -4,8 +4,8 @@ Code Directory Tree Structure
 This page describes the structure of the code comprising the project.
 
 ## Python
-All Python modules reside in the root directory of the repository:
-* `main.py`: main server code, using the Flask web framework.
+All Python modules reside in the `anyway` subdirectory:
+* `app.py`: main server code, using the Flask web framework.
 * `models.py`: definitions for the classes used in the Python code, and through SQLAlchemy, definitions for the corresponding database tables.
 * `process.py`: loading data from the Central Bureau of Statistics (LMS), of which a sample resides in `static/data/lms`.
 * `united.py`: loading data from United Hatzala, of which a sample resides in `static/data/united`.
@@ -18,6 +18,8 @@ All Python modules reside in the root directory of the repository:
 * `oauth.py`: user authentication.
 * `utilities.py`: miscellaneous utilities.
 * `save_discussions.py`, `load_discussions.py`: used for saving/loading discussion markers to/from Disqus.
+
+One file, called `main.py` resides in the root of the repository. This file contains all commands needed to manipulate the database and run the server. Run `./main.py --help` for help.
 
 ## Jinja2 Templates
 We use Jinja2 for templates, to allow embedding data into HTML files. All templates reside in `templates`.

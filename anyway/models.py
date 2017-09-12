@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
-from constants import CONST
+from .constants import CONST
 from collections import namedtuple
 from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table, \
         ForeignKeyConstraint, func
@@ -10,7 +10,7 @@ from sqlalchemy.orm import relationship, load_only, backref
 
 import datetime
 import localization
-from database import Base, db_session
+from .database import Base, db_session
 from flask.ext.security import UserMixin, RoleMixin
 
 
@@ -596,6 +596,4 @@ def init_db():
     logging.info("Importing models")
     logging.info("Creating all tables")
     Base.metadata.create_all(bind=engine)
-	
-if __name__ == "__main__":
-    init_db()
+

@@ -22,11 +22,11 @@ install:
 before_script:
   - psql -c 'create database anyway;' -U postgres
   - export DATABASE_URL='postgresql://postgres@localhost/anyway'
-  - python models.py
+  - ./main.py init_db
 
 script:
-  - pylint -j $(nproc) *.py tests
+  - pylint -j $(nproc) anyway tests
   - eslint static/js --ignore-path=static/js/.eslintignore
-  - python process.py
-  - python united.py --light
+  - ./main.py process_data
+  - ./main.py import_united_data --light
   - pytest tests

@@ -1,5 +1,5 @@
-from models import Marker
-from static.pymapcluster import calculate_clusters
+from .models import Marker
+from .pymapcluster import calculate_clusters
 import logging
 import concurrent.futures
 import multiprocessing

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import argparse
-from models import DiscussionMarker
+from .models import DiscussionMarker
 import re
-from database import db_session
+from .database import db_session
 import sys
 import logging
 

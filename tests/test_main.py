@@ -1,5 +1,5 @@
-from main import parse_data
-from models import Marker
+from anyway.flask_app import parse_data
+from anyway.models import Marker
 
 
 def test_data_null():

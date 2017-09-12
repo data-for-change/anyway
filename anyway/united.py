@@ -4,15 +4,14 @@ import calendar
 import csv
 from datetime import datetime
 import os
-import argparse
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
 
-from constants import CONST
-from models import Marker
-from utilities import init_flask
-import importmail
+from .constants import CONST
+from .models import Marker
+from .utilities import init_flask
+from .import importmail
 
 from xml.dom import minidom
 
@@ -339,25 +338,15 @@ def update_db(collection):
     logging.info("\tFinished commiting the changes")
 
 
-def main():
+def main(light=True, username='', password='', lastmail=False):
     """
     Calls importmail.py prior to importing to DB
     """
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--light', action='store_true',
-                        help='Import without downloading any new files')
-    parser.add_argument('--username', default='')
-    parser.add_argument('--password', default='')
-    parser.add_argument('--lastmail', action='store_true')
-    parser.add_argument('--newformat', action='store_true',
-                        help='Parse files using new format')
-    args = parser.parse_args()
-
     collection = retrieve_ims_xml()
 
-    if not args.light:
+    if not light:
         logging.info("Importing data from mail...")
-        importmail.main(args.username, args.password, args.lastmail)
+        importmail.main(username, password, lastmail)
     united_path = "static/data/united/"
     total = 0
     logging.info("Loading United accidents...")
@@ -367,7 +356,3 @@ def main():
     logging.info("\tImported {0} items".format(total))
 
     update_db(collection)
-
-
-if __name__ == "__main__":
-    main()

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import glob
 import os
-import argparse
 import json
 from collections import OrderedDict
 import itertools
@@ -12,9 +11,9 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy import or_, and_
 
 import field_names
-from models import Marker, Involved, Vehicle
-import models
-from utilities import ItmToWGS84, init_flask, CsvReader, time_delta
+from .models import Marker, Involved, Vehicle
+from . import models
+from .utilities import ItmToWGS84, init_flask, CsvReader, time_delta
 import localization
 import logging
 
@@ -402,32 +401,24 @@ def get_provider_code(directory_name=None):
             return int(ans)
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--specific_folder', dest='specific_folder', action='store_true', default=False)
-    parser.add_argument('--delete_all', dest='delete_all', action='store_true', )
-    parser.add_argument('--path', type=str, default="static/data/lms")
-    parser.add_argument('--batch_size', type=int, default=100)
-    parser.add_argument('--provider_code', type=int)
-    args = parser.parse_args()
-
-    if args.specific_folder:
+def main(specific_folder, delete_all, path, batch_size, provider_code):
+    if specific_folder:
         if fileDialog:
-            dir_name = tkFileDialog.askdirectory(initialdir=os.path.abspath(args.path),
+            dir_name = tkFileDialog.askdirectory(initialdir=os.path.abspath(path),
                                                  title='Please select a directory')
         else:
             dir_name = raw_input('Please provide the directory path: ')
 
         dir_list = [dir_name]
-        if args.delete_all:
+        if delete_all:
             confirm_delete_all = raw_input("Are you sure you want to delete all the current data? (y/n)\n")
             if confirm_delete_all.lower() == 'n':
-                args.delete_all = False
+                delete_all = False
     else:
-        dir_list = glob.glob("{0}/*/*".format(args.path))
+        dir_list = glob.glob("{0}/*/*".format(path))
 
     # wipe all the Markers and Involved data first
-    if args.delete_all:
+    if delete_all:
         tables = (Vehicle, Involved, Marker)
         logging.info("Deleting tables: " + ", ".join(table.__name__ for table in tables))
         for table in tables:
@@ -438,8 +429,8 @@ def main():
     total = 0L
     for directory in dir_list:
         parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
-        provider_code = args.provider_code if args.provider_code else get_provider_code(parent_directory)
-        total += import_to_datastore(directory, provider_code, args.batch_size)
+        provider_code = provider_code if provider_code else get_provider_code(parent_directory)
+        total += import_to_datastore(directory, provider_code, batch_size)
 
     delete_invalid_entries()
 
@@ -448,6 +439,3 @@ def main():
     logging.info("Finished processing all directories{0}{1}".format(", except:\n" if failed else "",
                                                              "\n".join(failed)))
     logging.info("Total: {0} items in {1}".format(total, time_delta(started)))
-
-if __name__ == "__main__":
-    main()

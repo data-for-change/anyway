@@ -1,25 +1,27 @@
-import itertools
-from celery import Celery, group
 from models import Marker
 from static.pymapcluster import calculate_clusters
+import logging
+import concurrent.futures
 import multiprocessing
-
-
-celery_app = Celery('tasks', backend='rpc://', broker='pyamqp://guest@localhost//')
-
-@celery_app.task
-def calculate_marker_box(kwargs, marker_box):
-    kwargs.update(marker_box)
-    markers_in_box = Marker.bounding_box_query(**kwargs).markers.all()
-    return calculate_clusters(markers_in_box, kwargs['zoom'])
 
 
 def retrieve_clusters(**kwargs):
     marker_boxes = divide_to_boxes(kwargs['ne_lat'], kwargs['ne_lng'], kwargs['sw_lat'], kwargs['sw_lng'])
-    job = group([calculate_marker_box.s(kwargs, marker_box) for marker_box in marker_boxes])
-    result = job.apply_async()
-    result.join()
-    return list(itertools.chain.from_iterable(result.get()))
+    result_futures = []
+    logging.info('number of cores: ' + str(multiprocessing.cpu_count()))
+    with concurrent.futures.ThreadPoolExecutor(max_workers=multiprocessing.cpu_count()) as executor:
+        for marker_box in marker_boxes:
+
+            kwargs.update(marker_box)
+            markers_in_box = Marker.bounding_box_query(**kwargs).markers.all()
+            result_futures.append(executor.submit(calculate_clusters, markers_in_box, kwargs['zoom']))
+
+    completed_futures = concurrent.futures.wait(result_futures)
+    result = []
+    for future in completed_futures.done:
+        result.extend(future.result())
+
+    return result
 
 
 def divide_to_boxes(ne_lat, ne_lng, sw_lat, sw_lng):

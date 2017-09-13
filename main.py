@@ -85,10 +85,10 @@ def load_discussions(identifiers):
         try:
             db_session.add(marker)
             db_session.commit()
-            logging.info("Added:  " + identifier, end="")
+            logging.info("Added:  " + identifier)
         except:
             db_session.rollback()
-            logging.warn("Failed: " + identifier, end="")
+            logging.warn("Failed: " + identifier)
 
 
 if __name__ == '__main__':

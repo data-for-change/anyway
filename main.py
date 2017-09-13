@@ -71,6 +71,7 @@ def load_discussions(identifiers):
     identifiers = identifiers or sys.stdin
 
     for identifier in identifiers:
+        identifier = identifier.strip()
         m = re.match(r'\((\d+\.\d+),\s*(\d+\.\d+)\)', identifier)
         if not m:
             logging.error("Failed processing: " + identifier)
@@ -86,9 +87,9 @@ def load_discussions(identifiers):
             db_session.add(marker)
             db_session.commit()
             logging.info("Added:  " + identifier)
-        except:
+        except Exception as e:
             db_session.rollback()
-            logging.warn("Failed: " + identifier)
+            logging.warn("Failed: " + identifier + ": " + e.message)
 
 
 if __name__ == '__main__':

@@ -1,9 +1,10 @@
 ANYWAY [![Build Status](https://travis-ci.org/hasadna/anyway.png)](https://travis-ci.org/hasadna/anyway)
 ======
 
-[anyway.co.il](https://www.anyway.co.il/) - Crowd-sourced road hazard reporting website.
+[anyway.co.il](https://www.anyway.co.il/) - Crowd-sourced road hazard reporting website.<br>
+Also available at [oway.org.il](https://www.oway.org.il/).
 
-Feel free to contribute the project.
+Feel free to contribute to the project.
 
 To report bugs and feature requests, please [open an issue](https://github.com/hasadna/anyway/issues) on GitHub.
 

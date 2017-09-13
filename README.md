@@ -49,7 +49,7 @@ environment](https://www.youtube.com/watch?v=N5vscPTWKOk) is highly recommended.
 1. `sudo dnf upgrade python-setuptools`
 1. `sudo dnf install python-pip`
 
-## CentOS
+### CentOS
 1. `sudo yum upgrade python-setuptools`
 1. `sudo yum install python-pip`
 

@@ -340,38 +340,74 @@ def get_files(directory):
             yield name, csv
 
 
+def _batch_iterator(iterable, batch_size):
+    iterator = iter(iterable)
+    iteration_stopped = False
+
+    while True:
+        batch = []
+        for i in xrange(batch_size):
+            try:
+                batch.append(next(iterator))
+            except StopIteration:
+                iteration_stopped = True
+                break
+
+        yield batch
+        if iteration_stopped:
+            break
+
+
 def import_to_datastore(directory, provider_code, batch_size):
     """
     goes through all the files in a given directory, parses and commits them
     """
     try:
+        assert batch_size > 0
+
         files_from_lms = dict(get_files(directory))
         if len(files_from_lms) == 0:
             return 0
         logging.info("Importing '{}'".format(directory))
         started = datetime.now()
 
-        accidents = list(import_accidents(provider_code=provider_code, **files_from_lms))
+        new_ids = set()
+        new_items = 0
 
-        new_ids = [m["id"] for m in accidents
-                   if 0 == Marker.query.filter(and_(Marker.id == m["id"],
-                                                    Marker.provider_code == m["provider_code"])).count()]
+        accidents = (accident for accident
+                     in import_accidents(provider_code=provider_code, **files_from_lms)
+                     if  Marker.query.filter(
+                             and_(Marker.id == accident["id"],
+                                  Marker.provider_code == accident["provider_code"])).scalar() is None)
+
+        for accidents_chunk in _batch_iterator(iterable=accidents, batch_size=batch_size):
+            for accident in accidents_chunk:
+                new_ids.add(accident["id"])
+
+            db.session.bulk_insert_mappings(Marker, accidents_chunk)
+
+            new_items += len(accidents_chunk)
+
         if not new_ids:
             logging.info("\t\tNothing loaded, all accidents already in DB")
             return 0
 
-        db.session.execute(Marker.__table__.insert(), [m for m in accidents if m["id"] in new_ids])
-        db.session.commit()
-        involved = list(import_involved(provider_code=provider_code, **files_from_lms))
-        db.session.execute(Involved.__table__.insert(), [i for i in involved if i["accident_id"] in new_ids])
-        db.session.commit()
-        vehicles = list(import_vehicles(provider_code=provider_code, **files_from_lms))
-        db.session.execute(Vehicle.__table__.insert(), [v for v in vehicles if v["accident_id"] in new_ids])
-        db.session.commit()
+        involved = (record for record in
+                    import_involved(provider_code=provider_code, **files_from_lms)
+                    if record["accident_id"] in new_ids)
+        for involved_chunk in _batch_iterator(iterable=involved, batch_size=batch_size):
+            db.session.bulk_insert_mappings(Involved, involved_chunk)
+            new_items += len(involved_chunk)
 
-        total = len(accidents) + len(involved) + len(vehicles)
-        logging.info("\t{0} items in {1}".format(total, time_delta(started)))
-        return total
+        vehicles = (record for record in
+                    import_vehicles(provider_code=provider_code, **files_from_lms)
+                    if record["accident_id"] in new_ids)
+        for vehicles_chunk in _batch_iterator(iterable=vehicles, batch_size=batch_size):
+            db.session.bulk_insert_mappings(Vehicle, vehicles_chunk)
+            new_items += len(vehicles_chunk)
+
+        logging.info("\t{0} items in {1}".format(new_items, time_delta(started)))
+        return new_items
     except ValueError as e:
         failed_dirs[directory] = e.message
         return 0

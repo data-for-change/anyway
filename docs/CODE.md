@@ -5,14 +5,14 @@ This page describes the structure of the code comprising the project.
 
 ## Python
 All Python modules reside in the `anyway` subdirectory:
-* `app.py`: main server code, using the Flask web framework.
+* `flask_app.py`: main server code, using the Flask web framework.
 * `models.py`: definitions for the classes used in the Python code, and through SQLAlchemy, definitions for the corresponding database tables.
-* `process.py`: loading data from the Central Bureau of Statistics (LMS), of which a sample resides in `static/data/lms`.
-* `united.py`: loading data from United Hatzala, of which a sample resides in `static/data/united`.
-* `importmail.py`: connecting to the Gmail inbox we use for storing the United Hatzala data; used by `united.py`.
+* `process.py`: loading data from the Central Bureau of Statistics (CBS, למ"ס), of which a sample resides in `static/data/lms`.
+* `united.py`: loading data from United Hatzalah, of which a sample resides in `static/data/united`.
+* `importmail.py`: connecting to the Gmail inbox we use for storing the United Hatzalah data; used by `united.py`.
 * `clusters_calculator.py`, `globalmaptiles.py`: algorithm for calculating clusters of markers to be sent instead of individual ones in far zoom level.
 * `localization.py`: translation of field values.
-* `field_names.py`: English names of fields from LMS data.
+* `field_names.py`: English names of fields from CBS data.
 * `constants.py`: default values for map parameters.
 * `base.py`, `config.py`, `database.py`: configuration for database and web access.
 * `oauth.py`: user authentication.

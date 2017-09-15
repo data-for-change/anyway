@@ -93,7 +93,7 @@ def get_cluster_size(index, clusters):
     return Counter(clusters)[index]
 
 def calculate_clusters(markers, zoom, radius=50):
-    centers, clusters, sizes = create_clusters_centers(markers, zoom, radius)
+    centers, _, sizes = create_clusters_centers(markers, zoom, radius)
     json_clusts=[]
 
     for i, point in enumerate(centers):

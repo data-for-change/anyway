@@ -545,7 +545,7 @@ def init_login():
 
     # Create user loader function
     @login_manager.user_loader
-    def load_user(user_id):
+    def load_user(user_id): # pylint: disable=unused-variable
         return db_session.query(User).get(user_id)
 
 
@@ -634,7 +634,7 @@ class SendToSubscribersView(BaseView):
             for user in users_send_email_to:
                 message.add_bcc(user.email)
             try:
-                status, msg = sg.send(message)
+                sg.send(message)
             except SendGridClientError:
                 return "Error occurred while trying to send the emails"
             except SendGridServerError:

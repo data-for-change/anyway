@@ -13,7 +13,7 @@ pyproj==1.9.4
 webassets==0.10.1
 gunicorn==18.0
 itsdangerous==0.23
-psycopg2==2.5.5
+psycopg2
 wsgiref==0.1.2
 yuicompressor==2.4.8
 Flask-Admin==1.1.0

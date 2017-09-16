@@ -84,7 +84,7 @@ class Point(object):
     id = Column(Integer, primary_key=True)
     latitude = Column(Float())
     longitude = Column(Float())
-        
+
 class MarkerMixin(Point):
     type = Column(Integer)
     title = Column(String(100))
@@ -560,7 +560,7 @@ class GeneralPreferences(Base):
         return {
             "user_id": self.user_id,
             "minimum_displayed_severity": self.minimum_displayed_severity,
-            "resource_type": self.resource_type           
+            "resource_type": self.resource_type
         }
 
 class ReportPreferences(Base):
@@ -583,7 +583,7 @@ class ReportPreferences(Base):
             "latitude": self.latitude,
             "longitude": self.longitude,
             "radius": self.radius,
-            "minimum_severity": self.minimum_severity                       
+            "minimum_severity": self.minimum_severity
         }
 
 
@@ -596,4 +596,3 @@ def init_db():
     logging.info("Importing models")
     logging.info("Creating all tables")
     Base.metadata.create_all(bind=engine)
-

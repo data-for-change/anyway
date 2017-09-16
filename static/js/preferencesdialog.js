@@ -3,13 +3,13 @@
  */
 var PreferencesDialog = Backbone.View.extend({
     className: "preferences-dialog",
-    events: {        
+    events: {
         "click .save-button": "submit",
         "click .close-button": "close",
         "change .produceAccidentsReport" : "showHideReportPrefereces",
         "change .prefTypeOfAccidents" : "changeTypeOfAccidents",
         "change .prefDisableHistoricalReport" : "changeSendHistoricalReport"
-    },     
+    },
     render: function () {
         var self = this;
         self.$el.append($("#preferences-dialog-template").html());
@@ -45,18 +45,18 @@ var PreferencesDialog = Backbone.View.extend({
             } else {
                 self.$el.find("#produceAccidentsReport").prop('checked', false);
                 $(".prefReportControls *").attr("disabled", "disabled");
-            }                  
+            }
             self.modal = self.$el.find(".modal");
             self.modal.modal("show");
             return self;
         });
-        
+
     },
     close: function () {
         this.modal.modal("hide");
     },
-    submit: function () {   
-        var accident_severity = this.$el.find("#prefAccidentSeverity :selected").val();    
+    submit: function () {
+        var accident_severity = this.$el.find("#prefAccidentSeverity :selected").val();
         var resource_types = [];
         var prefAccidentsLms = this.$el.find("#prefAccidentsLms");
         if ($(prefAccidentsLms).is(':checked')) {
@@ -69,8 +69,8 @@ var PreferencesDialog = Backbone.View.extend({
         var produceAccidentsReport = this.$el.find("#produceAccidentsReport").is(':checked');
         var lat = this.$el.find("#prefLat").val();
         var lon = this.$el.find("#prefLon").val();
-        var prefRadius = this.$el.find("#prefRadius :selected").val(); 
-        var prefAccidentSeverityForReport = this.$el.find("#prefAccidentSeverityForReport :selected").val();               
+        var prefRadius = this.$el.find("#prefRadius :selected").val();
+        var prefAccidentSeverityForReport = this.$el.find("#prefAccidentSeverityForReport :selected").val();
         var prefDisableHistoricalReport = this.$el.find("#prefDisableHistoricalReport");
         var history_report;
         if ($(prefDisableHistoricalReport).is(':checked')){
@@ -94,7 +94,7 @@ var PreferencesDialog = Backbone.View.extend({
     },
     changeTypeOfAccidents : function (ev) {
         var prefAccidentsLms = this.$el.find("#prefAccidentsLms").is(':checked');
-        var prefAccidentsIhud = this.$el.find("#prefAccidentsIhud").is(':checked');            
+        var prefAccidentsIhud = this.$el.find("#prefAccidentsIhud").is(':checked');
         if (!prefAccidentsLms && !prefAccidentsIhud) {
             $(ev.currentTarget).prop('checked', true);
         }

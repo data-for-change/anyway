@@ -55,7 +55,7 @@ app.config['OAUTH_CREDENTIALS'] = {
     },
     'google': {
         'id': os.environ.get('GOOGLE_LOGIN_CLIENT_ID'),
-        'secret': os.environ.get('GOOGLE_LOGIN_CLIENT_SECRET')    
+        'secret': os.environ.get('GOOGLE_LOGIN_CLIENT_SECRET')
     }
 }
 assets = flask.ext.assets.Environment()
@@ -511,7 +511,7 @@ class HistoricalReportPeriods:
         self.period_value=period_value
         self.severity_string=severity_string
 
-    
+
 class LoginFormAdmin(form.Form):
     username = fields.StringField(validators=[validators.required()])
     password = fields.PasswordField(validators=[validators.required()])
@@ -812,9 +812,9 @@ def oauth_callback(provider):
     oauth = OAuthSignIn.get_provider(provider)
     if provider == 'google':
         username, email = oauth.callback()
-        if email is None:        
+        if email is None:
             flash('Authentication failed.')
-            return redirect(url_for('index'))    
+            return redirect(url_for('index'))
         user=User.query.filter_by(email=email).first()
         if not user:
             user = User(nickname=username, email=email, provider=provider)
@@ -832,4 +832,3 @@ def oauth_callback(provider):
             db.session.commit()
     login.login_user(user, True)
     return redirect(url_for('index'))
-

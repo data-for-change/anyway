@@ -665,7 +665,7 @@ $(function () {
             $('#toggle-sidebar').click(function () {
                 $('.main').toggleClass('main-open').toggleClass('main-close');
                 $('.sidebar-container').toggleClass('sidebar-container-open').toggleClass('sidebar-container-close');
-                
+
                 setTimeout(function() {
                     google.maps.event.trigger(this.map, 'resize');
                 }.bind(this), 500);
@@ -1184,7 +1184,7 @@ $(function () {
             console.log("cluster items counter: " + clusterItemsCounter);
             console.log("Selected MaxIntensity level: " + heatMapMaxIntensity);
             console.log("Zoom level: " + this.map.zoom);
-            
+
             this.heatmap = new google.maps.visualization.HeatmapLayer({
                 data: latlngListForHeatMap,
                 maxIntensity: heatMapMaxIntensity,
@@ -1210,7 +1210,7 @@ $(function () {
                 } else {
                     severe = '';
                 }
-                
+
                 if (fatal == '' && severe == '' && light == '') {
                     severityText = "";
                 }

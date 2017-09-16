@@ -10,6 +10,7 @@
         "no-unused-vars": "off",
         "no-redeclare": "off",
         "no-inner-declarations": "off",
+        "no-trailing-spaces": "error",
         "linebreak-style": [
             "error",
             "unix"

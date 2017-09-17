@@ -19,7 +19,7 @@ DEFAULT_LAT_COL = 11
 DATE_INPUT_FORMAT = '%d-%m-%Y'
 DATE_URL_FORMAT = '%Y-%m-%d'
 
-ANYWAY_MARKERS_FORMAT = "https://www.anyway.co.il/markers?ne_lat={lat_max}&ne_lng={lon_max}&sw_lat={lat_min}&sw_lng={lon_min}&zoom=17&thin_markers=false&start_date={start_date}&end_date={end_date}&show_fatal=1&show_severe=1&show_light=1&approx=1&accurate=1&show_markers=1&show_discussions=&show_urban=3&show_intersection=3&show_lane=3&show_day=7&show_holiday=0&show_time=24&start_time=25&end_time=25&weather=0&road=0&separation=0&surface=0&acctype={acc_type}&controlmeasure=0&district=0&case_type=0"
+ANYWAY_MARKERS_FORMAT = "http://anyway-unstable.herokuapp.com/markers?ne_lat={lat_max}&ne_lng={lon_max}&sw_lat={lat_min}&sw_lng={lon_min}&zoom=17&thin_markers=false&start_date={start_date}&end_date={end_date}&show_fatal=1&show_severe=1&show_light=1&approx=1&accurate=1&show_markers=1&show_discussions=&show_urban=3&show_intersection=3&show_lane=3&show_day=7&show_holiday=0&show_time=24&start_time=25&end_time=25&weather=0&road=0&separation=0&surface=0&acctype={acc_type}&controlmeasure=0&district=0&case_type=0"
 ANYWAY_UI_FORMAT = "https://www.anyway.co.il/?zoom={zoom}&start_date={start_date}&end_date={end_date}&lat={lat}&lon={lon}&show_fatal=1&show_severe=1&show_light=1&approx=1&accurate=1&show_markers=1&show_discussions=&show_urban=3&show_intersection=3&show_lane=3&show_day=7&show_holiday=0&show_time=24&start_time=25&end_time=25&weather=0&road=0&separation=0&surface=0&acctype={acc_type}&controlmeasure=0&district=0&case_type=0"
 
 
@@ -120,11 +120,12 @@ def get_accidents_around(city, name, lat, lon, start_date, end_date, distance, p
     accidents_details['HARD'] = markers_data['hard']
     accidents_details['LIGHT'] = markers_data['light']
     accidents_details['UI_URL'] = ui_url
+    accidents_details['MARKERS_URL'] = markers_url
     return accidents_details
 
 
 def main(input_csv_filename, start_date, end_date, distance, pedestrian_only, output_filename):
-    headers = ['INDEX BY GRADE', 'CITY', 'NAME', 'GRADE', 'DEADLY', 'HARD', 'LIGHT', 'UI_URL']
+    headers = ['INDEX BY GRADE', 'CITY', 'NAME', 'GRADE', 'DEADLY', 'HARD', 'LIGHT', 'UI_URL', 'MARKERS_URL']
     accidents_list = []
     with io.open(input_csv_filename, 'r', encoding='utf-8') as csvfile:
         i = 0
@@ -141,7 +142,7 @@ def main(input_csv_filename, start_date, end_date, distance, pedestrian_only, ou
     with io.open(output_filename, 'w', encoding='utf-16') as out_file:
         out_file.write(unicode('\t'.join(headers) + '\n'))
         for accidents_details in accidents_list:
-            out_file.write(u'{index}\t{city}\t{name}\t{grade}\t{deadly}\t{hard}\t{light}\t{ui_url}\n'.format(
+            out_file.write(u'{index}\t{city}\t{name}\t{grade}\t{deadly}\t{hard}\t{light}\t{ui_url}\t{markers_url}\n'.format(
                 index=accidents_details['INDEX BY GRADE'],
                 city=accidents_details['CITY'],
                 name=accidents_details['NAME'],
@@ -149,7 +150,8 @@ def main(input_csv_filename, start_date, end_date, distance, pedestrian_only, ou
                 deadly=accidents_details['DEADLY'],
                 hard=accidents_details['HARD'],
                 light=accidents_details['LIGHT'],
-                ui_url=accidents_details['UI_URL']))
+                ui_url=accidents_details['UI_URL'],
+                markers_url=accidents_details['MARKERS_URL']))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

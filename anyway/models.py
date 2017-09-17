@@ -2,15 +2,15 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
-from constants import CONST
+from .constants import CONST
 from collections import namedtuple
 from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table, \
         ForeignKeyConstraint, func
 from sqlalchemy.orm import relationship, load_only, backref
 
 import datetime
-import localization
-from database import Base, db_session
+from . import localization
+from .database import Base, db_session
 from flask.ext.security import UserMixin, RoleMixin
 
 
@@ -84,7 +84,7 @@ class Point(object):
     id = Column(Integer, primary_key=True)
     latitude = Column(Float())
     longitude = Column(Float())
-        
+
 class MarkerMixin(Point):
     type = Column(Integer)
     title = Column(String(100))
@@ -338,6 +338,9 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         if is_thin:
             markers = markers.options(load_only("id", "longitude", "latitude"))
 
+        if kwargs.get('age_groups'):
+            markers = markers.join(Involved).filter(Involved.age_group.in_(kwargs.get('age_groups')))
+
         total_records = markers.count()
         if page and per_page:
             markers = markers.offset((page - 1 ) * per_page).limit(per_page)
@@ -560,7 +563,7 @@ class GeneralPreferences(Base):
         return {
             "user_id": self.user_id,
             "minimum_displayed_severity": self.minimum_displayed_severity,
-            "resource_type": self.resource_type           
+            "resource_type": self.resource_type
         }
 
 class ReportPreferences(Base):
@@ -583,19 +586,16 @@ class ReportPreferences(Base):
             "latitude": self.latitude,
             "longitude": self.longitude,
             "radius": self.radius,
-            "minimum_severity": self.minimum_severity                       
+            "minimum_severity": self.minimum_severity
         }
 
 
 
 def init_db():
-    from database import engine
+    from .database import engine
     # import all modules here that might define models so that
     # they will be registered properly on the metadata.  Otherwise
     # you will have to import them first before calling init_db()
     logging.info("Importing models")
     logging.info("Creating all tables")
     Base.metadata.create_all(bind=engine)
-	
-if __name__ == "__main__":
-    init_db()

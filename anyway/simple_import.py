@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import datetime
-from constants import CONST
+from .constants import CONST
 
 
 db_connection_string = os.environ.get('CLEARDB_DATABASE_URL')
@@ -13,7 +13,7 @@ autocommit = False # Autocommit does not seem to work
 db_session = sessionmaker(autocommit=autocommit, autoflush=True, bind=engine)
 Base = declarative_base()
 session = db_session()
-from models import Marker
+from .models import Marker
 marker = Marker(
             user = None,
             title = "Accident",

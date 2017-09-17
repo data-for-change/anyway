@@ -1,9 +1,8 @@
 ##
-import globalmaptiles as globaltiles
+from . import globalmaptiles as globaltiles
 from math import cos, sin, atan2, sqrt
-import time
 ##
- 
+
 def center_geolocation(geolocations):
     """
     Provide a relatively accurate center lat, lon returned as a list pair, given
@@ -14,18 +13,18 @@ def center_geolocation(geolocations):
     x = 0
     y = 0
     z = 0
- 
+
     for lat, lon in geolocations:
         lat = float(lat)
         lon = float(lon)
         x += cos(lat) * cos(lon)
         y += cos(lat) * sin(lon)
         z += sin(lat)
- 
+
     x = float(x / len(geolocations))
     y = float(y / len(geolocations))
     z = float(z / len(geolocations))
- 
+
     return (atan2(y, x), atan2(z, sqrt(x * x + y * y)))
 
 def latlng_to_zoompixels(mercator, lat, lng, zoom):
@@ -94,7 +93,7 @@ def get_cluster_size(index, clusters):
     return Counter(clusters)[index]
 
 def calculate_clusters(markers, zoom, radius=50):
-    centers, clusters, sizes = create_clusters_centers(markers, zoom, radius)
+    centers, _, sizes = create_clusters_centers(markers, zoom, radius)
     json_clusts=[]
 
     for i, point in enumerate(centers):
@@ -107,5 +106,5 @@ if __name__ == '__main__':
     ##
     mercator = globaltiles.GlobalMercator()
     latlngs = [(28.43, 8), (28.43, 8), (28.44, 8), (35, 8)]
-    centers, clusters = cluster_markers(mercator, latlngs, 21)
+    centers, clusters, _ = cluster_markers(mercator, latlngs, 21)
     ##

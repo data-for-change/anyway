@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import glob
 import os
-import argparse
 import json
 from collections import OrderedDict
 import itertools
@@ -11,11 +10,10 @@ from datetime import datetime
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy import or_, and_
 
-import field_names
-from models import Marker, Involved, Vehicle
-import models
-from utilities import ItmToWGS84, init_flask, CsvReader, time_delta
-import localization
+from . import field_names, localization
+from .models import Marker, Involved, Vehicle
+from . import models
+from .utilities import ItmToWGS84, init_flask, CsvReader, time_delta
 import logging
 
 # Headless servers cannot use GUI file dialog and require raw user input
@@ -342,38 +340,74 @@ def get_files(directory):
             yield name, csv
 
 
+def _batch_iterator(iterable, batch_size):
+    iterator = iter(iterable)
+    iteration_stopped = False
+
+    while True:
+        batch = []
+        for _ in xrange(batch_size):
+            try:
+                batch.append(next(iterator))
+            except StopIteration:
+                iteration_stopped = True
+                break
+
+        yield batch
+        if iteration_stopped:
+            break
+
+
 def import_to_datastore(directory, provider_code, batch_size):
     """
     goes through all the files in a given directory, parses and commits them
     """
     try:
+        assert batch_size > 0
+
         files_from_lms = dict(get_files(directory))
         if len(files_from_lms) == 0:
             return 0
         logging.info("Importing '{}'".format(directory))
         started = datetime.now()
 
-        accidents = list(import_accidents(provider_code=provider_code, **files_from_lms))
+        new_ids = set()
+        new_items = 0
 
-        new_ids = [m["id"] for m in accidents
-                   if 0 == Marker.query.filter(and_(Marker.id == m["id"],
-                                                    Marker.provider_code == m["provider_code"])).count()]
+        accidents = (accident for accident
+                     in import_accidents(provider_code=provider_code, **files_from_lms)
+                     if  Marker.query.filter(
+                             and_(Marker.id == accident["id"],
+                                  Marker.provider_code == accident["provider_code"])).scalar() is None)
+
+        for accidents_chunk in _batch_iterator(iterable=accidents, batch_size=batch_size):
+            for accident in accidents_chunk:
+                new_ids.add(accident["id"])
+
+            db.session.bulk_insert_mappings(Marker, accidents_chunk)
+
+            new_items += len(accidents_chunk)
+
         if not new_ids:
             logging.info("\t\tNothing loaded, all accidents already in DB")
             return 0
 
-        db.session.execute(Marker.__table__.insert(), [m for m in accidents if m["id"] in new_ids])
-        db.session.commit()
-        involved = list(import_involved(provider_code=provider_code, **files_from_lms))
-        db.session.execute(Involved.__table__.insert(), [i for i in involved if i["accident_id"] in new_ids])
-        db.session.commit()
-        vehicles = list(import_vehicles(provider_code=provider_code, **files_from_lms))
-        db.session.execute(Vehicle.__table__.insert(), [v for v in vehicles if v["accident_id"] in new_ids])
-        db.session.commit()
+        involved = (record for record in
+                    import_involved(provider_code=provider_code, **files_from_lms)
+                    if record["accident_id"] in new_ids)
+        for involved_chunk in _batch_iterator(iterable=involved, batch_size=batch_size):
+            db.session.bulk_insert_mappings(Involved, involved_chunk)
+            new_items += len(involved_chunk)
 
-        total = len(accidents) + len(involved) + len(vehicles)
-        logging.info("\t{0} items in {1}".format(total, time_delta(started)))
-        return total
+        vehicles = (record for record in
+                    import_vehicles(provider_code=provider_code, **files_from_lms)
+                    if record["accident_id"] in new_ids)
+        for vehicles_chunk in _batch_iterator(iterable=vehicles, batch_size=batch_size):
+            db.session.bulk_insert_mappings(Vehicle, vehicles_chunk)
+            new_items += len(vehicles_chunk)
+
+        logging.info("\t{0} items in {1}".format(new_items, time_delta(started)))
+        return new_items
     except ValueError as e:
         failed_dirs[directory] = e.message
         return 0
@@ -402,32 +436,24 @@ def get_provider_code(directory_name=None):
             return int(ans)
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--specific_folder', dest='specific_folder', action='store_true', default=False)
-    parser.add_argument('--delete_all', dest='delete_all', action='store_true', )
-    parser.add_argument('--path', type=str, default="static/data/lms")
-    parser.add_argument('--batch_size', type=int, default=100)
-    parser.add_argument('--provider_code', type=int)
-    args = parser.parse_args()
-
-    if args.specific_folder:
+def main(specific_folder, delete_all, path, batch_size, provider_code):
+    if specific_folder:
         if fileDialog:
-            dir_name = tkFileDialog.askdirectory(initialdir=os.path.abspath(args.path),
+            dir_name = tkFileDialog.askdirectory(initialdir=os.path.abspath(path),
                                                  title='Please select a directory')
         else:
             dir_name = raw_input('Please provide the directory path: ')
 
         dir_list = [dir_name]
-        if args.delete_all:
+        if delete_all:
             confirm_delete_all = raw_input("Are you sure you want to delete all the current data? (y/n)\n")
             if confirm_delete_all.lower() == 'n':
-                args.delete_all = False
+                delete_all = False
     else:
-        dir_list = glob.glob("{0}/*/*".format(args.path))
+        dir_list = glob.glob("{0}/*/*".format(path))
 
     # wipe all the Markers and Involved data first
-    if args.delete_all:
+    if delete_all:
         tables = (Vehicle, Involved, Marker)
         logging.info("Deleting tables: " + ", ".join(table.__name__ for table in tables))
         for table in tables:
@@ -438,8 +464,8 @@ def main():
     total = 0L
     for directory in dir_list:
         parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
-        provider_code = args.provider_code if args.provider_code else get_provider_code(parent_directory)
-        total += import_to_datastore(directory, provider_code, args.batch_size)
+        provider_code = provider_code if provider_code else get_provider_code(parent_directory)
+        total += import_to_datastore(directory, provider_code, batch_size)
 
     delete_invalid_entries()
 
@@ -448,6 +474,3 @@ def main():
     logging.info("Finished processing all directories{0}{1}".format(", except:\n" if failed else "",
                                                              "\n".join(failed)))
     logging.info("Total: {0} items in {1}".format(total, time_delta(started)))
-
-if __name__ == "__main__":
-    main()

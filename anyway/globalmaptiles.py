@@ -62,7 +62,7 @@ I would like to know where it was used.
 
 Class is available under the open-source GDAL license (www.gdal.org).
 """
-# pylint: disable=W
+# pylint: disable=W,C
 
 import math
 

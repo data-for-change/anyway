@@ -67,6 +67,7 @@ $(function () {
             this.show_severe = '1';
             this.show_light = '1';
             this.show_urban = 3;
+            this.age_groups = "";
             this.show_intersection = 3;
             this.show_lane = 3;
             this.show_day = 7;
@@ -292,6 +293,7 @@ $(function () {
             params["controlmeasure"] = this.controlmeasure;
             params["district"] = this.district;
             params["case_type"] = this.case_type;
+            params["age_groups"] = this.age_groups;
             return params;
         },
         setMultipleMarkersIcon: function () {
@@ -665,7 +667,7 @@ $(function () {
             $('#toggle-sidebar').click(function () {
                 $('.main').toggleClass('main-open').toggleClass('main-close');
                 $('.sidebar-container').toggleClass('sidebar-container-open').toggleClass('sidebar-container-close');
-                
+
                 setTimeout(function() {
                     google.maps.event.trigger(this.map, 'resize');
                 }.bind(this), 500);
@@ -981,6 +983,33 @@ $(function () {
             this.resetMarkers();
             this.fetchMarkers();
         },
+        getAgeGroupFilter: function() {
+            var age_groups = '';
+
+            if ($("#checkbox-00-04").is(":checked")) {
+                age_groups += "1,";
+            } if ($("#checkbox-05-09").is(":checked")) {
+                age_groups += "2,";
+            } if ($("#checkbox-10-14").is(":checked")) {
+                age_groups += "3,";
+            } if ($("#checkbox-15-19").is(":checked")) {
+                age_groups += "4,";
+            } if ($("#checkbox-20-24").is(":checked")) {
+                age_groups += "5,";
+            } if ($("#checkbox-25-69").is(":checked")) {
+                age_groups += "6,7,8,9,10,11,12,13,14,";
+            } if ($("#checkbox-70-74").is(":checked")) {
+                age_groups += "15,";
+            } if ($("#checkbox-75-79").is(":checked")) {
+                age_groups += "16,";
+            } if ($("#checkbox-80-84").is(":checked")) {
+                age_groups += "17,";
+            } if ($("#checkbox-85-plus").is(":checked")) {
+                age_groups += "18,";
+            }
+
+            return (age_groups ? age_groups.slice(0, -1) : "0");
+        },
         loadFilter: function() {
             if ($("#checkbox-discussions").is(":checked")) { this.show_discussions='1'; } else { this.show_discussions=''; }
             if ($("#checkbox-accidents").is(":checked")) { this.show_markers='1'; } else { this.show_markers=''; }
@@ -999,6 +1028,8 @@ $(function () {
             } else {
                 this.show_urban = 0;
             }
+
+            this.age_groups = this.getAgeGroupFilter();
 
             if ($("#checkbox-intersection").is(":checked") && $("#checkbox-nonintersection").is(":checked")) {
                 this.show_intersection = 3;
@@ -1184,7 +1215,7 @@ $(function () {
             console.log("cluster items counter: " + clusterItemsCounter);
             console.log("Selected MaxIntensity level: " + heatMapMaxIntensity);
             console.log("Zoom level: " + this.map.zoom);
-            
+
             this.heatmap = new google.maps.visualization.HeatmapLayer({
                 data: latlngListForHeatMap,
                 maxIntensity: heatMapMaxIntensity,
@@ -1210,7 +1241,7 @@ $(function () {
                 } else {
                     severe = '';
                 }
-                
+
                 if (fatal == '' && severe == '' && light == '') {
                     severityText = "";
                 }

@@ -1,6 +1,6 @@
 from flask import session, redirect
 from flask import request
-from models import User
+from .models import User
 from functools import wraps
 
 def set_user(user):

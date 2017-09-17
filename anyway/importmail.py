@@ -3,7 +3,7 @@ import imaplib
 import os
 from datetime import datetime, timedelta
 import time
-from utilities import time_delta
+from .utilities import time_delta
 import sys
 import argparse
 import logging
@@ -70,7 +70,7 @@ def main(username=None, password=None, lastmail=False):
         mail = email.message_from_string(email_body)
         try:
             mtime = datetime.strptime(mail['Date'][:-6], '%a, %d %b %Y %H:%M:%S')
-        except:
+        except ValueError:
             mtime = datetime.strptime(mail['Date'][:-12], '%a, %d %b %Y %H:%M:%S')
 
         if not is_empty:

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import csv
 import os
-import field_names
+from . import field_names
 
 
 _tables = {

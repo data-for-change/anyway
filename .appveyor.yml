@@ -1,0 +1,39 @@
+environment:
+  matrix:
+    - PYTHON: "C:\\Python27\\"
+      DATABASE_URL: 'postgresql://postgres@localhost/anyway'
+
+services:
+ - postgresql
+
+init:
+- ps: >-
+    Set-Content "c:\program files\postgresql\9.6\data\pg_hba.conf" "host    all             all             ::1/128            trust"
+
+    Add-Content "c:\program files\postgresql\9.6\data\pg_hba.conf" "host    all             all             127.0.0.1/32            trust"
+
+    $env:Path += ";c:\program files\postgresql\9.6\bin"
+
+    $env:Path += ";$python\bin"
+
+install:
+- ps: >-
+    python -m pip install -U --no-cache-dir pip wheel
+
+    python -m pip install --no-cache-dir -r requirements.txt -r test_requirements.txt
+
+build: off
+
+test_script:
+- ps: >-
+    psql -U postgres -c "CREATE ROLE appveyor LOGIN SUPERUSER CREATEDB CREATEROLE;"
+
+    createdb anyway
+
+    python main.py init_db
+
+    python main.py process_data
+
+    python main.py import_united_data --light
+
+    python -m pytest tests

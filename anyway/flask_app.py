@@ -5,7 +5,7 @@ from StringIO import StringIO
 import time
 
 import jinja2
-from flask import make_response, render_template, Response, jsonify, url_for, flash
+from flask import make_response, render_template, Response, jsonify, url_for, flash, abort
 import flask.ext.assets
 from webassets.ext.jinja2 import AssetsExtension
 from webassets import Environment as AssetsEnvironment
@@ -40,6 +40,7 @@ from .base import user_optional
 from .models import (Marker, DiscussionMarker, HighlightPoint, Involved, User, ReportPreferences,
                      Vehicle, Role, GeneralPreferences)
 from .config import ENTRIES_PER_PAGE
+import httplib
 
 
 app = utilities.init_flask(__name__)
@@ -141,10 +142,13 @@ def get_kwargs():
         try:
             kwargs['age_groups'] = [int(value) for value in kwargs['age_groups'].split(',')]
         except ValueError:
-            raise Exception("bad")
+            abort(httplib.BAD_REQUEST)
 
+    try:
+        kwargs.update({arg: datetime.date.fromtimestamp(int(request.values[arg])) for arg in ('start_date', 'end_date')})
+    except ValueError:
+        abort(httplib.BAD_REQUEST)
 
-    kwargs.update({arg: datetime.date.fromtimestamp(int(request.values[arg])) for arg in ('start_date', 'end_date')})
     return kwargs
 
 @babel.localeselector

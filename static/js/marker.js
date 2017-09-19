@@ -260,6 +260,7 @@ var MarkerView = Backbone.View.extend({
             });
         }
 
+        app.map.gestureHandling = "cooperative";
         $(document).keydown(app.ESCinfoWindow);
     },
     clickShare : function() {

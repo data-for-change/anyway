@@ -434,7 +434,8 @@ $(function () {
                 zoomControl: !MAP_ONLY,
                 panControl: !MAP_ONLY,
                 streetViewControl: !MAP_ONLY,
-                styles: MAP_STYLE
+                styles: MAP_STYLE,
+                gestureHandling: "greedy"
             };
             this.map = new google.maps.Map(this.$el.find("#map_canvas").get(0), mapOptions);
 
@@ -711,6 +712,7 @@ $(function () {
                 this.updateUrl();
                 $(document).off('keydown',app.ESCinfoWindow);
             }
+            app.map.gestureHandling = "greedy";
         },
         clickMap: function (e) {
             this.closeInfoWindow();

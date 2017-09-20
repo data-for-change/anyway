@@ -428,18 +428,18 @@
                     <a class="btn btn-social-icon btn-facebook" href="{{  url_for('logout') }}">{{ gettext('Logout') }}
                         <span class="fa fa-sign-out"></span>
                     </a>
-                    <br/>                    
+                    <br/>
                 {% else %}
                     <a class="btn btn-social-icon btn-facebook" href="{{ url_for('oauth_authorize', provider='facebook') }}">{{ gettext('Login with Facebook') }}
                         <span class="fa fa-facebook"></span>
-                    </a>                    
+                    </a>
                     <br/>
                     <!--<h3>OR</h3>-->
                     <br/>
                     <a class="btn btn-social-icon btn-google" href="{{ url_for('oauth_authorize', provider='google') }}">
                         {{ gettext('Login with Google') }}
                         <span class="fa fa-google"></span>
-                    </a>                
+                    </a>
                 {% endif %}
             </div>
         </div>
@@ -451,18 +451,18 @@
 
 <div id="preferences-dialog-template" style="display: none" dir="rtl">
     <div class="modal hide fade">
-        <!-- Modal content-->        
+        <!-- Modal content-->
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal">&times;</button>
             <h4 class="modal-title">העדפות:</h4>
         </div>
         <div class="modal-body" style="max-height: 800px;">
             <form role="form" id="prefForm">
-                <div class="form-group">                   
+                <div class="form-group">
                     <div style="width: 400px; margin: 0 auto;">
                         <div style="float: right;  margin-left: 10px">
                             <label for="prefAccidentSeverity" style="vertical-align: middle; height: 30px; display: table-cell;" >חומרת תאונה מינימלית להצגה</label>
-                        </div>                      
+                        </div>
                         <div style="float: right; margin-right: 10px">
                             <select id="prefAccidentSeverity" style="width: 80px; vertical-align: middle; display: table-cell;">
                                 {% for accident_type in pref_accident_severity %}
@@ -470,45 +470,45 @@
                                 {% endfor %}
                             </select>
                         </div>
-                    </div>                                    
+                    </div>
                 </div>
                 <div style="clear: both">
                 </div>
-                <div>                   
+                <div>
                     <div style="width: 400px; margin: 0 auto;">
                         <div style="float: right;  margin-left: 10px">
                             <label for="prefAccidentSeverity" style="vertical-align: middle; height: 30px; display: table-cell;" >הצג תאונות</label>
-                        </div>                      
-                        <div style="float: right; margin-right: 10px;">                            
+                        </div>
+                        <div style="float: right; margin-right: 10px;">
                             <label style="float: right; margin-left: 10px; vertical-align: middle; display: table-cell;" ><input name="prefAccidentsType" id="prefAccidentsLms" type="checkbox" value="1" style="display: inline" class="prefTypeOfAccidents" />&nbsp;למ"ס</label>
                             <label style="float: right; vertical-align: middle; display: table-cell;" ><input name="prefAccidentsType" id="prefAccidentsIhud" type="checkbox" value="2" style="display: inline" class="prefTypeOfAccidents" />&nbsp;איחוד הצלה</label>
                         </div>
-                    </div>                                    
+                    </div>
                 </div>
                 <br/>
                 <br/>
                 <br/>
-                <div>                   
-                    <div style="width: 400px; margin: 0 auto;">                        
+                <div>
+                    <div style="width: 400px; margin: 0 auto;">
                         <label style="margin-left: 10px; vertical-align: middle; display: table-cell;" ><input id="produceAccidentsReport" class="produceAccidentsReport" type="checkbox" value="1" style="display: inline" />&nbsp;הפקת דוח תאונה</label>
-                    </div>                                    
-                </div>       
-                <br/>                     
+                    </div>
+                </div>
+                <br/>
                 <div style="width: 400px; margin: 0 auto;" class="prefReportControls">
-                    <div style="margin-right: 15px">                        
-                        <div style="clear: right; float: right;  margin-left: 10px">                     
+                    <div style="margin-right: 15px">
+                        <div style="clear: right; float: right;  margin-left: 10px">
                             <label style="float: right; margin-left: 10px;" for="prefLat">קו רוחב:</label>
-                            <input style="float: right; margin-left: 10px; width: 80px;" id="prefLat" type="text" name="prefLat"  /> 
+                            <input style="float: right; margin-left: 10px; width: 80px;" id="prefLat" type="text" name="prefLat"  />
                             <label style="float: right; margin-left: 10px;" for="prefLon">קו אורך:</label>
-                            <input style="float: right; margin-left: 10px; width: 80px;" id="prefLon" type="text" name="prefLon" />  
-                        </div>              
-                    </div>                            
-                </div>   
-                <div style="width: 400px; margin: 0 auto;" class="prefReportControls">    
-                     <div style="margin-right: 15px">                                
-                        <div style="clear: right; float: right;  margin-left: 10px; width: 100px">                     
-                            <label style="vertical-align: middle; height: 30px; display: table-cell;" for="prefRadius">רדיוס:</label>                                          
-                        </div>   
+                            <input style="float: right; margin-left: 10px; width: 80px;" id="prefLon" type="text" name="prefLon" />
+                        </div>
+                    </div>
+                </div>
+                <div style="width: 400px; margin: 0 auto;" class="prefReportControls">
+                     <div style="margin-right: 15px">
+                        <div style="clear: right; float: right;  margin-left: 10px; width: 100px">
+                            <label style="vertical-align: middle; height: 30px; display: table-cell;" for="prefRadius">רדיוס:</label>
+                        </div>
                         <div style="float: right; margin-right: 10px">
                             <select id="prefRadius" style="width: 80px; vertical-align: middle; display: table-cell; width: 100px;">
                                 {% for radius in pref_radius %}
@@ -519,54 +519,54 @@
                         <div style="float: right;  margin-right: 20px">
                             <label style="vertical-align: middle; height: 30px; display: table-cell;">מטר</label>
                         </div>
-                     </div>                                    
-                </div>     
-                
-                <div style="width: 400px; margin: 0 auto;" class="prefReportControls">    
-                     <div style="margin-right: 15px">                                
-                        <div style="clear: right; float: right;  margin-left: 10px; width: 100px">                     
-                            <label style="vertical-align: middle; height: 30px; display: table-cell;" for="prefAccidentSeverityForReport">חומרת תאונה</label>                                          
-                        </div>   
+                     </div>
+                </div>
+
+                <div style="width: 400px; margin: 0 auto;" class="prefReportControls">
+                     <div style="margin-right: 15px">
+                        <div style="clear: right; float: right;  margin-left: 10px; width: 100px">
+                            <label style="vertical-align: middle; height: 30px; display: table-cell;" for="prefAccidentSeverityForReport">חומרת תאונה</label>
+                        </div>
                         <div style="float: right; margin-right: 10px">
                             <select id="prefAccidentSeverityForReport" style="width: 80px; vertical-align: middle; display: table-cell; width: 100px;">
                                 {% for accident_report_type in pref_accident_report_severity %}
                                     <option id="{{accident_report_type.id}}" value="{{accident_report_type.value}}">{{accident_report_type.string}}</option>
                                 {% endfor %}
                             </select>
-                        </div>  
-                     </div>                                    
-                </div>      
-                         
-                <div style="width: 400px; margin: 0 auto;" class="prefReportControls">    
-                     <div style="margin-right: 15px">                                
-                        <div style="clear: right; float: right;  margin-left: 10px; width: 100px">                     
-                            <label style="vertical-align: middle; height: 30px; display: table-cell;" for="prefHistoricalReportPeriod">דוח היסטורי עבור</label>                                          
-                        </div>   
+                        </div>
+                     </div>
+                </div>
+
+                <div style="width: 400px; margin: 0 auto;" class="prefReportControls">
+                     <div style="margin-right: 15px">
+                        <div style="clear: right; float: right;  margin-left: 10px; width: 100px">
+                            <label style="vertical-align: middle; height: 30px; display: table-cell;" for="prefHistoricalReportPeriod">דוח היסטורי עבור</label>
+                        </div>
                         <div style="float: right; margin-right: 10px">
                             <select id="prefHistoricalReportPeriod" style="width: 100px; vertical-align: middle; display: table-cell;">
                                 {% for historical_period in pref_historical_report_periods %}
                                     <option id="{{historical_period.id}}" value="{{historical_period.value}}">{{historical_period.string}}</option>
                                  {% endfor %}
-                            </select>               
-                        </div> 
-                        <div style="float: right;  margin-right: 20px">                     
-                            <label style="vertical-align: middle; height: 30px; display: table-cell;">חודשים</label>                                          
+                            </select>
+                        </div>
+                        <div style="float: right;  margin-right: 20px">
+                            <label style="vertical-align: middle; height: 30px; display: table-cell;">חודשים</label>
                         </div>
                         <div style="clear: right; float: right;">
                             <div>
                                 <label style="margin-left: 10px; vertical-align: middle; display: table-cell;" ><input id="prefDisableHistoricalReport" class="prefDisableHistoricalReport" type="checkbox" value="0" style="display: inline" />&nbsp;לא לשלוח דוח היסטורי</label>
                             </div>
                         </div>
-                     </div>                                    
-                </div>      
-                
-            </form> 
-        </div>                        
+                     </div>
+                </div>
+
+            </form>
+        </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">סגירה</button>
-            <button type="button" class="btn btn-primary save-button" data-dismiss="modal">שמירה</button>                
+            <button type="button" class="btn btn-primary save-button" data-dismiss="modal">שמירה</button>
         </div>
-    </div>    
+    </div>
 </div>
 
 <div id="sidebar-template" style="display: none">
@@ -649,7 +649,7 @@
                 <div class="btn-label" style="margin: 10px">החל מ :</div>
                 <input id="sdate" class="btn date" type="date" style="width: 52% !important; margin-top: 10px" value="{{default_start_date_format|default('2011-01-01')}}" oninput="app.loadFilter()">
                 <div class="btn-label" style="margin: 10px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;עד :</div>
-                
+
                 <input id="edate" class="btn date" type="date" style="width: 52% !important; margin-top: 10px" value="{{default_end_date_format|default('2025-01-01')}}" oninput="app.loadFilter()">
             </div>
 
@@ -1210,7 +1210,7 @@
                     version: 'v2.3'
                 });
             window.app = new AppView();
-            
+
 
               // Load the app
 
@@ -1392,5 +1392,3 @@
 
 </body>
 </html>
-
-

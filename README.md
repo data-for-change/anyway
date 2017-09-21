@@ -90,7 +90,9 @@ It is useful to add the following to your `~/.bashrc` (fixing for the correct pa
 Then you can simply start working by running the `anyway` command.
 
 ## Testing
-To run tests: `pylint -j $(nproc) anyway tests && pytest ./tests`
+To run tests: `pylint -j $(nproc) anyway tests && pytest -m "not browser" ./tests`
+
+If you also wish to run the real browser tests, replace`-m "not browser"` with `--driver Chrome` or specify the browser of your choice. To learn more, read about [pytest-selenium](http://pytest-selenium.readthedocs.io/en/latest/user_guide.html#specifying-a-browser).
 
 ## Docker
 See [DOCKER](docs/DOCKER.md)

@@ -89,6 +89,9 @@ def test_clusters(app):
     resp = json.loads(rv.data)
     assert 'clusters' in resp
     assert resp['clusters']
+    for cluster in resp['clusters']:
+        for attr in ['longitude', 'latitude', 'size']:
+            assert attr in cluster
 
 
 def test_single_marker(app):

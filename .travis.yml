@@ -19,11 +19,11 @@ env:
     - SAUCE_USERNAME=anyway
     - secure: "RYGbTO5b15B5BJnmLQAajWskG7F/lDT+BO/P2EjP8xU5P70hME3PNgaZPJ1phPq49XRS4Oe2t4c7ta6V1JdDMc10MkihmEqgdsRyxw4UhVtz6i4mDYFZFrgntYofqbvfrc5r9Z4C81y8a79wY6D/H10L2ocpEeEsZWilh+N8mWE="
     - secure: "HmWdkaHFKlvFKgpTc/TFtOwPxgu/FE+/J27sTMsXkFxf7MCSa4817CtEs6BumlVAuoPtnxy9es6RYsUoqv5+eIJBwCryx+DtmxjUqMtRM2RlNOPtRABOjZ/QECqgaRtNEAsSxQH3XWWWkniqQgXFCS6crKUhA+elpvivKgf9iyQ="
-    - DATABASE_URL='postgresql://postgres@localhost/anyway'
 
   matrix:
-    - BROWSER=Chrome
-    - BROWSER=Firefox
+    - BROWSER=Chrome DATABASE_URL='postgresql://postgres@localhost/anyway'
+    - BROWSER=Firefox DATABASE_URL='postgresql://postgres@localhost/anyway'
+    - BROWSER=Firefox DATABASE_URL='sqlite:///testing.db'
 
 services:
   - postgresql

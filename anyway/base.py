@@ -2,13 +2,17 @@ from flask import session, redirect
 from flask import request
 from .models import User
 from functools import wraps
+from .utilities import init_flask
+from flask.ext.sqlalchemy import SQLAlchemy
+app = init_flask(__name__)
+db = SQLAlchemy(app)
 
 def set_user(user):
     session["user"] = user.id
 
 def get_user():
     if "user" in session:
-        return User.query.filter(User.id == session["user"]).scalar()
+        return db.session.query(User).filter(User.id == session["user"]).scalar()
     else:
         return None
 

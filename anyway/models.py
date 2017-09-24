@@ -7,12 +7,15 @@ from collections import namedtuple
 from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table, \
         ForeignKeyConstraint, func
 from sqlalchemy.orm import relationship, load_only, backref
+from .utilities import init_flask
+from flask.ext.sqlalchemy import SQLAlchemy
 
 import datetime
 from . import localization
-from .database import Base, db_session
+from .database import Base
 from flask.ext.security import UserMixin, RoleMixin
-
+app = init_flask(__name__)
+db = SQLAlchemy(app)
 
 MarkerResult = namedtuple('MarkerResult', ['markers', 'total_records'])
 
@@ -254,8 +257,8 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         per_page = kwargs.get('per_page')
 
         if not kwargs.get('show_markers', True):
-            return MarkerResult(markers=Marker.query.filter(sql.false()), total_records=0)
-        markers = Marker.query \
+            return MarkerResult(markers=db.session.query(Marker).filter(sql.false()), total_records=0)
+        markers = db.session.query(Marker) \
             .filter(Marker.longitude <= kwargs['ne_lng']) \
             .filter(Marker.longitude >= kwargs['sw_lng']) \
             .filter(Marker.latitude <= kwargs['ne_lat']) \
@@ -270,7 +273,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         elif approx and not accurate:
             markers = markers.filter(Marker.locationAccuracy != 1)
         elif not accurate and not approx:
-            return MarkerResult(markers=Marker.query.filter(sql.false()), total_records=0)
+            return MarkerResult(markers=db.session.query(Marker).filter(sql.false()), total_records=0)
         if not kwargs.get('show_fatal', True):
             markers = markers.filter(Marker.severity != 1)
         if not kwargs.get('show_severe', True):
@@ -283,21 +286,21 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
             elif kwargs['show_urban'] == 1:
                 markers = markers.filter(Marker.roadType >= 3).filter(Marker.roadType <= 4)
             else:
-                return MarkerResult(markers=Marker.query.filter(sql.false()), total_records=0)
+                return MarkerResult(markers=db.session.query(Marker).filter(sql.false()), total_records=0)
         if kwargs.get('show_intersection', 3) != 3:
             if kwargs['show_intersection'] == 2:
                 markers = markers.filter(Marker.roadType != 2).filter(Marker.roadType != 4)
             elif kwargs['show_intersection'] == 1:
                 markers = markers.filter(Marker.roadType != 1).filter(Marker.roadType != 3)
             else:
-                return MarkerResult(markers=Marker.query.filter(sql.false()), total_records=0)
+                return MarkerResult(markers=db.session.query(Marker).filter(sql.false()), total_records=0)
         if kwargs.get('show_lane', 3) != 3:
             if kwargs['show_lane'] == 2:
                 markers = markers.filter(Marker.one_lane >= 2).filter(Marker.one_lane <= 3)
             elif kwargs['show_lane'] == 1:
                 markers = markers.filter(Marker.one_lane == 1)
             else:
-                return MarkerResult(markers=Marker.query.filter(sql.false()), total_records=0)
+                return MarkerResult(markers=db.session.query(Marker).filter(sql.false()), total_records=0)
 
         if kwargs.get('show_day', 7) != 7:
             markers = markers.filter(func.extract("dow", Marker.created) == kwargs['show_day'])
@@ -354,11 +357,11 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
             vehicles = None
             involved = None
             if fetch_markers:
-                markers = db_session.query(Marker).filter(Marker.id.in_(markers_ids))
+                markers = db.session.query(Marker).filter(Marker.id.in_(markers_ids))
             if fetch_vehicles:
-                vehicles = db_session.query(Vehicle).filter(Vehicle.accident_id.in_(markers_ids))
+                vehicles = db.session.query(Vehicle).filter(Vehicle.accident_id.in_(markers_ids))
             if fetch_involved:
-                involved = db_session.query(Involved).filter(Involved.accident_id.in_(markers_ids))
+                involved = db.session.query(Involved).filter(Involved.accident_id.in_(markers_ids))
             result = markers.all() if markers is not None else [], vehicles.all() if vehicles is not None else [], \
                    involved.all() if involved is not None else []
             return MarkerResult(markers=result, total_records=len(result))
@@ -367,7 +370,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
 
     @staticmethod
     def get_marker(marker_id):
-        return Marker.query.filter_by(id=marker_id)
+        return db.session.query(Marker).filter_by(id=marker_id)
 
     @classmethod
     def parse(cls, data):
@@ -405,12 +408,12 @@ class DiscussionMarker(MarkerMixin, Base):
 
     @staticmethod
     def get_by_identifier(identifier):
-        return DiscussionMarker.query.filter_by(identifier=identifier)
+        return db.session.query(DiscussionMarker).filter_by(identifier=identifier)
 
     @classmethod
     def parse(cls, data):
         # FIXME the id should be generated automatically, but isn't
-        last = DiscussionMarker.query.order_by('-id').first()
+        last = db.session.query(DiscussionMarker).order_by('-id').first()
         return DiscussionMarker(
             id=last.id + 1 if last else 0,
             latitude=data["latitude"],
@@ -424,8 +427,8 @@ class DiscussionMarker(MarkerMixin, Base):
     @staticmethod
     def bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng, show_discussions):
         if not show_discussions:
-            return Marker.query.filter(sql.false())
-        markers = DiscussionMarker.query \
+            return db.session.query(Marker).filter(sql.false())
+        markers = db.session.query(DiscussionMarker) \
             .filter(DiscussionMarker.longitude <= ne_lng) \
             .filter(DiscussionMarker.longitude >= sw_lng) \
             .filter(DiscussionMarker.latitude <= ne_lat) \
@@ -592,10 +595,13 @@ class ReportPreferences(Base):
 
 
 def init_db():
-    from .database import engine
+    from .utilities import init_flask
+    from flask.ext.sqlalchemy import SQLAlchemy
+    app = init_flask(__name__)
+    db = SQLAlchemy(app)
     # import all modules here that might define models so that
     # they will be registered properly on the metadata.  Otherwise
     # you will have to import them first before calling init_db()
     logging.info("Importing models")
     logging.info("Creating all tables")
-    Base.metadata.create_all(bind=engine)
+    Base.metadata.create_all(db.engine)

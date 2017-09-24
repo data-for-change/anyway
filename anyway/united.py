@@ -313,7 +313,7 @@ def import_to_db(collection, path):
         return 0
 
     new_ids = [m["id"] for m in accidents
-               if 0 == Marker.query.filter(and_(Marker.id == m["id"],
+               if 0 == db.session.query(Marker).filter(and_(Marker.id == m["id"],
                                                 Marker.provider_code == m["provider_code"])).count()]
     if not new_ids:
         logging.info("\t\tNothing loaded, all accidents already in DB")
@@ -330,7 +330,7 @@ def update_db(collection):
     """
     app = init_flask(__name__)
     db = SQLAlchemy(app)
-    united = Marker.query.filter(Marker.provider_code == 2)
+    united = db.session.query(Marker).filter(Marker.provider_code == 2)
     for accident in united:
         if not accident.weather:
             accident.weather = process_weather_data(collection, accident.latitude, accident.longitude)

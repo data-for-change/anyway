@@ -49,7 +49,7 @@ lms_files = {
 }
 
 coordinates_converter = ItmToWGS84()
-app = init_flask(__name__)
+app = init_flask()
 db = SQLAlchemy(app)
 
 

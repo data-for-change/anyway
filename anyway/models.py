@@ -14,7 +14,7 @@ import datetime
 from . import localization
 from .database import Base
 from flask.ext.security import UserMixin, RoleMixin
-app = init_flask(__name__)
+app = init_flask()
 db = SQLAlchemy(app)
 
 MarkerResult = namedtuple('MarkerResult', ['markers', 'total_records'])
@@ -597,7 +597,7 @@ class ReportPreferences(Base):
 def init_db():
     from .utilities import init_flask
     from flask.ext.sqlalchemy import SQLAlchemy
-    app = init_flask(__name__)
+    app = init_flask()
     db = SQLAlchemy(app)
     # import all modules here that might define models so that
     # they will be registered properly on the metadata.  Otherwise

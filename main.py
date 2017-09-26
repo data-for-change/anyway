@@ -65,8 +65,13 @@ def import_united_data(light, username, password, lastmail):
 @cli.command()
 @click.argument('identifiers', nargs=-1)
 def load_discussions(identifiers):
-    from anyway.database import db_session
     from anyway.models import DiscussionMarker
+
+    from flask.ext.sqlalchemy import SQLAlchemy
+    from anyway.utilities import init_flask
+
+    app = init_flask()
+    db = SQLAlchemy(app)
 
     identifiers = identifiers or sys.stdin
 

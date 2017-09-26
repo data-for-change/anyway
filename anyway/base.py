@@ -4,7 +4,7 @@ from .models import User
 from functools import wraps
 from .utilities import init_flask
 from flask.ext.sqlalchemy import SQLAlchemy
-app = init_flask(__name__)
+app = init_flask()
 db = SQLAlchemy(app)
 
 def set_user(user):

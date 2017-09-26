@@ -306,7 +306,7 @@ def import_to_db(collection, path):
     :param path: Local files directory ('united_path' on main() below)
     :return: length of DB entries after execution
     """
-    app = init_flask(__name__)
+    app = init_flask()
     db = SQLAlchemy(app)
     accidents = list(create_accidents(collection, path))
     if not accidents:
@@ -328,7 +328,7 @@ def update_db(collection):
     """
     :return: length of DB entries after execution
     """
-    app = init_flask(__name__)
+    app = init_flask()
     db = SQLAlchemy(app)
     united = db.session.query(Marker).filter(Marker.provider_code == 2)
     for accident in united:

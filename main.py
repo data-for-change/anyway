@@ -15,13 +15,14 @@ def cli():
 @click.option('--open', 'open_server', is_flag=True,
               help='Open the server for communication from outside', default=False)
 def testserver(open_server):
-    from anyway import app, united
+    from anyway import app
+    from anyway.parsers import united
     from apscheduler.scheduler import Scheduler
 
     sched = Scheduler()
 
     @sched.interval_schedule(hours=12)
-    def scheduled_import():
+    def scheduled_import(): # pylint: disable=unused-variable
         united.main()
     sched.start()
 
@@ -38,26 +39,31 @@ def init_db():
     init_db()
 
 
-@cli.command()
+@cli.group()
+def process():
+    pass
+
+
+@process.command()
 @click.option('--specific_folder', is_flag=True, default=False)
 @click.option('--delete_all', is_flag=True)
 @click.option('--path', type=str, default="static/data/lms")
 @click.option('--batch_size', type=int, default=100)
 @click.option('--provider_code', type=int)
-def process_data(specific_folder, delete_all, path, batch_size, provider_code):
-    from anyway.process import main
+def cbs(specific_folder, delete_all, path, batch_size, provider_code):
+    from anyway.parsers.cbs import main
 
     return main(specific_folder=specific_folder, delete_all=delete_all, path=path,
                 batch_size=batch_size, provider_code=provider_code)
 
 
-@cli.command()
+@process.command()
 @click.option('--light', is_flag=True, help='Import without downloading any new files')
 @click.option('--username', default='')
 @click.option('--password', default='')
 @click.option('--lastmail', is_flag=True)
-def import_united_data(light, username, password, lastmail):
-    from anyway.united import main
+def united(light, username, password, lastmail):
+    from anyway.parsers.united import main
 
     return main(light=light, username=username, password=password, lastmail=lastmail)
 
@@ -66,7 +72,6 @@ def import_united_data(light, username, password, lastmail):
 @click.argument('identifiers', nargs=-1)
 def load_discussions(identifiers):
     from anyway.models import DiscussionMarker
-
     from flask.ext.sqlalchemy import SQLAlchemy
     from anyway.utilities import init_flask
 
@@ -89,13 +94,13 @@ def load_discussions(identifiers):
             'identifier': identifier
         })
         try:
-            db_session.add(marker)
-            db_session.commit()
+            db.session.add(marker)
+            db.session.commit()
             logging.info("Added:  " + identifier)
         except Exception as e:
-            db_session.rollback()
+            db.session.rollback()
             logging.warn("Failed: " + identifier + ": " + e.message)
 
 
 if __name__ == '__main__':
-    cli(sys.argv[1:])
+    cli(sys.argv[1:]) # pylint: disable=too-many-function-args

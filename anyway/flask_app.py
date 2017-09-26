@@ -42,7 +42,7 @@ from .config import ENTRIES_PER_PAGE
 import httplib
 
 
-app = utilities.init_flask(__name__)
+app = utilities.init_flask()
 db = SQLAlchemy(app)
 app.config.from_object(__name__)
 app.config['SECURITY_REGISTERABLE'] = False

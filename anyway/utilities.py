@@ -13,13 +13,12 @@ import re
 
 _PROJECT_ROOT = os.path.join(os.path.dirname(__file__), '..')
 
-def init_flask(name):
+def init_flask():
     """
     initializes a Flask instance with default values
-    :param name: the name of the instance
     """
     app = Flask(
-        name,
+        "anyway",
         template_folder=os.path.join(_PROJECT_ROOT, 'templates'),
         static_folder=os.path.join(_PROJECT_ROOT, 'static'),)
     app.config.from_object(config)

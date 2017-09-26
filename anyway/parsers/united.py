@@ -8,10 +8,10 @@ import os
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
 
-from .constants import CONST
-from .models import Marker
-from .utilities import init_flask
-from .import importmail
+from ..constants import CONST
+from ..models import Marker
+from ..utilities import init_flask
+from ..import importmail
 
 from xml.dom import minidom
 

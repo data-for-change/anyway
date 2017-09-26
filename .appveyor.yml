@@ -32,8 +32,8 @@ test_script:
 
     python main.py init_db
 
-    python main.py process_data
+    python main.py process cbs
 
-    python main.py import_united_data --light
+    python main.py process united --light
 
     python -m pytest -m "not browser" tests

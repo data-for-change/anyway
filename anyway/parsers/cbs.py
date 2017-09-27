@@ -16,6 +16,7 @@ from .. import field_names, localization
 from ..models import Marker, Involved, Vehicle
 from .. import models
 from ..utilities import ItmToWGS84, init_flask, CsvReader, time_delta
+from .utils import batch_iterator
 import logging
 
 # Headless servers cannot use GUI file dialog and require raw user input
@@ -343,24 +344,6 @@ def get_files(directory):
             yield name, csv
 
 
-def _batch_iterator(iterable, batch_size):
-    iterator = iter(iterable)
-    iteration_stopped = False
-
-    while True:
-        batch = []
-        for _ in six.moves.range(batch_size):
-            try:
-                batch.append(next(iterator))
-            except StopIteration:
-                iteration_stopped = True
-                break
-
-        yield batch
-        if iteration_stopped:
-            break
-
-
 def import_to_datastore(directory, provider_code, batch_size):
     """
     goes through all the files in a given directory, parses and commits them
@@ -383,7 +366,7 @@ def import_to_datastore(directory, provider_code, batch_size):
                              and_(Marker.id == accident["id"],
                                   Marker.provider_code == accident["provider_code"])).scalar() is None)
 
-        for accidents_chunk in _batch_iterator(iterable=accidents, batch_size=batch_size):
+        for accidents_chunk in batch_iterator(iterable=accidents, batch_size=batch_size):
             for accident in accidents_chunk:
                 new_ids.add(accident["id"])
 
@@ -398,14 +381,14 @@ def import_to_datastore(directory, provider_code, batch_size):
         involved = (record for record in
                     import_involved(provider_code=provider_code, **files_from_lms)
                     if record["accident_id"] in new_ids)
-        for involved_chunk in _batch_iterator(iterable=involved, batch_size=batch_size):
+        for involved_chunk in batch_iterator(iterable=involved, batch_size=batch_size):
             db.session.bulk_insert_mappings(Involved, involved_chunk)
             new_items += len(involved_chunk)
 
         vehicles = (record for record in
                     import_vehicles(provider_code=provider_code, **files_from_lms)
                     if record["accident_id"] in new_ids)
-        for vehicles_chunk in _batch_iterator(iterable=vehicles, batch_size=batch_size):
+        for vehicles_chunk in batch_iterator(iterable=vehicles, batch_size=batch_size):
             db.session.bulk_insert_mappings(Vehicle, vehicles_chunk)
             new_items += len(vehicles_chunk)
 

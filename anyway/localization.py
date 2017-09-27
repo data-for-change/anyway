@@ -234,7 +234,9 @@ _fields = {
     "NAFA": "נפה",
     "EZOR_TIVI": "אזור טבעי",
     "MAAMAD_MINIZIPALI": "מעמד מוניציפלי",
-    "ZURAT_ISHUV": "צורת יישוב"
+    "ZURAT_ISHUV": "צורת יישוב",
+    "VEHICLE_TYPE": "סוג רכב",
+    "OFFENCE_TYPE": "סוג עבירה"
 }
 
 if six.PY3:

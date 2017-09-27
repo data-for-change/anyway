@@ -66,6 +66,14 @@ def united(light, username, password, lastmail):
     return main(light=light, username=username, password=password, lastmail=lastmail)
 
 
+@process.command()
+@click.argument("filename")
+def rsa(filename):
+    from anyway.parsers.rsa import parse
+
+    return parse(filename)
+
+
 @cli.command()
 @click.argument('identifiers', nargs=-1)
 def load_discussions(identifiers):

@@ -38,7 +38,7 @@ before_script:
   - ./main.py init_db
 
 script:
-  - pylint -j $(nproc) anyway tests
+  - pylint -j $(nproc) anyway tests main.py
   - eslint static/js --ignore-path=static/js/.eslintignore
   - ./main.py process cbs
   - ./main.py process united --light

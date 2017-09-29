@@ -21,9 +21,8 @@ env:
     - secure: "HmWdkaHFKlvFKgpTc/TFtOwPxgu/FE+/J27sTMsXkFxf7MCSa4817CtEs6BumlVAuoPtnxy9es6RYsUoqv5+eIJBwCryx+DtmxjUqMtRM2RlNOPtRABOjZ/QECqgaRtNEAsSxQH3XWWWkniqQgXFCS6crKUhA+elpvivKgf9iyQ="
 
   matrix:
-    - BROWSER=Chrome DATABASE_URL='postgresql://postgres@localhost/anyway'
-    - BROWSER=Firefox DATABASE_URL='postgresql://postgres@localhost/anyway'
-    - BROWSER=Firefox DATABASE_URL='sqlite:///testing.db'
+    - DATABASE_URL='postgresql://postgres@localhost/anyway'
+    - DATABASE_URL='sqlite:///testing.db'
 
 services:
   - postgresql
@@ -43,4 +42,5 @@ script:
   - eslint static/js --ignore-path=static/js/.eslintignore
   - ./main.py process_data
   - ./main.py import_united_data --light
-  - pytest tests --driver SauceLabs --capability browserName $BROWSER --capability tunnelIdentifier $TRAVIS_JOB_NUMBER
+  - pytest tests -m "not browser"
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then for BROWSER in Chrome Firefox; do pytest tests -m browser --driver SauceLabs --capability browserName $BROWSER --capability tunnelIdentifier $TRAVIS_JOB_NUMBER; done; fi

@@ -38,6 +38,7 @@ before_script:
   - ./main.py init_db
 
 script:
+  - echo "hi"
   - pylint -j $(nproc) anyway tests
   - eslint static/js --ignore-path=static/js/.eslintignore
   - ./main.py process_data

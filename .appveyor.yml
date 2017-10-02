@@ -30,7 +30,7 @@ test_script:
 
     createdb anyway
 
-    python main.py init_db
+    alembic upgrade head
 
     python main.py process cbs
 

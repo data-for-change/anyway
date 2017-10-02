@@ -69,7 +69,7 @@ See the [Wiki](https://github.com/hasadna/anyway/wiki/Setting-up-a-Python-develo
   * bash: `export DATABASE_URL='sqlite:///local.db'`
   * windows shell: `set DATABASE_URL=sqlite:///local.db`
 
-1. First time, create tables: `python main.py init_db`
+1. First time, create tables: `alembic upgrade head`
 1. Optionally, get the [complete accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTdWdPMXV5c2gycW8/view?usp=sharing) after sending a permission request, and extract it into `/static/data/lms`. Otherwise, you'll use the [example accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTSjNMUXYyeW4yQkk/view?usp=sharing) that you already got with the code, so no need to get it again.
 1. Populate the data (markers etc.): `python main.py process cbs`: this will take less than an hour if
    you're using the example files (default), but if you have the complete data it may take several
@@ -93,6 +93,16 @@ Then you can simply start working by running the `anyway` command.
 To run tests: `pylint -j $(nproc) anyway tests && pytest -m "not browser" ./tests`
 
 If you also wish to run the real browser tests, replace`-m "not browser"` with `--driver Chrome` or specify the browser of your choice. To learn more, read about [pytest-selenium](http://pytest-selenium.readthedocs.io/en/latest/user_guide.html#specifying-a-browser).
+
+## Altering the database schema
+When creating a patch that alters the database schema, you should use generate the appropriate
+[Alembic](http://alembic.zzzcomputing.com/en/latest/index.html) revision by running:
+
+``` shell
+alembic revision --autogenerate -m "Description of the change"
+```
+
+Make sure to commit your revision together with the code.
 
 ## Docker
 See [DOCKER](docs/DOCKER.md)

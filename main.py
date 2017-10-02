@@ -33,12 +33,6 @@ def testserver(open_server):
             port=int(os.getenv('PORT', 5000)))
 
 
-@cli.command()
-def init_db():
-    from anyway.models import init_db
-    init_db()
-
-
 @cli.group()
 def process():
     pass

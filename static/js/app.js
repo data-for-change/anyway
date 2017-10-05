@@ -83,6 +83,7 @@ $(function () {
             this.controlmeasure = 0;
             this.district = 0;
             this.case_type = 0;
+            this.total_markers = 0;
 
             this.dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
 
@@ -195,6 +196,7 @@ $(function () {
             }
         },
         markersFetched: function(params, reset) {
+            this.total_markers = this.markers.state.totalRecords;
             this.reloadSidebar(this);
             if (this.markers.hasNextPage()) {
                 delete params.page;
@@ -1273,9 +1275,10 @@ $(function () {
                     accuracyText = "";
                 }
 
+                var total_string = (markerCount == this.total_markers) ? "" : " מתוך " + this.total_markers;
                 $("#filter-string").empty()
                     .append("<span>מציג </span>")
-                    .append("<span><a onclick='showFilter(FILTER_MARKERS)'>"+markerCount+"</a></span>")
+                    .append("<span><a onclick='showFilter(FILTER_MARKERS)'>" + markerCount + total_string + "</a></span>")
                     .append("<span> תאונות</span>")
                     .append("<span> בין התאריכים </span><br>")
                     .append("<span><a onclick='showFilter(FILTER_DATE)'>"+

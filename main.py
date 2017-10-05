@@ -14,7 +14,8 @@ def cli():
 @cli.command()
 @click.option('--open', 'open_server', is_flag=True,
               help='Open the server for communication from outside', default=False)
-def testserver(open_server):
+@click.option('--debug-js', is_flag=True, help="Don't minify the JavaScript files")
+def testserver(open_server, debug_js):
     from anyway import app
     from anyway.parsers import united
     from apscheduler.scheduler import Scheduler
@@ -27,6 +28,9 @@ def testserver(open_server):
     sched.start()
 
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')
+
+    if debug_js:
+        app.config['ASSETS_DEBUG'] = True
 
     default_host = '0.0.0.0' if open_server else '127.0.0.1'
     app.run(debug=True, host=os.getenv('IP', default_host),

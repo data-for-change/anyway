@@ -1,32 +1,29 @@
-FROM partlab/ubuntu-java
-
-# Use bash for environment setup
-RUN ln -snf /bin/bash /bin/sh
+FROM ubuntu:xenial
 
 # Install system tools
-RUN apt-get -y update && apt-get install -y --no-install-recommends -qq build-essential \
-git \
-python-pip \
-python-dev \
-python-tk \
-libpq-dev \
-vim \
-sqlite3 \
-&& apt-get clean
-
-# Create required aliases and env variables
-RUN echo "export DATABASE_URL=sqlite:////anyway/local.db" >> ~/.bashrc
+RUN apt-get -y update && \
+    apt-get install -y --no-install-recommends -qq \
+        build-essential \
+        python-pip \
+        python-dev \
+        python-tk \
+        libpq-dev \
+        sqlite3 \
+        openjdk-9-jre \
+    && apt-get clean
 
 WORKDIR /anyway
-EXPOSE 5000
 
-ADD requirements.txt /anyway
-RUN pip install -U setuptools
+# First copy only the requirement.txt, so changes in other files won't trigger
+# a full pip reinstall
+COPY requirements.txt /anyway
+RUN pip install -U setuptools wheel
 RUN pip install -r requirements.txt
 
-ADD . /anyway
+COPY . /anyway
 
-RUN export "DATABASE_URL=sqlite:////anyway/local.db" && python models.py && python process.py
+VOLUME ["/anyway/static"]
+EXPOSE 5000
 
-#docker docker build -t hasdna/anyway .
-#docker run -it -p 80:5000 --name anyway hasdna/anyway /bin/bash -c 'export DATABASE_URL=sqlite:////anyway/local.db && python main.py --open'
+ENTRYPOINT ["/anyway/docker-entrypoint.sh"]
+CMD ["python", "main.py", "testserver", "--open"]

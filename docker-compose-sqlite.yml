@@ -1,0 +1,13 @@
+version: '2'
+
+services:
+  anyway:
+    build: .
+    image: hasadna/anyway:latest
+    ports:
+      - "8080:5000"
+    environment:
+      - DATABASE_URL=sqlite:////anyway/local.db
+    volumes:
+      - ./static:/anyway/static
+    restart: always

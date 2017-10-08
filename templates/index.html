@@ -297,6 +297,17 @@
         </div>
 
 
+        <div id="rsa-marker-content-template" style="display: none">
+          <div class="marker-info-window">
+            <h4 class="title"></h4>
+            <a class="profile-image-url" target="_blank" style="float: left">
+              <img class="profile-image"/>
+            </a>
+            <p class="added-by"></p>
+            <p class="description" style="margin:0"></p>
+          </div>
+        </div>
+
         <div id="marker-content-template" style="display: none">
             <div class="marker-info-window">
                 <h4 class="title"></h4>
@@ -1042,6 +1053,14 @@
           <div><div class="gmnoprint" title="<%- icon %>" ></div></div><span class="date"><%- created %></span> -<br> <span class="type"><%- type %></span>
         </a>
     </li>
+</script>
+
+<script type="text/html" id="sidebarRSAItemTemplate">
+  <li>
+    <a>
+      <div><div class="gmnoprint" title="<%- icon %>" ></div></div><span>אירוע הדווח על ידי שומרי הדרך</span> <br> <span class="description"><%- description %></span>
+    </a>
+  </li>
 </script>
 
 <script type="text/javascript"

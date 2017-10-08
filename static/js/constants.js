@@ -12,6 +12,11 @@ PROVIDERS[2] = {
   url: "http://www.1221.org.il",
   logo: "united.jpg",
 };
+PROVIDERS[4] = {
+    name: "שומרי הדרך",
+    url: "http://www.rsa.org.il/",
+    logo: "rsa.png"
+};
 
 var SEVERITY_FATAL = 1;
 var SEVERITY_SEVERE = 2;

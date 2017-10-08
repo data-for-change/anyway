@@ -66,6 +66,7 @@ $(function () {
             this.show_fatal = '1';
             this.show_severe = '1';
             this.show_light = '1';
+            this.show_rsa = '';
             this.show_urban = 3;
             this.age_groups = "";
             this.show_intersection = 3;
@@ -275,6 +276,7 @@ $(function () {
             params["show_fatal"] = this.show_fatal;
             params["show_severe"] = this.show_severe;
             params["show_light"] = this.show_light;
+            params["show_rsa"] = this.show_rsa;
             params["approx"] = this.approx;
             params["accurate"] = this.accurate;
             params["show_markers"] = this.show_markers;
@@ -745,6 +747,9 @@ $(function () {
             }
 
             // markers are loaded immediately as they are fetched
+            if (!this.fitsFilters(model)){
+                console.log(model + " doesn't fit");
+            }
             if (this.clusterMode() || this.fitsFilters(model) ||
                 !this.clusterMode() && model.get("type") == MARKER_TYPE_DISCUSSION) {
                 var markerView = new MarkerView({model: model, map: this.map, markerIconType: this.markerIconType}).render();
@@ -1032,6 +1037,7 @@ $(function () {
             if ($("#checkbox-fatal").is(":checked")) { this.show_fatal='1'; } else { this.show_fatal=''; }
             if ($("#checkbox-severe").is(":checked")) { this.show_severe='1'; } else { this.show_severe=''; }
             if ($("#checkbox-light").is(":checked")) { this.show_light='1'; } else { this.show_light=''; }
+            if ($("#checkbox-rsa").is(":checked")) { this.show_rsa='1'; } else { this.show_rsa=''; }
 
             if ($("#checkbox-urban").is(":checked") && $("#checkbox-nonurban").is(":checked")) {
                 this.show_urban = 3;
@@ -1090,6 +1096,7 @@ $(function () {
             bool_atrs["checkbox-fatal"] = this.show_fatal;
             bool_atrs["checkbox-severe"] = this.show_severe;
             bool_atrs["checkbox-light"] = this.show_light;
+            bool_atrs["checkbox-rsa"] = this.show_rsa;
 
              $.each(bool_atrs, function(attr, attr_value) {
                  $('#' + attr).prop("checked", attr_value == '1');

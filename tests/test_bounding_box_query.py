@@ -15,7 +15,7 @@ def base_kwargs():
             'start_date': datetime.date(2014, 1, 1), 'ne_lng': 34.79928962966915, 'show_severe': True,
             'end_date': datetime.date(2016, 1, 1), 'start_time': 25, 'acctype': 0, 'separation': 0,
             'show_urban': 3, 'show_lane': 3, 'sw_lng': 34.78877537033077, 'zoom': 17, 'show_holiday': 0,
-            'end_time': 25, 'road': 0, 'ne_lat': 32.072427482938345}
+            'end_time': 25, 'road': 0, 'ne_lat': 32.072427482938345, 'show_rsa': False}
 
 
 def test_location_filters(base_kwargs):

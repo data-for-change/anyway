@@ -132,8 +132,8 @@ ARG_TYPES = {'ne_lat': (float, 32.072427482938345), 'ne_lng': (float, 34.7992896
              'separation': (int, 0), 'surface': (int, 0), 'acctype': (int, 0), 'controlmeasure': (int, 0),
              'district': (int, 0), 'case_type': (int, 0), 'fetch_markers': (bool, True), 'fetch_vehicles': (bool, True),
              'fetch_involved': (bool, True), 'age_groups': (str, ""),
-             'page': (int, 0),
-             'per_page': (int, 0)}
+             'page': (int, 0), 'per_page': (int, 0),
+             'show_rsa': (bool, False)}
 
 def get_kwargs():
     kwargs = {arg: arg_type(request.values.get(arg, default_value)) for (arg, (arg_type, default_value)) in iteritems(ARG_TYPES)}

@@ -268,6 +268,10 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
             .filter(Marker.created >= kwargs['start_date']) \
             .filter(Marker.created < kwargs['end_date']) \
             .order_by(desc(Marker.created))
+
+        if not kwargs['show_rsa']:
+            markers = markers.filter(Marker.provider_code != CONST.RSA_PROVIDER_CODE)
+
         if yield_per:
             markers = markers.yield_per(yield_per)
         if accurate and not approx:

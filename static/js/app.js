@@ -988,31 +988,41 @@ $(function () {
             this.fetchMarkers();
         },
         getAgeGroupFilter: function() {
-            var age_groups = '';
+            var age_groups = [];
 
             if ($("#checkbox-00-04").is(":checked")) {
-                age_groups += "1,";
+                age_groups.push(1);
             } if ($("#checkbox-05-09").is(":checked")) {
-                age_groups += "2,";
+                age_groups.push(2);
             } if ($("#checkbox-10-14").is(":checked")) {
-                age_groups += "3,";
+                age_groups.push(3);
             } if ($("#checkbox-15-19").is(":checked")) {
-                age_groups += "4,";
+                age_groups.push(4);
             } if ($("#checkbox-20-24").is(":checked")) {
-                age_groups += "5,";
+                age_groups.push(5);
             } if ($("#checkbox-25-69").is(":checked")) {
-                age_groups += "6,7,8,9,10,11,12,13,14,";
+                for (var i = 6; i <=14; ++i) {
+                    age_groups.push(i);
+                }
             } if ($("#checkbox-70-74").is(":checked")) {
-                age_groups += "15,";
+                age_groups.push(15);
             } if ($("#checkbox-75-79").is(":checked")) {
-                age_groups += "16,";
+                age_groups.push(16);
             } if ($("#checkbox-80-84").is(":checked")) {
-                age_groups += "17,";
+                age_groups.push(17);
             } if ($("#checkbox-85-plus").is(":checked")) {
-                age_groups += "18,";
+                age_groups.push(18);
             }
 
-            return (age_groups ? age_groups.slice(0, -1) : "0");
+            if (age_groups.length == 18) {
+                return "";
+            }
+
+            if (age_groups.length == 0) {
+                return "0";
+            }
+
+            return age_groups.join();
         },
         loadFilter: function() {
             if ($("#checkbox-discussions").is(":checked")) { this.show_discussions='1'; } else { this.show_discussions=''; }

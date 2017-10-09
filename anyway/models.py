@@ -174,6 +174,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
     cross_mode = Column(Integer)
     cross_location = Column(Integer)
     cross_direction = Column(Integer)
+    involved = relationship("Involved", foreign_keys="Involved.accident_id")
 
     @staticmethod
     def json_to_description(msg):
@@ -342,7 +343,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
             markers = markers.options(load_only("id", "longitude", "latitude"))
 
         if kwargs.get('age_groups'):
-            markers = markers.join(Involved).filter(Involved.age_group.in_(kwargs.get('age_groups')))
+            markers = markers.filter(Marker.involved.any(Involved.age_group.in_(kwargs.get('age_groups'))))
 
         total_records = markers.count()
         if page and per_page:

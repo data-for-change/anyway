@@ -14,7 +14,7 @@ webassets==0.10.1
 gunicorn==18.0
 itsdangerous==0.23
 psycopg2
-wsgiref==0.1.2
+wsgiref==0.1.2; python_version <= '2.7'
 yuicompressor==2.4.8
 Flask-Admin==1.1.0
 Flask-Security==1.7.5

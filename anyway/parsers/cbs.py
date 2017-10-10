@@ -461,7 +461,7 @@ def main(specific_folder, delete_all, path, batch_size, provider_code):
             db.session.commit()
 
     started = datetime.now()
-    total = 0L
+    total = 0
     for directory in dir_list:
         parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
         provider_code = provider_code if provider_code else get_provider_code(parent_directory)

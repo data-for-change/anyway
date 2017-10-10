@@ -1,3 +1,4 @@
+from __future__ import print_function
 import email
 import imaplib
 import os
@@ -81,7 +82,7 @@ def main(username=None, password=None, lastmail=False):
                 continue
 
         # Handles Gmail bug which hasn't physically removed some of the deleted files
-        mail_date = datetime(2015, 10, 06, 10)
+        mail_date = datetime(2015, 10, 6, 10)
         if mtime < mail_date:
             continue
 
@@ -96,7 +97,7 @@ def main(username=None, password=None, lastmail=False):
                 if os.path.isfile(filepath):
                     break
                 total += 1
-                print 'Currently loading: ' + filename + '       '
+                print('Currently loading: ' + filename + '       ')
                 sys.stdout.write("\033[F")
                 time.sleep(0.1)
                 with open(filepath, 'wb') as fp:

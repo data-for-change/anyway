@@ -51,6 +51,8 @@ $(function () {
         events : {
         },
         initialize : function() {
+            var url_params = new URLSearchParams(window.location.search);
+
             this.markers = new MarkerCollection();
             this.clusters = new ClusterCollection();
             this.model = new Backbone.Model();
@@ -66,7 +68,7 @@ $(function () {
             this.show_fatal = '1';
             this.show_severe = '1';
             this.show_light = '1';
-            this.show_rsa = '';
+            this.show_rsa = url_params.get('show_rsa') || '';
             this.show_urban = 3;
             this.age_groups = "";
             this.show_intersection = 3;

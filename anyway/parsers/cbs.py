@@ -6,6 +6,8 @@ from collections import OrderedDict
 import itertools
 import re
 from datetime import datetime
+import six
+from six import iteritems
 
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy import or_, and_
@@ -307,12 +309,13 @@ def import_vehicles(provider_code, vehicles, **kwargs):
 
 
 def get_files(directory):
-    for name, filename in lms_files.iteritems():
+    for name, filename in iteritems(lms_files):
 
         if name not in (STREETS, NON_URBAN_INTERSECTION, ACCIDENTS, INVOLVED, VEHICLES):
             continue
 
-        files = filter(lambda path: filename.lower() in path.lower(), os.listdir(directory))
+        files = [path for path in os.listdir(directory)
+                 if filename.lower() in path.lower()]
         amount = len(files)
         if amount == 0:
             raise ValueError("Not found: '%s'" % filename)
@@ -346,7 +349,7 @@ def _batch_iterator(iterable, batch_size):
 
     while True:
         batch = []
-        for _ in xrange(batch_size):
+        for _ in six.moves.range(batch_size):
             try:
                 batch.append(next(iterator))
             except StopIteration:
@@ -409,7 +412,7 @@ def import_to_datastore(directory, provider_code, batch_size):
         logging.info("\t{0} items in {1}".format(new_items, time_delta(started)))
         return new_items
     except ValueError as e:
-        failed_dirs[directory] = e.message
+        failed_dirs[directory] = str(e)
         return 0
 
 
@@ -431,7 +434,7 @@ def get_provider_code(directory_name=None):
 
     ans = ""
     while not ans.isdigit():
-        ans = raw_input("Directory provider code is invalid. Please enter a valid code: ")
+        ans = six.moves.input("Directory provider code is invalid. Please enter a valid code: ")
         if ans.isdigit():
             return int(ans)
 
@@ -442,11 +445,11 @@ def main(specific_folder, delete_all, path, batch_size, provider_code):
             dir_name = tkFileDialog.askdirectory(initialdir=os.path.abspath(path),
                                                  title='Please select a directory')
         else:
-            dir_name = raw_input('Please provide the directory path: ')
+            dir_name = six.moves.input('Please provide the directory path: ')
 
         dir_list = [dir_name]
         if delete_all:
-            confirm_delete_all = raw_input("Are you sure you want to delete all the current data? (y/n)\n")
+            confirm_delete_all = six.moves.input("Are you sure you want to delete all the current data? (y/n)\n")
             if confirm_delete_all.lower() == 'n':
                 delete_all = False
     else:
@@ -470,7 +473,7 @@ def main(specific_folder, delete_all, path, batch_size, provider_code):
     delete_invalid_entries()
 
     failed = ["\t'{0}' ({1})".format(directory, fail_reason) for directory, fail_reason in
-              failed_dirs.iteritems()]
+              iteritems(failed_dirs)]
     logging.info("Finished processing all directories{0}{1}".format(", except:\n" if failed else "",
                                                              "\n".join(failed)))
     logging.info("Total: {0} items in {1}".format(total, time_delta(started)))

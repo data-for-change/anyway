@@ -4,6 +4,7 @@ import calendar
 import csv
 from datetime import datetime
 import os
+import six
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
@@ -286,12 +287,12 @@ def create_accidents(collection, file_location):
             created = parse_date(accident[csvmap["time"]])
             marker = {'id': accident[csvmap["id"]], 'latitude': accident[csvmap["lat"]],
                       'longitude': accident[csvmap["long"]], 'created': created, 'provider_code': PROVIDER_CODE,
-                      'title': unicode(accident[csvmap["type"]], encoding='utf-8')[:100],
-                      'address': unicode((accident[csvmap["street"]] + ' ' + accident[csvmap["city"]]),
+                      'title': six.text_type(accident[csvmap["type"]], encoding='utf-8')[:100],
+                      'address': six.text_type((accident[csvmap["street"]] + ' ' + accident[csvmap["city"]]),
                                          encoding='utf-8'),
-                      'severity': 2 if u"קשה" in unicode(accident[csvmap["type"]], encoding='utf-8') else 3,
+                      'severity': 2 if u"קשה" in six.text_type(accident[csvmap["type"]], encoding='utf-8') else 3,
                       'locationAccuracy': 1, 'subtype': 21, 'type': CONST.MARKER_TYPE_ACCIDENT,
-                      'description': unicode(accident[csvmap["comment"]], encoding='utf-8'),
+                      'description': six.text_type(accident[csvmap["comment"]], encoding='utf-8'),
                       'weather': process_weather_data(collection, accident[csvmap["lat"]],
                                                       accident[csvmap["long"]])}
             if format_version == 0:

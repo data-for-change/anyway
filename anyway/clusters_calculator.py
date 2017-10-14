@@ -29,7 +29,7 @@ def divide_to_boxes(ne_lat, ne_lng, sw_lat, sw_lng):
     lat_box_size = (ne_lat - sw_lat) / cpu_count
     # lng_box_size = (sw_lng - ne_lng) / cpu_count
     boxes = []
-    for i in xrange(cpu_count):
+    for i in range(cpu_count):
         # TODO: the below calculation is using sw_lat as first param instead of ne_lat. Plz verify my fix for that:
         # boxes.append((sw_lat + (i + 1) * lat_box_size, ne_lng, sw_lat + i * lat_box_size, sw_lng))
         boxes.append({'ne_lat': ne_lat + (i + 1) * lat_box_size, 'ne_lng': ne_lng,

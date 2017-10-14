@@ -9,6 +9,7 @@ from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, Date
 from sqlalchemy.orm import relationship, load_only, backref
 from .utilities import init_flask
 from flask.ext.sqlalchemy import SQLAlchemy
+from six import iteritems
 
 import datetime
 from . import localization
@@ -229,7 +230,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
                 "cross_location": self.cross_location,
                 "cross_direction": self.cross_direction,
             }
-            for name, value in optional.iteritems():
+            for name, value in iteritems(optional):
                 if value != 0:
                     fields[name] = value
         return fields

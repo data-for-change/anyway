@@ -97,7 +97,7 @@ def load_discussions(identifiers):
             logging.info("Added:  " + identifier)
         except Exception as e:
             db.session.rollback()
-            logging.warn("Failed: " + identifier + ": " + e.message)
+            logging.warn("Failed: " + identifier + ": " + e)
 
 
 if __name__ == '__main__':

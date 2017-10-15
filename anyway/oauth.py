@@ -1,7 +1,6 @@
 from rauth import OAuth2Service
 from flask import current_app, url_for, request, redirect
-import json as jsonPackage
-import urllib2
+import requests
 import json
 
 
@@ -76,8 +75,9 @@ class FacebookSignIn(OAuthSignIn):
 class GoogleSignIn(OAuthSignIn):
     def __init__(self):
         super(GoogleSignIn, self).__init__('google')
-        googleinfo = urllib2.urlopen('https://accounts.google.com/.well-known/openid-configuration')
-        google_params = jsonPackage.load(googleinfo)
+        googleinfo = requests.get('https://accounts.google.com/.well-known/openid-configuration')
+        googleinfo.raise_for_status()
+        google_params = googleinfo.json()
         self.service = OAuth2Service(
                 name='google',
                 client_id=self.consumer_id,
@@ -102,7 +102,7 @@ class GoogleSignIn(OAuthSignIn):
                       'grant_type': 'authorization_code',
                       'redirect_uri': self.get_callback_url()
                      },
-                decoder = jsonPackage.loads
+                decoder = json.loads
         )
         me = oauth_session.get('').json()
         return (me['name'],

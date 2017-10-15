@@ -93,7 +93,7 @@ def get_parent_object_node(node):
 
 
 def accident_time_zone_adjustment(created):  # return accident time in UTC time
-
+    # pylint: disable=unexpected-keyword-arg
     accident_date = parse_date(created)
     daylight_saving_time = is_nth_weekday(4, 4, accident_date.year, 3)
     winter_clock = is_nth_weekday(4, 6, accident_date.year, 10)

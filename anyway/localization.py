@@ -3,6 +3,8 @@
 import csv
 import os
 from . import field_names
+import six
+from functools import partial
 
 
 _tables = {
@@ -235,8 +237,21 @@ _fields = {
     "ZURAT_ISHUV": "צורת יישוב"
 }
 
-_cities = list(csv.DictReader(open(os.path.join("static/data/cities.csv"))))
-_cities_names = {int(x[field_names.sign]): x[field_names.name].decode('cp1255') for x in _cities}
+if six.PY3:
+    _open_hebrew_textfile = partial(open, encoding='cp1255')
+else:
+    _open_hebrew_textfile = open
+
+if six.PY3:
+    _decode_hebrew = lambda s: s
+else:
+    _decode_hebrew = lambda s: s.decode("cp1255")
+
+
+with _open_hebrew_textfile(os.path.join("static/data/cities.csv"), "r") as f:
+    _cities = list(csv.DictReader(f))
+
+_cities_names = {int(x[field_names.sign]): _decode_hebrew(x[field_names.name]) for x in _cities}
 
 
 def get_field(field, value=None):

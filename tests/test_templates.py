@@ -32,5 +32,5 @@ def test_no_trailing_spaces(template_file):
 
 @pytest.mark.parametrize("template_file", _TEMPLATE_FILES)
 def test_template_syntax(template_file):
-    with open(template_file, "r") as f:
+    with open(template_file, "rb") as f:
         _environment.parse(f.read().decode("utf-8"))

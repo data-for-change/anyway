@@ -1086,7 +1086,7 @@
 <script type="text/javascript">
 
             {% if CONST %}
-                {% for key,val in CONST.iteritems() %}
+                {% for key,val in iteritems(CONST) %}
                    {{key}} = {{val}}
                 {% endfor %}
             {% else %}

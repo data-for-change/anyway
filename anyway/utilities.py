@@ -116,6 +116,8 @@ def time_delta(since):
                     for attr in attrs if getattr(delta, attr))
 
 if six.PY3:
-    decode_hebrew = lambda s: s
+    def decode_hebrew(s, encoding="cp1255"):
+        return s
 else:
-    decode_hebrew = lambda s: s.decode("cp1255")
+    def decode_hebrew(s, encoding="cp1255"):
+        return s.decode(encoding)

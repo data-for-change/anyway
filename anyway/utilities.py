@@ -9,6 +9,7 @@ import pyproj
 import threading
 import sys
 import re
+import six
 
 
 _PROJECT_ROOT = os.path.join(os.path.dirname(__file__), '..')
@@ -46,8 +47,8 @@ class CsvReader(object):
     """
     _digit_pattern = re.compile(r'^-?\d*(\.\d+)?$')
 
-    def __init__(self, filename):
-        self._file = open(filename)
+    def __init__(self, filename, encoding=None):
+        self._file = open(filename) if six.PY2 else open(filename, encoding=encoding)
         self._lock = threading.RLock()
         self._closed = False
 
@@ -84,7 +85,7 @@ class CsvReader(object):
 
     def __iter__(self):
         for line in DictReader(self._file):
-            converted = dict([(key.upper(), self._convert(val)) for key, val in line.iteritems()])
+            converted = dict([(key.upper(), self._convert(val)) for key, val in six.iteritems(line)])
             yield converted
 
 
@@ -113,3 +114,8 @@ def time_delta(since):
     return " ".join('%d %s' % (getattr(delta, attr),
                                getattr(delta, attr) > 1 and attr or attr[:-1])
                     for attr in attrs if getattr(delta, attr))
+
+if six.PY3:
+    decode_hebrew = lambda s: s
+else:
+    decode_hebrew = lambda s: s.decode("cp1255")

@@ -15,7 +15,8 @@ from sqlalchemy import or_, and_
 from .. import field_names, localization
 from ..models import Marker, Involved, Vehicle
 from .. import models
-from ..utilities import ItmToWGS84, init_flask, CsvReader, time_delta
+from ..utilities import ItmToWGS84, init_flask, CsvReader, time_delta, decode_hebrew
+from functools import partial
 import logging
 
 # Headless servers cannot use GUI file dialog and require raw user input
@@ -54,6 +55,7 @@ coordinates_converter = ItmToWGS84()
 app = init_flask()
 db = SQLAlchemy(app)
 
+json_dumps = partial(json.dumps, encoding=models.db_encoding) if six.PY2 else json.dumps
 
 def get_street(settlement_sign, street_sign, streets):
     """
@@ -62,7 +64,7 @@ def get_street(settlement_sign, street_sign, streets):
     if settlement_sign not in streets:
         # Changed to return blank string instead of None for correct presentation (Omer)
         return u""
-    street_name = [x[field_names.street_name].decode(CONTENT_ENCODING) for x in streets[settlement_sign] if
+    street_name = [decode_hebrew(x[field_names.street_name]) for x in streets[settlement_sign] if
                    x[field_names.street_sign] == street_sign]
     # there should be only one street name, or none if it wasn't found.
     return street_name[0] if len(street_name) == 1 else u""
@@ -127,12 +129,12 @@ def get_junction(accident, roads):
                 direction = u"דרומית" if accident[field_names.road1] % 2 == 0 else u"מערבית"
             if abs(float(accident["KM"] - junc_km)/10) >= 1:
                 string = str(abs(float(accident["KM"])-junc_km)/10) + u" ק״מ " + direction + u" ל" + \
-                    junction.decode(CONTENT_ENCODING)
+                    decode_hebrew(junction)
             elif 0 < abs(float(accident["KM"] - junc_km)/10) < 1:
                 string = str(int((abs(float(accident["KM"])-junc_km)/10)*1000)) + u" מטרים " + direction + u" ל" + \
-                    junction.decode(CONTENT_ENCODING)
+                    decode_hebrew(junction)
             else:
-                string = junction.decode(CONTENT_ENCODING)
+                string = decode_hebrew(junction)
             return string
         else:
             return u""
@@ -140,7 +142,7 @@ def get_junction(accident, roads):
     elif accident[field_names.non_urban_intersection] is not None:
         key = accident[field_names.road1], accident[field_names.road2], accident["KM"]
         junction = roads.get(key, None)
-        return junction.decode(CONTENT_ENCODING) if junction else u""
+        return decode_hebrew(junction) if junction else u""
     else:
         return u""
 
@@ -220,7 +222,7 @@ def import_accidents(provider_code, accidents, streets, roads, **kwargs):
             "id": int(accident[field_names.id]),
             "provider_code": int(provider_code),
             "title": "Accident",
-            "description": json.dumps(load_extra_data(accident, streets, roads), encoding=models.db_encoding),
+            "description": json_dumps(load_extra_data(accident, streets, roads)),
             "address": get_address(accident, streets),
             "latitude": lat,
             "longitude": lng,
@@ -322,7 +324,7 @@ def get_files(directory):
         if amount > 1:
             raise ValueError("Ambiguous: '%s'" % filename)
 
-        csv = CsvReader(os.path.join(directory, files[0]))
+        csv = CsvReader(os.path.join(directory, files[0]), encoding="cp1255")
 
         if name == STREETS:
             streets_map = {}
@@ -411,7 +413,7 @@ def import_to_datastore(directory, provider_code, batch_size):
 
         logging.info("\t{0} items in {1}".format(new_items, time_delta(started)))
         return new_items
-    except ValueError as e:
+    except RuntimeError as e:
         failed_dirs[directory] = str(e)
         return 0
 

@@ -29,7 +29,7 @@ from flask_admin import helpers, expose, BaseView
 from werkzeug.security import check_password_hash
 from sendgrid import sendgrid, SendGridClientError, SendGridServerError, Mail
 import glob
-from .utilities import CsvReader
+from .utilities import CsvReader, decode_hebrew
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.security import Security, SQLAlchemyUserDatastore, roles_required, current_user, LoginForm, login_required
 from flask.ext.compress import Compress
@@ -117,7 +117,7 @@ def generate_csv(results):
 
         row = {k: v.encode('utf8')
         if type(v) is six.text_type else v
-               for k, v in serialized.iteritems()}
+               for k, v in iteritems(serialized)}
         output.writerow(row)
         yield output_file.getvalue()
         output_file.truncate(0)
@@ -400,6 +400,7 @@ def index(marker=None, message=None):
     context['default_end_date_format'] = request.values.get('end_date', today.strftime('%Y-%m-%d'))
     context['default_start_date_format'] = request.values.get('start_date', (today - datetime.timedelta(days=1095)).strftime('%Y-%m-%d'))
     context['entries_per_page'] = ENTRIES_PER_PAGE
+    context['iteritems'] = iteritems
     return render_template('index.html', **context)
 
 
@@ -737,7 +738,7 @@ def read_dictionaries():
         if len(main_dict) == 1:
             for dic in main_dict['Dictionary']:
                 if type(dic[DICTCOLUMN3]) is str:
-                    lms_dictionary[(int(dic[DICTCOLUMN1]),int(dic[DICTCOLUMN2]))] = dic[DICTCOLUMN3].decode(content_encoding)
+                    lms_dictionary[(int(dic[DICTCOLUMN1]),int(dic[DICTCOLUMN2]))] = decode_hebrew(dic[DICTCOLUMN3], encoding=content_encoding)
                 else:
                     lms_dictionary[(int(dic[DICTCOLUMN1]),int(dic[DICTCOLUMN2]))] = int(dic[DICTCOLUMN3])
             return
@@ -752,7 +753,7 @@ def get_dict_file(directory):
             raise ValueError("file not found: " + filename + " in directory " + directory)
         if amount > 1:
             raise ValueError("there are too many matches: " + filename)
-        csv = CsvReader(os.path.join(directory, files[0]))
+        csv = CsvReader(os.path.join(directory, files[0]), encoding="cp1255")
         yield name, csv
 
 class ExtendedLoginForm(LoginForm):

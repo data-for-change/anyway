@@ -7,7 +7,7 @@ from collections import namedtuple
 from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table, \
         ForeignKeyConstraint, func
 from sqlalchemy.orm import relationship, load_only, backref
-from .utilities import init_flask
+from .utilities import init_flask, decode_hebrew
 from flask.ext.sqlalchemy import SQLAlchemy
 from six import iteritems
 
@@ -102,8 +102,8 @@ class MarkerMixin(Point):
     def format_description(field, value):
         # if the field's value is a static localizable field, fetch it.
         if field in localization.get_supported_tables():
-            value = localization.get_field(field, value).decode(db_encoding)
-        name = localization.get_field(field).decode(db_encoding)
+            value = decode_hebrew(localization.get_field(field, value), db_encoding)
+        name = decode_hebrew(localization.get_field(field), db_encoding)
         return u"{0}: {1}".format(name, value)
 
 class HighlightPoint(Point, Base):
@@ -180,7 +180,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
     @staticmethod
     def json_to_description(msg):
         description = json.loads(msg, encoding=db_encoding)
-        return "\n".join([Marker.format_description(field, value) for field, value in description.iteritems()])
+        return "\n".join([Marker.format_description(field, value) for field, value in iteritems(description)])
 
     def serialize(self, is_thin=False):
         fields = {

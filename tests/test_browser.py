@@ -68,7 +68,7 @@ def test_sanity(selenium, anyway_server):
     WebDriverWait(selenium, _WAIT_TIME).until(_ajax_finished)
 
     first_accidents = WebDriverWait(selenium, _WAIT_TIME).until(_check_accidents)
-    zoom_out_button = WebDriverWait(selenium, _WAIT_TIME).until(EC.element_to_be_clickable((By.XPATH, "//div[@title='הקטנת התצוגה']")))
+    zoom_out_button = WebDriverWait(selenium, _WAIT_TIME).until(EC.element_to_be_clickable((By.XPATH, "//button[@title='הקטנת התצוגה']")))
 
     zoom_out_button.click()
     WebDriverWait(selenium, _WAIT_TIME).until(_ajax_finished)

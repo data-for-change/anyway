@@ -42,6 +42,9 @@ You should be familiar with setting up Python in your computer. You can consult 
 platform specific tutorials. Developing by using a [virtual
 environment](https://www.youtube.com/watch?v=N5vscPTWKOk) is highly recommended.
 
+### Choosing a Python Version
+The project is currently transitioning to Python 3. Both Python 2 and 3 are supported at the moment, and the code is tested in Travis against both versions. If you are setting a new environment, it is recommended that you choose Python 3 for future compatibility. The instructions below are relevant for Python 2.
+
 ### Ubuntu
 1. `sudo apt-get install python2-pip python2-dev libpq-dev rabbitmq-server`
 1. `systemctl enable --now rabbitmq-server`
@@ -59,7 +62,7 @@ environment](https://www.youtube.com/watch?v=N5vscPTWKOk) is highly recommended.
 1. Activate your virtualenv (in case of using one): `source *env-name*/bin/activate`
 1. Run `pip install -r requirements.txt -r test_requirements.txt`
 
-### Windows (experimental)
+### Windows
 See the [Wiki](https://github.com/hasadna/anyway/wiki/Setting-up-a-Python-development-environment-in-Windows).
 
 ## Local first run (all platforms)

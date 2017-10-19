@@ -85,7 +85,7 @@ $(function () {
             this.case_type = 0;
             this.total_markers = 0;
 
-            this.dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
+            this.dateRanges = [new Date($('#sdateInit').val()), new Date($('#edateInit').val())];
 
             setTimeout(function(){
                 this.firstLoadDelay = false;
@@ -1156,8 +1156,8 @@ $(function () {
             });
 
             if (this.dateRanges !== 'undefined') {
-                document.getElementById("sdate").valueAsDate = new Date(this.dateRanges[0]);
-                document.getElementById("edate").valueAsDate = new Date(this.dateRanges[1]);
+                $("#sdate").datepicker("setDate", new Date(this.dateRanges[0]));
+                $("#edate").datepicker("setDate", new Date(this.dateRanges[1]));
             }
         },
         changeDate: function() {

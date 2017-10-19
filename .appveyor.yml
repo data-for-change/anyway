@@ -1,6 +1,6 @@
 environment:
   matrix:
-    - PYTHON: "C:\\Python27\\"
+    - PYTHON: "C:\\Python27"
       DATABASE_URL: 'postgresql://postgres@localhost/anyway'
       ANYWAY_DISABLE_CELERY: "1"
 
@@ -8,33 +8,23 @@ services:
  - postgresql
 
 init:
-- ps: >-
+- ps: |
     Set-Content "c:\program files\postgresql\9.6\data\pg_hba.conf" "host    all             all             ::1/128            trust"
-
     Add-Content "c:\program files\postgresql\9.6\data\pg_hba.conf" "host    all             all             127.0.0.1/32            trust"
-
-    $env:Path += ";c:\program files\postgresql\9.6\bin"
-
-    $env:Path += ";$python\bin"
+    $env:PATH += ";c:\program files\postgresql\9.6\bin"
+    $env:PATH = "$env:Python;$env:Python\Scripts;$env:PATH"
 
 install:
-- ps: >-
-    python -m pip install -U --no-cache-dir pip wheel
-
-    python -m pip install --no-cache-dir -r requirements.txt -r test_requirements.txt
+  - python --version
+  - python -m pip install -U --no-cache-dir pip wheel
+  - python -m pip install --no-cache-dir -r requirements.txt -r test_requirements.txt
 
 build: off
 
 test_script:
-- ps: >-
-    psql -U postgres -c "CREATE ROLE appveyor LOGIN SUPERUSER CREATEDB CREATEROLE;"
-
-    createdb anyway
-
-    alembic upgrade head
-
-    python main.py process cbs
-
-    python main.py process united --light
-
-    python -m pytest -m "not browser" tests
+  - psql -U postgres -c "CREATE ROLE appveyor LOGIN SUPERUSER CREATEDB CREATEROLE;"
+  - createdb anyway
+  - alembic upgrade head
+  - python main.py process cbs
+  - python main.py process united --light
+  - python -m pytest -m "not browser" tests

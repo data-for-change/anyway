@@ -1,8 +1,10 @@
 environment:
+  global:
+    DATABASE_URL: 'postgresql://postgres@localhost/anyway'
+    ANYWAY_DISABLE_CELERY: "1"
   matrix:
+    - PYTHON: "C:\\Python36"
     - PYTHON: "C:\\Python27"
-      DATABASE_URL: 'postgresql://postgres@localhost/anyway'
-      ANYWAY_DISABLE_CELERY: "1"
 
 services:
  - postgresql

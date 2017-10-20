@@ -24,8 +24,8 @@ _TEMPLATE_FILES = list(_iter_templates())
 
 @pytest.mark.parametrize("template_file", _TEMPLATE_FILES)
 def test_no_trailing_spaces(template_file):
-    with open(template_file, "r") as f:
-        template = f.read()
+    with open(template_file, "rb") as f:
+        template = f.read().decode("utf-8")
         if re.search(r"[ \t]+$", template, flags=re.MULTILINE):
             raise Exception("Trailing spaces found in {}".format(os.path.abspath(template_file)))
 

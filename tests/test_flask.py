@@ -2,6 +2,7 @@
 from six.moves import http_client
 import six
 from anyway import app as flask_app
+from anyway.utilities import open_utf8
 import json
 import pytest
 from functools import partial
@@ -53,7 +54,7 @@ def test_markers_2014086707(app):
     rv = app.get("/markers/2014086707")
     assert rv.status_code == http_client.OK
     #print(rv.data)
-    with open('tests/markers_2014086707.json') as fh:
+    with open_utf8('tests/markers_2014086707.json') as fh:
         assert json.loads(_text_data(rv)) == json.load(fh)
 
 

@@ -10,7 +10,7 @@ from sqlalchemy import and_
 
 from ..constants import CONST
 from ..models import Marker
-from ..utilities import init_flask, decode_hebrew
+from ..utilities import init_flask, decode_hebrew, open_utf8
 from ..import importmail
 
 from xml.dom import minidom
@@ -257,6 +257,7 @@ CSVMAP = [
         {"id": 0, "time": 1, "type": 2, "long": 3, "lat": 4,  "city": 5, "street": 6, "comment": 7, "casualties": 8},
         ]
 
+
 def create_accidents(collection, file_location):
     """
     :param file_location: local location of .csv
@@ -264,7 +265,7 @@ def create_accidents(collection, file_location):
     """
     logging.info("\tReading accidents data from '%s'..." % file_location)
 
-    with open(file_location, 'rU') as f:
+    with open_utf8(file_location, 'rU') as f:
         reader = csv.reader(f, delimiter=',', dialect=csv.excel_tab)
 
         for line, accident in enumerate(reader):

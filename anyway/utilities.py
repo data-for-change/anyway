@@ -4,6 +4,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from . import config
 from flask import Flask
+from functools import partial
 import os
 import pyproj
 import threading
@@ -121,3 +122,6 @@ if six.PY3:
 else:
     def decode_hebrew(s, encoding="cp1255"):
         return s.decode(encoding)
+
+
+open_utf8 = partial(open, encoding="utf-8") if six.PY3 else open

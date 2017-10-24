@@ -829,7 +829,7 @@ def oauth_callback(provider):
         if email is None:
             flash('Authentication failed.')
             return redirect(url_for('index'))
-        user=User.query.filter_by(email=email).first()
+        user=db.session.query(User).filter_by(email=email).first()
         if not user:
             user = User(nickname=username, email=email, provider=provider)
             db.session.add(user)
@@ -839,7 +839,7 @@ def oauth_callback(provider):
         if social_id is None:
             flash('Authentication failed.')
             return redirect(url_for('index'))
-        user = User.query.filter_by(social_id=social_id).first()
+        user = db.session.query(User).filter_by(social_id=social_id).first()
         if not user:
             user = User(social_id=social_id, nickname=username, email=email, provider=provider)
             db.session.add(user)

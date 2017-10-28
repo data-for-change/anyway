@@ -136,7 +136,7 @@ class HighlightPoint(Point, Base):
             longitude=data["longitude"]
         )
 
-class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
+class AccidentMarker(MarkerMixin, Base):
     __tablename__ = "markers"
     __table_args__ = (
         Index('acc_long_lat_idx', 'latitude', 'longitude'),
@@ -180,7 +180,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
     @staticmethod
     def json_to_description(msg):
         description = json.loads(msg, encoding=db_encoding)
-        return "\n".join([Marker.format_description(field, value) for field, value in iteritems(description)])
+        return "\n".join([AccidentMarker.format_description(field, value) for field, value in iteritems(description)])
 
     def serialize(self, is_thin=False):
         fields = {
@@ -210,7 +210,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
             if self.provider_code == CONST.UNITED_HATZALA_CODE:
                 fields.update({"description": self.description})
             else:
-                fields.update({"description": Marker.json_to_description(self.description)})
+                fields.update({"description": AccidentMarker.json_to_description(self.description)})
 
             optional = {
                 "one_lane": self.one_lane,
@@ -249,7 +249,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
 
         # example:
         # ne_lat=32.36292402647484&ne_lng=35.08873443603511&sw_lat=32.29257266524761&sw_lng=34.88445739746089
-        # >>>  m = Marker.bounding_box_query(32.36, 35.088, 32.292, 34.884)
+        # >>>  m = AccidentMarker.bounding_box_query(32.36, 35.088, 32.292, 34.884)
         # >>> m.count()
         # 250
 
@@ -259,92 +259,92 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
         per_page = kwargs.get('per_page')
 
         if not kwargs.get('show_markers', True):
-            return MarkerResult(markers=db.session.query(Marker).filter(sql.false()), total_records=0)
-        markers = db.session.query(Marker) \
-            .filter(Marker.longitude <= kwargs['ne_lng']) \
-            .filter(Marker.longitude >= kwargs['sw_lng']) \
-            .filter(Marker.latitude <= kwargs['ne_lat']) \
-            .filter(Marker.latitude >= kwargs['sw_lat']) \
-            .filter(Marker.created >= kwargs['start_date']) \
-            .filter(Marker.created < kwargs['end_date']) \
-            .order_by(desc(Marker.created))
+            return MarkerResult(markers=db.session.query(AccidentMarker).filter(sql.false()), total_records=0)
+        markers = db.session.query(AccidentMarker) \
+            .filter(AccidentMarker.longitude <= kwargs['ne_lng']) \
+            .filter(AccidentMarker.longitude >= kwargs['sw_lng']) \
+            .filter(AccidentMarker.latitude <= kwargs['ne_lat']) \
+            .filter(AccidentMarker.latitude >= kwargs['sw_lat']) \
+            .filter(AccidentMarker.created >= kwargs['start_date']) \
+            .filter(AccidentMarker.created < kwargs['end_date']) \
+            .order_by(desc(AccidentMarker.created))
         if yield_per:
             markers = markers.yield_per(yield_per)
         if accurate and not approx:
-            markers = markers.filter(Marker.locationAccuracy == 1)
+            markers = markers.filter(AccidentMarker.locationAccuracy == 1)
         elif approx and not accurate:
-            markers = markers.filter(Marker.locationAccuracy != 1)
+            markers = markers.filter(AccidentMarker.locationAccuracy != 1)
         elif not accurate and not approx:
-            return MarkerResult(markers=db.session.query(Marker).filter(sql.false()), total_records=0)
+            return MarkerResult(markers=db.session.query(AccidentMarker).filter(sql.false()), total_records=0)
         if not kwargs.get('show_fatal', True):
-            markers = markers.filter(Marker.severity != 1)
+            markers = markers.filter(AccidentMarker.severity != 1)
         if not kwargs.get('show_severe', True):
-            markers = markers.filter(Marker.severity != 2)
+            markers = markers.filter(AccidentMarker.severity != 2)
         if not kwargs.get('show_light', True):
-            markers = markers.filter(Marker.severity != 3)
+            markers = markers.filter(AccidentMarker.severity != 3)
         if kwargs.get('show_urban', 3) != 3:
             if kwargs['show_urban'] == 2:
-                markers = markers.filter(Marker.roadType >= 1).filter(Marker.roadType <= 2)
+                markers = markers.filter(AccidentMarker.roadType >= 1).filter(AccidentMarker.roadType <= 2)
             elif kwargs['show_urban'] == 1:
-                markers = markers.filter(Marker.roadType >= 3).filter(Marker.roadType <= 4)
+                markers = markers.filter(AccidentMarker.roadType >= 3).filter(AccidentMarker.roadType <= 4)
             else:
-                return MarkerResult(markers=db.session.query(Marker).filter(sql.false()), total_records=0)
+                return MarkerResult(markers=db.session.query(AccidentMarker).filter(sql.false()), total_records=0)
         if kwargs.get('show_intersection', 3) != 3:
             if kwargs['show_intersection'] == 2:
-                markers = markers.filter(Marker.roadType != 2).filter(Marker.roadType != 4)
+                markers = markers.filter(AccidentMarker.roadType != 2).filter(AccidentMarker.roadType != 4)
             elif kwargs['show_intersection'] == 1:
-                markers = markers.filter(Marker.roadType != 1).filter(Marker.roadType != 3)
+                markers = markers.filter(AccidentMarker.roadType != 1).filter(AccidentMarker.roadType != 3)
             else:
-                return MarkerResult(markers=db.session.query(Marker).filter(sql.false()), total_records=0)
+                return MarkerResult(markers=db.session.query(AccidentMarker).filter(sql.false()), total_records=0)
         if kwargs.get('show_lane', 3) != 3:
             if kwargs['show_lane'] == 2:
-                markers = markers.filter(Marker.one_lane >= 2).filter(Marker.one_lane <= 3)
+                markers = markers.filter(AccidentMarker.one_lane >= 2).filter(AccidentMarker.one_lane <= 3)
             elif kwargs['show_lane'] == 1:
-                markers = markers.filter(Marker.one_lane == 1)
+                markers = markers.filter(AccidentMarker.one_lane == 1)
             else:
-                return MarkerResult(markers=db.session.query(Marker).filter(sql.false()), total_records=0)
+                return MarkerResult(markers=db.session.query(AccidentMarker).filter(sql.false()), total_records=0)
 
         if kwargs.get('show_day', 7) != 7:
-            markers = markers.filter(func.extract("dow", Marker.created) == kwargs['show_day'])
+            markers = markers.filter(func.extract("dow", AccidentMarker.created) == kwargs['show_day'])
         if kwargs.get('show_holiday', 0) != 0:
-            markers = markers.filter(Marker.dayType == kwargs['show_holiday'])
+            markers = markers.filter(AccidentMarker.dayType == kwargs['show_holiday'])
 
         if kwargs.get('show_time', 24) != 24:
             if kwargs['show_time'] == 25:     # Daylight (6-18)
-                markers = markers.filter(func.extract("hour", Marker.created) >= 6)\
-                                 .filter(func.extract("hour", Marker.created) < 18)
+                markers = markers.filter(func.extract("hour", AccidentMarker.created) >= 6)\
+                                 .filter(func.extract("hour", AccidentMarker.created) < 18)
             elif kwargs['show_time'] == 26:   # Darktime (18-6)
-                markers = markers.filter((func.extract("hour", Marker.created) >= 18) |
-                                         (func.extract("hour", Marker.created) < 6))
+                markers = markers.filter((func.extract("hour", AccidentMarker.created) >= 18) |
+                                         (func.extract("hour", AccidentMarker.created) < 6))
             else:
-                markers = markers.filter(func.extract("hour", Marker.created) >= kwargs['show_time'])\
-                                 .filter(func.extract("hour", Marker.created) < kwargs['show_time']+6)
+                markers = markers.filter(func.extract("hour", AccidentMarker.created) >= kwargs['show_time'])\
+                                 .filter(func.extract("hour", AccidentMarker.created) < kwargs['show_time']+6)
         elif kwargs['start_time'] != 25 and kwargs['end_time'] != 25:
-            markers = markers.filter(func.extract("hour", Marker.created) >= kwargs['start_time'])\
-                             .filter(func.extract("hour", Marker.created) < kwargs['end_time'])
+            markers = markers.filter(func.extract("hour", AccidentMarker.created) >= kwargs['start_time'])\
+                             .filter(func.extract("hour", AccidentMarker.created) < kwargs['end_time'])
         if kwargs.get('weather', 0) != 0:
-            markers = markers.filter(Marker.weather == kwargs['weather'])
+            markers = markers.filter(AccidentMarker.weather == kwargs['weather'])
         if kwargs.get('road', 0) != 0:
-            markers = markers.filter(Marker.roadShape == kwargs['road'])
+            markers = markers.filter(AccidentMarker.roadShape == kwargs['road'])
         if kwargs.get('separation', 0) != 0:
-            markers = markers.filter(Marker.multi_lane == kwargs['separation'])
+            markers = markers.filter(AccidentMarker.multi_lane == kwargs['separation'])
         if kwargs.get('surface', 0) != 0:
-            markers = markers.filter(Marker.road_surface == kwargs['surface'])
+            markers = markers.filter(AccidentMarker.road_surface == kwargs['surface'])
         if kwargs.get('acctype', 0) != 0:
-            markers = markers.filter(Marker.subtype == kwargs['acctype'])
+            markers = markers.filter(AccidentMarker.subtype == kwargs['acctype'])
         if kwargs.get('controlmeasure', 0) != 0:
-            markers = markers.filter(Marker.road_control == kwargs['controlmeasure'])
+            markers = markers.filter(AccidentMarker.road_control == kwargs['controlmeasure'])
         if kwargs.get('district', 0) != 0:
-            markers = markers.filter(Marker.unit == kwargs['district'])
+            markers = markers.filter(AccidentMarker.unit == kwargs['district'])
 
         if kwargs.get('case_type', 0) != 0:
-            markers = markers.filter(Marker.provider_code == kwargs['case_type'])
+            markers = markers.filter(AccidentMarker.provider_code == kwargs['case_type'])
 
         if is_thin:
             markers = markers.options(load_only("id", "longitude", "latitude"))
 
         if kwargs.get('age_groups'):
-            markers = markers.filter(Marker.involved.any(Involved.age_group.in_(kwargs.get('age_groups'))))
+            markers = markers.filter(AccidentMarker.involved.any(Involved.age_group.in_(kwargs.get('age_groups'))))
 
         total_records = markers.count()
         if page and per_page:
@@ -359,7 +359,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
             vehicles = None
             involved = None
             if fetch_markers:
-                markers = db.session.query(Marker).filter(Marker.id.in_(markers_ids))
+                markers = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_(markers_ids))
             if fetch_vehicles:
                 vehicles = db.session.query(Vehicle).filter(Vehicle.accident_id.in_(markers_ids))
             if fetch_involved:
@@ -372,11 +372,11 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
 
     @staticmethod
     def get_marker(marker_id):
-        return db.session.query(Marker).filter_by(id=marker_id)
+        return db.session.query(AccidentMarker).filter_by(id=marker_id)
 
     @classmethod
     def parse(cls, data):
-        return Marker(
+        return AccidentMarker(
             type=CONST.MARKER_TYPE_ACCIDENT,
             title=data["title"],
             description=data["description"],
@@ -429,7 +429,7 @@ class DiscussionMarker(MarkerMixin, Base):
     @staticmethod
     def bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng, show_discussions):
         if not show_discussions:
-            return db.session.query(Marker).filter(sql.false())
+            return db.session.query(AccidentMarker).filter(sql.false())
         markers = db.session.query(DiscussionMarker) \
             .filter(DiscussionMarker.longitude <= ne_lng) \
             .filter(DiscussionMarker.longitude >= sw_lng) \
@@ -466,7 +466,7 @@ class Involved(Base):
     safety_measures_use = Column(Integer)
     late_deceased = Column(Integer)
     __table_args__ = (ForeignKeyConstraint([accident_id, provider_code],
-                                           [Marker.id, Marker.provider_code],
+                                           [AccidentMarker.id, AccidentMarker.provider_code],
                                            ondelete="CASCADE"),
                       {})
 
@@ -526,7 +526,7 @@ class Vehicle(Base):
     seats = Column(Integer)
     total_weight = Column(Integer)
     __table_args__ = (ForeignKeyConstraint([accident_id, provider_code],
-                                           [Marker.id, Marker.provider_code],
+                                           [AccidentMarker.id, AccidentMarker.provider_code],
                                            ondelete="CASCADE"),
                       {})
 

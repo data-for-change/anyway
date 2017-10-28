@@ -1,4 +1,4 @@
-from .models import Marker
+from .models import AccidentMarker
 from .pymapcluster import calculate_clusters
 from .task_queue import task_queue, map_task, task_signature
 import multiprocessing
@@ -7,7 +7,7 @@ import multiprocessing
 @task_queue.task
 def calculate_marker_box(marker_box, kwargs):
     kwargs.update(marker_box)
-    markers_in_box = Marker.bounding_box_query(**kwargs).markers.all()
+    markers_in_box = AccidentMarker.bounding_box_query(**kwargs).markers.all()
     return calculate_clusters(markers_in_box, kwargs['zoom'])
 
 

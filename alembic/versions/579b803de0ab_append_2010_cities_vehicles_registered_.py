@@ -516,4 +516,4 @@ def upgrade():
          "private": 3326, "motorcycle": 164, "year": 2010, "name_eng": "Tel Mond", "special": 6, "population": 10500},
         {"taxi": 3, "minibus": 52, "truck_over3500": 96, "name": "תל שבע", "bus": 10, "truck_upto3500": 587,
          "private": 1275, "motorcycle": 19, "year": 2010, "name_eng": "Tel Sheva", "special": 12, "population": 15700}
-    ], multiinsert=False)
+    ], multiinsert=True)

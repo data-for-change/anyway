@@ -176,6 +176,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
     cross_location = Column(Integer)
     cross_direction = Column(Integer)
     involved = relationship("Involved", foreign_keys="Involved.accident_id")
+    video = Column(Text)
 
     @staticmethod
     def json_to_description(msg):
@@ -191,6 +192,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
             "severity": self.severity,
             "locationAccuracy": self.locationAccuracy,
             "created": self.created.isoformat(),
+            "video": self.video,
         }
         if not is_thin:
             fields.update({

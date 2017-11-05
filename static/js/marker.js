@@ -72,6 +72,9 @@ var MarkerView = Backbone.View.extend({
 
             this.$el.find(".title").text(this.marker.get("title"));
             this.$el.find(".id").text(fields.ACC_ID + ": " + this.marker.get("id"));
+            if (this.model.get("video")) {
+                this.$el.find(".video").html('<iframe width="420" height="315" src="' + this.model.get("video").replace("/watch?v=", "/embed/") + '"></iframe>');
+            }
             this.$el.find(".provider_code").text(fields.PROVIDER_CODE + ": " + this.model.get("provider_code"));
             this.$el.find(".roadType").text(fields.SUG_DEREH + ": " + localization.SUG_DEREH[this.model.get("roadType")]);
             this.$el.find(".accidentType").text(fields.SUG_TEUNA+ ": " + localization.SUG_TEUNA[this.model.get("subtype")]);

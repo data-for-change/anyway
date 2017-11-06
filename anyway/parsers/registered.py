@@ -2,25 +2,16 @@
 import csv
 import glob
 import io
-import itertools
-import json
 import logging
 import os
-import re
 import sys
-from collections import OrderedDict
 from datetime import datetime
-from functools import partial
 
 import six
 from flask.ext.sqlalchemy import SQLAlchemy
-from six import iteritems
-from sqlalchemy import or_, and_
 
-from .. import field_names, localization
-from .. import models
 from ..models import RegisteredVehicle, City
-from ..utilities import init_flask, CsvReader, time_delta, decode_hebrew
+from ..utilities import init_flask, time_delta
 
 reload(sys)
 sys.setdefaultencoding('utf8')

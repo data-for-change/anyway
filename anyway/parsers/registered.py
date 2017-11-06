@@ -4,6 +4,7 @@ import glob
 import io
 import logging
 import os
+import re
 import sys
 from datetime import datetime
 
@@ -23,6 +24,9 @@ try:
 except (ValueError, ImportError):
     fileDialog = False
 
+syntax_error_city_name = {
+    'הרצלייה' : 'הרצליה'
+}
 app = init_flask()
 db = SQLAlchemy(app)
 
@@ -51,7 +55,6 @@ class DatastoreImporter(object):
                 row_count += 1
 
             db.session.bulk_insert_mappings(RegisteredVehicle, inserts)
-
         return total
 
     @staticmethod
@@ -61,9 +64,14 @@ class DatastoreImporter(object):
         return True
 
     def row_parse(self, row):
+        name = row[12].strip().encode('utf-8')
+        name = re.sub(' +',' ',name).replace('קריית','קרית')
+        if name in syntax_error_city_name:
+            name = syntax_error_city_name[name]
+
         return {
             'year': self._report_year,
-            'name': row[12].strip().encode('utf-8'),
+            'name': name,
             'name_eng': row[0].strip(),
             'motorcycle': self.as_int(row[1]),
             'special': self.as_int(row[2]),
@@ -122,4 +130,7 @@ def main(specific_folder, delete_all, path):
         total += importer.import_file(fname)
 
     db.session.commit()
+    db.engine.execute(
+        'UPDATE {0} rr SET city_id = ct.id FROM {1} ct WHERE rr.city_id IS NULL AND rr.name = ct.search_heb'.format(
+            RegisteredVehicle.__tablename__, City.__tablename__))
     logging.info("Total: {0} items in {1}".format(total, time_delta(started)))

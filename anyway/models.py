@@ -560,6 +560,7 @@ class RegisteredVehicle(Base):
     truck_over3500 = Column(Integer)
     truck_upto3500 = Column(Integer)
     private = Column(Integer)
+    population_year = Column(Integer)
     population = Column(Integer)
 
     def serialize(self):
@@ -577,6 +578,7 @@ class RegisteredVehicle(Base):
             "truck_over3500": self.truck_over3500,
             "truck_upto3500": self.truck_upto3500,
             "private": self.private,
+            "population_year": self.population_year,
             "population": self.population
         }
 

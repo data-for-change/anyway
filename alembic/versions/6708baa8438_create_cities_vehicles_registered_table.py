@@ -38,7 +38,8 @@ def upgrade():
         sa.Column('truck_over3500', sa.Integer(), nullable=False),
         sa.Column('truck_upto3500', sa.Integer(), nullable=False),
         sa.Column('private', sa.Integer(), nullable=False),
+        sa.Column('population_year', sa.Integer(), nullable=False),
         sa.Column('population', sa.Integer(), nullable=False),
         sa.PrimaryKeyConstraint('id'),
-        sa.UniqueConstraint('name','year')
+        sa.UniqueConstraint('name','year','population_year')
     )

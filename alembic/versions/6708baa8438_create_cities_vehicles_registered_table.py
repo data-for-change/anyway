@@ -40,6 +40,7 @@ def upgrade():
         sa.Column('private', sa.Integer(), nullable=False),
         sa.Column('population_year', sa.Integer(), nullable=False),
         sa.Column('population', sa.Integer(), nullable=False),
+        sa.Column('total', sa.Integer(), nullable=False),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('name','year','population_year')
     )

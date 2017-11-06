@@ -42,7 +42,7 @@ class DatastoreImporter(object):
     _report_year = 0
     _population_year = 0
 
-    def file_parse(self, inputfile):
+    def import_file(self, inputfile):
         total = 0
         elements = os.path.basename(inputfile).split('_')
         self._report_year = self.as_int(elements[0])
@@ -54,12 +54,13 @@ class DatastoreImporter(object):
                 if row_count > self._header_size:
                     if self.is_process_row(row):
                         total += 1
-                        inserts.append(self.row_convert(row))
+                        inserts.append(self.row_parse(row))
                 else:
                     self.header_row(row)
                 row_count += 1
 
             db.session.bulk_insert_mappings(RegisteredVehicle, inserts)
+
         return total
 
     @staticmethod
@@ -68,22 +69,23 @@ class DatastoreImporter(object):
             return False
         return True
 
-    def row_convert(self, row):
-        record = {}
-        record['year'] = self._report_year
-        record['name'] = row[12].strip().encode('utf-8')
-        record['name_eng'] = row[0].strip()
-        record['motorcycle'] = self.as_int(row[1])
-        record['special'] = self.as_int(row[2])
-        record['taxi'] = self.as_int(row[3])
-        record['bus'] = self.as_int(row[4])
-        record['minibus'] = self.as_int(row[5])
-        record['truck_over3500'] = self.as_int(row[6])
-        record['truck_upto3500'] = self.as_int(row[7])
-        record['private'] = self.as_int(row[9])
-        record['population'] = self.as_int(row[11])
-        record['population_year'] = self._population_year
-        return record
+    def row_parse(self, row):
+        return {
+            'year': self._report_year,
+            'name': row[12].strip().encode('utf-8'),
+            'name_eng': row[0].strip(),
+            'motorcycle': self.as_int(row[1]),
+            'special': self.as_int(row[2]),
+            'taxi': self.as_int(row[3]),
+            'bus': self.as_int(row[4]),
+            'minibus': self.as_int(row[5]),
+            'truck_over3500': self.as_int(row[6]),
+            'truck_upto3500': self.as_int(row[7]),
+            'private': self.as_int(row[9]),
+            'total': self.as_int(row[10]),
+            'population': self.as_int(row[11]),
+            'population_year': self._population_year
+        }
 
     @staticmethod
     def as_int(value):
@@ -126,7 +128,7 @@ def main(specific_folder, delete_all, path):
     dir_files = glob.glob("{0}/*.csv".format(dir_name))
     started = datetime.now()
     for fname in dir_files:
-        total += importer.file_parse(fname)
+        total += importer.import_file(fname)
 
     db.session.commit()
     logging.info("Total: {0} items in {1}".format(total, time_delta(started)))

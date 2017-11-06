@@ -562,6 +562,7 @@ class RegisteredVehicle(Base):
     private = Column(Integer)
     population_year = Column(Integer)
     population = Column(Integer)
+    total = Column(Integer)
 
     def serialize(self):
         return {
@@ -579,7 +580,8 @@ class RegisteredVehicle(Base):
             "truck_upto3500": self.truck_upto3500,
             "private": self.private,
             "population_year": self.population_year,
-            "population": self.population
+            "population": self.population,
+            "total" : self.total
         }
 
     # Flask-Login integration

@@ -24,11 +24,29 @@ try:
 except (ValueError, ImportError):
     fileDialog = False
 
-syntax_error_city_name = {
-    'הרצלייה' : 'הרצליה'
-}
 app = init_flask()
 db = SQLAlchemy(app)
+
+_manual_assing_on_city_name = {
+    'הרצלייה': 'הרצליה',
+    'תל אביב-יפו': 'תל אביב -יפו',
+    'אפרתה': 'אפרת',
+    "באקה-ג'ת": 'באקה אל-גרביה',
+    'בוקעאתה': 'בוקעאתא',
+    "ג'ש (גוש חלב)": "ג'ש )גוש חלב(",
+    'דבורייה': 'דבוריה',
+    'טובא-זנגרייה': 'טובא-זנגריה',
+    'יהוד': 'יהוד-מונוסון',
+    'יהוד-נווה אפרים': 'יהוד-מונוסון',
+    "כאוכב אבו אל- היג'א": "כאוכב אבו אל-היג'א",
+    "כעביה-טבאש- חג'אג'רה": "כעביה-טבאש-חג'אג'רה",
+    'מודיעין-מכבים- רעות' : 'מודיעין-מכבים-רעות',
+    'נהרייה' : 'נהריה',
+    "פקיעין (בוקייעה)" : "פקיעין )בוקייעה(",
+    'פרדסייה' : 'פרדסיה',
+    'קציר-חריש' : 'קציר',
+    'שבלי-אום אל-גנם' : 'שבלי - אום אל-גנם',
+}
 
 
 class DatastoreImporter(object):
@@ -65,14 +83,16 @@ class DatastoreImporter(object):
 
     def row_parse(self, row):
         name = row[12].strip().encode('utf-8')
-        name = re.sub(' +',' ',name).replace('קריית','קרית')
-        if name in syntax_error_city_name:
-            name = syntax_error_city_name[name]
+        name = re.sub(' +', ' ', name).replace('קריית', 'קרית').replace("\n", '')
+        search_name = name
+        if name in _manual_assing_on_city_name:
+            search_name = _manual_assing_on_city_name[name]
 
         return {
             'year': self._report_year,
             'name': name,
             'name_eng': row[0].strip(),
+            'search_name' : search_name,
             'motorcycle': self.as_int(row[1]),
             'special': self.as_int(row[2]),
             'taxi': self.as_int(row[3]),
@@ -131,6 +151,6 @@ def main(specific_folder, delete_all, path):
 
     db.session.commit()
     db.engine.execute(
-        'UPDATE {0} rr SET city_id = ct.id FROM {1} ct WHERE rr.city_id IS NULL AND rr.name = ct.search_heb'.format(
+        'UPDATE {0} rr SET city_id = ct.id FROM {1} ct WHERE rr.city_id IS NULL AND rr.search_name = ct.search_heb'.format(
             RegisteredVehicle.__tablename__, City.__tablename__))
     logging.info("Total: {0} items in {1}".format(total, time_delta(started)))

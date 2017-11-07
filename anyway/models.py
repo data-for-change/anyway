@@ -552,6 +552,7 @@ class RegisteredVehicle(Base):
     year = Column(Integer)
     name = Column(String)
     name_eng = Column(String)
+    search_name = Column(String)
     motorcycle = Column(Integer)
     special = Column(Integer)
     taxi = Column(Integer)
@@ -571,6 +572,7 @@ class RegisteredVehicle(Base):
             "year": self.year,
             "name": self.name,
             "name_eng": self.name_eng,
+            "search_name": self.search_name,
             "motorcycle": self.motorcycle,
             "special": self.special,
             "taxi": self.taxi,

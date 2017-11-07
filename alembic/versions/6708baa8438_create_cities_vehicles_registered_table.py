@@ -30,6 +30,7 @@ def upgrade():
         sa.Column('year', sa.Integer(), nullable=False),
         sa.Column('name', sa.String(length=100), nullable=False),
         sa.Column('name_eng', sa.String(length=100), nullable=True),
+        sa.Column('search_name', sa.String(length=100), nullable=False),
         sa.Column('motorcycle', sa.Integer(), nullable=False),
         sa.Column('special', sa.Integer(), nullable=False),
         sa.Column('taxi', sa.Integer(), nullable=False),

@@ -512,6 +512,94 @@ class Involved(Base):
         return self.id
 
 
+class City(Base):
+    __tablename__ = "cities"
+    id = Column(Integer, primary_key=True)
+    symbol_code = Column(Integer)
+    name = Column(String)
+    search_heb = Column(String)
+    search_eng = Column(String)
+    search_priority = Column(Integer)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "symbol_code": self.symbol_code,
+            "name": self.name,
+            "search_heb": self.search_heb,
+            "search_eng": self.search_eng,
+            "search_priority": self.search_priority
+        }
+
+    # Flask-Login integration
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.id
+
+
+class RegisteredVehicle(Base):
+    __tablename__ = "cities_vehicles_registered"
+    id = Column(Integer, primary_key=True)
+    city_id = Column(Integer)
+    year = Column(Integer)
+    name = Column(String)
+    name_eng = Column(String)
+    search_name = Column(String)
+    motorcycle = Column(Integer)
+    special = Column(Integer)
+    taxi = Column(Integer)
+    bus = Column(Integer)
+    minibus = Column(Integer)
+    truck_over3500 = Column(Integer)
+    truck_upto3500 = Column(Integer)
+    private = Column(Integer)
+    population_year = Column(Integer)
+    population = Column(Integer)
+    total = Column(Integer)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "city_id": self.city_id,
+            "year": self.year,
+            "name": self.name,
+            "name_eng": self.name_eng,
+            "search_name": self.search_name,
+            "motorcycle": self.motorcycle,
+            "special": self.special,
+            "taxi": self.taxi,
+            "bus": self.bus,
+            "minibus": self.minibus,
+            "truck_over3500": self.truck_over3500,
+            "truck_upto3500": self.truck_upto3500,
+            "private": self.private,
+            "population_year": self.population_year,
+            "population": self.population,
+            "total" : self.total
+        }
+
+    # Flask-Login integration
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.id
+
+
 class Vehicle(Base):
     __tablename__ = "vehicles"
     id = Column(Integer, primary_key=True)

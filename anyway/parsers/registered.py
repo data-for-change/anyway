@@ -134,7 +134,7 @@ def main(specific_folder, delete_all, path):
 
     # wipe all data first
     if delete_all:
-        tables = (RegisteredVehicle)
+        tables = (RegisteredVehicle,)
         logging.info("Deleting tables: " + ", ".join(table.__name__ for table in tables))
         for table in tables:
             db.session.query(table).delete()

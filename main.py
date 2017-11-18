@@ -58,7 +58,7 @@ def cbs(specific_folder, delete_all, path, batch_size, provider_code):
 @click.option('--specific_folder', is_flag=True, default=False)
 @click.option('--delete_all', is_flag=True)
 @click.option('--path', type=str, default="static/data/lms_vehicles_registered")
-def registered(specific_folder, delete_all, path):
+def registered_vehicles(specific_folder, delete_all, path):
     from anyway.parsers.registered import main
 
     return main(specific_folder=specific_folder, delete_all=delete_all, path=path)

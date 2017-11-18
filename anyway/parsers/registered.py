@@ -1,21 +1,16 @@
 # -*- coding: utf-8 -*-
 import csv
 import glob
-import io
 import logging
 import os
 import re
-import sys
 from datetime import datetime
 
 import six
 from flask.ext.sqlalchemy import SQLAlchemy
 
 from ..models import RegisteredVehicle, City
-from ..utilities import init_flask, time_delta
-
-reload(sys)
-sys.setdefaultencoding('utf8')
+from ..utilities import init_flask, time_delta, CsvReader
 
 # Headless servers cannot use GUI file dialog and require raw user input
 fileDialog = True
@@ -40,13 +35,19 @@ _manual_assing_on_city_name = {
     'יהוד-נווה אפרים': 'יהוד-מונוסון',
     "כאוכב אבו אל- היג'א": "כאוכב אבו אל-היג'א",
     "כעביה-טבאש- חג'אג'רה": "כעביה-טבאש-חג'אג'רה",
-    'מודיעין-מכבים- רעות' : 'מודיעין-מכבים-רעות',
-    'נהרייה' : 'נהריה',
-    "פקיעין (בוקייעה)" : "פקיעין )בוקייעה(",
-    'פרדסייה' : 'פרדסיה',
-    'קציר-חריש' : 'קציר',
-    'שבלי-אום אל-גנם' : 'שבלי - אום אל-גנם',
+    'מודיעין-מכבים- רעות': 'מודיעין-מכבים-רעות',
+    'נהרייה': 'נהריה',
+    "פקיעין (בוקייעה)": "פקיעין )בוקייעה(",
+    'פרדסייה': 'פרדסיה',
+    'קציר-חריש': 'קציר',
+    'שבלי-אום אל-גנם': 'שבלי - אום אל-גנם',
 }
+
+
+class CvsRawReader(CsvReader):
+    def __iter__(self):
+        for line in csv.reader(self._file):
+            yield line
 
 
 class DatastoreImporter(object):
@@ -59,20 +60,19 @@ class DatastoreImporter(object):
         total = 0
         elements = os.path.basename(inputfile).split('_')
         self._report_year = self.as_int(elements[0])
-        with io.open(inputfile, 'r', encoding=self._in_encode) as csvfile:
-            csvreader = csv.reader(csvfile, delimiter=',', quotechar='"')
-            row_count = 1
-            inserts = []
-            for row in csvreader:
-                if row_count > self._header_size:
-                    if self.is_process_row(row):
-                        total += 1
-                        inserts.append(self.row_parse(row))
-                else:
-                    self.header_row(row)
-                row_count += 1
+        csvreader = CvsRawReader(inputfile, encoding=self._in_encode)
+        row_count = 1
+        inserts = []
+        for row in csvreader:
+            if row_count > self._header_size:
+                if self.is_process_row(row):
+                    total += 1
+                    inserts.append(self.row_parse(row))
+            else:
+                self.header_row(row)
+            row_count += 1
 
-            db.session.bulk_insert_mappings(RegisteredVehicle, inserts)
+        db.session.bulk_insert_mappings(RegisteredVehicle, inserts)
         return total
 
     @staticmethod
@@ -82,7 +82,7 @@ class DatastoreImporter(object):
         return True
 
     def row_parse(self, row):
-        name = row[12].strip().encode('utf-8')
+        name = row[12].strip()
         name = re.sub(' +', ' ', name).replace('קריית', 'קרית').replace("\n", '')
         search_name = name
         if name in _manual_assing_on_city_name:
@@ -92,7 +92,7 @@ class DatastoreImporter(object):
             'year': self._report_year,
             'name': name,
             'name_eng': row[0].strip(),
-            'search_name' : search_name,
+            'search_name': search_name,
             'motorcycle': self.as_int(row[1]),
             'special': self.as_int(row[2]),
             'taxi': self.as_int(row[3]),

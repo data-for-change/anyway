@@ -51,20 +51,19 @@ class CvsRawReader(CsvReader):
 
 
 class DatastoreImporter(object):
-    _header_size = 12
-    _in_encode = "utf-8"
-    _report_year = 0
-    _population_year = 0
+    def __init__(self):
+        self._report_year = 0
+        self._population_year = 0
 
     def import_file(self, inputfile):
         total = 0
         elements = os.path.basename(inputfile).split('_')
         self._report_year = self.as_int(elements[0])
-        csvreader = CvsRawReader(inputfile, encoding=self._in_encode)
+        csvreader = CvsRawReader(inputfile, encoding="utf-8")
         row_count = 1
         inserts = []
         for row in csvreader:
-            if row_count > self._header_size:
+            if row_count > 12: # header contains exactly 12 rows
                 if self.is_process_row(row):
                     total += 1
                     inserts.append(self.row_parse(row))

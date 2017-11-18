@@ -22,7 +22,8 @@ except (ValueError, ImportError):
 app = init_flask()
 db = SQLAlchemy(app)
 
-_manual_assing_on_city_name = {
+CITY_NAME_COLUMN = 12
+_manual_assign_on_city_name = {
     'הרצלייה': 'הרצליה',
     'תל אביב-יפו': 'תל אביב -יפו',
     'אפרתה': 'אפרת',
@@ -63,7 +64,7 @@ class DatastoreImporter(object):
         row_count = 1
         inserts = []
         for row in csvreader:
-            if row_count > 12: # header contains exactly 12 rows
+            if row_count > 12:  # header contains exactly 12 rows
                 if self.is_process_row(row):
                     total += 1
                     inserts.append(self.row_parse(row))
@@ -76,16 +77,14 @@ class DatastoreImporter(object):
 
     @staticmethod
     def is_process_row(row):
-        if row[0].strip() == '' or row[1].strip() == '':
-            return False
-        return True
+        return  row[0].strip() and row[1].strip()
 
     def row_parse(self, row):
-        name = row[12].strip()
+        name = row[CITY_NAME_COLUMN].strip()
         name = re.sub(' +', ' ', name).replace('קריית', 'קרית').replace("\n", '')
         search_name = name
-        if name in _manual_assing_on_city_name:
-            search_name = _manual_assing_on_city_name[name]
+        if name in _manual_assign_on_city_name:
+            search_name = _manual_assign_on_city_name[name]
 
         return {
             'year': self._report_year,

@@ -141,8 +141,9 @@ def truncate_tables(db,tables):
         db.session.query(table).delete()
         db.session.commit()
 
+
 class ImporterUI(object):
-    def __init__(self,source_path,specific_folder=False,delete_all=False):
+    def __init__(self, source_path, specific_folder=False, delete_all=False):
         self._specific_folder = specific_folder
         self._delete_all = delete_all
         self._source_path = os.path.abspath(source_path)
@@ -152,7 +153,7 @@ class ImporterUI(object):
         if self._specific_folder:
             if _fileDialogExist:
                 return tkFileDialog.askdirectory(initialdir=self._source_path,
-                                                     title='Please select a directory')
+                                                 title='Please select a directory')
             else:
                 return six.moves.input('Please provide the directory path: ')
         return self._source_path

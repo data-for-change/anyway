@@ -15,16 +15,9 @@ from sqlalchemy import or_, and_
 from .. import field_names, localization
 from ..models import Marker, Involved, Vehicle
 from .. import models
-from ..utilities import ItmToWGS84, init_flask, CsvReader, time_delta, decode_hebrew
+from ..utilities import ItmToWGS84, init_flask, CsvReader, time_delta, decode_hebrew,ImporterUI,truncate_tables
 from functools import partial
 import logging
-
-# Headless servers cannot use GUI file dialog and require raw user input
-fileDialog = True
-try:
-    import tkFileDialog
-except (ValueError, ImportError):
-    fileDialog = False
 
 failed_dirs = OrderedDict()
 
@@ -442,28 +435,17 @@ def get_provider_code(directory_name=None):
 
 
 def main(specific_folder, delete_all, path, batch_size, provider_code):
-    if specific_folder:
-        if fileDialog:
-            dir_name = tkFileDialog.askdirectory(initialdir=os.path.abspath(path),
-                                                 title='Please select a directory')
-        else:
-            dir_name = six.moves.input('Please provide the directory path: ')
+    import_ui = ImporterUI(path, specific_folder, delete_all)
+    dir_name = import_ui.source_path()
 
+    if specific_folder:
         dir_list = [dir_name]
-        if delete_all:
-            confirm_delete_all = six.moves.input("Are you sure you want to delete all the current data? (y/n)\n")
-            if confirm_delete_all.lower() == 'n':
-                delete_all = False
     else:
-        dir_list = glob.glob("{0}/*/*".format(path))
+        dir_list = glob.glob("{0}/*/*".format(dir_name))
 
     # wipe all the Markers and Involved data first
-    if delete_all:
-        tables = (Vehicle, Involved, Marker)
-        logging.info("Deleting tables: " + ", ".join(table.__name__ for table in tables))
-        for table in tables:
-            db.session.query(table).delete()
-            db.session.commit()
+    if import_ui.is_delete_all():
+        truncate_tables(db, (Vehicle, Involved, Marker))
 
     started = datetime.now()
     total = 0
@@ -477,5 +459,5 @@ def main(specific_folder, delete_all, path, batch_size, provider_code):
     failed = ["\t'{0}' ({1})".format(directory, fail_reason) for directory, fail_reason in
               iteritems(failed_dirs)]
     logging.info("Finished processing all directories{0}{1}".format(", except:\n" if failed else "",
-                                                             "\n".join(failed)))
+                                                                    "\n".join(failed)))
     logging.info("Total: {0} items in {1}".format(total, time_delta(started)))

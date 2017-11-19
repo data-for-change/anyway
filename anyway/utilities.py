@@ -147,7 +147,6 @@ class ImporterUI(object):
         self._specific_folder = specific_folder
         self._delete_all = delete_all
         self._source_path = os.path.abspath(source_path)
-        pass
 
     def source_path(self):
         if self._specific_folder:

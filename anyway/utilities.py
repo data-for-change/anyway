@@ -11,6 +11,14 @@ import threading
 import sys
 import re
 import six
+import logging
+
+# Headless servers cannot use GUI file dialog and require raw user input
+_fileDialogExist = True
+try:
+    import tkFileDialog
+except (ValueError, ImportError):
+    _fileDialogExist = False
 
 
 _PROJECT_ROOT = os.path.join(os.path.dirname(__file__), '..')
@@ -125,3 +133,33 @@ else:
 
 
 open_utf8 = partial(open, encoding="utf-8") if six.PY3 else open
+
+
+def truncate_tables(db,tables):
+    logging.info("Deleting tables: " + ", ".join(table.__name__ for table in tables))
+    for table in tables:
+        db.session.query(table).delete()
+        db.session.commit()
+
+class ImporterUI(object):
+    def __init__(self,source_path,specific_folder=False,delete_all=False):
+        self._specific_folder = specific_folder
+        self._delete_all = delete_all
+        self._source_path = os.path.abspath(source_path)
+        pass
+
+    def source_path(self):
+        if self._specific_folder:
+            if _fileDialogExist:
+                return tkFileDialog.askdirectory(initialdir=self._source_path,
+                                                     title='Please select a directory')
+            else:
+                return six.moves.input('Please provide the directory path: ')
+        return self._source_path
+
+    def is_delete_all(self):
+        if self._delete_all and self._specific_folder:
+            confirm_delete_all = six.moves.input("Are you sure you want to delete all the current data? (y/n)\n")
+            if confirm_delete_all.lower() == 'n':
+                self._delete_all = False
+        return self._delete_all

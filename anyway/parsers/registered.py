@@ -6,18 +6,10 @@ import os
 import re
 from datetime import datetime
 
-import six
 from flask.ext.sqlalchemy import SQLAlchemy
 
 from ..models import RegisteredVehicle, City
-from ..utilities import init_flask, time_delta, CsvReader
-
-# Headless servers cannot use GUI file dialog and require raw user input
-fileDialog = True
-try:
-    import tkFileDialog
-except (ValueError, ImportError):
-    fileDialog = False
+from ..utilities import init_flask, time_delta, CsvReader, ImporterUI, truncate_tables
 
 app = init_flask()
 db = SQLAlchemy(app)
@@ -77,7 +69,7 @@ class DatastoreImporter(object):
 
     @staticmethod
     def is_process_row(row):
-        return  row[0].strip() and row[1].strip()
+        return row[0].strip() and row[1].strip()
 
     def row_parse(self, row):
         name = row[CITY_NAME_COLUMN].strip()
@@ -118,27 +110,12 @@ class DatastoreImporter(object):
 
 
 def main(specific_folder, delete_all, path):
-    if specific_folder:
-        if fileDialog:
-            dir_name = tkFileDialog.askdirectory(initialdir=os.path.abspath(path),
-                                                 title='Please select a directory')
-        else:
-            dir_name = six.moves.input('Please provide the directory path: ')
-
-        if delete_all:
-            confirm_delete_all = six.moves.input("Are you sure you want to delete all the current data? (y/n)\n")
-            if confirm_delete_all.lower() == 'n':
-                delete_all = False
-    else:
-        dir_name = os.path.abspath(path)
+    import_ui = ImporterUI(path, specific_folder, delete_all)
+    dir_name = import_ui.source_path()
 
     # wipe all data first
-    if delete_all:
-        tables = (RegisteredVehicle,)
-        logging.info("Deleting tables: " + ", ".join(table.__name__ for table in tables))
-        for table in tables:
-            db.session.query(table).delete()
-            db.session.commit()
+    if import_ui.is_delete_all():
+        truncate_tables(db, (RegisteredVehicle,))
 
     importer = DatastoreImporter()
     total = 0

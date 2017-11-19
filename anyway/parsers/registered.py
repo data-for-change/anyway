@@ -9,7 +9,7 @@ from datetime import datetime
 from flask.ext.sqlalchemy import SQLAlchemy
 
 from ..models import RegisteredVehicle, City
-from ..utilities import init_flask, time_delta, CsvReader, ImporterUI, truncate_tables
+from ..utilities import init_flask, time_delta, CsvReader, ImporterUI, truncate_tables,decode_hebrew
 
 app = init_flask()
 db = SQLAlchemy(app)
@@ -92,9 +92,9 @@ class DatastoreImporter(object):
 
         return {
             'year': self._report_year,
-            'name': name.decode('utf-8'),
+            'name': decode_hebrew(name,'utf-8'),
             'name_eng': row[COLUMN_CITY_NAME_ENG].strip(),
-            'search_name': search_name.decode('utf-8'),
+            'search_name': decode_hebrew(search_name,'utf-8'),
             'motorcycle': self.as_int(row[COLUMN_CITY_TOTAL_MOTORCYCLE]),
             'special': self.as_int(row[COLUMN_CITY_TOTAL_SPECIAL]),
             'taxi': self.as_int(row[COLUMN_CITY_TOTAL_TAXI]),

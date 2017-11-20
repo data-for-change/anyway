@@ -77,6 +77,7 @@ See the [Wiki](https://github.com/hasadna/anyway/wiki/Setting-up-a-Python-develo
    days. Be prepared.
 1. Populate United Hatzalah sample data: `python main.py process united --light` for the complete,
    or more recent data please contact the Anyway team.
+1. Populate LMS registered vehicles in cities : `python main.py process registered_vehicles`: this will take less than an hour
 1. Run the app: `python main.py testserver`: do this whenever you start working and want to try out your code.
 1. Navigate to http://127.0.0.1:5000 in your browser.
 1. If the site fails to load properly, make sure you have JDK installed on your machine

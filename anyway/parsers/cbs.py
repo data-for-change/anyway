@@ -413,11 +413,33 @@ def import_to_datastore(directory, provider_code, batch_size):
 
 def delete_invalid_entries():
     """
-    deletes all markers in the database with null latitude or longitude, and cascade
+    deletes all markers in the database with null latitude or longitude
+    first deletes from tables Involved and Vehicle, then from table Marker
     """
-    db.session.execute(Marker.__table__.delete().
-                       where(or_((Marker.longitude == None),
-                                 (Marker.latitude  == None))))
+
+    marker_ids_to_delete = db.session.query(Marker.id).filter(or_((Marker.longitude == None),
+                                                    (Marker.latitude  == None))).all()
+
+    marker_ids_to_delete = [acc_id[0] for acc_id in marker_ids_to_delete]
+
+    q = db.session.query(Involved).filter(Involved.accident_id.in_(marker_ids_to_delete))
+
+    if q.all():
+        print('deleting invalid entries from Involved')
+        q.delete(synchronize_session='fetch')
+
+    q = db.session.query(Vehicle).filter(Vehicle.accident_id.in_(marker_ids_to_delete))
+
+    if q.all():
+        print('deleting invalid entries from Vehicle')
+        q.delete(synchronize_session='fetch')
+
+    q = db.session.query(Marker).filter(Marker.id.in_(marker_ids_to_delete))
+
+    if q.all():
+        print('deleting invalid entries from Marker')
+        q.delete(synchronize_session='fetch')
+
     db.session.commit()
 
 

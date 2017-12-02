@@ -443,9 +443,9 @@ def main(specific_folder, delete_all, path, batch_size, provider_code):
     else:
         dir_list = glob.glob("{0}/*/*".format(dir_name))
 
-    # wipe all the Markers and Involved data first
+    # wipe all the AccidentMarker and Vehicle and Involved data first
     if import_ui.is_delete_all():
-        truncate_tables(db, (Vehicle, Involved, Marker))
+        truncate_tables(db, (Vehicle, Involved, AccidentMarker))
 
     started = datetime.now()
     total = 0

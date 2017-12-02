@@ -14,8 +14,8 @@ autocommit = False # Autocommit does not seem to work
 db_session = sessionmaker(autocommit=autocommit, autoflush=True, bind=engine)
 Base = declarative_base()
 session = db_session()
-from .models import Marker
-marker = Marker(
+from .models import AccidentMarker
+marker = AccidentMarker(
             user = None,
             title = "Accident",
             description = "sample accident",

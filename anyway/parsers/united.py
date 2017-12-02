@@ -9,7 +9,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
 
 from ..constants import CONST
-from ..models import Marker
+from ..models import AccidentMarker
 from ..utilities import init_flask, decode_hebrew, open_utf8
 from ..import importmail
 
@@ -313,13 +313,13 @@ def import_to_db(collection, path):
         return 0
 
     new_ids = [m["id"] for m in accidents
-               if 0 == db.session.query(Marker).filter(and_(Marker.id == m["id"],
-                                                Marker.provider_code == m["provider_code"])).count()]
+               if 0 == db.session.query(AccidentMarker).filter(and_(AccidentMarker.id == m["id"],
+                                                AccidentMarker.provider_code == m["provider_code"])).count()]
     if not new_ids:
         logging.info("\t\tNothing loaded, all accidents already in DB")
         return 0
 
-    db.session.execute(Marker.__table__.insert(), [m for m in accidents if m["id"] in new_ids])
+    db.session.execute(AccidentMarker.__table__.insert(), [m for m in accidents if m["id"] in new_ids])
     db.session.commit()
     return len(new_ids)
 
@@ -330,7 +330,7 @@ def update_db(collection):
     """
     app = init_flask()
     db = SQLAlchemy(app)
-    united = db.session.query(Marker).filter(Marker.provider_code == 2)
+    united = db.session.query(AccidentMarker).filter(AccidentMarker.provider_code == 2)
     for accident in united:
         if not accident.weather:
             accident.weather = process_weather_data(collection, accident.latitude, accident.longitude)

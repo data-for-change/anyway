@@ -13,7 +13,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy import or_, and_
 
 from .. import field_names, localization
-from ..models import Marker, Involved, Vehicle
+from ..models import AccidentMarker, Involved, Vehicle
 from .. import models
 from ..utilities import ItmToWGS84, init_flask, CsvReader, time_delta, decode_hebrew,ImporterUI,truncate_tables
 from functools import partial
@@ -374,15 +374,15 @@ def import_to_datastore(directory, provider_code, batch_size):
 
         accidents = (accident for accident
                      in import_accidents(provider_code=provider_code, **files_from_lms)
-                     if  db.session.query(Marker).filter(
-                             and_(Marker.id == accident["id"],
-                                  Marker.provider_code == accident["provider_code"])).scalar() is None)
+                     if  db.session.query(AccidentMarker).filter(
+                             and_(AccidentMarker.id == accident["id"],
+                                  AccidentMarker.provider_code == accident["provider_code"])).scalar() is None)
 
         for accidents_chunk in _batch_iterator(iterable=accidents, batch_size=batch_size):
             for accident in accidents_chunk:
                 new_ids.add(accident["id"])
 
-            db.session.bulk_insert_mappings(Marker, accidents_chunk)
+            db.session.bulk_insert_mappings(AccidentMarker, accidents_chunk)
 
             new_items += len(accidents_chunk)
 
@@ -415,9 +415,9 @@ def delete_invalid_entries():
     """
     deletes all markers in the database with null latitude or longitude, and cascade
     """
-    db.session.execute(Marker.__table__.delete().
-                       where(or_((Marker.longitude == None),
-                                 (Marker.latitude  == None))))
+    db.session.execute(AccidentMarker.__table__.delete().
+                       where(or_((AccidentMarker.longitude == None),
+                                 (AccidentMarker.latitude  == None))))
     db.session.commit()
 
 
@@ -443,9 +443,9 @@ def main(specific_folder, delete_all, path, batch_size, provider_code):
     else:
         dir_list = glob.glob("{0}/*/*".format(dir_name))
 
-    # wipe all the Markers and Involved data first
+    # wipe all the AccidentMarker and Vehicle and Involved data first
     if import_ui.is_delete_all():
-        truncate_tables(db, (Vehicle, Involved, Marker))
+        truncate_tables(db, (Vehicle, Involved, AccidentMarker))
 
     started = datetime.now()
     total = 0

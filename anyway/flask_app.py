@@ -37,7 +37,7 @@ from flask.ext.compress import Compress
 from .oauth import OAuthSignIn
 
 from .base import user_optional
-from .models import (Marker, DiscussionMarker, HighlightPoint, Involved, User, ReportPreferences,
+from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved, User, ReportPreferences,
                      Vehicle, Role, GeneralPreferences)
 from .config import ENTRIES_PER_PAGE
 from six.moves import http_client
@@ -166,7 +166,7 @@ def markers():
     kwargs = get_kwargs()
     logging.debug('querying markers in bounding box: %s' % kwargs)
     is_thin = (kwargs['zoom'] < CONST.MINIMAL_ZOOM)
-    result = Marker.bounding_box_query(is_thin, yield_per=50, involved_and_vehicles=False, **kwargs)
+    result = AccidentMarker.bounding_box_query(is_thin, yield_per=50, involved_and_vehicles=False, **kwargs)
 
     discussion_args = ('ne_lat', 'ne_lng', 'sw_lat', 'sw_lng', 'show_discussions')
     discussions = DiscussionMarker.bounding_box_query(**{arg: kwargs[arg] for arg in discussion_args})
@@ -189,7 +189,7 @@ def markers():
 def charts_data():
     logging.debug('getting charts data')
     kwargs = get_kwargs()
-    accidents, vehicles, involved = Marker.bounding_box_query(is_thin=False, yield_per=50, involved_and_vehicles=True, **kwargs)
+    accidents, vehicles, involved = AccidentMarker.bounding_box_query(is_thin=False, yield_per=50, involved_and_vehicles=True, **kwargs)
     accidents_list = [acc.serialize() for acc in accidents]
     vehicles_list = [vehicles_data_refinement(veh.serialize()) for veh in vehicles]
     involved_list = [involved_data_refinement(inv.serialize()) for inv in involved]
@@ -335,7 +335,7 @@ def index(marker=None, message=None):
     context['CONST'] = CONST.to_dict()
     #logging.debug("Debug CONST:{0}",context['CONST'])
     if 'marker' in request.values:
-        markers = Marker.get_marker(request.values['marker'])
+        markers = AccidentMarker.get_marker(request.values['marker'])
         if markers.count() == 1:
             marker = markers[0]
             context['coordinates'] = (marker.latitude, marker.longitude)

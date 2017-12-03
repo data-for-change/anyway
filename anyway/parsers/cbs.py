@@ -437,7 +437,7 @@ def delete_invalid_entries():
     q = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_(marker_ids_to_delete))
 
     if q.all():
-        print('deleting invalid entries from Marker')
+        print('deleting invalid entries from AccidentMarker')
         q.delete(synchronize_session='fetch')
 
     db.session.commit()

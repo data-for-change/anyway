@@ -416,7 +416,7 @@ def delete_invalid_entries():
     deletes all markers in the database with null latitude or longitude
     first deletes from tables Involved and Vehicle, then from table AccidentMarker
     """
-    
+
     marker_ids_to_delete = db.session.query(AccidentMarker.id).filter(or_((AccidentMarker.longitude == None),
                                                     (AccidentMarker.latitude  == None))).all()
 

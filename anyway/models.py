@@ -176,6 +176,7 @@ class AccidentMarker(MarkerMixin, Base):
     cross_location = Column(Integer)
     cross_direction = Column(Integer)
     involved = relationship("Involved", foreign_keys="Involved.accident_id")
+    vehicles = relationship("Vehicle", foreign_keys="Vehicle.accident_id")
 
     @staticmethod
     def json_to_description(msg):
@@ -331,7 +332,18 @@ class AccidentMarker(MarkerMixin, Base):
         if kwargs.get('surface', 0) != 0:
             markers = markers.filter(AccidentMarker.road_surface == kwargs['surface'])
         if kwargs.get('acctype', 0) != 0:
-            markers = markers.filter(AccidentMarker.subtype == kwargs['acctype'])
+            if kwargs['acctype'] <= 20:
+                markers = markers.filter(AccidentMarker.subtype == kwargs['acctype'])
+            elif kwargs['acctype'] == CONST.BIKE_ACCIDENTS_NO_CASUALTIES:
+                markers = markers.\
+                    filter(AccidentMarker.vehicles.any(Vehicle.vehicle_type == CONST.VEHICLE_TYPE_BIKE)).group_by(AccidentMarker.id).\
+                           having(~AccidentMarker.involved.\
+                                  any(Involved.involved_type != CONST.INVOLVED_TYPE_DRIVER_UNHARMED))
+            elif kwargs['acctype'] == CONST.BIKE_ACCIDENTS_WITH_CASUALTIES:
+                markers = markers. \
+                    filter(AccidentMarker.vehicles.\
+                           any(Vehicle.vehicle_type == CONST.VEHICLE_TYPE_BIKE)).group_by(AccidentMarker.id).\
+                    having(AccidentMarker.involved.any(Involved.involved_type != CONST.INVOLVED_TYPE_DRIVER_UNHARMED))
         if kwargs.get('controlmeasure', 0) != 0:
             markers = markers.filter(AccidentMarker.road_control == kwargs['controlmeasure'])
         if kwargs.get('district', 0) != 0:

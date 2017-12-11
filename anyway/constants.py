@@ -10,6 +10,13 @@ class Constants(object):
     HIGHLIGHT_TYPE_USER_SEARCH = 1
     HIGHLIGHT_TYPE_USER_GPS = 2
 
+    BIKE_ACCIDENTS_NO_CASUALTIES = 21
+    BIKE_ACCIDENTS_WITH_CASUALTIES = 22
+
+    VEHICLE_TYPE_BIKE = 15
+
+    INVOLVED_TYPE_DRIVER_UNHARMED = 1
+
     # other global constants (python only)
 
     def __setattr__(self, *_):

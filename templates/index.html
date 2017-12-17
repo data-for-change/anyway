@@ -100,6 +100,7 @@
             <div id="statistics-control"></div>
             <div id="full-screen-control"></div>
             <div id="heat-map-control"></div>
+            <div id="reports-control"></div>
         </div>
     </div>
     <div id="step2Component" class="sidebar-container sidebar-container-open" style="{{ 'display: none' if map_only }}"></div>
@@ -124,6 +125,38 @@
             <button class="btn btn-default js-btn-copytoclipboard" data-copy="iframe_link" style="float: left;"
                     type="button">העתק
             </button>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <a class="btn close-button" data-dismiss="modal" aria-hidden="true">סגור</a>
+    </div>
+</div>
+
+<div class="modal hide fade" id="reports-modal">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>דוחות</h3>
+    </div>
+    <div class="modal-body">
+        <div class="reports-container">
+            <div class="report-item">
+               <a href="/static/data/reports/accidents_near_schools_100m.xlsx">תאונות ליד בתי ספר ברדיוס של 100 מטר</a>
+            </div>
+            <div class="report-item">
+               <a href="/static/data/reports/accidents_near_schools_300m.xlsx">תאונות ליד בתי ספר ברדיוס של 300 מטר</a>
+            </div>
+            <div class="report-item">
+               <a href="/static/data/reports/accidents_near_schools_500m.xlsx">תאונות ליד בתי ספר ברדיוס של 500 מטר</a>
+            </div>
+            <div class="report-item">
+               <a href="/static/data/reports/pedestrian_accidents_100m.xlsx">תאונות עם הולכי רגל ברדיוס של 100 מטר</a>
+            </div>
+            <div class="report-item">
+               <a href="/static/data/reports/pedestrian_accidents_300m.xlsx">תאונות עם הולכי רגל ברדיוס של 300 מטר</a>
+            </div>
+            <div class="report-item">
+               <a href="/static/data/reports/pedestrian_accidents_500m.xlsx">תאונות עם הולכי רגל ברדיוס של 500 מטר</a>
+            </div>
         </div>
     </div>
     <div class="modal-footer">
@@ -1215,127 +1248,6 @@
                     xfbml: true,
                     version: 'v2.3'
                 });
-            window.app = new AppView();
-
-
-              // Load the app
-
-            {% if approx is defined and approx != '-1' %}
-                app.approx = {{approx}};
-            {% elif approx is defined and approx == '-1' %}
-                app.approx = '';
-            {% else %}
-                app.approx = '1';
-            {% endif %}
-            {% if accurate is defined and accurate != '-1' %}
-                app.accurate = {{accurate}};
-            {% elif accurate is defined and accurate == '-1' %}
-                app.accurate = '';
-            {% else %}
-                app.accurate = '1';
-            {% endif %}
-            {% if show_markers is defined and show_markers != '-1' %}
-                app.show_markers = {{show_markers}};
-            {% elif show_markers is defined and show_markers == '-1' %}
-                 app.show_markers = '';
-            {% else %}
-                app.show_markers ='1';
-            {% endif %}
-            {% if show_discussions is defined and show_discussions != '-1' %}
-                app.show_discussions = {{show_discussions}};
-            {% elif show_discussions is defined and show_discussions == '-1' %}
-                 app.show_discussions = '';
-            {% else %}
-                app.show_discussions='1';
-            {% endif %}
-            {% if show_fatal is defined and show_fatal != '-1'  %}
-                app.show_fatal = {{show_fatal}};
-            {% elif show_fatal is defined and show_fatal == '-1' %}
-                app.show_fatal = '';
-            {% else %}
-                app.show_fatal = '1';
-            {% endif %}
-            {% if show_severe is defined and show_severe != '-1'  %}
-                app.show_severe = {{show_severe}};
-            {% elif show_severe is defined and show_severe == '-1' %}
-                app.show_severe = '';
-            {% else %}
-                app.show_severe = '1';
-            {% endif %}
-            {% if show_light is defined and show_light != '-1' %}
-                app.show_light = {{show_light}};
-            {% elif show_light is defined and show_light == '-1' %}
-                app.show_light = '';
-            {% else %}
-                app.show_light = '1';
-            {% endif %}
-            {% if show_urban is defined and show_urban != '-1' %}
-                app.show_urban = {{show_urban}};
-            {% else %}
-                app.show_urban = 3;
-            {% endif %}
-            {% if show_intersection is defined and show_intersection != '-1' %}
-                app.show_intersection = {{show_intersection}};
-            {% else %}
-                app.show_intersection = 3;
-            {% endif %}
-            {% if show_lane is defined and show_lane != '-1' %}
-                app.show_lane = {{show_lane}};
-            {% endif %}
-            {% if show_day is defined and show_day != '-1' %}
-                app.show_day = {{show_day}};
-            {% endif %}
-            {% if show_holiday is defined and show_holiday != '-1' %}
-                app.show_holiday = {{show_holiday}};
-            {% endif %}
-            {% if show_time is defined and show_time != '-1' %}
-                app.show_time = {{show_time}};
-            {% endif %}
-            {% if start_time is defined and start_time != '-1' %}
-                app.start_time = {{start_time}};
-            {% endif %}
-            {% if end_time is defined and end_time != '-1' %}
-                app.end_time = {{end_time}};
-            {% endif %}
-            {% if weather is defined and weather != '-1' %}
-                app.weather = {{weather}};
-            {% endif %}
-            {% if road is defined and road != '-1' %}
-                app.road = {{road}};
-            {% endif %}
-            {% if separation is defined and separation != '-1' %}
-                app.separation = {{separation}};
-            {% endif %}
-            {% if surface is defined and surface != '-1' %}
-                app.surface = {{surface}};
-            {% endif %}
-            {% if acctype is defined and acctype != '-1' %}
-                app.acctype = {{acctype}};
-            {% endif %}
-            {% if controlmeasure is defined and controlmeasure != '-1' %}
-                app.controlmeasure = {{controlmeasure}};
-            {% endif %}
-            {% if district is defined and district != '-1' %}
-                app.district = {{district}};
-            {% endif %}
-            {% if case_type is defined and case_type != '-1' %}
-                app.case_type = {{case_type}};
-            {% endif %}
-            {% if years is defined %}
-                app.years = {{ years }};
-            {% else %}
-                app.years = [];
-            {% endif %}
-
-            app.render();
-            if (MARKER_ID) {
-              console.log('Setting marker: ' + MARKER_ID);
-              app.model.set("currentMarker", MARKER_ID);
-            } else if (DISCUSSION_IDENTIFIER) {
-              console.log('Setting discussion: ' + DISCUSSION_IDENTIFIER);
-              app.showDiscussion(DISCUSSION_IDENTIFIER);
-            }
-            app.loadFilterFromParameters();
             };
 
             (function(d, s, id){
@@ -1379,6 +1291,128 @@
     });
 
     window.onload = function() {
+
+        window.app = new AppView();
+
+        // Load the app
+
+        {% if approx is defined and approx != '-1' %}
+            app.approx = {{approx}};
+        {% elif approx is defined and approx == '-1' %}
+            app.approx = '';
+        {% else %}
+            app.approx = '1';
+        {% endif %}
+        {% if accurate is defined and accurate != '-1' %}
+            app.accurate = {{accurate}};
+        {% elif accurate is defined and accurate == '-1' %}
+            app.accurate = '';
+        {% else %}
+            app.accurate = '1';
+        {% endif %}
+        {% if show_markers is defined and show_markers != '-1' %}
+            app.show_markers = {{show_markers}};
+        {% elif show_markers is defined and show_markers == '-1' %}
+                app.show_markers = '';
+        {% else %}
+            app.show_markers ='1';
+        {% endif %}
+        {% if show_discussions is defined and show_discussions != '-1' %}
+            app.show_discussions = {{show_discussions}};
+        {% elif show_discussions is defined and show_discussions == '-1' %}
+                app.show_discussions = '';
+        {% else %}
+            app.show_discussions='1';
+        {% endif %}
+        {% if show_fatal is defined and show_fatal != '-1'  %}
+            app.show_fatal = {{show_fatal}};
+        {% elif show_fatal is defined and show_fatal == '-1' %}
+            app.show_fatal = '';
+        {% else %}
+            app.show_fatal = '1';
+        {% endif %}
+        {% if show_severe is defined and show_severe != '-1'  %}
+            app.show_severe = {{show_severe}};
+        {% elif show_severe is defined and show_severe == '-1' %}
+            app.show_severe = '';
+        {% else %}
+            app.show_severe = '1';
+        {% endif %}
+        {% if show_light is defined and show_light != '-1' %}
+            app.show_light = {{show_light}};
+        {% elif show_light is defined and show_light == '-1' %}
+            app.show_light = '';
+        {% else %}
+            app.show_light = '1';
+        {% endif %}
+        {% if show_urban is defined and show_urban != '-1' %}
+            app.show_urban = {{show_urban}};
+        {% else %}
+            app.show_urban = 3;
+        {% endif %}
+        {% if show_intersection is defined and show_intersection != '-1' %}
+            app.show_intersection = {{show_intersection}};
+        {% else %}
+            app.show_intersection = 3;
+        {% endif %}
+        {% if show_lane is defined and show_lane != '-1' %}
+            app.show_lane = {{show_lane}};
+        {% endif %}
+        {% if show_day is defined and show_day != '-1' %}
+            app.show_day = {{show_day}};
+        {% endif %}
+        {% if show_holiday is defined and show_holiday != '-1' %}
+            app.show_holiday = {{show_holiday}};
+        {% endif %}
+        {% if show_time is defined and show_time != '-1' %}
+            app.show_time = {{show_time}};
+        {% endif %}
+        {% if start_time is defined and start_time != '-1' %}
+            app.start_time = {{start_time}};
+        {% endif %}
+        {% if end_time is defined and end_time != '-1' %}
+            app.end_time = {{end_time}};
+        {% endif %}
+        {% if weather is defined and weather != '-1' %}
+            app.weather = {{weather}};
+        {% endif %}
+        {% if road is defined and road != '-1' %}
+            app.road = {{road}};
+        {% endif %}
+        {% if separation is defined and separation != '-1' %}
+            app.separation = {{separation}};
+        {% endif %}
+        {% if surface is defined and surface != '-1' %}
+            app.surface = {{surface}};
+        {% endif %}
+        {% if acctype is defined and acctype != '-1' %}
+            app.acctype = {{acctype}};
+        {% endif %}
+        {% if controlmeasure is defined and controlmeasure != '-1' %}
+            app.controlmeasure = {{controlmeasure}};
+        {% endif %}
+        {% if district is defined and district != '-1' %}
+            app.district = {{district}};
+        {% endif %}
+        {% if case_type is defined and case_type != '-1' %}
+            app.case_type = {{case_type}};
+        {% endif %}
+        {% if years is defined %}
+            app.years = {{ years }};
+        {% else %}
+            app.years = [];
+        {% endif %}
+
+        app.render();
+        if (MARKER_ID) {
+            console.log('Setting marker: ' + MARKER_ID);
+            app.model.set("currentMarker", MARKER_ID);
+        } else if (DISCUSSION_IDENTIFIER) {
+            console.log('Setting discussion: ' + DISCUSSION_IDENTIFIER);
+            app.showDiscussion(DISCUSSION_IDENTIFIER);
+        }
+        app.loadFilterFromParameters();
+
         $("#sdate").datepicker({
             dateFormat: "yy-mm-dd",
             changeMonth: true,
@@ -1386,17 +1420,17 @@
             onSelect: function(dateText) {
                 app.loadFilter()
             }
-       });
-       $("#edate").datepicker({
+        });
+        $("#edate").datepicker({
             dateFormat: "yy-mm-dd",
             changeMonth: true,
             changeYear: true,
             onSelect: function(dateText) {
                 app.loadFilter()
             }
-       });
-       $("#sdate").datepicker("setDate", $('#sdateInit').val());
-       $("#edate").datepicker("setDate", $('#edateInit').val());
+        });
+        $("#sdate").datepicker("setDate", $('#sdateInit').val());
+        $("#edate").datepicker("setDate", $('#edateInit').val());
     }
 
 </script>

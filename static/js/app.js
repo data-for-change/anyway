@@ -394,6 +394,9 @@ $(function () {
         linkMap: function () {
             $('#embed').modal('show');
         },
+        openReportsModal: function() {
+            $('#reports-modal').modal('show');
+        },
         fullScreen: function () {
             var body = document.body;
 
@@ -507,6 +510,13 @@ $(function () {
                 this.toggleHeatmap();
             }.bind(this));
 
+            var reportsDiv = document.createElement('div');
+            reportsDiv.className = "map-button reports-control";
+            reportsDiv.innerHTML = $("#reports-control").html();
+            google.maps.event.addDomListener(reportsDiv, 'click', function () {
+                this.openReportsModal();
+            }.bind(this));
+
             mapControlDiv.appendChild(resetMapDiv);
             mapControlDiv.appendChild(downloadCsvDiv);
             mapControlDiv.appendChild(linkMapDiv);
@@ -514,6 +524,7 @@ $(function () {
             mapControlDiv.appendChild(statDiv);
             mapControlDiv.appendChild(fullScreenDiv);
             mapControlDiv.appendChild(heatMapDiv);
+            mapControlDiv.appendChild(reportsDiv);
             if (MAP_ONLY)
                 mapControlDiv.style = "display:none";
 
@@ -546,6 +557,11 @@ $(function () {
             heatMapLabel.className = 'control-label';
             heatMapLabel.innerHTML = 'מפת חום';
             heatMapDiv.appendChild(heatMapLabel);
+
+            var reportsLabel = document.createElement('div');
+            reportsLabel.className = 'control-label';
+            reportsLabel.innerHTML = 'דוחות';
+            reportsDiv.appendChild(reportsLabel);
 
             this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(mapControlDiv);
 

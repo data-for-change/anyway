@@ -394,6 +394,13 @@ input[type="date"],input[type="time"]{
     content: '\f0b2'
 }
 
+.reports-control:after {
+    font-size: 15px;
+    color: #ccc;
+    font-family: 'FontAwesome';
+    content: '\f15c'
+}
+
 .heat-map-control:after{
     font-size: 17px;
     color: #ccc;
@@ -614,6 +621,14 @@ input[type="date"],input[type="time"]{
     padding-bottom: 20px;
     border-bottom: 1px solid #eee;
     margin-bottom: 20px;
+}
+
+.reports-container .report-item {
+    margin-top: 10px;
+}
+
+.reports-container .report-item:last-child {
+    margin-bottom: 10px;
 }
 
 .form-control-wide {

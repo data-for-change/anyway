@@ -44,6 +44,7 @@ nosetests.xml
 .DS_Store
 
 venv
+.venv
 
 # data files
 /static/data/lms

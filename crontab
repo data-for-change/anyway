@@ -1,1 +1,1 @@
-0,30 * * * * python united.py
+0,30 * * * * python main.py process_data

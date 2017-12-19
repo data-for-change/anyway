@@ -22,7 +22,7 @@ function statPanelClick(widthOfPanel, heightOfPanel, chartWidth, chartHeight) {
             startJSPanelWithChart(jsPanel, widthOfPanel, heightOfPanel, chartWidth, chartHeight);
         }
     });
-};
+}
 
 var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chartWidth, chartHeight) {
     var isClusterMode = false;
@@ -47,7 +47,7 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
     str += chartHeight.toString() + '">';
     if (app.markers.length === 0 && app.clusters.length > 0) {
         isClusterMode = true;
-        str += '<h2> אין נתונים להצגה. אנא הגדל/י את רמת המיקוד במפה </h2>'
+        str += '<h2> אין נתונים להצגה. אנא הגדל/י את רמת המיקוד במפה </h2>';
     }
     str += '</div>';
     jsPanel.content.empty();
@@ -69,7 +69,7 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
     }
 
     switch (currentTypeOfChart) {
-        case "accidentsPerMonth":            
+        case "accidentsPerMonth":
             var sum;
             var jsonAccidentsByMonth;
             var groupedAccidentsByMonth = _.countBy(app.markers.pluck("created"), function(item) {
@@ -84,14 +84,14 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
                     return {
                         "label": month,
                         "value": (numOfAccidents / sum).toFixed(2)
-                    }
+                    };
                 });
             } else {
                 jsonAccidentsByMonth = _.map(groupedAccidentsByMonth, function(numOfAccidents, month) {
                     return {
                         "label": month,
                         "value": numOfAccidents.toString()
-                    }
+                    };
                 });
             }
 
@@ -161,7 +161,7 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
                 return {
                     "label": year,
                     "value": numOfAccidents.toString()
-                }
+                };
             });
             jsonAccidentsByYear = _.sortBy(jsonAccidentsByYear, 'label');
             var groupedAccidentsByMonth = _.countBy(app.markers.pluck("created"), function(item) {
@@ -171,7 +171,7 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
             var jsonAccidentsByMonth = _.map(groupedAccidentsByMonth, function(numOfAccidents, month) {
                 return {
                     "label": month
-                }
+                };
             });
             jsonAccidentsByMonth = _.sortBy(jsonAccidentsByMonth, 'label');
             var groupedAccidentsForAllYears = _.countBy(app.markers.pluck("created"), function(item) {
@@ -181,7 +181,7 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
                 return {
                     "label": month,
                     "value": numOfAccidents.toString()
-                }
+                };
             });
             jsonAccidentsByMonthAllYears = _.sortBy(jsonAccidentsByMonthAllYears, 'label');
             var dataPerMonth = [];
@@ -308,14 +308,14 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
                     return {
                         "label": severity,
                         "value": (numOfAccidents / sum).toFixed(2)
-                    }
+                    };
                 });
             } else {
                 jsonAccidentsBySeverity = _.map(groupedAccidentsBySeverity, function(numOfAccidents, severity) {
                     return {
                         "label": severity,
                         "value": numOfAccidents.toString()
-                    }
+                    };
                 });
             }
 
@@ -645,7 +645,7 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
                         age_groups[involved[i].age_group]++;
                     }else{
                         age_groups[involved[i].age_group] = 1;
-                    }                     
+                    }
                 }
                 for (var key in age_groups) {
                     if (age_groups.hasOwnProperty(key)) {
@@ -661,13 +661,13 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
                         "dataFormat": "json",
                         "dataSource": {
                             "chart": {
-                                "caption": "מספר הנפגעים לפי קבוצת גיל",                                
+                                "caption": "מספר הנפגעים לפי קבוצת גיל",
                                 "theme": "fint",
                                 "showPercentValues": currentDataType === "percentType" ? "1" : "0",
                                 "showPercentInTooltip": currentDataType === "percentType" ? "1" : "0",
                                 "decimals": "1",
-                                "useDataPlotColorForLabels": "1",                                
-                            },                            
+                                "useDataPlotColorForLabels": "1",
+                            },
                             "data": dataset
                         }
                     });
@@ -687,50 +687,50 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
                 var males = [];
                 var females = [];
                 var keys = [];
-                var categories = { category: [] };                
-                for (var i = 0; i < involved.length; i++) {                    
-                    if (age_groups[involved[i].age_group]){                         
+                var categories = { category: [] };
+                for (var i = 0; i < involved.length; i++) {
+                    if (age_groups[involved[i].age_group]){
                         if (involved[i].sex === 1){
                             if (age_groups[involved[i].age_group].male){
                                 age_groups[involved[i].age_group].male++;
                             }else{
                                 age_groups[involved[i].age_group].male = 1;
-                            }                           
+                            }
                         }else if (involved[i].sex === 2){
                             if (age_groups[involved[i].age_group].female){
                                 age_groups[involved[i].age_group].female++;
                             }else{
                                 age_groups[involved[i].age_group].female = 1;
-                            }                            
-                        }                        
+                            }
+                        }
                     }else{
                         age_groups[involved[i].age_group] = {};
-                        if (involved[i].sex === 1){                            
-                            age_groups[involved[i].age_group].male = 1;                            
-                        }else if (involved[i].sex === 2){                            
-                            age_groups[involved[i].age_group].female = 1;                            
+                        if (involved[i].sex === 1){
+                            age_groups[involved[i].age_group].male = 1;
+                        }else if (involved[i].sex === 2){
+                            age_groups[involved[i].age_group].female = 1;
                         }
-                    }                     
+                    }
                 }
                 for (var key in age_groups) {
                     if (age_groups.hasOwnProperty(key)) {
-                        keys.push(key);                
+                        keys.push(key);
                     }
                 }
                 keys.sort();
-                for (var i = 0; i < keys.length; i++) {                    
+                for (var i = 0; i < keys.length; i++) {
                     categories.category.push({ label: keys[i]});
-                        if (age_groups[keys[i]].male){                            
-                            males.push({ value: age_groups[keys[i]].male.toString() });                                                       
+                        if (age_groups[keys[i]].male){
+                            males.push({ value: age_groups[keys[i]].male.toString() });
                         }else{
                             males.push({ value: '0' });
                         }
-                        if (age_groups[keys[i]].female){                            
-                            females.push({ value: age_groups[keys[i]].female.toString() });                                                       
+                        if (age_groups[keys[i]].female){
+                            females.push({ value: age_groups[keys[i]].female.toString() });
                         }else{
                             females.push({ value: '0' });
-                        }  
-                }               
+                        }
+                }
                 dataset.push({ seriesname: 'זכר', data: males});
                 dataset.push({ seriesname: 'נקבה', data: females});
                 FusionCharts.ready(function() {
@@ -742,9 +742,9 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
                         "dataFormat": "json",
                         "dataSource": {
                             "chart": {
-                                "caption": "מספר הנפגעים לפי קבוצת גיל ומין",                                
-                                "theme": "fint"                                                                                                                            
-                            },    
+                                "caption": "מספר הנפגעים לפי קבוצת גיל ומין",
+                                "theme": "fint"
+                            },
                             "categories": categories,
                             "dataset": dataset
                         }

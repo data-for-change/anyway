@@ -1,29 +1,18 @@
-import unittest
-from main import parse_data
-from models import Marker
+from six import iteritems
+from anyway.flask_app import parse_data
+from anyway.models import AccidentMarker
 
-class TestParseData(unittest.TestCase):
 
-    def setUp(self):
-        self.marker_dummy = dict(type=1, title="test title", description="test description", latitude=1, longitude=1)
-        self.bad_marker_dummy = dict(type=1, title="No properties")
+def test_data_null():
+    assert parse_data(AccidentMarker, None) is None
 
-    def tearDown(self):
-        self.marker_dummy = None
-        self.bad_marker_dummy = None
 
-    def test_data_null(self):
-        self.assertIsNone(parse_data(Marker, None))
+def test_bad_data():
+    assert parse_data(AccidentMarker, dict(type=1, title="No properties")) is None
 
-    def test_bad_data(self):
-        self.assertIsNone(parse_data(Marker, self.bad_marker_dummy))
 
-    def test_parse_marker(self):
-        marker = parse_data(Marker, self.marker_dummy)
-        for key, value in self.marker_dummy.iteritems():
-            self.assertEqual(getattr(marker, key), value)
-
-if __name__ == '__main__':
-    unittest.main()
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestParseData)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+def test_parse_marker():
+    marker_dummy = dict(type=1, title="test title", description="test description", latitude=1, longitude=1)
+    marker = parse_data(AccidentMarker, marker_dummy)
+    for key, value in iteritems(marker_dummy):
+        assert getattr(marker, key) == value

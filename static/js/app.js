@@ -22,11 +22,19 @@ $(function () {
 
     var Discussion = Backbone.Model.extend({});
 
-    window.MarkerCollection = Backbone.Collection.extend({
+    window.MarkerCollection = Backbone.PageableCollection.extend({
         url: "/markers",
 
-        parse: function (response, options) {
+        state: {
+            pageSize: ENTRIES_PER_PAGE
+        },
+
+        parseRecords: function (response) {
             return response.markers;
+        },
+
+        parseState: function (response) {
+            return response.pagination;
         }
     });
 
@@ -59,6 +67,7 @@ $(function () {
             this.show_severe = '1';
             this.show_light = '1';
             this.show_urban = 3;
+            this.age_groups = "";
             this.show_intersection = 3;
             this.show_lane = 3;
             this.show_day = 7;
@@ -74,8 +83,9 @@ $(function () {
             this.controlmeasure = 0;
             this.district = 0;
             this.case_type = 0;
+            this.total_markers = 0;
 
-            this.dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
+            this.dateRanges = [new Date($('#sdateInit').val()), new Date($('#edateInit').val())];
 
             setTimeout(function(){
                 this.firstLoadDelay = false;
@@ -134,7 +144,7 @@ $(function () {
             }
            Backbone.history.navigate(Backbone.history.fragment, false);
            // Backbone.history.navigate(url, true);
-           window.history.pushState('','','/')
+           window.history.pushState('','','/');
         },
         clusterMode: function () {
             return this.map.zoom < MINIMAL_ZOOM;
@@ -167,7 +177,7 @@ $(function () {
                 this.clusters.fetch({
                     data: $.param(params),
                     reset: reset,
-                    success: this.reloadSidebar.bind(this)
+                    success: this.markersFetched(this)
                 });
             } else {
                 this.clearClustersFromMap();
@@ -178,10 +188,29 @@ $(function () {
 
                 this.clearClustersFromMap();
 
-                this.markers.fetch({
-                    data: $.param(params),
+                this.markers.getFirstPage({
+                    data: params,
                     reset: reset,
-                    success: this.reloadSidebar.bind(this)
+                    success: this.markersFetched.bind(this, params, reset)
+                });
+            }
+        },
+        markersFetched: function(params, reset) {
+            this.total_markers = this.markers.state.totalRecords;
+            this.reloadSidebar(this);
+            if (this.markers.hasNextPage()) {
+                delete params.page;
+                delete params.per_page;
+                delete params.total_entries;
+                delete params.total_pages;
+
+                if (!_.isEqual(params, this.buildMarkersParams())) {
+                    return;
+                }
+
+                this.markers.getNextPage({
+                    data: params,
+                    success: this.markersFetched.bind(this, params, reset)
                 });
             }
         },
@@ -266,6 +295,7 @@ $(function () {
             params["controlmeasure"] = this.controlmeasure;
             params["district"] = this.district;
             params["case_type"] = this.case_type;
+            params["age_groups"] = this.age_groups;
             return params;
         },
         setMultipleMarkersIcon: function () {
@@ -364,6 +394,9 @@ $(function () {
         linkMap: function () {
             $('#embed').modal('show');
         },
+        openReportsModal: function() {
+            $('#reports-modal').modal('show');
+        },
         fullScreen: function () {
             var body = document.body;
 
@@ -406,7 +439,8 @@ $(function () {
                 zoomControl: !MAP_ONLY,
                 panControl: !MAP_ONLY,
                 streetViewControl: !MAP_ONLY,
-                styles: MAP_STYLE
+                styles: MAP_STYLE,
+                gestureHandling: "greedy"
             };
             this.map = new google.maps.Map(this.$el.find("#map_canvas").get(0), mapOptions);
 
@@ -476,6 +510,13 @@ $(function () {
                 this.toggleHeatmap();
             }.bind(this));
 
+            var reportsDiv = document.createElement('div');
+            reportsDiv.className = "map-button reports-control";
+            reportsDiv.innerHTML = $("#reports-control").html();
+            google.maps.event.addDomListener(reportsDiv, 'click', function () {
+                this.openReportsModal();
+            }.bind(this));
+
             mapControlDiv.appendChild(resetMapDiv);
             mapControlDiv.appendChild(downloadCsvDiv);
             mapControlDiv.appendChild(linkMapDiv);
@@ -483,6 +524,7 @@ $(function () {
             mapControlDiv.appendChild(statDiv);
             mapControlDiv.appendChild(fullScreenDiv);
             mapControlDiv.appendChild(heatMapDiv);
+            mapControlDiv.appendChild(reportsDiv);
             if (MAP_ONLY)
                 mapControlDiv.style = "display:none";
 
@@ -515,6 +557,11 @@ $(function () {
             heatMapLabel.className = 'control-label';
             heatMapLabel.innerHTML = 'מפת חום';
             heatMapDiv.appendChild(heatMapLabel);
+
+            var reportsLabel = document.createElement('div');
+            reportsLabel.className = 'control-label';
+            reportsLabel.innerHTML = 'דוחות';
+            reportsDiv.appendChild(reportsLabel);
 
             this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(mapControlDiv);
 
@@ -639,7 +686,7 @@ $(function () {
             $('#toggle-sidebar').click(function () {
                 $('.main').toggleClass('main-open').toggleClass('main-close');
                 $('.sidebar-container').toggleClass('sidebar-container-open').toggleClass('sidebar-container-close');
-                
+
                 setTimeout(function() {
                     google.maps.event.trigger(this.map, 'resize');
                 }.bind(this), 500);
@@ -683,6 +730,7 @@ $(function () {
                 this.updateUrl();
                 $(document).off('keydown',app.ESCinfoWindow);
             }
+            app.map.gestureHandling = "greedy";
         },
         clickMap: function (e) {
             this.closeInfoWindow();
@@ -955,14 +1003,51 @@ $(function () {
             this.resetMarkers();
             this.fetchMarkers();
         },
+        getAgeGroupFilter: function() {
+            var age_groups = [];
+
+            if ($("#checkbox-00-04").is(":checked")) {
+                age_groups.push(1);
+            } if ($("#checkbox-05-09").is(":checked")) {
+                age_groups.push(2);
+            } if ($("#checkbox-10-14").is(":checked")) {
+                age_groups.push(3);
+            } if ($("#checkbox-15-19").is(":checked")) {
+                age_groups.push(4);
+            } if ($("#checkbox-20-24").is(":checked")) {
+                age_groups.push(5);
+            } if ($("#checkbox-25-69").is(":checked")) {
+                for (var i = 6; i <=14; ++i) {
+                    age_groups.push(i);
+                }
+            } if ($("#checkbox-70-74").is(":checked")) {
+                age_groups.push(15);
+            } if ($("#checkbox-75-79").is(":checked")) {
+                age_groups.push(16);
+            } if ($("#checkbox-80-84").is(":checked")) {
+                age_groups.push(17);
+            } if ($("#checkbox-85-plus").is(":checked")) {
+                age_groups.push(18);
+            }
+
+            if (age_groups.length == 18) {
+                return "";
+            }
+
+            if (age_groups.length == 0) {
+                return "0";
+            }
+
+            return age_groups.join();
+        },
         loadFilter: function() {
-            if ($("#checkbox-discussions").is(":checked")) { this.show_discussions='1' } else { this.show_discussions='' }
-            if ($("#checkbox-accidents").is(":checked")) { this.show_markers='1' } else { this.show_markers='' }
-            if ($("#checkbox-accurate").is(":checked")) { this.accurate='1' } else { this.accurate='' }
-            if ($("#checkbox-approx").is(":checked")) { this.approx='1' } else { this.approx='' }
-            if ($("#checkbox-fatal").is(":checked")) { this.show_fatal='1' } else { this.show_fatal='' }
-            if ($("#checkbox-severe").is(":checked")) { this.show_severe='1' } else { this.show_severe='' }
-            if ($("#checkbox-light").is(":checked")) { this.show_light='1' } else { this.show_light='' }
+            if ($("#checkbox-discussions").is(":checked")) { this.show_discussions='1'; } else { this.show_discussions=''; }
+            if ($("#checkbox-accidents").is(":checked")) { this.show_markers='1'; } else { this.show_markers=''; }
+            if ($("#checkbox-accurate").is(":checked")) { this.accurate='1'; } else { this.accurate=''; }
+            if ($("#checkbox-approx").is(":checked")) { this.approx='1'; } else { this.approx=''; }
+            if ($("#checkbox-fatal").is(":checked")) { this.show_fatal='1'; } else { this.show_fatal=''; }
+            if ($("#checkbox-severe").is(":checked")) { this.show_severe='1'; } else { this.show_severe=''; }
+            if ($("#checkbox-light").is(":checked")) { this.show_light='1'; } else { this.show_light=''; }
 
             if ($("#checkbox-urban").is(":checked") && $("#checkbox-nonurban").is(":checked")) {
                 this.show_urban = 3;
@@ -972,7 +1057,9 @@ $(function () {
                 this.show_urban = 1;
             } else {
                 this.show_urban = 0;
-            };
+            }
+
+            this.age_groups = this.getAgeGroupFilter();
 
             if ($("#checkbox-intersection").is(":checked") && $("#checkbox-nonintersection").is(":checked")) {
                 this.show_intersection = 3;
@@ -982,7 +1069,7 @@ $(function () {
                 this.show_intersection = 1;
             } else {
                 this.show_intersection = 0;
-            };
+            }
 
             // This section only filters one-lane and multi-lane.
             // Accidents with 'other' setting (which are the majority) Will not be shown
@@ -994,7 +1081,7 @@ $(function () {
                 this.show_lane = 1;
             } else {
                 this.show_lane = 0;
-            };
+            }
 
             this.weather = $("input[type='radio'][name='weather']:checked").val();
             this.road = $("input[type='radio'][name='road']:checked").val();
@@ -1005,7 +1092,7 @@ $(function () {
             this.district = $("input[type='radio'][name='district']:checked").val();
             this.case_type = $("input[type='radio'][name='casetype']:checked").val();
 
-            this.dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())]
+            this.dateRanges = [new Date($("#sdate").val()), new Date($("#edate").val())];
             this.resetMarkers();
             this.fetchMarkers();
             this.updateFilterString();
@@ -1085,19 +1172,19 @@ $(function () {
             });
 
             if (this.dateRanges !== 'undefined') {
-                document.getElementById("sdate").valueAsDate = new Date(this.dateRanges[0]);
-                document.getElementById("edate").valueAsDate = new Date(this.dateRanges[1]);
+                $("#sdate").datepicker("setDate", new Date(this.dateRanges[0]));
+                $("#edate").datepicker("setDate", new Date(this.dateRanges[1]));
             }
         },
         changeDate: function() {
 
-            this.show_day = $("input[type='radio'][name='day']:checked").val()
-            this.show_holiday = $("input[type='radio'][name='holiday']:checked").val()
-            this.show_time = $("input[type='radio'][name='time']:checked").val()
+            this.show_day = $("input[type='radio'][name='day']:checked").val();
+            this.show_holiday = $("input[type='radio'][name='holiday']:checked").val();
+            this.show_time = $("input[type='radio'][name='time']:checked").val();
             // TODO: only parses the hour int for now, need to apply the minutes too
             if (!isNaN(parseInt($("#stime").val())) && !isNaN(parseInt($("#etime").val()))){
-                this.start_time = parseInt($("#stime").val())
-                this.end_time = parseInt($("#etime").val())
+                this.start_time = parseInt($("#stime").val());
+                this.end_time = parseInt($("#etime").val());
                 $("#checkbox-time-all").prop('checked', true);
             }
 
@@ -1158,7 +1245,7 @@ $(function () {
             console.log("cluster items counter: " + clusterItemsCounter);
             console.log("Selected MaxIntensity level: " + heatMapMaxIntensity);
             console.log("Zoom level: " + this.map.zoom);
-            
+
             this.heatmap = new google.maps.visualization.HeatmapLayer({
                 data: latlngListForHeatMap,
                 maxIntensity: heatMapMaxIntensity,
@@ -1173,9 +1260,9 @@ $(function () {
 
                 // Severity variables and strings
                 if (fatal == '1') {
-                    fatal = "קטלנית "
+                    fatal = "קטלנית ";
                 } else {
-                    fatal = ""
+                    fatal = "";
                 }
                 if (severe == '1' && fatal != '' && light == '') {
                     severe = "וקשה ";
@@ -1184,9 +1271,9 @@ $(function () {
                 } else {
                     severe = '';
                 }
-                ;
+
                 if (fatal == '' && severe == '' && light == '') {
-                    severityText = ""
+                    severityText = "";
                 }
 
                 if (light == '1' && (fatal != '' || severe != '')) {
@@ -1199,9 +1286,9 @@ $(function () {
 
                 // Accuracy variables and strings
                 if (accurate == '1') {
-                    accurate = "מדויק "
+                    accurate = "מדויק ";
                 } else {
-                    accurate = ""
+                    accurate = "";
                 }
                 if (approx == '1' && accurate != '') {
                     approx = "ומרחבי";
@@ -1211,12 +1298,13 @@ $(function () {
                     approx = "";
                 }
                 if (accurate == '' && approx == '') {
-                    accuracyText = ""
+                    accuracyText = "";
                 }
 
+                var total_string = (markerCount == this.total_markers) ? "" : " מתוך " + this.total_markers;
                 $("#filter-string").empty()
                     .append("<span>מציג </span>")
-                    .append("<span><a onclick='showFilter(FILTER_MARKERS)'>"+markerCount+"</a></span>")
+                    .append("<span><a onclick='showFilter(FILTER_MARKERS)'>" + markerCount + total_string + "</a></span>")
                     .append("<span> תאונות</span>")
                     .append("<span> בין התאריכים </span><br>")
                     .append("<span><a onclick='showFilter(FILTER_DATE)'>"+

@@ -9,7 +9,7 @@ if(isRetina){
     }
 
     for (var icon in ICONS){
-        for (var i in ICONS[icon]){            
+        for (var i in ICONS[icon]){
             ICONS[icon][i] = addRetinaSuffix(ICONS[icon][i]);
         }
     }

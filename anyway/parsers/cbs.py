@@ -406,7 +406,7 @@ def import_to_datastore(directory, provider_code, batch_size):
 
         logging.info("\t{0} items in {1}".format(new_items, time_delta(started)))
         return new_items
-    except RuntimeError as e:
+    except ValueError as e:
         failed_dirs[directory] = str(e)
         return 0
 

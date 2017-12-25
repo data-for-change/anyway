@@ -765,7 +765,7 @@ input[type='checkbox']{
 #filter-string{
     text-align: center;
     vertical-align: middle;
-    padding-top: 10%; !important;
+    padding-top: 4% !important;
 }
 
 #filter-string > p{

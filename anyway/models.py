@@ -5,7 +5,7 @@ import logging
 from .constants import CONST
 from collections import namedtuple
 from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table, \
-        ForeignKeyConstraint, func
+        ForeignKeyConstraint, func, and_
 from sqlalchemy.orm import relationship, load_only, backref
 from .utilities import init_flask, decode_hebrew
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -335,12 +335,12 @@ class AccidentMarker(MarkerMixin, Base):
             if kwargs['acctype'] <= 20:
                 markers = markers.filter(AccidentMarker.subtype == kwargs['acctype'])
             elif kwargs['acctype'] == CONST.BIKE_ACCIDENTS_NO_CASUALTIES:
-                markers = markers.\
+                markers = markers.filter(and_(AccidentMarker.vehicles.any(), AccidentMarker.involved.any())).\
                     filter(AccidentMarker.vehicles.any(Vehicle.vehicle_type == CONST.VEHICLE_TYPE_BIKE)).group_by(AccidentMarker.id).\
                            having(~AccidentMarker.involved.\
                                   any(Involved.involved_type != CONST.INVOLVED_TYPE_DRIVER_UNHARMED))
             elif kwargs['acctype'] == CONST.BIKE_ACCIDENTS_WITH_CASUALTIES:
-                markers = markers. \
+                markers = markers.filter(and_(AccidentMarker.vehicles.any(), AccidentMarker.involved.any())).\
                     filter(AccidentMarker.vehicles.\
                            any(Vehicle.vehicle_type == CONST.VEHICLE_TYPE_BIKE)).group_by(AccidentMarker.id).\
                     having(AccidentMarker.involved.any(Involved.involved_type != CONST.INVOLVED_TYPE_DRIVER_UNHARMED))

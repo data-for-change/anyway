@@ -12,7 +12,7 @@ See also [our Android app](https://github.com/hasadna/anywayAndroidApp) on GitHu
 
 The datasets Anyway uses are documented here:
 * [CBS (Central Bureau of Statistics, למ"ס)](https://github.com/hasadna/anyway/blob/dev/docs/LMS.md)
-* [United Hatzalah (איחוד הצלה)](https://github.com/hasadna/anyway/blob/dev/docs/UNITED.md)
+* [United Hatzalah (איחוד הצלה)](https://github.com/hasadna/anyway/blob/dev/docs/UNITED.md) - Currently not in use
 
 See [Code Directory Tree Structure](docs/CODE.md).
 

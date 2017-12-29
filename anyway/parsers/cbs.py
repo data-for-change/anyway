@@ -211,6 +211,8 @@ def import_accidents(provider_code, accidents, streets, roads, **kwargs):
             lng, lat = None, None   # Must insert everything to avoid foreign key failure
         main_street, secondary_street = get_streets(accident, streets)
 
+        assert(int(provider_code) == int(accident[field_names.file_type]))
+
         marker = {
             "id": int(accident[field_names.id]),
             "provider_code": int(provider_code),

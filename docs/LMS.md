@@ -1,6 +1,6 @@
 ## Introduction
 
-This document describes the contents of the file [lms.zip](https://drive.google.com/file/d/0B4yX8HDe1VaTdWdPMXV5c2gycW8/view?usp=sharing), which is used in the ANYWAY project in the [Public Knowledge Workshop](http://www.hasadna.org.il). The file was acquired from the Israeli Central Bureau of Statistics (הלשכה המרכזית לסטטיסטיקה, למ”ס), for the purposes of the ANYWAY project.
+This document describes the contents of the directory [lms](https://drive.google.com/drive/folders/1JVBNP3oTn12zxWExPKeCf_vetNHVCcoo?usp=sharing), which is used in the ANYWAY project in the [Public Knowledge Workshop](http://www.hasadna.org.il). The file was acquired from the Israeli Central Bureau of Statistics (הלשכה המרכזית לסטטיסטיקה, למ”ס), for the purposes of the ANYWAY project.
 It contains information about traffic accidents from 2005-2014, including location, time, vehicles and individuals involved, and more.
 See the data on a map on http://oway.org.il/
 

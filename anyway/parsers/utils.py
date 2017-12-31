@@ -4,7 +4,7 @@ def batch_iterator(iterable, batch_size):
 
     while True:
         batch = []
-        for _ in xrange(batch_size):
+        for _ in range(batch_size):
             try:
                 batch.append(next(iterator))
             except StopIteration:

@@ -633,7 +633,7 @@
                 <label for="checkbox-accidents" class="btn two right">תאונות</label>
                 <input type="checkbox" id="checkbox-discussions" onclick="app.loadFilter()" checked/>
                 <label for="checkbox-discussions" class="btn two left">דיונים</label>
-                <input type="checkbox" id="checkbox-rsa" onclick="app.loadFilter()"/>
+                <input type="checkbox" id="checkbox-rsa" onclick="app.loadFilter()" checked/>
                 <label for="checkbox-rsa" class="btn one">עבירות שדווחו על ידי שומרי הדרך</label>
             </div>
             <ul class="current-view sidebar-pin"></ul>
@@ -1231,6 +1231,12 @@
             LAYERS[SEVERITY_LIGHT] = 1;
             {% endif %}
 
+            {% if show_rsa %}
+            LAYERS[SEVERITY_IRRELEVANT_RSA] = {{show_rsa}};
+            {% else %}
+            LAYERS[SEVERITY_IRRELEVANT_RSA] = 1;
+            {% endif %}
+
             {% if zoom %}
             INIT_ZOOM = {{zoom}};
             {% else %}
@@ -1339,12 +1345,26 @@
         {% else %}
             app.show_markers ='1';
         {% endif %}
+        {% if show_accidents is defined and show_accidents != '-1' %}
+            app.show_accidents = {{show_accidents}};
+        {% elif show_accidents is defined and show_accidents == '-1' %}
+                app.show_accidents = '';
+        {% else %}
+            app.show_accidents ='1';
+        {% endif %}
         {% if show_discussions is defined and show_discussions != '-1' %}
             app.show_discussions = {{show_discussions}};
         {% elif show_discussions is defined and show_discussions == '-1' %}
                 app.show_discussions = '';
         {% else %}
             app.show_discussions='1';
+        {% endif %}
+        {% if show_rsa is defined and show_rsa != '-1' %}
+            app.show_rsa = {{show_rsa}};
+        {% elif show_rsa is defined and show_rsa == '-1' %}
+                app.show_rsa = '';
+        {% else %}
+            app.show_rsa='1';
         {% endif %}
         {% if show_fatal is defined and show_fatal != '-1'  %}
             app.show_fatal = {{show_fatal}};

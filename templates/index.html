@@ -600,6 +600,8 @@
                 <label for="checkbox-accidents" class="btn two right">תאונות</label>
                 <input type="checkbox" id="checkbox-discussions" onclick="app.loadFilter()" checked/>
                 <label for="checkbox-discussions" class="btn two left">דיונים</label>
+                <input type="checkbox" id="checkbox-rsa" onclick="app.loadFilter()"/>
+                <label for="checkbox-rsa" class="btn one">עבירות שדווחו על ידי שומרי הדרך</label>
             </div>
             <ul class="current-view sidebar-pin"></ul>
         </div>
@@ -646,11 +648,6 @@
                 <label for="checkbox-one-lane" class="btn one">חד-סטרי</label>
             </div>
 
-            <div class="btn-label">שונות:</div>
-            <div class="btn-wrap separator">
-              <input type="checkbox" id="checkbox-rsa" onclick="app.loadFilter()"/>
-              <label for="checkbox-rsa" class="btn one">אירועים שדווחו על ידי שומרי הדרך</label>
-            </div>
         </div>
 
         <!-- FILTER TIME (ZMAN)-->

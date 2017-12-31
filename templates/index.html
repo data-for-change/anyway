@@ -330,6 +330,17 @@
         </div>
 
 
+        <div id="rsa-marker-content-template" style="display: none">
+          <div class="marker-info-window">
+            <h4 class="title"></h4>
+            <a class="profile-image-url" target="_blank" style="float: left">
+              <img class="profile-image"/>
+            </a>
+            <p class="added-by"></p>
+            <p class="description" style="margin:0"></p>
+          </div>
+        </div>
+
         <div id="marker-content-template" style="display: none">
             <div class="marker-info-window">
                 <h4 class="title"></h4>
@@ -622,6 +633,8 @@
                 <label for="checkbox-accidents" class="btn two right">תאונות</label>
                 <input type="checkbox" id="checkbox-discussions" onclick="app.loadFilter()" checked/>
                 <label for="checkbox-discussions" class="btn two left">דיונים</label>
+                <input type="checkbox" id="checkbox-rsa" onclick="app.loadFilter()"/>
+                <label for="checkbox-rsa" class="btn one">עבירות שדווחו על ידי שומרי הדרך</label>
             </div>
             <ul class="current-view sidebar-pin"></ul>
         </div>
@@ -667,6 +680,7 @@
                 <input type="checkbox" id="checkbox-one-lane" onclick="app.loadFilter()" checked/>
                 <label for="checkbox-one-lane" class="btn one">חד-סטרי</label>
             </div>
+
         </div>
 
         <!-- FILTER TIME (ZMAN)-->
@@ -1081,6 +1095,14 @@
           <div><div class="gmnoprint" title="<%- icon %>" ></div></div><span class="date"><%- created %></span> -<br> <span class="type"><%- type %></span>
         </a>
     </li>
+</script>
+
+<script type="text/html" id="sidebarRSAItemTemplate">
+  <li>
+    <a>
+      <div><div class="gmnoprint" title="<%- icon %>" ></div></div><span>אירוע הדווח על ידי שומרי הדרך</span> <br> <span class="description"><%- description %></span>
+    </a>
+  </li>
 </script>
 
 <script type="text/javascript"

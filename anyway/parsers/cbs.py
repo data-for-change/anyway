@@ -217,6 +217,8 @@ def import_accidents(provider_code, accidents, streets, roads, **kwargs):
             lng, lat = None, None   # Must insert everything to avoid foreign key failure
         main_street, secondary_street = get_streets(accident, streets)
 
+        assert(int(provider_code) == int(accident[field_names.file_type]))
+
         marker = {
             "id": int(accident[field_names.id]),
             "provider_code": int(provider_code),
@@ -422,7 +424,7 @@ def get_provider_code(directory_name=None):
             return int(ans)
 
 
-def main(specific_folder, delete_all, path, batch_size, provider_code):
+def main(specific_folder, delete_all, path, batch_size):
     if specific_folder:
         if fileDialog:
             dir_name = tkFileDialog.askdirectory(initialdir=os.path.abspath(path),
@@ -450,7 +452,7 @@ def main(specific_folder, delete_all, path, batch_size, provider_code):
     total = 0
     for directory in dir_list:
         parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
-        provider_code = provider_code if provider_code else get_provider_code(parent_directory)
+        provider_code = get_provider_code(parent_directory)
         total += import_to_datastore(directory, provider_code, batch_size)
 
     delete_invalid_entries()

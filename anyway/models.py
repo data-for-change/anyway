@@ -5,7 +5,7 @@ import logging
 from .constants import CONST
 from collections import namedtuple
 from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table, \
-        ForeignKeyConstraint, func
+        ForeignKeyConstraint, func, and_
 from sqlalchemy.orm import relationship, load_only, backref
 from .utilities import init_flask
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -176,6 +176,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
     cross_location = Column(Integer)
     cross_direction = Column(Integer)
     involved = relationship("Involved", foreign_keys="Involved.accident_id")
+    video_link = Column(Text)
 
     @staticmethod
     def json_to_description(msg):
@@ -229,6 +230,7 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
                 "cross_mode": self.cross_mode,
                 "cross_location": self.cross_location,
                 "cross_direction": self.cross_direction,
+                "video_link": self.video_link,
             }
             for name, value in iteritems(optional):
                 if value != 0:
@@ -271,6 +273,12 @@ class Marker(MarkerMixin, Base): # TODO rename to AccidentMarker
 
         if not kwargs['show_rsa']:
             markers = markers.filter(Marker.provider_code != CONST.RSA_PROVIDER_CODE)
+
+        if not kwargs['show_accidents']:
+            markers = markers.filter(and_(Marker.provider_code != CONST.CBS_ACCIDENT_TYPE_1_CODE,
+                                          Marker.provider_code != CONST.CBS_ACCIDENT_TYPE_3_CODE,
+                                          Marker.provider_code != CONST.UNITED_HATZALA_CODE))
+
 
         if yield_per:
             markers = markers.yield_per(yield_per)

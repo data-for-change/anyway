@@ -14,25 +14,32 @@ def _iter_rows(filename):
     sheet = workbook[u"גיליון1"]
     rows = sheet.rows
     first_row = next(rows)
-    assert [cell.value for cell in first_row] == [u'סוג עבירה', u'סוג רכב', u'נ"צ']
-    for id_, row in enumerate(rows):
-        offence = row[0].value
-        vehicle_type = row[1].value
-        coordinates = row[2].value
-        if not offence:
+    assert [cell.value for cell in first_row] == [u'מזהה', u'סוג עבירה', u'סוג רכב', u'נ"צ', u'קישור']
+    for row in rows:
+        id_ = int(row[0].value)
+        violation = row[1].value
+        vehicle_type = row[2].value
+        coordinates = row[3].value
+        video_link = row[4].value
+        if not violation:
             continue
 
         vehicle_type = vehicle_type or ''
         coordinates = coordinates.split(',')
-        longitude, latitude = float(coordinates[0]), float(coordinates[1])
-        description = {'OFFENCE_TYPE': offence, 'VEHICLE_TYPE': vehicle_type}
+        latitude, longitude = float(coordinates[0]), float(coordinates[1])
+        description = {'VIOLATION_TYPE': violation, 'VEHICLE_TYPE': vehicle_type}
 
-        yield {'id': id_, 'latitude': longitude,
-               'created': datetime(2017, 1, 1),
-               'longitude': latitude, 'provider_code': CONST.RSA_PROVIDER_CODE,
-               'severity': 3, 'title': 'שומרי הדרך',
+        yield {'id': id_,
+               'latitude': latitude,
+               'longitude': longitude,
+               'created': datetime(2017, 12, 31),
+               'provider_code': CONST.RSA_PROVIDER_CODE,
+               'severity': -1,
+               'title': 'שומרי הדרך',
                'description': json.dumps(description),
-               'locationAccuracy': 1, 'type': CONST.MARKER_TYPE_ACCIDENT}
+               'locationAccuracy': 1,
+               'type': CONST.MARKER_TYPE_ACCIDENT,
+               'video_link': video_link}
 
 
 def parse(filename):

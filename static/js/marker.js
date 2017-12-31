@@ -66,7 +66,18 @@ var MarkerView = Backbone.View.extend({
             this.$el.find(".profile-image").attr("title", provider.name);
             this.$el.find(".profile-image-url").attr("href", provider.url);
             this.$el.find(".added-by").html("מקור: <a href='" +
-                provider.url + "' target='blank'>" + provider.name + "</a>");
+                                            provider.url + "' target='blank'>" + provider.name + "</a>");
+        } else if (this.model.get("provider_code") == 4) {
+            this.$el.html($("#rsa-marker-content-template").html());
+
+            this.$el.find(".title").text(this.marker.get("title"));
+            this.$el.find(".description").text(this.model.get("description"));
+            this.$el.find(".profile-image").attr("width", "70px");
+            this.$el.find(".profile-image").attr("src", "/static/img/logos/" + provider.logo);
+            this.$el.find(".profile-image").attr("title", provider.name);
+            this.$el.find(".profile-image-url").attr("href", provider.url);
+            this.$el.find(".added-by").html("מקור: <a href='" +
+                                            provider.url + "' target='blank'>" + provider.name + "</a>");
         }else{
             this.$el.html($("#marker-content-template").html());
 
@@ -142,12 +153,17 @@ var MarkerView = Backbone.View.extend({
                     }
                 }
 
-                accuracy = !(this.model.get("locationAccuracy") == 1);
+            accuracy = !(this.model.get("locationAccuracy") == 1);
+
+            if (this.model.get("provider_code") == 4) {
+                markerTitle = "אירוע הדווח על ידי שומרי הדרך";
+            } else {
                 markerTitle = "ביום " + moment(this.model.get("created")).format("dddd") + ", ה-"
                     + moment(this.model.get("created")).format("LL")
                     + " אירעה תאונה " + SEVERITY_MAP[this.model.get("severity")]
                     + " מסוג " + localization.SUG_TEUNA[this.model.get("subtype")] + " "
                     + loc;
+            }
                 break;
             case 'multiple':
                 accuracy = (this.marker.opacity != 1);

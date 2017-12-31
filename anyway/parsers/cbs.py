@@ -17,6 +17,7 @@ from ..models import AccidentMarker, Involved, Vehicle
 from .. import models
 from ..utilities import ItmToWGS84, init_flask, CsvReader, time_delta, decode_hebrew,ImporterUI,truncate_tables
 from functools import partial
+from .utils import batch_iterator
 import logging
 
 failed_dirs = OrderedDict()
@@ -340,24 +341,6 @@ def get_files(directory):
             yield name, csv
 
 
-def _batch_iterator(iterable, batch_size):
-    iterator = iter(iterable)
-    iteration_stopped = False
-
-    while True:
-        batch = []
-        for _ in six.moves.range(batch_size):
-            try:
-                batch.append(next(iterator))
-            except StopIteration:
-                iteration_stopped = True
-                break
-
-        yield batch
-        if iteration_stopped:
-            break
-
-
 def import_to_datastore(directory, provider_code, batch_size):
     """
     goes through all the files in a given directory, parses and commits them
@@ -380,7 +363,7 @@ def import_to_datastore(directory, provider_code, batch_size):
                              and_(AccidentMarker.id == accident["id"],
                                   AccidentMarker.provider_code == accident["provider_code"])).scalar() is None)
 
-        for accidents_chunk in _batch_iterator(iterable=accidents, batch_size=batch_size):
+        for accidents_chunk in batch_iterator(iterable=accidents, batch_size=batch_size):
             for accident in accidents_chunk:
                 new_ids.add(accident["id"])
 
@@ -395,14 +378,14 @@ def import_to_datastore(directory, provider_code, batch_size):
         involved = (record for record in
                     import_involved(provider_code=provider_code, **files_from_lms)
                     if record["accident_id"] in new_ids)
-        for involved_chunk in _batch_iterator(iterable=involved, batch_size=batch_size):
+        for involved_chunk in batch_iterator(iterable=involved, batch_size=batch_size):
             db.session.bulk_insert_mappings(Involved, involved_chunk)
             new_items += len(involved_chunk)
 
         vehicles = (record for record in
                     import_vehicles(provider_code=provider_code, **files_from_lms)
                     if record["accident_id"] in new_ids)
-        for vehicles_chunk in _batch_iterator(iterable=vehicles, batch_size=batch_size):
+        for vehicles_chunk in batch_iterator(iterable=vehicles, batch_size=batch_size):
             db.session.bulk_insert_mappings(Vehicle, vehicles_chunk)
             new_items += len(vehicles_chunk)
 
@@ -458,7 +441,7 @@ def get_provider_code(directory_name=None):
             return int(ans)
 
 
-def main(specific_folder, delete_all, path, batch_size, provider_code):
+def main(specific_folder, delete_all, path, batch_size):
     import_ui = ImporterUI(path, specific_folder, delete_all)
     dir_name = import_ui.source_path()
 
@@ -475,7 +458,7 @@ def main(specific_folder, delete_all, path, batch_size, provider_code):
     total = 0
     for directory in dir_list:
         parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
-        provider_code = provider_code if provider_code else get_provider_code(parent_directory)
+        provider_code = get_provider_code(parent_directory)
         total += import_to_datastore(directory, provider_code, batch_size)
 
     delete_invalid_entries()

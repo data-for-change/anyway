@@ -2,7 +2,7 @@ $(function () {
     var AppRouter = Backbone.Router.extend({
         routes: {
             "": "navigateEmpty",
-            "/?marker=:id&start_date=:start&end_date=:end&show_fatal=:showFatal&show_severe=:showSevere&show_light=:showLight&show_inaccurate=:showInaccurate&zoom=:zoom&lat=:lat&lon=:lon": "navigate"
+            "/?marker=:id&start_date=:start&end_date=:end&show_rsa=:showRSA&show_fatal=:showFatal&show_severe=:showSevere&show_light=:showLight&show_inaccurate=:showInaccurate&zoom=:zoom&lat=:lat&lon=:lon": "navigate"
         },
         //removed navigate function because we don't use backbone navigation for now
         //navigate: function (id, start, end, showFatal, showSevere, showLight, showInaccurate, zoom, lat, lon) {
@@ -115,6 +115,8 @@ $(function () {
                 _.bind(this.reloadMarkersIfNeeded, this, "showSevere"))
                 .bind("change:showLight",
                 _.bind(this.reloadMarkersIfNeeded, this, "showLight"))
+                .bind("change:showRSA",
+                _.bind(this.reloadMarkersIfNeeded, this, "showRSA"))
                 .bind("change:showInaccurateMarkers",
                 _.bind(this.reloadMarkersIfNeeded, this, "showInaccurateMarkers"))
                 .bind("change:dateRange", this.reloadMarkers, this);
@@ -750,7 +752,7 @@ $(function () {
             });
         },
         initLayers: function (severity) {
-            var severities = [SEVERITY_FATAL, SEVERITY_SEVERE, SEVERITY_LIGHT];
+            var severities = [SEVERITY_IRRELEVANT_RSA, SEVERITY_FATAL, SEVERITY_SEVERE, SEVERITY_LIGHT];
             var self = this;
             severities.forEach(function (severity) {
                 var attr = SEVERITY_ATTRIBUTES[severity];

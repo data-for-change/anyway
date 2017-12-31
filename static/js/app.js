@@ -285,7 +285,7 @@ $(function () {
             params["approx"] = this.approx;
             params["accurate"] = this.accurate;
             params["show_markers"] = this.show_markers;
-            params["show_accidents"] = this.show_accidents
+            params["show_accidents"] = this.show_accidents;
             params["show_discussions"] = this.show_discussions;
             params["show_rsa"] = this.show_rsa;
             params["show_urban"] = this.show_urban;
@@ -1054,7 +1054,7 @@ $(function () {
         },
         loadFilter: function() {
             if ($("#checkbox-discussions").is(":checked")) { this.show_discussions='1'; } else { this.show_discussions=''; }
-            if ($("#checkbox-accidents").is(":checked")) { this.show_markers='1'; this.show_accidents='1'} else { this.show_accidents=''; }
+            if ($("#checkbox-accidents").is(":checked")) { this.show_markers='1'; this.show_accidents='1'; } else { this.show_accidents=''; }
             if ($("#checkbox-rsa").is(":checked")) { this.show_markers='1'; this.show_rsa='1'; } else { this.show_rsa=''; }
             if ($("#checkbox-accurate").is(":checked")) { this.accurate='1'; } else { this.accurate=''; }
             if ($("#checkbox-approx").is(":checked")) { this.approx='1'; } else { this.approx=''; }

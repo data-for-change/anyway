@@ -10,6 +10,7 @@ var SidebarView = Backbone.View.extend({
     initialize: function(options) {
         this.map = options.map;
         this.sidebarItemTemplate = _.template($("#sidebarItemTemplate").text());
+        this.sidebarRSAItemTemplate = _.template($("#sidebarRSAItemTemplate").text());
     },
     render: function() {
         this.$el.append($("#sidebar-template").html());
@@ -50,11 +51,18 @@ var SidebarView = Backbone.View.extend({
 
                 var iconUrl = markerView.getIcon();
 
-                var entryHtml = this.sidebarItemTemplate({
-                    created: moment(markerModel.get("created")).format("LLLL"),
-                    type: localization.SUG_TEUNA[markerModel.get("subtype")],
-                    icon: markerView.getTitle("single"),
-                });
+                if (markerModel.get("provider_code") == 4) {
+                    var entryHtml = this.sidebarRSAItemTemplate({
+                        description: markerModel.get("description").split("\n")[0],
+                        icon: markerView.getTitle("single"),
+                    });
+                } else {
+                    var entryHtml = this.sidebarItemTemplate({
+                        created: moment(markerModel.get("created")).format("LLLL"),
+                        type: localization.SUG_TEUNA[markerModel.get("subtype")],
+                        icon: markerView.getTitle("single"),
+                    });
+                }
 
                 var $entry = $(entryHtml);
                 $entry.data("marker", marker);

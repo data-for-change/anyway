@@ -51,6 +51,8 @@ $(function () {
         events : {
         },
         initialize : function() {
+            var url_params = new URLSearchParams(window.location.search);
+
             this.markers = new MarkerCollection();
             this.clusters = new ClusterCollection();
             this.model = new Backbone.Model();
@@ -60,7 +62,9 @@ $(function () {
             this.clusterList = [];
             this.firstLoadDelay = true;
             this.show_markers = '1';
+            this.show_accidents = '1';
             this.show_discussions = '1';
+            this.show_rsa = '1';
             this.accurate = '1';
             this.approx = '1';
             this.show_fatal = '1';
@@ -197,6 +201,9 @@ $(function () {
         },
         markersFetched: function(params, reset) {
             this.total_markers = this.markers.state.totalRecords;
+            this.total_accidents = this.markers.state.totalAccidents;
+            this.total_rsa = this.markers.state.totalRSA;
+
             this.reloadSidebar(this);
             if (this.markers.hasNextPage()) {
                 delete params.page;
@@ -278,7 +285,9 @@ $(function () {
             params["approx"] = this.approx;
             params["accurate"] = this.accurate;
             params["show_markers"] = this.show_markers;
+            params["show_accidents"] = this.show_accidents
             params["show_discussions"] = this.show_discussions;
+            params["show_rsa"] = this.show_rsa;
             params["show_urban"] = this.show_urban;
             params["show_intersection"] = this.show_intersection;
             params["show_lane"] = this.show_lane;
@@ -761,6 +770,9 @@ $(function () {
             }
 
             // markers are loaded immediately as they are fetched
+            if (!this.fitsFilters(model)){
+                console.log(model + " doesn't fit");
+            }
             if (this.clusterMode() || this.fitsFilters(model) ||
                 !this.clusterMode() && model.get("type") == MARKER_TYPE_DISCUSSION) {
                 var markerView = new MarkerView({model: model, map: this.map, markerIconType: this.markerIconType}).render();
@@ -1042,7 +1054,8 @@ $(function () {
         },
         loadFilter: function() {
             if ($("#checkbox-discussions").is(":checked")) { this.show_discussions='1'; } else { this.show_discussions=''; }
-            if ($("#checkbox-accidents").is(":checked")) { this.show_markers='1'; } else { this.show_markers=''; }
+            if ($("#checkbox-accidents").is(":checked")) { this.show_markers='1'; this.show_accidents='1'} else { this.show_accidents=''; }
+            if ($("#checkbox-rsa").is(":checked")) { this.show_markers='1'; this.show_rsa='1'; } else { this.show_rsa=''; }
             if ($("#checkbox-accurate").is(":checked")) { this.accurate='1'; } else { this.accurate=''; }
             if ($("#checkbox-approx").is(":checked")) { this.approx='1'; } else { this.approx=''; }
             if ($("#checkbox-fatal").is(":checked")) { this.show_fatal='1'; } else { this.show_fatal=''; }
@@ -1100,7 +1113,8 @@ $(function () {
         loadFilterFromParameters: function() {
             var bool_atrs = {};
             bool_atrs["checkbox-discussions"] = this.show_discussions;
-            bool_atrs["checkbox-accidents"] = this.show_markers;
+            bool_atrs["checkbox-accidents"] = this.show_accidents;
+            bool_atrs["checkbox-rsa"] = this.show_rsa;
             bool_atrs["checkbox-accurate"] = this.accurate;
             bool_atrs["checkbox-approx"] = this.approx;
             bool_atrs["checkbox-fatal"] = this.show_fatal;
@@ -1256,7 +1270,7 @@ $(function () {
         updateFilterString: function() {
             if (!this.clusterMode()) {
                 var fatal = this.show_fatal, severe = this.show_severe, light = this.show_light, severityText = " בחומרה ";
-                var accurate = this.accurate, approx = this.approx, accuracyText = " ובעיגון ";
+                var accurate = this.accurate, approx = this.approx, accuracyText = " בעיגון ";
 
                 // Severity variables and strings
                 if (fatal == '1') {
@@ -1301,22 +1315,25 @@ $(function () {
                     accuracyText = "";
                 }
 
-                var total_string = (markerCount == this.total_markers) ? "" : " מתוך " + this.total_markers;
                 $("#filter-string").empty()
                     .append("<span>מציג </span>")
-                    .append("<span><a onclick='showFilter(FILTER_MARKERS)'>" + markerCount + total_string + "</a></span>")
-                    .append("<span> תאונות</span>")
-                    .append("<span> בין התאריכים </span><br>")
-                    .append("<span><a onclick='showFilter(FILTER_DATE)'>"+
-                                moment(this.dateRanges[0]).format('LL') + " עד " +
-                                moment(this.dateRanges[1]).format('LL') +"</a></span><br>")
+                    .append("<span><a onclick='showFilter(FILTER_MARKERS)'>" + this.total_accidents + "</a></span>")
+                    .append("<span> תאונות</span><br>")
                     .append("<span>" + severityText + "</span>")
                     .append("<span><a onclick='showFilter(FILTER_INFO)' style='color: #d81c32;'>" + fatal + "</a></span>")
                     .append("<span><a onclick='showFilter(FILTER_INFO)' style='color: #ff9f1c;'>" + severe + "</a></span>")
                     .append("<span><a onclick='showFilter(FILTER_INFO)' style='color: #ffd82b;'>" + light + "</a></span><br>")
+                    .append("<span> ו-</span>")
+                    .append("<span><a onclick='showFilter(FILTER_MARKERS)'>" + this.total_rsa + "</a></span>")
+                    .append("<span> עבירות</span>")
                     .append("<span>" + accuracyText + "</span>")
                     .append("<span><a onclick='showFilter(FILTER_INFO)'>" + accurate + "</a></span>")
-                    .append("<span><a onclick='showFilter(FILTER_INFO)'>" + approx + "</a></span>")
+                    .append("<span><a onclick='showFilter(FILTER_INFO)'>" + approx + "</a></span><br>")
+                    .append("<span> בין התאריכים </span><br>")
+                    .append("<span><a onclick='showFilter(FILTER_DATE)'>"+
+                                moment(this.dateRanges[0]).format('LL') + " עד " +
+                                moment(this.dateRanges[1]).format('LL') +"</a></span><br>")
+
                 ;
             } else {
                 $("#filter-string").empty()

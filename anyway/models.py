@@ -5,7 +5,7 @@ import logging
 from .constants import CONST
 from collections import namedtuple
 from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table, \
-        ForeignKeyConstraint, func
+        ForeignKeyConstraint, func, and_
 from sqlalchemy.orm import relationship, load_only, backref
 from .utilities import init_flask, decode_hebrew
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -177,6 +177,7 @@ class AccidentMarker(MarkerMixin, Base):
     cross_direction = Column(Integer)
     involved = relationship("Involved", foreign_keys="Involved.accident_id")
     vehicles = relationship("Vehicle", foreign_keys="Vehicle.accident_id")
+    video_link = Column(Text)
 
     @staticmethod
     def json_to_description(msg):
@@ -230,6 +231,7 @@ class AccidentMarker(MarkerMixin, Base):
                 "cross_mode": self.cross_mode,
                 "cross_location": self.cross_location,
                 "cross_direction": self.cross_direction,
+                "video_link": self.video_link,
             }
             for name, value in iteritems(optional):
                 if value != 0:
@@ -269,6 +271,16 @@ class AccidentMarker(MarkerMixin, Base):
             .filter(AccidentMarker.created >= kwargs['start_date']) \
             .filter(AccidentMarker.created < kwargs['end_date']) \
             .order_by(desc(AccidentMarker.created))
+
+        if not kwargs['show_rsa']:
+            markers = markers.filter(AccidentMarker.provider_code != CONST.RSA_PROVIDER_CODE)
+
+        if not kwargs['show_accidents']:
+            markers = markers.filter(and_(AccidentMarker.provider_code != CONST.CBS_ACCIDENT_TYPE_1_CODE,
+                                          AccidentMarker.provider_code != CONST.CBS_ACCIDENT_TYPE_3_CODE,
+                                          AccidentMarker.provider_code != CONST.UNITED_HATZALA_CODE))
+
+
         if yield_per:
             markers = markers.yield_per(yield_per)
         if accurate and not approx:

@@ -47,12 +47,11 @@ def process():
 @click.option('--delete_all', is_flag=True)
 @click.option('--path', type=str, default="static/data/lms")
 @click.option('--batch_size', type=int, default=100)
-@click.option('--provider_code', type=int)
-def cbs(specific_folder, delete_all, path, batch_size, provider_code):
+def cbs(specific_folder, delete_all, path, batch_size):
     from anyway.parsers.cbs import main
 
     return main(specific_folder=specific_folder, delete_all=delete_all, path=path,
-                batch_size=batch_size, provider_code=provider_code)
+                batch_size=batch_size)
 
 @process.command()
 @click.option('--specific_folder', is_flag=True, default=False)
@@ -73,6 +72,14 @@ def united(light, username, password, lastmail):
     from anyway.parsers.united import main
 
     return main(light=light, username=username, password=password, lastmail=lastmail)
+
+
+@process.command()
+@click.argument("filename")
+def rsa(filename):
+    from anyway.parsers.rsa import parse
+
+    return parse(filename)
 
 
 @cli.command()

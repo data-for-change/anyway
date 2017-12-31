@@ -91,8 +91,9 @@ def shutdown_session(exception=None):
     db.session.remove()
 
 
-def generate_json(accidents, discussions, is_thin, total_records=None):
+def generate_json(accidents, rsa_markers, discussions, is_thin, total_records=None):
     markers = accidents.all()
+    markers += rsa_markers.all()
 
     if not is_thin:
         markers += discussions.all()
@@ -100,8 +101,13 @@ def generate_json(accidents, discussions, is_thin, total_records=None):
     if total_records is None:
         total_records = len(accidents)
 
+    total_accidents = accidents.count()
+    total_rsa = rsa_markers.count()
+
     entries = [ marker.serialize(is_thin) for marker in markers ]
-    return jsonify({"markers" : entries , 'pagination': {'totalRecords': total_records}})
+    return jsonify({"markers" : entries , 'pagination': {'totalRecords': total_records,
+                                                         'totalAccidents': total_accidents,
+                                                         'totalRSA': total_rsa}})
 
 
 def generate_csv(results):
@@ -126,14 +132,13 @@ ARG_TYPES = {'ne_lat': (float, 32.072427482938345), 'ne_lng': (float, 34.7992896
              'sw_lat': (float, 34.79928962966915), 'sw_lng': (float, 34.78877537033077), 'zoom': (int, 17),
              'show_fatal': (bool, True), 'show_severe': (bool, True), 'show_light': (bool, True),
              'approx': (bool, True), 'accurate': (bool, True), 'show_markers': (bool, True),
-             'show_discussions': (bool, True), 'show_urban': (int, 3), 'show_intersection': (int, 3),
-             'show_lane': (int, 3), 'show_day': (int, 0), 'show_holiday': (int, 0),  'show_time': (int, 24),
-             'start_time': (int, 25), 'end_time': (int, 25), 'weather': (int, 0), 'road': (int, 0),
-             'separation': (int, 0), 'surface': (int, 0), 'acctype': (int, 0), 'controlmeasure': (int, 0),
-             'district': (int, 0), 'case_type': (int, 0), 'fetch_markers': (bool, True), 'fetch_vehicles': (bool, True),
-             'fetch_involved': (bool, True), 'age_groups': (str, ""),
-             'page': (int, 0),
-             'per_page': (int, 0)}
+             'show_accidents': (bool, True), 'show_rsa': (bool, True), 'show_discussions': (bool, True),
+             'show_urban': (int, 3), 'show_intersection': (int, 3), 'show_lane': (int, 3), 'show_day': (int, 0),
+             'show_holiday': (int, 0),  'show_time': (int, 24), 'start_time': (int, 25), 'end_time': (int, 25),
+             'weather': (int, 0), 'road': (int, 0), 'separation': (int, 0), 'surface': (int, 0), 'acctype': (int, 0),
+             'controlmeasure': (int, 0), 'district': (int, 0), 'case_type': (int, 0), 'fetch_markers': (bool, True),
+             'fetch_vehicles': (bool, True), 'fetch_involved': (bool, True), 'age_groups': (str, ""),
+             'page': (int, 0), 'per_page': (int, 0)}
 
 def get_kwargs():
     kwargs = {arg: arg_type(request.values.get(arg, default_value)) for (arg, (arg_type, default_value)) in iteritems(ARG_TYPES)}
@@ -167,6 +172,9 @@ def markers():
     logging.debug('querying markers in bounding box: %s' % kwargs)
     is_thin = (kwargs['zoom'] < CONST.MINIMAL_ZOOM)
     result = AccidentMarker.bounding_box_query(is_thin, yield_per=50, involved_and_vehicles=False, **kwargs)
+    markers = result.markers
+    accidents_markers = markers.from_self().filter(AccidentMarker.provider_code != CONST.RSA_PROVIDER_CODE)
+    rsa_markers = markers.from_self().filter(AccidentMarker.provider_code == CONST.RSA_PROVIDER_CODE)
 
     discussion_args = ('ne_lat', 'ne_lng', 'sw_lat', 'sw_lng', 'show_discussions')
     discussions = DiscussionMarker.bounding_box_query(**{arg: kwargs[arg] for arg in discussion_args})
@@ -181,7 +189,7 @@ def markers():
         })
 
     else: # defaults to json
-        return generate_json(result.markers, discussions, is_thin, total_records=result.total_records)
+        return generate_json(accidents_markers, rsa_markers, discussions, is_thin, total_records=result.total_records)
 
 
 @app.route("/charts-data", methods=["GET"])
@@ -366,7 +374,7 @@ def index(marker=None, message=None):
             context['map_only'] = 1
     if 'lat' in request.values and 'lon' in request.values:
         context['coordinates'] = (request.values['lat'], request.values['lon'])
-    for attr in 'approx', 'accurate', 'show_markers', 'show_discussions', 'show_urban', 'show_intersection', 'show_lane',\
+    for attr in 'approx', 'accurate', 'show_markers', 'show_accidents', 'show_rsa', 'show_discussions', 'show_urban', 'show_intersection', 'show_lane',\
                 'show_day', 'show_holiday', 'show_time', 'start_time', 'end_time', 'weather', 'road', 'separation',\
                 'surface', 'acctype', 'controlmeasure', 'district', 'case_type', 'show_fatal', 'show_severe', 'show_light':
         value = request.values.get(attr)

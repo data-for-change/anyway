@@ -1327,7 +1327,7 @@ $(function () {
                     .append("<span><a onclick='showFilter(FILTER_INFO)' style='color: #ffd82b;'>" + light + "</a></span><br>")
                     .append("<span> ו-</span>")
                     .append("<span><a onclick='showFilter(FILTER_MARKERS)'>" + this.total_rsa + "</a></span>")
-                    .append("<span> עבירות</span>")
+                    .append("<span> אירועים</span>")
                     .append("<span>" + accuracyText + "</span>")
                     .append("<span><a onclick='showFilter(FILTER_INFO)'>" + accurate + "</a></span>")
                     .append("<span><a onclick='showFilter(FILTER_INFO)'>" + approx + "</a></span><br>")

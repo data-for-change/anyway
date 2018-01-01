@@ -156,7 +156,7 @@ var MarkerView = Backbone.View.extend({
             accuracy = !(this.model.get("locationAccuracy") == 1);
 
             if (this.model.get("provider_code") == 4) {
-                markerTitle = "אירוע הדווח על ידי שומרי הדרך";
+                markerTitle = "אירוע שדווח על ידי שומרי הדרך";
             } else {
                 markerTitle = "ביום " + moment(this.model.get("created")).format("dddd") + ", ה-"
                     + moment(this.model.get("created")).format("LL")
@@ -167,7 +167,7 @@ var MarkerView = Backbone.View.extend({
                 break;
             case 'multiple':
                 accuracy = (this.marker.opacity != 1);
-                markerTitle = 'תאונות בנקודה זו'; // the number of the accidents will be chain to the start of the title.
+                markerTitle = 'תאונות ו/או ריאועים בנקודה זו'; // the number of the accidents will be chain to the start of the title.
                 break;
             case 'discussion':
                 markerTitle = 'דיון';

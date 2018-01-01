@@ -156,7 +156,7 @@ var MarkerView = Backbone.View.extend({
             accuracy = !(this.model.get("locationAccuracy") == 1);
 
             if (this.model.get("provider_code") == 4) {
-                markerTitle = "אירוע הדווח על ידי שומרי הדרך";
+                markerTitle = "אירוע שדווח על ידי שומרי הדרך";
             } else {
                 markerTitle = "ביום " + moment(this.model.get("created")).format("dddd") + ", ה-"
                     + moment(this.model.get("created")).format("LL")

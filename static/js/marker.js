@@ -167,7 +167,7 @@ var MarkerView = Backbone.View.extend({
                 break;
             case 'multiple':
                 accuracy = (this.marker.opacity != 1);
-                markerTitle = 'תאונות בנקודה זו'; // the number of the accidents will be chain to the start of the title.
+                markerTitle = 'תאונות ו/או ריאועים בנקודה זו'; // the number of the accidents will be chain to the start of the title.
                 break;
             case 'discussion':
                 markerTitle = 'דיון';

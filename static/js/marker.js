@@ -67,7 +67,7 @@ var MarkerView = Backbone.View.extend({
             this.$el.find(".profile-image-url").attr("href", provider.url);
             this.$el.find(".added-by").html("מקור: <a href='" +
                                             provider.url + "' target='blank'>" + provider.name + "</a>");
-        } else if (this.model.get("provider_code") == 4) {
+        } else if (this.model.get("provider_code") == RSA_PROVIDER_CODE) {
             this.$el.html($("#rsa-marker-content-template").html());
 
             this.$el.find(".title").text(this.marker.get("title"));
@@ -167,7 +167,7 @@ var MarkerView = Backbone.View.extend({
                 break;
             case 'multiple':
                 accuracy = (this.marker.opacity != 1);
-                markerTitle = 'תאונות ו/או ריאועים בנקודה זו'; // the number of the accidents will be chain to the start of the title.
+                markerTitle = 'תאונות ו/או אירועים בנקודה זו'; // the number of the accidents will be chain to the start of the title.
                 break;
             case 'discussion':
                 markerTitle = 'דיון';

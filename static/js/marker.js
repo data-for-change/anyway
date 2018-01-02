@@ -67,7 +67,7 @@ var MarkerView = Backbone.View.extend({
             this.$el.find(".profile-image-url").attr("href", provider.url);
             this.$el.find(".added-by").html("מקור: <a href='" +
                                             provider.url + "' target='blank'>" + provider.name + "</a>");
-        } else if (this.model.get("provider_code") == 4) {
+        } else if (this.model.get("provider_code") == RSA_PROVIDER_CODE) {
             this.$el.html($("#rsa-marker-content-template").html());
 
             this.$el.find(".title").text(this.marker.get("title"));

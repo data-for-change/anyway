@@ -75,6 +75,7 @@ MULTIPLE_ICONS[SEVERITY_FATAL] = "/static/img/icons/multiple_lethal.png";
 MULTIPLE_ICONS[SEVERITY_SEVERE] = "/static/img/icons/multiple_severe.png";
 MULTIPLE_ICONS[SEVERITY_LIGHT] = "/static/img/icons/multiple_medium.png";
 MULTIPLE_ICONS[SEVERITY_VARIOUS] = "/static/img/icons/multiple_various.png";
+MULTIPLE_ICONS[SEVERITY_IRRELEVANT_RSA] = "/static/img/icons/multiple_various.png";
 
 var USER_LOCATION_ICON = "/static/img/icons/you_are_Here.png";
 var DISCUSSION_ICON = "/static/img/icons/discussion.png";

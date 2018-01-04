@@ -676,8 +676,7 @@ $(function () {
             console.log('Loaded SidebarView');
 
             $(document).ajaxStart(function () {
-                this.spinner = $('<li/>');
-                this.spinner.height('20px');
+                this.spinner = $('<li class="spinner-container"></li>');
                 this.sidebar.$currentViewList.prepend(this.spinner);
                 this.spinner.spin();
             }.bind(this));

@@ -8,7 +8,6 @@ RUN apt-get -y update && \
         python-dev \
         python-tk \
         libpq-dev \
-        sqlite3 \
         openjdk-9-jre \
     && apt-get clean
 

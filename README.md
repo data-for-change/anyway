@@ -66,9 +66,11 @@ The project is currently transitioning to Python 3. Both Python 2 and 3 are supp
 See the [Wiki](https://github.com/hasadna/anyway/wiki/Setting-up-a-Python-development-environment-in-Windows).
 
 ## Local first run (all platforms)
+1. Set up a PostgreSQL server and create a database for anyway. The instructions for doing that
+   depend on your operating system
 1. Define connection string (needs to be defined whenever you start working):
-  * bash: `export DATABASE_URL='sqlite:///local.db'`
-  * windows shell: `set DATABASE_URL=sqlite:///local.db`
+  * bash: `export DATABASE_URL='postgresql://postgres@localhost/anyway'`
+  * windows shell: `set DATABASE_URL=postgresql://postgres@localhost/anyway`
 
 1. First time, create tables: `alembic upgrade head`
 1. Optionally, get the [complete accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTdWdPMXV5c2gycW8/view?usp=sharing) after sending a permission request, and extract it into `/static/data/lms`. Otherwise, you'll use the [example accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTSjNMUXYyeW4yQkk/view?usp=sharing) that you already got with the code, so no need to get it again.
@@ -88,7 +90,7 @@ See the [Wiki](https://github.com/hasadna/anyway/wiki/Setting-up-a-Python-develo
 
 It is useful to add the following to your `~/.bashrc` (fixing for the correct path):
 
-    alias anyway='cd *path*/anyway && workon anyway && export DATABASE_URL=sqlite:///local.db'
+    alias anyway='cd *path*/anyway && workon anyway && export DATABASE_URL=postgresql://postgres@localhost/anyway'
 
 Then you can simply start working by running the `anyway` command.
 

@@ -180,11 +180,7 @@ $(function () {
 
             if (this.clusterMode()) {
                 this.closeInfoWindow();
-                this.clusters.fetch({
-                    data: $.param(params),
-                    reset: reset,
-                    success: this.markersFetched(this)
-                });
+                this.reloadSidebar(this);
             } else {
                 this.clearClustersFromMap();
                 $("#view-filter").prop('disabled', false);

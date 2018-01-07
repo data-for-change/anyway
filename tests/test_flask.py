@@ -86,17 +86,6 @@ def test_markers(app, show_fatal, show_severe, show_light, show_accurate, show_a
         assert show_approx or marker['locationAccuracy'] == 1
 
 
-def test_clusters(app):
-    rv = app.get("/clusters?ne_lat=34.430273343405844&ne_lng=44.643749999999955&sw_lat=28.84061194106889&sw_lng=22.385449218749955&zoom=6&thin_markers=true&start_date=1104537600&end_date=1486944000&show_fatal=1&show_severe=1&show_light=1&approx=1&accurate=1&show_markers=1&show_discussions=1&show_urban=3&show_intersection=3&show_lane=3&show_day=7&show_holiday=0&show_time=24&start_time=25&end_time=25&weather=0&road=0&separation=0&surface=0&acctype=0&controlmeasure=0&district=0&case_type=0")
-    assert rv.status_code == http_client.OK
-    #print(rv.data)
-    resp = json.loads(_text_data(rv))
-    assert 'clusters' in resp
-    assert resp['clusters']
-    for cluster in resp['clusters']:
-        for attr in ['longitude', 'latitude', 'size']:
-            assert attr in cluster
-
 
 def test_single_marker(app):
     rv = app.get("/markers/2014027147")

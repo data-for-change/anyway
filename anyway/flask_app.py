@@ -277,8 +277,6 @@ def discussion():
         return make_response(post_handler(marker))
 
 
-@app.route("/clusters", methods=["GET"])
-@user_optional
 def clusters():
     start_time = time.time()
     kwargs = get_kwargs()

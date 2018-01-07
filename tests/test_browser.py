@@ -78,7 +78,3 @@ def test_sanity(selenium, anyway_server):
     zoom_out_button.click()
     WebDriverWait(selenium, _WAIT_TIME).until(_ajax_finished)
     WebDriverWait(selenium, _WAIT_TIME).until(lambda selenium: len(_get_info_window_markers(selenium)) == 0)
-    WebDriverWait(selenium, _WAIT_TIME).until(_click_a_cluster)
-
-    WebDriverWait(selenium, _WAIT_TIME).until(_ajax_finished)
-    WebDriverWait(selenium, _WAIT_TIME).until(_check_accidents)

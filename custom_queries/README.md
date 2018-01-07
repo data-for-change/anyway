@@ -1,8 +1,7 @@
 Custom Queries
 ==============
 
-This directory provides specialised views and queries. Those are written in the dialect of PostgreSQL 9
-and are not expected to work on Sqlite.
+This directory provides specialised views and queries.
 
 * view_lamas_markers_by_city_and_date.sql: Provides following items
   * lamas_markers_by_city_and_date view: Extracts city name, year, month and day of week from Lamas data. Note

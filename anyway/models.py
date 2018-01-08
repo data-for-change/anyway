@@ -346,16 +346,8 @@ class AccidentMarker(MarkerMixin, Base):
         if kwargs.get('acctype', 0) != 0:
             if kwargs['acctype'] <= 20:
                 markers = markers.filter(AccidentMarker.subtype == kwargs['acctype'])
-            # elif kwargs['acctype'] == CONST.BIKE_ACCIDENTS_NO_CASUALTIES:
-            #     markers = markers.filter(and_(AccidentMarker.vehicles.any(), AccidentMarker.involved.any())).\
-            #         filter(AccidentMarker.vehicles.any(Vehicle.vehicle_type == CONST.VEHICLE_TYPE_BIKE)).group_by(AccidentMarker.id).\
-            #                having(~AccidentMarker.involved.\
-            #                       any(Involved.involved_type != CONST.INVOLVED_TYPE_DRIVER_UNHARMED))
-            # elif kwargs['acctype'] == CONST.BIKE_ACCIDENTS_WITH_CASUALTIES:
-            #     markers = markers.filter(and_(AccidentMarker.vehicles.any(), AccidentMarker.involved.any())).\
-            #         filter(AccidentMarker.vehicles.\
-            #                any(Vehicle.vehicle_type == CONST.VEHICLE_TYPE_BIKE)).group_by(AccidentMarker.id).\
-            #         having(AccidentMarker.involved.any(Involved.involved_type != CONST.INVOLVED_TYPE_DRIVER_UNHARMED))
+            elif kwargs['acctype'] == CONST.BIKE_ACCIDENTS:
+                markers = markers.filter(AccidentMarker.vehicles.any(Vehicle.vehicle_type == CONST.VEHICLE_TYPE_BIKE))
         if kwargs.get('controlmeasure', 0) != 0:
             markers = markers.filter(AccidentMarker.road_control == kwargs['controlmeasure'])
         if kwargs.get('district', 0) != 0:

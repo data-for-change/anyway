@@ -178,6 +178,9 @@ class AccidentMarker(MarkerMixin, Base):
     involved = relationship("Involved", foreign_keys="Involved.accident_id")
     vehicles = relationship("Vehicle", foreign_keys="Vehicle.accident_id")
     video_link = Column(Text)
+    road1 = Column(Integer)
+    road2 = Column(Integer)
+    km = Column(Float)
 
     @staticmethod
     def json_to_description(msg):
@@ -232,6 +235,9 @@ class AccidentMarker(MarkerMixin, Base):
                 "cross_location": self.cross_location,
                 "cross_direction": self.cross_direction,
                 "video_link": self.video_link,
+                "road1": self.road1,
+                "road2": self.road2,
+                "km": self.km
             }
             for name, value in iteritems(optional):
                 if value != 0:

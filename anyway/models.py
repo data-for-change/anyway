@@ -178,6 +178,9 @@ class AccidentMarker(MarkerMixin, Base):
     involved = relationship("Involved", foreign_keys="Involved.accident_id")
     vehicles = relationship("Vehicle", foreign_keys="Vehicle.accident_id")
     video_link = Column(Text)
+    road1 = Column(Integer)
+    road2 = Column(Integer)
+    km = Column(Float)
 
     @staticmethod
     def json_to_description(msg):
@@ -232,6 +235,9 @@ class AccidentMarker(MarkerMixin, Base):
                 "cross_location": self.cross_location,
                 "cross_direction": self.cross_direction,
                 "video_link": self.video_link,
+                "road1": self.road1,
+                "road2": self.road2,
+                "km": self.km
             }
             for name, value in iteritems(optional):
                 if value != 0:
@@ -346,16 +352,8 @@ class AccidentMarker(MarkerMixin, Base):
         if kwargs.get('acctype', 0) != 0:
             if kwargs['acctype'] <= 20:
                 markers = markers.filter(AccidentMarker.subtype == kwargs['acctype'])
-            # elif kwargs['acctype'] == CONST.BIKE_ACCIDENTS_NO_CASUALTIES:
-            #     markers = markers.filter(and_(AccidentMarker.vehicles.any(), AccidentMarker.involved.any())).\
-            #         filter(AccidentMarker.vehicles.any(Vehicle.vehicle_type == CONST.VEHICLE_TYPE_BIKE)).group_by(AccidentMarker.id).\
-            #                having(~AccidentMarker.involved.\
-            #                       any(Involved.involved_type != CONST.INVOLVED_TYPE_DRIVER_UNHARMED))
-            # elif kwargs['acctype'] == CONST.BIKE_ACCIDENTS_WITH_CASUALTIES:
-            #     markers = markers.filter(and_(AccidentMarker.vehicles.any(), AccidentMarker.involved.any())).\
-            #         filter(AccidentMarker.vehicles.\
-            #                any(Vehicle.vehicle_type == CONST.VEHICLE_TYPE_BIKE)).group_by(AccidentMarker.id).\
-            #         having(AccidentMarker.involved.any(Involved.involved_type != CONST.INVOLVED_TYPE_DRIVER_UNHARMED))
+            elif kwargs['acctype'] == CONST.BIKE_ACCIDENTS:
+                markers = markers.filter(AccidentMarker.vehicles.any(Vehicle.vehicle_type == CONST.VEHICLE_TYPE_BIKE))
         if kwargs.get('controlmeasure', 0) != 0:
             markers = markers.filter(AccidentMarker.road_control == kwargs['controlmeasure'])
         if kwargs.get('district', 0) != 0:

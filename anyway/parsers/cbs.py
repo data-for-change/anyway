@@ -249,6 +249,9 @@ def import_accidents(provider_code, accidents, streets, roads, **kwargs):
             "cross_mode": get_data_value(accident[field_names.cross_mode]),
             "cross_location": get_data_value(accident[field_names.cross_location]),
             "cross_direction": get_data_value(accident[field_names.cross_direction]),
+            "road1": get_data_value(accident[field_names.road1]),
+            "road2": get_data_value(accident[field_names.road2]),
+            "km": float(accident[field_names.km]) if accident[field_names.km] else None,
         }
 
         yield marker

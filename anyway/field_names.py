@@ -44,6 +44,9 @@ didnt_cross = "LO_HAZA"
 cross_mode = "OFEN_HAZIYA"
 cross_location = "MEKOM_HAZIYA"
 cross_direction = "KIVUN_HAZIYA"
+road1="KVISH1"
+road2="KVISH2"
+km="KM"
 
 # Involved csv fields
 involved_type = "SUG_MEORAV"

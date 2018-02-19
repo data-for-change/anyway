@@ -110,28 +110,3 @@ See [DOCKER](docs/DOCKER.md)
 
 ## Translation and Localization
 See [TRANSLATE](docs/TRANSLATE.md)
-
-## Server: Installing dependencies
-Similar to "Local Developement: Installing dependencies" with the addition of the rabbitmq-server installation.
-
-### Ubuntu
-1. `sudo apt-get install python2-pip python2-dev libpq-dev rabbitmq-server`
-1. `systemctl enable --now rabbitmq-server`
-
-### Fedora
-1. `sudo dnf upgrade python-setuptools`
-1. `sudo dnf install python-pip rabbitmq-server`
-1. `systemctl enable --now rabbitmq-server`
-
-### OS X
-1. `sudo easy_install pip setuptools`
-1. Install and activate [RabbitMQ](https://www.rabbitmq.com/install-standalone-mac.html)
-
-### Windows
-See the [Wiki](https://github.com/hasadna/anyway/wiki/Setting-up-a-Python-development-environment-in-Windows).
-
-## Server: Local first run (all platforms) addition
-
-Similar to "Local Developement: Local first run (all platforms)" with the following addition at the end:
-1. If your platform supports RabbitMQ, you should lunch a Celery worker by running `celery worker -A anyway.clusters_calculator -D`. Otherwise, export the environment variable `ANYWAY_DISABLE_CELERY` to disable the use of Celery.
-

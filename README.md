@@ -36,7 +36,7 @@ Contributing
 * Get updates whenever you start working: `git pull upstream dev`
 * Push to your fork when you've committed your changes and tested them: `git push`, and make a pull request from your fork on GitHub
 
-## Installing dependencies
+## Local Developement: Installing dependencies
 
 You should be familiar with setting up Python in your computer. You can consult the [wiki](https://github.com/hasadna/anyway/wiki/Setup) for
 platform specific tutorials. Developing by using a [virtual
@@ -47,16 +47,12 @@ The project is currently transitioning to Python 3. Both Python 2 and 3 are supp
 
 ### Ubuntu
 1. `sudo apt-get install python2-pip python2-dev libpq-dev rabbitmq-server`
-1. `systemctl enable --now rabbitmq-server`
 
 ### Fedora
 1. `sudo dnf upgrade python-setuptools`
-1. `sudo dnf install python-pip rabbitmq-server`
-1. `systemctl enable --now rabbitmq-server`
 
 ### OS X
 1. `sudo easy_install pip setuptools`
-1. Install and activate [RabbitMQ](https://www.rabbitmq.com/install-standalone-mac.html)
 
 ### For all platforms:
 1. Activate your virtualenv (in case of using one): `source *env-name*/bin/activate`
@@ -65,12 +61,13 @@ The project is currently transitioning to Python 3. Both Python 2 and 3 are supp
 ### Windows
 See the [Wiki](https://github.com/hasadna/anyway/wiki/Setting-up-a-Python-development-environment-in-Windows).
 
-## Local first run (all platforms)
+## Local Developement: Local first run (all platforms)
 1. Set up a PostgreSQL server and create a database for anyway. The instructions for doing that
    depend on your operating system
 1. Define connection string (needs to be defined whenever you start working):
   * bash: `export DATABASE_URL='postgresql://postgres@localhost/anyway'`
   * windows shell: `set DATABASE_URL=postgresql://postgres@localhost/anyway`
+  You might need to add your password to the connection url. For more information: https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING
 
 1. First time, create tables: `alembic upgrade head`
 1. Optionally, get the [complete accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTdWdPMXV5c2gycW8/view?usp=sharing) after sending a permission request, and extract it into `/static/data/lms`. Otherwise, you'll use the [example accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTSjNMUXYyeW4yQkk/view?usp=sharing) that you already got with the code, so no need to get it again.
@@ -83,7 +80,6 @@ See the [Wiki](https://github.com/hasadna/anyway/wiki/Setting-up-a-Python-develo
 1. Run the app: `python main.py testserver`: do this whenever you start working and want to try out your code.
 1. Navigate to http://127.0.0.1:5000 in your browser.
 1. If the site fails to load properly, make sure you have JDK installed on your machine
-1. If your platform supports RabbitMQ, you should lunch a Celery worker by running `celery worker -A anyway.clusters_calculator -D`. Otherwise, export the environment variable `ANYWAY_DISABLE_CELERY` to disable the use of Celery.
 1. If you wish to share your app on the local network, you can expose flask by running `python
     main.py testserver --open` (Please note that this would expose your machine on port 5000 to all
     local nodes)
@@ -114,3 +110,28 @@ See [DOCKER](docs/DOCKER.md)
 
 ## Translation and Localization
 See [TRANSLATE](docs/TRANSLATE.md)
+
+## Server: Installing dependencies
+Similar to "Local Developement: Installing dependencies" with the addition of the rabbitmq-server installation.
+
+### Ubuntu
+1. `sudo apt-get install python2-pip python2-dev libpq-dev rabbitmq-server`
+1. `systemctl enable --now rabbitmq-server`
+
+### Fedora
+1. `sudo dnf upgrade python-setuptools`
+1. `sudo dnf install python-pip rabbitmq-server`
+1. `systemctl enable --now rabbitmq-server`
+
+### OS X
+1. `sudo easy_install pip setuptools`
+1. Install and activate [RabbitMQ](https://www.rabbitmq.com/install-standalone-mac.html)
+
+### Windows
+See the [Wiki](https://github.com/hasadna/anyway/wiki/Setting-up-a-Python-development-environment-in-Windows).
+
+## Server: Local first run (all platforms) addition
+
+Similar to "Local Developement: Local first run (all platforms)" with the following addition at the end:
+1. If your platform supports RabbitMQ, you should lunch a Celery worker by running `celery worker -A anyway.clusters_calculator -D`. Otherwise, export the environment variable `ANYWAY_DISABLE_CELERY` to disable the use of Celery.
+

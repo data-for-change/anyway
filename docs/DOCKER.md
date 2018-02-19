@@ -13,7 +13,7 @@ As a developer you can do one of both:
 
 The container loads itself with the command given in the instructions, it has the DB on it, deployed and ready to work (at /anyway/local.db)
 With every local code change, the container would restart itself and the changes would be immediately available in your web browser.
-The current image is based on an Ubuntu linux with java. 
+The current image is based on an Ubuntu linux with java.
 
 Read more on the docker [Github project] (https://github.com/docker/docker)
 
@@ -38,38 +38,51 @@ To retrieve a docker machine address: `docker-machine ip default` <br>
 
 More
 -----------------------
-To install requirements again, redeploy DB or any requirement involving the dependencies installation, 
-simply rebuild the image; get it from [here] (https://github.com/omerxx/anyway-docker/blob/master/Dockerfile), 
+To install requirements again, redeploy DB or any requirement involving the dependencies installation,
+simply rebuild the image; get it from [here] (https://github.com/omerxx/anyway-docker/blob/master/Dockerfile),
 then go to its local path and `docker build --no-cache -t hasdna/anyway .`
 
 ## Docker commands
 
-Set your VM with the current running shell session: 
+Set your VM with the current running shell session:
 
     eval "$(docker-machine env default)"
 
 
-List your local docker images: 
+List your local docker images:
 
     docker images
-    
-List your running containers: 
-    
+
+List your running containers:
+
     docker ps
-    
-List all containers ever: 
+
+List all containers ever:
 
     docker ps -a
 
-Stop a running container (id is listed in `docker ps`): 
+Stop a running container (id is listed in `docker ps`):
 
-    docker top <container-id> 
+    docker top <container-id>
 
-Deleting an image(from `docker images`): 
+Deleting an image(from `docker images`):
 
     docker rmi <image-id>
- 
 
+
+Additional Notes
+-----------------------
+If you want to work with your own code and the docker or if your 8080 port is already taken by other dockers\servers you need to create an override for the docker-compose.
+For example:
+
+```version: '2'
+services:
+ anyway:
+   volumes:
+     - ./anyway:/anyway/anyway
+```
+
+This loads the ./anyway dir (relative to the docker-compose file) as /anyway/anyway in the docker overriding the inner volume and allowing you to run your own code inside the docker.
 
 Questions and ideas
 -----------------

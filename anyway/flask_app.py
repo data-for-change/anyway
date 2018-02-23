@@ -26,7 +26,7 @@ import flask_admin as admin
 import flask.ext.login as login
 from flask_admin.contrib import sqla
 from flask_admin import helpers, expose, BaseView
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 from sendgrid import sendgrid, SendGridClientError, SendGridServerError, Mail
 import glob
 from .utilities import CsvReader, decode_hebrew
@@ -608,12 +608,14 @@ class AdminIndexView(admin.AdminIndexView):
     #    form = RegistrationForm(request.form)
     #    if helpers.validate_form_on_submit(form):
     #        user = User()
-    #
+    #        admin_role = db.session.query(Role).filter_by(name='admin').first()
     #        form.populate_obj(user)
     #        # we hash the users password to avoid saving it as plaintext in the db,
     #        # remove to use plain text:
     #        user.password = generate_password_hash(form.password.data)
     #        user.is_admin = True
+    #        user.nickname = user.username
+    #        user.roles.append(admin_role) #adding admin role
     #
     #        db.session.add(user)
     #        db.session.commit()

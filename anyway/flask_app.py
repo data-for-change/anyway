@@ -26,7 +26,7 @@ import flask_admin as admin
 import flask.ext.login as login
 from flask_admin.contrib import sqla
 from flask_admin import helpers, expose, BaseView
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import check_password_hash
 from sendgrid import sendgrid, SendGridClientError, SendGridServerError, Mail
 import glob
 from .utilities import CsvReader, decode_hebrew

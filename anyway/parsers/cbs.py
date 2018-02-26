@@ -7,6 +7,7 @@ import itertools
 import re
 from datetime import datetime
 import six
+import sys
 from six import iteritems
 
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -347,15 +348,21 @@ def get_files(directory):
         elif name in (ACCIDENTS, INVOLVED, VEHICLES):
             yield name, csv
 
-def chunks(l, n):
+def chunks_27(l, n):
     """Yield successive n-sized chunks from l."""
     for i in xrange(0, len(l), n):
         yield l[i:i + n]
+
+def chunks_30(l, n):
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
+
 
 def import_to_datastore(directory, provider_code, batch_size):
     """
     goes through all the files in a given directory, parses and commits them
     """
+    chunks = chunks_27 if sys.version_info < (3, 0) else chunks_30
     try:
         assert batch_size > 0
 

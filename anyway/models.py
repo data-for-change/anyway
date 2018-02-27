@@ -84,6 +84,9 @@ class Role(Base, RoleMixin):
     name = Column(String(80), unique=True)
     description = Column(String(255))
 
+    def __unicode__(self):
+        return self.name
+
 class Point(object):
     id = Column(Integer, primary_key=True)
     latitude = Column(Float())

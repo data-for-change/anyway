@@ -1,4 +1,6 @@
 $(function () {
+    var GESTURE_HANDLING = (MAP_ONLY ? "cooperative" : "greedy");
+
     var AppRouter = Backbone.Router.extend({
         routes: {
             "": "navigateEmpty",
@@ -443,11 +445,11 @@ $(function () {
                 zoom: INIT_ZOOM,
                 mapTypeId: google.maps.MapTypeId.ROADMAP,
                 mapTypeControl: false,
-                zoomControl: !MAP_ONLY,
-                panControl: !MAP_ONLY,
+                zoomControl: true,
+                panControl: true,
                 streetViewControl: !MAP_ONLY,
                 styles: MAP_STYLE,
-                gestureHandling: "greedy"
+                gestureHandling: GESTURE_HANDLING
             };
             this.map = new google.maps.Map(this.$el.find("#map_canvas").get(0), mapOptions);
 
@@ -736,7 +738,7 @@ $(function () {
                 this.updateUrl();
                 $(document).off('keydown',app.ESCinfoWindow);
             }
-            app.map.gestureHandling = "greedy";
+            app.map.gestureHandling = GESTURE_HANDLING;
         },
         clickMap: function (e) {
             this.closeInfoWindow();

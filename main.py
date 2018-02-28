@@ -46,7 +46,7 @@ def process():
 @click.option('--specific_folder', is_flag=True, default=False)
 @click.option('--delete_all', is_flag=True)
 @click.option('--path', type=str, default="static/data/lms")
-@click.option('--batch_size', type=int, default=100)
+@click.option('--batch_size', type=int, default=10000)
 def cbs(specific_folder, delete_all, path, batch_size):
     from anyway.parsers.cbs import main
 

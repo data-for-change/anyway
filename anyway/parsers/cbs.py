@@ -11,14 +11,13 @@ import sys
 from six import iteritems
 
 from flask.ext.sqlalchemy import SQLAlchemy
-from sqlalchemy import or_, and_
+from sqlalchemy import or_
 
 from .. import field_names, localization
 from ..models import AccidentMarker, Involved, Vehicle
 from .. import models
 from ..utilities import ItmToWGS84, init_flask, CsvReader, time_delta, decode_hebrew,ImporterUI,truncate_tables
 from functools import partial
-from .utils import batch_iterator
 import logging
 
 failed_dirs = OrderedDict()
@@ -254,6 +253,16 @@ def import_accidents(provider_code, accidents, streets, roads, **kwargs):
             "road1": get_data_value(accident[field_names.road1]),
             "road2": get_data_value(accident[field_names.road2]),
             "km": float(accident[field_names.km]) if accident[field_names.km] else None,
+            "yishuv_symbol": get_data_value(accident[field_names.yishuv_symbol]),
+            "geo_area": get_data_value(accident[field_names.geo_area]),
+            "day_night": get_data_value(accident[field_names.day_night]),
+            "day_in_week": get_data_value(accident[field_names.day_in_week]),
+            "traffic_light": get_data_value(accident[field_names.traffic_light]),
+            "region": get_data_value(accident[field_names.region]),
+            "district": get_data_value(accident[field_names.district]),
+            "natural_area": get_data_value(accident[field_names.natural_area]),
+            "minizipali_status": get_data_value(accident[field_names.minizipali_status]),
+            "yishuv_shape": get_data_value(accident[field_names.yishuv_shape]),
         }
 
         markers.append(marker)

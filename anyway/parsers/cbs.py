@@ -7,7 +7,6 @@ import itertools
 import re
 from datetime import datetime
 import six
-import sys
 from six import iteritems
 
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -367,8 +366,8 @@ def import_to_datastore(directory, provider_code, batch_size):
     """
     goes through all the files in a given directory, parses and commits them
     """
-    try: xrange 
-    except NameError: 
+    try: xrange
+    except NameError:
         xrange = range
     try:
         assert batch_size > 0

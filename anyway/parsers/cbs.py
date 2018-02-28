@@ -356,7 +356,7 @@ def get_files(directory):
         elif name in (ACCIDENTS, INVOLVED, VEHICLES):
             yield name, csv
 
-def chunks(l, n):
+def chunks(l, n, xrange):
     """Yield successive n-sized chunks from l."""
     for i in xrange(0, len(l), n):
         yield l[i:i + n]
@@ -384,7 +384,7 @@ def import_to_datastore(directory, provider_code, batch_size):
         accidents = import_accidents(provider_code=provider_code, **files_from_lms)
         accidents = [accident for accident in accidents if accident['id'] not in all_existing_accidents_ids]
         new_items += len(accidents)
-        for accidents_chunk in chunks(accidents, batch_size):
+        for accidents_chunk in chunks(accidents, batch_size, xrange):
             db.session.bulk_insert_mappings(AccidentMarker, accidents_chunk)
 
         all_involved_accident_ids = set(map(lambda x: x[0], db.session.query(Involved.accident_id).all()))

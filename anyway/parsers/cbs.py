@@ -390,14 +390,14 @@ def import_to_datastore(directory, provider_code, batch_size):
         all_involved_accident_ids = set(map(lambda x: x[0], db.session.query(Involved.accident_id).all()))
         involved = import_involved(provider_code=provider_code, **files_from_lms)
         involved = [x for x in involved if x['accident_id'] not in all_involved_accident_ids]
-        for involved_chunk in chunks(involved, batch_size):
+        for involved_chunk in chunks(involved, batch_size, xrange):
             db.session.bulk_insert_mappings(Involved, involved_chunk)
         new_items += len(involved)
 
         all_vehicles_accident_ids = set(map(lambda x: x[0], db.session.query(Vehicle.accident_id).all()))
         vehicles = import_vehicles(provider_code=provider_code, **files_from_lms)
         vehicles = [x for x in vehicles if x['accident_id'] not in all_vehicles_accident_ids]
-        for vehicles_chunk in chunks(vehicles, batch_size):
+        for vehicles_chunk in chunks(vehicles, batch_size, xrange):
             db.session.bulk_insert_mappings(Vehicle, vehicles_chunk)
         new_items += len(vehicles)
 

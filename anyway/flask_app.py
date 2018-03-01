@@ -608,12 +608,14 @@ class AdminIndexView(admin.AdminIndexView):
     #    form = RegistrationForm(request.form)
     #    if helpers.validate_form_on_submit(form):
     #        user = User()
-    #
+    #        admin_role = db.session.query(Role).filter_by(name='admin').first()
     #        form.populate_obj(user)
     #        # we hash the users password to avoid saving it as plaintext in the db,
     #        # remove to use plain text:
     #        user.password = generate_password_hash(form.password.data)
     #        user.is_admin = True
+    #        user.nickname = user.username
+    #        user.roles.append(admin_role) #adding admin role
     #
     #        db.session.add(user)
     #        db.session.commit()
@@ -726,7 +728,8 @@ init_login()
 
 admin = admin.Admin(app, 'ANYWAY Administration Panel', index_view=AdminIndexView(), base_template='admin_master.html')
 
-admin.add_view(AdminView(User, db.session, name='Users', endpoint='AllUsers', category='Users'))
+admin.add_view(AdminView(User, db.session, name='Users', endpoint='Users', category='Users'))
+admin.add_view(AdminView(Role, db.session, name='Roles', endpoint='Roles'))
 admin.add_view(OpenNewOrgAccount(name='Open new organization account', endpoint='OpenAccount', category='Users'))
 admin.add_view(SendToSubscribersView(name='Send To Subscribers'))
 admin.add_view(ViewHighlightedMarkersData(name='View Highlighted Markers Data', endpoint='ViewHighlightedMarkersData', category='View Highlighted Markers'))

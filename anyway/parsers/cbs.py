@@ -10,14 +10,13 @@ import six
 from six import iteritems
 
 from flask.ext.sqlalchemy import SQLAlchemy
-from sqlalchemy import or_, and_
+from sqlalchemy import or_
 
 from .. import field_names, localization
 from ..models import AccidentMarker, Involved, Vehicle
 from .. import models
 from ..utilities import ItmToWGS84, init_flask, CsvReader, time_delta, decode_hebrew,ImporterUI,truncate_tables
 from functools import partial
-from .utils import batch_iterator
 import logging
 
 failed_dirs = OrderedDict()
@@ -202,6 +201,7 @@ def get_data_value(value):
 
 def import_accidents(provider_code, accidents, streets, roads, **kwargs):
     logging.info("\tReading accident data from '%s'..." % os.path.basename(accidents.name()))
+    markers = []
     for accident in accidents:
         if field_names.x_coordinate not in accident or field_names.y_coordinate not in accident:
             raise ValueError("Missing x and y coordinates")
@@ -252,18 +252,30 @@ def import_accidents(provider_code, accidents, streets, roads, **kwargs):
             "road1": get_data_value(accident[field_names.road1]),
             "road2": get_data_value(accident[field_names.road2]),
             "km": float(accident[field_names.km]) if accident[field_names.km] else None,
+            "yishuv_symbol": get_data_value(accident[field_names.yishuv_symbol]),
+            "geo_area": get_data_value(accident[field_names.geo_area]),
+            "day_night": get_data_value(accident[field_names.day_night]),
+            "day_in_week": get_data_value(accident[field_names.day_in_week]),
+            "traffic_light": get_data_value(accident[field_names.traffic_light]),
+            "region": get_data_value(accident[field_names.region]),
+            "district": get_data_value(accident[field_names.district]),
+            "natural_area": get_data_value(accident[field_names.natural_area]),
+            "minizipali_status": get_data_value(accident[field_names.minizipali_status]),
+            "yishuv_shape": get_data_value(accident[field_names.yishuv_shape]),
         }
 
-        yield marker
-    accidents.close()
+        markers.append(marker)
+
+    return markers
 
 
 def import_involved(provider_code, involved, **kwargs):
     logging.info("\tReading involved data from '%s'..." % os.path.basename(involved.name()))
+    involved_result = []
     for involve in involved:
         if not involve[field_names.id]:  # skip lines with no accident id
             continue
-        yield {
+        involved_result.append({
             "accident_id": int(involve[field_names.id]),
             "provider_code": int(provider_code),
             "involved_type": int(involve[field_names.involved_type]),
@@ -287,14 +299,15 @@ def import_involved(provider_code, involved, **kwargs):
             "release_dest": get_data_value(involve[field_names.release_dest]),
             "safety_measures_use": get_data_value(involve[field_names.safety_measures_use]),
             "late_deceased": get_data_value(involve[field_names.late_deceased]),
-        }
-    involved.close()
+        })
+    return involved_result
 
 
 def import_vehicles(provider_code, vehicles, **kwargs):
     logging.info("\tReading vehicles data from '%s'..." % os.path.basename(vehicles.name()))
+    vehicles_result = []
     for vehicle in vehicles:
-        yield {
+        vehicles_result.append({
             "accident_id": int(vehicle[field_names.id]),
             "provider_code": int(provider_code),
             "engine_volume": int(vehicle[field_names.engine_volume]),
@@ -305,8 +318,8 @@ def import_vehicles(provider_code, vehicles, **kwargs):
             "vehicle_type": get_data_value(vehicle[field_names.vehicle_type]),
             "seats": get_data_value(vehicle[field_names.seats]),
             "total_weight": get_data_value(vehicle[field_names.total_weight]),
-        }
-    vehicles.close()
+        })
+    return vehicles_result
 
 
 def get_files(directory):
@@ -343,11 +356,19 @@ def get_files(directory):
         elif name in (ACCIDENTS, INVOLVED, VEHICLES):
             yield name, csv
 
+def chunks(l, n, xrange):
+    """Yield successive n-sized chunks from l."""
+    for i in xrange(0, len(l), n):
+        yield l[i:i + n]
+
 
 def import_to_datastore(directory, provider_code, batch_size):
     """
     goes through all the files in a given directory, parses and commits them
     """
+    try: xrange
+    except NameError:
+        xrange = range
     try:
         assert batch_size > 0
 
@@ -357,40 +378,28 @@ def import_to_datastore(directory, provider_code, batch_size):
         logging.info("Importing '{}'".format(directory))
         started = datetime.now()
 
-        new_ids = set()
         new_items = 0
 
-        accidents = (accident for accident
-                     in import_accidents(provider_code=provider_code, **files_from_lms)
-                     if  db.session.query(AccidentMarker).filter(
-                             and_(AccidentMarker.id == accident["id"],
-                                  AccidentMarker.provider_code == accident["provider_code"])).scalar() is None)
-
-        for accidents_chunk in batch_iterator(iterable=accidents, batch_size=batch_size):
-            for accident in accidents_chunk:
-                new_ids.add(accident["id"])
-
+        all_existing_accidents_ids = set(map(lambda x: x[0], db.session.query(AccidentMarker.id).all()))
+        accidents = import_accidents(provider_code=provider_code, **files_from_lms)
+        accidents = [accident for accident in accidents if accident['id'] not in all_existing_accidents_ids]
+        new_items += len(accidents)
+        for accidents_chunk in chunks(accidents, batch_size, xrange):
             db.session.bulk_insert_mappings(AccidentMarker, accidents_chunk)
 
-            new_items += len(accidents_chunk)
-
-        if not new_ids:
-            logging.info("\t\tNothing loaded, all accidents already in DB")
-            return 0
-
-        involved = (record for record in
-                    import_involved(provider_code=provider_code, **files_from_lms)
-                    if record["accident_id"] in new_ids)
-        for involved_chunk in batch_iterator(iterable=involved, batch_size=batch_size):
+        all_involved_accident_ids = set(map(lambda x: x[0], db.session.query(Involved.accident_id).all()))
+        involved = import_involved(provider_code=provider_code, **files_from_lms)
+        involved = [x for x in involved if x['accident_id'] not in all_involved_accident_ids]
+        for involved_chunk in chunks(involved, batch_size, xrange):
             db.session.bulk_insert_mappings(Involved, involved_chunk)
-            new_items += len(involved_chunk)
+        new_items += len(involved)
 
-        vehicles = (record for record in
-                    import_vehicles(provider_code=provider_code, **files_from_lms)
-                    if record["accident_id"] in new_ids)
-        for vehicles_chunk in batch_iterator(iterable=vehicles, batch_size=batch_size):
+        all_vehicles_accident_ids = set(map(lambda x: x[0], db.session.query(Vehicle.accident_id).all()))
+        vehicles = import_vehicles(provider_code=provider_code, **files_from_lms)
+        vehicles = [x for x in vehicles if x['accident_id'] not in all_vehicles_accident_ids]
+        for vehicles_chunk in chunks(vehicles, batch_size, xrange):
             db.session.bulk_insert_mappings(Vehicle, vehicles_chunk)
-            new_items += len(vehicles_chunk)
+        new_items += len(vehicles)
 
         logging.info("\t{0} items in {1}".format(new_items, time_delta(started)))
         return new_items

@@ -8,7 +8,7 @@ Feel free to contribute to the project.
 
 To report bugs and feature requests, please [open an issue](https://github.com/hasadna/anyway/issues) on GitHub.
 
-See also [our Android app](https://github.com/hasadna/anywayAndroidApp) on GitHub.
+See also [our Android app](https://github.com/samuelregev/anywayAndroidApp/) on GitHub.
 
 The datasets Anyway uses are documented here:
 * [CBS (Central Bureau of Statistics, למ"ס)](https://github.com/hasadna/anyway/blob/dev/docs/LMS.md)
@@ -36,7 +36,7 @@ Contributing
 * Get updates whenever you start working: `git pull upstream dev`
 * Push to your fork when you've committed your changes and tested them: `git push`, and make a pull request from your fork on GitHub
 
-## Installing dependencies
+## Local Developement: Installing dependencies
 
 You should be familiar with setting up Python in your computer. You can consult the [wiki](https://github.com/hasadna/anyway/wiki/Setup) for
 platform specific tutorials. Developing by using a [virtual
@@ -47,16 +47,12 @@ The project is currently transitioning to Python 3. Both Python 2 and 3 are supp
 
 ### Ubuntu
 1. `sudo apt-get install python2-pip python2-dev libpq-dev rabbitmq-server`
-1. `systemctl enable --now rabbitmq-server`
 
 ### Fedora
 1. `sudo dnf upgrade python-setuptools`
-1. `sudo dnf install python-pip rabbitmq-server`
-1. `systemctl enable --now rabbitmq-server`
 
 ### OS X
 1. `sudo easy_install pip setuptools`
-1. Install and activate [RabbitMQ](https://www.rabbitmq.com/install-standalone-mac.html)
 
 ### For all platforms:
 1. Activate your virtualenv (in case of using one): `source *env-name*/bin/activate`
@@ -65,25 +61,25 @@ The project is currently transitioning to Python 3. Both Python 2 and 3 are supp
 ### Windows
 See the [Wiki](https://github.com/hasadna/anyway/wiki/Setting-up-a-Python-development-environment-in-Windows).
 
-## Local first run (all platforms)
+## Local Developement: Local first run (all platforms)
 1. Set up a PostgreSQL server and create a database for anyway. The instructions for doing that
    depend on your operating system
 1. Define connection string (needs to be defined whenever you start working):
   * bash: `export DATABASE_URL='postgresql://postgres@localhost/anyway'`
   * windows shell: `set DATABASE_URL=postgresql://postgres@localhost/anyway`
+  You might need to add your password to the connection url. For more information: https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING
 
 1. First time, create tables: `alembic upgrade head`
-1. Optionally, get the [complete accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTdWdPMXV5c2gycW8/view?usp=sharing) after sending a permission request, and extract it into `/static/data/lms`. Otherwise, you'll use the [example accidents file](https://drive.google.com/file/d/0B4yX8HDe1VaTSjNMUXYyeW4yQkk/view?usp=sharing) that you already got with the code, so no need to get it again.
-1. Populate the data (markers etc.): `python main.py process cbs`: this will take less than an hour if
+1. Optionally, get the [complete accidents file](https://drive.google.com/file/d/1lRl5ZMfXuGTEjvpdXL8lI8UKcrVDK9ne/view?usp=sharing) after sending a permission request, and extract it into `/static/data/lms`. Otherwise, you'll use the example accidents files that you already got with the code.
+1. Populate the data (markers etc.): `python main.py process cbs`: this will take a few minutes if
    you're using the example files (default), but if you have the complete data it may take several
-   days. Be prepared.
+   hours.
 1. Populate United Hatzalah sample data: `python main.py process united --light` for the complete,
    or more recent data please contact the Anyway team.
 1. Populate LMS registered vehicles in cities : `python main.py process registered_vehicles`: this will take less than an hour
 1. Run the app: `python main.py testserver`: do this whenever you start working and want to try out your code.
 1. Navigate to http://127.0.0.1:5000 in your browser.
 1. If the site fails to load properly, make sure you have JDK installed on your machine
-1. If your platform supports RabbitMQ, you should lunch a Celery worker by running `celery worker -A anyway.clusters_calculator -D`. Otherwise, export the environment variable `ANYWAY_DISABLE_CELERY` to disable the use of Celery.
 1. If you wish to share your app on the local network, you can expose flask by running `python
     main.py testserver --open` (Please note that this would expose your machine on port 5000 to all
     local nodes)

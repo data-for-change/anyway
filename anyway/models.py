@@ -84,6 +84,9 @@ class Role(Base, RoleMixin):
     name = Column(String(80), unique=True)
     description = Column(String(255))
 
+    def __unicode__(self):
+        return self.name
+
 class Point(object):
     id = Column(Integer, primary_key=True)
     latitude = Column(Float())
@@ -181,6 +184,16 @@ class AccidentMarker(MarkerMixin, Base):
     road1 = Column(Integer)
     road2 = Column(Integer)
     km = Column(Float)
+    yishuv_symbol = Column(Integer)
+    geo_area = Column(Integer)
+    day_night = Column(Integer)
+    day_in_week = Column(Integer)
+    traffic_light = Column(Integer)
+    region = Column(Integer)
+    district = Column(Integer)
+    natural_area = Column(Integer)
+    minizipali_status = Column(Integer)
+    yishuv_shape = Column(Integer)
 
     @staticmethod
     def json_to_description(msg):

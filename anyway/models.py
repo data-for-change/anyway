@@ -2,19 +2,23 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
+
 from .constants import CONST
 from collections import namedtuple
 from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table, \
-        ForeignKeyConstraint, func, and_
+    ForeignKeyConstraint, func, and_, select
 from sqlalchemy.orm import relationship, load_only, backref
 from .utilities import init_flask, decode_hebrew
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 from six import iteritems
+from geoalchemy2 import Geometry
+
 
 import datetime
 from . import localization
 from .database import Base
-from flask.ext.security import UserMixin, RoleMixin
+from flask_security import UserMixin, RoleMixin
+
 app = init_flask()
 db = SQLAlchemy(app)
 
@@ -194,6 +198,7 @@ class AccidentMarker(MarkerMixin, Base):
     natural_area = Column(Integer)
     minizipali_status = Column(Integer)
     yishuv_shape = Column(Integer)
+    geom = Column(Geometry('POINT'))
 
     @staticmethod
     def json_to_description(msg):
@@ -280,16 +285,28 @@ class AccidentMarker(MarkerMixin, Base):
         page = kwargs.get('page')
         per_page = kwargs.get('per_page')
 
+        baseX = kwargs['ne_lat'];
+        baseY = kwargs['ne_lng'];
+        distanceX = kwargs['sw_lng'];
+        distanceY = kwargs['sw_lat'];
+        pol_str = 'SRID=4326;POLYGON(({0} {1}, {2} {1}, {2} {3}, {0} {3}, {0} {1}))'.format(baseX, baseY, distanceX \
+                                                                                  ,distanceY)
         if not kwargs.get('show_markers', True):
             return MarkerResult(markers=db.session.query(AccidentMarker).filter(sql.false()), total_records=0)
-        markers = db.session.query(AccidentMarker) \
-            .filter(AccidentMarker.longitude <= kwargs['ne_lng']) \
-            .filter(AccidentMarker.longitude >= kwargs['sw_lng']) \
-            .filter(AccidentMarker.latitude <= kwargs['ne_lat']) \
-            .filter(AccidentMarker.latitude >= kwargs['sw_lat']) \
+
+        markers = db.session.query(AccidentMarker).filter(AccidentMarker.geom.ST_Intersects(pol_str)) \
             .filter(AccidentMarker.created >= kwargs['start_date']) \
             .filter(AccidentMarker.created < kwargs['end_date']) \
             .order_by(desc(AccidentMarker.created))
+
+        # markers = db.session.query(AccidentMarker) \
+        #     .filter(AccidentMarker.longitude <= kwargs['ne_lng']) \
+        #     .filter(AccidentMarker.longitude >= kwargs['sw_lng']) \
+        #     .filter(AccidentMarker.latitude <= kwargs['ne_lat']) \
+        #     .filter(AccidentMarker.latitude >= kwargs['sw_lat']) \
+        #     .filter(AccidentMarker.created >= kwargs['start_date']) \
+        #     .filter(AccidentMarker.created < kwargs['end_date']) \
+        #     .order_by(desc(AccidentMarker.created))
 
         if not kwargs['show_rsa']:
             markers = markers.filter(AccidentMarker.provider_code != CONST.RSA_PROVIDER_CODE)

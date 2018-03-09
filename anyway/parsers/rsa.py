@@ -4,7 +4,6 @@ from ..constants import CONST
 from ..models import AccidentMarker
 from ..utilities import init_flask
 from .utils import batch_iterator
-from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from openpyxl import load_workbook
 from dateutil import parser

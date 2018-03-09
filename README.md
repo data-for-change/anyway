@@ -11,7 +11,7 @@ To report bugs and feature requests, please [open an issue](https://github.com/h
 See also [our Android app](https://github.com/samuelregev/anywayAndroidApp/) on GitHub.
 
 The datasets Anyway uses are documented here:
-* [CBS (Central Bureau of Statistics, למ"ס)](https://github.com/hasadna/anyway/blob/dev/docs/LMS.md)
+* [CBS (Central Bureau of Statistics, למ"ס)](https://github.com/hasadna/anyway/blob/dev/docs/CBS.md)
 * [United Hatzalah (איחוד הצלה)](https://github.com/hasadna/anyway/blob/dev/docs/UNITED.md) - Currently not in use
 
 See [Code Directory Tree Structure](docs/CODE.md).
@@ -70,13 +70,14 @@ See the [Wiki](https://github.com/hasadna/anyway/wiki/Setting-up-a-Python-develo
   You might need to add your password to the connection url. For more information: https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING
 
 1. First time, create tables: `alembic upgrade head`
-1. Optionally, get the [complete accidents file](https://drive.google.com/file/d/1lRl5ZMfXuGTEjvpdXL8lI8UKcrVDK9ne/view?usp=sharing) after sending a permission request, and extract it into `/static/data/lms`. Otherwise, you'll use the example accidents files that you already got with the code.
+1. Optionally, get the [complete accidents file](https://drive.google.com/file/d/1lRl5ZMfXuGTEjvpdXL8lI8UKcrVDK9ne/view?usp=sharing) after sending a permission request, and extract it into `/static/data/cbs`. Otherwise, you'll use the example accidents files that you already got with the code.
 1. Populate the data (markers etc.): `python main.py process cbs`: this will take a few minutes if
    you're using the example files (default), but if you have the complete data it may take several
    hours.
 1. Populate United Hatzalah sample data: `python main.py process united --light` for the complete,
    or more recent data please contact the Anyway team.
-1. Populate LMS registered vehicles in cities : `python main.py process registered_vehicles`: this will take less than an hour
+1. Populate CBS registered vehicles in cities : `python main.py process registered_vehicles`: this will take less than an hour
+1. Get the RSA file from [rsa file](https://drive.google.com/drive/folders/1oR3q-RBKy8AWXf5Z1JNBKD9cqqlEG-jC?usp=sharing) and extract the file into `/static/data/rsa`. To Populate RSA data: `python main.py process rsa <rsa_file_name>`
 1. Run the app: `python main.py testserver`: do this whenever you start working and want to try out your code.
 1. Navigate to http://127.0.0.1:5000 in your browser.
 1. If the site fails to load properly, make sure you have JDK installed on your machine

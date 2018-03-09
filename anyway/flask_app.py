@@ -81,7 +81,7 @@ DICTIONARY = "Dictionary"
 DICTCOLUMN1 = "MS_TAVLA"
 DICTCOLUMN2 = "KOD"
 DICTCOLUMN3 = "TEUR"
-lms_dict_files = {DICTIONARY: "Dictionary.csv"}
+cbs_dict_files = {DICTIONARY: "Dictionary.csv"}
 content_encoding = 'cp1255'
 
 Compress(app)
@@ -205,20 +205,20 @@ def charts_data():
 
 
 def vehicles_data_refinement(vehicle):
-    vehicle["engine_volume"] = lms_dictionary.get((111, vehicle["engine_volume"]))
-    vehicle["total_weight"] = lms_dictionary.get((112, vehicle["total_weight"]))
-    vehicle["driving_directions"] = lms_dictionary.get((28, vehicle["driving_directions"]))
+    vehicle["engine_volume"] = cbs_dictionary.get((111, vehicle["engine_volume"]))
+    vehicle["total_weight"] = cbs_dictionary.get((112, vehicle["total_weight"]))
+    vehicle["driving_directions"] = cbs_dictionary.get((28, vehicle["driving_directions"]))
     return vehicle
 
 
 def involved_data_refinement(involved):
-    involved["age_group"] = lms_dictionary.get((92, involved["age_group"]))
-    involved["population_type"] = lms_dictionary.get((66, involved["population_type"]))
-    involved["home_district"] = lms_dictionary.get((77, involved["home_district"]))
-    involved["home_nafa"] = lms_dictionary.get((79, involved["home_nafa"]))
-    involved["home_area"] = lms_dictionary.get((80, involved["home_area"]))
-    involved["home_municipal_status"] = lms_dictionary.get((78, involved["home_municipal_status"]))
-    involved["home_residence_type"] = lms_dictionary.get((81, involved["home_residence_type"]))
+    involved["age_group"] = cbs_dictionary.get((92, involved["age_group"]))
+    involved["population_type"] = cbs_dictionary.get((66, involved["population_type"]))
+    involved["home_district"] = cbs_dictionary.get((77, involved["home_district"]))
+    involved["home_nafa"] = cbs_dictionary.get((79, involved["home_nafa"]))
+    involved["home_area"] = cbs_dictionary.get((80, involved["home_area"]))
+    involved["home_municipal_status"] = cbs_dictionary.get((78, involved["home_municipal_status"]))
+    involved["home_residence_type"] = cbs_dictionary.get((81, involved["home_residence_type"]))
     return involved
 
 
@@ -229,20 +229,20 @@ def marker(marker_id):
     list_to_return = list()
     for inv in involved:
         obj = inv.serialize()
-        obj["age_group"] = lms_dictionary.get((92, obj["age_group"]))
-        obj["population_type"] = lms_dictionary.get((66, obj["population_type"]))
-        obj["home_district"] = lms_dictionary.get((77, obj["home_district"]))
-        obj["home_nafa"] = lms_dictionary.get((79, obj["home_nafa"]))
-        obj["home_area"] = lms_dictionary.get((80, obj["home_area"]))
-        obj["home_municipal_status"] = lms_dictionary.get((78, obj["home_municipal_status"]))
-        obj["home_residence_type"] = lms_dictionary.get((81, obj["home_residence_type"]))
+        obj["age_group"] = cbs_dictionary.get((92, obj["age_group"]))
+        obj["population_type"] = cbs_dictionary.get((66, obj["population_type"]))
+        obj["home_district"] = cbs_dictionary.get((77, obj["home_district"]))
+        obj["home_nafa"] = cbs_dictionary.get((79, obj["home_nafa"]))
+        obj["home_area"] = cbs_dictionary.get((80, obj["home_area"]))
+        obj["home_municipal_status"] = cbs_dictionary.get((78, obj["home_municipal_status"]))
+        obj["home_residence_type"] = cbs_dictionary.get((81, obj["home_residence_type"]))
         list_to_return.append(obj)
 
     for veh in vehicles:
         obj = veh.serialize()
-        obj["engine_volume"] = lms_dictionary.get((111, obj["engine_volume"]))
-        obj["total_weight"] = lms_dictionary.get((112, obj["total_weight"]))
-        obj["driving_directions"] = lms_dictionary.get((28, obj["driving_directions"]))
+        obj["engine_volume"] = cbs_dictionary.get((111, obj["engine_volume"]))
+        obj["total_weight"] = cbs_dictionary.get((112, obj["total_weight"]))
+        obj["driving_directions"] = cbs_dictionary.get((28, obj["driving_directions"]))
         list_to_return.append(obj)
     return make_response(json.dumps(list_to_return, ensure_ascii=False))
 
@@ -458,7 +458,7 @@ def update_preferences():
     cur_general_preferences = db.session.query(GeneralPreferences).filter(User.id == cur_id).first()
     if request.method == "GET":
         if cur_report_preferences is None and cur_general_preferences is None:
-            return jsonify(accident_severity='0', pref_accidents_lms=True, pref_accidents_ihud=True, produce_accidents_report=False)
+            return jsonify(accident_severity='0', pref_accidents_cbs=True, pref_accidents_ihud=True, produce_accidents_report=False)
         else:
             resource_types = cur_general_preferences.resource_type.split(',')
             if cur_report_preferences is None:
@@ -735,26 +735,26 @@ admin.add_view(SendToSubscribersView(name='Send To Subscribers'))
 admin.add_view(ViewHighlightedMarkersData(name='View Highlighted Markers Data', endpoint='ViewHighlightedMarkersData', category='View Highlighted Markers'))
 admin.add_view(ViewHighlightedMarkersMap(name='View Highlighted Markers Map', endpoint='ViewHighlightedMarkersMap', category='View Highlighted Markers'))
 
-lms_dictionary = {}
+cbs_dictionary = {}
 
 @app.before_first_request
 def read_dictionaries():
-    global lms_dictionary
-    for directory in sorted(glob.glob("{0}/{1}/*/*".format(app.static_folder, 'data/lms')),reverse=True):
+    global cbs_dictionary
+    for directory in sorted(glob.glob("{0}/{1}/*/*".format(app.static_folder, 'data/cbs')),reverse=True):
         main_dict = dict(get_dict_file(directory))
         if len(main_dict) == 0:
             return
         if len(main_dict) == 1:
             for dic in main_dict['Dictionary']:
                 if type(dic[DICTCOLUMN3]) is str:
-                    lms_dictionary[(int(dic[DICTCOLUMN1]),int(dic[DICTCOLUMN2]))] = decode_hebrew(dic[DICTCOLUMN3], encoding=content_encoding)
+                    cbs_dictionary[(int(dic[DICTCOLUMN1]),int(dic[DICTCOLUMN2]))] = decode_hebrew(dic[DICTCOLUMN3], encoding=content_encoding)
                 else:
-                    lms_dictionary[(int(dic[DICTCOLUMN1]),int(dic[DICTCOLUMN2]))] = int(dic[DICTCOLUMN3])
+                    cbs_dictionary[(int(dic[DICTCOLUMN1]),int(dic[DICTCOLUMN2]))] = int(dic[DICTCOLUMN3])
             return
 
 
 def get_dict_file(directory):
-    for name, filename in iteritems(lms_dict_files):
+    for name, filename in iteritems(cbs_dict_files):
         files = [path for path in os.listdir(directory)
                  if filename.lower() in path.lower()]
         amount = len(files)

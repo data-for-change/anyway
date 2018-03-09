@@ -34,7 +34,7 @@ DICTIONARY = "dictionary"
 INVOLVED = "involved"
 VEHICLES = "vehicles"
 
-lms_files = {
+cbs_files = {
     ACCIDENTS: "AccData.csv",
     URBAN_INTERSECTION: "IntersectUrban.csv",
     NON_URBAN_INTERSECTION: "IntersectNonUrban.csv",
@@ -323,7 +323,7 @@ def import_vehicles(provider_code, vehicles, **kwargs):
 
 
 def get_files(directory):
-    for name, filename in iteritems(lms_files):
+    for name, filename in iteritems(cbs_files):
 
         if name not in (STREETS, NON_URBAN_INTERSECTION, ACCIDENTS, INVOLVED, VEHICLES):
             continue
@@ -372,8 +372,8 @@ def import_to_datastore(directory, provider_code, batch_size):
     try:
         assert batch_size > 0
 
-        files_from_lms = dict(get_files(directory))
-        if len(files_from_lms) == 0:
+        files_from_cbs = dict(get_files(directory))
+        if len(files_from_cbs) == 0:
             return 0
         logging.info("Importing '{}'".format(directory))
         started = datetime.now()
@@ -381,21 +381,21 @@ def import_to_datastore(directory, provider_code, batch_size):
         new_items = 0
 
         all_existing_accidents_ids = set(map(lambda x: x[0], db.session.query(AccidentMarker.id).all()))
-        accidents = import_accidents(provider_code=provider_code, **files_from_lms)
+        accidents = import_accidents(provider_code=provider_code, **files_from_cbs)
         accidents = [accident for accident in accidents if accident['id'] not in all_existing_accidents_ids]
         new_items += len(accidents)
         for accidents_chunk in chunks(accidents, batch_size, xrange):
             db.session.bulk_insert_mappings(AccidentMarker, accidents_chunk)
 
         all_involved_accident_ids = set(map(lambda x: x[0], db.session.query(Involved.accident_id).all()))
-        involved = import_involved(provider_code=provider_code, **files_from_lms)
+        involved = import_involved(provider_code=provider_code, **files_from_cbs)
         involved = [x for x in involved if x['accident_id'] not in all_involved_accident_ids]
         for involved_chunk in chunks(involved, batch_size, xrange):
             db.session.bulk_insert_mappings(Involved, involved_chunk)
         new_items += len(involved)
 
         all_vehicles_accident_ids = set(map(lambda x: x[0], db.session.query(Vehicle.accident_id).all()))
-        vehicles = import_vehicles(provider_code=provider_code, **files_from_lms)
+        vehicles = import_vehicles(provider_code=provider_code, **files_from_cbs)
         vehicles = [x for x in vehicles if x['accident_id'] not in all_vehicles_accident_ids]
         for vehicles_chunk in chunks(vehicles, batch_size, xrange):
             db.session.bulk_insert_mappings(Vehicle, vehicles_chunk)

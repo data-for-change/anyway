@@ -4,23 +4,25 @@ from ..constants import CONST
 from ..models import AccidentMarker
 from ..utilities import init_flask
 from .utils import batch_iterator
-from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from openpyxl import load_workbook
+from dateutil import parser
 
 
 def _iter_rows(filename):
     workbook = load_workbook(filename, read_only=True)
-    sheet = workbook[u"גיליון1"]
+    sheet = workbook[u"Worksheet1"]
     rows = sheet.rows
     first_row = next(rows)
-    assert [cell.value for cell in first_row] == [u'מזהה', u'סוג עבירה', u'סוג רכב', u'נ"צ', u'קישור']
+    headers = [u'מזהה', u'סוג עבירה', u'סוג רכב', u'נ״צ', u'סרטון', u'תאריך דיווח']
+    assert [cell.value for cell in first_row] == headers
     for row in rows:
         id_ = int(row[0].value)
         violation = row[1].value
         vehicle_type = row[2].value
         coordinates = row[3].value
         video_link = row[4].value
+        timestamp = parser.parse(row[5].value)
         if not violation:
             continue
 
@@ -32,7 +34,7 @@ def _iter_rows(filename):
         yield {'id': id_,
                'latitude': latitude,
                'longitude': longitude,
-               'created': datetime(2017, 12, 30),
+               'created': timestamp,
                'provider_code': CONST.RSA_PROVIDER_CODE,
                'severity': 0,
                'title': 'שומרי הדרך',

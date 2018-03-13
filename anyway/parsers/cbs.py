@@ -8,8 +8,7 @@ import re
 from datetime import datetime
 import six
 from six import iteritems
-
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_
 
 from .. import field_names, localization
@@ -262,6 +261,7 @@ def import_accidents(provider_code, accidents, streets, roads, **kwargs):
             "natural_area": get_data_value(accident[field_names.natural_area]),
             "minizipali_status": get_data_value(accident[field_names.minizipali_status]),
             "yishuv_shape": get_data_value(accident[field_names.yishuv_shape]),
+            "geom": None,
         }
 
         markers.append(marker)
@@ -439,6 +439,13 @@ def delete_invalid_entries():
 
     db.session.commit()
 
+def fill_db_geo_data():
+    """
+    Fills empty geometry object according to coordinates in database
+    """
+    db.session.execute('UPDATE markers SET geom = ST_SetSRID(ST_MakePoint(longitude,latitude),4326)\
+                           WHERE geom IS NULL;')
+    db.session.commit()
 
 def get_provider_code(directory_name=None):
     if directory_name:
@@ -474,6 +481,8 @@ def main(specific_folder, delete_all, path, batch_size):
         total += import_to_datastore(directory, provider_code, batch_size)
 
     delete_invalid_entries()
+
+    fill_db_geo_data()
 
     failed = ["\t'{0}' ({1})".format(directory, fail_reason) for directory, fail_reason in
               iteritems(failed_dirs)]

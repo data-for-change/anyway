@@ -628,11 +628,11 @@
         <div class="filter-panel" id="step6tour">
             <div class="btn-label">מציג:</div>
             <div class="btn-wrap separator">
-                <input type="checkbox" id="checkbox-accidents" onclick="app.loadFilter()" checked/>
+                <input type="checkbox" id="checkbox-accidents" onclick="app.loadFilter('general', 'accidents')" checked/>
                 <label for="checkbox-accidents" class="btn two right">תאונות</label>
-                <input type="checkbox" id="checkbox-discussions" onclick="app.loadFilter()" checked/>
+                <input type="checkbox" id="checkbox-discussions" onclick="app.loadFilter('general', 'discussions')" checked/>
                 <label for="checkbox-discussions" class="btn two left">דיונים</label>
-                <input type="checkbox" id="checkbox-rsa" onclick="app.loadFilter()" checked/>
+                <input type="checkbox" id="checkbox-rsa" onclick="app.loadFilter('general', 'rsa')" checked/>
                 <label for="checkbox-rsa" class="btn one">אירועים שדווחו על ידי שומרי הדרך</label>
             </div>
             <ul class="current-view sidebar-pin"></ul>
@@ -648,35 +648,35 @@
         <div class="filter-panel">
             <div class="btn-label">חומרה:</div>
             <div class="btn-wrap separator">
-                <input type="checkbox" id="checkbox-fatal" onclick="app.loadFilter()" checked/>
+                <input type="checkbox" id="checkbox-fatal" onclick="app.loadFilter('severity', 'fatal')" checked/>
                 <label for="checkbox-fatal" class="btn three right fatal">קטלניות</label>
-                <input type="checkbox" id="checkbox-severe" onclick="app.loadFilter()" checked/>
+                <input type="checkbox" id="checkbox-severe" onclick="app.loadFilter('severity', 'severe')" checked/>
                 <label for="checkbox-severe" class="btn three middle severe">קשות</label>
-                <input type="checkbox" id="checkbox-light" onclick="app.loadFilter()" checked/>
+                <input type="checkbox" id="checkbox-light" onclick="app.loadFilter('severity', 'light')" checked/>
                 <label for="checkbox-light" class="btn three left light">קלות</label>
             </div>
 
             <div class="btn-label">מיקום:</div>
             <div class="btn-wrap separator">
-                <input type="checkbox" id="checkbox-accurate" onclick="app.loadFilter()" checked/>
+                <input type="checkbox" id="checkbox-accurate" onclick="app.loadFilter('location', 'accurate')" checked/>
                 <label for="checkbox-accurate" class="btn two right">עיגון מדויק</label>
-                <input type="checkbox" id="checkbox-approx" onclick="app.loadFilter()" checked/>
+                <input type="checkbox" id="checkbox-approx" onclick="app.loadFilter('location', 'approx')" checked/>
                 <label for="checkbox-approx" class="btn two left">עיגון מרחבי</label>
             </div>
 
             <div class="btn-label">דרך:</div>
             <div class="btn-wrap separator">
-                <input type="checkbox" id="checkbox-urban" onclick="app.loadFilter()" checked/>
+                <input type="checkbox" id="checkbox-urban" onclick="app.loadFilter('road', 'urban')" checked/>
                 <label for="checkbox-urban" class="btn one">עירוני</label>
-                <input type="checkbox" id="checkbox-nonurban" onclick="app.loadFilter()" checked/>
+                <input type="checkbox" id="checkbox-nonurban" onclick="app.loadFilter('road', 'nonurban')" checked/>
                 <label for="checkbox-nonurban" class="btn one">לא עירוני</label>
-                <input type="checkbox" id="checkbox-intersection" onclick="app.loadFilter()" checked/>
+                <input type="checkbox" id="checkbox-intersection" onclick="app.loadFilter('road', 'intersection')" checked/>
                 <label for="checkbox-intersection" class="btn one">צומת</label>
-                <input type="checkbox" id="checkbox-nonintersection" onclick="app.loadFilter()" checked/>
+                <input type="checkbox" id="checkbox-nonintersection" onclick="app.loadFilter('road', 'nonintersection')" checked/>
                 <label for="checkbox-nonintersection" class="btn one">לא בצומת</label>
-                <input type="checkbox" id="checkbox-multi-lane" onclick="app.loadFilter()" checked/>
+                <input type="checkbox" id="checkbox-multi-lane" onclick="app.loadFilter('road', 'multi lane')" checked/>
                 <label for="checkbox-multi-lane" class="btn one">דו-סטרי</label>
-                <input type="checkbox" id="checkbox-one-lane" onclick="app.loadFilter()" checked/>
+                <input type="checkbox" id="checkbox-one-lane" onclick="app.loadFilter('road', 'one lane')" checked/>
                 <label for="checkbox-one-lane" class="btn one">חד-סטרי</label>
             </div>
 
@@ -775,75 +775,75 @@
         <div class="filter-panel">
             <div class="btn-label">מזג-אויר:</div>
             <div class="btn-wrap separator">
-                <input type="radio" name="weather" id="checkbox-weather-all" value=0 onclick="app.loadFilter()" checked />
+                <input type="radio" name="weather" id="checkbox-weather-all" value=0 onclick="app.loadFilter('weather', 'all')" checked />
                 <label for="checkbox-weather-all" class="btn one">הכל</label>
-                <input type="radio" name="weather" id="checkbox-weather-clear" value=1 onclick="app.loadFilter()" />
+                <input type="radio" name="weather" id="checkbox-weather-clear" value=1 onclick="app.loadFilter('weather', 'clear')" />
                 <label for="checkbox-weather-clear" class="btn one icon-weather" title="בהיר">B</label>
-                <input type="radio" name="weather" id="checkbox-weather-rainy" value=2 onclick="app.loadFilter()" />
+                <input type="radio" name="weather" id="checkbox-weather-rainy" value=2 onclick="app.loadFilter('weather', 'rainy')" />
                 <label for="checkbox-weather-rainy" class="btn one icon-weather" title="גשום">R</label>
-                <input type="radio" name="weather" id="checkbox-weather-heat" value=3 onclick="app.loadFilter()" />
+                <input type="radio" name="weather" id="checkbox-weather-heat" value=3 onclick="app.loadFilter('weather', 'heat')" />
                 <label for="checkbox-weather-heat" class="btn one icon-weather" title="שרבי">E</label>
-                <input type="radio" name="weather" id="checkbox-weather-cloudy" value=4 onclick="app.loadFilter()" />
+                <input type="radio" name="weather" id="checkbox-weather-cloudy" value=4 onclick="app.loadFilter('weather', 'cloudy')" />
                 <label for="checkbox-weather-cloudy" class="btn one icon-weather" title="מעונן">Y</label>
-                <input type="radio" name="weather" id="checkbox-weather-other" value=5 onclick="app.loadFilter()" />
+                <input type="radio" name="weather" id="checkbox-weather-other" value=5 onclick="app.loadFilter('weather', 'other')" />
                 <label for="checkbox-weather-other" class="btn one">אחר</label>
             </div>
 
             <div class="btn-label">פני הכביש:</div>
             <div class="btn-wrap separator">
-                <input type="radio" name="surface" id="checkbox-surface-all" value=0 onclick="app.loadFilter()" checked />
+                <input type="radio" name="surface" id="checkbox-surface-all" value=0 onclick="app.loadFilter('road surface', 'all')" checked />
                 <label for="checkbox-surface-all" class="btn one">הכל</label>
-                <input type="radio" name="surface" id="checkbox-dry" value=1 onclick="app.loadFilter()" />
+                <input type="radio" name="surface" id="checkbox-dry" value=1 onclick="app.loadFilter('road surface', 'dry')" />
                 <label for="checkbox-dry" class="btn one">יבש</label>
-                <input type="radio" name="surface" id="checkbox-wet" value=2 onclick="app.loadFilter()" />
+                <input type="radio" name="surface" id="checkbox-wet" value=2 onclick="app.loadFilter('road surface', 'wet')" />
                 <label for="checkbox-wet" class="btn one">רטוב ממים</label>
-                <input type="radio" name="surface" id="checkbox-gas" value=3 onclick="app.loadFilter()" />
+                <input type="radio" name="surface" id="checkbox-gas" value=3 onclick="app.loadFilter('road surface', 'gas')" />
                 <label for="checkbox-gas" class="btn one">מרוח בחומר דלק</label>
-                <input type="radio" name="surface" id="checkbox-mud" value=4 onclick="app.loadFilter()" />
+                <input type="radio" name="surface" id="checkbox-mud" value=4 onclick="app.loadFilter('road surface', 'mud')" />
                 <label for="checkbox-mud" class="btn one">מכוסה בוץ</label>
-                <input type="radio" name="surface" id="checkbox-sand" value=5 onclick="app.loadFilter()" />
+                <input type="radio" name="surface" id="checkbox-sand" value=5 onclick="app.loadFilter('road surface', 'sand')" />
                 <label for="checkbox-sand" class="btn one">חול \ חצץ</label>
-                <input type="radio" name="surface" id="checkbox-surface-else" value=6 onclick="app.loadFilter()" />
+                <input type="radio" name="surface" id="checkbox-surface-else" value=6 onclick="app.loadFilter('road surface', 'other')" />
                 <label for="checkbox-surface-else" class="btn one">אחר</label>
             </div>
 
             <div class="btn-label">צורת דרך:</div>
             <div class="btn-wrap separator">
-                <input type="radio" name="road" id="checkbox-all-road" value=0 onclick="app.loadFilter()" checked />
+                <input type="radio" name="road" id="checkbox-all-road" value=0 onclick="app.loadFilter('road shape', 'all')" checked />
                 <label for="checkbox-all-road" class="btn one">הכל</label>
-                <input type="radio" name="road" id="checkbox-general-road" value=8 onclick="app.loadFilter()" />
+                <input type="radio" name="road" id="checkbox-general-road" value=8 onclick="app.loadFilter('road shape', 'straight or intersection')" />
                 <label for="checkbox-general-road" class="btn one">כביש ישר/צומת</label>
-                <input type="radio" name="road" id="checkbox-curve" value=5 onclick="app.loadFilter()" />
+                <input type="radio" name="road" id="checkbox-curve" value=5 onclick="app.loadFilter('road shape', 'curve')" />
                 <label for="checkbox-curve" class="btn one">עקום חד</label>
-                <input type="radio" name="road" id="checkbox-misc" value=3 onclick="app.loadFilter()" />
+                <input type="radio" name="road" id="checkbox-misc" value=3 onclick="app.loadFilter('road shape', 'gas station or parking')" />
                 <label for="checkbox-misc" class="btn one">מ. חניה / ת. דלק</label>
-                <input type="radio" name="road" id="checkbox-steep" value=4 onclick="app.loadFilter()" />
+                <input type="radio" name="road" id="checkbox-steep" value=4 onclick="app.loadFilter('road shape', 'steep')" />
                 <label for="checkbox-steep" class="btn one">שיפוע תלול</label>
-                <input type="radio" name="road" id="checkbox-bridge-tunnel" value=6 onclick="app.loadFilter()" />
+                <input type="radio" name="road" id="checkbox-bridge-tunnel" value=6 onclick="app.loadFilter('road shape', 'bridge tunnel')" />
                 <label for="checkbox-bridge-tunnel" class="btn one">על גשר / מנהרה</label>
-                <input type="radio" name="road" id="checkbox-crossroad" value=7 onclick="app.loadFilter()" />
+                <input type="radio" name="road" id="checkbox-crossroad" value=7 onclick="app.loadFilter('road shape', 'crossroad')" />
                 <label for="checkbox-crossroad" class="btn one">מפגש מסילת רכבת</label>
-                <input type="radio" name="road" id="checkbox-inter-enter" value=1 onclick="app.loadFilter()" />
+                <input type="radio" name="road" id="checkbox-inter-enter" value=1 onclick="app.loadFilter('road shape', 'inter enter')" />
                 <label for="checkbox-inter-enter" class="btn one">כניסה למחלף</label>
-                <input type="radio" name="road" id="checkbox-inter-exit" value=2 onclick="app.loadFilter()" />
+                <input type="radio" name="road" id="checkbox-inter-exit" value=2 onclick="app.loadFilter('road shape', 'inter exit')" />
                 <label for="checkbox-inter-exit" class="btn one">יציאה ממחלף</label>
-                <input type="radio" name="road" id="checkbox-other" value=9 onclick="app.loadFilter()" />
+                <input type="radio" name="road" id="checkbox-other" value=9 onclick="app.loadFilter('road shape', 'other')" />
                 <label for="checkbox-other" class="btn one">אחר</label>
             </div>
 
             <div class="btn-label">הפרדת מסלולים:</div>
             <div class="btn-wrap separator">
-                <input type="radio" name="separation" id="checkbox-sep-all" value=0 onclick="app.loadFilter()" checked />
+                <input type="radio" name="separation" id="checkbox-sep-all" value=0 onclick="app.loadFilter('lane seperation', 'all')" checked />
                 <label for="checkbox-sep-all" class="btn one">הכל</label>
-                <input type="radio" name="separation" id="checkbox-sep-fence" value=2 onclick="app.loadFilter()" />
+                <input type="radio" name="separation" id="checkbox-sep-fence" value=2 onclick="app.loadFilter('lane seperation', 'fence')" />
                 <label for="checkbox-sep-fence" class="btn one">מפרדה עם גדר</label>
-                <input type="radio" name="separation" id="checkbox-sep-marked" value=1 onclick="app.loadFilter()" />
+                <input type="radio" name="separation" id="checkbox-sep-marked" value=1 onclick="app.loadFilter('lane seperation', 'marked')" />
                 <label for="checkbox-sep-marked" class="btn one">מפרדה מסומנת</label>
-               <input type="radio" name="separation" id="checkbox-sep-continuous" value=3 onclick="app.loadFilter()" />
+               <input type="radio" name="separation" id="checkbox-sep-continuous" value=3 onclick="app.loadFilter('lane seperation', 'continuous')" />
                 <label for="checkbox-sep-continuous" class="btn one">מפרדה בנויה</label>
-                <input type="radio" name="separation" id="checkbox-sep-dotted" value=4 onclick="app.loadFilter()" />
+                <input type="radio" name="separation" id="checkbox-sep-dotted" value=4 onclick="app.loadFilter('lane seperation', 'dotted')" />
                 <label for="checkbox-sep-dotted" class="btn one">מפרדה לא בנויה</label>
-                <input type="radio" name="separation" id="checkbox-sep-built" value=5 onclick="app.loadFilter()" />
+                <input type="radio" name="separation" id="checkbox-sep-built" value=5 onclick="app.loadFilter('lane seperation', 'other')" />
                 <label for="checkbox-sep-built" class="btn one">אחר</label>
             </div>
         </div>
@@ -859,80 +859,80 @@
 
             <div class="btn-label">סוג תאונה:</div>
             <div class="btn-wrap separator">
-                <input type="radio" name="acctype" id="checkbox-type-all" value=0 onclick="app.loadFilter()" checked />
+                <input type="radio" name="acctype" id="checkbox-type-all" value=0 onclick="app.loadFilter('accident type', 'all')" checked />
                 <label for="checkbox-type-all" class="btn one">הכל</label>
-                <input type="radio" name="acctype" id="checkbox-front-side" value=2 onclick="app.loadFilter()" />
+                <input type="radio" name="acctype" id="checkbox-front-side" value=2 onclick="app.loadFilter('accident type', 'front to side')" />
                 <label for="checkbox-front-side" class="btn one">חזית אל צד</label>
-                <input type="radio" name="acctype" id="checkbox-front-rear" value=3 onclick="app.loadFilter()" />
+                <input type="radio" name="acctype" id="checkbox-front-rear" value=3 onclick="app.loadFilter('accident type', 'rear')" />
                 <label for="checkbox-front-rear" class="btn one">חזית באחור</label>
-                <input type="radio" name="acctype" id="checkbox-side-side" value=4 onclick="app.loadFilter()" />
+                <input type="radio" name="acctype" id="checkbox-side-side" value=4 onclick="app.loadFilter('accident type', 'side to side')" />
                 <label for="checkbox-side-side" class="btn one">צד בצד</label>
-                <input type="radio" name="acctype" id="checkbox-front-front" value=5 onclick="app.loadFilter()" />
+                <input type="radio" name="acctype" id="checkbox-front-front" value=5 onclick="app.loadFilter('accident type', 'front to front')" />
                 <label for="checkbox-front-front" class="btn one">חזית אל חזית</label>
-                <input type="radio" name="acctype" id="checkbox-rear-front" value=17 onclick="app.loadFilter()" />
+                <input type="radio" name="acctype" id="checkbox-rear-front" value=17 onclick="app.loadFilter('accident type', 'rear to front')" />
                 <label for="checkbox-rear-front" class="btn one">אחור אל חזית</label>
-                <input type="radio" name="acctype" id="checkbox-rear-side" value=18 onclick="app.loadFilter()" />
+                <input type="radio" name="acctype" id="checkbox-rear-side" value=18 onclick="app.loadFilter('accident type', 'rear to side')" />
                 <label for="checkbox-rear-side" class="btn one">אחור אל צד</label>
-                <input type="radio" name="acctype" id="checkbox-standing" value=6 onclick="app.loadFilter()" />
+                <input type="radio" name="acctype" id="checkbox-standing" value=6 onclick="app.loadFilter('accident type', 'standing')" />
                 <label for="checkbox-standing" class="btn one">התנגשות ברכב עוצר</label>
-                <input type="radio" name="acctype" id="checkbox-parked" value=7 onclick="app.loadFilter()" />
+                <input type="radio" name="acctype" id="checkbox-parked" value=7 onclick="app.loadFilter('accident type', 'parked')" />
                 <label for="checkbox-parked" class="btn one">התנגשות ברכב חונה</label>
-                <input type="radio" name="acctype" id="checkbox-animal" value=19 onclick="app.loadFilter()" />
+                <input type="radio" name="acctype" id="checkbox-animal" value=19 onclick="app.loadFilter('accident type', 'animal')" />
                 <label for="checkbox-animal" class="btn one">התנגשות בבעל חיים</label>
-                <input type="radio" name="acctype" id="checkbox-still" value=8 onclick="app.loadFilter()" />
+                <input type="radio" name="acctype" id="checkbox-still" value=8 onclick="app.loadFilter('accident type', 'still')" />
                 <label for="checkbox-still" class="btn one">התנגשות בעצם דומם</label>
-                <input type="radio" name="acctype" id="checkbox-sidewalk" value=9 onclick="app.loadFilter()" />
+                <input type="radio" name="acctype" id="checkbox-sidewalk" value=9 onclick="app.loadFilter('accident type', 'sidewalk')" />
                 <label for="checkbox-sidewalk" class="btn one">ירידה מהכביש \ עלייה למדרכה</label>
-                <input type="radio" name="acctype" id="checkbox-flip" value=10 onclick="app.loadFilter()" />
+                <input type="radio" name="acctype" id="checkbox-flip" value=10 onclick="app.loadFilter('accident type', 'flip')" />
                 <label for="checkbox-flip" class="btn one">התהפכות</label>
-                <input type="radio" name="acctype" id="checkbox-slide" value=11 onclick="app.loadFilter()" />
+                <input type="radio" name="acctype" id="checkbox-slide" value=11 onclick="app.loadFilter('accident type', 'slide')" />
                 <label for="checkbox-slide" class="btn one">החלקה</label>
-                <input type="radio" name="acctype" id="checkbox-inside" value=12 onclick="app.loadFilter()" />
+                <input type="radio" name="acctype" id="checkbox-inside" value=12 onclick="app.loadFilter('accident type', 'inside')" />
                 <label for="checkbox-inside" class="btn one">פגיעה בנוסע בתוך כלי רכב</label>
-                <input type="radio" name="acctype" id="checkbox-fall" value=13 onclick="app.loadFilter()" />
+                <input type="radio" name="acctype" id="checkbox-fall" value=13 onclick="app.loadFilter('accident type', 'fall')" />
                 <label for="checkbox-fall" class="btn one">נפילה ברכב נע</label>
-                <input type="radio" name="acctype" id="checkbox-load" value=20 onclick="app.loadFilter()" />
+                <input type="radio" name="acctype" id="checkbox-load" value=20 onclick="app.loadFilter('accident type', 'load')" />
                 <label for="checkbox-load" class="btn one">פגיעה ממטען של רכב</label>
-                <input type="radio" name="acctype" id="checkbox-fire" value=14 onclick="app.loadFilter()" />
+                <input type="radio" name="acctype" id="checkbox-fire" value=14 onclick="app.loadFilter('accident type', 'fire')" />
                 <label for="checkbox-fire" class="btn one">שריפה</label>
-                <input type="radio" name="acctype" id="checkbox-type-pedestrian" value=1 onclick="app.loadFilter()" />
+                <input type="radio" name="acctype" id="checkbox-type-pedestrian" value=1 onclick="app.loadFilter('accident type', 'else')" />
                 <label for="checkbox-type-pedestrian" class="btn one">אחר</label>
-                <input type="radio" name="acctype" id="checkbox-type-else" value=1 onclick="app.loadFilter()" />
+                <input type="radio" name="acctype" id="checkbox-type-else" value=1 onclick="app.loadFilter('accident type', 'else')" />
                 <label for="checkbox-type-else" class="btn one">פגיעה בהולך רגל</label>
-                <input type="radio" name="acctype" id="checkbox-type-bike-no-casualties" value=21 onclick="app.loadFilter()" />
+                <input type="radio" name="acctype" id="checkbox-type-bike-no-casualties" value=21 onclick="app.loadFilter('accident type', 'bike no casualties')" />
                 <label for="checkbox-type-bike-no-casualties" class="btn one">אופניים</label>
             </div>
 
             <div class="btn-label">גילאי מעורכים</div>
             <div class="btn-wrap separator">
-                <input type="checkbox" name="agegroups" id="checkbox-00-04" value=2 onclick="app.loadFilter()" checked />
+                <input type="checkbox" name="agegroups" id="checkbox-00-04" value=2 onclick="app.loadFilter('ages', '00-04')" checked />
                 <label for="checkbox-00-04" class="btn one">00-04</label>
 
-                <input type="checkbox" name="agegroups" id="checkbox-05-09" value=2 onclick="app.loadFilter()" checked />
+                <input type="checkbox" name="agegroups" id="checkbox-05-09" value=2 onclick="app.loadFilter('ages', '05-09')" checked />
                 <label for="checkbox-05-09" class="btn one">05-09</label>
 
-                <input type="checkbox" name="agegroups" id="checkbox-10-14" value=2 onclick="app.loadFilter()" checked />
+                <input type="checkbox" name="agegroups" id="checkbox-10-14" value=2 onclick="app.loadFilter('ages', '10-14')" checked />
                 <label for="checkbox-10-14" class="btn one">10-14</label>
 
-                <input type="checkbox" name="agegroups" id="checkbox-15-19" value=2 onclick="app.loadFilter()" checked />
+                <input type="checkbox" name="agegroups" id="checkbox-15-19" value=2 onclick="app.loadFilter('ages', '15-19')" checked />
                 <label for="checkbox-15-19" class="btn one">15-19</label>
 
-                <input type="checkbox" name="agegroups" id="checkbox-20-24" value=2 onclick="app.loadFilter()" checked />
+                <input type="checkbox" name="agegroups" id="checkbox-20-24" value=2 onclick="app.loadFilter('ages', '20-24')" checked />
                 <label for="checkbox-20-24" class="btn one">20-24</label>
 
-                <input type="checkbox" name="agegroups" id="checkbox-25-69" value=2 onclick="app.loadFilter()" checked />
+                <input type="checkbox" name="agegroups" id="checkbox-25-69" value=2 onclick="app.loadFilter('ages', '25-69')" checked />
                 <label for="checkbox-25-69" class="btn one">25-69</label>
 
-                <input type="checkbox" name="agegroups" id="checkbox-70-74" value=2 onclick="app.loadFilter()" checked />
+                <input type="checkbox" name="agegroups" id="checkbox-70-74" value=2 onclick="app.loadFilter('ages', '70-74')" checked />
                 <label for="checkbox-70-74" class="btn one">70-74</label>
 
-                <input type="checkbox" name="agegroups" id="checkbox-75-79" value=2 onclick="app.loadFilter()" checked />
+                <input type="checkbox" name="agegroups" id="checkbox-75-79" value=2 onclick="app.loadFilter('ages', '75-79')" checked />
                 <label for="checkbox-75-79" class="btn one">75-79</label>
 
-                <input type="checkbox" name="agegroups" id="checkbox-80-84" value=2 onclick="app.loadFilter()" checked />
+                <input type="checkbox" name="agegroups" id="checkbox-80-84" value=2 onclick="app.loadFilter('ages', '80-84')" checked />
                 <label for="checkbox-80-84" class="btn one">80-84</label>
 
-                <input type="checkbox" name="agegroups" id="checkbox-85-plus" value=2 onclick="app.loadFilter()" checked />
+                <input type="checkbox" name="agegroups" id="checkbox-85-plus" value=2 onclick="app.loadFilter('ages', '85+')" checked />
                 <label for="checkbox-85-plus" class="btn one" dir="ltr">85+</label>
             </div>
 
@@ -949,63 +949,63 @@
         <div class="filter-panel">
             <div class="btn-label">סוג תיק:</div>
             <div class="btn-wrap separator">
-                <input type="radio" name="casetype" id="checkbox-case-all" value=0 onclick="app.loadFilter()" checked/>
+                <input type="radio" name="casetype" id="checkbox-case-all" value=0 onclick="app.loadFilter('file type', 'all')" checked/>
                 <label for="checkbox-case-all" class="btn one">הכל</label>
-                <input type="radio" name="casetype" id="checkbox-case-1" value=1 onclick="app.loadFilter()" />
+                <input type="radio" name="casetype" id="checkbox-case-1" value=1 onclick="app.loadFilter('file type', 'case-1')" />
                 <label for="checkbox-case-1" class="btn one" style="padding-right: 10px !important; padding-left:  10px !important;">LAMAS 1</label>
-                <input type="radio" name="casetype" id="checkbox-case-3" value=3 onclick="app.loadFilter()" />
+                <input type="radio" name="casetype" id="checkbox-case-3" value=3 onclick="app.loadFilter('file type', 'case-3')" />
                 <label for="checkbox-case-3" class="btn one" style="padding-right: 10px !important; padding-left:  10px !important;">LAMAS 3</label>
-                <input type="radio" name="casetype" id="checkbox-case-2" value=2 onclick="app.loadFilter()" />
+                <input type="radio" name="casetype" id="checkbox-case-2" value=2 onclick="app.loadFilter('file type', 'case-2')" />
                 <label for="checkbox-case-2" class="btn one" style="padding-right: 10px !important; padding-left:  10px !important;">United Hazalah</label>
             </div>
 
             <div class="btn-label">אמצעי בקרה:</div>
             <div class="btn-wrap separator">
-                <input type="radio" name="controlmeasure" id="checkbox-controls-all" value=0 onclick="app.loadFilter()" checked/>
+                <input type="radio" name="controlmeasure" id="checkbox-controls-all" value=0 onclick="app.loadFilter('control measurement', 'all')" checked/>
                 <label for="checkbox-controls-all" class="btn one">הכל</label>
-                <input type="radio" name="controlmeasure" id="checkbox-none" value=1 onclick="app.loadFilter()" />
+                <input type="radio" name="controlmeasure" id="checkbox-none" value=1 onclick="app.loadFilter('control measurement', 'none')" />
                 <label for="checkbox-none" class="btn one">אין בקרה</label>
-                <input type="radio" name="controlmeasure" id="checkbox-traffic-func" value=2 onclick="app.loadFilter()" />
+                <input type="radio" name="controlmeasure" id="checkbox-traffic-func" value=2 onclick="app.loadFilter('control measurement', 'func')" />
                 <label for="checkbox-traffic-func" class="btn one">רמזור תקין</label>
-                <input type="radio" name="controlmeasure" id="checkbox-traffic-flicker" value=3 onclick="app.loadFilter()" />
+                <input type="radio" name="controlmeasure" id="checkbox-traffic-flicker" value=3 onclick="app.loadFilter('control measurement', 'flicker')" />
                 <label for="checkbox-traffic-flicker" class="btn one">רמזור מהבהב (צהוב)</label>
-                <input type="radio" name="controlmeasure" id="checkbox-traffic-malfunc" value=4 onclick="app.loadFilter()" />
+                <input type="radio" name="controlmeasure" id="checkbox-traffic-malfunc" value=4 onclick="app.loadFilter('control measurement', 'malfunc')" />
                 <label for="checkbox-traffic-malfunc" class="btn one">רמזור לא תקין</label>
-                <input type="radio" name="controlmeasure" id="checkbox-stop" value=5 onclick="app.loadFilter()" />
+                <input type="radio" name="controlmeasure" id="checkbox-stop" value=5 onclick="app.loadFilter('control measurement', 'stop')" />
                 <label for="checkbox-stop" class="btn one">תמרור עצור</label>
-                <input type="radio" name="controlmeasure" id="checkbox-right" value=6 onclick="app.loadFilter()" />
+                <input type="radio" name="controlmeasure" id="checkbox-right" value=6 onclick="app.loadFilter('control measurement', 'right')" />
                 <label for="checkbox-right" class="btn one">תמרור זכות קדימה</label>
-                <input type="radio" name="controlmeasure" id="checkbox-controls-else" value=7 onclick="app.loadFilter()" />
+                <input type="radio" name="controlmeasure" id="checkbox-controls-else" value=7 onclick="app.loadFilter('control measurement', 'else')" />
                 <label for="checkbox-controls-else" class="btn one">אחר</label>
             </div>
 
             <div class="btn-label">מרחב:</div>
             <div class="btn-wrap separator">
-                <input type="radio" name="district" id="checkbox-district-all" value=0 onclick="app.loadFilter()" checked />
+                <input type="radio" name="district" id="checkbox-district-all" value=0 onclick="app.loadFilter('district', 'all')" checked />
                 <label for="checkbox-district-all" class="btn one">הכל</label>
-                <input type="radio" name="district" id="checkbox-district-hof" value=11 onclick="app.loadFilter()" />
+                <input type="radio" name="district" id="checkbox-district-hof" value=11 onclick="app.loadFilter('district', 'hof')" />
                 <label for="checkbox-district-hof" class="btn one">חוף</label>
-                <input type="radio" name="district" id="checkbox-district-galil" value=12 onclick="app.loadFilter()" />
+                <input type="radio" name="district" id="checkbox-district-galil" value=12 onclick="app.loadFilter('district', 'galil')" />
                 <label for="checkbox-district-galil" class="btn one">גליל</label>
-                <input type="radio" name="district" id="checkbox-district-amakim" value=14 onclick="app.loadFilter()" />
+                <input type="radio" name="district" id="checkbox-district-amakim" value=14 onclick="app.loadFilter('district', 'amakim')" />
                 <label for="checkbox-district-amakim" class="btn one">עמקים</label>
-                <input type="radio" name="district" id="checkbox-district-ta" value=20 onclick="app.loadFilter()" />
+                <input type="radio" name="district" id="checkbox-district-ta" value=20 onclick="app.loadFilter('district', 'ta')" />
                 <label for="checkbox-district-ta" class="btn one">תל-אביב</label>
-                <input type="radio" name="district" id="checkbox-district-eilat" value=33 onclick="app.loadFilter()" />
+                <input type="radio" name="district" id="checkbox-district-eilat" value=33 onclick="app.loadFilter('district', 'eilat')" />
                 <label for="checkbox-district-eilat" class="btn one">אילת</label>
-                <input type="radio" name="district" id="checkbox-district-hanegev" value=34 onclick="app.loadFilter()" />
+                <input type="radio" name="district" id="checkbox-district-hanegev" value=34 onclick="app.loadFilter('district', 'hanegev')" />
                 <label for="checkbox-district-hanegev" class="btn one">הנגב</label>
-                <input type="radio" name="district" id="checkbox-district-lachish" value=38 onclick="app.loadFilter()" />
+                <input type="radio" name="district" id="checkbox-district-lachish" value=38 onclick="app.loadFilter('district', 'lachish')" />
                 <label for="checkbox-district-lachish" class="btn one">לכיש</label>
-                <input type="radio" name="district" id="checkbox-district-shomron" value=41 onclick="app.loadFilter()" />
+                <input type="radio" name="district" id="checkbox-district-shomron" value=41 onclick="app.loadFilter('district', 'shomron')" />
                 <label for="checkbox-district-shomron" class="btn one">שומרון</label>
-                <input type="radio" name="district" id="checkbox-district-yehuda" value=43 onclick="app.loadFilter()" />
+                <input type="radio" name="district" id="checkbox-district-yehuda" value=43 onclick="app.loadFilter('district', 'yehuda')" />
                 <label for="checkbox-district-yehuda" class="btn one">יהודה</label>
-                <input type="radio" name="district" id="checkbox-district-hasharon" value=51 onclick="app.loadFilter()" />
+                <input type="radio" name="district" id="checkbox-district-hasharon" value=51 onclick="app.loadFilter('district', 'hasharon')" />
                 <label for="checkbox-district-hasharon" class="btn one">השרון</label>
-                <input type="radio" name="district" id="checkbox-district-hashfela" value=52 onclick="app.loadFilter()" />
+                <input type="radio" name="district" id="checkbox-district-hashfela" value=52 onclick="app.loadFilter('district', 'hashfela')" />
                 <label for="checkbox-district-hashfela" class="btn one">השפלה</label>
-                <input type="radio" name="district" id="checkbox-district-jerusalem" value=61 onclick="app.loadFilter()" />
+                <input type="radio" name="district" id="checkbox-district-jerusalem" value=61 onclick="app.loadFilter('district', 'jerusalem')" />
                 <label for="checkbox-district-jerusalem" class="btn one">ירושלים</label>
             </div>
         </div>
@@ -1475,7 +1475,7 @@
             changeMonth: true,
             changeYear: true,
             onSelect: function(dateText) {
-                app.loadFilter()
+                app.loadFilter('start date change', dateText.toString());
             }
         });
         $("#edate").datepicker({
@@ -1483,7 +1483,7 @@
             changeMonth: true,
             changeYear: true,
             onSelect: function(dateText) {
-                app.loadFilter()
+                app.loadFilter('end date change', dateText.toString());
             }
         });
         $("#sdate").datepicker("setDate", $('#sdateInit').val());

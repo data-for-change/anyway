@@ -1051,7 +1051,8 @@ $(function () {
 
             return age_groups.join();
         },
-        loadFilter: function() {
+        loadFilter: function(eventAction, eventLabel) {
+            ga('send', 'event', 'filters', eventAction, eventLabel);
             if ($("#checkbox-discussions").is(":checked")) { this.show_discussions='1'; } else { this.show_discussions=''; }
             if ($("#checkbox-accidents").is(":checked")) { this.show_markers='1'; this.show_accidents='1'; } else { this.show_accidents=''; }
             if ($("#checkbox-rsa").is(":checked")) { this.show_markers='1'; this.show_rsa='1'; } else { this.show_rsa=''; }

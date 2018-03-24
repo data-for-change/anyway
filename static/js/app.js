@@ -344,9 +344,11 @@ $(function () {
                         markerNearModel.set("groupID", firstMemberGroupId);
                         var currentMarkerNearSeverity = markerNearModel.get('severity');
                         // severity is an enum, when it's lower then it's more severe
-                        if (currentMarkerNearSeverity > groupSeverity) {
-                            groupsData[firstMemberIndex].severity = currentMarkerNearSeverity;
-                            groupSeverity = currentMarkerNearSeverity;
+                        if (currentMarkerNearSeverity < groupSeverity) {
+                            if (currentMarkerNearSeverity != SEVERITY_IRRELEVANT_RSA) {
+                                groupsData[firstMemberIndex].severity = currentMarkerNearSeverity;
+                                groupSeverity = currentMarkerNearSeverity;
+                            }
                         }
                         if (groupsData[firstMemberIndex].opacity != 'opaque') {
                             if (markerNearModel.get("locationAccuracy") == 1) {

@@ -344,7 +344,7 @@ $(function () {
                         markerNearModel.set("groupID", firstMemberGroupId);
                         var currentMarkerNearSeverity = markerNearModel.get('severity');
                         // severity is an enum, when it's lower then it's more severe
-                        if (currentMarkerNearSeverity < groupSeverity) {
+                        if (currentMarkerNearSeverity > groupSeverity) {
                             groupsData[firstMemberIndex].severity = currentMarkerNearSeverity;
                             groupSeverity = currentMarkerNearSeverity;
                         }

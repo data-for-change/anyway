@@ -7,7 +7,7 @@ This page describes the structure of the code comprising the project.
 All Python modules reside in the `anyway` subdirectory:
 * `flask_app.py`: main server code, using the Flask web framework.
 * `models.py`: definitions for the classes used in the Python code, and through SQLAlchemy, definitions for the corresponding database tables.
-* `process.py`: loading data from the Central Bureau of Statistics (CBS, למ"ס), of which a sample resides in `static/data/lms`.
+* `process.py`: loading data from the Central Bureau of Statistics (CBS, למ"ס), of which a sample resides in `static/data/cbs`.
 * `united.py`: loading data from United Hatzalah, of which a sample resides in `static/data/united`.
 * `importmail.py`: connecting to the Gmail inbox we use for storing the United Hatzalah data; used by `united.py`.
 * `clusters_calculator.py`, `globalmaptiles.py`: algorithm for calculating clusters of markers to be sent instead of individual ones in far zoom level.

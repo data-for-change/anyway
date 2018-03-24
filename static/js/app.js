@@ -1,4 +1,6 @@
 $(function () {
+    var GESTURE_HANDLING = (MAP_ONLY ? "cooperative" : "greedy");
+
     var AppRouter = Backbone.Router.extend({
         routes: {
             "": "navigateEmpty",
@@ -343,8 +345,10 @@ $(function () {
                         var currentMarkerNearSeverity = markerNearModel.get('severity');
                         // severity is an enum, when it's lower then it's more severe
                         if (currentMarkerNearSeverity < groupSeverity) {
-                            groupsData[firstMemberIndex].severity = currentMarkerNearSeverity;
-                            groupSeverity = currentMarkerNearSeverity;
+                            if (currentMarkerNearSeverity != SEVERITY_IRRELEVANT_RSA) {
+                                groupsData[firstMemberIndex].severity = currentMarkerNearSeverity;
+                                groupSeverity = currentMarkerNearSeverity;
+                            }
                         }
                         if (groupsData[firstMemberIndex].opacity != 'opaque') {
                             if (markerNearModel.get("locationAccuracy") == 1) {
@@ -443,11 +447,11 @@ $(function () {
                 zoom: INIT_ZOOM,
                 mapTypeId: google.maps.MapTypeId.ROADMAP,
                 mapTypeControl: false,
-                zoomControl: !MAP_ONLY,
-                panControl: !MAP_ONLY,
+                zoomControl: true,
+                panControl: true,
                 streetViewControl: !MAP_ONLY,
                 styles: MAP_STYLE,
-                gestureHandling: "greedy"
+                gestureHandling: GESTURE_HANDLING
             };
             this.map = new google.maps.Map(this.$el.find("#map_canvas").get(0), mapOptions);
 
@@ -736,7 +740,7 @@ $(function () {
                 this.updateUrl();
                 $(document).off('keydown',app.ESCinfoWindow);
             }
-            app.map.gestureHandling = "greedy";
+            app.map.gestureHandling = GESTURE_HANDLING;
         },
         clickMap: function (e) {
             this.closeInfoWindow();
@@ -1049,7 +1053,8 @@ $(function () {
 
             return age_groups.join();
         },
-        loadFilter: function() {
+        loadFilter: function(eventAction, eventLabel) {
+            ga('send', 'event', 'filters', eventAction, eventLabel);
             if ($("#checkbox-discussions").is(":checked")) { this.show_discussions='1'; } else { this.show_discussions=''; }
             if ($("#checkbox-accidents").is(":checked")) { this.show_markers='1'; this.show_accidents='1'; } else { this.show_accidents=''; }
             if ($("#checkbox-rsa").is(":checked")) { this.show_markers='1'; this.show_rsa='1'; } else { this.show_rsa=''; }

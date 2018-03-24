@@ -45,8 +45,9 @@ def process():
 @process.command()
 @click.option('--specific_folder', is_flag=True, default=False)
 @click.option('--delete_all', is_flag=True)
-@click.option('--path', type=str, default="static/data/lms")
+@click.option('--path', type=str, default="static/data/cbs")
 @click.option('--batch_size', type=int, default=10000)
+
 def cbs(specific_folder, delete_all, path, batch_size):
     from anyway.parsers.cbs import main
 
@@ -56,7 +57,7 @@ def cbs(specific_folder, delete_all, path, batch_size):
 @process.command()
 @click.option('--specific_folder', is_flag=True, default=False)
 @click.option('--delete_all', is_flag=True)
-@click.option('--path', type=str, default="static/data/lms_vehicles_registered")
+@click.option('--path', type=str, default="static/data/cbs_vehicles_registered")
 def registered_vehicles(specific_folder, delete_all, path):
     from anyway.parsers.registered import main
 

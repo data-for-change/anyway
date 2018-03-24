@@ -36,7 +36,7 @@
     -webkit-border-radius: 50% 50% 50% 0 !important;
     border-radius: 50% 50% 50% 0 !important;
     transform: rotate(-45deg) translate(12px,-31px) !important;
-    background-color: #ce18b9
+    background-color: #00aeef
 
 }
 
@@ -61,7 +61,7 @@
     border-radius: 50%;
     text-align: center;
     line-height: 24px;
-    color: #ce18b9;
+    color: #00aeef;
     -webkit-transform: rotate(45deg);
     -moz-transform: rotate(45deg);
     -o-transform: rotate(45deg);

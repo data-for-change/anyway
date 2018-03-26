@@ -35,7 +35,7 @@ install:
 
 before_script:
   - psql -c 'create database anyway;' -U postgres
-  - psql -U postgres -c "CREATE EXTENSION postgis;"
+  - psql -c 'CREATE EXTENSION postgis;' -U postgres -d anyway
   - alembic upgrade head
   - celery worker -A anyway.clusters_calculator -D
 

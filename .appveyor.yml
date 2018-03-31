@@ -5,25 +5,22 @@ environment:
   matrix:
     - PYTHON: "C:\\Python36"
     - PYTHON: "C:\\Python27"
- 
-cache:
- - C:\libs\%POSTGIS_FILE%.zip -> appveyor.yml
- 
+
 services:
  - postgresql96
 
 init:
-  - cd c:\libs
-  - curl -L -O -S -s http://winnie.postgis.net/download/windows/pg94/buildbot/postgis-pg96-binaries-2.4.3w64gcc48.zip
-  - 7z x postgis-pg96-binaries-2.3.6w32gcc481.zip
-  - xcopy /e /y /q postgis-pg96-binaries-2.4.3w64gcc48.zip "c:\program files\postgresql\9.6"
-  - ps: |
+- ps: |
     Set-Content "c:\program files\postgresql\9.6\data\pg_hba.conf" "host    all             all             ::1/128            trust"
     Add-Content "c:\program files\postgresql\9.6\data\pg_hba.conf" "host    all             all             127.0.0.1/32            trust"
     $env:PATH += ";c:\program files\postgresql\9.6\bin"
     $env:PATH = "$env:Python;$env:Python\Scripts;$env:PATH"
 
 install:
+  - cd c:\libs
+  - curl -L -O -S -s http://winnie.postgis.net/download/windows/pg94/buildbot/postgis-pg96-binaries-2.3.6w32gcc481.zip
+  - 7z x postgis-pg96-binaries-2.3.6w32gcc481.zip
+  - xcopy /e /y /q postgis-pg96-binaries-2.3.6w32gcc481.zip "c:\program files\postgresql\9.6"
   - python --version
   - python -m pip install -U --no-cache-dir pip wheel
   - python -m pip install --no-cache-dir -r requirements.txt -r test_requirements.txt

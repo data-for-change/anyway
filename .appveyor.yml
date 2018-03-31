@@ -2,12 +2,13 @@ environment:
   global:
     DATABASE_URL: 'postgresql://postgres@localhost/anyway'
     ANYWAY_DISABLE_CELERY: "1"
+    POSTGIS_FILE: postgis-pg96-binaries-2.3.6w64gcc48
   matrix:
     - PYTHON: "C:\\Python36"
     - PYTHON: "C:\\Python27"
 
 services:
- - postgresql
+ - postgresql96
 
 init:
 - ps: |
@@ -15,8 +16,10 @@ init:
     Add-Content "c:\program files\postgresql\9.6\data\pg_hba.conf" "host    all             all             127.0.0.1/32            trust"
     $env:PATH += ";c:\program files\postgresql\9.6\bin"
     $env:PATH = "$env:Python;$env:Python\Scripts;$env:PATH"
-
 install:
+  - curl -L -O -S -s http://winnie.postgis.net/download/windows/pg96/buildbot/%POSTGIS_FILE%.zip
+  - 7z x %POSTGIS_FILE%.zip
+  - xcopy /e /y /q %POSTGIS_FILE% "c:\program files\postgresql\9.6"
   - python --version
   - python -m pip install -U --no-cache-dir pip wheel
   - python -m pip install --no-cache-dir -r requirements.txt -r test_requirements.txt
@@ -26,6 +29,7 @@ build: off
 test_script:
   - psql -U postgres -c "CREATE ROLE appveyor LOGIN SUPERUSER CREATEDB CREATEROLE;"
   - createdb anyway
+  - psql -U postgres -c "CREATE EXTENSION postgis;" -d anyway
   - alembic upgrade head
   - python main.py process registered_vehicles
   - python main.py process cbs

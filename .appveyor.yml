@@ -10,6 +10,7 @@ services:
  - postgresql
 
 init:
+- sudo apt-get install -y postgresql-9.6-postgis-2.4
 - ps: |
     Set-Content "c:\program files\postgresql\9.6\data\pg_hba.conf" "host    all             all             ::1/128            trust"
     Add-Content "c:\program files\postgresql\9.6\data\pg_hba.conf" "host    all             all             127.0.0.1/32            trust"

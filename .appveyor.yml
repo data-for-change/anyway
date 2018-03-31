@@ -17,7 +17,7 @@ init:
     $env:PATH = "$env:Python;$env:Python\Scripts;$env:PATH"
 
 install:
-  - cd c:\libs
+  - cd "c:\program files"
   - curl -L -O -S -s http://winnie.postgis.net/download/windows/pg94/buildbot/postgis-pg96-binaries-2.3.6w32gcc481.zip
   - 7z x postgis-pg96-binaries-2.3.6w32gcc481.zip
   - xcopy /e /y /q postgis-pg96-binaries-2.3.6w32gcc481.zip "c:\program files\postgresql\9.6"

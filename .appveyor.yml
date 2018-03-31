@@ -17,7 +17,7 @@ init:
     $env:PATH = "$env:Python;$env:Python\Scripts;$env:PATH"
 
 install:
-  - sh: sudo apt-get install -y postgresql-9.6-postgis-2.4
+  - sh: sudo apt-get install -y postgresql-9.6-postgis-scripts
   - python --version
   - python -m pip install -U --no-cache-dir pip wheel
   - python -m pip install --no-cache-dir -r requirements.txt -r test_requirements.txt

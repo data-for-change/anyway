@@ -7,7 +7,7 @@ environment:
     - PYTHON: "C:\\Python36"
     - PYTHON: "C:\\Python27"
 cache:
- - "c:\program files\%POSTGIS_FILE%.zip" -> appveyor.yml
+ - c:\program files\%POSTGIS_FILE%.zip -> appveyor.yml
  
 services:
  - postgresql96

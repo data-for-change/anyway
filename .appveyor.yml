@@ -10,7 +10,6 @@ services:
  - postgresql
 
 init:
-- sudo apt-get install -y postgresql-9.6-postgis-2.4
 - ps: |
     Set-Content "c:\program files\postgresql\9.6\data\pg_hba.conf" "host    all             all             ::1/128            trust"
     Add-Content "c:\program files\postgresql\9.6\data\pg_hba.conf" "host    all             all             127.0.0.1/32            trust"
@@ -18,6 +17,7 @@ init:
     $env:PATH = "$env:Python;$env:Python\Scripts;$env:PATH"
 
 install:
+  - sudo apt-get install -y postgresql-9.6-postgis-2.4
   - python --version
   - python -m pip install -U --no-cache-dir pip wheel
   - python -m pip install --no-cache-dir -r requirements.txt -r test_requirements.txt

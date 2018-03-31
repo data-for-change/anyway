@@ -11,13 +11,13 @@ services:
 
 init:
 - ps: |
-    Set-Content "\usr\share\postgresql\9.6\data\pg_hba.conf" "host    all             all             ::1/128            trust"
-    Add-Content "\usr\share\postgresql\9.6\data\pg_hba.conf" "host    all             all             127.0.0.1/32            trust"
+    Set-Content "\usr\share\postgresql\9.6\main\pg_hba.conf" "host    all             all             ::1/128            trust"
+    Add-Content "\usr\share\postgresql\9.6\main\pg_hba.conf" "host    all             all             127.0.0.1/32            trust"
     $env:PATH += ";\usr\share\postgresql\9.6\bin"
     $env:PATH = "$env:Python;$env:Python\Scripts;$env:PATH"
 
 install:
-  - sh: sudo apt-get install -y postgresql-9.6 postgis postgresql-9.6-postgis-scripts
+  - sh: sudo apt-get install -y postgresql-9.6 postgresql-9.6-postgis-2.3 postgresql-contrib-9.6 postgresql-9.6-postgis-scripts
   - python --version
   - python -m pip install -U --no-cache-dir pip wheel
   - python -m pip install --no-cache-dir -r requirements.txt -r test_requirements.txt

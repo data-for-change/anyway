@@ -21,7 +21,7 @@ init:
 
 install:
   - cd "c:\program files"
-  - curl -L -O -S -s http://winnie.postgis.net/download/windows/pg94/buildbot/%POSTGIS_FILE%.zip
+  - curl -L -O -S -s http://winnie.postgis.net/download/windows/pg96/buildbot/%POSTGIS_FILE%.zip
   - 7z x %POSTGIS_FILE%.zip
   - xcopy /e /y /q %POSTGIS_FILE%.zip "c:\program files\postgresql\9.6"
   - python --version

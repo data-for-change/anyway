@@ -19,7 +19,7 @@ init:
 install:
   - curl -L -O -S -s http://winnie.postgis.net/download/windows/pg94/buildbot/postgis-pg96-binaries-2.3.6w32gcc481.zip
   - 7z x postgis-pg96-binaries-2.3.6w32gcc481.zip
-  - xcopy /e /y /q postgis-pg96-binaries-2.3.6w32gcc481.zip
+  - xcopy /e /y /q postgis-pg96-binaries-2.3.6w32gcc481.zip c:\program files\postgresql\9.6
   - python --version
   - python -m pip install -U --no-cache-dir pip wheel
   - python -m pip install --no-cache-dir -r requirements.txt -r test_requirements.txt

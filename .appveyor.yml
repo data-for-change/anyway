@@ -29,7 +29,6 @@ build: off
 test_script:
   - psql -U postgres -c "CREATE ROLE appveyor LOGIN SUPERUSER CREATEDB CREATEROLE;"
   - createdb anyway
-  - psql -U postgres -c "CREATE EXTENSION postgis;" -d anyway
   - alembic upgrade head
   - python main.py process registered_vehicles
   - python main.py process cbs

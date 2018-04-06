@@ -37,7 +37,6 @@ install:
 before_script:
   - sudo apt-get install -y postgresql-9.6-postgis-2.4
   - psql -c 'create database anyway;' -U postgres
-  - psql -c 'CREATE EXTENSION postgis;' -U postgres -d anyway
   - alembic upgrade head
   - celery worker -A anyway.clusters_calculator -D
 

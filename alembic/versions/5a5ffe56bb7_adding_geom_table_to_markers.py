@@ -26,7 +26,7 @@ def upgrade():
     conn.execute("SELECT AddGeometryColumn('public','markers','geom',4326,'POINT',2);")
     conn.execute('UPDATE markers SET geom = ST_SetSRID(ST_MakePoint(longitude,latitude),4326);')
     conn.execute('CREATE INDEX idx_markers_geom ON markers USING GIST(geom);')
-    conn.execute('VACUUM ANALYZE')
+    conn.execute('VACUUM ANALYZE;')
 
     ### end Alembic commands ###
 
@@ -40,5 +40,5 @@ def downgrade():
     conn.execute('DROP EXTENSION postgis_topology;')
     conn.execute('DROP EXTENSION postgis;')
     conn.execute('DROP SCHEMA IF EXISTS topology CASCADE;')
-    conn.execute('VACUUM ANALYZE')
+    conn.execute('VACUUM ANALYZE;')
     ### end Alembic commands ###

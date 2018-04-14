@@ -14,7 +14,7 @@ node_js:
 
 addons:
   sauce_connect: true
-  postgresql: 9.6
+  postgresql
 
 env:
   global:
@@ -35,7 +35,6 @@ install:
   - yarn global add eslint
 
 before_script:
-  - sudo apt-get install -y postgresql-9.6-postgis-2.4
   - psql -c 'create database anyway;' -U postgres
   - alembic upgrade head
   - celery worker -A anyway.clusters_calculator -D

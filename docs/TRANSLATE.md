@@ -1,7 +1,7 @@
 In the python code, instead of writing a message string like `'Message'`, use `gettext(u'Message In English')` (see `main.py`)
 Dont forget to import gettext:
 
-```from flask.ext.babel import gettext, ngettext```
+```from flask_babel import gettext, ngettext```
 
 In the templates, instead of writing strings like `<title>ANYWAY</title>`, use `<title>{{ gettext('ANYWAY - Influencing in Any Way') }}</title>` (See `templates/index.html`)
 

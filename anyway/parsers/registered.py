@@ -6,7 +6,7 @@ import os
 import re
 from datetime import datetime
 
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 
 from ..models import RegisteredVehicle, City
 from ..utilities import init_flask, time_delta, CsvReader, ImporterUI, truncate_tables,decode_hebrew

@@ -8,13 +8,13 @@ from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, Date
         ForeignKeyConstraint, func, and_
 from sqlalchemy.orm import relationship, load_only, backref
 from .utilities import init_flask, decode_hebrew
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 from six import iteritems
 
 import datetime
 from . import localization
 from .database import Base
-from flask.ext.security import UserMixin, RoleMixin
+from flask_security import UserMixin, RoleMixin
 app = init_flask()
 db = SQLAlchemy(app)
 

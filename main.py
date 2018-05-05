@@ -87,7 +87,7 @@ def rsa(filename):
 @click.argument('identifiers', nargs=-1)
 def load_discussions(identifiers):
     from anyway.models import DiscussionMarker
-    from flask.ext.sqlalchemy import SQLAlchemy
+    from flask_sqlalchemy import SQLAlchemy
     from anyway.utilities import init_flask
 
     app = init_flask()

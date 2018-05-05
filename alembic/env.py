@@ -55,7 +55,7 @@ def run_migrations_online():
 
     """
     from anyway.utilities import init_flask
-    from flask.ext.sqlalchemy import SQLAlchemy
+    from flask_sqlalchemy import SQLAlchemy
     app = init_flask()
     connectable = SQLAlchemy(app).engine
 

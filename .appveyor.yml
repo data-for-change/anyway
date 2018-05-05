@@ -2,7 +2,7 @@ environment:
   global:
     DATABASE_URL: 'postgresql://postgres@localhost/anyway'
     ANYWAY_DISABLE_CELERY: "1"
-    POSTGIS_FILE: postgis-pg96-binaries-2.3.7w64gcc48
+    POSTGIS_FILE: postgis-pg96-binaries-2.3.4w64gcc48
   matrix:
     - PYTHON: "C:\\Python36"
     - PYTHON: "C:\\Python27"
@@ -17,7 +17,7 @@ init:
     $env:PATH += ";c:\program files\postgresql\9.6\bin"
     $env:PATH = "$env:Python;$env:Python\Scripts;$env:PATH"
 install:
-  - curl -L -O -S -s http://winnie.postgis.net/download/windows/pg96/buildbot/%POSTGIS_FILE%.zip
+  - curl -f -L -O -S -s http://winnie.postgis.net/download/windows/pg96/buildbot/archive/%POSTGIS_FILE%.zip
   - 7z x %POSTGIS_FILE%.zip
   - xcopy /e /y /q %POSTGIS_FILE% "c:\program files\postgresql\9.6"
   - python --version

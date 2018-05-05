@@ -36,7 +36,7 @@ class User(Base, UserMixin):
     id = Column(Integer, primary_key=True)
     email = Column(String(120), unique=True)
     first_name = Column(String(50))
-    last_name = Column(String(50)
+    last_name = Column(String(50))
     access_token = Column(String(100))
     username = Column(String(50), unique=True)
     facebook_id = Column(String(50))

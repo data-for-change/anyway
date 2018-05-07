@@ -159,8 +159,7 @@ if __name__ == "__main__":
     parser.add_argument('--start_date', default='01-01-2012', type=valid_date, help='The Start Date - format DD-MM-YYYY')
     parser.add_argument('--end_date', default='01-01-2025', type=valid_date, help='The End Date - format DD-MM-YYYY')
     parser.add_argument('--distance', default=0.5, help='float In KM. Default is 0.5 (500m)', type=float)
-    parser.add_argument('--pedestrians_only', action='store_true', default=False,
-                        help='use the flag for pedestrian only results')
+    parser.add_argument('--pedestrians_only', action='store_true', default=False, help='use the flag for pedestrian only results')
     parser.add_argument('--output_file', default='output.csv', help='output file of the results. Default is output.csv')
     args = parser.parse_args()
     main(args.input_csv_filename, args.start_date, args.end_date, args.distance, args.pedestrians_only, args.output_file)

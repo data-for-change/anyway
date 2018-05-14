@@ -92,7 +92,7 @@ def read_all_excels(codebook_files):
             xls['DESCRIPTION'] = xls['DESCRIPTION'].astype(unicode).apply(lambda x: x.strip())
             df = pd.concat([df, xls])
         except:
-            print "Exception with file: %s" % codebook_file
+            print("Exception with file: {}".format(codebook_file))
 
     return df.drop_duplicates()
 

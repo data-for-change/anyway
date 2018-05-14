@@ -28,3 +28,4 @@ six
 celery[redis]
 openpyxl
 pandas
+xlrd

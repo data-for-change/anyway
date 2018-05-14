@@ -3,7 +3,7 @@ from flask import request
 from .models import User
 from functools import wraps
 from .utilities import init_flask
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 app = init_flask()
 db = SQLAlchemy(app)
 

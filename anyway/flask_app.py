@@ -7,10 +7,10 @@ import time
 
 import jinja2
 from flask import make_response, render_template, Response, jsonify, url_for, flash, abort
-import flask.ext.assets
+from flask_assets import Environment
 from webassets.ext.jinja2 import AssetsExtension
 from webassets import Environment as AssetsEnvironment
-from flask.ext.babel import Babel,gettext
+from flask_babel import Babel,gettext
 from .clusters_calculator import retrieve_clusters
 from sqlalchemy.orm import load_only
 
@@ -23,16 +23,16 @@ from .constants import CONST
 
 from wtforms import form, fields, validators, StringField, PasswordField, Form
 import flask_admin as admin
-import flask.ext.login as login
+import flask_login as login
 from flask_admin.contrib import sqla
 from flask_admin import helpers, expose, BaseView
 from werkzeug.security import check_password_hash
 from sendgrid import sendgrid, SendGridClientError, SendGridServerError, Mail
 import glob
 from .utilities import CsvReader, decode_hebrew
-from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.security import Security, SQLAlchemyUserDatastore, roles_required, current_user, LoginForm, login_required
-from flask.ext.compress import Compress
+from flask_sqlalchemy import SQLAlchemy
+from flask_security import Security, SQLAlchemyUserDatastore, roles_required, current_user, LoginForm, login_required
+from flask_compress import Compress
 
 from .oauth import OAuthSignIn
 
@@ -59,7 +59,7 @@ app.config['OAUTH_CREDENTIALS'] = {
         'secret': os.environ.get('GOOGLE_LOGIN_CLIENT_SECRET')
     }
 }
-assets = flask.ext.assets.Environment()
+assets = Environment()
 assets.init_app(app)
 
 assets_env = AssetsEnvironment(os.path.join(utilities._PROJECT_ROOT, 'static'), '/static')

@@ -9,7 +9,7 @@ from datetime import datetime
 import six
 from six import iteritems
 
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_
 
 from .. import field_names, localization

@@ -17,22 +17,22 @@
 
     <link href="{{ url }}static/img/icon.png" rel="icon"/>
     <link href='https://fonts.googleapis.com/css?family=Alef:400,700' rel='stylesheet' type='text/css'>
-    {% assets filters="yui_css", output="css/app.min.css",
-    "css/jquery.smartbanner.css",
-    "css/bootstrap.rtl.css",
-    "css/style.css",
-    "css/daterangepicker.css",
-    "css/accordion.css",
-    "css/bootstrap-tour.min.css",
-    "css/jquery-ui.min.css",
-    "css/jquery.jspanel.min.css" %}
+        {% assets filters="yui_css", output="css/app.min.css",
+            "css/jquery.smartbanner.css",
+            "css/bootstrap.rtl.css",
+            "css/style.css",
+            "css/daterangepicker.css",
+            "css/accordion.css",
+	        "css/bootstrap-tour.min.css",
+	        "css/jquery-ui.min.css",
+            "css/jquery.jspanel.min.css",
+            "css/markers.css"    %}
     <link rel="stylesheet" href="{{ ASSET_URL }}"/>
     {% endassets %}
     <!--// font awesome-->
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <!--// material design-->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="../static/css/markers.css?v=1.2">
 </head>
 
 <body style="margin: 0; position: relative; width: 100%; height: 100%">

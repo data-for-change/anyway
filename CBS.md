@@ -5,7 +5,7 @@ It contains information about traffic accidents from 2005-2017, including locati
 See the data on a map on http://oway.org.il/
 
 ## Directory structure
-The zipped archive contains two directories, `Accidents Type 1` and `Accidents Type 3`, each containing files of a different format. The subdirectories under these directories each correspond to one year (the first four digits in the directory name). Inside each subdirectory there are various files, each with the subdirectory name as a prefix. Here are the description of the files (listed without the prefix):
+The zipped archive contains two directories, `accidents_type_1` and `accidents_type_3`, each containing files of a different format. The subdirectories under these directories each correspond to one year (the first four digits in the directory name). Inside each subdirectory there are various files, each with the subdirectory name as a prefix. Here are the description of the files (listed without the prefix):
 
 * **AccAverages.{pdf,xls}**: averages of all numeric columns in `AccData.csv`, for data validation.
 * **AccCodebook.{pdf,xls}**: description of each column in `AccData.csv`, and its possible values.

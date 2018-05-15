@@ -101,6 +101,7 @@ $(function () {
                 .bind("reset", this.loadMarkers, this)
                 .bind("destroy", this.loadMarkers, this)
                 .bind("add", this.loadMarker, this)
+                .bind("remove", this.removeMarker, this)
                 .bind("change:currentModel", this.chooseMarker, this);
 
             this.clusters
@@ -762,12 +763,28 @@ $(function () {
                 }
             });
         },
-        loadMarker: function (model) {
+        getMarkerIndex: function(model) {
             for (var i = 0; i < this.markerList.length; i++) {
                 if (this.markerList[i].model.get("type") == model.get("type") &&
                     this.markerList[i].model.attributes.id == model.attributes.id) {
-                    return; // avoid adding duplicates
+                        return i;
                 }
+            }
+            return -1;
+        },
+        removeMarker: function (model) {
+            var markerIndex = this.getMarkerIndex(model);
+            if (markerIndex >= 0) {
+                var marker = this.markerList[markerIndex];
+                marker.marker.setMap(null);
+                this.markerList.splice(markerIndex, 1);
+                model.set("markerView", this.markerList.length);
+            }
+        },
+        loadMarker: function (model) {
+            var markerIndex = this.getMarkerIndex(model);
+            if (markerIndex >= 0) {
+                return; // avoid adding duplicates
             }
 
             // markers are loaded immediately as they are fetched

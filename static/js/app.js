@@ -676,14 +676,13 @@ $(function () {
             this.$el.find(".sidebar-container").append(this.sidebar.$el);
             console.log('Loaded SidebarView');
 
+            this.spinner = new Spinner();
             $(document).ajaxStart(function () {
-                this.spinner = $('<li class="spinner-container"></li>');
-                this.sidebar.$currentViewList.prepend(this.spinner);
-                this.spinner.spin();
+                this.spinner.spin(this.sidebar.$currentViewList[0]);
             }.bind(this));
             $(document).ajaxStop(function () {
                 if (this.spinner) {
-                    this.spinner.spin(false);
+                    this.spinner.stop();
                 }
             }.bind(this));
             console.log('Loaded spinner');

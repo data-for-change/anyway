@@ -754,7 +754,7 @@ $(function () {
                     layer = LAYERS[severity];
                 }
             });
-        },        
+        },
         startSpinner: function() {
             this.spinner.spin(this.sidebar.$currentViewList[0]);
         },

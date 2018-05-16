@@ -102,6 +102,8 @@ $(function () {
                 .bind("destroy", this.loadMarkers, this)
                 .bind("add", this.loadMarker, this)
                 .bind("remove", this.removeMarker, this)
+                .bind("request", this.startSpinner, this)
+                .bind("sync", this.stopSpinner, this)
                 .bind("change:currentModel", this.chooseMarker, this);
 
             this.clusters
@@ -677,15 +679,6 @@ $(function () {
             console.log('Loaded SidebarView');
 
             this.spinner = new Spinner();
-            $(document).ajaxStart(function () {
-                this.spinner.spin(this.sidebar.$currentViewList[0]);
-            }.bind(this));
-            $(document).ajaxStop(function () {
-                if (this.spinner) {
-                    this.spinner.stop();
-                }
-            }.bind(this));
-            console.log('Loaded spinner');
 
             this.previousZoom = this.map.zoom;
 
@@ -761,6 +754,14 @@ $(function () {
                     layer = LAYERS[severity];
                 }
             });
+        },        
+        startSpinner: function() {
+            this.spinner.spin(this.sidebar.$currentViewList[0]);
+        },
+        stopSpinner: function() {
+            if (this.spinner) {
+                this.spinner.stop();
+            }
         },
         getMarkerIndex: function(model) {
             for (var i = 0; i < this.markerList.length; i++) {

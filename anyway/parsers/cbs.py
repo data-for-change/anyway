@@ -9,7 +9,7 @@ from datetime import datetime
 import six
 from six import iteritems
 
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_
 
 from .. import field_names, localization
@@ -22,7 +22,7 @@ import logging
 failed_dirs = OrderedDict()
 
 CONTENT_ENCODING = 'cp1255'
-ACCIDENT_TYPE_REGEX = re.compile(r"Accidents Type (?P<type>\d)")
+ACCIDENT_TYPE_REGEX = re.compile(r"accidents_type_(?P<type>\d)")
 
 ACCIDENTS = 'accidents'
 CITIES = 'cities'

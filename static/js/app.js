@@ -101,6 +101,9 @@ $(function () {
                 .bind("reset", this.loadMarkers, this)
                 .bind("destroy", this.loadMarkers, this)
                 .bind("add", this.loadMarker, this)
+                .bind("remove", this.removeMarker, this)
+                .bind("request", this.startSpinner, this)
+                .bind("sync", this.stopSpinner, this)
                 .bind("change:currentModel", this.chooseMarker, this);
 
             this.clusters
@@ -675,17 +678,7 @@ $(function () {
             this.$el.find(".sidebar-container").append(this.sidebar.$el);
             console.log('Loaded SidebarView');
 
-            $(document).ajaxStart(function () {
-                this.spinner = $('<li class="spinner-container"></li>');
-                this.sidebar.$currentViewList.prepend(this.spinner);
-                this.spinner.spin();
-            }.bind(this));
-            $(document).ajaxStop(function () {
-                if (this.spinner) {
-                    this.spinner.spin(false);
-                }
-            }.bind(this));
-            console.log('Loaded spinner');
+            this.spinner = new Spinner();
 
             this.previousZoom = this.map.zoom;
 
@@ -762,12 +755,36 @@ $(function () {
                 }
             });
         },
-        loadMarker: function (model) {
+        startSpinner: function() {
+            this.spinner.spin(this.sidebar.$currentViewList[0]);
+        },
+        stopSpinner: function() {
+            if (this.spinner) {
+                this.spinner.stop();
+            }
+        },
+        getMarkerIndex: function(model) {
             for (var i = 0; i < this.markerList.length; i++) {
                 if (this.markerList[i].model.get("type") == model.get("type") &&
                     this.markerList[i].model.attributes.id == model.attributes.id) {
-                    return; // avoid adding duplicates
+                        return i;
                 }
+            }
+            return -1;
+        },
+        removeMarker: function (model) {
+            var markerIndex = this.getMarkerIndex(model);
+            if (markerIndex >= 0) {
+                var marker = this.markerList[markerIndex];
+                marker.marker.setMap(null);
+                this.markerList.splice(markerIndex, 1);
+                model.set("markerView", this.markerList.length);
+            }
+        },
+        loadMarker: function (model) {
+            var markerIndex = this.getMarkerIndex(model);
+            if (markerIndex >= 0) {
+                return; // avoid adding duplicates
             }
 
             // markers are loaded immediately as they are fetched

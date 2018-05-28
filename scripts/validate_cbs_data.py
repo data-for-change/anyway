@@ -45,7 +45,7 @@ def main(cbs_directory_path, all_output_file_name, missing_files_output_file_nam
     missing_data_output_file = open(missing_files_output_file_name, 'w')
 
     for subdir, dirs, files in sorted(os.walk(cbs_directory_path)):
-        if subdir.endswith('Accidents Type 1') or subdir.endswith('Accidents Type 3') or subdir.endswith('cbs') or subdir.endswith('cbs'):
+        if subdir.endswith('accidents_type_1') or subdir.endswith('accidents_type_3') or subdir.endswith('cbs') or subdir.endswith('cbs'):
             continue
         extra_files_list, missing_files_list = validate_cbs_directory(subdir)
         all_output_file.write(subdir + ':\n')

@@ -28,6 +28,7 @@
             "css/jquery.jspanel.min.css",
             "css/markers.css"    %}
     <link rel="stylesheet" href="{{ ASSET_URL }}"/>
+    <link rel="stylesheet" href="static/css/spin.css"/>
     {% endassets %}
     <!--// font awesome-->
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -1097,51 +1098,50 @@ ANYWAY מציגה על גבי מפה תאונות דרכים עם נפגעים �
         <li>
             <a>
       <div><div class="gmnoprint" title="<%- icon %>" ></div></div><span>אירוע שדווח על ידי שומרי הדרך</span> <br> <span class="description"><%- description %></span>
-            </a>
-        </li>
-    </script>
+    </a>
+  </li>
+</script>
 
-    <script type="text/javascript"
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBpOmft-UskZsAQth9vNl0fN6EXaRR6dZc&libraries=places,visualization&language=iw"></script>
-    {% assets filters="rjsmin", output="js/app.min.js",
-    "js/libs/jquery-1.11.3.min.js",
-    "js/libs/spin.min.js",
-    "js/libs/jquery.spin.js",
-    "js/libs/oms.min.js",
-    "js/libs/markerclusterer.js",
-    "js/markerClustererAugment.js",
-    "js/libs/underscore.js",
-    "js/libs/backbone.js",
-    "js/libs/backbone.paginator.min.js",
-    "js/libs/bootstrap.js",
-    "js/libs/notify-combined.min.js",
-    "js/libs/moment-with-langs.min.js",
-    "js/libs/date.js",
-    "js/libs/daterangepicker.js",
-    "js/libs/js-itm.js",
-    "js/constants.js",
-    "js/marker.js",
-    "js/clusterView.js",
-    "js/featuredialog.js",
-    "js/preferencesdialog.js",
-    "js/logindialog.js",
-    "js/sidebar.js",
-    "js/contextmenu.js",
-    "js/map_style.js",
-    "js/clipboard.js",
-    "js/libs/bootstrap-tour.min.js",
-    "js/app.js",
-    "js/localization.js",
-    "js/inv_dict.js",
-    "js/veh_dict.js",
-    "js/retina.js",
-    "js/statPanel.js",
-    "js/reports.js"
-    %}
-    <script type="text/javascript" src="{{ ASSET_URL }}"></script>
-    {% endassets %}
+<script type="text/javascript"
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBpOmft-UskZsAQth9vNl0fN6EXaRR6dZc&libraries=places,visualization&language=iw"></script>
+{% assets filters="rjsmin", output="js/app.min.js",
+"js/libs/jquery-1.11.3.min.js",
+"js/libs/spin.js",
+"js/libs/oms.min.js",
+"js/libs/markerclusterer.js",
+"js/markerClustererAugment.js",
+"js/libs/underscore.js",
+"js/libs/backbone.js",
+"js/libs/backbone.paginator.min.js",
+"js/libs/bootstrap.js",
+"js/libs/notify-combined.min.js",
+"js/libs/moment-with-langs.min.js",
+"js/libs/date.js",
+"js/libs/daterangepicker.js",
+"js/libs/js-itm.js",
+"js/constants.js",
+"js/marker.js",
+"js/clusterView.js",
+"js/featuredialog.js",
+"js/preferencesdialog.js",
+"js/logindialog.js",
+"js/sidebar.js",
+"js/contextmenu.js",
+"js/map_style.js",
+"js/clipboard.js",
+"js/libs/bootstrap-tour.min.js",
+"js/app.js",
+"js/localization.js",
+"js/inv_dict.js",
+"js/veh_dict.js",
+"js/retina.js",
+"js/statPanel.js",
+"js/reports.js"
+%}
+<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
 
-    <script type="text/javascript">
+<script type="text/javascript">
 
             {% if CONST %}
                 {% for key,val in iteritems(CONST) %}

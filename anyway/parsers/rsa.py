@@ -11,7 +11,6 @@ from dateutil import parser
 app = init_flask()
 db = SQLAlchemy(app)
 
-
 def _iter_rows(filename):
     workbook = load_workbook(filename, read_only=True)
     sheet = workbook[u"Worksheet1"]
@@ -24,8 +23,8 @@ def _iter_rows(filename):
 
         q = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_([id_]))
         if q.all():
-            print("id " + str(id_) + " already exists!")
-            continue
+            q.delete(synchronize_session='fetch')
+            db.session.commit()
 
         violation = row[1].value
         vehicle_type = row[2].value

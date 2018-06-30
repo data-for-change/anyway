@@ -31,7 +31,7 @@ Contributing
 ## Getting the code and Adding CI to your forked repository
 1. [Fork](https://github.com/hasadna/anyway/fork) this repository on GitHub
 1. Add Travis CI to your forked repository - in your github forked repository: Settings -> Integrations & services -> Add service -> Travis CI
-1. Add AppVeyor to your forked repository - [SignUp with your GitHub account](https://ci.appveyor.com/login) -> New Project -> GitHub -> anyway
+1. Add AppVeyor to your forked repository - [Login with your GitHub account](https://ci.appveyor.com/login) -> New Project -> GitHub -> anyway
 1. `git clone https://github.com/*you*/anyway`
 1. Add the main repository as your upstream remote: `git remote add upstream https://github.com/hasadna/anyway`
 

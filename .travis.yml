@@ -32,7 +32,7 @@ sudo: false
 
 install:
   - pip install -r requirements.txt -r test_requirements.txt
-  - yarn global add eslint
+  - yarn global add eslint --ignore-engines
 
 before_script:
   - sudo apt-get install -y postgresql-9.6-postgis-2.4

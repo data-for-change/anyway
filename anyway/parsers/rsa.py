@@ -8,6 +8,8 @@ from flask_sqlalchemy import SQLAlchemy
 from openpyxl import load_workbook
 from dateutil import parser
 
+app = init_flask()
+db = SQLAlchemy(app)
 
 def _iter_rows(filename):
     workbook = load_workbook(filename, read_only=True)
@@ -18,11 +20,17 @@ def _iter_rows(filename):
     assert [cell.value for cell in first_row] == headers
     for row in rows:
         id_ = int(row[0].value)
+
+        q = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_([id_]))
+        if q.all():
+            q.delete(synchronize_session='fetch')
+            db.session.commit()
+
         violation = row[1].value
         vehicle_type = row[2].value
         coordinates = row[3].value
         video_link = row[4].value
-        timestamp = parser.parse(row[5].value)
+        timestamp = parser.parse(row[5].value, dayfirst=True)
         if not violation:
             continue
 

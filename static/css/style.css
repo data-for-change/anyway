@@ -864,10 +864,3 @@ input[type='checkbox']{
     background-color: #D94330;
     color: #fff !important; 
 }
-
-.spinner-container {
-    position: absolute;
-    height: 40px;
-    top: 50%;
-    right: 120px
-}

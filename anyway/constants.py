@@ -1,7 +1,7 @@
 class Constants(object):
 
     # constants that used in javascript and python
-    MINIMAL_ZOOM = 16
+    MINIMAL_ZOOM = 15
 
     MARKER_TYPE_ACCIDENT = 1
     MARKER_TYPE_DISCUSSION = 2

@@ -1,3 +1,4 @@
+geoalchemy2
 Flask
 Flask-Assets
 Flask-Babel

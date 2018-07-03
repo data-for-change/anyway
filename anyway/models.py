@@ -447,6 +447,7 @@ class DiscussionMarker(MarkerMixin, Base):
     }
 
     identifier = Column(String(50), unique=True)
+    geom = Column(Geometry('POINT'))
 
     def serialize(self, is_thin=False):
         return {

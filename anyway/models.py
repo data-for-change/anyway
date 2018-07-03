@@ -489,7 +489,6 @@ class DiscussionMarker(MarkerMixin, Base):
         pol_str = 'SRID=4326;POLYGON(({0} {1}, {2} {1}, {2} {3}, {0} {3}, {0} {1}))'.format(baseX, baseY, distanceX \
                                                                                   ,distanceY)
         markers = db.session.query(DiscussionMarker).filter(DiscussionMarker.geom.ST_Intersects(pol_str)) \
-        markers = db.session.query(DiscussionMarker) \
             .order_by(desc(DiscussionMarker.created))
         return markers
 

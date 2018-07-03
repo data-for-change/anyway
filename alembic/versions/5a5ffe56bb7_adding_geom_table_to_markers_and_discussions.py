@@ -1,4 +1,4 @@
-"""Adding geom table to markers
+"""Adding geom table to markers and discussions
 
 Revision ID: 5a5ffe56bb7
 Revises: 3c0d35fdbe2e
@@ -26,6 +26,9 @@ def upgrade():
     conn.execute("SELECT AddGeometryColumn('public','markers','geom',4326,'POINT',2);")
     conn.execute('UPDATE markers SET geom = ST_SetSRID(ST_MakePoint(longitude,latitude),4326);')
     conn.execute('CREATE INDEX idx_markers_geom ON markers USING GIST(geom);')
+    conn.execute("SELECT AddGeometryColumn('public','discussions','geom',4326,'POINT',2);")
+    conn.execute('UPDATE discussions SET geom = ST_SetSRID(ST_MakePoint(longitude,latitude),4326);')
+    conn.execute('CREATE INDEX idx_discussions_geom ON discussions USING GIST(geom);')
     conn.execute('VACUUM ANALYZE;')
 
     ### end Alembic commands ###
@@ -37,6 +40,8 @@ def downgrade():
     conn.execution_options(isolation_level="AUTOCOMMIT")
     conn.execute('DROP INDEX idx_markers_geom;')
     op.drop_column('markers', 'geom')
+    conn.execute('DROP INDEX idx_discussions_geom;')
+    op.drop_column('discussions', 'geom')
     conn.execute('DROP EXTENSION postgis_topology;')
     conn.execute('DROP EXTENSION postgis;')
     conn.execute('DROP SCHEMA IF EXISTS topology CASCADE;')

@@ -1,7 +1,7 @@
 """initial
 
 Revision ID: 3741581c7fc4
-Revises: 
+Revises:
 Create Date: 2017-10-02 09:13:51.619334
 
 """
@@ -27,7 +27,8 @@ def upgrade():
     sa.Column('created', sa.DateTime(), nullable=True),
     sa.Column('identifier', sa.String(length=50), nullable=True),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('identifier')
+    sa.UniqueConstraint('identifier'),
+    schema='public'
     )
     op.create_index('disc_long_lat_idx', 'discussions', ['latitude', 'longitude'], unique=False)
     op.create_index(op.f('ix_discussions_created'), 'discussions', ['created'], unique=False)
@@ -37,7 +38,8 @@ def upgrade():
     sa.Column('longitude', sa.Float(), nullable=True),
     sa.Column('created', sa.DateTime(), nullable=True),
     sa.Column('type', sa.Integer(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    schema='public'
     )
     op.create_index('highlight_long_lat_idx', 'highlight_markers', ['latitude', 'longitude'], unique=False)
     op.create_table('markers',
@@ -76,7 +78,8 @@ def upgrade():
     sa.Column('cross_mode', sa.Integer(), nullable=True),
     sa.Column('cross_location', sa.Integer(), nullable=True),
     sa.Column('cross_direction', sa.Integer(), nullable=True),
-    sa.PrimaryKeyConstraint('id', 'provider_code')
+    sa.PrimaryKeyConstraint('id', 'provider_code'),
+    schema='public'
     )
     op.create_index('acc_long_lat_idx', 'markers', ['latitude', 'longitude'], unique=False)
     op.create_index(op.f('ix_markers_created'), 'markers', ['created'], unique=False)
@@ -85,7 +88,8 @@ def upgrade():
     sa.Column('name', sa.String(length=80), nullable=True),
     sa.Column('description', sa.String(length=255), nullable=True),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('name')
+    sa.UniqueConstraint('name'),
+    schema='public'
     )
     op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -107,14 +111,16 @@ def upgrade():
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('social_id'),
-    sa.UniqueConstraint('username')
+    sa.UniqueConstraint('username'),
+    schema='public'
     )
     op.create_table('general_preferences',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('minimum_displayed_severity', sa.Integer(), nullable=True),
     sa.Column('resource_type', sa.String(length=64), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('user_id')
+    sa.PrimaryKeyConstraint('user_id'),
+    schema='public'
     )
     op.create_table('involved',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -142,7 +148,8 @@ def upgrade():
     sa.Column('safety_measures_use', sa.Integer(), nullable=True),
     sa.Column('late_deceased', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['accident_id', 'provider_code'], [u'markers.id', u'markers.provider_code'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    schema='public'
     )
     op.create_table('report_preferences',
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -154,13 +161,15 @@ def upgrade():
     sa.Column('radius', sa.Float(), nullable=True),
     sa.Column('minimum_severity', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('user_id', 'line_number')
+    sa.PrimaryKeyConstraint('user_id', 'line_number'),
+    schema='public'
     )
     op.create_table('roles_users',
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('role_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], )
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    schema='public'
     )
     op.create_table('vehicles',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -175,7 +184,8 @@ def upgrade():
     sa.Column('seats', sa.Integer(), nullable=True),
     sa.Column('total_weight', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['accident_id', 'provider_code'], [u'markers.id', u'markers.provider_code'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    schema='public'
     )
     ### end Alembic commands ###
 

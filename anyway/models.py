@@ -18,6 +18,9 @@ import datetime
 from . import localization
 from .database import Base
 from flask_security import UserMixin, RoleMixin
+from geoalchemy2 import Geometry
+from geoalchemy2.functions import ST_Envelope
+
 app = init_flask()
 db = SQLAlchemy(app)
 
@@ -151,7 +154,7 @@ class AccidentMarker(MarkerMixin, Base):
     __mapper_args__ = {
         'polymorphic_identity': CONST.MARKER_TYPE_ACCIDENT
     }
-
+    geom = Column(Geometry('POINT'))
     provider_code = Column(Integer, primary_key=True)
     description = Column(Text)
     subtype = Column(Integer)
@@ -284,28 +287,20 @@ class AccidentMarker(MarkerMixin, Base):
         page = kwargs.get('page')
         per_page = kwargs.get('per_page')
 
-        baseX = kwargs['ne_lat'];
-        baseY = kwargs['ne_lng'];
-        distanceX = kwargs['sw_lng'];
-        distanceY = kwargs['sw_lat'];
-        pol_str = 'SRID=4326;POLYGON(({0} {1}, {2} {1}, {2} {3}, {0} {3}, {0} {1}))'.format(baseX, baseY, distanceX \
+        baseX = kwargs['sw_lng'];
+        baseY = kwargs['sw_lat'];
+        distanceX = kwargs['ne_lng'];
+        distanceY = kwargs['ne_lat'];
+        pol_str = 'POLYGON(({0} {1},{0} {3},{2} {3},{2} {1},{0} {1}))'.format(baseX, baseY, distanceX \
                                                                                   ,distanceY)
         if not kwargs.get('show_markers', True):
             return MarkerResult(markers=db.session.query(AccidentMarker).filter(sql.false()), total_records=0)
 
-        markers = db.session.query(AccidentMarker).filter(AccidentMarker.geom.ST_Intersects(pol_str)) \
+        markers = db.session.query(AccidentMarker) \
+            .filter(AccidentMarker.geom.intersects(pol_str)) \
             .filter(AccidentMarker.created >= kwargs['start_date']) \
             .filter(AccidentMarker.created < kwargs['end_date']) \
             .order_by(desc(AccidentMarker.created))
-
-        # markers = db.session.query(AccidentMarker) \
-        #     .filter(AccidentMarker.longitude <= kwargs['ne_lng']) \
-        #     .filter(AccidentMarker.longitude >= kwargs['sw_lng']) \
-        #     .filter(AccidentMarker.latitude <= kwargs['ne_lat']) \
-        #     .filter(AccidentMarker.latitude >= kwargs['sw_lat']) \
-        #     .filter(AccidentMarker.created >= kwargs['start_date']) \
-        #     .filter(AccidentMarker.created < kwargs['end_date']) \
-        #     .order_by(desc(AccidentMarker.created))
 
         if not kwargs['show_rsa']:
             markers = markers.filter(AccidentMarker.provider_code != CONST.RSA_PROVIDER_CODE)
@@ -482,13 +477,15 @@ class DiscussionMarker(MarkerMixin, Base):
     def bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng, show_discussions):
         if not show_discussions:
             return db.session.query(AccidentMarker).filter(sql.false())
+
         baseX = ne_lat;
         baseY = ne_lng;
         distanceX = sw_lng;
         distanceY = sw_lat;
-        pol_str = 'SRID=4326;POLYGON(({0} {1}, {2} {1}, {2} {3}, {0} {3}, {0} {1}))'.format(baseX, baseY, distanceX \
-                                                                                  ,distanceY)
-        markers = db.session.query(DiscussionMarker).filter(DiscussionMarker.geom.ST_Intersects(pol_str)) \
+        pol_str = 'POLYGON(({0} {1},{0} {3},{2} {3},{2} {1},{0} {1}))'.format(baseX, baseY, distanceX, distanceY)
+
+        markers = db.session.query(DiscussionMarker) \
+            .filter(DiscussionMarker.geom.intersects(pol_str)) \
             .order_by(desc(DiscussionMarker.created))
         return markers
 

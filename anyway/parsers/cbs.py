@@ -506,7 +506,7 @@ def main(specific_folder, delete_all, path, batch_size, delete_start_date):
     # wipe all the AccidentMarker and Vehicle and Involved data first
     if import_ui.is_delete_all():
         truncate_tables(db, (Vehicle, Involved, AccidentMarker))
-    if delete_start_date is not None:
+    else if delete_start_date is not None:
         delete_cbs_entries(delete_start_date)
     started = datetime.now()
     total = 0

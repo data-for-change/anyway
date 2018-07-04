@@ -439,6 +439,40 @@ def delete_invalid_entries():
 
     db.session.commit()
 
+
+def delete_cbs_entries(start_date):
+    """
+    deletes all CBS markers (provider_code=1 or provider_code=3) in the database with created date >= start_date
+    start_date is a string in the format of '%Y-%m-%d', for example, January 2nd 2018: start_date='2018-01-02'
+    first deletes from tables Involved and Vehicle, then from table AccidentMarker
+    """
+
+    marker_ids_to_delete = db.session.query(AccidentMarker.id)\
+                                     .filter(AccidentMarker.created >= datetime.strptime(start_date, '%Y-%m-%d'))\
+                                     .filter(or_((AccidentMarker.provider_code == 1), (AccidentMarker.provider_code == 3))).all()
+
+    marker_ids_to_delete = [acc_id[0] for acc_id in marker_ids_to_delete]
+
+    q = db.session.query(Involved).filter(Involved.accident_id.in_(marker_ids_to_delete))
+
+    if q.all():
+        print('deleting invalid entries from Involved')
+        q.delete(synchronize_session='fetch')
+
+    q = db.session.query(Vehicle).filter(Vehicle.accident_id.in_(marker_ids_to_delete))
+
+    if q.all():
+        print('deleting invalid entries from Vehicle')
+        q.delete(synchronize_session='fetch')
+
+    q = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_(marker_ids_to_delete))
+
+    if q.all():
+        print('deleting invalid entries from AccidentMarker')
+        q.delete(synchronize_session='fetch')
+
+    db.session.commit()
+
 def fill_db_geo_data():
     """
     Fills empty geometry object according to coordinates in database
@@ -460,7 +494,7 @@ def get_provider_code(directory_name=None):
             return int(ans)
 
 
-def main(specific_folder, delete_all, path, batch_size):
+def main(specific_folder, delete_all, path, batch_size, delete_start_date):
     import_ui = ImporterUI(path, specific_folder, delete_all)
     dir_name = import_ui.source_path()
 
@@ -472,7 +506,8 @@ def main(specific_folder, delete_all, path, batch_size):
     # wipe all the AccidentMarker and Vehicle and Involved data first
     if import_ui.is_delete_all():
         truncate_tables(db, (Vehicle, Involved, AccidentMarker))
-
+    else if delete_start_date is not None:
+        delete_cbs_entries(delete_start_date)
     started = datetime.now()
     total = 0
     for directory in dir_list:

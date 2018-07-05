@@ -14,6 +14,7 @@ from sqlalchemy import or_
 from .. import field_names, localization
 from ..models import AccidentMarker, Involved, Vehicle
 from .. import models
+from ..constants import CONST
 from ..utilities import ItmToWGS84, init_flask, CsvReader, time_delta, decode_hebrew,ImporterUI,truncate_tables
 from functools import partial
 import logging
@@ -408,7 +409,7 @@ def import_to_datastore(directory, provider_code, batch_size):
         return 0
 
 
-def delete_invalid_entries():
+def delete_invalid_entries(batch_size):
     """
     deletes all markers in the database with null latitude or longitude
     first deletes from tables Involved and Vehicle, then from table AccidentMarker
@@ -419,28 +420,32 @@ def delete_invalid_entries():
 
     marker_ids_to_delete = [acc_id[0] for acc_id in marker_ids_to_delete]
 
-    q = db.session.query(Involved).filter(Involved.accident_id.in_(marker_ids_to_delete))
+    logging.info('There are ' + str(len(marker_ids_to_delete)) + ' invalid accident_ids to delete')
 
-    if q.all():
-        print('deleting invalid entries from Involved')
-        q.delete(synchronize_session='fetch')
+    for ids_chunk in chunks(marker_ids_to_delete, batch_size, xrange):
 
-    q = db.session.query(Vehicle).filter(Vehicle.accident_id.in_(marker_ids_to_delete))
+        logging.info('Deleting a chunk of ' + str(len(ids_chunk)))
 
-    if q.all():
-        print('deleting invalid entries from Vehicle')
-        q.delete(synchronize_session='fetch')
+        q = db.session.query(Involved).filter(Involved.accident_id.in_(ids_chunk))
+        if q.all():
+            logging.info('deleting invalid entries from Involved')
+            q.delete(synchronize_session='fetch')
+            db.session.commit()
 
-    q = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_(marker_ids_to_delete))
+        q = db.session.query(Vehicle).filter(Vehicle.accident_id.in_(ids_chunk))
+        if q.all():
+            logging.info('deleting invalid entries from Vehicle')
+            q.delete(synchronize_session='fetch')
+            db.session.commit()
 
-    if q.all():
-        print('deleting invalid entries from AccidentMarker')
-        q.delete(synchronize_session='fetch')
+        q = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_(ids_chunk))
+        if q.all():
+            logging.info('deleting invalid entries from AccidentMarker')
+            q.delete(synchronize_session='fetch')
+            db.session.commit()
 
-    db.session.commit()
 
-
-def delete_cbs_entries(start_date):
+def delete_cbs_entries(start_date, batch_size):
     """
     deletes all CBS markers (provider_code=1 or provider_code=3) in the database with created date >= start_date
     start_date is a string in the format of '%Y-%m-%d', for example, January 2nd 2018: start_date='2018-01-02'
@@ -448,30 +453,35 @@ def delete_cbs_entries(start_date):
     """
 
     marker_ids_to_delete = db.session.query(AccidentMarker.id)\
-                                     .filter(AccidentMarker.created >= datetime.strptime(start_date, '%Y-%m-%d'))\
-                                     .filter(or_((AccidentMarker.provider_code == 1), (AccidentMarker.provider_code == 3))).all()
+                                     .filter(AccidentMarker.created >= datetime.strptime(start_date, '%Y-%m-%d')) \
+                                     .filter(or_((AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_1_CODE), \
+                                             (AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_3_CODE))).all()
 
     marker_ids_to_delete = [acc_id[0] for acc_id in marker_ids_to_delete]
 
-    q = db.session.query(Involved).filter(Involved.accident_id.in_(marker_ids_to_delete))
+    logging.info('There are ' + str(len(marker_ids_to_delete)) + ' accident ids to delete starting ' + str(start_date))
 
-    if q.all():
-        print('deleting invalid entries from Involved')
-        q.delete(synchronize_session='fetch')
+    for ids_chunk in chunks(marker_ids_to_delete, batch_size, xrange):
 
-    q = db.session.query(Vehicle).filter(Vehicle.accident_id.in_(marker_ids_to_delete))
+        logging.info('Deleting a chunk of ' + str(len(ids_chunk)))
 
-    if q.all():
-        print('deleting invalid entries from Vehicle')
-        q.delete(synchronize_session='fetch')
+        q = db.session.query(Involved).filter(Involved.accident_id.in_(ids_chunk))
+        if q.all():
+            logging.info('deleting entries from Involved')
+            q.delete(synchronize_session=False)
+            db.session.commit()
 
-    q = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_(marker_ids_to_delete))
+        q = db.session.query(Vehicle).filter(Vehicle.accident_id.in_(ids_chunk))
+        if q.all():
+            logging.info('deleting entries from Vehicle')
+            q.delete(synchronize_session=False)
+            db.session.commit()
 
-    if q.all():
-        print('deleting invalid entries from AccidentMarker')
-        q.delete(synchronize_session='fetch')
-
-    db.session.commit()
+        q = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_(ids_chunk))
+        if q.all():
+            logging.info('deleting entries from AccidentMarker')
+            q.delete(synchronize_session=False)
+            db.session.commit()
 
 def fill_db_geo_data():
     """
@@ -507,7 +517,7 @@ def main(specific_folder, delete_all, path, batch_size, delete_start_date):
     if import_ui.is_delete_all():
         truncate_tables(db, (Vehicle, Involved, AccidentMarker))
     elif delete_start_date is not None:
-        delete_cbs_entries(delete_start_date)
+        delete_cbs_entries(delete_start_date, batch_size)
     started = datetime.now()
     total = 0
     for directory in dir_list:
@@ -515,7 +525,7 @@ def main(specific_folder, delete_all, path, batch_size, delete_start_date):
         provider_code = get_provider_code(parent_directory)
         total += import_to_datastore(directory, provider_code, batch_size)
 
-    delete_invalid_entries()
+    delete_invalid_entries(batch_size)
 
     fill_db_geo_data()
 

@@ -149,12 +149,12 @@ class AccidentMarker(MarkerMixin, Base):
     __tablename__ = "markers"
     __table_args__ = (
         Index('acc_long_lat_idx', 'latitude', 'longitude'),
+        Index('id_idx_markers', 'id', unique=True)
     )
 
     __mapper_args__ = {
         'polymorphic_identity': CONST.MARKER_TYPE_ACCIDENT
     }
-    geom = Column(Geometry('POINT'))
     provider_code = Column(Integer, primary_key=True)
     description = Column(Text)
     subtype = Column(Integer)
@@ -519,6 +519,7 @@ class Involved(Base):
     __table_args__ = (ForeignKeyConstraint([accident_id, provider_code],
                                            [AccidentMarker.id, AccidentMarker.provider_code],
                                            ondelete="CASCADE"),
+                      Index('accident_id_idx_involved', 'accident_id'),
                       {})
 
     def serialize(self):
@@ -667,6 +668,7 @@ class Vehicle(Base):
     __table_args__ = (ForeignKeyConstraint([accident_id, provider_code],
                                            [AccidentMarker.id, AccidentMarker.provider_code],
                                            ondelete="CASCADE"),
+                      Index('accident_id_idx_vehicles', 'accident_id'),
                       {})
 
     def serialize(self):

@@ -477,15 +477,11 @@ class DiscussionMarker(MarkerMixin, Base):
     def bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng, show_discussions):
         if not show_discussions:
             return db.session.query(AccidentMarker).filter(sql.false())
-
-        baseX = ne_lat;
-        baseY = ne_lng;
-        distanceX = sw_lng;
-        distanceY = sw_lat;
-        pol_str = 'POLYGON(({0} {1},{0} {3},{2} {3},{2} {1},{0} {1}))'.format(baseX, baseY, distanceX, distanceY)
-
         markers = db.session.query(DiscussionMarker) \
-            .filter(DiscussionMarker.geom.intersects(pol_str)) \
+            .filter(DiscussionMarker.longitude <= ne_lng) \
+            .filter(DiscussionMarker.longitude >= sw_lng) \
+            .filter(DiscussionMarker.latitude <= ne_lat) \
+            .filter(DiscussionMarker.latitude >= sw_lat) \
             .order_by(desc(DiscussionMarker.created))
         return markers
 

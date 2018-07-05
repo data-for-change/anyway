@@ -155,7 +155,6 @@ class AccidentMarker(MarkerMixin, Base):
     __mapper_args__ = {
         'polymorphic_identity': CONST.MARKER_TYPE_ACCIDENT
     }
-    geom = Column(Geometry('POINT'))
     provider_code = Column(Integer, primary_key=True)
     description = Column(Text)
     subtype = Column(Integer)

@@ -139,23 +139,16 @@
     </div>
     <div class="modal-body">
         <div class="reports-container">
-            <div class="report-item">
-               <a href="/static/data/reports/accidents_near_schools_100m.xlsx">תאונות ליד בתי ספר ברדיוס של 100 מטר</a>
+            <div>
+                <select class="form-control" id="selectTypeOfReport">
+                    <option value=''>בחר...</option>
+                </select>
+                <select class="form-control" id="selectTypeOfReportData">
+                    <option value=''>בחר...</option>
+                </select>
             </div>
-            <div class="report-item">
-               <a href="/static/data/reports/accidents_near_schools_300m.xlsx">תאונות ליד בתי ספר ברדיוס של 300 מטר</a>
-            </div>
-            <div class="report-item">
-               <a href="/static/data/reports/accidents_near_schools_500m.xlsx">תאונות ליד בתי ספר ברדיוס של 500 מטר</a>
-            </div>
-            <div class="report-item">
-               <a href="/static/data/reports/pedestrian_accidents_100m.xlsx">תאונות עם הולכי רגל ברדיוס של 100 מטר</a>
-            </div>
-            <div class="report-item">
-               <a href="/static/data/reports/pedestrian_accidents_300m.xlsx">תאונות עם הולכי רגל ברדיוס של 300 מטר</a>
-            </div>
-            <div class="report-item">
-               <a href="/static/data/reports/pedestrian_accidents_500m.xlsx">תאונות עם הולכי רגל ברדיוס של 500 מטר</a>
+            <div class="report-item" id="selectedTypeUrl">
+            <a></a>
             </div>
         </div>
     </div>
@@ -1136,7 +1129,8 @@
 "js/inv_dict.js",
 "js/veh_dict.js",
 "js/retina.js",
-"js/statPanel.js"
+"js/statPanel.js",
+"js/reports.js"
 %}
 <script type="text/javascript" src="{{ ASSET_URL }}"></script>
 {% endassets %}

@@ -46,7 +46,7 @@ def process():
 @click.option('--specific_folder', is_flag=True, default=False)
 @click.option('--delete_all', is_flag=True)
 @click.option('--path', type=str, default="static/data/cbs")
-@click.option('--batch_size', type=int, default=10000)
+@click.option('--batch_size', type=int, default=5000)
 @click.option('--delete_start_date', type=str, default=None)
 
 def cbs(specific_folder, delete_all, path, batch_size, delete_start_date):

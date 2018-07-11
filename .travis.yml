@@ -70,4 +70,4 @@ deploy:
   script: bash .travis.sh deploy
   on:
     branch: hasadna-k8s
-    condition: "${TRAVIS_PYTHON_VERSION}" == "2.7.11"
+    condition: $TRAVIS_PYTHON_VERSION == "2.7.11"

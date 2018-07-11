@@ -7,16 +7,16 @@ cache:
 
 python:
   - 2.7.11
-  - 3.5
-  - 3.6
+#  - 3.5
+#  - 3.6
 
 
 # [x] specified node_js, but setting is not relevant for python
 # node_js:
 #   - "6"
 
-addons:
-  sauce_connect: true
+#addons:
+#  sauce_connect: true
 
 env:
   global:
@@ -39,27 +39,27 @@ env:
     - secure: "jWTV9AAe8EHFuLHYlyhb6Fky8a62NFw7C6XgruP8IKxqwSp59HwLla3qgSowZSBShqoJf5isUyBFzx8q/3Gq1/5OVWodvq+IEgxjg9B/bnUJcHxMw4h7RK/e8i32UK1q46yLtRpRM8h6HhODAecJET8KtK7qZyVWFiaj58eQewdj9PA9WjZsPdodxliMY03GyUfv/K996iqteNaelWXOPJua1qbOoLYiJl+FKyIazqlh73tkzEj/gstlYU5jddl1QeR7rWV2O74/az+H0Si8mk/jz9rsOY5pGZGmDBmorJ86ILv85LQAf7XR7djRNmvKs0ciATBvla33q8xTJB+Jow9PUAmEkfYVmWu9faMo1g3ycm8uuye8x+EZK1193ku8eGhEaBbuCrbW1Wc1LlQLcGbb9fb5nQWPnn68JQoD9A9D1CBqie4LfJ2qpw86oE4SBqhjSdLWVscpt7bnPUOxE/7AsuJjRJyCGWKjh6fRnfEI5u7S9ajDPf4FnT/mvhvFrq/CNZud2psiZ/DbJJfEBcFebcIGUT97KwbHb19KDVb0cTTwskAnydVXKjwQ3aV8b7qnGiIXBMEhzix3Kp9sPTxXOh5kcMJnruYNaKMXgGSMvK6ARx0e7/F8wCF6R8bppR1pRjKC4VfZfxtJ8Epqp0X8pMW5Y3RbeRVOHwjeG1I="
 
 services:
-  - postgresql
-  - rabbitmq
+#  - postgresql
+#  - rabbitmq
   - docker
 
 sudo: required
 
-install:
-  - pip install -r requirements.txt -r test_requirements.txt
-  - yarn global add eslint --ignore-engines
+#install:
+#  - pip install -r requirements.txt -r test_requirements.txt
+#  - yarn global add eslint --ignore-engines
 
-before_script:
-  - psql -c 'create database anyway;' -U postgres
-  - alembic upgrade head
-  - celery worker -A anyway.clusters_calculator -D
+#before_script:
+#  - psql -c 'create database anyway;' -U postgres
+#  - alembic upgrade head
+#  - celery worker -A anyway.clusters_calculator -D
 
 script:
-  - pylint -j $(nproc) anyway tests main.py
-  - if [ "${TRAVIS_PYTHON_VERSION}" == "2.7.11" ]; then eslint static/js --ignore-path=static/js/.eslintignore; fi
-  - ./main.py process registered_vehicles
-  - ./main.py process cbs
-  - pytest tests -m "not browser"
+#  - pylint -j $(nproc) anyway tests main.py
+#  - if [ "${TRAVIS_PYTHON_VERSION}" == "2.7.11" ]; then eslint static/js --ignore-path=static/js/.eslintignore; fi
+#  - ./main.py process registered_vehicles
+#  - ./main.py process cbs
+#  - pytest tests -m "not browser"
 #  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then for BROWSER in Chrome Firefox; do pytest tests -m browser --driver SauceLabs --capability browserName $BROWSER --capability tunnelIdentifier $TRAVIS_JOB_NUMBER; done; fi
   - if [ "${TRAVIS_PYTHON_VERSION}" == "2.7.11" ]; then curl -s https://raw.githubusercontent.com/hasadna/hasadna-k8s/master/apps_travis_script.sh > .travis.sh; fi
   - if [ "${TRAVIS_PYTHON_VERSION}" == "2.7.11" ]; then bash .travis.sh script; fi

@@ -56,13 +56,13 @@ before_script:
 
 script:
   - pylint -j $(nproc) anyway tests main.py
-  - eslint static/js --ignore-path=static/js/.eslintignore
+  - if [ "${TRAVIS_PYTHON_VERSION}" == "2.7.11" ]; then eslint static/js --ignore-path=static/js/.eslintignore; fi
   - ./main.py process registered_vehicles
   - ./main.py process cbs
   - pytest tests -m "not browser"
 #  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then for BROWSER in Chrome Firefox; do pytest tests -m browser --driver SauceLabs --capability browserName $BROWSER --capability tunnelIdentifier $TRAVIS_JOB_NUMBER; done; fi
-  - curl -s https://raw.githubusercontent.com/hasadna/hasadna-k8s/master/apps_travis_script.sh > .travis.sh
-  - bash .travis.sh script
+  - if [ "${TRAVIS_PYTHON_VERSION}" == "2.7.11" ]; then curl -s https://raw.githubusercontent.com/hasadna/hasadna-k8s/master/apps_travis_script.sh > .travis.sh; fi
+  - if [ "${TRAVIS_PYTHON_VERSION}" == "2.7.11" ]; then bash .travis.sh script; fi
 
 deploy:
   skip_cleanup: true
@@ -70,3 +70,4 @@ deploy:
   script: bash .travis.sh deploy
   on:
     branch: hasadna-k8s
+    condition: "${TRAVIS_PYTHON_VERSION}" == "2.7.11"

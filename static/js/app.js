@@ -931,13 +931,12 @@ $(function () {
         },
         contextMenuMap2 : function(e) {
 
-            debugger;
             this.clickLocation = e.latLng;
 
             if (this.menu) {
                 this.menu.remove();
-                this.menu = null;
             }
+
             this.menu = new ContextMenuView({
                 items: [
                     {
@@ -950,14 +949,10 @@ $(function () {
                         text : NEW_FEATURES,
                         callback : _.bind(this.featuresSubscriptionDialog, this)
                     }
-                ]});
-
-            if(this.menu2){
-                this.menu2.onRemove();
-                // this.menu2 = null;
-            }
-
-            this.menu2 = new ContextMenuOverlay(this.map, this.menu, e);
+                ],
+                map: this.map,
+                e: e
+                });
         },
         addDiscussionMarker : function() { // called once a comment is posted
             var identifier = this.newDiscussionIdentifier;

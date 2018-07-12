@@ -456,6 +456,7 @@ $(function () {
                 styles: MAP_STYLE,
                 gestureHandling: GESTURE_HANDLING
             };
+
             this.map = new google.maps.Map(this.$el.find("#map_canvas").get(0), mapOptions);
 
             var mapControlDiv = document.createElement('div');
@@ -695,7 +696,43 @@ $(function () {
                 }.bind(this), 500);
             }.bind(this));
             this.isReady = true;
-            google.maps.event.addListener(this.map, "rightclick", _.bind(this.contextMenuMap, this) );
+
+            /*
+            DELETE THIS  - START
+
+            var menuStyle = {
+                    menu: 'context_menu',
+                    menuSeparator: 'context_menu_separator',
+                    menuItem: 'context_menu_item'
+                };
+
+                var contextMenuOptions  = {
+                    id: "map_rightclick",
+                    eventName: "menu_item_selected",
+                    classNames: menuStyle,
+                    menuItems:
+                    [
+                       {label:'option1', id:'menu_option1'},
+                       {label:'option2', id:'menu_option2'},
+                    ]
+                };
+
+            var contextMenu = new google.maps.ContextMenu(this.map, contextMenuOptions, function() {
+                  console.log('optional callback');
+            });
+
+            google.maps.event.addListener(this.map, 'rightclick', function(mouseEvent) {
+            debugger;
+              contextMenu.show(mouseEvent.latLng);
+            });
+
+
+            DELETE THIS  - END
+            */
+
+            // google.maps.event.addListener(this.map, "rightclick", _.bind(this.contextMenuMap, this) );
+            google.maps.event.addListener(this.map, "rightclick", _.bind(this.contextMenuMap2, this) );
+
             google.maps.event.addListener(this.map, "idle", function(){
                 if (!this.firstLoadDelay){
                     this.fetchMarkers();
@@ -873,6 +910,7 @@ $(function () {
             this.model.set("currentMarker", null);
         },
         contextMenuMap : function(e) {
+
             this.clickLocation = e.latLng;
             if (this.menu) {
                 this.menu.remove();
@@ -890,6 +928,36 @@ $(function () {
                         callback : _.bind(this.featuresSubscriptionDialog, this)
                     }
                 ]}).render(e);
+        },
+        contextMenuMap2 : function(e) {
+
+            debugger;
+            this.clickLocation = e.latLng;
+
+            if (this.menu) {
+                this.menu.remove();
+                this.menu = null;
+            }
+            this.menu = new ContextMenuView({
+                items: [
+                    {
+                        icon : "plus-sign",
+                        text : ADD_DISCUSSION,
+                        callback : _.bind(this.showDiscussion, this)
+                    },
+                    {
+                        icon : "plus-sign",
+                        text : NEW_FEATURES,
+                        callback : _.bind(this.featuresSubscriptionDialog, this)
+                    }
+                ]});
+
+            if(this.menu2){
+                this.menu2.onRemove();
+                // this.menu2 = null;
+            }
+
+            this.menu2 = new ContextMenuOverlay(this.map, this.menu, e);
         },
         addDiscussionMarker : function() { // called once a comment is posted
             var identifier = this.newDiscussionIdentifier;

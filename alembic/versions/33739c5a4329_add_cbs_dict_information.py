@@ -3,6 +3,7 @@
 import os
 import pandas as pd
 import re, collections
+import xlrd
 
 FIELD_NAME = u'שם שדה'
 VARIABLE_NAME = u'שם משתנה'

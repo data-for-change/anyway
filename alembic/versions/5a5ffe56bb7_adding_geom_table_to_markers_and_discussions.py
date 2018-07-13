@@ -27,7 +27,6 @@ def upgrade():
     conn.execute("SELECT AddGeometryColumn('public','discussions','geom',4326,'POINT',2);")
     conn.execute('UPDATE discussions SET geom = ST_SetSRID(ST_MakePoint(longitude,latitude),4326);')
     conn.execute('CREATE INDEX idx_discussions_geom ON discussions USING GIST(geom);')
-    conn.execute('VACUUM ANALYZE;')
 
     ### end Alembic commands ###
 
@@ -42,5 +41,4 @@ def downgrade():
     conn.execute('DROP EXTENSION postgis_topology;')
     conn.execute('DROP EXTENSION postgis;')
     conn.execute('DROP SCHEMA IF EXISTS topology CASCADE;')
-    conn.execute('VACUUM ANALYZE;')
     ### end Alembic commands ###

@@ -136,14 +136,14 @@ def get_cbs_full_dict_data(path):
 """Add cbs dict information
 
 Revision ID: 33739c5a4329
-Revises: 3c0d35fdbe2e
+Revises: 41aa96fd6464
 Create Date: 2018-04-09 18:47:06.951936
 
 """
 
 # revision identifiers, used by Alembic.
 revision = '33739c5a4329'
-down_revision = '3c0d35fdbe2e'
+down_revision = '41aa96fd6464'
 branch_labels = None
 depends_on = None
 

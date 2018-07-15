@@ -697,39 +697,6 @@ $(function () {
             }.bind(this));
             this.isReady = true;
 
-            /*
-            DELETE THIS  - START
-
-            var menuStyle = {
-                    menu: 'context_menu',
-                    menuSeparator: 'context_menu_separator',
-                    menuItem: 'context_menu_item'
-                };
-
-                var contextMenuOptions  = {
-                    id: "map_rightclick",
-                    eventName: "menu_item_selected",
-                    classNames: menuStyle,
-                    menuItems:
-                    [
-                       {label:'option1', id:'menu_option1'},
-                       {label:'option2', id:'menu_option2'},
-                    ]
-                };
-
-            var contextMenu = new google.maps.ContextMenu(this.map, contextMenuOptions, function() {
-                  console.log('optional callback');
-            });
-
-            google.maps.event.addListener(this.map, 'rightclick', function(mouseEvent) {
-            debugger;
-              contextMenu.show(mouseEvent.latLng);
-            });
-
-
-            DELETE THIS  - END
-            */
-
             // google.maps.event.addListener(this.map, "rightclick", _.bind(this.contextMenuMap, this) );
             google.maps.event.addListener(this.map, "rightclick", _.bind(this.contextMenuMap2, this) );
 

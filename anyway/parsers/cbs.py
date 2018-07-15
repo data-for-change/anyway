@@ -357,8 +357,11 @@ def get_files(directory):
         elif name in (ACCIDENTS, INVOLVED, VEHICLES):
             yield name, csv
 
-def chunks(l, n, xrange):
+def chunks(l, n):
     """Yield successive n-sized chunks from l."""
+    try: xrange
+    except NameError:
+        xrange = range
     for i in xrange(0, len(l), n):
         yield l[i:i + n]
 
@@ -367,9 +370,6 @@ def import_to_datastore(directory, provider_code, batch_size):
     """
     goes through all the files in a given directory, parses and commits them
     """
-    try: xrange
-    except NameError:
-        xrange = range
     try:
         assert batch_size > 0
 
@@ -385,20 +385,20 @@ def import_to_datastore(directory, provider_code, batch_size):
         accidents = import_accidents(provider_code=provider_code, **files_from_cbs)
         accidents = [accident for accident in accidents if accident['id'] not in all_existing_accidents_ids]
         new_items += len(accidents)
-        for accidents_chunk in chunks(accidents, batch_size, xrange):
+        for accidents_chunk in chunks(accidents, batch_size):
             db.session.bulk_insert_mappings(AccidentMarker, accidents_chunk)
 
         all_involved_accident_ids = set(map(lambda x: x[0], db.session.query(Involved.accident_id).all()))
         involved = import_involved(provider_code=provider_code, **files_from_cbs)
         involved = [x for x in involved if x['accident_id'] not in all_involved_accident_ids]
-        for involved_chunk in chunks(involved, batch_size, xrange):
+        for involved_chunk in chunks(involved, batch_size):
             db.session.bulk_insert_mappings(Involved, involved_chunk)
         new_items += len(involved)
 
         all_vehicles_accident_ids = set(map(lambda x: x[0], db.session.query(Vehicle.accident_id).all()))
         vehicles = import_vehicles(provider_code=provider_code, **files_from_cbs)
         vehicles = [x for x in vehicles if x['accident_id'] not in all_vehicles_accident_ids]
-        for vehicles_chunk in chunks(vehicles, batch_size, xrange):
+        for vehicles_chunk in chunks(vehicles, batch_size):
             db.session.bulk_insert_mappings(Vehicle, vehicles_chunk)
         new_items += len(vehicles)
 
@@ -422,7 +422,7 @@ def delete_invalid_entries(batch_size):
 
     logging.info('There are ' + str(len(marker_ids_to_delete)) + ' invalid accident_ids to delete')
 
-    for ids_chunk in chunks(marker_ids_to_delete, batch_size, xrange):
+    for ids_chunk in chunks(marker_ids_to_delete, batch_size):
 
         logging.info('Deleting a chunk of ' + str(len(ids_chunk)))
 
@@ -461,7 +461,7 @@ def delete_cbs_entries(start_date, batch_size):
 
     logging.info('There are ' + str(len(marker_ids_to_delete)) + ' accident ids to delete starting ' + str(start_date))
 
-    for ids_chunk in chunks(marker_ids_to_delete, batch_size, xrange):
+    for ids_chunk in chunks(marker_ids_to_delete, batch_size):
 
         logging.info('Deleting a chunk of ' + str(len(ids_chunk)))
 

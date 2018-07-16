@@ -72,7 +72,7 @@ See the [Wiki](https://github.com/hasadna/anyway/wiki/Setting-up-a-Python-develo
   You might need to add your password to the connection url. For more information: https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING
 
 1. First time, create tables: `alembic upgrade head`
-1. Optionally, get the [complete accidents file](https://drive.google.com/file/d/19S2hUSzfPLBrhsf1zS8IHaypGN9WgSMc/view?usp=sharing) after sending a permission request, and extract it into `/static/data/cbs`. Otherwise, you'll use the example accidents files that you already got with the code.
+1. Optionally, get the [complete accidents file](https://drive.google.com/file/d/1t-ddf1zx0ze_HOfUq4nS7Gwf1dywhEIv/view?usp=sharing) after sending a permission request, and extract it into `/static/data/cbs`. Otherwise, you'll use the example accidents files that you already got with the code.
 1. Populate the data (markers etc.): `python main.py process cbs`: this will take a few minutes if
    you're using the example files (default), but if you have the complete data it may take several
    hours.

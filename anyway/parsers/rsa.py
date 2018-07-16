@@ -20,6 +20,7 @@ def _iter_rows(filename):
     assert [cell.value for cell in first_row] == headers
     for row in rows:
         id_ = int(row[0].value)
+        provider_and_id_ = int(str(CONST.RSA_PROVIDER_CODE) + str(id_))
 
         q = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_([id_]))
         if q.all():
@@ -40,6 +41,7 @@ def _iter_rows(filename):
         description = {'VIOLATION_TYPE': violation, 'VEHICLE_TYPE': vehicle_type}
 
         yield {'id': id_,
+               'provider_and_id': provider_and_id_,
                'latitude': latitude,
                'longitude': longitude,
                'created': timestamp,

@@ -5,8 +5,8 @@ import logging
 
 from .constants import CONST
 from collections import namedtuple
-from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table, \
-    ForeignKeyConstraint, func, and_, select
+from sqlalchemy import Column, BigInteger, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table, \
+    ForeignKeyConstraint, func, and_
 from sqlalchemy.orm import relationship, load_only, backref
 from .utilities import init_flask, decode_hebrew
 from flask_sqlalchemy import SQLAlchemy
@@ -19,7 +19,6 @@ from . import localization
 from .database import Base
 from flask_security import UserMixin, RoleMixin
 from geoalchemy2 import Geometry
-from geoalchemy2.functions import ST_Envelope
 
 app = init_flask()
 db = SQLAlchemy(app)
@@ -36,7 +35,7 @@ roles_users = Table('roles_users', Base.metadata,
 
 class User(Base, UserMixin):
     __tablename__ = "users"
-    id = Column(Integer, primary_key=True)
+    id = Column(BigInteger(), primary_key=True)
     email = Column(String(120), unique=True)
     first_name = Column(String(50))
     last_name = Column(String(50))
@@ -94,12 +93,12 @@ class Role(Base, RoleMixin):
         return self.name
 
 class Point(object):
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer(), primary_key=True)
     latitude = Column(Float())
     longitude = Column(Float())
 
 class MarkerMixin(Point):
-    type = Column(Integer)
+    type = Column(Integer())
     title = Column(String(100))
     created = Column(DateTime, default=datetime.datetime.now, index=True)
 
@@ -122,7 +121,7 @@ class HighlightPoint(Point, Base):
     )
 
     created = Column(DateTime, default=datetime.datetime.now)
-    type = Column(Integer)
+    type = Column(Integer())
 
     def serialize(self):
         return {
@@ -149,57 +148,73 @@ class AccidentMarker(MarkerMixin, Base):
     __tablename__ = "markers"
     __table_args__ = (
         Index('acc_long_lat_idx', 'latitude', 'longitude'),
-        Index('id_idx_markers', 'id', unique=True)
+        Index('id_idx_markers', 'id', unique=False),
+        Index('provider_and_id_idx_markers', 'provider_and_id', unique=True),
+        Index('idx_markers_geom', 'geom', unique=False),
+
     )
 
     __mapper_args__ = {
         'polymorphic_identity': CONST.MARKER_TYPE_ACCIDENT
     }
-    provider_code = Column(Integer, primary_key=True)
-    description = Column(Text)
-    subtype = Column(Integer)
-    severity = Column(Integer)
-    address = Column(Text)
-    locationAccuracy = Column(Integer)
-    roadType = Column(Integer)
-    roadShape = Column(Integer)
-    dayType = Column(Integer)
-    unit = Column(Integer)
-    mainStreet = Column(Text)
-    secondaryStreet = Column(Text)
-    junction = Column(Text)
-    one_lane = Column(Integer)
-    multi_lane = Column(Integer)
-    speed_limit = Column(Integer)
-    intactness = Column(Integer)
-    road_width = Column(Integer)
-    road_sign = Column(Integer)
-    road_light = Column(Integer)
-    road_control = Column(Integer)
-    weather = Column(Integer)
-    road_surface = Column(Integer)
-    road_object = Column(Integer)
-    object_distance = Column(Integer)
-    didnt_cross = Column(Integer)
-    cross_mode = Column(Integer)
-    cross_location = Column(Integer)
-    cross_direction = Column(Integer)
+    id = Column(BigInteger(), primary_key=True)
+    provider_and_id = Column(BigInteger())
+    provider_code = Column(Integer(), primary_key=True)
+    description = Column(Text())
+    subtype = Column(Integer())
+    severity = Column(Integer())
+    address = Column(Text())
+    locationAccuracy = Column(Integer())
+    roadType = Column(Integer())
+    roadShape = Column(Integer())
+    dayType = Column(Integer())
+    unit = Column(Integer())
+    mainStreet = Column(Text())
+    secondaryStreet = Column(Text())
+    junction = Column(Text())
+    one_lane = Column(Integer())
+    multi_lane = Column(Integer())
+    speed_limit = Column(Integer())
+    intactness = Column(Integer())
+    road_width = Column(Integer())
+    road_sign = Column(Integer())
+    road_light = Column(Integer())
+    road_control = Column(Integer())
+    weather = Column(Integer())
+    road_surface = Column(Integer())
+    road_object = Column(Integer())
+    object_distance = Column(Integer())
+    didnt_cross = Column(Integer())
+    cross_mode = Column(Integer())
+    cross_location = Column(Integer())
+    cross_direction = Column(Integer())
     involved = relationship("Involved", foreign_keys="Involved.accident_id")
     vehicles = relationship("Vehicle", foreign_keys="Vehicle.accident_id")
-    video_link = Column(Text)
-    road1 = Column(Integer)
-    road2 = Column(Integer)
+    video_link = Column(Text())
+    road1 = Column(Integer())
+    road2 = Column(Integer())
     km = Column(Float)
-    yishuv_symbol = Column(Integer)
-    geo_area = Column(Integer)
-    day_night = Column(Integer)
-    day_in_week = Column(Integer)
-    traffic_light = Column(Integer)
-    region = Column(Integer)
-    district = Column(Integer)
-    natural_area = Column(Integer)
-    minizipali_status = Column(Integer)
-    yishuv_shape = Column(Integer)
+    yishuv_symbol = Column(Integer())
+    geo_area = Column(Integer())
+    day_night = Column(Integer())
+    day_in_week = Column(Integer())
+    traffic_light = Column(Integer())
+    region = Column(Integer())
+    district = Column(Integer())
+    natural_area = Column(Integer())
+    minizipali_status = Column(Integer())
+    yishuv_shape = Column(Integer())
+    street1 = Column(Integer())
+    street2 = Column(Integer())
+    home = Column(Integer())
+    urban_intersection = Column(Integer())
+    non_urban_intersection = Column(Integer())
+    accident_year = Column(Integer())
+    accident_month = Column(Integer())
+    accident_day = Column(Integer())
+    accident_hour_raw = Column(Integer())
+    accident_hour = Column(Integer())
+    accident_minute = Column(Integer())
     geom = Column(Geometry('POINT'))
 
     @staticmethod
@@ -435,6 +450,7 @@ class DiscussionMarker(MarkerMixin, Base):
     __tablename__ = "discussions"
     __table_args__ = (
         Index('disc_long_lat_idx', 'latitude', 'longitude'),
+        Index('idx_discussions_geom', 'geom', unique=False)
     )
 
     __mapper_args__ = {
@@ -488,34 +504,40 @@ class DiscussionMarker(MarkerMixin, Base):
 
 class Involved(Base):
     __tablename__ = "involved"
-    id = Column(Integer, primary_key=True)
-    provider_code = Column(Integer)
-    accident_id = Column(Integer)
-    involved_type = Column(Integer)
-    license_acquiring_date = Column(Integer)
-    age_group = Column(Integer)
-    sex = Column(Integer)
-    car_type = Column(Integer)
-    safety_measures = Column(Integer)
-    home_city = Column(Integer)
-    injury_severity = Column(Integer)
-    injured_type = Column(Integer)
-    injured_position = Column(Integer)
-    population_type = Column(Integer)
-    home_district = Column(Integer)
-    home_nafa = Column(Integer)
-    home_area = Column(Integer)
-    home_municipal_status = Column(Integer)
-    home_residence_type = Column(Integer)
-    hospital_time = Column(Integer)
-    medical_type = Column(Integer)
-    release_dest = Column(Integer)
-    safety_measures_use = Column(Integer)
-    late_deceased = Column(Integer)
+    id = Column(BigInteger(), primary_key=True)
+    provider_and_id = Column(BigInteger())
+    provider_code = Column(Integer())
+    accident_id = Column(BigInteger())
+    involved_type = Column(Integer())
+    license_acquiring_date = Column(Integer())
+    age_group = Column(Integer())
+    sex = Column(Integer())
+    car_type = Column(Integer())
+    safety_measures = Column(Integer())
+    involve_yishuv_symbol = Column(Integer())
+    injury_severity = Column(Integer())
+    injured_type = Column(Integer())
+    injured_position = Column(Integer())
+    population_type = Column(Integer())
+    home_region = Column(Integer())
+    home_district = Column(Integer())
+    home_natural_area = Column(Integer())
+    home_municipal_status = Column(Integer())
+    home_residence_type = Column(Integer())
+    hospital_time = Column(Integer())
+    medical_type = Column(Integer())
+    release_dest = Column(Integer())
+    safety_measures_use = Column(Integer())
+    late_deceased = Column(Integer())
+    car_id = Column(Integer())
+    involve_id = Column(Integer())
+    accident_year = Column(Integer())
+    accident_month = Column(Integer())
     __table_args__ = (ForeignKeyConstraint([accident_id, provider_code],
                                            [AccidentMarker.id, AccidentMarker.provider_code],
                                            ondelete="CASCADE"),
-                      Index('accident_id_idx_involved', 'accident_id'),
+                      Index('accident_id_idx_involved', 'accident_id', unique=False),
+                      Index('provider_and_id_idx_involved', 'provider_and_id', unique=False),
                       {})
 
     def serialize(self):
@@ -529,14 +551,14 @@ class Involved(Base):
             "sex": self.sex,
             "car_type": self.car_type,
             "safety_measures": self.safety_measures,
-            "home_city": self.home_city,
+            "involve_yishuv_symbol": self.involve_yishuv_symbol,
             "injury_severity": self.injury_severity,
             "injured_type": self.injured_type,
             "injured_position": self.injured_position,
             "population_type": self.population_type,
+            "home_region": self.home_region,
             "home_district": self.home_district,
-            "home_nafa": self.home_nafa,
-            "home_area": self.home_area,
+            "home_natural_area": self.home_natural_area,
             "home_municipal_status": self.home_municipal_status,
             "home_residence_type": self.home_residence_type,
             "hospital_time": self.hospital_time,
@@ -562,12 +584,12 @@ class Involved(Base):
 
 class City(Base):
     __tablename__ = "cities"
-    id = Column(Integer, primary_key=True)
-    symbol_code = Column(Integer)
-    name = Column(String)
-    search_heb = Column(String)
-    search_eng = Column(String)
-    search_priority = Column(Integer)
+    id = Column(Integer(), primary_key=True)
+    symbol_code = Column(Integer())
+    name = Column(String())
+    search_heb = Column(String())
+    search_eng = Column(String())
+    search_priority = Column(Integer())
 
     def serialize(self):
         return {
@@ -595,23 +617,23 @@ class City(Base):
 
 class RegisteredVehicle(Base):
     __tablename__ = "cities_vehicles_registered"
-    id = Column(Integer, primary_key=True)
-    city_id = Column(Integer)
-    year = Column(Integer)
-    name = Column(String)
-    name_eng = Column(String)
-    search_name = Column(String)
-    motorcycle = Column(Integer)
-    special = Column(Integer)
-    taxi = Column(Integer)
-    bus = Column(Integer)
-    minibus = Column(Integer)
-    truck_over3500 = Column(Integer)
-    truck_upto3500 = Column(Integer)
-    private = Column(Integer)
-    population_year = Column(Integer)
-    population = Column(Integer)
-    total = Column(Integer)
+    id = Column(Integer(), primary_key=True)
+    city_id = Column(Integer())
+    year = Column(Integer())
+    name = Column(String())
+    name_eng = Column(String())
+    search_name = Column(String())
+    motorcycle = Column(Integer())
+    special = Column(Integer())
+    taxi = Column(Integer())
+    bus = Column(Integer())
+    minibus = Column(Integer())
+    truck_over3500 = Column(Integer())
+    truck_upto3500 = Column(Integer())
+    private = Column(Integer())
+    population_year = Column(Integer())
+    population = Column(Integer())
+    total = Column(Integer())
 
     def serialize(self):
         return {
@@ -650,21 +672,23 @@ class RegisteredVehicle(Base):
 
 class Vehicle(Base):
     __tablename__ = "vehicles"
-    id = Column(Integer, primary_key=True)
-    provider_code = Column(Integer)
-    accident_id = Column(Integer)
-    engine_volume = Column(Integer)
-    manufacturing_year = Column(Integer)
-    driving_directions = Column(Integer)
-    vehicle_status = Column(Integer)
-    vehicle_attribution = Column(Integer)
-    vehicle_type = Column(Integer)
-    seats = Column(Integer)
-    total_weight = Column(Integer)
+    id = Column(BigInteger(), primary_key=True)
+    provider_and_id = Column(BigInteger())
+    provider_code = Column(Integer())
+    accident_id = Column(BigInteger())
+    engine_volume = Column(Integer())
+    manufacturing_year = Column(Integer())
+    driving_directions = Column(Integer())
+    vehicle_status = Column(Integer())
+    vehicle_attribution = Column(Integer())
+    vehicle_type = Column(Integer())
+    seats = Column(Integer())
+    total_weight = Column(Integer())
     __table_args__ = (ForeignKeyConstraint([accident_id, provider_code],
                                            [AccidentMarker.id, AccidentMarker.provider_code],
                                            ondelete="CASCADE"),
-                      Index('accident_id_idx_vehicles', 'accident_id'),
+                      Index('accident_id_idx_vehicles', 'accident_id', unique=False),
+                      Index('provider_and_id_idx_vehicles', 'provider_and_id', unique=False),
                       {})
 
     def serialize(self):
@@ -730,3 +754,127 @@ class ReportPreferences(Base):
             "radius": self.radius,
             "minimum_severity": self.minimum_severity
         }
+
+
+class AccidentsNoLocation(Base, MarkerMixin):
+    __tablename__ = "markers_no_location"
+    __table_args__ = (
+        Index('id_idx_markers_no_location', 'id', unique=False),
+        Index('provider_and_id_idx_markers_no_location', 'provider_and_id', unique=True),
+    )
+    id = Column(BigInteger(), primary_key=True)
+    provider_and_id = Column(BigInteger())
+    provider_code = Column(Integer(), primary_key=True)
+    description = Column(Text())
+    subtype = Column(Integer())
+    severity = Column(Integer())
+    address = Column(Text())
+    locationAccuracy = Column(Integer())
+    roadType = Column(Integer())
+    roadShape = Column(Integer())
+    dayType = Column(Integer())
+    unit = Column(Integer())
+    mainStreet = Column(Text())
+    secondaryStreet = Column(Text())
+    junction = Column(Text())
+    one_lane = Column(Integer())
+    multi_lane = Column(Integer())
+    speed_limit = Column(Integer())
+    intactness = Column(Integer())
+    road_width = Column(Integer())
+    road_sign = Column(Integer())
+    road_light = Column(Integer())
+    road_control = Column(Integer())
+    weather = Column(Integer())
+    road_surface = Column(Integer())
+    road_object = Column(Integer())
+    object_distance = Column(Integer())
+    didnt_cross = Column(Integer())
+    cross_mode = Column(Integer())
+    cross_location = Column(Integer())
+    cross_direction = Column(Integer())
+    involved = relationship("InvolvedNoLocation", foreign_keys="InvolvedNoLocation.accident_id")
+    vehicles = relationship("VehicleNoLocation", foreign_keys="VehicleNoLocation.accident_id")
+    video_link = Column(Text())
+    road1 = Column(Integer())
+    road2 = Column(Integer())
+    km = Column(Float)
+    yishuv_symbol = Column(Integer())
+    geo_area = Column(Integer())
+    day_night = Column(Integer())
+    day_in_week = Column(Integer())
+    traffic_light = Column(Integer())
+    region = Column(Integer())
+    district = Column(Integer())
+    natural_area = Column(Integer())
+    minizipali_status = Column(Integer())
+    yishuv_shape = Column(Integer())
+    street1 = Column(Integer())
+    street2 = Column(Integer())
+    home = Column(Integer())
+    urban_intersection = Column(Integer())
+    non_urban_intersection = Column(Integer())
+    accident_year = Column(Integer())
+    accident_month = Column(Integer())
+    accident_day = Column(Integer())
+    accident_hour_raw = Column(Integer())
+    accident_hour = Column(Integer())
+    accident_minute = Column(Integer())
+
+class InvolvedNoLocation(Base):
+    __tablename__ = "involved_no_location"
+    id = Column(BigInteger(), primary_key=True)
+    provider_and_id = Column(BigInteger())
+    provider_code = Column(Integer())
+    accident_id = Column(BigInteger())
+    involved_type = Column(Integer())
+    license_acquiring_date = Column(Integer())
+    age_group = Column(Integer())
+    sex = Column(Integer())
+    car_type = Column(Integer())
+    safety_measures = Column(Integer())
+    involve_yishuv_symbol = Column(Integer())
+    injury_severity = Column(Integer())
+    injured_type = Column(Integer())
+    injured_position = Column(Integer())
+    population_type = Column(Integer())
+    home_region = Column(Integer())
+    home_district = Column(Integer())
+    home_natural_area = Column(Integer())
+    home_municipal_status = Column(Integer())
+    home_residence_type = Column(Integer())
+    hospital_time = Column(Integer())
+    medical_type = Column(Integer())
+    release_dest = Column(Integer())
+    safety_measures_use = Column(Integer())
+    late_deceased = Column(Integer())
+    car_id = Column(Integer())
+    involve_id = Column(Integer())
+    accident_year = Column(Integer())
+    accident_month = Column(Integer())
+    __table_args__ = (ForeignKeyConstraint([accident_id, provider_code],
+                                           [AccidentsNoLocation.id, AccidentsNoLocation.provider_code],
+                                           ondelete="CASCADE"),
+                      Index('accident_id_idx_involved_no_location', 'accident_id'),
+                      Index('provider_and_id_idx_involved_no_location', 'provider_and_id', unique=False),
+                      {})
+class VehicleNoLocation(Base):
+    __tablename__ = "vehicles_no_location"
+    id = Column(BigInteger(), primary_key=True)
+    provider_and_id = Column(BigInteger())
+    provider_code = Column(Integer())
+    accident_id = Column(BigInteger())
+    engine_volume = Column(Integer())
+    manufacturing_year = Column(Integer())
+    driving_directions = Column(Integer())
+    vehicle_status = Column(Integer())
+    vehicle_attribution = Column(Integer())
+    vehicle_type = Column(Integer())
+    seats = Column(Integer())
+    total_weight = Column(Integer())
+    __table_args__ = (ForeignKeyConstraint([accident_id, provider_code],
+                                           [AccidentsNoLocation.id, AccidentsNoLocation.provider_code],
+                                           ondelete="CASCADE"),
+                      Index('accident_id_idx_vehicles_no_location', 'accident_id'),
+                      Index('provider_and_id_idx_vehicles_no_location', 'provider_and_id', unique=False),
+                      {})

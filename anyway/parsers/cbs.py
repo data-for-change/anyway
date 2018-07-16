@@ -12,7 +12,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_
 
 from .. import field_names, localization
-from ..models import AccidentMarker, Involved, Vehicle
+from ..models import AccidentMarker, Involved, Vehicle, AccidentsNoLocation, InvolvedNoLocation, VehicleNoLocation
 from .. import models
 from ..constants import CONST
 from ..utilities import ItmToWGS84, init_flask, CsvReader, time_delta, decode_hebrew,ImporterUI,truncate_tables
@@ -202,6 +202,7 @@ def get_data_value(value):
 def import_accidents(provider_code, accidents, streets, roads, **kwargs):
     logging.info("\tReading accident data from '%s'..." % os.path.basename(accidents.name()))
     markers = []
+    markers_no_location = []
     for accident in accidents:
         if field_names.x_coordinate not in accident or field_names.y_coordinate not in accident:
             raise ValueError("Missing x and y coordinates")
@@ -213,9 +214,10 @@ def import_accidents(provider_code, accidents, streets, roads, **kwargs):
         main_street, secondary_street = get_streets(accident, streets)
 
         assert(int(provider_code) == int(accident[field_names.file_type]))
-
+        accident_datetime = parse_date(accident)
         marker = {
             "id": int(accident[field_names.id]),
+            "provider_and_id": int(str(provider_code) + str(accident[field_names.id])),
             "provider_code": int(provider_code),
             "title": "Accident",
             "description": json_dumps(load_extra_data(accident, streets, roads)),
@@ -224,7 +226,7 @@ def import_accidents(provider_code, accidents, streets, roads, **kwargs):
             "longitude": lng,
             "subtype": int(accident[field_names.accident_type]),
             "severity": int(accident[field_names.accident_severity]),
-            "created": parse_date(accident),
+            "created": accident_datetime,
             "locationAccuracy": int(accident[field_names.igun]),
             "roadType": int(accident[field_names.road_type]),
             "roadShape": int(accident[field_names.road_shape]),
@@ -262,12 +264,25 @@ def import_accidents(provider_code, accidents, streets, roads, **kwargs):
             "natural_area": get_data_value(accident[field_names.natural_area]),
             "minizipali_status": get_data_value(accident[field_names.minizipali_status]),
             "yishuv_shape": get_data_value(accident[field_names.yishuv_shape]),
+            "street1": get_data_value(accident[field_names.street1]),
+            "street2": get_data_value(accident[field_names.street2]),
+            "home": get_data_value(accident[field_names.home]),
+            "urban_intersection": get_data_value(accident[field_names.urban_intersection]),
+            "non_urban_intersection": get_data_value(accident[field_names.non_urban_intersection]),
+            "accident_year": get_data_value(accident[field_names.accident_year]),
+            "accident_month": get_data_value(accident[field_names.accident_month]),
+            "accident_day": get_data_value(accident[field_names.accident_day]),
+            "accident_hour_raw": get_data_value(accident[field_names.accident_hour]),
+            "accident_hour": get_data_value(accident_datetime.hour),
+            "accident_minute": get_data_value(accident_datetime.minute),
             "geom": None,
         }
 
         markers.append(marker)
 
-    return markers
+        if (lng, lat) == (None, None):
+            markers_no_location.append(marker)
+    return markers, markers_no_location
 
 
 def import_involved(provider_code, involved, **kwargs):
@@ -276,8 +291,10 @@ def import_involved(provider_code, involved, **kwargs):
     for involve in involved:
         if not involve[field_names.id]:  # skip lines with no accident id
             continue
+        assert(int(provider_code) == int(involve[field_names.file_type]))
         involved_result.append({
             "accident_id": int(involve[field_names.id]),
+            "provider_and_id": int(str(provider_code) + str(involve[field_names.id])),
             "provider_code": int(provider_code),
             "involved_type": int(involve[field_names.involved_type]),
             "license_acquiring_date": int(involve[field_names.license_acquiring_date]),
@@ -285,14 +302,14 @@ def import_involved(provider_code, involved, **kwargs):
             "sex": get_data_value(involve[field_names.sex]),
             "car_type": get_data_value(involve[field_names.car_type]),
             "safety_measures": get_data_value(involve[field_names.safety_measures]),
-            "home_city": get_data_value(involve[field_names.home_city]),
+            "involve_yishuv_symbol": get_data_value(involve[field_names.involve_yishuv_symbol]),
             "injury_severity": get_data_value(involve[field_names.injury_severity]),
             "injured_type": get_data_value(involve[field_names.injured_type]),
             "Injured_position": get_data_value(involve[field_names.injured_position]),
             "population_type": get_data_value(involve[field_names.population_type]),
+            "home_region": get_data_value(involve[field_names.home_region]),
             "home_district": get_data_value(involve[field_names.home_district]),
-            "home_nafa": get_data_value(involve[field_names.home_nafa]),
-            "home_area": get_data_value(involve[field_names.home_area]),
+            "home_natural_area": get_data_value(involve[field_names.home_natural_area]),
             "home_municipal_status": get_data_value(involve[field_names.home_municipal_status]),
             "home_residence_type": get_data_value(involve[field_names.home_residence_type]),
             "hospital_time": get_data_value(involve[field_names.hospital_time]),
@@ -300,6 +317,11 @@ def import_involved(provider_code, involved, **kwargs):
             "release_dest": get_data_value(involve[field_names.release_dest]),
             "safety_measures_use": get_data_value(involve[field_names.safety_measures_use]),
             "late_deceased": get_data_value(involve[field_names.late_deceased]),
+            "car_id": get_data_value(involve[field_names.car_id]),
+            "involve_id": get_data_value(involve[field_names.involve_id]),
+            "accident_year": get_data_value(involve[field_names.accident_year]),
+            "accident_month": get_data_value(involve[field_names.accident_month]),
+
         })
     return involved_result
 
@@ -308,8 +330,10 @@ def import_vehicles(provider_code, vehicles, **kwargs):
     logging.info("\tReading vehicles data from '%s'..." % os.path.basename(vehicles.name()))
     vehicles_result = []
     for vehicle in vehicles:
+        assert(int(provider_code) == int(vehicle[field_names.file_type]))
         vehicles_result.append({
             "accident_id": int(vehicle[field_names.id]),
+            "provider_and_id": int(str(provider_code) + str(vehicle[field_names.id])),
             "provider_code": int(provider_code),
             "engine_volume": int(vehicle[field_names.engine_volume]),
             "manufacturing_year": get_data_value(vehicle[field_names.manufacturing_year]),
@@ -319,6 +343,9 @@ def import_vehicles(provider_code, vehicles, **kwargs):
             "vehicle_type": get_data_value(vehicle[field_names.vehicle_type]),
             "seats": get_data_value(vehicle[field_names.seats]),
             "total_weight": get_data_value(vehicle[field_names.total_weight]),
+            "car_id": get_data_value(vehicle[field_names.car_id]),
+            "accident_year": get_data_value(vehicle[field_names.accident_year]),
+            "accident_month": get_data_value(vehicle[field_names.accident_month]),
         })
     return vehicles_result
 
@@ -378,29 +405,53 @@ def import_to_datastore(directory, provider_code, batch_size):
             return 0
         logging.info("Importing '{}'".format(directory))
         started = datetime.now()
-
         new_items = 0
+        accidents, accidents_no_location = import_accidents(provider_code=provider_code, **files_from_cbs)
 
-        all_existing_accidents_ids = set(map(lambda x: x[0], db.session.query(AccidentMarker.id).all()))
-        accidents = import_accidents(provider_code=provider_code, **files_from_cbs)
-        accidents = [accident for accident in accidents if accident['id'] not in all_existing_accidents_ids]
-        new_items += len(accidents)
+        all_existing_accidents_ids = set(map(lambda x: x[0],
+                                             db.session.query(AccidentMarker.provider_and_id).all()))
+        accidents = [accident for accident in accidents if accident['provider_and_id'] not in all_existing_accidents_ids]
+        logging.info('inserting ' + str(len(accidents)) + ' new accidents')
         for accidents_chunk in chunks(accidents, batch_size):
             db.session.bulk_insert_mappings(AccidentMarker, accidents_chunk)
+        new_items += len(accidents)
 
-        all_involved_accident_ids = set(map(lambda x: x[0], db.session.query(Involved.accident_id).all()))
+        all_involved_accident_ids = set(map(lambda x: x[0], db.session.query(Involved.provider_and_id).all()))
         involved = import_involved(provider_code=provider_code, **files_from_cbs)
-        involved = [x for x in involved if x['accident_id'] not in all_involved_accident_ids]
+        involved = [x for x in involved if x['provider_and_id'] not in all_involved_accident_ids]
+
+        logging.info('inserting ' + str(len(involved)) + ' new involved')
         for involved_chunk in chunks(involved, batch_size):
             db.session.bulk_insert_mappings(Involved, involved_chunk)
         new_items += len(involved)
 
-        all_vehicles_accident_ids = set(map(lambda x: x[0], db.session.query(Vehicle.accident_id).all()))
+        all_vehicles_accident_ids = set(map(lambda x: x[0], db.session.query(Vehicle.provider_and_id).all()))
         vehicles = import_vehicles(provider_code=provider_code, **files_from_cbs)
-        vehicles = [x for x in vehicles if x['accident_id'] not in all_vehicles_accident_ids]
+        vehicles = [x for x in vehicles if x['provider_and_id'] not in all_vehicles_accident_ids]
+        logging.info('inserting ' + str(len(vehicles)) + ' new vehicles')
         for vehicles_chunk in chunks(vehicles, batch_size):
             db.session.bulk_insert_mappings(Vehicle, vehicles_chunk)
         new_items += len(vehicles)
+
+
+        all_existing_accidents_ids_without_location = set(map(lambda x: x[0],
+                                                              db.session.query(AccidentsNoLocation.provider_and_id).all()))
+        accidents_no_location = [accident for accident in accidents_no_location \
+                                if accident['provider_and_id'] not in all_existing_accidents_ids_without_location]
+        accidents_no_location_ids = [accident['provider_and_id'] for accident in accidents_no_location]
+        logging.info('inserting ' + str(len(accidents_no_location)) + ' accidents without location')
+        for accidents_chunk in chunks(accidents_no_location, batch_size):
+            db.session.bulk_insert_mappings(AccidentsNoLocation, accidents_chunk)
+
+        involved_no_location = [x for x in involved if x['provider_and_id'] in accidents_no_location_ids]
+        logging.info('inserting ' + str(len(involved_no_location)) + ' involved without accident location')
+        for involved_chunk in chunks(involved_no_location, batch_size):
+            db.session.bulk_insert_mappings(InvolvedNoLocation, involved_chunk)
+
+        vehicles_no_location = [x for x in vehicles if x['provider_and_id'] in accidents_no_location_ids]
+        logging.info('inserting ' + str(len(vehicles_no_location)) + ' vehicles without accident location')
+        for vehicles_chunk in chunks(vehicles_no_location, batch_size):
+            db.session.bulk_insert_mappings(VehicleNoLocation, vehicles_chunk)
 
         logging.info("\t{0} items in {1}".format(new_items, time_delta(started)))
         return new_items
@@ -443,7 +494,6 @@ def delete_invalid_entries(batch_size):
             logging.info('deleting invalid entries from AccidentMarker')
             q.delete(synchronize_session='fetch')
             db.session.commit()
-
 
 def delete_cbs_entries(start_date, batch_size):
     """

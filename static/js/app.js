@@ -697,8 +697,7 @@ $(function () {
             }.bind(this));
             this.isReady = true;
 
-            // google.maps.event.addListener(this.map, "rightclick", _.bind(this.contextMenuMap, this) );
-            google.maps.event.addListener(this.map, "rightclick", _.bind(this.contextMenuMap2, this) );
+            google.maps.event.addListener(this.map, "rightclick", _.bind(this.contextMenuMap, this) );
 
             google.maps.event.addListener(this.map, "idle", function(){
                 if (!this.firstLoadDelay){
@@ -877,26 +876,6 @@ $(function () {
             this.model.set("currentMarker", null);
         },
         contextMenuMap : function(e) {
-
-            this.clickLocation = e.latLng;
-            if (this.menu) {
-                this.menu.remove();
-            }
-            this.menu = new ContextMenuView({
-                items: [
-                    {
-                        icon : "plus-sign",
-                        text : ADD_DISCUSSION,
-                        callback : _.bind(this.showDiscussion, this)
-                    },
-                    {
-                        icon : "plus-sign",
-                        text : NEW_FEATURES,
-                        callback : _.bind(this.featuresSubscriptionDialog, this)
-                    }
-                ]}).render(e);
-        },
-        contextMenuMap2 : function(e) {
 
             this.clickLocation = e.latLng;
 

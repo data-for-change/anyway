@@ -134,6 +134,11 @@ var MarkerView = Backbone.View.extend({
         };
     },
     getTitle : function(markerType) {
+
+        if(this.model.get("type") == MARKER_TYPE_DISCUSSION){
+            markerType = 'discussion';
+        }
+
         var markerTitle = '';
         var accuracy = '';
         var markerIconTypeIdentifier = this.markerIconType ? '' : '.';

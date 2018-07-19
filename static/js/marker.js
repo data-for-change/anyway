@@ -6,7 +6,6 @@ var MarkerView = Backbone.View.extend({
         "click .accordion-container input" : "accordionInputClick"
     },
     initialize : function(options) {
-        debugger;
         this.map = options.map;
         this.markerIconType = options.markerIconType;
         _.bindAll(this, "clickMarker");
@@ -20,7 +19,7 @@ var MarkerView = Backbone.View.extend({
     },
 
     render : function() {
-        debugger;
+
         var markerPosition = new google.maps.LatLng(this.model.get("latitude"),
             this.model.get("longitude"));
         var provider = PROVIDERS[this.model.get("provider_code")];
@@ -42,7 +41,6 @@ var MarkerView = Backbone.View.extend({
         this.marker.view = this;
 
         if (this.model.get("type") == MARKER_TYPE_DISCUSSION) {
-        debugger;
             this.marker.setTitle(this.getTitle('discussion')); //this.model.get("title"));
             google.maps.event.addListener(this.marker, "click",
                 _.bind(app.showDiscussion, app, this.model.get("identifier")) );
@@ -136,6 +134,11 @@ var MarkerView = Backbone.View.extend({
         };
     },
     getTitle : function(markerType) {
+
+        if(this.model.get("type") == MARKER_TYPE_DISCUSSION){
+            markerType = 'discussion';
+        }
+
         var markerTitle = '';
         var accuracy = '';
         var markerIconTypeIdentifier = this.markerIconType ? '' : '.';

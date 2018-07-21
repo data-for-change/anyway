@@ -83,6 +83,14 @@ def rsa(filename):
 
     return parse(filename)
 
+@process.command()
+@click.argument("filepath")
+@click.option('--batch_size', type=int, default=5000)
+def schools(filepath, batch_size):
+    from anyway.parsers.schools import parse
+    return parse(filepath=filepath,
+                 batch_size=batch_size)
+
 
 @cli.command()
 @click.argument('identifiers', nargs=-1)

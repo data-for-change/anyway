@@ -163,3 +163,12 @@ class ImporterUI(object):
             if confirm_delete_all.lower() == 'n':
                 self._delete_all = False
         return self._delete_all
+
+
+def chunks(l, n):
+    """Yield successive n-sized chunks from l."""
+    try: xrange
+    except NameError:
+        xrange = range
+    for i in xrange(0, len(l), n):
+        yield l[i:i + n]

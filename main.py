@@ -80,7 +80,6 @@ def united(light, username, password, lastmail):
 @click.argument("filename")
 def rsa(filename):
     from anyway.parsers.rsa import parse
-
     return parse(filename)
 
 @process.command()
@@ -124,6 +123,32 @@ def load_discussions(identifiers):
         except Exception as e:
             db.session.rollback()
             logging.warn("Failed: " + identifier + ": " + e)
+
+@cli.group()
+def scripts():
+    pass
+
+def valid_date(date_string):
+    DATE_INPUT_FORMAT = '%d-%m-%Y'
+    from datetime import datetime
+    try:
+        return datetime.strptime(date_string, DATE_INPUT_FORMAT)
+    except ValueError:
+        msg = "Not a valid date: '{0}'.".format(date_string)
+        raise argparse.ArgumentTypeError(msg)
+
+
+@scripts.command()
+@click.option('--start_date', default='01-01-2013', type=valid_date, help='The Start Date - format DD-MM-YYYY')
+@click.option('--end_date', default='31-12-2017', type=valid_date, help='The End Date - format DD-MM-YYYY')
+@click.option('--distance', default=0.5, help='float In KM. Default is 0.5 (500m)', type=float)
+@click.option('--output_path', default='output', help='output file of the results. Default is output.csv')
+def accidents_around_schools(start_date, end_date, distance, output_path):
+    from anyway.accidents_around_schools import main
+    return main(start_date=start_date,
+                 end_date=end_date,
+                 distance=distance,
+                 output_path=output_path)
 
 
 if __name__ == '__main__':

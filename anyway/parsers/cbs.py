@@ -15,7 +15,7 @@ from .. import field_names, localization
 from ..models import AccidentMarker, Involved, Vehicle, AccidentsNoLocation, InvolvedNoLocation, VehicleNoLocation
 from .. import models
 from ..constants import CONST
-from ..utilities import ItmToWGS84, init_flask, CsvReader, time_delta, decode_hebrew,ImporterUI,truncate_tables
+from ..utilities import ItmToWGS84, init_flask, CsvReader, time_delta, decode_hebrew,ImporterUI,truncate_tables,chunks
 from functools import partial
 import logging
 
@@ -384,13 +384,6 @@ def get_files(directory):
         elif name in (ACCIDENTS, INVOLVED, VEHICLES):
             yield name, csv
 
-def chunks(l, n):
-    """Yield successive n-sized chunks from l."""
-    try: xrange
-    except NameError:
-        xrange = range
-    for i in xrange(0, len(l), n):
-        yield l[i:i + n]
 
 
 def import_to_datastore(directory, provider_code, batch_size):
@@ -570,7 +563,7 @@ def main(specific_folder, delete_all, path, batch_size, delete_start_date):
         delete_cbs_entries(delete_start_date, batch_size)
     started = datetime.now()
     total = 0
-    for directory in dir_list:
+    for directory in sorted(dir_list):
         parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
         provider_code = get_provider_code(parent_directory)
         total += import_to_datastore(directory, provider_code, batch_size)

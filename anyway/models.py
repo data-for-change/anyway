@@ -878,3 +878,24 @@ class VehicleNoLocation(Base):
                       Index('accident_id_idx_vehicles_no_location', 'accident_id'),
                       Index('provider_and_id_idx_vehicles_no_location', 'provider_and_id', unique=False),
                       {})
+
+
+class School(Base):
+    __tablename__ = "schools"
+    id = Column(BigInteger(), primary_key=True, index=True)
+    fcode_type = Column(Integer(), nullable=True)
+    yishuv_symbol = Column(Integer(), nullable=True, index=True)
+    yishuv_name = Column(Text(), nullable=True)
+    school_name = Column(Text(), nullable=True)
+    school_latin_name = Column(Text(), nullable=True)
+    usg = Column(Integer(), nullable=True)
+    usg_code = Column(Integer(), nullable=True)
+    e_ord = Column(Float(), nullable=True)
+    n_ord = Column(Float(), nullable=True)
+    longitude = Column(Float(), nullable=True)
+    latitude = Column(Float(), nullable=True)
+    geom = Column(Geometry('POINT', srid=4326), index=True)
+    data_year = Column(Integer(), nullable=True)
+    prdct_ver = Column(DateTime, default=None)
+    x = Column(Float(), nullable=True)
+    y = Column(Float(), nullable=True)

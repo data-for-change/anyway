@@ -563,7 +563,7 @@ def main(specific_folder, delete_all, path, batch_size, delete_start_date):
         delete_cbs_entries(delete_start_date, batch_size)
     started = datetime.now()
     total = 0
-    for directory in dir_list:
+    for directory in sorted(dir_list):
         parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
         provider_code = get_provider_code(parent_directory)
         total += import_to_datastore(directory, provider_code, batch_size)

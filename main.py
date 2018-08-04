@@ -141,7 +141,7 @@ def valid_date(date_string):
 @scripts.command()
 @click.option('--start_date', default='01-01-2013', type=valid_date, help='The Start Date - format DD-MM-YYYY')
 @click.option('--end_date', default='31-12-2017', type=valid_date, help='The End Date - format DD-MM-YYYY')
-@click.option('--distance', default=0.5, help='float In KM. Default is 0.5 (500m)', type=float)
+@click.option('--distance', default=0.5, help='float In KM. Default is 0.3 (300m)', type=float)
 @click.option('--output_path', default='output', help='output file of the results. Default is output.csv')
 def accidents_around_schools(start_date, end_date, distance, output_path):
     from anyway.accidents_around_schools import main

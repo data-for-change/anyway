@@ -164,6 +164,16 @@ def get_locale():
     else:
         return lang
 
+
+@app.route('/schools', methods=["GET"])
+@user_optional
+def schools():
+    if request.method == "GET":
+        return render_template('schools_dashboard.html')
+    else:
+        return Response("Method Not Allowed", 405)
+
+
 @app.route("/markers", methods=["GET"])
 @user_optional
 def markers():

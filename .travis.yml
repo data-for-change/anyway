@@ -64,7 +64,7 @@ jobs:
         script: bash .hasadna-travis.sh deploy
     - stage: test
       name: deploy-production
-      if: branch = k8s-continous-deployment
+      if: branch = k8s-continous-deployment-production
       addons: {}
       services: [docker]
       install:

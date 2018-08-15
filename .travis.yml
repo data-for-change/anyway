@@ -2,19 +2,14 @@ language: python
 
 cache:
   - pip
-  - yarn
 
 python:
   - 2.7.11
   - 3.5
   - 3.6
 
-node_js:
-  - "6"
-
 addons:
   sauce_connect: true
-  postgresql
 
 env:
   global:
@@ -23,12 +18,14 @@ env:
     - DATABASE_URL='postgresql://postgres@localhost/anyway'
     - secure: "RYGbTO5b15B5BJnmLQAajWskG7F/lDT+BO/P2EjP8xU5P70hME3PNgaZPJ1phPq49XRS4Oe2t4c7ta6V1JdDMc10MkihmEqgdsRyxw4UhVtz6i4mDYFZFrgntYofqbvfrc5r9Z4C81y8a79wY6D/H10L2ocpEeEsZWilh+N8mWE="
     - secure: "HmWdkaHFKlvFKgpTc/TFtOwPxgu/FE+/J27sTMsXkFxf7MCSa4817CtEs6BumlVAuoPtnxy9es6RYsUoqv5+eIJBwCryx+DtmxjUqMtRM2RlNOPtRABOjZ/QECqgaRtNEAsSxQH3XWWWkniqQgXFCS6crKUhA+elpvivKgf9iyQ="
+    - secure: "bnbUbbtucC8+2v0HKpsnyzLHssNJf6a0oCeMSXgfskivMMRCmYzrOz7fXzSY5pEAPuqRUnOObzaE1JclUOMKfF1p4uGpLoOVKAArAvV6kWC34WVA1rQoebs7vd7KXKRsQMFEmmDhYERJZoF0Ojkx7J9abviVqMEBaEYT1d/ZomI="
+    - secure: "tmW0rf5YhG6zXm9PEbfBBtOy0cFOLjYnv37kJRbOZpoH+5F5lAXSk7jwbM1nonpzSQUChwAgjk6EfZPya5p+IM549R3lmhOeEawdFIi14li1KZDDwcUR3pGAlK8XOtHgsNgRUHZgQzUOkURREmyHfzojHk9+DE8cirOu2nNL1/c="
 
 services:
   - postgresql
   - rabbitmq
 
-sudo: false
+sudo: true
 
 install:
   - pip install -r requirements.txt -r test_requirements.txt
@@ -46,3 +43,38 @@ script:
   - ./main.py process cbs
   - pytest tests -m "not browser"
 #  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then for BROWSER in Chrome Firefox; do pytest tests -m browser --driver SauceLabs --capability browserName $BROWSER --capability tunnelIdentifier $TRAVIS_JOB_NUMBER; done; fi
+
+jobs:
+  include:
+    - stage: test
+      name: deploy-dev
+      if: branch = k8s-continous-deployment
+      addons: {}
+      services: [docker]
+      install:
+        - true
+      before_script:
+        - true
+      script:
+        - curl -s https://raw.githubusercontent.com/hasadna/hasadna-k8s/master/apps_travis_script.sh > .hasadna-travis.sh
+        - bash .hasadna-travis.sh script
+      deploy:
+        skip_cleanup: true
+        provider: script
+        script: bash .hasadna-travis.sh deploy
+    - stage: test
+      name: deploy-production
+      if: branch = k8s-continous-deployment
+      addons: {}
+      services: [docker]
+      install:
+        - true
+      before_script:
+        - true
+      script:
+        - curl -s https://raw.githubusercontent.com/hasadna/hasadna-k8s/master/apps_travis_script.sh > .hasadna-travis.sh
+        - bash .hasadna-travis.sh script
+      deploy:
+        skip_cleanup: true
+        provider: script
+        script: bash .hasadna-travis.sh deploy

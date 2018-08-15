@@ -1,3 +1,14 @@
 .dockerignore
 Dockerfile
 docker-compose-*
+*.enc
+.appveyor.yml
+.git
+.gitignore
+.idea
+.pylintrc
+.travis*
+*.md
+docker-compose.yml
+docs
+tests

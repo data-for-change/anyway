@@ -2,19 +2,21 @@ language: python
 
 cache:
   - pip
-  - yarn
+# [x] in cache section: unexpected key yarn, dropping
+#   - yarn
 
 python:
   - 2.7.11
-  - 3.5
-  - 3.6
+#  - 3.5
+#  - 3.6
 
-node_js:
-  - "6"
 
-addons:
-  sauce_connect: true
-  postgresql
+# [x] specified node_js, but setting is not relevant for python
+# node_js:
+#   - "6"
+
+#addons:
+#  sauce_connect: true
 
 env:
   global:
@@ -23,26 +25,49 @@ env:
     - DATABASE_URL='postgresql://postgres@localhost/anyway'
     - secure: "RYGbTO5b15B5BJnmLQAajWskG7F/lDT+BO/P2EjP8xU5P70hME3PNgaZPJ1phPq49XRS4Oe2t4c7ta6V1JdDMc10MkihmEqgdsRyxw4UhVtz6i4mDYFZFrgntYofqbvfrc5r9Z4C81y8a79wY6D/H10L2ocpEeEsZWilh+N8mWE="
     - secure: "HmWdkaHFKlvFKgpTc/TFtOwPxgu/FE+/J27sTMsXkFxf7MCSa4817CtEs6BumlVAuoPtnxy9es6RYsUoqv5+eIJBwCryx+DtmxjUqMtRM2RlNOPtRABOjZ/QECqgaRtNEAsSxQH3XWWWkniqQgXFCS6crKUhA+elpvivKgf9iyQ="
+    - K8S_OPS_REPO_BRANCH=master
+    - K8S_OPS_REPO_SLUG=hasadna/hasadna-k8s
+    - DOCKER_IMAGE=orihoch/anyway
+    - DEPLOY_YAML_UPDATE_FILE=values.auto-updated.yaml
+    - DEPLOY_VALUES_CHART_NAME=anyway
+    - DEPLOY_VALUES_IMAGE_PROP=image
+    - DEPLOY_COMMIT_MESSAGE="automatic update of anyway"
+    - DEPLOY_GIT_EMAIL=anyway-deployer@null.void
+    - DEPLOY_GIT_USER=anyway-deployer
+    - secure: "T2ADsY4WIFZcKMsmOQ1Qj6k1xkdjkXdrc/YlJqWR2iT3e5nsdJ42K+0VESD8VxV1RGpV2p6/BBhuHDEQ8WXSvm9hl4Wd18lZevcMayHsS3fw427bvtyI/TnuFC/m71YmawrcDrUW7PBYSsd/9rN7nKJUX9eUmYk4W6HaaDZ6f+2J1mtWhzBBXkXXn2t+lMXAzTWB8jTrFjtycYlFIiIj9SxrkAuobTIwBJrke3p1t5GQvCks/3YGywhoea62s/eZ0//uKoG1VjvrH7WjM8c9rSoR7EM/dXgPXxXAjG/xEZ0Ca+9WzpVOXe6f3Cn/nQf5+xxYoRjyKfOLLdCKH56RosdPwXCNA+cTg81S8VzKzANdyEHrswGvmkmWI8Oqbk1qK8nCpq7dRzkHAhS/3cndAKgI0pHjEhf9N1ZN95dNSH2NgyQ1y70QnFrRhe4s6/+9FjRa0XSNylkSNiy6Q4mNpT9Hj8iBH92tnuUM7zFX8wZ07brx5LfBvIqHLcZr6CMXeroppm7MNRMpuYta5P2jUdcxwm7/grxDTIgTLAZZrefYTZXE660ASPat6OxLs74/3V2QIayGYhvTzJm865gkE2OTxva2/IRdlY+ylF3X7jXXfqz/dz+WUlLRZ6OKErMDmhfw+EwgIzGcxDbI0GYtweE07FTzMHg8m5IAGeK3seA="
+    - secure: "VcviPX36K1A8f8AdDeaIptSuHHznYWRb/aqczCZ4AEw3HkCclPwgZMbs1OImzCABWg4thLDCxEDAUmLuS0Ea+7jocPc+X69WcR5d0bO3eXCujjQAZZ7MI5FGH+7JHLHlpuESFpWOGs65EOwNnVOHuehIRuNOF/3hC8UTuEqyY2rd8nkkMBqNi8TLSopdPDIpWkYGByAgf3HJCXQYOEWQxjYLfc5NpTIVcpCB0ImRNypLAXPvXmP75nsJCt9FYYK3TkuZ4pHD7nCib8eeg+VFz/6PjHAfsL0WzaH7PNwgJbg8qbhBDXnExg66f2Vi1WLrRVYbYMnqPHc80vbjgPHKMOdjKMMkEmxHpblLaK7fYJtzUr9p4KcBIsKhRue4OF2mO4EPBYa6oHn45qY5kznerAiLUNWq0klvlE1preuz2g64ynURXNv939azTwSHb/oPUiA9Dvj0InD0B53fDpn4+NvDXIkRkK3Y7nUFQNA55ojiAWa4/rqh6ImoIJzgqTOxjwbMUc782vhtWvcUmu6TqniPxhDUI2O5jQYfQEoqD78Hk9iFayeLfCdAp3BVnaWG4gbkdNnH0kO00FSMrMR0qGi3bYbCzKzb+scGR7YhPSsMTCqVq7sF5u9KAuSnNE4KA7JdVdZkovaNMtXS9Dg2SEDLKKFC5Sc9eMOgfE676Is="
+    - secure: "jWTV9AAe8EHFuLHYlyhb6Fky8a62NFw7C6XgruP8IKxqwSp59HwLla3qgSowZSBShqoJf5isUyBFzx8q/3Gq1/5OVWodvq+IEgxjg9B/bnUJcHxMw4h7RK/e8i32UK1q46yLtRpRM8h6HhODAecJET8KtK7qZyVWFiaj58eQewdj9PA9WjZsPdodxliMY03GyUfv/K996iqteNaelWXOPJua1qbOoLYiJl+FKyIazqlh73tkzEj/gstlYU5jddl1QeR7rWV2O74/az+H0Si8mk/jz9rsOY5pGZGmDBmorJ86ILv85LQAf7XR7djRNmvKs0ciATBvla33q8xTJB+Jow9PUAmEkfYVmWu9faMo1g3ycm8uuye8x+EZK1193ku8eGhEaBbuCrbW1Wc1LlQLcGbb9fb5nQWPnn68JQoD9A9D1CBqie4LfJ2qpw86oE4SBqhjSdLWVscpt7bnPUOxE/7AsuJjRJyCGWKjh6fRnfEI5u7S9ajDPf4FnT/mvhvFrq/CNZud2psiZ/DbJJfEBcFebcIGUT97KwbHb19KDVb0cTTwskAnydVXKjwQ3aV8b7qnGiIXBMEhzix3Kp9sPTxXOh5kcMJnruYNaKMXgGSMvK6ARx0e7/F8wCF6R8bppR1pRjKC4VfZfxtJ8Epqp0X8pMW5Y3RbeRVOHwjeG1I="
 
 services:
-  - postgresql
-  - rabbitmq
+#  - postgresql
+#  - rabbitmq
+  - docker
 
-sudo: false
+sudo: required
 
-install:
-  - pip install -r requirements.txt -r test_requirements.txt
-  - yarn global add eslint --ignore-engines
+#install:
+#  - pip install -r requirements.txt -r test_requirements.txt
+#  - yarn global add eslint --ignore-engines
 
-before_script:
-  - psql -c 'create database anyway;' -U postgres
-  - alembic upgrade head
-  - celery worker -A anyway.clusters_calculator -D
+#before_script:
+#  - psql -c 'create database anyway;' -U postgres
+#  - alembic upgrade head
+#  - celery worker -A anyway.clusters_calculator -D
 
 script:
-  - pylint -j $(nproc) anyway tests main.py
-  - eslint static/js --ignore-path=static/js/.eslintignore
-  - ./main.py process registered_vehicles
-  - ./main.py process cbs
-  - pytest tests -m "not browser"
+#  - pylint -j $(nproc) anyway tests main.py
+#  - if [ "${TRAVIS_PYTHON_VERSION}" == "2.7.11" ]; then eslint static/js --ignore-path=static/js/.eslintignore; fi
+#  - ./main.py process registered_vehicles
+#  - ./main.py process cbs
+#  - pytest tests -m "not browser"
 #  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then for BROWSER in Chrome Firefox; do pytest tests -m browser --driver SauceLabs --capability browserName $BROWSER --capability tunnelIdentifier $TRAVIS_JOB_NUMBER; done; fi
+  - if [ "${TRAVIS_PYTHON_VERSION}" == "2.7.11" ]; then curl -s https://raw.githubusercontent.com/hasadna/hasadna-k8s/master/apps_travis_script.sh > .travis.sh; fi
+  - if [ "${TRAVIS_PYTHON_VERSION}" == "2.7.11" ]; then bash .travis.sh script; fi
+
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: bash .travis.sh deploy
+  on:
+    branch: hasadna-k8s
+    condition: $TRAVIS_PYTHON_VERSION == "2.7.11"

@@ -48,6 +48,24 @@ jobs:
   include:
     - stage: test
       name: deploy-dev
+      if: branch = dev
+      addons: {}
+      services: [docker]
+      install:
+        - true
+      before_script:
+        - true
+      script:
+        - curl -s https://raw.githubusercontent.com/hasadna/hasadna-k8s/master/apps_travis_script.sh > .hasadna-travis.sh
+        - bash .hasadna-travis.sh script
+      deploy:
+        skip_cleanup: true
+        provider: script
+        script: bash .hasadna-travis.sh deploy
+        on:
+          branch: dev
+    - stage: test
+      name: deploy-production
       if: branch = testing_continuous_deployment
       addons: {}
       services: [docker]
@@ -64,21 +82,3 @@ jobs:
         script: bash .hasadna-travis.sh deploy
         on:
           branch: testing_continuous_deployment
-    - stage: test
-      name: deploy-production
-      if: branch = testing_continuous_deployment_production
-      addons: {}
-      services: [docker]
-      install:
-        - true
-      before_script:
-        - true
-      script:
-        - curl -s https://raw.githubusercontent.com/hasadna/hasadna-k8s/master/apps_travis_script.sh > .hasadna-travis.sh
-        - bash .hasadna-travis.sh script
-      deploy:
-        skip_cleanup: true
-        provider: script
-        script: bash .hasadna-travis.sh deploy
-        on:
-          branch: testing_continuous_deployment_production

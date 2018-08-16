@@ -34,8 +34,8 @@ var MarkerView = Backbone.View.extend({
             return this;
         }
 
-        this.marker.setIcon(this.getIcon());
-        if (!app.heatMapMode){
+        this.marker.setIcon(null);
+        if (!app.heatMapMode) {
             this.marker.setMap(this.map);
         }
         this.marker.view = this;

@@ -29,7 +29,7 @@ div[title^='דיון']:after{
     transform: rotate(45deg);
 }
 
-div[title*='תאונה'],.div[title*='תאונות'],.div[title*='איחוד הצלה'],.div[title*='שומרי הדרך']{
+div[title*='תאונה'],div[title*='תאונות'],div[title*='איחוד הצלה'],div[title*='שומרי הדרך']{
     width: 30px !important;
     height: 30px !important;
     opacity: 1 !important;
@@ -49,7 +49,7 @@ div[title*='תאונות']{
     transform: rotate(-45deg) translate(12px,-31px) !important;
 }
 
-div[title*='תאונה']:after, .div[title*='תאונות']:after,.div[title*='איחוד הצלה']:after, .div[title*='שומרי הדרך']:after {
+div[title*='תאונה']:after, div[title*='תאונות']:after,div[title*='איחוד הצלה']:after, div[title*='שומרי הדרך']:after {
     font-family: 'Material Icons';
     font-size: 18px;
     width: 24px;
@@ -112,7 +112,7 @@ div[title*='קלה']:after{
     color: #FFD82B;
 }
 
-div[title*='פגיעה']:after,.div[title*='החלקה']:after,.div[title*='התנגשות']:after{
+div[title*='פגיעה']:after,div[title*='החלקה']:after,div[title*='התנגשות']:after{
     content: '\e531';
 }
 
@@ -217,7 +217,7 @@ div[title*='הולך רגל']:after{
     content: '\e536';
 }
 
-.gm-style .div[title*='(נבחר)'], .gm-style .div[title]:hover{
+.gm-style div[title*='(נבחר)'], .gm-style div[title]:hover{
     box-shadow: 0px 0px 25px 12px rgb(160,100,140);
 }
 

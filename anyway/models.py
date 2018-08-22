@@ -441,7 +441,7 @@ class AccidentMarker(MarkerMixin, Base):
             markers = markers.options(load_only("id", "longitude", "latitude"))
 
         if kwargs.get('age_groups'):
-            markers = markers.filter(AccidentMarker.involved.any(Involved.age_group.in_(kwargs.get('age_groups'))))
+            markers = markers.filter(AccidentMarker.involved.any(Involved.age_group.in_(kwargs.get('age_groups').split(','))))
 
         total_records = markers.count()
         if page and per_page:

@@ -376,7 +376,7 @@ def index(marker=None, message=None):
         context['coordinates'] = (request.values['lat'], request.values['lon'])
     for attr in 'approx', 'accurate', 'show_markers', 'show_accidents', 'show_rsa', 'show_discussions', 'show_urban', 'show_intersection', 'show_lane',\
                 'show_day', 'show_holiday', 'show_time', 'start_time', 'end_time', 'weather', 'road', 'separation',\
-                'surface', 'acctype', 'controlmeasure', 'district', 'case_type', 'show_fatal', 'show_severe', 'show_light':
+                'surface', 'acctype', 'controlmeasure', 'district', 'case_type', 'show_fatal', 'show_severe', 'show_light', 'age_groups':
         value = request.values.get(attr)
         if value is not None:
             context[attr] = value or '-1'

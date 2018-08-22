@@ -41,7 +41,7 @@ from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved,
                      Vehicle, Role, GeneralPreferences)
 from .config import ENTRIES_PER_PAGE
 from six.moves import http_client
-
+from sqlalchemy import func
 
 app = utilities.init_flask()
 db = SQLAlchemy(app)
@@ -438,11 +438,15 @@ def updatebyemail():
         return  jsonify(respo='First name to long')
     if len(lname)>40:
         return  jsonify(respo='Last name to long')
-    if len(emailaddress)>40:
+    if len(emailaddress)>60:
         return jsonify(respo='Email too long', emailaddress = emailaddress)
     user_exists = db.session.query(User).filter(User.email == emailaddress)
     if user_exists.count()==0:
-        user = User(email = emailaddress, first_name = fname.decode("utf8"), last_name = lname.decode("utf8"), new_features_subscription=True)
+        curr_max_id = db.session.query(func.max(User.id)).scalar()
+        if curr_max_id is None:
+            curr_max_id = 0
+        user_id = curr_max_id + 1
+        user = User(id = user_id, email = emailaddress, first_name = fname.decode("utf8"), last_name = lname.decode("utf8"), new_features_subscription=True)
         db.session.add(user)
         db.session.commit()
         return jsonify(respo='Subscription saved', )

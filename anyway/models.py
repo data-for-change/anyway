@@ -83,6 +83,42 @@ class User(Base, UserMixin):
     def __unicode__(self):
         return self.username
 
+class LocationSubscribers(Base, UserMixin):
+    __tablename__ = "locationsubscribers"
+    id = Column(BigInteger(), primary_key=True)
+    email = Column(String(120))
+    first_name = Column(String(50))
+    last_name = Column(String(50))
+    ne_lng = Column(Float(), nullable=True)
+    ne_lat = Column(Float(), nullable=True)
+    sw_lng = Column(Float(), nullable=True)
+    sw_lat = Column(Float(), nullable=True)
+
+    def serialize(self):
+        return {
+            "id": str(self.id),
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "email": self.email,
+            "ne_lng": self.ne_lng,
+            "ne_lat": self.ne_lat,
+            "sw_lng": self.sw_lng,
+            "sw_lat": self.sw_lat
+        }
+
+    # Flask-Login integration
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.id
+
 class Role(Base, RoleMixin):
     __tablename__ = "roles"
     id = Column(Integer(), primary_key=True)

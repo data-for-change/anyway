@@ -452,7 +452,7 @@ $(function () {
                 mapTypeControl: false,
                 zoomControl: true,
                 panControl: true,
-                streetViewControl: !MAP_ONLY,
+                streetViewControl: true,
                 styles: MAP_STYLE,
                 gestureHandling: GESTURE_HANDLING
             };
@@ -892,8 +892,8 @@ $(function () {
                     },
                     {
                         icon : "plus-sign",
-                        text : NEW_FEATURES,
-                        callback : _.bind(this.featuresSubscriptionDialog, this)
+                        text : GET_LOCATION_UPDATES,
+                        callback : _.bind(this.LocationSubscriptionDialog, this)
                     }
                 ],
                 map: this.map,
@@ -957,6 +957,14 @@ $(function () {
         featuresSubscriptionDialog : function(type, event) {
             if (this.createDialog) this.createDialog.close();
             this.createDialog = new FeatureDialog({
+                type: type,
+                event: event,
+                markers: this.markers
+            }).render();
+        },
+        LocationSubscriptionDialog: function(type, event) {
+            if (this.createDialog) this.createDialog.close();
+            this.createDialog = new LocationSubscriptionDialog({
                 type: type,
                 event: event,
                 markers: this.markers

@@ -1,16 +1,16 @@
 var ADD_DISCUSSION = "צרו דיון";
-var NEW_FEATURES = "עדכן אותי לגבי תכונות חדשות";
+var GET_LOCATION_UPDATES = "קבלת עדכונים על התצוגה הנוכחית";
 
 var PROVIDERS = {};
 PROVIDERS[1] = PROVIDERS[3] = {
-  name: "הלשכה המרכזית לסטטיסטיקה",
-  url: "http://www.cbs.gov.il",
-  logo: "cbs.png",
+    name: "הלשכה המרכזית לסטטיסטיקה",
+    url: "http://www.cbs.gov.il",
+    logo: "cbs.png",
 };
 PROVIDERS[2] = {
-  name: "איחוד הצלה",
-  url: "http://www.1221.org.il",
-  logo: "united.jpg",
+    name: "איחוד הצלה",
+    url: "http://www.1221.org.il",
+    logo: "united.jpg",
 };
 PROVIDERS[4] = {
     name: "שומרי הדרך",
@@ -115,7 +115,7 @@ function getIcon(accidentType, severity) {
     } catch (err) {
         // stick to default icon
     }
-    if (isRetina){
+    if (isRetina) {
         var googleIcon = {
             url: icon,
             scaledSize: new google.maps.Size(30, 50)

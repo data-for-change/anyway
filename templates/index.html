@@ -1459,6 +1459,11 @@
         {% else %}
             app.years = [];
         {% endif %}
+        {% if age_groups is defined and age_groups != "" %}
+            app.age_groups = "{{  age_groups }}";
+        {% else %}
+            app.age_groups = "";
+        {% endif %}
 
         app.render();
         if (MARKER_ID) {

@@ -38,7 +38,7 @@ from .oauth import OAuthSignIn
 
 from .base import user_optional
 from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved, User, ReportPreferences,
-                     Vehicle, Role, GeneralPreferences)
+                     LocationSubscribers, Vehicle, Role, GeneralPreferences)
 from .config import ENTRIES_PER_PAGE
 from six.moves import http_client
 from sqlalchemy import func
@@ -142,18 +142,10 @@ ARG_TYPES = {'ne_lat': (float, 32.072427482938345), 'ne_lng': (float, 34.7992896
 
 def get_kwargs():
     kwargs = {arg: arg_type(request.values.get(arg, default_value)) for (arg, (arg_type, default_value)) in iteritems(ARG_TYPES)}
-
-    if kwargs['age_groups']:
-        try:
-            kwargs['age_groups'] = [int(value) for value in kwargs['age_groups'].split(',')]
-        except ValueError:
-            abort(http_client.BAD_REQUEST)
-
     try:
         kwargs.update({arg: datetime.date.fromtimestamp(int(request.values[arg])) for arg in ('start_date', 'end_date')})
     except ValueError:
         abort(http_client.BAD_REQUEST)
-
     return kwargs
 
 @babel.localeselector
@@ -427,9 +419,10 @@ def string2timestamp(s):
 def year2timestamp(y):
     return time.mktime(datetime.date(y, 1, 1).timetuple())
 
-@app.route("/new-features", methods=["POST"])
+@app.route("/location-subscription", methods=["POST"])
 def updatebyemail():
     jsonData = request.get_json(force=True)
+    logging.debug(jsonData)
     emailaddress = str(jsonData['address'])
     fname = (jsonData['fname']).encode("utf8")
     lname = (jsonData['lname']).encode("utf8")
@@ -440,25 +433,21 @@ def updatebyemail():
         return  jsonify(respo='Last name to long')
     if len(emailaddress)>60:
         return jsonify(respo='Email too long', emailaddress = emailaddress)
-    user_exists = db.session.query(User).filter(User.email == emailaddress)
-    if user_exists.count()==0:
-        curr_max_id = db.session.query(func.max(User.id)).scalar()
-        if curr_max_id is None:
-            curr_max_id = 0
-        user_id = curr_max_id + 1
-        user = User(id = user_id, email = emailaddress, first_name = fname.decode("utf8"), last_name = lname.decode("utf8"), new_features_subscription=True)
-        db.session.add(user)
-        db.session.commit()
-        return jsonify(respo='Subscription saved', )
-    else:
-        user_exists = user_exists.first()
-        if user_exists.new_features_subscription==False:
-            user_exists.new_features_subscription = True
-            db.session.add(user_exists)
-            db.session.commit()
-            return jsonify(respo='Subscription saved', )
-        else:
-            return jsonify(respo='Subscription already exist')
+    curr_max_id = db.session.query(func.max(LocationSubscribers.id)).scalar()
+    if curr_max_id is None:
+        curr_max_id = 0
+    user_id = curr_max_id + 1
+    user_subscription = LocationSubscribers(id = user_id,
+                               email = emailaddress,
+                               first_name = fname.decode("utf8"),
+                               last_name = lname.decode("utf8"),
+                               ne_lng=jsonData['ne_lng'],
+                               ne_lat=jsonData['ne_lat'],
+                               sw_lng=jsonData['sw_lng'],
+                               sw_lat=jsonData['sw_lat'])
+    db.session.add(user_subscription)
+    db.session.commit()
+    return jsonify(respo='Subscription saved', )
 
 @app.route("/preferences", methods=('GET', 'POST'))
 def update_preferences():

@@ -452,7 +452,7 @@ $(function () {
                 mapTypeControl: false,
                 zoomControl: true,
                 panControl: true,
-                streetViewControl: !MAP_ONLY,
+                streetViewControl: true,
                 styles: MAP_STYLE,
                 gestureHandling: GESTURE_HANDLING
             };

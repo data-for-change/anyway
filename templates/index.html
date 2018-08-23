@@ -1459,11 +1459,6 @@
         {% else %}
             app.years = [];
         {% endif %}
-        {% if age_groups is defined and age_groups != "" %}
-            app.age_groups = "{{  age_groups }}";
-        {% else %}
-            app.age_groups = Array.from({length: 18}, (v, k) => k+1);
-        {% endif %}
 
         app.render();
         if (MARKER_ID) {

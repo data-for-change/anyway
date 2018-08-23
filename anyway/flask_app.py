@@ -142,6 +142,13 @@ ARG_TYPES = {'ne_lat': (float, 32.072427482938345), 'ne_lng': (float, 34.7992896
 
 def get_kwargs():
     kwargs = {arg: arg_type(request.values.get(arg, default_value)) for (arg, (arg_type, default_value)) in iteritems(ARG_TYPES)}
+
+    if kwargs['age_groups']:
+        try:
+            kwargs['age_groups'] = [int(value) for value in kwargs['age_groups'].split(',')]
+        except ValueError:
+            abort(http_client.BAD_REQUEST)
+
     try:
         kwargs.update({arg: datetime.date.fromtimestamp(int(request.values[arg])) for arg in ('start_date', 'end_date')})
     except ValueError:
@@ -376,7 +383,7 @@ def index(marker=None, message=None):
         context['coordinates'] = (request.values['lat'], request.values['lon'])
     for attr in 'approx', 'accurate', 'show_markers', 'show_accidents', 'show_rsa', 'show_discussions', 'show_urban', 'show_intersection', 'show_lane',\
                 'show_day', 'show_holiday', 'show_time', 'start_time', 'end_time', 'weather', 'road', 'separation',\
-                'surface', 'acctype', 'controlmeasure', 'district', 'case_type', 'show_fatal', 'show_severe', 'show_light', 'age_groups':
+                'surface', 'acctype', 'controlmeasure', 'district', 'case_type', 'show_fatal', 'show_severe', 'show_light':
         value = request.values.get(attr)
         if value is not None:
             context[attr] = value or '-1'

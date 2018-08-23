@@ -1146,63 +1146,6 @@ $(function () {
             this.fetchMarkers();
             this.updateFilterString();
         },
-        setAgeGroupFilter: function() {
-            var age_groups_array = this.age_groups.toString().split(',').map(function(item) {
-                return parseInt(item);
-            });;            
-            if (age_groups_array.indexOf(1) !== -1) {
-                $("#checkbox-00-04").prop("checked", true);
-            }else{
-                $("#checkbox-00-04").prop("checked", false);
-            }
-            if (age_groups_array.indexOf(2) !== -1) {
-                $("#checkbox-05-09").prop("checked", true);
-            }else{
-                $("#checkbox-05-09").prop("checked", false);
-            }
-            if (age_groups_array.indexOf(3) !== -1) {
-                $("#checkbox-10-14").prop("checked", true);
-            }else{
-                $("#checkbox-10-14").prop("checked", false);
-            }
-            if (age_groups_array.indexOf(4) !== -1) {
-                $("#checkbox-15-19").prop("checked", true);
-            }else{
-                $("#checkbox-15-19").prop("checked", false);
-            } 
-            if (age_groups_array.indexOf(5) !== -1) {
-                $("#checkbox-20-24").prop("checked", true);
-            }else{
-                $("#checkbox-20-24").prop("checked", false);
-            }   
-            var ages25_69 = [6,7,8,9,10,11,12,13,14];        
-            var ages25_69_exist = age_groups_array.filter(function(val) { return ages25_69.indexOf(val) !== -1}).length > 0; 
-            if (ages25_69_exist) {
-                $("#checkbox-25-69").prop("checked", true);
-            }else{
-                $("#checkbox-25-69").prop("checked", false);
-            }
-            if (age_groups_array.indexOf(15) !== -1) {
-                $("#checkbox-70-74").prop("checked", true);
-            }else{
-                $("#checkbox-70-74").prop("checked", false);
-            }            
-            if (age_groups_array.indexOf(16) !== -1) {
-                $("#checkbox-75-79").prop("checked", true);
-            }else{
-                $("#checkbox-75-79").prop("checked", false);
-            }
-            if (age_groups_array.indexOf(17) !== -1) {
-                $("#checkbox-80-84").prop("checked", true);
-            }else{
-                $("#checkbox-80-84").prop("checked", false);
-            }            
-            if (age_groups_array.indexOf(18) !== -1) {
-                $("#checkbox-85-plus").prop("checked", true);
-            }else{
-                $("#checkbox-85-plus").prop("checked", false);
-            }          
-        },
         loadFilterFromParameters: function() {
             var bool_atrs = {};
             bool_atrs["checkbox-discussions"] = this.show_discussions;
@@ -1282,7 +1225,6 @@ $(function () {
                 $("#sdate").datepicker("setDate", new Date(this.dateRanges[0]));
                 $("#edate").datepicker("setDate", new Date(this.dateRanges[1]));
             }
-            this.setAgeGroupFilter();
         },
         changeDate: function() {
 

@@ -1167,14 +1167,16 @@ $(function () {
             }
             if (age_groups_array.indexOf(4) !== -1) {
                 $("#checkbox-15-19").prop("checked", true);
-            }  
+            }else{
+                $("#checkbox-15-19").prop("checked", false);
+            } 
             if (age_groups_array.indexOf(5) !== -1) {
                 $("#checkbox-20-24").prop("checked", true);
             }else{
                 $("#checkbox-20-24").prop("checked", false);
             }   
             var ages25_69 = [6,7,8,9,10,11,12,13,14];        
-            var ages25_69_exist = age_groups_array.filter(function(val) { ages25_69.indexOf(val) !== -1}).length > 0;           
+            var ages25_69_exist = age_groups_array.filter(function(val) { return ages25_69.indexOf(val) !== -1}).length > 0; 
             if (ages25_69_exist) {
                 $("#checkbox-25-69").prop("checked", true);
             }else{

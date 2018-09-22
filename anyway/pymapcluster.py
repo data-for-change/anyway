@@ -50,7 +50,7 @@ def cluster_markers(mercator, latlngs, zoom, gridsize=50):
     centers = []
     clusters = []
     sizes = []
-    latlngs = [latlng.serialize() for latlng in latlngs]
+    latlngs = [{"latitude": latlng.latitude, "longitude": latlng.longitude} for latlng in latlngs]
     for i, latlng in enumerate(latlngs):
         lat = latlng['latitude']
         lng = latlng['longitude']

@@ -20,7 +20,7 @@ def calculate_marker_box(marker_box, kwargs):
 
 def retrieve_clusters(**kwargs):
     start_time = time.time()
-    markers_in_box = AccidentMarker.bounding_box_query(**kwargs).markers.all()
+    markers_in_box = AccidentMarker.bounding_box_query(**kwargs).markers.with_entities(AccidentMarker.latitude, AccidentMarker.longitude).all()
     logging.debug('getting cluster data from db took %f seconds' % (time.time() - start_time))
     start_time = time.time()
     clusters = calculate_clusters(markers_in_box, kwargs['zoom'])

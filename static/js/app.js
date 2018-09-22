@@ -185,7 +185,11 @@ $(function () {
 
             if (this.clusterMode()) {
                 this.closeInfoWindow();
-                this.reloadSidebar(this);
+                this.clusters.fetch({
+                    data: $.param(params),
+                    reset: reset,
+                    success: this.reloadSidebar.bind(this)
+                });
             } else {
                 this.clearClustersFromMap();
                 $("#view-filter").prop('disabled', false);

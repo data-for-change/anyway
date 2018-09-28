@@ -78,6 +78,8 @@ var MarkerView = Backbone.View.extend({
             this.$el.find(".profile-image-url").attr("href", provider.url);
             this.$el.find(".added-by").html("מקור: <a href='" +
                 provider.url + "' target='blank'>" + provider.name + "</a>");
+            this.$el.find(".creation-date").text("תאריך: " +
+                                                moment(this.model.get("created")).format("LLLL"));
         } else {
             this.$el.html($("#marker-content-template").html());
 

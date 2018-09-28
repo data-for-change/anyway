@@ -20,6 +20,10 @@ class Constants(object):
 
     INVOLVED_TYPE_DRIVER_UNHARMED = 1
 
+    AGE_GROUPS_NUMBER = 18
+
+    ALL_AGE_GROUPS_LIST = [i for i in range(1, AGE_GROUPS_NUMBER + 1)]
+
     # other global constants (python only)
 
     def __setattr__(self, *_):

@@ -63,8 +63,7 @@ def test_bad_date(app):
 @query_flag("show_light")
 @query_flag("show_approx")
 @query_flag("show_accurate")
-@query_flag("show_rsa")
-def test_markers(app, show_fatal, show_severe, show_light, show_accurate, show_approx, show_rsa, marker_counter):
+def test_markers(app, show_fatal, show_severe, show_light, show_accurate, show_approx, marker_counter):
     url = URLObject('/markers').set_query_params({
         "ne_lat": "32.085413468822", "ne_lng": "34.797736215591385", "sw_lat": "32.07001357040486", "sw_lng": "34.775548982620194", "zoom": "16", "thin_markers": "false",
         "start_date": "1104537600", "end_date": "1484697600", "show_fatal": show_fatal, "show_severe": show_severe, "show_light": show_light, "approx": show_approx, "accurate": show_accurate,

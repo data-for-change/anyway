@@ -104,13 +104,13 @@ ACCIDENT_MINOR_TYPE_TO_TYPE[ACCIDENT_TYPE_UNITED_HATZALA] = ACCIDENT_TYPE_UNITED
 
 var DEFAULT_ICON = ICONS[1][1];
 
-function getIcon(accidentType, severity) {
+function getIcon(accident_type, accident_severity) {
     var icon = DEFAULT_ICON;
     try {
-        if (accidentType == "multiple") {
-            icon = MULTIPLE_ICONS[severity];
+        if (accident_type == "multiple") {
+            icon = MULTIPLE_ICONS[accident_severity];
         } else {
-            icon = ICONS[severity][ACCIDENT_MINOR_TYPE_TO_TYPE[accidentType]];
+            icon = ICONS[accident_severity][ACCIDENT_MINOR_TYPE_TO_TYPE[accident_type]];
         }
     } catch (err) {
         // stick to default icon
@@ -142,7 +142,7 @@ SEVERITY_MAP[SEVERITY_SEVERE] = 'קשה';
 SEVERITY_MAP[SEVERITY_LIGHT] = 'קלה';
 SEVERITY_MAP[SEVERITY_IRRELEVANT_RSA] = 'אירוע';
 
-var SUBTYPE_STRING = [
+var ACCIDENT_TYPE_STRING = [
     "פגיעה בהולך רגל",
     "התנגשות חזית אל צד",
     "התנגשות חזית באחור",

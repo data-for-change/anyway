@@ -23,7 +23,7 @@ marker = AccidentMarker(
             latitude = "00.33",
             longitude = "00.22",
             type = CONST.MARKER_TYPE_ACCIDENT,
-            subtype = "",
+            accident_type = "",
             created = datetime.datetime.now(),
         )
 session.add(marker)

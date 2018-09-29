@@ -3,9 +3,9 @@ var markerCount = 0;
 var SidebarView = Backbone.View.extend({
     className: "info-window",
     events: {
-        "click .current-view li" : "clickEntry",
-        "mouseover .current-view li" : "mouseOverEntry",
-        "mouseout .current-view li" : "mouseOutEntry",
+        "click .current-view li": "clickEntry",
+        "mouseover .current-view li": "mouseOverEntry",
+        "mouseout .current-view li": "mouseOutEntry",
     },
     initialize: function(options) {
         this.map = options.map;
@@ -39,11 +39,11 @@ var SidebarView = Backbone.View.extend({
             var markerView = markerList[i];
             var marker = markerView.marker;
             //take off all selections on current view update
-            if(markerView.isSelected()){
+            if (markerView.isSelected()) {
                 markerView.unselect();
             }
 
-            if (bounds.contains(marker.getPosition()) ){
+            if (bounds.contains(marker.getPosition())) {
                 var markerModel = markerView.model;
                 if (markerModel.get("type") == MARKER_TYPE_DISCUSSION) {
                     continue;
@@ -59,7 +59,7 @@ var SidebarView = Backbone.View.extend({
                 } else {
                     var entryHtml = this.sidebarItemTemplate({
                         created: moment(markerModel.get("created")).format("LLLL"),
-                        type: localization.SUG_TEUNA[markerModel.get("subtype")],
+                        type: localization.SUG_TEUNA[markerModel.get("accident_type")],
                         icon: markerView.getTitle("single"),
                     });
                 }
@@ -84,7 +84,7 @@ var SidebarView = Backbone.View.extend({
     },
     clickEntry: function(e) {
         var marker = this.getMarker(e);
-        if(marker){
+        if (marker) {
             marker.view.choose();
         }
     },
@@ -101,15 +101,15 @@ var SidebarView = Backbone.View.extend({
         var currentView = this.$el.find(".current-view");
         $(currentView).css("top", currentViewTop);
     },
-    mouseOverEntry: function(e){
+    mouseOverEntry: function(e) {
         var markerOfEntry = this.getMarker(e);
-        if(markerOfEntry){
+        if (markerOfEntry) {
             markerOfEntry.view.select();
         }
     },
-    mouseOutEntry: function(e){
+    mouseOutEntry: function(e) {
         var markerOfEntry = this.getMarker(e);
-        if(markerOfEntry){
+        if (markerOfEntry) {
             markerOfEntry.view.unselect();
         }
     },

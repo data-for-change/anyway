@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import csv
+import pandas as pd
 import os
 from . import field_names
 from .utilities import decode_hebrew
@@ -248,9 +249,7 @@ else:
 
 
 with _open_hebrew_textfile(os.path.join("static/data/cities.csv"), "r") as f:
-    _cities = list(csv.DictReader(f))
-
-_cities_names = {int(x[field_names.sign]): decode_hebrew(x[field_names.name]) for x in _cities}
+    _cities = pd.read_csv(f, index_col=field_names.sign)
 
 
 def get_field(field, value=None):
@@ -266,4 +265,8 @@ def get_supported_tables():
 
 
 def get_city_name(symbol_id):
-    return _cities_names.get(symbol_id, None)
+    try:
+        city = _cities_names.loc[symbol_id,field_names.name]
+        return city
+    except:
+        return None

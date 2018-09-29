@@ -357,7 +357,7 @@
                             <p class="id" style="margin:0"></p>
                             <p class="provider_code" style="margin:0"></p>
                             <p class="severityText" style="margin:0"></p>
-                            <p class="accidentType" style="margin:0"></p>
+                            <p class="accident_type" style="margin:0"></p>
                             <p class="road_object" style="margin:0"></p>
                             <p class="object_distance" style="margin:0"></p>
                             <p class="didnt_cross" style="margin:0"></p>
@@ -368,12 +368,12 @@
                         <input id="ac-2" type="checkbox" />
                         <label for="ac-2"><i class="fa fa-road fontIcon" id="fa-road-fix"></i>תנאי הדרך</label>
                         <div class="accordion-roller ac-general">
-                            <p class="roadType" style="margin:0"></p>
-                            <p class="roadShape" style="margin:0"></p>
+                            <p class="road_type" style="margin:0"></p>
+                            <p class="road_shape" style="margin:0"></p>
                             <p class="one_lane" style="margin:0"></p>
                             <p class="multi_lane" style="margin:0"></p>
                             <p class="speed_limit" style="margin:0"></p>
-                            <p class="intactness" style="margin:0"></p>
+                            <p class="road_intactness" style="margin:0"></p>
                             <p class="road_width" style="margin:0"></p>
                             <p class="road_sign" style="margin:0"></p>
                             <p class="road_light" style="margin:0"></p>
@@ -389,7 +389,7 @@
                         <label for="ac-3"><i class="material-icons fontIcon">&#xE55F;</i>מיקום וזמן</label>
                         <div class="accordion-roller ac-general">
                             <p class="creation-date" style="margin:0"></p>
-                            <p class="dayType" style="margin:0"></p>
+                            <p class="day_type" style="margin:0"></p>
                             <p class="mainStreet" style="margin:0"></p>
                             <p class="secondaryStreet" style="margin:0"></p>
                             <p class="junction" style="margin:0"></p>
@@ -414,7 +414,7 @@
                         <label for="ac-6"><i class="material-icons fontIcon">&#xE145;</i>מידע נוסף</label>
                         <div class="accordion-roller ac-general">
                             <p class="igun" style="margin:0"></p>
-                            <p class="unit" style="margin:0"></p>
+                            <p class="police_unit" style="margin:0"></p>
                         </div>
                     </div>
                 </div>
@@ -647,11 +647,11 @@
         <div class="filter-panel">
             <div class="btn-label">חומרה:</div>
             <div class="btn-wrap separator">
-                <input type="checkbox" id="checkbox-fatal" onclick="app.loadFilter('severity', 'fatal')" checked/>
+                <input type="checkbox" id="checkbox-fatal" onclick="app.loadFilter('accident_severity', 'fatal')" checked/>
                 <label for="checkbox-fatal" class="btn three right fatal">קטלניות</label>
-                <input type="checkbox" id="checkbox-severe" onclick="app.loadFilter('severity', 'severe')" checked/>
+                <input type="checkbox" id="checkbox-severe" onclick="app.loadFilter('accident_severity', 'severe')" checked/>
                 <label for="checkbox-severe" class="btn three middle severe">קשות</label>
-                <input type="checkbox" id="checkbox-light" onclick="app.loadFilter('severity', 'light')" checked/>
+                <input type="checkbox" id="checkbox-light" onclick="app.loadFilter('accident_severity', 'light')" checked/>
                 <label for="checkbox-light" class="btn three left light">קלות</label>
             </div>
 

@@ -62,9 +62,9 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
         return;
     }
 
-    if (currentTypeOfChart === "accidentsBySexAndAge"){
+    if (currentTypeOfChart === "accidentsBySexAndAge") {
         $('#selectTypeOfData').hide();
-    }else{
+    } else {
         $('#selectTypeOfData').show();
     }
 
@@ -296,7 +296,7 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
         case "severityTotal":
             var sum;
             var jsonAccidentsBySeverity;
-            var groupedAccidentsBySeverity = _.countBy(app.markers.pluck("severity"), function(item) {
+            var groupedAccidentsBySeverity = _.countBy(app.markers.pluck("accident_severity"), function(item) {
                 return item;
             });
 
@@ -306,14 +306,14 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
                 }, 0);
                 jsonAccidentsBySeverity = _.map(groupedAccidentsBySeverity, function(numOfAccidents, severity) {
                     return {
-                        "label": severity,
+                        "label": accident_severity,
                         "value": (numOfAccidents / sum).toFixed(2)
                     };
                 });
             } else {
                 jsonAccidentsBySeverity = _.map(groupedAccidentsBySeverity, function(numOfAccidents, severity) {
                     return {
-                        "label": severity,
+                        "label": accident_severity,
                         "value": numOfAccidents.toString()
                     };
                 });
@@ -636,20 +636,23 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
             params["fetch_markers"] = '';
             params["fetch_vehicles"] = '';
             params["fetch_involved"] = '1';
-            $.get("charts-data", params, function(data){
+            $.get("charts-data", params, function(data) {
                 var involved = data.involved;
                 var age_groups = {};
                 var dataset = [];
                 for (var i = 0; i < involved.length; i++) {
-                    if (age_groups[involved[i].age_group]){
+                    if (age_groups[involved[i].age_group]) {
                         age_groups[involved[i].age_group]++;
-                    }else{
+                    } else {
                         age_groups[involved[i].age_group] = 1;
                     }
                 }
                 for (var key in age_groups) {
                     if (age_groups.hasOwnProperty(key)) {
-                        dataset.push({ label: key, value: age_groups[key] });
+                        dataset.push({
+                            label: key,
+                            value: age_groups[key]
+                        });
                     }
                 }
                 FusionCharts.ready(function() {
@@ -680,34 +683,36 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
             params["fetch_markers"] = '';
             params["fetch_vehicles"] = '';
             params["fetch_involved"] = '1';
-            $.get("charts-data", params, function(data){
+            $.get("charts-data", params, function(data) {
                 var involved = data.involved;
                 var age_groups = {};
                 var dataset = [];
                 var males = [];
                 var females = [];
                 var keys = [];
-                var categories = { category: [] };
+                var categories = {
+                    category: []
+                };
                 for (var i = 0; i < involved.length; i++) {
-                    if (age_groups[involved[i].age_group]){
-                        if (involved[i].sex === 1){
-                            if (age_groups[involved[i].age_group].male){
+                    if (age_groups[involved[i].age_group]) {
+                        if (involved[i].sex === 1) {
+                            if (age_groups[involved[i].age_group].male) {
                                 age_groups[involved[i].age_group].male++;
-                            }else{
+                            } else {
                                 age_groups[involved[i].age_group].male = 1;
                             }
-                        }else if (involved[i].sex === 2){
-                            if (age_groups[involved[i].age_group].female){
+                        } else if (involved[i].sex === 2) {
+                            if (age_groups[involved[i].age_group].female) {
                                 age_groups[involved[i].age_group].female++;
-                            }else{
+                            } else {
                                 age_groups[involved[i].age_group].female = 1;
                             }
                         }
-                    }else{
+                    } else {
                         age_groups[involved[i].age_group] = {};
-                        if (involved[i].sex === 1){
+                        if (involved[i].sex === 1) {
                             age_groups[involved[i].age_group].male = 1;
-                        }else if (involved[i].sex === 2){
+                        } else if (involved[i].sex === 2) {
                             age_groups[involved[i].age_group].female = 1;
                         }
                     }
@@ -719,20 +724,36 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
                 }
                 keys.sort();
                 for (var i = 0; i < keys.length; i++) {
-                    categories.category.push({ label: keys[i]});
-                        if (age_groups[keys[i]].male){
-                            males.push({ value: age_groups[keys[i]].male.toString() });
-                        }else{
-                            males.push({ value: '0' });
-                        }
-                        if (age_groups[keys[i]].female){
-                            females.push({ value: age_groups[keys[i]].female.toString() });
-                        }else{
-                            females.push({ value: '0' });
-                        }
+                    categories.category.push({
+                        label: keys[i]
+                    });
+                    if (age_groups[keys[i]].male) {
+                        males.push({
+                            value: age_groups[keys[i]].male.toString()
+                        });
+                    } else {
+                        males.push({
+                            value: '0'
+                        });
+                    }
+                    if (age_groups[keys[i]].female) {
+                        females.push({
+                            value: age_groups[keys[i]].female.toString()
+                        });
+                    } else {
+                        females.push({
+                            value: '0'
+                        });
+                    }
                 }
-                dataset.push({ seriesname: 'זכר', data: males});
-                dataset.push({ seriesname: 'נקבה', data: females});
+                dataset.push({
+                    seriesname: 'זכר',
+                    data: males
+                });
+                dataset.push({
+                    seriesname: 'נקבה',
+                    data: females
+                });
                 FusionCharts.ready(function() {
                     var statChart = new FusionCharts({
                         "type": 'mscolumn2d',

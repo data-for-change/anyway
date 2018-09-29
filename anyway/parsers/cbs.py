@@ -2,7 +2,7 @@
 import glob
 import os
 import json
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 import itertools
 import re
 from datetime import datetime
@@ -12,7 +12,67 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_
 
 from .. import field_names, localization
-from ..models import AccidentMarker, Involved, Vehicle, AccidentsNoLocation, InvolvedNoLocation, VehicleNoLocation
+from ..models import (AccidentMarker,
+                      Involved,
+                      Vehicle,
+                      AccidentsNoLocation,
+                      InvolvedNoLocation,
+                      VehicleNoLocation,
+                      ColumnsDescription,
+                      PoliceUnit,
+                      RoadType,
+                      AccidentSeverity,
+                      AccidentType,
+                      RoadShape,
+                      OneLane,
+                      MultiLane,
+                      SpeedLimit,
+                      RoadIntactness,
+                      RoadWidth,
+                      RoadSign,
+                      RoadLight,
+                      RoadControl,
+                      Weather,
+                      RoadSurface,
+                      RoadObjecte,
+                      ObjectDistance,
+                      DidntCross,
+                      CrossMode,
+                      CrossLocation,
+                      CrossDirection,
+                      DrivingDirections,
+                      VehicleStatus,
+                      InvolvedType,
+                      SafetyMeasures,
+                      InjurySeverity,
+                      DayType,
+                      DayNight,
+                      DayInWeek,
+                      TrafficLight,
+                      VehicleAttribution,
+                      VehicleType,
+                      InjuredType,
+                      InjuredPosition,
+                      AccidentMonth,
+                      PopulationType,
+                      Sex,
+                      GeoArea,
+                      Region,
+                      MinizipaliStatus,
+                      District,
+                      NaturalArea,
+                      YishuvShape,
+                      AgeGroup,
+                      AccidentHourRaw,
+                      EngineVolume,
+                      TotalWeight,
+                      HospitalTime,
+                      MedicalType,
+                      ReleaseDest,
+                      SafetyMeasuresUse,
+                      LateDeceased,
+                      LocationAccuracy)
+
 from .. import models
 from ..constants import CONST
 from ..utilities import ItmToWGS84, init_flask, CsvReader, time_delta, decode_hebrew,ImporterUI,truncate_tables,chunks
@@ -42,6 +102,122 @@ cbs_files = {
     DICTIONARY: "Dictionary.csv",
     INVOLVED: "InvData.csv",
     VEHICLES: "VehData.csv"
+}
+
+DICTCOLUMN1 = "MS_TAVLA"
+DICTCOLUMN2 = "KOD"
+DICTCOLUMN3 = "TEUR"
+
+CLASSES_DICT = {0:   ColumnsDescription,
+               1:   PoliceUnit,
+               2:   RoadType,
+               4:   AccidentSeverity,
+               5:   AccidentType,
+               9:   RoadShape,
+               10:  OneLane,
+               11:  MultiLane,
+               12:  SpeedLimit,
+               13:  RoadIntactness,
+               14:  RoadWidth,
+               15:  RoadSign,
+               16:  RoadLight,
+               17:  RoadControl,
+               18:  Weather,
+               19:  RoadSurface,
+               21:  RoadObjecte,
+               22:  ObjectDistance,
+               23:  DidntCross,
+               24:  CrossMode,
+               25:  CrossLocation,
+               26:  CrossDirection,
+               28:  DrivingDirections,
+               30:  VehicleStatus,
+               31:  InvolvedType,
+               34:  SafetyMeasures,
+               35:  InjurySeverity,
+               37:  DayType,
+               38:  DayNight,
+               39:  DayInWeek,
+               40:  TrafficLight,
+               43:  VehicleAttribution,
+               45:  VehicleType,
+               50:  InjuredType,
+               52:  InjuredPosition,
+               60:  AccidentMonth,
+               66:  PopulationType,
+               67:  Sex,
+               68:  GeoArea,
+               77:  Region,
+               78:  MinizipaliStatus,
+               79:  District,
+               80:  NaturalArea,
+               81:  YishuvShape,
+               92:  AgeGroup,
+               93:  AccidentHourRaw,
+               111: EngineVolume,
+               112: TotalWeight,
+               200: HospitalTime,
+               201: MedicalType,
+               202: ReleaseDest,
+               203: SafetyMeasuresUse,
+               204: LateDeceased,
+               205: LocationAccuracy,
+}
+
+TABLES_DICT = {0:   'columns_description',
+               1:   'police_unit',
+               2:   'road_type',
+               4:   'accident_severity',
+               5:   'accident_type',
+               9:   'road_shape',
+               10:  'one_lane',
+               11:  'multi_lane',
+               12:  'speed_limit',
+               13:  'road_intactness',
+               14:  'road_width',
+               15:  'road_sign',
+               16:  'road_light',
+               17:  'road_control',
+               18:  'weather',
+               19:  'road_surface',
+               21:  'road_object',
+               22:  'object_distance',
+               23:  'didnt_cross',
+               24:  'cross_mode',
+               25:  'cross_location',
+               26:  'cross_direction',
+               28:  'driving_directions',
+               30:  'vehicle_status',
+               31:  'involved_type',
+               34:  'safety_measures',
+               35:  'injury_severity',
+               37:  'day_type',
+               38:  'day_night',
+               39:  'day_in_week',
+               40:  'traffic_light',
+               43:  'vehicle_attribution',
+               45:  'vehicle_type',
+               50:  'injured_type',
+               52:  'injured_position',
+               60:  'accident_month',
+               66:  'population_type',
+               67:  'sex',
+               68:  'geo_area',
+               77:  'region',
+               78:  'minizipali_status',
+               79:  'district',
+               80:  'natural_area',
+               81:  'yishuv_shape',
+               92:  'age_group',
+               93:  'accident_hour_raw',
+               111: 'engine_volume',
+               112: 'total_weight',
+               200: 'hospital_time',
+               201: 'medical_type',
+               202: 'release_dest',
+               203: 'safety_measures_use',
+               204: 'late_deceased',
+               205: 'location_accuracy',
 }
 
 coordinates_converter = ItmToWGS84()
@@ -97,6 +273,15 @@ def get_streets(accident, streets):
     secondary_street = get_street(accident[field_names.settlement_sign], accident[field_names.street2], streets)
     return main_street, secondary_street
 
+def get_non_urban_intersection(accident, roads):
+    """
+    extracts the non-urban-intersection from an accident
+    """
+    if accident[field_names.non_urban_intersection] is not None:
+        key = accident[field_names.road1], accident[field_names.road2], accident[field_names.km]
+        junction = roads.get(key, None)
+        return decode_hebrew(junction) if junction else u""
+    return u""
 
 def get_junction(accident, roads):
     """
@@ -133,7 +318,7 @@ def get_junction(accident, roads):
             return u""
 
     elif accident[field_names.non_urban_intersection] is not None:
-        key = accident[field_names.road1], accident[field_names.road2], accident["KM"]
+        key = accident[field_names.road1], accident[field_names.road2], accident[field_names.km]
         junction = roads.get(key, None)
         return decode_hebrew(junction) if junction else u""
     else:
@@ -224,21 +409,21 @@ def import_accidents(provider_code, accidents, streets, roads, **kwargs):
             "address": get_address(accident, streets),
             "latitude": lat,
             "longitude": lng,
-            "subtype": int(accident[field_names.accident_type]),
-            "severity": int(accident[field_names.accident_severity]),
+            "accident_type": int(accident[field_names.accident_type]),
+            "accident_severity": int(accident[field_names.accident_severity]),
             "created": accident_datetime,
-            "locationAccuracy": int(accident[field_names.igun]),
-            "roadType": int(accident[field_names.road_type]),
-            "roadShape": int(accident[field_names.road_shape]),
-            "dayType": int(accident[field_names.day_type]),
-            "unit": int(accident[field_names.unit]),
+            "location_accuracy": int(accident[field_names.igun]),
+            "road_type": int(accident[field_names.road_type]),
+            "road_shape": int(accident[field_names.road_shape]),
+            "day_type": int(accident[field_names.day_type]),
+            "police_unit": int(accident[field_names.police_unit]),
             "mainStreet": main_street,
             "secondaryStreet": secondary_street,
             "junction": get_junction(accident, roads),
             "one_lane": get_data_value(accident[field_names.one_lane]),
             "multi_lane": get_data_value(accident[field_names.multi_lane]),
             "speed_limit": get_data_value(accident[field_names.speed_limit]),
-            "intactness": get_data_value(accident[field_names.intactness]),
+            "road_intactness": get_data_value(accident[field_names.road_intactness]),
             "road_width": get_data_value(accident[field_names.road_width]),
             "road_sign": get_data_value(accident[field_names.road_sign]),
             "road_light": get_data_value(accident[field_names.road_light]),
@@ -255,6 +440,7 @@ def import_accidents(provider_code, accidents, streets, roads, **kwargs):
             "road2": get_data_value(accident[field_names.road2]),
             "km": float(accident[field_names.km]) if accident[field_names.km] else None,
             "yishuv_symbol": get_data_value(accident[field_names.yishuv_symbol]),
+            "yishuv_name": localization.get_city_name(accident[field_names.settlement_sign]),
             "geo_area": get_data_value(accident[field_names.geo_area]),
             "day_night": get_data_value(accident[field_names.day_night]),
             "day_in_week": get_data_value(accident[field_names.day_in_week]),
@@ -265,10 +451,13 @@ def import_accidents(provider_code, accidents, streets, roads, **kwargs):
             "minizipali_status": get_data_value(accident[field_names.minizipali_status]),
             "yishuv_shape": get_data_value(accident[field_names.yishuv_shape]),
             "street1": get_data_value(accident[field_names.street1]),
+            "street1_hebrew": get_street(accident[field_names.settlement_sign], accident[field_names.street1], streets),
             "street2": get_data_value(accident[field_names.street2]),
+            "street2_hebrew": get_street(accident[field_names.settlement_sign], accident[field_names.street2], streets),
             "home": get_data_value(accident[field_names.home]),
             "urban_intersection": get_data_value(accident[field_names.urban_intersection]),
             "non_urban_intersection": get_data_value(accident[field_names.non_urban_intersection]),
+            "non_urban_intersection_hebrew": get_non_urban_intersection(accident, roads),
             "accident_year": get_data_value(accident[field_names.accident_year]),
             "accident_month": get_data_value(accident[field_names.accident_month]),
             "accident_day": get_data_value(accident[field_names.accident_day]),
@@ -526,6 +715,7 @@ def delete_cbs_entries(start_date, batch_size):
             q.delete(synchronize_session=False)
             db.session.commit()
 
+
 def fill_db_geo_data():
     """
     Fills empty geometry object according to coordinates in database
@@ -547,7 +737,37 @@ def get_provider_code(directory_name=None):
             return int(ans)
 
 
-def main(specific_folder, delete_all, path, batch_size, delete_start_date):
+def read_dictionary(dictionary_file):
+    cbs_dictionary = defaultdict(dict)
+    dictionary = CsvReader(dictionary_file, encoding=CONTENT_ENCODING)
+    for dic in dictionary:
+        if type(dic[DICTCOLUMN3]) is str:
+            cbs_dictionary[int(dic[DICTCOLUMN1])][int(dic[DICTCOLUMN2])] = decode_hebrew(dic[DICTCOLUMN3],
+                                                                                          encoding=CONTENT_ENCODING)
+        else:
+            cbs_dictionary[int(dic[DICTCOLUMN1])][int(dic[DICTCOLUMN2])] = int(dic[DICTCOLUMN3])
+    return cbs_dictionary
+
+def create_dictionary_tables(dictionary_file):
+    cbs_dictionary = read_dictionary(dictionary_file)
+    for k,v in cbs_dictionary.iteritems():
+        if k == 97:
+            continue
+        curr_table = TABLES_DICT[k]
+        curr_class = CLASSES_DICT[k]
+        table_entries = db.session.query(curr_class)
+        table_entries.delete()
+        for inner_k,inner_v in v.iteritems():
+            sql_insert = 'INSERT INTO ' + curr_table + ' VALUES (' + str(inner_k) + ',' + "'" + inner_v.replace("'",'') + "'" + ')'
+            db.session.execute(sql_insert)
+            db.session.commit()
+
+
+def main(specific_folder, delete_all, path, batch_size, delete_start_date, dictionary_file):
+
+    if dictionary_file is not None:
+        create_dictionary_tables(dictionary_file)
+
     import_ui = ImporterUI(path, specific_folder, delete_all)
     dir_name = import_ui.source_path()
 

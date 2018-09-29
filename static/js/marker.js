@@ -84,13 +84,13 @@ var MarkerView = Backbone.View.extend({
             this.$el.find(".title").text(this.marker.get("title"));
             this.$el.find(".id").text(fields.ACC_ID + ": " + this.marker.get("id"));
             this.$el.find(".provider_code").text(fields.PROVIDER_CODE + ": " + this.model.get("provider_code"));
-            this.$el.find(".roadType").text(fields.SUG_DEREH + ": " + localization.SUG_DEREH[this.model.get("roadType")]);
-            this.$el.find(".accidentType").text(fields.SUG_TEUNA + ": " + localization.SUG_TEUNA[this.model.get("subtype")]);
-            this.$el.find(".roadShape").text(fields.ZURAT_DEREH + ": " + localization.ZURAT_DEREH[this.model.get("roadShape")]);
+            this.$el.find(".road_type").text(fields.SUG_DEREH + ": " + localization.SUG_DEREH[this.model.get("road_type")]);
+            this.$el.find(".accident_type").text(fields.SUG_TEUNA + ": " + localization.SUG_TEUNA[this.model.get("accident_type")]);
+            this.$el.find(".road_shape").text(fields.ZURAT_DEREH + ": " + localization.ZURAT_DEREH[this.model.get("road_shape")]);
             this.$el.find(".severityText").text(fields.HUMRAT_TEUNA + ": " + localization.HUMRAT_TEUNA[this.model.get("severity")]);
-            this.$el.find(".dayType").text(fields.SUG_YOM + ": " + localization.SUG_YOM[this.model.get("dayType")]);
+            this.$el.find(".day_type").text(fields.SUG_YOM + ": " + localization.SUG_YOM[this.model.get("day_type")]);
             this.$el.find(".igun").text(fields.STATUS_IGUN + ": " + localization.STATUS_IGUN[this.model.get("locationAccuracy")]);
-            this.$el.find(".unit").text(fields.YEHIDA + ": " + localization.YEHIDA[this.model.get("unit")]);
+            this.$el.find(".police_unit").text(fields.YEHIDA + ": " + localization.YEHIDA[this.model.get("police_unit")]);
             this.$el.find(".mainStreet").text(this.model.get("mainStreet"));
             this.$el.find(".secondaryStreet").text(this.model.get("secondaryStreet"));
             this.$el.find(".junction").text(this.model.get("junction"));
@@ -98,7 +98,7 @@ var MarkerView = Backbone.View.extend({
             this.localize("HAD_MASLUL", "one_lane");
             this.localize("RAV_MASLUL", "multi_lane");
             this.localize("MEHIRUT_MUTERET", "speed_limit");
-            this.localize("TKINUT", "intactness");
+            this.localize("TKINUT", "road_intactness");
             this.localize("ROHAV", "road_width");
             this.localize("SIMUN_TIMRUR", "road_sign");
             this.localize("TEURA", "road_light");
@@ -164,8 +164,8 @@ var MarkerView = Backbone.View.extend({
                 } else {
                     markerTitle = "ביום " + moment(this.model.get("created")).format("dddd") + ", ה-" +
                         moment(this.model.get("created")).format("LL") +
-                        " אירעה תאונה " + SEVERITY_MAP[this.model.get("severity")] +
-                        " מסוג " + localization.SUG_TEUNA[this.model.get("subtype")] + " " +
+                        " אירעה תאונה " + SEVERITY_MAP[this.model.get("accident_severity")] +
+                        " מסוג " + localization.SUG_TEUNA[this.model.get("accident_type")] + " " +
                         loc;
                 }
                 break;
@@ -291,7 +291,7 @@ var MarkerView = Backbone.View.extend({
             name: this.model.get("title"),
             link: document.location.href,
             description: this.model.get("description"),
-            caption: SUBTYPE_STRING[this.model.get("subtype")]
+            caption: ACCIDENT_TYPE_STRING[this.model.get("accident_type")]
                 // picture
         });
     },

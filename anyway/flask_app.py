@@ -99,7 +99,7 @@ def generate_json(accidents, rsa_markers, discussions, is_thin, total_records=No
         markers += discussions.all()
 
     if total_records is None:
-        total_records = len(accidents)
+        total_records = len(markers)
 
     total_accidents = accidents.count()
     total_rsa = rsa_markers.count()
@@ -137,7 +137,7 @@ ARG_TYPES = {'ne_lat': (float, 32.072427482938345), 'ne_lng': (float, 34.7992896
              'show_holiday': (int, 0),  'show_time': (int, 24), 'start_time': (int, 25), 'end_time': (int, 25),
              'weather': (int, 0), 'road': (int, 0), 'separation': (int, 0), 'surface': (int, 0), 'acctype': (int, 0),
              'controlmeasure': (int, 0), 'district': (int, 0), 'case_type': (int, 0), 'fetch_markers': (bool, True),
-             'fetch_vehicles': (bool, True), 'fetch_involved': (bool, True), 'age_groups': (str, ""),
+             'fetch_vehicles': (bool, True), 'fetch_involved': (bool, True), 'age_groups': (str, 'all'),
              'page': (int, 0), 'per_page': (int, 0)}
 
 def get_kwargs():
@@ -174,16 +174,15 @@ def markers():
     logging.debug('querying markers in bounding box: %s' % kwargs)
     is_thin = (kwargs['zoom'] < CONST.MINIMAL_ZOOM)
     result = AccidentMarker.bounding_box_query(is_thin, yield_per=50, involved_and_vehicles=False, **kwargs)
-    markers = result.markers
-    accidents_markers = markers.from_self().filter(AccidentMarker.provider_code != CONST.RSA_PROVIDER_CODE)
-    rsa_markers = markers.from_self().filter(AccidentMarker.provider_code == CONST.RSA_PROVIDER_CODE)
+    accident_markers = result.accident_markers
+    rsa_markers = result.rsa_markers
 
     discussion_args = ('ne_lat', 'ne_lng', 'sw_lat', 'sw_lng', 'show_discussions')
     discussions = DiscussionMarker.bounding_box_query(**{arg: kwargs[arg] for arg in discussion_args})
 
     if request.values.get('format') == 'csv':
         date_format = '%Y-%m-%d'
-        return Response(generate_csv(result.markers), headers={
+        return Response(generate_csv(accident_markers), headers={
             "Content-Type": "text/csv",
             "Content-Disposition": 'attachment; '
                                    'filename="Anyway-accidents-from-{0}-to-{1}.csv"'
@@ -191,7 +190,7 @@ def markers():
         })
 
     else: # defaults to json
-        return generate_json(accidents_markers, rsa_markers, discussions, is_thin, total_records=result.total_records)
+        return generate_json(accident_markers, rsa_markers, discussions, is_thin, total_records=result.total_records)
 
 
 @app.route("/charts-data", methods=["GET"])

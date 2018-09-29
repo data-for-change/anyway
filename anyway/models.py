@@ -24,7 +24,7 @@ from geoalchemy2 import functions as geoalchemy_functions
 app = init_flask()
 db = SQLAlchemy(app)
 
-MarkerResult = namedtuple('MarkerResult', ['markers', 'total_records'])
+MarkerResult = namedtuple('MarkerResult', ['accident_markers', 'rsa_markers', 'total_records'])
 
 db_encoding = 'utf-8'
 
@@ -328,29 +328,33 @@ class AccidentMarker(MarkerMixin, Base):
     @staticmethod
     def bounding_box_query(is_thin=False, yield_per=None, involved_and_vehicles=False, **kwargs):
 
-        # example:
-        # ne_lat=32.36292402647484&ne_lng=35.08873443603511&sw_lat=32.29257266524761&sw_lng=34.88445739746089
-        # >>>  m = AccidentMarker.bounding_box_query(32.36, 35.088, 32.292, 34.884)
-        # >>> m.count()
-        # 250
-
         approx = kwargs.get('approx', True)
         accurate = kwargs.get('accurate', True)
         page = kwargs.get('page')
         per_page = kwargs.get('per_page')
 
         if not kwargs.get('show_markers', True):
-            return MarkerResult(markers=db.session.query(AccidentMarker).filter(sql.false()), total_records=0)
+            return MarkerResult(accident_markers=db.session.query(AccidentMarker).filter(sql.false()),
+                                rsa_markers=db.session.query(AccidentMarker).filter(sql.false()),
+                                total_records=0)
 
         markers = db.session.query(AccidentMarker) \
             .filter(AccidentMarker.geom.intersects(ST_MakeEnvelope(float(kwargs['sw_lng']), float(kwargs['sw_lat']),
                                                                    float(kwargs['ne_lng']), float(kwargs['ne_lat'])))) \
             .filter(AccidentMarker.created >= kwargs['start_date']) \
             .filter(AccidentMarker.created < kwargs['end_date']) \
+            .filter(AccidentMarker.provider_code != CONST.RSA_PROVIDER_CODE) \
+            .order_by(desc(AccidentMarker.created))
+
+        rsa_markers = db.session.query(AccidentMarker) \
+            .filter(AccidentMarker.geom.intersects(pol_str)) \
+            .filter(AccidentMarker.created >= kwargs['start_date']) \
+            .filter(AccidentMarker.created < kwargs['end_date']) \
+            .filter(AccidentMarker.provider_code == CONST.RSA_PROVIDER_CODE) \
             .order_by(desc(AccidentMarker.created))
 
         if not kwargs['show_rsa']:
-            markers = markers.filter(AccidentMarker.provider_code != CONST.RSA_PROVIDER_CODE)
+            rsa_markers = db.session.query(AccidentMarker).filter(sql.false())
 
         if not kwargs['show_accidents']:
             markers = markers.filter(and_(AccidentMarker.provider_code != CONST.CBS_ACCIDENT_TYPE_1_CODE,
@@ -365,7 +369,9 @@ class AccidentMarker(MarkerMixin, Base):
         elif approx and not accurate:
             markers = markers.filter(AccidentMarker.locationAccuracy != 1)
         elif not accurate and not approx:
-            return MarkerResult(markers=db.session.query(AccidentMarker).filter(sql.false()), total_records=0)
+            return MarkerResult(accident_markers=db.session.query(AccidentMarker).filter(sql.false()),
+                                rsa_markers=db.session.query(AccidentMarker).filter(sql.false()),
+                                total_records=0)
         if not kwargs.get('show_fatal', True):
             markers = markers.filter(AccidentMarker.severity != 1)
         if not kwargs.get('show_severe', True):
@@ -378,21 +384,27 @@ class AccidentMarker(MarkerMixin, Base):
             elif kwargs['show_urban'] == 1:
                 markers = markers.filter(AccidentMarker.roadType >= 3).filter(AccidentMarker.roadType <= 4)
             else:
-                return MarkerResult(markers=db.session.query(AccidentMarker).filter(sql.false()), total_records=0)
+                return MarkerResult(accident_markers=db.session.query(AccidentMarker).filter(sql.false()),
+                                    rsa_markers=rsa_markers,
+                                    total_records=rsa_markers.count())
         if kwargs.get('show_intersection', 3) != 3:
             if kwargs['show_intersection'] == 2:
                 markers = markers.filter(AccidentMarker.roadType != 2).filter(AccidentMarker.roadType != 4)
             elif kwargs['show_intersection'] == 1:
                 markers = markers.filter(AccidentMarker.roadType != 1).filter(AccidentMarker.roadType != 3)
             else:
-                return MarkerResult(markers=db.session.query(AccidentMarker).filter(sql.false()), total_records=0)
+                return MarkerResult(accident_markers=db.session.query(AccidentMarker).filter(sql.false()),
+                                    rsa_markers=rsa_markers,
+                                    total_records=rsa_markers.count())
         if kwargs.get('show_lane', 3) != 3:
             if kwargs['show_lane'] == 2:
                 markers = markers.filter(AccidentMarker.one_lane >= 2).filter(AccidentMarker.one_lane <= 3)
             elif kwargs['show_lane'] == 1:
                 markers = markers.filter(AccidentMarker.one_lane == 1)
             else:
-                return MarkerResult(markers=db.session.query(AccidentMarker).filter(sql.false()), total_records=0)
+                return MarkerResult(accident_markers=db.session.query(AccidentMarker).filter(sql.false()),
+                                    rsa_markers=rsa_markers,
+                                    total_records=rsa_markers.count())
 
         if kwargs.get('show_day', 7) != 7:
             markers = markers.filter(func.extract("dow", AccidentMarker.created) == kwargs['show_day'])
@@ -437,9 +449,13 @@ class AccidentMarker(MarkerMixin, Base):
             markers = markers.options(load_only("id", "longitude", "latitude"))
 
         if kwargs.get('age_groups'):
-            markers = markers.filter(AccidentMarker.involved.any(Involved.age_group.in_(kwargs.get('age_groups').split(','))))
+            if kwargs.get('age_groups') == 'all':
+                age_groups_list = CONST.ALL_AGE_GROUPS_LIST
+            else:
+                age_groups_list = kwargs.get('age_groups').split(',')
+            markers = markers.filter(AccidentMarker.involved.any(Involved.age_group.in_(age_groups_list)))
 
-        total_records = markers.count()
+        total_records = markers.count() + rsa_markers.count()
         if page and per_page:
             markers = markers.offset((page - 1 ) * per_page).limit(per_page)
 
@@ -459,9 +475,13 @@ class AccidentMarker(MarkerMixin, Base):
                 involved = db.session.query(Involved).filter(Involved.accident_id.in_(markers_ids))
             result = markers.all() if markers is not None else [], vehicles.all() if vehicles is not None else [], \
                    involved.all() if involved is not None else []
-            return MarkerResult(markers=result, total_records=len(result))
+            return MarkerResult(accident_markers=result,
+                                rsa_markers=db.session.query(AccidentMarker).filter(sql.false()),
+                                total_records=len(result))
         else:
-            return MarkerResult(markers=markers, total_records=total_records)
+            return MarkerResult(accident_markers=markers,
+                                rsa_markers=rsa_markers,
+                                total_records=total_records)
 
     @staticmethod
     def get_marker(marker_id):

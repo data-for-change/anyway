@@ -9,8 +9,10 @@ import multiprocessing
 @task_queue.task
 def calculate_marker_box(marker_box, kwargs):
     kwargs.update(marker_box)
-    markers_in_box = AccidentMarker.bounding_box_query(**kwargs).markers.all()
-    return calculate_clusters(markers_in_box, kwargs['zoom'])
+    markers_in_box = AccidentMarker.bounding_box_query(**kwargs)
+    markers = markers_in_box.accidnet_markers.all()
+    markers += markers_in_box.rsa_markers.all()
+    return calculate_clusters(markers, kwargs['zoom'])
 
 
 # def retrieve_clusters(**kwargs):

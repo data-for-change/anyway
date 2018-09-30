@@ -306,7 +306,7 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
                 }, 0);
                 jsonAccidentsBySeverity = _.map(groupedAccidentsBySeverity, function(numOfAccidents, severity) {
                     return {
-                        "label": accident_severity,
+                    "label": accident_severity,
                         "value": (numOfAccidents / sum).toFixed(2)
                     };
                 });

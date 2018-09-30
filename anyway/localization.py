@@ -266,7 +266,7 @@ def get_supported_tables():
 
 def get_city_name(symbol_id):
     try:
-        city = _cities_names.loc[symbol_id,field_names.name]
+        city = _cities.loc[symbol_id,field_names.name]
         return city
     except:
         return None

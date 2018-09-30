@@ -341,7 +341,7 @@ $(function() {
                     firstMemberIndex = firstMemberGroupId - 1;
                     firstMember.set("groupID", firstMemberGroupId);
                     var groupSeverity = firstMember.get('accident_severity');
-                    var firstMemberOpacity = firstMember.get("locationAccuracy") == 1 ? 'opaque' : 1;
+                    var firstMemberOpacity = firstMember.get("location_accuracy") == 1 ? 'opaque' : 1;
                     groupsData.push({
                         accident_severity: groupSeverity,
                         opacity: firstMemberOpacity,
@@ -361,7 +361,7 @@ $(function() {
                             }
                         }
                         if (groupsData[firstMemberIndex].opacity != 'opaque') {
-                            if (markerNearModel.get("locationAccuracy") == 1) {
+                            if (markerNearModel.get("location_accuracy") == 1) {
                                 groupsData[firstMemberIndex].opacity = 'opaque';
                             } else {
                                 groupsData[firstMemberIndex].opacity++;
@@ -1430,10 +1430,10 @@ $(function() {
                 var fatal = this.show_fatal,
                     severe = this.show_severe,
                     light = this.show_light,
-                    severityText = " בחומרה ";
+                    accident_severity = " בחומרה ";
                 var accurate = this.accurate,
                     approx = this.approx,
-                    accuracyText = " בעיגון ";
+                    location_accuracy = " בעיגון ";
 
                 // accident_severity variables and strings
                 if (fatal == '1') {
@@ -1450,7 +1450,7 @@ $(function() {
                 }
 
                 if (fatal == '' && severe == '' && light == '') {
-                    severityText = "";
+                    accident_severity = "";
                 }
 
                 if (light == '1' && (fatal != '' || severe != '')) {
@@ -1475,21 +1475,21 @@ $(function() {
                     approx = "";
                 }
                 if (accurate == '' && approx == '') {
-                    accuracyText = "";
+                    location_accuracy = "";
                 }
 
                 $("#filter-string").empty()
                     .append("<span>מציג </span>")
                     .append("<span><a onclick='showFilter(FILTER_MARKERS)'>" + this.total_accidents + "</a></span>")
                     .append("<span> תאונות</span><br>")
-                    .append("<span>" + severityText + "</span>")
+                    .append("<span>" + accident_severity + "</span>")
                     .append("<span><a onclick='showFilter(FILTER_INFO)' style='color: #d81c32;'>" + fatal + "</a></span>")
                     .append("<span><a onclick='showFilter(FILTER_INFO)' style='color: #ff9f1c;'>" + severe + "</a></span>")
                     .append("<span><a onclick='showFilter(FILTER_INFO)' style='color: #ffd82b;'>" + light + "</a></span><br>")
                     .append("<span> ו-</span>")
                     .append("<span><a onclick='showFilter(FILTER_MARKERS)'>" + this.total_rsa + "</a></span>")
                     .append("<span> אירועים</span>")
-                    .append("<span>" + accuracyText + "</span>")
+                    .append("<span>" + location_accuracy + "</span>")
                     .append("<span><a onclick='showFilter(FILTER_INFO)'>" + accurate + "</a></span>")
                     .append("<span><a onclick='showFilter(FILTER_INFO)'>" + approx + "</a></span><br>")
                     .append("<span> בין התאריכים </span><br>")

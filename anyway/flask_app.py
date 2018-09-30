@@ -278,12 +278,13 @@ def discussion():
         return make_response(post_handler(marker))
 
 
+@app.route("/clusters", methods=["GET"])
 def clusters():
-    start_time = time.time()
+    # start_time = time.time()
     kwargs = get_kwargs()
     results = retrieve_clusters(**kwargs)
 
-    logging.debug('calculating clusters took %f seconds' % (time.time() - start_time))
+    # logging.debug('calculating clusters took %f seconds' % (time.time() - start_time))
     return Response(json.dumps({'clusters': results}), mimetype="application/json")
 
 

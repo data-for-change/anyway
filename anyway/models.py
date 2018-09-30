@@ -19,6 +19,7 @@ from . import localization
 from .database import Base
 from flask_security import UserMixin, RoleMixin
 from geoalchemy2 import Geometry
+from geoalchemy2 import functions as geoalchemy_functions
 
 app = init_flask()
 db = SQLAlchemy(app)
@@ -332,19 +333,14 @@ class AccidentMarker(MarkerMixin, Base):
         page = kwargs.get('page')
         per_page = kwargs.get('per_page')
 
-        baseX = kwargs['sw_lng'];
-        baseY = kwargs['sw_lat'];
-        distanceX = kwargs['ne_lng'];
-        distanceY = kwargs['ne_lat'];
-        pol_str = 'POLYGON(({0} {1},{0} {3},{2} {3},{2} {1},{0} {1}))'.format(baseX, baseY, distanceX \
-                                                                                  ,distanceY)
         if not kwargs.get('show_markers', True):
             return MarkerResult(accident_markers=db.session.query(AccidentMarker).filter(sql.false()),
                                 rsa_markers=db.session.query(AccidentMarker).filter(sql.false()),
                                 total_records=0)
 
         markers = db.session.query(AccidentMarker) \
-            .filter(AccidentMarker.geom.intersects(pol_str)) \
+            .filter(AccidentMarker.geom.intersects(ST_MakeEnvelope(float(kwargs['sw_lng']), float(kwargs['sw_lat']),
+                                                                   float(kwargs['ne_lng']), float(kwargs['ne_lat'])))) \
             .filter(AccidentMarker.created >= kwargs['start_date']) \
             .filter(AccidentMarker.created < kwargs['end_date']) \
             .filter(AccidentMarker.provider_code != CONST.RSA_PROVIDER_CODE) \
@@ -955,3 +951,8 @@ class School(Base):
     prdct_ver = Column(DateTime, default=None)
     x = Column(Float(), nullable=True)
     y = Column(Float(), nullable=True)
+
+
+class ST_MakeEnvelope(geoalchemy_functions.GenericFunction):
+    name = 'ST_MakeEnvelope'
+    type = Geometry

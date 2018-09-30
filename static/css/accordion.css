@@ -13,7 +13,8 @@
 	display: block;
 	height: 30px;
 	cursor: pointer;
-	color: #777;
+	color: #000;
+	font-weight: normal;
 	text-shadow: 1px 1px 1px rgba(255,255,255,0.8);
 	line-height: 28px;
 	font-size: 15px;

@@ -347,7 +347,8 @@ class AccidentMarker(MarkerMixin, Base):
             .order_by(desc(AccidentMarker.created))
 
         rsa_markers = db.session.query(AccidentMarker) \
-            .filter(AccidentMarker.geom.intersects(pol_str)) \
+            .filter(AccidentMarker.geom.intersects(ST_MakeEnvelope(float(kwargs['sw_lng']), float(kwargs['sw_lat']),
+                                                                   float(kwargs['ne_lng']), float(kwargs['ne_lat'])))) \
             .filter(AccidentMarker.created >= kwargs['start_date']) \
             .filter(AccidentMarker.created < kwargs['end_date']) \
             .filter(AccidentMarker.provider_code == CONST.RSA_PROVIDER_CODE) \

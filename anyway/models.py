@@ -551,6 +551,7 @@ class Involved(Base):
     car_type = Column(Integer())
     safety_measures = Column(Integer())
     involve_yishuv_symbol = Column(Integer())
+    involve_yishuv_name = Column(Text())
     injury_severity = Column(Integer())
     injured_type = Column(Integer())
     injured_position = Column(Integer())

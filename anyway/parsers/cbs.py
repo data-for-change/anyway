@@ -10,7 +10,9 @@ import six
 from six import iteritems
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_
-
+import pandas as pd
+import numpy as np
+import math
 from .. import field_names, localization
 from ..models import (AccidentMarker,
                       Involved,
@@ -75,7 +77,7 @@ from ..models import (AccidentMarker,
 
 from .. import models
 from ..constants import CONST
-from ..utilities import ItmToWGS84, init_flask, CsvReader, time_delta, decode_hebrew,ImporterUI,truncate_tables,chunks
+from ..utilities import ItmToWGS84, init_flask, time_delta,ImporterUI,truncate_tables,chunks
 from functools import partial
 import logging
 
@@ -233,7 +235,7 @@ def get_street(settlement_sign, street_sign, streets):
     if settlement_sign not in streets:
         # Changed to return blank string instead of None for correct presentation (Omer)
         return u""
-    street_name = [decode_hebrew(x[field_names.street_name]) for x in streets[settlement_sign] if
+    street_name = [x[field_names.street_name] for x in streets[settlement_sign] if
                    x[field_names.street_sign] == street_sign]
     # there should be only one street name, or none if it wasn't found.
     return street_name[0] if len(street_name) == 1 else u""
@@ -280,7 +282,7 @@ def get_non_urban_intersection(accident, roads):
     if accident[field_names.non_urban_intersection] is not None:
         key = accident[field_names.road1], accident[field_names.road2], accident[field_names.km]
         junction = roads.get(key, None)
-        return decode_hebrew(junction) if junction else u""
+        return junction if junction else u""
     return u""
 
 def get_junction(accident, roads):
@@ -307,12 +309,12 @@ def get_junction(accident, roads):
                 direction = u"דרומית" if accident[field_names.road1] % 2 == 0 else u"מערבית"
             if abs(float(accident["KM"] - junc_km)/10) >= 1:
                 string = str(abs(float(accident["KM"])-junc_km)/10) + u" ק״מ " + direction + u" ל" + \
-                    decode_hebrew(junction)
+                    junction
             elif 0 < abs(float(accident["KM"] - junc_km)/10) < 1:
                 string = str(int((abs(float(accident["KM"])-junc_km)/10)*1000)) + u" מטרים " + direction + u" ל" + \
-                    decode_hebrew(junction)
+                    junction
             else:
-                string = decode_hebrew(junction)
+                string = junction
             return string
         else:
             return u""
@@ -320,7 +322,7 @@ def get_junction(accident, roads):
     elif accident[field_names.non_urban_intersection] is not None:
         key = accident[field_names.road1], accident[field_names.road2], accident[field_names.km]
         junction = roads.get(key, None)
-        return decode_hebrew(junction) if junction else u""
+        return junction if junction else u""
     else:
         return u""
 
@@ -329,9 +331,9 @@ def parse_date(accident):
     """
     parses an accident's date
     """
-    year = accident[field_names.accident_year]
-    month = accident[field_names.accident_month]
-    day = accident[field_names.accident_day]
+    year = int(accident[field_names.accident_year])
+    month = int(accident[field_names.accident_month])
+    day = int(accident[field_names.accident_day])
 
     '''
     hours calculation explanation - The value of the hours is between 1 to 96.
@@ -341,6 +343,7 @@ def parse_date(accident):
     minutes = accident[field_names.accident_hour] * 15 - 15
     hours = int(minutes // 60)
     minutes %= 60
+    minutes = int(minutes)
     accident_date = datetime(year, month, day, hours, minutes, 0)
     return accident_date
 
@@ -381,17 +384,17 @@ def get_data_value(value):
     :returns: value for parameters which are not mandatory in an accident data
     OR -1 if the parameter value does not exist
     """
-    return int(value) if value else -1
+    return int(value) if value and not math.isnan(value) else -1
 
 
 def import_accidents(provider_code, accidents, streets, roads, **kwargs):
-    logging.info("\tReading accident data from '%s'..." % os.path.basename(accidents.name()))
     markers = []
     markers_no_location = []
-    for accident in accidents:
+    for _,accident in accidents.iterrows():
         if field_names.x_coordinate not in accident or field_names.y_coordinate not in accident:
             raise ValueError("Missing x and y coordinates")
-        if accident[field_names.x_coordinate] and accident[field_names.y_coordinate]:
+        if accident[field_names.x_coordinate] and not math.isnan(accident[field_names.x_coordinate]) \
+        and accident[field_names.y_coordinate] and not math.isnan(accident[field_names.y_coordinate]):
             lng, lat = coordinates_converter.convert(accident[field_names.x_coordinate],
                                                      accident[field_names.y_coordinate])
         else:
@@ -402,7 +405,7 @@ def import_accidents(provider_code, accidents, streets, roads, **kwargs):
         accident_datetime = parse_date(accident)
         marker = {
             "id": int(accident[field_names.id]),
-            "provider_and_id": int(str(provider_code) + str(accident[field_names.id])),
+            "provider_and_id": int(str(int(provider_code)) + str(int(accident[field_names.id]))),
             "provider_code": int(provider_code),
             "title": "Accident",
             "description": json_dumps(load_extra_data(accident, streets, roads)),
@@ -438,7 +441,7 @@ def import_accidents(provider_code, accidents, streets, roads, **kwargs):
             "cross_direction": get_data_value(accident[field_names.cross_direction]),
             "road1": get_data_value(accident[field_names.road1]),
             "road2": get_data_value(accident[field_names.road2]),
-            "km": float(accident[field_names.km]) if accident[field_names.km] else None,
+            "km": float(accident[field_names.km]) if accident[field_names.km] and not math.isnan(accident[field_names.km]) else -1,
             "yishuv_symbol": get_data_value(accident[field_names.yishuv_symbol]),
             "yishuv_name": localization.get_city_name(accident[field_names.settlement_sign]),
             "geo_area": get_data_value(accident[field_names.geo_area]),
@@ -462,8 +465,8 @@ def import_accidents(provider_code, accidents, streets, roads, **kwargs):
             "accident_month": get_data_value(accident[field_names.accident_month]),
             "accident_day": get_data_value(accident[field_names.accident_day]),
             "accident_hour_raw": get_data_value(accident[field_names.accident_hour]),
-            "accident_hour": get_data_value(accident_datetime.hour),
-            "accident_minute": get_data_value(accident_datetime.minute),
+            "accident_hour": accident_datetime.hour,
+            "accident_minute": accident_datetime.minute,
             "geom": None,
         }
 
@@ -475,15 +478,14 @@ def import_accidents(provider_code, accidents, streets, roads, **kwargs):
 
 
 def import_involved(provider_code, involved, **kwargs):
-    logging.info("\tReading involved data from '%s'..." % os.path.basename(involved.name()))
     involved_result = []
-    for involve in involved:
+    for _,involve in involved.iterrows():
         if not involve[field_names.id]:  # skip lines with no accident id
             continue
         assert(int(provider_code) == int(involve[field_names.file_type]))
         involved_result.append({
             "accident_id": int(involve[field_names.id]),
-            "provider_and_id": int(str(provider_code) + str(involve[field_names.id])),
+            "provider_and_id": int(str(int(provider_code)) + str(int(involve[field_names.id]))),
             "provider_code": int(provider_code),
             "involved_type": int(involve[field_names.involved_type]),
             "license_acquiring_date": int(involve[field_names.license_acquiring_date]),
@@ -492,6 +494,7 @@ def import_involved(provider_code, involved, **kwargs):
             "car_type": get_data_value(involve[field_names.car_type]),
             "safety_measures": get_data_value(involve[field_names.safety_measures]),
             "involve_yishuv_symbol": get_data_value(involve[field_names.involve_yishuv_symbol]),
+            "involve_yishuv_name": localization.get_city_name(involve[field_names.involve_yishuv_symbol]),
             "injury_severity": get_data_value(involve[field_names.injury_severity]),
             "injured_type": get_data_value(involve[field_names.injured_type]),
             "Injured_position": get_data_value(involve[field_names.injured_position]),
@@ -516,13 +519,12 @@ def import_involved(provider_code, involved, **kwargs):
 
 
 def import_vehicles(provider_code, vehicles, **kwargs):
-    logging.info("\tReading vehicles data from '%s'..." % os.path.basename(vehicles.name()))
     vehicles_result = []
-    for vehicle in vehicles:
+    for _,vehicle in vehicles.iterrows():
         assert(int(provider_code) == int(vehicle[field_names.file_type]))
         vehicles_result.append({
             "accident_id": int(vehicle[field_names.id]),
-            "provider_and_id": int(str(provider_code) + str(vehicle[field_names.id])),
+            "provider_and_id": int(str(int(provider_code)) + str(int(vehicle[field_names.id]))),
             "provider_code": int(provider_code),
             "engine_volume": int(vehicle[field_names.engine_volume]),
             "manufacturing_year": get_data_value(vehicle[field_names.manufacturing_year]),
@@ -541,10 +543,8 @@ def import_vehicles(provider_code, vehicles, **kwargs):
 
 def get_files(directory):
     for name, filename in iteritems(cbs_files):
-
         if name not in (STREETS, NON_URBAN_INTERSECTION, ACCIDENTS, INVOLVED, VEHICLES):
             continue
-
         files = [path for path in os.listdir(directory)
                  if filename.lower() in path.lower()]
         amount = len(files)
@@ -553,25 +553,23 @@ def get_files(directory):
         if amount > 1:
             raise ValueError("Ambiguous: '%s'" % filename)
 
-        csv = CsvReader(os.path.join(directory, files[0]), encoding="cp1255")
-
+        df = pd.read_csv(os.path.join(directory, files[0]), encoding="cp1255")
+        df.columns = [column.upper() for column in df.columns]
         if name == STREETS:
             streets_map = {}
-            for settlement in itertools.groupby(csv, lambda street: street.get(field_names.settlement, "OTHER")):
-                key, val = tuple(settlement)
+            groups = df.groupby(field_names.settlement)
+
+            for key, settlement in groups:
 
                 streets_map[key] = [{field_names.street_sign: x[field_names.street_sign],
-                                     field_names.street_name: x[field_names.street_name]} for x in val if
+                                     field_names.street_name: x[field_names.street_name]} for x in settlement if
                                     field_names.street_name in x and field_names.street_sign in x]
-            csv.close()
             yield name, streets_map
         elif name == NON_URBAN_INTERSECTION:
-            roads = {(x[field_names.road1], x[field_names.road2], x["KM"]): x[field_names.junction_name] for x in csv if
-                     field_names.road1 in x and field_names.road2 in x}
-            csv.close()
+            roads = {(x[field_names.road1], x[field_names.road2], x["KM"]): x[field_names.junction_name] for _,x in df.iterrows()}
             yield ROADS, roads
         elif name in (ACCIDENTS, INVOLVED, VEHICLES):
-            yield name, csv
+            yield name, df
 
 
 
@@ -579,67 +577,69 @@ def import_to_datastore(directory, provider_code, batch_size):
     """
     goes through all the files in a given directory, parses and commits them
     """
-    try:
-        assert batch_size > 0
+    #try:
+    assert batch_size > 0
 
-        files_from_cbs = dict(get_files(directory))
-        if len(files_from_cbs) == 0:
-            return 0
-        logging.info("Importing '{}'".format(directory))
-        started = datetime.now()
-        new_items = 0
-        accidents, accidents_no_location = import_accidents(provider_code=provider_code, **files_from_cbs)
-
-        all_existing_accidents_ids = set(map(lambda x: x[0],
-                                             db.session.query(AccidentMarker.provider_and_id).all()))
-        accidents = [accident for accident in accidents if accident['provider_and_id'] not in all_existing_accidents_ids]
-        logging.info('inserting ' + str(len(accidents)) + ' new accidents')
-        for accidents_chunk in chunks(accidents, batch_size):
-            db.session.bulk_insert_mappings(AccidentMarker, accidents_chunk)
-        new_items += len(accidents)
-
-        all_involved_accident_ids = set(map(lambda x: x[0], db.session.query(Involved.provider_and_id).all()))
-        involved = import_involved(provider_code=provider_code, **files_from_cbs)
-        involved = [x for x in involved if x['provider_and_id'] not in all_involved_accident_ids]
-
-        logging.info('inserting ' + str(len(involved)) + ' new involved')
-        for involved_chunk in chunks(involved, batch_size):
-            db.session.bulk_insert_mappings(Involved, involved_chunk)
-        new_items += len(involved)
-
-        all_vehicles_accident_ids = set(map(lambda x: x[0], db.session.query(Vehicle.provider_and_id).all()))
-        vehicles = import_vehicles(provider_code=provider_code, **files_from_cbs)
-        vehicles = [x for x in vehicles if x['provider_and_id'] not in all_vehicles_accident_ids]
-        logging.info('inserting ' + str(len(vehicles)) + ' new vehicles')
-        for vehicles_chunk in chunks(vehicles, batch_size):
-            db.session.bulk_insert_mappings(Vehicle, vehicles_chunk)
-        new_items += len(vehicles)
-
-
-        all_existing_accidents_ids_without_location = set(map(lambda x: x[0],
-                                                              db.session.query(AccidentsNoLocation.provider_and_id).all()))
-        accidents_no_location = [accident for accident in accidents_no_location \
-                                if accident['provider_and_id'] not in all_existing_accidents_ids_without_location]
-        accidents_no_location_ids = [accident['provider_and_id'] for accident in accidents_no_location]
-        logging.info('inserting ' + str(len(accidents_no_location)) + ' accidents without location')
-        for accidents_chunk in chunks(accidents_no_location, batch_size):
-            db.session.bulk_insert_mappings(AccidentsNoLocation, accidents_chunk)
-
-        involved_no_location = [x for x in involved if x['provider_and_id'] in accidents_no_location_ids]
-        logging.info('inserting ' + str(len(involved_no_location)) + ' involved without accident location')
-        for involved_chunk in chunks(involved_no_location, batch_size):
-            db.session.bulk_insert_mappings(InvolvedNoLocation, involved_chunk)
-
-        vehicles_no_location = [x for x in vehicles if x['provider_and_id'] in accidents_no_location_ids]
-        logging.info('inserting ' + str(len(vehicles_no_location)) + ' vehicles without accident location')
-        for vehicles_chunk in chunks(vehicles_no_location, batch_size):
-            db.session.bulk_insert_mappings(VehicleNoLocation, vehicles_chunk)
-
-        logging.info("\t{0} items in {1}".format(new_items, time_delta(started)))
-        return new_items
-    except ValueError as e:
-        failed_dirs[directory] = str(e)
+    files_from_cbs = dict(get_files(directory))
+    if len(files_from_cbs) == 0:
         return 0
+    logging.info("Importing '{}'".format(directory))
+    started = datetime.now()
+    new_items = 0
+    accidents, accidents_no_location = import_accidents(provider_code=provider_code, **files_from_cbs)
+
+    all_existing_accidents_ids = set(map(lambda x: x[0],
+                                         db.session.query(AccidentMarker.provider_and_id).all()))
+    accidents = [accident for accident in accidents if accident['provider_and_id'] not in all_existing_accidents_ids]
+    logging.info('inserting ' + str(len(accidents)) + ' new accidents')
+    for accidents_chunk in chunks(accidents, batch_size):
+        db.session.bulk_insert_mappings(AccidentMarker, accidents_chunk)
+    new_items += len(accidents)
+
+    all_involved_accident_ids = set(map(lambda x: x[0], db.session.query(Involved.provider_and_id).all()))
+    involved = import_involved(provider_code=provider_code, **files_from_cbs)
+    involved = [x for x in involved if x['provider_and_id'] not in all_involved_accident_ids]
+
+    logging.info('inserting ' + str(len(involved)) + ' new involved')
+    for involved_chunk in chunks(involved, batch_size):
+        db.session.bulk_insert_mappings(Involved, involved_chunk)
+    new_items += len(involved)
+
+    all_vehicles_accident_ids = set(map(lambda x: x[0], db.session.query(Vehicle.provider_and_id).all()))
+    vehicles = import_vehicles(provider_code=provider_code, **files_from_cbs)
+    vehicles = [x for x in vehicles if x['provider_and_id'] not in all_vehicles_accident_ids]
+    logging.info('inserting ' + str(len(vehicles)) + ' new vehicles')
+    for vehicles_chunk in chunks(vehicles, batch_size):
+        db.session.bulk_insert_mappings(Vehicle, vehicles_chunk)
+    new_items += len(vehicles)
+
+
+    all_existing_accidents_ids_without_location = set(map(lambda x: x[0],
+                                                          db.session.query(AccidentsNoLocation.provider_and_id).all()))
+    accidents_no_location = [accident for accident in accidents_no_location \
+                            if accident['provider_and_id'] not in all_existing_accidents_ids_without_location]
+    accidents_no_location_ids = [accident['provider_and_id'] for accident in accidents_no_location]
+    logging.info('inserting ' + str(len(accidents_no_location)) + ' accidents without location')
+    for accidents_chunk in chunks(accidents_no_location, batch_size):
+        db.session.bulk_insert_mappings(AccidentsNoLocation, accidents_chunk)
+
+    involved_no_location = [x for x in involved if x['provider_and_id'] in accidents_no_location_ids]
+    logging.info('inserting ' + str(len(involved_no_location)) + ' involved without accident location')
+    for involved_chunk in chunks(involved_no_location, batch_size):
+        db.session.bulk_insert_mappings(InvolvedNoLocation, involved_chunk)
+
+    vehicles_no_location = [x for x in vehicles if x['provider_and_id'] in accidents_no_location_ids]
+    logging.info('inserting ' + str(len(vehicles_no_location)) + ' vehicles without accident location')
+    for vehicles_chunk in chunks(vehicles_no_location, batch_size):
+        db.session.bulk_insert_mappings(VehicleNoLocation, vehicles_chunk)
+
+    logging.info("\t{0} items in {1}".format(new_items, time_delta(started)))
+    return new_items
+    # except ValueError as e:
+    #     failed_dirs[directory] = str(e)
+    #     if "Not found" in str(e):
+    #         return 0
+    #     raise(e)
 
 
 def delete_invalid_entries(batch_size):
@@ -739,11 +739,10 @@ def get_provider_code(directory_name=None):
 
 def read_dictionary(dictionary_file):
     cbs_dictionary = defaultdict(dict)
-    dictionary = CsvReader(dictionary_file, encoding=CONTENT_ENCODING)
+    dictionary = pd.read_csv(dictionary_file, encoding=CONTENT_ENCODING)
     for dic in dictionary:
         if type(dic[DICTCOLUMN3]) is str:
-            cbs_dictionary[int(dic[DICTCOLUMN1])][int(dic[DICTCOLUMN2])] = decode_hebrew(dic[DICTCOLUMN3],
-                                                                                          encoding=CONTENT_ENCODING)
+            cbs_dictionary[int(dic[DICTCOLUMN1])][int(dic[DICTCOLUMN2])] = dic[DICTCOLUMN3]
         else:
             cbs_dictionary[int(dic[DICTCOLUMN1])][int(dic[DICTCOLUMN2])] = int(dic[DICTCOLUMN3])
     return cbs_dictionary
@@ -786,6 +785,7 @@ def main(specific_folder, delete_all, path, batch_size, delete_start_date, dicti
     for directory in sorted(dir_list):
         parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
         provider_code = get_provider_code(parent_directory)
+        logging.info("Importing Directory " + directory)
         total += import_to_datastore(directory, provider_code, batch_size)
 
     delete_invalid_entries(batch_size)

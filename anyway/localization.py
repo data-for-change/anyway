@@ -4,7 +4,6 @@ import csv
 import pandas as pd
 import os
 from . import field_names
-from .utilities import decode_hebrew
 import six
 from functools import partial
 

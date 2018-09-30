@@ -29,7 +29,6 @@ from flask_admin import helpers, expose, BaseView
 from werkzeug.security import check_password_hash
 from sendgrid import sendgrid, SendGridClientError, SendGridServerError, Mail
 import glob
-from .utilities import CsvReader, decode_hebrew
 from flask_sqlalchemy import SQLAlchemy
 from flask_security import Security, SQLAlchemyUserDatastore, roles_required, current_user, LoginForm, login_required
 from flask_compress import Compress
@@ -42,6 +41,7 @@ from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved,
 from .config import ENTRIES_PER_PAGE
 from six.moves import http_client
 from sqlalchemy import func
+import pandas as pd
 
 app = utilities.init_flask()
 db = SQLAlchemy(app)
@@ -749,11 +749,11 @@ def read_dictionaries():
         if len(main_dict) == 0:
             return
         if len(main_dict) == 1:
-            for dic in main_dict['Dictionary']:
-                if type(dic[DICTCOLUMN3]) is str:
-                    cbs_dictionary[(int(dic[DICTCOLUMN1]),int(dic[DICTCOLUMN2]))] = decode_hebrew(dic[DICTCOLUMN3], encoding=content_encoding)
+            for k, df in main_dict['Dictionary'].iterrows():
+                if type(df[DICTCOLUMN3]) is not (int or float):
+                    cbs_dictionary[(int(df[DICTCOLUMN1]),int(df[DICTCOLUMN2]))] = df[DICTCOLUMN3]
                 else:
-                    cbs_dictionary[(int(dic[DICTCOLUMN1]),int(dic[DICTCOLUMN2]))] = int(dic[DICTCOLUMN3])
+                    cbs_dictionary[(int(df[DICTCOLUMN1]),int(df[DICTCOLUMN2]))] = int(df[DICTCOLUMN3])
             return
 
 
@@ -766,8 +766,8 @@ def get_dict_file(directory):
             raise ValueError("file not found: " + filename + " in directory " + directory)
         if amount > 1:
             raise ValueError("there are too many matches: " + filename)
-        csv = CsvReader(os.path.join(directory, files[0]), encoding="cp1255")
-        yield name, csv
+        df = pd.read_csv(os.path.join(directory, files[0]), encoding="cp1255")
+        yield name, df
 
 class ExtendedLoginForm(LoginForm):
     username = StringField('User Name', [validators.DataRequired()])

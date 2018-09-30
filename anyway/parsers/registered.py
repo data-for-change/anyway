@@ -9,7 +9,7 @@ from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 
 from ..models import RegisteredVehicle, City
-from ..utilities import init_flask, time_delta, CsvReader, ImporterUI, truncate_tables,decode_hebrew
+from ..utilities import init_flask, time_delta, ImporterUI, truncate_tables,decode_hebrew, anyway/flask_app.py, CsvReader
 
 app = init_flask()
 db = SQLAlchemy(app)

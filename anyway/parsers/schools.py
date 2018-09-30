@@ -2,7 +2,7 @@ from .. import school_fields
 import geoalchemy2.functions as func
 import logging
 from datetime import datetime
-from ..utilities import init_flask, CsvReader, time_delta, chunks
+from ..utilities import init_flask, time_delta, chunks
 from flask_sqlalchemy import SQLAlchemy
 from ..models import School
 import pandas as pd

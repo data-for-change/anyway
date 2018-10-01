@@ -251,7 +251,7 @@ var MarkerView = Backbone.View.extend({
                         that.localize_data(data, "KVUZA_GIL", "age_group", "nums", "involved");
                         that.localize_data(data, "MIN", "sex", "invs", "involved");
                         that.localize_data(data, "MAHOZ_MEGURIM", "home_district", "nums", "involved");
-                        that.localize_data(data, "SUG_REHEV_NASA_LMS", "car_type", "invs", "involved");
+                        that.localize_data(data, "SUG_REHEV_NASA_LMS", "vehicle_type", "invs", "involved");
                         that.localize_data(data, "EMZAE_BETIHUT", "safety_measures", "invs", "involved");
                         that.localize_data(data, "HUMRAT_PGIA", "injury_severity", "invs", "involved");
                         that.localize_data(data, "SUG_NIFGA_LMS", "injured_type", "invs", "involved");

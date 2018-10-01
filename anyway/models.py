@@ -550,7 +550,7 @@ class Involved(Base):
     license_acquiring_date = Column(Integer())
     age_group = Column(Integer())
     sex = Column(Integer())
-    car_type = Column(Integer())
+    vehicle_type = Column(Integer())
     safety_measures = Column(Integer())
     involve_yishuv_symbol = Column(Integer())
     involve_yishuv_name = Column(Text())
@@ -588,7 +588,7 @@ class Involved(Base):
             "license_acquiring_date": self.license_acquiring_date,
             "age_group": self.age_group,
             "sex": self.sex,
-            "car_type": self.car_type,
+            "vehicle_type": self.vehicle_type,
             "safety_measures": self.safety_measures,
             "involve_yishuv_symbol": self.involve_yishuv_symbol,
             "injury_severity": self.injury_severity,
@@ -870,7 +870,7 @@ class InvolvedNoLocation(Base):
     license_acquiring_date = Column(Integer())
     age_group = Column(Integer())
     sex = Column(Integer())
-    car_type = Column(Integer())
+    vehicle_type = Column(Integer())
     safety_measures = Column(Integer())
     involve_yishuv_symbol = Column(Integer())
     injury_severity = Column(Integer())

@@ -493,7 +493,7 @@ def import_involved(provider_code, involved, **kwargs):
             "license_acquiring_date": int(involve[field_names.license_acquiring_date]),
             "age_group": int(involve[field_names.age_group]),
             "sex": get_data_value(involve[field_names.sex]),
-            "car_type": get_data_value(involve[field_names.car_type]),
+            "vehicle_type": get_data_value(involve[field_names.vehicle_type]),
             "safety_measures": get_data_value(involve[field_names.safety_measures]),
             "involve_yishuv_symbol": get_data_value(involve[field_names.involve_yishuv_symbol]),
             "involve_yishuv_name": localization.get_city_name(involve[field_names.involve_yishuv_symbol]),

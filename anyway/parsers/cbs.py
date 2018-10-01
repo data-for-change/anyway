@@ -470,6 +470,8 @@ def import_accidents(provider_code, accidents, streets, roads, **kwargs):
             "accident_minute": accident_datetime.minute,
             "x": accident[field_names.x_coordinate],
             "y": accident[field_names.y_coordinate],
+            "vehicle_type_rsa": None,
+            "violation_type_rsa": None,
             "geom": None,
         }
 

@@ -258,6 +258,8 @@ class AccidentMarker(MarkerMixin, Base):
     accident_minute = Column(Integer())
     x = Column(Float())
     y = Column(Float())
+    vehicle_type_rsa = Column(Text())
+    violation_type_rsa = Column(Text())
     geom = Column(Geometry('POINT'))
 
     @staticmethod

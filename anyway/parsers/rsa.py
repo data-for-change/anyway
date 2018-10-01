@@ -51,7 +51,9 @@ def _iter_rows(filename):
                'description': json.dumps(description),
                'location_accuracy': 1,
                'type': CONST.MARKER_TYPE_ACCIDENT,
-               'video_link': video_link}
+               'video_link': video_link,
+               'vehicle_type_rsa': vehicle_type,
+               'violation_type_rsa': violation}
 
 
 def parse(filename):

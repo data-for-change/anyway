@@ -60,7 +60,7 @@ from ..models import (AccidentMarker,
                       Sex,
                       GeoArea,
                       Region,
-                      MinizipaliStatus,
+                      MunicipalStatus,
                       District,
                       NaturalArea,
                       YishuvShape,
@@ -73,7 +73,8 @@ from ..models import (AccidentMarker,
                       ReleaseDest,
                       SafetyMeasuresUse,
                       LateDeceased,
-                      LocationAccuracy)
+                      LocationAccuracy,
+                      ProviderCode)
 
 from .. import models
 from ..constants import CONST
@@ -150,7 +151,7 @@ CLASSES_DICT = {0:   ColumnsDescription,
                67:  Sex,
                68:  GeoArea,
                77:  Region,
-               78:  MinizipaliStatus,
+               78:  MunicipalStatus,
                79:  District,
                80:  NaturalArea,
                81:  YishuvShape,
@@ -206,7 +207,7 @@ TABLES_DICT = {0:   'columns_description',
                67:  'sex',
                68:  'geo_area',
                77:  'region',
-               78:  'minizipali_status',
+               78:  'municipal_status',
                79:  'district',
                80:  'natural_area',
                81:  'yishuv_shape',
@@ -451,7 +452,7 @@ def import_accidents(provider_code, accidents, streets, roads, **kwargs):
             "region": get_data_value(accident[field_names.region]),
             "district": get_data_value(accident[field_names.district]),
             "natural_area": get_data_value(accident[field_names.natural_area]),
-            "minizipali_status": get_data_value(accident[field_names.minizipali_status]),
+            "municipal_status": get_data_value(accident[field_names.municipal_status]),
             "yishuv_shape": get_data_value(accident[field_names.yishuv_shape]),
             "street1": get_data_value(accident[field_names.street1]),
             "street1_hebrew": get_street(accident[field_names.settlement_sign], accident[field_names.street1], streets),
@@ -555,7 +556,7 @@ def get_files(directory):
         if amount > 1:
             raise ValueError("Ambiguous: '%s'" % filename)
 
-        df = pd.read_csv(os.path.join(directory, files[0]), encoding="cp1255")
+        df = pd.read_csv(os.path.join(directory, files[0]), encoding=CONTENT_ENCODING)
         df.columns = [column.upper() for column in df.columns]
         if name == STREETS:
             streets_map = {}
@@ -579,69 +580,69 @@ def import_to_datastore(directory, provider_code, batch_size):
     """
     goes through all the files in a given directory, parses and commits them
     """
-    #try:
-    assert batch_size > 0
+    try:
+        assert batch_size > 0
 
-    files_from_cbs = dict(get_files(directory))
-    if len(files_from_cbs) == 0:
-        return 0
-    logging.info("Importing '{}'".format(directory))
-    started = datetime.now()
-    new_items = 0
-    accidents, accidents_no_location = import_accidents(provider_code=provider_code, **files_from_cbs)
+        files_from_cbs = dict(get_files(directory))
+        if len(files_from_cbs) == 0:
+            return 0
+        logging.info("Importing '{}'".format(directory))
+        started = datetime.now()
+        new_items = 0
+        accidents, accidents_no_location = import_accidents(provider_code=provider_code, **files_from_cbs)
 
-    all_existing_accidents_ids = set(map(lambda x: x[0],
-                                         db.session.query(AccidentMarker.provider_and_id).all()))
-    accidents = [accident for accident in accidents if accident['provider_and_id'] not in all_existing_accidents_ids]
-    logging.info('inserting ' + str(len(accidents)) + ' new accidents')
-    for accidents_chunk in chunks(accidents, batch_size):
-        db.session.bulk_insert_mappings(AccidentMarker, accidents_chunk)
-    new_items += len(accidents)
+        all_existing_accidents_ids = set(map(lambda x: x[0],
+                                             db.session.query(AccidentMarker.provider_and_id).all()))
+        accidents = [accident for accident in accidents if accident['provider_and_id'] not in all_existing_accidents_ids]
+        logging.info('inserting ' + str(len(accidents)) + ' new accidents')
+        for accidents_chunk in chunks(accidents, batch_size):
+            db.session.bulk_insert_mappings(AccidentMarker, accidents_chunk)
+        new_items += len(accidents)
 
-    all_involved_accident_ids = set(map(lambda x: x[0], db.session.query(Involved.provider_and_id).all()))
-    involved = import_involved(provider_code=provider_code, **files_from_cbs)
-    involved = [x for x in involved if x['provider_and_id'] not in all_involved_accident_ids]
+        all_involved_accident_ids = set(map(lambda x: x[0], db.session.query(Involved.provider_and_id).all()))
+        involved = import_involved(provider_code=provider_code, **files_from_cbs)
+        involved = [x for x in involved if x['provider_and_id'] not in all_involved_accident_ids]
 
-    logging.info('inserting ' + str(len(involved)) + ' new involved')
-    for involved_chunk in chunks(involved, batch_size):
-        db.session.bulk_insert_mappings(Involved, involved_chunk)
-    new_items += len(involved)
+        logging.info('inserting ' + str(len(involved)) + ' new involved')
+        for involved_chunk in chunks(involved, batch_size):
+            db.session.bulk_insert_mappings(Involved, involved_chunk)
+        new_items += len(involved)
 
-    all_vehicles_accident_ids = set(map(lambda x: x[0], db.session.query(Vehicle.provider_and_id).all()))
-    vehicles = import_vehicles(provider_code=provider_code, **files_from_cbs)
-    vehicles = [x for x in vehicles if x['provider_and_id'] not in all_vehicles_accident_ids]
-    logging.info('inserting ' + str(len(vehicles)) + ' new vehicles')
-    for vehicles_chunk in chunks(vehicles, batch_size):
-        db.session.bulk_insert_mappings(Vehicle, vehicles_chunk)
-    new_items += len(vehicles)
+        all_vehicles_accident_ids = set(map(lambda x: x[0], db.session.query(Vehicle.provider_and_id).all()))
+        vehicles = import_vehicles(provider_code=provider_code, **files_from_cbs)
+        vehicles = [x for x in vehicles if x['provider_and_id'] not in all_vehicles_accident_ids]
+        logging.info('inserting ' + str(len(vehicles)) + ' new vehicles')
+        for vehicles_chunk in chunks(vehicles, batch_size):
+            db.session.bulk_insert_mappings(Vehicle, vehicles_chunk)
+        new_items += len(vehicles)
 
 
-    all_existing_accidents_ids_without_location = set(map(lambda x: x[0],
-                                                          db.session.query(AccidentsNoLocation.provider_and_id).all()))
-    accidents_no_location = [accident for accident in accidents_no_location \
-                            if accident['provider_and_id'] not in all_existing_accidents_ids_without_location]
-    accidents_no_location_ids = [accident['provider_and_id'] for accident in accidents_no_location]
-    logging.info('inserting ' + str(len(accidents_no_location)) + ' accidents without location')
-    for accidents_chunk in chunks(accidents_no_location, batch_size):
-        db.session.bulk_insert_mappings(AccidentsNoLocation, accidents_chunk)
+        all_existing_accidents_ids_without_location = set(map(lambda x: x[0],
+                                                              db.session.query(AccidentsNoLocation.provider_and_id).all()))
+        accidents_no_location = [accident for accident in accidents_no_location \
+                                if accident['provider_and_id'] not in all_existing_accidents_ids_without_location]
+        accidents_no_location_ids = [accident['provider_and_id'] for accident in accidents_no_location]
+        logging.info('inserting ' + str(len(accidents_no_location)) + ' accidents without location')
+        for accidents_chunk in chunks(accidents_no_location, batch_size):
+            db.session.bulk_insert_mappings(AccidentsNoLocation, accidents_chunk)
 
-    involved_no_location = [x for x in involved if x['provider_and_id'] in accidents_no_location_ids]
-    logging.info('inserting ' + str(len(involved_no_location)) + ' involved without accident location')
-    for involved_chunk in chunks(involved_no_location, batch_size):
-        db.session.bulk_insert_mappings(InvolvedNoLocation, involved_chunk)
+        involved_no_location = [x for x in involved if x['provider_and_id'] in accidents_no_location_ids]
+        logging.info('inserting ' + str(len(involved_no_location)) + ' involved without accident location')
+        for involved_chunk in chunks(involved_no_location, batch_size):
+            db.session.bulk_insert_mappings(InvolvedNoLocation, involved_chunk)
 
-    vehicles_no_location = [x for x in vehicles if x['provider_and_id'] in accidents_no_location_ids]
-    logging.info('inserting ' + str(len(vehicles_no_location)) + ' vehicles without accident location')
-    for vehicles_chunk in chunks(vehicles_no_location, batch_size):
-        db.session.bulk_insert_mappings(VehicleNoLocation, vehicles_chunk)
+        vehicles_no_location = [x for x in vehicles if x['provider_and_id'] in accidents_no_location_ids]
+        logging.info('inserting ' + str(len(vehicles_no_location)) + ' vehicles without accident location')
+        for vehicles_chunk in chunks(vehicles_no_location, batch_size):
+            db.session.bulk_insert_mappings(VehicleNoLocation, vehicles_chunk)
 
-    logging.info("\t{0} items in {1}".format(new_items, time_delta(started)))
-    return new_items
-    # except ValueError as e:
-    #     failed_dirs[directory] = str(e)
-    #     if "Not found" in str(e):
-    #         return 0
-    #     raise(e)
+        logging.info("\t{0} items in {1}".format(new_items, time_delta(started)))
+        return new_items
+    except ValueError as e:
+        failed_dirs[directory] = str(e)
+        if "Not found" in str(e):
+            return 0
+        raise(e)
 
 
 def delete_invalid_entries(batch_size):
@@ -762,6 +763,14 @@ def create_dictionary_tables(dictionary_file):
             sql_insert = 'INSERT INTO ' + curr_table + ' VALUES (' + str(inner_k) + ',' + "'" + inner_v.replace("'",'') + "'" + ')'
             db.session.execute(sql_insert)
             db.session.commit()
+    create_provider_code_table()
+
+def create_provider_code_table():
+    provider_code_dict = {1: 'הלשכה המרכזית לסטטיסטיקה', 2: 'איחוד הצלה', 3: 'הלשכה המרכזית לסטטיסטיקה', 4: 'שומרי הדרך'}
+    for k, v in provider_code_dict.items():
+        sql_insert = 'INSERT INTO provider_code VALUES (' + str(k) + ',' + "'" + v + "'" + ')'
+        db.session.execute(sql_insert)
+        db.session.commit()
 
 
 def main(specific_folder, delete_all, path, batch_size, delete_start_date, dictionary_file):

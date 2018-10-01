@@ -240,7 +240,7 @@ class AccidentMarker(MarkerMixin, Base):
     region = Column(Integer())
     district = Column(Integer())
     natural_area = Column(Integer())
-    minizipali_status = Column(Integer())
+    municipal_status = Column(Integer())
     yishuv_shape = Column(Integer())
     street1 = Column(Integer())
     street1_hebrew = Column(Text())
@@ -846,7 +846,7 @@ class AccidentsNoLocation(Base, MarkerMixin):
     region = Column(Integer())
     district = Column(Integer())
     natural_area = Column(Integer())
-    minizipali_status = Column(Integer())
+    municipal_status = Column(Integer())
     yishuv_shape = Column(Integer())
     street1 = Column(Integer())
     street2 = Column(Integer())
@@ -1145,10 +1145,10 @@ class Region(Base):
     id = Column(Integer(), primary_key=True, index=True)
     region_hebrew = Column(Text(), nullable=True)
 
-class MinizipaliStatus(Base):
-    __tablename__ = "minizipali_status"
+class MunicipalStatus(Base):
+    __tablename__ = "municipal_status"
     id = Column(Integer(), primary_key=True, index=True)
-    minizipali_status_hebrew = Column(Text(), nullable=True)
+    municipal_status_hebrew = Column(Text(), nullable=True)
 
 class District(Base):
     __tablename__ = "district"

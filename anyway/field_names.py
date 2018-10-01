@@ -55,7 +55,7 @@ traffic_light = "RAMZOR"
 region = "MAHOZ"
 district = "NAFA"
 natural_area = "EZOR_TIVI"
-minizipali_status = "MAAMAD_MINIZIPALI"
+municipal_status = "MAAMAD_MINIZIPALI"
 yishuv_shape = "ZURAT_ISHUV"
 
 # Involved csv fields

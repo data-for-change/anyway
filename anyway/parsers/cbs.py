@@ -467,6 +467,8 @@ def import_accidents(provider_code, accidents, streets, roads, **kwargs):
             "accident_hour_raw": get_data_value(accident[field_names.accident_hour]),
             "accident_hour": accident_datetime.hour,
             "accident_minute": accident_datetime.minute,
+            "x": accident[field_names.x_coordinate],
+            "y": accident[field_names.y_coordinate],
             "geom": None,
         }
 
@@ -497,7 +499,7 @@ def import_involved(provider_code, involved, **kwargs):
             "involve_yishuv_name": localization.get_city_name(involve[field_names.involve_yishuv_symbol]),
             "injury_severity": get_data_value(involve[field_names.injury_severity]),
             "injured_type": get_data_value(involve[field_names.injured_type]),
-            "Injured_position": get_data_value(involve[field_names.injured_position]),
+            "injured_position": get_data_value(involve[field_names.injured_position]),
             "population_type": get_data_value(involve[field_names.population_type]),
             "home_region": get_data_value(involve[field_names.home_region]),
             "home_district": get_data_value(involve[field_names.home_district]),

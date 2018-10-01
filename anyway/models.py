@@ -230,7 +230,7 @@ class AccidentMarker(MarkerMixin, Base):
     video_link = Column(Text())
     road1 = Column(Integer())
     road2 = Column(Integer())
-    km = Column(Float)
+    km = Column(Float())
     yishuv_symbol = Column(Integer())
     yishuv_name = Column(Text())
     geo_area = Column(Integer())
@@ -256,6 +256,8 @@ class AccidentMarker(MarkerMixin, Base):
     accident_hour_raw = Column(Integer())
     accident_hour = Column(Integer())
     accident_minute = Column(Integer())
+    x = Column(Float())
+    y = Column(Float())
     geom = Column(Geometry('POINT'))
 
     @staticmethod

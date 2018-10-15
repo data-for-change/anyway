@@ -241,7 +241,7 @@ _fields = {
 }
 
 if six.PY3:
-    _open_hebrew_textfile = partial(open, encoding='cp1255')
+    _open_hebrew_textfile = partial(open, encoding='cp1252')
 else:
     _open_hebrew_textfile = open
 

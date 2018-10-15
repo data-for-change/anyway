@@ -240,14 +240,7 @@ _fields = {
     "VIOLATION_TYPE": "סוג עבירה"
 }
 
-if six.PY3:
-    _open_hebrew_textfile = partial(open, encoding='cp1252')
-else:
-    _open_hebrew_textfile = open
-
-
-
-with _open_hebrew_textfile(os.path.join("static/data/cities.csv"), "r") as f:
+with open(os.path.join("static/data/cities.csv"), "r") as f:
     _cities = pd.read_csv(f, index_col=field_names.sign)
 
 

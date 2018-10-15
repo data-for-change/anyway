@@ -28,3 +28,4 @@ click
 six
 celery[redis]
 openpyxl
+pandas

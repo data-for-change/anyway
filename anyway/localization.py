@@ -240,8 +240,7 @@ _fields = {
     "VIOLATION_TYPE": "סוג עבירה"
 }
 
-with open(os.path.join("static/data/cities.csv"), "r") as f:
-    _cities = pd.read_csv(f, encoding="utf-8", index_col=field_names.sign)
+_cities = pd.read_csv("static/data/cities.csv", encoding="utf-8", index_col=field_names.sign)
 
 
 def get_field(field, value=None):

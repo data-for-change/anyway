@@ -46,12 +46,14 @@ def _iter_rows(filename):
                'longitude': longitude,
                'created': timestamp,
                'provider_code': CONST.RSA_PROVIDER_CODE,
-               'severity': 0,
+               'accident_severity': 0,
                'title': 'שומרי הדרך',
                'description': json.dumps(description),
-               'locationAccuracy': 1,
+               'location_accuracy': 1,
                'type': CONST.MARKER_TYPE_ACCIDENT,
-               'video_link': video_link}
+               'video_link': video_link,
+               'vehicle_type_rsa': vehicle_type,
+               'violation_type_rsa': violation}
 
 
 def parse(filename):

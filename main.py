@@ -48,12 +48,17 @@ def process():
 @click.option('--path', type=str, default="static/data/cbs")
 @click.option('--batch_size', type=int, default=5000)
 @click.option('--delete_start_date', type=str, default=None)
+@click.option('--dictionary_file', type=str, default=None)
 
-def cbs(specific_folder, delete_all, path, batch_size, delete_start_date):
+def cbs(specific_folder, delete_all, path, batch_size, delete_start_date, dictionary_file):
     from anyway.parsers.cbs import main
 
-    return main(specific_folder=specific_folder, delete_all=delete_all, path=path,
-                batch_size=batch_size, delete_start_date=delete_start_date)
+    return main(specific_folder=specific_folder,
+                delete_all=delete_all,
+                path=path,
+                batch_size=batch_size,
+                delete_start_date=delete_start_date,
+                dictionary_file=dictionary_file)
 
 @process.command()
 @click.option('--specific_folder', is_flag=True, default=False)

@@ -198,21 +198,21 @@ class AccidentMarker(MarkerMixin, Base):
     provider_and_id = Column(BigInteger())
     provider_code = Column(Integer(), primary_key=True)
     description = Column(Text())
-    subtype = Column(Integer())
-    severity = Column(Integer())
+    accident_type = Column(Integer())
+    accident_severity = Column(Integer())
     address = Column(Text())
-    locationAccuracy = Column(Integer())
-    roadType = Column(Integer())
-    roadShape = Column(Integer())
-    dayType = Column(Integer())
-    unit = Column(Integer())
+    location_accuracy = Column(Integer())
+    road_type = Column(Integer())
+    road_shape = Column(Integer())
+    day_type = Column(Integer())
+    police_unit = Column(Integer())
     mainStreet = Column(Text())
     secondaryStreet = Column(Text())
     junction = Column(Text())
     one_lane = Column(Integer())
     multi_lane = Column(Integer())
     speed_limit = Column(Integer())
-    intactness = Column(Integer())
+    road_intactness = Column(Integer())
     road_width = Column(Integer())
     road_sign = Column(Integer())
     road_light = Column(Integer())
@@ -230,8 +230,9 @@ class AccidentMarker(MarkerMixin, Base):
     video_link = Column(Text())
     road1 = Column(Integer())
     road2 = Column(Integer())
-    km = Column(Float)
+    km = Column(Float())
     yishuv_symbol = Column(Integer())
+    yishuv_name = Column(Text())
     geo_area = Column(Integer())
     day_night = Column(Integer())
     day_in_week = Column(Integer())
@@ -239,19 +240,26 @@ class AccidentMarker(MarkerMixin, Base):
     region = Column(Integer())
     district = Column(Integer())
     natural_area = Column(Integer())
-    minizipali_status = Column(Integer())
+    municipal_status = Column(Integer())
     yishuv_shape = Column(Integer())
     street1 = Column(Integer())
+    street1_hebrew = Column(Text())
     street2 = Column(Integer())
+    street2_hebrew = Column(Text())
     home = Column(Integer())
     urban_intersection = Column(Integer())
     non_urban_intersection = Column(Integer())
+    non_urban_intersection_hebrew = Column(Text())
     accident_year = Column(Integer())
     accident_month = Column(Integer())
     accident_day = Column(Integer())
     accident_hour_raw = Column(Integer())
     accident_hour = Column(Integer())
     accident_minute = Column(Integer())
+    x = Column(Float())
+    y = Column(Float())
+    vehicle_type_rsa = Column(Text())
+    violation_type_rsa = Column(Text())
     geom = Column(Geometry('POINT'))
 
     @staticmethod
@@ -265,8 +273,8 @@ class AccidentMarker(MarkerMixin, Base):
             "provider_code": self.provider_code,
             "latitude": self.latitude,
             "longitude": self.longitude,
-            "severity": self.severity,
-            "locationAccuracy": self.locationAccuracy,
+            "accident_severity": self.accident_severity,
+            "location_accuracy": self.location_accuracy,
             "created": self.created.isoformat(),
         }
         if not is_thin:
@@ -274,11 +282,11 @@ class AccidentMarker(MarkerMixin, Base):
                 "title": self.title,
                 "address": self.address,
                 "type": self.type,
-                "subtype": self.subtype,
-                "roadType": self.roadType,
-                "roadShape": self.roadShape,
-                "dayType": self.dayType,
-                "unit": self.unit,
+                "accident_type": self.accident_type,
+                "road_type": self.road_type,
+                "road_shape": self.road_shape,
+                "day_type": self.day_type,
+                "police_unit": self.police_unit,
                 "mainStreet": self.mainStreet,
                 "secondaryStreet": self.secondaryStreet,
                 "junction": self.junction,
@@ -293,7 +301,7 @@ class AccidentMarker(MarkerMixin, Base):
                 "one_lane": self.one_lane,
                 "multi_lane": self.multi_lane,
                 "speed_limit": self.speed_limit,
-                "intactness": self.intactness,
+                "road_intactness": self.road_intactness,
                 "road_width": self.road_width,
                 "road_sign": self.road_sign,
                 "road_light": self.road_light,
@@ -361,29 +369,29 @@ class AccidentMarker(MarkerMixin, Base):
         if yield_per:
             markers = markers.yield_per(yield_per)
         if accurate and not approx:
-            markers = markers.filter(AccidentMarker.locationAccuracy == 1)
+            markers = markers.filter(AccidentMarker.location_accuracy == 1)
         elif approx and not accurate:
-            markers = markers.filter(AccidentMarker.locationAccuracy != 1)
+            markers = markers.filter(AccidentMarker.location_accuracy != 1)
         elif not accurate and not approx:
             return MarkerResult(markers=db.session.query(AccidentMarker).filter(sql.false()), total_records=0)
         if not kwargs.get('show_fatal', True):
-            markers = markers.filter(AccidentMarker.severity != 1)
+            markers = markers.filter(AccidentMarker.accident_severity != 1)
         if not kwargs.get('show_severe', True):
-            markers = markers.filter(AccidentMarker.severity != 2)
+            markers = markers.filter(AccidentMarker.accident_severity != 2)
         if not kwargs.get('show_light', True):
-            markers = markers.filter(AccidentMarker.severity != 3)
+            markers = markers.filter(AccidentMarker.accident_severity != 3)
         if kwargs.get('show_urban', 3) != 3:
             if kwargs['show_urban'] == 2:
-                markers = markers.filter(AccidentMarker.roadType >= 1).filter(AccidentMarker.roadType <= 2)
+                markers = markers.filter(AccidentMarker.road_type >= 1).filter(AccidentMarker.roadType <= 2)
             elif kwargs['show_urban'] == 1:
-                markers = markers.filter(AccidentMarker.roadType >= 3).filter(AccidentMarker.roadType <= 4)
+                markers = markers.filter(AccidentMarker.road_type >= 3).filter(AccidentMarker.roadType <= 4)
             else:
                 return MarkerResult(markers=db.session.query(AccidentMarker).filter(sql.false()), total_records=0)
         if kwargs.get('show_intersection', 3) != 3:
             if kwargs['show_intersection'] == 2:
-                markers = markers.filter(AccidentMarker.roadType != 2).filter(AccidentMarker.roadType != 4)
+                markers = markers.filter(AccidentMarker.road_type != 2).filter(AccidentMarker.roadType != 4)
             elif kwargs['show_intersection'] == 1:
-                markers = markers.filter(AccidentMarker.roadType != 1).filter(AccidentMarker.roadType != 3)
+                markers = markers.filter(AccidentMarker.road_type != 1).filter(AccidentMarker.roadType != 3)
             else:
                 return MarkerResult(markers=db.session.query(AccidentMarker).filter(sql.false()), total_records=0)
         if kwargs.get('show_lane', 3) != 3:
@@ -397,7 +405,7 @@ class AccidentMarker(MarkerMixin, Base):
         if kwargs.get('show_day', 7) != 7:
             markers = markers.filter(func.extract("dow", AccidentMarker.created) == kwargs['show_day'])
         if kwargs.get('show_holiday', 0) != 0:
-            markers = markers.filter(AccidentMarker.dayType == kwargs['show_holiday'])
+            markers = markers.filter(AccidentMarker.day_type == kwargs['show_holiday'])
 
         if kwargs.get('show_time', 24) != 24:
             if kwargs['show_time'] == 25:     # Daylight (6-18)
@@ -415,20 +423,20 @@ class AccidentMarker(MarkerMixin, Base):
         if kwargs.get('weather', 0) != 0:
             markers = markers.filter(AccidentMarker.weather == kwargs['weather'])
         if kwargs.get('road', 0) != 0:
-            markers = markers.filter(AccidentMarker.roadShape == kwargs['road'])
+            markers = markers.filter(AccidentMarker.road_shape == kwargs['road'])
         if kwargs.get('separation', 0) != 0:
             markers = markers.filter(AccidentMarker.multi_lane == kwargs['separation'])
         if kwargs.get('surface', 0) != 0:
             markers = markers.filter(AccidentMarker.road_surface == kwargs['surface'])
         if kwargs.get('acctype', 0) != 0:
             if kwargs['acctype'] <= 20:
-                markers = markers.filter(AccidentMarker.subtype == kwargs['acctype'])
+                markers = markers.filter(AccidentMarker.accident_type == kwargs['acctype'])
             elif kwargs['acctype'] == CONST.BIKE_ACCIDENTS:
                 markers = markers.filter(AccidentMarker.vehicles.any(Vehicle.vehicle_type == CONST.VEHICLE_TYPE_BIKE))
         if kwargs.get('controlmeasure', 0) != 0:
             markers = markers.filter(AccidentMarker.road_control == kwargs['controlmeasure'])
         if kwargs.get('district', 0) != 0:
-            markers = markers.filter(AccidentMarker.unit == kwargs['district'])
+            markers = markers.filter(AccidentMarker.police_unit == kwargs['district'])
 
         if kwargs.get('case_type', 0) != 0:
             markers = markers.filter(AccidentMarker.provider_code == kwargs['case_type'])
@@ -544,9 +552,10 @@ class Involved(Base):
     license_acquiring_date = Column(Integer())
     age_group = Column(Integer())
     sex = Column(Integer())
-    car_type = Column(Integer())
+    vehicle_type = Column(Integer())
     safety_measures = Column(Integer())
     involve_yishuv_symbol = Column(Integer())
+    involve_yishuv_name = Column(Text())
     injury_severity = Column(Integer())
     injured_type = Column(Integer())
     injured_position = Column(Integer())
@@ -581,7 +590,7 @@ class Involved(Base):
             "license_acquiring_date": self.license_acquiring_date,
             "age_group": self.age_group,
             "sex": self.sex,
-            "car_type": self.car_type,
+            "vehicle_type": self.vehicle_type,
             "safety_measures": self.safety_measures,
             "involve_yishuv_symbol": self.involve_yishuv_symbol,
             "injury_severity": self.injury_severity,
@@ -798,21 +807,21 @@ class AccidentsNoLocation(Base, MarkerMixin):
     provider_and_id = Column(BigInteger())
     provider_code = Column(Integer(), primary_key=True)
     description = Column(Text())
-    subtype = Column(Integer())
-    severity = Column(Integer())
+    accident_type = Column(Integer())
+    accident_severity = Column(Integer())
     address = Column(Text())
-    locationAccuracy = Column(Integer())
-    roadType = Column(Integer())
-    roadShape = Column(Integer())
-    dayType = Column(Integer())
-    unit = Column(Integer())
+    location_accuracy = Column(Integer())
+    road_type = Column(Integer())
+    road_shape = Column(Integer())
+    day_type = Column(Integer())
+    police_unit = Column(Integer())
     mainStreet = Column(Text())
     secondaryStreet = Column(Text())
     junction = Column(Text())
     one_lane = Column(Integer())
     multi_lane = Column(Integer())
     speed_limit = Column(Integer())
-    intactness = Column(Integer())
+    road_intactness = Column(Integer())
     road_width = Column(Integer())
     road_sign = Column(Integer())
     road_light = Column(Integer())
@@ -839,7 +848,7 @@ class AccidentsNoLocation(Base, MarkerMixin):
     region = Column(Integer())
     district = Column(Integer())
     natural_area = Column(Integer())
-    minizipali_status = Column(Integer())
+    municipal_status = Column(Integer())
     yishuv_shape = Column(Integer())
     street1 = Column(Integer())
     street2 = Column(Integer())
@@ -863,7 +872,7 @@ class InvolvedNoLocation(Base):
     license_acquiring_date = Column(Integer())
     age_group = Column(Integer())
     sex = Column(Integer())
-    car_type = Column(Integer())
+    vehicle_type = Column(Integer())
     safety_measures = Column(Integer())
     involve_yishuv_symbol = Column(Integer())
     injury_severity = Column(Integer())
@@ -936,3 +945,279 @@ class School(Base):
 class ST_MakeEnvelope(geoalchemy_functions.GenericFunction):
     name = 'ST_MakeEnvelope'
     type = Geometry
+
+class ColumnsDescription(Base):
+    __tablename__ = "columns_description"
+    id = Column(Integer(), primary_key=True, index=True)
+    column_description = Column(Text(), nullable=True)
+
+class PoliceUnit(Base):
+    __tablename__ = "police_unit"
+    id = Column(Integer(), primary_key=True, index=True)
+    police_unit_hebrew = Column(Text(), nullable=True)
+
+class RoadType(Base):
+    __tablename__ = "road_type"
+    id = Column(Integer(), primary_key=True, index=True)
+    road_type_hebrew = Column(Text(), nullable=True)
+
+class AccidentSeverity(Base):
+    __tablename__ = "accident_severity"
+    id = Column(Integer(), primary_key=True, index=True)
+    accident_severity_hebrew = Column(Text(), nullable=True)
+
+class AccidentType(Base):
+    __tablename__ = "accident_type"
+    id = Column(Integer(), primary_key=True, index=True)
+    accident_type_hebrew = Column(Text(), nullable=True)
+
+class RoadShape(Base):
+    __tablename__ = "road_shape"
+    id = Column(Integer(), primary_key=True, index=True)
+    road_shape_hebrew = Column(Text(), nullable=True)
+
+class OneLane(Base):
+    __tablename__ = "one_lane"
+    id = Column(Integer(), primary_key=True, index=True)
+    one_lane_hebrew = Column(Text(), nullable=True)
+
+class MultiLane(Base):
+    __tablename__ = "multi_lane"
+    id = Column(Integer(), primary_key=True, index=True)
+    multi_lane_hebrew = Column(Text(), nullable=True)
+
+class SpeedLimit(Base):
+    __tablename__ = "speed_limit"
+    id = Column(Integer(), primary_key=True, index=True)
+    speed_limit_hebrew = Column(Text(), nullable=True)
+
+class RoadIntactness(Base):
+    __tablename__ = "road_intactness"
+    id = Column(Integer(), primary_key=True, index=True)
+    road_intactness_hebrew = Column(Text(), nullable=True)
+
+class RoadWidth(Base):
+    __tablename__ = "road_width"
+    id = Column(Integer(), primary_key=True, index=True)
+    road_width_hebrew = Column(Text(), nullable=True)
+
+class RoadSign(Base):
+    __tablename__ = "road_sign"
+    id = Column(Integer(), primary_key=True, index=True)
+    road_sign_hebrew = Column(Text(), nullable=True)
+
+class RoadLight(Base):
+    __tablename__ = "road_light"
+    id = Column(Integer(), primary_key=True, index=True)
+    road_light_hebrew = Column(Text(), nullable=True)
+
+class RoadControl(Base):
+    __tablename__ = "road_control"
+    id = Column(Integer(), primary_key=True, index=True)
+    road_control_hebrew = Column(Text(), nullable=True)
+
+class Weather(Base):
+    __tablename__ = "weather"
+    id = Column(Integer(), primary_key=True, index=True)
+    weather_hebrew = Column(Text(), nullable=True)
+
+class RoadSurface(Base):
+    __tablename__ = "road_surface"
+    id = Column(Integer(), primary_key=True, index=True)
+    road_surface_hebrew = Column(Text(), nullable=True)
+
+class RoadObjecte(Base):
+    __tablename__ = "road_object"
+    id = Column(Integer(), primary_key=True, index=True)
+    road_object_hebrew = Column(Text(), nullable=True)
+
+class ObjectDistance(Base):
+    __tablename__ = "object_distance"
+    id = Column(Integer(), primary_key=True, index=True)
+    object_distance_hebrew = Column(Text(), nullable=True)
+
+class DidntCross(Base):
+    __tablename__ = "didnt_cross"
+    id = Column(Integer(), primary_key=True, index=True)
+    didnt_cross_hebrew = Column(Text(), nullable=True)
+
+class CrossMode(Base):
+    __tablename__ = "cross_mode"
+    id = Column(Integer(), primary_key=True, index=True)
+    cross_mode_hebrew = Column(Text(), nullable=True)
+
+class CrossLocation(Base):
+    __tablename__ = "cross_location"
+    id = Column(Integer(), primary_key=True, index=True)
+    cross_location_hebrew = Column(Text(), nullable=True)
+
+class CrossDirection(Base):
+    __tablename__ = "cross_direction"
+    id = Column(Integer(), primary_key=True, index=True)
+    cross_direction_hebrew = Column(Text(), nullable=True)
+
+class DrivingDirections(Base):
+    __tablename__ = "driving_directions"
+    id = Column(Integer(), primary_key=True, index=True)
+    driving_directions_hebrew = Column(Text(), nullable=True)
+
+class VehicleStatus(Base):
+    __tablename__ = "vehicle_status"
+    id = Column(Integer(), primary_key=True, index=True)
+    vehicle_status_hebrew = Column(Text(), nullable=True)
+
+class InvolvedType(Base):
+    __tablename__ = "involved_type"
+    id = Column(Integer(), primary_key=True, index=True)
+    involved_type_hebrew = Column(Text(), nullable=True)
+
+class SafetyMeasures(Base):
+    __tablename__ = "safety_measures"
+    id = Column(Integer(), primary_key=True, index=True)
+    safety_measures_hebrew = Column(Text(), nullable=True)
+
+class InjurySeverity(Base):
+    __tablename__ = "injury_severity"
+    id = Column(Integer(), primary_key=True, index=True)
+    injury_severity_hebrew = Column(Text(), nullable=True)
+
+class DayType(Base):
+    __tablename__ = "day_type"
+    id = Column(Integer(), primary_key=True, index=True)
+    day_type_hebrew = Column(Text(), nullable=True)
+
+class DayNight(Base):
+    __tablename__ = "day_night"
+    id = Column(Integer(), primary_key=True, index=True)
+    day_night_hebrew = Column(Text(), nullable=True)
+
+class DayInWeek(Base):
+    __tablename__ = "day_in_week"
+    id = Column(Integer(), primary_key=True, index=True)
+    day_in_week_hebrew = Column(Text(), nullable=True)
+
+class TrafficLight(Base):
+    __tablename__ = "traffic_light"
+    id = Column(Integer(), primary_key=True, index=True)
+    traffic_light_hebrew = Column(Text(), nullable=True)
+
+class VehicleAttribution(Base):
+    __tablename__ = "vehicle_attribution"
+    id = Column(Integer(), primary_key=True, index=True)
+    vehicle_attribution_hebrew = Column(Text(), nullable=True)
+
+class VehicleType(Base):
+    __tablename__ = "vehicle_type"
+    id = Column(Integer(), primary_key=True, index=True)
+    vehicle_type_hebrew = Column(Text(), nullable=True)
+
+class InjuredType(Base):
+    __tablename__ = "injured_type"
+    id = Column(Integer(), primary_key=True, index=True)
+    injured_type_hebrew = Column(Text(), nullable=True)
+
+class InjuredPosition(Base):
+    __tablename__ = "injured_position"
+    id = Column(Integer(), primary_key=True, index=True)
+    injured_position_hebrew = Column(Text(), nullable=True)
+
+class AccidentMonth(Base):
+    __tablename__ = "accident_month"
+    id = Column(Integer(), primary_key=True, index=True)
+    accident_month_hebrew = Column(Text(), nullable=True)
+
+
+class PopulationType(Base):
+    __tablename__ = "population_type"
+    id = Column(Integer(), primary_key=True, index=True)
+    population_type_hebrew = Column(Text(), nullable=True)
+
+class Sex(Base):
+    __tablename__ = "sex"
+    id = Column(Integer(), primary_key=True, index=True)
+    sex_hebrew = Column(Text(), nullable=True)
+
+class GeoArea(Base):
+    __tablename__ = "geo_area"
+    id = Column(Integer(), primary_key=True, index=True)
+    geo_area_hebrew = Column(Text(), nullable=True)
+
+class Region(Base):
+    __tablename__ = "region"
+    id = Column(Integer(), primary_key=True, index=True)
+    region_hebrew = Column(Text(), nullable=True)
+
+class MunicipalStatus(Base):
+    __tablename__ = "municipal_status"
+    id = Column(Integer(), primary_key=True, index=True)
+    municipal_status_hebrew = Column(Text(), nullable=True)
+
+class District(Base):
+    __tablename__ = "district"
+    id = Column(Integer(), primary_key=True, index=True)
+    district_hebrew = Column(Text(), nullable=True)
+
+class NaturalArea(Base):
+    __tablename__ = "natural_area"
+    id = Column(Integer(), primary_key=True, index=True)
+    natural_area_hebrew = Column(Text(), nullable=True)
+
+class YishuvShape(Base):
+    __tablename__ = "yishuv_shape"
+    id = Column(Integer(), primary_key=True, index=True)
+    yishuv_shape_hebrew = Column(Text(), nullable=True)
+
+class AgeGroup(Base):
+    __tablename__ = "age_group"
+    id = Column(Integer(), primary_key=True, index=True)
+    age_group_hebrew = Column(Text(), nullable=True)
+
+class AccidentHourRaw(Base):
+    __tablename__ = "accident_hour_raw"
+    id = Column(Integer(), primary_key=True, index=True)
+    accident_hour_raw_hebrew = Column(Text(), nullable=True)
+
+class EngineVolume(Base):
+    __tablename__ = "engine_volume"
+    id = Column(Integer(), primary_key=True, index=True)
+    engine_volume_hebrew = Column(Text(), nullable=True)
+
+class TotalWeight(Base):
+    __tablename__ = "total_weight"
+    id = Column(Integer(), primary_key=True, index=True)
+    total_weight_hebrew = Column(Text(), nullable=True)
+
+class HospitalTime(Base):
+    __tablename__ = "hospital_time"
+    id = Column(Integer(), primary_key=True, index=True)
+    hospital_time_hebrew = Column(Text(), nullable=True)
+
+class MedicalType(Base):
+    __tablename__ = "medical_type"
+    id = Column(Integer(), primary_key=True, index=True)
+    medical_type_hebrew = Column(Text(), nullable=True)
+
+class ReleaseDest(Base):
+    __tablename__ = "release_dest"
+    id = Column(Integer(), primary_key=True, index=True)
+    release_dest_hebrew = Column(Text(), nullable=True)
+
+class SafetyMeasuresUse(Base):
+    __tablename__ = "safety_measures_use"
+    id = Column(Integer(), primary_key=True, index=True)
+    safety_measures_use_hebrew = Column(Text(), nullable=True)
+
+class LateDeceased(Base):
+    __tablename__ = "late_deceased"
+    id = Column(Integer(), primary_key=True, index=True)
+    late_deceased_hebrew = Column(Text(), nullable=True)
+
+class LocationAccuracy(Base):
+    __tablename__ = "location_accuracy"
+    id = Column(Integer(), primary_key=True, index=True)
+    location_accuracy_hebrew = Column(Text(), nullable=True)
+
+class ProviderCode(Base):
+    __tablename__ = "provider_code"
+    id = Column(Integer(), primary_key=True, index=True)
+    provider_code_hebrew = Column(Text(), nullable=True)

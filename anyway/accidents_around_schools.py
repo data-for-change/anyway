@@ -72,7 +72,7 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
         .filter(or_((AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_1_CODE), (AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_3_CODE))) \
         .filter(AccidentMarker.created >= start_date) \
         .filter(AccidentMarker.created < end_date) \
-        .filter(AccidentMarker.locationAccuracy == LOCATION_ACCURACY_PRECISE_INT) \
+        .filter(AccidentMarker.location_accuracy == LOCATION_ACCURACY_PRECISE_INT) \
         .filter(AccidentMarker.yishuv_symbol != YISHUV_SYMBOL_NOT_EXIST) \
         .filter(Involved.age_group.in_([1,2,3,4])) #ages 0-19
 

@@ -68,7 +68,7 @@ def calc_markers(markers):
     DEADLY_WEIGHT = 7
     HARD_WEIGHT = 5
     LIGHT_WEIGHT = 1
-    severities = [x.get("severity", 1) for x in markers]
+    severities = [x.get("accident_severity", 1) for x in markers]
     light_count = severities.count(3)
     hard_count = severities.count(2)
     deadly_count = severities.count(1)
@@ -109,7 +109,7 @@ def get_accidents_around(city, name, lat, lon, start_date, end_date, distance, p
     except Exception as e:
         print 'failed to parse:', markers_res.text
         raise e
-    markers = [x for x in markers if x['locationAccuracy'] not in (2, 9)]
+    markers = [x for x in markers if x['location_accuracy'] not in (2, 9)]
     markers_data = calc_markers(markers)
 
     accidents_details = dict()

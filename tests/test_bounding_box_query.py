@@ -35,21 +35,21 @@ def test_accurate_filter(base_kwargs):
     result = AccidentMarker.bounding_box_query(yield_per=50, **base_kwargs)
     accident_markers = result.accident_markers
     for marker in accident_markers:
-        assert marker.locationAccuracy == 1
+        assert marker.location_accuracy == 1
 
 def test_approx_filter(base_kwargs):
     base_kwargs['accurate'] = False
     result = AccidentMarker.bounding_box_query(yield_per=50, **base_kwargs)
     accident_markers = result.accident_markers
     for marker in accident_markers:
-        assert marker.locationAccuracy != 1
+        assert marker.location_accuracy != 1
 
 def test_fatal_severity_filter(base_kwargs):
     base_kwargs['show_fatal'] = False
     result = AccidentMarker.bounding_box_query(yield_per=50, **base_kwargs)
     accident_markers = result.accident_markers
     for marker in accident_markers:
-        assert marker.severity != 1
+        assert marker.accident_severity != 1
 
 
 def test_severe_severity_filter(base_kwargs):
@@ -57,7 +57,7 @@ def test_severe_severity_filter(base_kwargs):
     result = AccidentMarker.bounding_box_query(yield_per=50, **base_kwargs)
     accident_markers = result.accident_markers
     for marker in accident_markers:
-        assert marker.severity != 2
+        assert marker.accident_severity != 2
 
 
 def test_light_severity_filter(base_kwargs):
@@ -65,4 +65,4 @@ def test_light_severity_filter(base_kwargs):
     result = AccidentMarker.bounding_box_query(yield_per=50, **base_kwargs)
     accident_markers = result.accident_markers
     for marker in accident_markers:
-        assert marker.severity != 3
+        assert marker.accident_severity != 3

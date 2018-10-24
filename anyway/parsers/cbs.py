@@ -253,7 +253,8 @@ def get_address(accident, streets):
         return u""
 
     # the home field is invalid if it's empty or if it contains 9999
-    home = accident[field_names.home] if accident[field_names.home] != 9999 else None
+    home = int(accident[field_names.home]) if not pd.isnull(accident[field_names.home]) \
+                                              and int(accident[field_names.home]) != 9999  else None
     settlement = localization.get_city_name(accident[field_names.settlement_sign])
 
     if not home and not settlement:
@@ -563,12 +564,10 @@ def get_files(directory):
         if name == STREETS:
             streets_map = {}
             groups = df.groupby(field_names.settlement)
-
             for key, settlement in groups:
-
                 streets_map[key] = [{field_names.street_sign: x[field_names.street_sign],
-                                     field_names.street_name: x[field_names.street_name]} for x in settlement if
-                                    field_names.street_name in x and field_names.street_sign in x]
+                                     field_names.street_name: x[field_names.street_name]} for _,x in settlement.iterrows()]
+
             yield name, streets_map
         elif name == NON_URBAN_INTERSECTION:
             roads = {(x[field_names.road1], x[field_names.road2], x["KM"]): x[field_names.junction_name] for _,x in df.iterrows()}

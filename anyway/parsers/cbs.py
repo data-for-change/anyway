@@ -253,7 +253,8 @@ def get_address(accident, streets):
         return u""
 
     # the home field is invalid if it's empty or if it contains 9999
-    home = accident[field_names.home] if accident[field_names.home] != 9999 else None
+    home = int(accident[field_names.home]) if not pd.isnull(accident[field_names.home]) \
+                                              and int(accident[field_names.home]) != 9999  else None
     settlement = localization.get_city_name(accident[field_names.settlement_sign])
 
     if not home and not settlement:

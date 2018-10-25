@@ -170,3 +170,5 @@ var FILTER_INFO = 1;
 var FILTER_DATE = 2;
 
 var SELECTED_MARKER = '(נבחר)';
+
+var AGE_GROUPS_NUMBER = 18;

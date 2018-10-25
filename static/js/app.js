@@ -1102,14 +1102,6 @@ $(function() {
                 age_groups.push(18);
             }
 
-            if (age_groups.length == 18) {
-                return "";
-            }
-
-            if (age_groups.length == 0) {
-                return "0";
-            }
-
             return age_groups.join();
         },
         loadFilter: function(eventAction, eventLabel) {
@@ -1208,7 +1200,7 @@ $(function() {
         setAgeGroupFilter: function() {
             var age_groups_array = this.age_groups.toString().split(',').map(function(item) {
                 return parseInt(item);
-            });;
+            });
             if (age_groups_array.indexOf(1) !== -1) {
                 $("#checkbox-00-04").prop("checked", true);
             } else {

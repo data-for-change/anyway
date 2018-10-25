@@ -458,12 +458,10 @@ class AccidentMarker(MarkerMixin, Base):
             markers = markers.options(load_only("id", "longitude", "latitude"))
 
         if kwargs.get('age_groups'):
-            if kwargs.get('age_groups') == 'all':
-                age_groups_list = CONST.ALL_AGE_GROUPS_LIST
-            else:
-                age_groups_list = kwargs.get('age_groups').split(',')
+            age_groups_list = kwargs.get('age_groups').split(',')
             markers = markers.filter(AccidentMarker.involved.any(Involved.age_group.in_(age_groups_list)))
-
+        else:
+            markers = db.session.query(AccidentMarker).filter(sql.false())
         total_records = markers.count() + rsa_markers.count()
         if page and per_page:
             markers = markers.offset((page - 1 ) * per_page).limit(per_page)

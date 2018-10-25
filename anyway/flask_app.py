@@ -137,7 +137,7 @@ ARG_TYPES = {'ne_lat': (float, 32.072427482938345), 'ne_lng': (float, 34.7992896
              'show_holiday': (int, 0),  'show_time': (int, 24), 'start_time': (int, 25), 'end_time': (int, 25),
              'weather': (int, 0), 'road': (int, 0), 'separation': (int, 0), 'surface': (int, 0), 'acctype': (int, 0),
              'controlmeasure': (int, 0), 'district': (int, 0), 'case_type': (int, 0), 'fetch_markers': (bool, True),
-             'fetch_vehicles': (bool, True), 'fetch_involved': (bool, True), 'age_groups': (str, 'all'),
+             'fetch_vehicles': (bool, True), 'fetch_involved': (bool, True), 'age_groups': (str, str(CONST.ALL_AGE_GROUPS_LIST).strip('[]').replace(' ', '')),
              'page': (int, 0), 'per_page': (int, 0)}
 
 def get_kwargs():

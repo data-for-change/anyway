@@ -1461,7 +1461,7 @@
             app.years = [];
         {% endif %}
         {% if age_groups is defined and age_groups != "" %}
-            app.age_groups = "{{  age_groups }}";
+            app.age_groups = {{  age_groups }};
         {% else %}
             app.age_groups = Array.from({length: AGE_GROUPS_NUMBER}, (v, k) => k+1);
         {% endif %}

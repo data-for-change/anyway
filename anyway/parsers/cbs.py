@@ -486,7 +486,7 @@ def import_accidents(provider_code, accidents, streets, roads, **kwargs):
 def import_involved(provider_code, involved, **kwargs):
     involved_result = []
     for _,involve in involved.iterrows():
-        if not involve[field_names.id]:  # skip lines with no accident id
+        if not involve[field_names.id] or pd.isnull(involve[field_names.id]):  # skip lines with no accident id
             continue
         assert(int(provider_code) == int(involve[field_names.file_type]))
         involved_result.append({
@@ -757,10 +757,12 @@ def create_dictionary_tables(dictionary_file):
         curr_class = CLASSES_DICT[k]
         table_entries = db.session.query(curr_class)
         table_entries.delete()
+        logging.info('Deleted dictionary values from table ' + curr_table)
         for inner_k,inner_v in v.iteritems():
             sql_insert = 'INSERT INTO ' + curr_table + ' VALUES (' + str(inner_k) + ',' + "'" + inner_v.replace("'",'') + "'" + ')'
             db.session.execute(sql_insert)
             db.session.commit()
+        logging.info('Inserted dictionary values into table ' + curr_table)
     create_provider_code_table()
 
 def create_provider_code_table():

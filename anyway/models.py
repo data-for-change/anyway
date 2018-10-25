@@ -463,6 +463,7 @@ class AccidentMarker(MarkerMixin, Base):
         else:
             markers = db.session.query(AccidentMarker).filter(sql.false())
         total_records = markers.count() + rsa_markers.count()
+
         if page and per_page:
             markers = markers.offset((page - 1 ) * per_page).limit(per_page)
 

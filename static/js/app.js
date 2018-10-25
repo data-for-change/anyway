@@ -1200,6 +1200,7 @@ $(function() {
             this.fetchMarkers();
             this.updateFilterString();
         },
+
         setAgeGroupFilter: function() {
             var age_groups_array = this.age_groups.toString().split(',').map(function(item) {
                 return parseInt(item);
@@ -1264,6 +1265,7 @@ $(function() {
                 $("#checkbox-unknown-age").prop("checked", false);
             }
         },
+
         loadFilterFromParameters: function() {
             var bool_atrs = {};
             bool_atrs["checkbox-discussions"] = this.show_discussions;
@@ -1343,7 +1345,6 @@ $(function() {
                 $("#sdate").datepicker("setDate", new Date(this.dateRanges[0]));
                 $("#edate").datepicker("setDate", new Date(this.dateRanges[1]));
             }
-            this.setAgeGroupFilter();
         },
         changeDate: function() {
 

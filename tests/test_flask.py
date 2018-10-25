@@ -40,7 +40,7 @@ def test_markers_empty(app):
 def marker_counter():
     counter = Counter()
     yield counter
-    assert counter['markers'] == 3232
+    assert counter['markers'] == 1624
 
 
 def test_bad_date(app):

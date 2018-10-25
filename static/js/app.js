@@ -1101,6 +1101,9 @@ $(function() {
             if ($("#checkbox-85-plus").is(":checked")) {
                 age_groups.push(18);
             }
+            if ($("#checkbox-unknown-age").is(":checked")) {
+                age_groups.push(99);
+            }
 
             return age_groups.join();
         },
@@ -1254,6 +1257,11 @@ $(function() {
                 $("#checkbox-85-plus").prop("checked", true);
             } else {
                 $("#checkbox-85-plus").prop("checked", false);
+            }
+            if (age_groups_array.indexOf(99) !== -1) {
+                $("#checkbox-unknown-age").prop("checked", true);
+            } else {
+                $("#checkbox-unknown-age").prop("checked", false);
             }
         },
         loadFilterFromParameters: function() {

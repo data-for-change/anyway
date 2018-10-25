@@ -22,7 +22,7 @@ class Constants(object):
 
     AGE_GROUPS_NUMBER = 18
 
-    ALL_AGE_GROUPS_LIST = list(range(1, AGE_GROUPS_NUMBER + 1))
+    ALL_AGE_GROUPS_LIST = list(range(1, AGE_GROUPS_NUMBER + 1)) + [99]
 
     # other global constants (python only)
 

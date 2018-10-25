@@ -934,6 +934,9 @@
 
                 <input type="checkbox" name="agegroups" id="checkbox-85-plus" value=2 onclick="app.loadFilter('ages', '85+')" checked />
                 <label for="checkbox-85-plus" class="btn one" dir="ltr">85+</label>
+
+                <input type="checkbox" name="agegroups" id="checkbox-unknown-age" value=2 onclick="app.loadFilter('ages', 'לא ידוע')" checked />
+                <label for="checkbox-unknown-age" class="btn one" dir="ltr">לא ידוע</label>
             </div>
 
         </div>
@@ -1463,7 +1466,9 @@
         {% if age_groups is defined and age_groups != "" %}
             app.age_groups = {{  age_groups }};
         {% else %}
-            app.age_groups = Array.from({length: AGE_GROUPS_NUMBER}, (v, k) => k+1);
+            var age_groups_list = Array.from({length: AGE_GROUPS_NUMBER}, (v, k) => k+1);
+            age_groups_list.push(99)
+            app.age_groups = age_groups_list;
         {% endif %}
 
         app.render();

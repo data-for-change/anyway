@@ -1,4 +1,4 @@
-$(function () {
+$(function() {
     var GESTURE_HANDLING = (MAP_ONLY ? "cooperative" : "greedy");
 
     var AppRouter = Backbone.Router.extend({
@@ -17,7 +17,7 @@ $(function () {
         //    app.map.setZoom(parseInt(zoom));
         //    app.map.setCenter(new google.maps.LatLng(lat, lon));
         //},
-        navigateEmpty: function () {
+        navigateEmpty: function() {
             app.model.set("currentMarker", null);
         }
     });
@@ -31,11 +31,11 @@ $(function () {
             pageSize: ENTRIES_PER_PAGE
         },
 
-        parseRecords: function (response) {
+        parseRecords: function(response) {
             return response.markers;
         },
 
-        parseState: function (response) {
+        parseState: function(response) {
             return response.pagination;
         }
     });
@@ -43,16 +43,15 @@ $(function () {
     window.ClusterCollection = Backbone.Collection.extend({
         url: "/clusters",
 
-        parse: function (response, options) {
+        parse: function(response, options) {
             return response.clusters;
         }
     });
 
     window.AppView = Backbone.View.extend({
-        el : $("#app"),
-        events : {
-        },
-        initialize : function() {
+        el: $("#app"),
+        events: {},
+        initialize: function() {
             var url_params = new URLSearchParams(window.location.search);
 
             this.markers = new MarkerCollection();
@@ -93,7 +92,7 @@ $(function () {
 
             this.dateRanges = [new Date($('#sdateInit').val()), new Date($('#edateInit').val())];
 
-            setTimeout(function(){
+            setTimeout(function() {
                 this.firstLoadDelay = false;
             }.bind(this), 2200);
 
@@ -115,15 +114,15 @@ $(function () {
             this.model
                 .bind("change:user", this.updateUser, this)
                 .bind("change:showFatal",
-                _.bind(this.reloadMarkersIfNeeded, this, "showFatal"))
+                    _.bind(this.reloadMarkersIfNeeded, this, "showFatal"))
                 .bind("change:showSevere",
-                _.bind(this.reloadMarkersIfNeeded, this, "showSevere"))
+                    _.bind(this.reloadMarkersIfNeeded, this, "showSevere"))
                 .bind("change:showLight",
-                _.bind(this.reloadMarkersIfNeeded, this, "showLight"))
+                    _.bind(this.reloadMarkersIfNeeded, this, "showLight"))
                 .bind("change:showRSA",
-                _.bind(this.reloadMarkersIfNeeded, this, "showRSA"))
+                    _.bind(this.reloadMarkersIfNeeded, this, "showRSA"))
                 .bind("change:showInaccurateMarkers",
-                _.bind(this.reloadMarkersIfNeeded, this, "showInaccurateMarkers"))
+                    _.bind(this.reloadMarkersIfNeeded, this, "showInaccurateMarkers"))
                 .bind("change:dateRange", this.reloadMarkers, this);
         },
         reloadMarkersIfNeeded: function(attr) {
@@ -134,12 +133,12 @@ $(function () {
                 this.loadMarkers();
             }
         },
-        updateUrl: function (url) {
+        updateUrl: function(url) {
             if (typeof url == 'undefined') {
                 if (app.infoWindow || app.discussionShown) return;
                 //url = "/?" + this.getCurrentUrlParams();
                 url = "";
-            }else{
+            } else {
                 var questionMarkPlace = url.indexOf('?');
                 if (questionMarkPlace != -1) {
                     url = url.substring(0, questionMarkPlace);
@@ -153,25 +152,25 @@ $(function () {
                     url = url.substring(0, googleCallbackPattern);
                 }
             }
-           Backbone.history.navigate(Backbone.history.fragment, false);
-           // Backbone.history.navigate(url, true);
-           window.history.pushState('','','/');
+            Backbone.history.navigate(Backbone.history.fragment, false);
+            // Backbone.history.navigate(url, true);
+            window.history.pushState('', '', '/');
         },
-        clusterMode: function () {
+        clusterMode: function() {
             return this.map.zoom < MINIMAL_ZOOM;
         },
-        zoomChanged: function () {
+        zoomChanged: function() {
             this.resetOnMouseUp = true;
             this.fetchMarkers();
         },
-        reloadMarkers: function () {
-            if (!this.firstLoadDelay){
+        reloadMarkers: function() {
+            if (!this.firstLoadDelay) {
                 this.oms.unspiderfy();
                 this.clearMarkersFromMap();
                 this.fetchMarkers();
             }
         },
-        fetchMarkers: function () {
+        fetchMarkers: function() {
             if (!this.isReady) return;
 
             var params = this.buildMarkersParams();
@@ -185,7 +184,11 @@ $(function () {
 
             if (this.clusterMode()) {
                 this.closeInfoWindow();
-                this.reloadSidebar(this);
+                this.clusters.fetch({
+                    data: $.param(params),
+                    reset: reset,
+                    success: this.reloadSidebar.bind(this)
+                });
             } else {
                 this.clearClustersFromMap();
                 $("#view-filter").prop('disabled', false);
@@ -224,40 +227,40 @@ $(function () {
                 });
             }
         },
-        reloadSidebar: function () {
+        reloadSidebar: function() {
             // HeatMap action is here because we're waiting for the markers/clusters to fetch from the server (AJAX request) and reloadSidebar() is being called on success.
             if (this.clusterMode()) {
                 this.sidebar.emptyMarkerList();
-                if (this.heatMapMode){
+                if (this.heatMapMode) {
                     this.heatmap.setMap(null);
                     // Drawing HeatMap for clusters
                     this.buildHeatMap("clusters");
                 }
             } else { // close enough
-                if (this.heatMapMode){
+                if (this.heatMapMode) {
                     this.heatmap.setMap(null);
                     // Drawing HeatMap for markers
                     this.buildHeatMap("markers");
-                }else{
+                } else {
                     this.setMultipleMarkersIcon();
                 }
                 this.sidebar.reloadMarkerList(this.markerList);
 
             }
-            if (jsPanelInst!=null){
+            if (jsPanelInst != null) {
                 startJSPanelWithChart(jsPanelInst, $("#statPanel").width(), $("#statPanel").height(),
-					$("#statPanel").width() - 30, $("#statPanel").height() - 80);
+                    $("#statPanel").width() - 30, $("#statPanel").height() - 80);
             }
             this.updateFilterString();
             this.chooseMarker();
-            if(this.iconTypeChanged == true){
+            if (this.iconTypeChanged == true) {
                 this.$el.find(".current-view").toggleClass("sidebar-pin");
                 this.$el.find(".current-view").toggleClass("sidebar-dot");
                 this.iconTypeChanged = false;
             }
 
         },
-        buildMarkersParams: function (isForUrl) {
+        buildMarkersParams: function(isForUrl) {
             var bounds = this.map.getBounds();
             if (!bounds) return null;
             var zoom = this.map.zoom;
@@ -274,7 +277,7 @@ $(function () {
                 // Pass start and end dates as unix time (in seconds)
                 params["start_date"] = this.dateRanges[0].getTime() / 1000;
                 params["end_date"] = this.dateRanges[1].getTime() / 1000;
-            }else{
+            } else {
                 var center = app.map.getCenter();
                 params["zoom"] = zoom;
                 params["start_date"] = moment(this.dateRanges[0]).format("YYYY-MM-DD");
@@ -310,51 +313,55 @@ $(function () {
             params["age_groups"] = this.age_groups;
             return params;
         },
-        setMultipleMarkersIcon: function () {
+        setMultipleMarkersIcon: function() {
             var groupID = 1;
             var groupsData = [];
 
-            _.each(this.oms.markersNearAnyOtherMarker(), function (marker) {
+            _.each(this.oms.markersNearAnyOtherMarker(), function(marker) {
                 marker.view.model.unset("groupID");
             });
 
             //make single icons for those who are no longer in a group
-            _.each(this.markerList, function(markerView){
+            _.each(this.markerList, function(markerView) {
                 var marker = markerView.marker;
-                if(this.map.getBounds().contains(marker.getPosition())){
-                    if(!this.oms.markersNearMarker(marker,true).length){
+                if (this.map.getBounds().contains(marker.getPosition())) {
+                    if (!this.oms.markersNearMarker(marker, true).length) {
                         marker.setTitle(markerView.getTitle("single"));
                     }
                 }
-            },this);
+            }, this);
 
             //goes over all overlapping markers
-            _.each(this.oms.markersNearAnyOtherMarker(), function (marker) {
+            _.each(this.oms.markersNearAnyOtherMarker(), function(marker) {
                 var firstMember = marker.view.model;
                 var firstMemberGroupId = firstMember.get("groupID");
-                var firstMemberIndex = firstMemberGroupId -1;
+                var firstMemberIndex = firstMemberGroupId - 1;
                 if (!firstMemberGroupId) {
                     firstMemberGroupId = groupID;
-                    firstMemberIndex = firstMemberGroupId -1;
+                    firstMemberIndex = firstMemberGroupId - 1;
                     firstMember.set("groupID", firstMemberGroupId);
-                    var groupSeverity = firstMember.get('severity');
-                    var firstMemberOpacity = firstMember.get("locationAccuracy") == 1 ? 'opaque' : 1;
-                    groupsData.push({severity: groupSeverity, opacity: firstMemberOpacity, quantity: 1});
+                    var groupSeverity = firstMember.get('accident_severity');
+                    var firstMemberOpacity = firstMember.get("location_accuracy") == 1 ? 'opaque' : 1;
+                    groupsData.push({
+                        accident_severity: groupSeverity,
+                        opacity: firstMemberOpacity,
+                        quantity: 1
+                    });
 
-                    //goes over all markers which overlapping 'firstMember', and get the 'max' severity
-                    _.each(this.oms.markersNearMarker(marker), function (markerNear) {
+                    //goes over all markers which overlapping 'firstMember', and get the 'max' accident_severity
+                    _.each(this.oms.markersNearMarker(marker), function(markerNear) {
                         var markerNearModel = markerNear.view.model;
                         markerNearModel.set("groupID", firstMemberGroupId);
-                        var currentMarkerNearSeverity = markerNearModel.get('severity');
-                        // severity is an enum, when it's lower then it's more severe
+                        var currentMarkerNearSeverity = markerNearModel.get('accident_severity');
+                        // accident_severity is an enum, when it's lower then it's more severe
                         if (currentMarkerNearSeverity < groupSeverity) {
                             if (currentMarkerNearSeverity != SEVERITY_IRRELEVANT_RSA) {
-                                groupsData[firstMemberIndex].severity = currentMarkerNearSeverity;
+                                groupsData[firstMemberIndex].accident_severity = currentMarkerNearSeverity;
                                 groupSeverity = currentMarkerNearSeverity;
                             }
                         }
                         if (groupsData[firstMemberIndex].opacity != 'opaque') {
-                            if (markerNearModel.get("locationAccuracy") == 1) {
+                            if (markerNearModel.get("location_accuracy") == 1) {
                                 groupsData[firstMemberIndex].opacity = 'opaque';
                             } else {
                                 groupsData[firstMemberIndex].opacity++;
@@ -364,26 +371,26 @@ $(function () {
                     });
                     groupID++;
                 }
-                if(marker.view.model.get("currentlySpiderfied")){
+                if (marker.view.model.get("currentlySpiderfied")) {
                     marker.setTitle(marker.view.getTitle("single"));
-                }else{
+                } else {
                     groupMarkersCount = groupsData[firstMemberIndex].quantity;
-                    groupSeverityString = SEVERITY_MAP[groupsData[firstMemberIndex].severity];
-                    marker.setTitle( groupMarkersCount + " " + marker.view.getTitle("multiple") + " חומרה מירבית: " + groupSeverityString);
+                    groupSeverityString = SEVERITY_MAP[groupsData[firstMemberIndex].accident_severity];
+                    marker.setTitle(groupMarkersCount + " " + marker.view.getTitle("multiple") + " חומרה מירבית: " + groupSeverityString);
                 }
-            },this);
+            }, this);
             this.groupsData = groupsData;
 
-                          // agam
-            if(tourLocation == 5) {
-                var myLatlng = new google.maps.LatLng(32.09170,34.86435);
+            // agam
+            if (tourLocation == 5) {
+                var myLatlng = new google.maps.LatLng(32.09170, 34.86435);
                 var location1 = new google.maps.Marker({
                     position: myLatlng,
                     map: this.map,
                     icon: app.retinaIconsResize(MULTIPLE_ICONS[SEVERITY_VARIOUS])
                 });
-                tourLocation = 6 ;
-                console.log("inside the group id "+tourLocation+"new2");
+                tourLocation = 6;
+                console.log("inside the group id " + tourLocation + "new2");
                 contentString = '<p>בנקודה זו התרחשו מספר תאונות, לחיצה על האייקון תציג אותן בנפרד ותאפשר בחירה</br> בתאונה בודדת.</p>';
                 titleString = 'אייקון של מספר תאונות באותו מקום';
                 defInfoWindows();
@@ -395,7 +402,7 @@ $(function () {
                 tourStyle(infowindow);
             }
         },
-        downloadCsv: function () {
+        downloadCsv: function() {
             if (this.markers.length > 0) {
                 params = this.buildMarkersParams();
                 params["format"] = "csv";
@@ -405,20 +412,20 @@ $(function () {
                 $('#empty-csv-dialog').modal('show');
             }
         },
-        linkMap: function () {
+        linkMap: function() {
             $('#embed').modal('show');
         },
         openReportsModal: function() {
             $('#reports-modal').modal('show');
         },
-        fullScreen: function () {
+        fullScreen: function() {
             var body = document.body;
 
             if (
                 document.fullscreenElement ||
                 document.webkitFullscreenElement ||
                 document.mozFullScreenElement ||
-                document.msFullscreenElement){
+                document.msFullscreenElement) {
                 if (document.exitFullscreen) {
                     document.exitFullscreen();
                 } else if (document.webkitExitFullscreen) {
@@ -428,7 +435,7 @@ $(function () {
                 } else if (document.msExitFullscreen) {
                     document.msExitFullscreen();
                 }
-            }else{
+            } else {
                 if (body.requestFullscreen) {
                     body.requestFullscreen();
                 } else if (body.webkitRequestFullscreen) {
@@ -440,7 +447,7 @@ $(function () {
                 }
             }
         },
-        render: function () {
+        render: function() {
             this.isReady = false;
 
             this.defaultLocation = new google.maps.LatLng(INIT_LAT, INIT_LON);
@@ -466,31 +473,31 @@ $(function () {
             var resetMapDiv = document.createElement('div');
             resetMapDiv.className = "map-button reset-map-control";
             resetMapDiv.innerHTML = $("#reset-map-control").html();
-            google.maps.event.addDomListener(resetMapDiv, 'click', function () {
+            google.maps.event.addDomListener(resetMapDiv, 'click', function() {
                 this.goToMyLocation();
             }.bind(this));
 
             var downloadCsvDiv = document.createElement('div');
             downloadCsvDiv.className = "map-button download-csv-control";
             downloadCsvDiv.innerHTML = $("#download-csv-control").html();
-            google.maps.event.addDomListener(downloadCsvDiv, 'click', function () {
+            google.maps.event.addDomListener(downloadCsvDiv, 'click', function() {
                 this.downloadCsv();
             }.bind(this));
 
             var linkMapDiv = document.createElement('div');
             linkMapDiv.className = 'map-button link-map-control';
             linkMapDiv.innerHTML = $("#link-map-control").html();
-            google.maps.event.addDomListener(linkMapDiv, 'click', function () {
+            google.maps.event.addDomListener(linkMapDiv, 'click', function() {
                 var url = document.URL + "?" + this.getCurrentUrlParams();
                 $map_link = $("#map_link"),
-                $iframe_link = $("#iframe_link"),
-                $embed_link = $("#js-embed-link");
+                    $iframe_link = $("#iframe_link"),
+                    $embed_link = $("#js-embed-link");
                 //if (url.indexOf('?') != -1) {
                 //    url = url.substring(0, url.indexOf('?'));
                 //}
                 $map_link.val(url);
                 $iframe_link.html('<iframe src="' + url + '&map_only=true"></iframe>');
-                $(".js-btn-copytoclipboard").on("click", function(){
+                $(".js-btn-copytoclipboard").on("click", function() {
                     $("#" + $(this).data("copy")).select();
                 });
                 this.linkMap();
@@ -499,28 +506,28 @@ $(function () {
             var tourDiv = document.createElement('div');
             tourDiv.className = "map-button tour-control blink";
             tourDiv.innerHTML = $("#tour-control").html();
-            google.maps.event.addDomListener(tourDiv, 'click', function () {
+            google.maps.event.addDomListener(tourDiv, 'click', function() {
                 tourClick();
             }.bind(this));
 
             var statDiv = document.createElement('div');
             statDiv.className = "map-button statistics-control";
             statDiv.innerHTML = $("#statistics-control").html();
-            google.maps.event.addDomListener(statDiv, 'click', function () {
-                statPanelClick(700,400,700,350);
+            google.maps.event.addDomListener(statDiv, 'click', function() {
+                statPanelClick(700, 400, 700, 350);
             }.bind(this));
 
             var fullScreenDiv = document.createElement('div');
             fullScreenDiv.className = "map-button full-screen-control";
             fullScreenDiv.innerHTML = $("#full-screen-control").html();
-            google.maps.event.addDomListener(fullScreenDiv, 'click', function () {
+            google.maps.event.addDomListener(fullScreenDiv, 'click', function() {
                 this.fullScreen();
             }.bind(this));
 
             var heatMapDiv = document.createElement('div');
             heatMapDiv.className = "map-button heat-map-control";
             heatMapDiv.innerHTML = $("#heat-map-control").html();
-            google.maps.event.addDomListener(heatMapDiv, 'click', function () {
+            google.maps.event.addDomListener(heatMapDiv, 'click', function() {
                 this.heatMapMode = !this.heatMapMode;
                 this.toggleHeatmap();
             }.bind(this));
@@ -528,7 +535,7 @@ $(function () {
             var reportsDiv = document.createElement('div');
             reportsDiv.className = "map-button reports-control";
             reportsDiv.innerHTML = $("#reports-control").html();
-            google.maps.event.addDomListener(reportsDiv, 'click', function () {
+            google.maps.event.addDomListener(reportsDiv, 'click', function() {
                 this.openReportsModal();
             }.bind(this));
 
@@ -587,9 +594,9 @@ $(function () {
             } else {
                 this.goToMyLocation();
             }
-            setTimeout(function(){
+            setTimeout(function() {
                 this.fetchMarkers();
-            }.bind(this),2000);
+            }.bind(this), 2000);
             // search box:
             // Create the search box and link it to the UI element.
             var input = document.getElementById('pac-input');
@@ -607,8 +614,8 @@ $(function () {
             if (MAP_ONLY)
                 toggleDiv.style = "display:none";
             toggleDiv.title = 'שנה תצוגת אייקונים';
-            google.maps.event.addDomListener(toggleBGDiv, 'click', function () {
-                if(! ( this.heatMapMode || this.clusterMode() ) ) {
+            google.maps.event.addDomListener(toggleBGDiv, 'click', function() {
+                if (!(this.heatMapMode || this.clusterMode())) {
                     $(toggleDiv).toggleClass('pin');
                     $(toggleDiv).toggleClass('dot');
                     this.iconTypeChanged = true;
@@ -625,7 +632,7 @@ $(function () {
 
             this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(toggleBGDiv);
 
-            google.maps.event.addListener(this.searchBox, 'places_changed', function () {
+            google.maps.event.addListener(this.searchBox, 'places_changed', function() {
                 this.handleSearchBox();
             }.bind(this));
 
@@ -634,48 +641,49 @@ $(function () {
                 markersWontHide: true,
                 keepSpiderfied: true
             });
-            this.oms.addListener("click", function (marker, event) {
+            this.oms.addListener("click", function(marker, event) {
                 marker.view.clickMarker();
                 this.clickedMarker = true;
             }.bind(this));
-            this.oms.addListener("spiderfy", function (markers) {
+            this.oms.addListener("spiderfy", function(markers) {
                 this.closeInfoWindow();
-                _.each(markers, function (marker) {
+                _.each(markers, function(marker) {
                     marker.setTitle(marker.view.getTitle('single'));
                     marker.view.model.set("currentlySpiderfied", true);
                 });
                 this.clickedMarker = true;
             }.bind(this));
-            this.oms.addListener("unspiderfy", function(markers){
-                _.each(markers, function(marker){
+            this.oms.addListener("unspiderfy", function(markers) {
+                _.each(markers, function(marker) {
                     marker.view.model.unset("currentlySpiderfied");
                 });
             }.bind(this));
             this.oms.addListener("unspiderfy", this.setMultipleMarkersIcon.bind(this));
             console.log('Loaded OverlappingMarkerSpiderfier');
-            var clusterStyle = [
-                {
-                    size: 42,
-                    width: 5
-                },
-                {
-                    size: 52,
-                    width: 10
-                },
-                {
-                    size: 62,
-                    width: 15
-                },
-                {
-                    size: 72,
-                    width: 20
-                }
-            ];
-            var mcOptions = {maxZoom: MINIMAL_ZOOM - 1, minimumClusterSize: 1, styles: clusterStyle};
+            var clusterStyle = [{
+                size: 42,
+                width: 5
+            }, {
+                size: 52,
+                width: 10
+            }, {
+                size: 62,
+                width: 15
+            }, {
+                size: 72,
+                width: 20
+            }];
+            var mcOptions = {
+                maxZoom: MINIMAL_ZOOM - 1,
+                minimumClusterSize: 1,
+                styles: clusterStyle
+            };
             this.clusterer = new MarkerClusterer(this.map, [], mcOptions);
             console.log('Loaded MarkerClusterer');
 
-            this.sidebar = new SidebarView({map: this.map}).render();
+            this.sidebar = new SidebarView({
+                map: this.map
+            }).render();
             this.$el.find(".sidebar-container").append(this.sidebar.$el);
             console.log('Loaded SidebarView');
 
@@ -684,10 +692,12 @@ $(function () {
             this.previousZoom = this.map.zoom;
 
             this.router = new AppRouter();
-            Backbone.history.start({pushState: true});
+            Backbone.history.start({
+                pushState: true
+            });
             console.log('Loaded AppRouter');
 
-            $('#toggle-sidebar').click(function () {
+            $('#toggle-sidebar').click(function() {
                 $('.main').toggleClass('main-open').toggleClass('main-close');
                 $('.sidebar-container').toggleClass('sidebar-container-open').toggleClass('sidebar-container-close');
 
@@ -697,25 +707,25 @@ $(function () {
             }.bind(this));
             this.isReady = true;
 
-            google.maps.event.addListener(this.map, "rightclick", _.bind(this.contextMenuMap, this) );
+            google.maps.event.addListener(this.map, "rightclick", _.bind(this.contextMenuMap, this));
 
-            google.maps.event.addListener(this.map, "idle", function(){
-                if (!this.firstLoadDelay){
+            google.maps.event.addListener(this.map, "idle", function() {
+                if (!this.firstLoadDelay) {
                     this.fetchMarkers();
                 }
-            }.bind(this) );
-            google.maps.event.addListener(this.map, "zoom_changed", function(){
+            }.bind(this));
+            google.maps.event.addListener(this.map, "zoom_changed", function() {
                 this.indicatingAvailabilityOfIconsDotsSwitch();
             }.bind(this));
-            google.maps.event.addListener(this.map, "click", _.bind(this.clickMap, this) );
+            google.maps.event.addListener(this.map, "click", _.bind(this.clickMap, this));
             this.sidebar.setResponsively();
             return this;
         },
-        goToMyLocation: function () {
+        goToMyLocation: function() {
             if (typeof this.myLocation !== 'undefined') {
                 this.setCenterWithMarker(this.myLocation);
             } else if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function (position) {
+                navigator.geolocation.getCurrentPosition(function(position) {
                     var latitude = position.coords.latitude;
                     var longitude = position.coords.longitude;
                     this.myLocation = new google.maps.LatLng(latitude, longitude);
@@ -728,33 +738,33 @@ $(function () {
             }
             this.map.setZoom(INIT_ZOOM);
         },
-        closeInfoWindow: function () {
+        closeInfoWindow: function() {
             if (app.infoWindow) {
                 this.selectedMarker = null;
                 app.infoWindow.close();
                 app.infoWindow = null;
                 this.updateUrl();
-                $(document).off('keydown',app.ESCinfoWindow);
+                $(document).off('keydown', app.ESCinfoWindow);
             }
             app.map.gestureHandling = GESTURE_HANDLING;
         },
-        clickMap: function (e) {
+        clickMap: function(e) {
             this.closeInfoWindow();
         },
-        trackDrag: function () {
-            google.maps.event.addListener(this.map, "mousemove", function () {
+        trackDrag: function() {
+            google.maps.event.addListener(this.map, "mousemove", function() {
                 this.resetOnMouseUp = true;
             });
         },
-        initLayers: function (severity) {
+        initLayers: function(accident_severity) {
             var severities = [SEVERITY_IRRELEVANT_RSA, SEVERITY_FATAL, SEVERITY_SEVERE, SEVERITY_LIGHT];
             var self = this;
-            severities.forEach(function (severity) {
-                var attr = SEVERITY_ATTRIBUTES[severity];
+            severities.forEach(function(accident_severity) {
+                var attr = SEVERITY_ATTRIBUTES[accident_severity];
                 var layer = self.model.get(attr);
                 if (!layer) {
-                    self.model.set(attr, LAYERS[severity]);
-                    layer = LAYERS[severity];
+                    self.model.set(attr, LAYERS[accident_severity]);
+                    layer = LAYERS[accident_severity];
                 }
             });
         },
@@ -770,12 +780,12 @@ $(function () {
             for (var i = 0; i < this.markerList.length; i++) {
                 if (this.markerList[i].model.get("type") == model.get("type") &&
                     this.markerList[i].model.attributes.id == model.attributes.id) {
-                        return i;
+                    return i;
                 }
             }
             return -1;
         },
-        removeMarker: function (model) {
+        removeMarker: function(model) {
             var markerIndex = this.getMarkerIndex(model);
             if (markerIndex >= 0) {
                 var marker = this.markerList[markerIndex];
@@ -784,59 +794,66 @@ $(function () {
                 model.set("markerView", this.markerList.length);
             }
         },
-        loadMarker: function (model) {
+        loadMarker: function(model) {
             var markerIndex = this.getMarkerIndex(model);
             if (markerIndex >= 0) {
                 return; // avoid adding duplicates
             }
 
             // markers are loaded immediately as they are fetched
-            if (!this.fitsFilters(model)){
+            if (!this.fitsFilters(model)) {
                 console.log(model + " doesn't fit");
             }
             if (this.clusterMode() || this.fitsFilters(model) ||
                 !this.clusterMode() && model.get("type") == MARKER_TYPE_DISCUSSION) {
-                var markerView = new MarkerView({model: model, map: this.map, markerIconType: this.markerIconType}).render();
+                var markerView = new MarkerView({
+                    model: model,
+                    map: this.map,
+                    markerIconType: this.markerIconType
+                }).render();
                 model.set("markerView", this.markerList.length);
                 this.markerList.push(markerView);
             }
         },
-        loadCluster: function (model) {
-            var clusterExists = _.any(this.clusterList, function (cluster) {
-                return cluster.model.attributes.longitude === model.attributes.longitude
-                    && cluster.model.attributes.latitude === model.attributes.latitude;
+        loadCluster: function(model) {
+            var clusterExists = _.any(this.clusterList, function(cluster) {
+                return cluster.model.attributes.longitude === model.attributes.longitude &&
+                    cluster.model.attributes.latitude === model.attributes.latitude;
             });
             if (!clusterExists) {
-                var clusterView = new ClusterView({model: model, map: this.map});
-                if (!this.heatMapMode){
+                var clusterView = new ClusterView({
+                    model: model,
+                    map: this.map
+                });
+                if (!this.heatMapMode) {
                     clusterView.render();
                 }
 
                 this.clusterList.push(clusterView);
             }
         },
-        loadClusters: function (model) {
+        loadClusters: function(model) {
             this.oms.unspiderfy();
             this.clearClustersFromMap();
             this.clusters.each(_.bind(this.loadCluster, this));
         },
 
-        fitsFilters: function (model) {
-            var layer = this.model.get(SEVERITY_ATTRIBUTES[model.get("severity")]);
+        fitsFilters: function(model) {
+            var layer = this.model.get(SEVERITY_ATTRIBUTES[model.get("accident_severity")]);
             if (!layer) {
                 return false;
             }
             return true;
         },
-        loadMarkers: function () {
+        loadMarkers: function() {
             this.oms.unspiderfy();
             this.clearMarkersFromMap();
             this.clearClustersFromMap();
             this.markers.each(_.bind(this.loadMarker, this));
         },
-        clearMarkersFromMap: function () {
+        clearMarkersFromMap: function() {
             if (this.markerList) {
-                _(this.markerList).each(_.bind(function (marker) {
+                _(this.markerList).each(_.bind(function(marker) {
                     marker.marker.setMap(null);
                 }, this));
             }
@@ -844,19 +861,19 @@ $(function () {
             this.clusterer.clearMarkersFromMap();
             this.clearClustersFromMap();
         },
-        clearClustersFromMap: function () {
+        clearClustersFromMap: function() {
             this.clusterer.removeClusters();
             this.clusterList = [];
         },
-        resetMarkers: function () {
+        resetMarkers: function() {
             this.clearMarkersFromMap();
             this.markers.reset();
         },
-        resetClusters: function () {
+        resetClusters: function() {
             this.clearClustersFromMap();
             this.clusters.reset();
         },
-        chooseMarker: function () {
+        chooseMarker: function() {
             if (!this.markerList.length) {
                 return;
             }
@@ -875,7 +892,7 @@ $(function () {
             markerView.choose();
             this.model.set("currentMarker", null);
         },
-        contextMenuMap : function(e) {
+        contextMenuMap: function(e) {
 
             this.clickLocation = e.latLng;
 
@@ -884,23 +901,20 @@ $(function () {
             }
 
             this.menu = new ContextMenuView({
-                items: [
-                    {
-                        icon : "plus-sign",
-                        text : ADD_DISCUSSION,
-                        callback : _.bind(this.showDiscussion, this)
-                    },
-                    {
-                        icon : "plus-sign",
-                        text : GET_LOCATION_UPDATES,
-                        callback : _.bind(this.LocationSubscriptionDialog, this)
-                    }
-                ],
+                items: [{
+                    icon: "plus-sign",
+                    text: ADD_DISCUSSION,
+                    callback: _.bind(this.showDiscussion, this)
+                }, {
+                    icon: "plus-sign",
+                    text: GET_LOCATION_UPDATES,
+                    callback: _.bind(this.LocationSubscriptionDialog, this)
+                }],
                 map: this.map,
                 e: e
-                });
+            });
         },
-        addDiscussionMarker : function() { // called once a comment is posted
+        addDiscussionMarker: function() { // called once a comment is posted
             var identifier = this.newDiscussionIdentifier;
             if (typeof identifier == 'undefined') return true; // marker already exists
             this.updateUrl(this.getDiscussionUrl(identifier));
@@ -910,16 +924,19 @@ $(function () {
                 longitude: this.clickLocation.lng(),
                 type: MARKER_TYPE_DISCUSSION
             });
-            var view = new MarkerView({model: model, map: this.map}).render();
+            var view = new MarkerView({
+                model: model,
+                map: this.map
+            }).render();
             $.post("discussion", JSON.stringify({
-                    "latitude"  : model.get("latitude"),
-                    "longitude" : model.get("longitude"),
-                    "identifier": identifier,
-                    "title"     : identifier
-                }));
+                "latitude": model.get("latitude"),
+                "longitude": model.get("longitude"),
+                "identifier": identifier,
+                "title": identifier
+            }));
             return true;
         },
-        showDiscussion : function(identifier) { // called when clicking add, or on marker
+        showDiscussion: function(identifier) { // called when clicking add, or on marker
             if (typeof identifier == 'undefined') { // new discussion from context menu
                 identifier = this.clickLocation.toString(); // (lat, lon)
                 this.newDiscussionIdentifier = identifier;
@@ -933,28 +950,28 @@ $(function () {
                 this.discussionShown = null;
             }.bind(this));
             var url = window.location.protocol + "//" + window.location.host +
-                      "/discussion?identifier=" + identifier;
+                "/discussion?identifier=" + identifier;
             DISQUS.reset({
                 reload: true,
-                config: function () {
+                config: function() {
                     this.page.identifier = identifier;
                     this.page.url = url;
                     this.page.title = identifier;
                 }
             });
         },
-        getDiscussionUrl: function (identifier) {
+        getDiscussionUrl: function(identifier) {
             return "/?discussion=" + identifier + "&" + app.getCurrentUrlParams();
         },
-        loginDialogLoad: function(){
+        loginDialogLoad: function() {
             if (this.createDialog) this.createDialog.close();
             this.createDialog = new LoginDialog().render();
         },
-        preferencesDialogLoad: function () {
+        preferencesDialogLoad: function() {
             if (this.createDialog) this.createDialog.close();
             this.createDialog = new PreferencesDialog().render();
         },
-        featuresSubscriptionDialog : function(type, event) {
+        featuresSubscriptionDialog: function(type, event) {
             if (this.createDialog) this.createDialog.close();
             this.createDialog = new FeatureDialog({
                 type: type,
@@ -970,22 +987,22 @@ $(function () {
                 markers: this.markers
             }).render();
         },
-        handleSearchBox: function () {
+        handleSearchBox: function() {
             var places = this.searchBox.getPlaces();
             if (places && places.length > 0) {
-              var place = places[0];
-              this.createHighlightPoint(place.geometry.location.lat(), place.geometry.location.lng(), HIGHLIGHT_TYPE_USER_SEARCH);
-              this.setCenterWithMarker(place.geometry.location);
-              this.map.setZoom(INIT_ZOOM);
+                var place = places[0];
+                this.createHighlightPoint(place.geometry.location.lat(), place.geometry.location.lng(), HIGHLIGHT_TYPE_USER_SEARCH);
+                this.setCenterWithMarker(place.geometry.location);
+                this.map.setZoom(INIT_ZOOM);
             }
         },
-        createHighlightPoint : function(lat, lng, highlightPointType) {
+        createHighlightPoint: function(lat, lng, highlightPointType) {
             if (isNaN(lat) || isNaN(lng) || isNaN(highlightPointType)) return;
             $.post("highlightpoints", JSON.stringify({
-                    "latitude": lat,
-                    "longitude": lng,
-                    "type": highlightPointType
-                }));
+                "latitude": lat,
+                "longitude": lng,
+                "type": highlightPointType
+            }));
         },
         setCenterWithMarker: function(loc) {
             this.closeInfoWindow();
@@ -996,19 +1013,18 @@ $(function () {
             }
 
             this.locationMarker = new google.maps.Marker({
-              position: loc,
-              map: this.map,
-              icon: {
+                position: loc,
+                map: this.map,
+                icon: {
                     path: google.maps.SymbolPath.CIRCLE,
                     scale: 0,
                     fillColor: 'black'
-              },
-              title: 'מיקום נוכחי'
+                },
+                title: 'מיקום נוכחי'
             });
 
-             // agam add- tour find location for step 2
-            if (tourLocation == 2)
-            {
+            // agam add- tour find location for step 2
+            if (tourLocation == 2) {
                 tourLocation = 3;
                 var location = this.locationMarker;
                 contentString = '<p>המיקום שחיפשתם יסומן באיקון הזה. </br> מסביבו תוכלו לראות אייקונים שמייצגים תאונות עם נפגעים.  </p>';
@@ -1022,22 +1038,22 @@ $(function () {
                 tourStyle(infowindow);
             }
         },
-        getCurrentUrlParams: function () {
+        getCurrentUrlParams: function() {
             var params = this.buildMarkersParams(true);
             var returnParams = [];
             $.each(params, function(attr, attr_value) {
                 returnParams.push(attr + "=" + attr_value);
             });
             return returnParams.join("&");
-		},
+        },
         ESCinfoWindow: function(event) {
             if (event.keyCode == 27) {
                 app.closeInfoWindow();
                 console.log('ESC pressed');
             }
         },
-        retinaIconsResize : function(image_url){
-            if (isRetina){
+        retinaIconsResize: function(image_url) {
+            if (isRetina) {
                 image_url = {
                     url: image_url,
                     scaledSize: new google.maps.Size(30, 50)
@@ -1045,7 +1061,7 @@ $(function () {
             }
             return image_url;
         },
-        toggleMarkerIconType: function(){
+        toggleMarkerIconType: function() {
             this.markerIconType = !this.markerIconType;
             this.resetMarkers();
             this.fetchMarkers();
@@ -1055,48 +1071,86 @@ $(function () {
 
             if ($("#checkbox-00-04").is(":checked")) {
                 age_groups.push(1);
-            } if ($("#checkbox-05-09").is(":checked")) {
+            }
+            if ($("#checkbox-05-09").is(":checked")) {
                 age_groups.push(2);
-            } if ($("#checkbox-10-14").is(":checked")) {
+            }
+            if ($("#checkbox-10-14").is(":checked")) {
                 age_groups.push(3);
-            } if ($("#checkbox-15-19").is(":checked")) {
+            }
+            if ($("#checkbox-15-19").is(":checked")) {
                 age_groups.push(4);
-            } if ($("#checkbox-20-24").is(":checked")) {
+            }
+            if ($("#checkbox-20-24").is(":checked")) {
                 age_groups.push(5);
-            } if ($("#checkbox-25-69").is(":checked")) {
-                for (var i = 6; i <=14; ++i) {
+            }
+            if ($("#checkbox-25-69").is(":checked")) {
+                for (var i = 6; i <= 14; ++i) {
                     age_groups.push(i);
                 }
-            } if ($("#checkbox-70-74").is(":checked")) {
+            }
+            if ($("#checkbox-70-74").is(":checked")) {
                 age_groups.push(15);
-            } if ($("#checkbox-75-79").is(":checked")) {
+            }
+            if ($("#checkbox-75-79").is(":checked")) {
                 age_groups.push(16);
-            } if ($("#checkbox-80-84").is(":checked")) {
+            }
+            if ($("#checkbox-80-84").is(":checked")) {
                 age_groups.push(17);
-            } if ($("#checkbox-85-plus").is(":checked")) {
+            }
+            if ($("#checkbox-85-plus").is(":checked")) {
                 age_groups.push(18);
             }
-
-            if (age_groups.length == 18) {
-                return "";
-            }
-
-            if (age_groups.length == 0) {
-                return "0";
+            if ($("#checkbox-unknown-age").is(":checked")) {
+                age_groups.push(99);
             }
 
             return age_groups.join();
         },
         loadFilter: function(eventAction, eventLabel) {
             ga('send', 'event', 'filters', eventAction, eventLabel);
-            if ($("#checkbox-discussions").is(":checked")) { this.show_discussions='1'; } else { this.show_discussions=''; }
-            if ($("#checkbox-accidents").is(":checked")) { this.show_markers='1'; this.show_accidents='1'; } else { this.show_accidents=''; }
-            if ($("#checkbox-rsa").is(":checked")) { this.show_markers='1'; this.show_rsa='1'; } else { this.show_rsa=''; }
-            if ($("#checkbox-accurate").is(":checked")) { this.accurate='1'; } else { this.accurate=''; }
-            if ($("#checkbox-approx").is(":checked")) { this.approx='1'; } else { this.approx=''; }
-            if ($("#checkbox-fatal").is(":checked")) { this.show_fatal='1'; } else { this.show_fatal=''; }
-            if ($("#checkbox-severe").is(":checked")) { this.show_severe='1'; } else { this.show_severe=''; }
-            if ($("#checkbox-light").is(":checked")) { this.show_light='1'; } else { this.show_light=''; }
+            if ($("#checkbox-discussions").is(":checked")) {
+                this.show_discussions = '1';
+            } else {
+                this.show_discussions = '';
+            }
+            if ($("#checkbox-accidents").is(":checked")) {
+                this.show_markers = '1';
+                this.show_accidents = '1';
+            } else {
+                this.show_accidents = '';
+            }
+            if ($("#checkbox-rsa").is(":checked")) {
+                this.show_markers = '1';
+                this.show_rsa = '1';
+            } else {
+                this.show_rsa = '';
+            }
+            if ($("#checkbox-accurate").is(":checked")) {
+                this.accurate = '1';
+            } else {
+                this.accurate = '';
+            }
+            if ($("#checkbox-approx").is(":checked")) {
+                this.approx = '1';
+            } else {
+                this.approx = '';
+            }
+            if ($("#checkbox-fatal").is(":checked")) {
+                this.show_fatal = '1';
+            } else {
+                this.show_fatal = '';
+            }
+            if ($("#checkbox-severe").is(":checked")) {
+                this.show_severe = '1';
+            } else {
+                this.show_severe = '';
+            }
+            if ($("#checkbox-light").is(":checked")) {
+                this.show_light = '1';
+            } else {
+                this.show_light = '';
+            }
 
             if ($("#checkbox-urban").is(":checked") && $("#checkbox-nonurban").is(":checked")) {
                 this.show_urban = 3;
@@ -1146,6 +1200,72 @@ $(function () {
             this.fetchMarkers();
             this.updateFilterString();
         },
+
+        setAgeGroupFilter: function() {
+            var age_groups_array = this.age_groups.toString().split(',').map(function(item) {
+                return parseInt(item);
+            });
+            if (age_groups_array.indexOf(1) !== -1) {
+                $("#checkbox-00-04").prop("checked", true);
+            } else {
+                $("#checkbox-00-04").prop("checked", false);
+            }
+            if (age_groups_array.indexOf(2) !== -1) {
+                $("#checkbox-05-09").prop("checked", true);
+            } else {
+                $("#checkbox-05-09").prop("checked", false);
+            }
+            if (age_groups_array.indexOf(3) !== -1) {
+                $("#checkbox-10-14").prop("checked", true);
+            } else {
+                $("#checkbox-10-14").prop("checked", false);
+            }
+            if (age_groups_array.indexOf(4) !== -1) {
+                $("#checkbox-15-19").prop("checked", true);
+            } else {
+                $("#checkbox-15-19").prop("checked", false);
+            }
+            if (age_groups_array.indexOf(5) !== -1) {
+                $("#checkbox-20-24").prop("checked", true);
+            } else {
+                $("#checkbox-20-24").prop("checked", false);
+            }
+            var ages25_69 = [6, 7, 8, 9, 10, 11, 12, 13, 14];
+            var ages25_69_exist = age_groups_array.filter(function(val) {
+                return ages25_69.indexOf(val) !== -1
+            }).length > 0;
+            if (ages25_69_exist) {
+                $("#checkbox-25-69").prop("checked", true);
+            } else {
+                $("#checkbox-25-69").prop("checked", false);
+            }
+            if (age_groups_array.indexOf(15) !== -1) {
+                $("#checkbox-70-74").prop("checked", true);
+            } else {
+                $("#checkbox-70-74").prop("checked", false);
+            }
+            if (age_groups_array.indexOf(16) !== -1) {
+                $("#checkbox-75-79").prop("checked", true);
+            } else {
+                $("#checkbox-75-79").prop("checked", false);
+            }
+            if (age_groups_array.indexOf(17) !== -1) {
+                $("#checkbox-80-84").prop("checked", true);
+            } else {
+                $("#checkbox-80-84").prop("checked", false);
+            }
+            if (age_groups_array.indexOf(18) !== -1) {
+                $("#checkbox-85-plus").prop("checked", true);
+            } else {
+                $("#checkbox-85-plus").prop("checked", false);
+            }
+            if (age_groups_array.indexOf(99) !== -1) {
+                $("#checkbox-unknown-age").prop("checked", true);
+            } else {
+                $("#checkbox-unknown-age").prop("checked", false);
+            }
+        },
+
         loadFilterFromParameters: function() {
             var bool_atrs = {};
             bool_atrs["checkbox-discussions"] = this.show_discussions;
@@ -1157,48 +1277,48 @@ $(function () {
             bool_atrs["checkbox-severe"] = this.show_severe;
             bool_atrs["checkbox-light"] = this.show_light;
 
-             $.each(bool_atrs, function(attr, attr_value) {
-                 $('#' + attr).prop("checked", attr_value == '1');
-             });
+            $.each(bool_atrs, function(attr, attr_value) {
+                $('#' + attr).prop("checked", attr_value == '1');
+            });
 
-            if (this.show_urban == 3){
+            if (this.show_urban == 3) {
                 $("#checkbox-urban").prop("checked", true);
                 $("#checkbox-nonurban").prop("checked", true);
-            }else if( this.show_urban == 2){
+            } else if (this.show_urban == 2) {
                 $("#checkbox-urban").prop("checked", true);
                 $("#checkbox-nonurban").prop("checked", false);
-            }else if( this.show_urban == 1){
+            } else if (this.show_urban == 1) {
                 $("#checkbox-nonurban").prop("checked", true);
                 $("#checkbox-urban").prop("checked", false);
-            }else{
+            } else {
                 $("#checkbox-nonurban").prop("checked", false);
                 $("#checkbox-urban").prop("checked", false);
             }
 
-            if (this.show_intersection == 3){
+            if (this.show_intersection == 3) {
                 $("#checkbox-intersection").prop("checked", true);
                 $("#checkbox-nonintersection").prop("checked", true);
-            }else if( this.show_intersection == 2){
+            } else if (this.show_intersection == 2) {
                 $("#checkbox-intersection").prop("checked", true);
                 $("#checkbox-nonintersection").prop("checked", false);
-            }else if( this.show_intersection == 1){
+            } else if (this.show_intersection == 1) {
                 $("#checkbox-nonintersection").prop("checked", true);
                 $("#checkbox-intersection").prop("checked", false);
-            }else{
+            } else {
                 $("#checkbox-nonintersection").prop("checked", false);
                 $("#checkbox-intersection").prop("checked", false);
             }
 
-            if (this.show_lane == 3){
+            if (this.show_lane == 3) {
                 $("#checkbox-multi-lane").prop("checked", true);
                 $("#checkbox-one-lane").prop("checked", true);
-            }else if( this.show_lane == 2){
+            } else if (this.show_lane == 2) {
                 $("#checkbox-multi-lane").prop("checked", true);
                 $("#checkbox-one-lane").prop("checked", false);
-            }else if( this.show_lane == 1){
+            } else if (this.show_lane == 1) {
                 $("#checkbox-one-lane").prop("checked", true);
                 $("#checkbox-multi-lane").prop("checked", false);
-            }else{
+            } else {
                 $("#checkbox-one-lane").prop("checked", false);
                 $("#checkbox-multi-lane").prop("checked", false);
             }
@@ -1214,8 +1334,8 @@ $(function () {
             radio_attrs["case_type"] = this.case_type;
 
             $.each(radio_attrs, function(attr, attr_value) {
-                $("input[type='radio'][name='" + attr +"']").each(function() {
-                    if($(this).val() == attr_value) {
+                $("input[type='radio'][name='" + attr + "']").each(function() {
+                    if ($(this).val() == attr_value) {
                         $(this).prop("checked", true);
                     }
                 });
@@ -1232,7 +1352,7 @@ $(function () {
             this.show_holiday = $("input[type='radio'][name='holiday']:checked").val();
             this.show_time = $("input[type='radio'][name='time']:checked").val();
             // TODO: only parses the hour int for now, need to apply the minutes too
-            if (!isNaN(parseInt($("#stime").val())) && !isNaN(parseInt($("#etime").val()))){
+            if (!isNaN(parseInt($("#stime").val())) && !isNaN(parseInt($("#etime").val()))) {
                 this.start_time = parseInt($("#stime").val());
                 this.end_time = parseInt($("#etime").val());
                 $("#checkbox-time-all").prop('checked', true);
@@ -1247,20 +1367,20 @@ $(function () {
             $(".heat-map-control").toggleClass('heat-map-control-red');
             // Indicating switch availability
             this.indicatingAvailabilityOfIconsDotsSwitch();
-            if (this.heatMapMode){
+            if (this.heatMapMode) {
                 this.oms.unspiderfy();
 
-                if (this.clusterMode()){
+                if (this.clusterMode()) {
                     // Clear clusters from map
                     this.clusterer.removeClusters();
                     // Drawing the HeatMap for clusters
                     this.buildHeatMap("clusters");
-                }else{
+                } else {
                     this.clearMarkersFromMap();
                     // Drawing the HeatMap for markers
                     this.buildHeatMap("markers");
                 }
-            }else{
+            } else {
                 this.heatmap.setMap(null);
                 this.reloadMarkers();
             }
@@ -1270,24 +1390,27 @@ $(function () {
             var clusterItemsCounter = 0;
             var heatMapMaxIntensity = 3;
 
-            if (markersOrClusters == "markers"){
-                _.each(this.markers.models, function(marker){
-                    latlngListForHeatMap.push(new google.maps.LatLng(marker.get('latitude'),marker.get('longitude')));
+            if (markersOrClusters == "markers") {
+                _.each(this.markers.models, function(marker) {
+                    latlngListForHeatMap.push(new google.maps.LatLng(marker.get('latitude'), marker.get('longitude')));
                 });
-            }else if (markersOrClusters == "clusters"){
-                _.each(this.clusterList, function(cluster){
-                    latlngListForHeatMap.push({ location: new google.maps.LatLng(cluster.model.get('latitude'),cluster.model.get('longitude')), weight: cluster.model.get('size') });
+            } else if (markersOrClusters == "clusters") {
+                _.each(this.clusterList, function(cluster) {
+                    latlngListForHeatMap.push({
+                        location: new google.maps.LatLng(cluster.model.get('latitude'), cluster.model.get('longitude')),
+                        weight: cluster.model.get('size')
+                    });
                     clusterItemsCounter += cluster.model.get('size');
                 });
-                if (clusterItemsCounter < 1000){
+                if (clusterItemsCounter < 1000) {
                     heatMapMaxIntensity = 10;
-                } else if (clusterItemsCounter > 1000 && clusterItemsCounter < 2000){
+                } else if (clusterItemsCounter > 1000 && clusterItemsCounter < 2000) {
                     heatMapMaxIntensity = 30;
-                } else if(clusterItemsCounter > 2000 && clusterItemsCounter < 4000){
+                } else if (clusterItemsCounter > 2000 && clusterItemsCounter < 4000) {
                     heatMapMaxIntensity = 90;
-                } else if(clusterItemsCounter > 4000 && clusterItemsCounter < 6000){
+                } else if (clusterItemsCounter > 4000 && clusterItemsCounter < 6000) {
                     heatMapMaxIntensity = 150;
-                } else if(clusterItemsCounter > 6000){
+                } else if (clusterItemsCounter > 6000) {
                     heatMapMaxIntensity = 250;
                 }
             }
@@ -1305,10 +1428,15 @@ $(function () {
         },
         updateFilterString: function() {
             if (!this.clusterMode()) {
-                var fatal = this.show_fatal, severe = this.show_severe, light = this.show_light, severityText = " בחומרה ";
-                var accurate = this.accurate, approx = this.approx, accuracyText = " בעיגון ";
+                var fatal = this.show_fatal,
+                    severe = this.show_severe,
+                    light = this.show_light,
+                    accident_severity = " בחומרה ";
+                var accurate = this.accurate,
+                    approx = this.approx,
+                    location_accuracy = " בעיגון ";
 
-                // Severity variables and strings
+                // accident_severity variables and strings
                 if (fatal == '1') {
                     fatal = "קטלנית ";
                 } else {
@@ -1323,7 +1451,7 @@ $(function () {
                 }
 
                 if (fatal == '' && severe == '' && light == '') {
-                    severityText = "";
+                    accident_severity = "";
                 }
 
                 if (light == '1' && (fatal != '' || severe != '')) {
@@ -1348,27 +1476,27 @@ $(function () {
                     approx = "";
                 }
                 if (accurate == '' && approx == '') {
-                    accuracyText = "";
+                    location_accuracy = "";
                 }
 
                 $("#filter-string").empty()
                     .append("<span>מציג </span>")
                     .append("<span><a onclick='showFilter(FILTER_MARKERS)'>" + this.total_accidents + "</a></span>")
                     .append("<span> תאונות</span><br>")
-                    .append("<span>" + severityText + "</span>")
+                    .append("<span>" + accident_severity + "</span>")
                     .append("<span><a onclick='showFilter(FILTER_INFO)' style='color: #d81c32;'>" + fatal + "</a></span>")
                     .append("<span><a onclick='showFilter(FILTER_INFO)' style='color: #ff9f1c;'>" + severe + "</a></span>")
                     .append("<span><a onclick='showFilter(FILTER_INFO)' style='color: #ffd82b;'>" + light + "</a></span><br>")
                     .append("<span> ו-</span>")
                     .append("<span><a onclick='showFilter(FILTER_MARKERS)'>" + this.total_rsa + "</a></span>")
                     .append("<span> אירועים</span>")
-                    .append("<span>" + accuracyText + "</span>")
+                    .append("<span>" + location_accuracy + "</span>")
                     .append("<span><a onclick='showFilter(FILTER_INFO)'>" + accurate + "</a></span>")
                     .append("<span><a onclick='showFilter(FILTER_INFO)'>" + approx + "</a></span><br>")
                     .append("<span> בין התאריכים </span><br>")
-                    .append("<span><a onclick='showFilter(FILTER_DATE)'>"+
-                                moment(this.dateRanges[0]).format('LL') + " עד " +
-                                moment(this.dateRanges[1]).format('LL') +"</a></span><br>")
+                    .append("<span><a onclick='showFilter(FILTER_DATE)'>" +
+                        moment(this.dateRanges[0]).format('LL') + " עד " +
+                        moment(this.dateRanges[1]).format('LL') + "</a></span><br>")
 
                 ;
             } else {
@@ -1377,7 +1505,7 @@ $(function () {
             }
         },
         indicatingAvailabilityOfIconsDotsSwitch: function() {
-            if (this.heatMapMode || this.clusterMode()){
+            if (this.heatMapMode || this.clusterMode()) {
                 // Indicating that the icons/dots switch is disabled
                 $(".map-button.toggle-control").addClass("toggle-control-disabled");
                 $(".map-button.toggle-control")[0].title = 'שינוי תצוגת אייקונים אינו זמין במצב זה';
@@ -1390,4 +1518,3 @@ $(function () {
         }
     });
 });
-

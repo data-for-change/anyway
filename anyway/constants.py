@@ -1,7 +1,7 @@
 class Constants(object):
 
     # constants that used in javascript and python
-    MINIMAL_ZOOM = 15
+    MINIMAL_ZOOM = 17
 
     MARKER_TYPE_ACCIDENT = 1
     MARKER_TYPE_DISCUSSION = 2
@@ -19,6 +19,10 @@ class Constants(object):
     VEHICLE_TYPE_BIKE = 15
 
     INVOLVED_TYPE_DRIVER_UNHARMED = 1
+
+    AGE_GROUPS_NUMBER = 18
+
+    ALL_AGE_GROUPS_LIST = list(range(1, AGE_GROUPS_NUMBER + 1)) + [99]
 
     # other global constants (python only)
 

@@ -8,7 +8,8 @@ Feel free to contribute to the project.
 
 To report bugs and feature requests, please [open an issue](https://github.com/hasadna/anyway/issues) on GitHub.
 
-See also [our Android app](https://github.com/samuelregev/anywayAndroidApp/) on GitHub.
+See also our [Android app](https://github.com/samuelregev/anywayAndroidApp/)
+and [iOS app](https://github.com/hasadna/Anyway-iOS/) on GitHub. 
 
 The datasets Anyway uses are documented here:
 * [CBS (Central Bureau of Statistics, למ"ס)](https://github.com/hasadna/anyway/blob/dev/docs/CBS.md)

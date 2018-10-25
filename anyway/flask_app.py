@@ -29,7 +29,6 @@ from flask_admin import helpers, expose, BaseView
 from werkzeug.security import check_password_hash
 from sendgrid import sendgrid, SendGridClientError, SendGridServerError, Mail
 import glob
-from .utilities import CsvReader, decode_hebrew
 from flask_sqlalchemy import SQLAlchemy
 from flask_security import Security, SQLAlchemyUserDatastore, roles_required, current_user, LoginForm, login_required
 from flask_compress import Compress
@@ -42,6 +41,7 @@ from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved,
 from .config import ENTRIES_PER_PAGE
 from six.moves import http_client
 from sqlalchemy import func
+import pandas as pd
 
 app = utilities.init_flask()
 db = SQLAlchemy(app)
@@ -99,7 +99,7 @@ def generate_json(accidents, rsa_markers, discussions, is_thin, total_records=No
         markers += discussions.all()
 
     if total_records is None:
-        total_records = len(accidents)
+        total_records = len(markers)
 
     total_accidents = accidents.count()
     total_rsa = rsa_markers.count()
@@ -137,18 +137,11 @@ ARG_TYPES = {'ne_lat': (float, 32.072427482938345), 'ne_lng': (float, 34.7992896
              'show_holiday': (int, 0),  'show_time': (int, 24), 'start_time': (int, 25), 'end_time': (int, 25),
              'weather': (int, 0), 'road': (int, 0), 'separation': (int, 0), 'surface': (int, 0), 'acctype': (int, 0),
              'controlmeasure': (int, 0), 'district': (int, 0), 'case_type': (int, 0), 'fetch_markers': (bool, True),
-             'fetch_vehicles': (bool, True), 'fetch_involved': (bool, True), 'age_groups': (str, ""),
+             'fetch_vehicles': (bool, True), 'fetch_involved': (bool, True), 'age_groups': (str, str(CONST.ALL_AGE_GROUPS_LIST).strip('[]').replace(' ', '')),
              'page': (int, 0), 'per_page': (int, 0)}
 
 def get_kwargs():
     kwargs = {arg: arg_type(request.values.get(arg, default_value)) for (arg, (arg_type, default_value)) in iteritems(ARG_TYPES)}
-
-    if kwargs['age_groups']:
-        try:
-            kwargs['age_groups'] = [int(value) for value in kwargs['age_groups'].split(',')]
-        except ValueError:
-            abort(http_client.BAD_REQUEST)
-
     try:
         kwargs.update({arg: datetime.date.fromtimestamp(int(request.values[arg])) for arg in ('start_date', 'end_date')})
     except ValueError:
@@ -181,16 +174,15 @@ def markers():
     logging.debug('querying markers in bounding box: %s' % kwargs)
     is_thin = (kwargs['zoom'] < CONST.MINIMAL_ZOOM)
     result = AccidentMarker.bounding_box_query(is_thin, yield_per=50, involved_and_vehicles=False, **kwargs)
-    markers = result.markers
-    accidents_markers = markers.from_self().filter(AccidentMarker.provider_code != CONST.RSA_PROVIDER_CODE)
-    rsa_markers = markers.from_self().filter(AccidentMarker.provider_code == CONST.RSA_PROVIDER_CODE)
+    accident_markers = result.accident_markers
+    rsa_markers = result.rsa_markers
 
     discussion_args = ('ne_lat', 'ne_lng', 'sw_lat', 'sw_lng', 'show_discussions')
     discussions = DiscussionMarker.bounding_box_query(**{arg: kwargs[arg] for arg in discussion_args})
 
     if request.values.get('format') == 'csv':
         date_format = '%Y-%m-%d'
-        return Response(generate_csv(result.markers), headers={
+        return Response(generate_csv(accident_markers), headers={
             "Content-Type": "text/csv",
             "Content-Disposition": 'attachment; '
                                    'filename="Anyway-accidents-from-{0}-to-{1}.csv"'
@@ -198,7 +190,7 @@ def markers():
         })
 
     else: # defaults to json
-        return generate_json(accidents_markers, rsa_markers, discussions, is_thin, total_records=result.total_records)
+        return generate_json(accident_markers, rsa_markers, discussions, is_thin, total_records=result.total_records)
 
 
 @app.route("/charts-data", methods=["GET"])
@@ -286,12 +278,13 @@ def discussion():
         return make_response(post_handler(marker))
 
 
+@app.route("/clusters", methods=["GET"])
 def clusters():
-    start_time = time.time()
+    # start_time = time.time()
     kwargs = get_kwargs()
     results = retrieve_clusters(**kwargs)
 
-    logging.debug('calculating clusters took %f seconds' % (time.time() - start_time))
+    # logging.debug('calculating clusters took %f seconds' % (time.time() - start_time))
     return Response(json.dumps({'clusters': results}), mimetype="application/json")
 
 
@@ -383,7 +376,7 @@ def index(marker=None, message=None):
         context['coordinates'] = (request.values['lat'], request.values['lon'])
     for attr in 'approx', 'accurate', 'show_markers', 'show_accidents', 'show_rsa', 'show_discussions', 'show_urban', 'show_intersection', 'show_lane',\
                 'show_day', 'show_holiday', 'show_time', 'start_time', 'end_time', 'weather', 'road', 'separation',\
-                'surface', 'acctype', 'controlmeasure', 'district', 'case_type', 'show_fatal', 'show_severe', 'show_light':
+                'surface', 'acctype', 'controlmeasure', 'district', 'case_type', 'show_fatal', 'show_severe', 'show_light', 'age_groups':
         value = request.values.get(attr)
         if value is not None:
             context[attr] = value or '-1'
@@ -755,11 +748,11 @@ def read_dictionaries():
         if len(main_dict) == 0:
             return
         if len(main_dict) == 1:
-            for dic in main_dict['Dictionary']:
-                if type(dic[DICTCOLUMN3]) is str:
-                    cbs_dictionary[(int(dic[DICTCOLUMN1]),int(dic[DICTCOLUMN2]))] = decode_hebrew(dic[DICTCOLUMN3], encoding=content_encoding)
+            for k, df in main_dict['Dictionary'].iterrows():
+                if type(df[DICTCOLUMN3]) is not (int or float):
+                    cbs_dictionary[(int(df[DICTCOLUMN1]),int(df[DICTCOLUMN2]))] = df[DICTCOLUMN3]
                 else:
-                    cbs_dictionary[(int(dic[DICTCOLUMN1]),int(dic[DICTCOLUMN2]))] = int(dic[DICTCOLUMN3])
+                    cbs_dictionary[(int(df[DICTCOLUMN1]),int(df[DICTCOLUMN2]))] = int(df[DICTCOLUMN3])
             return
 
 
@@ -772,8 +765,8 @@ def get_dict_file(directory):
             raise ValueError("file not found: " + filename + " in directory " + directory)
         if amount > 1:
             raise ValueError("there are too many matches: " + filename)
-        csv = CsvReader(os.path.join(directory, files[0]), encoding="cp1255")
-        yield name, csv
+        df = pd.read_csv(os.path.join(directory, files[0]), encoding="cp1255")
+        yield name, df
 
 class ExtendedLoginForm(LoginForm):
     username = StringField('User Name', [validators.DataRequired()])

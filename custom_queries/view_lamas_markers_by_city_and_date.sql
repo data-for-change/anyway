@@ -3,7 +3,7 @@ lamas_markers_by_city_and_date AS
 SELECT
 	id,
 	trim(both '* ' FROM (regexp_split_to_array(address, ',\s*'))[2]) AS city,
-	severity,
+	accident_severity,
 	CAST(date_part('year',  created) AS INTEGER) AS year,
 	CAST(date_part('month', created) AS INTEGER) AS month,
 	CAST(date_part('dow',   created) AS INTEGER) AS day_of_week
@@ -27,8 +27,8 @@ $$ LANGUAGE plpgsql IMMUTABLE;
 
 CREATE OR REPLACE VIEW
 lamas_marker_counts_by_city_year_and_severity AS
-	SELECT city ,year, severity,
+	SELECT city ,year, accident_severity,
 	COUNT(DISTINCT id) AS count,
-	severity_to_weight(severity) * COUNT(DISTINCT id) AS weighted_count
+	severity_to_weight(accident_severity) * COUNT(DISTINCT id) AS weighted_count
 	FROM lamas_markers_by_city_and_date
-	GROUP BY city, year, severity;
+	GROUP BY city, year, accident_severity;

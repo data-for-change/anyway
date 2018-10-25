@@ -24,7 +24,8 @@ apscheduler<3
 Flask-Compress
 rauth
 requests
-click
+click==6.7
 six
 celery[redis]
 openpyxl
+pandas

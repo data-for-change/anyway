@@ -336,6 +336,7 @@
               <img class="profile-image"/>
             </a>
             <p class="added-by"></p>
+            <p class="creation-date" style="white-space:nowrap"></p>
             <p class="description" style="margin:0"></p>
           </div>
         </div>
@@ -356,8 +357,8 @@
                         <div class="accordion-roller ac-general">
                             <p class="id" style="margin:0"></p>
                             <p class="provider_code" style="margin:0"></p>
-                            <p class="severityText" style="margin:0"></p>
-                            <p class="accidentType" style="margin:0"></p>
+                            <p class="accident_severity" style="margin:0"></p>
+                            <p class="accident_type" style="margin:0"></p>
                             <p class="road_object" style="margin:0"></p>
                             <p class="object_distance" style="margin:0"></p>
                             <p class="didnt_cross" style="margin:0"></p>
@@ -368,12 +369,12 @@
                         <input id="ac-2" type="checkbox" />
                         <label for="ac-2"><i class="fa fa-road fontIcon" id="fa-road-fix"></i>תנאי הדרך</label>
                         <div class="accordion-roller ac-general">
-                            <p class="roadType" style="margin:0"></p>
-                            <p class="roadShape" style="margin:0"></p>
+                            <p class="road_type" style="margin:0"></p>
+                            <p class="road_shape" style="margin:0"></p>
                             <p class="one_lane" style="margin:0"></p>
                             <p class="multi_lane" style="margin:0"></p>
                             <p class="speed_limit" style="margin:0"></p>
-                            <p class="intactness" style="margin:0"></p>
+                            <p class="road_intactness" style="margin:0"></p>
                             <p class="road_width" style="margin:0"></p>
                             <p class="road_sign" style="margin:0"></p>
                             <p class="road_light" style="margin:0"></p>
@@ -389,7 +390,7 @@
                         <label for="ac-3"><i class="material-icons fontIcon">&#xE55F;</i>מיקום וזמן</label>
                         <div class="accordion-roller ac-general">
                             <p class="creation-date" style="margin:0"></p>
-                            <p class="dayType" style="margin:0"></p>
+                            <p class="day_type" style="margin:0"></p>
                             <p class="mainStreet" style="margin:0"></p>
                             <p class="secondaryStreet" style="margin:0"></p>
                             <p class="junction" style="margin:0"></p>
@@ -414,7 +415,7 @@
                         <label for="ac-6"><i class="material-icons fontIcon">&#xE145;</i>מידע נוסף</label>
                         <div class="accordion-roller ac-general">
                             <p class="igun" style="margin:0"></p>
-                            <p class="unit" style="margin:0"></p>
+                            <p class="police_unit" style="margin:0"></p>
                         </div>
                     </div>
                 </div>
@@ -647,11 +648,11 @@
         <div class="filter-panel">
             <div class="btn-label">חומרה:</div>
             <div class="btn-wrap separator">
-                <input type="checkbox" id="checkbox-fatal" onclick="app.loadFilter('severity', 'fatal')" checked/>
+                <input type="checkbox" id="checkbox-fatal" onclick="app.loadFilter('accident_severity', 'fatal')" checked/>
                 <label for="checkbox-fatal" class="btn three right fatal">קטלניות</label>
-                <input type="checkbox" id="checkbox-severe" onclick="app.loadFilter('severity', 'severe')" checked/>
+                <input type="checkbox" id="checkbox-severe" onclick="app.loadFilter('accident_severity', 'severe')" checked/>
                 <label for="checkbox-severe" class="btn three middle severe">קשות</label>
-                <input type="checkbox" id="checkbox-light" onclick="app.loadFilter('severity', 'light')" checked/>
+                <input type="checkbox" id="checkbox-light" onclick="app.loadFilter('accident_severity', 'light')" checked/>
                 <label for="checkbox-light" class="btn three left light">קלות</label>
             </div>
 
@@ -933,6 +934,9 @@
 
                 <input type="checkbox" name="agegroups" id="checkbox-85-plus" value=2 onclick="app.loadFilter('ages', '85+')" checked />
                 <label for="checkbox-85-plus" class="btn one" dir="ltr">85+</label>
+
+                <input type="checkbox" name="agegroups" id="checkbox-unknown-age" value=2 onclick="app.loadFilter('ages', 'לא ידוע')" checked />
+                <label for="checkbox-unknown-age" class="btn one" dir="ltr">לא ידוע</label>
             </div>
 
         </div>
@@ -1069,7 +1073,7 @@
         <a href="http://www.hasadna.org.il/" title="לדעת להשפיע - מבית הסדנא לידע ציבורי"><img
                 src="/static/img/logos/hasadna.png" style="width: 20px; height: 20px; padding: 3px"/>
         </a>
-        <a style="border-left: 1px solid #ddd; padding-left: 8px;" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=F274PRUT6VSAA"
+        <a style="border-left: 1px solid #ddd; padding-left: 8px;" href="https://www.jgive.com/new/he/ils/donation-targets/3268"
            target="new">תרמו לנו</a>
         <a style="border-left: 1px solid #ddd; padding-left: 8px;" href="" data-toggle="modal" data-target="#developer-dialog">מפתחים</a>
         <a style="border-left: 1px solid #ddd; padding-left: 8px;" href="mailto:feedback@anyway.co.il?subject=ANYWAY%20Feedback" target="new">צרו קשר</a>
@@ -1458,6 +1462,13 @@
             app.years = {{ years }};
         {% else %}
             app.years = [];
+        {% endif %}
+        {% if age_groups is defined and age_groups != "" %}
+            app.age_groups = {{  age_groups }};
+        {% else %}
+            var age_groups_list = Array.from({length: AGE_GROUPS_NUMBER}, (v, k) => k+1);
+            age_groups_list.push(99)
+            app.age_groups = age_groups_list;
         {% endif %}
 
         app.render();

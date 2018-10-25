@@ -63,3 +63,10 @@ def parse(filename):
     for batch in batch_iterator(_iter_rows(filename), batch_size=50):
         db.session.bulk_insert_mappings(AccidentMarker, batch)
         db.session.commit()
+
+    """
+    Fills empty geometry object according to coordinates in database
+    """
+    db.session.execute('UPDATE markers SET geom = ST_SetSRID(ST_MakePoint(longitude,latitude),4326)\
+                           WHERE geom IS NULL;')
+    db.session.commit()

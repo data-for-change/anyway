@@ -8,32 +8,14 @@ services:
       - "8080:5000"
     environment:
       - DATABASE_URL=postgresql://anyway:anyway@db/anyway
-      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq
     volumes:
       - ./static:/anyway/static
     restart: always
     depends_on:
       - db
-      - rabbitmq
-
-  anyway_celery:
-    build: .
-    image: hasadna/anyway:latest
-    environment:
-      - DATABASE_URL=postgresql://anyway:anyway@db/anyway
-      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq
-    restart: always
-    entrypoint: ''
-    command: celery worker -A anyway.clusters_calculator
-    depends_on:
-      - db
-      - rabbitmq
-
-  rabbitmq:
-    image: rabbitmq
 
   db:
-    image: postgres:alpine
+    image: mdillon/postgis
     environment:
       - POSTGRES_PASSWORD=anyway
       - POSTGRES_USER=anyway

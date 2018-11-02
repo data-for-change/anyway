@@ -18,7 +18,6 @@ WORKDIR /anyway
 COPY requirements.txt /anyway
 RUN pip install -U setuptools wheel
 RUN pip install -r requirements.txt
-RUN pip install --upgrade pip enum34
 
 COPY . /anyway
 

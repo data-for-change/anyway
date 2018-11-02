@@ -29,3 +29,4 @@ six
 celery[redis]
 openpyxl
 pandas==0.22.0
+enum34

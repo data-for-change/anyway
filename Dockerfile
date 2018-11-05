@@ -21,6 +21,8 @@ RUN pip install -r requirements.txt
 
 COPY . /anyway
 
+RUN mv /anyway/static/data/rsa/rsa.xlsx /
+
 VOLUME ["/anyway/static"]
 EXPOSE 5000
 

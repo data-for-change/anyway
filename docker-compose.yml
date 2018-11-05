@@ -3,7 +3,7 @@ version: '2'
 services:
   anyway:
     build: .
-    image: hasadna/anyway:latest
+    image: uumpa/hasadna-anyway:fix_docker_test2
     ports:
       - "8080:5000"
     environment:

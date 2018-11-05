@@ -14,7 +14,10 @@ node_js:
 
 addons:
   sauce_connect: true
-  postgresql
+  postgresql: 9.6
+  apt:
+    packages:
+    - postgresql-9.6-postgis-2.3
 
 env:
   global:

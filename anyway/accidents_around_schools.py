@@ -1,22 +1,12 @@
 import sqlalchemy as sa
-from sqlalchemy.orm.query import Query, aliased
-from sqlalchemy.dialects import postgresql
-from sqlalchemy import desc, or_, join, select
-import geoalchemy2.functions as geofunc
-from geoalchemy2.elements import WKBElement
+from sqlalchemy import or_
 from flask_sqlalchemy import SQLAlchemy
-import argparse
-import io
 import math
-import requests
-from datetime import datetime
-from utilities import init_flask
-from models import AccidentMarker, Involved, School
-from constants import CONST
+from anyway.utilities import init_flask
+from anyway.models import AccidentMarker, Involved, School
+from anyway.constants import CONST
 import pandas as pd
 import os
-from time import strftime
-from datetime import datetime
 
 
 SUBTYPE_ACCIDENT_WITH_PEDESTRIAN = 1
@@ -62,7 +52,6 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
                                                                           baseY,
                                                                           distanceX,
                                                                           distanceY)
-    school_point = WKBElement('POINT({0} {1})'.format(longitude, latitude), srid=4326)
 
     query_obj = db.session.query(Involved, AccidentMarker) \
         .join(AccidentMarker, AccidentMarker.provider_and_id == Involved.provider_and_id) \
@@ -121,7 +110,7 @@ def main(start_date, end_date, distance, output_path):
     df_schools = df_schools[df_schools.yishuv_symbol != 0]
     df_schools.to_csv(os.path.join(output_path,'df_schools.csv'), encoding=CONTENT_ENCODING)
 
-    for idx, school in df_schools.iterrows():
+    for _, school in df_schools.iterrows():
         df_total = pd.concat([df_total,
                              acc_inv_query(longitude=school['longitude'],
                                            latitude=school['latitude'],

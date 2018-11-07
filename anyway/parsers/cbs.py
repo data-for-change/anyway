@@ -3,7 +3,6 @@ import glob
 import os
 import json
 from collections import OrderedDict, defaultdict
-import itertools
 import re
 from datetime import datetime
 import six
@@ -11,7 +10,6 @@ from six import iteritems
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_
 import pandas as pd
-import numpy as np
 import math
 from .. import field_names, localization
 from ..models import (AccidentMarker,
@@ -744,7 +742,7 @@ def get_provider_code(directory_name=None):
 def read_dictionary(dictionary_file):
     cbs_dictionary = defaultdict(dict)
     dictionary = pd.read_csv(dictionary_file, encoding=CONTENT_ENCODING)
-    for idx, dic in dictionary.iterrows():
+    for _, dic in dictionary.iterrows():
         cbs_dictionary[int(dic[DICTCOLUMN1])][int(dic[DICTCOLUMN2])] = dic[DICTCOLUMN3]
     return cbs_dictionary
 

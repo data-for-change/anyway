@@ -748,7 +748,7 @@ def read_dictionaries():
         if len(main_dict) == 0:
             return
         if len(main_dict) == 1:
-            for k, df in main_dict['Dictionary'].iterrows():
+            for _, df in main_dict['Dictionary'].iterrows():
                 if type(df[DICTCOLUMN3]) is not (int or float):
                     cbs_dictionary[(int(df[DICTCOLUMN1]),int(df[DICTCOLUMN2]))] = df[DICTCOLUMN3]
                 else:

@@ -1232,7 +1232,7 @@ $(function() {
             }
             var ages25_69 = [6, 7, 8, 9, 10, 11, 12, 13, 14];
             var ages25_69_exist = age_groups_array.filter(function(val) {
-                return ages25_69.indexOf(val) !== -1
+                return ages25_69.indexOf(val) !== -1;
             }).length > 0;
             if (ages25_69_exist) {
                 $("#checkbox-25-69").prop("checked", true);

@@ -1,11 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import csv
 import pandas as pd
-import os
 from . import field_names
-import six
-from functools import partial
 
 
 _tables = {
@@ -259,5 +255,5 @@ def get_city_name(symbol_id):
     try:
         city = _cities.loc[symbol_id,field_names.name]
         return city
-    except:
+    except Exception as _:
         return None

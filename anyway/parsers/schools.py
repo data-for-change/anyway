@@ -1,5 +1,4 @@
 from .. import school_fields
-import geoalchemy2.functions as func
 import logging
 from datetime import datetime
 from ..utilities import init_flask, time_delta, chunks
@@ -21,7 +20,7 @@ def get_schools(filepath):
     logging.info("\tReading schools data from '%s'..." % filepath)
     schools = []
     df = pd.read_csv(filepath)
-    for idx, school in df.iterrows():
+    for _, school in df.iterrows():
         longitude, latitude = float(school[school_fields.longitude]),float(school[school_fields.latitude]),
         point_str = 'SRID=4326;POINT({0} {1})'.format(longitude, latitude)
         school = {
@@ -63,9 +62,9 @@ def import_to_datastore(filepath, batch_size):
         new_items += len(schools)
         logging.info("\t{0} items in {1}".format(new_items, time_delta(started)))
         return new_items
-    except ValueError as e:
-        failed_dirs[directory] = str(e)
-        return 0
+    except:
+        error = "Schools import succeded partially with " + new_items + " schools"
+        raise Exception(error)
 
 def parse(filepath, batch_size):
     started = datetime.now()

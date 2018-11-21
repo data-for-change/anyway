@@ -148,7 +148,18 @@ def get_location_of_text(input_text, maps_key):
     gmaps = googlemaps.Client(key=maps_key)
     print('location: ' + location)
     geocode_result = gmaps.geocode(location, language="iw", region="il")
-    print(geocode_result[0]["geometry"]["location"])
+    if geocode_result is None or geocode_result == []:
+        return None
+    country = ""
+    print(geocode_result)
+    for address in geocode_result[0]["address_components"]:
+        if any("country" in s for s in address["types"]):
+            country = address["short_name"]
+            break
+    if country == "IL":
+        print(geocode_result[0]["geometry"]["location"])
+    else:
+        return None
 
 
 if __name__ == "__main__":

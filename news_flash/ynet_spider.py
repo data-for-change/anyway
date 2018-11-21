@@ -82,7 +82,7 @@ class YnetFlashScrap(scrapy.Spider):
             self.news_item["location"] = location
             if location != "":
                 geo_location = geocode_extract(location, self.maps_key)
-                if geo_location["lat"] == -1 and geo_location["lng"] == -1:
+                if geo_location is None:
                     self.news_item["lat"] = 0
                     self.news_item["lon"] = 0
                     self.news_item["location"] = ""

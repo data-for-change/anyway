@@ -46,6 +46,7 @@ def get_location_of_text(text):
             loc_entities_indices.append(translated_text.index(entity.name))
     # Sort entities by appearing order in the string
     loc_entities = [x for _, x in sorted(zip(loc_entities_indices, loc_entities))]
+    loc_entities_word_indices = [x for _, x in sorted(zip(loc_entities_indices, loc_entities_word_indices))]
     # Copy the string containing the entities for relational data between them
     if len(loc_entities) >= 1:
         # Location grouping - takes the largest group of words indicating location based on distance between groups

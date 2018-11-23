@@ -52,6 +52,10 @@ def get_location_of_text(input_text, maps_key):
             loc_entities_indices.append(translated_text.index(entity.name))
     # Sort entities by appearing order in the string
     loc_entities = [x for _, x in sorted(zip(loc_entities_indices, loc_entities))]
+    loc_entities_word_indices = [x for _, x in sorted(zip(loc_entities_indices, loc_entities_word_indices))]
+    print("\n \n \n")
+    print(loc_entities)
+    print(loc_entities_word_indices)
     print("reference grouping" + str(reference_grouping))
     # Copy the string containing the entities for relational data between them
     if len(loc_entities) >= 1:
@@ -59,7 +63,7 @@ def get_location_of_text(input_text, maps_key):
         loc_entities_word_indices.sort()
         diff = [loc_entities_word_indices[i + 1] - loc_entities_word_indices[i] for i in
                 range(len(loc_entities_word_indices) - 1)]
-
+        print(diff)
         if max(diff) > 3:  # distance is greater than 3 words
             avg = sum(diff) / len(diff)
             loc_segments = [[loc_entities_word_indices[0]]]
@@ -164,5 +168,5 @@ def get_location_of_text(input_text, maps_key):
 
 if __name__ == "__main__":
     sys.path.append(os.path.dirname(os.path.realpath(__file__)))
-    text = u'הלילה נקבע מותו של רוכב אופניים, בן 50 מתפח תקווה, שנפצע בתאונת דרכים ברחוב אורלוב בעיר ביום שלישי. המשטרה עצרה הלילה את נהג האוטובוס הפוגע, בן 40 תושב העיר. הוא יובא היום לדיון בהארכת מעצרו בבית משפט השלום בפתח תקווה. נמשכת חקירת נסיבות התאונה.'
+    text = u'רוכב אופנוע כבן 20 החליק ונהרג בכביש 71, בין עפולה לבית שאן, סמוך למחלף בית השיטה. צוות מד"א קבע את מותו במקום. צעיר נוסף, בן 26, נפצע באורח קל עד בינוני ופונה לבית חולים העמק בעפולה.'
     get_location_of_text(text, sys.argv[1])

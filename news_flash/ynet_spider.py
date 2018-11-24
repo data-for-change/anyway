@@ -45,24 +45,20 @@ class YnetFlashScrap(scrapy.Spider):
                         not (span_item.startswith('(') and span_item.endswith(')')):
                     self.news_item["description"] = span_item
 
-        if self.news_item["description"] != "" and not self.news_item["accident"]:
-            if ("תאונ" in self.news_item["description"] and "תאונת עבודה" not in self.news_item["description"]
-                and "תאונות עבודה" not in self.news_item["description"]) or \
-                    (('רכב' in self.news_item["description"] or 'אוטובוס' in self.news_item["description"] or
-                      'משאית' in self.news_item["description"] or 'קטנוע'in self.news_item["description"] or
-                      'אופנוע' in self.news_item["description"] or 'אופניים' in self.news_item["description"] or
-                      'קורקינט' in self.news_item["description"] or 'הולך רגל' in self.news_item["description"] or
-                      'הולכת רגל' in self.news_item["description"] or 'הולכי רגל' in self.news_item["description"])
-                     and ('נפגע' in self.news_item["description"] or 'פגיע' in self.news_item["description"] or
-                          'התנגש' in self.news_item["description"] or 'התהפך' in self.news_item["description"] or
-                          'התהפכ' in self.news_item["description"])):
+        accident_description = list(filter(None, self.news_item["description"].split('.')))[0]
+
+        if accident_description != "" and not self.news_item["accident"]:
+            if ("תאונ" in accident_description and "תאונת עבודה" not in accident_description
+                and "תאונות עבודה" not in accident_description) or \
+                    (('רכב' in accident_description or 'אוטובוס' in accident_description or
+                      'משאית' in accident_description or 'קטנוע'in accident_description or
+                      'אופנוע' in accident_description or 'אופניים' in accident_description or
+                      'קורקינט' in accident_description or 'הולך רגל' in accident_description or
+                      'הולכת רגל' in accident_description or 'הולכי רגל' in accident_description)
+                     and ('נפגע' in accident_description or 'פגיע' in accident_description or
+                          'התנגש' in accident_description or 'התהפך' in accident_description or
+                          'התהפכ' in accident_description)):
                 self.news_item["accident"] = True
-            else:
-                self.news_item["accident"] = False
-        elif self.news_item["description"] != "" and self.news_item["accident"] and (
-                "תאונת עבודה" in self.news_item["description"] or
-                "תאונות עבודה" in self.news_item["description"]):
-            self.news_item["accident"] = False
         if self.news_item["accident"]:
             if self.news_item["description"] != "":
                 location = get_location_of_text(self.news_item["description"])

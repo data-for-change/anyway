@@ -46,27 +46,16 @@ class YnetFlashScrap(scrapy.Spider):
                     self.news_item["description"] = span_item
 
         if self.news_item["description"] != "" and not self.news_item["accident"]:
-            if ("תאונ" in self.news_item["description"] and "תאונת עבודה" not in self.news_item["description"] and
-                "תאונות עבודה" not in self.news_item["description"]) or "נפגע מרכב" in self.news_item["description"] \
-                    or "נפגעה מרכב" in self.news_item["description"] or \
-                    "נפגעו מרכב" in self.news_item["description"] or \
-                    "פגיעת רכב" in self.news_item["description"] or \
-                    "פגיעת אוטובוס" in self.news_item["description"] or \
-                    "פגיעת משאית" in self.news_item["description"] or \
-                    "פגיעת קטנוע" in self.news_item["description"] or \
-                    "פגיעת אופנוע" in self.news_item["description"] or \
-                    "נפגע מאוטובוס" in self.news_item["description"] or \
-                    "נפגעה מאוטובוס" in self.news_item["description"] or \
-                    "נפגעו מאוטובוס" in self.news_item["description"] or \
-                    "נפגע ממשאית" in self.news_item["description"] or \
-                    "נפגעה ממשאית" in self.news_item["description"] or \
-                    "נפגעו ממשאית" in self.news_item["description"] or \
-                    "נפגע מאופנוע" in self.news_item["description"] or \
-                    "נפגעה מאופנוע" in self.news_item["description"] or \
-                    "נפגעו מאופנוע" in self.news_item["description"] or \
-                    "נפגע מקטנוע" in self.news_item["description"] or \
-                    "נפגעה מקטנוע" in self.news_item["description"] or \
-                    "נפגעו מקטנוע" in self.news_item["description"]:
+            if ("תאונ" in self.news_item["description"] and "תאונת עבודה" not in self.news_item["description"]
+                and "תאונות עבודה" not in self.news_item["description"]) or \
+                    (('רכב' in self.news_item["description"] or 'אוטובוס' in self.news_item["description"] or
+                      'משאית' in self.news_item["description"] or 'קטנוע'in self.news_item["description"] or
+                      'אופנוע' in self.news_item["description"] or 'אופניים' in self.news_item["description"] or
+                      'קורקינט' in self.news_item["description"] or 'הולך רגל' in self.news_item["description"] or
+                      'הולכת רגל' in self.news_item["description"] or 'הולכי רגל' in self.news_item["description"])
+                     and ('נפגע' in self.news_item["description"] or 'פגיע' in self.news_item["description"] or
+                          'התנגש' in self.news_item["description"] or 'התהפך' in self.news_item["description"] or
+                          'התהפכ' in self.news_item["description"])):
                 self.news_item["accident"] = True
             else:
                 self.news_item["accident"] = False

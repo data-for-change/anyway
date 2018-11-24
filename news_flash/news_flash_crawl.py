@@ -19,28 +19,13 @@ def news_flash_crawl(rss_link, site_name, maps_key):
         if (latest_date is not None and entry_parsed_date > latest_date) or latest_date is None:
             news_item = {"id_flash": id_flash, "date_parsed": entry_parsed_date, "title": entry.title,
                          "link": entry.links[0].href, "date": entry.published, "location": "", "lat": 0, "lon": 0}
-            # need to implement location extraction
-            if ("תאונ" in entry.title and "תאונת עבודה" not in entry.title and
-                "תאונות עבודה" not in entry.title) or "נפגע מרכב" in entry.title \
-                    or "נפגעה מרכב" in entry.title or \
-                    "נפגעו מרכב" in entry.title or \
-                    "פגיעת רכב" in entry.title or \
-                    "פגיעת אוטובוס" in entry.title or \
-                    "פגיעת משאית" in entry.title or \
-                    "פגיעת קטנוע" in entry.title or \
-                    "פגיעת אופנוע" in entry.title or \
-                    "נפגע מאוטובוס" in entry.title or \
-                    "נפגעה מאוטובוס" in entry.title or \
-                    "נפגעו מאוטובוס" in entry.title or \
-                    "נפגע ממשאית" in entry.title or \
-                    "נפגעה ממשאית" in entry.title or \
-                    "נפגעו ממשאית" in entry.title or \
-                    "נפגע מאופנוע" in entry.title or \
-                    "נפגעה מאופנוע" in entry.title or \
-                    "נפגעו מאופנוע" in entry.title or \
-                    "נפגע מקטנוע" in entry.title or \
-                    "נפגעה מקטנוע" in entry.title or \
-                    "נפגעו מקטנוע" in entry.title:
+            if ("תאונ" in entry.title and "תאונת עבודה" not in entry.title and "תאונות עבודה" not in entry.title)\
+                    or (('רכב' in entry.title or 'אוטובוס' in entry.title or 'משאית' in entry.title or 'קטנוע'
+                         in entry.title or 'אופנוע' in entry.title or 'אופניים' in entry.title or 'קורקינט'
+                         in entry.title or 'הולך רגל' in entry.title or 'הולכת רגל' in entry.title
+                         or 'הולכי רגל' in entry.title) and
+                        ('נפגע' in entry.title or 'פגיע' in entry.title or 'התנגש' in entry.title or 'התהפך'
+                         in entry.title or 'התהפכ' in entry.title)):
                 news_item["accident"] = True
             else:
                 news_item["accident"] = False

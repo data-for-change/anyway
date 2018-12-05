@@ -6,7 +6,7 @@ import logging
 from .constants import CONST
 from collections import namedtuple
 from sqlalchemy import Column, BigInteger, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table, \
-    ForeignKeyConstraint, func, and_
+    ForeignKeyConstraint, func, and_, TIMESTAMP
 from sqlalchemy.orm import relationship, load_only, backref
 from .utilities import init_flask, decode_hebrew
 from flask_sqlalchemy import SQLAlchemy
@@ -642,6 +642,47 @@ class Involved(Base):
     def get_id(self):
         return self.id
 
+class NewsFlash(Base):
+    __tablename__ = "news_flash"
+    id = Column(BigInteger(), primary_key=True)
+    accident = Column(Boolean())
+    author = Column(Text())
+    date = Column(TIMESTAMP())
+    description = Column(Text())
+    lat = Column(Float())
+    link = Column(Text())
+    lon = Column(Float())
+    title = Column(Text())
+    source = Column(Text())
+    location = Column(Text())
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "accident": self.accident,
+            "author": self.author,
+            "date": self.date,
+            "description": self.description,
+            "lat": self.lat,
+            "link": self.link,
+            "lon": self.lon,
+            "title": self.title,
+            "source": self.source,
+            "location": self.location
+        }
+
+    # Flask-Login integration
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.id
 
 class City(Base):
     __tablename__ = "cities"

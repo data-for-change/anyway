@@ -1,7 +1,7 @@
 from datetime import datetime
 import feedparser
 
-from db_queries import get_latest_date_from_db
+from ..anyway.parsers.news_flash import get_latest_date_from_db
 
 
 def is_new_flash_news(rss_link):

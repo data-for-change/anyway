@@ -45,20 +45,6 @@ class YnetFlashScrap(scrapy.Spider):
                         not (span_item.startswith('(') and span_item.endswith(')')):
                     self.news_item['description'] = span_item
 
-        accident_description = list(filter(None, self.news_item['description'].split('.')))[0]
-
-        if accident_description != '' and not self.news_item['accident']:
-            if ('תאונ' in accident_description and 'תאונת עבודה' not in accident_description
-                and 'תאונות עבודה' not in accident_description) or \
-                    (('רכב' in accident_description or 'אוטובוס' in accident_description or
-                      'משאית' in accident_description or 'קטנוע' in accident_description or
-                      'אופנוע' in accident_description or 'אופניים' in accident_description or
-                      'קורקינט' in accident_description or 'הולך רגל' in accident_description or
-                      'הולכת רגל' in accident_description or 'הולכי רגל' in accident_description)
-                     and ('נפגע' in accident_description or 'פגיע' in accident_description or
-                          'התנגש' in accident_description or 'התהפך' in accident_description or
-                          'התהפכ' in accident_description)):
-                self.news_item['accident'] = True
         if self.news_item['accident']:
             if self.news_item['description'] != '':
                 location = get_location_of_text(self.news_item['description'])

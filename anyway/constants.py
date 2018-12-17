@@ -24,6 +24,15 @@ class Constants(object):
 
     ALL_AGE_GROUPS_LIST = list(range(1, AGE_GROUPS_NUMBER + 1)) + [99]
 
+    CBS_FILES_HEBREW = {'sadot': 'Fields',
+                        'zmatim_ironiim': 'IntersectUrban',
+                        'zmatim_lo_ironiim': 'IntersectNonUrban',
+                        'rehev': 'VehData',
+                        'milon':'Dictionary',
+                        'meoravim': 'InvData',
+                        'klali': 'AccData',
+                        'rechovot':'DicStreets'}
+
     # other global constants (python only)
 
     def __setattr__(self, *_):

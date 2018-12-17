@@ -754,7 +754,7 @@ def read_dictionary(dictionary_file):
 def fill_dictionary_tables(cbs_dictionary, provider_code, year):
     if year < 2008:
         return
-    for k,v in cbs_dictionary.iteritems():
+    for k,v in cbs_dictionary.items():
         if k == 97:
             continue
         try:

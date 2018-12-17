@@ -38,18 +38,6 @@ def testserver(open_server, debug_js):
             port=int(os.getenv('PORT', 5000)))
 
 @cli.group()
-def preprocess():
-    pass
-
-@preprocess.command()
-@click.option('--path', type=str)
-
-def cbs(path):
-    from anyway.parsers.preprocessing_cbs_files import main
-
-    return main(path=path)
-
-@cli.group()
 def process():
     pass
 
@@ -105,6 +93,17 @@ def schools(filepath, batch_size):
     from anyway.parsers.schools import parse
     return parse(filepath=filepath,
                  batch_size=batch_size)
+@cli.group()
+def preprocess():
+    pass
+
+@preprocess.command()
+@click.option('--path', type=str)
+
+def preprocess_cbs(path):
+    from anyway.parsers.preprocessing_cbs_files import main
+
+    return main(path=path)
 
 @cli.group()
 def create_views():
@@ -112,7 +111,7 @@ def create_views():
 
 @create_views.command()
 
-def cbs():
+def cbs_views():
     from anyway.parsers.cbs import create_views
 
     return create_views()
@@ -123,7 +122,7 @@ def update_dictionary_tables():
 
 @update_dictionary_tables.command()
 @click.option('--path', type=str, default="static/data/cbs")
-def cbs(path):
+def update_cbs(path):
     from anyway.parsers.cbs import update_dictionary_tables
 
     return update_dictionary_tables(path)
@@ -134,7 +133,7 @@ def truncate_dictionary_tables():
 
 @truncate_dictionary_tables.command()
 @click.option('--path', type=str)
-def cbs(path):
+def truncate_cbs(path):
     from anyway.parsers.cbs import truncate_dictionary_tables
 
     return truncate_dictionary_tables(path)

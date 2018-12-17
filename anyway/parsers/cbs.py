@@ -759,9 +759,8 @@ def fill_dictionary_tables(cbs_dictionary, provider_code, year):
             continue
         try:
             curr_table = TABLES_DICT[k]
-            curr_class = CLASSES_DICT[k]
-        except:
-            logging.ERROR('A key ' + str(k) + ' was added to dictionary - update models, tables and classes')
+        except Exception as _:
+            logging.info('A key ' + str(k) + ' was added to dictionary - update models, tables and classes')
             continue
         for inner_k,inner_v in v.items():
             sql_delete = 'DELETE FROM ' + curr_table + ' WHERE provider_code=' + str(provider_code) + ' AND year=' + str(year)
@@ -775,11 +774,10 @@ def fill_dictionary_tables(cbs_dictionary, provider_code, year):
 
 def truncate_dictionary_tables(dictionary_file):
     cbs_dictionary = read_dictionary(dictionary_file)
-    for k,v in cbs_dictionary.items():
+    for k,_ in cbs_dictionary.items():
         if k == 97:
             continue
         curr_table = TABLES_DICT[k]
-        curr_class = CLASSES_DICT[k]
         sql_truncate = 'TRUNCATE TABLE ' + curr_table
         db.session.execute(sql_truncate)
         db.session.commit()

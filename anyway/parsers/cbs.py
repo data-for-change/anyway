@@ -76,6 +76,7 @@ from ..models import (AccidentMarker,
 
 from .. import models
 from ..constants import CONST
+from ..views import VIEWS
 from ..utilities import ItmToWGS84, init_flask, time_delta,ImporterUI,truncate_tables,chunks
 from functools import partial
 import logging
@@ -547,7 +548,7 @@ def import_vehicles(provider_code, vehicles, **kwargs):
 
 def get_files(directory):
     for name, filename in iteritems(cbs_files):
-        if name not in (STREETS, NON_URBAN_INTERSECTION, ACCIDENTS, INVOLVED, VEHICLES):
+        if name not in (STREETS, NON_URBAN_INTERSECTION, ACCIDENTS, INVOLVED, VEHICLES, DICTIONARY):
             continue
         files = [path for path in os.listdir(directory)
                  if filename.lower() in path.lower()]
@@ -556,8 +557,10 @@ def get_files(directory):
             raise ValueError("Not found: '%s'" % filename)
         if amount > 1:
             raise ValueError("Ambiguous: '%s'" % filename)
-
-        df = pd.read_csv(os.path.join(directory, files[0]), encoding=CONTENT_ENCODING)
+        file_path = os.path.join(directory, files[0])
+        if name == DICTIONARY:
+            yield name, read_dictionary(file_path)
+        df = pd.read_csv(file_path, encoding=CONTENT_ENCODING)
         df.columns = [column.upper() for column in df.columns]
         if name == STREETS:
             streets_map = {}
@@ -573,9 +576,7 @@ def get_files(directory):
         elif name in (ACCIDENTS, INVOLVED, VEHICLES):
             yield name, df
 
-
-
-def import_to_datastore(directory, provider_code, batch_size):
+def import_to_datastore(directory, provider_code, year, batch_size):
     """
     goes through all the files in a given directory, parses and commits them
     """
@@ -587,6 +588,10 @@ def import_to_datastore(directory, provider_code, batch_size):
             return 0
         logging.info("Importing '{}'".format(directory))
         started = datetime.now()
+
+        # import dictionary
+        fill_dictionary_tables(files_from_cbs[DICTIONARY], provider_code, year)
+
         new_items = 0
         accidents, accidents_no_location = import_accidents(provider_code=provider_code, **files_from_cbs)
 
@@ -746,39 +751,74 @@ def read_dictionary(dictionary_file):
         cbs_dictionary[int(dic[DICTCOLUMN1])][int(dic[DICTCOLUMN2])] = dic[DICTCOLUMN3]
     return cbs_dictionary
 
-def create_dictionary_tables(dictionary_file):
+def fill_dictionary_tables(cbs_dictionary, provider_code, year):
+    if year < 2008:
+        return
+    for k,v in cbs_dictionary.items():
+        if k == 97:
+            continue
+        try:
+            curr_table = TABLES_DICT[k]
+        except Exception as _:
+            logging.info('A key ' + str(k) + ' was added to dictionary - update models, tables and classes')
+            continue
+        for inner_k,inner_v in v.items():
+            sql_delete = 'DELETE FROM ' + curr_table + ' WHERE provider_code=' + str(provider_code) + ' AND year=' + str(year)
+            db.session.execute(sql_delete)
+            db.session.commit()
+            sql_insert = 'INSERT INTO ' + curr_table + ' VALUES (' + str(inner_k) + ',' +  str(year) + ',' + str(provider_code) + ',' + "'" + inner_v.replace("'",'') + "'"  + ')' + ' ON CONFLICT DO NOTHING'
+            db.session.execute(sql_insert)
+            db.session.commit()
+        logging.info('Inserted/Updated dictionary values into table ' + curr_table)
+    create_provider_code_table()
+
+def truncate_dictionary_tables(dictionary_file):
     cbs_dictionary = read_dictionary(dictionary_file)
-    for k,v in cbs_dictionary.iteritems():
+    for k,_ in cbs_dictionary.items():
         if k == 97:
             continue
         curr_table = TABLES_DICT[k]
-        curr_class = CLASSES_DICT[k]
-        table_entries = db.session.query(curr_class)
-        table_entries.delete()
-        logging.info('Deleted dictionary values from table ' + curr_table)
-        for inner_k,inner_v in v.iteritems():
-            sql_insert = 'INSERT INTO ' + curr_table + ' VALUES (' + str(inner_k) + ',' + "'" + inner_v.replace("'",'') + "'" + ')'
-            db.session.execute(sql_insert)
-            db.session.commit()
-        logging.info('Inserted dictionary values into table ' + curr_table)
-    create_provider_code_table()
+        sql_truncate = 'TRUNCATE TABLE ' + curr_table
+        db.session.execute(sql_truncate)
+        db.session.commit()
+        logging.info('Truncated table ' + curr_table)
 
 def create_provider_code_table():
     provider_code_table = 'provider_code'
     provider_code_class = ProviderCode
     table_entries = db.session.query(provider_code_class)
     table_entries.delete()
-    provider_code_dict = {1: u'הלשכה המרכזית לסטטיסטיקה', 2: u'איחוד הצלה', 3: u'הלשכה המרכזית לסטטיסטיקה', 4: u'שומרי הדרך'}
+    provider_code_dict = {1: u'הלשכה המרכזית לסטטיסטיקה - סוג תיק 1', 2: u'איחוד הצלה', 3: u'הלשכה המרכזית לסטטיסטיקה - סוג תיק 3', 4: u'שומרי הדרך'}
     for k, v in provider_code_dict.items():
         sql_insert = 'INSERT INTO ' + provider_code_table + ' VALUES (' + str(k) + ',' + "'" + v + "'" + ')'
         db.session.execute(sql_insert)
         db.session.commit()
 
+def create_views():
+    db.session.execute('CREATE OR REPLACE VIEW markers_hebrew AS ' + VIEWS.MARKERS_HEBREW_VIEW)
+    db.session.execute('CREATE OR REPLACE VIEW involved_hebrew AS ' + VIEWS.INVOLVED_HEBREW_VIEW)
+    #TODO - Add vehicles_hebrew view after reloading the data
+    #db.session.execute('CREATE OR REPLACE VIEW vehicles_hebrew AS ' + VIEWS.VEHICLES_HEBREW_VIEW)
+    db.session.commit()
 
-def main(specific_folder, delete_all, path, batch_size, delete_start_date, dictionary_file):
+def update_dictionary_tables(path):
+    import_ui = ImporterUI(path)
+    dir_name = import_ui.source_path()
+    dir_list = glob.glob("{0}/*/*".format(dir_name))
 
-    if dictionary_file is not None:
-        create_dictionary_tables(dictionary_file)
+    for directory in sorted(dir_list, reverse=True):
+        directory_name = os.path.basename(os.path.normpath(directory))
+        year = directory_name[1:5] if directory_name[0] == 'H' else directory_name[0:4]
+        parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
+        provider_code = get_provider_code(parent_directory)
+        logging.info("Importing Directory " + directory)
+        files_from_cbs = dict(get_files(directory))
+        if len(files_from_cbs) == 0:
+            return 0
+        logging.info("Filling dictionary for directory '{}'".format(directory))
+        fill_dictionary_tables(files_from_cbs[DICTIONARY], provider_code, int(year))
+
+def main(specific_folder, delete_all, path, batch_size, delete_start_date, load_start_year):
 
     import_ui = ImporterUI(path, specific_folder, delete_all)
     dir_name = import_ui.source_path()
@@ -795,11 +835,18 @@ def main(specific_folder, delete_all, path, batch_size, delete_start_date, dicti
         delete_cbs_entries(delete_start_date, batch_size)
     started = datetime.now()
     total = 0
-    for directory in sorted(dir_list):
-        parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
-        provider_code = get_provider_code(parent_directory)
-        logging.info("Importing Directory " + directory)
-        total += import_to_datastore(directory, provider_code, batch_size)
+    for directory in sorted(dir_list, reverse=True):
+        directory_name = os.path.basename(os.path.normpath(directory))
+        year = directory_name[1:5] if directory_name[0] == 'H' else directory_name[0:4]
+        if int(year) >= int(load_start_year):
+            parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
+            provider_code = get_provider_code(parent_directory)
+            logging.info("Importing Directory " + directory)
+            total += import_to_datastore(directory, provider_code, int(year), batch_size)
+        else:
+            logging.info('Importing only starting year {0}. Directory {1} has year {2}'.format(load_start_year,
+                                                                                               directory_name,
+                                                                                               year))
 
     delete_invalid_entries(batch_size)
 
@@ -810,3 +857,5 @@ def main(specific_folder, delete_all, path, batch_size, delete_start_date, dicti
     logging.info("Finished processing all directories{0}{1}".format(", except:\n" if failed else "",
                                                                     "\n".join(failed)))
     logging.info("Total: {0} items in {1}".format(total, time_delta(started)))
+
+    create_views()

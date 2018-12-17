@@ -59,7 +59,7 @@ def process():
 @click.option('--path', type=str, default="static/data/cbs")
 @click.option('--batch_size', type=int, default=5000)
 @click.option('--delete_start_date', type=str, default=None)
-@click.option('--load_start_year', type=str, default='')
+@click.option('--load_start_year', type=str, default='2005')
 
 def cbs(specific_folder, delete_all, path, batch_size, delete_start_date, load_start_year):
     from anyway.parsers.cbs import main

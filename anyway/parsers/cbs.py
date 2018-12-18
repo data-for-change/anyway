@@ -763,7 +763,7 @@ def fill_dictionary_tables(cbs_dictionary, provider_code, year):
             logging.info('A key ' + str(k) + ' was added to dictionary - update models, tables and classes')
             continue
         for inner_k,inner_v in v.items():
-            sql_delete = 'DELETE FROM ' + curr_table + ' WHERE provider_code=' + str(provider_code) + ' AND year=' + str(year)
+            sql_delete = 'DELETE FROM ' + curr_table + ' WHERE provider_code=' + str(provider_code) + ' AND year=' + str(year) + ' AND id=' + str(inner_k)
             db.session.execute(sql_delete)
             db.session.commit()
             sql_insert = 'INSERT INTO ' + curr_table + ' VALUES (' + str(inner_k) + ',' +  str(year) + ',' + str(provider_code) + ',' + "'" + inner_v.replace("'",'') + "'"  + ')' + ' ON CONFLICT DO NOTHING'
@@ -809,6 +809,8 @@ def update_dictionary_tables(path):
     for directory in sorted(dir_list, reverse=True):
         directory_name = os.path.basename(os.path.normpath(directory))
         year = directory_name[1:5] if directory_name[0] == 'H' else directory_name[0:4]
+        if int(year) < 2008:
+            continue
         parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
         provider_code = get_provider_code(parent_directory)
         logging.info("Importing Directory " + directory)

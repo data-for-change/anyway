@@ -1,4 +1,3 @@
-from ..constants import CONST
 from six import iteritems
 import os
 

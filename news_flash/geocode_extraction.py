@@ -3,7 +3,7 @@ import googlemaps
 
 def geocode_extract(location, maps_key):
     gmaps = googlemaps.Client(key=maps_key)
-    geocode_result = gmaps.geocode(location, components={'country': 'IL'}, language='iw')
+    geocode_result = gmaps.geocode(location)
     if geocode_result is None or geocode_result == []:
         return None
     country = ''
@@ -14,4 +14,7 @@ def geocode_extract(location, maps_key):
     if country == 'IL':
         return geocode_result[0]['geometry']['location']
     else:
-        return None
+        if country == '':
+            return geocode_result[0]['geometry']['location']
+        else:
+            return None

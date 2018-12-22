@@ -198,13 +198,10 @@ def get_location_of_text(input_text, maps_key):
     translated_location = translated_location.strip()
     if ',' == translated_location[-1]:
         translated_location = translated_location[:-1]
-    print(translated_location)
-    result = translate_client.translate(translated_location, target_language='iw', source_language='en')
-    location = result['translatedText']
-    location = html.unescape(location)
+    location = html.unescape(translated_location)
     gmaps = googlemaps.Client(key=maps_key)
     print('location: ' + location)
-    geocode_result = gmaps.geocode(location, language='iw', region='il')
+    geocode_result = gmaps.geocode(location)
     if geocode_result is None or geocode_result == []:
         return None
     country = ''

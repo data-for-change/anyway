@@ -66,7 +66,7 @@ app.add_url_rule(
     view_func=GraphQLView.as_view(
         'graphql',
         schema=graphqlSchema,
-        graphiql=True, # for having the GraphiQL interface
+        graphiql=True,
         get_context=lambda: {'session': db.session}
     )
 )

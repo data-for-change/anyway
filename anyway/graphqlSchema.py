@@ -17,11 +17,10 @@ class AccidentMarkerHebrewConnection(relay.Connection):
 
 class Query(graphene.ObjectType):
     node = relay.Node.Field()
-    # Allows sorting over multiple columns, by default over the primary key
     accident_markers_hebrew = graphene.List(AccidentMarkerHebrew)
 
     def resolve_accident_markers_hebrew(self, info):
-        query = AccidentMarkerHebrew.get_query(info)  # SQLAlchemy query
+        query = AccidentMarkerHebrew.get_query(info)
         return query.all()
 
 

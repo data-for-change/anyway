@@ -29,3 +29,5 @@ six
 celery[redis]
 openpyxl
 pandas==0.22.0
+graphene-sqlalchemy==2.1.0
+Flask-GraphQL==2.0.0

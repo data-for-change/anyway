@@ -41,6 +41,8 @@ from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved,
 from .config import ENTRIES_PER_PAGE
 from six.moves import http_client
 from sqlalchemy import func
+from flask_graphql import GraphQLView
+from graphqlSchema import schema as graphqlSchema
 import pandas as pd
 
 app = utilities.init_flask()
@@ -59,6 +61,15 @@ app.config['OAUTH_CREDENTIALS'] = {
         'secret': os.environ.get('GOOGLE_LOGIN_CLIENT_SECRET')
     }
 }
+app.add_url_rule(
+    '/graphql',
+    view_func=GraphQLView.as_view(
+        'graphql',
+        schema=graphqlSchema,
+        graphiql=True,
+        get_context=lambda: {'session': db.session}
+    )
+)
 assets = Environment()
 assets.init_app(app)
 

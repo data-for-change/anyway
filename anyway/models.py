@@ -36,7 +36,7 @@ roles_users = Table('roles_users', Base.metadata,
 
 class User(Base, UserMixin):
     __tablename__ = "users"
-    id = Column(BigInteger(), Sequence('id_seq', start=23, increment=1),primary_key=True)
+    id = Column(BigInteger(), primary_key=True)
     email = Column(String(120), unique=True)
     first_name = Column(String(50))
     last_name = Column(String(50))

@@ -864,7 +864,11 @@ def oauth_callback(provider):
             return redirect(url_for('index'))
         user = db.session.query(User).filter_by(social_id=social_id).first()
         if not user:
-            user = User(social_id=social_id, nickname=username, email=email, provider=provider)
+            curr_max_id = db.session.query(func.max(User.id)).scalar()
+            if curr_max_id is None:
+                curr_max_id = 0
+            user_id = curr_max_id + 1
+            user = User(id=user_id, social_id=social_id, nickname=username, email=email, provider=provider)
             db.session.add(user)
             db.session.commit()
     login.login_user(user, True)

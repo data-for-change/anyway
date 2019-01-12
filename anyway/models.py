@@ -6,7 +6,7 @@ import logging
 from .constants import CONST
 from collections import namedtuple
 from sqlalchemy import Column, BigInteger, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table, \
-    ForeignKeyConstraint, func, and_
+    ForeignKeyConstraint, func, and_, Sequence
 from sqlalchemy.orm import relationship, load_only, backref
 from .utilities import init_flask, decode_hebrew
 from flask_sqlalchemy import SQLAlchemy
@@ -36,7 +36,7 @@ roles_users = Table('roles_users', Base.metadata,
 
 class User(Base, UserMixin):
     __tablename__ = "users"
-    id = Column(BigInteger(), primary_key=True)
+    id = Column(BigInteger(), Sequence('id_seq', start=23, increment=1),primary_key=True)
     email = Column(String(120), unique=True)
     first_name = Column(String(50))
     last_name = Column(String(50))

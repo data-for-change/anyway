@@ -42,7 +42,7 @@ from .config import ENTRIES_PER_PAGE
 from six.moves import http_client
 from sqlalchemy import func
 from flask_graphql import GraphQLView
-from graphqlSchema import schema as graphqlSchema
+from anyway.graphqlSchema import schema as graphqlSchema
 import pandas as pd
 
 app = utilities.init_flask()

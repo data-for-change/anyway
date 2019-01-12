@@ -1,7 +1,7 @@
 import graphene
 from graphene import relay
-from graphene_sqlalchemy import SQLAlchemyObjectType, SQLAlchemyConnectionField
-from models import AccidentMarkerView as AccidentMarkerViewModel
+from graphene_sqlalchemy import SQLAlchemyObjectType
+from anyway.models import AccidentMarkerView as AccidentMarkerViewModel
 
 
 class AccidentMarkerHebrew(SQLAlchemyObjectType):

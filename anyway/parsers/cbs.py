@@ -594,37 +594,44 @@ def import_to_datastore(directory, provider_code, year, batch_size):
 
         new_items = 0
         accidents, accidents_no_location = import_accidents(provider_code=provider_code, **files_from_cbs)
-
-        all_existing_accidents_ids = set(map(lambda x: x[0],
-                                             db.session.query(AccidentMarker.provider_and_id).all()))
-        accidents = [accident for accident in accidents if accident['provider_and_id'] not in all_existing_accidents_ids]
+        curr_accidents_ids = [accident['provider_and_id'] for accident in accidents]
+        # find accident ids that exist in db (dups) and don't insert them
+        accidents_ids_dups = set(map(lambda x: x[0],
+                                             db.session.query(AccidentMarker)\
+                                             .filter(AccidentMarker.provider_code == provider_code)\
+                                             .filter(AccidentMarker.accident_year.in_([year, year+1]))\
+                                             .filter(AccidentMarker.provider_and_id.in_(curr_accidents_ids))\
+                                             .with_entities(AccidentMarker.provider_and_id).all()))
+        accidents = [accident for accident in accidents if accident['provider_and_id'] not in accidents_ids_dups]
         logging.info('inserting ' + str(len(accidents)) + ' new accidents')
         for accidents_chunk in chunks(accidents, batch_size):
             db.session.bulk_insert_mappings(AccidentMarker, accidents_chunk)
         new_items += len(accidents)
 
-        all_involved_accident_ids = set(map(lambda x: x[0], db.session.query(Involved.provider_and_id).all()))
         involved = import_involved(provider_code=provider_code, **files_from_cbs)
-        involved = [x for x in involved if x['provider_and_id'] not in all_involved_accident_ids]
+        involved = [x for x in involved if x['provider_and_id'] not in accidents_ids_dups]
 
         logging.info('inserting ' + str(len(involved)) + ' new involved')
         for involved_chunk in chunks(involved, batch_size):
             db.session.bulk_insert_mappings(Involved, involved_chunk)
         new_items += len(involved)
 
-        all_vehicles_accident_ids = set(map(lambda x: x[0], db.session.query(Vehicle.provider_and_id).all()))
         vehicles = import_vehicles(provider_code=provider_code, **files_from_cbs)
-        vehicles = [x for x in vehicles if x['provider_and_id'] not in all_vehicles_accident_ids]
+        vehicles = [x for x in vehicles if x['provider_and_id'] not in accidents_ids_dups]
         logging.info('inserting ' + str(len(vehicles)) + ' new vehicles')
         for vehicles_chunk in chunks(vehicles, batch_size):
             db.session.bulk_insert_mappings(Vehicle, vehicles_chunk)
         new_items += len(vehicles)
 
-
-        all_existing_accidents_ids_without_location = set(map(lambda x: x[0],
-                                                              db.session.query(AccidentsNoLocation.provider_and_id).all()))
-        accidents_no_location = [accident for accident in accidents_no_location \
-                                if accident['provider_and_id'] not in all_existing_accidents_ids_without_location]
+        curr_accidents_no_location_ids = [accident['provider_and_id'] for accident in accidents_no_location]
+        # find accident ids that exist in db (dups) and don't insert them
+        accidents_no_location_ids_dups = set(map(lambda x: x[0],
+                                             db.session.query(AccidentsNoLocation)\
+                                             .filter(AccidentsNoLocation.provider_code == provider_code)\
+                                             .filter(AccidentsNoLocation.accident_year.in_([year, year+1]))\
+                                             .filter(AccidentsNoLocation.provider_and_id.in_(curr_accidents_no_location_ids))\
+                                             .with_entities(AccidentsNoLocation.provider_and_id).all()))
+        accidents_no_location = [accident for accident in accidents_no_location if accident['provider_and_id'] not in accidents_no_location_ids_dups]
         accidents_no_location_ids = [accident['provider_and_id'] for accident in accidents_no_location]
         logging.info('inserting ' + str(len(accidents_no_location)) + ' accidents without location')
         for accidents_chunk in chunks(accidents_no_location, batch_size):

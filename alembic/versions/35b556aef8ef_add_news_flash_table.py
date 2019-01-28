@@ -1,7 +1,7 @@
 """add new table
 
 Revision ID: 35b556aef8ef
-Revises: 3c8ad66233c0
+Revises: 423a7ea74c0a
 Create Date: 2018-12-10 11:31:29.518909
 
 """

@@ -594,6 +594,7 @@ class Involved(Base):
     involve_id = Column(Integer())
     accident_year = Column(Integer())
     accident_month = Column(Integer())
+    injury_severity_mais = Column(Integer())
     __table_args__ = (ForeignKeyConstraint([accident_id, provider_code],
                                            [AccidentMarker.id, AccidentMarker.provider_code],
                                            ondelete="CASCADE"),
@@ -748,6 +749,7 @@ class Vehicle(Base):
     car_id = Column(Integer())
     accident_year = Column(Integer())
     accident_month = Column(Integer())
+    vehicle_damage = Column(Integer())
     __table_args__ = (ForeignKeyConstraint([accident_id, provider_code],
                                            [AccidentMarker.id, AccidentMarker.provider_code],
                                            ondelete="CASCADE"),
@@ -916,6 +918,7 @@ class InvolvedNoLocation(Base):
     involve_id = Column(Integer())
     accident_year = Column(Integer())
     accident_month = Column(Integer())
+    injury_severity_mais = Column(Integer())
     __table_args__ = (ForeignKeyConstraint([accident_id, provider_code],
                                            [AccidentsNoLocation.id, AccidentsNoLocation.provider_code],
                                            ondelete="CASCADE"),
@@ -939,6 +942,7 @@ class VehicleNoLocation(Base):
     car_id = Column(Integer())
     accident_year = Column(Integer())
     accident_month = Column(Integer())
+    vehicle_damage = Column(Integer())
     __table_args__ = (ForeignKeyConstraint([accident_id, provider_code],
                                            [AccidentsNoLocation.id, AccidentsNoLocation.provider_code],
                                            ondelete="CASCADE"),
@@ -1355,6 +1359,20 @@ class ProviderCode(Base):
     __tablename__ = "provider_code"
     id = Column(Integer(), primary_key=True, index=True)
     provider_code_hebrew = Column(Text(), nullable=True)
+
+class VehicleDamage(Base):
+    __tablename__ = "vehicle_damage"
+    id = Column(Integer(), primary_key=True, index=True)
+    year = Column(Integer(), primary_key=True, index=True)
+    provider_code = Column(Integer(), primary_key=True, index=True)
+    vehicle_damage_hebrew = Column(Text(), nullable=True)
+
+class InjurySeverityMAIS(Base):
+    __tablename__ = "injury_severity_mais"
+    id = Column(Integer(), primary_key=True, index=True)
+    year = Column(Integer(), primary_key=True, index=True)
+    provider_code = Column(Integer(), primary_key=True, index=True)
+    injury_severity_mais_hebrew = Column(Text(), nullable=True)
 
 class AccidentMarkerView(Base):
     __tablename__ = "markers_hebrew"

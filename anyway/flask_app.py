@@ -41,6 +41,8 @@ from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved,
 from .config import ENTRIES_PER_PAGE
 from six.moves import http_client
 from sqlalchemy import func
+from flask_graphql import GraphQLView
+from anyway.graphqlSchema import schema as graphqlSchema
 import pandas as pd
 
 app = utilities.init_flask()
@@ -59,6 +61,15 @@ app.config['OAUTH_CREDENTIALS'] = {
         'secret': os.environ.get('GOOGLE_LOGIN_CLIENT_SECRET')
     }
 }
+app.add_url_rule(
+    '/graphql',
+    view_func=GraphQLView.as_view(
+        'graphql',
+        schema=graphqlSchema,
+        graphiql=True,
+        get_context=lambda: {'session': db.session}
+    )
+)
 assets = Environment()
 assets.init_app(app)
 
@@ -853,7 +864,11 @@ def oauth_callback(provider):
             return redirect(url_for('index'))
         user = db.session.query(User).filter_by(social_id=social_id).first()
         if not user:
-            user = User(social_id=social_id, nickname=username, email=email, provider=provider)
+            curr_max_id = db.session.query(func.max(User.id)).scalar()
+            if curr_max_id is None:
+                curr_max_id = 0
+            user_id = curr_max_id + 1
+            user = User(id=user_id, social_id=social_id, nickname=username, email=email, provider=provider)
             db.session.add(user)
             db.session.commit()
     login.login_user(user, True)

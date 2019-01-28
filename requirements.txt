@@ -33,3 +33,5 @@ feedparser
 scrapy
 google
 googlemaps
+graphene-sqlalchemy==2.1.0
+Flask-GraphQL==2.0.0

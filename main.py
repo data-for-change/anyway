@@ -37,11 +37,9 @@ def testserver(open_server, debug_js):
     app.run(debug=True, host=os.getenv('IP', default_host),
             port=int(os.getenv('PORT', 5000)))
 
-
 @cli.group()
 def process():
     pass
-
 
 @process.command()
 @click.option('--specific_folder', is_flag=True, default=False)
@@ -49,9 +47,9 @@ def process():
 @click.option('--path', type=str, default="static/data/cbs")
 @click.option('--batch_size', type=int, default=5000)
 @click.option('--delete_start_date', type=str, default=None)
-@click.option('--dictionary_file', type=str, default=None)
+@click.option('--load_start_year', type=str, default='2005')
 
-def cbs(specific_folder, delete_all, path, batch_size, delete_start_date, dictionary_file):
+def cbs(specific_folder, delete_all, path, batch_size, delete_start_date, load_start_year):
     from anyway.parsers.cbs import main
 
     return main(specific_folder=specific_folder,
@@ -59,7 +57,7 @@ def cbs(specific_folder, delete_all, path, batch_size, delete_start_date, dictio
                 path=path,
                 batch_size=batch_size,
                 delete_start_date=delete_start_date,
-                dictionary_file=dictionary_file)
+                load_start_year=load_start_year)
 
 @process.command()
 @click.option('--specific_folder', is_flag=True, default=False)
@@ -95,6 +93,50 @@ def schools(filepath, batch_size):
     from anyway.parsers.schools import parse
     return parse(filepath=filepath,
                  batch_size=batch_size)
+@cli.group()
+def preprocess():
+    pass
+
+@preprocess.command()
+@click.option('--path', type=str)
+
+def preprocess_cbs(path):
+    from anyway.parsers.preprocessing_cbs_files import main
+
+    return main(path=path)
+
+@cli.group()
+def create_views():
+    pass
+
+@create_views.command()
+
+def cbs_views():
+    from anyway.parsers.cbs import create_views
+
+    return create_views()
+
+@cli.group()
+def update_dictionary_tables():
+    pass
+
+@update_dictionary_tables.command()
+@click.option('--path', type=str, default="static/data/cbs")
+def update_cbs(path):
+    from anyway.parsers.cbs import update_dictionary_tables
+
+    return update_dictionary_tables(path)
+
+@cli.group()
+def truncate_dictionary_tables():
+    pass
+
+@truncate_dictionary_tables.command()
+@click.option('--path', type=str)
+def truncate_cbs(path):
+    from anyway.parsers.cbs import truncate_dictionary_tables
+
+    return truncate_dictionary_tables(path)
 
 
 @cli.command()

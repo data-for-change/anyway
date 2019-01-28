@@ -1,4 +1,4 @@
 pytest
-pylint
+pylint<2
 urlobject
 pytest-selenium

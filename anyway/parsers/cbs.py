@@ -78,6 +78,7 @@ from .. import models
 from ..constants import CONST
 from ..views import VIEWS
 from ..utilities import ItmToWGS84, init_flask, time_delta,ImporterUI,truncate_tables,chunks
+from ..import importmail_cbs
 from functools import partial
 import logging
 
@@ -820,35 +821,40 @@ def update_dictionary_tables(path):
         logging.info("Filling dictionary for directory '{}'".format(directory))
         fill_dictionary_tables(files_from_cbs[DICTIONARY], provider_code, int(year))
 
-def main(specific_folder, delete_all, path, batch_size, delete_start_date, load_start_year):
 
-    import_ui = ImporterUI(path, specific_folder, delete_all)
-    dir_name = import_ui.source_path()
+def main(specific_folder, delete_all, path, batch_size, delete_start_date, load_start_year, from_email, username='', password=''):
 
-    if specific_folder:
-        dir_list = [dir_name]
-    else:
-        dir_list = glob.glob("{0}/*/*".format(dir_name))
+    if not from_email:
+        import_ui = ImporterUI(path, specific_folder, delete_all)
+        dir_name = import_ui.source_path()
 
-    # wipe all the AccidentMarker and Vehicle and Involved data first
-    if import_ui.is_delete_all():
-        truncate_tables(db, (Vehicle, Involved, AccidentMarker))
-    elif delete_start_date is not None:
-        delete_cbs_entries(delete_start_date, batch_size)
-    started = datetime.now()
-    total = 0
-    for directory in sorted(dir_list, reverse=True):
-        directory_name = os.path.basename(os.path.normpath(directory))
-        year = directory_name[1:5] if directory_name[0] == 'H' else directory_name[0:4]
-        if int(year) >= int(load_start_year):
-            parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
-            provider_code = get_provider_code(parent_directory)
-            logging.info("Importing Directory " + directory)
-            total += import_to_datastore(directory, provider_code, int(year), batch_size)
+        if specific_folder:
+            dir_list = [dir_name]
         else:
-            logging.info('Importing only starting year {0}. Directory {1} has year {2}'.format(load_start_year,
-                                                                                               directory_name,
-                                                                                               year))
+            dir_list = glob.glob("{0}/*/*".format(dir_name))
+
+        # wipe all the AccidentMarker and Vehicle and Involved data first
+        if import_ui.is_delete_all():
+            truncate_tables(db, (Vehicle, Involved, AccidentMarker))
+        elif delete_start_date is not None:
+            delete_cbs_entries(delete_start_date, batch_size)
+        started = datetime.now()
+        total = 0
+        for directory in sorted(dir_list, reverse=True):
+            directory_name = os.path.basename(os.path.normpath(directory))
+            year = directory_name[1:5] if directory_name[0] == 'H' else directory_name[0:4]
+            if int(year) >= int(load_start_year):
+                parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
+                provider_code = get_provider_code(parent_directory)
+                logging.info("Importing Directory " + directory)
+                total += import_to_datastore(directory, provider_code, int(year), batch_size)
+            else:
+                logging.info('Importing only starting year {0}. Directory {1} has year {2}'.format(load_start_year,
+                                                                                                   directory_name,
+                                                                                                   year))
+    else:
+        logging.info("Importing data from mail...")
+        importmail_cbs.main(username, password, True)
 
     delete_invalid_entries(batch_size)
 

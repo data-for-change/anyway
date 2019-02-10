@@ -48,8 +48,11 @@ def process():
 @click.option('--batch_size', type=int, default=5000)
 @click.option('--delete_start_date', type=str, default=None)
 @click.option('--load_start_year', type=str, default='2005')
+@click.option('--from_email', is_flag=True, default=False)
+@click.option('--username', default='')
+@click.option('--password', default='')
 
-def cbs(specific_folder, delete_all, path, batch_size, delete_start_date, load_start_year):
+def cbs(specific_folder, delete_all, path, batch_size, delete_start_date, load_start_year, from_email, username, password):
     from anyway.parsers.cbs import main
 
     return main(specific_folder=specific_folder,
@@ -57,7 +60,10 @@ def cbs(specific_folder, delete_all, path, batch_size, delete_start_date, load_s
                 path=path,
                 batch_size=batch_size,
                 delete_start_date=delete_start_date,
-                load_start_year=load_start_year)
+                load_start_year=load_start_year,
+                from_email=from_email,
+                username=username,
+                password=password)
 
 @process.command()
 @click.option('--specific_folder', is_flag=True, default=False)

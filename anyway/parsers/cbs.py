@@ -79,8 +79,12 @@ from ..constants import CONST
 from ..views import VIEWS
 from ..utilities import ItmToWGS84, init_flask, time_delta,ImporterUI,truncate_tables,chunks
 from ..import importmail_cbs
+from . import preprocessing_cbs_files
 from functools import partial
 import logging
+import tempfile
+import shutil
+import zipfile
 
 failed_dirs = OrderedDict()
 
@@ -854,7 +858,16 @@ def main(specific_folder, delete_all, path, batch_size, delete_start_date, load_
                                                                                                    year))
     else:
         logging.info("Importing data from mail...")
-        importmail_cbs.main(username, password, True)
+        temp_dir = tempfile.mkdtemp()
+        zip_path = importmail_cbs.main(temp_dir, username, password, True)
+        zip_ref = zipfile.ZipFile(zip_path, 'r')
+        cbs_files_dir = os.path.join(temp_dir, 'cbsfiles')
+        if not os.path.exists(cbs_files_dir):
+            os.makedirs(cbs_files_dir)
+        zip_ref.extractall(cbs_files_dir)
+        zip_ref.close()
+        preprocessing_cbs_files.update_cbs_files_names(cbs_files_dir)
+        shutil.rmtree(temp_dir)
 
     delete_invalid_entries(batch_size)
 

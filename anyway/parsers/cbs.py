@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 import glob
 import os
 import json
@@ -8,7 +9,7 @@ from datetime import datetime
 import six
 from six import iteritems
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 import pandas as pd
 import math
 from .. import field_names, localization
@@ -85,6 +86,7 @@ import logging
 import tempfile
 import shutil
 import zipfile
+import traceback
 
 failed_dirs = OrderedDict()
 
@@ -581,6 +583,7 @@ def get_files(directory):
         elif name in (ACCIDENTS, INVOLVED, VEHICLES):
             yield name, df
 
+
 def import_to_datastore(directory, provider_code, year, batch_size):
     """
     goes through all the files in a given directory, parses and commits them
@@ -689,6 +692,7 @@ def delete_invalid_entries(batch_size):
             q.delete(synchronize_session='fetch')
             db.session.commit()
 
+
 def delete_cbs_entries(start_date, batch_size):
     """
     deletes all CBS markers (provider_code=1 or provider_code=3) in the database with created date >= start_date
@@ -704,6 +708,44 @@ def delete_cbs_entries(start_date, batch_size):
     marker_ids_to_delete = [acc_id[0] for acc_id in marker_ids_to_delete]
 
     logging.info('There are ' + str(len(marker_ids_to_delete)) + ' accident ids to delete starting ' + str(start_date))
+
+    for ids_chunk in chunks(marker_ids_to_delete, batch_size):
+
+        logging.info('Deleting a chunk of ' + str(len(ids_chunk)))
+
+        q = db.session.query(Involved).filter(Involved.accident_id.in_(ids_chunk))
+        if q.all():
+            logging.info('deleting entries from Involved')
+            q.delete(synchronize_session=False)
+            db.session.commit()
+
+        q = db.session.query(Vehicle).filter(Vehicle.accident_id.in_(ids_chunk))
+        if q.all():
+            logging.info('deleting entries from Vehicle')
+            q.delete(synchronize_session=False)
+            db.session.commit()
+
+        q = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_(ids_chunk))
+        if q.all():
+            logging.info('deleting entries from AccidentMarker')
+            q.delete(synchronize_session=False)
+            db.session.commit()
+
+
+def delete_cbs_entries_from_email(provider_code, year, batch_size):
+    """
+    deletes all CBS markers (provider_code=1 or provider_code=3) in the database with created date >= start_date
+    start_date is a string in the format of '%Y-%m-%d', for example, January 2nd 2018: start_date='2018-01-02'
+    first deletes from tables Involved and Vehicle, then from table AccidentMarker
+    """
+
+    marker_ids_to_delete = db.session.query(AccidentMarker.id)\
+                                     .filter(and_(AccidentMarker.accident_year == year), AccidentMarker.provider_code == provider_code).all()
+
+
+    marker_ids_to_delete = [acc_id[0] for acc_id in marker_ids_to_delete]
+
+    logging.info('There are ' + str(len(marker_ids_to_delete)) + ' accident ids to delete for year ' + str(year))
 
     for ids_chunk in chunks(marker_ids_to_delete, batch_size):
 
@@ -826,57 +868,75 @@ def update_dictionary_tables(path):
         fill_dictionary_tables(files_from_cbs[DICTIONARY], provider_code, int(year))
 
 
+def get_file_type_and_year(file_path):
+    df = pd.read_csv(file_path, encoding=CONTENT_ENCODING)
+    provider_code = df.iloc[0][field_names.file_type.lower()]
+    year = df.iloc[0][field_names.accident_year]
+    return int(provider_code), int(year)
+
+
 def main(specific_folder, delete_all, path, batch_size, delete_start_date, load_start_year, from_email, username='', password=''):
+    try:
+        if not from_email:
+            import_ui = ImporterUI(path, specific_folder, delete_all)
+            dir_name = import_ui.source_path()
 
-    if not from_email:
-        import_ui = ImporterUI(path, specific_folder, delete_all)
-        dir_name = import_ui.source_path()
-
-        if specific_folder:
-            dir_list = [dir_name]
-        else:
-            dir_list = glob.glob("{0}/*/*".format(dir_name))
-
-        # wipe all the AccidentMarker and Vehicle and Involved data first
-        if import_ui.is_delete_all():
-            truncate_tables(db, (Vehicle, Involved, AccidentMarker))
-        elif delete_start_date is not None:
-            delete_cbs_entries(delete_start_date, batch_size)
-        started = datetime.now()
-        total = 0
-        for directory in sorted(dir_list, reverse=True):
-            directory_name = os.path.basename(os.path.normpath(directory))
-            year = directory_name[1:5] if directory_name[0] == 'H' else directory_name[0:4]
-            if int(year) >= int(load_start_year):
-                parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
-                provider_code = get_provider_code(parent_directory)
-                logging.info("Importing Directory " + directory)
-                total += import_to_datastore(directory, provider_code, int(year), batch_size)
+            if specific_folder:
+                dir_list = [dir_name]
             else:
-                logging.info('Importing only starting year {0}. Directory {1} has year {2}'.format(load_start_year,
-                                                                                                   directory_name,
-                                                                                                   year))
-    else:
-        logging.info("Importing data from mail...")
-        temp_dir = tempfile.mkdtemp()
-        zip_path = importmail_cbs.main(temp_dir, username, password, True)
-        zip_ref = zipfile.ZipFile(zip_path, 'r')
-        cbs_files_dir = os.path.join(temp_dir, 'cbsfiles')
-        if not os.path.exists(cbs_files_dir):
-            os.makedirs(cbs_files_dir)
-        zip_ref.extractall(cbs_files_dir)
-        zip_ref.close()
-        preprocessing_cbs_files.update_cbs_files_names(cbs_files_dir)
-        shutil.rmtree(temp_dir)
+                dir_list = glob.glob("{0}/*/*".format(dir_name))
 
-    delete_invalid_entries(batch_size)
+            # wipe all the AccidentMarker and Vehicle and Involved data first
+            if import_ui.is_delete_all():
+                truncate_tables(db, (Vehicle, Involved, AccidentMarker))
+            elif delete_start_date is not None:
+                delete_cbs_entries(delete_start_date, batch_size)
+            started = datetime.now()
+            total = 0
+            for directory in sorted(dir_list, reverse=True):
+                directory_name = os.path.basename(os.path.normpath(directory))
+                year = directory_name[1:5] if directory_name[0] == 'H' else directory_name[0:4]
+                if int(year) >= int(load_start_year):
+                    parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
+                    provider_code = get_provider_code(parent_directory)
+                    logging.info("Importing Directory " + directory)
+                    total += import_to_datastore(directory, provider_code, int(year), batch_size)
+                else:
+                    logging.info('Importing only starting year {0}. Directory {1} has year {2}'.format(load_start_year,
+                                                                                                       directory_name,
+                                                                                                       year))
+        else:
+            logging.info("Importing data from mail...")
+            temp_dir = tempfile.mkdtemp()
+            zip_path = importmail_cbs.main(temp_dir, username, password, True)
+            zip_ref = zipfile.ZipFile(zip_path, 'r')
+            cbs_files_dir = os.path.join(temp_dir, 'cbsfiles')
+            if not os.path.exists(cbs_files_dir):
+                os.makedirs(cbs_files_dir)
+            zip_ref.extractall(cbs_files_dir)
+            zip_ref.close()
+            preprocessing_cbs_files.update_cbs_files_names(cbs_files_dir)
+            acc_data_file_path = preprocessing_cbs_files.get_accidents_file_data(cbs_files_dir)
+            provider_code, year = get_file_type_and_year(acc_data_file_path)
+            delete_cbs_entries_from_email(provider_code, year, batch_size)
+            started = datetime.now()
+            total = 0
+            logging.info("Importing Directory " + cbs_files_dir)
+            total += import_to_datastore(cbs_files_dir, provider_code, year, batch_size)
+            shutil.rmtree(temp_dir)
 
-    fill_db_geo_data()
+        delete_invalid_entries(batch_size)
 
-    failed = ["\t'{0}' ({1})".format(directory, fail_reason) for directory, fail_reason in
-              iteritems(failed_dirs)]
-    logging.info("Finished processing all directories{0}{1}".format(", except:\n" if failed else "",
-                                                                    "\n".join(failed)))
-    logging.info("Total: {0} items in {1}".format(total, time_delta(started)))
+        fill_db_geo_data()
 
-    create_views()
+        failed = ["\t'{0}' ({1})".format(directory, fail_reason) for directory, fail_reason in
+                  iteritems(failed_dirs)]
+        logging.info("Finished processing all directories{0}{1}".format(", except:\n" if failed else "",
+                                                                        "\n".join(failed)))
+        logging.info("Total: {0} items in {1}".format(total, time_delta(started)))
+
+        create_views()
+    except Exception as ex:
+        print("Exception occured while loading the cbs data: {0}".format(str(ex)))
+        print("Traceback: {0}".format(traceback.format_exc()))
+        # Todo - send an email that an exception occured

@@ -83,6 +83,7 @@ safety_measures_use = "SHIMUSHBEAVIZAREYBETIHUT_LMS"
 late_deceased = "PTIRAMEUHERET_LMS"
 car_id = "MISPAR_REHEV_FIKT"
 involve_id = "ZEHUT_FIKT"
+injury_severity_mais = "MAXAIS_LMS"
 
 # Vehicles data
 engine_volume = "NEFAH"
@@ -93,3 +94,4 @@ vehicle_attribution = "SHIYUH_REHEV_LMS"
 vehicle_type_vehicles = "SUG_REHEV_LMS"
 seats = "MEKOMOT_YESHIVA_LMS"
 total_weight = "MISHKAL_KOLEL_LMS"
+vehicle_damage = "NEZEK"

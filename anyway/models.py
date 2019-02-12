@@ -6,7 +6,7 @@ import logging
 from .constants import CONST
 from collections import namedtuple
 from sqlalchemy import Column, BigInteger, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table, \
-    ForeignKeyConstraint, func, and_
+    ForeignKeyConstraint, func, and_, Sequence, TIMESTAMP
 from sqlalchemy.orm import relationship, load_only, backref
 from .utilities import init_flask, decode_hebrew
 from flask_sqlalchemy import SQLAlchemy
@@ -594,6 +594,7 @@ class Involved(Base):
     involve_id = Column(Integer())
     accident_year = Column(Integer())
     accident_month = Column(Integer())
+    injury_severity_mais = Column(Integer())
     __table_args__ = (ForeignKeyConstraint([accident_id, provider_code],
                                            [AccidentMarker.id, AccidentMarker.provider_code],
                                            ondelete="CASCADE"),
@@ -642,6 +643,47 @@ class Involved(Base):
     def get_id(self):
         return self.id
 
+class NewsFlash(Base):
+    __tablename__ = "news_flash"
+    id = Column(BigInteger(), primary_key=True)
+    accident = Column(Boolean())
+    author = Column(Text())
+    date = Column(TIMESTAMP())
+    description = Column(Text())
+    lat = Column(Float())
+    link = Column(Text())
+    lon = Column(Float())
+    title = Column(Text())
+    source = Column(Text())
+    location = Column(Text())
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "accident": self.accident,
+            "author": self.author,
+            "date": self.date,
+            "description": self.description,
+            "lat": self.lat,
+            "link": self.link,
+            "lon": self.lon,
+            "title": self.title,
+            "source": self.source,
+            "location": self.location
+        }
+
+    # Flask-Login integration
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.id
 
 class City(Base):
     __tablename__ = "cities"
@@ -748,6 +790,7 @@ class Vehicle(Base):
     car_id = Column(Integer())
     accident_year = Column(Integer())
     accident_month = Column(Integer())
+    vehicle_damage = Column(Integer())
     __table_args__ = (ForeignKeyConstraint([accident_id, provider_code],
                                            [AccidentMarker.id, AccidentMarker.provider_code],
                                            ondelete="CASCADE"),
@@ -916,6 +959,7 @@ class InvolvedNoLocation(Base):
     involve_id = Column(Integer())
     accident_year = Column(Integer())
     accident_month = Column(Integer())
+    injury_severity_mais = Column(Integer())
     __table_args__ = (ForeignKeyConstraint([accident_id, provider_code],
                                            [AccidentsNoLocation.id, AccidentsNoLocation.provider_code],
                                            ondelete="CASCADE"),
@@ -939,6 +983,7 @@ class VehicleNoLocation(Base):
     car_id = Column(Integer())
     accident_year = Column(Integer())
     accident_month = Column(Integer())
+    vehicle_damage = Column(Integer())
     __table_args__ = (ForeignKeyConstraint([accident_id, provider_code],
                                            [AccidentsNoLocation.id, AccidentsNoLocation.provider_code],
                                            ondelete="CASCADE"),
@@ -1355,3 +1400,110 @@ class ProviderCode(Base):
     __tablename__ = "provider_code"
     id = Column(Integer(), primary_key=True, index=True)
     provider_code_hebrew = Column(Text(), nullable=True)
+
+class VehicleDamage(Base):
+    __tablename__ = "vehicle_damage"
+    id = Column(Integer(), primary_key=True, index=True)
+    year = Column(Integer(), primary_key=True, index=True)
+    provider_code = Column(Integer(), primary_key=True, index=True)
+    vehicle_damage_hebrew = Column(Text(), nullable=True)
+
+class InjurySeverityMAIS(Base):
+    __tablename__ = "injury_severity_mais"
+    id = Column(Integer(), primary_key=True, index=True)
+    year = Column(Integer(), primary_key=True, index=True)
+    provider_code = Column(Integer(), primary_key=True, index=True)
+    injury_severity_mais_hebrew = Column(Text(), nullable=True)
+
+class AccidentMarkerView(Base):
+    __tablename__ = "markers_hebrew"
+    id = Column(BigInteger(), primary_key=True)
+    provider_code = Column(Integer(), primary_key=True)
+    provider_code_hebrew = Column(Text())
+    accident_type = Column(Integer())
+    accident_type_hebrew = Column(Text())
+    accident_severity = Column(Integer())
+    accident_severity_hebrew = Column(Text())
+    location_accuracy = Column(Integer())
+    location_accuracy_hebrew = Column(Text())
+    road_type = Column(Integer())
+    road_type_hebrew = Column(Text())
+    road_shape = Column(Integer())
+    road_shape_hebrew = Column(Text())
+    day_type = Column(Integer())
+    day_type_hebrew = Column(Text())
+    police_unit = Column(Integer())
+    police_unit_hebrew = Column(Text())
+    one_lane = Column(Integer())
+    one_lane_hebrew = Column(Text())
+    multi_lane = Column(Integer())
+    multi_lane_hebrew = Column(Text())
+    speed_limit = Column(Integer())
+    speed_limit_hebrew = Column(Text())
+    road_intactness = Column(Integer())
+    road_intactness_hebrew = Column(Text())
+    road_width = Column(Integer())
+    road_width_hebrew = Column(Text())
+    road_sign = Column(Integer())
+    road_sign_hebrew = Column(Text())
+    road_light = Column(Integer())
+    road_light_hebrew = Column(Text())
+    road_control = Column(Integer())
+    road_control_hebrew = Column(Text())
+    weather = Column(Integer())
+    weather_hebrew = Column(Text())
+    road_surface = Column(Integer())
+    road_surface_hebrew = Column(Text())
+    road_object = Column(Integer())
+    road_object_hebrew = Column(Text())
+    object_distance = Column(Integer())
+    object_distance_hebrew = Column(Text())
+    didnt_cross = Column(Integer())
+    didnt_cross_hebrew = Column(Text())
+    cross_mode = Column(Integer())
+    cross_mode_hebrew = Column(Text())
+    cross_location = Column(Integer())
+    cross_location_hebrew = Column(Text())
+    cross_direction = Column(Integer())
+    cross_direction_hebrew = Column(Text())
+    road1 = Column(Integer())
+    road2 = Column(Integer())
+    km = Column(Float())
+    yishuv_symbol = Column(Integer())
+    yishuv_name = Column(Text())
+    geo_area = Column(Integer())
+    geo_area_hebrew = Column(Text())
+    day_night = Column(Integer())
+    day_night_hebrew = Column(Text())
+    day_in_week = Column(Integer())
+    day_in_week_hebrew = Column(Text())
+    traffic_light = Column(Integer())
+    traffic_light_hebrew = Column(Text())
+    region = Column(Integer())
+    region_hebrew = Column(Text())
+    district = Column(Integer())
+    district_hebrew = Column(Text())
+    natural_area = Column(Integer())
+    natural_area_hebrew = Column(Text())
+    municipal_status = Column(Integer())
+    municipal_status_hebrew = Column(Text())
+    yishuv_shape = Column(Integer())
+    yishuv_shape_hebrew = Column(Text())
+    street1 = Column(Integer())
+    street1_hebrew = Column(Text())
+    street2 = Column(Integer())
+    street2_hebrew = Column(Text())
+    non_urban_intersection_hebrew = Column(Text())
+    accident_year = Column(Integer())
+    accident_month = Column(Integer())
+    accident_day = Column(Integer())
+    accident_hour_raw = Column(Integer())
+    accident_hour_raw_hebrew = Column(Text())
+    accident_hour = Column(Integer())
+    accident_minute = Column(Integer())
+    geom = Column(Geometry('POINT'))
+    latitude = Column(Float())
+    longitude = Column(Float())
+    x = Column(Float())
+    y = Column(Float())
+

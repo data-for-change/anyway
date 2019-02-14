@@ -758,7 +758,7 @@ def delete_cbs_entries_from_email(provider_code, year, batch_size):
     first deletes from tables Involved and Vehicle, then from table AccidentMarker
     """
 
-    marker_ids_to_delete = db.session.query(AccidentMarker.id)\
+    marker_ids_to_delete = db.session.query(AccidentMarker.provider_and_id)\
                                      .filter(and_(AccidentMarker.accident_year == year), AccidentMarker.provider_code == provider_code).all()
 
 
@@ -770,19 +770,19 @@ def delete_cbs_entries_from_email(provider_code, year, batch_size):
 
         logging.info('Deleting a chunk of ' + str(len(ids_chunk)))
 
-        q = db.session.query(Involved).filter(Involved.accident_id.in_(ids_chunk))
+        q = db.session.query(Involved).filter(Involved.provider_and_id.in_(ids_chunk))
         if q.all():
             logging.info('deleting entries from Involved')
             q.delete(synchronize_session=False)
             db.session.commit()
 
-        q = db.session.query(Vehicle).filter(Vehicle.accident_id.in_(ids_chunk))
+        q = db.session.query(Vehicle).filter(Vehicle.provider_and_id.in_(ids_chunk))
         if q.all():
             logging.info('deleting entries from Vehicle')
             q.delete(synchronize_session=False)
             db.session.commit()
 
-        q = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_(ids_chunk))
+        q = db.session.query(AccidentMarker).filter(AccidentMarker.provider_and_id.in_(ids_chunk))
         if q.all():
             logging.info('deleting entries from AccidentMarker')
             q.delete(synchronize_session=False)

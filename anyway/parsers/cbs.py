@@ -714,9 +714,9 @@ def delete_invalid_entries(batch_size):
 
 def delete_cbs_entries(start_date, batch_size):
     """
-    deletes all CBS markers (provider_code=1 or provider_code=3) in the database with created date >= start_date
-    start_date is a string in the format of '%Y-%m-%d', for example, January 2nd 2018: start_date='2018-01-02'
+    deletes all CBS markers (provider_code=1 or provider_code=3) in the database created in year and with provider code provider_code
     first deletes from tables Involved and Vehicle, then from table AccidentMarker
+    first deletes from tables InvolvedNoLocation and VehicleNoLocation, then from table AccidentsNoLocation
     """
 
     marker_ids_to_delete = db.session.query(AccidentMarker.id)\
@@ -749,16 +749,43 @@ def delete_cbs_entries(start_date, batch_size):
             logging.info('deleting entries from AccidentMarker')
             q.delete(synchronize_session=False)
             db.session.commit()
+    marker_ids_to_delete = db.session.query(AccidentsNoLocation.provider_and_id)\
+                                     .filter(and_(AccidentsNoLocation.accident_year == year), AccidentsNoLocation.provider_code == provider_code).all()
 
+    marker_ids_to_delete = [acc_id[0] for acc_id in marker_ids_to_delete]
+
+    logging.info('There are ' + str(len(marker_ids_to_delete)) + ' accident ids without location to delete for year ' + str(year))
+
+    for ids_chunk in chunks(marker_ids_to_delete, batch_size):
+
+        logging.info('Deleting a chunk of ' + str(len(ids_chunk)))
+
+        q = db.session.query(InvolvedNoLocation).filter(InvolvedNoLocation.provider_and_id.in_(ids_chunk))
+        if q.all():
+            logging.info('deleting entries from InvolvedNoLocation')
+            q.delete(synchronize_session=False)
+            db.session.commit()
+
+        q = db.session.query(VehicleNoLocation).filter(VehicleNoLocation.provider_and_id.in_(ids_chunk))
+        if q.all():
+            logging.info('deleting entries from VehicleNoLocation')
+            q.delete(synchronize_session=False)
+            db.session.commit()
+
+        q = db.session.query(AccidentsNoLocation).filter(AccidentsNoLocation.provider_and_id.in_(ids_chunk))
+        if q.all():
+            logging.info('deleting entries from AccidentsNoLocation')
+            q.delete(synchronize_session=False)
+            db.session.commit()
 
 def delete_cbs_entries_from_email(provider_code, year, batch_size):
     """
-    deletes all CBS markers (provider_code=1 or provider_code=3) in the database with created date >= start_date
-    start_date is a string in the format of '%Y-%m-%d', for example, January 2nd 2018: start_date='2018-01-02'
+    deletes all CBS markers (provider_code=1 or provider_code=3) in the database created in year and with provider code provider_code
     first deletes from tables Involved and Vehicle, then from table AccidentMarker
+    first deletes from tables InvolvedNoLocation and VehicleNoLocation, then from table AccidentsNoLocation
     """
 
-    marker_ids_to_delete = db.session.query(AccidentMarker.id)\
+    marker_ids_to_delete = db.session.query(AccidentMarker.provider_and_id)\
                                      .filter(and_(AccidentMarker.accident_year == year), AccidentMarker.provider_code == provider_code).all()
 
 
@@ -770,24 +797,52 @@ def delete_cbs_entries_from_email(provider_code, year, batch_size):
 
         logging.info('Deleting a chunk of ' + str(len(ids_chunk)))
 
-        q = db.session.query(Involved).filter(Involved.accident_id.in_(ids_chunk))
+        q = db.session.query(Involved).filter(Involved.provider_and_id.in_(ids_chunk))
         if q.all():
             logging.info('deleting entries from Involved')
             q.delete(synchronize_session=False)
             db.session.commit()
 
-        q = db.session.query(Vehicle).filter(Vehicle.accident_id.in_(ids_chunk))
+        q = db.session.query(Vehicle).filter(Vehicle.provider_and_id.in_(ids_chunk))
         if q.all():
             logging.info('deleting entries from Vehicle')
             q.delete(synchronize_session=False)
             db.session.commit()
 
-        q = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_(ids_chunk))
+        q = db.session.query(AccidentMarker).filter(AccidentMarker.provider_and_id.in_(ids_chunk))
         if q.all():
             logging.info('deleting entries from AccidentMarker')
             q.delete(synchronize_session=False)
             db.session.commit()
 
+    marker_ids_to_delete = db.session.query(AccidentsNoLocation.provider_and_id)\
+                                     .filter(and_(AccidentsNoLocation.accident_year == year), AccidentsNoLocation.provider_code == provider_code).all()
+
+    marker_ids_to_delete = [acc_id[0] for acc_id in marker_ids_to_delete]
+
+    logging.info('There are ' + str(len(marker_ids_to_delete)) + ' accident ids without location to delete for year ' + str(year))
+
+    for ids_chunk in chunks(marker_ids_to_delete, batch_size):
+
+        logging.info('Deleting a chunk of ' + str(len(ids_chunk)))
+
+        q = db.session.query(InvolvedNoLocation).filter(InvolvedNoLocation.provider_and_id.in_(ids_chunk))
+        if q.all():
+            logging.info('deleting entries from InvolvedNoLocation')
+            q.delete(synchronize_session=False)
+            db.session.commit()
+
+        q = db.session.query(VehicleNoLocation).filter(VehicleNoLocation.provider_and_id.in_(ids_chunk))
+        if q.all():
+            logging.info('deleting entries from VehicleNoLocation')
+            q.delete(synchronize_session=False)
+            db.session.commit()
+
+        q = db.session.query(AccidentsNoLocation).filter(AccidentsNoLocation.provider_and_id.in_(ids_chunk))
+        if q.all():
+            logging.info('deleting entries from AccidentsNoLocation')
+            q.delete(synchronize_session=False)
+            db.session.commit()
 
 def fill_db_geo_data():
     """

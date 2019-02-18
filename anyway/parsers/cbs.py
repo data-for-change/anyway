@@ -899,7 +899,7 @@ def get_file_type_and_year(file_path):
     return int(provider_code), int(year)
 
 
-def main(specific_folder, delete_all, path, batch_size, delete_start_date, load_start_year, from_email, username='', password=''):
+def main(specific_folder, delete_all, path, batch_size, delete_start_date, load_start_year, from_email, username='', password='', email_search_start_date=''):
     try:
         if not from_email:
             import_ui = ImporterUI(path, specific_folder, delete_all)
@@ -932,7 +932,10 @@ def main(specific_folder, delete_all, path, batch_size, delete_start_date, load_
         else:
             logging.info("Importing data from mail...")
             temp_dir = tempfile.mkdtemp()
-            zip_path = importmail_cbs.main(temp_dir, username, password, True)
+            zip_path = importmail_cbs.main(temp_dir, username, password, email_search_start_date)
+            if zip_path is None:
+                logging.info("No new cbs files found")
+                return
             zip_ref = zipfile.ZipFile(zip_path, 'r')
             cbs_files_dir = os.path.join(temp_dir, 'cbsfiles')
             if not os.path.exists(cbs_files_dir):

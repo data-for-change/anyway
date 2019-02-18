@@ -51,8 +51,9 @@ def process():
 @click.option('--from_email', is_flag=True, default=False)
 @click.option('--username', default='')
 @click.option('--password', default='')
+@click.option('--email_search_start_date', type=str, default='') #format - DD.MM.YYYY
 
-def cbs(specific_folder, delete_all, path, batch_size, delete_start_date, load_start_year, from_email, username, password):
+def cbs(specific_folder, delete_all, path, batch_size, delete_start_date, load_start_year, from_email, username, password, email_search_start_date):
     from anyway.parsers.cbs import main
 
     return main(specific_folder=specific_folder,
@@ -63,7 +64,8 @@ def cbs(specific_folder, delete_all, path, batch_size, delete_start_date, load_s
                 load_start_year=load_start_year,
                 from_email=from_email,
                 username=username,
-                password=password)
+                password=password,
+                email_search_start_date=email_search_start_date)
 
 @process.command()
 @click.option('--specific_folder', is_flag=True, default=False)

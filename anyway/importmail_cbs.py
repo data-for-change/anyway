@@ -12,7 +12,7 @@ import logging
 mail_dir = 'cbs/data'
 
 
-def main(detach_dir, username=None, password=None, lastmail=False):
+def main(detach_dir, username=None, password=None, email_search_start_date=''):
     try:
         username = username or os.environ.get('MAILUSER')
         password = password or os.environ.get('MAILPASS')
@@ -32,7 +32,11 @@ def main(detach_dir, username=None, password=None, lastmail=False):
 
         try:
             imapsession.select(mail_dir)
-            typ, data = imapsession.search(None, 'ALL')
+            if email_search_start_date == '':
+                typ, data = imapsession.search(None, 'ALL')
+            else:
+                search_start_date = datetime.strptime(email_search_start_date, '%d.%m.%Y').strftime('%d-%b-%Y')
+                typ, data = imapsession.search(None, '(SINCE "{0}")'.format(search_start_date))
         except imaplib.IMAP4.error:
             logging.error('Error searching given mailbox: %s' % mail_dir)
             exit()
@@ -40,9 +44,6 @@ def main(detach_dir, username=None, password=None, lastmail=False):
         file_found = False
         if not os.path.exists(detach_dir):
             os.makedirs(detach_dir)
-        listdir = os.listdir(detach_dir)
-
-        is_empty = len(listdir) <= 1 or not lastmail
         total = 0
 
         # Iterating over all emails
@@ -62,18 +63,6 @@ def main(detach_dir, username=None, password=None, lastmail=False):
             except ValueError:
                 mtime = datetime.strptime(mail['Date'][:-12], '%a, %d %b %Y %H:%M:%S')
 
-            if not is_empty:
-                # Accident folder is not empty, we only need the latest
-                if datetime.now() - mtime < timedelta(hours=4):
-                    file_found = True
-                else:
-                    continue
-
-            # Handles Gmail bug which hasn't physically removed some of the deleted files
-            mail_date = datetime(2015, 10, 6, 10)
-            if mtime < mail_date:
-                continue
-
             for part in mail.walk():
                 if part.get_content_maintype() == 'multipart' or part.get('Content-Disposition') is None:
                     continue
@@ -90,6 +79,7 @@ def main(detach_dir, username=None, password=None, lastmail=False):
                     time.sleep(0.1)
                     with open(filepath, 'wb') as fp:
                         fp.write(part.get_payload(decode=True))
+                    file_found = True
 
             if file_found:
                 break
@@ -100,6 +90,7 @@ def main(detach_dir, username=None, password=None, lastmail=False):
         return filepath
     except Exception as ex:
         pass # Todo - send an error email to anyway email
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

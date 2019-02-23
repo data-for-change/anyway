@@ -749,7 +749,7 @@ def delete_cbs_entries(start_date, batch_size):
             logging.info('deleting entries from AccidentMarker')
             q.delete(synchronize_session=False)
             db.session.commit()
-            
+
     marker_ids_to_delete = db.session.query(AccidentsNoLocation.id)\
                                      .filter(AccidentsNoLocation.created >= datetime.strptime(start_date, '%Y-%m-%d')) \
                                      .filter(or_((AccidentsNoLocation.provider_code == CONST.CBS_ACCIDENT_TYPE_1_CODE), \

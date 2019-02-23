@@ -13,7 +13,6 @@ CBS_FILES_HEBREW = {'sadot': 'Fields',
 
 def update_cbs_files_names(directory):
     files = sorted([path for path in os.listdir(directory)])
-    accidents_file = None
     for file in files:
         file_path = os.path.join(directory,file)
         for hebrew_file_name, english_file_name in iteritems(CBS_FILES_HEBREW):
@@ -25,7 +24,3 @@ def get_accidents_file_data(directory):
     for file_path in os.listdir(directory):
         if file_path.endswith("{0}{1}".format(CBS_FILES_HEBREW['klali'], '.csv')):
             return os.path.join(directory, file_path)
-
-
-# def main(path):
-#     update_cbs_files_names(path)

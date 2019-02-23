@@ -756,7 +756,7 @@ def delete_cbs_entries(start_date, batch_size):
                                              (AccidentsNoLocation.provider_code == CONST.CBS_ACCIDENT_TYPE_3_CODE))).all()
     marker_ids_to_delete = [acc_id[0] for acc_id in marker_ids_to_delete]
 
-    logging.info('There are ' + str(len(marker_ids_to_delete)) + ' accident ids without location to delete for year ' + str(year))
+    logging.info('There are ' + str(len(marker_ids_to_delete)) + ' accident ids without location to delete')
 
     for ids_chunk in chunks(marker_ids_to_delete, batch_size):
 

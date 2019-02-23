@@ -6,7 +6,7 @@ import logging
 from .constants import CONST
 from collections import namedtuple
 from sqlalchemy import Column, BigInteger, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table, \
-    ForeignKeyConstraint, func, and_, Sequence, TIMESTAMP
+    ForeignKeyConstraint, func, and_, TIMESTAMP
 from sqlalchemy.orm import relationship, load_only, backref
 from .utilities import init_flask, decode_hebrew
 from flask_sqlalchemy import SQLAlchemy

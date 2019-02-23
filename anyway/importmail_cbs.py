@@ -2,7 +2,7 @@ from __future__ import print_function
 import email
 import imaplib
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 import time
 from .utilities import time_delta
 import sys
@@ -88,7 +88,7 @@ def main(detach_dir, username=None, password=None, email_search_start_date=''):
         imapsession.close()
         imapsession.logout()
         return filepath
-    except Exception as ex:
+    except Exception as _:
         pass # Todo - send an error email to anyway email
 
 

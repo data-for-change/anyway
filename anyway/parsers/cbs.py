@@ -749,9 +749,11 @@ def delete_cbs_entries(start_date, batch_size):
             logging.info('deleting entries from AccidentMarker')
             q.delete(synchronize_session=False)
             db.session.commit()
-    marker_ids_to_delete = db.session.query(AccidentsNoLocation.provider_and_id)\
-                                     .filter(and_(AccidentsNoLocation.accident_year == year), AccidentsNoLocation.provider_code == provider_code).all()
-
+            
+    marker_ids_to_delete = db.session.query(AccidentsNoLocation.id)\
+                                     .filter(AccidentsNoLocation.created >= datetime.strptime(start_date, '%Y-%m-%d')) \
+                                     .filter(or_((AccidentsNoLocation.provider_code == CONST.CBS_ACCIDENT_TYPE_1_CODE), \
+                                             (AccidentsNoLocation.provider_code == CONST.CBS_ACCIDENT_TYPE_3_CODE))).all()
     marker_ids_to_delete = [acc_id[0] for acc_id in marker_ids_to_delete]
 
     logging.info('There are ' + str(len(marker_ids_to_delete)) + ' accident ids without location to delete for year ' + str(year))
@@ -760,19 +762,19 @@ def delete_cbs_entries(start_date, batch_size):
 
         logging.info('Deleting a chunk of ' + str(len(ids_chunk)))
 
-        q = db.session.query(InvolvedNoLocation).filter(InvolvedNoLocation.provider_and_id.in_(ids_chunk))
+        q = db.session.query(InvolvedNoLocation).filter(InvolvedNoLocation.accident_id.in_(ids_chunk))
         if q.all():
             logging.info('deleting entries from InvolvedNoLocation')
             q.delete(synchronize_session=False)
             db.session.commit()
 
-        q = db.session.query(VehicleNoLocation).filter(VehicleNoLocation.provider_and_id.in_(ids_chunk))
+        q = db.session.query(VehicleNoLocation).filter(VehicleNoLocation.accident_id.in_(ids_chunk))
         if q.all():
             logging.info('deleting entries from VehicleNoLocation')
             q.delete(synchronize_session=False)
             db.session.commit()
 
-        q = db.session.query(AccidentsNoLocation).filter(AccidentsNoLocation.provider_and_id.in_(ids_chunk))
+        q = db.session.query(AccidentsNoLocation).filter(AccidentsNoLocation.id.in_(ids_chunk))
         if q.all():
             logging.info('deleting entries from AccidentsNoLocation')
             q.delete(synchronize_session=False)

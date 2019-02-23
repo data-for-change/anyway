@@ -1,8 +1,9 @@
 FROM ubuntu:xenial
 
 # Install system tools
-RUN apt-get -y update && \
-    apt-get install -y --no-install-recommends -qq \
+RUN apt-get clean
+RUN apt-get -y update
+RUN apt-get install -y \
         build-essential \
         python-pip \
         python-dev \

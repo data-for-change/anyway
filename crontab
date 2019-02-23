@@ -1,1 +1,1 @@
-0 15 * * * python main.py process cbs --from_email --username $MAILUSER --password $MAILPASS
+@daily python main.py process cbs --from_email --username $MAILUSER --password $MAILPASS

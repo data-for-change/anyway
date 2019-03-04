@@ -13,7 +13,7 @@ def scrap_flash_news(site_name, maps_key):
             news_flash_crawl(rss_link, site_name, maps_key)
 
 
-def main():
+def main(google_maps_key_path):
     sys.path.append(os.path.dirname(os.path.realpath(__file__)))
-    scrap_flash_news('ynet','/Users/atalya/Downloads/google_maps_key.txt')
+    scrap_flash_news('ynet',google_maps_key_path)
 

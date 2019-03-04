@@ -68,9 +68,10 @@ def cbs(specific_folder, delete_all, path, batch_size, delete_start_date, load_s
                 email_search_start_date=email_search_start_date)
 
 @process.command()
-def news_flash():
+@click.option('--google_maps_key_path', type=str)
+def news_flash(google_maps_key_path):
     from anyway.parsers.news_flash.scrap_flash_news import main
-    return main()
+    return main(google_maps_key_path)
 
 @process.command()
 @click.option('--specific_folder', is_flag=True, default=False)

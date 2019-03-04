@@ -1,7 +1,7 @@
 import scrapy
 import logging
 
-from ..anyway.parsers.news_flash import insert_new_flash_news
+from anyway.parsers.news_flash.news_flash_parser import insert_new_flash_news
 from .geocode_extraction import geocode_extract
 from .location_extraction import get_location_of_text
 

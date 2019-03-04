@@ -15,7 +15,7 @@ services:
       - db
 
   db:
-    image: mdillon/postgis
+    image: orihoch/anyway-db:postgres9.6-postgis2.5
     environment:
       - POSTGRES_PASSWORD=anyway
       - POSTGRES_USER=anyway

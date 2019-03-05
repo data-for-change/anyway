@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-if [ "${INITIALIZE}" == "yes" ]; then
+if [ "${INITIALIZE}" == "no" ]; then
   sleep 2
   ! alembic upgrade head && sleep 2 && ! alembic upgrade head && sleep 2 \
   && ! alembic upgrade head && echo failed to upgrade head && exit 1

@@ -20,4 +20,9 @@ services:
       - POSTGRES_PASSWORD=anyway
       - POSTGRES_USER=anyway
       - POSTGRES_DB=anyway
+    volumes:
+      - db_data:/var/lib/postgresql/data  
     restart: always
+
+volumes: 
+  db_data:

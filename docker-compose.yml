@@ -2,7 +2,7 @@ version: '2'
 
 services:
   anyway:
-    # build: .
+    build: .
     image: uumpa/hasadna-anyway:fix_docker_test3
     ports:
       - "8080:5000"
@@ -15,7 +15,7 @@ services:
       - db
 
   db:
-    image: orihoch/anyway-db:postgres9.6-postgis2.5
+    image: anyway_db:latest
     environment:
       - POSTGRES_PASSWORD=anyway
       - POSTGRES_USER=anyway

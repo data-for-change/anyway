@@ -21,9 +21,9 @@ RUN pip install -r requirements.txt
 
 COPY . /anyway
 
-RUN mv /anyway/static/data/rsa/rsa.xlsx /
+#RUN mv /anyway/static/data/rsa/rsa.xlsx /
 
-VOLUME ["/anyway/static"]
+#VOLUME ["/anyway/static"]
 EXPOSE 5000
 
 ENTRYPOINT ["/anyway/docker-entrypoint.sh"]

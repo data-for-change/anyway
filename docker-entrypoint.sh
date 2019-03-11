@@ -1,11 +1,9 @@
 #!/bin/bash
 
 
-if [ "${INITIALIZE}" == "no" ]; then
-  sleep 2
-  ! alembic upgrade head && sleep 2 && ! alembic upgrade head && sleep 2 \
-  && ! alembic upgrade head && echo failed to upgrade head && exit 1
-fi  
+
+  ! alembic upgrade head && echo failed to upgrade head && exit 1
+
 
 #ls -lah /rsa.xlsx
 

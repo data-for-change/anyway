@@ -41,7 +41,7 @@
 <div id="app">
     <div class="navbar navbar-fixed-top">
         <div class="navbar-inner" id="step1Component" style="vertical-align:middle; line-height: 40px; {{ '; display: none' if map_only }}">
-            <!-- <div style="float: left;">
+             <div style="float: left;">
                 <span id="connection_status" style="border-right: 1px solid #ddd; margin-left: 8px; padding-right: 8px; cursor: pointer" onclick="app.loginDialogLoad()">
                     {% if current_user.is_authenticated %}
                          {{ gettext('Hi') + ' ' + current_user.nickname }}
@@ -60,8 +60,8 @@
                 {% if current_user.is_authenticated %}
                     <img src="../static/img/settings.png" onclick="app.preferencesDialogLoad()" width="16" style="padding-left: 5px; cursor: pointer" />
                 {% endif %}
-            </div> -->
-                <!--<i class="fa fa-bars" style="border-right: 1px solid #ddd; padding-right: 8px; border-left: 1px solid #ddd; padding-left: 8px;margin-right: 102px; font-size: 18px; line-height: 100%; vertical-align: middle; cursor: pointer"></i>-->
+            </div>
+                <i class="fa fa-bars" style="border-right: 1px solid #ddd; padding-right: 8px; border-left: 1px solid #ddd; padding-left: 8px;margin-right: 102px; font-size: 18px; line-height: 100%; vertical-align: middle; cursor: pointer"></i>
             <div class="input-group" style="float: left;">
                 <button style="margin: 0 5px 0 2px;" type="button" class="btn btn-primary btn-xs" onclick="app.LocationSubscriptionDialog()">
                     הרשמה
@@ -459,7 +459,11 @@
     <div class="modal hide fade">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h3>{{ gettext('היכנס') }}</h3>
+            {% if current_user.is_authenticated %}
+                <h3>{{ gettext('התנתק') }}</h3>
+            {% else %}
+                <h3>{{ gettext('התחבר') }}</h3>
+            {% endif %}
         </div>
         <div class="modal-body" style="width: 50%; margin: 0 auto;">
             <div class="control-group" style="width: 100%; margin: 0 auto;">
@@ -477,12 +481,12 @@
                         <span class="fa fa-facebook"></span>
                     </a>
                     <br/>
-                    <!--<h3>OR</h3>-->
-                    <br/>
-                    <a class="btn btn-social-icon btn-google" href="{{ url_for('oauth_authorize', provider='google') }}">
-                        {{ gettext('Login with Google') }}
-                        <span class="fa fa-google"></span>
-                    </a>
+                    <!--&lt;!&ndash;<h3>OR</h3>&ndash;&gt;-->
+                    <!--<br/>-->
+                    <!--<a class="btn btn-social-icon btn-google" href="{{ url_for('oauth_authorize', provider='google') }}">-->
+                        <!--{{ gettext('Login with Google') }}-->
+                        <!--<span class="fa fa-google"></span>-->
+                    <!--</a>-->
                 {% endif %}
             </div>
         </div>
@@ -1464,7 +1468,7 @@
             app.years = [];
         {% endif %}
         {% if age_groups is defined and age_groups != "" %}
-            app.age_groups = {{  age_groups }};
+            app.age_groups = [{{  ''.join(age_groups) }}];
         {% else %}
             var age_groups_list = Array.from({length: AGE_GROUPS_NUMBER}, (v, k) => k+1);
             age_groups_list.push(99)

@@ -1,6 +1,6 @@
 from .models import AccidentMarker
 from .pymapcluster import calculate_clusters
-from .task_queue import task_queue, map_task, task_signature
+from .task_queue import task_queue
 import time
 import logging
 import multiprocessing
@@ -10,14 +10,9 @@ import multiprocessing
 def calculate_marker_box(marker_box, kwargs):
     kwargs.update(marker_box)
     markers_in_box = AccidentMarker.bounding_box_query(**kwargs)
-    markers = markers_in_box.accidnet_markers.all()
-    markers += markers_in_box.rsa_markers.all()
+    markers = markers_in_box['accidnet_markers'].all()
+    markers += markers_in_box['rsa_markers'].all()
     return calculate_clusters(markers, kwargs['zoom'])
-
-
-# def retrieve_clusters(**kwargs):
-#     marker_boxes = divide_to_boxes(kwargs['ne_lat'], kwargs['ne_lng'], kwargs['sw_lat'], kwargs['sw_lng'])
-#     return map_task(task_signature(calculate_marker_box, kwargs), marker_boxes)
 
 
 def retrieve_clusters(**kwargs):

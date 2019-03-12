@@ -15,7 +15,7 @@ services:
       - db
 
   db:
-    image: anyway_db:latest
+    image: mickeyrouash/anyway_db_mickeyr
     environment:
       - POSTGRES_PASSWORD=anyway
       - POSTGRES_USER=anyway

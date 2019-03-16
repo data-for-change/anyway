@@ -68,6 +68,12 @@ def cbs(specific_folder, delete_all, path, batch_size, delete_start_date, load_s
                 email_search_start_date=email_search_start_date)
 
 @process.command()
+@click.option('--google_maps_key_path', type=str)
+def news_flash(google_maps_key_path):
+    from anyway.parsers.news_flash.scrap_flash_news import main
+    return main(google_maps_key_path)
+
+@process.command()
 @click.option('--specific_folder', is_flag=True, default=False)
 @click.option('--delete_all', is_flag=True)
 @click.option('--path', type=str, default="static/data/cbs_vehicles_registered")

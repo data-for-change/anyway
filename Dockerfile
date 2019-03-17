@@ -17,6 +17,7 @@ WORKDIR /anyway
 # a full pip reinstall
 COPY requirements.txt /anyway
 RUN pip install -U setuptools wheel
+RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 COPY . /anyway

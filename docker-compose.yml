@@ -3,7 +3,7 @@ version: '2'
 services:
   anyway:
     build: .
-    image: uumpa/hasadna-anyway:fix_docker_test3
+    image: mickeyrouash/anyway_mickeyr
     ports:
       - "8080:5000"
     environment:

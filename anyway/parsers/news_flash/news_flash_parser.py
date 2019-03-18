@@ -1,6 +1,5 @@
-from flask_sqlalchemy import SQLAlchemy
-
 from anyway.utilities import init_flask
+from flask_sqlalchemy import SQLAlchemy
 
 app = init_flask()
 db = SQLAlchemy(app)
@@ -11,14 +10,15 @@ def get_description(ind):
     return description
 
 
-def insert_new_flash_news(id_flash, title, link, date_parsed, author, description, location, lat, lon, accident,
-                          source):
+def insert_new_flash_news(id_flash, title, link, date_parsed, author, description, location, lat, lon, road1,
+                          road2, intersection, city, street, accident, source):
     db.session.execute('INSERT INTO news_flash (id,title, link, date, author, description, location, lat, lon, '
-                       'accident, source) VALUES \
+                       'road1, road2, intersection, city, street, accident, source) VALUES \
                        (:id, :title, :link, :date, :author, :description, :location, :lat, :lon, :accident, :source)',
                        {'id': id_flash, 'title': title, 'link': link, 'date': date_parsed, 'author': author,
-                        'description': description, 'location': location, 'lat': lat, 'lon': lon, 'accident': accident,
-                        'source': source})
+                        'description': description, 'location': location, 'lat': lat, 'lon': lon, 'road1': road1,
+                        'road2': road2, 'intersection': intersection, 'city': city, 'street': street,
+                        'accident': accident, 'source': source})
     db.session.commit()
 
 

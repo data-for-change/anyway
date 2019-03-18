@@ -1,25 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import datetime
 import json
 import logging
-
-from .constants import CONST
 from collections import namedtuple
-from sqlalchemy import Column, BigInteger, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, sql, Table, \
-    ForeignKeyConstraint, func, and_, Sequence, TIMESTAMP
-from sqlalchemy.orm import relationship, load_only, backref
-from .utilities import init_flask, decode_hebrew
-from flask_sqlalchemy import SQLAlchemy
-from six import iteritems
-from geoalchemy2 import Geometry
 
-
-import datetime
-from . import localization
-from .database import Base
 from flask_security import UserMixin, RoleMixin
+from flask_sqlalchemy import SQLAlchemy
 from geoalchemy2 import Geometry
 from geoalchemy2 import functions as geoalchemy_functions
+from six import iteritems
+from sqlalchemy import Column, BigInteger, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, \
+    sql, Table, \
+    ForeignKeyConstraint, func, and_, TIMESTAMP
+from sqlalchemy.orm import relationship, load_only, backref
+
+from . import localization
+from .constants import CONST
+from .database import Base
+from .utilities import init_flask, decode_hebrew
 
 app = init_flask()
 db = SQLAlchemy(app)
@@ -646,16 +645,21 @@ class Involved(Base):
 class NewsFlash(Base):
     __tablename__ = "news_flash"
     id = Column(BigInteger(), primary_key=True)
-    accident = Column(Boolean())
-    author = Column(Text())
-    date = Column(TIMESTAMP())
-    description = Column(Text())
-    lat = Column(Float())
-    link = Column(Text())
-    lon = Column(Float())
-    title = Column(Text())
-    source = Column(Text())
-    location = Column(Text())
+    accident = Column(Boolean(), nullable=True)
+    author = Column(Text(), nullable=True)
+    date = Column(TIMESTAMP(), nullable=True)
+    description = Column(Text(), nullable=True)
+    lat = Column(Float(), nullable=True)
+    link = Column(Text(), nullable=True)
+    lon = Column(Float(), nullable=True)
+    road1 = Column(Float(), nullable=True)
+    road2 = Column(Float(), nullable=True)
+    intersection = Column(Text(), nullable=True)
+    city = Column(Text(), nullable=True)
+    street = Column(Text(), nullable=True)
+    title = Column(Text(), nullable=True)
+    source = Column(Text(), nullable=True)
+    location = Column(Text(), nullable=True)
 
     def serialize(self):
         return {
@@ -667,6 +671,11 @@ class NewsFlash(Base):
             "lat": self.lat,
             "link": self.link,
             "lon": self.lon,
+            "road1": self.road1,
+            "road2": self.road2,
+            "intersection": self.intersection,
+            "city": self.city,
+            "street": self.street,
             "title": self.title,
             "source": self.source,
             "location": self.location

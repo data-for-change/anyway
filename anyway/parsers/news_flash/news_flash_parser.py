@@ -14,7 +14,7 @@ def insert_new_flash_news(id_flash, title, link, date_parsed, author, descriptio
                           road2, intersection, city, street, accident, source):
     db.session.execute('INSERT INTO news_flash (id,title, link, date, author, description, location, lat, lon, '
                        'road1, road2, intersection, city, street, accident, source) VALUES \
-                       (:id, :title, :link, :date, :author, :description, :location, :lat, :lon, :accident, :source)',
+                       (:id, :title, :link, :date, :author, :description, :location, :lat, :lon, :road1, :road2, :intersection, :city, :street, :accident, :source)',
                        {'id': id_flash, 'title': title, 'link': link, 'date': date_parsed, 'author': author,
                         'description': description, 'location': location, 'lat': lat, 'lon': lon, 'road1': road1,
                         'road2': road2, 'intersection': intersection, 'city': city, 'street': street,

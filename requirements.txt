@@ -24,6 +24,7 @@ apscheduler<3
 Flask-Compress
 rauth
 requests
+setuptools
 click==6.7
 six
 celery[redis]
@@ -33,6 +34,8 @@ enum34==1.1.6
 feedparser
 scrapy
 google
+urllib3
+chardet
 googlemaps
 graphene-sqlalchemy==2.1.0
 Flask-GraphQL==2.0.0

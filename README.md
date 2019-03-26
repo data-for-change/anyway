@@ -42,7 +42,7 @@ We are using DOCKER. See [DOCKER](docs/DOCKER.md)
 * Get updates whenever you start working: `git pull upstream dev`
 * Push to your fork when you've committed your changes and tested them: `git push`. Now make sure CI tests are passing (Travis CI and AppVeyor) and make a pull request from your fork on GitHub
 
-## Getting the Data
+## Optional: Getting the Data
 1. Optionally, Get the [complete accidents file](https://drive.google.com/drive/folders/1JVBNP3oTn12zxWExPKeCf_vetNHVCcoo?usp=sharing) after sending a permission request, and extract it into `/static/data/cbs`. Otherwise, you'll use the example accidents files that you already got with the code.
 1. Get the RSA file from [rsa file](https://drive.google.com/drive/folders/1oR3q-RBKy8AWXf5Z1JNBKD9cqqlEG-jC?usp=sharing) after sending a permission request and extract the file into `/static/data/rsa`.
 

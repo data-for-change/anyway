@@ -24,19 +24,18 @@ Instructions
 
 **1.** [Get the code] (https://github.com/hasadna/anyway#getting-the-code-and-adding-ci-to-your-forked-repository)
 
-**2.** [Get the data] (https://github.com/hasadna/anyway#getting-the-data)
+**2.** [Install Docker] (https://docs.docker.com/install/)
 
-**3.** Install Docker <br><br>
-*OS X / Windows Users:* Install [Docker toolbox] (https://www.docker.com/docker-toolbox) ([MAC] (https://github.com/docker/toolbox/releases/download/v1.9.1e/DockerToolbox-1.9.1e.pkg) / [Windows] (https://github.com/docker/toolbox/releases/download/v1.9.1e/DockerToolbox-1.9.1e.exe))<br>
-*Linux Users:* `sudo apt-get install docker.io`
+**3.** Open "Docker terminal", go to the **anyway** directory and run:
+    `docker-compose up -d db`
+    
+**4.** Download the [db dump] (https://drive.google.com/drive/folders/1OesX8Y2MGgIcj0B3f5cdS-BIzt4govXA?usp=sharing) (You need to request access) and save it in the **anyway** directory.
 
-**4.** Open "Docker terminal", go to the **anyway** directory and run:
+**5.** Restore the db: `cat truncated_dump | docker-compose exec -T db psql -U anyway`
 
-    docker-compose up
-**You're all set!** Access the app on `localhost` (Linux) or (OS-X/Win) at the virtual machine’s IP (usually `192.168.99.100`); <br>
-To retrieve a docker machine address: `docker-machine ip default` <br>
-(no need for port specification, simply an IP; e.g `192.168.99.100`)
+**6.** start anyway container: `docker-compose up -d`
 
+**7.** **You're all set!** ANYWAY is up and running - connect to http://127.0.0.1:8080
 
 More
 -----------------------
@@ -70,6 +69,10 @@ Stop a running container (id is listed in `docker ps`):
 Deleting an image(from `docker images`):
 
     docker rmi <image-id>
+
+Rebuild the image:
+
+    docker-compose build
 
 
 Additional Notes

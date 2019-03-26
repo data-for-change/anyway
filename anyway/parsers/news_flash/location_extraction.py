@@ -561,7 +561,7 @@ def get_db_matching_location_of_text(text):
     text = preprocess_text(text, True)
     if is_urban(text):
         streets = pd.read_excel('anyway/parsers/news_flash/streets.xlsx', sheet_name='Sheet1')
-        cities = pd.read_excel('anyway/parsers/news_flash/cities.xlsx', sheet_name='Sheet1').tolist()
+        cities = pd.read_excel('anyway/parsers/news_flash/cities.xlsx', sheet_name='Sheet1').city.tolist()
         return process_urban(text, streets, cities)
     else:
         roads = pd.read_excel('anyway/parsers/news_flash/roads.xlsx', sheet_name='Sheet1')

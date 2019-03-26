@@ -71,7 +71,7 @@ def get_ner_location_of_text(text):
     if len(loc_entities) >= 1:
         diff = [loc_entities_word_indices[i + 1] - loc_entities_word_indices[i] for i in
                 range(len(loc_entities_word_indices) - 1)]
-        if max(diff) > 5:  # Distance is greater than 5 words
+        if diff and max(diff) > 5:  # Distance is greater than 5 words
             avg = sum(diff) / len(diff)
             loc_groups = [[loc_entities_word_indices[0]]]
             for x in loc_entities_word_indices[1:]:
@@ -233,9 +233,9 @@ def remove_text_inside_brackets(text, brackets="()[]{}"):
 
 
 def preprocess_text(text, get_first=False):
-    table_no_dot = string.maketrans(string.punctuation.replace('.', ''),
+    table_no_dot = str.maketrans(string.punctuation.replace('.', ''),
                                     ' ' * len(string.punctuation.replace('.', '')))  # remove punctuation, without '.'
-    table = string.maketrans(string.punctuation, ' ' * len(string.punctuation))  # remove punctuation
+    table = str.maketrans(string.punctuation, ' ' * len(string.punctuation))  # remove punctuation
     if type(text) != str:
         text = str(text)
     if any(key in text for key in '()[]{}'):
@@ -305,14 +305,14 @@ def process_roads_table(addresses_df):
 
 
 def first_init():
-    addresses_df = pd.read_excel('Addresses_new.xlsx', sheet_name='Sheet1')
+    addresses_df = pd.read_excel('anyway/parsers/news_flash/Addresses_new.xlsx', sheet_name='Sheet1')
     addresses_df = addresses_df.fillna('NaN')
     streets = process_streets_table(addresses_df)
     roads = process_roads_table(addresses_df)
     cities = streets.city.drop_duplicates()
-    streets.to_excel('streets.xlsx')
-    roads.to_excel('roads.xlsx')
-    cities.to_excel('cities.xlsx')
+    streets.to_excel('anyway/parsers/news_flash/streets.xlsx')
+    roads.to_excel('anyway/parsers/news_flash/roads.xlsx')
+    cities.to_excel('anyway/parsers/news_flash/cities.xlsx')
 
 
 def preprocess_urban_text(text, cities, threshold=90):
@@ -542,7 +542,7 @@ def process_nonurban(text, roads):
     if len(road1_candidates) > 0:
         road1_candidates = list(sorted(set(road1_candidates)))
         for road1 in road1_candidates:
-            road2_candidates = roads.loc[roads.road1 == road1].road2.dropna().tolist()
+            road2_candidates = roads.loc[roads.first_road==road1].second_road.dropna().tolist()
             for road2 in road2_candidates:
                 if text.find(road2) != -1:
                     if text.endswith(road2) or not \
@@ -560,9 +560,9 @@ def process_nonurban(text, roads):
 def get_db_matching_location_of_text(text):
     text = preprocess_text(text, True)
     if is_urban(text):
-        streets = pd.read_excel('streets.xlsx', sheet_name='Sheet1')
-        cities = pd.read_excel('cities.xlsx', sheet_name='Sheet1').tolist()
+        streets = pd.read_excel('anyway/parsers/news_flash/streets.xlsx', sheet_name='Sheet1')
+        cities = pd.read_excel('anyway/parsers/news_flash/cities.xlsx', sheet_name='Sheet1').city.tolist()
         return process_urban(text, streets, cities)
     else:
-        roads = pd.read_excel('roads.xlsx', sheet_name='Sheet1')
+        roads = pd.read_excel('anyway/parsers/news_flash/roads.xlsx', sheet_name='Sheet1')
         return process_nonurban(text, roads)

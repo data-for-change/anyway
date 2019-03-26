@@ -71,7 +71,7 @@ def get_ner_location_of_text(text):
     if len(loc_entities) >= 1:
         diff = [loc_entities_word_indices[i + 1] - loc_entities_word_indices[i] for i in
                 range(len(loc_entities_word_indices) - 1)]
-        if max(diff) > 5:  # Distance is greater than 5 words
+        if diff and max(diff) > 5:  # Distance is greater than 5 words
             avg = sum(diff) / len(diff)
             loc_groups = [[loc_entities_word_indices[0]]]
             for x in loc_entities_word_indices[1:]:
@@ -542,7 +542,7 @@ def process_nonurban(text, roads):
     if len(road1_candidates) > 0:
         road1_candidates = list(sorted(set(road1_candidates)))
         for road1 in road1_candidates:
-            road2_candidates = roads.loc[roads.road1 == road1].road2.dropna().tolist()
+            road2_candidates = roads.loc[roads.first_road==road1].second_road.dropna().tolist()
             for road2 in road2_candidates:
                 if text.find(road2) != -1:
                     if text.endswith(road2) or not \

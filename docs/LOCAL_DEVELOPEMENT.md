@@ -1,7 +1,8 @@
 Anyway Local environment
 ===========================
 
-We recommended using DOCKER - see DOCKER.md, but if for some reason you do not want to use it, see the instructions below.
+We recommended using DOCKER - see See [DOCKER](docs/DOCKER.md)
+However if for some reason you do not want to use it, see the instructions below.
 
 ## Local Developement: Installing dependencies
 

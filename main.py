@@ -71,7 +71,9 @@ def cbs(specific_folder, delete_all, path, batch_size, delete_start_date, load_s
 @click.option('--google_maps_key_path', type=str)
 def news_flash(google_maps_key_path):
     from anyway.parsers.news_flash.scrap_flash_news import main
-    return main(google_maps_key_path)
+    with open(google_maps_key_path) as file:
+        key = file.read()
+    return main(key)
 
 @process.command()
 @click.option('--specific_folder', is_flag=True, default=False)

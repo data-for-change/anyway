@@ -28,7 +28,6 @@ Instructions
     `docker-compose up -d db`
     
 **4.** Download the [zipped db dump] (https://drive.google.com/drive/folders/1OesX8Y2MGgIcj0B3f5cdS-BIzt4govXA?usp=sharing) (You need to request access) and save it in the **anyway** directory.
-Note that you'll need to request access to this data.
 
 **5.** unzip the truncated_dump
 

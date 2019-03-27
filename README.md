@@ -37,16 +37,16 @@ Contributing
 * Get updates whenever you start working: `git pull upstream dev`
 * Push to your fork when you've committed your changes and tested them: `git push`. Now make sure CI tests are passing (Travis CI and AppVeyor) and make a pull request from your fork on GitHub
 
-## Adding CI to your forked repository
-1. Add Travis CI to your forked repository - in your github forked repository: Settings -> Integrations & services -> Add service -> Travis CI
-1. Add AppVeyor to your forked repository - [Login with your GitHub account](https://ci.appveyor.com/login) -> New Project -> GitHub -> anyway
-
 ## Docker
 We are using DOCKER. See [DOCKER](docs/DOCKER.md)
 
 ## Optional: Getting the Data
 1. Optionally, Get the [complete accidents file](https://drive.google.com/drive/folders/1JVBNP3oTn12zxWExPKeCf_vetNHVCcoo?usp=sharing) after sending a permission request, and extract it into `/static/data/cbs`. Otherwise, you'll use the example accidents files that you already got with the code.
 1. Get the RSA file from [rsa file](https://drive.google.com/drive/folders/1oR3q-RBKy8AWXf5Z1JNBKD9cqqlEG-jC?usp=sharing) after sending a permission request and extract the file into `/static/data/rsa`.
+
+## Optional: Adding CI to your forked repository
+1. Add Travis CI to your forked repository - in your github forked repository: Settings -> Integrations & services -> Add service -> Travis CI
+1. Add AppVeyor to your forked repository - [Login with your GitHub account](https://ci.appveyor.com/login) -> New Project -> GitHub -> anyway
 
 ## Testing
 To run tests: `pylint -j $(nproc) anyway tests && pytest -m "not browser" ./tests`

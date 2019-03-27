@@ -18,11 +18,14 @@ WORKDIR /anyway
 # a full pip reinstall
 COPY requirements.txt /anyway
 RUN pip install -U setuptools wheel
+RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 COPY . /anyway
 
-VOLUME ["/anyway/static"]
+#RUN mv /anyway/static/data/rsa/rsa.xlsx /
+
+#VOLUME ["/anyway/static"]
 EXPOSE 5000
 
 ENTRYPOINT ["/anyway/docker-entrypoint.sh"]

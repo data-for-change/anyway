@@ -44,3 +44,4 @@ google-cloud-language
 google-cloud-translate
 attrs>17.3.0
 fuzzywuzzy
+xlrd

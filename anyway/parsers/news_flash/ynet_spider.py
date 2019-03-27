@@ -58,13 +58,13 @@ class YnetFlashScrap(scrapy.Spider):
                 location = get_ner_location_of_text(self.news_item['title'])
                 db_location = get_db_matching_location_of_text(self.news_item['title'])
             self.news_item['location'] = location
-            if db_location is NonUrbanAddress:
+            if type(db_location) is NonUrbanAddress:
                 self.news_item['road1'] = db_location.road1
                 self.news_item['road2'] = db_location.road2
                 self.news_item['intersection'] = db_location.intersection
                 self.news_item['city'] = None
                 self.news_item['street'] = None
-            elif db_location is UrbanAddress:
+            elif type(db_location) is UrbanAddress:
                 self.news_item['road1'] = None
                 self.news_item['road2'] = None
                 self.news_item['intersection'] = ''

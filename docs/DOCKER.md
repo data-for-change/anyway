@@ -31,7 +31,7 @@ Instructions
 
 **5.** unzip the truncated_dump
 
-**6.** Restore the db: `cat truncated_dump | docker-compose exec -T db psql -U anyway`
+**6.** Restore the db (in anyway directory): `cat truncated_dump | docker-compose exec -T db psql -U anyway`
 
 **7.** start anyway container: `docker-compose up -d`
 

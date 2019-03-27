@@ -3,8 +3,6 @@ ANYWAY’s docker environment
 
 Docker is an open source project to pack, ship and run any application as a lightweight container.
 
- ![docker png](static/img/docker.png)
-
 The idea is to deploy a container (light weight environment) that has all our app dependencies installed and ready to go.
 As a developer you can do one of both:
 
@@ -29,13 +27,15 @@ Instructions
 **3.** Open "Docker terminal", go to the **anyway** directory and run:
     `docker-compose up -d db`
     
-**4.** Download the [db dump] (https://drive.google.com/drive/folders/1OesX8Y2MGgIcj0B3f5cdS-BIzt4govXA?usp=sharing) (You need to request access) and save it in the **anyway** directory.
+**4.** Download the [zipped db dump] (https://drive.google.com/drive/folders/1OesX8Y2MGgIcj0B3f5cdS-BIzt4govXA?usp=sharing) (You need to request access) and save it in the **anyway** directory.
 
-**5.** Restore the db: `cat truncated_dump | docker-compose exec -T db psql -U anyway`
+**5.** unzip the truncated_dump
 
-**6.** start anyway container: `docker-compose up -d`
+**6.** Restore the db: `cat truncated_dump | docker-compose exec -T db psql -U anyway`
 
-**7.** **You're all set!** ANYWAY is up and running - connect to http://127.0.0.1:8080
+**7.** start anyway container: `docker-compose up -d`
+
+**8.** **You're all set!** ANYWAY is up and running - connect to http://127.0.0.1:8080
 
 More
 -----------------------

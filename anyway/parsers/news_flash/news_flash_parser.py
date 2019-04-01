@@ -16,8 +16,8 @@ def insert_new_flash_news(id_flash, title, link, date_parsed, author, descriptio
                        'road1, road2, intersection, city, street, accident, source) VALUES \
                        (:id, :title, :link, :date, :author, :description, :location, :lat, :lon, :road1, :road2, :intersection, :city, :street, :accident, :source)',
                        {'id': id_flash, 'title': title, 'link': link, 'date': date_parsed, 'author': author,
-                        'description': description, 'location': location, 'lat': lat, 'lon': lon, 'road1': int(road1),
-                        'road2': int(road2), 'intersection': intersection, 'city': city, 'street': street,
+                        'description': description, 'location': location, 'lat': lat, 'lon': lon, 'road1': int(road1) if road1 else road1,
+                        'road2': int(road2) if road2 else road2, 'intersection': intersection, 'city': city, 'street': street,
                         'accident': accident, 'source': source})
     db.session.commit()
 

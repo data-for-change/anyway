@@ -41,7 +41,7 @@
 <div id="app">
     <div class="navbar navbar-fixed-top">
         <div class="navbar-inner" id="step1Component" style="vertical-align:middle; line-height: 40px; {{ '; display: none' if map_only }}">
-            <!-- <div style="float: left;">
+             <div style="float: left;">
                 <span id="connection_status" style="border-right: 1px solid #ddd; margin-left: 8px; padding-right: 8px; cursor: pointer" onclick="app.loginDialogLoad()">
                     {% if current_user.is_authenticated %}
                          {{ gettext('Hi') + ' ' + current_user.nickname }}
@@ -60,9 +60,16 @@
                 {% if current_user.is_authenticated %}
                     <img src="../static/img/settings.png" onclick="app.preferencesDialogLoad()" width="16" style="padding-left: 5px; cursor: pointer" />
                 {% endif %}
-            </div> -->
-                <!--<i class="fa fa-bars" style="border-right: 1px solid #ddd; padding-right: 8px; border-left: 1px solid #ddd; padding-left: 8px;margin-right: 102px; font-size: 18px; line-height: 100%; vertical-align: middle; cursor: pointer"></i>-->
-                <div class="navbar-brand">
+            </div>
+                <i class="fa fa-bars" style="border-right: 1px solid #ddd; padding-right: 8px; border-left: 1px solid #ddd; padding-left: 8px;margin-right: 102px; font-size: 18px; line-height: 100%; vertical-align: middle; cursor: pointer"></i>
+            <div class="input-group" style="float: left;">
+                <button style="margin: 0 5px 0 2px;" type="button" class="btn btn-primary btn-xs" onclick="app.LocationSubscriptionDialog()">
+                    הרשמה
+                    <span><i class="fa fa-bell" style="font-size: small;"></i></span>
+                </button>
+                <span style="font-size: small; font-weight: bold; float: right;"> הירשמו לקבלת עידכונים על האיזור המוצג &larr; </span>
+            </div>
+            <div class="navbar-brand">
                     <a class="brand" href="/">
                         beta <img class="brand-img" src="/static/img/anyway.png">
                     </a>
@@ -202,7 +209,6 @@
         <br/>
         המרכז הבינתחומי הרצליה
         <br/>
-        <br/>
         שגיא מנשה, גיא חרץ, טל יפה, לביא מלמן, גיל לופו, ח״כ תמר זנדברג, עוזי בלומר, תומר סלוצקי
     </div>
     <div class="modal-footer">
@@ -220,7 +226,7 @@
             ANYWAY היא הדרך שלנו למנוע את התאונה הבאה. ביחד, נהגים, הולכי רגל, אזרחים ומקבלי החלטות נאבק בתאונות הדרכים.
             <br/>
             <br/>
-             ANYWAY מציגה על גבי מפה תאונות דרכים עם נפגעים ע״ב נתוני הלשכה המרכזית לסטטיסטיקה, ונתונים המוזרמים בזמן אמת באדיבות ארגון ״איחוד הצלה״. בהמשך, יתווסף מידע נוסף למפה וכן תתאפשר יכולת לפתח דיונים מבוססי מיקום על פתרונות אפשריים והתארגנות אזרחית. באמצעות ידע זמין, נגיש ושקוף אנו שואפים להעלות את המודעות לנושא תאונות הדרכים ולהעצים את יכולת ההשפעה של כל אחד ואחת על הסביבה הקרובה- הבית, השכונה, בית הספר של הילדים, מקום העבודה ועוד- על ידי פעולה משותפת בקהילה. אנחנו מאמינים שבעזרת ידע ציבורי קיים המוצג באתר יווצרו ידע ותובנות חדשים. שיתוף הידע הזה יאפשר לחברה האזרחית להתארגן לפעולה אקטיבית ולהזרים הצעות, רעיונות והתראות בחזרה אל הרשויות. 
+ ANYWAY מציגה על גבי מפה תאונות דרכים עם נפגעים ע״ב נתוני הלשכה המרכזית לסטטיסטיקה, ונתונים המוזרמים בזמן אמת באדיבות ארגון ״איחוד הצלה״. בהמשך, יתווסף מידע נוסף למפה וכן תתאפשר יכולת לפתח דיונים מבוססי מיקום על פתרונות אפשריים והתארגנות אזרחית. באמצעות ידע זמין, נגיש ושקוף אנו שואפים להעלות את המודעות לנושא תאונות הדרכים ולהעצים את יכולת ההשפעה של כל אחד ואחת על הסביבה הקרובה- הבית, השכונה, בית הספר של הילדים, מקום העבודה ועוד- על ידי פעולה משותפת בקהילה. אנחנו מאמינים שבעזרת ידע ציבורי קיים המוצג באתר יווצרו ידע ותובנות חדשים. שיתוף הידע הזה יאפשר לחברה האזרחית להתארגן לפעולה אקטיבית ולהזרים הצעות, רעיונות והתראות בחזרה אל הרשויות. 
             <br/>
             <br/>
             ANYWAY הוא חשמביר (פרויקט) הפועל בחסות הסדנא לידע ציבורי ונבנה על ידי מתנדבים.
@@ -229,7 +235,7 @@
             חברי הצוות:
             רון רייטר, שגיא סמולרסקי, דניאל הרשקוביץ, מיכל טננברג, ראובן יגל, יוסי אטיאס, עומרי בהומי, עודד לזר, עומר
             שכטר, דרור ברן, יבגני נמזר, יוני לימור, משה נחמיאס, שי בר לב, עדי הורביץ, נחום קשב, אושרי וייס, שמואל רגב,
-            אגם אלוני, אבי קליימן, לירון שלו ועומר המרמן.
+            אגם אלוני, אבי קליימן, לירון שלו, עומר המרמן, סימונה הולשטיין, עתליה אלון, אייל גלזר, וסלומון רדה.
             <br/>
             <br/>
             <a href="http://www.hasadna.org.il/%D7%94%D7%9E%D7%A2%D7%91%D7%93%D7%94-%D7%A9%D7%9C%D7%A0%D7%95/anyway-%D7%9E%D7%A9%D7%A4%D7%99%D7%A2%D7%99%D7%9D-%D7%A2%D7%9C-%D7%94%D7%93%D7%A8%D7%9A/">למידע
@@ -330,6 +336,7 @@
               <img class="profile-image"/>
             </a>
             <p class="added-by"></p>
+            <p class="creation-date" style="white-space:nowrap"></p>
             <p class="description" style="margin:0"></p>
           </div>
         </div>
@@ -350,8 +357,8 @@
                         <div class="accordion-roller ac-general">
                             <p class="id" style="margin:0"></p>
                             <p class="provider_code" style="margin:0"></p>
-                            <p class="severityText" style="margin:0"></p>
-                            <p class="accidentType" style="margin:0"></p>
+                            <p class="accident_severity" style="margin:0"></p>
+                            <p class="accident_type" style="margin:0"></p>
                             <p class="road_object" style="margin:0"></p>
                             <p class="object_distance" style="margin:0"></p>
                             <p class="didnt_cross" style="margin:0"></p>
@@ -362,12 +369,12 @@
                         <input id="ac-2" type="checkbox" />
                         <label for="ac-2"><i class="fa fa-road fontIcon" id="fa-road-fix"></i>תנאי הדרך</label>
                         <div class="accordion-roller ac-general">
-                            <p class="roadType" style="margin:0"></p>
-                            <p class="roadShape" style="margin:0"></p>
+                            <p class="road_type" style="margin:0"></p>
+                            <p class="road_shape" style="margin:0"></p>
                             <p class="one_lane" style="margin:0"></p>
                             <p class="multi_lane" style="margin:0"></p>
                             <p class="speed_limit" style="margin:0"></p>
-                            <p class="intactness" style="margin:0"></p>
+                            <p class="road_intactness" style="margin:0"></p>
                             <p class="road_width" style="margin:0"></p>
                             <p class="road_sign" style="margin:0"></p>
                             <p class="road_light" style="margin:0"></p>
@@ -383,7 +390,7 @@
                         <label for="ac-3"><i class="material-icons fontIcon">&#xE55F;</i>מיקום וזמן</label>
                         <div class="accordion-roller ac-general">
                             <p class="creation-date" style="margin:0"></p>
-                            <p class="dayType" style="margin:0"></p>
+                            <p class="day_type" style="margin:0"></p>
                             <p class="mainStreet" style="margin:0"></p>
                             <p class="secondaryStreet" style="margin:0"></p>
                             <p class="junction" style="margin:0"></p>
@@ -408,7 +415,7 @@
                         <label for="ac-6"><i class="material-icons fontIcon">&#xE145;</i>מידע נוסף</label>
                         <div class="accordion-roller ac-general">
                             <p class="igun" style="margin:0"></p>
-                            <p class="unit" style="margin:0"></p>
+                            <p class="police_unit" style="margin:0"></p>
                         </div>
                     </div>
                 </div>
@@ -416,13 +423,12 @@
          </div>
 
 
-<div id="feature-dialog-template" style="display: none">
+<div id="subscription-dialog-template" style="display: none">
     <div class="modal hide fade">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h3>עדכן אותי כשתכונות חדשות יהיו זמינות</h3>
-            <h5> אנו מפתחים תכונות חדשות לאתר. הנך מוזמנ/ת להשאיר פרטים על מנת שנוכל לעדכן אותך ברגע שתכונות חדשות יהיו
-                זמינות </h5>
+            <h3>קבלת עדכונים על התצוגה הנוכחית</h3>
+            <h5>הנך מוזמנ/ת להשאיר פרטים על מנת שנוכל לעדכן אותך על התצוגה הנוכחית</h5>
         </div>
         <div class="modal-body">
             <form class="form-horizontal">
@@ -453,7 +459,11 @@
     <div class="modal hide fade">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h3>{{ gettext('היכנס') }}</h3>
+            {% if current_user.is_authenticated %}
+                <h3>{{ gettext('התנתק') }}</h3>
+            {% else %}
+                <h3>{{ gettext('התחבר') }}</h3>
+            {% endif %}
         </div>
         <div class="modal-body" style="width: 50%; margin: 0 auto;">
             <div class="control-group" style="width: 100%; margin: 0 auto;">
@@ -471,12 +481,12 @@
                         <span class="fa fa-facebook"></span>
                     </a>
                     <br/>
-                    <!--<h3>OR</h3>-->
-                    <br/>
-                    <a class="btn btn-social-icon btn-google" href="{{ url_for('oauth_authorize', provider='google') }}">
-                        {{ gettext('Login with Google') }}
-                        <span class="fa fa-google"></span>
-                    </a>
+                    <!--&lt;!&ndash;<h3>OR</h3>&ndash;&gt;-->
+                    <!--<br/>-->
+                    <!--<a class="btn btn-social-icon btn-google" href="{{ url_for('oauth_authorize', provider='google') }}">-->
+                        <!--{{ gettext('Login with Google') }}-->
+                        <!--<span class="fa fa-google"></span>-->
+                    <!--</a>-->
                 {% endif %}
             </div>
         </div>
@@ -642,11 +652,11 @@
         <div class="filter-panel">
             <div class="btn-label">חומרה:</div>
             <div class="btn-wrap separator">
-                <input type="checkbox" id="checkbox-fatal" onclick="app.loadFilter('severity', 'fatal')" checked/>
+                <input type="checkbox" id="checkbox-fatal" onclick="app.loadFilter('accident_severity', 'fatal')" checked/>
                 <label for="checkbox-fatal" class="btn three right fatal">קטלניות</label>
-                <input type="checkbox" id="checkbox-severe" onclick="app.loadFilter('severity', 'severe')" checked/>
+                <input type="checkbox" id="checkbox-severe" onclick="app.loadFilter('accident_severity', 'severe')" checked/>
                 <label for="checkbox-severe" class="btn three middle severe">קשות</label>
-                <input type="checkbox" id="checkbox-light" onclick="app.loadFilter('severity', 'light')" checked/>
+                <input type="checkbox" id="checkbox-light" onclick="app.loadFilter('accident_severity', 'light')" checked/>
                 <label for="checkbox-light" class="btn three left light">קלות</label>
             </div>
 
@@ -928,6 +938,9 @@
 
                 <input type="checkbox" name="agegroups" id="checkbox-85-plus" value=2 onclick="app.loadFilter('ages', '85+')" checked />
                 <label for="checkbox-85-plus" class="btn one" dir="ltr">85+</label>
+
+                <input type="checkbox" name="agegroups" id="checkbox-unknown-age" value=2 onclick="app.loadFilter('ages', 'לא ידוע')" checked />
+                <label for="checkbox-unknown-age" class="btn one" dir="ltr">לא ידוע</label>
             </div>
 
         </div>
@@ -1064,7 +1077,7 @@
         <a href="http://www.hasadna.org.il/" title="לדעת להשפיע - מבית הסדנא לידע ציבורי"><img
                 src="/static/img/logos/hasadna.png" style="width: 20px; height: 20px; padding: 3px"/>
         </a>
-        <a style="border-left: 1px solid #ddd; padding-left: 8px;" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=F274PRUT6VSAA"
+        <a style="border-left: 1px solid #ddd; padding-left: 8px;" href="https://www.jgive.com/new/he/ils/donation-targets/3268"
            target="new">תרמו לנו</a>
         <a style="border-left: 1px solid #ddd; padding-left: 8px;" href="" data-toggle="modal" data-target="#developer-dialog">מפתחים</a>
         <a style="border-left: 1px solid #ddd; padding-left: 8px;" href="mailto:feedback@anyway.co.il?subject=ANYWAY%20Feedback" target="new">צרו קשר</a>
@@ -1117,6 +1130,7 @@
 "js/marker.js",
 "js/clusterView.js",
 "js/featuredialog.js",
+"js/subscriptiondialog.js",
 "js/preferencesdialog.js",
 "js/logindialog.js",
 "js/sidebar.js",
@@ -1452,6 +1466,13 @@
             app.years = {{ years }};
         {% else %}
             app.years = [];
+        {% endif %}
+        {% if age_groups is defined and age_groups != "" %}
+            app.age_groups = [{{  ''.join(age_groups) }}];
+        {% else %}
+            var age_groups_list = Array.from({length: AGE_GROUPS_NUMBER}, (v, k) => k+1);
+            age_groups_list.push(99)
+            app.age_groups = age_groups_list;
         {% endif %}
 
         app.render();

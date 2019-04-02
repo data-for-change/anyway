@@ -46,12 +46,14 @@ def _iter_rows(filename):
                'longitude': longitude,
                'created': timestamp,
                'provider_code': CONST.RSA_PROVIDER_CODE,
-               'severity': 0,
+               'accident_severity': 0,
                'title': 'שומרי הדרך',
                'description': json.dumps(description),
-               'locationAccuracy': 1,
+               'location_accuracy': 1,
                'type': CONST.MARKER_TYPE_ACCIDENT,
-               'video_link': video_link}
+               'video_link': video_link,
+               'vehicle_type_rsa': vehicle_type,
+               'violation_type_rsa': violation}
 
 
 def parse(filename):
@@ -61,3 +63,10 @@ def parse(filename):
     for batch in batch_iterator(_iter_rows(filename), batch_size=50):
         db.session.bulk_insert_mappings(AccidentMarker, batch)
         db.session.commit()
+
+    """
+    Fills empty geometry object according to coordinates in database
+    """
+    db.session.execute('UPDATE markers SET geom = ST_SetSRID(ST_MakePoint(longitude,latitude),4326)\
+                           WHERE geom IS NULL;')
+    db.session.commit()

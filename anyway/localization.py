@@ -1,11 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import csv
-import os
+import pandas as pd
 from . import field_names
-from .utilities import decode_hebrew
-import six
-from functools import partial
 
 
 _tables = {
@@ -240,17 +236,7 @@ _fields = {
     "VIOLATION_TYPE": "סוג עבירה"
 }
 
-if six.PY3:
-    _open_hebrew_textfile = partial(open, encoding='cp1255')
-else:
-    _open_hebrew_textfile = open
-
-
-
-with _open_hebrew_textfile(os.path.join("static/data/cities.csv"), "r") as f:
-    _cities = list(csv.DictReader(f))
-
-_cities_names = {int(x[field_names.sign]): decode_hebrew(x[field_names.name]) for x in _cities}
+_cities = pd.read_csv("static/data/cities.csv", encoding="utf-8", index_col=field_names.sign)
 
 
 def get_field(field, value=None):
@@ -266,4 +252,8 @@ def get_supported_tables():
 
 
 def get_city_name(symbol_id):
-    return _cities_names.get(symbol_id, None)
+    try:
+        city = _cities.loc[symbol_id,field_names.name]
+        return city
+    except Exception as _:
+        return None

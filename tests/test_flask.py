@@ -79,11 +79,11 @@ def test_markers(app, show_fatal, show_severe, show_light, show_accurate, show_a
     marker_counter["markers"] += len(resp['markers'])
 
     for marker in resp['markers']:
-        assert show_fatal or marker['severity'] != 1
-        assert show_severe or marker['severity'] != 2
-        assert show_light or marker['severity'] != 3
-        assert show_accurate or marker['locationAccuracy'] != 1
-        assert show_approx or marker['locationAccuracy'] == 1
+        assert show_fatal or marker['accident_severity'] != 1
+        assert show_severe or marker['accident_severity'] != 2
+        assert show_light or marker['accident_severity'] != 3
+        assert show_accurate or marker['location_accuracy'] != 1
+        assert show_approx or marker['location_accuracy'] == 1
 
 
 

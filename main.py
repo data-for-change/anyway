@@ -4,6 +4,7 @@ import logging
 import os
 import re
 import sys
+import argparse
 
 
 @click.group()
@@ -36,11 +37,9 @@ def testserver(open_server, debug_js):
     app.run(debug=True, host=os.getenv('IP', default_host),
             port=int(os.getenv('PORT', 5000)))
 
-
 @cli.group()
 def process():
     pass
-
 
 @process.command()
 @click.option('--specific_folder', is_flag=True, default=False)
@@ -48,12 +47,33 @@ def process():
 @click.option('--path', type=str, default="static/data/cbs")
 @click.option('--batch_size', type=int, default=5000)
 @click.option('--delete_start_date', type=str, default=None)
+@click.option('--load_start_year', type=str, default='2005')
+@click.option('--from_email', is_flag=True, default=False)
+@click.option('--username', default='')
+@click.option('--password', default='')
+@click.option('--email_search_start_date', type=str, default='') #format - DD.MM.YYYY
 
-def cbs(specific_folder, delete_all, path, batch_size, delete_start_date):
+def cbs(specific_folder, delete_all, path, batch_size, delete_start_date, load_start_year, from_email, username, password, email_search_start_date):
     from anyway.parsers.cbs import main
 
-    return main(specific_folder=specific_folder, delete_all=delete_all, path=path,
-                batch_size=batch_size, delete_start_date=delete_start_date)
+    return main(specific_folder=specific_folder,
+                delete_all=delete_all,
+                path=path,
+                batch_size=batch_size,
+                delete_start_date=delete_start_date,
+                load_start_year=load_start_year,
+                from_email=from_email,
+                username=username,
+                password=password,
+                email_search_start_date=email_search_start_date)
+
+@process.command()
+@click.option('--google_maps_key_path', type=str)
+def news_flash(google_maps_key_path):
+    from anyway.parsers.news_flash.scrap_flash_news import main
+    with open(google_maps_key_path) as file:
+        key = file.read()
+    return main(key)
 
 @process.command()
 @click.option('--specific_folder', is_flag=True, default=False)
@@ -89,6 +109,42 @@ def schools(filepath, batch_size):
     from anyway.parsers.schools import parse
     return parse(filepath=filepath,
                  batch_size=batch_size)
+@cli.group()
+def preprocess():
+    pass
+
+@cli.group()
+def create_views():
+    pass
+
+@create_views.command()
+
+def cbs_views():
+    from anyway.parsers.cbs import create_views
+
+    return create_views()
+
+@cli.group()
+def update_dictionary_tables():
+    pass
+
+@update_dictionary_tables.command()
+@click.option('--path', type=str, default="static/data/cbs")
+def update_cbs(path):
+    from anyway.parsers.cbs import update_dictionary_tables
+
+    return update_dictionary_tables(path)
+
+@cli.group()
+def truncate_dictionary_tables():
+    pass
+
+@truncate_dictionary_tables.command()
+@click.option('--path', type=str)
+def truncate_cbs(path):
+    from anyway.parsers.cbs import truncate_dictionary_tables
+
+    return truncate_dictionary_tables(path)
 
 
 @cli.command()
@@ -141,7 +197,7 @@ def valid_date(date_string):
 @scripts.command()
 @click.option('--start_date', default='01-01-2013', type=valid_date, help='The Start Date - format DD-MM-YYYY')
 @click.option('--end_date', default='31-12-2017', type=valid_date, help='The End Date - format DD-MM-YYYY')
-@click.option('--distance', default=0.5, help='float In KM. Default is 0.3 (300m)', type=float)
+@click.option('--distance', default=0.5, help='float In KM. Default is 0.5 (500m)', type=float)
 @click.option('--output_path', default='output', help='output file of the results. Default is output.csv')
 def accidents_around_schools(start_date, end_date, distance, output_path):
     from anyway.accidents_around_schools import main

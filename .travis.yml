@@ -7,9 +7,15 @@ python:
   - 2.7.11
   - 3.5
   - 3.6
+  - 3.7
 
 addons:
   sauce_connect: true
+
+  postgresql: 9.6
+  apt:
+    packages:
+    - postgresql-9.6-postgis-2.3
 
 env:
   global:

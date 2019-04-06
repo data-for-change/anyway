@@ -616,12 +616,12 @@ def import_to_datastore(directory, provider_code, year, batch_size):
         accidents, accidents_no_location = import_accidents(provider_code=provider_code, **files_from_cbs)
         curr_accidents_ids = [accident['provider_and_id'] for accident in accidents]
         # find accident ids that exist in db (dups) and don't insert them
-        accidents_ids_dups = set(map(lambda x: x[0],
+        accidents_ids_dups = list(set(map(lambda x: x[0],
                                              db.session.query(AccidentMarker)\
                                              .filter(AccidentMarker.provider_code == provider_code)\
                                              .filter(AccidentMarker.accident_year.in_([year, year-1]))\
                                              .filter(AccidentMarker.provider_and_id.in_(curr_accidents_ids))\
-                                             .with_entities(AccidentMarker.provider_and_id).all()))
+                                             .with_entities(AccidentMarker.provider_and_id).all())))
         delete_specific_cbs_entries_with_location(batch_size, accidents_ids_dups)
 
         logging.info('inserting ' + str(len(accidents)) + ' new accidents')
@@ -644,12 +644,12 @@ def import_to_datastore(directory, provider_code, year, batch_size):
 
         curr_accidents_no_location_ids = [accident['provider_and_id'] for accident in accidents_no_location]
         # find accident ids that exist in db (dups) and don't insert them
-        accidents_no_location_ids_dups = set(map(lambda x: x[0],
+        accidents_no_location_ids_dups = list(set(map(lambda x: x[0],
                                              db.session.query(AccidentsNoLocation)\
                                              .filter(AccidentsNoLocation.provider_code == provider_code)\
                                              .filter(AccidentsNoLocation.accident_year.in_([year, year-1]))\
                                              .filter(AccidentsNoLocation.provider_and_id.in_(curr_accidents_no_location_ids))\
-                                             .with_entities(AccidentsNoLocation.provider_and_id).all()))
+                                             .with_entities(AccidentsNoLocation.provider_and_id).all())))
 
         delete_specific_cbs_entries_no_location(batch_size, accidents_no_location_ids_dups)
 

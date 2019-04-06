@@ -619,17 +619,17 @@ def import_to_datastore(directory, provider_code, year, batch_size):
         accidents_ids_dups = set(map(lambda x: x[0],
                                              db.session.query(AccidentMarker)\
                                              .filter(AccidentMarker.provider_code == provider_code)\
-                                             .filter(AccidentMarker.accident_year.in_([year, year+1]))\
+                                             .filter(AccidentMarker.accident_year.in_([year, year-1]))\
                                              .filter(AccidentMarker.provider_and_id.in_(curr_accidents_ids))\
                                              .with_entities(AccidentMarker.provider_and_id).all()))
-        accidents = [accident for accident in accidents if accident['provider_and_id'] not in accidents_ids_dups]
+        delete_specific_cbs_entries_with_location(batch_size, accidents_ids_dups)
+
         logging.info('inserting ' + str(len(accidents)) + ' new accidents')
         for accidents_chunk in chunks(accidents, batch_size):
             db.session.bulk_insert_mappings(AccidentMarker, accidents_chunk)
         new_items += len(accidents)
 
         involved = import_involved(provider_code=provider_code, **files_from_cbs)
-        involved = [x for x in involved if x['provider_and_id'] not in accidents_ids_dups]
 
         logging.info('inserting ' + str(len(involved)) + ' new involved')
         for involved_chunk in chunks(involved, batch_size):
@@ -637,7 +637,6 @@ def import_to_datastore(directory, provider_code, year, batch_size):
         new_items += len(involved)
 
         vehicles = import_vehicles(provider_code=provider_code, **files_from_cbs)
-        vehicles = [x for x in vehicles if x['provider_and_id'] not in accidents_ids_dups]
         logging.info('inserting ' + str(len(vehicles)) + ' new vehicles')
         for vehicles_chunk in chunks(vehicles, batch_size):
             db.session.bulk_insert_mappings(Vehicle, vehicles_chunk)
@@ -648,10 +647,12 @@ def import_to_datastore(directory, provider_code, year, batch_size):
         accidents_no_location_ids_dups = set(map(lambda x: x[0],
                                              db.session.query(AccidentsNoLocation)\
                                              .filter(AccidentsNoLocation.provider_code == provider_code)\
-                                             .filter(AccidentsNoLocation.accident_year.in_([year, year+1]))\
+                                             .filter(AccidentsNoLocation.accident_year.in_([year, year-1]))\
                                              .filter(AccidentsNoLocation.provider_and_id.in_(curr_accidents_no_location_ids))\
                                              .with_entities(AccidentsNoLocation.provider_and_id).all()))
-        accidents_no_location = [accident for accident in accidents_no_location if accident['provider_and_id'] not in accidents_no_location_ids_dups]
+
+        delete_specific_cbs_entries_no_location(batch_size, accidents_no_location_ids_dups)
+
         accidents_no_location_ids = [accident['provider_and_id'] for accident in accidents_no_location]
         logging.info('inserting ' + str(len(accidents_no_location)) + ' accidents without location')
         for accidents_chunk in chunks(accidents_no_location, batch_size):
@@ -711,6 +712,53 @@ def delete_invalid_entries(batch_size):
             q.delete(synchronize_session='fetch')
             db.session.commit()
 
+def delete_specific_cbs_entries_with_location(batch_size, provider_and_id_list):
+
+    for ids_chunk in chunks(provider_and_id_list, batch_size):
+
+        logging.info('Deleting a chunk of ' + str(len(ids_chunk)))
+
+        q = db.session.query(Involved).filter(Involved.provider_and_id.in_(ids_chunk))
+        if q.all():
+            logging.info('deleting entries from Involved')
+            q.delete(synchronize_session=False)
+            db.session.commit()
+
+        q = db.session.query(Vehicle).filter(Vehicle.provider_and_id.in_(ids_chunk))
+        if q.all():
+            logging.info('deleting entries from Vehicle')
+            q.delete(synchronize_session=False)
+            db.session.commit()
+
+        q = db.session.query(AccidentMarker).filter(AccidentMarker.provider_and_id.in_(ids_chunk))
+        if q.all():
+            logging.info('deleting entries from AccidentMarker')
+            q.delete(synchronize_session=False)
+            db.session.commit()
+
+def delete_specific_cbs_entries_no_location(batch_size, provider_and_id_list):
+
+    for ids_chunk in chunks(provider_and_id_list, batch_size):
+
+        logging.info('Deleting a chunk of ' + str(len(ids_chunk)))
+
+        q = db.session.query(InvolvedNoLocation).filter(InvolvedNoLocation.provider_and_id.in_(ids_chunk))
+        if q.all():
+            logging.info('deleting entries from InvolvedNoLocation')
+            q.delete(synchronize_session=False)
+            db.session.commit()
+
+        q = db.session.query(VehicleNoLocation).filter(VehicleNoLocation.provider_and_id.in_(ids_chunk))
+        if q.all():
+            logging.info('deleting entries from VehicleNoLocation')
+            q.delete(synchronize_session=False)
+            db.session.commit()
+
+        q = db.session.query(AccidentsNoLocation).filter(AccidentsNoLocation.provider_and_id.in_(ids_chunk))
+        if q.all():
+            logging.info('deleting entries from AccidentsNoLocation')
+            q.delete(synchronize_session=False)
+            db.session.commit()
 
 def delete_cbs_entries(start_date, batch_size):
     """
@@ -974,7 +1022,7 @@ def main(specific_folder, delete_all, path, batch_size, delete_start_date, load_
                 delete_cbs_entries(delete_start_date, batch_size)
             started = datetime.now()
             total = 0
-            for directory in sorted(dir_list, reverse=True):
+            for directory in sorted(dir_list, reverse=False):
                 directory_name = os.path.basename(os.path.normpath(directory))
                 year = directory_name[1:5] if directory_name[0] == 'H' else directory_name[0:4]
                 if int(year) >= int(load_start_year):

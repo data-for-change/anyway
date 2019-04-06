@@ -113,6 +113,15 @@ def schools(filepath, batch_size):
 def preprocess():
     pass
 
+@preprocess.command()
+@click.option('--path', type=str)
+
+def preprocess_cbs(path):
+    from anyway.parsers.preprocessing_cbs_files import update_cbs_files_names
+
+    return update_cbs_files_names(path)
+
+
 @cli.group()
 def create_views():
     pass

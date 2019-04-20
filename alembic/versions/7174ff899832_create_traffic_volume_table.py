@@ -1,14 +1,14 @@
 """create traffic volume table
 
 Revision ID: 7174ff899832
-Revises: 35b556aef8ef
+Revises: 3070e32fe18
 Create Date: 2019-03-09 17:22:52.517242
 
 """
 
 # revision identifiers, used by Alembic.
 revision = '7174ff899832'
-down_revision = '35b556aef8ef'
+down_revision = '3070e32fe18'
 branch_labels = None
 depends_on = None
 

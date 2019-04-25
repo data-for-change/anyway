@@ -8,7 +8,7 @@ Jinja2
 SQLAlchemy
 Werkzeug
 newrelic
-pyproj
+pyproj==1.9.6
 webassets
 gunicorn
 psycopg2
@@ -34,7 +34,7 @@ enum34==1.1.6
 feedparser
 scrapy
 google
-urllib3
+urllib3==1.22
 chardet
 googlemaps
 graphene-sqlalchemy==2.1.0

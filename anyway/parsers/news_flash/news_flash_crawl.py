@@ -20,13 +20,13 @@ def news_flash_crawl(rss_link, site_name, maps_key):
                          'link': entry.links[0].href, 'date': entry.published, 'location': '', 'lat': 0, 'lon': 0}
             if (u'תאונ' in entry.title and u'תאונת עבודה' not in entry.title and u'תאונות עבודה' not in entry.title)\
                     or ((u'רכב' in entry.title or u'אוטובוס' in entry.title or u"ג'יפ" in entry.title
-                         or u'משאית' in entry.title or u'קטנוע'
+                         or u'משאית' in entry.title or u'קטנוע' in entry.title or u'טרקטור'
                          in entry.title or u'אופנוע' in entry.title or u'אופניים' in entry.title or u'קורקינט'
                          in entry.title or u'הולך רגל' in entry.title or u'הולכת רגל' in entry.title
                          or u'הולכי רגל' in entry.title) and
                         (u'נפגע' in entry.title or u'פגיע' in entry.title or
                          u'נפצע' in entry.title or u'פציע' in entry.title or u'התנגש' in entry.title or u'התהפך'
-                         in entry.title or u'התהפכ' in entry.title)):
+                         in entry.title or u'התהפכ' in entry.title)) and u'ירי' not in entry.title:
                 news_item['accident'] = True
             else:
                 news_item['accident'] = False

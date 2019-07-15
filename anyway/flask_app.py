@@ -13,7 +13,7 @@ from webassets import Environment as AssetsEnvironment
 from flask_babel import Babel,gettext
 from .clusters_calculator import retrieve_clusters
 from sqlalchemy.orm import load_only
-
+from sqlalchemy import and_, not_
 from flask import request, redirect, session
 import logging
 import datetime
@@ -37,7 +37,7 @@ from .oauth import OAuthSignIn
 
 from .base import user_optional
 from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved, User, ReportPreferences,
-                     LocationSubscribers, Vehicle, Role, GeneralPreferences)
+                     LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash)
 from .config import ENTRIES_PER_PAGE
 from six.moves import http_client
 from sqlalchemy import func
@@ -202,6 +202,27 @@ def markers():
 
     else: # defaults to json
         return generate_json(accident_markers, rsa_markers, discussions, is_thin, total_records=result.total_records)
+
+
+@app.route("/api/news-flash", methods=["GET"])
+@user_optional
+def news_flash():
+    logging.debug('getting news flash')
+    news_flash_id = request.values.get('id')
+    if news_flash_id is not None:
+        news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == news_flash_id).first()
+        if news_flash_obj is not None:
+            return Response(json.dumps(news_flash_obj), mimetype="application/json")
+        return Response(status=404)
+
+    # Todo - add start and end time for the news flashes
+    news_flashes = db.session.query(NewsFlash).filter(and_(NewsFlash.accident == True, not_(and_(NewsFlash.lat == 0, NewsFlash.lon == 0)), not_(and_(NewsFlash.lat == None, NewsFlash.lon == None)))).with_entities(NewsFlash.id,
+                                                                                                NewsFlash.lat,
+                                                                                                NewsFlash.lon,
+                                                                                                NewsFlash.title, NewsFlash.source, NewsFlash.date).order_by(NewsFlash.date.desc()).all()
+    news_flashes = [{"id": x.id, "lat": x.lat, "lon": x.lon, "title": x.title} for x in news_flashes]
+    return Response(json.dumps(news_flashes), mimetype="application/json")
+
 
 
 @app.route("/charts-data", methods=["GET"])

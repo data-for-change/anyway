@@ -667,7 +667,7 @@ class NewsFlash(Base):
             "id": self.id,
             "accident": self.accident,
             "author": self.author,
-            "date": self.date,
+            "date": self.date.isoformat(),
             "description": self.description,
             "lat": self.lat,
             "link": self.link,

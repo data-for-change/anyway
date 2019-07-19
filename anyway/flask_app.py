@@ -220,7 +220,7 @@ def news_flash():
                                                                                                 NewsFlash.lat,
                                                                                                 NewsFlash.lon,
                                                                                                 NewsFlash.title, NewsFlash.source, NewsFlash.date).order_by(NewsFlash.date.desc()).all()
-    news_flashes = [{"id": x.id, "lat": x.lat, "lon": x.lon, "title": x.title, "source": x.source, "date": x.date} for x in news_flashes]
+    news_flashes = [{"id": x.id, "lat": x.lat, "lon": x.lon, "title": x.title, "source": x.source, "date": x.date.isoformat()} for x in news_flashes]
     return Response(json.dumps(news_flashes), mimetype="application/json")
 
 

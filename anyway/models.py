@@ -642,6 +642,7 @@ class Involved(Base):
     def get_id(self):
         return self.id
 
+
 class NewsFlash(Base):
     __tablename__ = "news_flash"
     id = Column(BigInteger(), primary_key=True)

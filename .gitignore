@@ -54,3 +54,14 @@ venv
 /static/css/app.min.css
 /static/js/app.min.js
 /static/js/years.js
+
+#mano
+.ipynb_checkpoints/
+__pycache__/
+catboost_info/
+*.he.300.bin
+*.he.300.vec
+google_maps_key.txt
+*.he.text
+*.npy
+*.model

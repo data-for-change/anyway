@@ -86,6 +86,13 @@ def registered_vehicles(specific_folder, delete_all, path):
 
 
 @process.command()
+@click.option('--path', type=str, default="static/data/traffic_volume")
+def traffic_volume(path):
+    from anyway.parsers.traffic_volume import main
+    return main(path)
+
+
+@process.command()
 @click.option('--light', is_flag=True, help='Import without downloading any new files')
 @click.option('--username', default='')
 @click.option('--password', default='')

@@ -103,6 +103,12 @@ def rsa(filename):
     return parse(filename)
 
 @process.command()
+@click.argument("filename", type=str, default="static/data/segments/road_segments.xlsx")
+def road_segments(filename):
+    from anyway.parsers.road_segments import parse
+    return parse(filename)
+
+@process.command()
 @click.argument("filepath")
 @click.option('--batch_size', type=int, default=5000)
 def schools(filepath, batch_size):

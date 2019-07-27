@@ -1519,14 +1519,10 @@ class AccidentMarkerView(Base):
 class RoadSegments(Base):
     __tablename__ = "road_segments"
     id = Column(Integer(), primary_key=True)
+    segment_id = Column(Integer())
     road = Column(Integer())
     segment = Column(Integer())
     from_km = Column(Float())
     from_name = Column(Text())
     to_km = Column(Float())
     to_name = Column(Text())
-    x_coord = Column(Integer())
-    y_coord = Column(Integer())
-    segment_id = Column(Integer())
-    longitude = Column(Float())
-    latitude = Column(Float())

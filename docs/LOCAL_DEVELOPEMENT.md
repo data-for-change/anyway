@@ -44,6 +44,7 @@ See the [Wiki](https://github.com/hasadna/anyway/wiki/Setting-up-a-Python-develo
    hours.
 1. Populate United Hatzalah sample data: `python main.py process united --light` for the complete,
    or more recent data please contact the Anyway team.
+1. Populate the CBS road segments data: `python main.py process road_segments`
 1. Populate CBS registered vehicles in cities : `python main.py process registered_vehicles`: this will take less than an hour
 1. Get the RSA file from [rsa file](https://drive.google.com/drive/folders/1oR3q-RBKy8AWXf5Z1JNBKD9cqqlEG-jC?usp=sharing) and extract the file into `/static/data/rsa`. To Populate RSA data: `python main.py process rsa <rsa_file_name>`
 1. Run the app: `python main.py testserver`: do this whenever you start working and want to try out your code.

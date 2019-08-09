@@ -1047,6 +1047,7 @@ class TrafficVolume(Base):
     hour = Column(Integer())
     volume = Column(Integer())
     status = Column(Integer())
+    duplicate_count = Column(Integer())
 
 class PoliceUnit(Base):
     __tablename__ = "police_unit"

@@ -18,7 +18,7 @@ import sqlalchemy as sa
 
 def upgrade():
     op.create_table('traffic_volume',
-                    sa.Column('id', sa.Integer(), nullable=False),
+                    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False, primary_key=True),
                     sa.Column('year', sa.Integer(), nullable=True),
                     sa.Column('road', sa.Integer(), nullable=True),
                     sa.Column('section', sa.Integer(), nullable=True),
@@ -29,6 +29,7 @@ def upgrade():
                     sa.Column('hour', sa.Integer(), nullable=True),
                     sa.Column('volume', sa.Integer(), nullable=False),
                     sa.Column('status', sa.Integer(), nullable=True),
+                    sa.Column('duplicate_count', sa.Integer(), nullable=True),
                     sa.PrimaryKeyConstraint('id'),
                     sa.UniqueConstraint('year', 'road', 'section', 'lane', 'month',
                                             'day', 'day_of_week', 'hour')

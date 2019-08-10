@@ -37,7 +37,7 @@ from .oauth import OAuthSignIn
 
 from .base import user_optional
 from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved, User, ReportPreferences,
-                     LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash)
+                     LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School)
 from .config import ENTRIES_PER_PAGE
 from six.moves import http_client
 from sqlalchemy import func
@@ -223,6 +223,23 @@ def news_flash():
     news_flashes = [{"id": x.id, "lat": x.lat, "lon": x.lon, "title": x.title, "source": x.source, "date": x.date} for x in news_flashes]
     return Response(json.dumps(news_flashes, default=str), mimetype="application/json")
 
+@app.route("/api/schools", methods=["GET"])
+@user_optional
+def schools_api():
+    logging.debug('getting schools')
+    schools = db.session.query(School).filter(not_(and_(School.latitude == 0, School.longitude == 0)), \
+                                              not_(and_(School.latitude == None, School.longitude == None)))\
+                                      .with_entities(School.yishuv_symbol,
+                                                     School.yishuv_name,
+                                                     School.school_name,
+                                                     School.longitude,
+                                                     School.latitude).all()
+    schools_list = [{"yishuv_symbol": x.yishuv_symbol,
+                    "yishuv_name": x.yishuv_name,
+                    "school_name": x.school_name,
+                    "longitude": x.longitude,
+                    "latitude": x.latitude} for x in schools]
+    return Response(json.dumps(schools_list, default=str), mimetype="application/json")
 
 @app.route("/charts-data", methods=["GET"])
 @user_optional

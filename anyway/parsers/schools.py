@@ -1,4 +1,4 @@
-from .. import school_fields
+from static.data.schools import school_fields
 import logging
 from datetime import datetime
 from ..utilities import init_flask, time_delta, chunks

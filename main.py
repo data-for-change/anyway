@@ -116,7 +116,7 @@ def road_segments(filename):
     return parse(filename)
 
 @process.command()
-@click.argument("filepath")
+@click.argument("filepath", type=str, default="static/data/schools/schools.csv")
 @click.option('--batch_size', type=int, default=5000)
 def schools(filepath, batch_size):
     from anyway.parsers.schools import parse

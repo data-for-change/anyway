@@ -122,6 +122,19 @@ def schools(filepath, batch_size):
     from anyway.parsers.schools import parse
     return parse(filepath=filepath,
                  batch_size=batch_size)
+
+@process.command()
+@click.argument("schools_description_filepath", type=str, default="static/data/schools/schools_description.xlsx")
+@click.argument("schools_coordinates_filepath", type=str, default="static/data/schools/schools_coordinates.xlsx")
+@click.option('--batch_size', type=int, default=5000)
+def schools_with_description(schools_description_filepath,
+                             schools_coordinates_filepath,
+                             batch_size):
+    from anyway.parsers.schools_with_description import parse
+    return parse(schools_description_filepath=schools_description_filepath,
+                 schools_coordinates_filepath=schools_coordinates_filepath,
+                 batch_size=batch_size)
+
 @cli.group()
 def preprocess():
     pass

@@ -1023,6 +1023,33 @@ class School(Base):
     y = Column(Float(), nullable=True)
 
 
+class SchoolWithDescription(Base):
+    __tablename__ = "schools_with_description"
+    id = Column(BigInteger(), autoincrement=True, primary_key=True, index=True)
+    data_year = Column(Integer(), nullable=True)
+    symbol_id = Column(Integer(), nullable=True)
+    school_name = Column(Text(), nullable=True)
+    students_number = Column(Integer(), nullable=True)
+    municipality_name = Column(Text(), nullable=True)
+    yishuv_name = Column(Text(), nullable=True)
+    sector = Column(Text(), nullable=True)
+    inspection = Column(Text(), nullable=True)
+    legal_status = Column(Text(), nullable=True)
+    reporter = Column(Text(), nullable=True)
+    geo_district = Column(Text(), nullable=True)
+    education_type = Column(Text(), nullable=True)
+    school_type = Column(Text(), nullable=True)
+    institution_type = Column(Text(), nullable=True)
+    lowest_grade = Column(Integer(), nullable=True)
+    highest_grade = Column(Integer(), nullable=True)
+    foundation_year = Column(Integer(), nullable=True)
+    location_accuracy = Column(Text(), nullable=True)
+    geom = Column(Geometry('POINT', srid=4326), index=True)
+    x = Column(Float(), nullable=True)
+    y = Column(Float(), nullable=True)
+    longitude = Column(Float(), nullable=True)
+    latitude = Column(Float(), nullable=True)
+
 class ST_MakeEnvelope(geoalchemy_functions.GenericFunction):
     name = 'ST_MakeEnvelope'
     type = Geometry

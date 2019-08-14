@@ -48,6 +48,8 @@ See the [Wiki](https://github.com/hasadna/anyway/wiki/Setting-up-a-Python-develo
 1. Populate CBS registered vehicles in cities : `python main.py process registered_vehicles`: this will take less than an hour
 1. Get the RSA file from [rsa file](https://drive.google.com/drive/folders/1oR3q-RBKy8AWXf5Z1JNBKD9cqqlEG-jC?usp=sharing) and extract the file into `/static/data/rsa`. To Populate RSA data: `python main.py process rsa <rsa_file_name>`
 1. Optionally, get the [traffic volume files](https://drive.google.com/drive/folders/1OJjNlJ6Li2be0olwn1lj9d-bh9MpWEdK?usp=sharing) after sending a permission request, and extract it into `/static/data/traffic_volume`. To Populate traffic volume data: `python main.py process traffic_volume`
+1. Populate the schools data `python main.py process schools`. [source file link](https://data.gov.il/dataset/school/resource/99b92311-9675-4351-85cd-9ed5ee69a787) (no need to download - already in static/data/schools)
+1. Populate the schools data with description data `python main.py process schools_with_description`. Source files links: [mosdot](https://data.gov.il/dataset/mosdot), [coordinates](https://data.gov.il/dataset/coordinates) (no need to download - already in static/data/schools)
 1. Run the app: `python main.py testserver`: do this whenever you start working and want to try out your code.
 1. Navigate to http://127.0.0.1:5000 in your browser.
 1. If the site fails to load properly, make sure you have JDK installed on your machine

@@ -13,7 +13,7 @@ from webassets import Environment as AssetsEnvironment
 from flask_babel import Babel,gettext
 from .clusters_calculator import retrieve_clusters
 from sqlalchemy.orm import load_only
-from sqlalchemy import and_, not_
+from sqlalchemy import and_, not_, or_
 from flask import request, redirect, session
 import logging
 import datetime
@@ -37,7 +37,7 @@ from .oauth import OAuthSignIn
 
 from .base import user_optional
 from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved, User, ReportPreferences,
-                     LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School)
+                     LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School, SchoolWithDescription)
 from .config import ENTRIES_PER_PAGE
 from six.moves import http_client
 from sqlalchemy import func
@@ -240,6 +240,41 @@ def schools_api():
                     "longitude": x.longitude,
                     "latitude": x.latitude} for x in schools]
     return Response(json.dumps(schools_list, default=str), mimetype="application/json")
+
+@app.route("/api/schools-description", methods=["GET"])
+@user_optional
+def schools_description_api():
+    logging.debug('getting schools with descriptions')
+    schools = db.session.query(SchoolWithDescription) \
+                        .filter(not_(and_(SchoolWithDescription.latitude == 0, SchoolWithDescription.longitude == 0)), \
+                                not_(and_(SchoolWithDescription.latitude == None, SchoolWithDescription.longitude == None)), \
+                                or_(SchoolWithDescription.school_type == 'גן ילדים', SchoolWithDescription.school_type == 'בית ספר')) \
+                        .with_entities(SchoolWithDescription.symbol_id,
+                                       SchoolWithDescription.school_name,
+                                       SchoolWithDescription.students_number,
+                                       SchoolWithDescription.municipality_name,
+                                       SchoolWithDescription.yishuv_name,
+                                       SchoolWithDescription.geo_district,
+                                       SchoolWithDescription.school_type,
+                                       SchoolWithDescription.foundation_year,
+                                       SchoolWithDescription.location_accuracy,
+                                       SchoolWithDescription.students_number,
+                                       SchoolWithDescription.longitude,
+                                       SchoolWithDescription.latitude).all()
+    schools_list = [{'symbol_id':x.symbol_id,
+                     'school_name':x.school_name,
+                     'students_number':x.students_number,
+                     'municipality_name':x.municipality_name,
+                     'yishuv_name':x.yishuv_name,
+                     'geo_district':x.geo_district,
+                     'school_type':x.school_type,
+                     'foundation_year':x.foundation_year,
+                     'location_accuracy':x.location_accuracy,
+                     'students_number':x.students_number,
+                     'longitude': x.longitude,
+                     'latitude': x.latitude} for x in schools]
+    return Response(json.dumps(schools_list, default=str), mimetype="application/json")
+
 
 @app.route("/charts-data", methods=["GET"])
 @user_optional

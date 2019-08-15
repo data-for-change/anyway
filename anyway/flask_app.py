@@ -224,6 +224,7 @@ def news_flash():
     news_flashes = [{"id": x.id, "lat": x.lat, "lon": x.lon, "title": x.title, "source": x.source, "date": x.date} for x in news_flashes]
     return Response(json.dumps(news_flashes, default=str), mimetype="application/json")
 
+
 @app.route("/api/schools", methods=["GET"])
 @user_optional
 def schools_api():
@@ -240,7 +241,10 @@ def schools_api():
                     "school_name": x.school_name,
                     "longitude": x.longitude,
                     "latitude": x.latitude} for x in schools]
-    return Response(json.dumps(schools_list, default=str), mimetype="application/json")
+    response = Response(json.dumps(schools_list, default=str), mimetype="application/json")
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
 
 @app.route("/api/schools-description", methods=["GET"])
 @user_optional

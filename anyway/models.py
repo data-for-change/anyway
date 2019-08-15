@@ -1050,6 +1050,22 @@ class SchoolWithDescription(Base):
     longitude = Column(Float(), nullable=True)
     latitude = Column(Float(), nullable=True)
 
+class InjuredAroundSchool(Base):
+    __tablename__ = "injured_around_school"
+    id = Column(BigInteger(), autoincrement=True, primary_key=True, index=True)
+    school_id = Column(Integer(), nullable=True)
+    school_name = Column(Text(), nullable=True)
+    school_type = Column(Text(), nullable=True)
+    school_longitude = Column(Float(), nullable=True)
+    school_latitude = Column(Float(), nullable=True)
+    school_yishuv_name = Column(Text(), nullable=True)
+    school_anyway_link = Column(Text(), nullable=True)
+    involved_injury_severity = Column(Integer(), nullable=True)
+    involved_injury_severity_hebrew = Column(Text(), nullable=True)
+    accident_year = Column(Integer(), nullable=True)
+    distance_in_km = Column(Float(), nullable=True)
+    injured_count = Column(Integer(), nullable=True)
+
 class ST_MakeEnvelope(geoalchemy_functions.GenericFunction):
     name = 'ST_MakeEnvelope'
     type = Geometry

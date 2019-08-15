@@ -1027,7 +1027,7 @@ class SchoolWithDescription(Base):
     __tablename__ = "schools_with_description"
     id = Column(BigInteger(), autoincrement=True, primary_key=True, index=True)
     data_year = Column(Integer(), nullable=True)
-    symbol_id = Column(Integer(), nullable=True)
+    school_id = Column(Integer(), nullable=True)
     school_name = Column(Text(), nullable=True)
     students_number = Column(Integer(), nullable=True)
     municipality_name = Column(Text(), nullable=True)

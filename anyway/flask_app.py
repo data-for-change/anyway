@@ -244,12 +244,12 @@ def schools_api():
 @app.route("/api/schools-description", methods=["GET"])
 @user_optional
 def schools_description_api():
-    logging.debug('getting schools with descriptions')
+    logging.debug('getting schools with description')
     schools = db.session.query(SchoolWithDescription) \
                         .filter(not_(and_(SchoolWithDescription.latitude == 0, SchoolWithDescription.longitude == 0)), \
                                 not_(and_(SchoolWithDescription.latitude == None, SchoolWithDescription.longitude == None)), \
                                 or_(SchoolWithDescription.school_type == 'גן ילדים', SchoolWithDescription.school_type == 'בית ספר')) \
-                        .with_entities(SchoolWithDescription.symbol_id,
+                        .with_entities(SchoolWithDescription.school_id,
                                        SchoolWithDescription.school_name,
                                        SchoolWithDescription.students_number,
                                        SchoolWithDescription.municipality_name,
@@ -261,7 +261,7 @@ def schools_description_api():
                                        SchoolWithDescription.students_number,
                                        SchoolWithDescription.longitude,
                                        SchoolWithDescription.latitude).all()
-    schools_list = [{'symbol_id':x.symbol_id,
+    schools_list = [{'school_id':x.school_id,
                      'school_name':x.school_name,
                      'students_number':x.students_number,
                      'municipality_name':x.municipality_name,
@@ -274,6 +274,20 @@ def schools_description_api():
                      'longitude': x.longitude,
                      'latitude': x.latitude} for x in schools]
     return Response(json.dumps(schools_list, default=str), mimetype="application/json")
+
+
+@app.route("/api/schools-municipalities", methods=["GET"])
+@user_optional
+def schools_municipalities_api():
+    logging.debug('getting schools municipalities')
+    schools_municipalities = db.session.query(SchoolWithDescription) \
+                                       .filter(not_(and_(SchoolWithDescription.latitude == 0, SchoolWithDescription.longitude == 0)), \
+                                               not_(and_(SchoolWithDescription.latitude == None, SchoolWithDescription.longitude == None)), \
+                                               or_(SchoolWithDescription.school_type == 'גן ילדים', SchoolWithDescription.school_type == 'בית ספר')) \
+                                       .group_by(SchoolWithDescription.municipality_name) \
+                                       .with_entities(SchoolWithDescription.municipality_name).all()
+    schools_municipalities_list = sorted([x[0] for x in schools_municipalities])
+    return Response(json.dumps(schools_municipalities_list, default=str), mimetype="application/json")
 
 
 @app.route("/charts-data", methods=["GET"])

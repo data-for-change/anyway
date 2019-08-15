@@ -21,7 +21,7 @@ def upgrade():
     op.create_table('schools_with_description',
     sa.Column('id', sa.BigInteger(), nullable=False),
     sa.Column('data_year', sa.Integer(), nullable=True),
-    sa.Column('symbol_id', sa.Integer(), nullable=True),
+    sa.Column('school_id', sa.Integer(), nullable=True),
     sa.Column('school_name', sa.Text(), nullable=True),
     sa.Column('students_number', sa.Integer(), nullable=True),
     sa.Column('municipality_name', sa.Text(), nullable=True),

@@ -9,7 +9,7 @@ import math
 
 school_fields = {
     'data_year': 'שנה',
-    'symbol_id': 'סמל_מוסד',
+    'school_id': 'סמל_מוסד',
     'school_name': 'שם_מוסד',
     'students_number': 'סהכ_תלמידים_במוסד',
     'municipality_name': 'שם_רשות',
@@ -57,11 +57,11 @@ def get_schools_with_description(schools_description_filepath,
     max_year = df_schools[school_fields['data_year']].astype(int).max()
     df_schools = df_schools[df_schools[school_fields['data_year']] == max_year]
     for _, school in df_schools.iterrows():
-        symbol_id = get_numeric_value(school[school_fields['symbol_id']], int)
-        if symbol_id in list(df_coordinates[school_fields['symbol_id']].values):
-            x_coord = df_coordinates.loc[df_coordinates[school_fields['symbol_id']] == symbol_id, school_fields['x']].values[0]
-            y_coord = df_coordinates.loc[df_coordinates[school_fields['symbol_id']] == symbol_id, school_fields['y']].values[0]
-            location_accuracy = get_str_value(df_coordinates.loc[df_coordinates[school_fields['symbol_id']] == symbol_id,
+        school_id = get_numeric_value(school[school_fields['school_id']], int)
+        if school_id in list(df_coordinates[school_fields['school_id']].values):
+            x_coord = df_coordinates.loc[df_coordinates[school_fields['school_id']] == school_id, school_fields['x']].values[0]
+            y_coord = df_coordinates.loc[df_coordinates[school_fields['school_id']] == school_id, school_fields['y']].values[0]
+            location_accuracy = get_str_value(df_coordinates.loc[df_coordinates[school_fields['school_id']] == school_id,
                                                                 school_fields['location_accuracy']].values[0])
         else:
             x_coord = None
@@ -73,7 +73,7 @@ def get_schools_with_description(schools_description_filepath,
             longitude, latitude = None, None # otherwise yield will produce: UnboundLocalError: local variable referenced before assignment
         school = {
             'data_year': get_numeric_value(school[school_fields['data_year']], int),
-            'symbol_id': get_numeric_value(school[school_fields['symbol_id']], int),
+            'school_id': get_numeric_value(school[school_fields['school_id']], int),
             'school_name': get_str_value(school[school_fields['school_name']]),
             'students_number': get_numeric_value(school[school_fields['students_number']], int),
             'municipality_name': get_str_value(school[school_fields['municipality_name']]),
@@ -108,8 +108,8 @@ def import_to_datastore(schools_description_filepath,
         schools = get_schools_with_description(schools_description_filepath, schools_coordinates_filepath)
         new_items = 0
         all_existing_schools_symbol_ids = set(map(lambda x: x[0],
-                                             db.session.query(SchoolWithDescription.symbol_id).all()))
-        schools = [school for school in schools if school['symbol_id'] not in all_existing_schools_symbol_ids]
+                                             db.session.query(SchoolWithDescription.school_id).all()))
+        schools = [school for school in schools if school['school_id'] not in all_existing_schools_symbol_ids]
         logging.info('inserting ' + str(len(schools)) + ' new schools')
         for schools_chunk in chunks(schools, batch_size):
             db.session.bulk_insert_mappings(SchoolWithDescription, schools_chunk)

@@ -37,7 +37,8 @@ from .oauth import OAuthSignIn
 
 from .base import user_optional
 from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved, User, ReportPreferences,
-                     LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School, SchoolWithDescription)
+                     LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School, SchoolWithDescription,
+                     InjuredAroundSchool)
 from .config import ENTRIES_PER_PAGE
 from six.moves import http_client
 from sqlalchemy import func
@@ -249,7 +250,7 @@ def schools_api():
 @user_optional
 def schools_description_api():
     logging.debug('getting schools with description')
-    schools = db.session.query(SchoolWithDescription) \
+    query_obj = db.session.query(SchoolWithDescription) \
                         .filter(not_(and_(SchoolWithDescription.latitude == 0, SchoolWithDescription.longitude == 0)), \
                                 not_(and_(SchoolWithDescription.latitude == None, SchoolWithDescription.longitude == None)), \
                                 or_(SchoolWithDescription.school_type == 'גן ילדים', SchoolWithDescription.school_type == 'בית ספר')) \
@@ -262,21 +263,10 @@ def schools_description_api():
                                        SchoolWithDescription.school_type,
                                        SchoolWithDescription.foundation_year,
                                        SchoolWithDescription.location_accuracy,
-                                       SchoolWithDescription.students_number,
                                        SchoolWithDescription.longitude,
-                                       SchoolWithDescription.latitude).all()
-    schools_list = [{'school_id':x.school_id,
-                     'school_name':x.school_name,
-                     'students_number':x.students_number,
-                     'municipality_name':x.municipality_name,
-                     'yishuv_name':x.yishuv_name,
-                     'geo_district':x.geo_district,
-                     'school_type':x.school_type,
-                     'foundation_year':x.foundation_year,
-                     'location_accuracy':x.location_accuracy,
-                     'students_number':x.students_number,
-                     'longitude': x.longitude,
-                     'latitude': x.latitude} for x in schools]
+                                       SchoolWithDescription.latitude)
+    df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+    schools_list = df.to_dict(orient='records')
     response = Response(json.dumps(schools_list, default=str), mimetype="application/json")
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
@@ -293,6 +283,41 @@ def schools_municipalities_api():
                                        .with_entities(SchoolWithDescription.municipality_name).all()
     schools_municipalities_list = sorted([x[0] for x in schools_municipalities])
     response = Response(json.dumps(schools_municipalities_list, default=str), mimetype="application/json")
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
+@app.route("/api/injured-around_schools", methods=["GET"])
+@user_optional
+def injured_around_schools_api():
+    logging.debug('getting injured around schools api')
+    school_id = request.values.get('school_id')
+    if school_id is not None:
+        query_obj = db.session.query(InjuredAroundSchool).filter(InjuredAroundSchool.school_id == school_id)
+        df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+        injured_around_schools_list = df.to_dict(orient='records')
+        if not df.empty:
+            response = Response(json.dumps(injured_around_schools_list, default=str), mimetype="application/json")
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            return response
+        response = Response(status=404)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    school_yishuv_name = request.values.get('school_yishuv_name')
+    if school_yishuv_name is not None:
+        query_obj = db.session.query(InjuredAroundSchool).filter(InjuredAroundSchool.school_yishuv_name == school_yishuv_name)
+        df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+        injured_around_schools_list = df.to_dict(orient='records')
+        if not df.empty:
+            response = Response(json.dumps(injured_around_schools_list, default=str), mimetype="application/json")
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            return response
+        response = Response(status=404)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    query_obj = db.session.query(InjuredAroundSchool)
+    df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+    injured_around_schools_list = df.to_dict(orient='records')
+    response = Response(json.dumps(injured_around_schools_list, default=str), mimetype="application/json")
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 

@@ -5,6 +5,16 @@ import os
 import re
 import sys
 import argparse
+import datetime
+
+def valid_date(date_string):
+    DATE_INPUT_FORMAT = '%d-%m-%Y'
+    from datetime import datetime
+    try:
+        return datetime.strptime(date_string, DATE_INPUT_FORMAT)
+    except ValueError:
+        msg = "Not a valid date: '{0}'.".format(date_string)
+        raise argparse.ArgumentTypeError(msg)
 
 
 @click.group()
@@ -135,6 +145,18 @@ def schools_with_description(schools_description_filepath,
                  schools_coordinates_filepath=schools_coordinates_filepath,
                  batch_size=batch_size)
 
+@process.command()
+@click.option('--start_date', default='01-01-2014', type=valid_date, help='The Start Date - format DD-MM-YYYY')
+@click.option('--end_date', default=datetime.datetime.now().strftime('%d-%m-%Y'), type=valid_date, help='The End Date - format DD-MM-YYYY')
+@click.option('--distance', default=0.5, help='float In KM. Default is 0.5 (500m)', type=float)
+@click.option('--batch_size', type=int, default=5000)
+def injured_around_schools(start_date, end_date, distance, batch_size):
+    from anyway.parsers.injured_around_schools import parse
+    return parse(start_date=start_date,
+                 end_date=end_date,
+                 distance=distance,
+                 batch_size=batch_size)
+
 @cli.group()
 def preprocess():
     pass
@@ -218,15 +240,6 @@ def load_discussions(identifiers):
 @cli.group()
 def scripts():
     pass
-
-def valid_date(date_string):
-    DATE_INPUT_FORMAT = '%d-%m-%Y'
-    from datetime import datetime
-    try:
-        return datetime.strptime(date_string, DATE_INPUT_FORMAT)
-    except ValueError:
-        msg = "Not a valid date: '{0}'.".format(date_string)
-        raise argparse.ArgumentTypeError(msg)
 
 
 @scripts.command()

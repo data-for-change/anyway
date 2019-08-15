@@ -56,6 +56,7 @@ def get_schools_with_description(schools_description_filepath,
     schools = []
     max_year = df_schools[school_fields['data_year']].astype(int).max()
     df_schools = df_schools[df_schools[school_fields['data_year']] == max_year]
+    df_schools = df_schools.drop_duplicates(school_fields['school_id'])
     for _, school in df_schools.iterrows():
         school_id = get_numeric_value(school[school_fields['school_id']], int)
         if school_id in list(df_coordinates[school_fields['school_id']].values):

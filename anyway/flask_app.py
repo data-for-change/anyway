@@ -277,8 +277,9 @@ def schools_description_api():
                      'students_number':x.students_number,
                      'longitude': x.longitude,
                      'latitude': x.latitude} for x in schools]
-    return Response(json.dumps(schools_list, default=str), mimetype="application/json")
-
+    response = Response(json.dumps(schools_list, default=str), mimetype="application/json")
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 @app.route("/api/schools-municipalities", methods=["GET"])
 @user_optional
@@ -291,7 +292,9 @@ def schools_municipalities_api():
                                        .group_by(SchoolWithDescription.municipality_name) \
                                        .with_entities(SchoolWithDescription.municipality_name).all()
     schools_municipalities_list = sorted([x[0] for x in schools_municipalities])
-    return Response(json.dumps(schools_municipalities_list, default=str), mimetype="application/json")
+    response = Response(json.dumps(schools_municipalities_list, default=str), mimetype="application/json")
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 
 @app.route("/charts-data", methods=["GET"])

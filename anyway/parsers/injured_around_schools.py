@@ -132,6 +132,13 @@ def get_injured_around_schools(start_date, end_date, distance):
     injured_around_schools = df_injured_per_school_year.to_dict(orient='records')
     return injured_around_schools
 
+def truncate_injured_around_schools():
+    curr_table = 'injured_around_school'
+    sql_truncate = 'TRUNCATE TABLE ' + curr_table
+    db.session.execute(sql_truncate)
+    db.session.commit()
+    logging.info('Truncated table ' + curr_table)
+
 def import_to_datastore(start_date,
                         end_date,
                         distance,
@@ -139,13 +146,11 @@ def import_to_datastore(start_date,
     try:
         assert batch_size > 0
         started = datetime.now()
+        truncate_injured_around_schools()
         injured_around_schools = get_injured_around_schools(start_date, end_date, distance)
         new_items = 0
-        all_existing_schools_symbol_ids = set(map(lambda x: x[0],
-                                             db.session.query(InjuredAroundSchool.school_id).all()))
-        schools = [school for school in injured_around_schools if school['school_id'] not in all_existing_schools_symbol_ids]
-        logging.info('inserting ' + str(len(schools)) + ' new schools with injured around schools info')
-        for schools_chunk in chunks(schools, batch_size):
+        logging.info('inserting ' + str(len(injured_around_schools)) + ' new rows about schools with injured around schools info')
+        for schools_chunk in chunks(injured_around_schools, batch_size):
             db.session.bulk_insert_mappings(InjuredAroundSchool, schools_chunk)
             db.session.commit()
         new_items += len(schools)

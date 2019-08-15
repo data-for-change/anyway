@@ -13,7 +13,7 @@ from webassets import Environment as AssetsEnvironment
 from flask_babel import Babel,gettext
 from .clusters_calculator import retrieve_clusters
 from sqlalchemy.orm import load_only
-from sqlalchemy import and_, not_
+from sqlalchemy import and_, not_, or_
 from flask import request, redirect, session
 import logging
 import datetime
@@ -37,7 +37,8 @@ from .oauth import OAuthSignIn
 
 from .base import user_optional
 from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved, User, ReportPreferences,
-                     LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School)
+                     LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School, SchoolWithDescription,
+                     InjuredAroundSchool)
 from .config import ENTRIES_PER_PAGE
 from six.moves import http_client
 from sqlalchemy import func
@@ -240,6 +241,82 @@ def schools_api():
                     "longitude": x.longitude,
                     "latitude": x.latitude} for x in schools]
     return Response(json.dumps(schools_list, default=str), mimetype="application/json")
+
+@app.route("/api/schools-description", methods=["GET"])
+@user_optional
+def schools_description_api():
+    logging.debug('getting schools with description')
+    query_obj = db.session.query(SchoolWithDescription) \
+                        .filter(not_(and_(SchoolWithDescription.latitude == 0, SchoolWithDescription.longitude == 0)), \
+                                not_(and_(SchoolWithDescription.latitude == None, SchoolWithDescription.longitude == None)), \
+                                or_(SchoolWithDescription.school_type == 'גן ילדים', SchoolWithDescription.school_type == 'בית ספר')) \
+                        .with_entities(SchoolWithDescription.school_id,
+                                       SchoolWithDescription.school_name,
+                                       SchoolWithDescription.students_number,
+                                       SchoolWithDescription.municipality_name,
+                                       SchoolWithDescription.yishuv_name,
+                                       SchoolWithDescription.geo_district,
+                                       SchoolWithDescription.school_type,
+                                       SchoolWithDescription.foundation_year,
+                                       SchoolWithDescription.location_accuracy,
+                                       SchoolWithDescription.longitude,
+                                       SchoolWithDescription.latitude)
+    df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+    schools_list = df.to_dict(orient='records')
+    response = Response(json.dumps(schools_list, default=str), mimetype="application/json")
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
+@app.route("/api/schools-municipalities", methods=["GET"])
+@user_optional
+def schools_municipalities_api():
+    logging.debug('getting schools municipalities')
+    schools_municipalities = db.session.query(SchoolWithDescription) \
+                                       .filter(not_(and_(SchoolWithDescription.latitude == 0, SchoolWithDescription.longitude == 0)), \
+                                               not_(and_(SchoolWithDescription.latitude == None, SchoolWithDescription.longitude == None)), \
+                                               or_(SchoolWithDescription.school_type == 'גן ילדים', SchoolWithDescription.school_type == 'בית ספר')) \
+                                       .group_by(SchoolWithDescription.municipality_name) \
+                                       .with_entities(SchoolWithDescription.municipality_name).all()
+    schools_municipalities_list = sorted([x[0] for x in schools_municipalities])
+    response = Response(json.dumps(schools_municipalities_list, default=str), mimetype="application/json")
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
+@app.route("/api/injured-around_schools", methods=["GET"])
+@user_optional
+def injured_around_schools_api():
+    logging.debug('getting injured around schools api')
+    school_id = request.values.get('school_id')
+    if school_id is not None:
+        query_obj = db.session.query(InjuredAroundSchool).filter(InjuredAroundSchool.school_id == school_id)
+        df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+        injured_around_schools_list = df.to_dict(orient='records')
+        if not df.empty:
+            response = Response(json.dumps(injured_around_schools_list, default=str), mimetype="application/json")
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            return response
+        response = Response(status=404)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    school_yishuv_name = request.values.get('school_yishuv_name')
+    if school_yishuv_name is not None:
+        query_obj = db.session.query(InjuredAroundSchool).filter(InjuredAroundSchool.school_yishuv_name == school_yishuv_name)
+        df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+        injured_around_schools_list = df.to_dict(orient='records')
+        if not df.empty:
+            response = Response(json.dumps(injured_around_schools_list, default=str), mimetype="application/json")
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            return response
+        response = Response(status=404)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    query_obj = db.session.query(InjuredAroundSchool)
+    df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+    injured_around_schools_list = df.to_dict(orient='records')
+    response = Response(json.dumps(injured_around_schools_list, default=str), mimetype="application/json")
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
 
 @app.route("/charts-data", methods=["GET"])
 @user_optional

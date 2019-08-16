@@ -153,7 +153,7 @@ def import_to_datastore(start_date,
         for schools_chunk in chunks(injured_around_schools, batch_size):
             db.session.bulk_insert_mappings(InjuredAroundSchool, schools_chunk)
             db.session.commit()
-        new_items += len(schools)
+        new_items += len(injured_around_schools)
         logging.info("\t{0} items in {1}".format(new_items, time_delta(started)))
         return new_items
     except:

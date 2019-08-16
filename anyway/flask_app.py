@@ -271,22 +271,38 @@ def schools_description_api():
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
-@app.route("/api/schools-municipalities", methods=["GET"])
+@app.route("/api/schools-yishuvs", methods=["GET"])
 @user_optional
-def schools_municipalities_api():
-    logging.debug('getting schools municipalities')
-    schools_municipalities = db.session.query(SchoolWithDescription) \
+def schools_yishuvs_api():
+    logging.debug('getting schools yishuvs')
+    schools_yishuvs = db.session.query(SchoolWithDescription) \
                                        .filter(not_(and_(SchoolWithDescription.latitude == 0, SchoolWithDescription.longitude == 0)), \
                                                not_(and_(SchoolWithDescription.latitude == None, SchoolWithDescription.longitude == None)), \
                                                or_(SchoolWithDescription.school_type == 'גן ילדים', SchoolWithDescription.school_type == 'בית ספר')) \
-                                       .group_by(SchoolWithDescription.municipality_name) \
-                                       .with_entities(SchoolWithDescription.municipality_name).all()
-    schools_municipalities_list = sorted([x[0] for x in schools_municipalities])
-    response = Response(json.dumps(schools_municipalities_list, default=str), mimetype="application/json")
+                                       .group_by(SchoolWithDescription.yishuv_name) \
+                                       .with_entities(SchoolWithDescription.yishuv_name).all()
+    schools_yishuvs_list = sorted([x[0] for x in schools_yishuvs])
+    response = Response(json.dumps(schools_yishuvs_list, default=str), mimetype="application/json")
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
-@app.route("/api/injured-around_schools", methods=["GET"])
+@app.route("/api/schools-names", methods=["GET"])
+@user_optional
+def schools_names_api():
+    logging.debug('getting schools names')
+    query_obj = db.session.query(SchoolWithDescription) \
+                                       .filter(not_(and_(SchoolWithDescription.latitude == 0, SchoolWithDescription.longitude == 0)), \
+                                               not_(and_(SchoolWithDescription.latitude == None, SchoolWithDescription.longitude == None)), \
+                                               or_(SchoolWithDescription.school_type == 'גן ילדים', SchoolWithDescription.school_type == 'בית ספר')) \
+                                       .with_entities(SchoolWithDescription.school_id,
+                                                      SchoolWithDescription.school_name)
+    df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+    schools_names_ids = df.to_dict(orient='records')
+    response = Response(json.dumps(schools_names_ids, default=str), mimetype="application/json")
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
+@app.route("/api/injured-around-schools", methods=["GET"])
 @user_optional
 def injured_around_schools_api():
     logging.debug('getting injured around schools api')

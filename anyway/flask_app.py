@@ -295,7 +295,9 @@ def schools_names_api():
                                                not_(and_(SchoolWithDescription.latitude == None, SchoolWithDescription.longitude == None)), \
                                                or_(SchoolWithDescription.school_type == 'גן ילדים', SchoolWithDescription.school_type == 'בית ספר')) \
                                        .with_entities(SchoolWithDescription.school_id,
-                                                      SchoolWithDescription.school_name)
+                                                      SchoolWithDescription.school_name,
+                                                      SchoolWithDescription.longitude,
+                                                      SchoolWithDescription.latitude)
     df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
     schools_names_ids = df.to_dict(orient='records')
     response = Response(json.dumps(schools_names_ids, default=str), mimetype="application/json")

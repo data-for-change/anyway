@@ -271,6 +271,7 @@ def schools_description_api():
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
+
 @app.route("/api/schools-yishuvs", methods=["GET"])
 @user_optional
 def schools_yishuvs_api():
@@ -286,6 +287,7 @@ def schools_yishuvs_api():
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
+
 @app.route("/api/schools-names", methods=["GET"])
 @user_optional
 def schools_names_api():
@@ -294,15 +296,19 @@ def schools_names_api():
                                        .filter(not_(and_(SchoolWithDescription.latitude == 0, SchoolWithDescription.longitude == 0)), \
                                                not_(and_(SchoolWithDescription.latitude == None, SchoolWithDescription.longitude == None)), \
                                                or_(SchoolWithDescription.school_type == 'גן ילדים', SchoolWithDescription.school_type == 'בית ספר')) \
-                                       .with_entities(SchoolWithDescription.school_id,
+                                       .with_entities(SchoolWithDescription.yishuv_name,
                                                       SchoolWithDescription.school_name,
                                                       SchoolWithDescription.longitude,
-                                                      SchoolWithDescription.latitude)
+                                                      SchoolWithDescription.latitude,
+                                                      SchoolWithDescription.school_id)
     df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+    df = df.groupby(['yishuv_name', 'school_name', 'longitude', 'latitude']).min()
+    df = df.reset_index(drop=False)
     schools_names_ids = df.to_dict(orient='records')
     response = Response(json.dumps(schools_names_ids, default=str), mimetype="application/json")
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
+
 
 @app.route("/api/injured-around-schools", methods=["GET"])
 @user_optional
@@ -312,9 +318,12 @@ def injured_around_schools_api():
     if school_id is not None:
         query_obj = db.session.query(InjuredAroundSchool).filter(InjuredAroundSchool.school_id == school_id) \
                                                          .with_entities(InjuredAroundSchool.school_id,
-                                                                        InjuredAroundSchool.involved_injury_severity,
                                                                         InjuredAroundSchool.accident_year,
-                                                                        InjuredAroundSchool.injured_count)
+                                                                        InjuredAroundSchool.killed_count,
+                                                                        InjuredAroundSchool.severly_injured_count,
+                                                                        InjuredAroundSchool.light_injured_count,
+                                                                        InjuredAroundSchool.total_injured_killed_count,
+                                                                        InjuredAroundSchool.rank_in_yishuv)
         df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
         injured_around_schools_list = df.to_dict(orient='records')
         if not df.empty:
@@ -328,9 +337,12 @@ def injured_around_schools_api():
     if school_yishuv_name is not None:
         query_obj = db.session.query(InjuredAroundSchool).filter(InjuredAroundSchool.school_yishuv_name == school_yishuv_name) \
                                                          .with_entities(InjuredAroundSchool.school_id,
-                                                                        InjuredAroundSchool.involved_injury_severity,
                                                                         InjuredAroundSchool.accident_year,
-                                                                        InjuredAroundSchool.injured_count)
+                                                                        InjuredAroundSchool.killed_count,
+                                                                        InjuredAroundSchool.severly_injured_count,
+                                                                        InjuredAroundSchool.light_injured_count,
+                                                                        InjuredAroundSchool.total_injured_killed_count,
+                                                                        InjuredAroundSchool.rank_in_yishuv)
         df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
         injured_around_schools_list = df.to_dict(orient='records')
         if not df.empty:
@@ -341,12 +353,40 @@ def injured_around_schools_api():
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
     query_obj = db.session.query(InjuredAroundSchool).with_entities(InjuredAroundSchool.school_id,
-                                                                    InjuredAroundSchool.involved_injury_severity,
                                                                     InjuredAroundSchool.accident_year,
-                                                                    InjuredAroundSchool.injured_count)
+                                                                    InjuredAroundSchool.killed_count,
+                                                                    InjuredAroundSchool.severly_injured_count,
+                                                                    InjuredAroundSchool.light_injured_count,
+                                                                    InjuredAroundSchool.total_injured_killed_count,
+                                                                    InjuredAroundSchool.rank_in_yishuv)
     df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
     injured_around_schools_list = df.to_dict(orient='records')
     response = Response(json.dumps(injured_around_schools_list, default=str), mimetype="application/json")
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
+
+@app.route("/api/injured-around-schools-graphs-data", methods=["GET"])
+@user_optional
+def injured_around_schools_graphs_data_api():
+    logging.debug('getting injured around schools graphs data api')
+    school_id = request.values.get('school_id')
+    if school_id is not None:
+        query_obj = db.session.query(InjuredAroundSchool).filter(InjuredAroundSchool.school_id == school_id) \
+                                                         .with_entities(InjuredAroundSchool.school_id,
+                                                                        InjuredAroundSchool.accident_year,
+                                                                        InjuredAroundSchool.killed_count,
+                                                                        InjuredAroundSchool.severly_injured_count,
+                                                                        InjuredAroundSchool.light_injured_count,
+                                                                        InjuredAroundSchool.total_injured_killed_count,
+                                                                        InjuredAroundSchool.rank_in_yishuv)
+        df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+        injured_around_schools_list = df.to_dict(orient='records')
+        if not df.empty:
+            response = Response(json.dumps(injured_around_schools_list, default=str), mimetype="application/json")
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            return response
+    response = Response(status=404)
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 

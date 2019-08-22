@@ -3,7 +3,7 @@ from sqlalchemy import or_, not_, and_
 from flask_sqlalchemy import SQLAlchemy
 import math
 from ..utilities import init_flask, time_delta, chunks
-from ..models import AccidentMarker, Involved, School, SchoolWithDescription, InjuredAroundSchool
+from ..models import AccidentMarker, Involved, School, SchoolWithDescription, InjuredAroundSchool, InjuredAroundSchoolAllData
 from ..constants import CONST
 import pandas as pd
 import os
@@ -26,9 +26,6 @@ DATE_URL_FORMAT = '%Y-%m-%d'
 
 app = init_flask()
 db = SQLAlchemy(app)
-injury_severity_dict = {1: 'קטלנית',
-                        2: 'קשה',
-                        3: 'קלה'}
 
 
 def get_bounding_box(latitude, longitude, distance_in_km):
@@ -104,9 +101,105 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
     df['school_longitude'] = school.longitude
     df['school_latitude'] = school.latitude
     df['accident_year'] = df['involved_accident_year']
-    df['involved_injury_severity_hebrew'] = df['involved_injury_severity'].apply(lambda x: injury_severity_dict[x])
     return df
 
+
+def select_columns_df_total(df):
+    return df.loc[:,['school_id',
+                     'markers_provider_and_id',
+                     'markers_provider_code',
+                     'markers_description',
+                     'markers_accident_type',
+                     'markers_accident_severity',
+                     'markers_address',
+                     'markers_location_accuracy',
+                     'markers_road_type',
+                     'markers_road_shape',
+                     'markers_day_type',
+                     'markers_police_unit',
+                     'markers_mainStreet',
+                     'markers_secondaryStreet',
+                     'markers_junction',
+                     'markers_one_lane',
+                     'markers_multi_lane',
+                     'markers_speed_limit',
+                     'markers_road_intactness',
+                     'markers_road_width',
+                     'markers_road_sign',
+                     'markers_road_light',
+                     'markers_road_control',
+                     'markers_weather',
+                     'markers_road_surface',
+                     'markers_road_object',
+                     'markers_object_distance',
+                     'markers_didnt_cross',
+                     'markers_cross_mode',
+                     'markers_cross_location',
+                     'markers_cross_direction',
+                     'markers_video_link',
+                     'markers_road1',
+                     'markers_road2',
+                     'markers_km',
+                     'markers_yishuv_symbol',
+                     'markers_yishuv_name',
+                     'markers_geo_area',
+                     'markers_day_night',
+                     'markers_day_in_week',
+                     'markers_traffic_light',
+                     'markers_region',
+                     'markers_district',
+                     'markers_natural_area',
+                     'markers_municipal_status',
+                     'markers_yishuv_shape',
+                     'markers_street1',
+                     'markers_street1_hebrew',
+                     'markers_street2',
+                     'markers_street2_hebrew',
+                     'markers_home',
+                     'markers_urban_intersection',
+                     'markers_non_urban_intersection',
+                     'markers_non_urban_intersection_hebrew',
+                     'markers_accident_year',
+                     'markers_accident_month',
+                     'markers_accident_day',
+                     'markers_accident_hour_raw',
+                     'markers_accident_hour',
+                     'markers_accident_minute',
+                     'markers_x',
+                     'markers_y',
+                     'markers_vehicle_type_rsa',
+                     'markers_violation_type_rsa',
+                     'markers_geom',
+                     'involved_provider_and_id',
+                     'involved_provider_code',
+                     'involved_accident_id',
+                     'involved_involved_type',
+                     'involved_license_acquiring_date',
+                     'involved_age_group',
+                     'involved_sex',
+                     'involved_vehicle_type',
+                     'involved_safety_measures',
+                     'involved_involve_yishuv_symbol',
+                     'involved_involve_yishuv_name',
+                     'involved_injury_severity',
+                     'involved_injured_type',
+                     'involved_injured_position',
+                     'involved_population_type',
+                     'involved_home_region',
+                     'involved_home_district',
+                     'involved_home_natural_area',
+                     'involved_home_municipal_status',
+                     'involved_home_residence_type',
+                     'involved_hospital_time',
+                     'involved_medical_type',
+                     'involved_release_dest',
+                     'involved_safety_measures_use',
+                     'involved_late_deceased',
+                     'involved_car_id',
+                     'involved_involve_id',
+                     'involved_accident_year',
+                     'involved_accident_month',
+                     'involved_injury_severity_mais']]
 
 def get_injured_around_schools(start_date, end_date, distance):
     schools = db.session.query(SchoolWithDescription) \
@@ -123,17 +216,53 @@ def get_injured_around_schools(start_date, end_date, distance):
                                            end_date=end_date,
                                            school=school)],
                              axis=0)
-    df_injured_per_school_year = (df_total.groupby(['school_id', 'school_name', 'school_type', 'school_longitude', 'school_latitude', 'school_yishuv_name', 'school_anyway_link', 'involved_injury_severity', 'involved_injury_severity_hebrew', 'accident_year'])
-                                       .size()
-                                       .reset_index(name='injured_count')
-                                       .sort_values('injured_count', ascending=False))
-    df_injured_per_school_year = df_injured_per_school_year.reset_index()
-    df_injured_per_school_year['distance_in_km'] = distance
-    injured_around_schools = df_injured_per_school_year.to_dict(orient='records')
-    return injured_around_schools
+
+    # df_total_injured
+    df_total_injured = (df_total.groupby(['school_yishuv_name', 'school_id', 'school_name', 'school_type', 'school_anyway_link', 'school_longitude', 'school_latitude', 'accident_year','involved_injury_severity'])
+                                .size()
+                                .reset_index(name='injured_count')
+                                .loc[:,['school_yishuv_name',  'school_id', 'school_name', 'school_type', 'school_anyway_link', 'involved_injury_severity', 'injured_count', 'school_longitude', 'school_latitude',  'accident_year']])
+    df_total_injured = df_total_injured.set_index(['school_yishuv_name', 'school_id', 'school_name', 'school_type', 'school_anyway_link','school_longitude', 'school_latitude', 'accident_year', 'involved_injury_severity']).unstack(-1)
+    df_total_injured.fillna({'injured_count': 0, 'total_injured_count': 0}, inplace=True)
+    df_total_injured.loc[:,(slice('injured_count'), slice(None))] = df_total_injured.loc[:,(slice('injured_count'), slice(None))].apply(lambda x: x.apply(int))
+    df_total_injured['total_injured_count'] = (df_total_injured.loc[:,['injured_count']].sum(axis=1)).apply(int)
+
+    # get rank by yishuv
+    df_rank_by_yishuv = (df_total_injured.stack()
+                                         .groupby(['school_yishuv_name','school_id', 'school_name', 'school_type', 'school_anyway_link','school_longitude', 'school_latitude'])
+                                         .sum()
+                                         .reset_index())
+    df_rank_by_yishuv['total_injured_count'] = df_rank_by_yishuv['total_injured_count'].astype(int)
+
+    groups = (df_rank_by_yishuv.loc[:,['school_yishuv_name', 'school_id', 'school_name', 'school_type', 'school_longitude', 'school_latitude' , 'total_injured_count']]
+                               .groupby(['school_yishuv_name']))
+
+    df_rank_by_yishuv['rank_in_yishuv'] = groups['total_injured_count'].rank(method='dense', ascending=False).astype(int)
+    df_rank_by_yishuv = df_rank_by_yishuv.loc[:,['school_yishuv_name', 'school_id', 'school_name', 'school_type', 'school_longitude', 'school_latitude', 'rank_in_yishuv']]
+
+    # join df_total_injured and df_rank_by_yishuv with rank by yishuv
+    joined_df = pd.merge(df_total_injured.reset_index(), df_rank_by_yishuv, on=['school_yishuv_name', 'school_id', 'school_name', 'school_type', 'school_longitude', 'school_latitude' ], how='left')
+    joined_df.sort_values(['school_yishuv_name', 'rank_in_yishuv'], ascending=True, inplace=True)
+
+    joined_df.columns = [col if type(col)==str else '_'.join(map(str, col)) for col in joined_df.columns.values]
+    joined_df = joined_df.loc[:,['school_yishuv_name', 'school_id', 'school_name', 'school_type', 'school_anyway_link_', 'rank_in_yishuv', 'school_longitude', 'school_latitude', 'accident_year_', 'injured_count_1', 'injured_count_2', 'injured_count_3', 'total_injured_count_']]
+    joined_df.columns =         ['school_yishuv_name', 'school_id', 'school_name', 'school_type', 'school_anyway_link', 'rank_in_yishuv', 'school_longitude', 'school_latitude', 'accident_year', 'killed_count', 'severly_injured_count', 'light_injured_count', 'total_injured_killed_count']
+    joined_df['distance_in_km'] = distance
+    joined_df = joined_df.to_dict(orient='records')
+
+    df_total = select_columns_df_total(df_total)
+    df_total = df_total.to_dict(orient='records')
+
+    return joined_df, df_total
 
 def truncate_injured_around_schools():
     curr_table = 'injured_around_school'
+    sql_truncate = 'TRUNCATE TABLE ' + curr_table
+    db.session.execute(sql_truncate)
+    db.session.commit()
+    logging.info('Truncated table ' + curr_table)
+
+    curr_table = 'injured_around_school_all_data'
     sql_truncate = 'TRUNCATE TABLE ' + curr_table
     db.session.execute(sql_truncate)
     db.session.commit()
@@ -147,11 +276,21 @@ def import_to_datastore(start_date,
         assert batch_size > 0
         started = datetime.now()
         truncate_injured_around_schools()
-        injured_around_schools = get_injured_around_schools(start_date, end_date, distance)
+        injured_around_schools, df_total = get_injured_around_schools(start_date, end_date, distance)
         new_items = 0
         logging.info('inserting ' + str(len(injured_around_schools)) + ' new rows about schools with injured around schools info')
-        for schools_chunk in chunks(injured_around_schools, batch_size):
+        for chunk_idx, schools_chunk in enumerate(chunks(injured_around_schools, batch_size)):
+            if chunk_idx % 10 == 0:
+                logging_chunk = 'Chunk idx in injured_around_schools: ' + str(chunk_idx)
+                logging.info(logging_chunk)
             db.session.bulk_insert_mappings(InjuredAroundSchool, schools_chunk)
+            db.session.commit()
+        logging.info('inserting ' + str(len(df_total)) + ' new rows about schools with injured around schools info')
+        for chunk_idx, schools_chunk in enumerate(chunks(df_total, batch_size)):
+            if chunk_idx % 10 == 0:
+                logging_chunk = 'Chunk idx in injured_around_schools: ' + str(chunk_idx)
+                logging.info(logging_chunk)
+            db.session.bulk_insert_mappings(InjuredAroundSchoolAllData, schools_chunk)
             db.session.commit()
         new_items += len(injured_around_schools)
         logging.info("\t{0} items in {1}".format(new_items, time_delta(started)))

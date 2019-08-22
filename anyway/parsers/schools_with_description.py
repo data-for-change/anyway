@@ -54,9 +54,15 @@ def get_schools_with_description(schools_description_filepath,
     logging.info("\tReading schools coordinates data from '%s'..." % schools_coordinates_filepath)
     df_coordinates = pd.read_excel(schools_coordinates_filepath)
     schools = []
+    # get max data year
     max_year = df_schools[school_fields['data_year']].astype(int).max()
     df_schools = df_schools[df_schools[school_fields['data_year']] == max_year]
+    # get school_id
     df_schools = df_schools.drop_duplicates(school_fields['school_id'])
+    # sort by school_id
+    df_schools = df_schools.sort_values(school_fields['school_id'], ascending=True)
+    # drop duplicates of 'school_name','x', 'y'
+    df_schools = df_schools.drop_duplicates([school_fields['school_name'], school_fields['x'], school_fields['y']], keep='first')
     for _, school in df_schools.iterrows():
         school_id = get_numeric_value(school[school_fields['school_id']], int)
         if school_id in list(df_coordinates[school_fields['school_id']].values):
@@ -100,17 +106,22 @@ def get_schools_with_description(schools_description_filepath,
 
     return schools
 
+def truncate_schools_with_description():
+    curr_table = 'schools_with_description'
+    sql_truncate = 'TRUNCATE TABLE ' + curr_table
+    db.session.execute(sql_truncate)
+    db.session.commit()
+    logging.info('Truncated table ' + curr_table)
+
 def import_to_datastore(schools_description_filepath,
                         schools_coordinates_filepath,
                         batch_size):
     try:
         assert batch_size > 0
         started = datetime.now()
+        truncate_schools_with_description()
         schools = get_schools_with_description(schools_description_filepath, schools_coordinates_filepath)
         new_items = 0
-        all_existing_schools_symbol_ids = set(map(lambda x: x[0],
-                                             db.session.query(SchoolWithDescription.school_id).all()))
-        schools = [school for school in schools if school['school_id'] not in all_existing_schools_symbol_ids]
         logging.info('inserting ' + str(len(schools)) + ' new schools')
         for schools_chunk in chunks(schools, batch_size):
             db.session.bulk_insert_mappings(SchoolWithDescription, schools_chunk)

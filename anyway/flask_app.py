@@ -372,10 +372,11 @@ def injured_around_schools_graphs_data_api():
     logging.debug('getting injured around schools graphs data api')
     school_id = request.values.get('school_id')
     if school_id is not None:
-        query_obj = db.session.query(InjuredAroundSchoolAllData, func.count(InjuredAroundSchoolAllData.school_id)) \
+        query_obj = db.session.query(InjuredAroundSchoolAllData) \
                               .filter(InjuredAroundSchoolAllData.school_id == school_id) \
                               .join(Sex, and_(InjuredAroundSchoolAllData.involved_sex == Sex.id,
-                                                                     InjuredAroundSchoolAllData.markers_accident_year == Sex.year)) \
+                                              InjuredAroundSchoolAllData.markers_accident_year == Sex.year,
+                                              InjuredAroundSchoolAllData.markers_provider_code == Sex.provider_code)) \
                               .with_entities(InjuredAroundSchoolAllData.school_id,
                                              Sex.sex_hebrew,
                                              func.count(InjuredAroundSchoolAllData.school_id)) \

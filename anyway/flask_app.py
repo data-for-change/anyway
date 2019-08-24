@@ -389,7 +389,7 @@ def injured_around_schools_sex_graphs_data_api():
             return response
         else:
             query_obj = db.session.query(SchoolWithDescription) \
-                                  .filter(SchoolWithDescription.school_id == school_id), \
+                                  .filter(SchoolWithDescription.school_id == school_id) \
                                   .with_entities(SchoolWithDescription.school_id)
             df_school_id = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
             if not df_school_id.empty:
@@ -434,7 +434,7 @@ def injured_around_schools_months_graphs_data_api():
             return response
         else:
             query_obj = db.session.query(SchoolWithDescription) \
-                                  .filter(SchoolWithDescription.school_id == school_id), \
+                                  .filter(SchoolWithDescription.school_id == school_id) \
                                   .with_entities(SchoolWithDescription.school_id)
             df_school_id = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
             if not df_school_id.empty:

@@ -372,14 +372,13 @@ def injured_around_schools_graphs_data_api():
     logging.debug('getting injured around schools graphs data api')
     school_id = request.values.get('school_id')
     if school_id is not None:
-        query_obj = db.session.query(InjuredAroundSchool).filter(InjuredAroundSchool.school_id == school_id) \
-                                                         .with_entities(InjuredAroundSchool.school_id,
-                                                                        InjuredAroundSchool.accident_year,
-                                                                        InjuredAroundSchool.killed_count,
-                                                                        InjuredAroundSchool.severly_injured_count,
-                                                                        InjuredAroundSchool.light_injured_count,
-                                                                        InjuredAroundSchool.total_injured_killed_count,
-                                                                        InjuredAroundSchool.rank_in_yishuv)
+        query_obj = db.session.query(InjuredAroundSchoolAllData, Sex, func.count(Sex.sex_hebrew)) \
+                              .filter(InjuredAroundSchoolAllData.school_id == school_id) \
+                              .join(InjuredAroundSchoolAllData.involved_sex == Sex.id,
+                                    InjuredAroundSchoolAllData.markers_accident_year == Sex.year) \
+                              .with_entities(InjuredAroundSchoolAllData.school_id,
+                                             Sex.sex_hebrew)
+                              .group_by(Sex.sex_hebrew) \
         df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
         injured_around_schools_list = df.to_dict(orient='records')
         if not df.empty:

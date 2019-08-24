@@ -38,7 +38,7 @@ from .oauth import OAuthSignIn
 from .base import user_optional
 from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved, User, ReportPreferences,
                      LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School, SchoolWithDescription,
-                     InjuredAroundSchool, InjuredAroundSchoolAllData, Sex)
+                     InjuredAroundSchool, InjuredAroundSchoolAllData, Sex, AccidentMonth)
 from .config import ENTRIES_PER_PAGE
 from six.moves import http_client
 from sqlalchemy import func
@@ -365,11 +365,10 @@ def injured_around_schools_api():
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
-#, Sex, func.count(Sex.sex_hebrew)
-@app.route("/api/injured-around-schools-graphs-data", methods=["GET"])
+@app.route("/api/injured-around-schools-sex-graphs-data", methods=["GET"])
 @user_optional
-def injured_around_schools_graphs_data_api():
-    logging.debug('getting injured around schools graphs data api')
+def injured_around_schools_sex_graphs_data_api():
+    logging.debug('getting injured around schools sex graphs data api')
     school_id = request.values.get('school_id')
     if school_id is not None:
         query_obj = db.session.query(InjuredAroundSchoolAllData) \
@@ -382,6 +381,33 @@ def injured_around_schools_graphs_data_api():
                                              func.count(InjuredAroundSchoolAllData.school_id)) \
                               .group_by(InjuredAroundSchoolAllData.school_id,
                                              Sex.sex_hebrew)
+        df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+        injured_around_schools_list = df.to_dict(orient='records')
+        if not df.empty:
+            response = Response(json.dumps(injured_around_schools_list, default=str), mimetype="application/json")
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            return response
+    response = Response(status=404)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
+
+@app.route("/api/injured-around-schools-months-graphs-data", methods=["GET"])
+@user_optional
+def injured_around_schools_months_graphs_data_api():
+    logging.debug('getting injured around schools months graphs data api')
+    school_id = request.values.get('school_id')
+    if school_id is not None:
+        query_obj = db.session.query(InjuredAroundSchoolAllData) \
+                              .filter(InjuredAroundSchoolAllData.school_id == school_id) \
+                              .join(AccidentMonth, and_(InjuredAroundSchoolAllData.markers_accident_month == AccidentMonth.id,
+                                              InjuredAroundSchoolAllData.markers_accident_year == AccidentMonth.year,
+                                              InjuredAroundSchoolAllData.markers_provider_code == AccidentMonth.provider_code)) \
+                              .with_entities(InjuredAroundSchoolAllData.school_id,
+                                             AccidentMonth.accident_month_hebrew,
+                                             func.count(InjuredAroundSchoolAllData.school_id)) \
+                              .group_by(InjuredAroundSchoolAllData.school_id,
+                                             AccidentMonth.accident_month_hebrew)
         df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
         injured_around_schools_list = df.to_dict(orient='records')
         if not df.empty:

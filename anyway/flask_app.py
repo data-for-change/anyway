@@ -365,20 +365,21 @@ def injured_around_schools_api():
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
-
+#, Sex, func.count(Sex.sex_hebrew)
 @app.route("/api/injured-around-schools-graphs-data", methods=["GET"])
 @user_optional
 def injured_around_schools_graphs_data_api():
     logging.debug('getting injured around schools graphs data api')
     school_id = request.values.get('school_id')
     if school_id is not None:
-        query_obj = db.session.query(InjuredAroundSchoolAllData, Sex, func.count(Sex.sex_hebrew)) \
+        query_obj = db.session.query(InjuredAroundSchoolAllData, func.count(InjuredAroundSchoolAllData.school_id)) \
                               .filter(InjuredAroundSchoolAllData.school_id == school_id) \
-                              .join(InjuredAroundSchoolAllData, and_(InjuredAroundSchoolAllData.involved_sex == Sex.id,
+                              .join(Sex, and_(InjuredAroundSchoolAllData.involved_sex == Sex.id,
                                                                      InjuredAroundSchoolAllData.markers_accident_year == Sex.year)) \
                               .with_entities(InjuredAroundSchoolAllData.school_id,
                                              Sex.sex_hebrew) \
-                              .group_by(Sex.sex_hebrew)
+                              .group_by(InjuredAroundSchoolAllData.school_id,
+                                             Sex.sex_hebrew)
         df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
         injured_around_schools_list = df.to_dict(orient='records')
         if not df.empty:

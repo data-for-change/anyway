@@ -377,7 +377,8 @@ def injured_around_schools_graphs_data_api():
                               .join(Sex, and_(InjuredAroundSchoolAllData.involved_sex == Sex.id,
                                                                      InjuredAroundSchoolAllData.markers_accident_year == Sex.year)) \
                               .with_entities(InjuredAroundSchoolAllData.school_id,
-                                             Sex.sex_hebrew) \
+                                             Sex.sex_hebrew,
+                                             func.count(InjuredAroundSchoolAllData.school_id)) \
                               .group_by(InjuredAroundSchoolAllData.school_id,
                                              Sex.sex_hebrew)
         df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)

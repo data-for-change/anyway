@@ -325,9 +325,9 @@ def injured_around_schools_api():
                                                                         InjuredAroundSchool.total_injured_killed_count,
                                                                         InjuredAroundSchool.rank_in_yishuv)
         df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-        injured_around_schools_list = df.to_dict(orient='records')
+        final_list = df.to_dict(orient='records')
         if not df.empty:
-            response = Response(json.dumps(injured_around_schools_list, default=str), mimetype="application/json")
+            response = Response(json.dumps(final_list, default=str), mimetype="application/json")
             response.headers.add('Access-Control-Allow-Origin', '*')
             return response
         response = Response(status=404)
@@ -344,9 +344,9 @@ def injured_around_schools_api():
                                                                         InjuredAroundSchool.total_injured_killed_count,
                                                                         InjuredAroundSchool.rank_in_yishuv)
         df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-        injured_around_schools_list = df.to_dict(orient='records')
+        final_list = df.to_dict(orient='records')
         if not df.empty:
-            response = Response(json.dumps(injured_around_schools_list, default=str), mimetype="application/json")
+            response = Response(json.dumps(final_list, default=str), mimetype="application/json")
             response.headers.add('Access-Control-Allow-Origin', '*')
             return response
         response = Response(status=404)
@@ -360,8 +360,8 @@ def injured_around_schools_api():
                                                                     InjuredAroundSchool.total_injured_killed_count,
                                                                     InjuredAroundSchool.rank_in_yishuv)
     df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-    injured_around_schools_list = df.to_dict(orient='records')
-    response = Response(json.dumps(injured_around_schools_list, default=str), mimetype="application/json")
+    final_list = df.to_dict(orient='records')
+    response = Response(json.dumps(final_list, default=str), mimetype="application/json")
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
@@ -382,11 +382,29 @@ def injured_around_schools_sex_graphs_data_api():
                               .group_by(InjuredAroundSchoolAllData.school_id,
                                              Sex.sex_hebrew)
         df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-        injured_around_schools_list = df.to_dict(orient='records')
+        final_list = df.to_dict(orient='records')
         if not df.empty:
-            response = Response(json.dumps(injured_around_schools_list, default=str), mimetype="application/json")
+            response = Response(json.dumps(final_list, default=str), mimetype="application/json")
             response.headers.add('Access-Control-Allow-Origin', '*')
             return response
+        else:
+            query_obj = db.session.query(SchoolWithDescription) \
+                                  .filter(SchoolWithDescription.school_id == school_id), \
+                                  .with_entities(SchoolWithDescription.school_id)
+            df_school_id = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+            if not df_school_id.empty:
+                query_obj = db.session.query(Sex) \
+                                      .with_entities(Sex.sex_hebrew)
+                df_sex = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+                df_sex = df_sex.groupby(['sex_hebrew']).size().reset_index(name='count')
+                final_list = []
+                for sex in list(df_sex['sex_hebrew'].unique()):
+                    final_list.append({'school_id': school_id,
+                                                        'sex_hebrew': sex,
+                                                        'count_1': 0})
+                response = Response(json.dumps(final_list, default=str), mimetype="application/json")
+                response.headers.add('Access-Control-Allow-Origin', '*')
+                return response
     response = Response(status=404)
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
@@ -409,11 +427,29 @@ def injured_around_schools_months_graphs_data_api():
                               .group_by(InjuredAroundSchoolAllData.school_id,
                                              AccidentMonth.accident_month_hebrew)
         df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-        injured_around_schools_list = df.to_dict(orient='records')
+        final_list = df.to_dict(orient='records')
         if not df.empty:
-            response = Response(json.dumps(injured_around_schools_list, default=str), mimetype="application/json")
+            response = Response(json.dumps(final_list, default=str), mimetype="application/json")
             response.headers.add('Access-Control-Allow-Origin', '*')
             return response
+        else:
+            query_obj = db.session.query(SchoolWithDescription) \
+                                  .filter(SchoolWithDescription.school_id == school_id), \
+                                  .with_entities(SchoolWithDescription.school_id)
+            df_school_id = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+            if not df_school_id.empty:
+                query_obj = db.session.query(AccidentMonth) \
+                                      .with_entities(AccidentMonth.accident_month_hebrew)
+                df_month = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+                df_month = df_month.groupby(['accident_month_hebrew']).size().reset_index(name='count')
+                final_list = []
+                for month in list(df_month['accident_month_hebrew'].unique()):
+                    final_list.append({'school_id': school_id,
+                                       'accident_month_hebrew': month,
+                                       'count_1': 0})
+                response = Response(json.dumps(final_list, default=str), mimetype="application/json")
+                response.headers.add('Access-Control-Allow-Origin', '*')
+                return response
     response = Response(status=404)
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response

@@ -374,8 +374,8 @@ def injured_around_schools_graphs_data_api():
     if school_id is not None:
         query_obj = db.session.query(InjuredAroundSchoolAllData, Sex, func.count(Sex.sex_hebrew)) \
                               .filter(InjuredAroundSchoolAllData.school_id == school_id) \
-                              .join(InjuredAroundSchoolAllData.involved_sex == Sex.id,
-                                    InjuredAroundSchoolAllData.markers_accident_year == Sex.year) \
+                              .join(InjuredAroundSchoolAllData, and_(InjuredAroundSchoolAllData.involved_sex == Sex.id,
+                                                                     InjuredAroundSchoolAllData.markers_accident_year == Sex.year)) \
                               .with_entities(InjuredAroundSchoolAllData.school_id,
                                              Sex.sex_hebrew) \
                               .group_by(Sex.sex_hebrew)

@@ -377,8 +377,8 @@ def injured_around_schools_graphs_data_api():
                               .join(InjuredAroundSchoolAllData.involved_sex == Sex.id,
                                     InjuredAroundSchoolAllData.markers_accident_year == Sex.year) \
                               .with_entities(InjuredAroundSchoolAllData.school_id,
-                                             Sex.sex_hebrew)
-                              .group_by(Sex.sex_hebrew) \
+                                             Sex.sex_hebrew) \
+                              .group_by(Sex.sex_hebrew)
         df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
         injured_around_schools_list = df.to_dict(orient='records')
         if not df.empty:

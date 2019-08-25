@@ -705,13 +705,18 @@ def updatebyemail():
     emailaddress = str(jsonData['address'])
     fname = (jsonData['fname']).encode("utf8")
     lname = (jsonData['lname']).encode("utf8")
-
     if len(fname)>40:
-        return  jsonify(respo='First name to long')
+        response = Response(json.dumps({'respo':'First name too long'}, default=str), mimetype="application/json")
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
     if len(lname)>40:
-        return  jsonify(respo='Last name to long')
+        response = Response(json.dumps({'respo':'Last name too long'}, default=str), mimetype="application/json")
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
     if len(emailaddress)>60:
-        return jsonify(respo='Email too long', emailaddress = emailaddress)
+        response = Response(json.dumps({'respo':'Email too long'}, default=str), mimetype="application/json")
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
 
     curr_max_id = db.session.query(func.max(LocationSubscribers.id)).scalar()
     if curr_max_id is None:
@@ -740,7 +745,9 @@ def updatebyemail():
                                                 school_id=None)
     db.session.add(user_subscription)
     db.session.commit()
-    return jsonify(respo='Subscription saved', )
+    response = Response(json.dumps({'respo':'Subscription saved'}, default=str), mimetype="application/json")
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 @app.route("/preferences", methods=('GET', 'POST'))
 def update_preferences():

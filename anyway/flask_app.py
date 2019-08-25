@@ -145,6 +145,8 @@ ARG_TYPES = {'ne_lat': (float, 32.072427482938345), 'ne_lng': (float, 34.7992896
 
 def get_kwargs():
     kwargs = {arg: arg_type(request.values.get(arg, default_value)) for (arg, (arg_type, default_value)) in iteritems(ARG_TYPES)}
+    if request.values.get('age_groups[]') == '1234' or request.values.get('age_groups') == '1234':
+        kwargs['age_groups'] = '1,2,3,4'
     try:
         kwargs.update({arg: datetime.date.fromtimestamp(int(request.values[arg])) for arg in ('start_date', 'end_date')})
     except ValueError:

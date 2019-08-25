@@ -371,13 +371,19 @@ def injured_around_schools_sex_graphs_data_api():
                                              Sex.sex_hebrew,
                                              func.count(InjuredAroundSchoolAllData.school_id)) \
                               .group_by(InjuredAroundSchoolAllData.school_id,
-                                             Sex.sex_hebrew)
+                                        Sex.sex_hebrew)
         df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+        query_obj = db.session.query(Sex) \
+                              .with_entities(Sex.sex_hebrew)
         df_sex = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
         df_sex = df_sex.groupby(['sex_hebrew']).size().reset_index(name='count')
+        query_obj = db.session.query(SchoolWithDescription) \
+                              .filter(SchoolWithDescription.school_id == school_id) \
+                              .with_entities(SchoolWithDescription.school_id)
+        df_school_id = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
         if not df.empty:
             for sex in list(df_sex['sex_hebrew'].unique()):
-                if sex not in list(df.sex_hebrew):
+                if sex not in list(df['sex_hebrew'].unique()):
                     df = df.append({'school_id': school_id,
                                     'sex_hebrew': sex,
                                     'count_1': 0},
@@ -387,13 +393,7 @@ def injured_around_schools_sex_graphs_data_api():
             response.headers.add('Access-Control-Allow-Origin', '*')
             return response
         else:
-            query_obj = db.session.query(SchoolWithDescription) \
-                                  .filter(SchoolWithDescription.school_id == school_id) \
-                                  .with_entities(SchoolWithDescription.school_id)
-            df_school_id = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
             if not df_school_id.empty:
-                query_obj = db.session.query(Sex) \
-                                      .with_entities(Sex.sex_hebrew)
                 final_list = []
                 for sex in list(df_sex['sex_hebrew'].unique()):
                     final_list.append({'school_id': school_id,
@@ -438,7 +438,7 @@ def injured_around_schools_months_graphs_data_api():
         if not df.empty:
             for month in list(df_month['accident_month_hebrew'].unique()):
                 for injury_severity in list(df_injury_severity['injury_severity_hebrew'].unique()):
-                    if month not in list(df.accident_month_hebrew) \
+                    if month not in list(df.accident_month_hebrew.unique()) \
                         or injury_severity not in list(df[df.accident_month_hebrew == month].injury_severity_hebrew.unique()):
                         df = df.append({'school_id': school_id,
                                         'accident_month_hebrew': month,

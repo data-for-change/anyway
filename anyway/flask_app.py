@@ -387,10 +387,10 @@ def injured_around_schools_sex_graphs_data_api():
         if not df.empty:
             for sex in list(df_sex['sex_hebrew'].unique()):
                 if sex not in list(df.sex_hebrew):
-                    df.append({'school_id': school_id,
-                               'sex_hebrew': sex,
-                               'count_1': 0},
-                               ignore_index=True)
+                    df = df.append({'school_id': school_id,
+                                    'sex_hebrew': sex,
+                                    'count_1': 0},
+                                    ignore_index=True)
             final_list = df.to_dict(orient='records')
             response = Response(json.dumps(final_list, default=str), mimetype="application/json")
             response.headers.add('Access-Control-Allow-Origin', '*')
@@ -449,10 +449,10 @@ def injured_around_schools_months_graphs_data_api():
                 for injury_severity in list(df_injury_severity['injury_severity_hebrew'].unique()):
                     if month not in list(df.accident_month_hebrew) \
                         or injury_severity not in list(df[df.accident_month_hebrew == month].injury_severity_hebrew.unique()):
-                        df.append({'school_id': school_id,
-                                    'accident_month_hebrew': month,
-                                    'injury_severity_hebrew': injury_severity,
-                                    'count_1': 0},
+                        df = df.append({'school_id': school_id,
+                                        'accident_month_hebrew': month,
+                                        'injury_severity_hebrew': injury_severity,
+                                        'count_1': 0},
                                     ignore_index=True)
             final_list = df.to_dict(orient='records')
             response = Response(json.dumps(final_list, default=str), mimetype="application/json")

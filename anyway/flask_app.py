@@ -416,9 +416,11 @@ def injured_around_schools_months_graphs_data_api():
         query_obj = db.session.query(InjuredAroundSchoolAllData) \
                               .filter(InjuredAroundSchoolAllData.school_id == school_id) \
                               .join(AccidentMonth, and_(InjuredAroundSchoolAllData.markers_accident_month == AccidentMonth.id,
-                                              InjuredAroundSchoolAllData.markers_accident_year == AccidentMonth.year,
-                                              InjuredAroundSchoolAllData.markers_provider_code == AccidentMonth.provider_code)) \
-                              .join(InjurySeverity, InjuredAroundSchoolAllData.involved_injury_severity == InjurySeverity.id) \
+                                                        InjuredAroundSchoolAllData.markers_accident_year == AccidentMonth.year,
+                                                        InjuredAroundSchoolAllData.markers_provider_code == AccidentMonth.provider_code)) \
+                              .join(InjurySeverity, and_(InjuredAroundSchoolAllData.involved_injury_severity == InjurySeverity.id,
+                                                         InjuredAroundSchoolAllData.markers_accident_year == InjurySeverity.year,
+                                                         InjuredAroundSchoolAllData.markers_provider_code == InjurySeverity.provider_code)) \
                               .with_entities(InjuredAroundSchoolAllData.school_id,
                                              AccidentMonth.accident_month_hebrew,
                                             InjurySeverity.injury_severity_hebrew,
@@ -703,13 +705,18 @@ def updatebyemail():
     emailaddress = str(jsonData['address'])
     fname = (jsonData['fname']).encode("utf8")
     lname = (jsonData['lname']).encode("utf8")
-
     if len(fname)>40:
-        return  jsonify(respo='First name to long')
+        response = Response(json.dumps({'respo':'First name too long'}, default=str), mimetype="application/json")
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
     if len(lname)>40:
-        return  jsonify(respo='Last name to long')
+        response = Response(json.dumps({'respo':'Last name too long'}, default=str), mimetype="application/json")
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
     if len(emailaddress)>60:
-        return jsonify(respo='Email too long', emailaddress = emailaddress)
+        response = Response(json.dumps({'respo':'Email too long'}, default=str), mimetype="application/json")
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
 
     curr_max_id = db.session.query(func.max(LocationSubscribers.id)).scalar()
     if curr_max_id is None:
@@ -738,7 +745,9 @@ def updatebyemail():
                                                 school_id=None)
     db.session.add(user_subscription)
     db.session.commit()
-    return jsonify(respo='Subscription saved', )
+    response = Response(json.dumps({'respo':'Subscription saved'}, default=str), mimetype="application/json")
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 @app.route("/preferences", methods=('GET', 'POST'))
 def update_preferences():

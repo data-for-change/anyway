@@ -416,9 +416,11 @@ def injured_around_schools_months_graphs_data_api():
         query_obj = db.session.query(InjuredAroundSchoolAllData) \
                               .filter(InjuredAroundSchoolAllData.school_id == school_id) \
                               .join(AccidentMonth, and_(InjuredAroundSchoolAllData.markers_accident_month == AccidentMonth.id,
-                                              InjuredAroundSchoolAllData.markers_accident_year == AccidentMonth.year,
-                                              InjuredAroundSchoolAllData.markers_provider_code == AccidentMonth.provider_code)) \
-                              .join(InjurySeverity, InjuredAroundSchoolAllData.involved_injury_severity == InjurySeverity.id) \
+                                                        InjuredAroundSchoolAllData.markers_accident_year == AccidentMonth.year,
+                                                        InjuredAroundSchoolAllData.markers_provider_code == AccidentMonth.provider_code)) \
+                              .join(InjurySeverity, and_(InjuredAroundSchoolAllData.involved_injury_severity == InjurySeverity.id,
+                                                         InjuredAroundSchoolAllData.markers_accident_year == InjurySeverity.year,
+                                                         InjuredAroundSchoolAllData.markers_provider_code == InjurySeverity.provider_code)) \
                               .with_entities(InjuredAroundSchoolAllData.school_id,
                                              AccidentMonth.accident_month_hebrew,
                                             InjurySeverity.injury_severity_hebrew,

@@ -61,10 +61,10 @@ def get_schools_with_description(schools_description_filepath,
     df_schools = df_schools.drop_duplicates(school_fields['school_id'])
     # sort by school_id
     df_schools = df_schools.sort_values(school_fields['school_id'], ascending=True)
-    # drop duplicates of 'school_name','x', 'y'
-    df_schools = df_schools.drop_duplicates([school_fields['school_name'], school_fields['x'], school_fields['y']], keep='first')
+    all_schools_tuples = []
     for _, school in df_schools.iterrows():
         school_id = get_numeric_value(school[school_fields['school_id']], int)
+        school_name = get_str_value(school[school_fields['school_name']]).strip('"')
         if school_id in list(df_coordinates[school_fields['school_id']].values):
             x_coord = df_coordinates.loc[df_coordinates[school_fields['school_id']] == school_id, school_fields['x']].values[0]
             y_coord = df_coordinates.loc[df_coordinates[school_fields['school_id']] == school_id, school_fields['y']].values[0]
@@ -78,10 +78,16 @@ def get_schools_with_description(schools_description_filepath,
             longitude, latitude = coordinates_converter.convert(x_coord, y_coord)
         else:
             longitude, latitude = None, None # otherwise yield will produce: UnboundLocalError: local variable referenced before assignment
+        # Don't insert duplicates of 'school_name','x', 'y'
+        school_tuple = (school_name, x_coord, y_coord)
+        if school_tuple in all_schools_tuples:
+            continue
+        else:
+            all_schools_tuples.append(school_tuple)
         school = {
             'data_year': get_numeric_value(school[school_fields['data_year']], int),
             'school_id': get_numeric_value(school[school_fields['school_id']], int),
-            'school_name': get_str_value(school[school_fields['school_name']]).strip('"'),
+            'school_name': school_name,
             'students_number': get_numeric_value(school[school_fields['students_number']], int),
             'municipality_name': get_str_value(school[school_fields['municipality_name']]),
             'yishuv_name': get_str_value(school[school_fields['yishuv_name']]),

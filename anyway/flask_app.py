@@ -719,18 +719,32 @@ def updatebyemail():
         return  jsonify(respo='Last name to long')
     if len(emailaddress)>60:
         return jsonify(respo='Email too long', emailaddress = emailaddress)
+
     curr_max_id = db.session.query(func.max(LocationSubscribers.id)).scalar()
     if curr_max_id is None:
         curr_max_id = 0
     user_id = curr_max_id + 1
-    user_subscription = LocationSubscribers(id = user_id,
-                               email = emailaddress,
-                               first_name = fname.decode("utf8"),
-                               last_name = lname.decode("utf8"),
-                               ne_lng=jsonData['ne_lng'],
-                               ne_lat=jsonData['ne_lat'],
-                               sw_lng=jsonData['sw_lng'],
-                               sw_lat=jsonData['sw_lat'])
+    if 'school_id' in jsonData.keys():
+        school_id = int(jsonData['school_id'])
+        user_subscription = LocationSubscribers(id = user_id,
+                                                email = emailaddress,
+                                                first_name = fname.decode("utf8"),
+                                                last_name = lname.decode("utf8"),
+                                                ne_lng=None,
+                                                ne_lat=None,
+                                                sw_lng=None,
+                                                sw_lat=None,
+                                                school_id=school_id)
+    else:
+        user_subscription = LocationSubscribers(id = user_id,
+                                                email = emailaddress,
+                                                first_name = fname.decode("utf8"),
+                                                last_name = lname.decode("utf8"),
+                                                ne_lng=jsonData['ne_lng'],
+                                                ne_lat=jsonData['ne_lat'],
+                                                sw_lng=jsonData['sw_lng'],
+                                                sw_lat=jsonData['sw_lat'],
+                                                school_id=None)
     db.session.add(user_subscription)
     db.session.commit()
     return jsonify(respo='Subscription saved', )

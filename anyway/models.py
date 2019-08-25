@@ -93,6 +93,7 @@ class LocationSubscribers(Base, UserMixin):
     ne_lat = Column(Float(), nullable=True)
     sw_lng = Column(Float(), nullable=True)
     sw_lat = Column(Float(), nullable=True)
+    school_id = Column(Integer(), nullable=True)
 
     def serialize(self):
         return {

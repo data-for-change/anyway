@@ -81,7 +81,7 @@ def get_schools_with_description(schools_description_filepath,
         school = {
             'data_year': get_numeric_value(school[school_fields['data_year']], int),
             'school_id': get_numeric_value(school[school_fields['school_id']], int),
-            'school_name': get_str_value(school[school_fields['school_name']]),
+            'school_name': get_str_value(school[school_fields['school_name']]).strip('"'),
             'students_number': get_numeric_value(school[school_fields['students_number']], int),
             'municipality_name': get_str_value(school[school_fields['municipality_name']]),
             'yishuv_name': get_str_value(school[school_fields['yishuv_name']]),

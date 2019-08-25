@@ -382,8 +382,16 @@ def injured_around_schools_sex_graphs_data_api():
                               .group_by(InjuredAroundSchoolAllData.school_id,
                                              Sex.sex_hebrew)
         df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-        final_list = df.to_dict(orient='records')
+        df_sex = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+        df_sex = df_sex.groupby(['sex_hebrew']).size().reset_index(name='count')
         if not df.empty:
+            for sex in list(df_sex['sex_hebrew'].unique()):
+                if sex not in list(df.sex_hebrew):
+                    df.append({'school_id': school_id,
+                               'sex_hebrew': sex,
+                               'count_1': 0},
+                               ignore_index=True)
+            final_list = df.to_dict(orient='records')
             response = Response(json.dumps(final_list, default=str), mimetype="application/json")
             response.headers.add('Access-Control-Allow-Origin', '*')
             return response
@@ -395,13 +403,11 @@ def injured_around_schools_sex_graphs_data_api():
             if not df_school_id.empty:
                 query_obj = db.session.query(Sex) \
                                       .with_entities(Sex.sex_hebrew)
-                df_sex = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-                df_sex = df_sex.groupby(['sex_hebrew']).size().reset_index(name='count')
                 final_list = []
                 for sex in list(df_sex['sex_hebrew'].unique()):
                     final_list.append({'school_id': school_id,
-                                                        'sex_hebrew': sex,
-                                                        'count_1': 0})
+                                        'sex_hebrew': sex,
+                                        'count_1': 0})
                 response = Response(json.dumps(final_list, default=str), mimetype="application/json")
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 return response
@@ -421,14 +427,34 @@ def injured_around_schools_months_graphs_data_api():
                               .join(AccidentMonth, and_(InjuredAroundSchoolAllData.markers_accident_month == AccidentMonth.id,
                                               InjuredAroundSchoolAllData.markers_accident_year == AccidentMonth.year,
                                               InjuredAroundSchoolAllData.markers_provider_code == AccidentMonth.provider_code)) \
+                              .join(InjurySeverity, InjuredAroundSchoolAllData.involved_injury_severity == InjurySeverity.id) \
                               .with_entities(InjuredAroundSchoolAllData.school_id,
                                              AccidentMonth.accident_month_hebrew,
+                                            InjurySeverity.injury_severity_hebrew,
                                              func.count(InjuredAroundSchoolAllData.school_id)) \
                               .group_by(InjuredAroundSchoolAllData.school_id,
-                                             AccidentMonth.accident_month_hebrew)
+                                        AccidentMonth.accident_month_hebrew,
+                                        InjurySeverity.injury_severity_hebrew)
         df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-        final_list = df.to_dict(orient='records')
+        query_obj = db.session.query(AccidentMonth) \
+                              .with_entities(AccidentMonth.accident_month_hebrew)
+        df_month = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+        df_month = df_month.groupby(['accident_month_hebrew']).size().reset_index(name='count')
+        query_obj = db.session.query(InjurySeverity) \
+                              .with_entities(InjurySeverity.injury_severity_hebrew)
+        df_injury_severity = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+        df_injury_severity = df_injury_severity.groupby(['injury_severity_hebrew']).size().reset_index(name='count')
         if not df.empty:
+            for month in list(df_month['accident_month_hebrew'].unique()):
+                for injury_severity in list(df_injury_severity['injury_severity_hebrew'].unique()):
+                    if month not in list(df.accident_month_hebrew) \
+                        or injury_severity not in list(df[df.accident_month_hebrew == month].injury_severity_hebrew.unique()):
+                        df.append({'school_id': school_id,
+                                    'accident_month_hebrew': month,
+                                    'injury_severity_hebrew': injury_severity,
+                                    'count_1': 0},
+                                    ignore_index=True)
+            final_list = df.to_dict(orient='records')
             response = Response(json.dumps(final_list, default=str), mimetype="application/json")
             response.headers.add('Access-Control-Allow-Origin', '*')
             return response
@@ -438,15 +464,13 @@ def injured_around_schools_months_graphs_data_api():
                                   .with_entities(SchoolWithDescription.school_id)
             df_school_id = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
             if not df_school_id.empty:
-                query_obj = db.session.query(AccidentMonth) \
-                                      .with_entities(AccidentMonth.accident_month_hebrew)
-                df_month = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-                df_month = df_month.groupby(['accident_month_hebrew']).size().reset_index(name='count')
                 final_list = []
                 for month in list(df_month['accident_month_hebrew'].unique()):
-                    final_list.append({'school_id': school_id,
-                                       'accident_month_hebrew': month,
-                                       'count_1': 0})
+                    for injury_severity in list(df_injury_severity['injury_severity_hebrew'].unique()):
+                        final_list.append({'school_id': school_id,
+                                           'accident_month_hebrew': month,
+                                           'injury_severity_hebrew': injury_severity,
+                                           'count_1': 0})
                 response = Response(json.dumps(final_list, default=str), mimetype="application/json")
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 return response

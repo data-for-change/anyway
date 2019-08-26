@@ -231,6 +231,7 @@ def get_injured_around_schools(start_date, end_date, distance):
     shutil.rmtree(data_dir)
 
     # df_total_injured
+    logging.info('create df_total_injured')
     df_total_injured = (df_total.groupby(['school_yishuv_name', 'school_id', 'school_name', 'school_type', 'school_anyway_link', 'school_longitude', 'school_latitude', 'accident_year','involved_injury_severity'])
                                 .size()
                                 .reset_index(name='injured_count')
@@ -241,6 +242,7 @@ def get_injured_around_schools(start_date, end_date, distance):
     df_total_injured['total_injured_count'] = (df_total_injured.loc[:,['injured_count']].sum(axis=1)).apply(int)
 
     # get rank by yishuv
+    logging.info('create df_rank_by_yishuv')
     df_rank_by_yishuv = (df_total_injured.stack()
                                          .groupby(['school_yishuv_name','school_id', 'school_name', 'school_type', 'school_anyway_link','school_longitude', 'school_latitude'])
                                          .sum()
@@ -254,6 +256,8 @@ def get_injured_around_schools(start_date, end_date, distance):
     df_rank_by_yishuv = df_rank_by_yishuv.loc[:,['school_yishuv_name', 'school_id', 'school_name', 'school_type', 'school_longitude', 'school_latitude', 'rank_in_yishuv']]
 
     # join df_total_injured and df_rank_by_yishuv with rank by yishuv
+    logging.info('join df_total_injured and df_rank_by_yishuv')
+
     joined_df = pd.merge(df_total_injured.reset_index(), df_rank_by_yishuv, on=['school_yishuv_name', 'school_id', 'school_name', 'school_type', 'school_longitude', 'school_latitude' ], how='left')
     joined_df.sort_values(['school_yishuv_name', 'rank_in_yishuv'], ascending=True, inplace=True)
 
@@ -263,9 +267,10 @@ def get_injured_around_schools(start_date, end_date, distance):
     joined_df['distance_in_km'] = distance
     joined_df = joined_df.to_dict(orient='records')
 
+    logging.info('select_columns_df_total')
     df_total = select_columns_df_total(df_total)
     df_total = df_total.to_dict(orient='records')
-
+    logging.info('return joined_df, df_total')
     return joined_df, df_total
 
 def truncate_injured_around_schools():
@@ -288,8 +293,8 @@ def import_to_datastore(start_date,
     try:
         assert batch_size > 0
         started = datetime.now()
-        truncate_injured_around_schools()
         injured_around_schools, df_total = get_injured_around_schools(start_date, end_date, distance)
+        truncate_injured_around_schools()
         new_items = 0
         logging.info('inserting ' + str(len(injured_around_schools)) + ' new rows about to injured_around_school')
         for chunk_idx, schools_chunk in enumerate(chunks(injured_around_schools, batch_size)):
@@ -309,6 +314,7 @@ def import_to_datastore(start_date,
         logging.info("\t{0} items in {1}".format(new_items, time_delta(started)))
         return new_items
     except:
+        logging.info("\tExecution took {0}".format(time_delta(started)))
         error = "Schools import succeded partially with " + new_items + " schools"
         raise Exception(error)
 

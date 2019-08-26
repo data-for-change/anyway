@@ -306,6 +306,7 @@ def schools_names_api():
 @app.route("/api/injured-around-schools", methods=["GET"])
 @user_optional
 def injured_around_schools_api():
+    report_years = [2014, 2015, 2016, 2017, 2018]
     logging.debug('getting injured around schools api')
     school_id = request.values.get('school_id')
     if school_id is not None:
@@ -318,11 +319,40 @@ def injured_around_schools_api():
                                                                         InjuredAroundSchool.total_injured_killed_count,
                                                                         InjuredAroundSchool.rank_in_yishuv)
         df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-        final_list = df.to_dict(orient='records')
         if not df.empty:
+            for year in report_years:
+                if year not in list(df.accident_year.unique()):
+                    df = df.append({'school_id': df.school_id.values[0],
+                                    'accident_year': year,
+                                    'killed_count': 0,
+                                    'severly_injured_count': 0,
+                                    'light_injured_count': 0,
+                                    'total_injured_killed_count': 0,
+                                    'rank_in_yishuv': df.rank_in_yishuv.values[0]},
+                                    ignore_index=True)
+            final_list = df.to_dict(orient='records')
             response = Response(json.dumps(final_list, default=str), mimetype="application/json")
             response.headers.add('Access-Control-Allow-Origin', '*')
             return response
+        else:
+            query_obj = db.session.query(SchoolWithDescription) \
+                                  .filter(SchoolWithDescription.school_id == school_id) \
+                                  .with_entities(SchoolWithDescription.school_id)
+            df_school_id = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+            if not df_school_id.empty:
+                final_list = []
+                for year in report_years:
+                    final_list.append({'school_id': school_id,
+                                        'accident_year': year,
+                                        'killed_count': 0,
+                                        'severly_injured_count': 0,
+                                        'light_injured_count': 0,
+                                        'total_injured_killed_count': 0,
+                                        'rank_in_yishuv': None})
+                response = Response(json.dumps(final_list, default=str), mimetype="application/json")
+                response.headers.add('Access-Control-Allow-Origin', '*')
+                return response
+
         response = Response(status=404)
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response

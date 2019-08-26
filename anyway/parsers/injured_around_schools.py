@@ -9,6 +9,7 @@ import pandas as pd
 import os
 from datetime import datetime
 import logging
+import shutil
 
 
 SUBTYPE_ACCIDENT_WITH_PEDESTRIAN = 1
@@ -18,8 +19,8 @@ INJURED_TYPE_PEDESTRIAN = 1
 YISHUV_SYMBOL_NOT_EXIST = -1
 CONTENT_ENCODING = 'utf-8'
 HEBREW_ENCODING = 'cp1255'
-ANYWAY_UI_FORMAT_MAP_ONLY = "https://www.anyway.co.il/?zoom=17&start_date={start_date}&end_date={end_date}&lat={latitude}&lon={longitude}&show_fatal=1&show_severe=1&show_light=1&approx={location_approx}&accurate={location_accurate}&show_markers=1&show_discussions=0&show_urban=3&show_intersection=3&show_lane=3&show_day=7&show_holiday=0&show_time=24&start_time=25&end_time=25&weather=0&road=0&separation=0&surface=0&acctype={acc_type}&controlmeasure=0&district=0&case_type=0&show_rsa=0&age_groups=1,2,3,4&map_only=true"
-ANYWAY_UI_FORMAT_WITH_FILTERS = "https://www.anyway.co.il/?zoom=17&start_date={start_date}&end_date={end_date}&lat={latitude}&lon={longitude}&show_fatal=1&show_severe=1&show_light=1&approx={location_approx}&accurate={location_accurate}&show_markers=1&show_discussions=0&show_urban=3&show_intersection=3&show_lane=3&show_day=7&show_holiday=0&show_time=24&start_time=25&end_time=25&weather=0&road=0&separation=0&surface=0&acctype={acc_type}&controlmeasure=0&district=0&case_type=0&show_rsa=0&age_groups=1,2,3,4"
+ANYWAY_UI_FORMAT_MAP_ONLY = "https://www.anyway.co.il/?zoom=17&start_date={start_date}&end_date={end_date}&lat={latitude}&lon={longitude}&show_fatal=1&show_severe=1&show_light=1&approx={location_approx}&accurate={location_accurate}&show_markers=1&show_discussions=0&show_urban=3&show_intersection=3&show_lane=3&show_day=7&show_holiday=0&show_time=24&start_time=25&end_time=25&weather=0&road=0&separation=0&surface=0&acctype={acc_type}&controlmeasure=0&district=0&case_type=0&show_rsa=0&age_groups=1234&map_only=true"
+ANYWAY_UI_FORMAT_WITH_FILTERS = "https://www.anyway.co.il/?zoom=17&start_date={start_date}&end_date={end_date}&lat={latitude}&lon={longitude}&show_fatal=1&show_severe=1&show_light=1&approx={location_approx}&accurate={location_accurate}&show_markers=1&show_discussions=0&show_urban=3&show_intersection=3&show_lane=3&show_day=7&show_holiday=0&show_time=24&start_time=25&end_time=25&weather=0&road=0&separation=0&surface=0&acctype={acc_type}&controlmeasure=0&district=0&case_type=0&show_rsa=0&age_groups=1234"
 DATE_INPUT_FORMAT = '%d-%m-%Y'
 DATE_URL_FORMAT = '%Y-%m-%d'
 
@@ -206,16 +207,28 @@ def get_injured_around_schools(start_date, end_date, distance):
                         .filter(not_(and_(SchoolWithDescription.latitude == 0, SchoolWithDescription.longitude == 0)), \
                                 not_(and_(SchoolWithDescription.latitude == None, SchoolWithDescription.longitude == None)), \
                                 or_(SchoolWithDescription.school_type == 'גן ילדים', SchoolWithDescription.school_type == 'בית ספר')).all()
-    df_total = pd.DataFrame()
-    for _, school in enumerate(schools):
-        df_total = pd.concat([df_total,
-                             acc_inv_query(longitude=school.longitude,
+    data_dir = 'tmp_school_data'
+    if os.path.exists(data_dir):
+        shutil.rmtree(data_dir)
+    os.mkdir(data_dir)
+    for idx, school in enumerate(schools):
+        if idx % 100 == 0:
+            logging.info(idx)
+        df_curr = acc_inv_query(longitude=school.longitude,
                                            latitude=school.latitude,
                                            distance=distance,
                                            start_date=start_date,
                                            end_date=end_date,
-                                           school=school)],
-                             axis=0)
+                                           school=school)
+        curr_csv_path = os.path.join(data_dir, str(school.school_id))
+        df_curr.to_pickle(curr_csv_path)
+    df_total = pd.DataFrame()
+    for idx, filename in enumerate(os.listdir(data_dir)):
+        curr_csv_path = os.path.join(data_dir, filename)
+        df_total = pd.concat([df_total, pd.read_pickle(curr_csv_path)], axis=0)
+        if idx % 100 == 0:
+            logging.info(idx)
+    shutil.rmtree(data_dir)
 
     # df_total_injured
     df_total_injured = (df_total.groupby(['school_yishuv_name', 'school_id', 'school_name', 'school_type', 'school_anyway_link', 'school_longitude', 'school_latitude', 'accident_year','involved_injury_severity'])
@@ -278,21 +291,21 @@ def import_to_datastore(start_date,
         truncate_injured_around_schools()
         injured_around_schools, df_total = get_injured_around_schools(start_date, end_date, distance)
         new_items = 0
-        logging.info('inserting ' + str(len(injured_around_schools)) + ' new rows about schools with injured around schools info')
+        logging.info('inserting ' + str(len(injured_around_schools)) + ' new rows about to injured_around_school')
         for chunk_idx, schools_chunk in enumerate(chunks(injured_around_schools, batch_size)):
             if chunk_idx % 10 == 0:
                 logging_chunk = 'Chunk idx in injured_around_schools: ' + str(chunk_idx)
                 logging.info(logging_chunk)
             db.session.bulk_insert_mappings(InjuredAroundSchool, schools_chunk)
             db.session.commit()
-        logging.info('inserting ' + str(len(df_total)) + ' new rows about schools with injured around schools info')
+        logging.info('inserting ' + str(len(df_total)) + ' new rows injured_around_school_all_data')
         for chunk_idx, schools_chunk in enumerate(chunks(df_total, batch_size)):
             if chunk_idx % 10 == 0:
-                logging_chunk = 'Chunk idx in injured_around_schools: ' + str(chunk_idx)
+                logging_chunk = 'Chunk idx in injured_around_school_all_data: ' + str(chunk_idx)
                 logging.info(logging_chunk)
             db.session.bulk_insert_mappings(InjuredAroundSchoolAllData, schools_chunk)
             db.session.commit()
-        new_items += len(injured_around_schools)
+        new_items += len(injured_around_schools) + len(df_total)
         logging.info("\t{0} items in {1}".format(new_items, time_delta(started)))
         return new_items
     except:
@@ -308,4 +321,4 @@ def parse(start_date,
                                 end_date=end_date,
                                 distance=distance,
                                 batch_size=batch_size)
-    logging.info("Total: {0} schools in {1}".format(total, time_delta(started)))
+    logging.info("Total: {0} rows in {1}".format(total, time_delta(started)))

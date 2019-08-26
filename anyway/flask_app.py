@@ -166,7 +166,7 @@ def get_locale():
 @user_optional
 def schools():
     if request.method == "GET":
-        return render_template('schools_dashboard.html')
+        return render_template('schools_dashboard_react.html')
     else:
         return Response("Method Not Allowed", 405)
 

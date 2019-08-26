@@ -171,6 +171,15 @@ def schools():
         return Response("Method Not Allowed", 405)
 
 
+@app.route('/schools-report', methods=["GET"])
+@user_optional
+def schools_report():
+    if request.method == "GET":
+        return render_template('schools_dashboard_react.html')
+    else:
+        return Response("Method Not Allowed", 405)
+
+
 @app.route("/markers", methods=["GET"])
 @user_optional
 def markers():

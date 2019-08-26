@@ -125,8 +125,8 @@ def import_to_datastore(schools_description_filepath,
     try:
         assert batch_size > 0
         started = datetime.now()
-        truncate_schools_with_description()
         schools = get_schools_with_description(schools_description_filepath, schools_coordinates_filepath)
+        truncate_schools_with_description()
         new_items = 0
         logging.info('inserting ' + str(len(schools)) + ' new schools')
         for schools_chunk in chunks(schools, batch_size):

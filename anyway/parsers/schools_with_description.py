@@ -65,6 +65,9 @@ def get_schools_with_description(schools_description_filepath,
     for _, school in df_schools.iterrows():
         school_id = get_numeric_value(school[school_fields['school_id']], int)
         school_name = get_str_value(school[school_fields['school_name']]).strip('"')
+        school_type = get_str_value(school[school_fields['school_type']])
+        if school_type != 'בית ספר':
+            continue
         if school_id in list(df_coordinates[school_fields['school_id']].values):
             x_coord = df_coordinates.loc[df_coordinates[school_fields['school_id']] == school_id, school_fields['x']].values[0]
             y_coord = df_coordinates.loc[df_coordinates[school_fields['school_id']] == school_id, school_fields['y']].values[0]

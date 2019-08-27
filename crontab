@@ -1,2 +1,3 @@
-@daily www-data . $HOME/.profile; cd /var/www/anyway && python main.py process cbs --from_email --username $MAILUSER --password $MAILPASS --email_search_start_date date +%d.%m.%Y -d "-2 days"
-* * * * * www-data . $HOME/.profile; cd /var/www/anyway && python3.6 /var/www/anyway/main.py process news_flash --google_maps_key_path $GOOGLE_MAPS_KEY_FILE
+#@daily www-data . $HOME/.profile; cd /var/www/anyway && python main.py process cbs --from_email --username $MAILUSER --password $MAILPASS --email_search_start_date date +%d.%m.%Y -d "-2 days"
+* * * * * www-data . $HOME/.profile; export GOOGLE_APPLICATION_CREDENTIALS=/var/www/keys/newflash_google_key.json ;cd /var/www/anyway && python3.6 /var/www/anyway/main.py process news_flash --google_maps_key_path $GOOGLE_MAPS_KEY_FILE
+# >> /var/www/anyway/news_flash_cron_log.txt 2>&1

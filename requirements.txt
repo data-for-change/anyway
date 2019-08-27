@@ -45,3 +45,4 @@ google-cloud-translate
 attrs>17.3.0
 fuzzywuzzy
 xlrd
+flask_cors

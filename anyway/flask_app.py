@@ -45,6 +45,7 @@ from sqlalchemy import func
 from flask_graphql import GraphQLView
 from anyway.graphqlSchema import schema as graphqlSchema
 import pandas as pd
+from flask_cors import CORS
 
 app = utilities.init_flask()
 db = SQLAlchemy(app)
@@ -62,6 +63,7 @@ app.config['OAUTH_CREDENTIALS'] = {
         'secret': os.environ.get('GOOGLE_LOGIN_CLIENT_SECRET')
     }
 }
+CORS(app, resources={r"/location-subscription": {"origins": "*"}})
 assets = Environment()
 assets.init_app(app)
 
@@ -750,16 +752,19 @@ def updatebyemail():
         response = Response(json.dumps({'respo':'First name too long'}, default=str), mimetype="application/json")
         response.headers.add('Access-Control-Allow-Methods', ['POST', 'OPTIONS'])
         response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', ['Content-Type', 'Authorization'])
         return response
     if len(lname)>40:
         response = Response(json.dumps({'respo':'Last name too long'}, default=str), mimetype="application/json")
         response.headers.add('Access-Control-Allow-Methods', ['POST', 'OPTIONS'])
         response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', ['Content-Type', 'Authorization'])
         return response
     if len(emailaddress)>60:
         response = Response(json.dumps({'respo':'Email too long'}, default=str), mimetype="application/json")
         response.headers.add('Access-Control-Allow-Methods', ['POST', 'OPTIONS']  )
         response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', ['Content-Type', 'Authorization'])
         return response
 
     curr_max_id = db.session.query(func.max(LocationSubscribers.id)).scalar()
@@ -792,6 +797,7 @@ def updatebyemail():
     response = Response(json.dumps({'respo':'Subscription saved'}, default=str), mimetype="application/json")
     response.headers.add('Access-Control-Allow-Methods', ['POST', 'OPTIONS'])
     response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', ['Content-Type', 'Authorization'])
     return response
 
 @app.route("/preferences", methods=('GET', 'POST'))

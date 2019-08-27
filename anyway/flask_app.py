@@ -63,11 +63,12 @@ app.config['OAUTH_CREDENTIALS'] = {
         'secret': os.environ.get('GOOGLE_LOGIN_CLIENT_SECRET')
     }
 }
-CORS(app, resources={r"/location-subscription": {"origins": "*"}})
+
 assets = Environment()
 assets.init_app(app)
-
 assets_env = AssetsEnvironment(os.path.join(utilities._PROJECT_ROOT, 'static'), '/static')
+
+CORS(app, resources={r"/location-subscription": {"origins": "*"}})
 
 jinja_environment = jinja2.Environment(
     autoescape=True,

@@ -739,7 +739,7 @@ def string2timestamp(s):
 def year2timestamp(y):
     return time.mktime(datetime.date(y, 1, 1).timetuple())
 
-@app.route("/location-subscription", methods=["POST"])
+@app.route("/location-subscription", methods=["POST", "OPTIONS"])
 def updatebyemail():
     jsonData = request.get_json(force=True)
     logging.debug(jsonData)
@@ -748,14 +748,17 @@ def updatebyemail():
     lname = (jsonData['lname']).encode("utf8")
     if len(fname)>40:
         response = Response(json.dumps({'respo':'First name too long'}, default=str), mimetype="application/json")
+        response.headers.add('Access-Control-Allow-Methods', ['POST', 'OPTIONS'])
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
     if len(lname)>40:
         response = Response(json.dumps({'respo':'Last name too long'}, default=str), mimetype="application/json")
+        response.headers.add('Access-Control-Allow-Methods', ['POST', 'OPTIONS'])
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
     if len(emailaddress)>60:
         response = Response(json.dumps({'respo':'Email too long'}, default=str), mimetype="application/json")
+        response.headers.add('Access-Control-Allow-Methods', ['POST', 'OPTIONS']  )
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
 
@@ -787,6 +790,7 @@ def updatebyemail():
     db.session.add(user_subscription)
     db.session.commit()
     response = Response(json.dumps({'respo':'Subscription saved'}, default=str), mimetype="application/json")
+    response.headers.add('Access-Control-Allow-Methods', ['POST', 'OPTIONS'])
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 

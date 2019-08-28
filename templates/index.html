@@ -97,7 +97,7 @@
          style="{{ 'padding-top:0px;' if map_only }}position: fixed; width: 100%; height: 100%; box-sizing: border-box{{ '; padding-top: 40px; padding-right: 300px; padding-bottom: 40px' if not map_only }}">
         <div id="map_canvas" style="width: 100%; height: 100%; box-sizing: border-box"></div>
         <div id="toggle-control"></div>
-        <input id="pac-input" class="controls" type="text" placeholder="חפש מיקום">
+        <input id="pac-input" class="controls" type="text" placeholder="חפש מיקום" style="{{ 'display: none' if hide_search }}">
 
         <div id="map-control" style="{{ 'display: none' if map_only }}">
             <div id="reset-map-control"></div>

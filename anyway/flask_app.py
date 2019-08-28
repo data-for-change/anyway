@@ -732,6 +732,7 @@ def index(marker=None, message=None):
     context['default_start_date_format'] = request.values.get('start_date', (today - datetime.timedelta(days=365)).strftime('%Y-%m-%d'))
     context['entries_per_page'] = ENTRIES_PER_PAGE
     context['iteritems'] = iteritems
+    context['hide_search'] = True if request.values.get('hide_search') == 'true' else False
     return render_template('index.html', **context)
 
 

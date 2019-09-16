@@ -809,6 +809,8 @@ def updatebyemail():
 def report_problem():
     jsonData = request.get_json(force=True)
     logging.debug(jsonData)
+    first_name = (jsonData['first_name']).encode("utf8")
+    last_name = (jsonData['last_name']).encode("utf8")
     report_problem = ReportProblem(latitude=jsonData['latitude'],
                                    longitude=jsonData['longitude'],
                                    problem_description=jsonData['problem_description'],
@@ -821,8 +823,8 @@ def report_problem():
                                    sidewalk_is_blocked=jsonData['sidewalk_is_blocked'],
                                    street_light_issue=jsonData['street_light_issue'],
                                    road_hazard=jsonData['road_hazard'],
-                                   first_name=(jsonData['first_name']).decode("utf8"),
-                                   last_name=(jsonData['last_name']).decode("utf8"),
+                                   first_name=first_name.decode("utf8"),
+                                   last_name=last_name.decode("utf8"),
                                    phone_number=jsonData['phone_number'],
                                    email=str(jsonData['email']),
                                    send_to_municipality=jsonData['send_to_municipality'],

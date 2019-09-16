@@ -38,7 +38,7 @@ from .oauth import OAuthSignIn
 from .base import user_optional
 from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved, User, ReportPreferences,
                      LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School, SchoolWithDescription,
-                     InjuredAroundSchool, InjuredAroundSchoolAllData, Sex, AccidentMonth, InjurySeverity)
+                     InjuredAroundSchool, InjuredAroundSchoolAllData, Sex, AccidentMonth, InjurySeverity, ReportProblem)
 from .config import ENTRIES_PER_PAGE
 from six.moves import http_client
 from sqlalchemy import func
@@ -68,7 +68,7 @@ assets = Environment()
 assets.init_app(app)
 assets_env = AssetsEnvironment(os.path.join(utilities._PROJECT_ROOT, 'static'), '/static')
 
-CORS(app, resources={r"/location-subscription": {"origins": "*"}})
+CORS(app, resources={r"/location-subscription": {"origins": "*"}, r"/report-problem": {"origins": "*"}})
 
 jinja_environment = jinja2.Environment(
     autoescape=True,
@@ -91,6 +91,8 @@ cbs_dict_files = {DICTIONARY: "Dictionary.csv"}
 content_encoding = 'cp1255'
 
 Compress(app)
+
+CORS(app, resources={r"/location-subscription": {"origins": "*"}})
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
@@ -801,6 +803,39 @@ def updatebyemail():
     response.headers.add('Access-Control-Allow-Origin', '*')
     response.headers.add('Access-Control-Allow-Headers', ['Content-Type', 'Authorization'])
     return response
+
+
+@app.route("/report-problem", methods=["POST"])
+def report_problem():
+    jsonData = request.get_json(force=True)
+    logging.debug(jsonData)
+    report_problem = ReportProblem(latitude=jsonData['latitude'],
+                                   longitude=jsonData['longitude'],
+                                   problem_description=jsonData['problem_description'],
+                                   signs_on_the_road_not_clear=jsonData['signs_on_the_road_not_clear'],
+                                   signs_problem=jsonData['signs_problem'],
+                                   pothole=jsonData['pothole'],
+                                   no_light=jsonData['no_light'],
+                                   no_sign=jsonData['no_sign'],
+                                   crossing_missing=jsonData['crossing_missing'],
+                                   sidewalk_is_blocked=jsonData['sidewalk_is_blocked'],
+                                   street_light_issue=jsonData['street_light_issue'],
+                                   road_hazard=jsonData['road_hazard'],
+                                   first_name=(jsonData['first_name']).encode("utf8"),
+                                   last_name=(jsonData['last_name']).encode("utf8"),
+                                   phone_number=jsonData['phone_number'],
+                                   email=str(jsonData['email']),
+                                   send_to_municipality=jsonData['send_to_municipality'],
+                                   personal_id=jsonData['personal_id'],
+                                   image_data=jsonData['image_data'])
+    db.session.add(report_problem)
+    db.session.commit()
+    response = Response(json.dumps({'respo': 'Subscription saved'}, default=str), mimetype="application/json")
+    response.headers.add('Access-Control-Allow-Methods', ['POST', 'OPTIONS'])
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', ['Content-Type', 'Authorization'])
+    return response
+
 
 @app.route("/preferences", methods=('GET', 'POST'))
 def update_preferences():

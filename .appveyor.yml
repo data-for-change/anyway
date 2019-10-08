@@ -5,7 +5,6 @@ environment:
     POSTGIS_FILE: postgis-pg96-binaries-2.3.4w64gcc48
   matrix:
     - PYTHON: "C:\\Python36"
-    - PYTHON: "C:\\Python27"
 
 services:
  - postgresql

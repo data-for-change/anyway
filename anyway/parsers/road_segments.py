@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
-import math
-
-from ..constants import CONST
 from ..models import RoadSegments
 from ..utilities import init_flask
 from .utils import batch_iterator

@@ -29,6 +29,6 @@ test_script:
   - psql -U postgres -c "CREATE ROLE appveyor LOGIN SUPERUSER CREATEDB CREATEROLE;"
   - createdb anyway
   - alembic upgrade head
-  - python main.py process registered_vehicles
+  - python main.py process registered-vehicles
   - python main.py process cbs
   - python -m pytest -m "not browser" tests

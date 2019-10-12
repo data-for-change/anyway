@@ -8,7 +8,6 @@ from collections import namedtuple
 from flask_security import UserMixin, RoleMixin
 from flask_sqlalchemy import SQLAlchemy
 from geoalchemy2 import Geometry
-from geoalchemy2 import functions as geoalchemy_functions
 from six import iteritems
 from sqlalchemy import Column, BigInteger, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, \
     sql, Table, \

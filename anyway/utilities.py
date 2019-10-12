@@ -6,7 +6,6 @@ from . import config
 from flask import Flask
 from functools import partial
 import os
-import pyproj
 from pyproj import Transformer
 import threading
 import sys

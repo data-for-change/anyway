@@ -349,10 +349,10 @@ class AccidentMarker(MarkerMixin, Base):
         sw_lng = float(kwargs['sw_lng'])
         ne_lat = float(kwargs['ne_lat'])
         ne_lng =  float(kwargs['ne_lng'])
-        polygon_str = 'POLYGON(({0} {1},{0} {3},{2} {3},{2} {1},{0} {1}))'.format(sw_lat,
-                                                                              sw_lng,
-                                                                              ne_lat,
-                                                                              ne_lng)
+        polygon_str = 'POLYGON(({0} {1},{0} {3},{2} {3},{2} {1},{0} {1}))'.format(sw_lng,
+                                                                                  sw_lat,
+                                                                                  ne_lng,
+                                                                                  ne_lat)
 
         markers = db.session.query(AccidentMarker) \
             .filter(AccidentMarker.geom.intersects(polygon_str)) \

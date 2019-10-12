@@ -102,7 +102,7 @@ class ItmToWGS84(object):
     def __init__(self):
         # initializing WGS84 (epsg: 4326) and Israeli TM Grid (epsg: 2039) projections.
         # for more info: https://epsg.io/<epsg_num>/
-        self.transformer = Transformer.from_proj(2039, 4326)
+        self.transformer = Transformer.from_proj(2039, 4326, always_xy=True)
 
     def convert(self, x, y):
         """
@@ -113,7 +113,7 @@ class ItmToWGS84(object):
         :return: (longitude,latitude)
         """
         longitude, latitude = self.transformer.transform(x, y)
-        return longitude,latitude
+        return longitude, latitude
 
 
 def time_delta(since):

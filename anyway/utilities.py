@@ -111,9 +111,10 @@ class ItmToWGS84(object):
         :type x: float
         :type y: float
         :rtype: tuple
-        :return: (long,lat)
+        :return: (longitude,latitude)
         """
-        return self.transformer.transform(x, y)
+        longitude, latitude = self.transformer.transform(x, y)
+        return longitude,latitude
 
 
 def time_delta(since):

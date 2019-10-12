@@ -346,17 +346,24 @@ class AccidentMarker(MarkerMixin, Base):
                                 rsa_markers=db.session.query(AccidentMarker).filter(sql.false()),
                                 total_records=0)
 
+        sw_lat = float(kwargs['sw_lat'])
+        sw_lng = float(kwargs['sw_lng'])
+        ne_lat = float(kwargs['ne_lat'])
+        ne_lng =  float(kwargs['ne_lng'])
+        polygon_str = 'POLYGON(({0} {1},{0} {3},{2} {3},{2} {1},{0} {1}))'.format(sw_lat,
+                                                                              sw_lng,
+                                                                              ne_lat,
+                                                                              ne_lng)
+
         markers = db.session.query(AccidentMarker) \
-            .filter(AccidentMarker.geom.intersects(ST_MakeEnvelope(float(kwargs['sw_lng']), float(kwargs['sw_lat']),
-                                                                   float(kwargs['ne_lng']), float(kwargs['ne_lat'])))) \
+            .filter(AccidentMarker.geom.intersects(polygon_str)) \
             .filter(AccidentMarker.created >= kwargs['start_date']) \
             .filter(AccidentMarker.created < kwargs['end_date']) \
             .filter(AccidentMarker.provider_code != CONST.RSA_PROVIDER_CODE) \
             .order_by(desc(AccidentMarker.created))
 
         rsa_markers = db.session.query(AccidentMarker) \
-            .filter(AccidentMarker.geom.intersects(ST_MakeEnvelope(float(kwargs['sw_lng']), float(kwargs['sw_lat']),
-                                                                   float(kwargs['ne_lng']), float(kwargs['ne_lat'])))) \
+            .filter(AccidentMarker.geom.intersects(polygon_str)) \
             .filter(AccidentMarker.created >= kwargs['start_date']) \
             .filter(AccidentMarker.created < kwargs['end_date']) \
             .filter(AccidentMarker.provider_code == CONST.RSA_PROVIDER_CODE) \
@@ -1168,10 +1175,6 @@ class InjuredAroundSchoolAllData(Base):
     involved_accident_month = Column(Float())
     involved_injury_severity_mais = Column(Float())
 
-
-class ST_MakeEnvelope(geoalchemy_functions.GenericFunction):
-    name = 'ST_MakeEnvelope'
-    type = Geometry
 
 class ColumnsDescription(Base):
     __tablename__ = "columns_description"

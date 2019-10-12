@@ -6,7 +6,7 @@ from . import config
 from flask import Flask
 from functools import partial
 import os
-import pyproj
+from pyproj import Transformer
 import threading
 import sys
 import re
@@ -101,9 +101,8 @@ class CsvReader(object):
 class ItmToWGS84(object):
     def __init__(self):
         # initializing WGS84 (epsg: 4326) and Israeli TM Grid (epsg: 2039) projections.
-        # for more info: http://spatialreference.org/ref/epsg/<epsg_num>/
-        self.wgs84 = pyproj.Proj(init='epsg:4326')
-        self.itm = pyproj.Proj(init='epsg:2039')
+        # for more info: https://epsg.io/<epsg_num>/
+        self.transformer = Transformer.from_proj(2039, 4326, always_xy=True)
 
     def convert(self, x, y):
         """
@@ -111,9 +110,9 @@ class ItmToWGS84(object):
         :type x: float
         :type y: float
         :rtype: tuple
-        :return: (long,lat)
+        :return: (longitude,latitude)
         """
-        longitude, latitude = pyproj.transform(self.itm, self.wgs84, x, y)
+        longitude, latitude = self.transformer.transform(x, y)
         return longitude, latitude
 
 

@@ -1,9 +1,9 @@
-import sqlalchemy as sa
+# pylint: disable=no-member
 from sqlalchemy import or_, not_, and_
 from flask_sqlalchemy import SQLAlchemy
 import math
 from ..utilities import init_flask, time_delta, chunks
-from ..models import AccidentMarker, Involved, School, SchoolWithDescription, InjuredAroundSchool, InjuredAroundSchoolAllData
+from ..models import AccidentMarker, Involved, SchoolWithDescription, InjuredAroundSchool, InjuredAroundSchoolAllData
 from ..constants import CONST
 import pandas as pd
 import os

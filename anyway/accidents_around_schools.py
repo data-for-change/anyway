@@ -105,7 +105,7 @@ def main(start_date, end_date, distance, output_path):
     schools_query = sa.select([School])
     df_schools = pd.read_sql_query(schools_query, db.session.bind)
     df_total = pd.DataFrame()
-    df_schools = df_schools.drop_duplicates(['yishuv_name', 'longitude', 'latitude'])
+    df_schools = df_schools.drop_duplicates(['yishuv_name', 'longitude', 'latitude']) # pylint: disable=no-member
     df_schools.dropna(subset=['yishuv_name'] ,inplace=True)
     df_schools = df_schools[df_schools.yishuv_symbol != 0]
     df_schools.to_csv(os.path.join(output_path,'df_schools.csv'), encoding=CONTENT_ENCODING)

@@ -7,6 +7,7 @@ from flask import Flask
 from functools import partial
 import os
 import pyproj
+from pyproj import Transformer
 import threading
 import sys
 import re
@@ -101,9 +102,8 @@ class CsvReader(object):
 class ItmToWGS84(object):
     def __init__(self):
         # initializing WGS84 (epsg: 4326) and Israeli TM Grid (epsg: 2039) projections.
-        # for more info: http://spatialreference.org/ref/epsg/<epsg_num>/
-        self.wgs84 = pyproj.Proj(init='epsg:4326')
-        self.itm = pyproj.Proj(init='epsg:2039')
+        # for more info: https://epsg.io/<epsg_num>/
+        self.transformer = Transformer.from_proj(2039, 4326)
 
     def convert(self, x, y):
         """
@@ -113,8 +113,7 @@ class ItmToWGS84(object):
         :rtype: tuple
         :return: (long,lat)
         """
-        longitude, latitude = pyproj.transform(self.itm, self.wgs84, x, y)
-        return longitude, latitude
+        return self.transformer.transform(x, y)
 
 
 def time_delta(since):

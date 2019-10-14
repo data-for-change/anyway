@@ -5,7 +5,7 @@ from anyway.parsers.news_flash.news_flash_parser import insert_new_flash_news
 
 from .geocode_extraction import geocode_extract
 from .location_extraction import get_db_matching_location_of_text, NonUrbanAddress, UrbanAddress
-from .location_extraction import get_ner_location_of_text
+from .location_extraction import manual_filter_location_of_text
 
 
 class YnetFlashScrap(scrapy.Spider):
@@ -61,14 +61,14 @@ class YnetFlashScrap(scrapy.Spider):
         try:
             if self.news_item['accident']:
                 if self.news_item['description'] != '':
-                    location = get_ner_location_of_text(self.news_item['description'])
-                    db_location = get_db_matching_location_of_text(self.news_item['description'])
+                    location = manual_filter_location_of_text(self.news_item['description'])
+                    db_location = get_db_matching_location_of_text(location)
                     if location == '':
-                        location = get_ner_location_of_text(self.news_item['title'])
-                        db_location = get_db_matching_location_of_text(self.news_item['title'])
+                        location = manual_filter_location_of_text(self.news_item['title'])
+                        db_location = get_db_matching_location_of_text(location)
                 else:
-                    location = get_ner_location_of_text(self.news_item['title'])
-                    db_location = get_db_matching_location_of_text(self.news_item['title'])
+                    location = manual_filter_location_of_text(self.news_item['title'])
+                    db_location = get_db_matching_location_of_text(location)
                 self.news_item['location'] = location
                 if type(db_location) is NonUrbanAddress:
                     self.news_item['road1'] = db_location.road1
@@ -88,16 +88,15 @@ class YnetFlashScrap(scrapy.Spider):
                     self.news_item['intersection'] = None
                     self.news_item['city'] = None
                     self.news_item['street'] = None
-                if location != 'failed to extract location':
-                    geo_location = geocode_extract(location, self.maps_key)
-                    if geo_location is None:
-                        self.news_item['lat'] = 0
-                        self.news_item['lon'] = 0
-                        self.news_item['location'] = ''
-                        self.news_item['accident'] = False
-                    else:
-                        self.news_item['lat'] = geo_location['lat']
-                        self.news_item['lon'] = geo_location['lng']
+                geo_location = geocode_extract(location, self.maps_key)
+                if geo_location is None:
+                    self.news_item['lat'] = 0
+                    self.news_item['lon'] = 0
+                    self.news_item['location'] = ''
+                    self.news_item['accident'] = False
+                else:
+                    self.news_item['lat'] = geo_location['lat']
+                    self.news_item['lon'] = geo_location['lng']
         except Exception as _:
             pass
 
@@ -109,6 +108,5 @@ class YnetFlashScrap(scrapy.Spider):
                               self.news_item.get('road2'), self.news_item.get('intersection'),
                               self.news_item.get('city'), self.news_item.get('street'),
                               self.news_item.get('accident'), self.news_item.get('source'))
-
-        logging.info('new flash news added, is accident: '+str(self.news_item.get('accident')))
+        logging.info('new flash news added, is accident: ' + str(self.news_item.get('accident')))
         yield None

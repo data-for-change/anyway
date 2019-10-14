@@ -234,7 +234,7 @@ def remove_text_inside_brackets(text, brackets="()[]{}"):
 
 def preprocess_text(text, get_first=False):
     table_no_dot = str.maketrans(string.punctuation.replace('.', ''),
-                                    ' ' * len(string.punctuation.replace('.', '')))  # remove punctuation, without '.'
+                                 ' ' * len(string.punctuation.replace('.', '')))  # remove punctuation, without '.'
     table = str.maketrans(string.punctuation, ' ' * len(string.punctuation))  # remove punctuation
     if type(text) != str:
         text = str(text)
@@ -542,7 +542,7 @@ def process_nonurban(text, roads):
     if len(road1_candidates) > 0:
         road1_candidates = list(sorted(set(road1_candidates)))
         for road1 in road1_candidates:
-            road2_candidates = roads.loc[roads.first_road==road1].second_road.dropna().tolist()
+            road2_candidates = roads.loc[roads.first_road == road1].second_road.dropna().tolist()
             for road2 in road2_candidates:
                 if text.find(road2) != -1:
                     if text.endswith(road2) or not \
@@ -566,3 +566,75 @@ def get_db_matching_location_of_text(text):
     else:
         roads = pd.read_excel('anyway/parsers/news_flash/roads.xlsx', sheet_name='Sheet1')
         return process_nonurban(text, roads)
+
+
+def manual_filter_location_of_text(text):
+    if text.find('.') != -1:
+        text = text[:text.find('.')]
+    try:
+        filter_ind = float('inf')
+        forbid_words = ['תושב']
+        hospital_words = ['בבית החולים', 'בית חולים', 'בית החולים', 'מרכז רפואי']
+        hospital_names = ['שיבא', 'וולפסון', 'תל השומר', 'סוראסקי', 'הלל יפה', 'רמב"ם', 'רמבם', 'בני ציון', 'רוטשילד',
+                          'גליל מערבי', 'זיו', 'פוריה', 'ברזילי', 'אסף הרופא', 'סורוקה', 'רבין', 'בלינסון', 'גולדה',
+                          'כרמל', 'עמק', 'מאיר', 'קפלן', 'יוספטל', 'הדסה', 'שערי צדק', 'צאנז', 'לניאדו', 'אסותא',
+                          'מעיני הישועה', 'מדיקל סנטר', 'איטלקי', 'המשפחה הקדושה']
+        forbid_words.extend(hospital_words)
+        for forbid_word in forbid_words:
+            found_hospital = False
+            removed_punc = False
+            if forbid_word in text:
+                forbid_ind = text.find(forbid_word)
+                for punc_to_try in [',', ' - ']:
+                    punc_before_ind = text.find(punc_to_try, 0, forbid_ind)
+                    punc_after_ind = text.find(punc_to_try, forbid_ind)
+                    if punc_before_ind != -1 or punc_after_ind != -1:
+                        if punc_before_ind == -1:
+                            text = text[(punc_after_ind + 1):]
+                        elif punc_after_ind == -1:
+                            text = text[:punc_before_ind]
+                        else:
+                            text = text[:punc_before_ind] + ' ' + text[(punc_after_ind + 1):]
+                        removed_punc = True
+                        break
+                if (not removed_punc) and (forbid_word in hospital_words):
+                    for hospital_name in hospital_names:
+                        hospital_ind = text.find(hospital_name)
+                        if hospital_ind == forbid_ind + len(forbid_word) + 1 or hospital_ind == forbid_ind + len(
+                                forbid_word) + 2:
+                            text = text[:hospital_ind] + text[hospital_ind + len(hospital_name) + 1:]
+                            forbid_ind = text.find(forbid_word)
+                            text = text[:forbid_ind] + text[forbid_ind + len(forbid_word) + 1:]
+                            found_hospital = True
+                if (not found_hospital) and (not removed_punc):
+                    text = text[:forbid_ind] + text[text.find(' ', forbid_ind + len(forbid_word) + 2):]
+
+    except:
+        pass
+    if 'כביש' in text:
+        filter_ind = min(filter_ind, text.find('כביש'))
+    if 'שדרות' in text:
+        filter_ind = min(filter_ind, text.find('שדרות'))
+    if 'רחוב' in text:
+        filter_ind = min(filter_ind, text.find('רחוב'))
+    if 'מחלף' in text:
+        filter_ind = min(filter_ind, text.find('מחלף'))
+    if 'צומת' in text:
+        filter_ind = min(filter_ind, text.find('צומת'))
+    if 'סמוך ל' in text:
+        filter_ind = min(filter_ind, text.find('סמוך ל') + len('סמוך ל'))
+    if 'יישוב' in text:
+        filter_ind = min(filter_ind, text.find('יישוב'))
+    if 'מושב' in text:
+        filter_ind = min(filter_ind, text.find('מושב'))
+    if 'קיבוץ' in text:
+        filter_ind = min(filter_ind, text.find('קיבוץ'))
+    if 'התנחלות' in text:
+        filter_ind = min(filter_ind, text.find('התנחלות'))
+    if 'שכונת' in text:
+        filter_ind = min(filter_ind, text.find('שכונת'))
+    if 'בדרך' in text:
+        filter_ind = min(filter_ind, text.find('בדרך'))
+    if filter_ind != float('inf'):
+        text = text[filter_ind:]
+    return text

@@ -1,7 +1,6 @@
 """
 Get accidents around a location. The input is currently the schools CSV list obtained by the project's team
 This script is a standalone (using the API itself and not directly to DB) and can be run without setting up dev env.
-Script support python 2.7+
 To run:
 python accidents_around_location.py <input_file> [flags]
 

@@ -5,7 +5,6 @@ cache:
   - yarn
 
 python:
-  - 2.7.11
   - 3.5
   - 3.6
   - 3.7
@@ -18,7 +17,7 @@ addons:
   postgresql: 9.6
   apt:
     packages:
-    - postgresql-9.6-postgis-2.3
+    - postgresql-9.6-postgis-2.4
 
 env:
   global:
@@ -34,6 +33,9 @@ services:
 
 sudo: false
 
+before_install:
+  - pip install -U pytest
+
 install:
   - pip install -r requirements.txt -r test_requirements.txt
   - yarn global add eslint --ignore-engines
@@ -46,7 +48,7 @@ before_script:
 script:
   - pylint -j $(nproc) anyway tests main.py
   - eslint static/js --ignore-path=static/js/.eslintignore
-  - ./main.py process registered_vehicles
+  - ./main.py process registered-vehicles
   - ./main.py process cbs
   - pytest tests -m "not browser"
 #  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then for BROWSER in Chrome Firefox; do pytest tests -m browser --driver SauceLabs --capability browserName $BROWSER --capability tunnelIdentifier $TRAVIS_JOB_NUMBER; done; fi

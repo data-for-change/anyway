@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=no-member
 import os
 import csv
 from six import StringIO, iteritems
@@ -27,7 +28,7 @@ import flask_login as login
 from flask_admin.contrib import sqla
 from flask_admin import helpers, expose, BaseView
 from werkzeug.security import check_password_hash
-from sendgrid import sendgrid, SendGridClientError, SendGridServerError, Mail
+from sendgrid import SendGridAPIClient, Mail
 import glob
 from flask_sqlalchemy import SQLAlchemy
 from flask_security import Security, SQLAlchemyUserDatastore, roles_required, current_user, LoginForm, login_required
@@ -42,8 +43,6 @@ from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved,
 from .config import ENTRIES_PER_PAGE
 from six.moves import http_client
 from sqlalchemy import func
-from flask_graphql import GraphQLView
-from anyway.graphqlSchema import schema as graphqlSchema
 import pandas as pd
 from flask_cors import CORS
 
@@ -77,7 +76,7 @@ jinja_environment = jinja2.Environment(
 jinja_environment.assets_environment = assets_env
 
 
-sg = sendgrid.SendGridClient(app.config['SENDGRID_USERNAME'], app.config['SENDGRID_PASSWORD'], raise_errors=True)
+sg = SendGridAPIClient(app.config['SENDGRID_API_KEY'])
 
 babel = Babel(app)
 
@@ -1041,17 +1040,14 @@ class SendToSubscribersView(BaseView):
         else:
             jsondata = request.get_json(force=True)
             users_send_email_to = db.session.query(User).filter(User.new_features_subscription == True)
-            message = Mail()
-            message.set_subject(jsondata['subject'].encode("utf8"))
-            message.set_text(jsondata['message'].encode("utf8"))
-            message.set_from('ANYWAY Team <feedback@anyway.co.il>')
+            message = Mail(subject=jsondata['subject'].encode("utf8"),
+                           html_content=jsondata['message'].encode("utf8"),
+                           from_email='ANYWAY Team <feedback@anyway.co.il>')
             for user in users_send_email_to:
                 message.add_bcc(user.email)
             try:
                 sg.send(message)
-            except SendGridClientError:
-                return "Error occurred while trying to send the emails"
-            except SendGridServerError:
+            except Exception as _:
                 return "Error occurred while trying to send the emails"
             return "Email/s Sent"
 

@@ -3,12 +3,10 @@ from ..utilities import chunks
 from flask_sqlalchemy import SQLAlchemy
 from ..models import TrafficVolume
 from ..utilities import init_flask, time_delta
-from sqlalchemy.sql.expression import func
 import glob
 import os
 import logging
 import pandas as pd
-import numpy as np
 import math
 
 app = init_flask()
@@ -41,9 +39,6 @@ def delete_traffic_volume_of_year(year):
         db.session.commit()
 
 def delete_traffic_volume_of_directory(path):
-    traffic_volume_rows = []
-    all_rows = []
-    df_traffic_volume = pd.DataFrame()
     # Deleting all the records for each year that appears in the relevant file
     for file in os.listdir(path):
         file_path = os.path.join(path, file)

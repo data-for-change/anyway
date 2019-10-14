@@ -5,7 +5,6 @@ environment:
     POSTGIS_FILE: postgis-pg96-binaries-2.3.4w64gcc48
   matrix:
     - PYTHON: "C:\\Python36"
-    - PYTHON: "C:\\Python27"
 
 services:
  - postgresql
@@ -30,6 +29,6 @@ test_script:
   - psql -U postgres -c "CREATE ROLE appveyor LOGIN SUPERUSER CREATEDB CREATEROLE;"
   - createdb anyway
   - alembic upgrade head
-  - python main.py process registered_vehicles
+  - python main.py process registered-vehicles
   - python main.py process cbs
   - python -m pytest -m "not browser" tests

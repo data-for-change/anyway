@@ -5,7 +5,6 @@ import os
 import re
 import sys
 import argparse
-import datetime
 
 def valid_date(date_string):
     DATE_INPUT_FORMAT = '%d-%m-%Y'
@@ -28,15 +27,6 @@ def cli():
 @click.option('--debug-js', is_flag=True, help="Don't minify the JavaScript files")
 def testserver(open_server, debug_js):
     from anyway import app
-    from anyway.parsers import united
-    from apscheduler.scheduler import Scheduler
-
-    sched = Scheduler()
-
-    @sched.interval_schedule(hours=12)
-    def scheduled_import(): # pylint: disable=unused-variable
-        united.main()
-    sched.start()
 
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')
 

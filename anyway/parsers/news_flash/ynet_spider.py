@@ -88,7 +88,6 @@ class YnetFlashScrap(scrapy.Spider):
                     self.news_item['intersection'] = None
                     self.news_item['city'] = None
                     self.news_item['street'] = None
-                    
                 geo_location = geocode_extract(location, self.maps_key)
                 if geo_location is None:
                     self.news_item['lat'] = 0

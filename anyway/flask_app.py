@@ -543,7 +543,7 @@ def involved_data_refinement(involved):
     involved["home_district"] = cbs_dictionary.get((79, involved["home_district"]))
     involved["home_natural_area"] = cbs_dictionary.get((80, involved["home_natural_area"]))
     involved["home_municipal_status"] = cbs_dictionary.get((78, involved["home_municipal_status"]))
-    involved["home_residence_type"] = cbs_dictionary.get((81, involved["home_residence_type"]))
+    involved["home_yishuv_shape"] = cbs_dictionary.get((81, involved["home_yishuv_shape"]))
     return involved
 
 
@@ -560,7 +560,7 @@ def marker(marker_id):
         obj["home_district"] = cbs_dictionary.get((79, obj["home_district"]))
         obj["home_natural_area"] = cbs_dictionary.get((80, obj["home_natural_area"]))
         obj["home_municipal_status"] = cbs_dictionary.get((78, obj["home_municipal_status"]))
-        obj["home_residence_type"] = cbs_dictionary.get((81, obj["home_residence_type"]))
+        obj["home_yishuv_shape"] = cbs_dictionary.get((81, obj["home_yishuv_shape"]))
         list_to_return.append(obj)
 
     for veh in vehicles:

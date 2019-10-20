@@ -36,6 +36,12 @@ class YnetFlashScrap(scrapy.Spider):
         self.news_item['street'] = None
         self.news_item['street2'] = None
         self.news_item['resolution'] = None
+        self.news_item['geo_extracted_street'] = None
+        self.news_item['geo_extracted_road_no'] =None
+        self.news_item['geo_extracted_intersection'] = None
+        self.news_item['geo_extracted_city'] = None
+        self.news_item['geo_extracted_address'] = None
+        self.news_item['geo_extracted_district'] =None
         try:
             for item in response.css('div.text14 p::text').extract():
                 item = item.strip().replace('&nbsp', '').replace('\xa0', '')

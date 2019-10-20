@@ -677,7 +677,7 @@ def manual_filter_location_of_text(text):
                 if (not found_hospital) and (not removed_punc):
                     text = text[:forbid_ind] + text[text.find(' ', forbid_ind + len(forbid_word) + 2):]
 
-    except:
+    except Exception as _:
         pass
     if 'כביש' in text:
         filter_ind = min(filter_ind, text.find('כביש'))

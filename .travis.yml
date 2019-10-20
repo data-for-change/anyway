@@ -33,6 +33,9 @@ services:
 
 sudo: false
 
+before_install:
+  - pip install -U pytest
+
 install:
   - pip install -r requirements.txt -r test_requirements.txt
   - yarn global add eslint --ignore-engines

@@ -76,7 +76,7 @@ jinja_environment = jinja2.Environment(
 jinja_environment.assets_environment = assets_env
 
 
-sg = SendGridAPIClient(app.config['SENDGRID_API_KEY'])
+#sg = SendGridAPIClient(app.config['SENDGRID_API_KEY'])
 
 babel = Babel(app)
 
@@ -1045,11 +1045,11 @@ class SendToSubscribersView(BaseView):
                            from_email='ANYWAY Team <feedback@anyway.co.il>')
             for user in users_send_email_to:
                 message.add_bcc(user.email)
-            try:
-                sg.send(message)
-            except Exception as _:
-                return "Error occurred while trying to send the emails"
-            return "Email/s Sent"
+            #try:
+                #sg.send(message)
+            #except Exception as _:
+            #    return "Error occurred while trying to send the emails"
+            return "Email/s was not Sent"
 
     def is_visible(self):
         return login.current_user.is_authenticated

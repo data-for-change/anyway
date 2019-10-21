@@ -28,7 +28,8 @@ import flask_login as login
 from flask_admin.contrib import sqla
 from flask_admin import helpers, expose, BaseView
 from werkzeug.security import check_password_hash
-from sendgrid import SendGridAPIClient, Mail
+from sendgrid import Mail
+# from sendgrid import SendGridAPIClient
 import glob
 from flask_sqlalchemy import SQLAlchemy
 from flask_security import Security, SQLAlchemyUserDatastore, roles_required, current_user, LoginForm, login_required
@@ -76,7 +77,7 @@ jinja_environment = jinja2.Environment(
 jinja_environment.assets_environment = assets_env
 
 
-sg = SendGridAPIClient(app.config['SENDGRID_API_KEY'])
+#sg = SendGridAPIClient(app.config['SENDGRID_API_KEY'])
 
 babel = Babel(app)
 
@@ -230,6 +231,13 @@ def news_flash():
     news_flashes = [{"id": x.id, "lat": x.lat, "lon": x.lon, "title": x.title, "source": x.source, "date": x.date} for x in news_flashes]
     return Response(json.dumps(news_flashes, default=str), mimetype="application/json")
 
+@app.route("/api/news-flash/<int:news_flash_id>", methods=["GET"])
+@user_optional
+def single_news_flash(news_flash_id):
+    news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == news_flash_id).first()
+    if news_flash_obj is not None:
+        return Response(json.dumps(news_flash_obj.serialize(), default=str), mimetype="application/json")
+    return Response(status=404)
 
 @app.route("/api/schools", methods=["GET"])
 @user_optional
@@ -543,7 +551,7 @@ def involved_data_refinement(involved):
     involved["home_district"] = cbs_dictionary.get((79, involved["home_district"]))
     involved["home_natural_area"] = cbs_dictionary.get((80, involved["home_natural_area"]))
     involved["home_municipal_status"] = cbs_dictionary.get((78, involved["home_municipal_status"]))
-    involved["home_residence_type"] = cbs_dictionary.get((81, involved["home_residence_type"]))
+    involved["home_yishuv_shape"] = cbs_dictionary.get((81, involved["home_yishuv_shape"]))
     return involved
 
 
@@ -560,7 +568,7 @@ def marker(marker_id):
         obj["home_district"] = cbs_dictionary.get((79, obj["home_district"]))
         obj["home_natural_area"] = cbs_dictionary.get((80, obj["home_natural_area"]))
         obj["home_municipal_status"] = cbs_dictionary.get((78, obj["home_municipal_status"]))
-        obj["home_residence_type"] = cbs_dictionary.get((81, obj["home_residence_type"]))
+        obj["home_yishuv_shape"] = cbs_dictionary.get((81, obj["home_yishuv_shape"]))
         list_to_return.append(obj)
 
     for veh in vehicles:
@@ -1045,11 +1053,11 @@ class SendToSubscribersView(BaseView):
                            from_email='ANYWAY Team <feedback@anyway.co.il>')
             for user in users_send_email_to:
                 message.add_bcc(user.email)
-            try:
-                sg.send(message)
-            except Exception as _:
-                return "Error occurred while trying to send the emails"
-            return "Email/s Sent"
+            #try:
+                #sg.send(message)
+            #except Exception as _:
+            #    return "Error occurred while trying to send the emails"
+            return "Email/s was not Sent"
 
     def is_visible(self):
         return login.current_user.is_authenticated

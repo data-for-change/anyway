@@ -230,6 +230,13 @@ def news_flash():
     news_flashes = [{"id": x.id, "lat": x.lat, "lon": x.lon, "title": x.title, "source": x.source, "date": x.date} for x in news_flashes]
     return Response(json.dumps(news_flashes, default=str), mimetype="application/json")
 
+@app.route("/api/news-flash/<int:news_flash_id>", methods=["GET"])
+@user_optional
+def single_news_flash(news_flash_id):
+    news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == news_flash_id).first()
+    if news_flash_obj is not None:
+        return Response(json.dumps(news_flash_obj.serialize(), default=str), mimetype="application/json")
+    return Response(status=404)
 
 @app.route("/api/schools", methods=["GET"])
 @user_optional

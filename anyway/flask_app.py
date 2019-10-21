@@ -28,7 +28,8 @@ import flask_login as login
 from flask_admin.contrib import sqla
 from flask_admin import helpers, expose, BaseView
 from werkzeug.security import check_password_hash
-from sendgrid import SendGridAPIClient, Mail
+from sendgrid import Mail
+# from sendgrid import SendGridAPIClient
 import glob
 from flask_sqlalchemy import SQLAlchemy
 from flask_security import Security, SQLAlchemyUserDatastore, roles_required, current_user, LoginForm, login_required

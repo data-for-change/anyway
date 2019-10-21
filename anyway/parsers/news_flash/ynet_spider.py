@@ -124,9 +124,12 @@ class YnetFlashScrap(scrapy.Spider):
                               self.news_item.get('road2'), self.news_item.get('intersection'),
                               self.news_item.get('city'), self.news_item.get('street'),
                               self.news_item.get('street2'), self.news_item.get('resolution'),
-                              self.news_item.get('geo_extracted_street'), self.news_item.get('geo_extracted_road_no'),
-                              self.news_item.get('geo_extracted_intersection'), self.news_item.get('geo_extracted_city'),
-                              self.news_item.get('geo_extracted_address'), self.news_item.get('geo_extracted_district') 
+                              self.news_item.get('geo_extracted_street'),
+                              self.news_item.get('geo_extracted_road_no'),
+                              self.news_item.get('geo_extracted_intersection'),
+                              self.news_item.get('geo_extracted_city'),
+                              self.news_item.get('geo_extracted_address'),
+                              self.news_item.get('geo_extracted_district'),
                               self.news_item.get('accident'), self.news_item.get('source'))
         logging.info('new flash news added, is accident: ' + str(self.news_item.get('accident')))
         yield None

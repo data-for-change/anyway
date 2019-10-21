@@ -116,8 +116,6 @@ DICTCOLUMN1 = "MS_TAVLA"
 DICTCOLUMN2 = "KOD"
 DICTCOLUMN3 = "TEUR"
 
-roads_with_non_urban = {}
-
 CLASSES_DICT = {0:   ColumnsDescription,
                 1:   PoliceUnit,
                 2:   RoadType,
@@ -310,14 +308,12 @@ def get_non_urban_intersection(accident, roads):
         return junction
     return None
 
-# def get_non_urban_intersection_by_junction_number(accident):
-#     non_urban_intersection_value = accident.get(field_names.non_urban_intersection)
-#     if non_urban_intersection_value is not None and not math.isnan(non_urban_intersection_value):
-#         key = accident.get(field_names.non_urban_intersection)
-#         junction = roads_with_non_urban.get(key, None)
-#         if junction is None:
-#             junction = "צומת לא נמצא במילון לפי מספר צומת"
-#         return junction
+def get_non_urban_intersection_by_junction_number(accident, non_urban_intersection):
+    non_urban_intersection_value = accident.get(field_names.non_urban_intersection)
+    if non_urban_intersection_value is not None and not math.isnan(non_urban_intersection_value):
+        key = accident.get(field_names.non_urban_intersection)
+        junction = non_urban_intersection.get(key, None)
+        return junction
 
 def get_junction(accident, roads):
     """
@@ -421,7 +417,7 @@ def get_data_value(value):
     return int(value) if value and not math.isnan(value) else None
 
 
-def create_marker(accident, streets, roads):
+def create_marker(accident, streets, roads, non_urban_intersection):
     if field_names.x not in accident or field_names.y not in accident:
         raise ValueError("Missing x and y coordinates")
     if accident.get(field_names.x) and not math.isnan(accident.get(field_names.x)) \
@@ -499,6 +495,7 @@ def create_marker(accident, streets, roads):
         "urban_intersection": get_data_value(accident.get(field_names.urban_intersection)),
         "non_urban_intersection": get_data_value(accident.get(field_names.non_urban_intersection)),
         "non_urban_intersection_hebrew": get_non_urban_intersection(accident, roads),
+        "non_urban_intersection_by_junction_number": get_non_urban_intersection_by_junction_number(accident,non_urban_intersection),
         "accident_year": get_data_value(accident.get(field_names.accident_year)),
         "accident_month": get_data_value(accident.get(field_names.accident_month)),
         "accident_day": get_data_value(accident.get(field_names.accident_day)),
@@ -513,11 +510,11 @@ def create_marker(accident, streets, roads):
     }
     return marker
 
-def import_accidents(accidents, streets, roads, **kwargs):
+def import_accidents(accidents, streets, roads, non_urban_intersection, **kwargs):
     logging.info('Importing markers')
     accidents_result = []
     for _, accident in accidents.iterrows():
-        marker = create_marker(accident, streets, roads)
+        marker = create_marker(accident, streets, roads, non_urban_intersection)
         accidents_result.append(marker)
     db.session.bulk_insert_mappings(AccidentMarker, accidents_result)
     db.session.commit()
@@ -628,8 +625,9 @@ def get_files(directory):
                 output_files_dict[name] = streets_map
             elif name == NON_URBAN_INTERSECTION:
                 roads = {(x[field_names.road1], x[field_names.road2], x[field_names.km]): x[field_names.junction_name] for _,x in df.iterrows()}
-                roads_with_non_urban = {x[field_names.junction]: x[field_names.junction_name] for _,x in df.iterrows()}
+                non_urban_intersection = {x[field_names.junction]: x[field_names.junction_name] for _,x in df.iterrows()}
                 output_files_dict[ROADS] = roads
+                output_files_dict[NON_URBAN_INTERSECTION] = non_urban_intersection
     return output_files_dict
 
 
@@ -699,54 +697,6 @@ def delete_invalid_entries(batch_size):
         if q.all():
             logging.info('deleting invalid entries from AccidentMarker')
             q.delete(synchronize_session='fetch')
-            db.session.commit()
-
-def delete_specific_cbs_entries_with_location(batch_size, provider_and_id_list):
-
-    for ids_chunk in chunks(provider_and_id_list, batch_size):
-
-        logging.info('Deleting a chunk of ' + str(len(ids_chunk)))
-
-        q = db.session.query(Involved).filter(Involved.provider_and_id.in_(ids_chunk))
-        if q.all():
-            logging.info('deleting entries from Involved')
-            q.delete(synchronize_session=False)
-            db.session.commit()
-
-        q = db.session.query(Vehicle).filter(Vehicle.provider_and_id.in_(ids_chunk))
-        if q.all():
-            logging.info('deleting entries from Vehicle')
-            q.delete(synchronize_session=False)
-            db.session.commit()
-
-        q = db.session.query(AccidentMarker).filter(AccidentMarker.provider_and_id.in_(ids_chunk))
-        if q.all():
-            logging.info('deleting entries from AccidentMarker')
-            q.delete(synchronize_session=False)
-            db.session.commit()
-
-def delete_specific_cbs_entries_no_location(batch_size, provider_and_id_list):
-
-    for ids_chunk in chunks(provider_and_id_list, batch_size):
-
-        logging.info('Deleting a chunk of ' + str(len(ids_chunk)))
-
-        q = db.session.query(InvolvedNoLocation).filter(InvolvedNoLocation.provider_and_id.in_(ids_chunk))
-        if q.all():
-            logging.info('deleting entries from InvolvedNoLocation')
-            q.delete(synchronize_session=False)
-            db.session.commit()
-
-        q = db.session.query(VehicleNoLocation).filter(VehicleNoLocation.provider_and_id.in_(ids_chunk))
-        if q.all():
-            logging.info('deleting entries from VehicleNoLocation')
-            q.delete(synchronize_session=False)
-            db.session.commit()
-
-        q = db.session.query(AccidentsNoLocation).filter(AccidentsNoLocation.provider_and_id.in_(ids_chunk))
-        if q.all():
-            logging.info('deleting entries from AccidentsNoLocation')
-            q.delete(synchronize_session=False)
             db.session.commit()
 
 def delete_cbs_entries(start_date, batch_size):

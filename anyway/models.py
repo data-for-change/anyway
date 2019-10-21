@@ -692,14 +692,14 @@ class NewsFlash(Base):
             "intersection": self.intersection,
             "city": self.city,
             "street": self.street,
-            "street2": self.street2
-            "resolution": self.resolution
-            "geo_extracted_street": self.geo_extracted_street
-            "geo_extracted_road_no": self.geo_extracted_road_no
-            "geo_extracted_intersection": self.geo_extracted_intersection
-            "geo_extracted_city": self.geo_extracted_city
-            "geo_extracted_address": self.geo_extracted_address
-            "geo_extracted_district": self.geo_extracted_district
+            "street2": self.street2,
+            "resolution": self.resolution,
+            "geo_extracted_street": self.geo_extracted_street,
+            "geo_extracted_road_no": self.geo_extracted_road_no,
+            "geo_extracted_intersection": self.geo_extracted_intersection,
+            "geo_extracted_city": self.geo_extracted_city,
+            "geo_extracted_address": self.geo_extracted_address,
+            "geo_extracted_district": self.geo_extracted_district,
             "title": self.title,
             "source": self.source,
             "location": self.location

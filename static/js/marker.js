@@ -91,7 +91,7 @@ var MarkerView = Backbone.View.extend({
             this.$el.find(".road_shape").text(fields.ZURAT_DEREH + ": " + localization.ZURAT_DEREH[this.model.get("road_shape")]);
             this.$el.find(".accident_severity").text(fields.HUMRAT_TEUNA + ": " + localization.HUMRAT_TEUNA[this.model.get("accident_severity")]);
             this.$el.find(".day_type").text(fields.SUG_YOM + ": " + localization.SUG_YOM[this.model.get("day_type")]);
-            this.$el.find(".igun").text(fields.STATUS_IGUN + ": " + localization.STATUS_IGUN[this.model.get("location_accuracy")]);
+            this.$el.find(".location_accuracy").text(fields.STATUS_IGUN + ": " + localization.STATUS_IGUN[this.model.get("location_accuracy")]);
             this.$el.find(".police_unit").text(fields.YEHIDA + ": " + localization.YEHIDA[this.model.get("police_unit")]);
             this.$el.find(".mainStreet").text(this.model.get("mainStreet"));
             this.$el.find(".secondaryStreet").text(this.model.get("secondaryStreet"));

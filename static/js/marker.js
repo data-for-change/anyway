@@ -5,12 +5,12 @@ var MarkerView = Backbone.View.extend({
         "click .delete-button": "clickDelete",
         "click .accordion-container input": "accordionInputClick"
     },
-    initialize: function(options) {
+    initialize: function (options) {
         this.map = options.map;
         this.markerIconType = options.markerIconType;
         _.bindAll(this, "clickMarker");
     },
-    localize: function(field, value) {
+    localize: function (field, value) {
         //localizes non-mandatory data (which has the same consistent html and python field names)
         if (this.model.has(value) && this.model.get(value) != "" &&
             localization[field][this.model.get(value)] != undefined) {
@@ -18,7 +18,7 @@ var MarkerView = Backbone.View.extend({
         }
     },
 
-    render: function() {
+    render: function () {
 
         var markerPosition = new google.maps.LatLng(this.model.get("latitude"),
             this.model.get("longitude"));
@@ -79,7 +79,7 @@ var MarkerView = Backbone.View.extend({
             this.$el.find(".added-by").html("מקור: <a href='" +
                 provider.url + "' target='blank'>" + provider.name + "</a>");
             this.$el.find(".creation-date").text("תאריך: " +
-                                                moment(this.model.get("created")).format("LLLL"));
+                moment(this.model.get("created")).format("LLLL"));
         } else {
             this.$el.html($("#marker-content-template").html());
 
@@ -128,14 +128,14 @@ var MarkerView = Backbone.View.extend({
 
         return this;
     },
-    getIcon: function() {
+    getIcon: function () {
         return {
             path: google.maps.SymbolPath.CIRCLE,
             scale: 0,
             fillColor: 'black'
         };
     },
-    getTitle: function(markerType) {
+    getTitle: function (markerType) {
 
         if (this.model.get("type") == MARKER_TYPE_DISCUSSION) {
             markerType = 'discussion';
@@ -189,16 +189,16 @@ var MarkerView = Backbone.View.extend({
             return markerTitle + accuracy + markerIconTypeIdentifier;
         }
     },
-    choose: function() {
+    choose: function () {
         if (this.model.get("groupID") && !this.model.get("currentlySpiderfied")) {
             new google.maps.event.trigger(this.marker, "click");
         }
         new google.maps.event.trigger(this.marker, "click");
     },
-    getUrl: function() {
+    getUrl: function () {
         return "/?marker=" + this.model.get("id") + "&" + app.getCurrentUrlParams();
     },
-    localize_data: function(data, field, value, dataType, involved_or_vehicles) {
+    localize_data: function (data, field, value, dataType, involved_or_vehicles) {
         switch (dataType) {
             case "invs":
                 if (inv_dict[field] != undefined && inv_dict[field][data[i][value]] != undefined) {
@@ -225,7 +225,7 @@ var MarkerView = Backbone.View.extend({
                 break;
         }
     },
-    clickMarker: function() {
+    clickMarker: function () {
         that = this;
         app.closeInfoWindow();
         app.selectedMarker = this;
@@ -240,7 +240,12 @@ var MarkerView = Backbone.View.extend({
             app.updateUrl(that.getUrl());
         } else {
             this.marker_clicked = true;
-            $.get("/markers/" + this.model.get("id"), function(data) {
+            let markerId = `marker_id=${this.model.get('id')}`;
+            let providerCode = `provider_code=${this.model.get('provider_code')}`;
+            let accidentYear = `accident_year=${this.model.get('accident_year')}`;
+            let markersUrl = `/markers/all?${markerId}&${providerCode}&${accidentYear}`;
+
+            $.get(markersUrl, function (data) {
                 data = JSON.parse(data);
 
                 var j = 1;
@@ -287,17 +292,17 @@ var MarkerView = Backbone.View.extend({
         app.map.gestureHandling = "cooperative";
         $(document).keydown(app.ESCinfoWindow);
     },
-    clickShare: function() {
+    clickShare: function () {
         FB.ui({
             method: "feed",
             name: this.model.get("title"),
             link: document.location.href,
             description: this.model.get("description"),
             caption: ACCIDENT_TYPE_STRING[this.model.get("accident_type")]
-                // picture
+            // picture
         });
     },
-    accordionInputClick: function(e) {
+    accordionInputClick: function (e) {
         var input = e.currentTarget;
         if (input.checked) {
             var infoWindow = $(input).parents(".gm-style-iw > div");
@@ -309,39 +314,39 @@ var MarkerView = Backbone.View.extend({
                 var curIwScroll = infoWindow.scrollTop();
                 var labelPos = labelTop - infoWindowPos + curIwScroll;
 
-                setTimeout(function() {
+                setTimeout(function () {
                     var sectionHeightScroll = $(input).siblings(".accordion-roller").height() + curIwScroll;
                     var bestScrollTo = Math.min(sectionHeightScroll, labelPos);
                     var scrollAnimationDuration = Math.min((bestScrollTo - curIwScroll) * 9, 1300);
 
-                    $(infoWindow).on("mousewheel keyup mousedown DOMMouseScroll wheel touchmove", function() {
+                    $(infoWindow).on("mousewheel keyup mousedown DOMMouseScroll wheel touchmove", function () {
                         $(infoWindow).stop();
                     });
 
                     $(infoWindow).animate({
                         scrollTop: bestScrollTo
-                    }, scrollAnimationDuration, function() {
+                    }, scrollAnimationDuration, function () {
                         $(infoWindow).off("mousewheel keyup mousedown DOMMouseScroll wheel touchmove");
                     });
                 }.bind(this), 550);
             }
         }
     },
-    select: function() {
+    select: function () {
         //unselect all previous selections
-        _.each(app.markerList, function(markerView) {
+        _.each(app.markerList, function (markerView) {
             markerView.unselect();
         });
         //if marker is currently shown
         this.marker.setTitle(this.marker.getTitle() + SELECTED_MARKER);
     },
-    unselect: function() {
+    unselect: function () {
         //if was selected and currently displayed as single icon
         if (this.isSelected()) {
             this.marker.setTitle(this.marker.getTitle().replace(SELECTED_MARKER, ""));
         }
     },
-    isSelected: function() {
+    isSelected: function () {
         //if shown and selected
         return this.marker.getTitle().search(SELECTED_MARKER) != -1;
     },

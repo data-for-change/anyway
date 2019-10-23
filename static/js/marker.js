@@ -240,10 +240,10 @@ var MarkerView = Backbone.View.extend({
             app.updateUrl(that.getUrl());
         } else {
             this.marker_clicked = true;
-            let markerId = `marker_id=${this.model.get('id')}`;
-            let providerCode = `provider_code=${this.model.get('provider_code')}`;
-            let accidentYear = `accident_year=${this.model.get('accident_year')}`;
-            let markersUrl = `/markers/all?${markerId}&${providerCode}&${accidentYear}`;
+            var markerId = 'marker_id=' + this.model.get('id');
+            var providerCode = 'provider_code=' + this.model.get('provider_code');
+            var accidentYear = 'accident_year=' + this.model.get('accident_year');
+            var markersUrl = '/markers/all?'+ markerId + '&' + providerCode + '&' + accidentYear;
 
             $.get(markersUrl, function (data) {
                 data = JSON.parse(data);

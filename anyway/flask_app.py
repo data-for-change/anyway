@@ -572,20 +572,46 @@ def involved_data_refinement(involved):
     involved["home_yishuv_shape"] = cbs_dictionary.get((81, involved["home_yishuv_shape"]))
     return involved
 
+@app.route("/markers/<int:marker_id>", methods=["GET"])
+def marker(marker_id):
+
+    involved = db.session.query(Involved).filter(Involved.accident_id == marker_id)
+
+    vehicles = db.session.query(Vehicle).filter(Vehicle.accident_id == marker_id)
+
+    list_to_return = list()
+    for inv in involved:
+        obj = inv.serialize()
+        obj["age_group"] = cbs_dictionary.get((92, obj["age_group"]))
+        obj["population_type"] = cbs_dictionary.get((66, obj["population_type"]))
+        obj["home_region"] = cbs_dictionary.get((77, obj["home_region"]))
+        obj["home_district"] = cbs_dictionary.get((79, obj["home_district"]))
+        obj["home_natural_area"] = cbs_dictionary.get((80, obj["home_natural_area"]))
+        obj["home_municipal_status"] = cbs_dictionary.get((78, obj["home_municipal_status"]))
+        obj["home_yishuv_shape"] = cbs_dictionary.get((81, obj["home_yishuv_shape"]))
+        list_to_return.append(obj)
+
+    for veh in vehicles:
+        obj = veh.serialize()
+        obj["engine_volume"] = cbs_dictionary.get((111, obj["engine_volume"]))
+        obj["total_weight"] = cbs_dictionary.get((112, obj["total_weight"]))
+        obj["driving_directions"] = cbs_dictionary.get((28, obj["driving_directions"]))
+        list_to_return.append(obj)
+    return make_response(json.dumps(list_to_return, ensure_ascii=False))
 
 @app.route("/markers/all", methods=["GET"])
-def marker():
+def marker_all():
     marker_id = request.args.get('marker_id', None)
     provider_code = request.args.get('provider_code', None)
     accident_year = request.args.get('accident_year', None)
 
-    involved = db.session.query(Involved).filter(Involved.accident_id == marker_id and
-                                                 Involved.provider_code == provider_code and
-                                                 Involved.accident_year == accident_year)
+    involved = db.session.query(Involved).filter(and_(Involved.accident_id == marker_id,
+                                                      Involved.provider_code == provider_code,
+                                                      Involved.accident_year == accident_year))
 
-    vehicles = db.session.query(Vehicle).filter(Vehicle.accident_id == marker_id and
-                                                Vehicle.provider_code == provider_code and
-                                                Vehicle.accident_year == accident_year)
+    vehicles = db.session.query(Vehicle).filter(and_(Vehicle.accident_id == marker_id,
+                                                     Vehicle.provider_code == provider_code,
+                                                     Vehicle.accident_year == accident_year))
 
     list_to_return = list()
     for inv in involved:

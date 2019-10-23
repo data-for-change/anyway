@@ -274,6 +274,7 @@ class AccidentMarker(MarkerMixin, Base):
         fields = {
             "id": str(self.id),
             "provider_code": self.provider_code,
+            "accident_year": self.accident_year,
             "latitude": self.latitude,
             "longitude": self.longitude,
             "accident_severity": self.accident_severity,

@@ -185,7 +185,7 @@ class AccidentMarker(MarkerMixin, Base):
     __table_args__ = (
         Index('acc_long_lat_idx', 'latitude', 'longitude'),
         Index('id_idx_markers', 'id', unique=False),
-        Index('provider_and_id_idx_markers', 'provider_and_id', unique=True),
+        Index('provider_and_id_idx_markers', 'provider_and_id', unique=False),
         Index('idx_markers_geom', 'geom', unique=False),
 
     )
@@ -196,6 +196,7 @@ class AccidentMarker(MarkerMixin, Base):
     id = Column(BigInteger(), primary_key=True)
     provider_and_id = Column(BigInteger())
     provider_code = Column(Integer(), primary_key=True)
+    file_type_police = Column(Integer())
     description = Column(Text())
     accident_type = Column(Integer())
     accident_severity = Column(Integer())
@@ -224,12 +225,14 @@ class AccidentMarker(MarkerMixin, Base):
     cross_mode = Column(Integer())
     cross_location = Column(Integer())
     cross_direction = Column(Integer())
-    involved = relationship("Involved", foreign_keys="Involved.accident_id")
-    vehicles = relationship("Vehicle", foreign_keys="Vehicle.accident_id")
+    involved = relationship("Involved")
+    vehicles = relationship("Vehicle")
     video_link = Column(Text())
     road1 = Column(Integer())
     road2 = Column(Integer())
     km = Column(Float())
+    km_raw = Column(Text())
+    km_accurate= Column(Boolean())
     yishuv_symbol = Column(Integer())
     yishuv_name = Column(Text())
     geo_area = Column(Integer())
@@ -245,11 +248,11 @@ class AccidentMarker(MarkerMixin, Base):
     street1_hebrew = Column(Text())
     street2 = Column(Integer())
     street2_hebrew = Column(Text())
-    home = Column(Integer())
+    house_number = Column(Integer())
     urban_intersection = Column(Integer())
     non_urban_intersection = Column(Integer())
     non_urban_intersection_hebrew = Column(Text())
-    accident_year = Column(Integer())
+    accident_year = Column(Integer(), primary_key=True)
     accident_month = Column(Integer())
     accident_day = Column(Integer())
     accident_hour_raw = Column(Integer())
@@ -260,6 +263,7 @@ class AccidentMarker(MarkerMixin, Base):
     vehicle_type_rsa = Column(Text())
     violation_type_rsa = Column(Text())
     geom = Column(Geometry('POINT'))
+    non_urban_intersection_by_junction_number = Column(Text())
 
     @staticmethod
     def json_to_description(msg):
@@ -270,6 +274,7 @@ class AccidentMarker(MarkerMixin, Base):
         fields = {
             "id": str(self.id),
             "provider_code": self.provider_code,
+            "accident_year": self.accident_year,
             "latitude": self.latitude,
             "longitude": self.longitude,
             "accident_severity": self.accident_severity,
@@ -573,6 +578,7 @@ class Involved(Base):
     id = Column(BigInteger(), primary_key=True)
     provider_and_id = Column(BigInteger())
     provider_code = Column(Integer())
+    file_type_police = Column(Integer())
     accident_id = Column(BigInteger())
     involved_type = Column(Integer())
     license_acquiring_date = Column(Integer())
@@ -590,7 +596,7 @@ class Involved(Base):
     home_district = Column(Integer())
     home_natural_area = Column(Integer())
     home_municipal_status = Column(Integer())
-    home_residence_type = Column(Integer())
+    home_yishuv_shape = Column(Integer())
     hospital_time = Column(Integer())
     medical_type = Column(Integer())
     release_dest = Column(Integer())
@@ -601,8 +607,8 @@ class Involved(Base):
     accident_year = Column(Integer())
     accident_month = Column(Integer())
     injury_severity_mais = Column(Integer())
-    __table_args__ = (ForeignKeyConstraint([accident_id, provider_code],
-                                           [AccidentMarker.id, AccidentMarker.provider_code],
+    __table_args__ = (ForeignKeyConstraint([accident_id, provider_code, accident_year],
+                                           [AccidentMarker.id, AccidentMarker.provider_code, AccidentMarker.accident_year],
                                            ondelete="CASCADE"),
                       Index('accident_id_idx_involved', 'accident_id', unique=False),
                       Index('provider_and_id_idx_involved', 'provider_and_id', unique=False),
@@ -628,7 +634,7 @@ class Involved(Base):
             "home_district": self.home_district,
             "home_natural_area": self.home_natural_area,
             "home_municipal_status": self.home_municipal_status,
-            "home_residence_type": self.home_residence_type,
+            "home_yishuv_shape": self.home_yishuv_shape,
             "hospital_time": self.hospital_time,
             "medical_type": self.medical_type,
             "release_dest": self.release_dest,
@@ -795,6 +801,7 @@ class Vehicle(Base):
     id = Column(BigInteger(), primary_key=True)
     provider_and_id = Column(BigInteger())
     provider_code = Column(Integer())
+    file_type_police = Column(Integer())
     accident_id = Column(BigInteger())
     engine_volume = Column(Integer())
     manufacturing_year = Column(Integer())
@@ -808,8 +815,8 @@ class Vehicle(Base):
     accident_year = Column(Integer())
     accident_month = Column(Integer())
     vehicle_damage = Column(Integer())
-    __table_args__ = (ForeignKeyConstraint([accident_id, provider_code],
-                                           [AccidentMarker.id, AccidentMarker.provider_code],
+    __table_args__ = (ForeignKeyConstraint([accident_id, provider_code, accident_year],
+                                           [AccidentMarker.id, AccidentMarker.provider_code, AccidentMarker.accident_year],
                                            ondelete="CASCADE"),
                       Index('accident_id_idx_vehicles', 'accident_id', unique=False),
                       Index('provider_and_id_idx_vehicles', 'provider_and_id', unique=False),
@@ -878,135 +885,6 @@ class ReportPreferences(Base):
             "radius": self.radius,
             "minimum_severity": self.minimum_severity
         }
-
-
-class AccidentsNoLocation(Base, MarkerMixin):
-    __tablename__ = "markers_no_location"
-    __table_args__ = (
-        Index('id_idx_markers_no_location', 'id', unique=False),
-        Index('provider_and_id_idx_markers_no_location', 'provider_and_id', unique=True),
-    )
-    id = Column(BigInteger(), primary_key=True)
-    provider_and_id = Column(BigInteger())
-    provider_code = Column(Integer(), primary_key=True)
-    description = Column(Text())
-    accident_type = Column(Integer())
-    accident_severity = Column(Integer())
-    address = Column(Text())
-    location_accuracy = Column(Integer())
-    road_type = Column(Integer())
-    road_shape = Column(Integer())
-    day_type = Column(Integer())
-    police_unit = Column(Integer())
-    mainStreet = Column(Text())
-    secondaryStreet = Column(Text())
-    junction = Column(Text())
-    one_lane = Column(Integer())
-    multi_lane = Column(Integer())
-    speed_limit = Column(Integer())
-    road_intactness = Column(Integer())
-    road_width = Column(Integer())
-    road_sign = Column(Integer())
-    road_light = Column(Integer())
-    road_control = Column(Integer())
-    weather = Column(Integer())
-    road_surface = Column(Integer())
-    road_object = Column(Integer())
-    object_distance = Column(Integer())
-    didnt_cross = Column(Integer())
-    cross_mode = Column(Integer())
-    cross_location = Column(Integer())
-    cross_direction = Column(Integer())
-    involved = relationship("InvolvedNoLocation", foreign_keys="InvolvedNoLocation.accident_id")
-    vehicles = relationship("VehicleNoLocation", foreign_keys="VehicleNoLocation.accident_id")
-    video_link = Column(Text())
-    road1 = Column(Integer())
-    road2 = Column(Integer())
-    km = Column(Float)
-    yishuv_symbol = Column(Integer())
-    geo_area = Column(Integer())
-    day_night = Column(Integer())
-    day_in_week = Column(Integer())
-    traffic_light = Column(Integer())
-    region = Column(Integer())
-    district = Column(Integer())
-    natural_area = Column(Integer())
-    municipal_status = Column(Integer())
-    yishuv_shape = Column(Integer())
-    street1 = Column(Integer())
-    street2 = Column(Integer())
-    home = Column(Integer())
-    urban_intersection = Column(Integer())
-    non_urban_intersection = Column(Integer())
-    accident_year = Column(Integer())
-    accident_month = Column(Integer())
-    accident_day = Column(Integer())
-    accident_hour_raw = Column(Integer())
-    accident_hour = Column(Integer())
-    accident_minute = Column(Integer())
-
-class InvolvedNoLocation(Base):
-    __tablename__ = "involved_no_location"
-    id = Column(BigInteger(), primary_key=True)
-    provider_and_id = Column(BigInteger())
-    provider_code = Column(Integer())
-    accident_id = Column(BigInteger())
-    involved_type = Column(Integer())
-    license_acquiring_date = Column(Integer())
-    age_group = Column(Integer())
-    sex = Column(Integer())
-    vehicle_type = Column(Integer())
-    safety_measures = Column(Integer())
-    involve_yishuv_symbol = Column(Integer())
-    injury_severity = Column(Integer())
-    injured_type = Column(Integer())
-    injured_position = Column(Integer())
-    population_type = Column(Integer())
-    home_region = Column(Integer())
-    home_district = Column(Integer())
-    home_natural_area = Column(Integer())
-    home_municipal_status = Column(Integer())
-    home_residence_type = Column(Integer())
-    hospital_time = Column(Integer())
-    medical_type = Column(Integer())
-    release_dest = Column(Integer())
-    safety_measures_use = Column(Integer())
-    late_deceased = Column(Integer())
-    car_id = Column(Integer())
-    involve_id = Column(Integer())
-    accident_year = Column(Integer())
-    accident_month = Column(Integer())
-    injury_severity_mais = Column(Integer())
-    __table_args__ = (ForeignKeyConstraint([accident_id, provider_code],
-                                           [AccidentsNoLocation.id, AccidentsNoLocation.provider_code],
-                                           ondelete="CASCADE"),
-                      Index('accident_id_idx_involved_no_location', 'accident_id'),
-                      Index('provider_and_id_idx_involved_no_location', 'provider_and_id', unique=False),
-                      {})
-class VehicleNoLocation(Base):
-    __tablename__ = "vehicles_no_location"
-    id = Column(BigInteger(), primary_key=True)
-    provider_and_id = Column(BigInteger())
-    provider_code = Column(Integer())
-    accident_id = Column(BigInteger())
-    engine_volume = Column(Integer())
-    manufacturing_year = Column(Integer())
-    driving_directions = Column(Integer())
-    vehicle_status = Column(Integer())
-    vehicle_attribution = Column(Integer())
-    vehicle_type = Column(Integer())
-    seats = Column(Integer())
-    total_weight = Column(Integer())
-    car_id = Column(Integer())
-    accident_year = Column(Integer())
-    accident_month = Column(Integer())
-    vehicle_damage = Column(Integer())
-    __table_args__ = (ForeignKeyConstraint([accident_id, provider_code],
-                                           [AccidentsNoLocation.id, AccidentsNoLocation.provider_code],
-                                           ondelete="CASCADE"),
-                      Index('accident_id_idx_vehicles_no_location', 'accident_id'),
-                      Index('provider_and_id_idx_vehicles_no_location', 'provider_and_id', unique=False),
-                      {})
 
 
 class School(Base):
@@ -1128,7 +1006,7 @@ class InjuredAroundSchoolAllData(Base):
     markers_street1_hebrew = Column(Text())
     markers_street2 = Column(Float())
     markers_street2_hebrew = Column(Text())
-    markers_home = Column(Float())
+    markers_house_number = Column(Float())
     markers_urban_intersection = Column(Float())
     markers_non_urban_intersection = Column(Float())
     markers_non_urban_intersection_hebrew = Column(Text())
@@ -1162,7 +1040,7 @@ class InjuredAroundSchoolAllData(Base):
     involved_home_district = Column(Float())
     involved_home_natural_area = Column(Float())
     involved_home_municipal_status = Column(Float())
-    involved_home_residence_type = Column(Float())
+    involved_home_yishuv_shape = Column(Float())
     involved_hospital_time = Column(Float())
     involved_medical_type = Column(Float())
     involved_release_dest = Column(Float())
@@ -1581,13 +1459,6 @@ class VehicleDamage(Base):
     provider_code = Column(Integer(), primary_key=True, index=True)
     vehicle_damage_hebrew = Column(Text(), nullable=True)
 
-class InjurySeverityMAIS(Base):
-    __tablename__ = "injury_severity_mais"
-    id = Column(Integer(), primary_key=True, index=True)
-    year = Column(Integer(), primary_key=True, index=True)
-    provider_code = Column(Integer(), primary_key=True, index=True)
-    injury_severity_mais_hebrew = Column(Text(), nullable=True)
-
 class AccidentMarkerView(Base):
     __tablename__ = "markers_hebrew"
     id = Column(BigInteger(), primary_key=True)
@@ -1642,6 +1513,8 @@ class AccidentMarkerView(Base):
     road1 = Column(Integer())
     road2 = Column(Integer())
     km = Column(Float())
+    km_raw = Column(Text())
+    km_accurate = Column(Boolean())
     yishuv_symbol = Column(Integer())
     yishuv_name = Column(Text())
     geo_area = Column(Integer())

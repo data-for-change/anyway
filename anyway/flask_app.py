@@ -40,7 +40,9 @@ from .oauth import OAuthSignIn
 from .base import user_optional
 from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved, User, ReportPreferences,
                      LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School, SchoolWithDescription,
-                     InjuredAroundSchool, InjuredAroundSchoolAllData, Sex, AccidentMonth, InjurySeverity, ReportProblem)
+                     InjuredAroundSchool, InjuredAroundSchoolAllData, Sex, AccidentMonth, InjurySeverity, ReportProblem,
+                     EngineVolume, PopulationType, Region, District, NaturalArea, MunicipalStatus, YishuvShape,
+                     TotalWeight, DrivingDirections)
 from .config import ENTRIES_PER_PAGE
 from six.moves import http_client
 from sqlalchemy import func
@@ -572,9 +574,9 @@ def involved_data_refinement(involved):
     involved["home_yishuv_shape"] = cbs_dictionary.get((81, involved["home_yishuv_shape"]))
     return involved
 
+
 @app.route("/markers/<int:marker_id>", methods=["GET"])
 def marker(marker_id):
-
     involved = db.session.query(Involved).filter(Involved.accident_id == marker_id)
 
     vehicles = db.session.query(Vehicle).filter(Vehicle.accident_id == marker_id)
@@ -599,6 +601,7 @@ def marker(marker_id):
         list_to_return.append(obj)
     return make_response(json.dumps(list_to_return, ensure_ascii=False))
 
+
 @app.route("/markers/all", methods=["GET"])
 def marker_all():
     marker_id = request.args.get('marker_id', None)
@@ -616,20 +619,80 @@ def marker_all():
     list_to_return = list()
     for inv in involved:
         obj = inv.serialize()
-        obj["age_group"] = cbs_dictionary.get((92, obj["age_group"]))
-        obj["population_type"] = cbs_dictionary.get((66, obj["population_type"]))
-        obj["home_region"] = cbs_dictionary.get((77, obj["home_region"]))
-        obj["home_district"] = cbs_dictionary.get((79, obj["home_district"]))
-        obj["home_natural_area"] = cbs_dictionary.get((80, obj["home_natural_area"]))
-        obj["home_municipal_status"] = cbs_dictionary.get((78, obj["home_municipal_status"]))
-        obj["home_yishuv_shape"] = cbs_dictionary.get((81, obj["home_yishuv_shape"]))
+        # obj["age_group"] = cbs_dictionary.get((92, obj["age_group"]))
+        age_group = db.session.query(EngineVolume) \
+            .first(and_(EngineVolume.provider_code == provider_code,
+                        EngineVolume.year == accident_year))
+        if age_group:
+            obj["age_group"] = age_group['age_group_hebrew']
+
+        # obj["population_type"] = cbs_dictionary.get((66, obj["population_type"]))
+        population_type = db.session.query(￿PopulationType)\
+                .first(and_(￿PopulationType.provider_code == provider_code,
+                             PopulationType.year == accident_year))
+        if population_type:
+            obj["population_type"] = age_group['population_type_hebrew']
+
+        # obj["home_region"] = cbs_dictionary.get((77, obj["home_region"]))
+        home_region = db.session.query(￿Region) \
+                .first(and_(￿Region.provider_code == provider_code,
+                             Region.year == accident_year))
+        if home_region:
+            obj["home_region"] = age_group['region_hebrew']
+
+        # obj["home_district"] = cbs_dictionary.get((79, obj["home_district"]))
+        home_district = db.session.query(￿District) \
+                .first(and_(￿District.provider_code == provider_code,
+                             District.year == accident_year))
+        if home_district:
+            obj["home_district"] = home_district['district_hebrew']
+
+        # obj["home_natural_area"] = cbs_dictionary.get((80, obj["home_natural_area"]))
+        home_natural_area = db.session.query(￿NaturalArea) \
+                .first(and_(￿NaturalArea.provider_code == provider_code,
+                             NaturalArea.year == accident_year))
+        if home_natural_area:
+            obj["home_natural_area"] = home_natural_area['natural_area_hebrew']
+
+        # obj["home_municipal_status"] = cbs_dictionary.get((78, obj["home_municipal_status"]))
+        home_municipal_status = db.session.query(￿MunicipalStatus) \
+                .first(and_(￿MunicipalStatus.provider_code == provider_code,
+                             MunicipalStatus.year == accident_year))
+        if home_district:
+            obj["home_district"] = home_municipal_status['municipal_status_hebrew']
+
+        # obj["home_yishuv_shape"] = cbs_dictionary.get((81, obj["home_yishuv_shape"]))
+        home_yishuv_shape = db.session.query(￿YishuvShape) \
+                .first(and_(￿￿YishuvShape.provider_code == provider_code,
+                             ￿YishuvShape.year == accident_year))
+        if home_yishuv_shape:
+            obj["home_yishuv_shape"] = home_yishuv_shape['yishuv_shape_hebrew']
+
         list_to_return.append(obj)
 
     for veh in vehicles:
         obj = veh.serialize()
-        obj["engine_volume"] = cbs_dictionary.get((111, obj["engine_volume"]))
-        obj["total_weight"] = cbs_dictionary.get((112, obj["total_weight"]))
-        obj["driving_directions"] = cbs_dictionary.get((28, obj["driving_directions"]))
+        # obj["engine_volume"] = cbs_dictionary.get((111, obj["engine_volume"]))
+        engine_volume = db.session.query(￿EngineVolume) \
+                .first(and_(￿EngineVolume.provider_code == provider_code,
+                             EngineVolume.year == accident_year))
+        if engine_volume:
+            obj["engine_volume"] = engine_volume['engine_volume_hebrew']
+
+        # obj["total_weight"] = cbs_dictionary.get((112, obj["total_weight"]))
+        total_weight = db.session.query(￿TotalWeight) \
+                .first(and_(￿TotalWeight.provider_code == provider_code,
+                             TotalWeight.year == accident_year))
+        if total_weight:
+            obj["total_weight"] = total_weight['total_weight_hebrew']
+
+        # obj["driving_directions"] = cbs_dictionary.get((28, obj["driving_directions"]))
+        driving_directions = db.session.query(￿DrivingDirections) \
+                .first(and_(￿DrivingDirections.provider_code == provider_code,
+                             DrivingDirections.year == accident_year))
+        if driving_directions:
+            obj["driving_directions"] = driving_directions['driving_directions_hebrew']
+
         list_to_return.append(obj)
     return make_response(json.dumps(list_to_return, ensure_ascii=False))
 

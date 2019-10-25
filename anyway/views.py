@@ -134,7 +134,8 @@ class Views(object):
                                      LEFT JOIN accident_hour_raw ON markers.accident_hour_raw = accident_hour_raw.id AND markers.accident_year = accident_hour_raw.year AND markers.provider_code = accident_hour_raw.provider_code
                                      LEFT JOIN provider_code ON markers.provider_code = provider_code.id;"""
 
-    INVOLVED_HEBREW_VIEW = """SELECT involved.accident_id,
+    INVOLVED_HEBREW_VIEW = """SELECT
+    involved.accident_id,
     involved.provider_and_id,
     involved.provider_code,
     involved.file_type_police,
@@ -205,7 +206,8 @@ class Views(object):
      LEFT JOIN late_deceased ON involved.late_deceased = late_deceased.id AND involved.accident_year = late_deceased.year AND involved.provider_code = late_deceased.provider_code;"""
 
 
-    VEHICLES_HEBREW_VIEW = """ SELECT vehicles.id,
+    VEHICLES_HEBREW_VIEW = """ SELECT
+    vehicles.id,
     vehicles.accident_id,
     vehicles.provider_and_id,
     vehicles.provider_code,

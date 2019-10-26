@@ -5,7 +5,6 @@ import csv
 from six import StringIO, iteritems
 import six
 import time
-import sys
 
 import jinja2
 from flask import make_response, render_template, Response, jsonify, url_for, flash, abort

@@ -53,7 +53,8 @@ def _iter_rows(filename):
                'type': CONST.MARKER_TYPE_ACCIDENT,
                'video_link': video_link,
                'vehicle_type_rsa': vehicle_type,
-               'violation_type_rsa': violation}
+               'violation_type_rsa': violation,
+               'accident_year': timestamp.year}
 
 
 def parse(filename):

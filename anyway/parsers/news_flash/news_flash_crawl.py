@@ -8,6 +8,13 @@ from .ynet_spider import YnetFlashScrap
 
 
 def news_flash_crawl(rss_link, site_name, maps_key):
+    """
+    starts crawling by given rss link, site name and google maps key
+    :param rss_link: rss link to crawl and get news_flash from
+    :param site_name: name of site
+    :param maps_key: google maps key for geocode
+    :return: scraped news_flash are added to the db
+    """
     id_flash = get_latest_id_from_db() + 1
     latest_date = get_latest_date_from_db()
     d = feedparser.parse(rss_link)

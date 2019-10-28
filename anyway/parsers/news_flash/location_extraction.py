@@ -367,20 +367,21 @@ def preprocess_nonurban_text(text, intersections, threshold=80):
 
 
 class UrbanAddress:
-    def __init__(self, city='NaN', street='NaN'):
+    def __init__(self, city='NaN', street='NaN', street2='NaN'):
         self.city = city
         self.street = street
+        self.street2 = street2
 
     def __str__(self):
         return 'city: ' + str(self.city) + ', street: ' + \
-               str(self.street)
+               str(self.street) + ', street2 :' + str(self.street2)
 
     def __repr__(self):
-        return "UrbanAddress(%s, %s)" % (self.city, self.street)
+        return "UrbanAddress(%s, %s, %s)" % (self.city, self.street, self.street2)
 
     def __eq__(self, other):
         if isinstance(other, UrbanAddress):
-            return (self.city == other.city) and (self.street == other.street)
+            return (self.city == other.city) and (self.street == other.street) and (self.street2 == other.street2)
         else:
             return False
 
@@ -410,6 +411,71 @@ class NonUrbanAddress:
 
     def __hash__(self):
         return hash(self.__repr__())
+
+
+def process_urban_with_geo_dict(text, streets, cities, threshold_city=70,
+                                threshold_street=50, ratio=0.85,
+                                city='', street1='', street2=''):
+    if city != '':
+        suspected_city = process.extractOne(city, cities, scorer=fuzz.partial_ratio, score_cutoff=threshold_city)
+    else:
+        suspected_city = process.extractOne(text, cities, scorer=fuzz.partial_ratio, score_cutoff=threshold_city)
+    if suspected_city is not None:
+        suspected_city = suspected_city[0]
+        streets_in_city = streets.loc[streets.city == suspected_city]
+        relevant_streets_1 = streets_in_city.loc[(streets_in_city.street1 != 'NaN')].street1
+        relevant_streets_2 = streets_in_city.loc[(streets_in_city.street2 != 'NaN')].street2
+        relevant_streets = relevant_streets_1.append(relevant_streets_2).drop_duplicates()
+        relevant_streets_scores = relevant_streets.apply(lambda x: streets_in_city
+                                                         .loc[(streets_in_city.street1 == x) |
+                                                              (streets_in_city.street2 == x)].avg_accidents.max())
+        relevant_streets = pd.DataFrame(
+            {'street': relevant_streets.tolist(), 'avg_accidents': relevant_streets_scores.tolist()})
+        result_streets = []
+        result_city = []
+        for street in [street1, street2]:
+            if street != '':
+                suspected_streets = process.extract(street, list(set(relevant_streets.street.dropna().tolist())),
+                                                    scorer=fuzz.token_set_ratio, limit=3)
+                if len(suspected_streets) > 0:
+                    relevant_streets_scores = relevant_streets.loc[
+                        relevant_streets.street.isin(
+                            [suspected_street[0] for suspected_street in suspected_streets])].copy()
+                    relevant_streets_scores.avg_accidents = (
+                            relevant_streets_scores.avg_accidents / relevant_streets_scores.avg_accidents.max()).copy()
+                    suspected_streets = [(suspected_street[0],
+                                          (ratio * fuzz.token_set_ratio(text,
+                                                                        suspected_city[0] + ' ' + suspected_street[0]))
+                                          + ((1 - ratio) * 100 * relevant_streets_scores.loc[
+                                              relevant_streets_scores.street == suspected_street[0]].avg_accidents.iloc[
+                                              0]))
+                                         for suspected_street in suspected_streets if suspected_street is not None and
+                                         (ratio * fuzz.token_set_ratio(text,
+                                                                       suspected_city[0] + ' ' + suspected_street[0]))
+                                         + ((1 - ratio) * 100 *
+                                            relevant_streets_scores.loc[relevant_streets_scores.street ==
+                                                                        suspected_street[0]].avg_accidents.iloc[
+                                                0]) > threshold_street]
+                if len(suspected_streets) > 0:
+                    suspected_street = max(suspected_streets, key=lambda x: x[1])
+                    suspected_street = suspected_street[0]
+                    if suspected_street in streets_in_city.street1.tolist():
+                        suspected_street = streets_in_city.loc[streets_in_city.street1 == suspected_street].iloc[0]
+                        suspected_street_street = suspected_street.street1_hebrew
+                    else:
+                        suspected_street = streets_in_city.loc[streets_in_city.street2 == suspected_street].iloc[0]
+                        suspected_street_street = suspected_street.street2_hebrew
+                    suspected_street_city = suspected_street.yishuv_name
+                    result_streets.append(suspected_street_street)
+                    result_city.append(suspected_street_city)
+        if len(result_streets) > 0:
+            if len(result_streets) == 1:
+                return UrbanAddress(city=result_city[0], street=result_streets[0])
+            else:
+                return UrbanAddress(city=result_city[0], street=result_streets[0], street2=result_streets[1])
+        else:
+            return UrbanAddress(city=streets.loc[streets.city == suspected_city].yishuv_name.iloc[0])
+    return None
 
 
 def process_urban(text, streets, cities, threshold_city=70, threshold_street=50, ratio=0.85):
@@ -526,7 +592,9 @@ def process_intersections_both_roads(text, roads, roads_candidates, threshold=50
                            road2=roads_candidates[0][1].replace('כביש ', ''))
 
 
-def is_urban(text):
+def is_urban(text, geo_location_dict=None):
+    if geo_location_dict is not None:
+        return geo_location_dict['road_no'] == ''
     road_examples = ['כביש ' + str(digit) for digit in range(10)]
     return not any(road_example in text for road_example in road_examples)
 
@@ -557,11 +625,20 @@ def process_nonurban(text, roads):
         return process_intersection_no_roads(text, roads)
 
 
-def get_db_matching_location_of_text(text):
+def get_db_matching_location_of_text(text, geo_location_dict=None):
     text = preprocess_text(text, True)
-    if is_urban(text):
+    if is_urban(text, geo_location_dict=geo_location_dict):
         streets = pd.read_excel('anyway/parsers/news_flash/streets.xlsx', sheet_name='Sheet1')
         cities = pd.read_excel('anyway/parsers/news_flash/cities.xlsx', sheet_name='Sheet1').city.tolist()
+        if geo_location_dict is not None:
+            street1 = geo_location_dict['street']
+            street2 = ''
+            if geo_location_dict['intersection'] != '':
+                street1 = geo_location_dict['intersection'].split('&')[0].strip()
+                street2 = geo_location_dict['intersection'].split('&')[1].strip()
+            return process_urban_with_geo_dict(text, streets, cities,
+                                               city=geo_location_dict['city'],
+                                               street1=street1, street2=street2)
         return process_urban(text, streets, cities)
     else:
         roads = pd.read_excel('anyway/parsers/news_flash/roads.xlsx', sheet_name='Sheet1')
@@ -569,10 +646,10 @@ def get_db_matching_location_of_text(text):
 
 
 def manual_filter_location_of_text(text):
+    filter_ind = float('inf')
     if text.find('.') != -1:
         text = text[:text.find('.')]
     try:
-        filter_ind = float('inf')
         forbid_words = ['תושב']
         hospital_words = ['בבית החולים', 'בית חולים', 'בית החולים', 'מרכז רפואי']
         hospital_names = ['שיבא', 'וולפסון', 'תל השומר', 'סוראסקי', 'הלל יפה', 'רמב"ם', 'רמבם', 'בני ציון', 'רוטשילד',

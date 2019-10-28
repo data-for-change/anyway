@@ -23,7 +23,8 @@ except (ValueError, ImportError):
 
 _PROJECT_ROOT = os.path.join(os.path.dirname(__file__), '..')
 
-def init_flask():
+
+def init_flask() -> Flask:
     """
     initializes a Flask instance with default values
     """

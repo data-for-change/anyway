@@ -26,7 +26,7 @@ def cli():
               help='Open the server for communication from outside', default=False)
 @click.option('--debug-js', is_flag=True, help="Don't minify the JavaScript files")
 def testserver(open_server, debug_js):
-    from anyway import app
+    from anyway.app import app
 
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')
 
@@ -198,11 +198,7 @@ def truncate_cbs(path):
 @click.argument('identifiers', nargs=-1)
 def load_discussions(identifiers):
     from anyway.models import DiscussionMarker
-    from flask_sqlalchemy import SQLAlchemy
-    from anyway.utilities import init_flask
-
-    app = init_flask()
-    db = SQLAlchemy(app)
+    from anyway.app import db
 
     identifiers = identifiers or sys.stdin
 

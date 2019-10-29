@@ -6,7 +6,6 @@ import logging
 from collections import namedtuple
 
 from flask_security import UserMixin, RoleMixin
-from flask_sqlalchemy import SQLAlchemy
 from geoalchemy2 import Geometry
 from six import iteritems
 from sqlalchemy import Column, BigInteger, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, \
@@ -14,13 +13,11 @@ from sqlalchemy import Column, BigInteger, Integer, String, Boolean, Float, Fore
     ForeignKeyConstraint, func, and_, TIMESTAMP
 from sqlalchemy.orm import relationship, load_only, backref
 
+from anyway.app import db
 from . import localization
 from .constants import CONST
 from .database import Base
-from .utilities import init_flask, decode_hebrew
-
-app = init_flask()
-db = SQLAlchemy(app)
+from .utilities import decode_hebrew
 
 MarkerResult = namedtuple('MarkerResult', ['accident_markers', 'rsa_markers', 'total_records'])
 

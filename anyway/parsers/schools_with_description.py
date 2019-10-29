@@ -1,7 +1,8 @@
 import logging
 from datetime import datetime
-from ..utilities import init_flask, time_delta, chunks, ItmToWGS84
-from flask_sqlalchemy import SQLAlchemy
+
+from anyway.app import db
+from ..utilities import time_delta, chunks, ItmToWGS84
 from ..models import SchoolWithDescription
 import pandas as pd
 import numpy as np
@@ -30,8 +31,6 @@ school_fields = {
     'y': 'Y'
 }
 
-app = init_flask()
-db = SQLAlchemy(app)
 coordinates_converter = ItmToWGS84()
 
 def get_numeric_value(value, func):

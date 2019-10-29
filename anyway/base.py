@@ -1,14 +1,14 @@
-from flask import session, redirect
-from flask import request
-from .models import User
 from functools import wraps
-from .utilities import init_flask
-from flask_sqlalchemy import SQLAlchemy
-app = init_flask()
-db = SQLAlchemy(app)
+
+from flask import session, redirect, request
+
+from anyway.app import db
+from anyway.models import User
+
 
 def set_user(user):
     session["user"] = user.id
+
 
 def get_user():
     if "user" in session:
@@ -16,16 +16,16 @@ def get_user():
     else:
         return None
 
-def user_optional(handler):
 
+def user_optional(handler):
     @wraps(handler)
     def check_login(*args, **kwargs):
         return handler(*args, **kwargs)
 
     return check_login
 
-def user_required(handler):
 
+def user_required(handler):
     @wraps(handler)
     def check_login(*args, **kwargs):
         user = get_user()
@@ -35,4 +35,4 @@ def user_required(handler):
         else:
             return handler(*args, **kwargs)
 
-        return check_login
+    return check_login

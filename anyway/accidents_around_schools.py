@@ -1,8 +1,6 @@
 import sqlalchemy as sa
 from sqlalchemy import or_
-from flask_sqlalchemy import SQLAlchemy
 import math
-from anyway.utilities import init_flask
 from anyway.models import AccidentMarker, Involved, School
 from anyway.constants import CONST
 import pandas as pd
@@ -21,9 +19,6 @@ ANYWAY_UI_FORMAT_WITH_FILTERS = "https://www.anyway.co.il/?zoom=17&start_date={s
 DATE_INPUT_FORMAT = '%d-%m-%Y'
 DATE_URL_FORMAT = '%Y-%m-%d'
 
-
-app = init_flask()
-db = SQLAlchemy(app)
 
 def get_bounding_box(latitude, longitude, distance_in_km):
 

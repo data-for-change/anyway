@@ -54,10 +54,8 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
-    from anyway.utilities import init_flask
-    from flask_sqlalchemy import SQLAlchemy
-    app = init_flask()
-    connectable = SQLAlchemy(app).engine
+    from anyway.app import db
+    connectable = db.engine
 
     with connectable.connect() as connection:
         context.configure(

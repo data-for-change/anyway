@@ -6,13 +6,9 @@ import os
 import re
 from datetime import datetime
 
-from flask_sqlalchemy import SQLAlchemy
-
+from anyway.app import db
 from ..models import RegisteredVehicle, City
-from ..utilities import init_flask, time_delta, CsvReader, ImporterUI, truncate_tables,decode_hebrew
-
-app = init_flask()
-db = SQLAlchemy(app)
+from ..utilities import time_delta, CsvReader, ImporterUI, truncate_tables,decode_hebrew
 
 COLUMN_CITY_NAME_ENG = 0
 COLUMN_CITY_TOTAL_MOTORCYCLE = 1

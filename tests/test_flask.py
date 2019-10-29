@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from six.moves import http_client
 import six
-from anyway import app as flask_app
+from anyway.app import app as flask_app
 #from anyway.utilities import open_utf8
 import json
 import pytest

@@ -1,6 +1,6 @@
 import pytest
 import requests
-from anyway import app
+from anyway.app import app
 from threading import Thread
 from time import sleep
 from urlobject import URLObject

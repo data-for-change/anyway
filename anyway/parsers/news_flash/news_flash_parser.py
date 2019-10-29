@@ -1,8 +1,4 @@
-from anyway.utilities import init_flask
-from flask_sqlalchemy import SQLAlchemy
-
-app = init_flask()
-db = SQLAlchemy(app)
+from anyway.app import db
 
 
 def get_description(ind):

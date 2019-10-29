@@ -8,10 +8,11 @@ import re
 from datetime import datetime
 import six
 from six import iteritems
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_, and_
 import pandas as pd
 import math
+
+from anyway.app import db
 from .. import field_names, localization
 from ..models import (AccidentMarker,
                       Involved,
@@ -76,7 +77,7 @@ from ..models import (AccidentMarker,
 from .. import models
 from ..constants import CONST
 from ..views import VIEWS
-from ..utilities import ItmToWGS84, init_flask, time_delta, ImporterUI, truncate_tables, chunks
+from ..utilities import ItmToWGS84, time_delta, ImporterUI, truncate_tables, chunks
 from .. import importmail_cbs
 from . import preprocessing_cbs_files
 from functools import partial
@@ -232,8 +233,6 @@ TABLES_DICT = {0: 'columns_description',
                }
 
 coordinates_converter = ItmToWGS84()
-app = init_flask()
-db = SQLAlchemy(app)
 
 json_dumps = partial(json.dumps, encoding=models.db_encoding) if six.PY2 else json.dumps
 

@@ -1,16 +1,14 @@
 from datetime import datetime
+
+from anyway.app import db
 from ..utilities import chunks
-from flask_sqlalchemy import SQLAlchemy
 from ..models import TrafficVolume
-from ..utilities import init_flask, time_delta
+from ..utilities import time_delta
 import glob
 import os
 import logging
 import pandas as pd
 import math
-
-app = init_flask()
-db = SQLAlchemy(app)
 
 dictionary = {
     "shana": "year",

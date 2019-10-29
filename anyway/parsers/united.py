@@ -5,12 +5,12 @@ import csv
 from datetime import datetime
 import os
 
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
 
+from anyway.app import db
 from ..constants import CONST
 from ..models import AccidentMarker
-from ..utilities import init_flask, decode_hebrew, open_utf8
+from ..utilities import decode_hebrew, open_utf8
 from ..import importmail
 
 from xml.dom import minidom
@@ -306,8 +306,6 @@ def import_to_db(collection, path):
     :param path: Local files directory ('united_path' on main() below)
     :return: length of DB entries after execution
     """
-    app = init_flask()
-    db = SQLAlchemy(app)
     accidents = list(create_accidents(collection, path))
     if not accidents:
         return 0
@@ -328,8 +326,6 @@ def update_db(collection):
     """
     :return: length of DB entries after execution
     """
-    app = init_flask()
-    db = SQLAlchemy(app)
     united = db.session.query(AccidentMarker).filter(AccidentMarker.provider_code == 2)
     for accident in united:
         if not accident.weather:

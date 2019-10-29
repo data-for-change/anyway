@@ -1,8 +1,9 @@
 # pylint: disable=no-member
 from sqlalchemy import or_, not_, and_
-from flask_sqlalchemy import SQLAlchemy
 import math
-from ..utilities import init_flask, time_delta, chunks
+
+from anyway.app import db
+from ..utilities import time_delta, chunks
 from ..models import AccidentMarker, Involved, SchoolWithDescription, InjuredAroundSchool, InjuredAroundSchoolAllData
 from ..constants import CONST
 import pandas as pd
@@ -23,10 +24,6 @@ ANYWAY_UI_FORMAT_MAP_ONLY = "https://www.anyway.co.il/?zoom=17&start_date={start
 ANYWAY_UI_FORMAT_WITH_FILTERS = "https://www.anyway.co.il/?zoom=17&start_date={start_date}&end_date={end_date}&lat={latitude}&lon={longitude}&show_fatal=1&show_severe=1&show_light=1&approx={location_approx}&accurate={location_accurate}&show_markers=1&show_discussions=0&show_urban=3&show_intersection=3&show_lane=3&show_day=7&show_holiday=0&show_time=24&start_time=25&end_time=25&weather=0&road=0&separation=0&surface=0&acctype={acc_type}&controlmeasure=0&district=0&case_type=0&show_rsa=0&age_groups=1234"
 DATE_INPUT_FORMAT = '%d-%m-%Y'
 DATE_URL_FORMAT = '%Y-%m-%d'
-
-
-app = init_flask()
-db = SQLAlchemy(app)
 
 
 def get_bounding_box(latitude, longitude, distance_in_km):

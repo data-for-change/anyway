@@ -31,7 +31,7 @@ from werkzeug.security import check_password_hash
 from wtforms import form, fields, validators, StringField, PasswordField, Form
 
 from anyway.app_views.news_flash.api import news_flash, single_news_flash
-from anyway.base import app, db
+from anyway.app import app, db
 from anyway.helpers import get_kwargs, involved_data_refinement, vehicles_data_refinement, \
     parse_data, get_json_object, log_bad_request, post_handler, string2timestamp, \
     year2timestamp, PreferenceObject, get_dict_file

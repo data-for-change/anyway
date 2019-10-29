@@ -1,13 +1,11 @@
+from anyway.app import db
 from static.data.schools import school_fields
 import logging
 from datetime import datetime
-from ..utilities import init_flask, time_delta, chunks
-from flask_sqlalchemy import SQLAlchemy
+from ..utilities import time_delta, chunks
 from ..models import School
 import pandas as pd
 
-app = init_flask()
-db = SQLAlchemy(app)
 
 def get_data_value(value):
     """

@@ -10,7 +10,6 @@ import os
 import flask_admin as admin
 import flask_login as login
 import jinja2
-import pandas as pd
 from flask import make_response, render_template, Response, jsonify, url_for, flash
 from flask import request, redirect, session
 from flask_admin import helpers, expose, BaseView
@@ -23,7 +22,7 @@ from flask_security import Security, SQLAlchemyUserDatastore, roles_required, cu
 from flask_sqlalchemy import SQLAlchemy
 from sendgrid import Mail
 from six import iteritems
-from sqlalchemy import and_, not_, or_
+from sqlalchemy import and_, not_
 from sqlalchemy import func
 from sqlalchemy.orm import load_only
 from webassets import Environment as AssetsEnvironment
@@ -32,9 +31,10 @@ from werkzeug.security import check_password_hash
 from wtforms import form, fields, validators, StringField, PasswordField, Form
 
 from anyway.base import app, db
-from anyway.helpers import get_kwargs, generate_csv, generate_json, involved_data_refinement, vehicles_data_refinement, \
-    get_involved_dict, get_vehicle_dict, parse_data, get_json_object, log_bad_request, post_handler, string2timestamp, \
+from anyway.helpers import get_kwargs, involved_data_refinement, vehicles_data_refinement, \
+    parse_data, get_json_object, log_bad_request, post_handler, string2timestamp, \
     year2timestamp, PreferenceObject, get_dict_file
+from anyway.views.markers.api import markers, marker, marker_all
 from anyway.views.schools.api import schools_api, schools_description_api, schools_yishuvs_api, schools_names_api, \
     injured_around_schools_api, injured_around_schools_sex_graphs_data_api, \
     injured_around_schools_months_graphs_data_api
@@ -44,9 +44,8 @@ from .base import user_optional
 from .clusters_calculator import retrieve_clusters
 from .config import ENTRIES_PER_PAGE
 from .constants import CONST
-from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved, User, ReportPreferences,
-                     LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School, SchoolWithDescription,
-                     InjuredAroundSchool, InjuredAroundSchoolAllData, Sex, AccidentMonth, InjurySeverity, ReportProblem)
+from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, User, ReportPreferences,
+                     LocationSubscribers, Role, GeneralPreferences, NewsFlash, ReportProblem)
 from .oauth import OAuthSignIn
 
 app.config.from_object(__name__)
@@ -111,32 +110,7 @@ def get_locale():
 app.add_url_rule('/schools', endpoint=None, view_func=schools, methods=["GET"])
 app.add_url_rule('/schools-report', endpoint=None, view_func=schools_report, methods=["GET"])
 
-
-@app.route("/markers", methods=["GET"])
-@user_optional
-def markers():
-    logging.debug('getting markers')
-    kwargs = get_kwargs()
-    logging.debug('querying markers in bounding box: %s' % kwargs)
-    is_thin = (kwargs['zoom'] < CONST.MINIMAL_ZOOM)
-    result = AccidentMarker.bounding_box_query(is_thin, yield_per=50, involved_and_vehicles=False, **kwargs)
-    accident_markers = result.accident_markers
-    rsa_markers = result.rsa_markers
-
-    discussion_args = ('ne_lat', 'ne_lng', 'sw_lat', 'sw_lng', 'show_discussions')
-    discussions = DiscussionMarker.bounding_box_query(**{arg: kwargs[arg] for arg in discussion_args})
-
-    if request.values.get('format') == 'csv':
-        date_format = '%Y-%m-%d'
-        return Response(generate_csv(accident_markers), headers={
-            "Content-Type": "text/csv",
-            "Content-Disposition": 'attachment; '
-                                   'filename="Anyway-accidents-from-{0}-to-{1}.csv"'
-                        .format(kwargs["start_date"].strftime(date_format), kwargs["end_date"].strftime(date_format))
-        })
-
-    else:  # defaults to json
-        return generate_json(accident_markers, rsa_markers, discussions, is_thin, total_records=result.total_records)
+app.add_url_rule("/markers", endpoint=None, view_func=markers, methods=["GET"])
 
 
 @app.route("/api/news-flash", methods=["GET"])
@@ -196,70 +170,8 @@ def charts_data():
                     mimetype="application/json")
 
 
-@app.route("/markers/<int:marker_id>", methods=["GET"])
-def marker(marker_id):
-    involved = db.session.query(Involved).filter(Involved.accident_id == marker_id)
-
-    vehicles = db.session.query(Vehicle).filter(Vehicle.accident_id == marker_id)
-
-    list_to_return = list()
-    for inv in involved:
-        obj = inv.serialize()
-        obj["age_group"] = cbs_dictionary.get((92, obj["age_group"]))
-        obj["population_type"] = cbs_dictionary.get((66, obj["population_type"]))
-        obj["home_region"] = cbs_dictionary.get((77, obj["home_region"]))
-        obj["home_district"] = cbs_dictionary.get((79, obj["home_district"]))
-        obj["home_natural_area"] = cbs_dictionary.get((80, obj["home_natural_area"]))
-        obj["home_municipal_status"] = cbs_dictionary.get((78, obj["home_municipal_status"]))
-        obj["home_yishuv_shape"] = cbs_dictionary.get((81, obj["home_yishuv_shape"]))
-        list_to_return.append(obj)
-
-    for veh in vehicles:
-        obj = veh.serialize()
-        obj["engine_volume"] = cbs_dictionary.get((111, obj["engine_volume"]))
-        obj["total_weight"] = cbs_dictionary.get((112, obj["total_weight"]))
-        obj["driving_directions"] = cbs_dictionary.get((28, obj["driving_directions"]))
-        list_to_return.append(obj)
-    return make_response(json.dumps(list_to_return, ensure_ascii=False))
-
-
-@app.route("/markers/all", methods=["GET"])
-def marker_all():
-    marker_id = request.args.get('marker_id', None)
-    provider_code = request.args.get('provider_code', None)
-    accident_year = request.args.get('accident_year', None)
-
-    involved = db.session.query(Involved).filter(and_(Involved.accident_id == marker_id,
-                                                      Involved.provider_code == provider_code,
-                                                      Involved.accident_year == accident_year))
-
-    vehicles = db.session.query(Vehicle).filter(and_(Vehicle.accident_id == marker_id,
-                                                     Vehicle.provider_code == provider_code,
-                                                     Vehicle.accident_year == accident_year))
-
-    list_to_return = list()
-    for inv in involved:
-        obj = inv.serialize()
-        new_inv = get_involved_dict(provider_code, accident_year)
-        obj["age_group"] = new_inv["age_group"]
-        obj["population_type"] = new_inv["population_type"]
-        obj["home_region"] = new_inv["home_region"]
-        obj["home_district"] = new_inv["home_district"]
-        obj["home_natural_area"] = new_inv["home_natural_area"]
-        obj["home_municipal_status"] = new_inv["home_municipal_status"]
-        obj["home_yishuv_shape"] = new_inv["home_yishuv_shape"]
-
-        list_to_return.append(obj)
-
-    for veh in vehicles:
-        obj = veh.serialize()
-        new_veh = get_vehicle_dict(provider_code, accident_year)
-        obj["engine_volume"] = new_veh["engine_volume"]
-        obj["total_weight"] = new_veh["total_weight"]
-        obj["driving_directions"] = new_veh["driving_directions"]
-
-        list_to_return.append(obj)
-    return make_response(json.dumps(list_to_return, ensure_ascii=False))
+app.add_url_rule("/markers/<int:marker_id>", endpoint=None, view_func=marker, methods=["GET"])
+app.add_url_rule("/markers/all", endpoint=None, view_func=marker_all, methods=["GET"])
 
 
 @app.route("/discussion", methods=["GET", "POST"])

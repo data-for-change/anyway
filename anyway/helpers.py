@@ -11,7 +11,7 @@ from six.moves import http_client
 from sqlalchemy import and_
 import logging
 
-from anyway.app import db
+from anyway.base import db
 from anyway.constants import CONST
 from .models import (EngineVolume, PopulationType, Region, District, NaturalArea, MunicipalStatus, YishuvShape,
                      TotalWeight, DrivingDirections, AgeGroup)

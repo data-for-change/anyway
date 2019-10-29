@@ -30,6 +30,7 @@ from webassets.ext.jinja2 import AssetsExtension
 from werkzeug.security import check_password_hash
 from wtforms import form, fields, validators, StringField, PasswordField, Form
 
+from anyway.app_views.news_flash.api import news_flash, single_news_flash
 from anyway.base import app, db
 from anyway.helpers import get_kwargs, involved_data_refinement, vehicles_data_refinement, \
     parse_data, get_json_object, log_bad_request, post_handler, string2timestamp, \
@@ -112,40 +113,8 @@ app.add_url_rule('/schools-report', endpoint=None, view_func=schools_report, met
 
 app.add_url_rule("/markers", endpoint=None, view_func=markers, methods=["GET"])
 
-
-@app.route("/api/news-flash", methods=["GET"])
-@user_optional
-def news_flash():
-    logging.debug('getting news flash')
-    news_flash_id = request.values.get('id')
-    if news_flash_id is not None:
-        news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == news_flash_id).first()
-        if news_flash_obj is not None:
-            return Response(json.dumps(news_flash_obj.serialize(), default=str), mimetype="application/json")
-        return Response(status=404)
-
-    # Todo - add start and end time for the news flashes
-    news_flashes = db.session.query(NewsFlash).filter(
-        and_(NewsFlash.accident == True, not_(and_(NewsFlash.lat == 0, NewsFlash.lon == 0)),
-             not_(and_(NewsFlash.lat == None, NewsFlash.lon == None)))).with_entities(NewsFlash.id,
-                                                                                      NewsFlash.lat,
-                                                                                      NewsFlash.lon,
-                                                                                      NewsFlash.title, NewsFlash.source,
-                                                                                      NewsFlash.date).order_by(
-        NewsFlash.date.desc()).all()
-    news_flashes = [{"id": x.id, "lat": x.lat, "lon": x.lon, "title": x.title, "source": x.source, "date": x.date} for x
-                    in news_flashes]
-    return Response(json.dumps(news_flashes, default=str), mimetype="application/json")
-
-
-@app.route("/api/news-flash/<int:news_flash_id>", methods=["GET"])
-@user_optional
-def single_news_flash(news_flash_id):
-    news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == news_flash_id).first()
-    if news_flash_obj is not None:
-        return Response(json.dumps(news_flash_obj.serialize(), default=str), mimetype="application/json")
-    return Response(status=404)
-
+app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
+app.add_url_rule("/api/news-flash/<int:news_flash_id>", endpoint=None, view_func=single_news_flash, methods=["GET"])
 
 app.add_url_rule("/api/schools", endpoint=None, view_func=schools_api, methods=["GET"])
 app.add_url_rule("/api/schools-description", endpoint=None, view_func=schools_description_api, methods=["GET"])

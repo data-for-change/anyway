@@ -87,6 +87,8 @@ import shutil
 import zipfile
 import traceback
 
+global_cbs_dictionary = {}
+
 failed_dirs = OrderedDict()
 
 CONTENT_ENCODING = 'cp1255'

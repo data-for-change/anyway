@@ -41,6 +41,7 @@ from anyway.app_views.schools.api import schools_api, schools_description_api, s
     injured_around_schools_api, injured_around_schools_sex_graphs_data_api, \
     injured_around_schools_months_graphs_data_api
 from anyway.app_views.schools.base import schools, schools_report
+from anyway.parsers.cbs import global_cbs_dictionary
 from . import utilities
 from .base import user_optional
 from .clusters_calculator import retrieve_clusters
@@ -650,12 +651,9 @@ admin.add_view(ViewHighlightedMarkersData(name='View Highlighted Markers Data', 
 admin.add_view(ViewHighlightedMarkersMap(name='View Highlighted Markers Map', endpoint='ViewHighlightedMarkersMap',
                                          category='View Highlighted Markers'))
 
-cbs_dictionary = {}
-
 
 @app.before_first_request
 def read_dictionaries():
-    global cbs_dictionary
     for directory in sorted(glob.glob("{0}/{1}/*/*".format(app.static_folder, 'data/cbs')), reverse=True):
         main_dict = dict(get_dict_file(directory))
         if len(main_dict) == 0:
@@ -663,9 +661,9 @@ def read_dictionaries():
         if len(main_dict) == 1:
             for _, df in main_dict['Dictionary'].iterrows():
                 if type(df[DICTCOLUMN3]) is not (int or float):
-                    cbs_dictionary[(int(df[DICTCOLUMN1]), int(df[DICTCOLUMN2]))] = df[DICTCOLUMN3]
+                    global_cbs_dictionary[(int(df[DICTCOLUMN1]), int(df[DICTCOLUMN2]))] = df[DICTCOLUMN3]
                 else:
-                    cbs_dictionary[(int(df[DICTCOLUMN1]), int(df[DICTCOLUMN2]))] = int(df[DICTCOLUMN3])
+                    global_cbs_dictionary[(int(df[DICTCOLUMN1]), int(df[DICTCOLUMN2]))] = int(df[DICTCOLUMN3])
             return
 
 

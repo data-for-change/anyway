@@ -6,7 +6,7 @@ from sqlalchemy import and_
 
 from anyway.base import user_optional, db
 from anyway.constants import CONST
-from anyway.flask_app import cbs_dictionary
+from anyway.parsers.cbs import global_cbs_dictionary as cbs_dictionary
 from anyway.helpers import get_kwargs, generate_csv, generate_json, get_involved_dict, get_vehicle_dict
 from anyway.models import AccidentMarker, DiscussionMarker, Involved, Vehicle
 

@@ -34,11 +34,11 @@ from anyway.base import app, db
 from anyway.helpers import get_kwargs, involved_data_refinement, vehicles_data_refinement, \
     parse_data, get_json_object, log_bad_request, post_handler, string2timestamp, \
     year2timestamp, PreferenceObject, get_dict_file
-from anyway.views.markers.api import markers, marker, marker_all
-from anyway.views.schools.api import schools_api, schools_description_api, schools_yishuvs_api, schools_names_api, \
+from anyway.app_views.markers.api import markers, marker, marker_all
+from anyway.app_views.schools.api import schools_api, schools_description_api, schools_yishuvs_api, schools_names_api, \
     injured_around_schools_api, injured_around_schools_sex_graphs_data_api, \
     injured_around_schools_months_graphs_data_api
-from anyway.views.schools.base import schools, schools_report
+from anyway.app_views.schools.base import schools, schools_report
 from . import utilities
 from .base import user_optional
 from .clusters_calculator import retrieve_clusters

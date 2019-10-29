@@ -30,6 +30,7 @@ from webassets.ext.jinja2 import AssetsExtension
 from werkzeug.security import check_password_hash
 from wtforms import form, fields, validators, StringField, PasswordField, Form
 
+from anyway.app_views.clusters.api import clusters
 from anyway.app_views.news_flash.api import news_flash, single_news_flash
 from anyway.app import app, db
 from anyway.helpers import get_kwargs, involved_data_refinement, vehicles_data_refinement, \
@@ -173,14 +174,7 @@ def discussion():
         return make_response(post_handler(marker))
 
 
-@app.route("/clusters", methods=["GET"])
-def clusters():
-    # start_time = time.time()
-    kwargs = get_kwargs()
-    results = retrieve_clusters(**kwargs)
-
-    # logging.debug('calculating clusters took %f seconds' % (time.time() - start_time))
-    return Response(json.dumps({'clusters': results}), mimetype="application/json")
+app.add_url_rule("/clusters", endpoint=None, view_func=clusters, methods=["GET"])
 
 
 @app.route("/highlightpoints", methods=['POST'])

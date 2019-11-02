@@ -460,6 +460,7 @@ class Views(object):
     markers_hebrew.km,
     markers_hebrew.km_raw,
     markers_hebrew.km_accurate,
+    markers_hebrew.road_segments_name,
     markers_hebrew.yishuv_symbol as accident_yishuv_symbol,
     markers_hebrew.yishuv_name as accident_yishuv_name,
     markers_hebrew.geo_area,

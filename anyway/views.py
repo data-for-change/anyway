@@ -57,6 +57,7 @@ class Views(object):
                                     markers.km,
                                     markers.km_raw,
                                     markers.km_accurate,
+                                    road_segments.to_name road_segments_name,
                                     markers.yishuv_symbol,
                                     markers.yishuv_name,
                                     markers.geo_area,
@@ -99,6 +100,7 @@ class Views(object):
                                     markers.x,
                                     markers.y
                                    FROM markers
+                                     LEFT JOIN road_segments on (markers.road1 = road_segments.road) and (markers.km between road_segments.from_km and road_segments.to_km)
                                      LEFT JOIN accident_type ON markers.accident_type = accident_type.id AND markers.accident_year = accident_type.year AND markers.provider_code = accident_type.provider_code
                                      LEFT JOIN accident_severity ON markers.accident_severity = accident_severity.id AND markers.accident_year = accident_severity.year AND markers.provider_code = accident_severity.provider_code
                                      LEFT JOIN location_accuracy ON markers.location_accuracy = location_accuracy.id AND markers.accident_year = location_accuracy.year AND markers.provider_code = location_accuracy.provider_code
@@ -342,6 +344,7 @@ class Views(object):
     markers_hebrew.km,
     markers_hebrew.km_raw,
     markers_hebrew.km_accurate,
+    markers_hebrew.road_segments_name,
     markers_hebrew.yishuv_symbol as accident_yishuv_symbol,
     markers_hebrew.yishuv_name as accident_yishuv_name,
     markers_hebrew.geo_area,

@@ -100,7 +100,7 @@ class Views(object):
                                     markers.x,
                                     markers.y
                                    FROM markers
-                                     LEFT JOIN road_segments on (markers.road1 = road_segments.road) and (markers.km between road_segments.from_km and road_segments.to_km)
+                                     LEFT JOIN road_segments on (markers.road1 = road_segments.road) and (markers.km / 10 between road_segments.from_km and road_segments.to_km)
                                      LEFT JOIN accident_type ON markers.accident_type = accident_type.id AND markers.accident_year = accident_type.year AND markers.provider_code = accident_type.provider_code
                                      LEFT JOIN accident_severity ON markers.accident_severity = accident_severity.id AND markers.accident_year = accident_severity.year AND markers.provider_code = accident_severity.provider_code
                                      LEFT JOIN location_accuracy ON markers.location_accuracy = location_accuracy.id AND markers.accident_year = location_accuracy.year AND markers.provider_code = location_accuracy.provider_code

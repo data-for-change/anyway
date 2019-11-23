@@ -628,20 +628,24 @@ def process_nonurban(text, roads):
 def get_db_matching_location_of_text(text, geo_location_dict=None):
     text = preprocess_text(text, True)
     if is_urban(text, geo_location_dict=geo_location_dict):
-        streets = pd.read_excel('../news_flash/streets.xlsx', sheet_name='Sheet1')
-        cities = pd.read_excel('../news_flash/cities.xlsx', sheet_name='Sheet1').city.tolist()
+        streets = pd.read_excel(r"C:\Users\sagiv\Desktop\projects\Anyway\anyway\anyway\parsers\mda_twitter\streets.xlsx")
+        cities = pd.read_excel(r'C:\Users\sagiv\Desktop\projects\Anyway\anyway\anyway\parsers\mda_twitter\cities.xlsx', sheet_name='Sheet1').city.tolist()
         if geo_location_dict is not None:
             street1 = geo_location_dict['street']
             street2 = ''
             if geo_location_dict['intersection'] != '':
-                street1 = geo_location_dict['intersection'].split('&')[0].strip()
-                street2 = geo_location_dict['intersection'].split('&')[1].strip()
+                if len(geo_location_dict['intersection'].split('&')) > 1:
+                    street1 = geo_location_dict['intersection'].split('&')[0].strip()
+                    street2 = geo_location_dict['intersection'].split('&')[1].strip()
+                else:
+                    street1 = geo_location_dict['intersection'].split('&')[0].strip()
+                    street2 = ''
             return process_urban_with_geo_dict(text, streets, cities,
                                                city=geo_location_dict['city'],
                                                street1=street1, street2=street2)
         return process_urban(text, streets, cities)
     else:
-        roads = pd.read_excel('../news_flash/roads.xlsx', sheet_name='Sheet1')
+        roads = pd.read_excel(r'C:\Users\sagiv\Desktop\projects\Anyway\anyway\anyway\parsers\mda_twitter\roads.xlsx', sheet_name='Sheet1')
         return process_nonurban(text, roads)
 
 

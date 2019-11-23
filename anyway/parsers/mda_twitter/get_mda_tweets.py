@@ -74,7 +74,8 @@ def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret,
     api = tweepy.API(auth)
     # list that hold all tweets
     all_tweets = []
-    new_tweets = api.user_timeline(screen_name=screen_name, count=800, since_id=latest_tweet_id, tweet_mode='extended')
+    # new_tweets = api.user_timeline(screen_name=screen_name, count=800, since_id=latest_tweet_id, tweet_mode='extended')
+    new_tweets = api.user_timeline(screen_name=screen_name, count=800, tweet_mode='extended')
     all_tweets.extend(new_tweets)
     
     mda_tweets = [[tweet.id_str, tweet.created_at, tweet.full_text] for tweet in all_tweets]
@@ -103,7 +104,11 @@ def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret,
     tweets_df['road1'] = tweets_df['location'].apply(extract_road_number)
     tweets_df['road2'] = ['' for _ in range(len(tweets_df))]
 
+    tweets_df['location_db'] = tweets_df.apply(lambda row: get_db_matching_location_of_text(row['location'], row['google_location']), axis=1)
+
     tweets_df.rename({'tweet_text': 'title', 'lng': 'lon', 'tweet_id': 'id'}, axis=1, inplace=True)
 
     tweets_df.drop(['google_location', 'accident_date', 'accident_time', 'tweet_ts', 'road_no', 'address', 'district'], axis=1, inplace=True)
     return tweets_df
+
+

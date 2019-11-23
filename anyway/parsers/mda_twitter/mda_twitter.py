@@ -1,13 +1,13 @@
 from get_mda_tweets import get_user_tweets
-from anyway.utilities import init_flask
-from flask_sqlalchemy import SQLAlchemy
+# from anyway.utilities import init_flask
+# from flask_sqlalchemy import SQLAlchemy
 
-app = init_flask()
-db = SQLAlchemy(app)
+# app = init_flask()
+# db = SQLAlchemy(app)
 
-def get_latest_tweet_id_from_db():
-    tweet_id = db.session.execute('SELECT id FROM news_flash where source=\'twitter\' ORDER BY date DESC LIMIT 1').fetchone()
-    return tweet_id[0]
+# def get_latest_tweet_id_from_db():
+#     tweet_id = db.session.execute('SELECT id FROM news_flash where source=\'twitter\' ORDER BY date DESC LIMIT 1').fetchone()
+#     return tweet_id[0]
 
 
 if __name__ == "__main__":
@@ -20,6 +20,8 @@ if __name__ == "__main__":
 
     GOOGLE_MAPS_API_KEY = 'AIzaSyABPdbNQeWHizVpNptlIyHVsjCsj6BO1bM'
 
-    latest_tweet_id = get_latest_tweet_id_from_db()
+    # latest_tweet_id = get_latest_tweet_id_from_db()
 
-    mda_tweets = get_user_tweets(twitter_user, latest_tweet_id, CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET, GOOGLE_MAPS_API_KEY)
+    # mda_tweets = get_user_tweets(twitter_user, latest_tweet_id, CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET, GOOGLE_MAPS_API_KEY)
+    mda_tweets = get_user_tweets(twitter_user, 'test', CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET, GOOGLE_MAPS_API_KEY)
+    mda_tweets.to_excel('test.xlsx')

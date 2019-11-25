@@ -40,7 +40,9 @@ from .oauth import OAuthSignIn
 from .base import user_optional
 from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved, User, ReportPreferences,
                      LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School, SchoolWithDescription,
-                     InjuredAroundSchool, InjuredAroundSchoolAllData, Sex, AccidentMonth, InjurySeverity, ReportProblem)
+                     InjuredAroundSchool, InjuredAroundSchoolAllData, Sex, AccidentMonth, InjurySeverity, ReportProblem,
+                     EngineVolume, PopulationType, Region, District, NaturalArea, MunicipalStatus, YishuvShape,
+                     TotalWeight, DrivingDirections, AgeGroup)
 from .config import ENTRIES_PER_PAGE
 from six.moves import http_client
 from sqlalchemy import func
@@ -556,25 +558,91 @@ def charts_data():
 
 
 def vehicles_data_refinement(vehicle):
-    vehicle["engine_volume"] = cbs_dictionary.get((111, vehicle["engine_volume"]))
-    vehicle["total_weight"] = cbs_dictionary.get((112, vehicle["total_weight"]))
-    vehicle["driving_directions"] = cbs_dictionary.get((28, vehicle["driving_directions"]))
+    provider_code = vehicle["provider_code"]
+    accident_year = vehicle["accident_year"]
+    new_vehicle = get_vehicle_dict(provider_code, accident_year)
+
+    vehicle["engine_volume"] = new_vehicle["engine_volume"]
+    vehicle["total_weight"] = new_vehicle["total_weight"]
+    vehicle["driving_directions"] = new_vehicle["driving_directions"]
+
     return vehicle
 
 
 def involved_data_refinement(involved):
-    involved["age_group"] = cbs_dictionary.get((92, involved["age_group"]))
-    involved["population_type"] = cbs_dictionary.get((66, involved["population_type"]))
-    involved["home_region"] = cbs_dictionary.get((77, involved["home_region"]))
-    involved["home_district"] = cbs_dictionary.get((79, involved["home_district"]))
-    involved["home_natural_area"] = cbs_dictionary.get((80, involved["home_natural_area"]))
-    involved["home_municipal_status"] = cbs_dictionary.get((78, involved["home_municipal_status"]))
-    involved["home_yishuv_shape"] = cbs_dictionary.get((81, involved["home_yishuv_shape"]))
+    provider_code = involved["provider_code"]
+    accident_year = involved["accident_year"]
+    new_involved = get_involved_dict(provider_code, accident_year)
+
+    involved["age_group"] = new_involved["age_group"]
+    involved["population_type"] = new_involved["population_type"]
+    involved["home_region"] = new_involved["home_region"]
+    involved["home_district"] = new_involved["home_district"]
+    involved["home_natural_area"] = new_involved["home_natural_area"]
+    involved["home_municipal_status"] = new_involved["home_municipal_status"]
+    involved["home_yishuv_shape"] = new_involved["home_yishuv_shape"]
+
     return involved
+
+
+def get_involved_dict(provider_code, accident_year):
+    involved = {}
+    age_group = db.session.query(AgeGroup).filter(and_(AgeGroup.provider_code == provider_code,
+                                                       AgeGroup.year == accident_year)).first()
+    involved["age_group"] = age_group.age_group_hebrew if age_group else None
+
+    population_type = db.session.query(PopulationType).filter(and_(PopulationType.provider_code == provider_code,
+                                                                   PopulationType.year == accident_year)).first()
+
+    involved["population_type"] = population_type.population_type_hebrew if population_type else None
+
+    home_region = db.session.query(Region).filter(and_(Region.provider_code == provider_code,
+                                                       Region.year == accident_year)).first()
+    involved["home_region"] = home_region.region_hebrew if home_region else None
+
+    home_district = db.session.query(District).filter(and_(District.provider_code == provider_code,
+                                                           District.year == accident_year)).first()
+    involved["home_district"] = home_district.district_hebrew if home_district else None
+
+    home_natural_area = db.session.query(NaturalArea).filter(and_(NaturalArea.provider_code == provider_code,
+                                                                  NaturalArea.year == accident_year)).first()
+    involved["home_natural_area"] = home_natural_area.natural_area_hebrew if home_natural_area else None
+
+    home_municipal_status = db.session.query(MunicipalStatus).filter(
+        and_(MunicipalStatus.provider_code == provider_code,
+             MunicipalStatus.year == accident_year)).first()
+    involved[
+        "home_municipal_status"] = home_municipal_status.municipal_status_hebrew if home_municipal_status else None
+
+    home_yishuv_shape = db.session.query(YishuvShape).filter(and_(YishuvShape.provider_code == provider_code,
+                                                                  YishuvShape.year == accident_year)).first()
+    involved["home_yishuv_shape"] = home_yishuv_shape.yishuv_shape_hebrew if home_yishuv_shape else None
+
+    return involved
+
+
+def get_vehicle_dict(provider_code, accident_year):
+    vehicle = {}
+    engine_volume = db.session.query(EngineVolume) \
+        .filter(and_(EngineVolume.provider_code == provider_code, EngineVolume.year == accident_year)) \
+        .first()
+    vehicle["engine_volume"] = engine_volume.engine_volume_hebrew if engine_volume else None
+
+    total_weight = db.session.query(TotalWeight) \
+        .filter(and_(TotalWeight.provider_code == provider_code, TotalWeight.year == accident_year)) \
+        .first()
+    vehicle["total_weight"] = total_weight.total_weight_hebrew if engine_volume else None
+
+    driving_directions = db.session.query(DrivingDirections) \
+        .filter(and_(DrivingDirections.provider_code == provider_code, DrivingDirections.year == accident_year)) \
+        .first()
+    vehicle["driving_directions"] = driving_directions.driving_directions_hebrew if engine_volume else None
+
+    return vehicle
+
 
 @app.route("/markers/<int:marker_id>", methods=["GET"])
 def marker(marker_id):
-
     involved = db.session.query(Involved).filter(Involved.accident_id == marker_id)
 
     vehicles = db.session.query(Vehicle).filter(Vehicle.accident_id == marker_id)
@@ -599,6 +667,7 @@ def marker(marker_id):
         list_to_return.append(obj)
     return make_response(json.dumps(list_to_return, ensure_ascii=False))
 
+
 @app.route("/markers/all", methods=["GET"])
 def marker_all():
     marker_id = request.args.get('marker_id', None)
@@ -616,20 +685,24 @@ def marker_all():
     list_to_return = list()
     for inv in involved:
         obj = inv.serialize()
-        obj["age_group"] = cbs_dictionary.get((92, obj["age_group"]))
-        obj["population_type"] = cbs_dictionary.get((66, obj["population_type"]))
-        obj["home_region"] = cbs_dictionary.get((77, obj["home_region"]))
-        obj["home_district"] = cbs_dictionary.get((79, obj["home_district"]))
-        obj["home_natural_area"] = cbs_dictionary.get((80, obj["home_natural_area"]))
-        obj["home_municipal_status"] = cbs_dictionary.get((78, obj["home_municipal_status"]))
-        obj["home_yishuv_shape"] = cbs_dictionary.get((81, obj["home_yishuv_shape"]))
+        new_inv = get_involved_dict(provider_code, accident_year)
+        obj["age_group"] = new_inv["age_group"]
+        obj["population_type"] = new_inv["population_type"]
+        obj["home_region"] = new_inv["home_region"]
+        obj["home_district"] = new_inv["home_district"]
+        obj["home_natural_area"] = new_inv["home_natural_area"]
+        obj["home_municipal_status"] = new_inv["home_municipal_status"]
+        obj["home_yishuv_shape"] = new_inv["home_yishuv_shape"]
+
         list_to_return.append(obj)
 
     for veh in vehicles:
         obj = veh.serialize()
-        obj["engine_volume"] = cbs_dictionary.get((111, obj["engine_volume"]))
-        obj["total_weight"] = cbs_dictionary.get((112, obj["total_weight"]))
-        obj["driving_directions"] = cbs_dictionary.get((28, obj["driving_directions"]))
+        new_veh = get_vehicle_dict(provider_code, accident_year)
+        obj["engine_volume"] = new_veh["engine_volume"]
+        obj["total_weight"] = new_veh["total_weight"]
+        obj["driving_directions"] = new_veh["driving_directions"]
+
         list_to_return.append(obj)
     return make_response(json.dumps(list_to_return, ensure_ascii=False))
 

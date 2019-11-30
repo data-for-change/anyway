@@ -59,6 +59,21 @@ def extract_road_number(location):
         return int(road_search.group(1))
     return None
 
+def set_accident_resolution(accident_row):
+    if accident_row['intersection'] != '' and accident_row['road_no'] != '':
+        return 'צומת בינעירוני'
+    elif accident_row['intersection'] != '':
+        return 'צומת עירוני'
+    elif accident_row['road_no'] != '':
+        return 'כביש בינעירוני'
+    elif accident_row['street'] != '':
+        return 'רחוב'
+    elif accident_row['city'] != '':
+        return 'עיר'
+    elif accident_row['district'] != '':
+        return 'מחוז'
+    else:
+        return 'אחר'
 
 def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret, access_key, access_secret, google_maps_key):
     """
@@ -104,11 +119,13 @@ def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret,
     tweets_df['road1'] = tweets_df['location'].apply(extract_road_number)
     tweets_df['road2'] = ['' for _ in range(len(tweets_df))]
 
-    tweets_df['location_db'] = tweets_df.apply(lambda row: get_db_matching_location_of_text(row['location'], row['google_location']), axis=1)
+    tweets_df['resolution'] = tweets_df.apply(lambda row: set_accident_resolution(row), axis=1)
+
+    # tweets_df['location_db'] = tweets_df.apply(lambda row: get_db_matching_location_of_text(row['location'], row['google_location']), axis=1)
 
     tweets_df.rename({'tweet_text': 'title', 'lng': 'lon', 'tweet_id': 'id'}, axis=1, inplace=True)
 
-    tweets_df.drop(['google_location', 'accident_date', 'accident_time', 'tweet_ts', 'road_no', 'address', 'district'], axis=1, inplace=True)
+    tweets_df.drop(['google_location', 'accident_date', 'accident_time', 'tweet_ts'], axis=1, inplace=True)
     return tweets_df
 
 

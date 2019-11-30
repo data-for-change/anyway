@@ -100,6 +100,22 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
 
     return df
 
+def acc_in_area_query(pol_str, start_date, end_date):
+    # pol_str will be received in the following format: 'POLYGON(({lon} {lat},{lon} {lat},........,{lonN},{latN}))'
+    # please note that start point and end point must be equal: i.e. lon=lonN, lat=latN
+
+    query_obj = db.session.query(AccidentMarker) \
+        .filter(AccidentMarker.geom.intersects(pol_str)) \
+        .filter(or_((AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_1_CODE),
+                  (AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_3_CODE))) \
+        .filter(AccidentMarker.created >= start_date) \
+        .filter(AccidentMarker.created < end_date) \
+        .filter(AccidentMarker.location_accuracy == LOCATION_ACCURACY_PRECISE_INT) \
+        .filter(AccidentMarker.yishuv_symbol != YISHUV_SYMBOL_NOT_EXIST)
+
+    df = pd.read_sql_query(query_obj.with_labels().statement, query_obj.session.bind)
+    return df
+
 
 def main(start_date, end_date, distance, output_path):
     schools_query = sa.select([School])

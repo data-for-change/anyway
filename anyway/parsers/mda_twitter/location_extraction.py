@@ -435,8 +435,11 @@ def process_urban_with_geo_dict(text, streets, cities, threshold_city=70,
         result_city = []
         for street in [street1, street2]:
             if street != '':
-                suspected_streets = process.extract(street, list(set(relevant_streets.street.dropna().tolist())),
+                try:
+                    suspected_streets = process.extract(street, list(set(relevant_streets.street.dropna().tolist())),
                                                     scorer=fuzz.token_set_ratio, limit=3)
+                except:
+                    return UrbanAddress(city=city)
                 if len(suspected_streets) > 0:
                     relevant_streets_scores = relevant_streets.loc[
                         relevant_streets.street.isin(
@@ -594,7 +597,14 @@ def process_intersections_both_roads(text, roads, roads_candidates, threshold=50
 
 def is_urban(text, geo_location_dict=None):
     if geo_location_dict is not None:
-        return geo_location_dict['road_no'] == ''
+        if  geo_location_dict['road_no'] == '':
+            # check if any of geo_location_dict values contains a road mention
+            road_examples = ['כביש ' + str(digit) for digit in range(10)]
+            for key, value in geo_location_dict.items():
+                if value in road_examples:
+                    return True
+        else:
+            return False
     road_examples = ['כביש ' + str(digit) for digit in range(10)]
     return not any(road_example in text for road_example in road_examples)
 

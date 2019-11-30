@@ -3,8 +3,8 @@ import re
 import datetime
 import tweepy
 
-from geocode_extraction import geocode_extract
-from location_extraction import manual_filter_location_of_text, get_db_matching_location_of_text, NonUrbanAddress, UrbanAddress
+from .geocode_extraction import geocode_extract
+from .location_extraction import manual_filter_location_of_text, get_db_matching_location_of_text, NonUrbanAddress, UrbanAddress
 
 
 def extract_accident_time(text):
@@ -18,7 +18,8 @@ def extract_accident_time(text):
     if time_search:
         return time_search.group(1)
     return None
-    
+
+
 def classify_tweets(text):
     """
     classify tweets for tweets about car accidents and others
@@ -29,7 +30,7 @@ def classify_tweets(text):
         ((u'הולך רגל' in text or u'הולכת רגל' in text or u'נהג' in text or u'אדם' in text) and \
             (u'רכב' in text or u'מכונית' in text or u'אופנוע' in text or u"ג'יפ" in text or u'טרקטור' in text or u'משאית' in text or \
                  u'אופניים' in text or u'קורקינט' in text)):
-            return True
+        return True
     return False
 
 
@@ -59,7 +60,13 @@ def extract_road_number(location):
         return int(road_search.group(1))
     return None
 
+
 def set_accident_resolution(accident_row):
+    """
+    set the resolution of the accident
+    :param text: single tweet of an accident
+    :return: resolution option
+    """
     if accident_row['intersection'] != '' and accident_row['road_no'] != '':
         return 'צומת בינעירוני'
     elif accident_row['intersection'] != '':
@@ -74,6 +81,7 @@ def set_accident_resolution(accident_row):
         return 'מחוז'
     else:
         return 'אחר'
+
 
 def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret, access_key, access_secret, google_maps_key):
     """
@@ -92,7 +100,7 @@ def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret,
     # new_tweets = api.user_timeline(screen_name=screen_name, count=800, since_id=latest_tweet_id, tweet_mode='extended')
     new_tweets = api.user_timeline(screen_name=screen_name, count=800, tweet_mode='extended')
     all_tweets.extend(new_tweets)
-    
+
     mda_tweets = [[tweet.id_str, tweet.created_at, tweet.full_text] for tweet in all_tweets]
     tweets_df = pd.DataFrame(mda_tweets, columns=['tweet_id', 'tweet_ts', 'tweet_text'])
     tweets_df['accident'] = tweets_df['tweet_text'].apply(classify_tweets)
@@ -115,7 +123,7 @@ def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret,
     # expanding google maps dict results to seperate columns
     tweets_df = pd.concat([tweets_df, tweets_df['google_location'].apply(pd.Series)], axis=1)
     tweets_df = pd.concat([tweets_df.drop(['geom'], axis=1), tweets_df['geom'].apply(pd.Series)], axis=1)
-    
+
     tweets_df['road1'] = tweets_df['location'].apply(extract_road_number)
     tweets_df['road2'] = ['' for _ in range(len(tweets_df))]
 

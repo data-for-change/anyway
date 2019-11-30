@@ -1,4 +1,4 @@
-from get_mda_tweets import get_user_tweets
+from .get_mda_tweets import get_user_tweets
 # from anyway.utilities import init_flask
 # from flask_sqlalchemy import SQLAlchemy
 

@@ -100,6 +100,7 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
 
     return df
 
+
 def main(start_date, end_date, distance, output_path):
     schools_query = sa.select([School])
     df_schools = pd.read_sql_query(schools_query, db.session.bind)

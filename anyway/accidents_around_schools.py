@@ -109,9 +109,7 @@ def acc_in_area_query(pol_str, start_date, end_date):
         .filter(or_((AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_1_CODE),
                   (AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_3_CODE))) \
         .filter(AccidentMarker.created >= start_date) \
-        .filter(AccidentMarker.created < end_date) \
-        .filter(AccidentMarker.location_accuracy == LOCATION_ACCURACY_PRECISE_INT) \
-        .filter(AccidentMarker.yishuv_symbol != YISHUV_SYMBOL_NOT_EXIST)
+        .filter(AccidentMarker.created < end_date)
 
     df = pd.read_sql_query(query_obj.with_labels().statement, query_obj.session.bind)
     return df

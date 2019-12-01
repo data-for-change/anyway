@@ -6,6 +6,7 @@ from six import StringIO, iteritems
 import six
 import time
 
+
 import jinja2
 from flask import make_response, render_template, Response, jsonify, url_for, flash, abort
 from flask_assets import Environment
@@ -1311,9 +1312,13 @@ def get_dict_file(directory):
         yield name, df
 
 
-def acc_in_area_query(pol_str, start_date, end_date):
+@app.route("/markers/polygon/", methods=["GET"])
+def acc_in_area_query():
     # pol_str will be received in the following format: 'POLYGON(({lon} {lat},{lon} {lat},........,{lonN},{latN}))'
     # please note that start point and end point must be equal: i.e. lon=lonN, lat=latN
+    pol_str = request.values.get('polygon', "")
+    start_date = utilities.valid_date(request.values.get('start_date', '01-01-2013'))
+    end_date = utilities.valid_date(request.values.get('end_date', '31-12-2017'))
 
     query_obj = db.session.query(AccidentMarker) \
         .filter(AccidentMarker.geom.intersects(pol_str)) \
@@ -1323,7 +1328,11 @@ def acc_in_area_query(pol_str, start_date, end_date):
         .filter(AccidentMarker.created < end_date)
 
     df = pd.read_sql_query(query_obj.with_labels().statement, query_obj.session.bind)
-    return df
+    markers_in_area_list = df.to_dict(orient='records')
+    response = Response(json.dumps(markers_in_area_list, default=str), mimetype="application/json")
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
 
 
 class ExtendedLoginForm(LoginForm):

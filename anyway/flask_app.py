@@ -220,6 +220,16 @@ def markers():
         return generate_json(accident_markers, rsa_markers, discussions, is_thin, total_records=result.total_records)
 
 
+@app.route("/markers_by_yishuv_symbol", methods=["GET"])
+@user_optional
+def markers_by_yishuv_symbol():
+    logging.debug('getting markers by yishuv symbol')
+    yishuv_symbol = request.values.get('yishuv_symbol')
+    markers = db.session.query(AccidentMarker).filter(AccidentMarker.yishuv_symbol == yishuv_symbol).all()
+    entries = [marker.serialize(True) for marker in markers]
+    return jsonify({"markers": entries})
+
+
 @app.route("/api/news-flash", methods=["GET"])
 @user_optional
 def news_flash():

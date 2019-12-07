@@ -14,7 +14,7 @@ from webassets import Environment as AssetsEnvironment
 from flask_babel import Babel, gettext
 from .clusters_calculator import retrieve_clusters
 from sqlalchemy.orm import load_only
-from sqlalchemy import and_, not_, or_
+from sqlalchemy import and_, not_, or_, func
 from flask import request, redirect, session
 import logging
 import datetime
@@ -38,7 +38,7 @@ from flask_compress import Compress
 from .oauth import OAuthSignIn
 
 from .base import user_optional
-from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved, User, ReportPreferences,
+from .models import (AccidentMarker, AccidentMarkerView, DiscussionMarker, HighlightPoint, Involved, User, ReportPreferences,
                      LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School, SchoolWithDescription,
                      InjuredAroundSchool, InjuredAroundSchoolAllData, Sex, AccidentMonth, InjurySeverity, ReportProblem,
                      EngineVolume, PopulationType, Region, District, NaturalArea, MunicipalStatus, YishuvShape,
@@ -252,7 +252,6 @@ def single_news_flash(news_flash_id):
     if news_flash_obj is not None:
         return Response(json.dumps(news_flash_obj.serialize(), default=str), mimetype="application/json")
     return Response(status=404)
-
 
 @app.route("/api/schools", methods=["GET"])
 @user_optional
@@ -1407,3 +1406,22 @@ def oauth_callback(provider):
             db.session.commit()
     login.login_user(user, True)
     return redirect(url_for('index'))
+
+@app.route('/api/accidents_in_city_by_year_severity', methods=['GET'])
+def get_accidents_in_city_by_year_severity():
+    yishuv_symbol = request.values.get('yishuv_symbol')
+    results = db.session.query(
+                AccidentMarkerView.accident_year, 
+                AccidentMarkerView.accident_severity_hebrew, 
+                func.count(AccidentMarkerView.accident_year)
+            ).filter(
+                AccidentMarkerView.yishuv_symbol==yishuv_symbol,
+                or_(AccidentMarkerView.accident_type==1, AccidentMarkerView.accident_type==3)
+            ).group_by(
+                AccidentMarkerView.accident_year,
+                AccidentMarkerView.accident_severity_hebrew
+            ).order_by(
+                AccidentMarkerView.accident_year,
+                AccidentMarkerView.accident_severity_hebrew
+            ).all()
+    return Response(json.dumps(results, default=str), mimetype="application/json")

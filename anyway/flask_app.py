@@ -1411,8 +1411,8 @@ def oauth_callback(provider):
 def get_accidents_in_city_by_year_severity():
     yishuv_symbol = request.values.get('yishuv_symbol')
     results = db.session.query(
-                AccidentMarkerView.accident_year, 
-                AccidentMarkerView.accident_severity_hebrew, 
+                AccidentMarkerView.accident_year,
+                AccidentMarkerView.accident_severity_hebrew,
                 func.count(AccidentMarkerView.accident_year)
             ).filter(
                 AccidentMarkerView.yishuv_symbol==yishuv_symbol,

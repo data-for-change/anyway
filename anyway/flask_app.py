@@ -1416,7 +1416,7 @@ def get_accidents_in_city_by_year_severity():
                 func.count(AccidentMarkerView.accident_year)
             ).filter(
                 AccidentMarkerView.yishuv_symbol==yishuv_symbol,
-                or_(AccidentMarkerView.accident_type==1, AccidentMarkerView.accident_type==3)
+                or_(AccidentMarkerView.provider_code==1, AccidentMarkerView.provider_code==3)
             ).group_by(
                 AccidentMarkerView.accident_year,
                 AccidentMarkerView.accident_severity_hebrew

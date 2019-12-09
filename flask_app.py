@@ -1324,7 +1324,7 @@ def acc_in_area_query():
     start_date = request.values.get('start_date')
     end_date = request.values.get('end_date')
     if pol_str is None:
-        msg = "polygon parameter is mandatory and must be sent as part of request - http://{host:port}/markers/polygon?polygon=POLYGON(({lon} {" \
+        msg = "polygon parameter is mandatory and must be sent as part of the request - http://{host:port}/markers/polygon?polygon=POLYGON(({lon} {" \
               "lat},{lon} {lat},........,{lonN},{latN}))&start_date=<DD-MM-YYYY>&end_date=<DD-MM-YYYY> "
         raise abort(Response(msg))
     if start_date is not None:

@@ -47,7 +47,9 @@ def insert_new_flash_news(id_flash, title, link, date_parsed, author, descriptio
     :param source: source of the news flash
     """
     db.session.execute('INSERT INTO news_flash (id,title, link, date, author, description, location, lat, lon, '
-                       'road1, road2, intersection, city, street, accident, source) VALUES \
+                       'road1, road2, intersection, city, street, street2, resolution, geo_extracted_street, '
+                       'geo_extracted_road_no, geo_extracted_intersection, geo_extracted_city, '
+                       'geo_extracted_address, geo_extracted_district, accident, source) VALUES \
                        (:id, :title, :link, :date, :author, :description, :location, :lat, :lon, \
                        :road1, :road2, :intersection, :city, :street, :street2, :resolution, :geo_extracted_street,\
                        :geo_extracted_road_no, :geo_extracted_intersection, :geo_extracted_city, \

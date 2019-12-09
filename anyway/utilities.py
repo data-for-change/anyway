@@ -147,7 +147,7 @@ def valid_date(date_string):
     try:
         return datetime.strptime(date_string, DATE_INPUT_FORMAT)
     except ValueError:
-        msg = "Not a valid date: '{0}'.".format(date_string)
+        msg = "Not a valid date: '{0}'. Date should be in the format DD-MM-YYYY".format(date_string)
         raise argparse.ArgumentTypeError(msg)
 
 

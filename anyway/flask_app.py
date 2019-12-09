@@ -1314,23 +1314,25 @@ def get_dict_file(directory):
 
 @app.route("/markers/polygon/", methods=["GET"])
 def acc_in_area_query():
-    # pol_str will be received in the following format: 'POLYGON(({lon} {lat},{lon} {lat},........,{lonN},{latN}))'
-    # please note that start point and end point must be equal: i.e. lon=lonN, lat=latN
-    pol_str = request.values.get('polygon', "")
-    start_date = utilities.valid_date(request.values.get('start_date', '01-01-2013'))
-    end_date = utilities.valid_date(request.values.get('end_date', '31-12-2017'))
+    # polygon will be received in the following format: 'POLYGON(({lon} {lat},{lon} {lat},........,{lonN},
+    # {latN}))' please note that start point and end point must be equal: i.e. lon=lonN, lat=latN
+    # Request format: http://{server url}/markers/polygon?polygon=POLYGON(({lon} {lat},{lon} {lat},........,{lonN},
+    # {latN}))"
+
+    pol_str = request.values.get('polygon')
+    if pol_str is None:
+        msg = "polygon parameter is mandatory and must be sent as part of the request - http://{host:port}/markers/polygon?polygon=POLYGON(({lon} {" \
+              "lat},{lon} {lat},........,{lonN},{latN}))"
+        raise abort(Response(msg))
 
     query_obj = db.session.query(AccidentMarker) \
         .filter(AccidentMarker.geom.intersects(pol_str)) \
         .filter(or_((AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_1_CODE),
-               (AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_3_CODE))) \
-        .filter(AccidentMarker.created >= start_date) \
-        .filter(AccidentMarker.created < end_date)
+               (AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_3_CODE)))
 
     df = pd.read_sql_query(query_obj.with_labels().statement, query_obj.session.bind)
     markers_in_area_list = df.to_dict(orient='records')
     response = Response(json.dumps(markers_in_area_list, default=str), mimetype="application/json")
-    response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
 

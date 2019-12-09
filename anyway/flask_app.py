@@ -42,7 +42,7 @@ from .models import (AccidentMarker, AccidentMarkerView, DiscussionMarker, Highl
                      LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School, SchoolWithDescription,
                      InjuredAroundSchool, InjuredAroundSchoolAllData, Sex, AccidentMonth, InjurySeverity, ReportProblem,
                      EngineVolume, PopulationType, Region, District, NaturalArea, MunicipalStatus, YishuvShape,
-                     TotalWeight, DrivingDirections, AgeGroup)
+                     TotalWeight, DrivingDirections, AgeGroup, AccidentMarkerView)
 from .config import ENTRIES_PER_PAGE
 from six.moves import http_client
 from sqlalchemy import func
@@ -218,6 +218,26 @@ def markers():
 
     else:  # defaults to json
         return generate_json(accident_markers, rsa_markers, discussions, is_thin, total_records=result.total_records)
+
+
+@app.route("/markers_by_yishuv_symbol", methods=["GET"])
+@user_optional
+def markers_by_yishuv_symbol():
+    logging.debug('getting markers by yishuv symbol')
+    yishuv_symbol = request.values.get('yishuv_symbol')
+    markers = db.session.query(AccidentMarker).filter(AccidentMarker.yishuv_symbol == yishuv_symbol).all()
+    entries = [marker.serialize(True) for marker in markers]
+    return jsonify({"markers": entries})
+
+
+@app.route("/markers_hebrew_by_yishuv_symbol", methods=["GET"])
+@user_optional
+def markers_hebrew_by_yishuv_symbol():
+    logging.debug('getting hebrew markers by yishuv symbol')
+    yishuv_symbol = request.values.get('yishuv_symbol')
+    markers = db.session.query(AccidentMarkerView).filter(AccidentMarkerView.yishuv_symbol == yishuv_symbol).all()
+    entries = [marker.serialize() for marker in markers]
+    return Response(json.dumps(entries, default=str), mimetype="application/json")
 
 
 @app.route("/api/news-flash", methods=["GET"])

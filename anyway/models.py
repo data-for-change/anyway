@@ -671,6 +671,14 @@ class NewsFlash(Base):
     intersection = Column(Text(), nullable=True)
     city = Column(Text(), nullable=True)
     street = Column(Text(), nullable=True)
+    street2 = Column(Text(), nullable=True)
+    resolution = Column(Text(), nullable=True)
+    geo_extracted_street = Column(Text(), nullable=True)
+    geo_extracted_road_no = Column(Text(), nullable=True)
+    geo_extracted_intersection = Column(Text(), nullable=True)
+    geo_extracted_city = Column(Text(), nullable=True)
+    geo_extracted_address = Column(Text(), nullable=True)
+    geo_extracted_district = Column(Text(), nullable=True)
     title = Column(Text(), nullable=True)
     source = Column(Text(), nullable=True)
     location = Column(Text(), nullable=True)
@@ -690,6 +698,14 @@ class NewsFlash(Base):
             "intersection": self.intersection,
             "city": self.city,
             "street": self.street,
+            "street2": self.street2,
+            "resolution": self.resolution,
+            "geo_extracted_street": self.geo_extracted_street,
+            "geo_extracted_road_no": self.geo_extracted_road_no,
+            "geo_extracted_intersection": self.geo_extracted_intersection,
+            "geo_extracted_city": self.geo_extracted_city,
+            "geo_extracted_address": self.geo_extracted_address,
+            "geo_extracted_district": self.geo_extracted_district,
             "title": self.title,
             "source": self.source,
             "location": self.location
@@ -1552,6 +1568,101 @@ class AccidentMarkerView(Base):
     longitude = Column(Float())
     x = Column(Float())
     y = Column(Float())
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "provider_code": self.provider_code,
+            "provider_code_hebrew": self.provider_code_hebrew,
+            "accident_type": self.accident_type,
+            "accident_type_hebrew": self.accident_type_hebrew,
+            "accident_severity": self.accident_severity,
+            "accident_severity_hebrew": self.accident_severity_hebrew,
+            "location_accuracy": self.location_accuracy,
+            "location_accuracy_hebrew": self.location_accuracy_hebrew,
+            "road_type": self.road_type,
+            "road_type_hebrew": self.road_type_hebrew,
+            "road_shape": self.road_shape,
+            "road_shape_hebrew": self.road_shape_hebrew,
+            "day_type": self.day_type,
+            "day_type_hebrew": self.day_type_hebrew,
+            "police_unit": self.police_unit,
+            "police_unit_hebrew": self.police_unit_hebrew,
+            "one_lane": self.one_lane,
+            "one_lane_hebrew": self.one_lane_hebrew,
+            "multi_lane": self.multi_lane,
+            "multi_lane_hebrew": self.multi_lane_hebrew,
+            "speed_limit": self.speed_limit,
+            "speed_limit_hebrew": self.speed_limit_hebrew,
+            "road_intactness": self.road_intactness,
+            "road_intactness_hebrew": self.road_intactness_hebrew,
+            "road_width": self.road_width,
+            "road_width_hebrew": self.road_width_hebrew,
+            "road_sign": self.road_sign,
+            "road_sign_hebrew": self.road_sign_hebrew,
+            "road_light": self.road_light,
+            "road_light_hebrew": self.road_light_hebrew,
+            "road_control": self.road_control,
+            "road_control_hebrew": self.road_control_hebrew,
+            "weather": self.weather,
+            "weather_hebrew": self.weather_hebrew,
+            "road_surface": self.road_surface,
+            "road_surface_hebrew": self.road_surface_hebrew,
+            "road_object": self.road_object,
+            "road_object_hebrew": self.road_object_hebrew,
+            "object_distance": self.object_distance,
+            "object_distance_hebrew": self.object_distance_hebrew,
+            "didnt_cross": self.didnt_cross,
+            "didnt_cross_hebrew": self.didnt_cross_hebrew,
+            "cross_mode": self.cross_mode,
+            "cross_mode_hebrew": self.cross_mode_hebrew,
+            "cross_location": self.cross_location,
+            "cross_location_hebrew": self.cross_location_hebrew,
+            "cross_direction": self.cross_direction,
+            "cross_direction_hebrew": self.cross_direction_hebrew,
+            "road1": self.road1,
+            "road2": self.road2,
+            "km": self.km,
+            "km_raw": self.km_raw,
+            "km_accurate": self.km_accurate,
+            "yishuv_symbol": self.km_accurate,
+            "yishuv_name": self.yishuv_name,
+            "geo_area": self.geo_area,
+            "geo_area_hebrew": self.geo_area_hebrew,
+            "day_night": self.day_night,
+            "day_night_hebrew": self.day_night_hebrew,
+            "day_in_week": self.day_in_week,
+            "day_in_week_hebrew": self.day_in_week_hebrew,
+            "traffic_light": self.traffic_light,
+            "traffic_light_hebrew": self.traffic_light_hebrew,
+            "region": self.region,
+            "region_hebrew": self.region_hebrew,
+            "district": self.district,
+            "district_hebrew": self.district_hebrew,
+            "natural_area": self.natural_area,
+            "natural_area_hebrew": self.natural_area_hebrew,
+            "municipal_status": self.municipal_status,
+            "municipal_status_hebrew": self.municipal_status_hebrew,
+            "yishuv_shape": self.yishuv_shape,
+            "yishuv_shape_hebrew": self.yishuv_shape_hebrew,
+            "street1": self.street1,
+            "street1_hebrew": self.street1_hebrew,
+            "street2": self.street2,
+            "street2_hebrew": self.street2_hebrew,
+            "non_urban_intersection_hebrew": self.non_urban_intersection_hebrew,
+            "accident_year": self.accident_year,
+            "accident_month": self.accident_month,
+            "accident_day": self.accident_day,
+            "accident_hour_raw": self.accident_hour_raw,
+            "accident_hour_raw_hebrew": self.accident_hour_raw_hebrew,
+            "accident_hour": self.accident_hour,
+            "accident_minute": self.accident_minute,
+            "geom": self.geom,
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+            "x": self.x,
+            "y":  self.y
+        }
 
 class RoadSegments(Base):
     __tablename__ = "road_segments"

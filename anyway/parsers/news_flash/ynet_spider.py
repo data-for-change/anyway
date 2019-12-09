@@ -9,10 +9,13 @@ from .location_extraction import manual_filter_location_of_text
 
 
 class YnetFlashScrap(scrapy.Spider):
-    name = 'ynet_flash_scrap'
-    news_item = {}
-    maps_key = ''
-    custom_settings = {'LOG_ENABLED': False, }
+    """
+    class to scrap Ynet flash news, compatible with scrapy's API
+    """
+    name = 'ynet_flash_scrap'  # scraper name
+    news_item = {}  # news_item dict
+    maps_key = ''  # google maps key
+    custom_settings = {'LOG_ENABLED': False, }  # scrapy custom settings
 
     def __init__(self, url='', news_item=None, maps_key='', **kwargs):
         super().__init__(**kwargs)
@@ -23,6 +26,11 @@ class YnetFlashScrap(scrapy.Spider):
         self.maps_key = maps_key
 
     def parse(self, response):
+        """
+        process a news_flash and adds result to DB
+        :param response: response from scrapy
+        """
+        location = ''
         self.news_item['description'] = ''
         self.news_item['author'] = ''
         self.news_item['lat'] = 0
@@ -33,6 +41,14 @@ class YnetFlashScrap(scrapy.Spider):
         self.news_item['intersection'] = None
         self.news_item['city'] = None
         self.news_item['street'] = None
+        self.news_item['street2'] = None
+        self.news_item['resolution'] = None
+        self.news_item['geo_extracted_street'] = None
+        self.news_item['geo_extracted_road_no'] = None
+        self.news_item['geo_extracted_intersection'] = None
+        self.news_item['geo_extracted_city'] = None
+        self.news_item['geo_extracted_address'] = None
+        self.news_item['geo_extracted_district'] = None
         try:
             for item in response.css('div.text14 p::text').extract():
                 item = item.strip().replace('&nbsp', '').replace('\xa0', '')
@@ -62,32 +78,9 @@ class YnetFlashScrap(scrapy.Spider):
             if self.news_item['accident']:
                 if self.news_item['description'] != '':
                     location = manual_filter_location_of_text(self.news_item['description'])
-                    db_location = get_db_matching_location_of_text(location)
-                    if location == '':
-                        location = manual_filter_location_of_text(self.news_item['title'])
-                        db_location = get_db_matching_location_of_text(location)
-                else:
+                if location == '':
                     location = manual_filter_location_of_text(self.news_item['title'])
-                    db_location = get_db_matching_location_of_text(location)
                 self.news_item['location'] = location
-                if type(db_location) is NonUrbanAddress:
-                    self.news_item['road1'] = db_location.road1
-                    self.news_item['road2'] = db_location.road2
-                    self.news_item['intersection'] = db_location.intersection
-                    self.news_item['city'] = None
-                    self.news_item['street'] = None
-                elif type(db_location) is UrbanAddress:
-                    self.news_item['road1'] = None
-                    self.news_item['road2'] = None
-                    self.news_item['intersection'] = ''
-                    self.news_item['city'] = db_location.city
-                    self.news_item['street'] = db_location.street
-                else:
-                    self.news_item['road1'] = None
-                    self.news_item['road2'] = None
-                    self.news_item['intersection'] = None
-                    self.news_item['city'] = None
-                    self.news_item['street'] = None
                 geo_location = geocode_extract(location, self.maps_key)
                 if geo_location is None:
                     self.news_item['lat'] = 0
@@ -95,8 +88,37 @@ class YnetFlashScrap(scrapy.Spider):
                     self.news_item['location'] = ''
                     self.news_item['accident'] = False
                 else:
-                    self.news_item['lat'] = geo_location['lat']
-                    self.news_item['lon'] = geo_location['lng']
+                    self.news_item['lat'] = geo_location['geom']['lat']
+                    self.news_item['lon'] = geo_location['geom']['lng']
+                    self.news_item['geo_extracted_street'] = geo_location['street']
+                    self.news_item['geo_extracted_road_no'] = geo_location['road_no']
+                    self.news_item['geo_extracted_intersection'] = geo_location['intersection']
+                    self.news_item['geo_extracted_city'] = geo_location['city']
+                    self.news_item['geo_extracted_address'] = geo_location['address']
+                    self.news_item['geo_extracted_district'] = geo_location['district']
+                    if geo_location['intersection'] != '' and geo_location['road_no'] != '':
+                        self.news_item['resolution'] = 'צומת בינעירוני'
+                    elif geo_location['intersection'] != '':
+                        self.news_item['resolution'] = 'צומת עירוני'
+                    elif geo_location['road_no'] != '':
+                        self.news_item['resolution'] = 'כביש בינעירוני'
+                    elif geo_location['street'] != '':
+                        self.news_item['resolution'] = 'רחוב'
+                    elif geo_location['city'] != '':
+                        self.news_item['resolution'] = 'עיר'
+                    elif geo_location['district'] != '':
+                        self.news_item['resolution'] = 'מחוז'
+                    else:
+                        self.news_item['resolution'] = 'אחר'
+                    db_location = get_db_matching_location_of_text(location, geo_location)
+                    if type(db_location) is NonUrbanAddress:
+                        self.news_item['road1'] = db_location.road1
+                        self.news_item['road2'] = db_location.road2
+                        self.news_item['intersection'] = db_location.intersection
+                    elif type(db_location) is UrbanAddress:
+                        self.news_item['city'] = db_location.city
+                        self.news_item['street'] = db_location.street
+                        self.news_item['street2'] = db_location.street2
         except Exception as _:
             pass
 
@@ -107,6 +129,13 @@ class YnetFlashScrap(scrapy.Spider):
                               self.news_item.get('lon'), self.news_item.get('road1'),
                               self.news_item.get('road2'), self.news_item.get('intersection'),
                               self.news_item.get('city'), self.news_item.get('street'),
+                              self.news_item.get('street2'), self.news_item.get('resolution'),
+                              self.news_item.get('geo_extracted_street'),
+                              self.news_item.get('geo_extracted_road_no'),
+                              self.news_item.get('geo_extracted_intersection'),
+                              self.news_item.get('geo_extracted_city'),
+                              self.news_item.get('geo_extracted_address'),
+                              self.news_item.get('geo_extracted_district'),
                               self.news_item.get('accident'), self.news_item.get('source'))
         logging.info('new flash news added, is accident: ' + str(self.news_item.get('accident')))
         yield None

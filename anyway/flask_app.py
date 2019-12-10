@@ -240,6 +240,40 @@ def markers_hebrew_by_yishuv_symbol():
     return Response(json.dumps(entries, default=str), mimetype="application/json")
 
 
+@app.route("/yishuv_symbol_to_yishuv_name", methods=["GET"])
+@user_optional
+def yishuv_symbol_to_name():
+    """
+    output example:
+    [
+        {
+            "yishuv_symbol": 667,
+            "yishuv_name": "ברעם"
+        },
+        {
+            "yishuv_symbol": 424,
+            "yishuv_name": "גבים"
+        },
+        {
+            "yishuv_symbol": 1080,
+            "yishuv_name": "מבועים"
+        }
+    ]
+    """
+    logging.debug('getting yishuv symbol and yishuv name pairs')
+    markers = db.session.query(
+        AccidentMarkerView.yishuv_name,
+        AccidentMarkerView.yishuv_symbol
+    ).filter(
+        not_(AccidentMarkerView.yishuv_name == None)
+    ).group_by(
+        AccidentMarkerView.yishuv_name,
+        AccidentMarkerView.yishuv_symbol
+    ).all()
+    entries = [{"yishuv_name": x.yishuv_name, "yishuv_symbol": x.yishuv_symbol} for x in markers]
+    return Response(json.dumps(entries, default=str), mimetype="application/json")
+
+
 @app.route("/api/news-flash", methods=["GET"])
 @user_optional
 def news_flash():

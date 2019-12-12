@@ -55,4 +55,4 @@ venv
 /static/js/app.min.js
 /static/js/years.js
 
-.vscode
+/.vscode

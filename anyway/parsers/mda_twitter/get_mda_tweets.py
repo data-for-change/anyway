@@ -3,9 +3,8 @@ import re
 import datetime
 import tweepy
 
-import geocode_extraction as geo_ext
-import location_extraction as loc_ext
-
+from .geocode_extraction import *
+from .location_extraction import *
 
 def extract_accident_time(text):
     """
@@ -41,15 +40,15 @@ def get_matching_location_of_text_from_db(location, geo_location):
     :param geo_location: google maps geo_dict
     :return: dictionary of manual matching results
     """
-    db_location = loc_ext.get_db_matching_location_of_text(
+    db_location = get_db_matching_location_of_text(
         location, geo_location)
 
-    if type(db_location) is loc_ext.NonUrbanAddress:
+    if type(db_location) is NonUrbanAddress:
         return {'road1': db_location.road1,
                 'road2': db_location.road2,
                 'intersection': db_location.intersection
                 }
-    elif type(db_location) is loc_ext.UrbanAddress:
+    elif type(db_location) is UrbanAddress:
         return {'city': db_location.city,
                 'street': db_location.street,
                 'street2': db_location.street2
@@ -105,9 +104,15 @@ def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret,
     api = tweepy.API(auth)
     # list that hold all tweets
     all_tweets = []
-    # new_tweets = api.user_timeline(screen_name=screen_name, count=100, since_id=latest_tweet_id, tweet_mode='extended')
-    new_tweets = api.user_timeline(
-        screen_name=screen_name, count=100, tweet_mode='extended')
+
+    # fetch the last 100 tweets if there are no tweets in the DB
+    if latest_tweet_id == 'no_tweets':
+        new_tweets = api.user_timeline(
+            screen_name=screen_name, count=100, tweet_mode='extended')
+    else:
+        new_tweets = api.user_timeline(
+            screen_name=screen_name, count=100, since_id=latest_tweet_id, tweet_mode='extended')
+    
     all_tweets.extend(new_tweets)
 
     mda_tweets = [[tweet.id_str, tweet.created_at, tweet.full_text]
@@ -133,9 +138,9 @@ def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret,
     tweets_df['date'] = tweets_df['accident_date'].astype(
         str) + ' ' + tweets_df['accident_time']
     tweets_df['location'] = tweets_df['tweet_text'].apply(
-        loc_ext.manual_filter_location_of_text)
+        manual_filter_location_of_text)
     tweets_df['google_location'] = tweets_df['location'].apply(
-        geo_ext.geocode_extract, args=(google_maps_key, ))
+        geocode_extract, args=(google_maps_key, ))
 
     # expanding google maps dict results to seperate columns
     tweets_df = pd.concat(

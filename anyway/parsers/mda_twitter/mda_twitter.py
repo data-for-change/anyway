@@ -1,4 +1,4 @@
-import get_mda_tweets
+from .get_mda_tweets import *
 from anyway.utilities import init_flask
 from flask_sqlalchemy import SQLAlchemy
 import os
@@ -9,7 +9,8 @@ def get_latest_tweet_id_from_db():
     get the latest tweet id
     :return: latest tweet id
     """
-    tweet_id = db.session.execute('SELECT id FROM mda_tweet where source=\'twitter\' ORDER BY date DESC LIMIT 1').fetchone()
+    tweet_id = db.session.execute(
+        'SELECT id FROM mda_tweet where source=\'twitter\' ORDER BY date DESC LIMIT 1').fetchone()
     return tweet_id[0]
 
 
@@ -19,7 +20,7 @@ def insert_mda_tweet(id_tweet, title, link, date_parsed, author, description, lo
                      geo_extracted_address, geo_extracted_district, accident, source):
     """
     insert new mda_tweet to db
-    :param id_tweet: id of the mda_tweet, which should be the last one + 1
+    :param id_tweet: id of the mda_tweet
     :param title: title of the mda_tweet
     :param link: link to the mda_tweet
     :param date_parsed: parsed date of the mda_tweet
@@ -82,19 +83,22 @@ if __name__ == "__main__":
 
     latest_tweet_id = get_latest_tweet_id_from_db()
 
-    mda_tweets = get_mda_tweets(twitter_user, latest_tweet_id, TWITTER_CONSUMER_KEY,
-                                 TWITTER_CONSUMER_SECRET, TWITTER_ACCESS_KEY, TWITTER_ACCESS_SECRET, GOOGLE_MAPS_API_KEY)
-    mda_tweets = get_mda_tweets.get_user_tweets(
-        twitter_user, 'test', TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, TWITTER_ACCESS_KEY, TWITTER_ACCESS_SECRET, GOOGLE_MAPS_API_KEY)
+    # check if there are any MDA tweets in the DB
+    if latest_tweet_id != '':
+        mda_tweets = get_user_tweets(twitter_user, latest_tweet_id, TWITTER_CONSUMER_KEY,
+                                     TWITTER_CONSUMER_SECRET, TWITTER_ACCESS_KEY, TWITTER_ACCESS_SECRET, GOOGLE_MAPS_API_KEY)
+    else:
+        mda_tweets = get_user_tweets(
+            twitter_user, 'no_tweets', TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, TWITTER_ACCESS_KEY, TWITTER_ACCESS_SECRET, GOOGLE_MAPS_API_KEY)
 
     mda_tweets = mda_tweets[['id', 'accident', 'author', 'date', 'description', 'lat', 'link', 'lon', 'title', 'source', 'location', 'city', 'intersection', 'road1', 'road2', 'street',
                              'geo_extracted_address', 'geo_extracted_city', 'geo_extracted_district', 'geo_extracted_intersection', 'geo_extracted_road_no', 'geo_extracted_street', 'resolution', 'street2']]
 
     for row in mda_tweets.itertuples(index=False):
         (tweet_id, accident, author, date, description, lat, link, lon, title, source, location, city, intersection, road1, road2, street, geo_extracted_address,
-             geo_extracted_city, geo_extracted_district, geo_extracted_intersection, geo_extracted_road_no, geo_extracted_street, resolution, street2) = row
+         geo_extracted_city, geo_extracted_district, geo_extracted_intersection, geo_extracted_road_no, geo_extracted_street, resolution, street2) = row
 
         insert_mda_tweet(tweet_id, title, link, date, author, description, location, lat, lon, road1,
-                     road2, intersection, city, street, street2, resolution, geo_extracted_street,
-                     geo_extracted_road_no, geo_extracted_intersection, geo_extracted_city,
-                     geo_extracted_address, geo_extracted_district, accident, source)
+                         road2, intersection, city, street, street2, resolution, geo_extracted_street,
+                         geo_extracted_road_no, geo_extracted_intersection, geo_extracted_city,
+                         geo_extracted_address, geo_extracted_district, accident, source)

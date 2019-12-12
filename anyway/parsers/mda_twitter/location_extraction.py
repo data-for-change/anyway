@@ -438,7 +438,7 @@ def process_urban_with_geo_dict(text, streets, cities, threshold_city=70,
                 try:
                     suspected_streets = process.extract(street, list(set(relevant_streets.street.dropna().tolist())),
                                                     scorer=fuzz.token_set_ratio, limit=3)
-                except:
+                except Exception:
                     return UrbanAddress(city=city)
                 if len(suspected_streets) > 0:
                     relevant_streets_scores = relevant_streets.loc[
@@ -600,7 +600,7 @@ def is_urban(text, geo_location_dict=None):
         if  geo_location_dict['road_no'] == '':
             # check if any of geo_location_dict values contains a road mention
             road_examples = ['כביש ' + str(digit) for digit in range(10)]
-            for key, value in geo_location_dict.items():
+            for value in geo_location_dict.values():
                 if value in road_examples:
                     return True
         else:
@@ -638,8 +638,8 @@ def process_nonurban(text, roads):
 def get_db_matching_location_of_text(text, geo_location_dict=None):
     text = preprocess_text(text, True)
     if is_urban(text, geo_location_dict=geo_location_dict):
-        streets = pd.read_excel(r"C:\Users\sagiv\Desktop\projects\Anyway\anyway\anyway\parsers\mda_twitter\streets.xlsx")
-        cities = pd.read_excel(r'C:\Users\sagiv\Desktop\projects\Anyway\anyway\anyway\parsers\mda_twitter\cities.xlsx', sheet_name='Sheet1').city.tolist()
+        streets = pd.read_excel('anyway/parsers/news_flash/streets.xlsx')
+        cities = pd.read_excel('anyway/parsers/news_flash/cities.xlsx', sheet_name='Sheet1').city.tolist()
         if geo_location_dict is not None:
             street1 = geo_location_dict['street']
             street2 = ''
@@ -655,7 +655,7 @@ def get_db_matching_location_of_text(text, geo_location_dict=None):
                                                street1=street1, street2=street2)
         return process_urban(text, streets, cities)
     else:
-        roads = pd.read_excel(r'C:\Users\sagiv\Desktop\projects\Anyway\anyway\anyway\parsers\mda_twitter\roads.xlsx', sheet_name='Sheet1')
+        roads = pd.read_excel('anyway/parsers/news_flash/roads.xlsx', sheet_name='Sheet1')
         return process_nonurban(text, roads)
 
 

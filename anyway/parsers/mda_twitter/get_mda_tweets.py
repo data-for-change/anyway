@@ -3,8 +3,8 @@ import re
 import datetime
 import tweepy
 
-from .geocode_extraction import geocode_extract
-from .location_extraction import manual_filter_location_of_text, get_db_matching_location_of_text, NonUrbanAddress, UrbanAddress
+import geocode_extraction as geo_ext
+import location_extraction as loc_ext
 
 
 def extract_accident_time(text):
@@ -27,26 +27,34 @@ def classify_tweets(text):
     :return: boolean, true if tweet is about car accident, false for others
     """
     if text.startswith(u'בשעה') and \
-        ((u'הולך רגל' in text or u'הולכת רגל' in text or u'נהג' in text or u'אדם' in text) and \
-            (u'רכב' in text or u'מכונית' in text or u'אופנוע' in text or u"ג'יפ" in text or u'טרקטור' in text or u'משאית' in text or \
-                 u'אופניים' in text or u'קורקינט' in text)):
+            ((u'הולך רגל' in text or u'הולכת רגל' in text or u'נהג' in text or u'אדם' in text) and
+             (u'רכב' in text or u'מכונית' in text or u'אופנוע' in text or u"ג'יפ" in text or u'טרקטור' in text or u'משאית' in text or
+              u'אופניים' in text or u'קורקינט' in text)):
         return True
     return False
 
 
 def get_matching_location_of_text_from_db(location, geo_location):
-    db_location = get_db_matching_location_of_text(location, geo_location)
+    """
+    get results of manual location matching
+    :param location: accident's location
+    :param geo_location: google maps geo_dict
+    :return: dictionary of manual matching results
+    """
+    db_location = loc_ext.get_db_matching_location_of_text(
+        location, geo_location)
 
-    if type(db_location) is NonUrbanAddress:
-        return {'road1':db_location.road1,
-                'road2':db_location.road2,
-                'intersection':db_location.intersection
+    if type(db_location) is loc_ext.NonUrbanAddress:
+        return {'road1': db_location.road1,
+                'road2': db_location.road2,
+                'intersection': db_location.intersection
                 }
-    elif type(db_location) is UrbanAddress:
+    elif type(db_location) is loc_ext.UrbanAddress:
         return {'city': db_location.city,
                 'street': db_location.street,
                 'street2': db_location.street2
                 }
+
 
 def extract_road_number(location):
     """
@@ -97,43 +105,59 @@ def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret,
     api = tweepy.API(auth)
     # list that hold all tweets
     all_tweets = []
-    # new_tweets = api.user_timeline(screen_name=screen_name, count=800, since_id=latest_tweet_id, tweet_mode='extended')
-    new_tweets = api.user_timeline(screen_name=screen_name, count=800, tweet_mode='extended')
+    # new_tweets = api.user_timeline(screen_name=screen_name, count=100, since_id=latest_tweet_id, tweet_mode='extended')
+    new_tweets = api.user_timeline(
+        screen_name=screen_name, count=100, tweet_mode='extended')
     all_tweets.extend(new_tweets)
 
-    mda_tweets = [[tweet.id_str, tweet.created_at, tweet.full_text] for tweet in all_tweets]
-    tweets_df = pd.DataFrame(mda_tweets, columns=['tweet_id', 'tweet_ts', 'tweet_text'])
+    mda_tweets = [[tweet.id_str, tweet.created_at, tweet.full_text]
+                  for tweet in all_tweets]
+    tweets_df = pd.DataFrame(mda_tweets, columns=[
+                             'tweet_id', 'tweet_ts', 'tweet_text'])
     tweets_df['accident'] = tweets_df['tweet_text'].apply(classify_tweets)
 
     # filter tweets that are not about accidents
     tweets_df = tweets_df[tweets_df['accident'] == True]
 
-    tweets_df['accident_time'] = tweets_df['tweet_text'].apply(extract_accident_time)
-    tweets_df['accident_date'] = tweets_df['tweet_ts'].apply(lambda ts: datetime.datetime.date(ts))
+    tweets_df['accident_time'] = tweets_df['tweet_text'].apply(
+        extract_accident_time)
+    tweets_df['accident_date'] = tweets_df['tweet_ts'].apply(
+        lambda ts: datetime.datetime.date(ts))
 
-    tweets_df['link'] = tweets_df['tweet_id'].apply(lambda t: 'https://twitter.com/mda_israel/status/' + str(t))
+    tweets_df['link'] = tweets_df['tweet_id'].apply(
+        lambda t: 'https://twitter.com/mda_israel/status/' + str(t))
     tweets_df['author'] = ['מגן דוד אדום' for _ in range(len(tweets_df))]
     tweets_df['description'] = ['' for _ in range(len(tweets_df))]
     tweets_df['source'] = ['twitter' for _ in range(len(tweets_df))]
 
-    tweets_df['date'] = tweets_df['accident_date'].astype(str) + ' ' + tweets_df['accident_time']
-    tweets_df['location'] = tweets_df['tweet_text'].apply(manual_filter_location_of_text)
-    tweets_df['google_location'] = tweets_df['location'].apply(geocode_extract, args=(google_maps_key, ))
+    tweets_df['date'] = tweets_df['accident_date'].astype(
+        str) + ' ' + tweets_df['accident_time']
+    tweets_df['location'] = tweets_df['tweet_text'].apply(
+        loc_ext.manual_filter_location_of_text)
+    tweets_df['google_location'] = tweets_df['location'].apply(
+        geo_ext.geocode_extract, args=(google_maps_key, ))
 
     # expanding google maps dict results to seperate columns
-    tweets_df = pd.concat([tweets_df, tweets_df['google_location'].apply(pd.Series)], axis=1)
-    tweets_df = pd.concat([tweets_df.drop(['geom'], axis=1), tweets_df['geom'].apply(pd.Series)], axis=1)
+    tweets_df = pd.concat(
+        [tweets_df, tweets_df['google_location'].apply(pd.Series)], axis=1)
+    tweets_df = pd.concat(
+        [tweets_df.drop(['geom'], axis=1), tweets_df['geom'].apply(pd.Series)], axis=1)
 
     tweets_df['road1'] = tweets_df['location'].apply(extract_road_number)
     tweets_df['road2'] = ['' for _ in range(len(tweets_df))]
 
-    tweets_df['resolution'] = tweets_df.apply(lambda row: set_accident_resolution(row), axis=1)
+    tweets_df['resolution'] = tweets_df.apply(
+        lambda row: set_accident_resolution(row), axis=1)
 
-    # tweets_df['location_db'] = tweets_df.apply(lambda row: get_db_matching_location_of_text(row['location'], row['google_location']), axis=1)
+    tweets_df.rename({'tweet_text': 'title', 'lng': 'lon', 'tweet_id': 'id', 'road_no': 'geo_extracted_road_no', 'street': 'geo_extracted_street',
+                      'intersection': 'geo_extracted_intersection', 'city': 'geo_extracted_city', 'address': 'geo_extracted_address', 'district': 'geo_extracted_district'}, axis=1, inplace=True)
 
-    tweets_df.rename({'tweet_text': 'title', 'lng': 'lon', 'tweet_id': 'id'}, axis=1, inplace=True)
+    tweets_df['location_db'] = tweets_df.apply(lambda row: get_matching_location_of_text_from_db(
+        row['location'], row['google_location']), axis=1)
+    tweets_df = pd.concat(
+        [tweets_df, tweets_df['location_db'].apply(pd.Series)], axis=1)
 
-    tweets_df.drop(['google_location', 'accident_date', 'accident_time', 'tweet_ts'], axis=1, inplace=True)
+    tweets_df.drop(['google_location', 'accident_date', 'accident_time',
+                    'tweet_ts', 'location_db'], axis=1, inplace=True)
+
     return tweets_df
-
-

@@ -3,8 +3,8 @@ import re
 import datetime
 import tweepy
 
-from .geocode_extraction import *
-from .location_extraction import *
+from .geocode_extraction import geocode_extract
+from .location_extraction import UrbanAddress, NonUrbanAddress, get_db_matching_location_of_text, manual_filter_location_of_text
 
 def extract_accident_time(text):
     """
@@ -112,7 +112,6 @@ def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret,
     else:
         new_tweets = api.user_timeline(
             screen_name=screen_name, count=100, since_id=latest_tweet_id, tweet_mode='extended')
-    
     all_tweets.extend(new_tweets)
 
     mda_tweets = [[tweet.id_str, tweet.created_at, tweet.full_text]

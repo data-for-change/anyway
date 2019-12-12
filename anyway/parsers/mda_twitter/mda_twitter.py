@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 import os
 
 
-def get_latest_tweet_id_from_db():
+def get_latest_tweet_id_from_db(db):
     """
     get the latest tweet id
     :return: latest tweet id
@@ -14,7 +14,7 @@ def get_latest_tweet_id_from_db():
     return tweet_id[0]
 
 
-def insert_mda_tweet(id_tweet, title, link, date_parsed, author, description, location, lat, lon, road1,
+def insert_mda_tweet(db, id_tweet, title, link, date_parsed, author, description, location, lat, lon, road1,
                      road2, intersection, city, street, street2, resolution, geo_extracted_street,
                      geo_extracted_road_no, geo_extracted_intersection, geo_extracted_city,
                      geo_extracted_address, geo_extracted_district, accident, source):
@@ -68,7 +68,7 @@ def insert_mda_tweet(id_tweet, title, link, date_parsed, author, description, lo
     db.session.commit()
 
 
-if __name__ == "__main__":
+def mda_twitter():
     app = init_flask()
     db = SQLAlchemy(app)
 
@@ -81,7 +81,7 @@ if __name__ == "__main__":
 
     twitter_user = 'mda_israel'
 
-    latest_tweet_id = get_latest_tweet_id_from_db()
+    latest_tweet_id = get_latest_tweet_id_from_db(db)
 
     # check if there are any MDA tweets in the DB
     if latest_tweet_id != '':
@@ -98,7 +98,7 @@ if __name__ == "__main__":
         (tweet_id, accident, author, date, description, lat, link, lon, title, source, location, city, intersection, road1, road2, street, geo_extracted_address,
          geo_extracted_city, geo_extracted_district, geo_extracted_intersection, geo_extracted_road_no, geo_extracted_street, resolution, street2) = row
 
-        insert_mda_tweet(tweet_id, title, link, date, author, description, location, lat, lon, road1,
+        insert_mda_tweet(db, tweet_id, title, link, date, author, description, location, lat, lon, road1,
                          road2, intersection, city, street, street2, resolution, geo_extracted_street,
                          geo_extracted_road_no, geo_extracted_intersection, geo_extracted_city,
                          geo_extracted_address, geo_extracted_district, accident, source)

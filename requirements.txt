@@ -44,3 +44,4 @@ fuzzywuzzy
 xlrd
 flask_cors
 pandas
+tweepy

@@ -147,9 +147,6 @@ def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret,
     tweets_df = pd.concat(
         [tweets_df.drop(['geom'], axis=1), tweets_df['geom'].apply(pd.Series)], axis=1)
 
-    tweets_df['road1'] = tweets_df['location'].apply(extract_road_number)
-    tweets_df['road2'] = ['' for _ in range(len(tweets_df))]
-
     tweets_df['resolution'] = tweets_df.apply(
         lambda row: set_accident_resolution(row), axis=1)
 

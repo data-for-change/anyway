@@ -10,7 +10,7 @@ def get_latest_tweet_id_from_db(db):
     :return: latest tweet id
     """
     tweet_id = db.session.execute(
-        "SELECT id FROM mda_tweet where source='twitter' ORDER BY date DESC LIMIT 1").fetchone()
+        "SELECT id FROM news_flash where source='twitter' ORDER BY date DESC LIMIT 1").fetchone()
     if tweet_id:
         return tweet_id[0]
 

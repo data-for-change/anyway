@@ -90,11 +90,11 @@ def mda_twitter():
     else:
         mda_tweets = get_user_tweets(
             twitter_user, 'no_tweets', TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, TWITTER_ACCESS_KEY, TWITTER_ACCESS_SECRET, GOOGLE_MAPS_API_KEY)
-
-    mda_tweets = mda_tweets[['id', 'accident', 'author', 'date', 'description', 'lat', 'link', 'lon', 'title', 'source', 'location', 'city', 'intersection', 'road1', 'road2', 'street',
-                             'geo_extracted_address', 'geo_extracted_city', 'geo_extracted_district', 'geo_extracted_intersection', 'geo_extracted_road_no', 'geo_extracted_street', 'resolution', 'street2']]
     if mda_tweets is None:
         return
+    mda_tweets = mda_tweets[['id', 'accident', 'author', 'date', 'description', 'lat', 'link', 'lon', 'title', 'source', 'location', 'city', 'intersection', 'road1', 'road2', 'street',
+                             'geo_extracted_address', 'geo_extracted_city', 'geo_extracted_district', 'geo_extracted_intersection', 'geo_extracted_road_no', 'geo_extracted_street', 'resolution', 'street2']]
+
     for row in mda_tweets.itertuples(index=False):
         (tweet_id, accident, author, date, description, lat, link, lon, title, source, location, city, intersection, road1, road2, street, geo_extracted_address,
          geo_extracted_city, geo_extracted_district, geo_extracted_intersection, geo_extracted_road_no, geo_extracted_street, resolution, street2) = row

@@ -122,7 +122,8 @@ def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret,
 
     # filter tweets that are not about accidents
     tweets_df = tweets_df[tweets_df['accident'] == True]
-
+    if tweets_df.empty:
+        return None
     tweets_df['accident_time'] = tweets_df['tweet_text'].apply(
         extract_accident_time)
     tweets_df['accident_date'] = tweets_df['tweet_ts'].apply(

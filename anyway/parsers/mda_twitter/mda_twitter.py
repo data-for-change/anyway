@@ -10,9 +10,9 @@ def get_latest_tweet_id_from_db(db):
     :return: latest tweet id
     """
     tweet_id = db.session.execute(
-        'SELECT id FROM mda_tweet where source=\'twitter\' ORDER BY date DESC LIMIT 1').fetchone()
-    return tweet_id[0]
-
+        "SELECT id FROM mda_tweet where source='twitter' ORDER BY date DESC LIMIT 1").fetchone()
+    if tweet_id:
+        return tweet_id[0]
 
 def insert_mda_tweet(db, id_tweet, title, link, date_parsed, author, description, location, lat, lon, road1,
                      road2, intersection, city, street, street2, resolution, geo_extracted_street,
@@ -84,7 +84,7 @@ def mda_twitter():
     latest_tweet_id = get_latest_tweet_id_from_db(db)
 
     # check if there are any MDA tweets in the DB
-    if latest_tweet_id != '':
+    if latest_tweet_id:
         mda_tweets = get_user_tweets(twitter_user, latest_tweet_id, TWITTER_CONSUMER_KEY,
                                      TWITTER_CONSUMER_SECRET, TWITTER_ACCESS_KEY, TWITTER_ACCESS_SECRET, GOOGLE_MAPS_API_KEY)
     else:

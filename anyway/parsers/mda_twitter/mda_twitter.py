@@ -93,7 +93,8 @@ def mda_twitter():
 
     mda_tweets = mda_tweets[['id', 'accident', 'author', 'date', 'description', 'lat', 'link', 'lon', 'title', 'source', 'location', 'city', 'intersection', 'road1', 'road2', 'street',
                              'geo_extracted_address', 'geo_extracted_city', 'geo_extracted_district', 'geo_extracted_intersection', 'geo_extracted_road_no', 'geo_extracted_street', 'resolution', 'street2']]
-
+    if not mda_tweets:
+        return
     for row in mda_tweets.itertuples(index=False):
         (tweet_id, accident, author, date, description, lat, link, lon, title, source, location, city, intersection, road1, road2, street, geo_extracted_address,
          geo_extracted_city, geo_extracted_district, geo_extracted_intersection, geo_extracted_road_no, geo_extracted_street, resolution, street2) = row

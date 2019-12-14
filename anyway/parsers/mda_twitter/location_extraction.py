@@ -283,8 +283,8 @@ def process_streets_table(addresses_df):
 
 def process_roads_table(addresses_df):
     roads = pd.DataFrame(addresses_df[['road1', 'road2', 'non_urban_intersection_hebrew']])
-    roads.road1 = roads.road1.astype(str)
-    roads.road2 = roads.road2.astype(str)
+    roads.road1 = roads.road1.astype(str) if roads.road1 and not np.isnan(roads.road1) else None
+    roads.road2 = roads.road2.astype(str) if roads.road2 and not np.isnan(roads.road2) else None
     roads.non_urban_intersection_hebrew = roads.non_urban_intersection_hebrew.astype(str)
     roads['first_road'] = roads.road1
     roads['second_road'] = roads.road2
@@ -300,7 +300,6 @@ def process_roads_table(addresses_df):
     roads = roads.replace('nan', np.nan)
     roads = roads.dropna(how='all')
     roads = roads.drop_duplicates()
-    roads = roads.replace(np.nan, 'NaN')
     return roads
 
 

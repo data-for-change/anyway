@@ -10,7 +10,7 @@ def get_latest_tweet_id_from_db(db):
     :return: latest tweet id
     """
     tweet_id = db.session.execute(
-        "SELECT id FROM mda_tweet where source='twitter' ORDER BY date DESC LIMIT 1").fetchone()
+        "SELECT id FROM news_flash where source='twitter' ORDER BY date DESC LIMIT 1").fetchone()
     if tweet_id:
         return tweet_id[0]
 
@@ -90,7 +90,8 @@ def mda_twitter():
     else:
         mda_tweets = get_user_tweets(
             twitter_user, 'no_tweets', TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, TWITTER_ACCESS_KEY, TWITTER_ACCESS_SECRET, GOOGLE_MAPS_API_KEY)
-
+    if mda_tweets is None:
+        return
     mda_tweets = mda_tweets[['id', 'accident', 'author', 'date', 'description', 'lat', 'link', 'lon', 'title', 'source', 'location', 'city', 'intersection', 'road1', 'road2', 'street',
                              'geo_extracted_address', 'geo_extracted_city', 'geo_extracted_district', 'geo_extracted_intersection', 'geo_extracted_road_no', 'geo_extracted_street', 'resolution', 'street2']]
 

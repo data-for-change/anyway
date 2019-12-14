@@ -30,10 +30,12 @@ def mda_twitter():
             TWITTER_ACCESS_SECRET, GOOGLE_MAPS_API_KEY)
     if mda_tweets is None:
         return
-    mda_tweets = mda_tweets[['tweet_id', 'title', 'link', 'date', 'author', 'description', 'location', 'lat',
+
+    mda_tweets = mda_tweets[:,['tweet_id', 'title', 'link', 'date', 'author', 'description', 'location', 'lat',
                              'lon', 'resolution', 'region_hebrew', 'district_hebrew', 'yishuv_name', 'street1_hebrew',
                              'street2_hebrew', 'non_urban_intersection_hebrew', 'road1', 'road2', 'road_segment_name',
                              'accident', 'source']]
+
 
     for row in mda_tweets.itertuples(index=False):
         (tweet_id, title, link, date, author, description, location, lat, lon, resolution,

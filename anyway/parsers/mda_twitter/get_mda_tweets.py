@@ -32,6 +32,7 @@ def classify_tweets(text):
     return False
 
 
+
 def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret, access_key, access_secret, google_maps_key):
     """
     get all user's recent tweets

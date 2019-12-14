@@ -241,6 +241,40 @@ def markers_hebrew_by_yishuv_symbol():
     return Response(json.dumps(entries, default=str), mimetype="application/json")
 
 
+@app.route("/yishuv_symbol_to_yishuv_name", methods=["GET"])
+@user_optional
+def yishuv_symbol_to_name():
+    """
+    output example:
+    [
+        {
+            "yishuv_symbol": 667,
+            "yishuv_name": "ברעם"
+        },
+        {
+            "yishuv_symbol": 424,
+            "yishuv_name": "גבים"
+        },
+        {
+            "yishuv_symbol": 1080,
+            "yishuv_name": "מבועים"
+        }
+    ]
+    """
+    logging.debug('getting yishuv symbol and yishuv name pairs')
+    markers = db.session.query(
+        AccidentMarkerView.yishuv_name,
+        AccidentMarkerView.yishuv_symbol
+    ).filter(
+        not_(AccidentMarkerView.yishuv_name == None)
+    ).group_by(
+        AccidentMarkerView.yishuv_name,
+        AccidentMarkerView.yishuv_symbol
+    ).all()
+    entries = [{"yishuv_name": x.yishuv_name, "yishuv_symbol": x.yishuv_symbol} for x in markers]
+    return Response(json.dumps(entries, default=str), mimetype="application/json")
+
+
 @app.route("/api/news-flash", methods=["GET"])
 @user_optional
 def news_flash():
@@ -1464,10 +1498,10 @@ def get_accidents_in_city_by_year_severity():
     results = db.session.query(
                 AccidentMarkerView.accident_year,
                 AccidentMarkerView.accident_severity_hebrew,
-                func.count(AccidentMarkerView.accident_year)
+                func.count(AccidentMarkerView.accident_year).label('count')
             ).filter(
                 AccidentMarkerView.yishuv_symbol==yishuv_symbol,
-                or_(AccidentMarkerView.provider_code==1, AccidentMarkerView.provider_code==3)
+                or_(AccidentMarkerView.provider_code==CONST.CBS_ACCIDENT_TYPE_1_CODE, AccidentMarkerView.provider_code==CONST.CBS_ACCIDENT_TYPE_3_CODE)
             ).group_by(
                 AccidentMarkerView.accident_year,
                 AccidentMarkerView.accident_severity_hebrew
@@ -1475,4 +1509,4 @@ def get_accidents_in_city_by_year_severity():
                 AccidentMarkerView.accident_year,
                 AccidentMarkerView.accident_severity_hebrew
             ).all()
-    return Response(json.dumps(results, default=str), mimetype="application/json")
+    return Response(json.dumps([r._asdict() for r in results], default=str), mimetype="application/json")

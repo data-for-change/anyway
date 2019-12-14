@@ -46,12 +46,18 @@ def get_matching_location_of_text_from_db(location, geo_location):
     if type(db_location) is NonUrbanAddress:
         return {'road1': db_location.road1,
                 'road2': db_location.road2,
-                'intersection': db_location.intersection
+                'intersection': db_location.intersection,
+                'city': None,
+                'street': None,
+                'street2': None
                 }
     elif type(db_location) is UrbanAddress:
         return {'city': db_location.city,
                 'street': db_location.street,
-                'street2': db_location.street2
+                'street2': db_location.street2,
+                'road1': None,
+                'road2': None,
+                'intersection': None
                 }
 
 

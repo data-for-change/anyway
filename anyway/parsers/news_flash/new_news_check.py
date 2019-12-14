@@ -1,4 +1,5 @@
 from datetime import datetime
+
 import feedparser
 
 from .news_flash_parser import get_latest_date_from_db

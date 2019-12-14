@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 import json
+
+from dateutil import parser
+from flask_sqlalchemy import SQLAlchemy
+from openpyxl import load_workbook
+
+from .utils import batch_iterator
 from ..constants import CONST
 from ..models import AccidentMarker
 from ..utilities import init_flask
-from .utils import batch_iterator
-from flask_sqlalchemy import SQLAlchemy
-from openpyxl import load_workbook
-from dateutil import parser
 
 app = init_flask()
 db = SQLAlchemy(app)
+
 
 def _iter_rows(filename):
     workbook = load_workbook(filename, read_only=True)

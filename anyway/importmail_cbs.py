@@ -1,13 +1,15 @@
 from __future__ import print_function
+
+import argparse
 import email
 import imaplib
-import os
-from datetime import datetime
-import time
-from .utilities import time_delta
-import sys
-import argparse
 import logging
+import os
+import sys
+import time
+from datetime import datetime
+
+from .utilities import time_delta
 
 mail_dir = 'cbs/data'
 
@@ -89,7 +91,7 @@ def main(detach_dir, username=None, password=None, email_search_start_date=''):
         imapsession.logout()
         return filepath
     except Exception as _:
-        pass # Todo - send an error email to anyway email
+        pass  # Todo - send an error email to anyway email
 
 
 if __name__ == "__main__":
@@ -100,4 +102,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(args.username, args.password, args.lastmail)
-

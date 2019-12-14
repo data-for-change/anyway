@@ -1,9 +1,12 @@
-import pandas as pd
-import re
 import datetime
+import re
+
+import pandas as pd
 import tweepy
 
-from ..location_extraction import geocode_extract, manual_filter_location_of_text, get_db_matching_location, set_accident_resolution
+from ..location_extraction import geocode_extract, manual_filter_location_of_text, get_db_matching_location, \
+    set_accident_resolution
+
 
 def extract_accident_time(text):
     """
@@ -26,13 +29,15 @@ def classify_tweets(text):
     """
     if text.startswith(u'בשעה') and \
             ((u'הולך רגל' in text or u'הולכת רגל' in text or u'נהג' in text or u'אדם' in text) and
-             (u'רכב' in text or u'מכונית' in text or u'אופנוע' in text or u"ג'יפ" in text or u'טרקטור' in text or u'משאית' in text or
-              u'אופניים' in text or u'קורקינט' in text)):
+             (
+                     u'רכב' in text or u'מכונית' in text or u'אופנוע' in text or u"ג'יפ" in text or u'טרקטור' in text or u'משאית' in text or
+                     u'אופניים' in text or u'קורקינט' in text)):
         return True
     return False
 
 
-def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret, access_key, access_secret, google_maps_key):
+def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret, access_key, access_secret,
+                    google_maps_key):
     """
     get all user's recent tweets
     :param consumer_key: consumer_key for Twitter API
@@ -59,7 +64,7 @@ def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret,
     mda_tweets = [[tweet.id_str, tweet.created_at, tweet.full_text]
                   for tweet in all_tweets]
     tweets_df = pd.DataFrame(mda_tweets, columns=[
-                             'tweet_id', 'tweet_ts', 'tweet_text'])
+        'tweet_id', 'tweet_ts', 'tweet_text'])
     tweets_df['accident'] = tweets_df['tweet_text'].apply(classify_tweets)
 
     # filter tweets that are not about accidents
@@ -82,7 +87,7 @@ def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret,
     tweets_df['location'] = tweets_df['tweet_text'].apply(
         manual_filter_location_of_text)
     tweets_df['google_location'] = tweets_df['location'].apply(
-        geocode_extract, args=(google_maps_key, ))
+        geocode_extract, args=(google_maps_key,))
 
     # expanding google maps dict results to seperate columns
     tweets_df = pd.concat(
@@ -93,11 +98,13 @@ def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret,
     tweets_df['resolution'] = tweets_df.apply(
         lambda row: set_accident_resolution(row), axis=1)
 
-    tweets_df.rename({'tweet_text': 'title', 'lng': 'lon', 'road_no': 'geo_extracted_road_no', 'street': 'geo_extracted_street',
-                      'intersection': 'geo_extracted_intersection', 'city': 'geo_extracted_city', 'address': 'geo_extracted_address', 'district': 'geo_extracted_district'}, axis=1, inplace=True)
+    tweets_df.rename(
+        {'tweet_text': 'title', 'lng': 'lon', 'road_no': 'geo_extracted_road_no', 'street': 'geo_extracted_street',
+         'intersection': 'geo_extracted_intersection', 'city': 'geo_extracted_city', 'address': 'geo_extracted_address',
+         'district': 'geo_extracted_district'}, axis=1, inplace=True)
 
     tweets_df['location_db'] = tweets_df.apply(lambda row: get_db_matching_location(
-        row['lat'], row['lon'],row['resolution'],row['road_no']), axis=1)
+        row['lat'], row['lon'], row['resolution'], row['road_no']), axis=1)
     tweets_df = pd.concat(
         [tweets_df, tweets_df['location_db'].apply(pd.Series)], axis=1)
 

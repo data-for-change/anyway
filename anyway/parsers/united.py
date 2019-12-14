@@ -2,23 +2,20 @@
 # -*- coding: utf-8 -*-
 import calendar
 import csv
-from datetime import datetime
+import logging
 import os
-
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import and_
-
-from ..constants import CONST
-from ..models import AccidentMarker
-from ..utilities import init_flask, decode_hebrew, open_utf8
-from ..import importmail
-
+from datetime import datetime
 from xml.dom import minidom
 
 import math
-
 import requests
-import logging
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import and_
+
+from .. import importmail
+from ..constants import CONST
+from ..models import AccidentMarker
+from ..utilities import init_flask, decode_hebrew, open_utf8
 
 ############################################################################################
 # United.py is responsible for the parsing and deployment of "united hatzala" data to the DB
@@ -40,7 +37,6 @@ WEATHER = {"0": 1, "1": 2, "3": 3, "4": 4, "5": 5, "7": 6, "8": 6, "9": 7, "10":
            "92": 68, "93": 69, "94": 70, "95": 71, "96": 72, "97": 73, "98": 74, "99": 75}
 
 
-
 def retrieve_ims_xml():  # getting an xml document from the ims(israel meteorological service) website
     logging.basicConfig(level=logging.DEBUG)
     s = requests.session()
@@ -57,7 +53,8 @@ def parse_date(created):
     """
     global time
     global hour
-    DATE_FORMATS = ['%m/%d/%Y %I:%M:%S', '%Y-%m-%d %H:%M:%S', '%Y/%m/%d %I:%M:%S', '%d/%m/%Y %I:%M', '%Y/%m/%d %I:%M', '%m/%d/%Y %I:%M']
+    DATE_FORMATS = ['%m/%d/%Y %I:%M:%S', '%Y-%m-%d %H:%M:%S', '%Y/%m/%d %I:%M:%S', '%d/%m/%Y %I:%M', '%Y/%m/%d %I:%M',
+                    '%m/%d/%Y %I:%M']
 
     for date_format in DATE_FORMATS:
         try:
@@ -109,13 +106,13 @@ def accident_time_zone_adjustment(created):  # return accident time in UTC time
 
     # if accident happend before the last sunday of october at 2:00 o'clock
     elif accident_date.month == 10 & (
-                winter_clock.day > accident_date.day | (
-                            winter_clock.day == accident_date.day & accident_date.hour < 2)):
+            winter_clock.day > accident_date.day | (
+            winter_clock.day == accident_date.day & accident_date.hour < 2)):
         accident_date.replace(hour=accident_date.hour - 1)
 
     # if accident happend after the last friday of march at 2:00 o'clock
     elif (accident_date.month == 3 & daylight_saving_time.day < accident_date.day | (
-                    daylight_saving_time.day == accident_date.day & accident_date.hour >= 2)):
+            daylight_saving_time.day == accident_date.day & accident_date.hour >= 2)):
         accident_date.replace(hour=accident_date.hour - 1)
     # ]
     adate = ''.join(
@@ -141,7 +138,6 @@ def all_station_in_date_frame(collection, created):  # return the stations data 
 
 
 def find_station_by_coordinate(collection, latitude, longitude):
-
     station_place_in_xml = -1
     min_distance = float("inf")  # initialize big starting value so the distance will always be smaller than the initial
     station_data = collection.getElementsByTagName('surface_station')
@@ -178,6 +174,7 @@ def convert_xml_values_to_numbers(rain):
         # numbers that are higher then 990 in the xml code equals 0.(the last digit) for example 991 = 0.1
         rain_in_millimeters *= 0.01
     return rain_in_millimeters
+
 
 def get_weather_element(station, weather_data, tag):
     element = weather_data[station].getElementsByTagName(tag)
@@ -216,7 +213,7 @@ def process_weather_data(collection, latitude, longitude):
         rain_hours = RAIN_DURATION_CODE_TO_HOURS[str(rain_duration).strip()]
         # rain amount is between 0.1 and 0.5 millimeter
         if 0.0 < rain_in_millimeters <= 0.5 or (
-                        0.0 < rain_in_millimeters / rain_hours <= 0.5):
+                0.0 < rain_in_millimeters / rain_hours <= 0.5):
             if weather == 76:
                 weather = 80  # סופת רוחות, גשם קל
             elif weather == 77:
@@ -252,10 +249,11 @@ def process_weather_data(collection, latitude, longitude):
                 weather = 79  # גשם זלעפות
     return weather
 
+
 CSVMAP = [
-        {"id": 0, "time": 1, "lat": 2, "long": 3, "street": 4, "city": 6, "comment": 7, "type": 8, "casualties": 9},
-        {"id": 0, "time": 1, "type": 2, "long": 3, "lat": 4,  "city": 5, "street": 6, "comment": 7, "casualties": 8},
-        ]
+    {"id": 0, "time": 1, "lat": 2, "long": 3, "street": 4, "city": 6, "comment": 7, "type": 8, "casualties": 9},
+    {"id": 0, "time": 1, "type": 2, "long": 3, "lat": 4, "city": 5, "street": 6, "comment": 7, "casualties": 8},
+]
 
 
 def create_accidents(collection, file_location):
@@ -279,8 +277,8 @@ def create_accidents(collection, file_location):
                 continue
             csvmap = CSVMAP[format_version]
             if accident[csvmap["lat"]] == "" or accident[csvmap["long"]] == "" or \
-                            accident[csvmap["lat"]] is None or accident[csvmap["long"]] is None or \
-                            accident[csvmap["lat"]] == "NULL" or accident[csvmap["long"]] == "NULL":
+                    accident[csvmap["lat"]] is None or accident[csvmap["long"]] is None or \
+                    accident[csvmap["lat"]] == "NULL" or accident[csvmap["long"]] == "NULL":
                 logging.warn("\t\tMissing coordinates in line {0}. Moving on...".format(line + 1))
                 continue
 
@@ -288,8 +286,10 @@ def create_accidents(collection, file_location):
             marker = {'id': accident[csvmap["id"]], 'latitude': accident[csvmap["lat"]],
                       'longitude': accident[csvmap["long"]], 'created': created, 'provider_code': PROVIDER_CODE,
                       'title': decode_hebrew(accident[csvmap["type"]], encoding="utf-8")[:100],
-                      'address': decode_hebrew((accident[csvmap["street"]] + ' ' + accident[csvmap["city"]]), encoding="utf-8"),
-                      'accident_severity': 2 if u"קשה" in decode_hebrew(accident[csvmap["type"]], encoding="utf-8") else 3,
+                      'address': decode_hebrew((accident[csvmap["street"]] + ' ' + accident[csvmap["city"]]),
+                                               encoding="utf-8"),
+                      'accident_severity': 2 if u"קשה" in decode_hebrew(accident[csvmap["type"]],
+                                                                        encoding="utf-8") else 3,
                       'location_accuracy': 1, 'accident_type': 21, 'type': CONST.MARKER_TYPE_ACCIDENT,
                       'description': decode_hebrew(accident[csvmap["comment"]], encoding="utf-8"),
                       'weather': process_weather_data(collection, accident[csvmap["lat"]],
@@ -314,7 +314,8 @@ def import_to_db(collection, path):
 
     new_ids = [m["id"] for m in accidents
                if 0 == db.session.query(AccidentMarker).filter(and_(AccidentMarker.id == m["id"],
-                                                AccidentMarker.provider_code == m["provider_code"])).count()]
+                                                                    AccidentMarker.provider_code == m[
+                                                                        "provider_code"])).count()]
     if not new_ids:
         logging.info("\t\tNothing loaded, all accidents already in DB")
         return 0

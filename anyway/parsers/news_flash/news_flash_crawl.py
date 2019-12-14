@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import feedparser
 from datetime import datetime
+
+import feedparser
 from scrapy.crawler import CrawlerProcess
+
 from .news_flash_parser import get_latest_date_from_db
 from .ynet_spider import YnetFlashScrap
 

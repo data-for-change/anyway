@@ -1,11 +1,13 @@
 import logging
 from datetime import datetime
-from ..utilities import init_flask, time_delta, chunks, ItmToWGS84
-from flask_sqlalchemy import SQLAlchemy
-from ..models import SchoolWithDescription
-import pandas as pd
-import numpy as np
+
 import math
+import numpy as np
+import pandas as pd
+from flask_sqlalchemy import SQLAlchemy
+
+from ..models import SchoolWithDescription
+from ..utilities import init_flask, time_delta, chunks, ItmToWGS84
 
 school_fields = {
     'data_year': 'שנה',
@@ -34,11 +36,13 @@ app = init_flask()
 db = SQLAlchemy(app)
 coordinates_converter = ItmToWGS84()
 
+
 def get_numeric_value(value, func):
     """
     :returns: value if parameter value exists OR None if the parameter value does not exist
     """
     return func(value) if value and not np.isnan(value) else None
+
 
 def get_str_value(value):
     """
@@ -46,9 +50,9 @@ def get_str_value(value):
     """
     return value if value and value not in ['nan', 'Nan', 'NaN', 'NAN'] else None
 
+
 def get_schools_with_description(schools_description_filepath,
                                  schools_coordinates_filepath):
-
     logging.info("\tReading schools description data from '%s'..." % schools_description_filepath)
     df_schools = pd.read_excel(schools_description_filepath)
     logging.info("\tReading schools coordinates data from '%s'..." % schools_coordinates_filepath)
@@ -69,10 +73,15 @@ def get_schools_with_description(schools_description_filepath,
         if school_type != 'בית ספר':
             continue
         if school_id in list(df_coordinates[school_fields['school_id']].values):
-            x_coord = df_coordinates.loc[df_coordinates[school_fields['school_id']] == school_id, school_fields['x']].values[0]
-            y_coord = df_coordinates.loc[df_coordinates[school_fields['school_id']] == school_id, school_fields['y']].values[0]
-            location_accuracy = get_str_value(df_coordinates.loc[df_coordinates[school_fields['school_id']] == school_id,
-                                                                school_fields['location_accuracy']].values[0])
+            x_coord = \
+                df_coordinates.loc[df_coordinates[school_fields['school_id']] == school_id, school_fields['x']].values[
+                    0]
+            y_coord = \
+                df_coordinates.loc[df_coordinates[school_fields['school_id']] == school_id, school_fields['y']].values[
+                    0]
+            location_accuracy = get_str_value(
+                df_coordinates.loc[df_coordinates[school_fields['school_id']] == school_id,
+                                   school_fields['location_accuracy']].values[0])
         else:
             x_coord = None
             y_coord = None
@@ -80,7 +89,7 @@ def get_schools_with_description(schools_description_filepath,
         if x_coord and not math.isnan(x_coord) and y_coord and not math.isnan(y_coord):
             longitude, latitude = coordinates_converter.convert(x_coord, y_coord)
         else:
-            longitude, latitude = None, None # otherwise yield will produce: UnboundLocalError: local variable referenced before assignment
+            longitude, latitude = None, None  # otherwise yield will produce: UnboundLocalError: local variable referenced before assignment
         # Don't insert duplicates of 'school_name','x', 'y'
         school_tuple = (school_name, x_coord, y_coord)
         if school_tuple in all_schools_tuples:
@@ -115,12 +124,14 @@ def get_schools_with_description(schools_description_filepath,
 
     return schools
 
+
 def truncate_schools_with_description():
     curr_table = 'schools_with_description'
     sql_truncate = 'TRUNCATE TABLE ' + curr_table
     db.session.execute(sql_truncate)
     db.session.commit()
     logging.info('Truncated table ' + curr_table)
+
 
 def import_to_datastore(schools_description_filepath,
                         schools_coordinates_filepath,
@@ -141,6 +152,7 @@ def import_to_datastore(schools_description_filepath,
     except:
         error = "Schools import succeded partially with " + new_items + " schools"
         raise Exception(error)
+
 
 def parse(schools_description_filepath,
           schools_coordinates_filepath,

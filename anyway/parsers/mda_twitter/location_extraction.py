@@ -389,7 +389,7 @@ class UrbanAddress:
 
 
 class NonUrbanAddress:
-    def __init__(self, road1='NaN', road2='NaN', intersection='NaN'):
+    def __init__(self, road1=None, road2=None, intersection=None):
         self.road1 = road1
         self.road2 = road2
         self.intersection = intersection

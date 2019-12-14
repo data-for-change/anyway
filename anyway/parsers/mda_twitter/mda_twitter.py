@@ -2,6 +2,7 @@ from .get_mda_tweets import get_user_tweets
 from anyway.utilities import init_flask
 from flask_sqlalchemy import SQLAlchemy
 import os
+import numpy as np
 
 
 def get_latest_sequential_id_from_db(db):
@@ -10,7 +11,7 @@ def get_latest_sequential_id_from_db(db):
     :return: latest sequential id
     """
     sequential_id = db.session.execute(
-        "SELECT id FROM news_flash ORDER BY date DESC LIMIT 1").fetchone()
+        "SELECT id FROM news_flash ORDER BY id DESC LIMIT 1").fetchone()
     if sequential_id:
         return sequential_id[0]
 
@@ -68,8 +69,8 @@ def insert_mda_tweet(db, tweet_id, title, link, date_parsed, author, description
                        :geo_extracted_address, :geo_extracted_district, :accident, :source, :tweet_id)',
                        {'id': sequential_id, 'title': title, 'link': link, 'date': date_parsed, 'author': author,
                         'description': description, 'location': location, 'lat': lat, 'lon': lon,
-                        'road1': int(road1) if road1 else road1,
-                        'road2': int(road2) if road2 else road2, 'intersection': intersection, 'city': city,
+                        'road1': int(road1) if road1 and (isinstance(road1, (str, int)) or (isinstance(road1, float) and not np.isnan(road1))) else None,
+                        'road2': int(road2) if road2 and (isinstance(road2, (str, int)) or (isinstance(road2, float) and not np.isnan(road2))) else None, 'intersection': intersection, 'city': city,
                         'street': street, 'street2': street2,
                         'resolution': resolution, 'geo_extracted_street': geo_extracted_street,
                         'geo_extracted_road_no': geo_extracted_road_no,

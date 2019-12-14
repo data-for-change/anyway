@@ -42,10 +42,7 @@ See the [Wiki](https://github.com/hasadna/anyway/wiki/Setting-up-a-Python-develo
 1. Populate the data (markers etc.): `python main.py process cbs`: this will take a few minutes if
    you're using the example files (default), but if you have the complete data it may take several
    hours.
-1. Populate United Hatzalah sample data: `python main.py process united --light` for the complete,
-   or more recent data please contact the Anyway team.
 1. Populate the CBS road segments data: `python main.py process road_segments`
-1. Populate CBS registered vehicles in cities : `python main.py process registered_vehicles`: this will take less than an hour
 1. Get the RSA file from [rsa file](https://drive.google.com/drive/folders/1oR3q-RBKy8AWXf5Z1JNBKD9cqqlEG-jC?usp=sharing) and extract the file into `/static/data/rsa`. To Populate RSA data: `python main.py process rsa <rsa_file_name>`
 1. Optionally, get the [traffic volume files](https://drive.google.com/drive/folders/1OJjNlJ6Li2be0olwn1lj9d-bh9MpWEdK?usp=sharing) after sending a permission request, and extract it into `/static/data/traffic_volume`. To Populate traffic volume data: `python main.py process traffic_volume`
 1. Populate the schools data `python main.py process schools`. [source file link](https://data.gov.il/dataset/school/resource/99b92311-9675-4351-85cd-9ed5ee69a787) (no need to download - already in static/data/schools)

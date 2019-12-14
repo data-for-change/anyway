@@ -6,6 +6,7 @@ from six import StringIO, iteritems
 import six
 import time
 
+
 import jinja2
 from flask import make_response, render_template, Response, jsonify, url_for, flash, abort
 from flask_assets import Environment
@@ -1333,6 +1334,31 @@ def get_dict_file(directory):
             raise ValueError("there are too many matches: " + filename)
         df = pd.read_csv(os.path.join(directory, files[0]), encoding="cp1255")
         yield name, df
+
+
+@app.route("/markers/polygon/", methods=["GET"])
+def acc_in_area_query():
+    # polygon will be received in the following format: 'POLYGON(({lon} {lat},{lon} {lat},........,{lonN},
+    # {latN}))' please note that start point and end point must be equal: i.e. lon=lonN, lat=latN
+    # Request format: http://{server url}/markers/polygon?polygon=POLYGON(({lon} {lat},{lon} {lat},........,{lonN},
+    # {latN}))"
+
+    pol_str = request.values.get('polygon')
+    if pol_str is None:
+        msg = "polygon parameter is mandatory and must be sent as part of the request - http://{host:port}/markers/polygon?polygon=POLYGON(({lon} {" \
+              "lat},{lon} {lat},........,{lonN},{latN}))"
+        raise abort(Response(msg))
+
+    query_obj = db.session.query(AccidentMarker) \
+        .filter(AccidentMarker.geom.intersects(pol_str)) \
+        .filter(or_((AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_1_CODE),
+               (AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_3_CODE)))
+
+    df = pd.read_sql_query(query_obj.with_labels().statement, query_obj.session.bind)
+    markers_in_area_list = df.to_dict(orient='records')
+    response = Response(json.dumps(markers_in_area_list, default=str), mimetype="application/json")
+    return response
+
 
 
 class ExtendedLoginForm(LoginForm):

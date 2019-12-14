@@ -12,6 +12,7 @@ import sys
 import re
 import six
 import logging
+import argparse
 
 # Headless servers cannot use GUI file dialog and require raw user input
 _fileDialogExist = True
@@ -20,7 +21,7 @@ try:
 except (ValueError, ImportError):
     _fileDialogExist = False
 
-
+DATE_INPUT_FORMAT = '%d-%m-%Y'
 _PROJECT_ROOT = os.path.join(os.path.dirname(__file__), '..')
 
 def init_flask():
@@ -139,6 +140,15 @@ def truncate_tables(db,tables):
     for table in tables:
         db.session.query(table).delete()
         db.session.commit()
+
+
+def valid_date(date_string):
+    from datetime import datetime
+    try:
+        return datetime.strptime(date_string, DATE_INPUT_FORMAT)
+    except ValueError:
+        msg = "Not a valid date: '{0}'. Date should be in the format DD-MM-YYYY".format(date_string)
+        raise argparse.ArgumentTypeError(msg)
 
 
 class ImporterUI(object):

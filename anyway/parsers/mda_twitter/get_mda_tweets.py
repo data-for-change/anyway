@@ -3,8 +3,7 @@ import re
 import datetime
 import tweepy
 
-from .geocode_extraction import geocode_extract
-from .location_extraction import UrbanAddress, NonUrbanAddress, get_db_matching_location_of_text, manual_filter_location_of_text
+from ..location_extraction import geocode_extract, manual_filter_location_of_text, get_db_matching_location, set_accident_resolution
 
 def extract_accident_time(text):
     """
@@ -31,63 +30,6 @@ def classify_tweets(text):
               u'אופניים' in text or u'קורקינט' in text)):
         return True
     return False
-
-
-def get_matching_location_of_text_from_db(location, geo_location):
-    """
-    get results of manual location matching
-    :param location: accident's location
-    :param geo_location: google maps geo_dict
-    :return: dictionary of manual matching results
-    """
-    db_location = get_db_matching_location_of_text(
-        location, geo_location)
-
-    if type(db_location) is NonUrbanAddress:
-        return {'road1': db_location.road1,
-                'road2': db_location.road2,
-                'intersection': db_location.intersection
-                }
-    elif type(db_location) is UrbanAddress:
-        return {'city': db_location.city,
-                'street': db_location.street,
-                'street2': db_location.street2
-                }
-
-
-def extract_road_number(location):
-    """
-    extract road number from location if exsist
-    :param text: accident's location
-    :return: extracted road number
-    """
-    road_number_regex = r'כביש (\d{1,4})'
-    road_search = re.search(road_number_regex, location)
-    if road_search:
-        return int(road_search.group(1))
-    return None
-
-
-def set_accident_resolution(accident_row):
-    """
-    set the resolution of the accident
-    :param text: single tweet of an accident
-    :return: resolution option
-    """
-    if accident_row['intersection'] != '' and accident_row['road_no'] != '':
-        return 'צומת בינעירוני'
-    elif accident_row['intersection'] != '':
-        return 'צומת עירוני'
-    elif accident_row['road_no'] != '':
-        return 'כביש בינעירוני'
-    elif accident_row['street'] != '':
-        return 'רחוב'
-    elif accident_row['city'] != '':
-        return 'עיר'
-    elif accident_row['district'] != '':
-        return 'מחוז'
-    else:
-        return 'אחר'
 
 
 def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret, access_key, access_secret, google_maps_key):
@@ -151,11 +93,11 @@ def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret,
     tweets_df['resolution'] = tweets_df.apply(
         lambda row: set_accident_resolution(row), axis=1)
 
-    tweets_df.rename({'tweet_text': 'title', 'lng': 'lon', 'tweet_id': 'id', 'road_no': 'geo_extracted_road_no', 'street': 'geo_extracted_street',
+    tweets_df.rename({'tweet_text': 'title', 'lng': 'lon', 'road_no': 'geo_extracted_road_no', 'street': 'geo_extracted_street',
                       'intersection': 'geo_extracted_intersection', 'city': 'geo_extracted_city', 'address': 'geo_extracted_address', 'district': 'geo_extracted_district'}, axis=1, inplace=True)
 
-    tweets_df['location_db'] = tweets_df.apply(lambda row: get_matching_location_of_text_from_db(
-        row['location'], row['google_location']), axis=1)
+    tweets_df['location_db'] = tweets_df.apply(lambda row: get_db_matching_location(
+        row['lat'], row['lon'],row['resolution'],row['road_no']), axis=1)
     tweets_df = pd.concat(
         [tweets_df, tweets_df['location_db'].apply(pd.Series)], axis=1)
 

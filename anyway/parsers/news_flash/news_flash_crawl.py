@@ -3,7 +3,7 @@
 import feedparser
 from datetime import datetime
 from scrapy.crawler import CrawlerProcess
-from anyway.parsers.news_flash.news_flash_parser import get_latest_id_from_db, get_latest_date_from_db
+from .news_flash_parser import get_latest_date_from_db
 from .ynet_spider import YnetFlashScrap
 
 
@@ -15,7 +15,6 @@ def news_flash_crawl(rss_link, site_name, maps_key):
     :param maps_key: google maps key for geocode
     :return: scraped news_flash are added to the db
     """
-    id_flash = get_latest_id_from_db() + 1
     latest_date = get_latest_date_from_db()
     d = feedparser.parse(rss_link)
     process = CrawlerProcess()
@@ -23,7 +22,7 @@ def news_flash_crawl(rss_link, site_name, maps_key):
         entry_parsed_date = datetime.strptime(entry.published[:-6], '%a, %d %b %Y %H:%M:%S')
         entry_parsed_date = entry_parsed_date.replace(tzinfo=None)
         if (latest_date is not None and entry_parsed_date > latest_date) or latest_date is None:
-            news_item = {'id_flash': id_flash, 'date_parsed': entry_parsed_date, 'title': entry.title,
+            news_item = {'date_parsed': entry_parsed_date, 'title': entry.title,
                          'link': entry.links[0].href, 'date': entry.published, 'location': '', 'lat': 0, 'lon': 0}
             if ((u'תאונ' in entry.title and u'תאונת עבודה' not in entry.title and u'תאונות עבודה' not in entry.title)
                 or ((u'רכב' in entry.title or u'אוטובוס' in entry.title or u"ג'יפ" in entry.title
@@ -45,5 +44,4 @@ def news_flash_crawl(rss_link, site_name, maps_key):
             if site_name == 'ynet':
                 news_item['source'] = 'ynet'
                 process.crawl(YnetFlashScrap, entry.links[0].href, news_item=news_item, maps_key=maps_key)
-            id_flash = id_flash + 1
     process.start()

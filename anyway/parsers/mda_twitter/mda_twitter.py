@@ -4,20 +4,32 @@ from flask_sqlalchemy import SQLAlchemy
 import os
 
 
+def get_latest_sequential_id_from_db(db):
+    """
+    get the next sequential id from news_flash table
+    :return: latest sequential id
+    """
+    sequential_id = db.session.execute(
+        "SELECT id FROM news_flash ORDER BY date DESC LIMIT 1").fetchone()
+    if sequential_id:
+        return sequential_id[0]
+
+
 def get_latest_tweet_id_from_db(db):
     """
     get the latest tweet id
     :return: latest tweet id
     """
     tweet_id = db.session.execute(
-        "SELECT id FROM news_flash where source='twitter' ORDER BY date DESC LIMIT 1").fetchone()
+        "SELECT tweet_id FROM news_flash where source='twitter' ORDER BY date DESC LIMIT 1").fetchone()
     if tweet_id:
         return tweet_id[0]
 
-def insert_mda_tweet(db, id_tweet, title, link, date_parsed, author, description, location, lat, lon, road1,
+
+def insert_mda_tweet(db, tweet_id, title, link, date_parsed, author, description, location, lat, lon, road1,
                      road2, intersection, city, street, street2, resolution, geo_extracted_street,
                      geo_extracted_road_no, geo_extracted_intersection, geo_extracted_city,
-                     geo_extracted_address, geo_extracted_district, accident, source):
+                     geo_extracted_address, geo_extracted_district, accident, source, sequential_id):
     """
     insert new mda_tweet to db
     :param id_tweet: id of the mda_tweet
@@ -44,16 +56,17 @@ def insert_mda_tweet(db, id_tweet, title, link, date_parsed, author, description
     :param geo_extracted_district: district from data extracted from the geopoint
     :param accident: is the mda tweet an accident
     :param source: source of the mda tweet
+    :param sequential_id: sequential id for the new row
     """
     db.session.execute('INSERT INTO news_flash (id,title, link, date, author, description, location, lat, lon, '
                        'road1, road2, intersection, city, street, street2, resolution, geo_extracted_street, '
                        'geo_extracted_road_no, geo_extracted_intersection, geo_extracted_city, '
-                       'geo_extracted_address, geo_extracted_district, accident, source) VALUES \
+                       'geo_extracted_address, geo_extracted_district, accident, source, tweet_id) VALUES \
                        (:id, :title, :link, :date, :author, :description, :location, :lat, :lon, \
                        :road1, :road2, :intersection, :city, :street, :street2, :resolution, :geo_extracted_street,\
                        :geo_extracted_road_no, :geo_extracted_intersection, :geo_extracted_city, \
-                       :geo_extracted_address, :geo_extracted_district, :accident, :source)',
-                       {'id': id_tweet, 'title': title, 'link': link, 'date': date_parsed, 'author': author,
+                       :geo_extracted_address, :geo_extracted_district, :accident, :source, :tweet_id)',
+                       {'id': sequential_id, 'title': title, 'link': link, 'date': date_parsed, 'author': author,
                         'description': description, 'location': location, 'lat': lat, 'lon': lon,
                         'road1': int(road1) if road1 else road1,
                         'road2': int(road2) if road2 else road2, 'intersection': intersection, 'city': city,
@@ -64,7 +77,8 @@ def insert_mda_tweet(db, id_tweet, title, link, date_parsed, author, description
                         'geo_extracted_city': geo_extracted_city,
                         'geo_extracted_address': geo_extracted_address,
                         'geo_extracted_district': geo_extracted_district,
-                        'accident': accident, 'source': source})
+                        'accident': accident, 'source': source,
+                        'tweet_id': tweet_id})
     db.session.commit()
 
 
@@ -82,6 +96,9 @@ def mda_twitter():
     twitter_user = 'mda_israel'
 
     latest_tweet_id = get_latest_tweet_id_from_db(db)
+
+    # the next id to be used for the first new row
+    next_sequential_id = get_latest_sequential_id_from_db(db) + 1
 
     # check if there are any MDA tweets in the DB
     if latest_tweet_id:
@@ -102,4 +119,6 @@ def mda_twitter():
         insert_mda_tweet(db, tweet_id, title, link, date, author, description, location, lat, lon, road1,
                          road2, intersection, city, street, street2, resolution, geo_extracted_street,
                          geo_extracted_road_no, geo_extracted_intersection, geo_extracted_city,
-                         geo_extracted_address, geo_extracted_district, accident, source)
+                         geo_extracted_address, geo_extracted_district, accident, source, next_sequential_id)
+
+        next_sequential_id += 1

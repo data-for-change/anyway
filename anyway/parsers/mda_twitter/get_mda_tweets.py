@@ -3,8 +3,8 @@ import re
 import datetime
 import tweepy
 
-from ..news_flash.geocode_extraction import geocode_extract
-from ..news_flash.location_extraction import UrbanAddress, NonUrbanAddress, get_db_matching_location_of_text, manual_filter_location_of_text
+from .geocode_extraction import geocode_extract
+from .location_extraction import UrbanAddress, NonUrbanAddress, get_db_matching_location_of_text, manual_filter_location_of_text
 
 def extract_accident_time(text):
     """

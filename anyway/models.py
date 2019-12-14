@@ -682,6 +682,7 @@ class NewsFlash(Base):
     title = Column(Text(), nullable=True)
     source = Column(Text(), nullable=True)
     location = Column(Text(), nullable=True)
+    tweet_id = Column(BigInteger(), nullable=True)
 
     def serialize(self):
         return {

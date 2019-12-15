@@ -6,6 +6,8 @@ from six import StringIO, iteritems
 import six
 import time
 
+
+
 import jinja2
 from flask import make_response, render_template, Response, jsonify, url_for, flash, abort
 from flask_assets import Environment
@@ -42,7 +44,7 @@ from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved,
                      LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School, SchoolWithDescription,
                      InjuredAroundSchool, InjuredAroundSchoolAllData, Sex, AccidentMonth, InjurySeverity, ReportProblem,
                      EngineVolume, PopulationType, Region, District, NaturalArea, MunicipalStatus, YishuvShape,
-                     TotalWeight, DrivingDirections, AgeGroup)
+                     TotalWeight, DrivingDirections, AgeGroup, Municipality)
 from .config import ENTRIES_PER_PAGE
 from six.moves import http_client
 from sqlalchemy import func
@@ -1309,6 +1311,33 @@ def get_dict_file(directory):
             raise ValueError("there are too many matches: " + filename)
         df = pd.read_csv(os.path.join(directory, files[0]), encoding="cp1255")
         yield name, df
+
+
+@app.route("/api/markers/polygon/<string:pol_str>", methods=["GET"])
+def get_acc_in_area_query(pol_str):
+    # polygon will be received in the following format: 'POLYGON(({lon} {lat},{lon} {lat},........,{lonN},
+    # {latN}))' please note that start point and end point must be equal: i.e. lon=lonN, lat=latN
+    # Request format: http://{server url}/api/markers/polygon/POLYGON(({lon} {lat},{lon} {lat},........,{lonN},
+    # {latN}))"
+
+    query_obj = db.session.query(AccidentMarker) \
+        .filter(AccidentMarker.geom.intersects(pol_str)) \
+        .filter(or_((AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_1_CODE),
+               (AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_3_CODE)))
+
+    df = pd.read_sql_query(query_obj.with_labels().statement, query_obj.session.bind)
+    markers_in_area_list = df.to_dict(orient='records')
+    response = Response(json.dumps(markers_in_area_list, default=str), mimetype="application/json")
+    return response
+
+
+@app.route("/api/markers/muni/<int:muni_id>", methods=["GET"])
+def get_acc_in_muni_by_id(muni_id):
+    # Request format: http://{server url}/api/markers/muni/<municipality.id as retrieved from municipalities table>
+    muni_query_obj = db.session.query(Municipality).filter(Municipality.id == muni_id).first()
+    if muni_query_obj is not None:
+        return get_acc_in_area_query(muni_query_obj.polygon)
+    return Response(status=404)
 
 
 class ExtendedLoginForm(LoginForm):

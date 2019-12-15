@@ -1603,3 +1603,14 @@ class ReportProblem(Base):
     send_to_municipality = Column(Boolean())
     image_data = Column(String())
     personal_id = Column(String(20))
+
+
+class Municipality(Base):
+    __tablename__ = "municipalities"
+    id = Column(BigInteger(), primary_key=True)
+    heb_name = Column(String(100))
+    eng_name = Column(String(100))
+    polygon = Column(Geometry('POLYGON'))
+    symbol = Column(Integer())
+    osm_id = Column(Integer())
+    file_name = Column(String(100))

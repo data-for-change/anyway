@@ -1313,6 +1313,7 @@ def get_dict_file(directory):
         yield name, df
 
 
+
 @app.route("/api/markers/polygon/<string:pol_str>", methods=["GET"])
 def get_acc_in_area_query(pol_str):
     # polygon will be received in the following format: 'POLYGON(({lon} {lat},{lon} {lat},........,{lonN},

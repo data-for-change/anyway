@@ -1,11 +1,10 @@
 import os
 
+from anyway.parsers.news_flash_parser import insert_new_flash_news, get_latest_tweet_id_from_db
 from .get_mda_tweets import get_user_tweets
-from ..news_flash.news_flash_parser import insert_new_flash_news, get_latest_tweet_id_from_db
 
 
 def mda_twitter():
-
     TWITTER_CONSUMER_KEY = os.environ.get('TWITTER_CONSUMER_KEY')
     TWITTER_CONSUMER_SECRET = os.environ.get('TWITTER_CONSUMER_SECRET')
     TWITTER_ACCESS_KEY = os.environ.get('TWITTER_ACCESS_KEY')
@@ -30,9 +29,11 @@ def mda_twitter():
         return
 
     mda_tweets = mda_tweets.loc[:, ['tweet_id', 'title', 'link', 'date', 'author', 'description', 'location', 'lat',
-                             'lon', 'resolution', 'region_hebrew', 'district_hebrew', 'yishuv_name', 'street1_hebrew',
-                             'street2_hebrew', 'non_urban_intersection_hebrew', 'road1', 'road2', 'road_segment_name',
-                             'accident', 'source']]
+                                    'lon', 'resolution', 'region_hebrew', 'district_hebrew', 'yishuv_name',
+                                    'street1_hebrew',
+                                    'street2_hebrew', 'non_urban_intersection_hebrew', 'road1', 'road2',
+                                    'road_segment_name',
+                                    'accident', 'source']]
 
     for row in mda_tweets.itertuples(index=False):
         (tweet_id, title, link, date, author, description, location, lat, lon, resolution,

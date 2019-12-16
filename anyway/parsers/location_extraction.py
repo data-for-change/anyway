@@ -6,7 +6,7 @@ import geohash  # python-geohash package
 import googlemaps
 from geographiclib.geodesic import Geodesic
 
-from .news_flash.news_flash_parser import get_markers_for_location_extraction
+from anyway.parsers.news_flash_parser import get_markers_for_location_extraction
 
 resolution_dict = {'מחוז': ['region_hebrew'], 'נפה': ['district_hebrew'], 'עיר': ['yishuv_name'],
                    'רחוב': ['yishuv_name', 'street1_hebrew'],
@@ -31,7 +31,7 @@ def extract_road_number(location):
 
 
 def get_db_matching_location(latitude, longitude, resolution, road_no=None):
-    '''
+    """
     extracts location from db by closest geo point to location found, using road number if provided and limits to
     requested resolution
     :param latitude: location latitude
@@ -40,7 +40,7 @@ def get_db_matching_location(latitude, longitude, resolution, road_no=None):
     :param road_no: road number if there is
     :return: a dict containing all the geo fields stated in
     resolution dict, with values filled according to resolution
-    '''
+    """
     geod = Geodesic.WGS84
 
     relevant_fields = resolution_dict[resolution]

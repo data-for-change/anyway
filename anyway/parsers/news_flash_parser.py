@@ -19,24 +19,47 @@ def get_markers_for_location_extraction():
                 road_segment_name,
                 longitude,
                 latitude
-FROM markers_hebrew
-WHERE (provider_code=1
-       OR provider_code=3)
-  AND (longitude>0
-       AND latitude>0)''')
+            FROM markers_hebrew
+            WHERE (provider_code=1
+                   OR provider_code=3)
+              AND (longitude>0
+                   AND latitude>0)''')
     df = pd.DataFrame(query_res.fetchall())
     df.columns = query_res.keys()
     return df
 
 
-def get_description(ind):
+def get_description(news_flash_id):
     """
     get description by news_flash id
-    :param ind: news_flash id
+    :param news_flash_id: news_flash id
     :return: description of news_flash
     """
-    description = db.session.execute('SELECT description FROM news_flash WHERE id=:id', {'id': ind}).fetchone()
-    return description
+    description = db.session.execute('SELECT description FROM news_flash WHERE id=:id',
+                                     {'id': news_flash_id}).fetchone()
+    return description[0]
+
+
+def get_title(news_flash_id):
+    """
+    get title by news_flash id
+    :param news_flash_id: news_flash id
+    :return: title of news_flash
+    """
+    title = db.session.execute('SELECT title FROM news_flash WHERE id=:id',
+                               {'id': news_flash_id}).fetchone()
+    return title[0]
+
+
+def get_source(news_flash_id):
+    """
+    get source by news_flash id
+    :param news_flash_id: news_flash id
+    :return: source of news_flash
+    """
+    source = db.session.execute('SELECT source FROM news_flash WHERE id=:id',
+                                {'id': news_flash_id}).fetchone()
+    return source[0]
 
 
 def insert_new_flash_news(title, link, date_parsed, author, description, location, lat, lon, resolution,
@@ -102,38 +125,39 @@ def get_latest_tweet_id_from_db():
         return tweet_id[0]
 
 
-def update_location_by_id(ind, accident, location, lat, lon):
+def update_news_flash_by_id(news_flash_id, params_dict):
     """
     update news flash with new parameters
-    :param ind: id of news flash to update
-    :param accident: update accident status
-    :param location: update of textual location
-    :param lat: new found latitude
-    :param lon: new found longitude
     :return:
     """
-    db.session.execute(
-        'UPDATE news_flash SET accident = :accident, location = :location, lat = :lat, lon = :lon WHERE id=:id',
-        {'accident': accident, 'location': location, 'lat': lat, 'lon': lon, 'id': ind})
-    db.session.commit()
+    sql_query = 'UPDATE news_flash SET '
+    if params_dict is not None and len(params_dict) > 0:
+        for k, v in params_dict.items():
+            sql_query = sql_query + '{key} = :{key}, '.format(key=k)
+        if sql_query.endswith(', '):
+            sql_query = sql_query[:-2]
+        sql_query = sql_query + ' WHERE id:=id'
+        params_dict['id'] = news_flash_id
+        db.session.execute(sql_query, params_dict)
+        db.session.commit()
 
 
-def get_title(ind):
-    """
-    title of news flash by id
-    :param ind: id
-    :return: title of corresponding news flash
-    """
-    title = db.session.execute('SELECT title FROM news_flash WHERE id=:id', {'id': ind}).fetchone()
-    return title
+def get_all_news_flash_ids(source=None):
+    if source is not None:
+        res = db.session.execute(
+            'SELECT DISTINCT id FROM news_flash where source=:source', {'source': source}).fetchall()
+    else:
+        res = db.session.execute('SELECT DISTINCT id FROM news_flash').fetchall()
+    return [r[0] for r in res]
 
 
-def get_latest_date_from_db():
+def get_latest_date_from_db(source):
     """
     returns latest date of news flash
     :return: latest date of news flash
     """
-    latest_date = db.session.execute('SELECT date FROM news_flash ORDER BY id DESC LIMIT 1').fetchone()
+    latest_date = db.session.execute(
+        'SELECT date FROM news_flash WHERE source=:source ORDER BY date DESC LIMIT 1', {'source': source}).fetchone()
     if latest_date is None:
         return None
     return latest_date[0].replace(tzinfo=None)

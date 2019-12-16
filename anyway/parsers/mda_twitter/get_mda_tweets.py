@@ -4,6 +4,7 @@ import re
 import pandas as pd
 import tweepy
 
+from anyway.parsers.news_flash_classifiers import classify_tweets
 from ..location_extraction import geocode_extract, manual_filter_location_of_text, get_db_matching_location, \
     set_accident_resolution
 
@@ -20,20 +21,6 @@ def extract_accident_time(text):
         return time_search.group(1)
     return None
 
-
-def classify_tweets(text):
-    """
-    classify tweets for tweets about car accidents and others
-    :param text: tweet text
-    :return: boolean, true if tweet is about car accident, false for others
-    """
-    if text.startswith(u'בשעה') and \
-            ((u'הולך רגל' in text or u'הולכת רגל' in text or u'נהג' in text or u'אדם' in text) and
-             (
-                     u'רכב' in text or u'מכונית' in text or u'אופנוע' in text or u"ג'יפ" in text or u'טרקטור' in text or u'משאית' in text or
-                     u'אופניים' in text or u'קורקינט' in text)):
-        return True
-    return False
 
 
 def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret, access_key, access_secret,

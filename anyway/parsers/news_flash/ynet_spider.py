@@ -2,7 +2,7 @@ import logging
 
 import scrapy
 
-from .news_flash_parser import insert_new_flash_news
+from anyway.parsers.news_flash_parser import insert_new_flash_news
 from ..location_extraction import manual_filter_location_of_text, geocode_extract, get_db_matching_location, \
     set_accident_resolution
 

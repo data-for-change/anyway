@@ -9,10 +9,13 @@ from .location_extraction import manual_filter_location_of_text
 
 
 class YnetFlashScrap(scrapy.Spider):
-    name = 'ynet_flash_scrap'
-    news_item = {}
-    maps_key = ''
-    custom_settings = {'LOG_ENABLED': False, }
+    """
+    class to scrap Ynet flash news, compatible with scrapy's API
+    """
+    name = 'ynet_flash_scrap'  # scraper name
+    news_item = {}  # news_item dict
+    maps_key = ''  # google maps key
+    custom_settings = {'LOG_ENABLED': False, }  # scrapy custom settings
 
     def __init__(self, url='', news_item=None, maps_key='', **kwargs):
         super().__init__(**kwargs)
@@ -23,6 +26,10 @@ class YnetFlashScrap(scrapy.Spider):
         self.maps_key = maps_key
 
     def parse(self, response):
+        """
+        process a news_flash and adds result to DB
+        :param response: response from scrapy
+        """
         location = ''
         self.news_item['description'] = ''
         self.news_item['author'] = ''

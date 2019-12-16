@@ -2,14 +2,6 @@ import googlemaps
 
 
 def geocode_extract(location, maps_key):
-    """
-    this method takes a string representing location and a google maps key and returns a dict of the corresponding
-    location found on google maps (by that string), describing details of the location found and the geometry
-    :param location: string representing location
-    :param maps_key: google maps API key
-    :return: a dict containing data about the found location on google maps, with the keys: street,
-    road_no [road number], intersection, city, address, district and the geometry of the location.
-    """
     gmaps = googlemaps.Client(key=maps_key)
     geocode_result = gmaps.geocode(location, region='il', language='iw')
     if geocode_result is None or geocode_result == []:

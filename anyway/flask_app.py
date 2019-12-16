@@ -16,7 +16,7 @@ from webassets import Environment as AssetsEnvironment
 from flask_babel import Babel, gettext
 from .clusters_calculator import retrieve_clusters
 from sqlalchemy.orm import load_only
-from sqlalchemy import and_, not_, or_, func
+from sqlalchemy import and_, not_, or_
 from flask import request, redirect, session
 import logging
 import datetime
@@ -40,7 +40,7 @@ from flask_compress import Compress
 from .oauth import OAuthSignIn
 
 from .base import user_optional
-from .models import (AccidentMarker, AccidentMarkerView, DiscussionMarker, HighlightPoint, Involved, User, ReportPreferences,
+from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved, User, ReportPreferences,
                      LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School, SchoolWithDescription,
                      InjuredAroundSchool, InjuredAroundSchoolAllData, Sex, AccidentMonth, InjurySeverity, ReportProblem,
                      EngineVolume, PopulationType, Region, District, NaturalArea, MunicipalStatus, YishuvShape,

@@ -1605,7 +1605,6 @@ class ReportProblem(Base):
     personal_id = Column(String(20))
 
 
-
 class Municipality(Base):
     __tablename__ = "municipalities"
     id = Column(BigInteger(), primary_key=True)

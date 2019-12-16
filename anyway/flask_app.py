@@ -1313,7 +1313,6 @@ def get_dict_file(directory):
         yield name, df
 
 
-
 @app.route("/api/markers/polygon/<string:pol_str>", methods=["GET"])
 def get_acc_in_area_query(pol_str):
     # polygon will be received in the following format: 'POLYGON(({lon} {lat},{lon} {lat},........,{lonN},
@@ -1338,7 +1337,7 @@ def get_acc_in_muni_by_id(muni_id):
     muni_query_obj = db.session.query(Municipality).filter(Municipality.id == muni_id).first()
     if muni_query_obj is not None:
         return get_acc_in_area_query(muni_query_obj.polygon)
-    return Response(status=404)
+    return Response("Failed to find municipality for id: " + str(muni_id))
 
 
 class ExtendedLoginForm(LoginForm):

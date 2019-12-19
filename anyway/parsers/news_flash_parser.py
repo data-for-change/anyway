@@ -132,7 +132,7 @@ def update_news_flash_by_id(news_flash_id, params_dict):
     """
     sql_query = 'UPDATE news_flash SET '
     if params_dict is not None and len(params_dict) > 0:
-        for k, v in params_dict.items():
+        for k, _ in params_dict.items():
             sql_query = sql_query + '{key} = :{key}, '.format(key=k)
         if sql_query.endswith(', '):
             sql_query = sql_query[:-2]

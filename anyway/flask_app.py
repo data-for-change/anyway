@@ -1492,21 +1492,43 @@ def oauth_callback(provider):
     login.login_user(user, True)
     return redirect(url_for('index'))
 
-@app.route('/api/accidents_in_city_by_year_severity', methods=['GET'])
-def get_accidents_in_city_by_year_severity():
-    yishuv_symbol = request.values.get('yishuv_symbol')
-    results = db.session.query(
-                AccidentMarkerView.accident_year,
-                AccidentMarkerView.accident_severity_hebrew,
-                func.count(AccidentMarkerView.accident_year).label('count')
+def get_accidents_in_location(request, filters=None, by_severity=None, by_year=None):
+    filters = filters or []
+    location_field_names = ['yishuv_symbol', 'street1_hebrew', 'street2_hebrew', 'road1', 'road2', 'road_segment_number', 'road_segment_id']
+    location_filters = [(field_name, request.values.get(field_name)) for field_name in location_field_names if request.values.get(field_name)]
+    filters.extend(location_filters)
+    select = []
+    if by_year:
+        select.append(AccidentMarkerView.accident_year)
+    if by_severity:
+        select.append(AccidentMarkerView.accident_severity_hebrew)
+    if by_year or by_severity:
+        count_column_name = 'accident_year' if by_year else 'accident_severity'
+        select.append(func.count(getattr(AccidentMarkerView, count_column_name)).label('count'))
+    select = select or [AccidentMarkerView]
+    query = db.session.query(*select
             ).filter(
-                AccidentMarkerView.yishuv_symbol==yishuv_symbol,
-                or_(AccidentMarkerView.provider_code==CONST.CBS_ACCIDENT_TYPE_1_CODE, AccidentMarkerView.provider_code==CONST.CBS_ACCIDENT_TYPE_3_CODE)
-            ).group_by(
-                AccidentMarkerView.accident_year,
-                AccidentMarkerView.accident_severity_hebrew
-            ).order_by(
-                AccidentMarkerView.accident_year,
-                AccidentMarkerView.accident_severity_hebrew
-            ).all()
-    return Response(json.dumps([r._asdict() for r in results], default=str), mimetype="application/json")
+                AccidentMarkerView.provider_code.in_([CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE])
+            )
+    for condition in filters:
+        key, value = condition
+        query = query.filter(getattr(AccidentMarkerView, key)==value)
+    if by_year:
+        query = query.group_by(AccidentMarkerView.accident_year).order_by(AccidentMarkerView.accident_year)
+    if by_severity:
+        query = query.group_by(AccidentMarkerView.accident_severity_hebrew).order_by(AccidentMarkerView.accident_severity_hebrew)
+    df = pd.read_sql_query(query.statement, query.session.bind)
+    return df.to_dict(orient='records')
+
+@app.route('/api/accidents_by_severity_in_location', methods=['GET'])
+def get_accidents_severity_in_location():
+    return Response(json.dumps(get_accidents_in_location(request, by_severity=True), default=str), mimetype="application/json")
+
+@app.route('/api/accidents_by_year_in_location', methods=['GET'])
+def get_accidents_year_in_location():
+    return Response(json.dumps(get_accidents_in_location(request, by_year=True), default=str), mimetype="application/json")
+
+@app.route('/api/accidents_by_year_and_severity_in_location', methods=['GET'])
+def get_accidents_year_and_severity_in_location():
+    return Response(json.dumps(get_accidents_in_location(request, by_severity=True, by_year=True), default=str), mimetype="application/json")
+

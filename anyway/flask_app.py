@@ -1,54 +1,52 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=no-member
-import os
 import csv
-from six import StringIO, iteritems
-import six
-import time
-
-
-import jinja2
-from flask import make_response, render_template, Response, jsonify, url_for, flash, abort
-from flask_assets import Environment
-from webassets.ext.jinja2 import AssetsExtension
-from webassets import Environment as AssetsEnvironment
-from flask_babel import Babel, gettext
-from .clusters_calculator import retrieve_clusters
-from sqlalchemy.orm import load_only
-from sqlalchemy import and_, not_, or_, func
-from flask import request, redirect, session
-import logging
 import datetime
-import json
-from . import utilities
-from .constants import CONST
-
-from wtforms import form, fields, validators, StringField, PasswordField, Form
-import flask_admin as admin
-import flask_login as login
-from flask_admin.contrib import sqla
-from flask_admin import helpers, expose, BaseView
-from werkzeug.security import check_password_hash
-from sendgrid import Mail
 # from sendgrid import SendGridAPIClient
 import glob
-from flask_sqlalchemy import SQLAlchemy
-from flask_security import Security, SQLAlchemyUserDatastore, roles_required, current_user, LoginForm, login_required
+import json
+import logging
+import os
+import time
+
+import flask_admin as admin
+import flask_login as login
+import jinja2
+import pandas as pd
+import six
+from flask import make_response, render_template, Response, jsonify, url_for, flash, abort
+from flask import request, redirect, session
+from flask_admin import helpers, expose, BaseView
+from flask_admin.contrib import sqla
+from flask_assets import Environment
+from flask_babel import Babel, gettext
 from flask_compress import Compress
+from flask_cors import CORS
+from flask_security import Security, SQLAlchemyUserDatastore, roles_required, current_user, LoginForm, login_required
+from flask_sqlalchemy import SQLAlchemy
+from sendgrid import Mail
+from six import StringIO, iteritems
+from six.moves import http_client
+from sqlalchemy import and_, not_, or_
+from sqlalchemy import func
+from sqlalchemy.orm import load_only
+from webassets import Environment as AssetsEnvironment
+from webassets.ext.jinja2 import AssetsExtension
+from werkzeug.security import check_password_hash
+from wtforms import form, fields, validators, StringField, PasswordField, Form
 
-from .oauth import OAuthSignIn
-
+from . import utilities
 from .base import user_optional
-from .models import (AccidentMarker, AccidentMarkerView, DiscussionMarker, HighlightPoint, Involved, User, ReportPreferences,
+from .clusters_calculator import retrieve_clusters
+from .config import ENTRIES_PER_PAGE
+from .constants import CONST
+from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved, User,
+                     ReportPreferences,
                      LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School, SchoolWithDescription,
                      InjuredAroundSchool, InjuredAroundSchoolAllData, Sex, AccidentMonth, InjurySeverity, ReportProblem,
                      EngineVolume, PopulationType, Region, District, NaturalArea, MunicipalStatus, YishuvShape,
                      TotalWeight, DrivingDirections, AgeGroup, AccidentMarkerView)
-from .config import ENTRIES_PER_PAGE
-from six.moves import http_client
-from sqlalchemy import func
-import pandas as pd
-from flask_cors import CORS
+from .oauth import OAuthSignIn
 
 app = utilities.init_flask()
 db = SQLAlchemy(app)
@@ -307,6 +305,7 @@ def single_news_flash(news_flash_id):
     if news_flash_obj is not None:
         return Response(json.dumps(news_flash_obj.serialize(), default=str), mimetype="application/json")
     return Response(status=404)
+
 
 @app.route("/api/schools", methods=["GET"])
 @user_optional
@@ -663,18 +662,21 @@ def get_involved_dict(provider_code, accident_year):
     home_natural_area = db.session.query(NaturalArea).filter(and_(NaturalArea.provider_code == provider_code,
                                                                   NaturalArea.year == accident_year)).all()
 
-    involved["home_natural_area"] = {g.id: g.natural_area_hebrew for g in home_natural_area} if home_natural_area else None
+    involved["home_natural_area"] = {g.id: g.natural_area_hebrew for g in
+                                     home_natural_area} if home_natural_area else None
 
     home_municipal_status = db.session.query(MunicipalStatus).filter(
         and_(MunicipalStatus.provider_code == provider_code,
              MunicipalStatus.year == accident_year)).all()
     involved[
-        "home_municipal_status"] = {g.id: g.municipal_status_hebrew for g in home_municipal_status} if home_municipal_status else None
+        "home_municipal_status"] = {g.id: g.municipal_status_hebrew for g in
+                                    home_municipal_status} if home_municipal_status else None
 
     home_yishuv_shape = db.session.query(YishuvShape).filter(and_(YishuvShape.provider_code == provider_code,
                                                                   YishuvShape.year == accident_year)).all()
 
-    involved["home_yishuv_shape"] = {g.id: g.yishuv_shape_hebrew for g in home_yishuv_shape} if home_yishuv_shape else None
+    involved["home_yishuv_shape"] = {g.id: g.yishuv_shape_hebrew for g in
+                                     home_yishuv_shape} if home_yishuv_shape else None
 
     return involved
 
@@ -682,7 +684,7 @@ def get_involved_dict(provider_code, accident_year):
 def get_vehicle_dict(provider_code, accident_year):
     vehicle = {}
     engine_volume = db.session.query(EngineVolume) \
-        .filter(and_(EngineVolume.provider_code == provider_code, EngineVolume.year == accident_year))\
+        .filter(and_(EngineVolume.provider_code == provider_code, EngineVolume.year == accident_year)) \
         .all()
 
     vehicle["engine_volume"] = {g.id: g.engine_volume_hebrew for g in engine_volume} if engine_volume else None
@@ -695,7 +697,8 @@ def get_vehicle_dict(provider_code, accident_year):
     driving_directions = db.session.query(DrivingDirections) \
         .filter(and_(DrivingDirections.provider_code == provider_code, DrivingDirections.year == accident_year)) \
         .all()
-    vehicle["driving_directions"] = {g.id: g.driving_directions_hebrew for g in driving_directions} if driving_directions else None
+    vehicle["driving_directions"] = {g.id: g.driving_directions_hebrew for g in
+                                     driving_directions} if driving_directions else None
 
     return vehicle
 
@@ -746,12 +749,16 @@ def marker_all():
         obj = inv.serialize()
         new_inv = get_involved_dict(provider_code, accident_year)
         obj["age_group"] = new_inv["age_group"].get(obj["age_group"]) if new_inv["age_group"] else None
-        obj["population_type"] = new_inv["population_type"].get(obj["population_type"]) if new_inv["population_type"] else None
+        obj["population_type"] = new_inv["population_type"].get(obj["population_type"]) if new_inv[
+            "population_type"] else None
         obj["home_region"] = new_inv["home_region"].get(obj["home_region"]) if new_inv["home_region"] else None
         obj["home_district"] = new_inv["home_district"].get(obj["home_district"]) if new_inv["home_district"] else None
-        obj["home_natural_area"] = new_inv["home_natural_area"].get(obj["home_natural_area"]) if new_inv["home_natural_area"] else None
-        obj["home_municipal_status"] = new_inv["home_municipal_status"].get(obj["home_municipal_status"]) if new_inv["home_municipal_status"] else None
-        obj["home_yishuv_shape"] = new_inv["home_yishuv_shape"].get(obj["home_yishuv_shape"]) if new_inv["home_yishuv_shape"] else None
+        obj["home_natural_area"] = new_inv["home_natural_area"].get(obj["home_natural_area"]) if new_inv[
+            "home_natural_area"] else None
+        obj["home_municipal_status"] = new_inv["home_municipal_status"].get(obj["home_municipal_status"]) if new_inv[
+            "home_municipal_status"] else None
+        obj["home_yishuv_shape"] = new_inv["home_yishuv_shape"].get(obj["home_yishuv_shape"]) if new_inv[
+            "home_yishuv_shape"] else None
 
         list_to_return.append(obj)
 
@@ -760,7 +767,8 @@ def marker_all():
         new_veh = get_vehicle_dict(provider_code, accident_year)
         obj["engine_volume"] = new_veh["engine_volume"].get(obj["engine_volume"]) if new_veh["engine_volume"] else None
         obj["total_weight"] = new_veh["total_weight"].get(obj["total_weight"]) if new_veh["total_weight"] else None
-        obj["driving_directions"] = new_veh["driving_directions"].get(obj["driving_directions"]) if new_veh["driving_directions"] else None
+        obj["driving_directions"] = new_veh["driving_directions"].get(obj["driving_directions"]) if new_veh[
+            "driving_directions"] else None
 
         list_to_return.append(obj)
     return make_response(json.dumps(list_to_return, ensure_ascii=False))
@@ -1386,13 +1394,12 @@ def acc_in_area_query():
     query_obj = db.session.query(AccidentMarker) \
         .filter(AccidentMarker.geom.intersects(pol_str)) \
         .filter(or_((AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_1_CODE),
-               (AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_3_CODE)))
+                    (AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_3_CODE)))
 
     df = pd.read_sql_query(query_obj.with_labels().statement, query_obj.session.bind)
     markers_in_area_list = df.to_dict(orient='records')
     response = Response(json.dumps(markers_in_area_list, default=str), mimetype="application/json")
     return response
-
 
 
 class ExtendedLoginForm(LoginForm):
@@ -1492,21 +1499,23 @@ def oauth_callback(provider):
     login.login_user(user, True)
     return redirect(url_for('index'))
 
+
 @app.route('/api/accidents_in_city_by_year_severity', methods=['GET'])
 def get_accidents_in_city_by_year_severity():
     yishuv_symbol = request.values.get('yishuv_symbol')
     results = db.session.query(
-                AccidentMarkerView.accident_year,
-                AccidentMarkerView.accident_severity_hebrew,
-                func.count(AccidentMarkerView.accident_year).label('count')
-            ).filter(
-                AccidentMarkerView.yishuv_symbol==yishuv_symbol,
-                or_(AccidentMarkerView.provider_code==CONST.CBS_ACCIDENT_TYPE_1_CODE, AccidentMarkerView.provider_code==CONST.CBS_ACCIDENT_TYPE_3_CODE)
-            ).group_by(
-                AccidentMarkerView.accident_year,
-                AccidentMarkerView.accident_severity_hebrew
-            ).order_by(
-                AccidentMarkerView.accident_year,
-                AccidentMarkerView.accident_severity_hebrew
-            ).all()
+        AccidentMarkerView.accident_year,
+        AccidentMarkerView.accident_severity_hebrew,
+        func.count(AccidentMarkerView.accident_year).label('count')
+    ).filter(
+        AccidentMarkerView.yishuv_symbol == yishuv_symbol,
+        or_(AccidentMarkerView.provider_code == CONST.CBS_ACCIDENT_TYPE_1_CODE,
+            AccidentMarkerView.provider_code == CONST.CBS_ACCIDENT_TYPE_3_CODE)
+    ).group_by(
+        AccidentMarkerView.accident_year,
+        AccidentMarkerView.accident_severity_hebrew
+    ).order_by(
+        AccidentMarkerView.accident_year,
+        AccidentMarkerView.accident_severity_hebrew
+    ).all()
     return Response(json.dumps([r._asdict() for r in results], default=str), mimetype="application/json")

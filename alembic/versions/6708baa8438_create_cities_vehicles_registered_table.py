@@ -13,6 +13,7 @@ branch_labels = None
 depends_on = None
 
 import sqlalchemy as sa
+
 from alembic import op
 
 _table_name = "cities_vehicles_registered"
@@ -43,5 +44,5 @@ def upgrade():
         sa.Column('population', sa.Integer(), nullable=False),
         sa.Column('total', sa.Integer(), nullable=False),
         sa.PrimaryKeyConstraint('id'),
-        sa.UniqueConstraint('name','year','population_year')
+        sa.UniqueConstraint('name', 'year', 'population_year')
     )

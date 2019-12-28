@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
-from six.moves import http_client
-import six
-from anyway import app as flask_app
-#from anyway.utilities import open_utf8
+# from anyway.utilities import open_utf8
 import json
-import pytest
-from functools import partial
-from urlobject import URLObject
 from collections import Counter
+from functools import partial
+
+import pytest
+import six
+from six.moves import http_client
+from urlobject import URLObject
+
+from anyway import app as flask_app
+
 
 @pytest.fixture
 def app():
@@ -28,12 +31,12 @@ def test_main(app):
     assert '<title>ANYWAY - משפיעים בכל דרך</title>' in _text_data(rv)
 
 
-#It requires parameters to know which markers you want.
+# It requires parameters to know which markers you want.
 def test_markers_empty(app):
     rv = app.get('/markers')
     assert rv.status_code == http_client.BAD_REQUEST
     assert '<title>400 Bad Request</title>' in _text_data(rv)
-    #print(rv.data)
+    # print(rv.data)
 
 
 @pytest.fixture(scope="module")
@@ -44,7 +47,8 @@ def marker_counter():
 
 
 def test_bad_date(app):
-    rv = app.get("/markers?ne_lat=32.08656790211843&ne_lng=34.80611543655391&sw_lat=32.08003198103277&sw_lng=34.793884563446&zoom=17&thin_markers=false&start_date=a1104537600&end_date=1484697600&show_fatal=1&show_severe=1&show_light=1&approx=1&accurate=1&show_markers=1&show_discussions=1&show_urban=3&show_intersection=3&show_lane=3&show_day=7&show_holiday=0&show_time=24&start_time=25&end_time=25&weather=0&road=0&separation=0&surface=0&acctype=0&controlmeasure=0&district=0&case_type=0")
+    rv = app.get(
+        "/markers?ne_lat=32.08656790211843&ne_lng=34.80611543655391&sw_lat=32.08003198103277&sw_lng=34.793884563446&zoom=17&thin_markers=false&start_date=a1104537600&end_date=1484697600&show_fatal=1&show_severe=1&show_light=1&approx=1&accurate=1&show_markers=1&show_discussions=1&show_urban=3&show_intersection=3&show_lane=3&show_day=7&show_holiday=0&show_time=24&start_time=25&end_time=25&weather=0&road=0&separation=0&surface=0&acctype=0&controlmeasure=0&district=0&case_type=0")
     assert rv.status_code == http_client.BAD_REQUEST
     assert rv.headers['Content-Type'] == 'text/html'
 
@@ -65,10 +69,14 @@ def test_bad_date(app):
 @query_flag("show_accurate")
 def test_markers(app, show_fatal, show_severe, show_light, show_accurate, show_approx, marker_counter):
     url = URLObject('/markers').set_query_params({
-        "ne_lat": "32.085413468822", "ne_lng": "34.797736215591385", "sw_lat": "32.07001357040486", "sw_lng": "34.775548982620194", "zoom": "16", "thin_markers": "false",
-        "start_date": "1104537600", "end_date": "1484697600", "show_fatal": show_fatal, "show_severe": show_severe, "show_light": show_light, "approx": show_approx, "accurate": show_accurate,
-        "show_markers": "1", "show_accidents": "1", "show_rsa": "0", "show_discussions": "1", "show_urban": "3", "show_intersection": "3", "show_lane": "3", "show_day": "7", "show_holiday": "0",
-        "show_time": "24", "start_time": "25", "end_time": "25", "weather": "0", "road": "0", "separation": "0", "surface": "0", "acctype": "0", "controlmeasure": "0", "district": "0", "case_type": "0"})
+        "ne_lat": "32.085413468822", "ne_lng": "34.797736215591385", "sw_lat": "32.07001357040486",
+        "sw_lng": "34.775548982620194", "zoom": "16", "thin_markers": "false",
+        "start_date": "1104537600", "end_date": "1484697600", "show_fatal": show_fatal, "show_severe": show_severe,
+        "show_light": show_light, "approx": show_approx, "accurate": show_accurate,
+        "show_markers": "1", "show_accidents": "1", "show_rsa": "0", "show_discussions": "1", "show_urban": "3",
+        "show_intersection": "3", "show_lane": "3", "show_day": "7", "show_holiday": "0",
+        "show_time": "24", "start_time": "25", "end_time": "25", "weather": "0", "road": "0", "separation": "0",
+        "surface": "0", "acctype": "0", "controlmeasure": "0", "district": "0", "case_type": "0"})
 
     rv = app.get(url)
     assert rv.status_code == http_client.OK
@@ -84,8 +92,6 @@ def test_markers(app, show_fatal, show_severe, show_light, show_accurate, show_a
         assert show_light or marker['accident_severity'] != 3
         assert show_accurate or marker['location_accuracy'] != 1
         assert show_approx or marker['location_accuracy'] == 1
-
-
 
 # def test_single_marker(app):
 #     rv = app.get("/markers/2014027147")

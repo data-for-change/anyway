@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
-from ..models import RoadSegments
-from ..utilities import init_flask
-from .utils import batch_iterator
 from flask_sqlalchemy import SQLAlchemy
 from openpyxl import load_workbook
 
+from .utils import batch_iterator
+from ..models import RoadSegments
+from ..utilities import init_flask
+
 app = init_flask()
 db = SQLAlchemy(app)
+
 
 def _iter_rows(filename):
     workbook = load_workbook(filename, read_only=True)
@@ -29,7 +31,7 @@ def _iter_rows(filename):
         to_name = row[6].value
 
         yield {
-            'segment_id' : segment_id,
+            'segment_id': segment_id,
             'road': road,
             'segment': segment,
             'from_km': from_km,

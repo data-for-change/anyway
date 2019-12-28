@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from .models import DiscussionMarker
+
 from sqlalchemy.orm import load_only
+
+from .models import DiscussionMarker
+
 
 def main():
     for marker in DiscussionMarker.query.options(load_only("id", "identifier")).all():

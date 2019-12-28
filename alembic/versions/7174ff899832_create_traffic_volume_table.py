@@ -12,8 +12,9 @@ down_revision = '02a8fabf9e53'
 branch_labels = None
 depends_on = None
 
-from alembic import op
 import sqlalchemy as sa
+
+from alembic import op
 
 
 def upgrade():
@@ -32,7 +33,7 @@ def upgrade():
                     sa.Column('duplicate_count', sa.Integer(), nullable=True),
                     sa.PrimaryKeyConstraint('id'),
                     sa.UniqueConstraint('year', 'road', 'section', 'lane', 'month',
-                                            'day', 'day_of_week', 'hour')
+                                        'day', 'day_of_week', 'hour')
                     )
 
 

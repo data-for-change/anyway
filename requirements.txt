@@ -46,3 +46,4 @@ xlrd
 flask_cors
 pandas
 tweepy
+bs4

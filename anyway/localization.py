@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import pandas as pd
-from . import field_names
 
+from . import field_names
 
 _tables = {
     "SUG_DEREH": {
@@ -201,8 +201,8 @@ _fields = {
     "BAYIT": "מספר בית",
     "ZOMET_IRONI": "צומת עירוני",  # from intersect urban dictionary
     "KVISH1": "כביש 1",  # from intersect urban dictionary
-    "KVISH2": "כביש 2",  #from intersect urban dictionary
-    "ZOMET_LO_IRONI": "צומת לא עירוני",  #from non urban dictionary
+    "KVISH2": "כביש 2",  # from intersect urban dictionary
+    "ZOMET_LO_IRONI": "צומת לא עירוני",  # from non urban dictionary
     "YEHIDA": "יחידה",
     "SUG_YOM": "סוג יום",
     "RAMZOR": "רמזור",
@@ -253,7 +253,7 @@ def get_supported_tables():
 
 def get_city_name(symbol_id):
     try:
-        city = _cities.loc[symbol_id,field_names.name]
+        city = _cities.loc[symbol_id, field_names.name]
         return city
     except Exception as _:
         return None

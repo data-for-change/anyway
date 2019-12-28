@@ -15,6 +15,18 @@ def get_description(ind):
     return description
 
 
+def insert_new_flash_news(news_flash):
+    insert_new_flash_news(news_flash.id_flash, news_flash.title, news_flash.link, news_flash.date_parsed,
+                          news_flash.author, news_flash.description, news_flash.location,
+                          news_flash.lat, news_flash.lon, news_flash.road1, news_flash.road2,
+                          news_flash.intersection, news_flash.city, news_flash.street,
+                          news_flash.street2, news_flash.resolution, news_flash.geo_extracted_street,
+                          news_flash.geo_extracted_road_no, news_flash.geo_extracted_intersection,
+                          news_flash.geo_extracted_city, news_flash.geo_extracted_address,
+                          news_flash.geo_extracted_district, news_flash.accident,
+                          news_flash.source)
+
+
 def insert_new_flash_news(id_flash, title, link, date_parsed, author, description, location, lat, lon, road1,
                           road2, intersection, city, street, street2, resolution, geo_extracted_street,
                           geo_extracted_road_no, geo_extracted_intersection, geo_extracted_city,

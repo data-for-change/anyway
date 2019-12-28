@@ -648,7 +648,7 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
                     }
                 }
                 for (var key in age_groups) {
-                    if (age_groups.hasOwnProperty(key)) {
+                    if (Object.prototype.hasOwnProperty.call(age_groups, key)) {
                         dataset.push({
                             label: key,
                             value: age_groups[key]
@@ -718,7 +718,7 @@ var startJSPanelWithChart = function(jsPanel, widthOfPanel, heightOfPanel, chart
                     }
                 }
                 for (var key in age_groups) {
-                    if (age_groups.hasOwnProperty(key)) {
+                    if (Object.prototype.hasOwnProperty.call(age_groups, key)) {
                         keys.push(key);
                     }
                 }

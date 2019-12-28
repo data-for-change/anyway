@@ -6,6 +6,15 @@ import re
 import sys
 import argparse
 
+def valid_date(date_string):
+    DATE_INPUT_FORMAT = '%d-%m-%Y'
+    from datetime import datetime
+    try:
+        return datetime.strptime(date_string, DATE_INPUT_FORMAT)
+    except ValueError:
+        msg = "Not a valid date: '{0}'.".format(date_string)
+        raise argparse.ArgumentTypeError(msg)
+
 
 @click.group()
 def cli():
@@ -18,15 +27,6 @@ def cli():
 @click.option('--debug-js', is_flag=True, help="Don't minify the JavaScript files")
 def testserver(open_server, debug_js):
     from anyway import app
-    from anyway.parsers import united
-    from apscheduler.scheduler import Scheduler
-
-    sched = Scheduler()
-
-    @sched.interval_schedule(hours=12)
-    def scheduled_import(): # pylint: disable=unused-variable
-        united.main()
-    sched.start()
 
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')
 
@@ -86,6 +86,13 @@ def registered_vehicles(specific_folder, delete_all, path):
 
 
 @process.command()
+@click.option('--path', type=str, default="static/data/traffic_volume")
+def traffic_volume(path):
+    from anyway.parsers.traffic_volume import main
+    return main(path)
+
+
+@process.command()
 @click.option('--light', is_flag=True, help='Import without downloading any new files')
 @click.option('--username', default='')
 @click.option('--password', default='')
@@ -103,15 +110,55 @@ def rsa(filename):
     return parse(filename)
 
 @process.command()
-@click.argument("filepath")
+@click.argument("filename", type=str, default="static/data/segments/road_segments.xlsx")
+def road_segments(filename):
+    from anyway.parsers.road_segments import parse
+    return parse(filename)
+
+@process.command()
+@click.argument("filepath", type=str, default="static/data/schools/schools.csv")
 @click.option('--batch_size', type=int, default=5000)
 def schools(filepath, batch_size):
     from anyway.parsers.schools import parse
     return parse(filepath=filepath,
                  batch_size=batch_size)
+
+@process.command()
+@click.argument("schools_description_filepath", type=str, default="static/data/schools/schools_description.xlsx")
+@click.argument("schools_coordinates_filepath", type=str, default="static/data/schools/schools_coordinates.xlsx")
+@click.option('--batch_size', type=int, default=5000)
+def schools_with_description(schools_description_filepath,
+                             schools_coordinates_filepath,
+                             batch_size):
+    from anyway.parsers.schools_with_description import parse
+    return parse(schools_description_filepath=schools_description_filepath,
+                 schools_coordinates_filepath=schools_coordinates_filepath,
+                 batch_size=batch_size)
+
+@process.command()
+@click.option('--start_date', default='01-01-2014', type=valid_date, help='The Start Date - format DD-MM-YYYY')
+@click.option('--end_date', default='31-12-2018', type=valid_date, help='The End Date - format DD-MM-YYYY')
+@click.option('--distance', default=0.5, help='float In KM. Default is 0.5 (500m)', type=float)
+@click.option('--batch_size', type=int, default=5000)
+def injured_around_schools(start_date, end_date, distance, batch_size):
+    from anyway.parsers.injured_around_schools import parse
+    return parse(start_date=start_date,
+                 end_date=end_date,
+                 distance=distance,
+                 batch_size=batch_size)
+
 @cli.group()
 def preprocess():
     pass
+
+@preprocess.command()
+@click.option('--path', type=str)
+
+def preprocess_cbs(path):
+    from anyway.parsers.preprocessing_cbs_files import update_cbs_files_names
+
+    return update_cbs_files_names(path)
+
 
 @cli.group()
 def create_views():
@@ -183,15 +230,6 @@ def load_discussions(identifiers):
 @cli.group()
 def scripts():
     pass
-
-def valid_date(date_string):
-    DATE_INPUT_FORMAT = '%d-%m-%Y'
-    from datetime import datetime
-    try:
-        return datetime.strptime(date_string, DATE_INPUT_FORMAT)
-    except ValueError:
-        msg = "Not a valid date: '{0}'.".format(date_string)
-        raise argparse.ArgumentTypeError(msg)
 
 
 @scripts.command()

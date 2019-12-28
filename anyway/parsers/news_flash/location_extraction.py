@@ -16,6 +16,12 @@ from google.cloud.language import types
 
 
 def get_ner_location_of_text(text):
+    """
+    This method returns the main location described in the text, using Named Entity Recognition and
+    entities clustering.
+    :param text: string
+    :return: string representing the main location described in the text
+    """
     no_random_road_groups = []
     no_hospital_loc_groups = []
     loc_groups = []
@@ -215,6 +221,13 @@ def get_ner_location_of_text(text):
 
 
 def remove_text_inside_brackets(text, brackets="()[]{}"):
+    """
+    Helper method, removes texts in brackets, by given brackets, can support multiple brackets
+    :param text: string
+    :param brackets: string containing the brackets, should contains pairs of wanted brackets for example,
+    if you want to remove text inside the brackets () , insert () to this param.
+    :return: the text without the text inside the brackets
+    """
     count = [0] * (len(brackets) // 2)  # count open/close brackets
     saved_chars = []
     for character in text:
@@ -233,8 +246,15 @@ def remove_text_inside_brackets(text, brackets="()[]{}"):
 
 
 def preprocess_text(text, get_first=False):
+    """
+    Removes punctuation, converts text to str, remove texts inside brackets, removes whitespaces and returns
+    upon request the text or the first sentence only.
+    :param text: string
+    :param get_first: return first sentence only or not
+    :return: preprocessed data
+    """
     table_no_dot = str.maketrans(string.punctuation.replace('.', ''),
-                                    ' ' * len(string.punctuation.replace('.', '')))  # remove punctuation, without '.'
+                                 ' ' * len(string.punctuation.replace('.', '')))  # remove punctuation, without '.'
     table = str.maketrans(string.punctuation, ' ' * len(string.punctuation))  # remove punctuation
     if type(text) != str:
         text = str(text)
@@ -248,6 +268,12 @@ def preprocess_text(text, get_first=False):
 
 
 def preprocess_intersection(intersections):
+    """
+    Strips footers and headers (like the words intersection, junction, etc in hebrew)
+    intersections column in series
+    :param intersections: intersections series in pandas
+    :return: preprocessed intersection series
+    """
     intersections = intersections.replace('יישוב', '')
     intersections = intersections.replace('ישוב', '')
     intersections = intersections.replace('מושבה', '')
@@ -261,6 +287,11 @@ def preprocess_intersection(intersections):
 
 
 def process_streets_table(addresses_df):
+    """
+    Method to proess the addresses dataframe to create a filtered unique streets dataframe
+    :param addresses_df: addresses dataframe, created from the markers table
+    :return: filtered unique streets dataframe
+    """
     streets = pd.DataFrame(addresses_df.drop(
         ['road1', 'road2', 'non_urban_intersection_hebrew'], axis=1))
     streets.yishuv_name = streets.yishuv_name.astype(str)
@@ -282,6 +313,11 @@ def process_streets_table(addresses_df):
 
 
 def process_roads_table(addresses_df):
+    """
+    Method to proess the addresses dataframe to create a filtered unique roads dataframe
+    :param addresses_df: addresses dataframe, created from the markers table
+    :return: filtered unique roads dataframe
+    """
     roads = pd.DataFrame(addresses_df[['road1', 'road2', 'non_urban_intersection_hebrew']])
     roads.road1 = roads.road1.astype(str)
     roads.road2 = roads.road2.astype(str)
@@ -305,6 +341,10 @@ def process_roads_table(addresses_df):
 
 
 def first_init():
+    """
+    Method for the creation of 3 xlsx files, used in later processing
+    :return: saves the filtered tables as xlsx files for later usage
+    """
     addresses_df = pd.read_excel('anyway/parsers/news_flash/Addresses_new.xlsx', sheet_name='Sheet1')
     addresses_df = addresses_df.fillna('NaN')
     streets = process_streets_table(addresses_df)
@@ -316,6 +356,13 @@ def first_init():
 
 
 def preprocess_urban_text(text, cities, threshold=90):
+    """
+    Cleaning of text related to urban locations
+    :param text: text
+    :param cities: cities found in DB
+    :param threshold: threshold for accuracy of extracted city from the text, to determine how good was the filter
+    :return: filtered text if it helps to extract location matched to DB
+    """
     text_new = text
     if 'רחוב ' in text:
         text_new = text.split('רחוב ')[1].strip()
@@ -338,6 +385,14 @@ def preprocess_urban_text(text, cities, threshold=90):
 
 
 def preprocess_nonurban_text(text, intersections, threshold=80):
+    """
+    Cleaning of text related to non-urban locations
+    :param text: text
+    :param intersections: intersections found in DB
+    :param threshold: threshold for accuracy of extracted intersection from the text,
+     to determine how good was the filter
+    :return: filtered text if it helps to extract location matched to DB
+    """
     text_new = text
     if 'צומת' in text:
         text_new = text.split('צומת')[1].strip()
@@ -366,21 +421,23 @@ def preprocess_nonurban_text(text, intersections, threshold=80):
     return text_new
 
 
+# class to help store data about UrbanAddress for DB matching
 class UrbanAddress:
-    def __init__(self, city='NaN', street='NaN'):
+    def __init__(self, city='NaN', street='NaN', street2='NaN'):
         self.city = city
         self.street = street
+        self.street2 = street2
 
     def __str__(self):
         return 'city: ' + str(self.city) + ', street: ' + \
-               str(self.street)
+               str(self.street) + ', street2 :' + str(self.street2)
 
     def __repr__(self):
-        return "UrbanAddress(%s, %s)" % (self.city, self.street)
+        return "UrbanAddress(%s, %s, %s)" % (self.city, self.street, self.street2)
 
     def __eq__(self, other):
         if isinstance(other, UrbanAddress):
-            return (self.city == other.city) and (self.street == other.street)
+            return (self.city == other.city) and (self.street == other.street) and (self.street2 == other.street2)
         else:
             return False
 
@@ -388,6 +445,7 @@ class UrbanAddress:
         return hash(self.__repr__())
 
 
+# class to help store data about NonUrbanAddress for DB matching
 class NonUrbanAddress:
     def __init__(self, road1='NaN', road2='NaN', intersection='NaN'):
         self.road1 = road1
@@ -412,7 +470,96 @@ class NonUrbanAddress:
         return hash(self.__repr__())
 
 
+def process_urban_with_geo_dict(text, streets, cities, threshold_city=70,
+                                threshold_street=50, ratio=0.85,
+                                city='', street1='', street2=''):
+    """
+    Attempts to return the most matching urban address that can be extracted from the text to an address in the DB
+    using hint data fom found location on google maps
+    :param text: text
+    :param streets: streets - the data from the DB - csv
+    :param cities: cities - the data from the DB - csv
+    :param threshold_city: threshold for city fuzzy matching
+    :param threshold_street: threshold for street fuzzy matching
+    :param ratio: type of matching
+    :param city: hint - if provided from the found location on google maps
+    :param street1: hint - if provided from the found location on google maps
+    :param street2: hint - if provided from the found location on google maps
+    :return: UrbanAddress object containing the relevant information for urban address
+    """
+    if city != '':
+        suspected_city = process.extractOne(city, cities, scorer=fuzz.partial_ratio, score_cutoff=threshold_city)
+    else:
+        suspected_city = process.extractOne(text, cities, scorer=fuzz.partial_ratio, score_cutoff=threshold_city)
+    if suspected_city is not None:
+        suspected_city = suspected_city[0]
+        streets_in_city = streets.loc[streets.city == suspected_city]
+        relevant_streets_1 = streets_in_city.loc[(streets_in_city.street1 != 'NaN')].street1
+        relevant_streets_2 = streets_in_city.loc[(streets_in_city.street2 != 'NaN')].street2
+        relevant_streets = relevant_streets_1.append(relevant_streets_2).drop_duplicates()
+        relevant_streets_scores = relevant_streets.apply(lambda x: streets_in_city
+                                                         .loc[(streets_in_city.street1 == x) |
+                                                              (streets_in_city.street2 == x)].avg_accidents.max())
+        relevant_streets = pd.DataFrame(
+            {'street': relevant_streets.tolist(), 'avg_accidents': relevant_streets_scores.tolist()})
+        result_streets = []
+        result_city = []
+        for street in [street1, street2]:
+            if street != '':
+                suspected_streets = process.extract(street, list(set(relevant_streets.street.dropna().tolist())),
+                                                    scorer=fuzz.token_set_ratio, limit=3)
+                if len(suspected_streets) > 0:
+                    relevant_streets_scores = relevant_streets.loc[
+                        relevant_streets.street.isin(
+                            [suspected_street[0] for suspected_street in suspected_streets])].copy()
+                    relevant_streets_scores.avg_accidents = (
+                            relevant_streets_scores.avg_accidents / relevant_streets_scores.avg_accidents.max()).copy()
+                    suspected_streets = [(suspected_street[0],
+                                          (ratio * fuzz.token_set_ratio(text,
+                                                                        suspected_city[0] + ' ' + suspected_street[0]))
+                                          + ((1 - ratio) * 100 * relevant_streets_scores.loc[
+                                              relevant_streets_scores.street == suspected_street[0]].avg_accidents.iloc[
+                                              0]))
+                                         for suspected_street in suspected_streets if suspected_street is not None and
+                                         (ratio * fuzz.token_set_ratio(text,
+                                                                       suspected_city[0] + ' ' + suspected_street[0]))
+                                         + ((1 - ratio) * 100 *
+                                            relevant_streets_scores.loc[relevant_streets_scores.street ==
+                                                                        suspected_street[0]].avg_accidents.iloc[
+                                                0]) > threshold_street]
+                if len(suspected_streets) > 0:
+                    suspected_street = max(suspected_streets, key=lambda x: x[1])
+                    suspected_street = suspected_street[0]
+                    if suspected_street in streets_in_city.street1.tolist():
+                        suspected_street = streets_in_city.loc[streets_in_city.street1 == suspected_street].iloc[0]
+                        suspected_street_street = suspected_street.street1_hebrew
+                    else:
+                        suspected_street = streets_in_city.loc[streets_in_city.street2 == suspected_street].iloc[0]
+                        suspected_street_street = suspected_street.street2_hebrew
+                    suspected_street_city = suspected_street.yishuv_name
+                    result_streets.append(suspected_street_street)
+                    result_city.append(suspected_street_city)
+        if len(result_streets) > 0:
+            if len(result_streets) == 1:
+                return UrbanAddress(city=result_city[0], street=result_streets[0])
+            else:
+                return UrbanAddress(city=result_city[0], street=result_streets[0], street2=result_streets[1])
+        else:
+            return UrbanAddress(city=streets.loc[streets.city == suspected_city].yishuv_name.iloc[0])
+    return None
+
+
 def process_urban(text, streets, cities, threshold_city=70, threshold_street=50, ratio=0.85):
+    """
+    Attempts to return the most matching urban address that can be extracted from the text to an address in the DB
+    :param text: text
+    :param streets: streets - the data from the DB - csv
+    :param cities: cities - the data from the DB - csv
+    :param threshold_city: threshold for city fuzzy matching
+    :param threshold_street: threshold for street fuzzy matching
+    :param ratio: type of matching
+    :return: UrbanAddress object containing the relevant information for urban address
+    """
     text = preprocess_urban_text(text, cities)
     suspected_city = process.extractOne(text, cities, scorer=fuzz.partial_ratio, score_cutoff=threshold_city)
     if suspected_city is not None:
@@ -456,6 +603,15 @@ def process_urban(text, streets, cities, threshold_city=70, threshold_street=50,
 
 
 def process_intersection_first_road(text, roads, road1_candidates, threshold=50):
+    """
+    Attempts to return the most matching non-urban address that can be extracted from the text to an address in the DB,
+    given a specified road
+    :param text: text
+    :param roads: roads table
+    :param road1_candidates: road 1 candidates
+    :param threshold: fuzzy wuzzy threshold
+    :return: NonUrbanAddress object, containing at least 1 road
+    """
     relevant_intersections = None
     for road1_candidate in road1_candidates:
         if relevant_intersections is None:
@@ -482,6 +638,14 @@ def process_intersection_first_road(text, roads, road1_candidates, threshold=50)
 
 
 def process_intersection_no_roads(text, roads, threshold=50):
+    """
+    Attempts to return the most matching non-urban address that can be extracted from the text to an address in the DB,
+    given nothing - the hebrew word of road appears but no numeric road is found in the text - SHOULD NOT GET HERE
+    :param text: text
+    :param roads: roads table
+    :param threshold: fuzzy wuzzy threshold
+    :return: NonUrbanAddress object
+    """
     relevant_intersections = roads.drop_duplicates()
     text = preprocess_nonurban_text(text, relevant_intersections)
     suspected_intersection = process.extractOne(text, list(set(relevant_intersections.intersection.dropna().tolist())),
@@ -498,6 +662,15 @@ def process_intersection_no_roads(text, roads, threshold=50):
 
 
 def process_intersections_both_roads(text, roads, roads_candidates, threshold=50):
+    """
+    Attempts to return the most matching non-urban address that can be extracted from the text to an address in the DB,
+    given more than 1 found road
+    :param text: text
+    :param roads: roads table
+    :param roads_candidates: road 1  and 2 candidates (list of tuples (road1, road2))
+    :param threshold: fuzzy wuzzy threshold
+    :return: NonUrbanAddress object, containing at least 2 roads
+    """
     relevant_intersections = None
     for candidate in roads_candidates:
         if relevant_intersections is None:
@@ -526,12 +699,28 @@ def process_intersections_both_roads(text, roads, roads_candidates, threshold=50
                            road2=roads_candidates[0][1].replace('כביש ', ''))
 
 
-def is_urban(text):
+def is_urban(text, geo_location_dict=None):
+    """
+    Simple check to determine if the text is about urban address - based on the word road followed by numeric
+    character - if exists, nonurban, otherwise urban.
+    :param text: text
+    :param geo_location_dict: if geo location dict from extract geolocation exists, uses this to check if the location
+    contains a road, if not, it is urban
+    :return: if the text talks about urban address
+    """
+    if geo_location_dict is not None:
+        return geo_location_dict['road_no'] == ''
     road_examples = ['כביש ' + str(digit) for digit in range(10)]
     return not any(road_example in text for road_example in road_examples)
 
 
 def process_nonurban(text, roads):
+    """
+    if text describes non-urban extracts road candidates for further process and intersection with DB
+    :param text: text
+    :param roads: roads table
+    :return: NonUrbanAddress object with found data
+    """
     road1_candidates = []
     roads_candidates = []
     for road1 in roads.first_road:
@@ -542,7 +731,7 @@ def process_nonurban(text, roads):
     if len(road1_candidates) > 0:
         road1_candidates = list(sorted(set(road1_candidates)))
         for road1 in road1_candidates:
-            road2_candidates = roads.loc[roads.first_road==road1].second_road.dropna().tolist()
+            road2_candidates = roads.loc[roads.first_road == road1].second_road.dropna().tolist()
             for road2 in road2_candidates:
                 if text.find(road2) != -1:
                     if text.endswith(road2) or not \
@@ -557,12 +746,106 @@ def process_nonurban(text, roads):
         return process_intersection_no_roads(text, roads)
 
 
-def get_db_matching_location_of_text(text):
+def get_db_matching_location_of_text(text, geo_location_dict=None):
+    """
+    matching the text to the locations provided in the DB, based on fuzzy string matching.
+    :param text: text
+    :param geo_location_dict: geolocation dict from geolocation if it is extracted, helps further processing
+    :return: UrbanAddress ot NonUrbanAddress object with matching data
+    """
     text = preprocess_text(text, True)
-    if is_urban(text):
+    if is_urban(text, geo_location_dict=geo_location_dict):
         streets = pd.read_excel('anyway/parsers/news_flash/streets.xlsx', sheet_name='Sheet1')
         cities = pd.read_excel('anyway/parsers/news_flash/cities.xlsx', sheet_name='Sheet1').city.tolist()
+        if geo_location_dict is not None:
+            street1 = geo_location_dict['street']
+            street2 = ''
+            if geo_location_dict['intersection'] != '':
+                street1 = geo_location_dict['intersection'].split('&')[0].strip()
+                street2 = geo_location_dict['intersection'].split('&')[1].strip()
+            return process_urban_with_geo_dict(text, streets, cities,
+                                               city=geo_location_dict['city'],
+                                               street1=street1, street2=street2)
         return process_urban(text, streets, cities)
     else:
         roads = pd.read_excel('anyway/parsers/news_flash/roads.xlsx', sheet_name='Sheet1')
         return process_nonurban(text, roads)
+
+
+def manual_filter_location_of_text(text):
+    """
+    filters the text so it will be easier to find corresponding geolocation, based on manual chosen filters.
+    :param text: text
+    :return: filtered text - should catch the correct location most of the time.
+    """
+    filter_ind = float('inf')
+    if text.find('.') != -1:
+        text = text[:text.find('.')]
+    try:
+        forbid_words = ['תושב']
+        hospital_words = ['בבית החולים', 'בית חולים', 'בית החולים', 'מרכז רפואי']
+        hospital_names = ['שיבא', 'וולפסון', 'תל השומר', 'סוראסקי', 'הלל יפה', 'רמב"ם', 'רמבם', 'בני ציון', 'רוטשילד',
+                          'גליל מערבי', 'זיו', 'פוריה', 'ברזילי', 'אסף הרופא', 'סורוקה', 'רבין', 'בלינסון', 'גולדה',
+                          'כרמל', 'עמק', 'מאיר', 'קפלן', 'יוספטל', 'הדסה', 'שערי צדק', 'צאנז', 'לניאדו', 'אסותא',
+                          'מעיני הישועה', 'מדיקל סנטר', 'איטלקי', 'המשפחה הקדושה']
+        forbid_words.extend(hospital_words)
+        for forbid_word in forbid_words:
+            found_hospital = False
+            removed_punc = False
+            if forbid_word in text:
+                forbid_ind = text.find(forbid_word)
+                for punc_to_try in [',', ' - ']:
+                    punc_before_ind = text.find(punc_to_try, 0, forbid_ind)
+                    punc_after_ind = text.find(punc_to_try, forbid_ind)
+                    if punc_before_ind != -1 or punc_after_ind != -1:
+                        if punc_before_ind == -1:
+                            text = text[(punc_after_ind + 1):]
+                        elif punc_after_ind == -1:
+                            text = text[:punc_before_ind]
+                        else:
+                            text = text[:punc_before_ind] + ' ' + text[(punc_after_ind + 1):]
+                        removed_punc = True
+                        break
+                if (not removed_punc) and (forbid_word in hospital_words):
+                    for hospital_name in hospital_names:
+                        hospital_ind = text.find(hospital_name)
+                        if hospital_ind == forbid_ind + len(forbid_word) + 1 or hospital_ind == forbid_ind + len(
+                                forbid_word) + 2:
+                            text = text[:hospital_ind] + text[hospital_ind + len(hospital_name) + 1:]
+                            forbid_ind = text.find(forbid_word)
+                            text = text[:forbid_ind] + text[forbid_ind + len(forbid_word) + 1:]
+                            found_hospital = True
+                if (not found_hospital) and (not removed_punc):
+                    text = text[:forbid_ind] + text[text.find(' ', forbid_ind + len(forbid_word) + 2):]
+
+    except Exception as _:
+        pass
+    if 'כביש' in text:
+        filter_ind = min(filter_ind, text.find('כביש'))
+    if 'שדרות' in text:
+        filter_ind = min(filter_ind, text.find('שדרות'))
+    if 'רחוב' in text:
+        filter_ind = min(filter_ind, text.find('רחוב'))
+    if 'מחלף' in text:
+        filter_ind = min(filter_ind, text.find('מחלף'))
+    if 'צומת' in text:
+        filter_ind = min(filter_ind, text.find('צומת'))
+    if 'סמוך ל' in text:
+        filter_ind = min(filter_ind, text.find('סמוך ל') + len('סמוך ל'))
+    if 'ליד ה' in text:
+        filter_ind = min(filter_ind, text.find('ליד ה') + len('ליד ה'))
+    if 'יישוב' in text:
+        filter_ind = min(filter_ind, text.find('יישוב'))
+    if 'מושב' in text:
+        filter_ind = min(filter_ind, text.find('מושב'))
+    if 'קיבוץ' in text:
+        filter_ind = min(filter_ind, text.find('קיבוץ'))
+    if 'התנחלות' in text:
+        filter_ind = min(filter_ind, text.find('התנחלות'))
+    if 'שכונת' in text:
+        filter_ind = min(filter_ind, text.find('שכונת'))
+    if 'בדרך' in text:
+        filter_ind = min(filter_ind, text.find('בדרך'))
+    if filter_ind != float('inf'):
+        text = text[filter_ind:]
+    return text

@@ -1532,3 +1532,7 @@ def get_accidents_year_in_location():
 def get_accidents_year_and_severity_in_location():
     return Response(json.dumps(get_accidents_in_location(request, by_severity=True, by_year=True), default=str), mimetype="application/json")
 
+@app.route('/api/accidents_in_location', methods=['GET'])
+def get_all_accidents_in_location():
+    return Response(json.dumps(get_accidents_in_location(request), default=str), mimetype="application/json")
+

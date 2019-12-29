@@ -1,18 +1,21 @@
 from __future__ import print_function
+
+import argparse
+import logging
+import os
+import re
+import sys
+import threading
 from csv import DictReader
 from datetime import datetime
-from dateutil.relativedelta import relativedelta
-from . import config
-from flask import Flask
 from functools import partial
-import os
-from pyproj import Transformer
-import threading
-import sys
-import re
+
 import six
-import logging
-import argparse
+from dateutil.relativedelta import relativedelta
+from flask import Flask
+from pyproj import Transformer
+
+from . import config
 
 # Headless servers cannot use GUI file dialog and require raw user input
 _fileDialogExist = True
@@ -24,6 +27,7 @@ except (ValueError, ImportError):
 DATE_INPUT_FORMAT = '%d-%m-%Y'
 _PROJECT_ROOT = os.path.join(os.path.dirname(__file__), '..')
 
+
 def init_flask():
     """
     initializes a Flask instance with default values
@@ -31,7 +35,7 @@ def init_flask():
     app = Flask(
         "anyway",
         template_folder=os.path.join(_PROJECT_ROOT, 'templates'),
-        static_folder=os.path.join(_PROJECT_ROOT, 'static'),)
+        static_folder=os.path.join(_PROJECT_ROOT, 'static'), )
     app.config.from_object(config)
     app.config['BABEL_TRANSLATION_DIRECTORIES'] = os.path.join(_PROJECT_ROOT, 'translations')
     return app
@@ -124,6 +128,7 @@ def time_delta(since):
                                getattr(delta, attr) > 1 and attr or attr[:-1])
                     for attr in attrs if getattr(delta, attr))
 
+
 if six.PY3:
     def decode_hebrew(s, encoding="cp1255"):
         return s
@@ -131,11 +136,10 @@ else:
     def decode_hebrew(s, encoding="cp1255"):
         return s.decode(encoding)
 
-
 open_utf8 = partial(open, encoding="utf-8") if six.PY3 else open
 
 
-def truncate_tables(db,tables):
+def truncate_tables(db, tables):
     logging.info("Deleting tables: " + ", ".join(table.__name__ for table in tables))
     for table in tables:
         db.session.query(table).delete()
@@ -176,7 +180,8 @@ class ImporterUI(object):
 
 def chunks(l, n):
     """Yield successive n-sized chunks from l."""
-    try: xrange
+    try:
+        xrange
     except NameError:
         xrange = range
     for i in xrange(0, len(l), n):

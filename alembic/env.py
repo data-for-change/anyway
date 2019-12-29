@@ -1,8 +1,10 @@
 from __future__ import with_statement
-import sys
+
 import os
-from alembic import context
+import sys
 from logging.config import fileConfig
+
+from alembic import context
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -19,7 +21,9 @@ fileConfig(config.config_file_name)
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 from anyway.database import Base
+
 target_metadata = Base.metadata
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -67,6 +71,7 @@ def run_migrations_online():
 
         with context.begin_transaction():
             context.run_migrations()
+
 
 if context.is_offline_mode():
     run_migrations_offline()

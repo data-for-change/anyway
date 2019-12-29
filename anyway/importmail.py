@@ -1,13 +1,15 @@
 from __future__ import print_function
+
+import argparse
 import email
 import imaplib
-import os
-from datetime import datetime, timedelta
-import time
-from .utilities import time_delta
-import sys
-import argparse
 import logging
+import os
+import sys
+import time
+from datetime import datetime, timedelta
+
+from .utilities import time_delta
 
 ##############################################################################################
 # importmail.py is responsible for extracting and downloading united hatzala email attachments
@@ -28,7 +30,6 @@ detach_dir = 'static/data/united'
 
 
 def main(username=None, password=None, lastmail=False):
-
     username = username or os.environ.get('MAILUSER')
     password = password or os.environ.get('MAILPASS')
     if not username:
@@ -110,6 +111,7 @@ def main(username=None, password=None, lastmail=False):
     imapsession.close()
     imapsession.logout()
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--username', default='')
@@ -118,4 +120,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(args.username, args.password, args.lastmail)
-

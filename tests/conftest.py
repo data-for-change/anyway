@@ -1,10 +1,12 @@
-import pytest
-import requests
-from anyway import app
 from threading import Thread
 from time import sleep
+
+import pytest
+import requests
 from urlobject import URLObject
 from werkzeug.serving import make_server
+
+from anyway import app
 
 
 class ServerThread(Thread):

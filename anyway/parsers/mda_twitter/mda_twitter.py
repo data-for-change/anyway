@@ -44,3 +44,4 @@ def mda_twitter():
                               region_hebrew, district_hebrew, yishuv_name, street1_hebrew, street2_hebrew,
                               non_urban_intersection_hebrew, road1, road2, road_segment_name, accident, source,
                               tweet_id=tweet_id)
+							  

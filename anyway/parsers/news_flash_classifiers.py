@@ -1,23 +1,48 @@
+def tweet_with_accident_veichle_and_person(text):
+    """
+    check if tweet contains words indicating an accident between person and veichle
+    :param text: tweet text
+    :return: boolean, true if tweet contains words, false for others
+    """
+    if ((u'הולך רגל' in text or u'הולכת רגל' in text or u'נהג' in text
+         or u'אדם' in text)
+            and (u'רכב' in text or u'מכונית' in text or u'אופנוע' in text
+                 or u"ג'יפ" in text or u'טרקטור' in text or u'משאית' in text
+                 or u'אופניים' in text or u'קורקינט' in text)):
+        return True
+    return False
+
+def tweet_with_car_accident(text):
+    """
+    check if tweet contains words indicating a car accident
+    :param text: tweet text
+    :return: boolean, true if tweet contains words, false for others
+    """
+    if u'תאונת דרכים' in text or u'ת.ד' in text:
+        return True
+    return False
+
+
+def tweet_with_veichles(text):
+    """
+    check if tweet contains veichle word
+    :param text: tweet text
+    :return: boolean, true if tweet contains veichle, false for others
+    """
+    if u'רכב' in text or u'מכונית' in text or u'אופנוע' in text or u"ג'יפ" in text or u'טרקטור' in text or u'משאית' in text or \
+        u'אופניים' in text or u'קורקינט' in text:
+        return True
+    return False
+
+
+
 def classify_tweets(text):
     """
     classify tweets for tweets about car accidents and others
     :param text: tweet text
     :return: boolean, true if tweet is about car accident, false for others
     """
-    return text.startswith(u'בשעה') and (
-            (u'הולך רגל' in text or
-             u'הולכת רגל' in text or
-             u'נהג' in text or
-             u'אדם' in text)
-            and
-            (u'רכב' in text or
-             u'מכונית' in text or
-             u'אופנוע' in text or
-             u"ג'יפ" in text or
-             u'טרקטור' in text or
-             u'משאית' in text or
-             u'אופניים' in text or
-             u'קורקינט' in text))
+    return text.startswith(u'בשעה') and (tweet_with_accident_veichle_and_person(text) or tweet_with_car_accident(text) or tweet_with_veichles(text))
 
 
 def classify_ynet(text):

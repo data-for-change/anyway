@@ -82,6 +82,19 @@ def news_flash(google_maps_key_path):
 
 
 @process.command()
+@click.option('--google_maps_key_path', type=str, required=True)
+@click.option('--source', type=str)
+def update_news_flash(google_maps_key_path, source=None):
+    from anyway.parsers.news_flash_updater import main
+    with open(google_maps_key_path) as file:
+        key = file.read()
+    if source == '':
+        source = None
+    return main(key, source)
+
+
+
+@process.command()
 @click.option('--specific_folder', is_flag=True, default=False)
 @click.option('--delete_all', is_flag=True)
 @click.option('--path', type=str, default="static/data/cbs_vehicles_registered")

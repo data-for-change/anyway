@@ -10,7 +10,7 @@ news_flash_classifiers = {'ynet': classify_ynet,
                           'mda': classify_tweets}
 
 
-def update_all_news_flash(maps_key, source=None):
+def main(maps_key, source=None):
     news_flash_ids = get_all_news_flash_ids(source)
     news_item = {}
     for news_flash_id in news_flash_ids:

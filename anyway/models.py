@@ -690,6 +690,13 @@ class NewsFlash(Base):
     source = Column(Text(), nullable=True)
     location = Column(Text(), nullable=True)
     tweet_id = Column(BigInteger(), nullable=True)
+    region_hebrew = Column(Text(), nullable=True)
+    district_hebrew = Column(Text(), nullable=True)
+    yishuv_name = Column(Text(), nullable=True)
+    street1_hebrew = Column(Text(), nullable=True)
+    street2_hebrew  = Column(Text(), nullable=True)
+    non_urban_intersection_hebrew = Column(Text(), nullable=True)
+    road_segment_name = Column(Text(), nullable=True)
 
     def serialize(self):
         return {

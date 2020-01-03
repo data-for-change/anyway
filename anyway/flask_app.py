@@ -1528,5 +1528,5 @@ def extract_news_flash_location(news_flash_id):
         return Response(status=404)
     data = {'resolution': resolution}
     for field in resolution_dict[resolution]:
-         data[field] = getattr(news_flash_obj, field)
+        data[field] = getattr(news_flash_obj, field)
     return Response(json.dumps({'name': 'location', 'data': data}, default=str), mimetype="application/json")

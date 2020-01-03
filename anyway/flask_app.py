@@ -47,6 +47,7 @@ from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved,
                      EngineVolume, PopulationType, Region, District, NaturalArea, MunicipalStatus, YishuvShape,
                      TotalWeight, DrivingDirections, AgeGroup, AccidentMarkerView)
 from .oauth import OAuthSignIn
+from .parsers import resolution_dict
 
 app = utilities.init_flask()
 db = SQLAlchemy(app)
@@ -1519,3 +1520,13 @@ def get_accidents_in_city_by_year_severity():
         AccidentMarkerView.accident_severity_hebrew
     ).all()
     return Response(json.dumps([r._asdict() for r in results], default=str), mimetype="application/json")
+
+def extract_news_flash_location(news_flash_id):
+    news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id==news_flash_id).first()
+    resolution = news_flash_obj.resolution.encode('utf-8') if news_flash_obj.resolution else None
+    if not news_flash_obj or not resolution or resolution not in resolution_dict:
+        return Response(status=404)
+    data = {'resolution': resolution}
+    for field in resolution_dict[resolution]:
+         data[field] = getattr(news_flash_obj, field)
+    return Response(json.dumps({'name': 'location', 'data': data}, default=str), mimetype="application/json")

@@ -1492,6 +1492,34 @@ def oauth_callback(provider):
     login.login_user(user, True)
     return redirect(url_for('index'))
 
+def get_stats(table_obj, filter_statements, group_by, count, start_time, end_time):
+    query = db.session.query(table_obj)
+    if start_time:
+        query = query.filter(table_obj.created >= start_time)
+    if end_time:
+        query = query.filter(table_obj.created <= end_time)
+    df = pd.read_sql_query(query.statement, query.session.bind)
+    # TODO Add filters
+    if group_by:
+        df = df.groupby(group_by)
+    if count:
+        df = df[count].count().reset_index(name='count')
+    return df.to_dict(orient='records')
+
+def get_accidents_stats(filters=None, group_by=None, count=None, start_time=None, end_time=None):
+    # TODO Add filter for provider_code 1 or 3
+    return get_stats(AccidentMarker, filters, group_by, count, start_time, end_time)
+
+@app.route('/api/pd_accidents_by_severity_in_location', methods=['GET'])
+def pd_get_accidents_severity_in_location(): 
+    # TODO Get this from new function (extract from news flash).
+    resolution = 'yishuv_symbol'
+    value      = request.values.get(resolution)
+    # TODO Add filters
+    start_time = datetime.datetime(year=2014, month=9, day=1)
+    return Response(json.dumps(get_accidents_stats(group_by='accident_severity', count='accident_severity', start_time=start_time), default=str), mimetype="application/json")
+
+'''
 def get_accidents_in_location(request, filters=None, by_severity=None, by_year=None):
     filters = filters or []
     location_field_names = ['yishuv_symbol', 'street1_hebrew', 'street2_hebrew', 'road1', 'road2', 'road_segment_number', 'road_segment_id']
@@ -1535,4 +1563,4 @@ def get_accidents_year_and_severity_in_location():
 @app.route('/api/accidents_in_location', methods=['GET'])
 def get_all_accidents_in_location():
     return Response(json.dumps(get_accidents_in_location(request), default=str), mimetype="application/json")
-
+'''

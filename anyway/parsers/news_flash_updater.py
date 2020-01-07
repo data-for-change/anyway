@@ -40,13 +40,12 @@ def update_single_news_flash(maps_key, news_flash_id):
             news_item['resolution']=None
             for col in ['region_hebrew', 'district_hebrew', 'yishuv_name', 'street1_hebrew', 'street2_hebrew',
                             'non_urban_intersection_hebrew', 'road1', 'road2', 'road_segment_name']:
-                    news_item[col] = None
+                news_item[col] = None
         update_news_flash_by_id(news_flash_id, news_item)
         logging.info('new flash news updated, is accident: ' + str(news_item['accident']))
     except Exception as e:
         logging.info('new flash news failed to update, index: ' + str(news_flash_id))
-        print(e)
-        raise()
+        logging.info(e)
 
 def main(maps_key, source=None, news_flash_id=None):
     if news_flash_id is not None:

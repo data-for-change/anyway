@@ -136,7 +136,7 @@ def update_news_flash_by_id(news_flash_id, params_dict):
             sql_query = sql_query + '{key} = :{key}, '.format(key=k)
         if sql_query.endswith(', '):
             sql_query = sql_query[:-2]
-        sql_query = sql_query + ' WHERE id:=id'
+        sql_query = sql_query + ' WHERE id=:id'
         params_dict['id'] = news_flash_id
         db.session.execute(sql_query, params_dict)
         db.session.commit()

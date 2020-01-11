@@ -114,7 +114,7 @@ def insert_new_flash_news(title, link, date_parsed, author, description, locatio
     db.session.commit()
 
 
-def insert_new_flash_news(news_flash, tweet_id=None):
+def insert_new_flash_news_wrapper(news_flash, tweet_id=None):
     insert_new_flash_news(news_flash.title, news_flash.link, news_flash.date_parsed, news_flash.author,
                           news_flash.description, news_flash.location, news_flash.lat, news_flash.lon,
                           news_flash.resolution, news_flash.region_hebrew, news_flash.district_hebrew,

@@ -5,7 +5,7 @@ from . import parsing_utils
 import logging
 
 from anyway.parsers.news_flash_parser import get_latest_date_from_db
-from anyway.parsers.news_flash_parser import insert_new_flash_news
+from anyway.parsers.news_flash_parser import insert_new_flash_news_wrapper
 
 
 def beautiful_soup_news_flash_parse(rss_link, site_name, maps_key):
@@ -32,5 +32,5 @@ def beautiful_soup_news_flash_parse(rss_link, site_name, maps_key):
             pass
         parsing_utils.process_after_parsing(news_item, maps_key)
 
-        insert_new_flash_news(news_item)
+        insert_new_flash_news_wrapper(news_item)
         logging.info('new flash news added, is accident: ' + str(news_item['accident']))

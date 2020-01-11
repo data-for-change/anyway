@@ -73,8 +73,8 @@ def get_db_matching_location(latitude, longitude, resolution, road_no=None):
             if (type(most_fit_loc[field])==str and (most_fit_loc[field] == '' or most_fit_loc[field]=='nan'))\
             or (type(most_fit_loc[field])==np.float64 and np.isnan(most_fit_loc[field])):
                 final_loc[field]=None
-        else:
-            final_loc[field] = most_fit_loc[field]
+            else:
+                final_loc[field] = most_fit_loc[field]
     return final_loc
 
 

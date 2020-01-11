@@ -1,13 +1,14 @@
 import graphene
 from graphene import relay
 from graphene_sqlalchemy import SQLAlchemyObjectType
+
 from anyway.models import AccidentMarkerView as AccidentMarkerViewModel
 
 
 class AccidentMarkerHebrew(SQLAlchemyObjectType):
     class Meta:
         model = AccidentMarkerViewModel
-        interfaces = (relay.Node, )
+        interfaces = (relay.Node,)
 
 
 class AccidentMarkerHebrewConnection(relay.Connection):

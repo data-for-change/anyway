@@ -1,18 +1,31 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+
 import glob
-import os
 import json
-from collections import OrderedDict, defaultdict
+import logging
+import os
 import re
+import shutil
+import tempfile
+import traceback
+import zipfile
+from collections import OrderedDict, defaultdict
 from datetime import datetime
-import six
-from six import iteritems
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import or_, and_
-import pandas as pd
+from functools import partial
+
 import math
+import pandas as pd
+import six
+from flask_sqlalchemy import SQLAlchemy
+from six import iteritems
+from sqlalchemy import or_, and_
+
+from . import preprocessing_cbs_files
 from .. import field_names, localization
+from .. import importmail_cbs
+from .. import models
+from ..constants import CONST
 from ..models import (AccidentMarker,
                       Involved,
                       Vehicle,
@@ -72,19 +85,8 @@ from ..models import (AccidentMarker,
                       LocationAccuracy,
                       ProviderCode,
                       VehicleDamage)
-
-from .. import models
-from ..constants import CONST
-from ..views import VIEWS
 from ..utilities import ItmToWGS84, init_flask, time_delta, ImporterUI, truncate_tables, chunks
-from .. import importmail_cbs
-from . import preprocessing_cbs_files
-from functools import partial
-import logging
-import tempfile
-import shutil
-import zipfile
-import traceback
+from ..views import VIEWS
 
 failed_dirs = OrderedDict()
 

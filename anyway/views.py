@@ -1,5 +1,4 @@
 class Views(object):
-
     MARKERS_HEBREW_VIEW = """SELECT markers.id,
                                     markers.provider_and_id,
                                     markers.provider_code,
@@ -208,7 +207,6 @@ class Views(object):
      LEFT JOIN release_dest ON involved.release_dest = release_dest.id AND involved.accident_year = release_dest.year AND involved.provider_code = release_dest.provider_code
      LEFT JOIN safety_measures_use ON involved.safety_measures_use = safety_measures_use.id AND involved.accident_year = safety_measures_use.year AND involved.provider_code = safety_measures_use.provider_code
      LEFT JOIN late_deceased ON involved.late_deceased = late_deceased.id AND involved.accident_year = late_deceased.year AND involved.provider_code = late_deceased.provider_code;"""
-
 
     VEHICLES_HEBREW_VIEW = """ SELECT
     vehicles.id,
@@ -532,5 +530,6 @@ class Views(object):
     INNER JOIN markers_hebrew ON vehicles_hebrew.provider_code = markers_hebrew.provider_code
                              AND vehicles_hebrew.accident_id = markers_hebrew.id
                              AND vehicles_hebrew.accident_year = markers_hebrew.accident_year ;"""
+
 
 VIEWS = Views()

@@ -1,6 +1,9 @@
-import pytest
-from anyway.models import AccidentMarker  # for AccidentMarker.bounding_box_query
 import datetime
+
+import pytest
+
+from anyway.models import AccidentMarker  # for AccidentMarker.bounding_box_query
+
 
 # This tests year 2014 accidents as this is the current example git data for testing
 # Once this changes to another year or to the current year's accidents (as should be) un-comment lines 11,13,15
@@ -23,10 +26,10 @@ def test_location_filters(base_kwargs):
     accident_markers = result.accident_markers
     rsa_markers = result.rsa_markers
     for marker in accident_markers:
-        assert base_kwargs['sw_lat'] <= marker.latitude  <= base_kwargs['ne_lat']
+        assert base_kwargs['sw_lat'] <= marker.latitude <= base_kwargs['ne_lat']
         assert base_kwargs['sw_lng'] <= marker.longitude <= base_kwargs['ne_lng']
     for marker in rsa_markers:
-        assert base_kwargs['sw_lat'] <= marker.latitude  <= base_kwargs['ne_lat']
+        assert base_kwargs['sw_lat'] <= marker.latitude <= base_kwargs['ne_lat']
         assert base_kwargs['sw_lng'] <= marker.longitude <= base_kwargs['ne_lng']
 
 
@@ -37,12 +40,14 @@ def test_accurate_filter(base_kwargs):
     for marker in accident_markers:
         assert marker.location_accuracy == 1
 
+
 def test_approx_filter(base_kwargs):
     base_kwargs['accurate'] = False
     result = AccidentMarker.bounding_box_query(yield_per=50, **base_kwargs)
     accident_markers = result.accident_markers
     for marker in accident_markers:
         assert marker.location_accuracy != 1
+
 
 def test_fatal_severity_filter(base_kwargs):
     base_kwargs['show_fatal'] = False

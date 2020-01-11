@@ -1,9 +1,10 @@
+import logging
+import multiprocessing
+import time
+
 from .models import AccidentMarker
 from .pymapcluster import calculate_clusters
 from .task_queue import task_queue
-import time
-import logging
-import multiprocessing
 
 
 @task_queue.task
@@ -18,7 +19,8 @@ def calculate_marker_box(marker_box, kwargs):
 def retrieve_clusters(**kwargs):
     start_time = time.time()
     result = AccidentMarker.bounding_box_query(**kwargs)
-    accident_markers_in_box = result.accident_markers.with_entities(AccidentMarker.latitude, AccidentMarker.longitude).all()
+    accident_markers_in_box = result.accident_markers.with_entities(AccidentMarker.latitude,
+                                                                    AccidentMarker.longitude).all()
     rsa_markers_in_box = result.rsa_markers.with_entities(AccidentMarker.latitude, AccidentMarker.longitude).all()
     logging.debug('getting cluster data from db took %f seconds' % (time.time() - start_time))
     start_time = time.time()

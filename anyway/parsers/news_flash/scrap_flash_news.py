@@ -3,7 +3,7 @@ import sys
 from .new_news_check import is_new_flash_news
 from .news_flash_crawl import ynet_news_flash_crawl
 from ..mda_twitter.mda_twitter import mda_twitter
-from . import beautiful_soup_news_flash_parse
+from .beautiful_soup_news_flash_parse import beautiful_soup_news_flash_parse
 # from sys import exit
 # import time
 

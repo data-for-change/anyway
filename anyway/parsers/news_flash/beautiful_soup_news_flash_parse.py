@@ -9,7 +9,7 @@ from anyway.parsers.news_flash_parser import insert_new_flash_news
 
 
 def beautiful_soup_news_flash_parse(rss_link, site_name, maps_key):
-    latest_date = get_latest_date_from_db()
+    latest_date = get_latest_date_from_db(site_name)
     response = requests.get(rss_link)
     html_soup = BeautifulSoup(response.text, "html.parser")
     news_items = parsing_utils.get_all_news_items(html_soup, site_name)

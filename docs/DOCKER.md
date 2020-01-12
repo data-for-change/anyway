@@ -27,11 +27,14 @@ Instructions
 **3.** Open "Docker terminal", go to the **anyway** directory and run:
     `docker-compose up -d db`
     
-**4.** start anyway container: `docker-compose up -d`
+**4.** Optional: Download the [db dump] (https://drive.google.com/file/d/1ECAmh5PZwgKiDAvij0fO_M5QvklU7oQ9/view?usp=sharing) (You need to request access) and save it in the **anyway** directory.
+Restore the db (in anyway directory): `cat <truncated dump file name> | docker-compose exec -T db psql -U anyway`
 
-**5.** while docker is running, run the following command to populate data (from 2014) `docker exec -i -t anyway_anyway_1 python main.py process cbs`
+**5.** start anyway container: `docker-compose up -d`
 
-**6.** **You're all set!** ANYWAY is up and running - connect to http://127.0.0.1:8080 and change dates to 2014 in order to see accidents
+**6.** If you didn't perform stage 4 - Load the example data into the DB: while docker is running, run the following command to populate data (from 2014) `docker exec -i -t anyway_anyway_1 python main.py process cbs`
+
+**7.** **You're all set!** ANYWAY is up and running - connect to http://127.0.0.1:8080 and change dates to 2014 in order to see accidents
 
 More
 -----------------------

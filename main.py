@@ -1,10 +1,12 @@
 #!/usr/bin/env python
-import click
+import argparse
 import logging
 import os
 import re
 import sys
-import argparse
+
+import click
+
 
 def valid_date(date_string):
     DATE_INPUT_FORMAT = '%d-%m-%Y'
@@ -38,8 +40,27 @@ def testserver(open_server, debug_js):
             port=int(os.getenv('PORT', 5000)))
 
 @cli.group()
+def update_news_flash():
+    pass
+
+@update_news_flash.command()
+@click.option('--google_maps_key_path', type=str)
+@click.option('--source',default='', type=str)
+@click.option('--news_flash_id',default='', type=str)
+def update(google_maps_key_path, source, news_flash_id):
+    from anyway.parsers.news_flash_updater import main
+    with open(google_maps_key_path) as file:
+        key = file.read()
+    if source=='':
+        source=None
+    if news_flash_id=='':
+        news_flash_id=None
+    return main(key,source, news_flash_id)
+
+@cli.group()
 def process():
     pass
+
 
 @process.command()
 @click.option('--specific_folder', is_flag=True, default=False)
@@ -51,9 +72,9 @@ def process():
 @click.option('--from_email', is_flag=True, default=False)
 @click.option('--username', default='')
 @click.option('--password', default='')
-@click.option('--email_search_start_date', type=str, default='') #format - DD.MM.YYYY
-
-def cbs(specific_folder, delete_all, path, batch_size, delete_start_date, load_start_year, from_email, username, password, email_search_start_date):
+@click.option('--email_search_start_date', type=str, default='')  # format - DD.MM.YYYY
+def cbs(specific_folder, delete_all, path, batch_size, delete_start_date, load_start_year, from_email, username,
+        password, email_search_start_date):
     from anyway.parsers.cbs import main
 
     return main(specific_folder=specific_folder,
@@ -67,6 +88,7 @@ def cbs(specific_folder, delete_all, path, batch_size, delete_start_date, load_s
                 password=password,
                 email_search_start_date=email_search_start_date)
 
+
 @process.command()
 @click.option('--google_maps_key_path', type=str)
 def news_flash(google_maps_key_path):
@@ -74,6 +96,7 @@ def news_flash(google_maps_key_path):
     with open(google_maps_key_path) as file:
         key = file.read()
     return main(key)
+
 
 @process.command()
 @click.option('--specific_folder', is_flag=True, default=False)
@@ -109,11 +132,13 @@ def rsa(filename):
     from anyway.parsers.rsa import parse
     return parse(filename)
 
+
 @process.command()
 @click.argument("filename", type=str, default="static/data/segments/road_segments.xlsx")
 def road_segments(filename):
     from anyway.parsers.road_segments import parse
     return parse(filename)
+
 
 @process.command()
 @click.argument("filepath", type=str, default="static/data/schools/schools.csv")
@@ -122,6 +147,7 @@ def schools(filepath, batch_size):
     from anyway.parsers.schools import parse
     return parse(filepath=filepath,
                  batch_size=batch_size)
+
 
 @process.command()
 @click.argument("schools_description_filepath", type=str, default="static/data/schools/schools_description.xlsx")
@@ -135,6 +161,7 @@ def schools_with_description(schools_description_filepath,
                  schools_coordinates_filepath=schools_coordinates_filepath,
                  batch_size=batch_size)
 
+
 @process.command()
 @click.option('--start_date', default='01-01-2014', type=valid_date, help='The Start Date - format DD-MM-YYYY')
 @click.option('--end_date', default='31-12-2018', type=valid_date, help='The End Date - format DD-MM-YYYY')
@@ -147,13 +174,14 @@ def injured_around_schools(start_date, end_date, distance, batch_size):
                  distance=distance,
                  batch_size=batch_size)
 
+
 @cli.group()
 def preprocess():
     pass
 
+
 @preprocess.command()
 @click.option('--path', type=str)
-
 def preprocess_cbs(path):
     from anyway.parsers.preprocessing_cbs_files import update_cbs_files_names
 
@@ -164,16 +192,18 @@ def preprocess_cbs(path):
 def create_views():
     pass
 
-@create_views.command()
 
+@create_views.command()
 def cbs_views():
     from anyway.parsers.cbs import create_views
 
     return create_views()
 
+
 @cli.group()
 def update_dictionary_tables():
     pass
+
 
 @update_dictionary_tables.command()
 @click.option('--path', type=str, default="static/data/cbs")
@@ -182,9 +212,11 @@ def update_cbs(path):
 
     return update_dictionary_tables(path)
 
+
 @cli.group()
 def truncate_dictionary_tables():
     pass
+
 
 @truncate_dictionary_tables.command()
 @click.option('--path', type=str)
@@ -227,6 +259,7 @@ def load_discussions(identifiers):
             db.session.rollback()
             logging.warn("Failed: " + identifier + ": " + e)
 
+
 @cli.group()
 def scripts():
     pass
@@ -240,10 +273,10 @@ def scripts():
 def accidents_around_schools(start_date, end_date, distance, output_path):
     from anyway.accidents_around_schools import main
     return main(start_date=start_date,
-                 end_date=end_date,
-                 distance=distance,
-                 output_path=output_path)
+                end_date=end_date,
+                distance=distance,
+                output_path=output_path)
 
 
 if __name__ == '__main__':
-    cli(sys.argv[1:]) # pylint: disable=too-many-function-args
+    cli(sys.argv[1:])  # pylint: disable=too-many-function-args

@@ -1532,13 +1532,13 @@ def get_accidents_stats(resolution, filters=None, group_by=None, count=None, sta
     if resolution is None:
         return {}
     filters = filters or {}
-    filters['provider_code'] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE] 
+    filters['provider_code'] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
     start_time = datetime.datetime.fromtimestamp(int(start_time)) if start_time else None
     end_time = datetime.datetime.fromtimestamp(int(end_time)) if end_time else None
     return get_stats(AccidentMarker, filters, group_by, count, start_time, end_time)
 
 @app.route('/api/count_accidents_by_severity_in_location', methods=['GET'])
-def count_accidents_by_severity_in_location(): 
+def count_accidents_by_severity_in_location():
     location_info = extract_news_flash_location(request.values.get('news_flash_id'))['data']
     resolution    = location_info.pop('resolution')
     start_time    = request.values.get('start_time')

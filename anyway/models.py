@@ -271,6 +271,8 @@ class AccidentMarker(MarkerMixin, Base):
     violation_type_rsa = Column(Text())
     geom = Column(Geometry('POINT'))
     non_urban_intersection_by_junction_number = Column(Text())
+    rsa_severity = Column(Integer())
+    rsa_license_plate = Column(Text())
 
     @staticmethod
     def json_to_description(msg):

@@ -103,16 +103,17 @@ def shutdown_session(exception=None):
 
 def generate_json(accidents, rsa_markers, discussions, is_thin, total_records=None):
     markers = accidents.all()
-    markers += rsa_markers.all()
+    total_accidents = len(markers)
+
+    rsa = rsa_markers.all()
+    total_rsa = len(rsa)
+    markers += rsa
 
     if not is_thin:
         markers += discussions.all()
 
     if total_records is None:
         total_records = len(markers)
-
-    total_accidents = accidents.count()
-    total_rsa = rsa_markers.count()
 
     entries = [marker.serialize(is_thin) for marker in markers]
     return jsonify({"markers": entries, 'pagination': {'totalRecords': total_records,

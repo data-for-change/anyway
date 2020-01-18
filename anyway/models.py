@@ -347,7 +347,7 @@ class AccidentMarker(MarkerMixin, Base):
         self.put()
 
     @staticmethod
-    def bounding_box_query(is_thin=False, yield_per=None, involved_and_vehicles=False, **kwargs):
+    def bounding_box_query(is_thin=False, yield_per=None, involved_and_vehicles=False, query_entities=None, **kwargs):
         approx = kwargs.get('approx', True)
         accurate = kwargs.get('accurate', True)
         page = kwargs.get('page')
@@ -367,19 +367,36 @@ class AccidentMarker(MarkerMixin, Base):
                                                                                   ne_lng,
                                                                                   ne_lat)
 
-        markers = db.session.query(AccidentMarker) \
-            .filter(AccidentMarker.geom.intersects(polygon_str)) \
-            .filter(AccidentMarker.created >= kwargs['start_date']) \
-            .filter(AccidentMarker.created < kwargs['end_date']) \
-            .filter(AccidentMarker.provider_code != CONST.RSA_PROVIDER_CODE) \
-            .order_by(desc(AccidentMarker.created))
+        if query_entities is not None:
+            markers = db.session.query(AccidentMarker) \
+                .with_entities(*query_entities) \
+                .filter(AccidentMarker.geom.intersects(polygon_str)) \
+                .filter(AccidentMarker.created >= kwargs['start_date']) \
+                .filter(AccidentMarker.created < kwargs['end_date']) \
+                .filter(AccidentMarker.provider_code != CONST.RSA_PROVIDER_CODE) \
+                .order_by(desc(AccidentMarker.created))
 
-        rsa_markers = db.session.query(AccidentMarker) \
-            .filter(AccidentMarker.geom.intersects(polygon_str)) \
-            .filter(AccidentMarker.created >= kwargs['start_date']) \
-            .filter(AccidentMarker.created < kwargs['end_date']) \
-            .filter(AccidentMarker.provider_code == CONST.RSA_PROVIDER_CODE) \
-            .order_by(desc(AccidentMarker.created))
+            rsa_markers = db.session.query(AccidentMarker) \
+                .with_entities(*query_entities) \
+                .filter(AccidentMarker.geom.intersects(polygon_str)) \
+                .filter(AccidentMarker.created >= kwargs['start_date']) \
+                .filter(AccidentMarker.created < kwargs['end_date']) \
+                .filter(AccidentMarker.provider_code == CONST.RSA_PROVIDER_CODE) \
+                .order_by(desc(AccidentMarker.created))
+        else:
+            markers = db.session.query(AccidentMarker) \
+                .filter(AccidentMarker.geom.intersects(polygon_str)) \
+                .filter(AccidentMarker.created >= kwargs['start_date']) \
+                .filter(AccidentMarker.created < kwargs['end_date']) \
+                .filter(AccidentMarker.provider_code != CONST.RSA_PROVIDER_CODE) \
+                .order_by(desc(AccidentMarker.created))
+
+            rsa_markers = db.session.query(AccidentMarker) \
+                .filter(AccidentMarker.geom.intersects(polygon_str)) \
+                .filter(AccidentMarker.created >= kwargs['start_date']) \
+                .filter(AccidentMarker.created < kwargs['end_date']) \
+                .filter(AccidentMarker.provider_code == CONST.RSA_PROVIDER_CODE) \
+                .order_by(desc(AccidentMarker.created))
 
         if not kwargs['show_rsa']:
             rsa_markers = db.session.query(AccidentMarker).filter(sql.false())

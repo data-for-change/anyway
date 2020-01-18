@@ -691,17 +691,7 @@ class NewsFlash(Base):
     lon = Column(Float(), nullable=True)
     road1 = Column(Float(), nullable=True)
     road2 = Column(Float(), nullable=True)
-    intersection = Column(Text(), nullable=True)
-    city = Column(Text(), nullable=True)
-    street = Column(Text(), nullable=True)
-    street2 = Column(Text(), nullable=True)
     resolution = Column(Text(), nullable=True)
-    geo_extracted_street = Column(Text(), nullable=True)
-    geo_extracted_road_no = Column(Text(), nullable=True)
-    geo_extracted_intersection = Column(Text(), nullable=True)
-    geo_extracted_city = Column(Text(), nullable=True)
-    geo_extracted_address = Column(Text(), nullable=True)
-    geo_extracted_district = Column(Text(), nullable=True)
     title = Column(Text(), nullable=True)
     source = Column(Text(), nullable=True)
     location = Column(Text(), nullable=True)
@@ -726,20 +716,18 @@ class NewsFlash(Base):
             "lon": self.lon,
             "road1": self.road1,
             "road2": self.road2,
-            "intersection": self.intersection,
-            "city": self.city,
-            "street": self.street,
-            "street2": self.street2,
             "resolution": self.resolution,
-            "geo_extracted_street": self.geo_extracted_street,
-            "geo_extracted_road_no": self.geo_extracted_road_no,
-            "geo_extracted_intersection": self.geo_extracted_intersection,
-            "geo_extracted_city": self.geo_extracted_city,
-            "geo_extracted_address": self.geo_extracted_address,
-            "geo_extracted_district": self.geo_extracted_district,
             "title": self.title,
             "source": self.source,
-            "location": self.location
+            "location": self.location,
+            "tweet_id": self.tweet_id,
+            "region_hebrew": self.region_hebrew,
+            "district_hebrew": self.district_hebrew,
+            "yishuv_name": self.yishuv_name,
+            "street1_hebrew": self.street1_hebrew,
+            "street2_hebrew": self.street2_hebrew,
+            "non_urban_intersection_hebrew": self.non_urban_intersection_hebrew,
+            "road_segment_name": self.road_segment_name,
         }
 
     # Flask-Login integration

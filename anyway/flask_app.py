@@ -1563,7 +1563,7 @@ def infographics_data():
         return Response({})
 
     location_info_empty = True
-    for key, value in location_info.items():
+    for _, value in location_info.items():
         if value is not None:
             location_info_empty = False
     if location_info_empty:
@@ -1595,7 +1595,7 @@ def infographics_data():
     start_year = datetime.date(start_time.year, 1, 1)
     end_year = datetime.date(end_time.year, 12, 31)
     accident_count_by_accident_year = {'accident_count_by_accident_year':
-                                  {'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_year', count='accident_year', start_time=start_year, end_time=end_time),
+                                  {'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_year', count='accident_year', start_time=start_year, end_time=end_year),
                                   'meta': {}}}
     output.append(accident_count_by_accident_year)
 

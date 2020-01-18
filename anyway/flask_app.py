@@ -1503,6 +1503,9 @@ def oauth_callback(provider):
 
 def extract_news_flash_location(news_flash_id):
     news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id==news_flash_id).first()
+    if not news_flash_obj:
+        logging.warn('could not find news flash id {}'.format(news_flash_id))
+        return None
     resolution = news_flash_obj.resolution if news_flash_obj.resolution else None
     if not news_flash_obj or not resolution or resolution not in resolution_dict:
         logging.warn('could not find valid resolution for news flash id {}'.format(news_flash_id))
@@ -1556,7 +1559,10 @@ def infographics_data():
 
     output = []
 
-    location_info = extract_news_flash_location(request.values.get('news_flash_id'))['data']
+    location_info = extract_news_flash_location(request.values.get('news_flash_id'))
+    if location_info is None:
+        return Response({})
+    location_info = location_info['data']
     output.append({"location_info": location_info.copy()})
     resolution    = location_info.pop('resolution')
     if resolution is None:

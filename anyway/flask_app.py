@@ -1501,33 +1501,47 @@ def oauth_callback(provider):
     login.login_user(user, True)
     return redirect(url_for('index'))
 
-
-@app.route('/api/accidents_in_city_by_year_severity', methods=['GET'])
-def get_accidents_in_city_by_year_severity():
-    yishuv_symbol = request.values.get('yishuv_symbol')
-    results = db.session.query(
-        AccidentMarkerView.accident_year,
-        AccidentMarkerView.accident_severity_hebrew,
-        func.count(AccidentMarkerView.accident_year).label('count')
-    ).filter(
-        AccidentMarkerView.yishuv_symbol == yishuv_symbol,
-        or_(AccidentMarkerView.provider_code == CONST.CBS_ACCIDENT_TYPE_1_CODE,
-            AccidentMarkerView.provider_code == CONST.CBS_ACCIDENT_TYPE_3_CODE)
-    ).group_by(
-        AccidentMarkerView.accident_year,
-        AccidentMarkerView.accident_severity_hebrew
-    ).order_by(
-        AccidentMarkerView.accident_year,
-        AccidentMarkerView.accident_severity_hebrew
-    ).all()
-    return Response(json.dumps([r._asdict() for r in results], default=str), mimetype="application/json")
-
 def extract_news_flash_location(news_flash_id):
     news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id==news_flash_id).first()
     resolution = news_flash_obj.resolution.encode('utf-8') if news_flash_obj.resolution else None
     if not news_flash_obj or not resolution or resolution not in resolution_dict:
-        return Response(status=404)
+        logging.warn('could not find valid resolution for news flash id {}'.format(news_flash_id))
+        return {'name': 'location', 'data': {'resolution': None}}
     data = {'resolution': resolution}
     for field in resolution_dict[resolution]:
         data[field] = getattr(news_flash_obj, field)
-    return Response(json.dumps({'name': 'location', 'data': data}, default=str), mimetype="application/json")
+    return {'name': 'location', 'data': data}
+
+def get_stats(table_obj, filters, group_by, count, start_time, end_time):
+    query = db.session.query(table_obj)
+    if start_time:
+        query = query.filter(table_obj.created >= start_time)
+    if end_time:
+        query = query.filter(table_obj.created <= end_time)
+    df = pd.read_sql_query(query.statement, query.session.bind)
+    # TODO fix- filters are not being applied (always same nums)
+    if filters:
+        for field_name, value in filters.iteritems():
+            getattr(df, field_name).isin(list(value))
+    if group_by:
+        df = df.groupby(group_by)
+    if count:
+        df = df[count].count().reset_index(name='count')
+    return df.to_dict(orient='records') if group_by or count else df.to_dict()
+
+def get_accidents_stats(resolution, filters=None, group_by=None, count=None, start_time=None, end_time=None):
+    if resolution is None:
+        return {}
+    filters = filters or {}
+    filters['provider_code'] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    start_time = datetime.datetime.fromtimestamp(int(start_time)) if start_time else None
+    end_time = datetime.datetime.fromtimestamp(int(end_time)) if end_time else None
+    return get_stats(AccidentMarker, filters, group_by, count, start_time, end_time)
+
+@app.route('/api/count_accidents_by_severity_in_location', methods=['GET'])
+def count_accidents_by_severity_in_location():
+    location_info = extract_news_flash_location(request.values.get('news_flash_id'))['data']
+    resolution    = location_info.pop('resolution')
+    start_time    = request.values.get('start_time')
+    end_time      = request.values.get('end_time')
+    return Response(json.dumps(get_accidents_stats(resolution=resolution, filters=location_info, group_by='accident_severity', count='accident_severity', start_time=start_time, end_time=end_time), default=str), mimetype="application/json")

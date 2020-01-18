@@ -1559,6 +1559,7 @@ class VehicleDamage(Base):
 class AccidentMarkerView(Base):
     __tablename__ = "markers_hebrew"
     id = Column(BigInteger(), primary_key=True)
+    accident_timestamp = Column(DateTime, default=None)
     provider_code = Column(Integer(), primary_key=True)
     provider_code_hebrew = Column(Text())
     accident_type = Column(Integer())
@@ -1649,6 +1650,9 @@ class AccidentMarkerView(Base):
     longitude = Column(Float())
     x = Column(Float())
     y = Column(Float())
+    road_segment_id = Column(Integer())
+    road_segment_name = Column(Text())
+    road_segment_number = Column(Integer())
 
     def serialize(self):
         return {

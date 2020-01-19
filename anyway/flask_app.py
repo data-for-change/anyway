@@ -1501,33 +1501,108 @@ def oauth_callback(provider):
     login.login_user(user, True)
     return redirect(url_for('index'))
 
-
-@app.route('/api/accidents_in_city_by_year_severity', methods=['GET'])
-def get_accidents_in_city_by_year_severity():
-    yishuv_symbol = request.values.get('yishuv_symbol')
-    results = db.session.query(
-        AccidentMarkerView.accident_year,
-        AccidentMarkerView.accident_severity_hebrew,
-        func.count(AccidentMarkerView.accident_year).label('count')
-    ).filter(
-        AccidentMarkerView.yishuv_symbol == yishuv_symbol,
-        or_(AccidentMarkerView.provider_code == CONST.CBS_ACCIDENT_TYPE_1_CODE,
-            AccidentMarkerView.provider_code == CONST.CBS_ACCIDENT_TYPE_3_CODE)
-    ).group_by(
-        AccidentMarkerView.accident_year,
-        AccidentMarkerView.accident_severity_hebrew
-    ).order_by(
-        AccidentMarkerView.accident_year,
-        AccidentMarkerView.accident_severity_hebrew
-    ).all()
-    return Response(json.dumps([r._asdict() for r in results], default=str), mimetype="application/json")
-
 def extract_news_flash_location(news_flash_id):
     news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id==news_flash_id).first()
-    resolution = news_flash_obj.resolution.encode('utf-8') if news_flash_obj.resolution else None
+    if not news_flash_obj:
+        logging.warn('could not find news flash id {}'.format(news_flash_id))
+        return None
+    resolution = news_flash_obj.resolution if news_flash_obj.resolution else None
     if not news_flash_obj or not resolution or resolution not in resolution_dict:
-        return Response(status=404)
+        logging.warn('could not find valid resolution for news flash id {}'.format(news_flash_id))
+        return {'name': 'location', 'data': {'resolution': None}}
     data = {'resolution': resolution}
     for field in resolution_dict[resolution]:
         data[field] = getattr(news_flash_obj, field)
-    return Response(json.dumps({'name': 'location', 'data': data}, default=str), mimetype="application/json")
+    return {'name': 'location', 'data': data}
+
+def get_query(table_obj, filters, start_time, end_time):
+    query = db.session.query(table_obj)
+    if start_time:
+        query = query.filter(getattr(table_obj,'accident_timestamp') >= start_time)
+    if end_time:
+        query = query.filter(getattr(table_obj,'accident_timestamp') <= end_time)
+    if filters:
+        for field_name, value in filters.items():
+            if isinstance(value, list):
+                values = value
+            else:
+                values = [value]
+            query = query.filter((getattr(table_obj,field_name)).in_(values))
+    return query
+
+def get_accidents_stats(table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None):
+    filters = filters or {}
+    filters['provider_code'] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    # get stats
+    query = get_query(table_obj, filters, start_time, end_time)
+    if group_by:
+        query = query.group_by(group_by)
+        query = query.with_entities(group_by, func.count(count))
+    df = pd.read_sql_query(query.statement, query.session.bind)
+    df.rename(columns={'count_1': 'count'}, inplace=True)
+    df.columns = [c.replace('_hebrew', '') for c in df.columns]
+    return df.to_dict(orient='records') if group_by or count else df.to_dict()
+
+def get_most_severe_accidents(table_obj, filters, start_time, end_time, limit=10):
+    filters = filters or {}
+    filters['provider_code'] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    query = get_query(table_obj, filters, start_time, end_time)
+    query = query.with_entities('longitude', 'latitude', 'accident_severity_hebrew', 'accident_timestamp')
+    query = query.order_by(getattr(table_obj,"accident_severity"), getattr(table_obj,"accident_timestamp").desc())
+    query = query.limit(limit)
+    df = pd.read_sql_query(query.statement, query.session.bind)
+    df.columns = [c.replace('_hebrew', '') for c in df.columns]
+    return df.to_dict(orient='records')
+
+@app.route('/api/infographics_data', methods=['GET'])
+def infographics_data():
+
+    output = []
+
+    location_info = extract_news_flash_location(request.values.get('news_flash_id'))
+    if location_info is None:
+        return Response({})
+    location_info = location_info['data']
+    output.append({"location_info": location_info.copy()})
+    resolution    = location_info.pop('resolution')
+    if resolution is None:
+        return Response({})
+
+    location_info_empty = True
+    for _, value in location_info.items():
+        if value is not None:
+            location_info_empty = False
+    if location_info_empty:
+        return Response({})
+    start_time    = request.values.get('start_time')
+    end_time      = request.values.get('end_time')
+
+    start_time = datetime.datetime.fromtimestamp(int(start_time)) if start_time else None
+    end_time = datetime.datetime.fromtimestamp(int(end_time)) if end_time else None
+
+    # most severe accidents
+    most_severe_accidents = {'most_severe_accidents':
+                            {'data': get_most_severe_accidents(table_obj=AccidentMarkerView, filters=location_info, start_time=start_time, end_time=end_time),
+                            'meta': {}}}
+    output.append(most_severe_accidents)
+    # accident_severity count
+    accident_count_by_severity = {'accident_count_by_severity':
+                                  {'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_severity_hebrew', count='accident_severity_hebrew', start_time=start_time, end_time=end_time),
+                                  'meta': {}}}
+    output.append(accident_count_by_severity)
+
+    # accident_type count
+    accident_count_by_accident_type = {'accident_count_by_accident_type':
+                                  {'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_type_hebrew', count='accident_type_hebrew', start_time=start_time, end_time=end_time),
+                                  'meta': {}}}
+    output.append(accident_count_by_accident_type)
+
+    # accident_year count
+    start_year = datetime.date(start_time.year, 1, 1)
+    end_year = datetime.date(end_time.year, 12, 31)
+    accident_count_by_accident_year = {'accident_count_by_accident_year':
+                                  {'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_year', count='accident_year', start_time=start_year, end_time=end_year),
+                                  'meta': {}}}
+    output.append(accident_count_by_accident_year)
+
+    return Response(json.dumps(output, default=str), mimetype="application/json")

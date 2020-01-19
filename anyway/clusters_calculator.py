@@ -10,7 +10,7 @@ from .task_queue import task_queue
 @task_queue.task
 def calculate_marker_box(marker_box, kwargs):
     kwargs.update(marker_box)
-    markers_in_box = AccidentMarker.bounding_box_query(**kwargs)
+    markers_in_box = AccidentMarker.bounding_box_query(query_entities=[AccidentMarker.latitude, AccidentMarker.longitude], **kwargs)
     markers = markers_in_box['accidnet_markers'].all()
     markers += markers_in_box['rsa_markers'].all()
     return calculate_clusters(markers, kwargs['zoom'])
@@ -18,10 +18,9 @@ def calculate_marker_box(marker_box, kwargs):
 
 def retrieve_clusters(**kwargs):
     start_time = time.time()
-    result = AccidentMarker.bounding_box_query(**kwargs)
-    accident_markers_in_box = result.accident_markers.with_entities(AccidentMarker.latitude,
-                                                                    AccidentMarker.longitude).all()
-    rsa_markers_in_box = result.rsa_markers.with_entities(AccidentMarker.latitude, AccidentMarker.longitude).all()
+    result = AccidentMarker.bounding_box_query(query_entities=[AccidentMarker.latitude, AccidentMarker.longitude], **kwargs)
+    accident_markers_in_box = result.accident_markers.all()
+    rsa_markers_in_box = result.rsa_markers.all()
     logging.debug('getting cluster data from db took %f seconds' % (time.time() - start_time))
     start_time = time.time()
     clusters = calculate_clusters(accident_markers_in_box + rsa_markers_in_box, kwargs['zoom'])

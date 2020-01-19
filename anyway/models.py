@@ -347,7 +347,7 @@ class AccidentMarker(MarkerMixin, Base):
         self.put()
 
     @staticmethod
-    def bounding_box_query(is_thin=False, yield_per=None, involved_and_vehicles=False, **kwargs):
+    def bounding_box_query(is_thin=False, yield_per=None, involved_and_vehicles=False, query_entities=None, **kwargs):
         approx = kwargs.get('approx', True)
         accurate = kwargs.get('accurate', True)
         page = kwargs.get('page')
@@ -367,19 +367,36 @@ class AccidentMarker(MarkerMixin, Base):
                                                                                   ne_lng,
                                                                                   ne_lat)
 
-        markers = db.session.query(AccidentMarker) \
-            .filter(AccidentMarker.geom.intersects(polygon_str)) \
-            .filter(AccidentMarker.created >= kwargs['start_date']) \
-            .filter(AccidentMarker.created < kwargs['end_date']) \
-            .filter(AccidentMarker.provider_code != CONST.RSA_PROVIDER_CODE) \
-            .order_by(desc(AccidentMarker.created))
+        if query_entities is not None:
+            markers = db.session.query(AccidentMarker) \
+                .with_entities(*query_entities) \
+                .filter(AccidentMarker.geom.intersects(polygon_str)) \
+                .filter(AccidentMarker.created >= kwargs['start_date']) \
+                .filter(AccidentMarker.created < kwargs['end_date']) \
+                .filter(AccidentMarker.provider_code != CONST.RSA_PROVIDER_CODE) \
+                .order_by(desc(AccidentMarker.created))
 
-        rsa_markers = db.session.query(AccidentMarker) \
-            .filter(AccidentMarker.geom.intersects(polygon_str)) \
-            .filter(AccidentMarker.created >= kwargs['start_date']) \
-            .filter(AccidentMarker.created < kwargs['end_date']) \
-            .filter(AccidentMarker.provider_code == CONST.RSA_PROVIDER_CODE) \
-            .order_by(desc(AccidentMarker.created))
+            rsa_markers = db.session.query(AccidentMarker) \
+                .with_entities(*query_entities) \
+                .filter(AccidentMarker.geom.intersects(polygon_str)) \
+                .filter(AccidentMarker.created >= kwargs['start_date']) \
+                .filter(AccidentMarker.created < kwargs['end_date']) \
+                .filter(AccidentMarker.provider_code == CONST.RSA_PROVIDER_CODE) \
+                .order_by(desc(AccidentMarker.created))
+        else:
+            markers = db.session.query(AccidentMarker) \
+                .filter(AccidentMarker.geom.intersects(polygon_str)) \
+                .filter(AccidentMarker.created >= kwargs['start_date']) \
+                .filter(AccidentMarker.created < kwargs['end_date']) \
+                .filter(AccidentMarker.provider_code != CONST.RSA_PROVIDER_CODE) \
+                .order_by(desc(AccidentMarker.created))
+
+            rsa_markers = db.session.query(AccidentMarker) \
+                .filter(AccidentMarker.geom.intersects(polygon_str)) \
+                .filter(AccidentMarker.created >= kwargs['start_date']) \
+                .filter(AccidentMarker.created < kwargs['end_date']) \
+                .filter(AccidentMarker.provider_code == CONST.RSA_PROVIDER_CODE) \
+                .order_by(desc(AccidentMarker.created))
 
         if not kwargs['show_rsa']:
             rsa_markers = db.session.query(AccidentMarker).filter(sql.false())
@@ -674,17 +691,7 @@ class NewsFlash(Base):
     lon = Column(Float(), nullable=True)
     road1 = Column(Float(), nullable=True)
     road2 = Column(Float(), nullable=True)
-    intersection = Column(Text(), nullable=True)
-    city = Column(Text(), nullable=True)
-    street = Column(Text(), nullable=True)
-    street2 = Column(Text(), nullable=True)
     resolution = Column(Text(), nullable=True)
-    geo_extracted_street = Column(Text(), nullable=True)
-    geo_extracted_road_no = Column(Text(), nullable=True)
-    geo_extracted_intersection = Column(Text(), nullable=True)
-    geo_extracted_city = Column(Text(), nullable=True)
-    geo_extracted_address = Column(Text(), nullable=True)
-    geo_extracted_district = Column(Text(), nullable=True)
     title = Column(Text(), nullable=True)
     source = Column(Text(), nullable=True)
     location = Column(Text(), nullable=True)
@@ -709,20 +716,18 @@ class NewsFlash(Base):
             "lon": self.lon,
             "road1": self.road1,
             "road2": self.road2,
-            "intersection": self.intersection,
-            "city": self.city,
-            "street": self.street,
-            "street2": self.street2,
             "resolution": self.resolution,
-            "geo_extracted_street": self.geo_extracted_street,
-            "geo_extracted_road_no": self.geo_extracted_road_no,
-            "geo_extracted_intersection": self.geo_extracted_intersection,
-            "geo_extracted_city": self.geo_extracted_city,
-            "geo_extracted_address": self.geo_extracted_address,
-            "geo_extracted_district": self.geo_extracted_district,
             "title": self.title,
             "source": self.source,
-            "location": self.location
+            "location": self.location,
+            "tweet_id": self.tweet_id,
+            "region_hebrew": self.region_hebrew,
+            "district_hebrew": self.district_hebrew,
+            "yishuv_name": self.yishuv_name,
+            "street1_hebrew": self.street1_hebrew,
+            "street2_hebrew": self.street2_hebrew,
+            "non_urban_intersection_hebrew": self.non_urban_intersection_hebrew,
+            "road_segment_name": self.road_segment_name,
         }
 
     # Flask-Login integration
@@ -1554,6 +1559,7 @@ class VehicleDamage(Base):
 class AccidentMarkerView(Base):
     __tablename__ = "markers_hebrew"
     id = Column(BigInteger(), primary_key=True)
+    accident_timestamp = Column(DateTime, default=None)
     provider_code = Column(Integer(), primary_key=True)
     provider_code_hebrew = Column(Text())
     accident_type = Column(Integer())
@@ -1644,6 +1650,9 @@ class AccidentMarkerView(Base):
     longitude = Column(Float())
     x = Column(Float())
     y = Column(Float())
+    road_segment_id = Column(Integer())
+    road_segment_name = Column(Text())
+    road_segment_number = Column(Integer())
 
     def serialize(self):
         return {

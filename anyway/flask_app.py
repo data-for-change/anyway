@@ -275,6 +275,53 @@ def yishuv_symbol_to_name():
     return Response(json.dumps(entries, default=str), mimetype="application/json")
 
 
+@app.route("/api/news-flash-filters", methods=["GET"])
+@user_optional
+def news_flash_filters():
+    logging.debug('getting filtered news flash')
+    source = request.values.get('source')
+    count = request.values.get('news_flash_count')
+    start_date = request.values.get('start_date')
+    end_date = request.values.get('end_date')
+    news_flash_obj = db.session.query(NewsFlash)
+
+    # get all possible sources
+    sources = [str(source_name[0]) for source_name in db.session.query(NewsFlash.source).distinct().all()]
+    if source:
+        if source not in sources:
+            return Response('{"message": "Requested source does not exist"}',
+                            status=404,
+                            mimetype='application/json')
+        else:
+            news_flash_obj = news_flash_obj.filter(NewsFlash.source == source)
+
+    if start_date and end_date:
+        s = datetime.datetime.fromtimestamp(int(start_date))
+        e = datetime.datetime.fromtimestamp(int(end_date))
+        news_flash_obj = news_flash_obj.filter(and_(NewsFlash.date <= e,
+                                                    NewsFlash.date >= s))
+
+    # when only one of the dates is sent
+    elif start_date or end_date:
+        return Response('{"message": "Must send both start_date and end_date"}',
+                        status=404,
+                        mimetype='application/json')
+
+    news_flash_obj = news_flash_obj.filter(
+        and_(NewsFlash.accident == True, not_(and_(NewsFlash.lat == 0, NewsFlash.lon == 0)),
+             not_(and_(NewsFlash.lat == None, NewsFlash.lon == None)))
+    ).order_by(
+        NewsFlash.date.desc())
+
+    if count:
+        news_flash_obj = news_flash_obj.limit(count)
+
+    news_flashes = news_flash_obj.all()
+
+    news_flashes_jsons = [news_flash.serialize() for news_flash in news_flashes]
+    return Response(json.dumps(news_flashes_jsons, default=str), mimetype="application/json")
+
+
 @app.route("/api/news-flash", methods=["GET"])
 @user_optional
 def news_flash():

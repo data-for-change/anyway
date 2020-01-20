@@ -4,12 +4,14 @@ from anyway.parsers.location_extraction import manual_filter_location_of_text, \
     geocode_extract, get_db_matching_location, set_accident_resolution
 from anyway.parsers.news_flash_classifiers import classify_ynet, classify_tweets
 from anyway.parsers.news_flash_parser import get_all_news_flash_data_for_updates, \
-    update_news_flash_by_id
+    update_news_flash_bulk
 
 news_flash_classifiers = {'ynet': classify_ynet,
                           'twitter': classify_tweets}
 
-def update_news_flash(maps_key, news_flash_data):
+def update_news_flash(maps_key, news_flash_data, bulk_size=100):
+    news_flash_id_list=[]
+    params_dict_list=[]
     for news_flash_id, title, description, item_source, old_location in news_flash_data:
         item_data=description
         if item_data is None or item_data == '':
@@ -38,15 +40,21 @@ def update_news_flash(maps_key, news_flash_data):
             else:
                 news_item['lat'] = 0
                 news_item['lon'] = 0
-                news_item['resolution']=None
                 for col in ['region_hebrew', 'district_hebrew', 'yishuv_name', 'street1_hebrew', 'street2_hebrew',
-                                'non_urban_intersection_hebrew', 'road1', 'road2', 'road_segment_name']:
+                                'non_urban_intersection_hebrew', 'road1', 'road2', 'road_segment_name','resolution']:
                     news_item[col] = None
-            update_news_flash_by_id(news_flash_id, news_item)
+            news_flash_id_list.append(news_flash_id)
+            params_dict_list.append(news_item)
+            if len(news_flash_id_list)>=bulk_size:
+                update_news_flash_bulk(news_flash_id_list, params_dict_list)
+                news_flash_id_list=[]
+                params_dict_list=[]
             logging.info('new flash news updated, is accident: ' + str(news_item['accident']))
         except Exception as e:
             logging.info('new flash news failed to update, index: ' + str(news_flash_id))
             logging.info(e)
+    if len(news_flash_id_list)>0:
+        update_news_flash_bulk(news_flash_id_list, params_dict_list)
 
 def main(maps_key, source=None, news_flash_id=None):
     if news_flash_id is not None:

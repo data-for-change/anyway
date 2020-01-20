@@ -64,6 +64,6 @@ def main(maps_key, source=None, news_flash_id=None):
     else:
         news_flash_data=get_all_news_flash_data_for_updates()
     if len(news_flash_data)>0:
-        update_news_flash(maps_key, news_flash_data)    
+        update_news_flash(maps_key, news_flash_data)
     else:
         logging.info('no matching news flash found, source={0}, id={1}'.format(source,news_flash_id))

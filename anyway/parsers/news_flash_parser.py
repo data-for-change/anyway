@@ -134,7 +134,7 @@ def get_latest_tweet_id_from_db():
         return tweet_id[0]
 
 def update_news_flash_bulk(news_flash_id_list, params_dict_list):
-    if len(news_flash_id_list)>0 and len(news_flash_id_list)==len(params_dict_list): 
+    if len(news_flash_id_list)>0 and len(news_flash_id_list)==len(params_dict_list):
         for i in range(len(news_flash_id_list)):
             update_news_flash_by_id(news_flash_id_list[i],params_dict_list[i], commit=False)
         db.session.commit()

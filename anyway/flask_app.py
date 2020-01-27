@@ -70,7 +70,7 @@ assets = Environment()
 assets.init_app(app)
 assets_env = AssetsEnvironment(os.path.join(utilities._PROJECT_ROOT, 'static'), '/static')
 
-CORS(app, resources={r"/location-subscription": {"origins": "*"}, r"/report-problem": {"origins": "*"}})
+CORS(app, resources={r"/location-subscription": {"origins": "*"}, r"/report-problem": {"origins": "*"}, r"/api/infographics_data": {"origins": "*"}, r"/api/news-flash-filters": {"origins": "*"}})
 
 jinja_environment = jinja2.Environment(
     autoescape=True,
@@ -92,8 +92,6 @@ cbs_dict_files = {DICTIONARY: "Dictionary.csv"}
 content_encoding = 'cp1255'
 
 Compress(app)
-
-CORS(app, resources={r"/location-subscription": {"origins": "*"}})
 
 
 @app.teardown_appcontext

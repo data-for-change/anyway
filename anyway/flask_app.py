@@ -1613,11 +1613,7 @@ def infographics_data():
     if resolution is None:
         return Response({})
 
-    location_info_empty = True
-    for _, value in location_info.items():
-        if value is not None:
-            location_info_empty = False
-    if location_info_empty:
+    if all(value is None for value in location_info.values()):
         return Response({})
     start_time    = request.values.get('start_time')
     end_time      = request.values.get('end_time')

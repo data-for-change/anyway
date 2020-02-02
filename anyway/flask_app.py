@@ -750,33 +750,6 @@ def get_vehicle_dict(provider_code, accident_year):
     return vehicle
 
 
-@app.route("/markers/<int:marker_id>", methods=["GET"])
-def marker(marker_id):
-    involved = db.session.query(Involved).filter(Involved.accident_id == marker_id)
-
-    vehicles = db.session.query(Vehicle).filter(Vehicle.accident_id == marker_id)
-
-    list_to_return = list()
-    for inv in involved:
-        obj = inv.serialize()
-        obj["age_group"] = cbs_dictionary.get((92, obj["age_group"]))
-        obj["population_type"] = cbs_dictionary.get((66, obj["population_type"]))
-        obj["home_region"] = cbs_dictionary.get((77, obj["home_region"]))
-        obj["home_district"] = cbs_dictionary.get((79, obj["home_district"]))
-        obj["home_natural_area"] = cbs_dictionary.get((80, obj["home_natural_area"]))
-        obj["home_municipal_status"] = cbs_dictionary.get((78, obj["home_municipal_status"]))
-        obj["home_yishuv_shape"] = cbs_dictionary.get((81, obj["home_yishuv_shape"]))
-        list_to_return.append(obj)
-
-    for veh in vehicles:
-        obj = veh.serialize()
-        obj["engine_volume"] = cbs_dictionary.get((111, obj["engine_volume"]))
-        obj["total_weight"] = cbs_dictionary.get((112, obj["total_weight"]))
-        obj["driving_directions"] = cbs_dictionary.get((28, obj["driving_directions"]))
-        list_to_return.append(obj)
-    return make_response(json.dumps(list_to_return, ensure_ascii=False))
-
-
 @app.route("/markers/all", methods=["GET"])
 def marker_all():
     marker_id = request.args.get('marker_id', None)
@@ -1393,36 +1366,6 @@ admin.add_view(ViewHighlightedMarkersData(name='View Highlighted Markers Data', 
 admin.add_view(ViewHighlightedMarkersMap(name='View Highlighted Markers Map', endpoint='ViewHighlightedMarkersMap',
                                          category='View Highlighted Markers'))
 
-cbs_dictionary = {}
-
-
-@app.before_first_request
-def read_dictionaries():
-    global cbs_dictionary
-    for directory in sorted(glob.glob("{0}/{1}/*/*".format(app.static_folder, 'data/cbs')), reverse=True):
-        main_dict = dict(get_dict_file(directory))
-        if len(main_dict) == 0:
-            return
-        if len(main_dict) == 1:
-            for _, df in main_dict['Dictionary'].iterrows():
-                if type(df[DICTCOLUMN3]) is not (int or float):
-                    cbs_dictionary[(int(df[DICTCOLUMN1]), int(df[DICTCOLUMN2]))] = df[DICTCOLUMN3]
-                else:
-                    cbs_dictionary[(int(df[DICTCOLUMN1]), int(df[DICTCOLUMN2]))] = int(df[DICTCOLUMN3])
-            return
-
-
-def get_dict_file(directory):
-    for name, filename in iteritems(cbs_dict_files):
-        files = [path for path in os.listdir(directory)
-                 if filename.lower() in path.lower()]
-        amount = len(files)
-        if amount == 0:
-            raise ValueError("file not found: " + filename + " in directory " + directory)
-        if amount > 1:
-            raise ValueError("there are too many matches: " + filename)
-        df = pd.read_csv(os.path.join(directory, files[0]), encoding="cp1255")
-        yield name, df
 
 
 @app.route("/markers/polygon/", methods=["GET"])

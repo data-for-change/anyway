@@ -60,7 +60,7 @@ def classify_ynet(text):
                 (u'פגע' in text or u'פגיע' in text or u'פגוע' in text or
                  u'הרג' in text or u'הריג' in text or u'הרוג' in text or
                  u'פצע' in text or u'פציע' in text or u'פצוע' in text or
-                 text or u'התנגש' in text or u'התהפך'
+                 u'התנגש' in text or u'התהפך'
                  in text or u'התהפכ' in text))) and \
            (u' ירי ' not in text and not text.startswith(u' ירי') and
             u' ירייה ' not in text and not text.startswith(u' ירייה') and

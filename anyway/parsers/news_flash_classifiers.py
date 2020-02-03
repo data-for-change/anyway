@@ -51,17 +51,21 @@ def classify_ynet(text):
     :param text: news flash text
     :return: boolean, true if news flash is about car accident, false for others
     """
-    return ((u'תאונ' in text and u'תאונת עבודה' not in text and u'תאונות עבודה' not in text)
-            or ((u'רכב' in text or u'אוטובוס' in text or u"ג'יפ" in text
-                 or u'משאית' in text or u'קטנוע' in text or u'טרקטור'
-                 in text or u'אופנוע' in text or u'אופניים' in text or u'קורקינט'
-                 in text or u'הולך רגל' in text or u'הולכת רגל' in text
-                 or u'הולכי רגל' in text) and
-                (u'פגע' in text or u'פגיע' in text or u'פגוע' in text or
-                 u'הרג' in text or u'הריג' in text or u'הרוג' in text or
-                 u'פצע' in text or u'פציע' in text or u'פצוע' in text or
-                 text or u'התנגש' in text or u'התהפך'
-                 in text or u'התהפכ' in text))) and \
-           (u' ירי ' not in text and not text.startswith(u' ירי') and
-            u' ירייה ' not in text and not text.startswith(u' ירייה') and
-            u' יריות ' not in text and not text.startswith(u' יריות'))
+    accident_words = [u'תאונ', ]
+    working_accidents_words = [u'תאונת עבודה', u'תאונות עבודה']
+    involved_words = [u'רכב', u'אוטובוס', u"ג'יפ", u'משאית', u'קטנוע', u'טרקטור',
+                      u'אופנוע', u'אופניים', u'קורקינט', u'הולך רגל', u'הולכת רגל',
+                      u'הולכי רגל']
+    hurt_words = [u'פגע', u'פגיע', u'פגוע', u'הרג', u'הריג', u'הרוג', u'פצע', 'פציע',
+                  u'פצוע', u'התנגש', u'התהפך', u'התהפכ']
+    shooting_words = [u' ירי ', u' ירייה ', u' יריות ']
+    shooting_startswith = [u' ירי', u' ירייה', u' יריות']
+
+    explicit_accident = any([val in text for val in accident_words])
+    not_work_accident = all([val not in text for val in working_accidents_words])
+    involved = any([val in text for val in involved_words])
+    hurt = any([val in text for val in hurt_words])
+    no_shooting = all([val not in text for val in shooting_words]) and all(
+        [not text.startswith(val) for val in shooting_startswith])
+
+    return ((explicit_accident and not_work_accident) or (involved and hurt)) and no_shooting

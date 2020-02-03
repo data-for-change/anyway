@@ -695,9 +695,9 @@ textarea.form-control-wide {
 
 .marker-info-window{
     overflow-y: hidden;
-    overflow-x: hidden;/*
-    height: 370px;
-    width: 340px;*/
+    overflow-x: hidden;
+    /* height: 370px; */
+    width: 300px;
 }
 
 .gm-style-iw > div::-webkit-scrollbar{

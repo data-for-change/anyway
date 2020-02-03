@@ -133,8 +133,14 @@ def get_latest_tweet_id_from_db():
     if tweet_id:
         return tweet_id[0]
 
+def update_news_flash_bulk(news_flash_id_list, params_dict_list):
+    if len(news_flash_id_list)>0 and len(news_flash_id_list)==len(params_dict_list):
+        for i in range(len(news_flash_id_list)):
+            update_news_flash_by_id(news_flash_id_list[i],params_dict_list[i], commit=False)
+        db.session.commit()
 
-def update_news_flash_by_id(news_flash_id, params_dict):
+
+def update_news_flash_by_id(news_flash_id, params_dict, commit=True):
     """
     update news flash with new parameters
     :return:
@@ -148,7 +154,8 @@ def update_news_flash_by_id(news_flash_id, params_dict):
         sql_query = sql_query + ' WHERE id=:id'
         params_dict['id'] = news_flash_id
         db.session.execute(sql_query, params_dict)
-        db.session.commit()
+        if commit:
+            db.session.commit()
 
 
 def get_all_news_flash_ids(source=None):
@@ -158,6 +165,17 @@ def get_all_news_flash_ids(source=None):
     else:
         res = db.session.execute('SELECT DISTINCT id FROM news_flash').fetchall()
     return [r[0] for r in res]
+
+def get_all_news_flash_data_for_updates(source=None, id=None):
+    if id is not None:
+        res = db.session.execute(
+            'SELECT DISTINCT id, title, description, source, location FROM news_flash where id=:id', {'id': id}).fetchall()
+    elif source is not None:
+        res = db.session.execute(
+            'SELECT DISTINCT id, title, description, source, location FROM news_flash where source=:source', {'source': source}).fetchall()
+    else:
+        res = db.session.execute('SELECT DISTINCT id, title, description, source, location FROM news_flash').fetchall()
+    return res
 
 
 def get_latest_date_from_db(source):

@@ -48,4 +48,4 @@ xlrd
 flask_cors
 pandas
 tweepy
-bs4
+beautifulsoup4==4.6.0

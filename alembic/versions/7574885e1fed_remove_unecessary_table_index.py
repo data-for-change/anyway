@@ -33,6 +33,7 @@ def downgrade():
     op.create_index('provider_and_id_idx_markers', 'markers', ['provider_and_id'], unique=False)
     op.create_index('provider_and_id_idx_involved', 'involved', ['provider_and_id'], unique=False)
     op.create_index('provider_and_id_idx_vehicles', 'vehicles', ['provider_and_id'], unique=False)
+    conn = op.get_bind()
     conn.execute('CREATE INDEX geom_gix ON markers USING GIST (geography(geom));')
     conn.execute('CREATE INDEX discussions_gix ON discussions USING GIST (geography(geom));')
     # ### end Alembic commands ###

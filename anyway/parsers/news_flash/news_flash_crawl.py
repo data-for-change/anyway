@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from datetime import datetime
-
 import feedparser
+from datetime import datetime
 from scrapy.crawler import CrawlerProcess
 
 from anyway.parsers.news_flash_classifiers import classify_ynet

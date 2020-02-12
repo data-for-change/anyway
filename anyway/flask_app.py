@@ -1544,13 +1544,14 @@ def get_most_severe_accidents(table_obj, filters, start_time, end_time, limit=10
 @app.route('/api/infographics_data', methods=['GET'])
 def infographics_data():
 
-    output = []
+    output = {}
 
     location_info = extract_news_flash_location(request.values.get('news_flash_id'))
     if location_info is None:
         return Response({})
     location_info = location_info['data']
-    output.append({"location_info": location_info.copy()})
+    output['meta'] = {"location_info": location_info.copy()}
+    output['widgets'] = []
     resolution    = location_info.pop('resolution')
     if resolution is None:
         return Response({})
@@ -1563,29 +1564,30 @@ def infographics_data():
     start_time = datetime.datetime.fromtimestamp(int(start_time)) if start_time else None
     end_time = datetime.datetime.fromtimestamp(int(end_time)) if end_time else None
 
-    # most severe accidents
-    most_severe_accidents = {'most_severe_accidents':
-                            {'data': get_most_severe_accidents(table_obj=AccidentMarkerView, filters=location_info, start_time=start_time, end_time=end_time),
-                            'meta': {}}}
-    output.append(most_severe_accidents)
-    # accident_severity count
-    accident_count_by_severity = {'accident_count_by_severity':
-                                  {'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_severity_hebrew', count='accident_severity_hebrew', start_time=start_time, end_time=end_time),
-                                  'meta': {}}}
-    output.append(accident_count_by_severity)
-
-    # accident_type count
-    accident_count_by_accident_type = {'accident_count_by_accident_type':
-                                  {'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_type_hebrew', count='accident_type_hebrew', start_time=start_time, end_time=end_time),
-                                  'meta': {}}}
-    output.append(accident_count_by_accident_type)
-
     # accident_year count
     start_year = datetime.date(start_time.year, 1, 1)
     end_year = datetime.date(end_time.year, 12, 31)
-    accident_count_by_accident_year = {'accident_count_by_accident_year':
-                                  {'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_year', count='accident_year', start_time=start_year, end_time=end_year),
-                                  'meta': {}}}
-    output.append(accident_count_by_accident_year)
+
+    # most severe accidents
+    most_severe_accidents = {'name': 'most_severe_accidents',
+                            'data': get_most_severe_accidents(table_obj=AccidentMarkerView, filters=location_info, start_time=start_time, end_time=end_time),
+                            'meta': {}}
+    output['widgets'].append(most_severe_accidents)
+    # accident_severity count
+    accident_count_by_severity = {'name': 'accident_count_by_severity',
+                                  'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_severity_hebrew', count='accident_severity_hebrew', start_time=start_time, end_time=end_time),
+                                  'meta': {}}
+    output['widgets'].append(accident_count_by_severity)
+
+    # accident_type count
+    accident_count_by_accident_type = {'name': 'accident_count_by_accident_type',
+                                      'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_type_hebrew', count='accident_type_hebrew', start_time=start_time, end_time=end_time),
+                                       'meta': {}}
+    output['widgets'].append(accident_count_by_accident_type)
+
+    accident_count_by_accident_year = {'name': 'accident_count_by_accident_year',
+                                       'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_year', count='accident_year', start_time=start_year, end_time=end_year),
+                                       'meta': {}}
+    output['widgets'].append(accident_count_by_accident_year)
 
     return Response(json.dumps(output, default=str), mimetype="application/json")

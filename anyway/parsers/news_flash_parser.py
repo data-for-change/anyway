@@ -50,6 +50,17 @@ def get_title(news_flash_id):
                                {'id': news_flash_id}).fetchone()
     return title[0]
 
+def remove_duplicate_rows():
+    """
+    remove duplicate rows by link
+    """
+    db.session.execute('''
+        DELETE FROM news_flash T1
+        USING news_flash T2
+        WHERE T1.ctid < T2.ctid  -- delete the older versions
+        AND T1.link  = T2.link;  -- add more columns if needed
+        ''')
+    db.session.commit()
 
 def get_source(news_flash_id):
     """

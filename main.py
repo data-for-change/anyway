@@ -57,10 +57,14 @@ def update(google_maps_key_path, source, news_flash_id):
         news_flash_id=None
     return main(key,source, news_flash_id)
 
+@update_news_flash.command()
+def remove_duplicate_news_flash_rows():
+    from anyway.parsers.news_flash_parser import remove_duplicate_rows
+    remove_duplicate_rows()
+
 @cli.group()
 def process():
     pass
-
 
 @process.command()
 @click.option('--specific_folder', is_flag=True, default=False)

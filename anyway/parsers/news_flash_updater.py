@@ -7,7 +7,8 @@ from anyway.parsers.news_flash_parser import get_all_news_flash_data_for_updates
     update_news_flash_bulk
 
 news_flash_classifiers = {'ynet': classify_ynet,
-                          'twitter': classify_tweets}
+                          'twitter': classify_tweets,
+                          'walla': classify_ynet}
 
 def update_news_flash(maps_key, news_flash_data, bulk_size=100):
     news_flash_id_list=[]

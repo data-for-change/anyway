@@ -1,17 +1,21 @@
 from __future__ import print_function
+
+import argparse
+import logging
+import os
+import re
+import sys
+import threading
 from csv import DictReader
 from datetime import datetime
-from dateutil.relativedelta import relativedelta
-from . import config
-from flask import Flask
 from functools import partial
-import os
-import pyproj
-import threading
-import sys
-import re
+
 import six
-import logging
+from dateutil.relativedelta import relativedelta
+from flask import Flask
+from pyproj import Transformer
+
+from . import config
 
 # Headless servers cannot use GUI file dialog and require raw user input
 _fileDialogExist = True
@@ -20,8 +24,9 @@ try:
 except (ValueError, ImportError):
     _fileDialogExist = False
 
-
+DATE_INPUT_FORMAT = '%d-%m-%Y'
 _PROJECT_ROOT = os.path.join(os.path.dirname(__file__), '..')
+
 
 def init_flask():
     """
@@ -30,7 +35,7 @@ def init_flask():
     app = Flask(
         "anyway",
         template_folder=os.path.join(_PROJECT_ROOT, 'templates'),
-        static_folder=os.path.join(_PROJECT_ROOT, 'static'),)
+        static_folder=os.path.join(_PROJECT_ROOT, 'static'), )
     app.config.from_object(config)
     app.config['BABEL_TRANSLATION_DIRECTORIES'] = os.path.join(_PROJECT_ROOT, 'translations')
     return app
@@ -101,9 +106,8 @@ class CsvReader(object):
 class ItmToWGS84(object):
     def __init__(self):
         # initializing WGS84 (epsg: 4326) and Israeli TM Grid (epsg: 2039) projections.
-        # for more info: http://spatialreference.org/ref/epsg/<epsg_num>/
-        self.wgs84 = pyproj.Proj(init='epsg:4326')
-        self.itm = pyproj.Proj(init='epsg:2039')
+        # for more info: https://epsg.io/<epsg_num>/
+        self.transformer = Transformer.from_proj(2039, 4326, always_xy=True)
 
     def convert(self, x, y):
         """
@@ -111,9 +115,9 @@ class ItmToWGS84(object):
         :type x: float
         :type y: float
         :rtype: tuple
-        :return: (long,lat)
+        :return: (longitude,latitude)
         """
-        longitude, latitude = pyproj.transform(self.itm, self.wgs84, x, y)
+        longitude, latitude = self.transformer.transform(x, y)
         return longitude, latitude
 
 
@@ -124,6 +128,7 @@ def time_delta(since):
                                getattr(delta, attr) > 1 and attr or attr[:-1])
                     for attr in attrs if getattr(delta, attr))
 
+
 if six.PY3:
     def decode_hebrew(s, encoding="cp1255"):
         return s
@@ -131,15 +136,23 @@ else:
     def decode_hebrew(s, encoding="cp1255"):
         return s.decode(encoding)
 
-
 open_utf8 = partial(open, encoding="utf-8") if six.PY3 else open
 
 
-def truncate_tables(db,tables):
+def truncate_tables(db, tables):
     logging.info("Deleting tables: " + ", ".join(table.__name__ for table in tables))
     for table in tables:
         db.session.query(table).delete()
         db.session.commit()
+
+
+def valid_date(date_string):
+    from datetime import datetime
+    try:
+        return datetime.strptime(date_string, DATE_INPUT_FORMAT)
+    except ValueError:
+        msg = "Not a valid date: '{0}'. Date should be in the format DD-MM-YYYY".format(date_string)
+        raise argparse.ArgumentTypeError(msg)
 
 
 class ImporterUI(object):
@@ -167,7 +180,8 @@ class ImporterUI(object):
 
 def chunks(l, n):
     """Yield successive n-sized chunks from l."""
-    try: xrange
+    try:
+        xrange
     except NameError:
         xrange = range
     for i in xrange(0, len(l), n):

@@ -1,9 +1,7 @@
-Anyway’s docker environment
+ANYWAY’s docker environment
 ===========================
 
 Docker is an open source project to pack, ship and run any application as a lightweight container.
-
- ![docker png](static/img/docker.png)
 
 The idea is to deploy a container (light weight environment) that has all our app dependencies installed and ready to go.
 As a developer you can do one of both:
@@ -20,26 +18,28 @@ Read more on the docker [Github project] (https://github.com/docker/docker)
 
 Instructions
 -----------------------
-* Please complete ANYWAY’s [“getting the code” section] (https://github.com/hasadna/anyway#getting-the-code) before starting
+* Please complete ANYWAY’s [“getting the code” section] (https://github.com/hasadna/anyway#getting-the-code-and-adding-ci-to-your-forked-repository) before starting
 
-**1.** [Get the code] (https://github.com/hasadna/anyway#getting-the-code)
+**1.** [Get the code] (https://github.com/hasadna/anyway#getting-the-code-and-adding-ci-to-your-forked-repository)
 
-**2.** Install Docker <br><br>
-*OS X / Windows Users:* Install [Docker toolbox] (https://www.docker.com/docker-toolbox) ([MAC] (https://github.com/docker/toolbox/releases/download/v1.9.1e/DockerToolbox-1.9.1e.pkg) / [Windows] (https://github.com/docker/toolbox/releases/download/v1.9.1e/DockerToolbox-1.9.1e.exe))<br>
-*Linux Users:* `sudo apt-get install docker.io`
+**2.** [Install Docker] (https://docs.docker.com/install/)
 
 **3.** Open "Docker terminal", go to the **anyway** directory and run:
+    `docker-compose up -d db`
+    
+**4.** Optional: Download the [db dump] (https://drive.google.com/file/d/1ECAmh5PZwgKiDAvij0fO_M5QvklU7oQ9/view?usp=sharing) (You need to request access) and save it in the **anyway** directory.
+Restore the db (in anyway directory): `cat <truncated dump file name> | docker-compose exec -T db psql -U anyway`
 
-    docker-compose up
-**You're all set!** Access the app on `localhost` (Linux) or (OS-X/Win) at the virtual machine’s IP (usually `192.168.99.100`); <br>
-To retrieve a docker machine address: `docker-machine ip default` <br>
-(no need for port specification, simply an IP; e.g `192.168.99.100`)
+**5.** start anyway container: `docker-compose up -d`
 
+**6.** If you didn't perform stage 4 - Load the example data into the DB: while docker is running, run the following command to populate data (from 2014) `docker exec -i -t anyway_anyway_1 python main.py process cbs`
+
+**7.** **You're all set!** ANYWAY is up and running - connect to http://127.0.0.1:8080 and change dates to 2014 in order to see accidents
 
 More
 -----------------------
 To install requirements again, redeploy DB or any requirement involving the dependencies installation,
-simply rebuild the image; get it from [here] (https://github.com/omerxx/anyway-docker/blob/master/Dockerfile),
+simply rebuild the image;
 then go to its local path and `docker build --no-cache -t hasdna/anyway .`
 
 ## Docker commands
@@ -69,6 +69,10 @@ Deleting an image(from `docker images`):
 
     docker rmi <image-id>
 
+Rebuild the image:
+
+    docker-compose build
+
 
 Additional Notes
 -----------------------
@@ -86,4 +90,4 @@ This loads the ./anyway dir (relative to the docker-compose file) as /anyway/any
 
 Questions and ideas
 -----------------
-Talk to Omer on ANYWAY's Slack (omerxx)
+Talk to Atalya on HASADNA's Slack (atalya)

@@ -1,12 +1,13 @@
 import os
-import pytest
 import re
+
+import pytest
 from jinja2 import Environment
 from webassets.ext.jinja2 import AssetsExtension
 
-
 _TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), "../templates")
 _environment = Environment(extensions=[AssetsExtension])
+
 
 def _error_handler(e):
     raise e

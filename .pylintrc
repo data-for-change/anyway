@@ -8,7 +8,7 @@ score=no
 output-format=parseable
 
 [TYPECHECK]
-ignored-modules=flask.ext,http.client
+ignored-modules=flask.ext,http.client,google,pandas,google.cloud.language_v1.types
 ignored-classes=scoped_session
 
 [FORMAT]

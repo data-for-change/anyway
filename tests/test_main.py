@@ -1,4 +1,5 @@
 from six import iteritems
+
 from anyway.flask_app import parse_data
 from anyway.models import AccidentMarker
 

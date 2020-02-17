@@ -1,7 +1,8 @@
-from rauth import OAuth2Service
-from flask import current_app, url_for, request, redirect
-import requests
 import json
+
+import requests
+from flask import current_app, url_for, request, redirect
+from rauth import OAuth2Service
 
 
 class OAuthSignIn(object):
@@ -29,8 +30,8 @@ class OAuthSignIn(object):
             self.providers = {}
             for provider_class in self.__subclasses__():
                 provider = provider_class()
-                self.providers[provider.provider_name] = provider
-        return self.providers[provider_name]
+                setattr(self.providers, provider.provider_name, provider)
+        return getattr(self.providers, provider_name)
 
 
 class FacebookSignIn(OAuthSignIn):
@@ -59,15 +60,15 @@ class FacebookSignIn(OAuthSignIn):
             data={'code': request.args['code'],
                   'grant_type': 'authorization_code',
                   'redirect_uri': self.get_callback_url(),
-            },
+                  },
             decoder=json.loads
         )
         me = oauth_session.get('me?fields=id,email').json()
         return (
             'facebook$' + me['id'],
             me.get('email').split('@')[0],  # Facebook does not provide
-                                            # username, so the email's user
-                                            # is used instead
+            # username, so the email's user
+            # is used instead
             me.get('email')
         )
 
@@ -79,12 +80,12 @@ class GoogleSignIn(OAuthSignIn):
         googleinfo.raise_for_status()
         google_params = googleinfo.json()
         self.service = OAuth2Service(
-                name='google',
-                client_id=self.consumer_id,
-                client_secret=self.consumer_secret,
-                authorize_url=google_params.get('authorization_endpoint'),
-                base_url=google_params.get('userinfo_endpoint'),
-                access_token_url=google_params.get('token_endpoint')
+            name='google',
+            client_id=self.consumer_id,
+            client_secret=self.consumer_secret,
+            authorize_url=google_params.get('authorization_endpoint'),
+            base_url=google_params.get('userinfo_endpoint'),
+            access_token_url=google_params.get('token_endpoint')
         )
 
     def authorize(self):
@@ -92,17 +93,17 @@ class GoogleSignIn(OAuthSignIn):
             scope='email',
             response_type='code',
             redirect_uri=self.get_callback_url())
-            )
+        )
 
     def callback(self):
         if 'code' not in request.args:
             return None, None, None
         oauth_session = self.service.get_auth_session(
-                data={'code': request.args['code'],
-                      'grant_type': 'authorization_code',
-                      'redirect_uri': self.get_callback_url()
-                     },
-                decoder = json.loads
+            data={'code': request.args['code'],
+                  'grant_type': 'authorization_code',
+                  'redirect_uri': self.get_callback_url()
+                  },
+            decoder=json.loads
         )
         me = oauth_session.get('').json()
         return (me['name'],

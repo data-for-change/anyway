@@ -3,39 +3,26 @@ version: '2'
 services:
   anyway:
     build: .
-    image: hasadna/anyway:latest
+    image: mickeyrouash/anyway_mickeyr
     ports:
       - "8080:5000"
     environment:
       - DATABASE_URL=postgresql://anyway:anyway@db/anyway
-      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq
     volumes:
-      - ./static:/anyway/static
+      - .:/anyway
     restart: always
     depends_on:
       - db
-      - rabbitmq
-
-  anyway_celery:
-    build: .
-    image: hasadna/anyway:latest
-    environment:
-      - DATABASE_URL=postgresql://anyway:anyway@db/anyway
-      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq
-    restart: always
-    entrypoint: ''
-    command: celery worker -A anyway.clusters_calculator
-    depends_on:
-      - db
-      - rabbitmq
-
-  rabbitmq:
-    image: rabbitmq
 
   db:
-    image: postgres:alpine
+    image: mickeyrouash/anyway_db_mickeyr
     environment:
       - POSTGRES_PASSWORD=anyway
       - POSTGRES_USER=anyway
       - POSTGRES_DB=anyway
+    volumes:
+      - db_data:/var/lib/postgresql/data  
     restart: always
+
+volumes: 
+  db_data:

@@ -1,28 +1,44 @@
-FROM ubuntu:xenial
+FROM ubuntu:19.10
 
 # Install system tools
-RUN apt-get -y update && \
-    apt-get install -y --no-install-recommends -qq \
+# Install system tools
+RUN apt-get clean && \
+    apt-get -y update && \
+    apt-get install -y \
+        python3.7-dev \
         build-essential \
-        python-pip \
-        python-dev \
-        python-tk \
+        postgresql-client \
         libpq-dev \
-        openjdk-9-jre \
-    && apt-get clean
+        virtualenv && \
+    apt-get clean
 
 WORKDIR /anyway
 
+COPY requirements.txt /anyway
+COPY  alembic.ini /anyway
+COPY  alembic /anyway/alembic
+
+
 # First copy only the requirement.txt, so changes in other files won't trigger
 # a full pip reinstall
-COPY requirements.txt /anyway
-RUN pip install -U setuptools wheel
-RUN pip install -r requirements.txt
+
+RUN virtualenv /venv3 -p python3
+ENV VIRTUAL_ENV=/venv3
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+RUN . /venv3/bin/activate && \
+                    pip install -U setuptools wheel && \
+                    pip install --upgrade pip && \
+                    pip install -r requirements.txt
+
 
 COPY . /anyway
 
-VOLUME ["/anyway/static"]
+#RUN mv /anyway/static/data/rsa/rsa.xlsx /
+
+#VOLUME ["/anyway/static"]
 EXPOSE 5000
 
 ENTRYPOINT ["/anyway/docker-entrypoint.sh"]
+
 CMD ["python", "main.py", "testserver", "--open"]

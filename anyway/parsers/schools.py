@@ -1,13 +1,16 @@
-from .. import school_fields
 import logging
 from datetime import datetime
-from ..utilities import init_flask, time_delta, chunks
-from flask_sqlalchemy import SQLAlchemy
-from ..models import School
+
 import pandas as pd
+from flask_sqlalchemy import SQLAlchemy
+
+from static.data.schools import school_fields
+from ..models import School
+from ..utilities import init_flask, time_delta, chunks
 
 app = init_flask()
 db = SQLAlchemy(app)
+
 
 def get_data_value(value):
     """
@@ -16,12 +19,13 @@ def get_data_value(value):
     """
     return int(value) if value else -1
 
+
 def get_schools(filepath):
     logging.info("\tReading schools data from '%s'..." % filepath)
     schools = []
     df = pd.read_csv(filepath)
     for _, school in df.iterrows():
-        longitude, latitude = float(school[school_fields.longitude]),float(school[school_fields.latitude]),
+        longitude, latitude = float(school[school_fields.longitude]), float(school[school_fields.latitude]),
         point_str = 'SRID=4326;POINT({0} {1})'.format(longitude, latitude)
         school = {
             "id": int(school[school_fields.id]),
@@ -46,6 +50,7 @@ def get_schools(filepath):
 
     return schools
 
+
 def import_to_datastore(filepath, batch_size):
     try:
         assert batch_size > 0
@@ -53,7 +58,7 @@ def import_to_datastore(filepath, batch_size):
         schools = get_schools(filepath)
         new_items = 0
         all_existing_schools_ids = set(map(lambda x: x[0],
-                                             db.session.query(School.id).all()))
+                                           db.session.query(School.id).all()))
         schools = [school for school in schools if school['id'] not in all_existing_schools_ids]
         logging.info('inserting ' + str(len(schools)) + ' new schools')
         for schools_chunk in chunks(schools, batch_size):
@@ -65,6 +70,7 @@ def import_to_datastore(filepath, batch_size):
     except:
         error = "Schools import succeded partially with " + new_items + " schools"
         raise Exception(error)
+
 
 def parse(filepath, batch_size):
     started = datetime.now()

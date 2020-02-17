@@ -1517,6 +1517,7 @@ def get_query(table_obj, filters, start_time, end_time):
             query = query.filter((getattr(table_obj,field_name)).in_(values))
     return query
 
+
 def get_accidents_stats(table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None):
     filters = filters or {}
     filters['provider_code'] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
@@ -1530,6 +1531,7 @@ def get_accidents_stats(table_obj, filters=None, group_by=None, count=None, star
     df.columns = [c.replace('_hebrew', '') for c in df.columns]
     return df.to_dict(orient='records') if group_by or count else df.to_dict()
 
+
 def get_most_severe_accidents(table_obj, filters, start_time, end_time, limit=10):
     filters = filters or {}
     filters['provider_code'] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
@@ -1540,6 +1542,16 @@ def get_most_severe_accidents(table_obj, filters, start_time, end_time, limit=10
     df = pd.read_sql_query(query.statement, query.session.bind)
     df.columns = [c.replace('_hebrew', '') for c in df.columns]
     return df.to_dict(orient='records')
+
+
+def get_accidents_heat_map(table_obj, filters, start_time, end_time):
+    filters = filters or {}
+    filters['provider_code'] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    query = get_query(table_obj, filters, start_time, end_time)
+    query = query.with_entities('longitude', 'latitude')
+    df = pd.read_sql_query(query.statement, query.session.bind)
+    return df.to_dict(orient='records')
+
 
 @app.route('/api/infographics_data', methods=['GET'])
 def infographics_data():
@@ -1593,5 +1605,13 @@ def infographics_data():
                                        'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_year', count='accident_year', start_time=start_year, end_time=end_year),
                                        'meta': {}}
     output['widgets'].append(accident_count_by_accident_year)
+
+    accidents_heat_map = {'name': 'accidents_heat_map',
+                          'data': get_accidents_heat_map(table_obj=AccidentMarkerView,
+                                                         filters=location_info,
+                                                         start_time=start_time,
+                                                         end_time=end_time),
+                          'meta': {}}
+    output['widgets'].append(accidents_heat_map)
 
     return Response(json.dumps(output, default=str), mimetype="application/json")

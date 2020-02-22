@@ -44,7 +44,7 @@ from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved,
                      LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School, SchoolWithDescription,
                      InjuredAroundSchool, InjuredAroundSchoolAllData, Sex, AccidentMonth, InjurySeverity, ReportProblem,
                      EngineVolume, PopulationType, Region, District, NaturalArea, MunicipalStatus, YishuvShape,
-                     TotalWeight, DrivingDirections, AgeGroup, AccidentMarkerView)
+                     TotalWeight, DrivingDirections, AgeGroup, AccidentMarkerView, InvolvedMarkerView)
 from .oauth import OAuthSignIn
 from .parsers import resolution_dict
 
@@ -1531,6 +1531,17 @@ def get_accidents_stats(table_obj, filters=None, group_by=None, count=None, star
     df.columns = [c.replace('_hebrew', '') for c in df.columns]
     return df.to_dict(orient='records') if group_by or count else df.to_dict()
 
+def get_injured_filters(location_info):
+    new_filters = {}
+    for curr_filter, curr_values in location_info.items():
+        if curr_filter in ['region_hebrew', 'district_hebrew', 'district_hebrew', 'yishuv_name']:
+            new_filter_name = 'accident_' + curr_filter
+            new_filters[new_filter_name] = curr_values
+        else:
+            new_filters[curr_filter] = curr_values
+    new_filters['injury_severity'] = [1,2,3,4,5]
+    return new_filters
+
 
 def get_most_severe_accidents(table_obj, filters, start_time, end_time, limit=10):
     filters = filters or {}
@@ -1601,11 +1612,13 @@ def infographics_data():
                                        'meta': {}}
     output['widgets'].append(accident_count_by_accident_type)
 
+    # accident count by accident year
     accident_count_by_accident_year = {'name': 'accident_count_by_accident_year',
                                        'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_year', count='accident_year', start_time=start_year, end_time=end_year),
                                        'meta': {}}
     output['widgets'].append(accident_count_by_accident_year)
 
+    # accidents heat map
     accidents_heat_map = {'name': 'accidents_heat_map',
                           'data': get_accidents_heat_map(table_obj=AccidentMarkerView,
                                                          filters=location_info,
@@ -1613,5 +1626,11 @@ def infographics_data():
                                                          end_time=end_time),
                           'meta': {}}
     output['widgets'].append(accidents_heat_map)
+
+    # injured count by accident year
+    injured_count_by_accident_year = {'name': 'injured_count_by_accident_year',
+                                       'data': get_accidents_stats(table_obj=InvolvedMarkerView, filters=get_injured_filters(location_info), group_by='accident_year', count='accident_year', start_time=start_year, end_time=end_year),
+                                       'meta': {}}
+    output['widgets'].append(injured_count_by_accident_year)
 
     return Response(json.dumps(output, default=str), mimetype="application/json")

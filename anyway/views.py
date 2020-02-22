@@ -292,6 +292,7 @@ class Views(object):
     involved_hebrew.involve_id,
     involved_hebrew.accident_year,
     involved_hebrew.accident_month,
+    markers_hebrew.provider_code_hebrew,
     markers_hebrew.accident_timestamp,
     markers_hebrew.accident_type,
     markers_hebrew.accident_type_hebrew,

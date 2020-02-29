@@ -3,7 +3,7 @@ version: '2'
 services:
   anyway:
     build: .
-    image: mickeyrouash/anyway_mickeyr
+    image: hasadna/anyway:latest
     ports:
       - "8080:5000"
     environment:

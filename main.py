@@ -179,6 +179,14 @@ def injured_around_schools(start_date, end_date, distance, batch_size):
                  batch_size=batch_size)
 
 
+@process.command()
+@click.option('--start_date', default='01-01-2019', type=valid_date, help='The Start Date - format DD-MM-YYYY')
+@click.option('--end_date', default='01-01-2020', type=valid_date, help='The End Date - format DD-MM-YYYY')
+def waze_data(start_date, end_date):
+    from anyway.parsers.waze.waze_data_parser import waze_parser
+    return waze_parser(bucket_name='anyway-hasadna.appspot.com', start_date=start_date, end_date=end_date)
+
+
 @cli.group()
 def preprocess():
     pass

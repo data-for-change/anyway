@@ -1,5 +1,4 @@
 import logging
-import multiprocessing
 import time
 from .models import AccidentMarker
 from .pymapcluster import calculate_clusters

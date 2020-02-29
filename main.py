@@ -39,11 +39,32 @@ def testserver(open_server, debug_js):
     app.run(debug=True, host=os.getenv('IP', default_host),
             port=int(os.getenv('PORT', 5000)))
 
+@cli.group()
+def update_news_flash():
+    pass
+
+@update_news_flash.command()
+@click.option('--google_maps_key_path', type=str)
+@click.option('--source',default='', type=str)
+@click.option('--news_flash_id',default='', type=str)
+def update(google_maps_key_path, source, news_flash_id):
+    from anyway.parsers.news_flash_updater import main
+    with open(google_maps_key_path) as file:
+        key = file.read()
+    if source=='':
+        source=None
+    if news_flash_id=='':
+        news_flash_id=None
+    return main(key,source, news_flash_id)
+
+@update_news_flash.command()
+def remove_duplicate_news_flash_rows():
+    from anyway.parsers.news_flash_parser import remove_duplicate_rows
+    remove_duplicate_rows()
 
 @cli.group()
 def process():
     pass
-
 
 @process.command()
 @click.option('--specific_folder', is_flag=True, default=False)

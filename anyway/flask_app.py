@@ -3,7 +3,6 @@
 import csv
 import datetime
 # from sendgrid import SendGridAPIClient
-import glob
 import json
 import logging
 import os
@@ -45,8 +44,9 @@ from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved,
                      LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School, SchoolWithDescription,
                      InjuredAroundSchool, InjuredAroundSchoolAllData, Sex, AccidentMonth, InjurySeverity, ReportProblem,
                      EngineVolume, PopulationType, Region, District, NaturalArea, MunicipalStatus, YishuvShape,
-                     TotalWeight, DrivingDirections, AgeGroup, AccidentMarkerView)
+                     TotalWeight, DrivingDirections, AgeGroup, AccidentMarkerView, InvolvedMarkerView)
 from .oauth import OAuthSignIn
+from .parsers import resolution_dict
 
 app = utilities.init_flask()
 db = SQLAlchemy(app)
@@ -69,7 +69,7 @@ assets = Environment()
 assets.init_app(app)
 assets_env = AssetsEnvironment(os.path.join(utilities._PROJECT_ROOT, 'static'), '/static')
 
-CORS(app, resources={r"/location-subscription": {"origins": "*"}, r"/report-problem": {"origins": "*"}})
+CORS(app, resources={r"/location-subscription": {"origins": "*"}, r"/report-problem": {"origins": "*"}, r"/api/infographics_data": {"origins": "*"}, r"/api/news-flash-filters": {"origins": "*"}})
 
 jinja_environment = jinja2.Environment(
     autoescape=True,
@@ -92,8 +92,6 @@ content_encoding = 'cp1255'
 
 Compress(app)
 
-CORS(app, resources={r"/location-subscription": {"origins": "*"}})
-
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
@@ -102,16 +100,17 @@ def shutdown_session(exception=None):
 
 def generate_json(accidents, rsa_markers, discussions, is_thin, total_records=None):
     markers = accidents.all()
-    markers += rsa_markers.all()
+    total_accidents = len(markers)
+
+    rsa = rsa_markers.all()
+    total_rsa = len(rsa)
+    markers += rsa
 
     if not is_thin:
         markers += discussions.all()
 
     if total_records is None:
         total_records = len(markers)
-
-    total_accidents = accidents.count()
-    total_rsa = rsa_markers.count()
 
     entries = [marker.serialize(is_thin) for marker in markers]
     return jsonify({"markers": entries, 'pagination': {'totalRecords': total_records,
@@ -271,6 +270,53 @@ def yishuv_symbol_to_name():
     ).all()
     entries = [{"yishuv_name": x.yishuv_name, "yishuv_symbol": x.yishuv_symbol} for x in markers]
     return Response(json.dumps(entries, default=str), mimetype="application/json")
+
+
+@app.route("/api/news-flash-filters", methods=["GET"])
+@user_optional
+def news_flash_filters():
+    logging.debug('getting filtered news flash')
+    source = request.values.get('source')
+    count = request.values.get('news_flash_count')
+    start_date = request.values.get('start_date')
+    end_date = request.values.get('end_date')
+    news_flash_obj = db.session.query(NewsFlash)
+
+    # get all possible sources
+    sources = [str(source_name[0]) for source_name in db.session.query(NewsFlash.source).distinct().all()]
+    if source:
+        if source not in sources:
+            return Response('{"message": "Requested source does not exist"}',
+                            status=404,
+                            mimetype='application/json')
+        else:
+            news_flash_obj = news_flash_obj.filter(NewsFlash.source == source)
+
+    if start_date and end_date:
+        s = datetime.datetime.fromtimestamp(int(start_date))
+        e = datetime.datetime.fromtimestamp(int(end_date))
+        news_flash_obj = news_flash_obj.filter(and_(NewsFlash.date <= e,
+                                                    NewsFlash.date >= s))
+
+    # when only one of the dates is sent
+    elif start_date or end_date:
+        return Response('{"message": "Must send both start_date and end_date"}',
+                        status=404,
+                        mimetype='application/json')
+
+    news_flash_obj = news_flash_obj.filter(
+        and_(NewsFlash.accident == True, not_(and_(NewsFlash.lat == 0, NewsFlash.lon == 0)),
+             not_(and_(NewsFlash.lat == None, NewsFlash.lon == None)))
+    ).order_by(
+        NewsFlash.date.desc())
+
+    if count:
+        news_flash_obj = news_flash_obj.limit(count)
+
+    news_flashes = news_flash_obj.all()
+
+    news_flashes_jsons = [news_flash.serialize() for news_flash in news_flashes]
+    return Response(json.dumps(news_flashes_jsons, default=str), mimetype="application/json")
 
 
 @app.route("/api/news-flash", methods=["GET"])
@@ -701,33 +747,6 @@ def get_vehicle_dict(provider_code, accident_year):
                                      driving_directions} if driving_directions else None
 
     return vehicle
-
-
-@app.route("/markers/<int:marker_id>", methods=["GET"])
-def marker(marker_id):
-    involved = db.session.query(Involved).filter(Involved.accident_id == marker_id)
-
-    vehicles = db.session.query(Vehicle).filter(Vehicle.accident_id == marker_id)
-
-    list_to_return = list()
-    for inv in involved:
-        obj = inv.serialize()
-        obj["age_group"] = cbs_dictionary.get((92, obj["age_group"]))
-        obj["population_type"] = cbs_dictionary.get((66, obj["population_type"]))
-        obj["home_region"] = cbs_dictionary.get((77, obj["home_region"]))
-        obj["home_district"] = cbs_dictionary.get((79, obj["home_district"]))
-        obj["home_natural_area"] = cbs_dictionary.get((80, obj["home_natural_area"]))
-        obj["home_municipal_status"] = cbs_dictionary.get((78, obj["home_municipal_status"]))
-        obj["home_yishuv_shape"] = cbs_dictionary.get((81, obj["home_yishuv_shape"]))
-        list_to_return.append(obj)
-
-    for veh in vehicles:
-        obj = veh.serialize()
-        obj["engine_volume"] = cbs_dictionary.get((111, obj["engine_volume"]))
-        obj["total_weight"] = cbs_dictionary.get((112, obj["total_weight"]))
-        obj["driving_directions"] = cbs_dictionary.get((28, obj["driving_directions"]))
-        list_to_return.append(obj)
-    return make_response(json.dumps(list_to_return, ensure_ascii=False))
 
 
 @app.route("/markers/all", methods=["GET"])
@@ -1346,36 +1365,6 @@ admin.add_view(ViewHighlightedMarkersData(name='View Highlighted Markers Data', 
 admin.add_view(ViewHighlightedMarkersMap(name='View Highlighted Markers Map', endpoint='ViewHighlightedMarkersMap',
                                          category='View Highlighted Markers'))
 
-cbs_dictionary = {}
-
-
-@app.before_first_request
-def read_dictionaries():
-    global cbs_dictionary
-    for directory in sorted(glob.glob("{0}/{1}/*/*".format(app.static_folder, 'data/cbs')), reverse=True):
-        main_dict = dict(get_dict_file(directory))
-        if len(main_dict) == 0:
-            return
-        if len(main_dict) == 1:
-            for _, df in main_dict['Dictionary'].iterrows():
-                if type(df[DICTCOLUMN3]) is not (int or float):
-                    cbs_dictionary[(int(df[DICTCOLUMN1]), int(df[DICTCOLUMN2]))] = df[DICTCOLUMN3]
-                else:
-                    cbs_dictionary[(int(df[DICTCOLUMN1]), int(df[DICTCOLUMN2]))] = int(df[DICTCOLUMN3])
-            return
-
-
-def get_dict_file(directory):
-    for name, filename in iteritems(cbs_dict_files):
-        files = [path for path in os.listdir(directory)
-                 if filename.lower() in path.lower()]
-        amount = len(files)
-        if amount == 0:
-            raise ValueError("file not found: " + filename + " in directory " + directory)
-        if amount > 1:
-            raise ValueError("there are too many matches: " + filename)
-        df = pd.read_csv(os.path.join(directory, files[0]), encoding="cp1255")
-        yield name, df
 
 
 @app.route("/markers/polygon/", methods=["GET"])
@@ -1499,23 +1488,149 @@ def oauth_callback(provider):
     login.login_user(user, True)
     return redirect(url_for('index'))
 
+def extract_news_flash_location(news_flash_id):
+    news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id==news_flash_id).first()
+    if not news_flash_obj:
+        logging.warn('could not find news flash id {}'.format(news_flash_id))
+        return None
+    resolution = news_flash_obj.resolution if news_flash_obj.resolution else None
+    if not news_flash_obj or not resolution or resolution not in resolution_dict:
+        logging.warn('could not find valid resolution for news flash id {}'.format(news_flash_id))
+        return {'name': 'location', 'data': {'resolution': None}}
+    data = {'resolution': resolution}
+    for field in resolution_dict[resolution]:
+        data[field] = getattr(news_flash_obj, field)
+    return {'name': 'location', 'data': data}
 
-@app.route('/api/accidents_in_city_by_year_severity', methods=['GET'])
-def get_accidents_in_city_by_year_severity():
-    yishuv_symbol = request.values.get('yishuv_symbol')
-    results = db.session.query(
-        AccidentMarkerView.accident_year,
-        AccidentMarkerView.accident_severity_hebrew,
-        func.count(AccidentMarkerView.accident_year).label('count')
-    ).filter(
-        AccidentMarkerView.yishuv_symbol == yishuv_symbol,
-        or_(AccidentMarkerView.provider_code == CONST.CBS_ACCIDENT_TYPE_1_CODE,
-            AccidentMarkerView.provider_code == CONST.CBS_ACCIDENT_TYPE_3_CODE)
-    ).group_by(
-        AccidentMarkerView.accident_year,
-        AccidentMarkerView.accident_severity_hebrew
-    ).order_by(
-        AccidentMarkerView.accident_year,
-        AccidentMarkerView.accident_severity_hebrew
-    ).all()
-    return Response(json.dumps([r._asdict() for r in results], default=str), mimetype="application/json")
+def get_query(table_obj, filters, start_time, end_time):
+    query = db.session.query(table_obj)
+    if start_time:
+        query = query.filter(getattr(table_obj,'accident_timestamp') >= start_time)
+    if end_time:
+        query = query.filter(getattr(table_obj,'accident_timestamp') <= end_time)
+    if filters:
+        for field_name, value in filters.items():
+            if isinstance(value, list):
+                values = value
+            else:
+                values = [value]
+            query = query.filter((getattr(table_obj,field_name)).in_(values))
+    return query
+
+
+def get_accidents_stats(table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None):
+    filters = filters or {}
+    filters['provider_code'] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    # get stats
+    query = get_query(table_obj, filters, start_time, end_time)
+    if group_by:
+        query = query.group_by(group_by)
+        query = query.with_entities(group_by, func.count(count))
+    df = pd.read_sql_query(query.statement, query.session.bind)
+    df.rename(columns={'count_1': 'count'}, inplace=True)
+    df.columns = [c.replace('_hebrew', '') for c in df.columns]
+    return df.to_dict(orient='records') if group_by or count else df.to_dict()
+
+def get_injured_filters(location_info):
+    new_filters = {}
+    for curr_filter, curr_values in location_info.items():
+        if curr_filter in ['region_hebrew', 'district_hebrew', 'district_hebrew', 'yishuv_name']:
+            new_filter_name = 'accident_' + curr_filter
+            new_filters[new_filter_name] = curr_values
+        else:
+            new_filters[curr_filter] = curr_values
+    new_filters['injury_severity'] = [1,2,3,4,5]
+    return new_filters
+
+
+def get_most_severe_accidents(table_obj, filters, start_time, end_time, limit=10):
+    filters = filters or {}
+    filters['provider_code'] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    query = get_query(table_obj, filters, start_time, end_time)
+    query = query.with_entities('longitude', 'latitude', 'accident_severity_hebrew', 'accident_timestamp')
+    query = query.order_by(getattr(table_obj,"accident_severity"), getattr(table_obj,"accident_timestamp").desc())
+    query = query.limit(limit)
+    df = pd.read_sql_query(query.statement, query.session.bind)
+    df.columns = [c.replace('_hebrew', '') for c in df.columns]
+    return df.to_dict(orient='records')
+
+
+def get_accidents_heat_map(table_obj, filters, start_time, end_time):
+    filters = filters or {}
+    filters['provider_code'] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    query = get_query(table_obj, filters, start_time, end_time)
+    query = query.with_entities('longitude', 'latitude')
+    df = pd.read_sql_query(query.statement, query.session.bind)
+    return df.to_dict(orient='records')
+
+
+@app.route('/api/infographics_data', methods=['GET'])
+def infographics_data():
+
+    output = {}
+
+    location_info = extract_news_flash_location(request.values.get('news_flash_id'))
+    if location_info is None:
+        return Response({})
+    location_info = location_info['data']
+    output['meta'] = {"location_info": location_info.copy()}
+    output['widgets'] = []
+    resolution    = location_info.pop('resolution')
+    if resolution is None:
+        return Response({})
+
+    location_info_empty = True
+    for _, value in location_info.items():
+        if value is not None:
+            location_info_empty = False
+    if location_info_empty:
+        return Response({})
+    start_time    = request.values.get('start_time')
+    end_time      = request.values.get('end_time')
+
+    start_time = datetime.datetime.fromtimestamp(int(start_time)) if start_time else None
+    end_time = datetime.datetime.fromtimestamp(int(end_time)) if end_time else None
+
+    # accident_year count
+    start_year = datetime.date(start_time.year, 1, 1)
+    end_year = datetime.date(end_time.year, 12, 31)
+
+    # most severe accidents
+    most_severe_accidents = {'name': 'most_severe_accidents',
+                            'data': get_most_severe_accidents(table_obj=AccidentMarkerView, filters=location_info, start_time=start_time, end_time=end_time),
+                            'meta': {}}
+    output['widgets'].append(most_severe_accidents)
+    # accident_severity count
+    accident_count_by_severity = {'name': 'accident_count_by_severity',
+                                  'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_severity_hebrew', count='accident_severity_hebrew', start_time=start_time, end_time=end_time),
+                                  'meta': {}}
+    output['widgets'].append(accident_count_by_severity)
+
+    # accident_type count
+    accident_count_by_accident_type = {'name': 'accident_count_by_accident_type',
+                                      'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_type_hebrew', count='accident_type_hebrew', start_time=start_time, end_time=end_time),
+                                       'meta': {}}
+    output['widgets'].append(accident_count_by_accident_type)
+
+    # accident count by accident year
+    accident_count_by_accident_year = {'name': 'accident_count_by_accident_year',
+                                       'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_year', count='accident_year', start_time=start_year, end_time=end_year),
+                                       'meta': {}}
+    output['widgets'].append(accident_count_by_accident_year)
+
+    # accidents heat map
+    accidents_heat_map = {'name': 'accidents_heat_map',
+                          'data': get_accidents_heat_map(table_obj=AccidentMarkerView,
+                                                         filters=location_info,
+                                                         start_time=start_time,
+                                                         end_time=end_time),
+                          'meta': {}}
+    output['widgets'].append(accidents_heat_map)
+
+    # injured count by accident year
+    injured_count_by_accident_year = {'name': 'injured_count_by_accident_year',
+                                       'data': get_accidents_stats(table_obj=InvolvedMarkerView, filters=get_injured_filters(location_info), group_by='accident_year', count='accident_year', start_time=start_year, end_time=end_year),
+                                       'meta': {}}
+    output['widgets'].append(injured_count_by_accident_year)
+
+    return Response(json.dumps(output, default=str), mimetype="application/json")

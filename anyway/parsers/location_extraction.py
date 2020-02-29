@@ -5,16 +5,9 @@ import re
 import geohash  # python-geohash package
 import googlemaps
 from geographiclib.geodesic import Geodesic
-
+import numpy as np
 from anyway.parsers.news_flash_parser import get_markers_for_location_extraction
-
-resolution_dict = {'מחוז': ['region_hebrew'], 'נפה': ['district_hebrew'], 'עיר': ['yishuv_name'],
-                   'רחוב': ['yishuv_name', 'street1_hebrew'],
-                   'צומת עירוני': ['yishuv_name', 'street1_hebrew', 'street2_hebrew'],
-                   'כביש בינעירוני': ['road1', 'road_segment_name'],
-                   'צומת בינעירוני': ['road1', 'road_segment_name', 'road2', 'non_urban_intersection_hebrew'],
-                   'אחר': ['region_hebrew', 'district_hebrew', 'yishuv_name', 'street1_hebrew', 'street2_hebrew',
-                           'non_urban_intersection_hebrew', 'road1', 'road2', 'road_segment_name']}
+from . import resolution_dict
 
 
 def extract_road_number(location):
@@ -51,9 +44,9 @@ def get_db_matching_location(latitude, longitude, resolution, road_no=None):
     # READ MARKERS FROM DB
     markers = get_markers_for_location_extraction()
     markers['geohash'] = markers.apply(lambda x: geohash.encode(x['latitude'], x['longitude'], precision=4), axis=1)
-
+    markers_orig=markers.copy()
     if resolution != 'אחר':
-        if road_no is not None and road_no > 0 and ('road1' in relevant_fields or 'road2' in relevant_fields):
+        if road_no is not None and road_no!='' and int(road_no) > 0 and ('road1' in relevant_fields or 'road2' in relevant_fields):
             markers = markers.loc[(markers['road1'] == int(road_no)) | (markers['road2'] == int(road_no))]
         for field in relevant_fields:
             if field == 'road1':
@@ -63,6 +56,8 @@ def get_db_matching_location(latitude, longitude, resolution, road_no=None):
                     field == 'yishuv_name' or field == 'street1_hebrew':
                 markers = markers.loc[markers[field].notnull()]
                 markers = markers.loc[markers[field] != '']
+    if markers.count()[0]==0:
+        markers=markers_orig
 
     # FILTER BY GEOHASH
     curr_geohash = geohash.encode(latitude, longitude, precision=4)
@@ -74,7 +69,12 @@ def get_db_matching_location(latitude, longitude, resolution, road_no=None):
         lambda x: geod.Inverse(latitude, longitude, x['latitude'], x['longitude'])['s12'], axis=1)
     most_fit_loc = markers.loc[markers['dist_point'] == markers['dist_point'].min()].iloc[0].to_dict()
     for field in relevant_fields:
-        final_loc[field] = most_fit_loc[field]
+        if most_fit_loc[field] is not None:
+            if (type(most_fit_loc[field])==str and (most_fit_loc[field] == '' or most_fit_loc[field]=='nan'))\
+            or (type(most_fit_loc[field])==np.float64 and np.isnan(most_fit_loc[field])):
+                final_loc[field]=None
+            else:
+                final_loc[field] = most_fit_loc[field]
     return final_loc
 
 

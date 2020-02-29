@@ -19,29 +19,26 @@ def _iter_rows(filename):
     sheet = workbook[u"Worksheet1"]
     rows = sheet.rows
     first_row = next(rows)
-    headers = [u'מזהה', u'סוג עבירה', u'סוג רכב', u'נ״צ', u'סרטון', u'תאריך דיווח']
+    headers = [u'מזהה', u'תאריך דיווח', u'סטטוס', u'סוג עבירה', u'סוג רכב', u'סוג לוחית רישוי', u'רמת חומרה', u'נ״צ סופי']
     assert [cell.value for cell in first_row] == headers
     for row in rows:
         id_ = int(row[0].value)
         provider_and_id_ = int(str(CONST.RSA_PROVIDER_CODE) + str(id_))
 
-        q = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_([id_]))
-        if q.all():
-            q.delete(synchronize_session='fetch')
-            db.session.commit()
-
-        violation = row[1].value
-        vehicle_type = row[2].value
-        coordinates = row[3].value
-        video_link = row[4].value
-        timestamp = parser.parse(row[5].value, dayfirst=True)
+        violation = row[3].value
+        vehicle_type = row[4].value
+        coordinates = row[7].value
+        severity = row[6].value
+        rsa_license_plate = row[5].value
+        video_link = None
+        timestamp = parser.parse(row[1].value, dayfirst=True)
         if not violation:
             continue
 
         vehicle_type = vehicle_type or ''
         coordinates = coordinates.split(',')
         latitude, longitude = float(coordinates[0]), float(coordinates[1])
-        description = {'VIOLATION_TYPE': violation, 'VEHICLE_TYPE': vehicle_type}
+        description = {'VIOLATION_TYPE': violation, 'VEHICLE_TYPE': vehicle_type, 'RSA_SEVERITY': severity, 'RSA_LICENSE_PLATE': rsa_license_plate}
 
         yield {'id': id_,
                'provider_and_id': provider_and_id_,
@@ -50,6 +47,7 @@ def _iter_rows(filename):
                'created': timestamp,
                'provider_code': CONST.RSA_PROVIDER_CODE,
                'accident_severity': 0,
+               'rsa_severity': severity,
                'title': 'שומרי הדרך',
                'description': json.dumps(description),
                'location_accuracy': 1,
@@ -57,6 +55,7 @@ def _iter_rows(filename):
                'video_link': video_link,
                'vehicle_type_rsa': vehicle_type,
                'violation_type_rsa': violation,
+               'rsa_license_plate': rsa_license_plate,
                'accident_year': timestamp.year}
 
 
@@ -64,7 +63,7 @@ def parse(filename):
     app = init_flask()
     db = SQLAlchemy(app)
 
-    for batch in batch_iterator(_iter_rows(filename), batch_size=50):
+    for batch in batch_iterator(_iter_rows(filename), batch_size=5000):
         db.session.bulk_insert_mappings(AccidentMarker, batch)
         db.session.commit()
 

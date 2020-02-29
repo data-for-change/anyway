@@ -14,7 +14,7 @@ About
 ### Our Goal
 
 At ANYWAY we aim to reduce road accidents by: 
-1. Raising public awareness of existing road hazards and leading towards safer road behaviour.
+1. Raising public awareness of existing road hazards, thereby leading towards safer road behaviour.
 1. Collaborating with authorities in order to assist and drive them to find solutions in light of Vision Zero. Such solutions will improve road infrastructure and behavioural problems in attempt to prevent road fatalities.
 
 Take a look at our [facebook page](https://www.facebook.com/anywayisrael). See also our [Android app](https://github.com/samuelregev/anywayAndroidApp/) and [iOS app](https://github.com/hasadna/Anyway-iOS/) on GitHub.
@@ -22,7 +22,7 @@ Take a look at our [facebook page](https://www.facebook.com/anywayisrael). See a
 
 ### ANYWAY’s Interactive Map:
 
-ANYWAY presents locations over an [interactive map](https://www.anyway.co.il/) as well as information regarding traffic accidents including casualties, information originating from the Central Bureau of Statistics (הלשכה המרכזית לסטטיסטיקה) and United Hazalah’s (איחוד הצלה) data, and traffic violations as reported by road vigilantes (שומרי הדרך). The website allows visitors to discuss possible solutions in their residential or drive zone with the goal of coming up with field solutions by both drivers and pedestrians, on both local and national scope.
+ANYWAY presents locations over an [interactive map](https://www.anyway.co.il/) as well as information regarding traffic accidents including casualties, information originating from the Central Bureau of Statistics (הלשכה המרכזית לסטטיסטיקה) and United Hatzalah’s (איחוד הצלה) data, and traffic violations as reported by road vigilantes (שומרי הדרך). The website allows visitors to discuss possible solutions in their residential or drive zone with the goal of coming up with field solutions by both drivers and pedestrians, on both local and national scope.
 
 The map is also available at [oway.org.il](https://www.oway.org.il/).
 
@@ -34,7 +34,7 @@ At the beginning of one of the school years we created a report of pedestrian [a
 
 ### ANYWAY’s Infographics Generator - Our Next Challenge
 
-ANYWAY’s next challenge is to form a unique automatic generator of infographics to empower and serve journalists, bloggers, public opinion leaders, community leaders etc. in the era of **data journalism**. The generated infographics will enhance reporting and news writing with the use of **statistics**. Each infographic will be driven by a real-time road accident related **news flash** and will provide a deeper insight into the story based on historical data. This, we believe, will increase both the quantity and quality of articles dealing with road accidents, and will result in raising public awareness and creating pressure on decision makers to initiate infrastructure improvements in light of **Vision Zero**.
+ANYWAY’s next challenge is to form an automatic generator of infographics to empower and serve journalists, bloggers, public opinion leaders, community leaders etc. in the era of **data journalism**. The generated infographics will enhance reporting and news writing with the use of **statistics**. Each infographic will be created for a real-time road accident related **news flash** and will provide a deeper insight into the story based on historical data. This, we believe, will increase both the quantity and quality of articles dealing with road accidents, and will result in raising public awareness and creating pressure on decision makers to initiate infrastructure improvements in light of **Vision Zero**.
 
 
 ### HASADNA

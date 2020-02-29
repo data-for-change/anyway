@@ -24,7 +24,7 @@ def parse_waze_alerts_data(waze_alerts):
     waze_df = json_normalize(waze_alerts)
     waze_df['created_at'] = pd.to_datetime(waze_df['pubMillis'], unit='ms')
     waze_df.rename({
-        'location.x': 'latitude', 
+        'location.x': 'latitude',
         'location.y': 'lontitude',
         'nThumbsUp': 'number_thumbs_up',
         'reportRating': 'report_rating',
@@ -33,7 +33,7 @@ def parse_waze_alerts_data(waze_alerts):
         'roadType': 'road_type'
         }, axis=1, inplace=True)
     waze_df['geom'] = waze_df.apply(lambda row: 'POINT({} {})'.format(row['lontitude'], row['latitude']), axis=1)
-    waze_df['road_type'] = waze_df['road_type'].fillna(-1) 
+    waze_df['road_type'] = waze_df['road_type'].fillna(-1)
     waze_df.drop(['country', 'pubMillis', 'reportDescription'], axis=1, inplace=True)
 
     return waze_df.to_dict('records')
@@ -51,7 +51,7 @@ def parse_waze_traffic_jams_data(waze_jams):
     waze_df['geom'] = waze_df['line'].apply(lambda l: 'LINESTRING({})'.format(','.join(['{} {}'.format(nz['x'], nz['y']) for nz in l])))
     waze_df['line'] = waze_df['line'].apply(str)
     waze_df['segments'] = waze_df['segments'].apply(str)
-    waze_df['turnType'] = waze_df['roadType'].fillna(-1) 
+    waze_df['turnType'] = waze_df['roadType'].fillna(-1)
     waze_df.drop(['country', 'pubMillis'], axis=1, inplace=True)
     waze_df.rename({
             'speedKMH': 'speed_kmh',

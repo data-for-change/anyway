@@ -1983,7 +1983,7 @@ class WazeTrafficJams(Base):
     speed = Column(Integer())
     segments = Column(Text())
     road_type = Column(Integer())
-    delay = Column(Integer()) 
+    delay = Column(Integer())
     street = Column(Text())
     city = Column(Text())
     end_node = Column(Text())

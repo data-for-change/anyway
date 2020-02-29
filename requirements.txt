@@ -49,3 +49,4 @@ flask_cors
 pandas
 tweepy
 beautifulsoup4==4.6.0
+google-cloud-storage

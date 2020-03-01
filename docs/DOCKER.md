@@ -13,21 +13,21 @@ The container loads itself with the command given in the instructions, it has th
 With every local code change, the container would restart itself and the changes would be immediately available in your web browser.
 The current image is based on an Ubuntu linux with java.
 
-Read more on the docker [Github project] (https://github.com/docker/docker)
+Read more on the docker [Github project](https://github.com/docker/docker)
 
 
 Instructions
 -----------------------
-* Please complete ANYWAY’s [“getting the code” section] (https://github.com/hasadna/anyway#getting-the-code-and-adding-ci-to-your-forked-repository) before starting
+* Please complete ANYWAY’s [“getting the code” section](https://github.com/hasadna/anyway#getting-the-code-and-adding-ci-to-your-forked-repository) before starting
 
-**1.** [Get the code] (https://github.com/hasadna/anyway#getting-the-code-and-adding-ci-to-your-forked-repository)
+**1.** [Get the code](https://github.com/hasadna/anyway#getting-the-code-and-adding-ci-to-your-forked-repository)
 
-**2.** [Install Docker] (https://docs.docker.com/install/)
+**2.** [Install Docker](https://docs.docker.com/install/)
 
 **3.** Open "Docker terminal", go to the **anyway** directory and run:
     `docker-compose up -d db`
     
-**4.** Optional: Download the [db dump] (https://drive.google.com/file/d/1ECAmh5PZwgKiDAvij0fO_M5QvklU7oQ9/view?usp=sharing) (You need to request access) and save it in the **anyway** directory.
+**4.** Optional: Download the [db dump](https://drive.google.com/drive/folders/1OesX8Y2MGgIcj0B3f5cdS-BIzt4govXA?usp=sharing) (You need to request access) and save it in the **anyway** directory.
 Restore the db (in anyway directory): `cat <truncated dump file name> | docker-compose exec -T db psql -U anyway`
 
 **5.** start anyway container: `docker-compose up -d`

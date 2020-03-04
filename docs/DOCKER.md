@@ -18,9 +18,9 @@ Read more on the docker [Github project](https://github.com/docker/docker)
 
 Instructions
 -----------------------
-* Please complete ANYWAY’s [“getting the code” section](https://github.com/hasadna/anyway#getting-the-code-and-adding-ci-to-your-forked-repository) before starting
+* Please complete ANYWAY’s [“getting the code” section](https://github.com/hasadna/anyway#getting-the-code) before starting
 
-**1.** [Get the code](https://github.com/hasadna/anyway#getting-the-code-and-adding-ci-to-your-forked-repository)
+**1.** [Get the code](https://github.com/hasadna/anyway#getting-the-code)
 
 **2.** [Install Docker](https://docs.docker.com/install/)
 

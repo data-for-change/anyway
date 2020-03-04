@@ -9,6 +9,7 @@ RUN apt-get clean && \
         build-essential \
         postgresql-client \
         libpq-dev \
+        default-jdk \
         virtualenv && \
     apt-get clean
 

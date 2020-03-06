@@ -90,8 +90,7 @@ def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret,
 
     tweets_df['location_db'] = tweets_df.apply(lambda row: get_db_matching_location(
         row['lat'], row['lon'], row['resolution'],
-        int(row['geo_extracted_road_no']) if row['geo_extracted_road_no'] is not None and row[
-            'geo_extracted_road_no'] != '' else None), axis=1)
+        row['geo_extracted_road_no']), axis=1)
     tweets_df = pd.concat(
         [tweets_df, tweets_df['location_db'].apply(pd.Series)], axis=1)
 

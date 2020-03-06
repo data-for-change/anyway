@@ -4,11 +4,12 @@ import re
 
 import geohash  # python-geohash package
 import googlemaps
-from geographiclib.geodesic import Geodesic
 import numpy as np
+from geographiclib.geodesic import Geodesic
+
 from anyway.parsers.news_flash_parser import get_markers_for_location_extraction
 from . import resolution_dict
-
+import logging
 
 def extract_road_number(location):
     """
@@ -84,19 +85,21 @@ def set_accident_resolution(accident_row):
     :param accident_row: single row of an accident
     :return: resolution option
     """
-    if accident_row['intersection'] != '' and '/' in accident_row['intersection']:
+    logging.info(accident_row['link'])
+
+    if accident_row['intersection'] is not None and str(accident_row['intersection']) != '' and '/' in str(accident_row['intersection']):
         return 'צומת עירוני'
-    elif accident_row['intersection'] != '':
+    elif accident_row['intersection'] is not None and str(accident_row['intersection']) != '':
         return 'צומת בינעירוני'
-    elif accident_row['road_no'] != '':
+    elif accident_row['intersection'] is not None and str(accident_row['road_no']) != '':
         return 'כביש בינעירוני'
-    elif accident_row['street'] != '':
+    elif accident_row['street'] is not None and str(accident_row['street']) != '':
         return 'רחוב'
-    elif accident_row['city'] != '':
+    elif accident_row['city'] is not None and str(accident_row['city']) != '':
         return 'עיר'
-    elif accident_row['subdistrict'] != '':
+    elif accident_row['subdistrict'] is not None and str(accident_row['subdistrict']) != '':
         return 'נפה'
-    elif accident_row['district'] != '':
+    elif accident_row['district'] is not None and str(accident_row['district']) != '':
         return 'מחוז'
     else:
         return 'אחר'

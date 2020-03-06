@@ -1,5 +1,6 @@
 # coding=utf-8
 
+import logging
 import re
 
 import geohash  # python-geohash package
@@ -9,7 +10,7 @@ from geographiclib.geodesic import Geodesic
 
 from anyway.parsers.news_flash_parser import get_markers_for_location_extraction
 from . import resolution_dict
-import logging
+
 
 def extract_road_number(location):
     """
@@ -21,7 +22,7 @@ def extract_road_number(location):
     road_search = re.search(road_number_regex, location)
     if road_search:
         return int(road_search.group(1))
-    return None
+    return np.nan
 
 
 def get_db_matching_location(latitude, longitude, resolution, road_no=None):
@@ -45,10 +46,11 @@ def get_db_matching_location(latitude, longitude, resolution, road_no=None):
     # READ MARKERS FROM DB
     markers = get_markers_for_location_extraction()
     markers['geohash'] = markers.apply(lambda x: geohash.encode(x['latitude'], x['longitude'], precision=4), axis=1)
-    markers_orig=markers.copy()
+    markers_orig = markers.copy()
     if resolution != 'אחר':
-        if road_no is not None and road_no!='' and int(road_no) > 0 and ('road1' in relevant_fields or 'road2' in relevant_fields):
-            markers = markers.loc[(markers['road1'] == int(road_no)) | (markers['road2'] == int(road_no))]
+        if road_no is not None and road_no != np.nan and road_no > 0 and (
+                'road1' in relevant_fields or 'road2' in relevant_fields):
+            markers = markers.loc[(markers['road1'] == road_no) | (markers['road2'] == road_no)]
         for field in relevant_fields:
             if field == 'road1':
                 markers = markers.loc[markers[field].notnull()]
@@ -57,8 +59,8 @@ def get_db_matching_location(latitude, longitude, resolution, road_no=None):
                     field == 'yishuv_name' or field == 'street1_hebrew':
                 markers = markers.loc[markers[field].notnull()]
                 markers = markers.loc[markers[field] != '']
-    if markers.count()[0]==0:
-        markers=markers_orig
+    if markers.count()[0] == 0:
+        markers = markers_orig
 
     # FILTER BY GEOHASH
     curr_geohash = geohash.encode(latitude, longitude, precision=4)
@@ -71,9 +73,9 @@ def get_db_matching_location(latitude, longitude, resolution, road_no=None):
     most_fit_loc = markers.loc[markers['dist_point'] == markers['dist_point'].min()].iloc[0].to_dict()
     for field in relevant_fields:
         if most_fit_loc[field] is not None:
-            if (type(most_fit_loc[field])==str and (most_fit_loc[field] == '' or most_fit_loc[field]=='nan'))\
-            or (type(most_fit_loc[field])==np.float64 and np.isnan(most_fit_loc[field])):
-                final_loc[field]=None
+            if (type(most_fit_loc[field]) == str and (most_fit_loc[field] == '' or most_fit_loc[field] == 'nan')) \
+                    or (type(most_fit_loc[field]) == np.float64 and np.isnan(most_fit_loc[field])):
+                final_loc[field] = None
             else:
                 final_loc[field] = most_fit_loc[field]
     return final_loc
@@ -87,11 +89,12 @@ def set_accident_resolution(accident_row):
     """
     logging.info(accident_row['link'])
 
-    if accident_row['intersection'] is not None and str(accident_row['intersection']) != '' and '/' in str(accident_row['intersection']):
+    if accident_row['intersection'] is not None and str(accident_row['intersection']) != '' and '/' in str(
+            accident_row['intersection']):
         return 'צומת עירוני'
     elif accident_row['intersection'] is not None and str(accident_row['intersection']) != '':
         return 'צומת בינעירוני'
-    elif accident_row['intersection'] is not None and str(accident_row['road_no']) != '':
+    elif accident_row['road_no'] is not None and accident_row['road_no'] != np.nan and accident_row['road_no'] > 0:
         return 'כביש בינעירוני'
     elif accident_row['street'] is not None and str(accident_row['street']) != '':
         return 'רחוב'
@@ -121,7 +124,7 @@ def geocode_extract(location, maps_key):
     response = geocode_result[0]
     geom = response['geometry']['location']
     street = ''
-    road_no = ''
+    road_no = np.nan
     intersection = ''
     subdistrict = ''
     city = ''
@@ -129,19 +132,24 @@ def geocode_extract(location, maps_key):
     for item in response['address_components']:
         if 'route' in item['types']:
             if item['short_name'].isdigit():
-                road_no = item['short_name']
+                road_no = int(item['short_name'])
             else:
-                street = item['long_name']
+                street = item['long_name'] if (
+                        response['long_name'] is not None and response['long_name'] != np.nan) else ''
         elif 'point_of_interest' in item['types'] or 'intersection' in item['types']:
-            intersection = item['long_name']
+            intersection = item['long_name'] if (
+                    response['long_name'] is not None and response['long_name'] != np.nan) else ''
         elif 'locality' in item['types']:
-            city = item['long_name']
+            city = item['long_name'] if (response['long_name'] is not None and response['long_name'] != np.nan) else ''
         elif 'administrative_area_level_2' in item['types']:
-            subdistrict = item['long_name']
+            subdistrict = item['long_name'] if (
+                    response['long_name'] is not None and response['long_name'] != np.nan) else ''
         elif 'administrative_area_level_1' in item['types']:
-            district = item['long_name']
-    address = response['formatted_address']
-    if road_no == '' and extract_road_number(location) is not None:
+            district = item['long_name'] if (
+                    response['long_name'] is not None and response['long_name'] != np.nan) else ''
+    address = response['formatted_address'] if (
+            response['formatted_address'] is not None and response['formatted_address'] != np.nan) else ''
+    if road_no == np.nan and extract_road_number(location) is not None:
         road_no = extract_road_number(location)
     return {'street': street, 'road_no': road_no, 'intersection': intersection,
             'city': city, 'address': address, 'subdistrict': subdistrict,

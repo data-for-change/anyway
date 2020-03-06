@@ -81,7 +81,7 @@ def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret,
         [tweets_df, tweets_df['google_location'].apply(pd.Series)], axis=1)
     tweets_df = pd.concat(
         [tweets_df.drop(['geom'], axis=1), tweets_df['geom'].apply(pd.Series)], axis=1)
-
+    tweets_df = tweets_df.fillna('')
     tweets_df['resolution'] = tweets_df.apply(
         lambda row: set_accident_resolution(row), axis=1)
 

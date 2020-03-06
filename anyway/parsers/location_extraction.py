@@ -87,8 +87,7 @@ def set_accident_resolution(accident_row):
     """
     logging.info(accident_row['link'])
 
-    if accident_row['intersection'] is not None and str(accident_row['intersection']) != '' and '/' in str(
-            accident_row['intersection']):
+    if accident_row['intersection'] is not None and str(accident_row['intersection']) != '' and '/' in str(accident_row['intersection']):
         return 'צומת עירוני'
     elif accident_row['intersection'] is not None and str(accident_row['intersection']) != '':
         return 'צומת בינעירוני'

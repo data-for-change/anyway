@@ -50,3 +50,5 @@ pandas
 tweepy
 beautifulsoup4==4.6.0
 google-cloud-storage
+google-cloud-core
+google-api-core

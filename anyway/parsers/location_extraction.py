@@ -9,7 +9,7 @@ from geographiclib.geodesic import Geodesic
 
 from anyway.parsers.news_flash_parser import get_markers_for_location_extraction
 from . import resolution_dict
-
+import logging
 
 def extract_road_number(location):
     """
@@ -85,6 +85,8 @@ def set_accident_resolution(accident_row):
     :param accident_row: single row of an accident
     :return: resolution option
     """
+    logging.info(accident_row['link'])
+
     if accident_row['intersection'] is not None and str(accident_row['intersection']) != '' and '/' in str(
             accident_row['intersection']):
         return 'צומת עירוני'

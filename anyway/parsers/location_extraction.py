@@ -135,18 +135,18 @@ def geocode_extract(location, maps_key):
                 road_no = int(item['short_name'])
             else:
                 street = item['long_name'] if (
-                        response['long_name'] is not None and response['long_name'] != np.nan) else ''
+                        item['long_name'] is not None and item['long_name'] != np.nan) else ''
         elif 'point_of_interest' in item['types'] or 'intersection' in item['types']:
             intersection = item['long_name'] if (
-                    response['long_name'] is not None and response['long_name'] != np.nan) else ''
+                    item['long_name'] is not None and item['long_name'] != np.nan) else ''
         elif 'locality' in item['types']:
-            city = item['long_name'] if (response['long_name'] is not None and response['long_name'] != np.nan) else ''
+            city = item['long_name'] if (item['long_name'] is not None and item['long_name'] != np.nan) else ''
         elif 'administrative_area_level_2' in item['types']:
             subdistrict = item['long_name'] if (
-                    response['long_name'] is not None and response['long_name'] != np.nan) else ''
+                    item['long_name'] is not None and item['long_name'] != np.nan) else ''
         elif 'administrative_area_level_1' in item['types']:
             district = item['long_name'] if (
-                    response['long_name'] is not None and response['long_name'] != np.nan) else ''
+                    item['long_name'] is not None and item['long_name'] != np.nan) else ''
     address = response['formatted_address'] if (
             response['formatted_address'] is not None and response['formatted_address'] != np.nan) else ''
     if road_no == np.nan and extract_road_number(location) is not None:

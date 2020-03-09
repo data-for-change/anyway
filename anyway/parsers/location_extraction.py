@@ -23,7 +23,7 @@ def extract_road_number(location):
         road_search = re.search(road_number_regex, location)
         if road_search:
             return int(road_search.group(1))
-    except:
+    except Exception as _:
         if location is not None:
             logging.info('bug in extract road number {0}'.format(location))
         else:
@@ -83,7 +83,7 @@ def get_db_matching_location(latitude, longitude, resolution, road_no=None):
                     final_loc[field] = None
                 else:
                     final_loc[field] = most_fit_loc[field]
-    except: 
+    except Exception as _: 
         logging.info('db matching failed for latitude {0}, longitude {1}, resolution {2}, road no {3}'.format(latitude, longitude, resolution, road_no))
     return final_loc
 
@@ -112,7 +112,7 @@ def set_accident_resolution(accident_row):
             return 'מחוז'
         else:
             return 'אחר'
-    except:
+    except Exception as _:
         if accident_row is None:
             logging.info('bug in accident resolution')
         else:
@@ -166,7 +166,7 @@ def geocode_extract(location, maps_key):
                 response['formatted_address'] is not None) else ''
         if road_no == None and extract_road_number(location) is not None:
             road_no = extract_road_number(location)
-    except:
+    except Exception as _:
         logging.info('geocode extract location {0} maps key {1}'.format(location, maps_key))
     return {'street': street, 'road_no': road_no, 'intersection': intersection,
             'city': city, 'address': address, 'subdistrict': subdistrict,

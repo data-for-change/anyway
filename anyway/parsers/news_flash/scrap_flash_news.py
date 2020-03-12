@@ -34,4 +34,4 @@ def main(google_maps_key_path):
     sys.path.append(os.path.dirname(os.path.realpath(__file__)))
     scrap_flash_news('ynet', google_maps_key_path)
     scrap_flash_news('walla', google_maps_key_path)
-    scrap_flash_news('twitter', google_maps_key_path)
+    # scrap_flash_news('twitter', google_maps_key_path)

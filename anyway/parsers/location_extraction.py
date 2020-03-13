@@ -168,6 +168,7 @@ def geocode_extract(location, maps_key):
             road_no = extract_road_number(location)
     except Exception as _:
         logging.info('geocode extract location {0} maps key {1}'.format(location, maps_key))
+
     return {'street': street, 'road_no': road_no, 'intersection': intersection,
             'city': city, 'address': address, 'subdistrict': subdistrict,
             'district': district, 'geom': geom}

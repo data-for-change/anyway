@@ -83,11 +83,8 @@ def get_db_matching_location(latitude, longitude, resolution, road_no=None):
                     final_loc[field] = None
                 else:
                     final_loc[field] = most_fit_loc[field]
-<<<<<<< HEAD
-    except Exception as _: 
-=======
+
     except Exception as _:
->>>>>>> 30fc20ceea236032c19bf4e97fb2323beeabad68
         logging.info('db matching failed for latitude {0}, longitude {1}, resolution {2}, road no {3}'.format(latitude, longitude, resolution, road_no))
     return final_loc
 

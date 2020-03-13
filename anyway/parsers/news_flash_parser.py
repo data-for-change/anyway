@@ -1,6 +1,6 @@
 import pandas as pd
 from flask_sqlalchemy import SQLAlchemy
-
+import numpy as np
 from anyway.utilities import init_flask
 
 app = init_flask()
@@ -101,6 +101,14 @@ def insert_new_flash_news(title, link, date_parsed, author, description, locatio
     :param accident: is the news flash an accident
     :param source: source of the news flash
     """
+    temp = [title, link, date_parsed, author, description, location, lat, lon, resolution, 
+                          region_hebrew, district_hebrew, yishuv_name, street1_hebrew, street2_hebrew,
+                          non_urban_intersection_hebrew, road1, road2, road_segment_name, accident, source,
+                          tweet_id]
+    title, link, date_parsed, author, description, location, lat, lon, resolution, \
+                          region_hebrew, district_hebrew, yishuv_name, street1_hebrew, street2_hebrew, \
+                          non_urban_intersection_hebrew, road1, road2, road_segment_name, accident, source, \
+                          tweet_id = pd.Series(temp).replace({pd.np.nan: None})
     db.session.execute('INSERT INTO news_flash (tweet_id, title, link, date, author, description, location, lat, lon, '
                        'resolution, region_hebrew, district_hebrew, yishuv_name, street1_hebrew, street2_hebrew, '
                        'non_urban_intersection_hebrew, road1, road2, road_segment_name, '

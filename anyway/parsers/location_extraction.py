@@ -94,6 +94,7 @@ def set_accident_resolution(accident_row):
     :param accident_row: single row of an accident
     :return: resolution option
     """
+    logging.info(accident_row['link'])
     try:
         if accident_row['intersection'] is not None and str(accident_row['intersection']) != '' and '/' in str(
                 accident_row['intersection']):

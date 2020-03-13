@@ -6,6 +6,7 @@ import re
 import geohash  # python-geohash package
 import googlemaps
 import numpy as np
+import pandas as pd
 from geographiclib.geodesic import Geodesic
 
 from anyway.parsers.news_flash_parser import get_markers_for_location_extraction

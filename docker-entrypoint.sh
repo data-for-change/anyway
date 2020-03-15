@@ -3,7 +3,6 @@
 
 
   ! alembic upgrade head && echo failed to upgrade head && exit 1
-  python main.py create-views cbs-views
 
 
 #ls -lah /rsa.xlsx

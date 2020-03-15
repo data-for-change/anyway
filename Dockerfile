@@ -9,6 +9,7 @@ RUN apt-get clean && \
         build-essential \
         postgresql-client \
         libpq-dev \
+        default-jdk \
         virtualenv && \
     apt-get clean
 
@@ -34,11 +35,8 @@ RUN . /venv3/bin/activate && \
 
 COPY . /anyway
 
-#RUN mv /anyway/static/data/rsa/rsa.xlsx /
-
-#VOLUME ["/anyway/static"]
 EXPOSE 5000
 
 ENTRYPOINT ["/anyway/docker-entrypoint.sh"]
 
-CMD ["python", "main.py", "testserver", "--open"]
+CMD FLASK_APP=anyway flask run --host 0.0.0.0

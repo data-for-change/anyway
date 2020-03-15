@@ -2,7 +2,7 @@ from google.cloud import storage
 import pandas as pd
 from pandas.io.json import json_normalize
 import json
-from waze_db_functions import insert_waze_alerts, insert_waze_traffic_jams
+from .waze_db_functions import insert_waze_alerts, insert_waze_traffic_jams
 
 def list_blobs(bucket_name):
     """

@@ -703,6 +703,7 @@ class NewsFlash(Base):
     street2_hebrew  = Column(Text(), nullable=True)
     non_urban_intersection_hebrew = Column(Text(), nullable=True)
     road_segment_name = Column(Text(), nullable=True)
+    tags = Column(Text(), nullable=True)
 
     def serialize(self):
         return {
@@ -728,6 +729,7 @@ class NewsFlash(Base):
             "street2_hebrew": self.street2_hebrew,
             "non_urban_intersection_hebrew": self.non_urban_intersection_hebrew,
             "road_segment_name": self.road_segment_name,
+            "tags": self.tags
         }
 
     # Flask-Login integration

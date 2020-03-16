@@ -1633,7 +1633,7 @@ def infographics_data():
                                        'meta': {}}
     output['widgets'].append(injured_count_by_accident_year)
 
-  # accident count on day light
+    # accident count on day light
     accident_count_by_day_night = {'name': 'accident_count_by_day_night',
                                    'data' : get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,group_by='day_night_hebrew', count='day_night_hebrew', start_time=start_year, end_time=end_year),
                                     'meta': {}}

@@ -74,7 +74,7 @@ def get_source(news_flash_id):
 
 def insert_new_flash_news(title, link, date_parsed, author, description, location, lat, lon, resolution,
                           region_hebrew, district_hebrew, yishuv_name, street1_hebrew, street2_hebrew,
-                          non_urban_intersection_hebrew, road1, road2, road_segment_name, accident, source,
+                          non_urban_intersection_hebrew, road1, road2, road_segment_name, accident, source, tags
                           tweet_id=None):
     """
     insert new news_flash to db
@@ -99,23 +99,24 @@ def insert_new_flash_news(title, link, date_parsed, author, description, locatio
     :param resolution: resolution of found location
     :param accident: is the news flash an accident
     :param source: source of the news flash
+    :param tags: extracted tags of the news flash
     """
     temp = [title, link, date_parsed, author, description, location, lat, lon, resolution,
                           region_hebrew, district_hebrew, yishuv_name, street1_hebrew, street2_hebrew,
-                          non_urban_intersection_hebrew, road1, road2, road_segment_name, accident, source,
+                          non_urban_intersection_hebrew, road1, road2, road_segment_name, accident, source, tags
                           tweet_id]
     title, link, date_parsed, author, description, location, lat, lon, resolution, \
                           region_hebrew, district_hebrew, yishuv_name, street1_hebrew, street2_hebrew, \
-                          non_urban_intersection_hebrew, road1, road2, road_segment_name, accident, source, \
+                          non_urban_intersection_hebrew, road1, road2, road_segment_name, accident, source, tags \
                           tweet_id = pd.Series(temp).replace({pd.np.nan: None})
     db.session.execute('INSERT INTO news_flash (tweet_id, title, link, date, author, description, location, lat, lon, '
                        'resolution, region_hebrew, district_hebrew, yishuv_name, street1_hebrew, street2_hebrew, '
                        'non_urban_intersection_hebrew, road1, road2, road_segment_name, '
-                       'accident, source'') VALUES \
+                       'accident, tags source'') VALUES \
                        (:tweet_id, :title, :link, :date, :author, :description, :location, :lat, :lon, :resolution, \
                        :region_hebrew, :district_hebrew, :yishuv_name, :street1_hebrew, :street2_hebrew,'
                        ' :non_urban_intersection_hebrew, :road1, :road2, :road_segment_name,'
-                       ' :accident, :source)',
+                       ' :accident, :tags, :source)',
                        {'tweet_id': tweet_id, 'title': title, 'link': link, 'date': date_parsed, 'author': author,
                         'description': description, 'location': location, 'lat': lat, 'lon': lon,
                         'resolution': resolution,
@@ -128,7 +129,9 @@ def insert_new_flash_news(title, link, date_parsed, author, description, locatio
                         'road1': road1,
                         'road2': road2,
                         'road_segment_name': road_segment_name,
-                        'accident': accident, 'source': source})
+                        'accident': accident, 
+                        'tags': tags,
+                        'source': source})
     db.session.commit()
 
 

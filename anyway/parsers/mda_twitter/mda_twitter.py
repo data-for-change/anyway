@@ -33,14 +33,14 @@ def mda_twitter():
                                     'street1_hebrew',
                                     'street2_hebrew', 'non_urban_intersection_hebrew', 'road1', 'road2',
                                     'road_segment_name',
-                                    'accident', 'source']]
+                                    'accident', 'source', 'tags']]
 
     for row in mda_tweets.itertuples(index=False):
         (tweet_id, title, link, date, author, description, location, lat, lon, resolution,
          region_hebrew, district_hebrew, yishuv_name, street1_hebrew, street2_hebrew,
-         non_urban_intersection_hebrew, road1, road2, road_segment_name, accident, source) = row
+         non_urban_intersection_hebrew, road1, road2, road_segment_name, accident, source, tags) = row
 
         insert_new_flash_news(title, link, date, author, description, location, lat, lon, resolution,
                               region_hebrew, district_hebrew, yishuv_name, street1_hebrew, street2_hebrew,
-                              non_urban_intersection_hebrew, road1, road2, road_segment_name, accident, source,
+                              non_urban_intersection_hebrew, road1, road2, road_segment_name, accident, source, tags
                               tweet_id=tweet_id)

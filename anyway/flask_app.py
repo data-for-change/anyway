@@ -1637,6 +1637,6 @@ def infographics_data():
     accident_count_by_day_night = {'name': 'accident_count_by_day_night',
                                    'data' : get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,group_by='day_night_hebrew', count='day_night_hebrew', start_time=start_year, end_time=end_year),
                                     'meta': {}}
-    output['widgets'].append(accident_count_by_day_night)                       
+    output['widgets'].append(accident_count_by_day_night)
 
     return Response(json.dumps(output, default=str), mimetype="application/json")

@@ -1636,7 +1636,7 @@ def infographics_data():
     output['widgets'].append(accident_count_by_day_night)
 
     # accidents distribution count by hour
-    accidents_count_by_hour = {'name': 'accidents_distribution_count_by_hour',
+    accidents_count_by_hour = {'name': 'accidents_count_by_hour',
                                             'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_hour', count='accident_hour', start_time=start_time, end_time=end_time),
                                             'meta': {}}
     output['widgets'].append(accidents_count_by_hour)

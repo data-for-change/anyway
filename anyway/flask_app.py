@@ -1641,4 +1641,10 @@ def infographics_data():
                                             'meta': {}}
     output['widgets'].append(accidents_count_by_hour)
 
+    # accident count by road_light
+    accident_count_by_road_light = {'name': 'accident_count_by_road_light',
+                                   'data' : get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,group_by='road_light_hebrew', count='road_light_hebrew', start_time=start_year, end_time=end_year),
+                                    'meta': {}}
+    output['widgets'].append(accident_count_by_road_light)
+
     return Response(json.dumps(output, default=str), mimetype="application/json")

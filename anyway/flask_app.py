@@ -1547,7 +1547,8 @@ def get_most_severe_accidents(table_obj, filters, start_time, end_time, limit=10
     filters = filters or {}
     filters['provider_code'] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
     query = get_query(table_obj, filters, start_time, end_time)
-    query = query.with_entities('longitude', 'latitude', 'accident_severity_hebrew', 'accident_timestamp')
+    query = query.with_entities('longitude', 'latitude', 'accident_severity_hebrew', 'accident_timestamp',
+                                'accident_type_hebrew')
     query = query.order_by(getattr(table_obj,"accident_severity"), getattr(table_obj,"accident_timestamp").desc())
     query = query.limit(limit)
     df = pd.read_sql_query(query.statement, query.session.bind)

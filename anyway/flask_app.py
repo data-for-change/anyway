@@ -1582,15 +1582,18 @@ def infographics_data():
 
     if all(value is None for value in location_info.values()):
         return Response({})
-    start_time    = request.values.get('start_time')
-    end_time      = request.values.get('end_time')
 
-    start_time = datetime.datetime.fromtimestamp(int(start_time)) if start_time else None
-    end_time = datetime.datetime.fromtimestamp(int(end_time)) if end_time else None
+    number_of_years_ago_to_pull_raw = request.values.get('years_ago', CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
+    try:
+        number_of_years_ago_to_pull = int(number_of_years_ago_to_pull_raw)
+    except ValueError:
+        return Response({})
 
-    # accident_year count
-    start_year = datetime.date(start_time.year, 1, 1)
-    end_year = datetime.date(end_time.year, 12, 31)
+    if number_of_years_ago_to_pull < 0 or number_of_years_ago_to_pull > 100:
+        return Response({})
+
+    end_time = datetime.date.today()
+    start_time = datetime.date(end_time.year - number_of_years_ago_to_pull, 1, 1)
 
     # most severe accidents
     most_severe_accidents = {'name': 'most_severe_accidents',
@@ -1611,7 +1614,7 @@ def infographics_data():
 
     # accident count by accident year
     accident_count_by_accident_year = {'name': 'accident_count_by_accident_year',
-                                       'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_year', count='accident_year', start_time=start_year, end_time=end_year),
+                                       'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_year', count='accident_year', start_time=start_time, end_time=end_time),
                                        'meta': {}}
     output['widgets'].append(accident_count_by_accident_year)
 
@@ -1626,13 +1629,13 @@ def infographics_data():
 
     # injured count by accident year
     injured_count_by_accident_year = {'name': 'injured_count_by_accident_year',
-                                       'data': get_accidents_stats(table_obj=InvolvedMarkerView, filters=get_injured_filters(location_info), group_by='accident_year', count='accident_year', start_time=start_year, end_time=end_year),
+                                       'data': get_accidents_stats(table_obj=InvolvedMarkerView, filters=get_injured_filters(location_info), group_by='accident_year', count='accident_year', start_time=start_time, end_time=end_time),
                                        'meta': {}}
     output['widgets'].append(injured_count_by_accident_year)
 
     # accident count on day light
     accident_count_by_day_night = {'name': 'accident_count_by_day_night',
-                                   'data' : get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,group_by='day_night_hebrew', count='day_night_hebrew', start_time=start_year, end_time=end_year),
+                                   'data' : get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='day_night_hebrew', count='day_night_hebrew', start_time=start_time, end_time=end_time),
                                     'meta': {}}
     output['widgets'].append(accident_count_by_day_night)
 
@@ -1644,7 +1647,7 @@ def infographics_data():
 
     # accident count by road_light
     accident_count_by_road_light = {'name': 'accident_count_by_road_light',
-                                   'data' : get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,group_by='road_light_hebrew', count='road_light_hebrew', start_time=start_year, end_time=end_year),
+                                   'data' : get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='road_light_hebrew', count='road_light_hebrew', start_time=start_time, end_time=end_time),
                                     'meta': {}}
     output['widgets'].append(accident_count_by_road_light)
 

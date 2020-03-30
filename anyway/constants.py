@@ -24,6 +24,7 @@ class Constants(object):
     ALL_AGE_GROUPS_LIST = list(range(1, AGE_GROUPS_NUMBER + 1)) + [99]
 
     # other global constants (python only)
+    DEFAULT_NUMBER_OF_YEARS_AGO = 5
 
     def __setattr__(self, *_):
         """

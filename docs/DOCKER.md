@@ -88,6 +88,17 @@ services:
 
 This loads the ./anyway dir (relative to the docker-compose file) as /anyway/anyway in the docker overriding the inner volume and allowing you to run your own code inside the docker.
 
+
+Common Errors
+-----------------------
+Q: When working in Windows environment you might encounter in this error during the build proccess.
+```
+anyway_1  | standard_init_linux.go:211: exec user process caused "no such file or directory"
+```
+A: The solution is very simple. You need to go to the docker-entrypoint.sh file and save it as CRLF (encoding of new line in Windows) instead of LF (encoding of new line in Linux). 
+In VS code just open the file and choose CLRF at the button right of the screen, for other IDEs check online for instructions.
+
+
 Questions and ideas
 -----------------
 Talk to Atalya on HASADNA's Slack (atalya)

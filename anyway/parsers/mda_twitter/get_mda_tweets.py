@@ -5,6 +5,7 @@ import pandas as pd
 import tweepy
 
 from anyway.parsers.news_flash_classifiers import classify_tweets
+from anyway.parsers.news_flash_tags import extract_tags
 from ..location_extraction import geocode_extract, manual_filter_location_of_text, get_db_matching_location, \
     set_accident_resolution
 
@@ -93,6 +94,8 @@ def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret,
         row['geo_extracted_road_no']), axis=1)
     tweets_df = pd.concat(
         [tweets_df, tweets_df['location_db'].apply(pd.Series)], axis=1)
+
+    tweets_df['tags'] = tweets_df['title'].apply(extract_tags)
 
     tweets_df.drop(['google_location', 'accident_date', 'accident_time',
                     'tweet_ts', 'location_db'], axis=1, inplace=True)

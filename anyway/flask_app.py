@@ -1495,15 +1495,12 @@ def extract_news_flash_location(news_flash_id):
         logging.warn('could not find news flash id {}'.format(news_flash_id))
         return None
     resolution = news_flash_obj.resolution if news_flash_obj.resolution else None
-    print('resolution -->>>', resolution, flush=True)
     if not news_flash_obj or not resolution or resolution not in resolution_dict:
         logging.warn('could not find valid resolution for news flash id {}'.format(news_flash_id))
         return {'name': 'location', 'data': {'resolution': None}}
-    print('resolution_dict -->>>', resolution_dict, flush=True)
     data = {'resolution': resolution}
     for field in resolution_dict[resolution]:
         data[field] = getattr(news_flash_obj, field)
-    print('data -->>>', data, flush=True)
     return {'name': 'location', 'data': data}
 
 
@@ -1672,7 +1669,7 @@ def infographics_data():
     output['widgets'].append(accident_count_by_road_light)
 
     # accident count by road_segment
-    accident_count_by_road_light = {'name': 'accident_count_by_road_segment',
+    accident_count_by_road_light = {'name': 'accident_count_by_road_segment_name',
                                     'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,
                                                                 group_by='road_segment_name', count='road_segment_name',
                                                                 start_time=start_year, end_time=end_year),

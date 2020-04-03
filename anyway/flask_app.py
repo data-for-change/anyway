@@ -69,7 +69,8 @@ assets = Environment()
 assets.init_app(app)
 assets_env = AssetsEnvironment(os.path.join(utilities._PROJECT_ROOT, 'static'), '/static')
 
-CORS(app, resources={r"/location-subscription": {"origins": "*"}, r"/report-problem": {"origins": "*"}, r"/api/infographics_data": {"origins": "*"}, r"/api/news-flash-filters": {"origins": "*"}})
+CORS(app, resources={r"/location-subscription": {"origins": "*"}, r"/report-problem": {"origins": "*"},
+                     r"/api/infographics_data": {"origins": "*"}, r"/api/news-flash-filters": {"origins": "*"}})
 
 jinja_environment = jinja2.Environment(
     autoescape=True,
@@ -1366,7 +1367,6 @@ admin.add_view(ViewHighlightedMarkersMap(name='View Highlighted Markers Map', en
                                          category='View Highlighted Markers'))
 
 
-
 @app.route("/markers/polygon/", methods=["GET"])
 def acc_in_area_query():
     # polygon will be received in the following format: 'POLYGON(({lon} {lat},{lon} {lat},........,{lonN},
@@ -1488,33 +1488,38 @@ def oauth_callback(provider):
     login.login_user(user, True)
     return redirect(url_for('index'))
 
+
 def extract_news_flash_location(news_flash_id):
-    news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id==news_flash_id).first()
+    news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == news_flash_id).first()
     if not news_flash_obj:
         logging.warn('could not find news flash id {}'.format(news_flash_id))
         return None
     resolution = news_flash_obj.resolution if news_flash_obj.resolution else None
+    print('resolution -->>>', resolution, flush=True)
     if not news_flash_obj or not resolution or resolution not in resolution_dict:
         logging.warn('could not find valid resolution for news flash id {}'.format(news_flash_id))
         return {'name': 'location', 'data': {'resolution': None}}
+    print('resolution_dict -->>>', resolution_dict, flush=True)
     data = {'resolution': resolution}
     for field in resolution_dict[resolution]:
         data[field] = getattr(news_flash_obj, field)
+    print('data -->>>', data, flush=True)
     return {'name': 'location', 'data': data}
+
 
 def get_query(table_obj, filters, start_time, end_time):
     query = db.session.query(table_obj)
     if start_time:
-        query = query.filter(getattr(table_obj,'accident_timestamp') >= start_time)
+        query = query.filter(getattr(table_obj, 'accident_timestamp') >= start_time)
     if end_time:
-        query = query.filter(getattr(table_obj,'accident_timestamp') <= end_time)
+        query = query.filter(getattr(table_obj, 'accident_timestamp') <= end_time)
     if filters:
         for field_name, value in filters.items():
             if isinstance(value, list):
                 values = value
             else:
                 values = [value]
-            query = query.filter((getattr(table_obj,field_name)).in_(values))
+            query = query.filter((getattr(table_obj, field_name)).in_(values))
     return query
 
 
@@ -1531,6 +1536,7 @@ def get_accidents_stats(table_obj, filters=None, group_by=None, count=None, star
     df.columns = [c.replace('_hebrew', '') for c in df.columns]
     return df.to_dict(orient='records') if group_by or count else df.to_dict()
 
+
 def get_injured_filters(location_info):
     new_filters = {}
     for curr_filter, curr_values in location_info.items():
@@ -1539,7 +1545,7 @@ def get_injured_filters(location_info):
             new_filters[new_filter_name] = curr_values
         else:
             new_filters[curr_filter] = curr_values
-    new_filters['injury_severity'] = [1,2,3,4,5]
+    new_filters['injury_severity'] = [1, 2, 3, 4, 5]
     return new_filters
 
 
@@ -1549,7 +1555,7 @@ def get_most_severe_accidents(table_obj, filters, start_time, end_time, limit=10
     query = get_query(table_obj, filters, start_time, end_time)
     query = query.with_entities('longitude', 'latitude', 'accident_severity_hebrew', 'accident_timestamp',
                                 'accident_type_hebrew')
-    query = query.order_by(getattr(table_obj,"accident_severity"), getattr(table_obj,"accident_timestamp").desc())
+    query = query.order_by(getattr(table_obj, "accident_severity"), getattr(table_obj, "accident_timestamp").desc())
     query = query.limit(limit)
     df = pd.read_sql_query(query.statement, query.session.bind)
     df.columns = [c.replace('_hebrew', '') for c in df.columns]
@@ -1567,7 +1573,6 @@ def get_accidents_heat_map(table_obj, filters, start_time, end_time):
 
 @app.route('/api/infographics_data', methods=['GET'])
 def infographics_data():
-
     output = {}
 
     location_info = extract_news_flash_location(request.values.get('news_flash_id'))
@@ -1576,14 +1581,14 @@ def infographics_data():
     location_info = location_info['data']
     output['meta'] = {"location_info": location_info.copy()}
     output['widgets'] = []
-    resolution    = location_info.pop('resolution')
+    resolution = location_info.pop('resolution')
     if resolution is None:
         return Response({})
 
     if all(value is None for value in location_info.values()):
         return Response({})
-    start_time    = request.values.get('start_time')
-    end_time      = request.values.get('end_time')
+    start_time = request.values.get('start_time')
+    end_time = request.values.get('end_time')
 
     start_time = datetime.datetime.fromtimestamp(int(start_time)) if start_time else None
     end_time = datetime.datetime.fromtimestamp(int(end_time)) if end_time else None
@@ -1594,24 +1599,33 @@ def infographics_data():
 
     # most severe accidents
     most_severe_accidents = {'name': 'most_severe_accidents',
-                            'data': get_most_severe_accidents(table_obj=AccidentMarkerView, filters=location_info, start_time=start_time, end_time=end_time),
-                            'meta': {}}
+                             'data': get_most_severe_accidents(table_obj=AccidentMarkerView, filters=location_info,
+                                                               start_time=start_time, end_time=end_time),
+                             'meta': {}}
     output['widgets'].append(most_severe_accidents)
     # accident_severity count
     accident_count_by_severity = {'name': 'accident_count_by_severity',
-                                  'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_severity_hebrew', count='accident_severity_hebrew', start_time=start_time, end_time=end_time),
+                                  'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,
+                                                              group_by='accident_severity_hebrew',
+                                                              count='accident_severity_hebrew', start_time=start_time,
+                                                              end_time=end_time),
                                   'meta': {}}
     output['widgets'].append(accident_count_by_severity)
 
     # accident_type count
     accident_count_by_accident_type = {'name': 'accident_count_by_accident_type',
-                                      'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_type_hebrew', count='accident_type_hebrew', start_time=start_time, end_time=end_time),
+                                       'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,
+                                                                   group_by='accident_type_hebrew',
+                                                                   count='accident_type_hebrew', start_time=start_time,
+                                                                   end_time=end_time),
                                        'meta': {}}
     output['widgets'].append(accident_count_by_accident_type)
 
     # accident count by accident year
     accident_count_by_accident_year = {'name': 'accident_count_by_accident_year',
-                                       'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_year', count='accident_year', start_time=start_year, end_time=end_year),
+                                       'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,
+                                                                   group_by='accident_year', count='accident_year',
+                                                                   start_time=start_year, end_time=end_year),
                                        'meta': {}}
     output['widgets'].append(accident_count_by_accident_year)
 
@@ -1626,25 +1640,42 @@ def infographics_data():
 
     # injured count by accident year
     injured_count_by_accident_year = {'name': 'injured_count_by_accident_year',
-                                       'data': get_accidents_stats(table_obj=InvolvedMarkerView, filters=get_injured_filters(location_info), group_by='accident_year', count='accident_year', start_time=start_year, end_time=end_year),
-                                       'meta': {}}
+                                      'data': get_accidents_stats(table_obj=InvolvedMarkerView,
+                                                                  filters=get_injured_filters(location_info),
+                                                                  group_by='accident_year', count='accident_year',
+                                                                  start_time=start_year, end_time=end_year),
+                                      'meta': {}}
     output['widgets'].append(injured_count_by_accident_year)
 
     # accident count on day light
     accident_count_by_day_night = {'name': 'accident_count_by_day_night',
-                                   'data' : get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,group_by='day_night_hebrew', count='day_night_hebrew', start_time=start_year, end_time=end_year),
-                                    'meta': {}}
+                                   'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,
+                                                               group_by='day_night_hebrew', count='day_night_hebrew',
+                                                               start_time=start_year, end_time=end_year),
+                                   'meta': {}}
     output['widgets'].append(accident_count_by_day_night)
 
     # accidents distribution count by hour
     accidents_count_by_hour = {'name': 'accidents_count_by_hour',
-                                            'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_hour', count='accident_hour', start_time=start_time, end_time=end_time),
-                                            'meta': {}}
+                               'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,
+                                                           group_by='accident_hour', count='accident_hour',
+                                                           start_time=start_time, end_time=end_time),
+                               'meta': {}}
     output['widgets'].append(accidents_count_by_hour)
 
     # accident count by road_light
     accident_count_by_road_light = {'name': 'accident_count_by_road_light',
-                                   'data' : get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,group_by='road_light_hebrew', count='road_light_hebrew', start_time=start_year, end_time=end_year),
+                                    'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,
+                                                                group_by='road_light_hebrew', count='road_light_hebrew',
+                                                                start_time=start_year, end_time=end_year),
+                                    'meta': {}}
+    output['widgets'].append(accident_count_by_road_light)
+
+    # accident count by road_segment
+    accident_count_by_road_light = {'name': 'accident_count_by_road_segment',
+                                    'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,
+                                                                group_by='road_segment_name', count='road_segment_name',
+                                                                start_time=start_year, end_time=end_year),
                                     'meta': {}}
     output['widgets'].append(accident_count_by_road_light)
 

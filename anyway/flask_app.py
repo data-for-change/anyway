@@ -44,7 +44,7 @@ from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved,
                      LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School, SchoolWithDescription,
                      InjuredAroundSchool, InjuredAroundSchoolAllData, Sex, AccidentMonth, InjurySeverity, ReportProblem,
                      EngineVolume, PopulationType, Region, District, NaturalArea, MunicipalStatus, YishuvShape,
-                     TotalWeight, DrivingDirections, AgeGroup, AccidentMarkerView, InvolvedMarkerView)
+                     TotalWeight, DrivingDirections, AgeGroup, AccidentMarkerView, InvolvedMarkerView, EmbeddedReports)
 from .oauth import OAuthSignIn
 from .parsers import resolution_dict
 
@@ -69,7 +69,11 @@ assets = Environment()
 assets.init_app(app)
 assets_env = AssetsEnvironment(os.path.join(utilities._PROJECT_ROOT, 'static'), '/static')
 
-CORS(app, resources={r"/location-subscription": {"origins": "*"}, r"/report-problem": {"origins": "*"}, r"/api/infographics_data": {"origins": "*"}, r"/api/news-flash-filters": {"origins": "*"}})
+CORS(app, resources={r"/location-subscription": {"origins": "*"},
+                     r"/report-problem": {"origins": "*"},
+                     r"/api/infographics_data": {"origins": "*"},
+                     r"/api/news-flash-filters": {"origins": "*"},
+                     r"/api/embedded-reports": {"origins": "*"}})
 
 jinja_environment = jinja2.Environment(
     autoescape=True,
@@ -1652,3 +1656,16 @@ def infographics_data():
     output['widgets'].append(accident_count_by_road_light)
 
     return Response(json.dumps(output, default=str), mimetype="application/json")
+
+@app.route("/api/embedded-reports", methods=["GET"])
+@user_optional
+def embedded_reports_api():
+    logging.debug('getting embedded reports')
+    embedded_reports = db.session.query(EmbeddedReports).all()
+    embedded_reports_list = [{"id": x.id,
+                              "report_name_english": x.report_name_english,
+                              "report_name_hebrew": x.report_name_hebrew,
+                              "url": x.url} for x in embedded_reports]
+    response = Response(json.dumps(embedded_reports_list, default=str), mimetype="application/json")
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response

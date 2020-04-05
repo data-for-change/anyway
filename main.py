@@ -186,6 +186,12 @@ def waze_data(start_date, end_date):
     from anyway.parsers.waze.waze_data_parser import waze_parser
     return waze_parser(bucket_name='anyway-hasadna.appspot.com', start_date=start_date, end_date=end_date)
 
+@process.command()
+@click.argument("filename", type=str, default="static/data/embedded_reports/embedded_reports.csv")
+def embedded_reports(filename):
+    from anyway.parsers.embedded_reports import parse
+    return parse(filename)
+
 
 @cli.group()
 def preprocess():

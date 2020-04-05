@@ -1991,3 +1991,11 @@ class WazeTrafficJams(Base):
     start_node = Column(Text())
     created_at = Column(DateTime, index=True)
     geom = Column(Geometry('LINESTRING'))
+
+
+class EmbeddedReports(Base):
+    __tablename__ = "embedded_reports"
+    id = Column(Integer(), primary_key=True)
+    report_name_english = Column(String(), primary_key=True)
+    report_name_hebrew = Column(String())
+    url = Column(String())

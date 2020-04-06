@@ -44,7 +44,7 @@ from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved,
                      LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School, SchoolWithDescription,
                      InjuredAroundSchool, InjuredAroundSchoolAllData, Sex, AccidentMonth, InjurySeverity, ReportProblem,
                      EngineVolume, PopulationType, Region, District, NaturalArea, MunicipalStatus, YishuvShape,
-                     TotalWeight, DrivingDirections, AgeGroup, AccidentMarkerView, InvolvedMarkerView)
+                     TotalWeight, DrivingDirections, AgeGroup, AccidentMarkerView, InvolvedMarkerView, EmbeddedReports)
 from .oauth import OAuthSignIn
 from .parsers import resolution_dict
 
@@ -69,7 +69,11 @@ assets = Environment()
 assets.init_app(app)
 assets_env = AssetsEnvironment(os.path.join(utilities._PROJECT_ROOT, 'static'), '/static')
 
-CORS(app, resources={r"/location-subscription": {"origins": "*"}, r"/report-problem": {"origins": "*"}, r"/api/infographics_data": {"origins": "*"}, r"/api/news-flash-filters": {"origins": "*"}})
+CORS(app, resources={r"/location-subscription": {"origins": "*"},
+                     r"/report-problem": {"origins": "*"},
+                     r"/api/infographics_data": {"origins": "*"},
+                     r"/api/news-flash-filters": {"origins": "*"},
+                     r"/api/embedded-reports": {"origins": "*"}})
 
 jinja_environment = jinja2.Environment(
     autoescape=True,
@@ -1547,7 +1551,8 @@ def get_most_severe_accidents(table_obj, filters, start_time, end_time, limit=10
     filters = filters or {}
     filters['provider_code'] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
     query = get_query(table_obj, filters, start_time, end_time)
-    query = query.with_entities('longitude', 'latitude', 'accident_severity_hebrew', 'accident_timestamp')
+    query = query.with_entities('longitude', 'latitude', 'accident_severity_hebrew', 'accident_timestamp',
+                                'accident_type_hebrew')
     query = query.order_by(getattr(table_obj,"accident_severity"), getattr(table_obj,"accident_timestamp").desc())
     query = query.limit(limit)
     df = pd.read_sql_query(query.statement, query.session.bind)
@@ -1581,15 +1586,18 @@ def infographics_data():
 
     if all(value is None for value in location_info.values()):
         return Response({})
-    start_time    = request.values.get('start_time')
-    end_time      = request.values.get('end_time')
 
-    start_time = datetime.datetime.fromtimestamp(int(start_time)) if start_time else None
-    end_time = datetime.datetime.fromtimestamp(int(end_time)) if end_time else None
+    number_of_years_ago_to_pull_raw = request.values.get('years_ago', CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
+    try:
+        number_of_years_ago_to_pull = int(number_of_years_ago_to_pull_raw)
+    except ValueError:
+        return Response({})
 
-    # accident_year count
-    start_year = datetime.date(start_time.year, 1, 1)
-    end_year = datetime.date(end_time.year, 12, 31)
+    if number_of_years_ago_to_pull < 0 or number_of_years_ago_to_pull > 100:
+        return Response({})
+
+    end_time = datetime.date.today()
+    start_time = datetime.date(end_time.year - number_of_years_ago_to_pull, 1, 1)
 
     # most severe accidents
     most_severe_accidents = {'name': 'most_severe_accidents',
@@ -1610,7 +1618,7 @@ def infographics_data():
 
     # accident count by accident year
     accident_count_by_accident_year = {'name': 'accident_count_by_accident_year',
-                                       'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_year', count='accident_year', start_time=start_year, end_time=end_year),
+                                       'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_year', count='accident_year', start_time=start_time, end_time=end_time),
                                        'meta': {}}
     output['widgets'].append(accident_count_by_accident_year)
 
@@ -1625,8 +1633,39 @@ def infographics_data():
 
     # injured count by accident year
     injured_count_by_accident_year = {'name': 'injured_count_by_accident_year',
-                                       'data': get_accidents_stats(table_obj=InvolvedMarkerView, filters=get_injured_filters(location_info), group_by='accident_year', count='accident_year', start_time=start_year, end_time=end_year),
+                                       'data': get_accidents_stats(table_obj=InvolvedMarkerView, filters=get_injured_filters(location_info), group_by='accident_year', count='accident_year', start_time=start_time, end_time=end_time),
                                        'meta': {}}
     output['widgets'].append(injured_count_by_accident_year)
 
+    # accident count on day light
+    accident_count_by_day_night = {'name': 'accident_count_by_day_night',
+                                   'data' : get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='day_night_hebrew', count='day_night_hebrew', start_time=start_time, end_time=end_time),
+                                    'meta': {}}
+    output['widgets'].append(accident_count_by_day_night)
+
+    # accidents distribution count by hour
+    accidents_count_by_hour = {'name': 'accidents_count_by_hour',
+                                            'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_hour', count='accident_hour', start_time=start_time, end_time=end_time),
+                                            'meta': {}}
+    output['widgets'].append(accidents_count_by_hour)
+
+    # accident count by road_light
+    accident_count_by_road_light = {'name': 'accident_count_by_road_light',
+                                   'data' : get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='road_light_hebrew', count='road_light_hebrew', start_time=start_time, end_time=end_time),
+                                    'meta': {}}
+    output['widgets'].append(accident_count_by_road_light)
+
     return Response(json.dumps(output, default=str), mimetype="application/json")
+
+@app.route("/api/embedded-reports", methods=["GET"])
+@user_optional
+def embedded_reports_api():
+    logging.debug('getting embedded reports')
+    embedded_reports = db.session.query(EmbeddedReports).all()
+    embedded_reports_list = [{"id": x.id,
+                              "report_name_english": x.report_name_english,
+                              "report_name_hebrew": x.report_name_hebrew,
+                              "url": x.url} for x in embedded_reports]
+    response = Response(json.dumps(embedded_reports_list, default=str), mimetype="application/json")
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response

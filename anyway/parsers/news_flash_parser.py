@@ -1,5 +1,6 @@
 import pandas as pd
 from flask_sqlalchemy import SQLAlchemy
+
 from anyway.utilities import init_flask
 
 app = init_flask()
@@ -49,6 +50,7 @@ def get_title(news_flash_id):
                                {'id': news_flash_id}).fetchone()
     return title[0]
 
+
 def remove_duplicate_rows():
     """
     remove duplicate rows by link
@@ -60,6 +62,7 @@ def remove_duplicate_rows():
         AND T1.link  = T2.link;  -- add more columns if needed
         ''')
     db.session.commit()
+
 
 def get_source(news_flash_id):
     """
@@ -101,13 +104,13 @@ def insert_new_flash_news(title, link, date_parsed, author, description, locatio
     :param source: source of the news flash
     """
     temp = [title, link, date_parsed, author, description, location, lat, lon, resolution,
-                          region_hebrew, district_hebrew, yishuv_name, street1_hebrew, street2_hebrew,
-                          non_urban_intersection_hebrew, road1, road2, road_segment_name, accident, source,
-                          tweet_id]
+            region_hebrew, district_hebrew, yishuv_name, street1_hebrew, street2_hebrew,
+            non_urban_intersection_hebrew, road1, road2, road_segment_name, accident, source,
+            tweet_id]
     title, link, date_parsed, author, description, location, lat, lon, resolution, \
-                          region_hebrew, district_hebrew, yishuv_name, street1_hebrew, street2_hebrew, \
-                          non_urban_intersection_hebrew, road1, road2, road_segment_name, accident, source, \
-                          tweet_id = pd.Series(temp).replace({pd.np.nan: None})
+    region_hebrew, district_hebrew, yishuv_name, street1_hebrew, street2_hebrew, \
+    non_urban_intersection_hebrew, road1, road2, road_segment_name, accident, source, \
+    tweet_id = pd.Series(temp).replace({pd.np.nan: None, '': None, 0: None, -1: None, ' ': None})
     db.session.execute('INSERT INTO news_flash (tweet_id, title, link, date, author, description, location, lat, lon, '
                        'resolution, region_hebrew, district_hebrew, yishuv_name, street1_hebrew, street2_hebrew, '
                        'non_urban_intersection_hebrew, road1, road2, road_segment_name, '
@@ -151,10 +154,11 @@ def get_latest_tweet_id_from_db():
     if tweet_id:
         return tweet_id[0]
 
+
 def update_news_flash_bulk(news_flash_id_list, params_dict_list):
-    if len(news_flash_id_list)>0 and len(news_flash_id_list)==len(params_dict_list):
+    if len(news_flash_id_list) > 0 and len(news_flash_id_list) == len(params_dict_list):
         for i in range(len(news_flash_id_list)):
-            update_news_flash_by_id(news_flash_id_list[i],params_dict_list[i], commit=False)
+            update_news_flash_by_id(news_flash_id_list[i], params_dict_list[i], commit=False)
         db.session.commit()
 
 
@@ -184,13 +188,16 @@ def get_all_news_flash_ids(source=None):
         res = db.session.execute('SELECT DISTINCT id FROM news_flash').fetchall()
     return [r[0] for r in res]
 
+
 def get_all_news_flash_data_for_updates(source=None, id=None):
     if id is not None:
         res = db.session.execute(
-            'SELECT DISTINCT id, title, description, source, location FROM news_flash where id=:id', {'id': id}).fetchall()
+            'SELECT DISTINCT id, title, description, source, location FROM news_flash where id=:id',
+            {'id': id}).fetchall()
     elif source is not None:
         res = db.session.execute(
-            'SELECT DISTINCT id, title, description, source, location FROM news_flash where source=:source', {'source': source}).fetchall()
+            'SELECT DISTINCT id, title, description, source, location FROM news_flash where source=:source',
+            {'source': source}).fetchall()
     else:
         res = db.session.execute('SELECT DISTINCT id, title, description, source, location FROM news_flash').fetchall()
     return res

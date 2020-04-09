@@ -160,6 +160,7 @@ $(function() {
             return this.map.zoom < MINIMAL_ZOOM;
         },
         zoomChanged: function() {
+            debugger;
             this.resetOnMouseUp = true;
             this.fetchMarkers();
         },
@@ -539,6 +540,14 @@ $(function() {
                 this.openReportsModal();
             }.bind(this));
 
+            var reportsExtraDiv = document.createElement('div');
+            reportsExtraDiv.className = "map-button reports-extra-control";
+            reportsExtraDiv.innerHTML = $("#reports-extra-control").html();
+            google.maps.event.addDomListener(reportsExtraDiv, 'click', function() {
+                var url = window.location.protocol + "//" + window.location.host + "/reports";
+                window.location.href = url;
+            }.bind(this));
+
             mapControlDiv.appendChild(resetMapDiv);
             mapControlDiv.appendChild(downloadCsvDiv);
             mapControlDiv.appendChild(linkMapDiv);
@@ -547,6 +556,8 @@ $(function() {
             mapControlDiv.appendChild(fullScreenDiv);
             mapControlDiv.appendChild(heatMapDiv);
             mapControlDiv.appendChild(reportsDiv);
+            mapControlDiv.appendChild(reportsExtraDiv);
+
             if (MAP_ONLY)
                 mapControlDiv.style = "display:none";
 
@@ -584,6 +595,11 @@ $(function() {
             reportsLabel.className = 'control-label';
             reportsLabel.innerHTML = 'דוחות';
             reportsDiv.appendChild(reportsLabel);
+
+            var reportsExtraLabel = document.createElement('div');
+            reportsExtraLabel.className = 'control-label';
+            reportsExtraLabel.innerHTML = 'דוחות נוספים';
+            reportsExtraDiv.appendChild(reportsExtraLabel);
 
             this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(mapControlDiv);
 

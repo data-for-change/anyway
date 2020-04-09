@@ -402,6 +402,12 @@ input[type="date"],input[type="time"]{
     font-family: 'FontAwesome';
     content: '\f15c'
 }
+.reports-extra-control:after {
+    font-size: 15px;
+    color: #ccc;
+    font-family: 'FontAwesome';
+    content: '\f15c'
+}
 
 .heat-map-control:after{
     font-size: 17px;

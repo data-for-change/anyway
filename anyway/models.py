@@ -422,18 +422,18 @@ class AccidentMarker(MarkerMixin, Base):
             markers = markers.filter(AccidentMarker.accident_severity != 3)
         if kwargs.get('show_urban', 3) != 3:
             if kwargs['show_urban'] == 2:
-                markers = markers.filter(AccidentMarker.road_type >= 1).filter(AccidentMarker.roadType <= 2)
+                markers = markers.filter(AccidentMarker.road_type >= 1).filter(AccidentMarker.road_type <= 2)
             elif kwargs['show_urban'] == 1:
-                markers = markers.filter(AccidentMarker.road_type >= 3).filter(AccidentMarker.roadType <= 4)
+                markers = markers.filter(AccidentMarker.road_type >= 3).filter(AccidentMarker.road_type <= 4)
             else:
                 return MarkerResult(accident_markers=db.session.query(AccidentMarker).filter(sql.false()),
                                     rsa_markers=rsa_markers,
                                     total_records=None)
         if kwargs.get('show_intersection', 3) != 3:
             if kwargs['show_intersection'] == 2:
-                markers = markers.filter(AccidentMarker.road_type != 2).filter(AccidentMarker.roadType != 4)
+                markers = markers.filter(AccidentMarker.road_type != 2).filter(AccidentMarker.road_type != 4)
             elif kwargs['show_intersection'] == 1:
-                markers = markers.filter(AccidentMarker.road_type != 1).filter(AccidentMarker.roadType != 3)
+                markers = markers.filter(AccidentMarker.road_type != 1).filter(AccidentMarker.road_type != 3)
             else:
                 return MarkerResult(accident_markers=db.session.query(AccidentMarker).filter(sql.false()),
                                     rsa_markers=rsa_markers,

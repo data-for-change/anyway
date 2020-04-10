@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from ..models import EmbeddedReports
 from ..utilities import init_flask
-from .utils import batch_iterator
 import pandas as pd
 from flask_sqlalchemy import SQLAlchemy
 

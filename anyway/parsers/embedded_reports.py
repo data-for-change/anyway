@@ -21,6 +21,10 @@ def _iter_rows(filename):
 
 
 def parse(filename):
-    for batch in batch_iterator(_iter_rows(filename), batch_size=50):
-        db.session.bulk_insert_mappings(EmbeddedReports, batch)
+    for row in _iter_rows(filename):
+        current_report = db.session.query(EmbeddedReports).filter(EmbeddedReports.report_name_english == row['report_name_english']).all()
+        if not current_report:
+            db.session.bulk_insert_mappings(EmbeddedReports, [row])
+        else:
+            db.session.bulk_update_mappings(EmbeddedReports, [row])
         db.session.commit()

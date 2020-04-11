@@ -15,7 +15,8 @@ def beautiful_soup_news_flash_parse(rss_link, site_name, maps_key):
     news_items = parsing_utils.get_all_news_items(html_soup, site_name)
     date = parsing_utils.get_date(html_soup, site_name)
 
-    for item_soup in news_items:
+    for item in news_items:
+        item_soup = item.copy()
         entry_parsed_date = parsing_utils.get_date_time(item_soup, date, site_name)
         if not ((latest_date is None) or (entry_parsed_date > latest_date)):
             continue

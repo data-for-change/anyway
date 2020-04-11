@@ -58,29 +58,46 @@ def get_all_news_items(html_soup, site_name='walla'):
     news_items = []
     try:
         if site_name == 'walla':
-            news_items = html_soup.find_all('article', class_='article fc ')
+            news_items = html_soup.find_all('section', class_='css-qjvjzr ')
     except Exception as _:
         pass
     return news_items
 
 
-def get_date(item_soup, site_name='walla'):
+def get_date(html_soup, site_name='walla'):
     date = ''
     try:
         if site_name == 'walla':
-            entry_parsed_date = item_soup.find("time").get('datetime')
-            entry_parsed_date = datetime.strptime(entry_parsed_date, "%Y-%m-%d %H:%M")
-            date = entry_parsed_date.replace(tzinfo=None)
+            date_soup = html_soup.find('div', class_='date-part-1')
+            for elm in date_soup:
+                try:
+                    date = datetime.strptime(elm, "%d.%m.%Y")
+                    return date
+                except Exception as _:
+                    pass
     except Exception as _:
         pass
     return date
+
+
+def get_date_time(item_soup, date, site_name='walla'):
+    entry_parsed_date = ''
+    try:
+        if site_name == 'walla':
+            time_soup = item_soup.find("div", class_="time").get_text()
+            time = datetime.strptime(time_soup, "%H:%M")
+            entry_parsed_date = datetime.combine(date.date(), time.time())
+            entry_parsed_date = entry_parsed_date.replace(tzinfo=None)
+    except Exception as _:
+        pass
+    return entry_parsed_date
 
 
 def get_author(item_soup, site_name='walla'):
     author = ''
     try:
         if site_name == 'walla':
-            author = item_soup.find('span', class_='author').get_text()
+            author = item_soup.find('div', class_='author').get_text()
     except Exception as _:
         pass
     return author
@@ -90,7 +107,7 @@ def get_title(item_soup, site_name='walla'):
     title = ''
     try:
         if site_name == 'walla':
-            title = item_soup.find('span', class_='text').get_text()
+            title = item_soup.find('h2', class_='title').get_text()
     except Exception as _:
         pass
     return title
@@ -100,28 +117,17 @@ def get_link(item_soup, site_name='walla'):
     link = ''
     try:
         if site_name == 'walla':
-            link = item_soup.find("a").get("data-href")
+            link = f'https://news.walla.co.il{item_soup.find("a").get("href")}'
     except Exception as _:
         pass
     return link
 
 
-def get_description(article_soup, site_name='walla'):
+def get_description(item_soup, site_name='walla'):
     description = ''
     try:
         if site_name == 'walla':
-            description = article_soup.find('section', class_='article-content').find(
-                'p').find(text=True, recursive=False)
+            description = item_soup.find('div', class_='content').find('p').get_text()
     except Exception as _:
         pass
     return description
-
-
-def update_title_from_article(article_soup, site_name='walla'):
-    title = ''
-    try:
-        if site_name == 'walla':
-            title = article_soup.find('h1').get_text()
-    except Exception as _:
-        pass
-    return title

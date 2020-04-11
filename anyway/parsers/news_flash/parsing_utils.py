@@ -108,7 +108,7 @@ def get_author(item_soup, site_name='walla'):
             author = item_soup.find('div', class_='author').get_text()
         elif site_name == 'ynet':
             author_text = item_soup.find('script', type="application/ld+json").get_text()
-            author = author_text.split('(')[1].split(')')[0]
+            author = author_text.split('(')[-1].split(')')[0]
     except Exception as _:
         pass
     return author

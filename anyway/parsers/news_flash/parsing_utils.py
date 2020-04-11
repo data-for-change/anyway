@@ -59,6 +59,8 @@ def get_all_news_items(html_soup, site_name='walla'):
     try:
         if site_name == 'walla':
             news_items = html_soup.find_all('section', class_='css-qjvjzr ')
+        elif site_name == 'ynet':
+            news_items = [i for i in html_soup.find_all('item') if i.category.get_text() == 'מבזקים']
     except Exception as _:
         pass
     return news_items
@@ -75,6 +77,8 @@ def get_date(html_soup, site_name='walla'):
                     return date
                 except Exception as _:
                     pass
+        elif site_name == 'ynet':
+            pass
     except Exception as _:
         pass
     return date
@@ -87,7 +91,11 @@ def get_date_time(item_soup, date, site_name='walla'):
             time_soup = item_soup.find("div", class_="time").get_text()
             time = datetime.strptime(time_soup, "%H:%M")
             entry_parsed_date = datetime.combine(date.date(), time.time())
-            entry_parsed_date = entry_parsed_date.replace(tzinfo=None)
+        elif site_name == 'ynet':
+            time_soup = item_soup.pubdate.get_text()
+            entry_parsed_date = datetime.strptime(time_soup[:-6], '%a, %d %b %Y %H:%M:%S')
+
+        entry_parsed_date = entry_parsed_date.replace(tzinfo=None)
     except Exception as _:
         pass
     return entry_parsed_date
@@ -98,6 +106,9 @@ def get_author(item_soup, site_name='walla'):
     try:
         if site_name == 'walla':
             author = item_soup.find('div', class_='author').get_text()
+        elif site_name == 'ynet':
+            author_text = item_soup.find('script', type="application/ld+json").get_text()
+            author = author_text.split('(')[1].split(')')[0]
     except Exception as _:
         pass
     return author
@@ -108,6 +119,8 @@ def get_title(item_soup, site_name='walla'):
     try:
         if site_name == 'walla':
             title = item_soup.find('h2', class_='title').get_text()
+        elif site_name == 'ynet':
+            title = item_soup.title.get_text()
     except Exception as _:
         pass
     return title
@@ -118,6 +131,8 @@ def get_link(item_soup, site_name='walla'):
     try:
         if site_name == 'walla':
             link = f'https://news.walla.co.il{item_soup.find("a").get("href")}'
+        elif site_name == 'ynet':
+            link = item_soup.guid.get_text()
     except Exception as _:
         pass
     return link
@@ -128,6 +143,9 @@ def get_description(item_soup, site_name='walla'):
     try:
         if site_name == 'walla':
             description = item_soup.find('div', class_='content').find('p').get_text()
+        if site_name == 'ynet':
+            description_text = item_soup.find('script', type="application/ld+json").get_text()
+            description = description_text.split('\"description\"')[1].split('(')[0]
     except Exception as _:
         pass
     return description

@@ -21,9 +21,14 @@ def beautiful_soup_news_flash_parse(rss_link, site_name, maps_key):
             continue
 
         news_item = parsing_utils.init_news_item(entry_parsed_date, site_name)
-        news_item['author'] = parsing_utils.get_author(item_soup, site_name)
         news_item['title'] = parsing_utils.get_title(item_soup, site_name)
         news_item['link'] = parsing_utils.get_link(item_soup, site_name)
+
+        if site_name == 'ynet':
+            response = requests.get(news_item['link'])
+            item_soup = BeautifulSoup(response.text, "html.parser")
+
+        news_item['author'] = parsing_utils.get_author(item_soup, site_name)
         news_item['description'] = parsing_utils.get_description(item_soup, site_name)
 
         parsing_utils.process_after_parsing(news_item, maps_key)

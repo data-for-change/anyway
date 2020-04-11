@@ -135,15 +135,6 @@ def insert_new_flash_news(title, link, date_parsed, author, description, locatio
     db.session.commit()
 
 
-def insert_new_flash_news_wrapper(news_flash, tweet_id=None):
-    insert_new_flash_news(news_flash['title'], news_flash['link'], news_flash['date_parsed'], news_flash['author'],
-                          news_flash['description'], news_flash['location'], news_flash['lat'], news_flash['lon'],
-                          news_flash['resolution'], news_flash['region_hebrew'], news_flash['district_hebrew'],
-                          news_flash['yishuv_name'], news_flash['street1_hebrew'], news_flash['street2_hebrew'],
-                          news_flash['non_urban_intersection_hebrew'], news_flash['road1'], news_flash['road2'],
-                          news_flash['road_segment_name'], news_flash['accident'], news_flash['source'], tweet_id)
-
-
 def get_latest_tweet_id_from_db():
     """
     get the latest tweet id

@@ -3,6 +3,7 @@ import feedparser
 import requests
 from bs4 import BeautifulSoup
 
+from . import parsing_utils
 from anyway.parsers.news_flash_parser import get_latest_date_from_db
 
 
@@ -17,10 +18,11 @@ def is_new_flash_news(rss_link, site_name):
         d = feedparser.parse(rss_link)
         newest_entry = datetime.strptime(d.entries[0].published[:-6], '%a, %d %b %Y %H:%M:%S')
     elif site_name == 'walla':
-        d = requests.get(rss_link)
-        first_item = BeautifulSoup(d.text, "html.parser").find_all('article', class_='article fc ')[0]
-        newest_entry = first_item.find("time").get('datetime')
-        newest_entry = datetime.strptime(newest_entry, "%Y-%m-%d %H:%M")
+        response = requests.get(rss_link)
+        html_soup = BeautifulSoup(response.text, "html.parser")
+        first_news_item = parsing_utils.get_all_news_items(html_soup, site_name)[0]
+        date = parsing_utils.get_date(html_soup, site_name)
+        newest_entry = parsing_utils.get_date_time(first_news_item, date, site_name)
     else:
         return False
     newest_entry = newest_entry.replace(tzinfo=None)

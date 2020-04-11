@@ -17,8 +17,8 @@ def scrap_flash_news(site_name, maps_key):
     if site_name == 'ynet':
         rss_link = 'https://www.ynet.co.il/Integration/StoryRss1854.xml'
         if is_new_flash_news(rss_link, site_name):
-            # ynet_news_flash_crawl(rss_link, maps_key)
-            beautiful_soup_news_flash_parse(rss_link, site_name, maps_key)
+            ynet_news_flash_crawl(rss_link, maps_key)
+            # beautiful_soup_news_flash_parse(rss_link, site_name, maps_key)
     if site_name == 'walla':
         rss_link = 'https://news.walla.co.il/breaking'
         if is_new_flash_news(rss_link, site_name):

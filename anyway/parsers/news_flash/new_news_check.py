@@ -3,7 +3,7 @@ import feedparser
 import requests
 from bs4 import BeautifulSoup
 
-from . import parsing_utils
+from anyway.parsers.news_flash import parsing_utils
 from anyway.parsers.news_flash_parser import get_latest_date_from_db
 
 

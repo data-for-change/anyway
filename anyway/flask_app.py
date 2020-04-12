@@ -343,7 +343,7 @@ def news_flash():
         return Response(status=404)
 
     if road_number:
-        news_flash_obj = news_flash_obj.filter(NewsFlash.road1 == road_number).all()
+        news_flash_obj = news_flash_obj.filter(NewsFlash.road1 == road_number)
 
     # get all possible sources
     sources = [str(source_name[0]) for source_name in db.session.query(NewsFlash.source).distinct().all()]

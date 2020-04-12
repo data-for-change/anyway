@@ -160,7 +160,6 @@ $(function() {
             return this.map.zoom < MINIMAL_ZOOM;
         },
         zoomChanged: function() {
-            debugger;
             this.resetOnMouseUp = true;
             this.fetchMarkers();
         },

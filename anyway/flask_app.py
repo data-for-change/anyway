@@ -367,7 +367,7 @@ def news_flash():
                         status=404,
                         mimetype='application/json')
 
-    if road_segment:
+    if road_segment == 'true':
         news_flash_obj = news_flash_obj.filter(not_(NewsFlash.road_segment_name == None))
 
     news_flash_obj = news_flash_obj.filter(

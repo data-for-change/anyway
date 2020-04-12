@@ -406,7 +406,7 @@ input[type="date"],input[type="time"]{
     font-size: 15px;
     color: #ccc;
     font-family: 'FontAwesome';
-    content: '\f15c'
+    content: '\f022'
 }
 
 .heat-map-control:after{

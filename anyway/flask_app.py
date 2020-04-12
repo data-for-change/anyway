@@ -796,6 +796,13 @@ def marker_all():
         list_to_return.append(obj)
     return make_response(json.dumps(list_to_return, ensure_ascii=False))
 
+@app.route("/reports", methods=["GET"])
+@user_optional
+def reports():
+    if request.method == "GET":
+        return render_template('schools_dashboard_react.html')
+    else:
+        return Response("Method Not Allowed", 405)
 
 @app.route("/discussion", methods=["GET", "POST"])
 @user_optional

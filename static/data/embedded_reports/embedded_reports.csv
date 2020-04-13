@@ -1,5 +1,5 @@
 id,report_name_english,report_name_hebrew,url
-1,accidents_general_israel,תאונות דרכים עם נפגעים בישראל,https://public.tableau.com/views/Anyway-IsraelsCarAccidentsAnalysisOverall/sheet0?:display_count=y&:origin=viz_share_link
-2,accidents_municipalities,תאונות דרכים עם נפגעים ביישובים בישראל,https://public.tableau.com/views/AYWAY-/sheet1?:display_count=y&:origin=viz_share_link
-3,accidents_municipalities_comparison,תאונות דרכים עם נפגעים - השוואת מדדים,https://public.tableau.com/views/Anyway-IsraelsCarAccidentsAnalysisCities/sheet0?:display_count=y&:origin=viz_share_link
-4,accidents_around_schools,תאונות דרכים עם נפגעים סביב מוסדות לימוד,https://hasadna.github.io/anyway-schools-report/
+1,accidents_general_israel,תאונות דרכים עם נפגעים בישראל,https://public.tableau.com/views/Anyway-IsraelsCarAccidentsAnalysisOverall/sheet0?:display_count=y&:origin=viz_share_link&:showVizHome=no&:embed=true
+2,accidents_municipalities,תאונות דרכים עם נפגעים ביישובים בישראל,https://public.tableau.com/views/AYWAY-/sheet1?:display_count=y&:origin=viz_share_link&:showVizHome=no&:embed=true
+3,accidents_municipalities_comparison,תאונות דרכים עם נפגעים - השוואת מדדים,https://public.tableau.com/views/Anyway-IsraelsCarAccidentsAnalysisCities/sheet0?:display_count=y&:origin=viz_share_link&:showVizHome=no&:embed=true
+4,accidents_around_schools,תאונות דרכים עם נפגעים סביב מוסדות לימוד,https://hasadna.github.io/anyway-reports/schools

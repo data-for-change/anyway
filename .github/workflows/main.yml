@@ -22,5 +22,9 @@ jobs:
       run: |
         docker-compose up -d --build
     - name: Tests
+      env:
+        SAUCELABS_USERNAME: anyway
+        SAUCE_USERNAME: anyway
+        DATABASE_URL: postgresql://postgres@localhost/anyway
       run: |
         pytest tests -m "not browser"

@@ -17,6 +17,7 @@ services:
 
   db:
     image: mickeyrouash/anyway_db_mickeyr
+    container_name: db
     environment:
       - POSTGRES_PASSWORD=anyway
       - POSTGRES_USER=anyway

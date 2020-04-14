@@ -21,6 +21,10 @@ jobs:
     - name: Running server
       run: |
         docker-compose -f docker-compose-test.yml up -d --build
+    - name: DB initialization
+      run: |
+        ./main.py process registered-vehicles
+        ./main.py process cbs
     - name: Tests
       env:
         SAUCELABS_USERNAME: anyway

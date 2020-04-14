@@ -29,9 +29,9 @@ jobs:
     - name: Running server
       run: |
         docker-compose -f docker-compose-test.yml up -d --build
-    - name: wait 100 sec
+    - name: Waiting for db startup
       run: |
-        sleep 100
+        docker exec anyway bash ./wait_for_postgres.sh
     - name: DB initialization
       run: |
         docker exec anyway ./main.py process registered-vehicles

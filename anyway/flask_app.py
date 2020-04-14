@@ -1005,6 +1005,7 @@ def index(marker=None, message=None):
     context['entries_per_page'] = ENTRIES_PER_PAGE
     context['iteritems'] = iteritems
     context['hide_search'] = True if request.values.get('hide_search') == 'true' else False
+    context['embedded_reports'] = get_embedded_reports()
     return render_template('index.html', **context)
 
 
@@ -1694,15 +1695,21 @@ def infographics_data():
 
     return Response(json.dumps(output, default=str), mimetype="application/json")
 
-@app.route("/api/embedded-reports", methods=["GET"])
-@user_optional
-def embedded_reports_api():
+
+def get_embedded_reports():
     logging.debug('getting embedded reports')
     embedded_reports = db.session.query(EmbeddedReports).all()
     embedded_reports_list = [{"id": x.id,
                               "report_name_english": x.report_name_english,
                               "report_name_hebrew": x.report_name_hebrew,
                               "url": x.url} for x in embedded_reports]
+    return embedded_reports_list
+
+
+@app.route("/api/embedded-reports", methods=["GET"])
+@user_optional
+def embedded_reports_api():
+    embedded_reports_list = get_embedded_reports()
     response = Response(json.dumps(embedded_reports_list, default=str), mimetype="application/json")
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response

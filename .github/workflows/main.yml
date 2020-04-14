@@ -31,15 +31,16 @@ jobs:
         docker-compose -f docker-compose-test.yml up -d --build
     - name: DB initialization
       run: |
-        while ! nc -z 0.0.0.0 5432; do sleep 1 && echo sleeping...; done;
-        docker exec anyway ./main.py process registered-vehicles
-    # docker exec anyway ./main.py process cbs
+        # while ! nc -z 0.0.0.0 5432; do sleep 1 && echo sleeping...; done;
+        # docker exec anyway ./main.py process registered-vehicles
+        docker exec anyway ./main.py process cbs
     - name: The job has failed
       if: failure()
       run : |
         docker ps
         docker container inspect anyway
         docker logs --details anyway
+        echo +-+-+-+
         docker container inspect db
         docker logs --details db
     - name: Tests

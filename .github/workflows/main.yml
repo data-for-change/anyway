@@ -12,9 +12,13 @@ jobs:
         export SAUCELABS_USERNAME=anyway
         export SAUCE_USERNAME=anyway
         export DATABASE_URL=postgresql://postgres@localhost/anyway
+        export POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD }}
+        export POSTGRES_USER=${{ secrets.DB_USER }}
         echo "::set-env name=SAUCELABS_USERNAME::$SAUCELABS_USERNAME"
         echo "::set-env name=SAUCE_USERNAME::$SAUCE_USERNAME"
         echo "::set-env name=DATABASE_URL::$DATABASE_URL"
+        echo "::set-env name=POSTGRES_PASSWORD::$POSTGRES_PASSWORD"
+        echo "::set-env name=POSTGRES_USER::$POSTGRES_USER"
     - name: Set up Python
       uses: actions/setup-python@v1
       with:
@@ -48,6 +52,4 @@ jobs:
     - name: Tests
       run: |
         pytest tests -m "not browser"
-      env:
-        POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        POSTGRES_USER: ${{ secrets.DB_USER }}
+

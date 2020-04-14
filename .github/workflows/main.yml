@@ -35,7 +35,7 @@ jobs:
         docker-compose -f docker-compose-test.yml up -d --build
     - name: Waiting for db startup
       run: |
-        docker exec anyway bash ./wait_for_postgres.sh
+        bash ./wait_for_postgres.sh
     - name: The job has failed
       if: failure()
       run : |

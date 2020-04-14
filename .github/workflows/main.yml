@@ -62,5 +62,6 @@ jobs:
         docker logs --details db
     - name: Tests
       run: |
-        pytest tests -m "not browser"
+        docker exec anyway pip install -r ./test_requirements.txt
+        docker exec anyway pytest tests -m "not browser"
 

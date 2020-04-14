@@ -3,6 +3,7 @@ version: '2'
 services:
   anyway:
     build: .
+    container_name: anyway
     image: hasadna/anyway:latest
     ports:
       - "8080:5000"

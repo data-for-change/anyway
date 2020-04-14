@@ -48,3 +48,6 @@ jobs:
     - name: Tests
       run: |
         pytest tests -m "not browser"
+      env:
+        POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        POSTGRES_USER: ${{ secrets.DB_USER }}

@@ -4,3 +4,4 @@ until psql -h 0.0.0.0 -U anyway -d anyway -c "select 1" > /dev/null 2>&1 || [ $R
   echo "Waiting for postgres server, $((RETRIES--)) remaining attempts..."
   sleep 1
 done
+sleep 10

@@ -7,6 +7,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Set environment variables
+      run: |
+        export SAUCELABS_USERNAME=anyway
+        export SAUCE_USERNAME=anyway
+        export DATABASE_URL=postgresql://postgres@localhost/anyway
+        echo "::set-env name=SAUCELABS_USERNAME::$SAUCELABS_USERNAME"
+        echo "::set-env name=SAUCE_USERNAME::$SAUCE_USERNAME"
+        echo "::set-env name=DATABASE_URL::$DATABASE_URL"
     - name: Set up Python
       uses: actions/setup-python@v1
       with:
@@ -26,9 +34,5 @@ jobs:
         ./main.py process registered-vehicles
         ./main.py process cbs
     - name: Tests
-      env:
-        SAUCELABS_USERNAME: anyway
-        SAUCE_USERNAME: anyway
-        DATABASE_URL: postgresql://postgres@localhost/anyway
       run: |
         pytest tests -m "not browser"

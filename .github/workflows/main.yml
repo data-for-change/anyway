@@ -36,6 +36,15 @@ jobs:
     - name: Waiting for db startup
       run: |
         docker exec anyway bash ./wait_for_postgres.sh
+    - name: The job has failed
+      if: failure()
+      run : |
+        docker ps
+        docker container inspect anyway
+        docker logs --details anyway
+        echo +-+-+-
+        docker container inspect db
+        docker logs --details db
     - name: DB initialization
       run: |
         docker exec anyway ./main.py process registered-vehicles

@@ -20,7 +20,7 @@ jobs:
         pylint anyway tests main.py
     - name: Running server
       run: |
-        docker-compose up -d --build
+        docker-compose -f docker-compose-test.yml up -d --build
     - name: Tests
       env:
         SAUCELABS_USERNAME: anyway

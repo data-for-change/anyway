@@ -1,0 +1,30 @@
+version: '2'
+
+services:
+  anyway:
+    build: .
+    image: hasadna/anyway:latest
+    ports:
+      - "8080:5000"
+    environment:
+      - DATABASE_URL=postgresql://anyway:anyway@db/anyway
+    volumes:
+      - .:/anyway
+    restart: always
+    depends_on:
+      - db
+
+  db:
+    image: mickeyrouash/anyway_db_mickeyr
+    environment:
+      - POSTGRES_PASSWORD=anyway
+      - POSTGRES_USER=anyway
+      - POSTGRES_DB=anyway
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: always
+
+volumes:
+  db_data:

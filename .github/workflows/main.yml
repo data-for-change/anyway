@@ -33,6 +33,12 @@ jobs:
       run: |
         ./main.py process registered-vehicles
     # docker exec anyway ./main.py process cbs
+    - name: The job has failed
+      if: failure()
+      run : |
+        docker ps
+        docker container inspect anyway
+        docker logs --details anyway
     - name: Tests
       run: |
         pytest tests -m "not browser"

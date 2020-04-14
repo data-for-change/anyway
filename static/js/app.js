@@ -992,6 +992,7 @@ $(function() {
                  return;
              }
              window.open("https://hasadna.github.io/anyway-reports/" + selectObject.value, '_blank');
+             $("#embeddedReportsList").val("0");
         },
         handleSearchBox: function() {
             var places = this.searchBox.getPlaces();

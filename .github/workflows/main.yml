@@ -32,7 +32,7 @@ jobs:
     - name: DB initialization
       run: |
         while ! nc -z 0.0.0.0 5432; do sleep 1 && echo sleeping...; done;
-        ./main.py process registered-vehicles
+        docker exec anyway ./main.py process registered-vehicles
     # docker exec anyway ./main.py process cbs
     - name: The job has failed
       if: failure()

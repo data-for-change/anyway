@@ -47,4 +47,4 @@ jobs:
         docker logs --details db
     - name: Tests
       run: |
-        docker exec anyway pytest tests -m "not browser"
+        pytest tests -m "not browser"

@@ -988,11 +988,11 @@ $(function() {
             }).render();
         },
         handleEmbeddedReportSelection: function(selectObject) {
-             if (selectObject.value === "0") {
-                 return;
-             }
-             window.open("https://hasadna.github.io/anyway-reports/" + selectObject.value, '_blank');
-             $("#embeddedReportsList").val("0");
+            if (selectObject.value === "0") {
+                return;
+            }
+            window.open("https://anyway-reports.netlify.com/" + selectObject.value, '_blank');
+            $("#embeddedReportsList").val("0");
         },
         handleSearchBox: function() {
             var places = this.searchBox.getPlaces();

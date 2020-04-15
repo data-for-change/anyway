@@ -45,9 +45,8 @@ jobs:
         echo +-+-+-
         docker container inspect db
         docker logs --details db
-  Deploy:
+  Tessts:
     runs-on: ubuntu-latest
     steps:
-    - run: |
-      echo Deployed!
+    - uses: actions/checkout@v2
 

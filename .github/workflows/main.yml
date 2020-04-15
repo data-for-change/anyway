@@ -52,10 +52,10 @@ jobs:
       - uses: stefanoeb/eslint-action@1.0.2
         with:
           files: static/js
-  Deploy:
-    needs: [Tests, Pylint,Eslint]
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-        echo Deployed!
+  # Deploy:
+  #   needs: [Tests, Pylint,Eslint]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - run: |
+  #       echo Deployed!
 

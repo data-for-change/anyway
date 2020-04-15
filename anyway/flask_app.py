@@ -28,6 +28,8 @@ from six import StringIO, iteritems
 from six.moves import http_client
 from sqlalchemy import and_, not_, or_
 from sqlalchemy import func
+from sqlalchemy import desc
+from sqlalchemy import cast, Numeric
 from sqlalchemy.orm import load_only
 from webassets import Environment as AssetsEnvironment
 from webassets.ext.jinja2 import AssetsExtension
@@ -44,7 +46,7 @@ from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved,
                      LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School, SchoolWithDescription,
                      InjuredAroundSchool, InjuredAroundSchoolAllData, Sex, AccidentMonth, InjurySeverity, ReportProblem,
                      EngineVolume, PopulationType, Region, District, NaturalArea, MunicipalStatus, YishuvShape,
-                     TotalWeight, DrivingDirections, AgeGroup, AccidentMarkerView, InvolvedMarkerView)
+                     TotalWeight, DrivingDirections, AgeGroup, AccidentMarkerView, InvolvedMarkerView, RoadSegments)
 from .oauth import OAuthSignIn
 from .parsers import resolution_dict
 
@@ -1520,6 +1522,26 @@ def get_query(table_obj, filters, start_time, end_time):
     return query
 
 
+def get_top_road_segments_injured_per_km(resolution, location_info):
+    if resolution != 'כביש בינעירוני':
+        return {}
+    query = db.session.query().with_entities(
+        AccidentMarkerView.road_segment_name,
+        func.count(AccidentMarkerView.road_segment_name).label('total_accident'),
+        (RoadSegments.to_km - RoadSegments.from_km).label('segment_length'),
+        cast((func.count(AccidentMarkerView.road_segment_name) / (RoadSegments.to_km - RoadSegments.from_km)),
+             Numeric(10, 4)).label(
+            'accidents_per_km')) \
+        .filter(AccidentMarkerView.road1 == RoadSegments.road) \
+        .filter(AccidentMarkerView.road_segment_number == RoadSegments.segment) \
+        .filter(AccidentMarkerView.road1 == location_info['road1']) \
+        .filter(AccidentMarkerView.road_segment_name is not None) \
+        .group_by(AccidentMarkerView.road_segment_name, RoadSegments.from_km, RoadSegments.to_km) \
+        .order_by(desc('accidents_per_km'))
+    result = pd.read_sql_query(query.statement, query.session.bind)
+    return result.to_dict(orient='records')
+
+
 def get_accidents_stats(table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None):
     filters = filters or {}
     filters['provider_code'] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
@@ -1669,11 +1691,9 @@ def infographics_data():
     output['widgets'].append(accident_count_by_road_light)
 
     # accident count by road_segment
-    accident_count_by_road_segment_name = {'name': 'accident_count_by_road_segment',
-                                    'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,
-                                                                group_by='road_segment_name', count='road_segment_name',
-                                                                start_time=start_year, end_time=end_year),
-                                    'meta': {}}
-    output['widgets'].append(accident_count_by_road_segment_name)
+    top_road_segments_injured_per_km = {'name': 'top_road_segments_injured_per_km',
+                                        'data': get_top_road_segments_injured_per_km(resolution, location_info),
+                                        'meta': {}}
+    output['widgets'].append(top_road_segments_injured_per_km)
 
     return Response(json.dumps(output, default=str), mimetype="application/json")

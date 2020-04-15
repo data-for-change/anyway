@@ -68,6 +68,14 @@
                 </button>
                 <span style="font-size: small; font-weight: bold; float: right;"> הירשמו לקבלת עידכונים על האיזור המוצג &larr; </span>
             </div>
+            <div style="float: left; margin-left: 20px">
+                <select id="embeddedReportsList" style="width: 80px; vertical-align: middle; display: table-cell; width: 100px; margin-top: 5px" onchange="app.handleEmbeddedReportSelection(this)">
+                    <option id="embedded_report_select_report" value="0">בחר דוח להצגה</option>
+                    {% for embedded_report in embedded_reports %}
+                        <option id="embedded_report_{{embedded_report.report_name_english}}" value="{{embedded_report.report_name_english}}">{{embedded_report.report_name_hebrew}}</option>
+                    {% endfor %}
+                </select>
+            </div>
 <!--            <div style="float: left; margin-left: 20px">-->
 <!--                <button style="margin: 0 5px 0 2px;" type="button" class="btn btn-primary btn-xs" onclick="window.location.href='https://hasadna.github.io/anyway-schools-report/'">-->
 <!--                דו"ח מוסדות לימוד-->

@@ -991,7 +991,7 @@ $(function() {
             if (selectObject.value === "0") {
                 return;
             }
-            window.open("https://anyway-reports.netlify.com/" + selectObject.value, '_blank');
+            window.open("https://anyway-reports.netlify.com/" + selectObject.value, '_self');
             $("#embeddedReportsList").val("0");
         },
         handleSearchBox: function() {

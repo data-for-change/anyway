@@ -45,10 +45,10 @@ jobs:
         echo +-+-+-
         docker container inspect db
         docker logs --details db
-  Deploy:
+  Pylint:
+    needs: Tests
     runs-on: ubuntu-latest
     steps:
-    - name : Deploying
-    run: |
-      echo Deployed!
+    - uses: actions/checkout@v2
+    - name: Set up Python
 

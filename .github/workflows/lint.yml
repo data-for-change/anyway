@@ -11,5 +11,6 @@ jobs:
         with:
           node-version: 6
       - run: rm -f .yarnclean
-      - run: yarn global add eslint --ignore-engines
-      - run: eslint static/js --ignore-path=static/js/.eslintignore
+      - run: |
+          yarn global add eslint --ignore-engines
+          eslint static/js --ignore-path=static/js/.eslintignore

@@ -45,7 +45,7 @@ jobs:
         echo +-+-+-
         docker container inspect db
         docker logs --details db
-  Pylint:
+  Pslint:
     needs: Tests
     runs-on: ubuntu-latest
     steps:

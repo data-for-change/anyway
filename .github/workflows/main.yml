@@ -45,8 +45,9 @@ jobs:
         echo +-+-+-
         docker container inspect db
         docker logs --details db
-  Tessts:
+  Deploy:
     runs-on: ubuntu-latest
+    needs: [Tests, Pylint]
     steps:
     - uses: actions/checkout@v2
 

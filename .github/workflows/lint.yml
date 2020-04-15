@@ -1,16 +1,12 @@
 name: Lint
 
-on: [push]
+on: pull_request
 
 jobs:
   eslint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v1
+      - uses: hallee/eslint-action@master
         with:
-          node-version: 6
-      - uses: borales/actions-yarn@v2.0.0
-        with:
-          cmd: add eslint --ignore-engines
-      - run: eslint static/js --ignore-path=static/js/.eslintignore
+          repo-token: ${{secrets.GITHUB_TOKEN}}

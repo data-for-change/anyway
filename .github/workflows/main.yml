@@ -45,17 +45,10 @@ jobs:
         echo +-+-+-
         docker container inspect db
         docker logs --details db
-  Eslint:
+  Deploy:
+    needs: [Tests, Pylint]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: stefanoeb/eslint-action@1.0.2
-        with:
-          files: static/js
-  # Deploy:
-  #   needs: [Tests, Pylint,Eslint]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - run: |
-  #       echo Deployed!
+    - run: |
+      echo Deployed!
 

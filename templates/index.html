@@ -70,7 +70,7 @@
             </div>
             <div style="float: left; margin-left: 20px">
                 <select id="embeddedReportsList" style="width: 80px; vertical-align: middle; display: table-cell; width: 150px; margin-top: 5px" onchange="app.handleEmbeddedReportSelection(this)">
-                    <option id="embedded_report_select_report" value="0">בחר דוח להצגה</option>
+                    <option id="embedded_report_select_report" value="0">בחרו דו״ח להצגה</option>
                     {% for embedded_report in embedded_reports %}
                         <option id="embedded_report_{{embedded_report.report_name_english}}" value="{{embedded_report.report_name_english}}">{{embedded_report.report_name_hebrew}}</option>
                     {% endfor %}

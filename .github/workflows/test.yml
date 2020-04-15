@@ -1,0 +1,18 @@
+name: test
+on:
+  push:
+    branches: [ dev ]
+jobs:
+  Deploy:
+    runs-on: ubuntu-latest
+    needs: [Tests, Pylint]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build and push Docker images
+      uses: docker/build-push-action@v1.0.1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        repository: slipperymuffin/anyway
+        tag_with_ref: true
+        tag_with_sha: true

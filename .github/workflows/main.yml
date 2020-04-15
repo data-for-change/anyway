@@ -49,6 +49,7 @@ jobs:
     needs: [Tests, Pylint]
     runs-on: ubuntu-latest
     steps:
-    - run: |
+    - name : Deploying
+    run: |
       echo Deployed!
 

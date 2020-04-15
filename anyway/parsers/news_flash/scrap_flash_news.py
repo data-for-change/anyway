@@ -27,12 +27,12 @@ def scrap_flash_news(site_name, maps_key):
         mda_twitter()
 
 
-def main(google_maps_key_path):
+def main(google_maps_key):
     """
     main function for beginning of the news flash process
     :param google_maps_key_path: path to google maps key
     """
     sys.path.append(os.path.dirname(os.path.realpath(__file__)))
-    scrap_flash_news('ynet', google_maps_key_path)
-    scrap_flash_news('walla', google_maps_key_path)
-    scrap_flash_news('twitter', google_maps_key_path)
+    scrap_flash_news('ynet', google_maps_key)
+    scrap_flash_news('walla', google_maps_key)
+    scrap_flash_news('twitter', google_maps_key)

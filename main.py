@@ -92,7 +92,6 @@ def cbs(specific_folder, delete_all, path, batch_size, delete_start_date, load_s
 
 
 @process.command()
-@click.option()
 def news_flash():
     from anyway.parsers.news_flash.scrap_flash_news import main
     key = os.environ.get('GOOGLE_MAPS_KEY')

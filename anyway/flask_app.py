@@ -46,7 +46,8 @@ from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved,
                      LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School, SchoolWithDescription,
                      InjuredAroundSchool, InjuredAroundSchoolAllData, Sex, AccidentMonth, InjurySeverity, ReportProblem,
                      EngineVolume, PopulationType, Region, District, NaturalArea, MunicipalStatus, YishuvShape,
-                     TotalWeight, DrivingDirections, AgeGroup, AccidentMarkerView, InvolvedMarkerView, EmbeddedReports, RoadSegments)
+                     TotalWeight, DrivingDirections, AgeGroup, AccidentMarkerView, InvolvedMarkerView, EmbeddedReports,
+                     RoadSegments)
 from .oauth import OAuthSignIn
 from .parsers import resolution_dict
 
@@ -138,7 +139,7 @@ def generate_csv(results):
             output.writeheader()
 
         row = {k: v.encode('utf8')
-               if type(v) is six.text_type else v
+        if type(v) is six.text_type else v
                for k, v in iteritems(serialized)}
         output.writerow(row)
         yield output_file.getvalue()
@@ -223,7 +224,7 @@ def markers():
             "Content-Disposition": 'attachment; '
                                    'filename="Anyway-accidents-from-{0}-to-{1}.csv"'
                         .format(kwargs["start_date"].strftime(date_format), kwargs["end_date"].strftime(date_format))
-                        })
+        })
 
     else:  # defaults to json
         return generate_json(accident_markers, rsa_markers, discussions, is_thin, total_records=result.total_records)
@@ -689,8 +690,8 @@ def injured_around_schools_months_graphs_data_api():
             for month in list(df_month['accident_month_hebrew'].unique()):
                 for injury_severity in list(df_injury_severity['injury_severity_hebrew'].unique()):
                     if month not in list(df.accident_month_hebrew.unique()) \
-                        or injury_severity not in list(
-                            df[df.accident_month_hebrew == month].injury_severity_hebrew.unique()):
+                            or injury_severity not in list(
+                        df[df.accident_month_hebrew == month].injury_severity_hebrew.unique()):
                         df = df.append({'school_id': school_id,
                                         'accident_month_hebrew': month,
                                         'injury_severity_hebrew': injury_severity,
@@ -1008,7 +1009,7 @@ def index(marker=None, message=None):
             context['discussion'] = marker.identifier
         else:
             message = gettext(u"Discussion not found:") + \
-                request.values['discussion']
+                      request.values['discussion']
     if 'start_date' in request.values:
         context['start_date'] = string2timestamp(request.values['start_date'])
     elif marker:
@@ -1450,7 +1451,7 @@ class ViewHighlightedMarkersMap(BaseView):
 class OpenAccountForm(Form):
     username = StringField('Username', validators=[validators.DataRequired()])
     password = PasswordField('Password', validators=[
-                             validators.DataRequired()])
+        validators.DataRequired()])
 
     def validate_on_submit(self):
         if self.username.data == '':
@@ -1659,9 +1660,9 @@ def get_query(table_obj, filters, start_time, end_time):
 
 
 def get_top_road_segments_injured_per_km(resolution, location_info, start_time=None, end_time=None):
-    if resolution != 'כביש בינעירוני': # relevent for non urban roads only 
+    if resolution != 'כביש בינעירוני':  # relevent for non urban roads only
         return {}
-         
+
     query = get_query(table_obj=AccidentMarkerView, filters=None,
                       start_time=start_time, end_time=end_time)
 
@@ -1794,7 +1795,9 @@ def infographics_data():
 
     # accident count by accident year
     accident_count_by_accident_year = {'name': 'accident_count_by_accident_year',
-                                       'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_year', count='accident_year', start_time=start_time, end_time=end_time),
+                                       'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,
+                                                                   group_by='accident_year', count='accident_year',
+                                                                   start_time=start_time, end_time=end_time),
                                        'meta': {}}
     output['widgets'].append(accident_count_by_accident_year)
 
@@ -1809,13 +1812,18 @@ def infographics_data():
 
     # injured count by accident year
     injured_count_by_accident_year = {'name': 'injured_count_by_accident_year',
-                                      'data': get_accidents_stats(table_obj=InvolvedMarkerView, filters=get_injured_filters(location_info), group_by='accident_year', count='accident_year', start_time=start_time, end_time=end_time),
+                                      'data': get_accidents_stats(table_obj=InvolvedMarkerView,
+                                                                  filters=get_injured_filters(location_info),
+                                                                  group_by='accident_year', count='accident_year',
+                                                                  start_time=start_time, end_time=end_time),
                                       'meta': {}}
     output['widgets'].append(injured_count_by_accident_year)
 
     # accident count on day light
     accident_count_by_day_night = {'name': 'accident_count_by_day_night',
-                                   'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='day_night_hebrew', count='day_night_hebrew', start_time=start_time, end_time=end_time),
+                                   'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,
+                                                               group_by='day_night_hebrew', count='day_night_hebrew',
+                                                               start_time=start_time, end_time=end_time),
                                    'meta': {}}
     output['widgets'].append(accident_count_by_day_night)
 
@@ -1829,7 +1837,9 @@ def infographics_data():
 
     # accident count by road_light
     accident_count_by_road_light = {'name': 'accident_count_by_road_light',
-                                    'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='road_light_hebrew', count='road_light_hebrew', start_time=start_time, end_time=end_time),
+                                    'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,
+                                                                group_by='road_light_hebrew', count='road_light_hebrew',
+                                                                start_time=start_time, end_time=end_time),
                                     'meta': {}}
     output['widgets'].append(accident_count_by_road_light)
 

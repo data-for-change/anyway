@@ -53,7 +53,7 @@ def update(source, news_flash_id):
         source=None
     if news_flash_id=='':
         news_flash_id=None
-    return main(key,source, news_flash_id)
+    return main(key, source, news_flash_id)
 
 @update_news_flash.command()
 def remove_duplicate_news_flash_rows():

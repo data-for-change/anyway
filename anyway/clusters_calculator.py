@@ -2,9 +2,7 @@ import logging
 import time
 from .models import AccidentMarker
 from .pymapcluster import calculate_clusters
-from .task_queue import task_queue
 
-@task_queue.task
 def retrieve_clusters(**kwargs):
     start_time = time.time()
     result = AccidentMarker.bounding_box_query(is_thin=True, **kwargs)

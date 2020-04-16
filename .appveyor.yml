@@ -1,7 +1,6 @@
 environment:
   global:
     DATABASE_URL: 'postgresql://postgres@localhost/anyway'
-    ANYWAY_DISABLE_CELERY: "1"
     POSTGIS_FILE: postgis-bundle-pg96-2.4.0x64
   matrix:
     - PYTHON: "C:\\Python36"

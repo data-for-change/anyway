@@ -15,8 +15,8 @@ jobs:
       with:
           node-version: '6'
     - run: |
-      npm install -g eslint
-      eslint static/js --ignore-path=static/js/.eslintignore
+        npm install -g eslint
+        eslint static/js --ignore-path=static/js/.eslintignore
   Pylint:
     runs-on: ubuntu-latest
     steps:

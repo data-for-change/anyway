@@ -6,6 +6,13 @@ on:
       - master
       - dev
 jobs:
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: stefanoeb/eslint-action@1.0.2
+        with:
+          files: static/js --ignore-path=static/js/.eslintignore
   Pylint:
     runs-on: ubuntu-latest
     steps:

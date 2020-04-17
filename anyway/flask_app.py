@@ -1584,12 +1584,16 @@ def get_injured_filters(location_info):
 
 
 def get_most_severe_accidents(table_obj, filters, start_time, end_time, limit=10):
+    entities = 'longitude', 'latitude', 'accident_severity_hebrew', 'accident_timestamp', 'accident_type_hebrew'
+    return get_most_severe_accidents_with_entities(table_obj, filters, entities, start_time, end_time, limit=10)
+
+
+def get_most_severe_accidents_with_entities(table_obj, filters, entities, start_time, end_time, limit=10):
     filters = filters or {}
     filters['provider_code'] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
     query = get_query(table_obj, filters, start_time, end_time)
-    query = query.with_entities('longitude', 'latitude', 'accident_severity_hebrew', 'accident_timestamp',
-                                'accident_type_hebrew')
-    query = query.order_by(getattr(table_obj,"accident_severity"), getattr(table_obj,"accident_timestamp").desc())
+    query = query.with_entities(*entities)
+    query = query.order_by(getattr(table_obj, "accident_severity"), getattr(table_obj, "accident_timestamp").desc())
     query = query.limit(limit)
     df = pd.read_sql_query(query.statement, query.session.bind)
     df.columns = [c.replace('_hebrew', '') for c in df.columns]
@@ -1682,6 +1686,16 @@ def infographics_data():
                             'data': get_most_severe_accidents(table_obj=AccidentMarkerView, filters=location_info, start_time=start_time, end_time=end_time),
                             'meta': {}}
     output['widgets'].append(most_severe_accidents)
+
+    # most severe accidents additional info
+    entities = 'accident_timestamp', 'accident_month', 'accident_hour', 'accident_type_hebrew'
+    most_severe_accidents_additional_info = {
+        'name': 'most_severe_accidents_additional_info',
+        'headline': 'not yet implemented',
+        'data': get_most_severe_accidents_additional_info(location_info, start_time, end_time),
+        'meta': {}}
+    output['widgets'].append(most_severe_accidents_additional_info)
+
     # accident_severity count
     accident_count_by_severity = {'name': 'accident_count_by_severity',
                                   'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_severity_hebrew', count='accident_severity_hebrew', start_time=start_time, end_time=end_time),
@@ -1762,3 +1776,44 @@ def embedded_reports_api():
     response = Response(json.dumps(embedded_reports_list, default=str), mimetype="application/json")
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
+
+
+def get_most_severe_accidents_additional_info(location_info, start_time, end_time):
+    entities = 'id', 'provider_code', 'accident_timestamp', 'accident_type_hebrew'
+    accidents = get_most_severe_accidents_with_entities(
+        table_obj=AccidentMarkerView,
+        filters=location_info,
+        entities=entities,
+        start_time=start_time,
+        end_time=end_time)
+    logging.debug('accidents:{}'.format(accidents))
+    # Add casualties
+    for accident in accidents:
+        accident['type'] = accident['accident_type']
+        ts = accident['accident_timestamp']
+        ts = str(ts).split(' ')
+        accident['date'] = convert_yyyy_mm_dd_to_dd_mm_yy(ts[0])
+        accident['hour'] = ts[1][0:5]
+        num = get_casualties_count_in_accident(accident['id'], accident['provider_code'], 1)
+        accident['#dead'] = num
+        num = get_casualties_count_in_accident(accident['id'], accident['provider_code'], [2, 3])
+        accident['#injured'] = num
+        del accident['accident_timestamp'], accident['accident_type'], accident['id'], accident['provider_code']
+    return accidents
+
+
+def convert_yyyy_mm_dd_to_dd_mm_yy(date):
+    return '{}/{}/{}'.format(int(date[8:10]), int(date[5:7]), int(date[2:4]))
+
+
+# count of dead and severely injured
+def get_casualties_count_in_accident(accident_id, provider_code, injury_severity):
+    filters = {'accident_id': accident_id, 'provider_code': provider_code, 'injury_severity': injury_severity}
+    casualties = get_accidents_stats(table_obj=InvolvedMarkerView, filters=filters,
+                                     group_by='injury_severity', count='injury_severity')
+    res = 0
+    for ca in casualties:
+        key = 'killed' if 1 == ca['injury_severity'] else 'severely_wounded'
+        res += ca['count']
+    return res
+

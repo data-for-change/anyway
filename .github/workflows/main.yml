@@ -30,6 +30,7 @@ jobs:
         bash ./wait_for_postgres.sh
     - name: DB Initialization
       run: |
+        docker exec anyway alembic upgrade head
         docker exec anyway ./main.py process registered-vehicles
         docker exec anyway ./main.py process cbs
     - name: Tests

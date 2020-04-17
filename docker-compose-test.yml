@@ -9,8 +9,6 @@ services:
       - "8080:5000"
     environment:
       - DATABASE_URL=postgresql://anyway:anyway@db/anyway
-      - POSTGRES_PASSWORD=anyway
-      - POSTGRES_USER=anyway
     volumes:
       - .:/anyway
     restart: always

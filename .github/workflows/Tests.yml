@@ -6,7 +6,7 @@ on:
       - master
       - dev
 jobs:
-  eslint:
+  Eslint:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

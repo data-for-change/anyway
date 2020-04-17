@@ -9,10 +9,13 @@ jobs:
   eslint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: stefanoeb/eslint-action@1.0.2
-        with:
-          files: static/js --ignore-path=static/js/.eslintignore
+    - uses: actions/checkout@v2
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v1.4.1
+      with:
+          node-version: '6'
+    - run: yarn global add eslint --ignore-engines
+    - run: eslint static/js --ignore-path=static/js/.eslintignore
   Pylint:
     runs-on: ubuntu-latest
     steps:

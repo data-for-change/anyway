@@ -1,4 +1,4 @@
-$(function( {
+$(function() {
     var GESTURE_HANDLING = (MAP_ONLY ? "cooperative" : "greedy");
 
     var AppRouter = Backbone.Router.extend({

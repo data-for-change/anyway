@@ -1,7 +1,13 @@
 name: CI
+
 on:
   push:
-    branches: [ dev ]
+    branches:
+      - master
+      - dev
+  pull_request:
+    branches:
+      - master
 jobs:
   Pylint:
     runs-on: ubuntu-latest

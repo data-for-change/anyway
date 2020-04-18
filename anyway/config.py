@@ -15,8 +15,6 @@ SQLALCHEMY_TRACK_MODIFICATIONS = True
 ENTRIES_PER_PAGE = os.environ.get('ENTRIES_PER_PAGE', 1000)
 SQLALCHEMY_POOL_RECYCLE = 60
 
-SECRET_KEY = 'aiosdjsaodjoidjioewnioewfnoeijfoisdjf'
-
 # available languages
 LANGUAGES = {
     'en': 'English',

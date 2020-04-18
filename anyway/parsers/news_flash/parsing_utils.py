@@ -1,18 +1,18 @@
+from datetime import datetime
+
+from anyway.parsers.news_flash_classifiers import classify_ynet
 from ..location_extraction import manual_filter_location_of_text, geocode_extract, get_db_matching_location, \
     set_accident_resolution
-from datetime import datetime
-from anyway.parsers.news_flash_classifiers import classify_ynet
 
 
 def process_after_parsing(news_item, maps_key):
-    location = ''
+    location = None
     news_item['accident'] = classify_ynet(news_item['title'])
-
     try:
         if news_item['accident']:
-            if news_item['description'] != '':
+            if news_item['description'] is not None:
                 location = manual_filter_location_of_text(news_item['description'])
-            if location == '':
+            if location is None:
                 location = manual_filter_location_of_text(news_item['title'])
             news_item['location'] = location
             geo_location = geocode_extract(location, maps_key)
@@ -32,25 +32,25 @@ def process_after_parsing(news_item, maps_key):
 
 def init_news_item(entry_parsed_date, site_name='walla'):
     news_item = {'date_parsed': entry_parsed_date,
-                 'title': '',
-                 'link': '',
+                 'title': None,
+                 'link': None,
                  'source': site_name,
-                 'description': '',
-                 'author': '',
+                 'description': None,
+                 'author': None,
                  'accident': False,
-                 'location': '',
-                 'lat': 0,
-                 'lon': 0,
+                 'location': None,
+                 'lat': None,
+                 'lon': None,
                  'road1': None,
                  'road2': None,
-                 'road_segment_name': '',
-                 'yishuv_name': '',
-                 'street1_hebrew': '',
-                 'street2_hebrew': '',
+                 'road_segment_name': None,
+                 'yishuv_name': None,
+                 'street1_hebrew': None,
+                 'street2_hebrew': None,
                  'resolution': None,
-                 'region_hebrew': '',
-                 'district_hebrew': '',
-                 'non_urban_intersection_hebrew': ''}
+                 'region_hebrew': None,
+                 'district_hebrew': None,
+                 'non_urban_intersection_hebrew': None}
     return news_item
 
 
@@ -67,7 +67,7 @@ def get_all_news_items(html_soup, site_name='walla'):
 
 
 def get_date(html_soup, site_name='walla'):
-    date = ''
+    date = None
     try:
         if site_name == 'walla':
             date_soup = html_soup.find('div', class_='date-part-1')
@@ -85,7 +85,7 @@ def get_date(html_soup, site_name='walla'):
 
 
 def get_date_time(item_soup, date, site_name='walla'):
-    entry_parsed_date = ''
+    entry_parsed_date = None
     try:
         if site_name == 'walla':
             time_soup = item_soup.find("div", class_="time").get_text()
@@ -102,7 +102,7 @@ def get_date_time(item_soup, date, site_name='walla'):
 
 
 def get_author(item_soup, site_name='walla'):
-    author = ''
+    author = None
     try:
         if site_name == 'walla':
             author = item_soup.find('div', class_='author').get_text()
@@ -115,7 +115,7 @@ def get_author(item_soup, site_name='walla'):
 
 
 def get_title(item_soup, site_name='walla'):
-    title = ''
+    title = None
     try:
         if site_name == 'walla':
             title = item_soup.find('h2', class_='title').get_text()
@@ -127,7 +127,7 @@ def get_title(item_soup, site_name='walla'):
 
 
 def get_link(item_soup, site_name='walla'):
-    link = ''
+    link = None
     try:
         if site_name == 'walla':
             link = f'https://news.walla.co.il{item_soup.find("a").get("href")}'
@@ -139,7 +139,7 @@ def get_link(item_soup, site_name='walla'):
 
 
 def get_description(item_soup, site_name='walla'):
-    description = ''
+    description = None
     try:
         if site_name == 'walla':
             description = item_soup.find('div', class_='content').find('p').get_text()

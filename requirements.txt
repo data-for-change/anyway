@@ -29,7 +29,6 @@ requests
 setuptools
 click
 six
-celery[redis]
 openpyxl
 enum34
 feedparser

@@ -2,7 +2,6 @@
 # pylint: disable=no-member
 import csv
 import datetime
-# from sendgrid import SendGridAPIClient
 import json
 import logging
 import os
@@ -80,8 +79,6 @@ jinja_environment = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), "../templates")),
     extensions=[AssetsExtension])
 jinja_environment.assets_environment = assets_env
-
-# sg = SendGridAPIClient(app.config['SENDGRID_API_KEY'])
 
 babel = Babel(app)
 
@@ -328,24 +325,61 @@ def news_flash_filters():
 def news_flash():
     logging.debug('getting news flash')
     news_flash_id = request.values.get('id')
+    source = request.values.get('source')
+    count = request.values.get('news_flash_count')
+    start_date = request.values.get('start_date')
+    end_date = request.values.get('end_date')
+    road_number = request.values.get('road_number')
+    road_segment = request.values.get('road_segment_only')
+    news_flash_obj = db.session.query(NewsFlash)
+
     if news_flash_id is not None:
-        news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == news_flash_id).first()
+        news_flash_obj = news_flash_obj.filter(NewsFlash.id == news_flash_id).first()
         if news_flash_obj is not None:
             return Response(json.dumps(news_flash_obj.serialize(), default=str), mimetype="application/json")
         return Response(status=404)
 
-    # Todo - add start and end time for the news flashes
-    news_flashes = db.session.query(NewsFlash).filter(
+    if road_number:
+        news_flash_obj = news_flash_obj.filter(NewsFlash.road1 == road_number)
+
+    # get all possible sources
+    sources = [str(source_name[0]) for source_name in db.session.query(NewsFlash.source).distinct().all()]
+    if source:
+        if source not in sources:
+            return Response('{"message": "Requested source does not exist"}',
+                            status=404,
+                            mimetype='application/json')
+        else:
+            news_flash_obj = news_flash_obj.filter(NewsFlash.source == source)
+
+    if start_date and end_date:
+        s = datetime.datetime.fromtimestamp(int(start_date))
+        e = datetime.datetime.fromtimestamp(int(end_date))
+        news_flash_obj = news_flash_obj.filter(and_(NewsFlash.date <= e,
+                                                    NewsFlash.date >= s))
+
+    # when only one of the dates is sent
+    elif start_date or end_date:
+        return Response('{"message": "Must send both start_date and end_date"}',
+                        status=404,
+                        mimetype='application/json')
+
+    if road_segment == 'true':
+        news_flash_obj = news_flash_obj.filter(not_(NewsFlash.road_segment_name == None))
+
+    news_flash_obj = news_flash_obj.filter(
         and_(NewsFlash.accident == True, not_(and_(NewsFlash.lat == 0, NewsFlash.lon == 0)),
-             not_(and_(NewsFlash.lat == None, NewsFlash.lon == None)))).with_entities(NewsFlash.id,
-                                                                                      NewsFlash.lat,
-                                                                                      NewsFlash.lon,
-                                                                                      NewsFlash.title, NewsFlash.source,
-                                                                                      NewsFlash.date).order_by(
-        NewsFlash.date.desc()).all()
-    news_flashes = [{"id": x.id, "lat": x.lat, "lon": x.lon, "title": x.title, "source": x.source, "date": x.date} for x
-                    in news_flashes]
-    return Response(json.dumps(news_flashes, default=str), mimetype="application/json")
+             not_(and_(NewsFlash.lat == None, NewsFlash.lon == None)))
+    ).order_by(
+        NewsFlash.date.desc())
+
+    if count:
+        news_flash_obj = news_flash_obj.limit(count)
+
+    news_flashes = news_flash_obj.all()
+
+    news_flashes_jsons = [news_flash.serialize() for news_flash in news_flashes]
+    return Response(json.dumps(news_flashes_jsons, default=str), mimetype="application/json")
 
 
 @app.route("/api/news-flash/<int:news_flash_id>", methods=["GET"])
@@ -968,6 +1002,7 @@ def index(marker=None, message=None):
     context['entries_per_page'] = ENTRIES_PER_PAGE
     context['iteritems'] = iteritems
     context['hide_search'] = True if request.values.get('hide_search') == 'true' else False
+    context['embedded_reports'] = get_embedded_reports()
     return render_template('index.html', **context)
 
 
@@ -1657,15 +1692,21 @@ def infographics_data():
 
     return Response(json.dumps(output, default=str), mimetype="application/json")
 
-@app.route("/api/embedded-reports", methods=["GET"])
-@user_optional
-def embedded_reports_api():
+
+def get_embedded_reports():
     logging.debug('getting embedded reports')
     embedded_reports = db.session.query(EmbeddedReports).all()
     embedded_reports_list = [{"id": x.id,
                               "report_name_english": x.report_name_english,
                               "report_name_hebrew": x.report_name_hebrew,
                               "url": x.url} for x in embedded_reports]
+    return embedded_reports_list
+
+
+@app.route("/api/embedded-reports", methods=["GET"])
+@user_optional
+def embedded_reports_api():
+    embedded_reports_list = get_embedded_reports()
     response = Response(json.dumps(embedded_reports_list, default=str), mimetype="application/json")
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response

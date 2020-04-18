@@ -722,7 +722,7 @@ textarea.form-control-wide {
 #toggle-sidebar {
     /*border-right: 1px solid #ddd;*/
     /*padding-right: 8px;*/
-    border-left: 1px solid #ddd;
+    /*border-left: 1px solid #ddd;*/
     padding-left: 8px;
     height: 100%;
     /*padding-top: 1px;*/

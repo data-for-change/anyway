@@ -12,7 +12,6 @@ SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
 if SQLALCHEMY_DATABASE_URI is None:
     raise Exception('Please, set the DATABASE_URL environment variable to be postgresql://postgres@localhost/anyway')
 SQLALCHEMY_TRACK_MODIFICATIONS = True
-SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
 ENTRIES_PER_PAGE = os.environ.get('ENTRIES_PER_PAGE', 1000)
 SQLALCHEMY_POOL_RECYCLE = 60
 

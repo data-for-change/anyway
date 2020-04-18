@@ -22,8 +22,8 @@ def get_markers_for_location_extraction():
             FROM markers_hebrew
             WHERE (provider_code=1
                    OR provider_code=3)
-              AND (longitude>0
-                   AND latitude>0)''')
+              AND (longitude is not null
+                   AND latitude is not null)''')
     df = pd.DataFrame(query_res.fetchall())
     df.columns = query_res.keys()
     return df

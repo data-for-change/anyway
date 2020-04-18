@@ -87,7 +87,10 @@ def get_db_matching_location(latitude, longitude, resolution, road_no=None):
                     final_loc[field] = most_fit_loc[field]
 
     except Exception as _:
-        logging.info('db matching failed for latitude {0}, longitude {1}, resolution {2}, road no {3}'.format(latitude, longitude, resolution, road_no))
+        logging.info('db matching failed for latitude {0}, longitude {1}, resolution {2}, road no {3}'.format(latitude,
+                                                                                                              longitude,
+                                                                                                              resolution,
+                                                                                                              road_no))
     return final_loc
 
 
@@ -98,20 +101,19 @@ def set_accident_resolution(accident_row):
     :return: resolution option
     """
     try:
-        if accident_row['intersection'] is not None and str(accident_row['intersection']) != '' and '/' in str(
-                accident_row['intersection']):
+        if accident_row['intersection'] is not None and '/' in str(accident_row['intersection']):
             return 'צומת עירוני'
-        elif accident_row['intersection'] is not None and str(accident_row['intersection']) != '':
+        elif accident_row['intersection'] is not None:
             return 'צומת בינעירוני'
-        elif accident_row['road_no'] is not None and accident_row['road_no'] > 0:
+        elif accident_row['road_no'] is not None:
             return 'כביש בינעירוני'
-        elif accident_row['street'] is not None and str(accident_row['street']) != '':
+        elif accident_row['street'] is not None:
             return 'רחוב'
-        elif accident_row['city'] is not None and str(accident_row['city']) != '':
+        elif accident_row['city'] is not None:
             return 'עיר'
-        elif accident_row['subdistrict'] is not None and str(accident_row['subdistrict']) != '':
+        elif accident_row['subdistrict'] is not None:
             return 'נפה'
-        elif accident_row['district'] is not None and str(accident_row['district']) != '':
+        elif accident_row['district'] is not None:
             return 'מחוז'
         else:
             return 'אחר'
@@ -129,14 +131,14 @@ def geocode_extract(location, maps_key):
     :return: a dict containing data about the found location on google maps, with the keys: street,
     road_no [road number], intersection, city, address, district and the geometry of the location.
     """
-    street = ''
+    street = None
     road_no = None
-    intersection = ''
-    subdistrict = ''
-    city = ''
-    district = ''
-    address = ''
-    geom={'lat':'','lng':''}
+    intersection = None
+    subdistrict = None
+    city = None
+    district = None
+    address = None
+    geom = {'lat': None, 'lng': None}
     try:
         gmaps = googlemaps.Client(key=maps_key)
         geocode_result = gmaps.geocode(location, region='il')
@@ -149,22 +151,17 @@ def geocode_extract(location, maps_key):
                 if item['short_name'].isdigit():
                     road_no = int(item['short_name'])
                 else:
-                    street = item['long_name'] if (
-                            item['long_name'] is not None) else ''
+                    street = item['long_name']
             elif 'point_of_interest' in item['types'] or 'intersection' in item['types']:
-                intersection = item['long_name'] if (
-                        item['long_name'] is not None) else ''
+                intersection = item['long_name']
             elif 'locality' in item['types']:
-                city = item['long_name'] if (item['long_name'] is not None) else ''
+                city = item['long_name']
             elif 'administrative_area_level_2' in item['types']:
-                subdistrict = item['long_name'] if (
-                        item['long_name'] is not None) else ''
+                subdistrict = item['long_name']
             elif 'administrative_area_level_1' in item['types']:
-                district = item['long_name'] if (
-                        item['long_name'] is not None) else ''
-        address = response['formatted_address'] if (
-                response['formatted_address'] is not None) else ''
-        if road_no == None and extract_road_number(location) is not None:
+                district = item['long_name']
+        address = response['formatted_address']
+        if road_no is None and extract_road_number(location) is not None:
             road_no = extract_road_number(location)
     except Exception as _:
         logging.info('geocode extract location {0} maps key {1}'.format(location, maps_key))

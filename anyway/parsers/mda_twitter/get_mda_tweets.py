@@ -65,7 +65,7 @@ def get_user_tweets(screen_name, latest_tweet_id, consumer_key, consumer_secret,
     tweets_df['link'] = tweets_df['tweet_id'].apply(
         lambda t: 'https://twitter.com/mda_israel/status/' + str(t))
     tweets_df['author'] = ['מגן דוד אדום' for _ in range(len(tweets_df))]
-    tweets_df['description'] = ['' for _ in range(len(tweets_df))]
+    tweets_df['description'] = [None for _ in range(len(tweets_df))]
     tweets_df['source'] = ['twitter' for _ in range(len(tweets_df))]
 
     tweets_df['date'] = tweets_df['accident_date'].astype(

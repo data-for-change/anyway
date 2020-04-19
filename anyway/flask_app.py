@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import time
+from collections import defaultdict
 
 import flask_admin as admin
 import flask_login as login
@@ -1604,6 +1605,48 @@ def get_accidents_heat_map(table_obj, filters, start_time, end_time):
     return df.to_dict(orient='records')
 
 
+def filter_and_group_injured_count_per_age_group(data_of_ages):
+    import re
+    range_dict = {0: 14, 15: 24, 25: 64, 65: 200}
+    return_dict_by_required_age_group = defaultdict(int)
+
+    for age_range_and_count in data_of_ages:
+        age_range = age_range_and_count['age_group']
+        count = age_range_and_count['count']
+
+        # Parse the db age range
+        match_parsing = re.match("([0-9]{2})\\-([0-9]{2})", age_range)
+        if match_parsing:
+            regex_age_matches = match_parsing.groups()
+            if len(regex_age_matches) != 2:
+                return_dict_by_required_age_group["unknown"] += count
+                continue
+            min_age_raw, max_age_raw = regex_age_matches
+        else:
+            match_parsing = re.match("([0-9]{2})\\+", age_range)  # e.g  85+
+            if match_parsing:
+                min_age_raw, max_age_raw = match_parsing.group(1), 200  # We assume that no body live beyond age 200
+            else:
+                return_dict_by_required_age_group["unknown"] += count
+                continue
+
+        # Find to what "bucket" to aggregate the data
+        min_age = int(min_age_raw)
+        max_age = int(max_age_raw)
+        for item in range_dict.items():
+            item_min_range, item_max_range = item
+            if item_min_range <= min_age <= item_max_range and item_min_range <= max_age <= item_max_range:
+                string_age_range = f'{item_min_range:02}-{item_max_range:02}'
+                return_dict_by_required_age_group[string_age_range] += count
+                break
+
+    # Rename the last key
+    return_dict_by_required_age_group["65+"] = return_dict_by_required_age_group["65-200"]
+    del return_dict_by_required_age_group["65-200"]
+
+    return return_dict_by_required_age_group
+
+
 @app.route('/api/infographics_data', methods=['GET'])
 def infographics_data():
 
@@ -1689,6 +1732,15 @@ def infographics_data():
                                    'data' : get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='road_light_hebrew', count='road_light_hebrew', start_time=start_time, end_time=end_time),
                                     'meta': {}}
     output['widgets'].append(accident_count_by_road_light)
+
+    # injured count per age group
+    data_of_injured_count_per_age_group_raw = get_accidents_stats(table_obj=InvolvedMarkerView, filters=get_injured_filters(location_info), group_by='age_group_hebrew', count='age_group_hebrew', start_time=start_time, end_time=end_time)
+    data_of_injured_count_per_age_group = filter_and_group_injured_count_per_age_group(data_of_injured_count_per_age_group_raw)
+
+    injured_count_per_age_group = {'name': 'injured_count_per_age_group',
+                                   'data': data_of_injured_count_per_age_group,
+                                   'meta': {}}
+    output['widgets'].append(injured_count_per_age_group)
 
     return Response(json.dumps(output, default=str), mimetype="application/json")
 

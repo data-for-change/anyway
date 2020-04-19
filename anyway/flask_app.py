@@ -2,7 +2,6 @@
 # pylint: disable=no-member
 import csv
 import datetime
-# from sendgrid import SendGridAPIClient
 import json
 import logging
 import os
@@ -80,8 +79,6 @@ jinja_environment = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), "../templates")),
     extensions=[AssetsExtension])
 jinja_environment.assets_environment = assets_env
-
-# sg = SendGridAPIClient(app.config['SENDGRID_API_KEY'])
 
 babel = Babel(app)
 

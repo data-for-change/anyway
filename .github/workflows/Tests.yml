@@ -9,6 +9,7 @@ on:
     branches:
       - master
       - dev
+      - run-tests
 jobs:
   Eslint:
     runs-on: ubuntu-latest

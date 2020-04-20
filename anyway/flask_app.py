@@ -1688,7 +1688,6 @@ def infographics_data():
     output['widgets'].append(most_severe_accidents)
 
     # most severe accidents additional info
-    entities = 'accident_timestamp', 'accident_month', 'accident_hour', 'accident_type_hebrew'
     most_severe_accidents_additional_info = {
         'name': 'most_severe_accidents_additional_info',
         'headline': 'not yet implemented',
@@ -1813,7 +1812,6 @@ def get_casualties_count_in_accident(accident_id, provider_code, injury_severity
                                      group_by='injury_severity', count='injury_severity')
     res = 0
     for ca in casualties:
-        key = 'killed' if 1 == ca['injury_severity'] else 'severely_wounded'
         res += ca['count']
     return res
 

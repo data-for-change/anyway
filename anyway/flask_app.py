@@ -1657,6 +1657,7 @@ def infographics_data():
     output = {}
 
     location_info = extract_news_flash_location(request.values.get('news_flash_id'))
+    logging.debug('location_info:{}'.format(location_info))
     if location_info is None:
         return Response({})
     location_info = location_info['data']
@@ -1690,7 +1691,7 @@ def infographics_data():
     # most severe accidents additional info
     most_severe_accidents_additional_info = {
         'name': 'most_severe_accidents_additional_info',
-        'headline': 'not yet implemented',
+        'headline': gen_news_flash_location_text(request.values.get('news_flash_id')),
         'data': get_most_severe_accidents_additional_info(location_info, start_time, end_time),
         'meta': {}}
     output['widgets'].append(most_severe_accidents_additional_info)
@@ -1813,5 +1814,38 @@ def get_casualties_count_in_accident(accident_id, provider_code, injury_severity
     res = 0
     for ca in casualties:
         res += ca['count']
+    return res
+
+
+# generate text describing location or road segment of news flash
+# to be used by most severe accidents additional info widget
+def gen_news_flash_location_text(news_flash_id):
+    news_flash_item = db.session.query(NewsFlash).filter(NewsFlash.id==news_flash_id).first()
+    logging.debug('news_flash_item:{}'.format(news_flash_item))
+    nf = news_flash_item.serialize()
+    logging.debug('news flash serialized:{}'.format(nf))
+    logging.debug('news_flash_id:{}({})'.format(news_flash_id, type(nf)))
+    resolution = nf['resolution'] if nf['resolution'] else ''
+    yishuv_name = nf['yishuv_name'] if nf['yishuv_name'] else ''
+    road1 = str(int(nf['road1'])) if nf['road1'] else ''
+    road2 = str(int(nf['road2'])) if nf['road2'] else ''
+    street1_hebrew = nf['street1_hebrew'] if nf['street1_hebrew'] else ''
+    road_segment_name = nf['road_segment_name'] if nf['road_segment_name'] else ''
+    if resolution == 'כביש בינעירוני' and road1 and road_segment_name:
+        res = 'כביש ' + road1 + ' במקטע ' + road_segment_name
+    elif resolution == 'עיר' and not yishuv_name:
+        res = nf['location']
+    elif resolution == 'עיר' and yishuv_name:
+        res = nf['yishuv_name']
+    elif resolution == 'צומת בינעירוני' and road1 and road2:
+        res = 'צומת כביש ' + road1 + ' עם כביש ' + road2
+    elif resolution == 'צומת בינעירוני' and road1 and road_segment_name:
+        res = 'כביש ' + road1 + ' במקטע ' + road_segment_name
+    elif resolution == 'רחוב' and yishuv_name and street1_hebrew:
+        res = ' רחוב ' + street1_hebrew + ' ב' + yishuv_name
+    else:
+        logging.warning("Did not found quality resolution. Using location field. News Flash id:{}".format(nf['id']))
+        res = nf['location']
+    logging.debug('{}'.format(res))
     return res
 

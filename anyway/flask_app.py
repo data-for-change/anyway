@@ -1540,9 +1540,10 @@ def extract_news_flash_location(news_flash_id):
     data = {'resolution': resolution}
     for field in resolution_dict[resolution]:
         data[field] = getattr(news_flash_obj, field)
+    gps = {}
     for field in ['lon', 'lat']:
-        data[field] = getattr(news_flash_obj, field)
-    return {'name': 'location', 'data': data}
+        gps[field] = getattr(news_flash_obj, field)
+    return {'name': 'location', 'data': data, 'gps': gps}
 
 def get_query(table_obj, filters, start_time, end_time):
     query = db.session.query(table_obj)
@@ -1755,6 +1756,7 @@ def infographics_data():
     logging.debug('location_text:{}'.format(location_text))
     if location_info is None:
         return Response({})
+    gps = location_info['gps']
     location_info = location_info['data']
     output['meta'] = {"location_info": location_info.copy()}
     output['widgets'] = []
@@ -1803,8 +1805,8 @@ def infographics_data():
 
     # street view
     street_view = {'name': 'street_view',
-                   'longitude': location_info['lon'],
-                   'latitude': location_info['lat']}
+                   'longitude': gps['lon'],
+                   'latitude': gps['lat']}
     output['widgets'].append(street_view)
 
 

@@ -18,7 +18,7 @@ psycopg2
 yuicompressor
 Flask-Admin
 Flask-Security
-WTForms
+WTForms==2.2.1
 sendgrid
 python-dateutil
 alembic
@@ -29,7 +29,6 @@ requests
 setuptools
 click
 six
-celery[redis]
 openpyxl
 enum34
 feedparser

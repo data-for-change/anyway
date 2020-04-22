@@ -44,18 +44,16 @@ def update_news_flash():
     pass
 
 @update_news_flash.command()
-@click.option('--google_maps_key_path', type=str)
 @click.option('--source',default='', type=str)
 @click.option('--news_flash_id',default='', type=str)
-def update(google_maps_key_path, source, news_flash_id):
+def update(source, news_flash_id):
     from anyway.parsers.news_flash_updater import main
-    with open(google_maps_key_path) as file:
-        key = file.read()
+    key = os.environ.get('GOOGLE_MAPS_KEY')
     if source=='':
         source=None
     if news_flash_id=='':
         news_flash_id=None
-    return main(key,source, news_flash_id)
+    return main(key, source, news_flash_id)
 
 @update_news_flash.command()
 def remove_duplicate_news_flash_rows():
@@ -94,11 +92,9 @@ def cbs(specific_folder, delete_all, path, batch_size, delete_start_date, load_s
 
 
 @process.command()
-@click.option('--google_maps_key_path', type=str)
-def news_flash(google_maps_key_path):
+def news_flash():
     from anyway.parsers.news_flash.scrap_flash_news import main
-    with open(google_maps_key_path) as file:
-        key = file.read()
+    key = os.environ.get('GOOGLE_MAPS_KEY')
     return main(key)
 
 

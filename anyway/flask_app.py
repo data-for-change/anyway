@@ -1651,137 +1651,21 @@ def filter_and_group_injured_count_per_age_group(data_of_ages):
     return return_dict_by_required_age_group
 
 
-@app.route('/api/infographics_data', methods=['GET'])
-def infographics_data():
-
-    output = {}
-
-    location_info = extract_news_flash_location(request.values.get('news_flash_id'))
-    logging.debug('location_info:{}'.format(location_info))
-    if location_info is None:
-        return Response({})
-    location_info = location_info['data']
-    output['meta'] = {"location_info": location_info.copy()}
-    output['widgets'] = []
-    resolution    = location_info.pop('resolution')
-    if resolution is None:
-        return Response({})
-
-    if all(value is None for value in location_info.values()):
-        return Response({})
-
-    number_of_years_ago_to_pull_raw = request.values.get('years_ago', CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
-    try:
-        number_of_years_ago_to_pull = int(number_of_years_ago_to_pull_raw)
-    except ValueError:
-        return Response({})
-
-    if number_of_years_ago_to_pull < 0 or number_of_years_ago_to_pull > 100:
-        return Response({})
-
-    end_time = datetime.date.today()
-    start_time = datetime.date(end_time.year - number_of_years_ago_to_pull, 1, 1)
-
-    # most severe accidents
-    most_severe_accidents = {'name': 'most_severe_accidents',
-                            'data': get_most_severe_accidents(table_obj=AccidentMarkerView, filters=location_info, start_time=start_time, end_time=end_time),
-                            'meta': {}}
-    output['widgets'].append(most_severe_accidents)
-
-    # most severe accidents table
-    most_severe_accidents_table = {
-        'name': 'most_severe_accidents_table',
-        'headline': gen_news_flash_location_text(request.values.get('news_flash_id')),
-        'data': get_most_severe_accidents_table(location_info, start_time, end_time),
-        'meta': {}}
-    output['widgets'].append(most_severe_accidents_table)
-
-    # street view
-    street_view = {'name': 'street_view',
-                   'longitude': location_info['lon'],
-                   'latitude': location_info['lat']}
-    output['widgets'].append(street_view)
-
-    # accidents heat map
-    accidents_heat_map = {'name': 'accidents_heat_map',
-                          'data': get_accidents_heat_map(table_obj=AccidentMarkerView,
-                                                         filters=location_info,
-                                                         start_time=start_time,
-                                                         end_time=end_time),
-                          'meta': {}}
-    output['widgets'].append(accidents_heat_map)
-
-    # injured count by accident year
-    injured_count_by_accident_year = {'name': 'injured_count_by_accident_year',
-                                       'data': get_accidents_stats(table_obj=InvolvedMarkerView, filters=get_injured_filters(location_info), group_by='accident_year', count='accident_year', start_time=start_time, end_time=end_time),
-                                       'meta': {}}
-    output['widgets'].append(injured_count_by_accident_year)
-
-    # accident count on day light
-    accident_count_by_day_night = {'name': 'accident_count_by_day_night',
-                                   'data' : get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='day_night_hebrew', count='day_night_hebrew', start_time=start_time, end_time=end_time),
-                                    'meta': {}}
-    output['widgets'].append(accident_count_by_day_night)
-
-    # accidents distribution count by hour
-    accidents_count_by_hour = {'name': 'accidents_count_by_hour',
-                                            'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_hour', count='accident_hour', start_time=start_time, end_time=end_time),
-                                            'meta': {}}
-    output['widgets'].append(accidents_count_by_hour)
-
-    # accident count by road_light
-    accident_count_by_road_light = {'name': 'accident_count_by_road_light',
-                                   'data' : get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='road_light_hebrew', count='road_light_hebrew', start_time=start_time, end_time=end_time),
-                                    'meta': {}}
-    output['widgets'].append(accident_count_by_road_light)
-
-    # injured count per age group
-    data_of_injured_count_per_age_group_raw = get_accidents_stats(table_obj=InvolvedMarkerView, filters=get_injured_filters(location_info), group_by='age_group_hebrew', count='age_group_hebrew', start_time=start_time, end_time=end_time)
-    data_of_injured_count_per_age_group = filter_and_group_injured_count_per_age_group(data_of_injured_count_per_age_group_raw)
-
-    injured_count_per_age_group = {'name': 'injured_count_per_age_group',
-                                   'data': data_of_injured_count_per_age_group,
-                                   'meta': {}}
-    output['widgets'].append(injured_count_per_age_group)
-
-    # accident_severity count
-    accident_count_by_severity = {'name': 'accident_count_by_severity',
-                                  'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_severity_hebrew', count='accident_severity_hebrew', start_time=start_time, end_time=end_time),
-                                  'meta': {}}
-    output['widgets'].append(accident_count_by_severity)
-
-    # accident_type count
-    accident_count_by_accident_type = {'name': 'accident_count_by_accident_type',
-                                      'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_type_hebrew', count='accident_type_hebrew', start_time=start_time, end_time=end_time),
-                                       'meta': {}}
-    output['widgets'].append(accident_count_by_accident_type)
-
-    # accident count by accident year
-    accident_count_by_accident_year = {'name': 'accident_count_by_accident_year',
-                                       'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_year', count='accident_year', start_time=start_time, end_time=end_time),
-                                       'meta': {}}
-    output['widgets'].append(accident_count_by_accident_year)
-
-    return Response(json.dumps(output, default=str), mimetype="application/json")
+def get_most_severe_accidents_table_text(location_text):
+    return 'תאונות חמורות ב' + location_text
 
 
-def get_embedded_reports():
-    logging.debug('getting embedded reports')
-    embedded_reports = db.session.query(EmbeddedReports).all()
-    embedded_reports_list = [{"id": x.id,
-                              "report_name_english": x.report_name_english,
-                              "report_name_hebrew": x.report_name_hebrew,
-                              "url": x.url} for x in embedded_reports]
-    return embedded_reports_list
+def get_accident_count_by_severity_text(location_text, start_year, end_year):
+    count_by_severity = get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_severity_hebrew', count='accident_severity_hebrew', start_time=start_time, end_time=end_time)
+    severity_text = ''
+    total_accidents_count = 0
+    for severity, count in count_by_severity.items():
+        severity_text += str(count) + 'בחומרה ' + severity + '\n'
+        total_accidents_count += count
 
-
-@app.route("/api/embedded-reports", methods=["GET"])
-@user_optional
-def embedded_reports_api():
-    embedded_reports_list = get_embedded_reports()
-    response = Response(json.dumps(embedded_reports_list, default=str), mimetype="application/json")
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    return response
+    return 'בין השנים ' + str(start_year) + '-' + str(end_year) + ',\n' \
+           + 'ב' + location_info + 'התרחשו ' + str(total_accidents_count) + 'תאונות.' \
+           + severity_text
 
 
 def get_most_severe_accidents_table(location_info, start_time, end_time):
@@ -1855,3 +1739,139 @@ def gen_news_flash_location_text(news_flash_id):
     logging.debug('{}'.format(res))
     return res
 
+
+@app.route('/api/infographics_data', methods=['GET'])
+def infographics_data():
+
+    output = {}
+    news_flash_id = request.values.get('news_flash_id')
+    location_info = extract_news_flash_location(news_flash_id)
+    logging.debug('location_info:{}'.format(location_info))
+    location_text = gen_news_flash_location_text(news_flash_id)
+    logging.debug('location_text:{}'.format(location_text))
+    if location_info is None:
+        return Response({})
+    location_info = location_info['data']
+    output['meta'] = {"location_info": location_info.copy()}
+    output['widgets'] = []
+    resolution    = location_info.pop('resolution')
+    if resolution is None:
+        return Response({})
+
+    if all(value is None for value in location_info.values()):
+        return Response({})
+
+    number_of_years_ago_to_pull_raw = request.values.get('years_ago', CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
+    try:
+        number_of_years_ago_to_pull = int(number_of_years_ago_to_pull_raw)
+    except ValueError:
+        return Response({})
+
+    if number_of_years_ago_to_pull < 0 or number_of_years_ago_to_pull > 100:
+        return Response({})
+
+    end_time = datetime.date.today()
+    start_time = datetime.date(end_time.year - number_of_years_ago_to_pull, 1, 1)
+
+    # accident_severity count
+    accident_count_by_severity = {'name': 'accident_count_by_severity',
+                                  'data': {'text': get_accident_count_by_severity_text(location_text, start_time.year, end_time.year)},
+                                  'meta': {}}
+    output['widgets'].append(accident_count_by_severity)
+
+    # most severe accidents
+
+    most_severe_accidents = {'name': 'most_severe_accidents',
+                             'data': get_most_severe_accidents(table_obj=AccidentMarkerView, filters=location_info, start_time=start_time, end_time=end_time),
+                             'meta': {}}
+    output['widgets'].append(most_severe_accidents)
+
+    # most severe accidents table
+    most_severe_accidents_table = {
+        'name': 'most_severe_accidents_table',
+        'data': {'title': get_most_severe_accidents_table_text(location_text),
+                 'table': get_most_severe_accidents_table(location_info, start_time, end_time)}
+        'meta': {}}
+    output['widgets'].append(most_severe_accidents_table)
+
+    # street view
+    street_view = {'name': 'street_view',
+                   'longitude': location_info['lon'],
+                   'latitude': location_info['lat']}
+    output['widgets'].append(street_view)
+
+
+    # accidents heat map
+    accidents_heat_map = {'name': 'accidents_heat_map',
+                          'data': get_accidents_heat_map(table_obj=AccidentMarkerView,
+                                                         filters=location_info,
+                                                         start_time=start_time,
+                                                         end_time=end_time),
+                          'meta': {}}
+    output['widgets'].append(accidents_heat_map)
+
+    # injured count by accident year
+    injured_count_by_accident_year = {'name': 'injured_count_by_accident_year',
+                                       'data': get_accidents_stats(table_obj=InvolvedMarkerView, filters=get_injured_filters(location_info), group_by='accident_year', count='accident_year', start_time=start_time, end_time=end_time),
+                                       'meta': {}}
+    output['widgets'].append(injured_count_by_accident_year)
+
+    # accident count on day light
+    accident_count_by_day_night = {'name': 'accident_count_by_day_night',
+                                   'data' : get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='day_night_hebrew', count='day_night_hebrew', start_time=start_time, end_time=end_time),
+                                    'meta': {}}
+    output['widgets'].append(accident_count_by_day_night)
+
+    # accidents distribution count by hour
+    accidents_count_by_hour = {'name': 'accidents_count_by_hour',
+                                            'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_hour', count='accident_hour', start_time=start_time, end_time=end_time),
+                                            'meta': {}}
+    output['widgets'].append(accidents_count_by_hour)
+
+    # accident count by road_light
+    accident_count_by_road_light = {'name': 'accident_count_by_road_light',
+                                   'data' : get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='road_light_hebrew', count='road_light_hebrew', start_time=start_time, end_time=end_time),
+                                    'meta': {}}
+    output['widgets'].append(accident_count_by_road_light)
+
+    # injured count per age group
+    data_of_injured_count_per_age_group_raw = get_accidents_stats(table_obj=InvolvedMarkerView, filters=get_injured_filters(location_info), group_by='age_group_hebrew', count='age_group_hebrew', start_time=start_time, end_time=end_time)
+    data_of_injured_count_per_age_group = filter_and_group_injured_count_per_age_group(data_of_injured_count_per_age_group_raw)
+
+    injured_count_per_age_group = {'name': 'injured_count_per_age_group',
+                                   'data': data_of_injured_count_per_age_group,
+                                   'meta': {}}
+    output['widgets'].append(injured_count_per_age_group)
+
+    # accident_type count
+    accident_count_by_accident_type = {'name': 'accident_count_by_accident_type',
+                                      'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_type_hebrew', count='accident_type_hebrew', start_time=start_time, end_time=end_time),
+                                       'meta': {}}
+    output['widgets'].append(accident_count_by_accident_type)
+
+    # accident count by accident year
+    accident_count_by_accident_year = {'name': 'accident_count_by_accident_year',
+                                       'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_year', count='accident_year', start_time=start_time, end_time=end_time),
+                                       'meta': {}}
+    output['widgets'].append(accident_count_by_accident_year)
+
+    return Response(json.dumps(output, default=str), mimetype="application/json")
+
+
+def get_embedded_reports():
+    logging.debug('getting embedded reports')
+    embedded_reports = db.session.query(EmbeddedReports).all()
+    embedded_reports_list = [{"id": x.id,
+                              "report_name_english": x.report_name_english,
+                              "report_name_hebrew": x.report_name_hebrew,
+                              "url": x.url} for x in embedded_reports]
+    return embedded_reports_list
+
+
+@app.route("/api/embedded-reports", methods=["GET"])
+@user_optional
+def embedded_reports_api():
+    embedded_reports_list = get_embedded_reports()
+    response = Response(json.dumps(embedded_reports_list, default=str), mimetype="application/json")
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response

@@ -1584,12 +1584,16 @@ def get_injured_filters(location_info):
 
 
 def get_most_severe_accidents(table_obj, filters, start_time, end_time, limit=10):
+    entities = 'longitude', 'latitude', 'accident_severity_hebrew', 'accident_timestamp', 'accident_type_hebrew'
+    return get_most_severe_accidents_with_entities(table_obj, filters, entities, start_time, end_time, limit=10)
+
+
+def get_most_severe_accidents_with_entities(table_obj, filters, entities, start_time, end_time, limit=10):
     filters = filters or {}
     filters['provider_code'] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
     query = get_query(table_obj, filters, start_time, end_time)
-    query = query.with_entities('longitude', 'latitude', 'accident_severity_hebrew', 'accident_timestamp',
-                                'accident_type_hebrew')
-    query = query.order_by(getattr(table_obj,"accident_severity"), getattr(table_obj,"accident_timestamp").desc())
+    query = query.with_entities(*entities)
+    query = query.order_by(getattr(table_obj, "accident_severity"), getattr(table_obj, "accident_timestamp").desc())
     query = query.limit(limit)
     df = pd.read_sql_query(query.statement, query.session.bind)
     df.columns = [c.replace('_hebrew', '') for c in df.columns]
@@ -1653,6 +1657,7 @@ def infographics_data():
     output = {}
 
     location_info = extract_news_flash_location(request.values.get('news_flash_id'))
+    logging.debug('location_info:{}'.format(location_info))
     if location_info is None:
         return Response({})
     location_info = location_info['data']
@@ -1682,6 +1687,15 @@ def infographics_data():
                             'data': get_most_severe_accidents(table_obj=AccidentMarkerView, filters=location_info, start_time=start_time, end_time=end_time),
                             'meta': {}}
     output['widgets'].append(most_severe_accidents)
+
+    # most severe accidents additional info
+    most_severe_accidents_additional_info = {
+        'name': 'most_severe_accidents_additional_info',
+        'headline': gen_news_flash_location_text(request.values.get('news_flash_id')),
+        'data': get_most_severe_accidents_additional_info(location_info, start_time, end_time),
+        'meta': {}}
+    output['widgets'].append(most_severe_accidents_additional_info)
+
     # accident_severity count
     accident_count_by_severity = {'name': 'accident_count_by_severity',
                                   'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_severity_hebrew', count='accident_severity_hebrew', start_time=start_time, end_time=end_time),
@@ -1762,3 +1776,76 @@ def embedded_reports_api():
     response = Response(json.dumps(embedded_reports_list, default=str), mimetype="application/json")
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
+
+
+def get_most_severe_accidents_additional_info(location_info, start_time, end_time):
+    entities = 'id', 'provider_code', 'accident_timestamp', 'accident_type_hebrew'
+    accidents = get_most_severe_accidents_with_entities(
+        table_obj=AccidentMarkerView,
+        filters=location_info,
+        entities=entities,
+        start_time=start_time,
+        end_time=end_time)
+    logging.debug('accidents:{}'.format(accidents))
+    # Add casualties
+    for accident in accidents:
+        accident['type'] = accident['accident_type']
+        ts = accident['accident_timestamp']
+        ts = str(ts).split(' ')
+        accident['date'] = convert_yyyy_mm_dd_to_dd_mm_yy(ts[0])
+        accident['hour'] = ts[1][0:5]
+        num = get_casualties_count_in_accident(accident['id'], accident['provider_code'], 1)
+        accident['#dead'] = num
+        num = get_casualties_count_in_accident(accident['id'], accident['provider_code'], [2, 3])
+        accident['#injured'] = num
+        del accident['accident_timestamp'], accident['accident_type'], accident['id'], accident['provider_code']
+    return accidents
+
+
+def convert_yyyy_mm_dd_to_dd_mm_yy(date):
+    return '{}/{}/{}'.format(int(date[8:10]), int(date[5:7]), int(date[2:4]))
+
+
+# count of dead and severely injured
+def get_casualties_count_in_accident(accident_id, provider_code, injury_severity):
+    filters = {'accident_id': accident_id, 'provider_code': provider_code, 'injury_severity': injury_severity}
+    casualties = get_accidents_stats(table_obj=InvolvedMarkerView, filters=filters,
+                                     group_by='injury_severity', count='injury_severity')
+    res = 0
+    for ca in casualties:
+        res += ca['count']
+    return res
+
+
+# generate text describing location or road segment of news flash
+# to be used by most severe accidents additional info widget
+def gen_news_flash_location_text(news_flash_id):
+    news_flash_item = db.session.query(NewsFlash).filter(NewsFlash.id==news_flash_id).first()
+    logging.debug('news_flash_item:{}'.format(news_flash_item))
+    nf = news_flash_item.serialize()
+    logging.debug('news flash serialized:{}'.format(nf))
+    logging.debug('news_flash_id:{}({})'.format(news_flash_id, type(nf)))
+    resolution = nf['resolution'] if nf['resolution'] else ''
+    yishuv_name = nf['yishuv_name'] if nf['yishuv_name'] else ''
+    road1 = str(int(nf['road1'])) if nf['road1'] else ''
+    road2 = str(int(nf['road2'])) if nf['road2'] else ''
+    street1_hebrew = nf['street1_hebrew'] if nf['street1_hebrew'] else ''
+    road_segment_name = nf['road_segment_name'] if nf['road_segment_name'] else ''
+    if resolution == 'כביש בינעירוני' and road1 and road_segment_name:
+        res = 'כביש ' + road1 + ' במקטע ' + road_segment_name
+    elif resolution == 'עיר' and not yishuv_name:
+        res = nf['location']
+    elif resolution == 'עיר' and yishuv_name:
+        res = nf['yishuv_name']
+    elif resolution == 'צומת בינעירוני' and road1 and road2:
+        res = 'צומת כביש ' + road1 + ' עם כביש ' + road2
+    elif resolution == 'צומת בינעירוני' and road1 and road_segment_name:
+        res = 'כביש ' + road1 + ' במקטע ' + road_segment_name
+    elif resolution == 'רחוב' and yishuv_name and street1_hebrew:
+        res = ' רחוב ' + street1_hebrew + ' ב' + yishuv_name
+    else:
+        logging.warning("Did not found quality resolution. Using location field. News Flash id:{}".format(nf['id']))
+        res = nf['location']
+    logging.debug('{}'.format(res))
+    return res
+

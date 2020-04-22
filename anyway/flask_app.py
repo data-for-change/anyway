@@ -1585,7 +1585,7 @@ def get_injured_filters(location_info):
 
 def get_most_severe_accidents(table_obj, filters, start_time, end_time, limit=10):
     entities = 'longitude', 'latitude', 'accident_severity_hebrew', 'accident_timestamp', 'accident_type_hebrew'
-    return get_most_severe_accidents_with_entities(table_obj, filters, entities, start_time, end_time, limit=10)
+    return get_most_severe_accidents_with_entities(table_obj, filters, entities, start_time, end_time, limit)
 
 
 def get_most_severe_accidents_with_entities(table_obj, filters, entities, start_time, end_time, limit=10):
@@ -1688,13 +1688,20 @@ def infographics_data():
                             'meta': {}}
     output['widgets'].append(most_severe_accidents)
 
-    # most severe accidents additional info
-    most_severe_accidents_additional_info = {
-        'name': 'most_severe_accidents_additional_info',
+    # most severe accidents table
+    most_severe_accidents_table = {
+        'name': 'most_severe_accidents_table',
         'headline': gen_news_flash_location_text(request.values.get('news_flash_id')),
-        'data': get_most_severe_accidents_additional_info(location_info, start_time, end_time),
+        'data': get_most_severe_accidents_table(location_info, start_time, end_time),
         'meta': {}}
-    output['widgets'].append(most_severe_accidents_additional_info)
+    output['widgets'].append(most_severe_accidents_table)
+
+
+    # street views
+    street_view = {'name': 'street_view'
+                   'longitude': location_info['lon'],
+                   'latitude': location_info['lat']}
+    output['widgets'].append(street_view)
 
     # accident_severity count
     accident_count_by_severity = {'name': 'accident_count_by_severity',
@@ -1778,7 +1785,7 @@ def embedded_reports_api():
     return response
 
 
-def get_most_severe_accidents_additional_info(location_info, start_time, end_time):
+def get_most_severe_accidents_table(location_info, start_time, end_time):
     entities = 'id', 'provider_code', 'accident_timestamp', 'accident_type_hebrew'
     accidents = get_most_severe_accidents_with_entities(
         table_obj=AccidentMarkerView,
@@ -1795,9 +1802,9 @@ def get_most_severe_accidents_additional_info(location_info, start_time, end_tim
         accident['date'] = convert_yyyy_mm_dd_to_dd_mm_yy(ts[0])
         accident['hour'] = ts[1][0:5]
         num = get_casualties_count_in_accident(accident['id'], accident['provider_code'], 1)
-        accident['#dead'] = num
+        accident['killed_count'] = num
         num = get_casualties_count_in_accident(accident['id'], accident['provider_code'], [2, 3])
-        accident['#injured'] = num
+        accident['injured_count'] = num
         del accident['accident_timestamp'], accident['accident_type'], accident['id'], accident['provider_code']
     return accidents
 

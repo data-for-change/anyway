@@ -18,7 +18,7 @@ psycopg2
 yuicompressor
 Flask-Admin
 Flask-Security
-WTForms
+WTForms==2.2.1
 sendgrid
 python-dateutil
 alembic

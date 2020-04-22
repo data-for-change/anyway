@@ -137,7 +137,7 @@ def generate_csv(results):
             output.writeheader()
 
         row = {k: v.encode('utf8')
-        if type(v) is six.text_type else v
+               if type(v) is six.text_type else v
                for k, v in iteritems(serialized)}
         output.writerow(row)
         yield output_file.getvalue()
@@ -222,7 +222,7 @@ def markers():
             "Content-Disposition": 'attachment; '
                                    'filename="Anyway-accidents-from-{0}-to-{1}.csv"'
                         .format(kwargs["start_date"].strftime(date_format), kwargs["end_date"].strftime(date_format))
-        })
+                        })
 
     else:  # defaults to json
         return generate_json(accident_markers, rsa_markers, discussions, is_thin, total_records=result.total_records)
@@ -688,8 +688,8 @@ def injured_around_schools_months_graphs_data_api():
             for month in list(df_month['accident_month_hebrew'].unique()):
                 for injury_severity in list(df_injury_severity['injury_severity_hebrew'].unique()):
                     if month not in list(df.accident_month_hebrew.unique()) \
-                            or injury_severity not in list(
-                        df[df.accident_month_hebrew == month].injury_severity_hebrew.unique()):
+                        or injury_severity not in list(
+                            df[df.accident_month_hebrew == month].injury_severity_hebrew.unique()):
                         df = df.append({'school_id': school_id,
                                         'accident_month_hebrew': month,
                                         'injury_severity_hebrew': injury_severity,
@@ -1007,7 +1007,7 @@ def index(marker=None, message=None):
             context['discussion'] = marker.identifier
         else:
             message = gettext(u"Discussion not found:") + \
-                      request.values['discussion']
+                request.values['discussion']
     if 'start_date' in request.values:
         context['start_date'] = string2timestamp(request.values['start_date'])
     elif marker:
@@ -1724,7 +1724,8 @@ def get_most_severe_accidents_with_entities(table_obj, filters, entities, start_
         CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
     query = get_query(table_obj, filters, start_time, end_time)
     query = query.with_entities(*entities)
-    query = query.order_by(getattr(table_obj, "accident_severity"), getattr(table_obj, "accident_timestamp").desc())
+    query = query.order_by(getattr(table_obj, "accident_severity"), getattr(
+        table_obj, "accident_timestamp").desc())
     query = query.limit(limit)
     df = pd.read_sql_query(query.statement, query.session.bind)
     df.columns = [c.replace('_hebrew', '') for c in df.columns]
@@ -1761,7 +1762,8 @@ def filter_and_group_injured_count_per_age_group(data_of_ages):
         else:
             match_parsing = re.match("([0-9]{2})\\+", age_range)  # e.g  85+
             if match_parsing:
-                min_age_raw, max_age_raw = match_parsing.group(1), 200  # We assume that no body live beyond age 200
+                # We assume that no body live beyond age 200
+                min_age_raw, max_age_raw = match_parsing.group(1), 200
             else:
                 return_dict_by_required_age_group["unknown"] += count
                 continue
@@ -1788,13 +1790,15 @@ def get_most_severe_accidents_table_text(location_text):
 
 
 def get_accident_count_by_severity_text(location_info, location_text, start_time, end_time):
-    count_by_severity = get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_severity_hebrew', count='accident_severity_hebrew', start_time=start_time, end_time=end_time)
+    count_by_severity = get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,
+                                            group_by='accident_severity_hebrew', count='accident_severity_hebrew', start_time=start_time, end_time=end_time)
     severity_text = ''
     total_accidents_count = 0
     start_year = start_time.year
     end_year = end_time.year
     for severity_and_count in count_by_severity:
-        severity_text += str(severity_and_count['count']) + ' בחומרה ' + severity_and_count['accident_severity'] + '\n'
+        severity_text += str(severity_and_count['count']) + \
+            ' בחומרה ' + severity_and_count['accident_severity'] + '\n'
         total_accidents_count += severity_and_count['count']
 
     return 'בין השנים ' + str(start_year) + '-' + str(end_year) + ',\n' \
@@ -1818,9 +1822,11 @@ def get_most_severe_accidents_table(location_info, start_time, end_time):
         ts = str(ts).split(' ')
         accident['date'] = convert_yyyy_mm_dd_to_dd_mm_yy(ts[0])
         accident['hour'] = ts[1][0:5]
-        num = get_casualties_count_in_accident(accident['id'], accident['provider_code'], 1)
+        num = get_casualties_count_in_accident(
+            accident['id'], accident['provider_code'], 1)
         accident['killed_count'] = num
-        num = get_casualties_count_in_accident(accident['id'], accident['provider_code'], [2, 3])
+        num = get_casualties_count_in_accident(
+            accident['id'], accident['provider_code'], [2, 3])
         accident['injured_count'] = num
         del accident['accident_timestamp'], accident['accident_type'], accident['id'], accident['provider_code']
     return accidents
@@ -1832,7 +1838,8 @@ def convert_yyyy_mm_dd_to_dd_mm_yy(date):
 
 # count of dead and severely injured
 def get_casualties_count_in_accident(accident_id, provider_code, injury_severity):
-    filters = {'accident_id': accident_id, 'provider_code': provider_code, 'injury_severity': injury_severity}
+    filters = {'accident_id': accident_id,
+               'provider_code': provider_code, 'injury_severity': injury_severity}
     casualties = get_accidents_stats(table_obj=InvolvedMarkerView, filters=filters,
                                      group_by='injury_severity', count='injury_severity')
     res = 0
@@ -1844,7 +1851,8 @@ def get_casualties_count_in_accident(accident_id, provider_code, injury_severity
 # generate text describing location or road segment of news flash
 # to be used by most severe accidents additional info widget
 def gen_news_flash_location_text(news_flash_id):
-    news_flash_item = db.session.query(NewsFlash).filter(NewsFlash.id==news_flash_id).first()
+    news_flash_item = db.session.query(NewsFlash).filter(
+        NewsFlash.id == news_flash_id).first()
     logging.debug('news_flash_item:{}'.format(news_flash_item))
     nf = news_flash_item.serialize()
     logging.debug('news flash serialized:{}'.format(nf))
@@ -1868,7 +1876,8 @@ def gen_news_flash_location_text(news_flash_id):
     elif resolution == 'רחוב' and yishuv_name and street1_hebrew:
         res = ' רחוב ' + street1_hebrew + ' ב' + yishuv_name
     else:
-        logging.warning("Did not found quality resolution. Using location field. News Flash id:{}".format(nf['id']))
+        logging.warning(
+            "Did not found quality resolution. Using location field. News Flash id:{}".format(nf['id']))
         res = nf['location']
     logging.debug('{}'.format(res))
     return res
@@ -1939,7 +1948,6 @@ def infographics_data():
                    'latitude': gps['lat']}
     output['widgets'].append(street_view)
 
-
     # accidents heat map
     accidents_heat_map = {'name': 'accidents_heat_map',
                           'data': get_accidents_heat_map(table_obj=AccidentMarkerView,
@@ -1952,7 +1960,8 @@ def infographics_data():
     # injured count by accident year
     injured_count_by_accident_year = {'name': 'injured_count_by_accident_year',
                                       'data': get_accidents_stats(table_obj=InvolvedMarkerView,
-                                                                  filters=get_injured_filters(location_info),
+                                                                  filters=get_injured_filters(
+                                                                      location_info),
                                                                   group_by='accident_year', count='accident_year',
                                                                   start_time=start_time, end_time=end_time),
                                       'meta': {}}
@@ -1981,7 +1990,7 @@ def infographics_data():
                                                                 start_time=start_time, end_time=end_time),
                                     'meta': {}}
     output['widgets'].append(accident_count_by_road_light)
-
+    
     # accident count by road_segment
     top_road_segments_injured_per_km = {'name': 'top_road_segments_injured_per_km',
                                         'data': get_top_road_segments_injured_per_km(resolution=resolution,
@@ -1990,10 +1999,12 @@ def infographics_data():
                                                                                      end_time=end_time),
                                         'meta': {}}
     output['widgets'].append(top_road_segments_injured_per_km)
-    
+
     # injured count per age group
-    data_of_injured_count_per_age_group_raw = get_accidents_stats(table_obj=InvolvedMarkerView, filters=get_injured_filters(location_info), group_by='age_group_hebrew', count='age_group_hebrew', start_time=start_time, end_time=end_time)
-    data_of_injured_count_per_age_group = filter_and_group_injured_count_per_age_group(data_of_injured_count_per_age_group_raw)
+    data_of_injured_count_per_age_group_raw = get_accidents_stats(table_obj=InvolvedMarkerView, filters=get_injured_filters(
+        location_info), group_by='age_group_hebrew', count='age_group_hebrew', start_time=start_time, end_time=end_time)
+    data_of_injured_count_per_age_group = filter_and_group_injured_count_per_age_group(
+        data_of_injured_count_per_age_group_raw)
 
     injured_count_per_age_group = {'name': 'injured_count_per_age_group',
                                    'data': data_of_injured_count_per_age_group,
@@ -2002,7 +2013,7 @@ def infographics_data():
 
     # accident_type count
     accident_count_by_accident_type = {'name': 'accident_count_by_accident_type',
-                                      'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_type_hebrew', count='accident_type_hebrew', start_time=start_time, end_time=end_time),
+                                       'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_type_hebrew', count='accident_type_hebrew', start_time=start_time, end_time=end_time),
                                        'meta': {}}
     output['widgets'].append(accident_count_by_accident_type)
 

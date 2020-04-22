@@ -1745,6 +1745,20 @@ def gen_news_flash_location_text(news_flash_id):
     return res
 
 
+def get_front_collision_relative_to_other(accident_type_data_group):
+    accident_type_data = accident_type_data_group['data']
+    sum_front_collision = 0
+    total_other_accidents = 0
+
+    for accident_type_row in accident_type_data:
+        if accident_type_row['accident_type'] == 'התנגשות חזית בחזית':
+            sum_front_collision += accident_type_row['count']
+        else:
+            total_other_accidents += accident_type_row['count']
+
+    return {'התנגשות חזית בחזית': sum_front_collision, 'תאונות אחרות': total_other_accidents}
+
+
 @app.route('/api/infographics_data', methods=['GET'])
 def infographics_data():
 
@@ -1779,6 +1793,11 @@ def infographics_data():
     end_time = datetime.date.today()
     start_time = datetime.date(end_time.year - number_of_years_ago_to_pull, 1, 1)
 
+    # accident_type count - data pull only
+    accident_count_by_accident_type = {'name': 'accident_count_by_accident_type',
+                                      'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_type_hebrew', count='accident_type_hebrew', start_time=start_time, end_time=end_time),
+                                       'meta': {}}
+
     # accident_severity count
     accident_count_by_severity = {'name': 'accident_count_by_severity',
                                   'data': {'text': get_accident_count_by_severity_text(location_info=location_info,
@@ -1809,6 +1828,11 @@ def infographics_data():
                    'latitude': gps['lat']}
     output['widgets'].append(street_view)
 
+    # front collision relative to other accidents
+    front_collision_relative_to_other = {'name': 'front_collision_count_relative_to_other_accident_count',
+                                         'data': get_front_collision_relative_to_other(accident_count_by_accident_type),
+                                         'meta': {}}
+    output['widgets'].append(front_collision_relative_to_other)
 
     # accidents heat map
     accidents_heat_map = {'name': 'accidents_heat_map',
@@ -1852,10 +1876,7 @@ def infographics_data():
                                    'meta': {}}
     output['widgets'].append(injured_count_per_age_group)
 
-    # accident_type count
-    accident_count_by_accident_type = {'name': 'accident_count_by_accident_type',
-                                      'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_type_hebrew', count='accident_type_hebrew', start_time=start_time, end_time=end_time),
-                                       'meta': {}}
+    # accident_type count insert to widget list
     output['widgets'].append(accident_count_by_accident_type)
 
     # accident count by accident year

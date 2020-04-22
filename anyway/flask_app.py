@@ -1696,30 +1696,11 @@ def infographics_data():
         'meta': {}}
     output['widgets'].append(most_severe_accidents_table)
 
-
-    # street views
+    # street view
     street_view = {'name': 'street_view',
                    'longitude': location_info['lon'],
                    'latitude': location_info['lat']}
     output['widgets'].append(street_view)
-
-    # accident_severity count
-    accident_count_by_severity = {'name': 'accident_count_by_severity',
-                                  'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_severity_hebrew', count='accident_severity_hebrew', start_time=start_time, end_time=end_time),
-                                  'meta': {}}
-    output['widgets'].append(accident_count_by_severity)
-
-    # accident_type count
-    accident_count_by_accident_type = {'name': 'accident_count_by_accident_type',
-                                      'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_type_hebrew', count='accident_type_hebrew', start_time=start_time, end_time=end_time),
-                                       'meta': {}}
-    output['widgets'].append(accident_count_by_accident_type)
-
-    # accident count by accident year
-    accident_count_by_accident_year = {'name': 'accident_count_by_accident_year',
-                                       'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_year', count='accident_year', start_time=start_time, end_time=end_time),
-                                       'meta': {}}
-    output['widgets'].append(accident_count_by_accident_year)
 
     # accidents heat map
     accidents_heat_map = {'name': 'accidents_heat_map',
@@ -1762,6 +1743,24 @@ def infographics_data():
                                    'data': data_of_injured_count_per_age_group,
                                    'meta': {}}
     output['widgets'].append(injured_count_per_age_group)
+
+    # accident_severity count
+    accident_count_by_severity = {'name': 'accident_count_by_severity',
+                                  'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_severity_hebrew', count='accident_severity_hebrew', start_time=start_time, end_time=end_time),
+                                  'meta': {}}
+    output['widgets'].append(accident_count_by_severity)
+
+    # accident_type count
+    accident_count_by_accident_type = {'name': 'accident_count_by_accident_type',
+                                      'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_type_hebrew', count='accident_type_hebrew', start_time=start_time, end_time=end_time),
+                                       'meta': {}}
+    output['widgets'].append(accident_count_by_accident_type)
+
+    # accident count by accident year
+    accident_count_by_accident_year = {'name': 'accident_count_by_accident_year',
+                                       'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_year', count='accident_year', start_time=start_time, end_time=end_time),
+                                       'meta': {}}
+    output['widgets'].append(accident_count_by_accident_year)
 
     return Response(json.dumps(output, default=str), mimetype="application/json")
 

@@ -1990,7 +1990,7 @@ def infographics_data():
                                                                 start_time=start_time, end_time=end_time),
                                     'meta': {}}
     output['widgets'].append(accident_count_by_road_light)
-    
+
     # accident count by road_segment
     top_road_segments_injured_per_km = {'name': 'top_road_segments_injured_per_km',
                                         'data': get_top_road_segments_injured_per_km(resolution=resolution,

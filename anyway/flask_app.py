@@ -1655,10 +1655,12 @@ def get_most_severe_accidents_table_text(location_text):
     return 'תאונות חמורות ב' + location_text
 
 
-def get_accident_count_by_severity_text(location_info, start_year, end_year):
+def get_accident_count_by_severity_text(location_info, start_time, end_time):
     count_by_severity = get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_severity_hebrew', count='accident_severity_hebrew', start_time=start_time, end_time=end_time)
     severity_text = ''
     total_accidents_count = 0
+    start_year = start_time.year
+    end_year = end_time.year
     for severity, count in count_by_severity.items():
         severity_text += str(count) + 'בחומרה ' + severity + '\n'
         total_accidents_count += count
@@ -1775,9 +1777,9 @@ def infographics_data():
 
     # accident_severity count
     accident_count_by_severity = {'name': 'accident_count_by_severity',
-                                  'data': {'text': get_accident_count_by_severity_text(location_inf=location_info,
-                                                                                       start_year=start_time.year,
-                                                                                       end_year=end_time.year)},
+                                  'data': {'text': get_accident_count_by_severity_text(location_info=location_info,
+                                                                                       start_time=start_time,
+                                                                                       end_time=end_time)},
                                   'meta': {}}
     output['widgets'].append(accident_count_by_severity)
 

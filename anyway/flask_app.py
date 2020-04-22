@@ -1698,7 +1698,7 @@ def infographics_data():
 
 
     # street views
-    street_view = {'name': 'street_view'
+    street_view = {'name': 'street_view',
                    'longitude': location_info['lon'],
                    'latitude': location_info['lat']}
     output['widgets'].append(street_view)

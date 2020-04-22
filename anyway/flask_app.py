@@ -1790,7 +1790,7 @@ def infographics_data():
     most_severe_accidents_table = {
         'name': 'most_severe_accidents_table',
         'data': {'title': get_most_severe_accidents_table_text(location_text),
-                 'table': get_most_severe_accidents_table(location_info, start_time, end_time)}
+                 'table': get_most_severe_accidents_table(location_info, start_time, end_time)},
         'meta': {}}
     output['widgets'].append(most_severe_accidents_table)
 

@@ -1540,6 +1540,8 @@ def extract_news_flash_location(news_flash_id):
     data = {'resolution': resolution}
     for field in resolution_dict[resolution]:
         data[field] = getattr(news_flash_obj, field)
+    for field in ['lon', 'lat']:
+        data[field] = getattr(news_flash_obj, field)
     return {'name': 'location', 'data': data}
 
 def get_query(table_obj, filters, start_time, end_time):

@@ -1661,9 +1661,9 @@ def get_accident_count_by_severity_text(location_info, start_time, end_time):
     total_accidents_count = 0
     start_year = start_time.year
     end_year = end_time.year
-    for severity, count in count_by_severity.items():
-        severity_text += str(count) + 'בחומרה ' + severity + '\n'
-        total_accidents_count += count
+    for severity_and_count in count_by_severity:
+        severity_text += str(severity_and_count['count']) + 'בחומרה ' + severity_and_count['accident_severity'] + '\n'
+        total_accidents_count += severity_and_count['count']
 
     return 'בין השנים ' + str(start_year) + '-' + str(end_year) + ',\n' \
            + 'ב' + location_info + 'התרחשו ' + str(total_accidents_count) + 'תאונות.' \

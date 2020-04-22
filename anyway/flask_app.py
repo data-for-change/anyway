@@ -1660,7 +1660,7 @@ def get_query(table_obj, filters, start_time, end_time):
     return query
 
 
-def get_top_road_segments_injured_per_km(resolution, location_info, start_time=None, end_time=None):
+def get_top_road_segments_accidents_per_km(resolution, location_info, start_time=None, end_time=None, limit=5):
     if resolution != 'כביש בינעירוני':  # relevent for non urban roads only
         return {}
 
@@ -1680,7 +1680,8 @@ def get_top_road_segments_injured_per_km(resolution, location_info, start_time=N
         .filter(AccidentMarkerView.road1 == location_info['road1']) \
         .filter(AccidentMarkerView.road_segment_name is not None) \
         .group_by(AccidentMarkerView.road_segment_name, RoadSegments.from_km, RoadSegments.to_km) \
-        .order_by(desc('accidents_per_km'))
+        .order_by(desc('accidents_per_km')) \
+        .limit(limit)
 
     result = pd.read_sql_query(query.statement, query.session.bind)
     return result.to_dict(orient='records')
@@ -1992,13 +1993,13 @@ def infographics_data():
     output['widgets'].append(accident_count_by_road_light)
 
     # accident count by road_segment
-    top_road_segments_injured_per_km = {'name': 'top_road_segments_injured_per_km',
-                                        'data': get_top_road_segments_injured_per_km(resolution=resolution,
+    top_road_segments_accidents_per_km = {'name': 'top_road_segments_accidents_per_km',
+                                        'data': get_top_road_segments_accidents_per_km(resolution=resolution,
                                                                                      location_info=location_info,
                                                                                      start_time=start_time,
                                                                                      end_time=end_time),
                                         'meta': {}}
-    output['widgets'].append(top_road_segments_injured_per_km)
+    output['widgets'].append(top_road_segments_accidents_per_km)
 
     # injured count per age group
     data_of_injured_count_per_age_group_raw = get_accidents_stats(table_obj=InvolvedMarkerView, filters=get_injured_filters(

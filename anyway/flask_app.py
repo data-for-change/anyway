@@ -28,6 +28,8 @@ from six import StringIO, iteritems
 from six.moves import http_client
 from sqlalchemy import and_, not_, or_
 from sqlalchemy import func
+from sqlalchemy import desc
+from sqlalchemy import cast, Numeric
 from sqlalchemy.orm import load_only
 from webassets import Environment as AssetsEnvironment
 from webassets.ext.jinja2 import AssetsExtension
@@ -44,7 +46,8 @@ from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved,
                      LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School, SchoolWithDescription,
                      InjuredAroundSchool, InjuredAroundSchoolAllData, Sex, AccidentMonth, InjurySeverity, ReportProblem,
                      EngineVolume, PopulationType, Region, District, NaturalArea, MunicipalStatus, YishuvShape,
-                     TotalWeight, DrivingDirections, AgeGroup, AccidentMarkerView, InvolvedMarkerView, EmbeddedReports)
+                     TotalWeight, DrivingDirections, AgeGroup, AccidentMarkerView, InvolvedMarkerView, EmbeddedReports,
+                     RoadSegments)
 from .oauth import OAuthSignIn
 from .parsers import resolution_dict
 
@@ -67,7 +70,8 @@ app.config['OAUTH_CREDENTIALS'] = {
 
 assets = Environment()
 assets.init_app(app)
-assets_env = AssetsEnvironment(os.path.join(utilities._PROJECT_ROOT, 'static'), '/static')
+assets_env = AssetsEnvironment(os.path.join(
+    utilities._PROJECT_ROOT, 'static'), '/static')
 
 CORS(app, resources={r"/location-subscription": {"origins": "*"},
                      r"/report-problem": {"origins": "*"},
@@ -77,7 +81,8 @@ CORS(app, resources={r"/location-subscription": {"origins": "*"},
 
 jinja_environment = jinja2.Environment(
     autoescape=True,
-    loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), "../templates")),
+    loader=jinja2.FileSystemLoader(os.path.join(
+        os.path.dirname(__file__), "../templates")),
     extensions=[AssetsExtension])
 jinja_environment.assets_environment = assets_env
 
@@ -132,7 +137,7 @@ def generate_csv(results):
             output.writeheader()
 
         row = {k: v.encode('utf8')
-        if type(v) is six.text_type else v
+               if type(v) is six.text_type else v
                for k, v in iteritems(serialized)}
         output.writerow(row)
         yield output_file.getvalue()
@@ -200,12 +205,15 @@ def markers():
     kwargs = get_kwargs()
     logging.debug('querying markers in bounding box: %s' % kwargs)
     is_thin = (kwargs['zoom'] < CONST.MINIMAL_ZOOM)
-    result = AccidentMarker.bounding_box_query(is_thin, yield_per=50, involved_and_vehicles=False, **kwargs)
+    result = AccidentMarker.bounding_box_query(
+        is_thin, yield_per=50, involved_and_vehicles=False, **kwargs)
     accident_markers = result.accident_markers
     rsa_markers = result.rsa_markers
 
-    discussion_args = ('ne_lat', 'ne_lng', 'sw_lat', 'sw_lng', 'show_discussions')
-    discussions = DiscussionMarker.bounding_box_query(**{arg: kwargs[arg] for arg in discussion_args})
+    discussion_args = ('ne_lat', 'ne_lng', 'sw_lat',
+                       'sw_lng', 'show_discussions')
+    discussions = DiscussionMarker.bounding_box_query(
+        **{arg: kwargs[arg] for arg in discussion_args})
 
     if request.values.get('format') == 'csv':
         date_format = '%Y-%m-%d'
@@ -214,7 +222,7 @@ def markers():
             "Content-Disposition": 'attachment; '
                                    'filename="Anyway-accidents-from-{0}-to-{1}.csv"'
                         .format(kwargs["start_date"].strftime(date_format), kwargs["end_date"].strftime(date_format))
-        })
+                        })
 
     else:  # defaults to json
         return generate_json(accident_markers, rsa_markers, discussions, is_thin, total_records=result.total_records)
@@ -225,7 +233,8 @@ def markers():
 def markers_by_yishuv_symbol():
     logging.debug('getting markers by yishuv symbol')
     yishuv_symbol = request.values.get('yishuv_symbol')
-    markers = db.session.query(AccidentMarker).filter(AccidentMarker.yishuv_symbol == yishuv_symbol).all()
+    markers = db.session.query(AccidentMarker).filter(
+        AccidentMarker.yishuv_symbol == yishuv_symbol).all()
     entries = [marker.serialize(True) for marker in markers]
     return jsonify({"markers": entries})
 
@@ -235,7 +244,8 @@ def markers_by_yishuv_symbol():
 def markers_hebrew_by_yishuv_symbol():
     logging.debug('getting hebrew markers by yishuv symbol')
     yishuv_symbol = request.values.get('yishuv_symbol')
-    markers = db.session.query(AccidentMarkerView).filter(AccidentMarkerView.yishuv_symbol == yishuv_symbol).all()
+    markers = db.session.query(AccidentMarkerView).filter(
+        AccidentMarkerView.yishuv_symbol == yishuv_symbol).all()
     entries = [marker.serialize() for marker in markers]
     return Response(json.dumps(entries, default=str), mimetype="application/json")
 
@@ -270,7 +280,8 @@ def yishuv_symbol_to_name():
         AccidentMarkerView.yishuv_name,
         AccidentMarkerView.yishuv_symbol
     ).all()
-    entries = [{"yishuv_name": x.yishuv_name, "yishuv_symbol": x.yishuv_symbol} for x in markers]
+    entries = [{"yishuv_name": x.yishuv_name,
+                "yishuv_symbol": x.yishuv_symbol} for x in markers]
     return Response(json.dumps(entries, default=str), mimetype="application/json")
 
 
@@ -285,7 +296,8 @@ def news_flash_filters():
     news_flash_obj = db.session.query(NewsFlash)
 
     # get all possible sources
-    sources = [str(source_name[0]) for source_name in db.session.query(NewsFlash.source).distinct().all()]
+    sources = [str(source_name[0]) for source_name in db.session.query(
+        NewsFlash.source).distinct().all()]
     if source:
         if source not in sources:
             return Response('{"message": "Requested source does not exist"}',
@@ -317,7 +329,8 @@ def news_flash_filters():
 
     news_flashes = news_flash_obj.all()
 
-    news_flashes_jsons = [news_flash.serialize() for news_flash in news_flashes]
+    news_flashes_jsons = [news_flash.serialize()
+                          for news_flash in news_flashes]
     return Response(json.dumps(news_flashes_jsons, default=str), mimetype="application/json")
 
 
@@ -335,7 +348,8 @@ def news_flash():
     news_flash_obj = db.session.query(NewsFlash)
 
     if news_flash_id is not None:
-        news_flash_obj = news_flash_obj.filter(NewsFlash.id == news_flash_id).first()
+        news_flash_obj = news_flash_obj.filter(
+            NewsFlash.id == news_flash_id).first()
         if news_flash_obj is not None:
             return Response(json.dumps(news_flash_obj.serialize(), default=str), mimetype="application/json")
         return Response(status=404)
@@ -344,7 +358,8 @@ def news_flash():
         news_flash_obj = news_flash_obj.filter(NewsFlash.road1 == road_number)
 
     # get all possible sources
-    sources = [str(source_name[0]) for source_name in db.session.query(NewsFlash.source).distinct().all()]
+    sources = [str(source_name[0]) for source_name in db.session.query(
+        NewsFlash.source).distinct().all()]
     if source:
         if source not in sources:
             return Response('{"message": "Requested source does not exist"}',
@@ -366,7 +381,8 @@ def news_flash():
                         mimetype='application/json')
 
     if road_segment == 'true':
-        news_flash_obj = news_flash_obj.filter(not_(NewsFlash.road_segment_name == None))
+        news_flash_obj = news_flash_obj.filter(
+            not_(NewsFlash.road_segment_name == None))
 
     news_flash_obj = news_flash_obj.filter(
         and_(NewsFlash.accident == True, not_(and_(NewsFlash.lat == 0, NewsFlash.lon == 0)),
@@ -379,14 +395,16 @@ def news_flash():
 
     news_flashes = news_flash_obj.all()
 
-    news_flashes_jsons = [news_flash.serialize() for news_flash in news_flashes]
+    news_flashes_jsons = [news_flash.serialize()
+                          for news_flash in news_flashes]
     return Response(json.dumps(news_flashes_jsons, default=str), mimetype="application/json")
 
 
 @app.route("/api/news-flash/<int:news_flash_id>", methods=["GET"])
 @user_optional
 def single_news_flash(news_flash_id):
-    news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == news_flash_id).first()
+    news_flash_obj = db.session.query(NewsFlash).filter(
+        NewsFlash.id == news_flash_id).first()
     if news_flash_obj is not None:
         return Response(json.dumps(news_flash_obj.serialize(), default=str), mimetype="application/json")
     return Response(status=404)
@@ -396,7 +414,7 @@ def single_news_flash(news_flash_id):
 @user_optional
 def schools_api():
     logging.debug('getting schools')
-    schools = db.session.query(School).filter(not_(and_(School.latitude == 0, School.longitude == 0)), \
+    schools = db.session.query(School).filter(not_(and_(School.latitude == 0, School.longitude == 0)),
                                               not_(and_(School.latitude == None, School.longitude == None))) \
         .with_entities(School.yishuv_symbol,
                        School.yishuv_name,
@@ -408,7 +426,8 @@ def schools_api():
                      "school_name": x.school_name,
                      "longitude": x.longitude,
                      "latitude": x.latitude} for x in schools]
-    response = Response(json.dumps(schools_list, default=str), mimetype="application/json")
+    response = Response(json.dumps(schools_list, default=str),
+                        mimetype="application/json")
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
@@ -418,8 +437,9 @@ def schools_api():
 def schools_description_api():
     logging.debug('getting schools with description')
     query_obj = db.session.query(SchoolWithDescription) \
-        .filter(not_(and_(SchoolWithDescription.latitude == 0, SchoolWithDescription.longitude == 0)), \
-                not_(and_(SchoolWithDescription.latitude == None, SchoolWithDescription.longitude == None)), \
+        .filter(not_(and_(SchoolWithDescription.latitude == 0, SchoolWithDescription.longitude == 0)),
+                not_(and_(SchoolWithDescription.latitude == None,
+                          SchoolWithDescription.longitude == None)),
                 or_(SchoolWithDescription.school_type == 'גן ילדים', SchoolWithDescription.school_type == 'בית ספר')) \
         .with_entities(SchoolWithDescription.school_id,
                        SchoolWithDescription.school_name,
@@ -434,7 +454,8 @@ def schools_description_api():
                        SchoolWithDescription.latitude)
     df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
     schools_list = df.to_dict(orient='records')
-    response = Response(json.dumps(schools_list, default=str), mimetype="application/json")
+    response = Response(json.dumps(schools_list, default=str),
+                        mimetype="application/json")
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
@@ -444,13 +465,15 @@ def schools_description_api():
 def schools_yishuvs_api():
     logging.debug('getting schools yishuvs')
     schools_yishuvs = db.session.query(SchoolWithDescription) \
-        .filter(not_(and_(SchoolWithDescription.latitude == 0, SchoolWithDescription.longitude == 0)), \
-                not_(and_(SchoolWithDescription.latitude == None, SchoolWithDescription.longitude == None)), \
+        .filter(not_(and_(SchoolWithDescription.latitude == 0, SchoolWithDescription.longitude == 0)),
+                not_(and_(SchoolWithDescription.latitude == None,
+                          SchoolWithDescription.longitude == None)),
                 or_(SchoolWithDescription.school_type == 'גן ילדים', SchoolWithDescription.school_type == 'בית ספר')) \
         .group_by(SchoolWithDescription.yishuv_name) \
         .with_entities(SchoolWithDescription.yishuv_name).all()
     schools_yishuvs_list = sorted([x[0] for x in schools_yishuvs])
-    response = Response(json.dumps(schools_yishuvs_list, default=str), mimetype="application/json")
+    response = Response(json.dumps(schools_yishuvs_list,
+                                   default=str), mimetype="application/json")
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
@@ -460,8 +483,9 @@ def schools_yishuvs_api():
 def schools_names_api():
     logging.debug('getting schools names')
     query_obj = db.session.query(SchoolWithDescription) \
-        .filter(not_(and_(SchoolWithDescription.latitude == 0, SchoolWithDescription.longitude == 0)), \
-                not_(and_(SchoolWithDescription.latitude == None, SchoolWithDescription.longitude == None)), \
+        .filter(not_(and_(SchoolWithDescription.latitude == 0, SchoolWithDescription.longitude == 0)),
+                not_(and_(SchoolWithDescription.latitude == None,
+                          SchoolWithDescription.longitude == None)),
                 or_(SchoolWithDescription.school_type == 'גן ילדים', SchoolWithDescription.school_type == 'בית ספר')) \
         .with_entities(SchoolWithDescription.yishuv_name,
                        SchoolWithDescription.school_name,
@@ -469,10 +493,12 @@ def schools_names_api():
                        SchoolWithDescription.latitude,
                        SchoolWithDescription.school_id)
     df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-    df = df.groupby(['yishuv_name', 'school_name', 'longitude', 'latitude']).min()
+    df = df.groupby(['yishuv_name', 'school_name',
+                     'longitude', 'latitude']).min()
     df = df.reset_index(drop=False)
     schools_names_ids = df.to_dict(orient='records')
-    response = Response(json.dumps(schools_names_ids, default=str), mimetype="application/json")
+    response = Response(json.dumps(schools_names_ids,
+                                   default=str), mimetype="application/json")
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
@@ -505,14 +531,16 @@ def injured_around_schools_api():
                                     'rank_in_yishuv': df.rank_in_yishuv.values[0]},
                                    ignore_index=True)
             final_list = df.to_dict(orient='records')
-            response = Response(json.dumps(final_list, default=str), mimetype="application/json")
+            response = Response(json.dumps(
+                final_list, default=str), mimetype="application/json")
             response.headers.add('Access-Control-Allow-Origin', '*')
             return response
         else:
             query_obj = db.session.query(SchoolWithDescription) \
                 .filter(SchoolWithDescription.school_id == school_id) \
                 .with_entities(SchoolWithDescription.school_id)
-            df_school_id = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+            df_school_id = pd.read_sql_query(
+                query_obj.statement, query_obj.session.bind)
             if not df_school_id.empty:
                 final_list = []
                 for year in report_years:
@@ -523,7 +551,8 @@ def injured_around_schools_api():
                                        'light_injured_count': 0,
                                        'total_injured_killed_count': 0,
                                        'rank_in_yishuv': None})
-                response = Response(json.dumps(final_list, default=str), mimetype="application/json")
+                response = Response(json.dumps(
+                    final_list, default=str), mimetype="application/json")
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 return response
 
@@ -544,7 +573,8 @@ def injured_around_schools_api():
         df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
         final_list = df.to_dict(orient='records')
         if not df.empty:
-            response = Response(json.dumps(final_list, default=str), mimetype="application/json")
+            response = Response(json.dumps(
+                final_list, default=str), mimetype="application/json")
             response.headers.add('Access-Control-Allow-Origin', '*')
             return response
         response = Response(status=404)
@@ -559,7 +589,8 @@ def injured_around_schools_api():
                                                                     InjuredAroundSchool.rank_in_yishuv)
     df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
     final_list = df.to_dict(orient='records')
-    response = Response(json.dumps(final_list, default=str), mimetype="application/json")
+    response = Response(json.dumps(final_list, default=str),
+                        mimetype="application/json")
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
@@ -584,11 +615,13 @@ def injured_around_schools_sex_graphs_data_api():
         query_obj = db.session.query(Sex) \
             .with_entities(Sex.sex_hebrew)
         df_sex = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-        df_sex = df_sex.groupby(['sex_hebrew']).size().reset_index(name='count')
+        df_sex = df_sex.groupby(
+            ['sex_hebrew']).size().reset_index(name='count')
         query_obj = db.session.query(SchoolWithDescription) \
             .filter(SchoolWithDescription.school_id == school_id) \
             .with_entities(SchoolWithDescription.school_id)
-        df_school_id = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+        df_school_id = pd.read_sql_query(
+            query_obj.statement, query_obj.session.bind)
         if not df.empty:
             for sex in list(df_sex['sex_hebrew'].unique()):
                 if sex not in list(df['sex_hebrew'].unique()):
@@ -597,7 +630,8 @@ def injured_around_schools_sex_graphs_data_api():
                                     'count_1': 0},
                                    ignore_index=True)
             final_list = df.to_dict(orient='records')
-            response = Response(json.dumps(final_list, default=str), mimetype="application/json")
+            response = Response(json.dumps(
+                final_list, default=str), mimetype="application/json")
             response.headers.add('Access-Control-Allow-Origin', '*')
             return response
         else:
@@ -607,7 +641,8 @@ def injured_around_schools_sex_graphs_data_api():
                     final_list.append({'school_id': school_id,
                                        'sex_hebrew': sex,
                                        'count_1': 0})
-                response = Response(json.dumps(final_list, default=str), mimetype="application/json")
+                response = Response(json.dumps(
+                    final_list, default=str), mimetype="application/json")
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 return response
     response = Response(status=404)
@@ -639,32 +674,38 @@ def injured_around_schools_months_graphs_data_api():
         df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
         query_obj = db.session.query(AccidentMonth) \
             .with_entities(AccidentMonth.accident_month_hebrew)
-        df_month = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-        df_month = df_month.groupby(['accident_month_hebrew']).size().reset_index(name='count')
+        df_month = pd.read_sql_query(
+            query_obj.statement, query_obj.session.bind)
+        df_month = df_month.groupby(
+            ['accident_month_hebrew']).size().reset_index(name='count')
         query_obj = db.session.query(InjurySeverity) \
             .with_entities(InjurySeverity.injury_severity_hebrew)
-        df_injury_severity = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-        df_injury_severity = df_injury_severity.groupby(['injury_severity_hebrew']).size().reset_index(name='count')
+        df_injury_severity = pd.read_sql_query(
+            query_obj.statement, query_obj.session.bind)
+        df_injury_severity = df_injury_severity.groupby(
+            ['injury_severity_hebrew']).size().reset_index(name='count')
         if not df.empty:
             for month in list(df_month['accident_month_hebrew'].unique()):
                 for injury_severity in list(df_injury_severity['injury_severity_hebrew'].unique()):
                     if month not in list(df.accident_month_hebrew.unique()) \
-                            or injury_severity not in list(
-                        df[df.accident_month_hebrew == month].injury_severity_hebrew.unique()):
+                        or injury_severity not in list(
+                            df[df.accident_month_hebrew == month].injury_severity_hebrew.unique()):
                         df = df.append({'school_id': school_id,
                                         'accident_month_hebrew': month,
                                         'injury_severity_hebrew': injury_severity,
                                         'count_1': 0},
                                        ignore_index=True)
             final_list = df.to_dict(orient='records')
-            response = Response(json.dumps(final_list, default=str), mimetype="application/json")
+            response = Response(json.dumps(
+                final_list, default=str), mimetype="application/json")
             response.headers.add('Access-Control-Allow-Origin', '*')
             return response
         else:
             query_obj = db.session.query(SchoolWithDescription) \
                 .filter(SchoolWithDescription.school_id == school_id) \
                 .with_entities(SchoolWithDescription.school_id)
-            df_school_id = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+            df_school_id = pd.read_sql_query(
+                query_obj.statement, query_obj.session.bind)
             if not df_school_id.empty:
                 final_list = []
                 for month in list(df_month['accident_month_hebrew'].unique()):
@@ -673,7 +714,8 @@ def injured_around_schools_months_graphs_data_api():
                                            'accident_month_hebrew': month,
                                            'injury_severity_hebrew': injury_severity,
                                            'count_1': 0})
-                response = Response(json.dumps(final_list, default=str), mimetype="application/json")
+                response = Response(json.dumps(
+                    final_list, default=str), mimetype="application/json")
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 return response
     response = Response(status=404)
@@ -689,8 +731,10 @@ def charts_data():
     accidents, vehicles, involved = AccidentMarker.bounding_box_query(is_thin=False, yield_per=50,
                                                                       involved_and_vehicles=True, **kwargs)
     accidents_list = [acc.serialize() for acc in accidents]
-    vehicles_list = [vehicles_data_refinement(veh.serialize()) for veh in vehicles]
-    involved_list = [involved_data_refinement(inv.serialize()) for inv in involved]
+    vehicles_list = [vehicles_data_refinement(
+        veh.serialize()) for veh in vehicles]
+    involved_list = [involved_data_refinement(
+        inv.serialize()) for inv in involved]
     return Response(json.dumps({'accidents': accidents_list, 'vehicles': vehicles_list, 'involved': involved_list}),
                     mimetype="application/json")
 
@@ -727,22 +771,26 @@ def get_involved_dict(provider_code, accident_year):
     involved = {}
     age_group = db.session.query(AgeGroup).filter(and_(AgeGroup.provider_code == provider_code,
                                                        AgeGroup.year == accident_year)).all()
-    involved["age_group"] = {g.id: g.age_group_hebrew for g in age_group} if age_group else None
+    involved["age_group"] = {
+        g.id: g.age_group_hebrew for g in age_group} if age_group else None
 
     population_type = db.session.query(PopulationType).filter(and_(PopulationType.provider_code == provider_code,
                                                                    PopulationType.year == accident_year)).all()
 
-    involved["population_type"] = {g.id: g.population_type_hebrew for g in population_type} if population_type else None
+    involved["population_type"] = {
+        g.id: g.population_type_hebrew for g in population_type} if population_type else None
 
     home_region = db.session.query(Region).filter(and_(Region.provider_code == provider_code,
                                                        Region.year == accident_year)).all()
 
-    involved["home_region"] = {g.id: g.region_hebrew for g in home_region} if home_region else None
+    involved["home_region"] = {
+        g.id: g.region_hebrew for g in home_region} if home_region else None
 
     home_district = db.session.query(District).filter(and_(District.provider_code == provider_code,
                                                            District.year == accident_year)).all()
 
-    involved["home_district"] = {g.id: g.district_hebrew for g in home_district} if home_district else None
+    involved["home_district"] = {
+        g.id: g.district_hebrew for g in home_district} if home_district else None
 
     home_natural_area = db.session.query(NaturalArea).filter(and_(NaturalArea.provider_code == provider_code,
                                                                   NaturalArea.year == accident_year)).all()
@@ -772,12 +820,14 @@ def get_vehicle_dict(provider_code, accident_year):
         .filter(and_(EngineVolume.provider_code == provider_code, EngineVolume.year == accident_year)) \
         .all()
 
-    vehicle["engine_volume"] = {g.id: g.engine_volume_hebrew for g in engine_volume} if engine_volume else None
+    vehicle["engine_volume"] = {
+        g.id: g.engine_volume_hebrew for g in engine_volume} if engine_volume else None
 
     total_weight = db.session.query(TotalWeight) \
         .filter(and_(TotalWeight.provider_code == provider_code, TotalWeight.year == accident_year)) \
         .all()
-    vehicle["total_weight"] = {g.id: g.total_weight_hebrew for g in total_weight} if total_weight else None
+    vehicle["total_weight"] = {
+        g.id: g.total_weight_hebrew for g in total_weight} if total_weight else None
 
     driving_directions = db.session.query(DrivingDirections) \
         .filter(and_(DrivingDirections.provider_code == provider_code, DrivingDirections.year == accident_year)) \
@@ -806,11 +856,14 @@ def marker_all():
     for inv in involved:
         obj = inv.serialize()
         new_inv = get_involved_dict(provider_code, accident_year)
-        obj["age_group"] = new_inv["age_group"].get(obj["age_group"]) if new_inv["age_group"] else None
+        obj["age_group"] = new_inv["age_group"].get(
+            obj["age_group"]) if new_inv["age_group"] else None
         obj["population_type"] = new_inv["population_type"].get(obj["population_type"]) if new_inv[
             "population_type"] else None
-        obj["home_region"] = new_inv["home_region"].get(obj["home_region"]) if new_inv["home_region"] else None
-        obj["home_district"] = new_inv["home_district"].get(obj["home_district"]) if new_inv["home_district"] else None
+        obj["home_region"] = new_inv["home_region"].get(
+            obj["home_region"]) if new_inv["home_region"] else None
+        obj["home_district"] = new_inv["home_district"].get(
+            obj["home_district"]) if new_inv["home_district"] else None
         obj["home_natural_area"] = new_inv["home_natural_area"].get(obj["home_natural_area"]) if new_inv[
             "home_natural_area"] else None
         obj["home_municipal_status"] = new_inv["home_municipal_status"].get(obj["home_municipal_status"]) if new_inv[
@@ -823,8 +876,10 @@ def marker_all():
     for veh in vehicles:
         obj = veh.serialize()
         new_veh = get_vehicle_dict(provider_code, accident_year)
-        obj["engine_volume"] = new_veh["engine_volume"].get(obj["engine_volume"]) if new_veh["engine_volume"] else None
-        obj["total_weight"] = new_veh["total_weight"].get(obj["total_weight"]) if new_veh["total_weight"] else None
+        obj["engine_volume"] = new_veh["engine_volume"].get(
+            obj["engine_volume"]) if new_veh["engine_volume"] else None
+        obj["total_weight"] = new_veh["total_weight"].get(
+            obj["total_weight"]) if new_veh["total_weight"] else None
         obj["driving_directions"] = new_veh["driving_directions"].get(obj["driving_directions"]) if new_veh[
             "driving_directions"] else None
 
@@ -845,7 +900,7 @@ def discussion():
         else:  # show existing discussion
             try:
                 marker = db.session.query(DiscussionMarker) \
-                    .filter(DiscussionMarker.identifier == \
+                    .filter(DiscussionMarker.identifier ==
                             identifier).first()
                 context['title'] = marker.title
             except AttributeError:
@@ -897,7 +952,8 @@ def post_handler(obj):
         db.session.commit()
         return jsonify(obj.serialize())
     except Exception as e:
-        logging.debug("could not handle a post for object:{0}, error:{1}".format(obj, e))
+        logging.debug(
+            "could not handle a post for object:{0}, error:{1}".format(obj, e))
         return ""
 
 
@@ -907,7 +963,8 @@ def parse_data(cls, data):
     try:
         return cls.parse(data) if data is not None else None
     except Exception as e:
-        logging.debug("Could not parse the requested data, for class:{0}, data:{1}. Error:{2}".format(cls, data, e))
+        logging.debug(
+            "Could not parse the requested data, for class:{0}, data:{1}. Error:{2}".format(cls, data, e))
         return
 
 
@@ -915,7 +972,8 @@ def get_json_object(request):
     try:
         return request.get_json(force=True)
     except Exception as e:
-        logging.debug("Could not get json from a request. request:{0}. Error:{1}".format(request, e))
+        logging.debug(
+            "Could not get json from a request. request:{0}. Error:{1}".format(request, e))
         return
 
 
@@ -941,13 +999,15 @@ def index(marker=None, message=None):
         else:
             message = u"תאונה לא נמצאה: " + request.values['marker']
     elif 'discussion' in request.values:
-        discussions = DiscussionMarker.get_by_identifier(request.values['discussion'])
+        discussions = DiscussionMarker.get_by_identifier(
+            request.values['discussion'])
         if discussions.count() == 1:
             marker = discussions[0]
             context['coordinates'] = (marker.latitude, marker.longitude)
             context['discussion'] = marker.identifier
         else:
-            message = gettext(u"Discussion not found:") + request.values['discussion']
+            message = gettext(u"Discussion not found:") + \
+                request.values['discussion']
     if 'start_date' in request.values:
         context['start_date'] = string2timestamp(request.values['start_date'])
     elif marker:
@@ -982,10 +1042,11 @@ def index(marker=None, message=None):
     pref_report_light = PreferenceObject('prefReportLight', '2', u"קלה")
     pref_report_severe = PreferenceObject('prefReportSevere', '1', u"חמורה")
     pref_report_fatal = PreferenceObject('prefReportFatal', '0', u"קטלנית")
-    pref_accident_report_severity.extend([pref_report_light, pref_report_severe, pref_report_fatal])
+    pref_accident_report_severity.extend(
+        [pref_report_light, pref_report_severe, pref_report_fatal])
     context['pref_accident_report_severity'] = pref_accident_report_severity
     pref_historical_report_periods = []
-    month_strings = [u"אחד", u"שניים", u"שלושה", u"ארבעה", u"חמישה", u"שישה", u"שבעה", u"שמונה", u"תשעה", \
+    month_strings = [u"אחד", u"שניים", u"שלושה", u"ארבעה", u"חמישה", u"שישה", u"שבעה", u"שמונה", u"תשעה",
                      u"עשרה", u"אחד עשר", u"שניים עשר"]
     for x in range(0, 12):
         pref_historical_report_periods.append(
@@ -993,16 +1054,19 @@ def index(marker=None, message=None):
     context['pref_historical_report_periods'] = pref_historical_report_periods
     pref_radius = []
     for x in range(1, 5):
-        pref_radius.append(PreferenceObject('prefRadius' + str(x * 500), x * 500, x * 500))
+        pref_radius.append(PreferenceObject(
+            'prefRadius' + str(x * 500), x * 500, x * 500))
     context['pref_radius'] = pref_radius
     today = datetime.date.today()
-    context['default_end_date_format'] = request.values.get('end_date', today.strftime('%Y-%m-%d'))
+    context['default_end_date_format'] = request.values.get(
+        'end_date', today.strftime('%Y-%m-%d'))
     context['default_start_date_format'] = request.values.get('start_date',
                                                               (today - datetime.timedelta(days=365)).strftime(
                                                                   '%Y-%m-%d'))
     context['entries_per_page'] = ENTRIES_PER_PAGE
     context['iteritems'] = iteritems
-    context['hide_search'] = True if request.values.get('hide_search') == 'true' else False
+    context['hide_search'] = True if request.values.get(
+        'hide_search') == 'true' else False
     context['embedded_reports'] = get_embedded_reports()
     return render_template('index.html', **context)
 
@@ -1023,22 +1087,31 @@ def updatebyemail():
     fname = (jsonData['fname']).encode("utf8")
     lname = (jsonData['lname']).encode("utf8")
     if len(fname) > 40:
-        response = Response(json.dumps({'respo': 'First name too long'}, default=str), mimetype="application/json")
-        response.headers.add('Access-Control-Allow-Methods', ['POST', 'OPTIONS'])
+        response = Response(json.dumps(
+            {'respo': 'First name too long'}, default=str), mimetype="application/json")
+        response.headers.add(
+            'Access-Control-Allow-Methods', ['POST', 'OPTIONS'])
         response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', ['Content-Type', 'Authorization'])
+        response.headers.add('Access-Control-Allow-Headers',
+                             ['Content-Type', 'Authorization'])
         return response
     if len(lname) > 40:
-        response = Response(json.dumps({'respo': 'Last name too long'}, default=str), mimetype="application/json")
-        response.headers.add('Access-Control-Allow-Methods', ['POST', 'OPTIONS'])
+        response = Response(json.dumps(
+            {'respo': 'Last name too long'}, default=str), mimetype="application/json")
+        response.headers.add(
+            'Access-Control-Allow-Methods', ['POST', 'OPTIONS'])
         response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', ['Content-Type', 'Authorization'])
+        response.headers.add('Access-Control-Allow-Headers',
+                             ['Content-Type', 'Authorization'])
         return response
     if len(emailaddress) > 60:
-        response = Response(json.dumps({'respo': 'Email too long'}, default=str), mimetype="application/json")
-        response.headers.add('Access-Control-Allow-Methods', ['POST', 'OPTIONS'])
+        response = Response(json.dumps(
+            {'respo': 'Email too long'}, default=str), mimetype="application/json")
+        response.headers.add(
+            'Access-Control-Allow-Methods', ['POST', 'OPTIONS'])
         response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', ['Content-Type', 'Authorization'])
+        response.headers.add('Access-Control-Allow-Headers',
+                             ['Content-Type', 'Authorization'])
         return response
 
     curr_max_id = db.session.query(func.max(LocationSubscribers.id)).scalar()
@@ -1049,7 +1122,8 @@ def updatebyemail():
         school_id = int(jsonData['school_id'])
         user_subscription = LocationSubscribers(id=user_id,
                                                 email=emailaddress,
-                                                first_name=fname.decode("utf8"),
+                                                first_name=fname.decode(
+                                                    "utf8"),
                                                 last_name=lname.decode("utf8"),
                                                 ne_lng=None,
                                                 ne_lat=None,
@@ -1059,7 +1133,8 @@ def updatebyemail():
     else:
         user_subscription = LocationSubscribers(id=user_id,
                                                 email=emailaddress,
-                                                first_name=fname.decode("utf8"),
+                                                first_name=fname.decode(
+                                                    "utf8"),
                                                 last_name=lname.decode("utf8"),
                                                 ne_lng=jsonData['ne_lng'],
                                                 ne_lat=jsonData['ne_lat'],
@@ -1068,10 +1143,12 @@ def updatebyemail():
                                                 school_id=None)
     db.session.add(user_subscription)
     db.session.commit()
-    response = Response(json.dumps({'respo': 'Subscription saved'}, default=str), mimetype="application/json")
+    response = Response(json.dumps(
+        {'respo': 'Subscription saved'}, default=str), mimetype="application/json")
     response.headers.add('Access-Control-Allow-Methods', ['POST', 'OPTIONS'])
     response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', ['Content-Type', 'Authorization'])
+    response.headers.add('Access-Control-Allow-Headers',
+                         ['Content-Type', 'Authorization'])
     return response
 
 
@@ -1102,10 +1179,12 @@ def report_problem():
                                    image_data=jsonData['image_data'])
     db.session.add(report_problem)
     db.session.commit()
-    response = Response(json.dumps({'respo': 'Subscription saved'}, default=str), mimetype="application/json")
+    response = Response(json.dumps(
+        {'respo': 'Subscription saved'}, default=str), mimetype="application/json")
     response.headers.add('Access-Control-Allow-Methods', ['POST', 'OPTIONS'])
     response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', ['Content-Type', 'Authorization'])
+    response.headers.add('Access-Control-Allow-Headers',
+                         ['Content-Type', 'Authorization'])
     return response
 
 
@@ -1117,8 +1196,10 @@ def update_preferences():
     cur_user = db.session.query(User).filter(User.id == cur_id).first()
     if cur_user is None:
         return jsonify(respo='user not found')
-    cur_report_preferences = db.session.query(ReportPreferences).filter(User.id == cur_id).first()
-    cur_general_preferences = db.session.query(GeneralPreferences).filter(User.id == cur_id).first()
+    cur_report_preferences = db.session.query(
+        ReportPreferences).filter(User.id == cur_id).first()
+    cur_general_preferences = db.session.query(
+        GeneralPreferences).filter(User.id == cur_id).first()
     if request.method == "GET":
         if cur_report_preferences is None and cur_general_preferences is None:
             return jsonify(accident_severity='0', pref_accidents_cbs=True, pref_accidents_ihud=True,
@@ -1130,9 +1211,9 @@ def update_preferences():
                                pref_resource_types=resource_types, produce_accidents_report=False)
             else:
                 return jsonify(accident_severity=cur_general_preferences.minimum_displayed_severity,
-                               pref_resource_types=resource_types, produce_accidents_report=True, \
+                               pref_resource_types=resource_types, produce_accidents_report=True,
                                lat=cur_report_preferences.latitude, lon=cur_report_preferences.longitude,
-                               pref_radius=cur_report_preferences.radius, \
+                               pref_radius=cur_report_preferences.radius,
                                pref_accident_severity_for_report=cur_report_preferences.minimum_severity,
                                how_many_months_back=cur_report_preferences.how_many_months_back)
     else:
@@ -1147,7 +1228,8 @@ def update_preferences():
         history_report = json_data['history_report']
         is_history_report = (history_report != '0')
         resource_types = ','.join(resources)
-        cur_general_preferences = db.session.query(GeneralPreferences).filter(User.id == cur_id).first()
+        cur_general_preferences = db.session.query(
+            GeneralPreferences).filter(User.id == cur_id).first()
         if cur_general_preferences is None:
             general_pref = GeneralPreferences(user_id=cur_id, minimum_displayed_severity=accident_severity,
                                               resource_type=resource_types)
@@ -1165,8 +1247,8 @@ def update_preferences():
             if lon == '':
                 lon = None
             if cur_report_preferences is None:
-                report_pref = ReportPreferences(user_id=cur_id, line_number=1, historical_report=is_history_report, \
-                                                how_many_months_back=history_report, latitude=lat, longitude=lon, \
+                report_pref = ReportPreferences(user_id=cur_id, line_number=1, historical_report=is_history_report,
+                                                how_many_months_back=history_report, latitude=lat, longitude=lon,
                                                 radius=pref_radius, minimum_severity=pref_accident_severity_for_report)
                 db.session.add(report_pref)
                 db.session.commit()
@@ -1305,7 +1387,8 @@ class SendToSubscribersView(BaseView):
     @expose('/', methods=('GET', 'POST'))
     def index(self):
         if request.method == 'GET':
-            user_emails = db.session.query(User).filter(User.new_features_subscription == True)
+            user_emails = db.session.query(User).filter(
+                User.new_features_subscription == True)
             email_list = []
             for user in user_emails:
                 email_list.append(user.email)
@@ -1314,7 +1397,8 @@ class SendToSubscribersView(BaseView):
             return self.render('sendemail.html', **context)
         else:
             jsondata = request.get_json(force=True)
-            users_send_email_to = db.session.query(User).filter(User.new_features_subscription == True)
+            users_send_email_to = db.session.query(User).filter(
+                User.new_features_subscription == True)
             message = Mail(subject=jsondata['subject'].encode("utf8"),
                            html_content=jsondata['message'].encode("utf8"),
                            from_email='ANYWAY Team <feedback@anyway.co.il>')
@@ -1334,7 +1418,8 @@ class ViewHighlightedMarkersData(BaseView):
     @roles_required('admin')
     @expose('/')
     def index(self):
-        highlightedpoints = db.session.query(HighlightPoint).options(load_only("id", "latitude", "longitude", "type"))
+        highlightedpoints = db.session.query(HighlightPoint).options(
+            load_only("id", "latitude", "longitude", "type"))
         points = []
         for point in highlightedpoints:
             p = HighlightPoint()
@@ -1363,7 +1448,8 @@ class ViewHighlightedMarkersMap(BaseView):
 
 class OpenAccountForm(Form):
     username = StringField('Username', validators=[validators.DataRequired()])
-    password = PasswordField('Password', validators=[validators.DataRequired()])
+    password = PasswordField('Password', validators=[
+        validators.DataRequired()])
 
     def validate_on_submit(self):
         if self.username.data == '':
@@ -1380,7 +1466,8 @@ class OpenNewOrgAccount(BaseView):
     def index(self):
         formAccount = OpenAccountForm(request.form)
         if request.method == "POST" and formAccount.validate_on_submit():
-            user = User(username=formAccount.username.data, password=formAccount.password.data)
+            user = User(username=formAccount.username.data,
+                        password=formAccount.password.data)
             role = db.session.query(Role).filter(Role.id == 2).first()
             user.roles.append(role)
             db.session.add(user)
@@ -1394,17 +1481,19 @@ class OpenNewOrgAccount(BaseView):
 
 init_login()
 
-admin = admin.Admin(app, 'ANYWAY Administration Panel', index_view=AdminIndexView(), base_template='admin_master.html')
+admin = admin.Admin(app, 'ANYWAY Administration Panel',
+                    index_view=AdminIndexView(), base_template='admin_master.html')
 
-admin.add_view(AdminView(User, db.session, name='Users', endpoint='Users', category='Users'))
+admin.add_view(AdminView(User, db.session, name='Users',
+                         endpoint='Users', category='Users'))
 admin.add_view(AdminView(Role, db.session, name='Roles', endpoint='Roles'))
-admin.add_view(OpenNewOrgAccount(name='Open new organization account', endpoint='OpenAccount', category='Users'))
+admin.add_view(OpenNewOrgAccount(
+    name='Open new organization account', endpoint='OpenAccount', category='Users'))
 admin.add_view(SendToSubscribersView(name='Send To Subscribers'))
 admin.add_view(ViewHighlightedMarkersData(name='View Highlighted Markers Data', endpoint='ViewHighlightedMarkersData',
                                           category='View Highlighted Markers'))
 admin.add_view(ViewHighlightedMarkersMap(name='View Highlighted Markers Map', endpoint='ViewHighlightedMarkersMap',
                                          category='View Highlighted Markers'))
-
 
 
 @app.route("/markers/polygon/", methods=["GET"])
@@ -1425,9 +1514,11 @@ def acc_in_area_query():
         .filter(or_((AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_1_CODE),
                     (AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_3_CODE)))
 
-    df = pd.read_sql_query(query_obj.with_labels().statement, query_obj.session.bind)
+    df = pd.read_sql_query(
+        query_obj.with_labels().statement, query_obj.session.bind)
     markers_in_area_list = df.to_dict(orient='records')
-    response = Response(json.dumps(markers_in_area_list, default=str), mimetype="application/json")
+    response = Response(json.dumps(markers_in_area_list,
+                                   default=str), mimetype="application/json")
     return response
 
 
@@ -1439,7 +1530,8 @@ class ExtendedLoginForm(LoginForm):
             return False
         if self.username.data.strip() == '':
             return False
-        self.user = db.session.query(User).filter(User.username == self.username.data).first()
+        self.user = db.session.query(User).filter(
+            User.username == self.username.data).first()
         if self.user is None:
             return False
         if self.password.data == self.user.password:
@@ -1522,20 +1614,24 @@ def oauth_callback(provider):
             if curr_max_id is None:
                 curr_max_id = 0
             user_id = curr_max_id + 1
-            user = User(id=user_id, social_id=social_id, nickname=username, email=email, provider=provider)
+            user = User(id=user_id, social_id=social_id,
+                        nickname=username, email=email, provider=provider)
             db.session.add(user)
             db.session.commit()
     login.login_user(user, True)
     return redirect(url_for('index'))
 
+
 def extract_news_flash_location(news_flash_id):
-    news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id==news_flash_id).first()
+    news_flash_obj = db.session.query(NewsFlash).filter(
+        NewsFlash.id == news_flash_id).first()
     if not news_flash_obj:
         logging.warn('could not find news flash id {}'.format(news_flash_id))
         return None
     resolution = news_flash_obj.resolution if news_flash_obj.resolution else None
     if not news_flash_obj or not resolution or resolution not in resolution_dict:
-        logging.warn('could not find valid resolution for news flash id {}'.format(news_flash_id))
+        logging.warn(
+            'could not find valid resolution for news flash id {}'.format(news_flash_id))
         return {'name': 'location', 'data': {'resolution': None}}
     data = {'resolution': resolution}
     for field in resolution_dict[resolution]:
@@ -1545,25 +1641,56 @@ def extract_news_flash_location(news_flash_id):
         gps[field] = getattr(news_flash_obj, field)
     return {'name': 'location', 'data': data, 'gps': gps}
 
+
 def get_query(table_obj, filters, start_time, end_time):
     query = db.session.query(table_obj)
     if start_time:
-        query = query.filter(getattr(table_obj,'accident_timestamp') >= start_time)
+        query = query.filter(
+            getattr(table_obj, 'accident_timestamp') >= start_time)
     if end_time:
-        query = query.filter(getattr(table_obj,'accident_timestamp') <= end_time)
+        query = query.filter(
+            getattr(table_obj, 'accident_timestamp') <= end_time)
     if filters:
         for field_name, value in filters.items():
             if isinstance(value, list):
                 values = value
             else:
                 values = [value]
-            query = query.filter((getattr(table_obj,field_name)).in_(values))
+            query = query.filter((getattr(table_obj, field_name)).in_(values))
     return query
+
+
+def get_top_road_segments_accidents_per_km(resolution, location_info, start_time=None, end_time=None, limit=5):
+    if resolution != 'כביש בינעירוני':  # relevent for non urban roads only
+        return {}
+
+    query = get_query(table_obj=AccidentMarkerView, filters=None,
+                      start_time=start_time, end_time=end_time)
+
+    query = query.with_entities(
+        AccidentMarkerView.road_segment_name,
+        func.count(AccidentMarkerView.road_segment_name).label(
+            'total_accidents'),
+        (RoadSegments.to_km - RoadSegments.from_km).label('segment_length'),
+        cast((func.count(AccidentMarkerView.road_segment_name) / (RoadSegments.to_km - RoadSegments.from_km)),
+             Numeric(10, 4)).label(
+            'accidents_per_km')) \
+        .filter(AccidentMarkerView.road1 == RoadSegments.road) \
+        .filter(AccidentMarkerView.road_segment_number == RoadSegments.segment) \
+        .filter(AccidentMarkerView.road1 == location_info['road1']) \
+        .filter(AccidentMarkerView.road_segment_name is not None) \
+        .group_by(AccidentMarkerView.road_segment_name, RoadSegments.from_km, RoadSegments.to_km) \
+        .order_by(desc('accidents_per_km')) \
+        .limit(limit)
+
+    result = pd.read_sql_query(query.statement, query.session.bind)
+    return result.to_dict(orient='records')
 
 
 def get_accidents_stats(table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None):
     filters = filters or {}
-    filters['provider_code'] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    filters['provider_code'] = [
+        CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
     # get stats
     query = get_query(table_obj, filters, start_time, end_time)
     if group_by:
@@ -1574,6 +1701,7 @@ def get_accidents_stats(table_obj, filters=None, group_by=None, count=None, star
     df.columns = [c.replace('_hebrew', '') for c in df.columns]
     return df.to_dict(orient='records') if group_by or count else df.to_dict()
 
+
 def get_injured_filters(location_info):
     new_filters = {}
     for curr_filter, curr_values in location_info.items():
@@ -1582,7 +1710,7 @@ def get_injured_filters(location_info):
             new_filters[new_filter_name] = curr_values
         else:
             new_filters[curr_filter] = curr_values
-    new_filters['injury_severity'] = [1,2,3,4,5]
+    new_filters['injury_severity'] = [1, 2, 3, 4, 5]
     return new_filters
 
 
@@ -1593,10 +1721,12 @@ def get_most_severe_accidents(table_obj, filters, start_time, end_time, limit=10
 
 def get_most_severe_accidents_with_entities(table_obj, filters, entities, start_time, end_time, limit=10):
     filters = filters or {}
-    filters['provider_code'] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    filters['provider_code'] = [
+        CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
     query = get_query(table_obj, filters, start_time, end_time)
     query = query.with_entities(*entities)
-    query = query.order_by(getattr(table_obj, "accident_severity"), getattr(table_obj, "accident_timestamp").desc())
+    query = query.order_by(getattr(table_obj, "accident_severity"), getattr(
+        table_obj, "accident_timestamp").desc())
     query = query.limit(limit)
     df = pd.read_sql_query(query.statement, query.session.bind)
     df.columns = [c.replace('_hebrew', '') for c in df.columns]
@@ -1605,7 +1735,8 @@ def get_most_severe_accidents_with_entities(table_obj, filters, entities, start_
 
 def get_accidents_heat_map(table_obj, filters, start_time, end_time):
     filters = filters or {}
-    filters['provider_code'] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    filters['provider_code'] = [
+        CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
     query = get_query(table_obj, filters, start_time, end_time)
     query = query.with_entities('longitude', 'latitude')
     df = pd.read_sql_query(query.statement, query.session.bind)
@@ -1632,7 +1763,8 @@ def filter_and_group_injured_count_per_age_group(data_of_ages):
         else:
             match_parsing = re.match("([0-9]{2})\\+", age_range)  # e.g  85+
             if match_parsing:
-                min_age_raw, max_age_raw = match_parsing.group(1), 200  # We assume that no body live beyond age 200
+                # We assume that no body live beyond age 200
+                min_age_raw, max_age_raw = match_parsing.group(1), 200
             else:
                 return_dict_by_required_age_group["unknown"] += count
                 continue
@@ -1659,13 +1791,15 @@ def get_most_severe_accidents_table_text(location_text):
 
 
 def get_accident_count_by_severity_text(location_info, location_text, start_time, end_time):
-    count_by_severity = get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_severity_hebrew', count='accident_severity_hebrew', start_time=start_time, end_time=end_time)
+    count_by_severity = get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,
+                                            group_by='accident_severity_hebrew', count='accident_severity_hebrew', start_time=start_time, end_time=end_time)
     severity_text = ''
     total_accidents_count = 0
     start_year = start_time.year
     end_year = end_time.year
     for severity_and_count in count_by_severity:
-        severity_text += str(severity_and_count['count']) + ' בחומרה ' + severity_and_count['accident_severity'] + '\n'
+        severity_text += str(severity_and_count['count']) + \
+            ' בחומרה ' + severity_and_count['accident_severity'] + '\n'
         total_accidents_count += severity_and_count['count']
 
     return 'בין השנים ' + str(start_year) + '-' + str(end_year) + ',\n' \
@@ -1689,9 +1823,11 @@ def get_most_severe_accidents_table(location_info, start_time, end_time):
         ts = str(ts).split(' ')
         accident['date'] = convert_yyyy_mm_dd_to_dd_mm_yy(ts[0])
         accident['hour'] = ts[1][0:5]
-        num = get_casualties_count_in_accident(accident['id'], accident['provider_code'], 1)
+        num = get_casualties_count_in_accident(
+            accident['id'], accident['provider_code'], 1)
         accident['killed_count'] = num
-        num = get_casualties_count_in_accident(accident['id'], accident['provider_code'], [2, 3])
+        num = get_casualties_count_in_accident(
+            accident['id'], accident['provider_code'], [2, 3])
         accident['injured_count'] = num
         del accident['accident_timestamp'], accident['accident_type'], accident['id'], accident['provider_code']
     return accidents
@@ -1703,7 +1839,8 @@ def convert_yyyy_mm_dd_to_dd_mm_yy(date):
 
 # count of dead and severely injured
 def get_casualties_count_in_accident(accident_id, provider_code, injury_severity):
-    filters = {'accident_id': accident_id, 'provider_code': provider_code, 'injury_severity': injury_severity}
+    filters = {'accident_id': accident_id,
+               'provider_code': provider_code, 'injury_severity': injury_severity}
     casualties = get_accidents_stats(table_obj=InvolvedMarkerView, filters=filters,
                                      group_by='injury_severity', count='injury_severity')
     res = 0
@@ -1715,7 +1852,8 @@ def get_casualties_count_in_accident(accident_id, provider_code, injury_severity
 # generate text describing location or road segment of news flash
 # to be used by most severe accidents additional info widget
 def gen_news_flash_location_text(news_flash_id):
-    news_flash_item = db.session.query(NewsFlash).filter(NewsFlash.id==news_flash_id).first()
+    news_flash_item = db.session.query(NewsFlash).filter(
+        NewsFlash.id == news_flash_id).first()
     logging.debug('news_flash_item:{}'.format(news_flash_item))
     nf = news_flash_item.serialize()
     logging.debug('news flash serialized:{}'.format(nf))
@@ -1739,7 +1877,8 @@ def gen_news_flash_location_text(news_flash_id):
     elif resolution == 'רחוב' and yishuv_name and street1_hebrew:
         res = ' רחוב ' + street1_hebrew + ' ב' + yishuv_name
     else:
-        logging.warning("Did not found quality resolution. Using location field. News Flash id:{}".format(nf['id']))
+        logging.warning(
+            "Did not found quality resolution. Using location field. News Flash id:{}".format(nf['id']))
         res = nf['location']
     logging.debug('{}'.format(res))
     return res
@@ -1747,7 +1886,6 @@ def gen_news_flash_location_text(news_flash_id):
 
 @app.route('/api/infographics_data', methods=['GET'])
 def infographics_data():
-
     output = {}
     news_flash_id = request.values.get('news_flash_id')
     location_info = extract_news_flash_location(news_flash_id)
@@ -1760,14 +1898,15 @@ def infographics_data():
     location_info = location_info['data']
     output['meta'] = {"location_info": location_info.copy()}
     output['widgets'] = []
-    resolution    = location_info.pop('resolution')
+    resolution = location_info.pop('resolution')
     if resolution is None:
         return Response({})
 
     if all(value is None for value in location_info.values()):
         return Response({})
 
-    number_of_years_ago_to_pull_raw = request.values.get('years_ago', CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
+    number_of_years_ago_to_pull_raw = request.values.get(
+        'years_ago', CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
     try:
         number_of_years_ago_to_pull = int(number_of_years_ago_to_pull_raw)
     except ValueError:
@@ -1777,7 +1916,8 @@ def infographics_data():
         return Response({})
 
     end_time = datetime.date.today()
-    start_time = datetime.date(end_time.year - number_of_years_ago_to_pull, 1, 1)
+    start_time = datetime.date(
+        end_time.year - number_of_years_ago_to_pull, 1, 1)
 
     # accident_severity count
     accident_count_by_severity = {'name': 'accident_count_by_severity',
@@ -1809,7 +1949,6 @@ def infographics_data():
                    'latitude': gps['lat']}
     output['widgets'].append(street_view)
 
-
     # accidents heat map
     accidents_heat_map = {'name': 'accidents_heat_map',
                           'data': get_accidents_heat_map(table_obj=AccidentMarkerView,
@@ -1821,31 +1960,52 @@ def infographics_data():
 
     # injured count by accident year
     injured_count_by_accident_year = {'name': 'injured_count_by_accident_year',
-                                       'data': get_accidents_stats(table_obj=InvolvedMarkerView, filters=get_injured_filters(location_info), group_by='accident_year', count='accident_year', start_time=start_time, end_time=end_time),
-                                       'meta': {}}
+                                      'data': get_accidents_stats(table_obj=InvolvedMarkerView,
+                                                                  filters=get_injured_filters(
+                                                                      location_info),
+                                                                  group_by='accident_year', count='accident_year',
+                                                                  start_time=start_time, end_time=end_time),
+                                      'meta': {}}
     output['widgets'].append(injured_count_by_accident_year)
 
     # accident count on day light
     accident_count_by_day_night = {'name': 'accident_count_by_day_night',
-                                   'data' : get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='day_night_hebrew', count='day_night_hebrew', start_time=start_time, end_time=end_time),
-                                    'meta': {}}
+                                   'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,
+                                                               group_by='day_night_hebrew', count='day_night_hebrew',
+                                                               start_time=start_time, end_time=end_time),
+                                   'meta': {}}
     output['widgets'].append(accident_count_by_day_night)
 
     # accidents distribution count by hour
     accidents_count_by_hour = {'name': 'accidents_count_by_hour',
-                                            'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_hour', count='accident_hour', start_time=start_time, end_time=end_time),
-                                            'meta': {}}
+                               'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,
+                                                           group_by='accident_hour', count='accident_hour',
+                                                           start_time=start_time, end_time=end_time),
+                               'meta': {}}
     output['widgets'].append(accidents_count_by_hour)
 
     # accident count by road_light
     accident_count_by_road_light = {'name': 'accident_count_by_road_light',
-                                   'data' : get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='road_light_hebrew', count='road_light_hebrew', start_time=start_time, end_time=end_time),
+                                    'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,
+                                                                group_by='road_light_hebrew', count='road_light_hebrew',
+                                                                start_time=start_time, end_time=end_time),
                                     'meta': {}}
     output['widgets'].append(accident_count_by_road_light)
 
+    # accident count by road_segment
+    top_road_segments_accidents_per_km = {'name': 'top_road_segments_accidents_per_km',
+                                        'data': get_top_road_segments_accidents_per_km(resolution=resolution,
+                                                                                     location_info=location_info,
+                                                                                     start_time=start_time,
+                                                                                     end_time=end_time),
+                                        'meta': {}}
+    output['widgets'].append(top_road_segments_accidents_per_km)
+
     # injured count per age group
-    data_of_injured_count_per_age_group_raw = get_accidents_stats(table_obj=InvolvedMarkerView, filters=get_injured_filters(location_info), group_by='age_group_hebrew', count='age_group_hebrew', start_time=start_time, end_time=end_time)
-    data_of_injured_count_per_age_group = filter_and_group_injured_count_per_age_group(data_of_injured_count_per_age_group_raw)
+    data_of_injured_count_per_age_group_raw = get_accidents_stats(table_obj=InvolvedMarkerView, filters=get_injured_filters(
+        location_info), group_by='age_group_hebrew', count='age_group_hebrew', start_time=start_time, end_time=end_time)
+    data_of_injured_count_per_age_group = filter_and_group_injured_count_per_age_group(
+        data_of_injured_count_per_age_group_raw)
 
     injured_count_per_age_group = {'name': 'injured_count_per_age_group',
                                    'data': data_of_injured_count_per_age_group,
@@ -1854,7 +2014,7 @@ def infographics_data():
 
     # accident_type count
     accident_count_by_accident_type = {'name': 'accident_count_by_accident_type',
-                                      'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_type_hebrew', count='accident_type_hebrew', start_time=start_time, end_time=end_time),
+                                       'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_type_hebrew', count='accident_type_hebrew', start_time=start_time, end_time=end_time),
                                        'meta': {}}
     output['widgets'].append(accident_count_by_accident_type)
 
@@ -1881,6 +2041,7 @@ def get_embedded_reports():
 @user_optional
 def embedded_reports_api():
     embedded_reports_list = get_embedded_reports()
-    response = Response(json.dumps(embedded_reports_list, default=str), mimetype="application/json")
+    response = Response(json.dumps(embedded_reports_list,
+                                   default=str), mimetype="application/json")
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response

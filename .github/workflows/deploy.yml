@@ -1,10 +1,12 @@
 name: Deploy
 on:
-  pull_request:
-    types: [closed]
+  push:
+    branches:
+      - master
+      - dev
 jobs:
   Deploy:
-    if: github.event.pull_request.merged == true
+    if: github.repository == 'hasadna/anyway'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

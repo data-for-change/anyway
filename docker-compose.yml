@@ -3,6 +3,7 @@ version: '2'
 services:
   anyway:
     build: .
+    container_name: anyway
     image: hasadna/anyway:latest
     ports:
       - "8080:5000"
@@ -15,14 +16,17 @@ services:
       - db
 
   db:
-    image: mickeyrouash/anyway_db_mickeyr
+    image: postgis/postgis:9.6-2.5-alpine
+    container_name: db
     environment:
       - POSTGRES_PASSWORD=anyway
       - POSTGRES_USER=anyway
       - POSTGRES_DB=anyway
     volumes:
-      - db_data:/var/lib/postgresql/data  
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
     restart: always
 
-volumes: 
+volumes:
   db_data:

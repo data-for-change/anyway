@@ -6,6 +6,7 @@ on:
       - dev
 jobs:
   Deploy:
+    if: github.repository == 'hasadna/anyway'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

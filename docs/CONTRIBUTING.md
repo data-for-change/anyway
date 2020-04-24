@@ -121,22 +121,20 @@ You are more than welcome to join us, ask questions and raise any issues you stu
 
 **Slack**
 
-[Our Slack channel](https://oway.slack.com/) is connected to the relevant git notifications. 
-Ask galraij to add you and use it to keep in touch with the team while off-campus.
+[Our Slack channel](https://hasadna.slack.com/) is connected to the relevant git notifications. 
+Ask atalyaalon to add you and use it to keep in touch with the team while off-campus.
 Questions are always welcome.
 
 
 **Points of Contacts**
 
-* galraij - Project Manager
-* danielhers - Development Team Leader
-* aviklai - DB and Statistics
-* omerxx - Backend
-* OmerSchechter - Frontend
-* yosefh - Translations
-* LironRS - UI/UX
-* avielg - [iOS Version](https://github.com/avielg/Anyway-iOS)
+* galraij - Project Entrepreneur and Manager
+* atalyaalon - Head of R&D
+* inbalbeka - Product Team Leader
+* Mano3 - Algorithms Team Leader
+* Alonr6 - Data Analysis Team Leader
+* elashahar01 - Data Science Team Leader
+* yuvalbl - Front End Team Leader
+* assafdayan - Back End Tech Leader
 
 (contributors: feel free to edit the file, add yourselves to the POC list, and share any tips that you find helpful)
-
-

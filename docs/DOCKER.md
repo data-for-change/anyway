@@ -27,7 +27,7 @@ Instructions
 **3.** Open "Docker terminal", go to the **anyway** directory and run:
     `docker-compose up -d db`
     
-**4.** Optional: Download the [db dump](https://drive.google.com/drive/folders/1OesX8Y2MGgIcj0B3f5cdS-BIzt4govXA?usp=sharing) (You need to request access) and save it in the **anyway** directory.
+**4.** Download the [db dump](https://drive.google.com/drive/folders/1OesX8Y2MGgIcj0B3f5cdS-BIzt4govXA?usp=sharing) (You need to request access) and save it in the **anyway** directory.
 Restore the db (in anyway directory): `cat <truncated dump file name> | docker-compose exec -T db psql -U anyway`
 
 **5.** start anyway container: `docker-compose up -d`

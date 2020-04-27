@@ -173,10 +173,6 @@ class HighlightPoint(Point, Base):
             "type": self.type,
         }
 
-    def update(self, data):
-        self.type = data["type"]
-        self.latitude = data["latitude"]
-        self.longitude = data["longitude"]
 
     @classmethod
     def parse(cls, data):
@@ -336,15 +332,6 @@ class AccidentMarker(MarkerMixin, Base):
                 if value != 0:
                     fields[name] = value
         return fields
-
-    def update(self, data, current_user):
-        self.title = data["title"]
-        self.description = data["description"]
-        self.type = data["type"]
-        self.latitude = data["latitude"]
-        self.longitude = data["longitude"]
-
-        self.put()
 
     @staticmethod
     def bounding_box_query(is_thin=False, yield_per=None, involved_and_vehicles=False, query_entities=None, **kwargs):

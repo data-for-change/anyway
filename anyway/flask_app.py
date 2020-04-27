@@ -1803,7 +1803,7 @@ def get_accident_count_by_severity_text(location_info, location_text, start_time
         total_accidents_count += severity_and_count['count']
 
     return 'בין השנים ' + str(start_year) + '-' + str(end_year) + ',\n' \
-           + 'ב' + location_text + 'התרחשו ' + str(total_accidents_count) + 'תאונות.' \
+           + 'ב' + location_text + 'התרחשו ' + str(total_accidents_count) + ' תאונות.\n' \
            + severity_text
 
 

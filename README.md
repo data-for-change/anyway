@@ -55,9 +55,7 @@ Take a look at the [daily reports](https://www.gov.il/he/Departments/General/dai
 
 Contributing
 -----------------------
-* We try to follow the process of other Hasadna projects, e.g. [Open-Knesset](https://oknesset-devel.readthedocs.org/en/latest/).
 * Please take a moment to read our ["Contributing to ANYWAY" manifest](docs/CONTRIBUTING.md).
-* To see our GitHub issues in a nicer interface, take a look at [HuBoard](https://huboard.com/hasadna/anyway). Check out the Ready list to find a task to work on. The Backlog list there contains issues that are still not ready to be started. The Working list contains issues already started by developers (make sure to move your issue there once you start working on it), and the Done list contains completed issues that are waiting to be confirmed done and closed.
 
 ## Getting the code
 1. [Fork](https://github.com/hasadna/anyway/fork) this repository on GitHub

@@ -1819,10 +1819,9 @@ def get_most_severe_accidents_table(location_info, start_time, end_time):
     # Add casualties
     for accident in accidents:
         accident['type'] = accident['accident_type']
-        ts = accident['accident_timestamp']
-        ts = str(ts).split(' ')
-        accident['date'] = convert_yyyy_mm_dd_to_dd_mm_yy(ts[0])
-        accident['hour'] = ts[1][0:5]
+        dt = accident['accident_timestamp'].to_pydatetime()
+        accident['date'] = dt.strftime("%d/%m/%y")
+        accident['hour'] = dt.strftime("%H:%M")
         num = get_casualties_count_in_accident(
             accident['id'], accident['provider_code'], 1)
         accident['killed_count'] = num
@@ -1831,10 +1830,6 @@ def get_most_severe_accidents_table(location_info, start_time, end_time):
         accident['injured_count'] = num
         del accident['accident_timestamp'], accident['accident_type'], accident['id'], accident['provider_code']
     return accidents
-
-
-def convert_yyyy_mm_dd_to_dd_mm_yy(date):
-    return '{}/{}/{}'.format(int(date[8:10]), int(date[5:7]), int(date[2:4]))
 
 
 # count of dead and severely injured

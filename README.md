@@ -22,7 +22,7 @@ Take a look at our [facebook page](https://www.facebook.com/anywayisrael). See a
 
 ### ANYWAY’s Interactive Map:
 
-ANYWAY presents locations over an [interactive map](https://www.anyway.co.il/) as well as information regarding traffic accidents including casualties, information originating from the Central Bureau of Statistics (הלשכה המרכזית לסטטיסטיקה) and United Hatzalah’s (איחוד הצלה) data, and traffic violations as reported by road vigilantes (שומרי הדרך). The website allows visitors to discuss possible solutions in their residential or drive zone with the goal of coming up with field solutions by both drivers and pedestrians, on both local and national scope.
+ANYWAY presents locations over an [interactive map](https://www.anyway.co.il/) as well as information regarding traffic accidents including casualties, information originating from the Central Bureau of Statistics (הלשכה המרכזית לסטטיסטיקה) and traffic violations as reported by road vigilantes (שומרי הדרך). The website allows visitors to discuss possible solutions in their residential or drive zone with the goal of coming up with field solutions by both drivers and pedestrians, on both local and national scope.
 
 The map is also available at [oway.org.il](https://www.oway.org.il/).
 

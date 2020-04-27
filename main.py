@@ -116,17 +116,6 @@ def traffic_volume(path):
 
 
 @process.command()
-@click.option('--light', is_flag=True, help='Import without downloading any new files')
-@click.option('--username', default='')
-@click.option('--password', default='')
-@click.option('--lastmail', is_flag=True)
-def united(light, username, password, lastmail):
-    from anyway.parsers.united import main
-
-    return main(light=light, username=username, password=password, lastmail=lastmail)
-
-
-@process.command()
 @click.argument("filename")
 def rsa(filename):
     from anyway.parsers.rsa import parse

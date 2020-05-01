@@ -24,7 +24,7 @@ Instructions
 
 **2.** [Install Docker](https://docs.docker.com/install/)
 
-**3.** Open "Docker terminal", go to the **anyway** directory and run:
+**3.** Open your terminal,  go to the **anyway** directory and run:
     `docker-compose up -d db`
     
 **4.** Download the [db dump](https://drive.google.com/drive/folders/1OesX8Y2MGgIcj0B3f5cdS-BIzt4govXA?usp=sharing) (You need to request access) and save it in the **anyway** directory.

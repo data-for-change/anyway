@@ -1,4 +1,4 @@
-ANYWAY [![Build Status](https://travis-ci.org/hasadna/anyway.png)](https://travis-ci.org/hasadna/anyway) [![Build status](https://ci.appveyor.com/api/projects/status/pg5qvt62y16bu4k5?svg=true)](https://ci.appveyor.com/project/r-darwish/anyway)
+ANYWAY [![Build Status](https://github.com/hasadna/anyway/workflows/Tests/badge.svg)](https://github.com/hasadna/anyway/actions?query=workflow%3ATests)
 ======
 
 Welcome to ANYWAY!
@@ -63,7 +63,7 @@ Contributing
 1. Add the main repository as your upstream remote: `git remote add upstream https://github.com/hasadna/anyway`
 
 * Get updates whenever you start working: `git pull upstream dev`
-* Push to your fork when you've committed your changes and tested them: `git push`. Now make sure CI tests are passing (Travis CI and AppVeyor) and make a pull request from your fork on GitHub
+* Push to your fork when you've committed your changes and tested them: `git push`. Now make sure CI tests are passing (see Actions tab) and make a pull request from your fork on GitHub
 
 ## Docker
 We are using DOCKER. See [DOCKER](docs/DOCKER.md)

@@ -24,15 +24,19 @@ Instructions
 
 **2.** [Install Docker](https://docs.docker.com/install/)
 
-**3.** Open "Docker terminal", go to the **anyway** directory and run:
-    `docker-compose up -d db`
-    
-**4.** Download the [db dump](https://drive.google.com/drive/folders/1OesX8Y2MGgIcj0B3f5cdS-BIzt4govXA?usp=sharing) (You need to request access) and save it in the **anyway** directory.
-Restore the db (in anyway directory): `cat <truncated dump file name> | docker-compose exec -T db psql -U anyway`
+**3.** Build anyway container: `docker-compose build`
 
-**5.** start anyway container: `docker-compose up -d`
+**4.** Start the container, go to the **anyway** directory and run:
+    `docker-compose up -d`
 
-**6.** **You're all set!** ANYWAY is up and running - connect to http://127.0.0.1:8080 and change dates to 2014 in order to see accidents
+**5.** Download the [db dump](https://drive.google.com/drive/folders/1OesX8Y2MGgIcj0B3f5cdS-BIzt4govXA?usp=sharing) (You need to request access) and save it in the **anyway** directory.
+Restore the db (in anyway directory): `cat <truncated dump file path> | docker-compose exec -T db psql -U anyway`
+Now your containers are up and with data loaded.
+
+**6.** **You're all set!** ANYWAY is up and running - connect to http://127.0.0.1:8080
+Note - you won't see the map since the key works in production.
+
+**7.**. To stop the containers run: `docker-compose down`
 
 More
 -----------------------

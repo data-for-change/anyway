@@ -30,9 +30,11 @@ Instructions
 **4.** Download the [db dump](https://drive.google.com/drive/folders/1OesX8Y2MGgIcj0B3f5cdS-BIzt4govXA?usp=sharing) (You need to request access) and save it in the **anyway** directory.
 Restore the db (in anyway directory): `cat <truncated dump file name> | docker-compose exec -T db psql -U anyway`
 
-**5.** start anyway container: `docker-compose up -d`
+**5.** build anyway container: `docker-compose build`
 
-**6.** **You're all set!** ANYWAY is up and running - connect to http://127.0.0.1:8080 and change dates to 2014 in order to see accidents
+**6.**. start anyway container: `docker-compose up -d`
+
+**7.** **You're all set!** ANYWAY is up and running - connect to http://127.0.0.1:8080 and change dates to 2014 in order to see accidents
 
 More
 -----------------------

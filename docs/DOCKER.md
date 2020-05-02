@@ -40,7 +40,7 @@ Now your containers are up and with data loaded.
 **6.** **You're all set!** ANYWAY is up and running - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
 
-**7.**. To stop the containers run: `docker-compose down`
+**7.** To stop the containers run: `docker-compose down`
 
 **For Ubuntu:**
 
@@ -56,7 +56,29 @@ Now your containers are up and with data loaded.
 **6.** **You're all set!** ANYWAY is up and running - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
 
-**7.**. To stop the containers run: `sudo docker-compose down`
+**7.** To stop the containers run: `sudo docker-compose down`
+
+
+Environment Configuration for WIndows 
+-----------------------
+**1.** Install Oracle Virtual Box for Window - Download 'Windows hosts' installer from: https://www.virtualbox.org/wiki/Downloads
+
+**2.** Create new VM for Ubuntu OS - see next tutorial – 'How to Use VirtualBox' - https://www.youtube.com/watch?v=sB_5fqiysi4&t=315s
+
+**3.** After VM creation, if you're dealing the next warning:
+
+"System Acceleration Settings: The hardware virtualization is enabled in the Acceleration section of the system although it is not supported from the host system. It should be disabled in order to start the visual system."
+
+you need to enable virtualization in the BIOS Screen – Base on your computer, go to BIOS Screen to enable virtualization, see for example: 
+'How to enable Virtualization (VT-x) in Bios' - https://www.youtube.com/watch?v=MOuTxfzCvMY
+
+**4.** In the VM Settings storage - Download Ubuntu 18.04 LTS iso for Desktop: https://releases.ubuntu.com/18.04.4/
+
+**5.** Power-On the VM and the Ubuntu installation should start
+
+**6.** You have Ubuntu VM on your Windows!
+
+**7.** Get the code, install docker and run Anyway Container for Ubuntu
 
 More
 -----------------------

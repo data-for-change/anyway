@@ -1636,7 +1636,9 @@ def extract_news_flash_location(news_flash_id):
         return {'name': 'location', 'data': {'resolution': None}}
     data = {'resolution': resolution}
     for field in resolution_dict[resolution]:
-        data[field] = getattr(news_flash_obj, field)
+        curr_field = getattr(news_flash_obj, field)
+        if curr_field is not None:
+            data[field] = curr_field
     gps = {}
     for field in ['lon', 'lat']:
         gps[field] = getattr(news_flash_obj, field)

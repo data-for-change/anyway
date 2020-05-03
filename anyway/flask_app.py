@@ -1635,7 +1635,7 @@ def infographics_data():
     logging.debug('location_info:{}'.format(location_info))
     if location_info is None:
         return Response({})
-    location_text = gen_news_flash_location_text(news_flash_id)
+    location_text = get_news_flash_location_text(news_flash_id)
     logging.debug('location_text:{}'.format(location_text))
     gps = location_info['gps']
     location_info = location_info['data']

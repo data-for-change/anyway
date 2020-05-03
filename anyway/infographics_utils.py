@@ -253,7 +253,7 @@ def get_casualties_count_in_accident(accident_id, provider_code, injury_severity
 
 # generate text describing location or road segment of news flash
 # to be used by most severe accidents additional info widget
-def gen_news_flash_location_text(news_flash_id):
+def get_news_flash_location_text(news_flash_id):
     news_flash_item = db.session.query(NewsFlash).filter(
         NewsFlash.id == news_flash_id).first()
     logging.debug('news_flash_item:{}'.format(news_flash_item))

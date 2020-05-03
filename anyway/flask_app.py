@@ -343,6 +343,7 @@ def news_flash():
     count = request.values.get('news_flash_count')
     start_date = request.values.get('start_date')
     end_date = request.values.get('end_date')
+    interurban_only = request.values.get('interurban_only')
     road_number = request.values.get('road_number')
     road_segment = request.values.get('road_segment_only')
     news_flash_obj = db.session.query(NewsFlash)
@@ -353,9 +354,6 @@ def news_flash():
         if news_flash_obj is not None:
             return Response(json.dumps(news_flash_obj.serialize(), default=str), mimetype="application/json")
         return Response(status=404)
-
-    if road_number:
-        news_flash_obj = news_flash_obj.filter(NewsFlash.road1 == road_number)
 
     # get all possible sources
     sources = [str(source_name[0]) for source_name in db.session.query(
@@ -373,19 +371,22 @@ def news_flash():
         e = datetime.datetime.fromtimestamp(int(end_date))
         news_flash_obj = news_flash_obj.filter(and_(NewsFlash.date <= e,
                                                     NewsFlash.date >= s))
-
     # when only one of the dates is sent
     elif start_date or end_date:
         return Response('{"message": "Must send both start_date and end_date"}',
                         status=404,
                         mimetype='application/json')
-
+    if interurban_only == 'true':
+        news_flash_obj = news_flash_obj.filter(
+            NewsFlash.resolution.in_(['כביש בינעירוני']))
+    if road_number:
+        news_flash_obj = news_flash_obj.filter(NewsFlash.road1 == road_number)
     if road_segment == 'true':
         news_flash_obj = news_flash_obj.filter(
             not_(NewsFlash.road_segment_name == None))
-
     news_flash_obj = news_flash_obj.filter(
-        and_(NewsFlash.accident == True, not_(and_(NewsFlash.lat == 0, NewsFlash.lon == 0)),
+        and_(NewsFlash.accident == True,
+             not_(and_(NewsFlash.lat == 0, NewsFlash.lon == 0)),
              not_(and_(NewsFlash.lat == None, NewsFlash.lon == None)))
     ).order_by(
         NewsFlash.date.desc())

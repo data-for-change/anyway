@@ -1717,11 +1717,6 @@ def get_injured_filters(location_info):
     return new_filters
 
 
-def get_most_severe_accidents(table_obj, filters, start_time, end_time, limit=10):
-    entities = 'longitude', 'latitude', 'accident_severity_hebrew', 'accident_timestamp', 'accident_type_hebrew'
-    return get_most_severe_accidents_with_entities(table_obj, filters, entities, start_time, end_time, limit)
-
-
 def get_most_severe_accidents_with_entities(table_obj, filters, entities, start_time, end_time, limit=10):
     filters = filters or {}
     filters['provider_code'] = [
@@ -1734,6 +1729,11 @@ def get_most_severe_accidents_with_entities(table_obj, filters, entities, start_
     df = pd.read_sql_query(query.statement, query.session.bind)
     df.columns = [c.replace('_hebrew', '') for c in df.columns]
     return df.to_dict(orient='records')
+
+
+def get_most_severe_accidents(table_obj, filters, start_time, end_time, limit=10):
+    entities = 'longitude', 'latitude', 'accident_severity_hebrew', 'accident_timestamp', 'accident_type_hebrew'
+    return get_most_severe_accidents_with_entities(table_obj, filters, entities, start_time, end_time, limit)
 
 
 def get_accidents_heat_map(table_obj, filters, start_time, end_time):

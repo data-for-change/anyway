@@ -1881,17 +1881,19 @@ def gen_news_flash_location_text(news_flash_id):
     logging.debug('{}'.format(res))
     return res
 
-
+'''
+    Returns infographics_data API
+'''
 @app.route('/api/infographics_data', methods=['GET'])
 def infographics_data():
     output = {}
     news_flash_id = request.values.get('news_flash_id')
     location_info = extract_news_flash_location(news_flash_id)
     logging.debug('location_info:{}'.format(location_info))
-    location_text = gen_news_flash_location_text(news_flash_id)
-    logging.debug('location_text:{}'.format(location_text))
     if location_info is None:
         return Response({})
+    location_text = gen_news_flash_location_text(news_flash_id)
+    logging.debug('location_text:{}'.format(location_text))
     gps = location_info['gps']
     location_info = location_info['data']
     output['meta'] = {"location_info": location_info.copy()}
@@ -1927,7 +1929,6 @@ def infographics_data():
     output['widgets'].append(accident_count_by_severity)
 
     # most severe accidents
-
     most_severe_accidents = {'name': 'most_severe_accidents',
                              'data': get_most_severe_accidents(table_obj=AccidentMarkerView, filters=location_info, start_time=start_time, end_time=end_time),
                              'meta': {}}

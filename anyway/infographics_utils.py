@@ -346,6 +346,49 @@ def get_news_flash_location_text(news_flash_id):
     logging.debug('{}'.format(res))
     return res
 
+
+def extract_news_flash_obj(news_flash_id):
+    news_flash_obj = db.session.query(NewsFlash).filter(
+        NewsFlash.id == news_flash_id).first()
+
+    if not news_flash_obj:
+        logging.warning('Could not find news flash id {}'.format(news_flash_id))
+        return None
+
+    return news_flash_obj
+
+
+def sum_road_accidents_by_specific_type(road_data, field_name):
+    dict_merge = defaultdict(int)
+    for accident_data in road_data:
+        if accident_data['accident_type'] == field_name:
+            dict_merge[field_name] += accident_data['count']
+        else:
+            dict_merge['other'] += accident_data['count']
+    return dict_merge
+
+
+def get_head_to_head_stat(news_flash_id, start_time, end_time):
+    news_flash_obj = extract_news_flash_obj(news_flash_id)
+    road_data = {}
+    filter_dict = {'road_type': CONST.ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION,
+                   'accident_severity': CONST.ACCIDENT_SEVERITY_DEADLY}
+    all_roads_data = get_accidents_stats(table_obj=AccidentMarkerView,
+                                         filters=filter_dict,
+                                         group_by='accident_type_hebrew', count='accident_type_hebrew',
+                                         start_time=start_time, end_time=end_time)
+
+    if news_flash_obj.road1 and news_flash_obj.road_segment_name:
+        filter_dict.update({'road1': news_flash_obj.road1, 'road_segment_name': news_flash_obj.road_segment_name})
+        road_data = get_accidents_stats(table_obj=AccidentMarkerView,
+                                        filters=filter_dict,
+                                        group_by='accident_type_hebrew', count='accident_type_hebrew',
+                                        start_time=start_time, end_time=end_time)
+
+    return {'specific_road_fatal_accidents': sum_road_accidents_by_specific_type(road_data, 'התנגשות חזית בחזית'),
+            'all_roads_fatal_accidents': sum_road_accidents_by_specific_type(all_roads_data, 'התנגשות חזית בחזית')}
+
+
 def create_infographics_data(news_flash_id, number_of_years_ago):
     output = {}
     try:
@@ -410,12 +453,13 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
                                 'latitude': gps['lat']})
     output['widgets'].append(street_view.serialize())
 
-
-    # vision zero
-    vision_zero = Widget(name='vision_zero',
-                         rank=5,
-                         items=['vision_zero_2_plus_1'])
-    output['widgets'].append(vision_zero.serialize())
+    # head to head accidents
+    head_to_head_accidents = Widget(name='head_to_head_accidents',
+                                    rank=5,
+                                    items=get_head_to_head_stat(news_flash_id=news_flash_id,
+                                                                start_time=start_time,
+                                                                end_time=end_time))
+    output['widgets'].append(head_to_head_accidents.serialize())
 
     # accident_type count
     accident_count_by_accident_type = Widget(name='accident_count_by_accident_type',
@@ -516,5 +560,11 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
                                          rank=14,
                                          items=data_of_injured_count_per_age_group)
     output['widgets'].append(injured_count_per_age_group.serialize())
+
+    # vision zero
+    vision_zero = Widget(name='vision_zero',
+                         rank=15,
+                         items=['vision_zero_2_plus_1'])
+    output['widgets'].append(vision_zero.serialize())
 
     return Response(json.dumps(output, default=str), mimetype="application/json")

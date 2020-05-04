@@ -65,6 +65,7 @@ simply rebuild the image;
 then go to its local path and `docker build --no-cache -t hasdna/anyway .`
 
 ## Docker commands
+Use `sudo` before each docker commands if you are using ubuntu.
 
 Set your VM with the current running shell session:
 
@@ -94,6 +95,14 @@ Deleting an image(from `docker images`):
 Rebuild the image:
 
     docker-compose build
+
+Open container bash terminal to execute commands:
+
+    docker exec -it <container-name> bash
+
+For example - to open the bash terminal of the anyway container:
+
+    docker exec -it anyway bash
 
 
 Additional Notes

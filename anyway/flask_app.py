@@ -42,7 +42,7 @@ from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved,
                      LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School, SchoolWithDescription,
                      InjuredAroundSchool, InjuredAroundSchoolAllData, Sex, AccidentMonth, InjurySeverity, ReportProblem,
                      EngineVolume, PopulationType, Region, District, NaturalArea, MunicipalStatus, YishuvShape,
-                     TotalWeight, DrivingDirections, AgeGroup, AccidentMarkerView, InvolvedMarkerView, EmbeddedReports)
+                     TotalWeight, DrivingDirections, AgeGroup, AccidentMarkerView, EmbeddedReports)
 from .oauth import OAuthSignIn
 from .infographics_utils import create_infographics_data
 from .app_and_db import app, db
@@ -430,6 +430,8 @@ def schools_api():
 @app.route("/api/schools-description", methods=["GET"])
 @user_optional
 def schools_description_api():
+    # Disable all the no-member violations in this function
+    # pylint: disable=no-member
     logging.debug('getting schools with description')
     query_obj = db.session.query(SchoolWithDescription) \
         .filter(not_(and_(SchoolWithDescription.latitude == 0, SchoolWithDescription.longitude == 0)),
@@ -476,6 +478,8 @@ def schools_yishuvs_api():
 @app.route("/api/schools-names", methods=["GET"])
 @user_optional
 def schools_names_api():
+    # Disable all the no-member violations in this function
+    # pylint: disable=no-member
     logging.debug('getting schools names')
     query_obj = db.session.query(SchoolWithDescription) \
         .filter(not_(and_(SchoolWithDescription.latitude == 0, SchoolWithDescription.longitude == 0)),
@@ -501,6 +505,8 @@ def schools_names_api():
 @app.route("/api/injured-around-schools", methods=["GET"])
 @user_optional
 def injured_around_schools_api():
+    # Disable all the no-member violations in this function
+    # pylint: disable=no-member
     report_years = [2014, 2015, 2016, 2017, 2018]
     logging.debug('getting injured around schools api')
     school_id = request.values.get('school_id')
@@ -593,6 +599,8 @@ def injured_around_schools_api():
 @app.route("/api/injured-around-schools-sex-graphs-data", methods=["GET"])
 @user_optional
 def injured_around_schools_sex_graphs_data_api():
+    # Disable all the no-member violations in this function
+    # pylint: disable=no-member
     logging.debug('getting injured around schools sex graphs data api')
     school_id = request.values.get('school_id')
     if school_id is not None:
@@ -1498,6 +1506,8 @@ def acc_in_area_query():
     # Request format: http://{server url}/markers/polygon?polygon=POLYGON(({lon} {lat},{lon} {lat},........,{lonN},
     # {latN}))"
 
+    # Disable all the no-member violations in this function
+    # pylint: disable=no-member
     pol_str = request.values.get('polygon')
     if pol_str is None:
         msg = "polygon parameter is mandatory and must be sent as part of the request - http://{host:port}/markers/polygon?polygon=POLYGON(({lon} {" \
@@ -1622,7 +1632,6 @@ def oauth_callback(provider):
 '''
 @app.route('/api/infographics_data', methods=['GET'])
 def infographics_data():
-    output = {}
     news_flash_id = request.values.get('news_flash_id')
     number_of_years_ago = request.values.get(
         'years_ago', CONST.DEFAULT_NUMBER_OF_YEARS_AGO)

@@ -1,9 +1,13 @@
+# -*- coding: utf-8 -*-
 import logging
+import datetime
+import json
+import pandas as pd
 from collections import defaultdict
 from sqlalchemy import func
 from sqlalchemy import cast, Numeric
 from sqlalchemy import desc
-import pandas as pd
+from flask import Response
 from .constants import CONST
 from .models import (NewsFlash, AccidentMarkerView, InvolvedMarkerView, RoadSegments)
 from .parsers import resolution_dict
@@ -126,7 +130,7 @@ def get_top_road_segments_accidents_per_km(resolution, location_info, start_time
         .limit(limit)
 
     result = pd.read_sql_query(query.statement, query.session.bind)
-    return result.to_dict(orient='records')
+    return result.to_dict(orient='records')  # pylint: disable=no-member
 
 
 def get_accidents_stats(table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None):
@@ -139,9 +143,9 @@ def get_accidents_stats(table_obj, filters=None, group_by=None, count=None, star
         query = query.group_by(group_by)
         query = query.with_entities(group_by, func.count(count))
     df = pd.read_sql_query(query.statement, query.session.bind)
-    df.rename(columns={'count_1': 'count'}, inplace=True)
+    df.rename(columns={'count_1': 'count'}, inplace=True)  # pylint: disable=no-member
     df.columns = [c.replace('_hebrew', '') for c in df.columns]
-    return df.to_dict(orient='records') if group_by or count else df.to_dict()
+    return df.to_dict(orient='records') if group_by or count else df.to_dict()  # pylint: disable=no-member
 
 
 def get_injured_filters(location_info):
@@ -167,7 +171,7 @@ def get_most_severe_accidents_with_entities(table_obj, filters, entities, start_
     query = query.limit(limit)
     df = pd.read_sql_query(query.statement, query.session.bind)
     df.columns = [c.replace('_hebrew', '') for c in df.columns]
-    return df.to_dict(orient='records')
+    return df.to_dict(orient='records')  # pylint: disable=no-member
 
 
 def get_most_severe_accidents(table_obj, filters, start_time, end_time, limit=10):
@@ -182,7 +186,7 @@ def get_accidents_heat_map(table_obj, filters, start_time, end_time):
     query = get_query(table_obj, filters, start_time, end_time)
     query = query.with_entities('longitude', 'latitude')
     df = pd.read_sql_query(query.statement, query.session.bind)
-    return df.to_dict(orient='records')
+    return df.to_dict(orient='records')  # pylint: disable=no-member
 
 
 def filter_and_group_injured_count_per_age_group(data_of_ages):

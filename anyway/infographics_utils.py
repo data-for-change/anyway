@@ -7,7 +7,7 @@ import pandas as pd
 from .constants import CONST
 from .models import (NewsFlash, AccidentMarkerView, InvolvedMarkerView, RoadSegments)
 from .parsers import resolution_dict
-from .app_and_db import app, db
+from .app_and_db import db
 
 '''
     Widget structure:

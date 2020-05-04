@@ -34,7 +34,7 @@ jobs:
         pip install -r test_requirements.txt -r requirements.txt
     - name: Pylint
       run: |
-        pylint anyway tests main.py
+        pylint anyway tests main.py ignored-modules=pandas
   Tests:
     runs-on: ubuntu-latest
     steps:

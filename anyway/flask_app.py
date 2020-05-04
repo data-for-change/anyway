@@ -26,7 +26,6 @@ from six import StringIO, iteritems
 from six.moves import http_client
 from sqlalchemy import and_, not_, or_
 from sqlalchemy import func
-from sqlalchemy import desc
 from sqlalchemy.orm import load_only
 from webassets import Environment as AssetsEnvironment
 from webassets.ext.jinja2 import AssetsExtension
@@ -43,8 +42,7 @@ from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved,
                      LocationSubscribers, Vehicle, Role, GeneralPreferences, NewsFlash, School, SchoolWithDescription,
                      InjuredAroundSchool, InjuredAroundSchoolAllData, Sex, AccidentMonth, InjurySeverity, ReportProblem,
                      EngineVolume, PopulationType, Region, District, NaturalArea, MunicipalStatus, YishuvShape,
-                     TotalWeight, DrivingDirections, AgeGroup, AccidentMarkerView, InvolvedMarkerView, EmbeddedReports,
-                     RoadSegments)
+                     TotalWeight, DrivingDirections, AgeGroup, AccidentMarkerView, InvolvedMarkerView, EmbeddedReports)
 from .oauth import OAuthSignIn
 from .infographics_utils import *
 from .app_and_db import app, db

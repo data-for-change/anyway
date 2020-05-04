@@ -6,8 +6,6 @@ import json
 import logging
 import os
 import time
-from collections import defaultdict
-
 import flask_admin as admin
 import flask_login as login
 import jinja2
@@ -29,7 +27,6 @@ from six.moves import http_client
 from sqlalchemy import and_, not_, or_
 from sqlalchemy import func
 from sqlalchemy import desc
-from sqlalchemy import cast, Numeric
 from sqlalchemy.orm import load_only
 from webassets import Environment as AssetsEnvironment
 from webassets.ext.jinja2 import AssetsExtension
@@ -49,11 +46,9 @@ from .models import (AccidentMarker, DiscussionMarker, HighlightPoint, Involved,
                      TotalWeight, DrivingDirections, AgeGroup, AccidentMarkerView, InvolvedMarkerView, EmbeddedReports,
                      RoadSegments)
 from .oauth import OAuthSignIn
-from .parsers import resolution_dict
-from .inographics_utils import *
+from .infographics_utils import *
+from .app_and_db import app, db
 
-app = utilities.init_flask()
-db = SQLAlchemy(app)
 app.config.from_object(__name__)
 app.config['SECURITY_REGISTERABLE'] = False
 app.config['SECURITY_USER_IDENTITY_ATTRIBUTES'] = 'username'
@@ -1663,108 +1658,146 @@ def infographics_data():
         end_time.year - number_of_years_ago_to_pull, 1, 1)
 
     # accident_severity count
-    accident_count_by_severity = {'name': 'accident_count_by_severity',
-                                  'data': {'text': get_accident_count_by_severity_text(location_info=location_info,
-                                                                                       location_text=location_text,
-                                                                                       start_time=start_time,
-                                                                                       end_time=end_time)},
-                                  'meta': {}}
-    output['widgets'].append(accident_count_by_severity)
+    text, items = get_accident_count_by_severity(location_info=location_info,
+                                                 location_text=location_text,
+                                                 start_time=start_time,
+                                                 end_time=end_time)
 
-    # most severe accidents
-    most_severe_accidents = {'name': 'most_severe_accidents',
-                             'data': get_most_severe_accidents(table_obj=AccidentMarkerView, filters=location_info, start_time=start_time, end_time=end_time),
-                             'meta': {}}
-    output['widgets'].append(most_severe_accidents)
+    accident_count_by_severity = Widget(name='accident_count_by_severity',
+                                        rank=1,
+                                        items=items,
+                                        text=text)
+    output['widgets'].append(accident_count_by_severity.serialize())
 
     # most severe accidents table
-    most_severe_accidents_table = {
-        'name': 'most_severe_accidents_table',
-        'data': {'title': get_most_severe_accidents_table_text(location_text),
-                 'table': get_most_severe_accidents_table(location_info, start_time, end_time)},
-        'meta': {}}
-    output['widgets'].append(most_severe_accidents_table)
+    most_severe_accidents_table = Widget(name='most_severe_accidents_table',
+                                        rank=2,
+                                        items=get_most_severe_accidents_table(location_info, start_time, end_time),
+                                        title=get_most_severe_accidents_table_title(location_text))
+    output['widgets'].append(most_severe_accidents_table.serialize())
+
+    # most severe accidents
+    most_severe_accidents = Widget(name='most_severe_accidents',
+                                   rank=3,
+                                   items=get_most_severe_accidents(table_obj=AccidentMarkerView,
+                                                                   filters=location_info,
+                                                                   start_time=start_time,
+                                                                   end_time=end_time))
+    output['widgets'].append(most_severe_accidents.serialize())
 
     # street view
-    street_view = {'name': 'street_view',
-                   'longitude': gps['lon'],
-                   'latitude': gps['lat']}
-    output['widgets'].append(street_view)
+    street_view = Widget(name='street_view',
+                         rank=4,
+                         items={'longitude': gps['lon'],
+                                'latitude': gps['lat']})
+    output['widgets'].append(street_view.serialize())
 
-    # accidents heat map
-    accidents_heat_map = {'name': 'accidents_heat_map',
-                          'data': get_accidents_heat_map(table_obj=AccidentMarkerView,
-                                                         filters=location_info,
-                                                         start_time=start_time,
-                                                         end_time=end_time),
-                          'meta': {}}
-    output['widgets'].append(accidents_heat_map)
 
-    # injured count by accident year
-    injured_count_by_accident_year = {'name': 'injured_count_by_accident_year',
-                                      'data': get_accidents_stats(table_obj=InvolvedMarkerView,
-                                                                  filters=get_injured_filters(
-                                                                      location_info),
-                                                                  group_by='accident_year', count='accident_year',
-                                                                  start_time=start_time, end_time=end_time),
-                                      'meta': {}}
-    output['widgets'].append(injured_count_by_accident_year)
-
-    # accident count on day light
-    accident_count_by_day_night = {'name': 'accident_count_by_day_night',
-                                   'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,
-                                                               group_by='day_night_hebrew', count='day_night_hebrew',
-                                                               start_time=start_time, end_time=end_time),
-                                   'meta': {}}
-    output['widgets'].append(accident_count_by_day_night)
-
-    # accidents distribution count by hour
-    accidents_count_by_hour = {'name': 'accidents_count_by_hour',
-                               'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,
-                                                           group_by='accident_hour', count='accident_hour',
-                                                           start_time=start_time, end_time=end_time),
-                               'meta': {}}
-    output['widgets'].append(accidents_count_by_hour)
-
-    # accident count by road_light
-    accident_count_by_road_light = {'name': 'accident_count_by_road_light',
-                                    'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,
-                                                                group_by='road_light_hebrew', count='road_light_hebrew',
-                                                                start_time=start_time, end_time=end_time),
-                                    'meta': {}}
-    output['widgets'].append(accident_count_by_road_light)
-
-    # accident count by road_segment
-    top_road_segments_accidents_per_km = {'name': 'top_road_segments_accidents_per_km',
-                                        'data': get_top_road_segments_accidents_per_km(resolution=resolution,
-                                                                                     location_info=location_info,
-                                                                                     start_time=start_time,
-                                                                                     end_time=end_time),
-                                        'meta': {}}
-    output['widgets'].append(top_road_segments_accidents_per_km)
-
-    # injured count per age group
-    data_of_injured_count_per_age_group_raw = get_accidents_stats(table_obj=InvolvedMarkerView, filters=get_injured_filters(
-        location_info), group_by='age_group_hebrew', count='age_group_hebrew', start_time=start_time, end_time=end_time)
-    data_of_injured_count_per_age_group = filter_and_group_injured_count_per_age_group(
-        data_of_injured_count_per_age_group_raw)
-
-    injured_count_per_age_group = {'name': 'injured_count_per_age_group',
-                                   'data': data_of_injured_count_per_age_group,
-                                   'meta': {}}
-    output['widgets'].append(injured_count_per_age_group)
+    # vision zero
+    vision_zero = Widget(name='vision_zero',
+                         rank=5,
+                         items=['vision_zero_2_plus_1'])
+    output['widgets'].append(vision_zero.serialize())
 
     # accident_type count
-    accident_count_by_accident_type = {'name': 'accident_count_by_accident_type',
-                                       'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_type_hebrew', count='accident_type_hebrew', start_time=start_time, end_time=end_time),
-                                       'meta': {}}
-    output['widgets'].append(accident_count_by_accident_type)
+    accident_count_by_accident_type = Widget(name='accident_count_by_accident_type',
+                                             rank=6,
+                                             items=get_accident_count_by_accident_type(location_info=location_info,
+                                                                                       start_time=start_time,
+                                                                                       end_time=end_time))
+    output['widgets'].append(accident_count_by_accident_type.serialize())
+
+    # accidents heat map
+    accidents_heat_map = Widget(name='accidents_heat_map',
+                         rank=7,
+                         items=get_accidents_heat_map(table_obj=AccidentMarkerView,
+                                                      filters=location_info,
+                                                      start_time=start_time,
+                                                      end_time=end_time))
+    output['widgets'].append(accidents_heat_map.serialize())
 
     # accident count by accident year
-    accident_count_by_accident_year = {'name': 'accident_count_by_accident_year',
-                                       'data': get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info, group_by='accident_year', count='accident_year', start_time=start_time, end_time=end_time),
-                                       'meta': {}}
-    output['widgets'].append(accident_count_by_accident_year)
+    accident_count_by_accident_year = Widget(name='accident_count_by_accident_year',
+                                            rank=8,
+                                            items=get_accidents_stats(table_obj=AccidentMarkerView,
+                                                                      filters=location_info,
+                                                                      group_by='accident_year',
+                                                                      count='accident_year',
+                                                                      start_time=start_time,
+                                                                      end_time=end_time),
+                                            title='כמות תאונות')
+    output['widgets'].append(accident_count_by_accident_year.serialize())
+
+    # injured count by accident year
+    injured_count_by_accident_year = Widget(name='injured_count_by_accident_year',
+                                            rank=9,
+                                            items=get_accidents_stats(table_obj=InvolvedMarkerView,
+                                                                      filters=get_injured_filters(location_info),
+                                                                      group_by='accident_year',
+                                                                      count='accident_year',
+                                                                      start_time=start_time,
+                                                                      end_time=end_time),
+                                            title='כמות פצועים')
+    output['widgets'].append(injured_count_by_accident_year.serialize())
+
+    # accident count on day light
+    accident_count_by_day_night = Widget(name='accident_count_by_day_night',
+                                         rank=10,
+                                         items=get_accidents_stats(table_obj=AccidentMarkerView,
+                                                                   filters=location_info,
+                                                                   group_by='day_night_hebrew',
+                                                                   count='day_night_hebrew',
+                                                                   start_time=start_time,
+                                                                   end_time=end_time),
+                                         title='כמות תאונות ביום ובלילה')
+    output['widgets'].append(accident_count_by_day_night.serialize())
+
+    # accidents distribution count by hour
+    accidents_count_by_hour = Widget(name='accidents_count_by_hour',
+                                         rank=11,
+                                         items=get_accidents_stats(table_obj=AccidentMarkerView,
+                                                                   filters=location_info,
+                                                                   group_by='accident_hour',
+                                                                   count='accident_hour',
+                                                                   start_time=start_time,
+                                                                   end_time=end_time),
+                                         title='כמות תאונות לפי שעה')
+    output['widgets'].append(accidents_count_by_hour.serialize())
+
+    # accident count by road_light
+    accident_count_by_road_light = Widget(name='accident_count_by_road_light',
+                                         rank=12,
+                                         items=get_accidents_stats(table_obj=AccidentMarkerView,
+                                                                   filters=location_info,
+                                                                   group_by='road_light_hebrew',
+                                                                   count='road_light_hebrew',
+                                                                   start_time=start_time,
+                                                                   end_time=end_time),
+                                         title='כמות תאונות לפי תאורה')
+    output['widgets'].append(accident_count_by_road_light.serialize())
+
+    # accident count by road_segment
+    top_road_segments_accidents_per_km = Widget(name='top_road_segments_accidents_per_km',
+                                         rank=13,
+                                         items=get_top_road_segments_accidents_per_km(resolution=resolution,
+                                                                                     location_info=location_info,
+                                                                                     start_time=start_time,
+                                                                                     end_time=end_time))
+    output['widgets'].append(top_road_segments_accidents_per_km.serialize())
+
+    # injured count per age group
+    data_of_injured_count_per_age_group_raw = get_accidents_stats(table_obj=InvolvedMarkerView,
+                                                                  filters=get_injured_filters(location_info),
+                                                                  group_by='age_group_hebrew',
+                                                                  count='age_group_hebrew',
+                                                                  start_time=start_time,
+                                                                  end_time=end_time)
+    data_of_injured_count_per_age_group = filter_and_group_injured_count_per_age_group(data_of_injured_count_per_age_group_raw)
+
+    injured_count_per_age_group = Widget(name='injured_count_per_age_group',
+                                         rank=14,
+                                         items=data_of_injured_count_per_age_group)
+    output['widgets'].append(injured_count_per_age_group.serialize())
 
     return Response(json.dumps(output, default=str), mimetype="application/json")
 

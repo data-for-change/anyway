@@ -1,30 +1,51 @@
+import logging
+from collections import defaultdict
+from sqlalchemy import func
+from sqlalchemy import cast, Numeric
+from sqlalchemy import desc
+import pandas as pd
+from .constants import CONST
+from .models import (NewsFlash, AccidentMarkerView, InvolvedMarkerView, RoadSegments)
+from .parsers import resolution_dict
+from .app_and_db import app, db
 
 '''
     Widget structure:
     {
-        'name': str
+        'name': str,
+        'rank': int (Integer),
         'data': {'items': list (Array) | dictionary (Object),
-                 'text': dictionary (Object) - can be empty,
-                 'additional': dictionary (Object) -can be empty,
+                 'text': list (Array) - optional,
+                 'title': str (String) - optional,
+                 'additional': dictionary (Object) - optional,
                  'meta': dictionary (Object) - can be empty
     }
 '''
 class Widget():
-    def __init__(self, name, rank, items, text={}, additional={}, meta={}):
+    def __init__(self, name, rank, items, text=None, title=None, additional=None, meta=None):
         self.name = name
         self.rank = rank
         self.items = items
         self.text = text
+        self.title = title
         self.additional = additional
+        self.meta = meta
 
     def serialize(self):
-        return {'name': self.name,
-                'rank': self.rank,
-                'data':
-                    'items': items,
-                    'text': text,
-                    'additional': additional,
-                    'meta': meta}
+        output = {}
+        output['name'] = self.name
+        output['rank'] = self.rank
+        output['data'] = {}
+        output['data']['items'] = self.items
+        if self.text:
+            output['data']['text'] = self.text
+        if self.title:
+            output['data']['title'] = self.title
+        if self.additional:
+            output['data']['additional'] = self.additional
+        if self.meta:
+            output['data']['meta'] = self.meta
+        return output
 
 
 def extract_news_flash_location(news_flash_id):
@@ -66,6 +87,20 @@ def get_query(table_obj, filters, start_time, end_time):
             query = query.filter((getattr(table_obj, field_name)).in_(values))
     return query
 
+def get_accident_count_by_accident_type(location_info, start_time, end_time):
+    all_accident_type_count = get_accidents_stats(table_obj=AccidentMarkerView,
+                                                  filters=location_info,
+                                                  group_by='accident_type_hebrew',
+                                                  count='accident_type_hebrew',
+                                                  start_time=start_time,
+                                                  end_time=end_time)
+    merged_accident_type_count = [{'accident_type': 'התנגשות', 'count': 0}]
+    for item in all_accident_type_count:
+        if 'התנגשות' in item['accident_type']:
+            merged_accident_type_count[0]['count'] += item['count']
+        else:
+            merged_accident_type_count.append('item')
+    return merged_accident_type_count
 
 def get_top_road_segments_accidents_per_km(resolution, location_info, start_time=None, end_time=None, limit=5):
     if resolution != 'כביש בינעירוני':  # relevent for non urban roads only
@@ -94,17 +129,24 @@ def get_top_road_segments_accidents_per_km(resolution, location_info, start_time
     return result.to_dict(orient='records')
 
 
-def get_accidents_stats(table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None):
+def get_accidents_stats(table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None, order_by=None):
     filters = filters or {}
     filters['provider_code'] = [
         CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
     # get stats
     query = get_query(table_obj, filters, start_time, end_time)
-    if group_by:
+    if group_by and order_by:
+        query = query.group_by(group_by, order_by)
+        query = query.with_entities(group_by, order_by, func.count(count))
+    elif group_by:
         query = query.group_by(group_by)
         query = query.with_entities(group_by, func.count(count))
+    elif order_by:
+        query = query.order_by(order_by)
     df = pd.read_sql_query(query.statement, query.session.bind)
     df.rename(columns={'count_1': 'count'}, inplace=True)
+    if order_by:
+        df.drop(columns=[order_by], inplace=True)
     df.columns = [c.replace('_hebrew', '') for c in df.columns]
     return df.to_dict(orient='records') if group_by or count else df.to_dict()
 
@@ -193,25 +235,46 @@ def filter_and_group_injured_count_per_age_group(data_of_ages):
     return return_dict_by_required_age_group
 
 
-def get_most_severe_accidents_table_text(location_text):
+def get_most_severe_accidents_table_title(location_text):
     return 'תאונות חמורות ב' + location_text
 
 
-def get_accident_count_by_severity_text(location_info, location_text, start_time, end_time):
-    count_by_severity = get_accidents_stats(table_obj=AccidentMarkerView, filters=location_info,
-                                            group_by='accident_severity_hebrew', count='accident_severity_hebrew', start_time=start_time, end_time=end_time)
-    severity_text = ''
+def get_accident_count_by_severity(location_info, location_text, start_time, end_time):
+    count_by_severity = get_accidents_stats(table_obj=AccidentMarkerView,
+                                            filters=location_info,
+                                            group_by='accident_severity_hebrew',
+                                            count='accident_severity_hebrew',
+                                            start_time=start_time,
+                                            end_time=end_time,
+                                            order_by='accident_severity')
+    severity_dict = {'קטלנית': 1,
+                     'קשה': 2,
+                     'קלה': 3}
+    items = {}
+    text = []
+    severity_texts = ['','','']
     total_accidents_count = 0
     start_year = start_time.year
     end_year = end_time.year
     for severity_and_count in count_by_severity:
-        severity_text += str(severity_and_count['count']) + \
-            ' בחומרה ' + severity_and_count['accident_severity'] + '\n'
-        total_accidents_count += severity_and_count['count']
-
-    return 'בין השנים ' + str(start_year) + '-' + str(end_year) + ',\n' \
-           + 'ב' + location_text + 'התרחשו ' + str(total_accidents_count) + ' תאונות.\n' \
-           + severity_text
+        if severity_and_count['count'] > 0:
+            accident_severity_hebrew = severity_and_count['accident_severity']
+            severity_num = severity_dict[accident_severity_hebrew]
+            severity_count_var = 'severity_{}_count'.format(severity_num)
+            idx = severity_num-1
+            severity_texts[idx] = ('{' + severity_count_var + '}' + \
+                                                   ' בחומרה ' + accident_severity_hebrew)
+            items[severity_count_var] = severity_and_count['count']
+            total_accidents_count += severity_and_count['count']
+    years_text = 'בין השנים {start_year}-{end_year},'
+    text.append(years_text)
+    items['start_year'] = start_year
+    items['end_year'] = end_year
+    location_and_total_text = 'ב' + location_text + ' התרחשו {total_accidents_count}' + ' תאונות.'
+    text.append(location_and_total_text)
+    items['total_accidents_count'] = total_accidents_count
+    text += severity_texts
+    return text, items
 
 
 def get_most_severe_accidents_table(location_info, start_time, end_time):

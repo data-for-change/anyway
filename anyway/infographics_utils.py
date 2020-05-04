@@ -129,24 +129,17 @@ def get_top_road_segments_accidents_per_km(resolution, location_info, start_time
     return result.to_dict(orient='records')
 
 
-def get_accidents_stats(table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None, order_by=None):
+def get_accidents_stats(table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None):
     filters = filters or {}
     filters['provider_code'] = [
         CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
     # get stats
     query = get_query(table_obj, filters, start_time, end_time)
-    if group_by and order_by:
-        query = query.group_by(group_by, order_by)
-        query = query.with_entities(group_by, order_by, func.count(count))
-    elif group_by:
+    if group_by:
         query = query.group_by(group_by)
         query = query.with_entities(group_by, func.count(count))
-    elif order_by:
-        query = query.order_by(order_by)
     df = pd.read_sql_query(query.statement, query.session.bind)
     df.rename(columns={'count_1': 'count'}, inplace=True)
-    if order_by:
-        df.drop(columns=[order_by], inplace=True)
     df.columns = [c.replace('_hebrew', '') for c in df.columns]
     return df.to_dict(orient='records') if group_by or count else df.to_dict()
 
@@ -245,8 +238,7 @@ def get_accident_count_by_severity(location_info, location_text, start_time, end
                                             group_by='accident_severity_hebrew',
                                             count='accident_severity_hebrew',
                                             start_time=start_time,
-                                            end_time=end_time,
-                                            order_by='accident_severity')
+                                            end_time=end_time)
     severity_dict = {'קטלנית': 1,
                      'קשה': 2,
                      'קלה': 3}
@@ -278,7 +270,7 @@ def get_accident_count_by_severity(location_info, location_text, start_time, end
 
 
 def get_most_severe_accidents_table(location_info, start_time, end_time):
-    entities = 'id', 'provider_code', 'accident_timestamp', 'accident_type_hebrew'
+    entities = 'id', 'provider_code', 'accident_timestamp', 'accident_type_hebrew', 'accident_year'
     accidents = get_most_severe_accidents_with_entities(
         table_obj=AccidentMarkerView,
         filters=location_info,
@@ -293,19 +285,21 @@ def get_most_severe_accidents_table(location_info, start_time, end_time):
         accident['date'] = dt.strftime("%d/%m/%y")
         accident['hour'] = dt.strftime("%H:%M")
         num = get_casualties_count_in_accident(
-            accident['id'], accident['provider_code'], 1)
+            accident['id'], accident['provider_code'], 1, accident['accident_year'])
         accident['killed_count'] = num
         num = get_casualties_count_in_accident(
-            accident['id'], accident['provider_code'], [2, 3])
+            accident['id'], accident['provider_code'], [2, 3], accident['accident_year'])
         accident['injured_count'] = num
         del accident['accident_timestamp'], accident['accident_type'], accident['id'], accident['provider_code']
     return accidents
 
 
 # count of dead and severely injured
-def get_casualties_count_in_accident(accident_id, provider_code, injury_severity):
+def get_casualties_count_in_accident(accident_id, provider_code, injury_severity, accident_year):
     filters = {'accident_id': accident_id,
-               'provider_code': provider_code, 'injury_severity': injury_severity}
+               'provider_code': provider_code,
+               'injury_severity': injury_severity,
+               'accident_year': accident_year}
     casualties = get_accidents_stats(table_obj=InvolvedMarkerView, filters=filters,
                                      group_by='injury_severity', count='injury_severity')
     res = 0

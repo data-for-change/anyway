@@ -364,8 +364,15 @@ def sum_road_accidents_by_specific_type(road_data, field_name):
         if accident_data['accident_type'] == field_name:
             dict_merge[field_name] += accident_data['count']
         else:
-            dict_merge['other'] += accident_data['count']
+            dict_merge['תאונות אחרות'] += accident_data['count']
     return dict_merge
+
+
+def convert_roads_fatal_accidents_to_frontend_view(data_dict):
+    data_list = []
+    for key, value in data_dict.items():
+        data_list.append({'desc': key, 'count': value})
+    return data_list
 
 
 def get_head_to_head_stat(news_flash_id, start_time, end_time):
@@ -385,8 +392,11 @@ def get_head_to_head_stat(news_flash_id, start_time, end_time):
                                         group_by='accident_type_hebrew', count='accident_type_hebrew',
                                         start_time=start_time, end_time=end_time)
 
-    return {'specific_road_fatal_accidents': sum_road_accidents_by_specific_type(road_data, 'התנגשות חזית בחזית'),
-            'all_roads_fatal_accidents': sum_road_accidents_by_specific_type(all_roads_data, 'התנגשות חזית בחזית')}
+    road_data_dict = sum_road_accidents_by_specific_type(road_data, 'התנגשות חזית בחזית')
+    all_roads_data_dict = sum_road_accidents_by_specific_type(all_roads_data, 'התנגשות חזית בחזית')
+
+    return {'specific_road_segment_fatal_accidents': convert_roads_fatal_accidents_to_frontend_view(road_data_dict),
+            'all_roads_fatal_accidents': convert_roads_fatal_accidents_to_frontend_view(all_roads_data_dict)}
 
 
 def create_infographics_data(news_flash_id, number_of_years_ago):
@@ -454,12 +464,12 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     output['widgets'].append(street_view.serialize())
 
     # head to head accidents
-    head_to_head_accidents = Widget(name='head_to_head_accidents',
+    head_on_collisions_comparison = Widget(name='head_on_collisions_comparison',
                                     rank=5,
                                     items=get_head_to_head_stat(news_flash_id=news_flash_id,
                                                                 start_time=start_time,
                                                                 end_time=end_time))
-    output['widgets'].append(head_to_head_accidents.serialize())
+    output['widgets'].append(head_on_collisions_comparison.serialize())
 
     # accident_type count
     accident_count_by_accident_type = Widget(name='accident_count_by_accident_type',

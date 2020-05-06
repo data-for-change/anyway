@@ -18,21 +18,19 @@ from .app_and_db import db
     {
         'name': str,
         'rank': int (Integer),
-        'data': {'items': list (Array) | dictionary (Object),
-                 'text': list (Array) - optional,
-                 'title': str (String) - optional,
-                 'additional': dictionary (Object) - optional,
-                 'meta': dictionary (Object) - can be empty
+        'data': {
+                 'items': list (Array) | dictionary (Object),
+                 'text': dictionary (Object) - can be empty
+                 }
+        'meta': dictionary (Object) - can be empty
     }
 '''
 class Widget():
-    def __init__(self, name, rank, items, text=None, title=None, additional=None, meta=None):
+    def __init__(self, name, rank, items, text=None, meta=None):
         self.name = name
         self.rank = rank
         self.items = items
         self.text = text
-        self.title = title
-        self.additional = additional
         self.meta = meta
 
     def serialize(self):
@@ -43,12 +41,8 @@ class Widget():
         output['data']['items'] = self.items
         if self.text:
             output['data']['text'] = self.text
-        if self.title:
-            output['data']['title'] = self.title
-        if self.additional:
-            output['data']['additional'] = self.additional
         if self.meta:
-            output['data']['meta'] = self.meta
+            output['meta'] = self.meta
         return output
 
 
@@ -62,7 +56,7 @@ def extract_news_flash_location(news_flash_id):
     if not news_flash_obj or not resolution or resolution not in resolution_dict:
         logging.warn(
             'could not find valid resolution for news flash id {}'.format(news_flash_id))
-        return {'name': 'location', 'data': {'resolution': None}}
+        return None
     data = {'resolution': resolution}
     for field in resolution_dict[resolution]:
         curr_field = getattr(news_flash_obj, field)
@@ -103,7 +97,7 @@ def get_accident_count_by_accident_type(location_info, start_time, end_time):
         if 'התנגשות' in item['accident_type']:
             merged_accident_type_count[0]['count'] += item['count']
         else:
-            merged_accident_type_count.append('item')
+            merged_accident_type_count.append(item)
     return merged_accident_type_count
 
 def get_top_road_segments_accidents_per_km(resolution, location_info, start_time=None, end_time=None, limit=5):
@@ -243,34 +237,23 @@ def get_accident_count_by_severity(location_info, location_text, start_time, end
                                             count='accident_severity_hebrew',
                                             start_time=start_time,
                                             end_time=end_time)
-    severity_dict = {'קטלנית': 1,
-                     'קשה': 2,
-                     'קלה': 3}
+    severity_dict = {'קטלנית': 'fatal',
+                     'קשה': 'severe',
+                     'קלה': 'light'}
     items = {}
-    text = []
-    severity_texts = ['','','']
     total_accidents_count = 0
     start_year = start_time.year
     end_year = end_time.year
     for severity_and_count in count_by_severity:
-        if severity_and_count['count'] > 0:
-            accident_severity_hebrew = severity_and_count['accident_severity']
-            severity_num = severity_dict[accident_severity_hebrew]
-            severity_count_var = 'severity_{}_count'.format(severity_num)
-            idx = severity_num-1
-            severity_texts[idx] = ('{' + severity_count_var + '}' + \
-                                                   ' בחומרה ' + accident_severity_hebrew)
-            items[severity_count_var] = severity_and_count['count']
-            total_accidents_count += severity_and_count['count']
-    years_text = 'בין השנים {start_year}-{end_year},'
-    text.append(years_text)
+        accident_severity_hebrew = severity_and_count['accident_severity']
+        severity_english = severity_dict[accident_severity_hebrew]
+        severity_count_text = 'severity_{}_count'.format(severity_english)
+        items[severity_count_text] = severity_and_count['count']
+        total_accidents_count += severity_and_count['count']
     items['start_year'] = start_year
     items['end_year'] = end_year
-    location_and_total_text = 'ב' + location_text + ' התרחשו {total_accidents_count}' + ' תאונות.'
-    text.append(location_and_total_text)
     items['total_accidents_count'] = total_accidents_count
-    text += severity_texts
-    return text, items
+    return items
 
 
 def get_most_severe_accidents_table(location_info, start_time, end_time):
@@ -281,7 +264,6 @@ def get_most_severe_accidents_table(location_info, start_time, end_time):
         entities=entities,
         start_time=start_time,
         end_time=end_time)
-    logging.debug('accidents:{}'.format(accidents))
     # Add casualties
     for accident in accidents:
         accident['type'] = accident['accident_type']
@@ -317,10 +299,7 @@ def get_casualties_count_in_accident(accident_id, provider_code, injury_severity
 def get_news_flash_location_text(news_flash_id):
     news_flash_item = db.session.query(NewsFlash).filter(
         NewsFlash.id == news_flash_id).first()
-    logging.debug('news_flash_item:{}'.format(news_flash_item))
     nf = news_flash_item.serialize()
-    logging.debug('news flash serialized:{}'.format(nf))
-    logging.debug('news_flash_id:{}({})'.format(news_flash_id, type(nf)))
     resolution = nf['resolution'] if nf['resolution'] else ''
     yishuv_name = nf['yishuv_name'] if nf['yishuv_name'] else ''
     road1 = str(int(nf['road1'])) if nf['road1'] else ''
@@ -343,7 +322,6 @@ def get_news_flash_location_text(news_flash_id):
         logging.warning(
             "Did not found quality resolution. Using location field. News Flash id:{}".format(nf['id']))
         res = nf['location']
-    logging.debug('{}'.format(res))
     return res
 
 def create_infographics_data(news_flash_id, number_of_years_ago):
@@ -355,14 +333,15 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     if number_of_years_ago < 0 or number_of_years_ago > 100:
         return Response({})
     location_info = extract_news_flash_location(news_flash_id)
-    logging.debug('location_info:{}'.format(location_info))
     if location_info is None:
         return Response({})
+    logging.debug('location_info:{}'.format(location_info))
     location_text = get_news_flash_location_text(news_flash_id)
     logging.debug('location_text:{}'.format(location_text))
     gps = location_info['gps']
     location_info = location_info['data']
-    output['meta'] = {"location_info": location_info.copy()}
+    output['meta'] = {'location_info': location_info.copy(),
+                      'location_text': location_text}
     output['widgets'] = []
     resolution = location_info.pop('resolution')
     if resolution is None:
@@ -376,22 +355,21 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         end_time.year - number_of_years_ago, 1, 1)
 
     # accident_severity count
-    text, items = get_accident_count_by_severity(location_info=location_info,
+    items = get_accident_count_by_severity(location_info=location_info,
                                                  location_text=location_text,
                                                  start_time=start_time,
                                                  end_time=end_time)
 
     accident_count_by_severity = Widget(name='accident_count_by_severity',
                                         rank=1,
-                                        items=items,
-                                        text=text)
+                                        items=items)
     output['widgets'].append(accident_count_by_severity.serialize())
 
     # most severe accidents table
     most_severe_accidents_table = Widget(name='most_severe_accidents_table',
                                         rank=2,
                                         items=get_most_severe_accidents_table(location_info, start_time, end_time),
-                                        title=get_most_severe_accidents_table_title(location_text))
+                                        text={'title':get_most_severe_accidents_table_title(location_text)})
     output['widgets'].append(most_severe_accidents_table.serialize())
 
     # most severe accidents
@@ -443,7 +421,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
                                                                       count='accident_year',
                                                                       start_time=start_time,
                                                                       end_time=end_time),
-                                            title='כמות תאונות')
+                                            text={'title':'כמות תאונות'})
     output['widgets'].append(accident_count_by_accident_year.serialize())
 
     # injured count by accident year
@@ -455,7 +433,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
                                                                       count='accident_year',
                                                                       start_time=start_time,
                                                                       end_time=end_time),
-                                            title='כמות פצועים')
+                                            text={'title':'כמות פצועים'})
     output['widgets'].append(injured_count_by_accident_year.serialize())
 
     # accident count on day light
@@ -467,7 +445,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
                                                                    count='day_night_hebrew',
                                                                    start_time=start_time,
                                                                    end_time=end_time),
-                                         title='כמות תאונות ביום ובלילה')
+                                         text={'title':'כמות תאונות ביום ובלילה'})
     output['widgets'].append(accident_count_by_day_night.serialize())
 
     # accidents distribution count by hour
@@ -479,7 +457,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
                                                                    count='accident_hour',
                                                                    start_time=start_time,
                                                                    end_time=end_time),
-                                         title='כמות תאונות לפי שעה')
+                                         text={'title':'כמות תאונות לפי שעה'})
     output['widgets'].append(accidents_count_by_hour.serialize())
 
     # accident count by road_light
@@ -491,7 +469,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
                                                                    count='road_light_hebrew',
                                                                    start_time=start_time,
                                                                    end_time=end_time),
-                                         title='כמות תאונות לפי תאורה')
+                                         text={'title':'כמות תאונות לפי תאורה'})
     output['widgets'].append(accident_count_by_road_light.serialize())
 
     # accident count by road_segment
@@ -511,7 +489,6 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
                                                                   start_time=start_time,
                                                                   end_time=end_time)
     data_of_injured_count_per_age_group = filter_and_group_injured_count_per_age_group(data_of_injured_count_per_age_group_raw)
-
     injured_count_per_age_group = Widget(name='injured_count_per_age_group',
                                          rank=14,
                                          items=data_of_injured_count_per_age_group)

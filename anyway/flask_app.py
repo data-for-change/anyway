@@ -1633,8 +1633,10 @@ def oauth_callback(provider):
 @app.route('/api/infographics_data', methods=['GET'])
 def infographics_data():
     news_flash_id = request.values.get('news_flash_id')
-    number_of_years_ago = request.values.get(
-        'years_ago', CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
+    number_of_years_ago = request.values.get('years_ago', CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
+    logging.debug('getting infographics data for news_flash_id: {news_flash_id}, \
+                  in time period:{number_of_years_ago}'.format(news_flash_id=news_flash_id,
+                                                               number_of_years_ago=number_of_years_ago))
     return create_infographics_data(news_flash_id=news_flash_id,
                                     number_of_years_ago=number_of_years_ago)
 

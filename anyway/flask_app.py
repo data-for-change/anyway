@@ -69,7 +69,7 @@ assets_env = AssetsEnvironment(os.path.join(
 
 CORS(app, resources={r"/location-subscription": {"origins": "*"},
                      r"/report-problem": {"origins": "*"},
-                     r"/api/infographics_data": {"origins": "*"},
+                     r"/api/infographics-data": {"origins": "*"},
                      r"/api/news-flash-filters": {"origins": "*"},
                      r"/api/embedded-reports": {"origins": "*"}})
 
@@ -1628,9 +1628,9 @@ def oauth_callback(provider):
 
 
 '''
-    Returns infographics_data API
+    Returns infographics-data API
 '''
-@app.route('/api/infographics_data', methods=['GET'])
+@app.route('/api/infographics-data', methods=['GET'])
 def infographics_data():
     news_flash_id = request.values.get('news_flash_id')
     number_of_years_ago = request.values.get('years_ago', CONST.DEFAULT_NUMBER_OF_YEARS_AGO)

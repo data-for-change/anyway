@@ -24,6 +24,10 @@ Instructions
 
 **2.** [Install Docker](https://docs.docker.com/install/)
 
+**Continue with your OS, See below**
+
+**For Mac:**
+
 **3.** Build anyway container: `docker-compose build`
 
 **4.** Start the container, go to the **anyway** directory and run:
@@ -38,6 +42,22 @@ Note - you won't see the map since the key works in production.
 
 **7.**. To stop the containers run: `docker-compose down`
 
+**For Ubuntu:**
+
+**3.** Build anyway container: `sudo docker-compose build`
+
+**4.** Start the container, go to the **anyway** directory and run:
+    `sudo docker-compose up -d`
+
+**5.** Download the [db dump](https://drive.google.com/drive/folders/1OesX8Y2MGgIcj0B3f5cdS-BIzt4govXA?usp=sharing) (You need to request access) and save it in the **anyway** directory.
+Restore the db (in anyway directory): `cat <truncated dump file path> | sudo docker-compose exec -T db psql -U anyway`
+Now your containers are up and with data loaded.
+
+**6.** **You're all set!** ANYWAY is up and running - connect to http://127.0.0.1:8080
+Note - you won't see the map since the key works in production.
+
+**7.**. To stop the containers run: `sudo docker-compose down`
+
 More
 -----------------------
 To install requirements again, redeploy DB or any requirement involving the dependencies installation,
@@ -45,6 +65,7 @@ simply rebuild the image;
 then go to its local path and `docker build --no-cache -t hasdna/anyway .`
 
 ## Docker commands
+Use `sudo` before each docker commands if you are using ubuntu.
 
 Set your VM with the current running shell session:
 
@@ -74,6 +95,14 @@ Deleting an image(from `docker images`):
 Rebuild the image:
 
     docker-compose build
+
+Open container bash terminal to execute commands:
+
+    docker exec -it <container-name> bash
+
+For example - to open the bash terminal of the anyway container:
+
+    docker exec -it anyway bash
 
 
 Additional Notes

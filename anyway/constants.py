@@ -23,6 +23,12 @@ class Constants(object):
 
     ALL_AGE_GROUPS_LIST = list(range(1, AGE_GROUPS_NUMBER + 1)) + [99]
 
+    # This is a type for the 'accident_severity' table field name
+    ACCIDENT_SEVERITY_DEADLY = 1
+
+    # This is a type for the 'road_type' table field name
+    ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION = 4
+
     # other global constants (python only)
     DEFAULT_NUMBER_OF_YEARS_AGO = 5
 

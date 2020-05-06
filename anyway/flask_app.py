@@ -71,6 +71,7 @@ CORS(app, resources={r"/location-subscription": {"origins": "*"},
                      r"/report-problem": {"origins": "*"},
                      r"/api/infographics-data": {"origins": "*"},
                      r"/api/news-flash-filters": {"origins": "*"},
+                     r"/api/news-flash": {"origins": "*"},
                      r"/api/embedded-reports": {"origins": "*"}})
 
 jinja_environment = jinja2.Environment(

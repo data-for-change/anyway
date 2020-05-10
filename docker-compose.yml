@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 
 services:
   anyway:
@@ -16,12 +16,13 @@ services:
       - db
 
   db:
-    image: postgis/postgis:9.6-2.5-alpine
+    build: db_docker
     container_name: db
     environment:
       - POSTGRES_PASSWORD=anyway
       - POSTGRES_USER=anyway
       - POSTGRES_DB=anyway
+      - DB_DUMP_PATH=/docker-entrypoint-initdb.d/anyway_public.pgdump
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:

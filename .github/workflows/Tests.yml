@@ -19,6 +19,7 @@ jobs:
       with:
           node-version: '8.17'
     - run: npm install -g eslint
+    - run: npm install babel-eslint --save-dev
     - run: eslint static/js --ignore-path=static/js/.eslintignore
   Pylint:
     runs-on: ubuntu-latest

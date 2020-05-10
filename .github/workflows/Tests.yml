@@ -17,7 +17,7 @@ jobs:
     - name: Setup Node.js environment
       uses: actions/setup-node@v1.4.1
       with:
-          node-version: '8.17'
+          node-version: '12.16.3'
     - run: npm install -g eslint
     - run: npm install babel-eslint --save-dev
     - run: eslint static/js --ignore-path=static/js/.eslintignore

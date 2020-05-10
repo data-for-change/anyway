@@ -38,9 +38,9 @@ Instructions
 Note - you won't see the map since the key works in production.
 If you need to see the map contact atalya via slack to get a developer key.
 
-**7.**. To stop the containers run: `docker-compose down`
+**7.** To stop the containers run: `docker-compose down`
 
-**8.**. To rebuild the docker containers with the most updated db, run `docker volume rm anyway_db_data` and go back to stage 4.
+**8.** To rebuild the docker containers with the most updated db, run `docker volume rm anyway_db_data` and go back to stage 4.
 
 **For Ubuntu:**
 
@@ -53,9 +53,9 @@ If you need to see the map contact atalya via slack to get a developer key.
 Note - you won't see the map since the key works in production.
 If you need to see the map contact atalya via slack to get a developer key.
 
-**7.**. To stop the containers run: `sudo docker-compose down`
+**7.** To stop the containers run: `sudo docker-compose down`
 
-**8.**. To rebuild the docker containers with the most updated db, run `sudo docker volume rm anyway_db_data` and go back to stage 4.
+**8.** To rebuild the docker containers with the most updated db, run `sudo docker volume rm anyway_db_data` and go back to stage 4.
 
 ## Additional Docker commands
 Use `sudo` before each docker commands if you are using ubuntu.

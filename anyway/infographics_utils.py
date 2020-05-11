@@ -382,7 +382,7 @@ def get_latest_accident_date(table_obj, filters, start_time, end_time):
     filters['provider_code'] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
     query = db.session.query(func.max(table_obj.accident_timestamp))
     df = pd.read_sql_query(query.statement, query.session.bind)
-   return result.to_dict(orient='records')  # pylint: disable=no-member
+    return result.to_dict(orient='records')  # pylint: disable=no-member
 
 def create_infographics_data(news_flash_id, number_of_years_ago):
     output = {}

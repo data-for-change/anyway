@@ -413,7 +413,6 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     end_time = datetime.date.today()
     start_time = datetime.date(
         end_time.year - number_of_years_ago, 1, 1)
-    
     last_accident_date=get_latest_accident_date(table_obj=AccidentMarkerView, filters=[], start_time=start_time, end_time=end_time)
     #converting to datetime object to get the year
     end_time=last_accident_date.to_pydatetime().date()

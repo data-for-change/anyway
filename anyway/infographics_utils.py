@@ -382,7 +382,7 @@ def get_latest_accident_date(table_obj, filters, start_time, end_time):
     filters['provider_code'] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
     query = db.session.query(func.max(table_obj.accident_timestamp))
     df = pd.read_sql_query(query.statement, query.session.bind)
-    return result.to_dict(orient='records')  # pylint: disable=no-member
+    return (df.to_dict(orient='records'))[0].get("max_1") # pylint: disable=no-member
 
 def create_infographics_data(news_flash_id, number_of_years_ago):
     output = {}
@@ -413,6 +413,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     end_time = datetime.date.today()
     start_time = datetime.date(
         end_time.year - number_of_years_ago, 1, 1)
+
     last_accident_date=get_latest_accident_date(table_obj=AccidentMarkerView, filters=[], start_time=start_time, end_time=end_time)
     #converting to datetime object to get the year
     end_time=last_accident_date.to_pydatetime().date()

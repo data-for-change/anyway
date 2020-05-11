@@ -2109,3 +2109,4 @@ class InfographicsDataCacheTemp(InfographicsDataCacheFields, Base):
     def get_id(self):
         return self.news_flash_id
 
+

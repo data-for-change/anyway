@@ -13,6 +13,7 @@ from .models import NewsFlash, AccidentMarkerView, InvolvedMarkerView, RoadSegme
 from .parsers import resolution_dict
 from .app_and_db import db
 from .infographics_dictionaries import driver_type_hebrew_dict
+from anyway.parsers import infographics_data_cache_updater
 
 """
     Widget structure:
@@ -500,12 +501,12 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     try:
         number_of_years_ago = int(number_of_years_ago)
     except ValueError:
-        return Response({})
+        return {}
     if number_of_years_ago < 0 or number_of_years_ago > 100:
-        return Response({})
+        return {}
     location_info = extract_news_flash_location(news_flash_id)
     if location_info is None:
-        return Response({})
+        return {}
     logging.debug("location_info:{}".format(location_info))
     location_text = get_news_flash_location_text(news_flash_id)
     logging.debug("location_text:{}".format(location_text))
@@ -516,10 +517,10 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     output["widgets"] = []
     resolution = location_info.pop("resolution")
     if resolution is None:
-        return Response({})
+        return {}
 
     if all(value is None for value in location_info.values()):
-        return Response({})
+        return {}
 
     last_accident_date = get_latest_accident_date(
         table_obj=AccidentMarkerView, filters=None)
@@ -733,4 +734,19 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     )
     output["widgets"].append(accident_count_by_driver_type.serialize())
 
-    return Response(json.dumps(output, default=str), mimetype="application/json")
+    return json.dumps(output, default=str)
+
+
+def get_infographics_data(news_flash_id, number_of_years_ago):
+    try:
+        cache_data = infographics_data_cache_updater.get_infographics_data_from_cache(news_flash_id, number_of_years_ago)
+        logging.debug(f'returned value from cache:{type(cache_data)}:{cache_data}')
+    except Exception as e:
+        logging.error(f'Exception while retrieving from infographics cache({news_flash_id},{number_of_years_ago})'
+                      f':cause:{e.__cause__}, class:{e.__class__}')
+        cache_data = {}
+    if cache_data:
+        return cache_data
+    else:
+        return create_infographics_data(news_flash_id, number_of_years_ago)
+

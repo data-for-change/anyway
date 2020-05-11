@@ -77,7 +77,7 @@ from .models import (
     EmbeddedReports,
 )
 from .oauth import OAuthSignIn
-from .infographics_utils import create_infographics_data
+from .infographics_utils import get_infographics_data
 from .app_and_db import app, db
 
 app.config.from_object(__name__)
@@ -1943,10 +1943,9 @@ def infographics_data():
                   in time period:{number_of_years_ago}".format(
             news_flash_id=news_flash_id, number_of_years_ago=number_of_years_ago
         )
-    )
-    return create_infographics_data(
-        news_flash_id=news_flash_id, number_of_years_ago=number_of_years_ago
-    )
+    json_data = get_infographics_data(news_flash_id=news_flash_id, number_of_years_ago=number_of_years_ago)
+    return Response(json_data, mimetype="application/json")
+
 
 
 def get_embedded_reports():

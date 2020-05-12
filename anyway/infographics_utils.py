@@ -377,7 +377,7 @@ def get_head_to_head_stat(news_flash_id, start_time, end_time):
             'all_roads_fatal_accidents': convert_roads_fatal_accidents_to_frontend_view(all_roads_data_dict)}
 
 #gets the latest date an accident has occured
-def get_latest_accident_date(table_obj, filters, start_time, end_time):
+def get_latest_accident_date(table_obj, filters):
     filters= filters or {}
     filters['provider_code'] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
     query = db.session.query(func.max(table_obj.accident_timestamp))
@@ -409,17 +409,15 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 
     if all(value is None for value in location_info.values()):
         return Response({})
-    
-    last_accident_date=get_latest_accident_date(table_obj=AccidentMarkerView, filters=None, start_time=start_time, end_time=end_time)
+
+    last_accident_date=get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
     #converting to datetime object to get the date
     end_time=last_accident_date.to_pydatetime().date()
 
     start_time = datetime.date(
         end_time.year - number_of_years_ago, 1, 1)
 
-   
-
-    # accident_severity count
+    #accident_severity count
     items = get_accident_count_by_severity(location_info=location_info,
                                                  location_text=location_text,
                                                  start_time=start_time,

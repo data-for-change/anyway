@@ -409,14 +409,15 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 
     if all(value is None for value in location_info.values()):
         return Response({})
+    
+    last_accident_date=get_latest_accident_date(table_obj=AccidentMarkerView, filters=None, start_time=start_time, end_time=end_time)
+    #converting to datetime object to get the date
+    end_time=last_accident_date.to_pydatetime().date()
 
-    end_time = datetime.date.today()
     start_time = datetime.date(
         end_time.year - number_of_years_ago, 1, 1)
 
-    last_accident_date=get_latest_accident_date(table_obj=AccidentMarkerView, filters=None, start_time=start_time, end_time=end_time)
-    #converting to datetime object to get the year
-    end_time=last_accident_date.to_pydatetime().date()
+   
 
     # accident_severity count
     items = get_accident_count_by_severity(location_info=location_info,

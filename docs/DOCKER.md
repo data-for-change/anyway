@@ -18,6 +18,8 @@ Read more on the docker [Github project](https://github.com/docker/docker)
 
 Instructions
 -----------------------
+* For Windows users please first install ubuntu VM. See [UBUNTU_VM_ON_WINDOWS](docs/UBUNTU_VM_ON_WINDOWS.md)
+
 * Please complete ANYWAY’s [“getting the code” section](https://github.com/hasadna/anyway#getting-the-code) before starting
 
 **1.** [Get the code](https://github.com/hasadna/anyway#getting-the-code)
@@ -40,7 +42,7 @@ Now your containers are up and with data loaded.
 **6.** **You're all set!** ANYWAY is up and running - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
 
-**7.**. To stop the containers run: `docker-compose down`
+**7.** To stop the containers run: `docker-compose down`
 
 **For Ubuntu:**
 
@@ -56,7 +58,8 @@ Now your containers are up and with data loaded.
 **6.** **You're all set!** ANYWAY is up and running - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
 
-**7.**. To stop the containers run: `sudo docker-compose down`
+**7.** To stop the containers run: `sudo docker-compose down`
+
 
 More
 -----------------------

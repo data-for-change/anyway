@@ -415,7 +415,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     end_time=last_accident_date.to_pydatetime().date()
 
     start_time = datetime.date(
-        end_time.year - number_of_years_ago, 1, 1)
+        end_time.year + 1 - number_of_years_ago, 1, 1)
 
     #accident_severity count
     items = get_accident_count_by_severity(location_info=location_info,

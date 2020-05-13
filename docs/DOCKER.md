@@ -26,54 +26,49 @@ Instructions
 
 **2.** [Install Docker](https://docs.docker.com/install/)
 
+**3.** Copy the GDRIVE_FILE_ID from [this file](https://drive.google.com/file/d/1IRnSsRwwHFtmGTNlSOfChg-H6R8JKMpl/view?usp=sharing) (You need to request access)
 **Continue with your OS, See below**
 
 **For Mac:**
 
-**3.** Build anyway container: `docker-compose build`
+**4.** If this is your first time installing ANYWAY Docker environment - move on to stage 5.
+Otherwise, to build an existing environment with the most updated DB, remove DB volume by running `docker volume rm anyway_db_data`.
+Note - this will delete all of your local DB data!
 
-**4.** Start the container, go to the **anyway** directory and run:
+**5.** Build anyway container with updated DB data (in anyway main directory): `docker-compose -f docker-compose.yml build --build-arg RESTORE_DB=TRUE --build-arg GDRIVE_FILE_ID=<GDRIVE_FILE_ID value>`
+
+**6.** Start the container, go to the **anyway** directory and run:
     `docker-compose up -d`
 
-**5.** Download the [db dump](https://drive.google.com/drive/folders/1OesX8Y2MGgIcj0B3f5cdS-BIzt4govXA?usp=sharing) (You need to request access) and save it in the **anyway** directory.
-Restore the db (in anyway directory): `cat <truncated dump file path> | docker-compose exec -T db psql -U anyway`
-Now your containers are up and with data loaded.
-
-**6.** **You're all set!** ANYWAY is up and running - connect to http://127.0.0.1:8080
+**7.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
+If you need to see the map contact atalya via slack to get a developer key.
 
-**7.** To stop the containers run: `docker-compose down`
+**8.** To stop the containers run: `docker-compose down`
 
 **For Ubuntu:**
 
-**3.** Build anyway container: `sudo docker-compose build`
+**4.** If this is your first time installing ANYWAY Docker environment - move on to stage 5.
+Otherwise, to build an existing environment with the most updated DB, remove DB volume by running `sudo docker volume rm anyway_db_data`.
+Note - this will delete all of your local DB data!
 
-**4.** Start the container, go to the **anyway** directory and run:
+**5.** Build anyway container with updated DB data (in anyway main directory): `sudo docker-compose -f docker-compose.yml build --build-arg RESTORE_DB=TRUE --build-arg GDRIVE_FILE_ID=<GDRIVE_FILE_ID value>`
+
+**6.** Start the container, go to the **anyway** directory and run:
     `sudo docker-compose up -d`
 
-**5.** Download the [db dump](https://drive.google.com/drive/folders/1OesX8Y2MGgIcj0B3f5cdS-BIzt4govXA?usp=sharing) (You need to request access) and save it in the **anyway** directory.
-Restore the db (in anyway directory): `cat <truncated dump file path> | sudo docker-compose exec -T db psql -U anyway`
-Now your containers are up and with data loaded.
-
-**6.** **You're all set!** ANYWAY is up and running - connect to http://127.0.0.1:8080
+**7.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
+If you need to see the map for development email us [anyway@anyway.co.il](mailto:anyway@anyway.co.il) to get a developer key.
 
-**7.** To stop the containers run: `sudo docker-compose down`
+**8.** To stop the containers run: `sudo docker-compose down`
 
-
-More
------------------------
-To install requirements again, redeploy DB or any requirement involving the dependencies installation,
-simply rebuild the image;
-then go to its local path and `docker build --no-cache -t hasdna/anyway .`
-
-## Docker commands
+## Additional Docker commands
 Use `sudo` before each docker commands if you are using ubuntu.
 
-Set your VM with the current running shell session:
-
-    eval "$(docker-machine env default)"
-
+To install requirements again, update DB schema OR redeploy any of the requirement involving the dependencies installation,
+simply rebuild the image;
+Run in anyway `docker-compose build`
 
 List your local docker images:
 
@@ -91,15 +86,11 @@ Stop a running container (id is listed in `docker ps`):
 
     docker top <container-id>
 
-Deleting an image(from `docker images`):
-
-    docker rmi <image-id>
-
 Rebuild the image:
 
     docker-compose build
 
-Open container bash terminal to execute commands:
+Open container bash terminal to execute commands (while container is running):
 
     docker exec -it <container-name> bash
 
@@ -107,13 +98,33 @@ For example - to open the bash terminal of the anyway container:
 
     docker exec -it anyway bash
 
+For example - to open the bash terminal of the db container:
+
+    docker exec -it db bash
+
+**Be careful with the following command** Deleting an image(from `docker images`):
+
+    docker rmi <image-id OR image repository>
+
+**Be careful with the following command** Remove the DB volume (this will delete all db data)
+
+    docker volume rm anyway_db_data
+
+**Be careful with the following command** Delete all docker unused images and all volumes
+
+    docker system prune --all --volumes
+
+Set your VM with the current running shell session:
+
+    eval "$(docker-machine env default)"
+
 
 Additional Notes
 -----------------------
-If you want to work with your own code and the docker or if your 8080 port is already taken by other dockers\servers you need to create an override for the docker-compose.
+If you want to work with your own code and the docker OR if your 8080 port is already taken by other dockers\servers you need to create an override for the docker-compose.
 For example:
 
-```version: '2'
+```version: '3'
 services:
  anyway:
    volumes:
@@ -124,4 +135,4 @@ This loads the ./anyway dir (relative to the docker-compose file) as /anyway/any
 
 Questions and ideas
 -----------------
-Talk to Atalya on HASADNA's Slack (atalya)
+Talk to Atalya on HASADNA's Slack (atalya) or email us [anyway@anyway.co.il](mailto:anyway@anyway.co.il).

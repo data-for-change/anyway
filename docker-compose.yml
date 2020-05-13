@@ -22,7 +22,7 @@ services:
       - POSTGRES_PASSWORD=anyway
       - POSTGRES_USER=anyway
       - POSTGRES_DB=anyway
-      - DB_DUMP_PATH=/docker-entrypoint-initdb.d/anyway_public.pgdump
+      - DB_DUMP_PATH=/tmp/anyway_public.pgdump
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:

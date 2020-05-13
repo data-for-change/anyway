@@ -29,33 +29,37 @@ Instructions
 
 **For Mac:**
 
-**4.** Build anyway container (in anyway main directory): `docker-compose -f docker-compose.yml build --build-arg CURR_ENV=DEV --build-arg GDRIVE_FILE_ID=<GDRIVE_FILE_ID value>`
+**4.** If this is your first time installing ANYWAY Docker environment - move on to stage 5.
+Otherwise, to build an existing environment with the most updated DB, remove DB volume by running `docker volume rm anyway_db_data`.
+Note - this will delete all of your local DB data!
 
-**5.** Start the container, go to the **anyway** directory and run:
+**5.** Build anyway container with updated DB data (in anyway main directory): `docker-compose -f docker-compose.yml build --build-arg RESTORE_DB=TRUE --build-arg GDRIVE_FILE_ID=<GDRIVE_FILE_ID value>`
+
+**6.** Start the container, go to the **anyway** directory and run:
     `docker-compose up -d`
 
-**6.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
+**7.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
 If you need to see the map contact atalya via slack to get a developer key.
 
-**7.** To stop the containers run: `docker-compose down`
-
-**8.** To rebuild the docker containers with the most updated db, run `docker volume rm anyway_db_data` and go back to stage 4.
+**8.** To stop the containers run: `docker-compose down`
 
 **For Ubuntu:**
 
-**4.** Build anyway container (in anyway main directory): `sudo docker-compose -f docker-compose.yml build --build-arg CURR_ENV=DEV --build-arg GDRIVE_FILE_ID=<GDRIVE_FILE_ID value>`
+**4.** If this is your first time installing ANYWAY Docker environment - move on to stage 5.
+Otherwise, to build an existing environment with the most updated DB, remove DB volume by running `sudo docker volume rm anyway_db_data`.
+Note - this will delete all of your local DB data!
 
-**5.** Start the container, go to the **anyway** directory and run:
+**5.** Build anyway container with updated DB data (in anyway main directory): `sudo docker-compose -f docker-compose.yml build --build-arg RESTORE_DB=TRUE --build-arg GDRIVE_FILE_ID=<GDRIVE_FILE_ID value>`
+
+**6.** Start the container, go to the **anyway** directory and run:
     `sudo docker-compose up -d`
 
-**6.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
+**7.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
 If you need to see the map contact atalya via slack to get a developer key.
 
-**7.** To stop the containers run: `sudo docker-compose down`
-
-**8.** To rebuild the docker containers with the most updated db, run `sudo docker volume rm anyway_db_data` and go back to stage 4.
+**8.** To stop the containers run: `sudo docker-compose down`
 
 ## Additional Docker commands
 Use `sudo` before each docker commands if you are using ubuntu.

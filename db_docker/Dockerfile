@@ -6,7 +6,6 @@ RUN apk add --update-cache python3 sudo &&\
 ARG GDRIVE_FILE_ID=''
 ARG RESTORE_DB='FALSE'
 ARG GDRIVE_URL='https://drive.google.com/uc?id='
-ARG DB_DUMP_DIR=/docker-entrypoint-initdb.d
 ARG DB_DUMP_PATH=/tmp/anyway_public.pgdump
 
 ENV GDRIVE_FILE_ID=$GDRIVE_FILE_ID

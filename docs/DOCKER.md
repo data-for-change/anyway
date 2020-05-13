@@ -38,7 +38,8 @@ Note - this will delete all of your local DB data!
 **5.** Build anyway container with updated DB data (in anyway main directory): `docker-compose -f docker-compose.yml build --build-arg RESTORE_DB=TRUE --build-arg GDRIVE_FILE_ID=<GDRIVE_FILE_ID value>`
 
 **6.** Start the container, go to the **anyway** directory and run:
-    `docker-compose up -d`
+    `docker-compose up`
+It will take a few minutes until it's done.
 
 **7.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
@@ -55,7 +56,8 @@ Note - this will delete all of your local DB data!
 **5.** Build anyway container with updated DB data (in anyway main directory): `sudo docker-compose -f docker-compose.yml build --build-arg RESTORE_DB=TRUE --build-arg GDRIVE_FILE_ID=<GDRIVE_FILE_ID value>`
 
 **6.** Start the container, go to the **anyway** directory and run:
-    `sudo docker-compose up -d`
+    `sudo docker-compose up`
+It will take a few minutes until it's done.
 
 **7.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
@@ -67,8 +69,13 @@ If you need to see the map for development email us [anyway@anyway.co.il](mailto
 Use `sudo` before each docker commands if you are using ubuntu.
 
 To install requirements again, update DB schema OR redeploy any of the requirement involving the dependencies installation,
-simply rebuild the image;
-Run in anyway `docker-compose build`
+simply rebuild the image - Run in anyway directory:
+
+    docker-compose build
+
+Run docker-compose in detached mode - containers are running in background:
+
+    docker-compose up -d
 
 List your local docker images:
 
@@ -94,13 +101,17 @@ Open container bash terminal to execute commands (while container is running):
 
     docker exec -it <container-name> bash
 
+For example - to open the bash terminal of the db container:
+
+    docker exec -it db bash
+
 For example - to open the bash terminal of the anyway container:
 
     docker exec -it anyway bash
 
-For example - to open the bash terminal of the db container:
+Inside the bash terminal of anyway container - run the following to use postgres command line:
 
-    docker exec -it db bash
+    psql $DATABASE_URL
 
 **Be careful with the following command** Deleting an image(from `docker images`):
 

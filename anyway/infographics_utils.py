@@ -338,6 +338,9 @@ def extract_news_flash_obj(news_flash_id):
 
 def sum_road_accidents_by_specific_type(road_data, field_name):
     dict_merge = defaultdict(int)
+    dict_merge[field_name] = 0
+    dict_merge['תאונות אחרות'] = 0
+
     for accident_data in road_data:
         if accident_data['accident_type'] == field_name:
             dict_merge[field_name] += accident_data['count']

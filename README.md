@@ -29,7 +29,7 @@ The map is also available at [oway.org.il](https://www.oway.org.il/).
 
 ### ANYWAY Schools Report
 
-At the beginning of one of the school years we created a report of pedestrian [accidents around schools](http://www.anyway.co.il/schools) - this is one simple example of insights that can be extracted from the data that we have.
+At the beginning of one of the school years we created a report of pedestrian [accidents around schools](https://anyway-reports.netlify.app/accidents_around_schools) - this is one simple example of insights that can be extracted from the data that we have.
 
 
 ### ANYWAY’s Infographics Generator - Our Next Challenge

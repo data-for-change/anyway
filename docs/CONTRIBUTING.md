@@ -132,11 +132,11 @@ Before you make a pull request, squash your commits into logical units of work u
 
 ## Contribution Tips
 
-**Remove Volunteering**
+**Remote Volunteering**
 
-On regular days, the team meets each Monday at Google Campus, Tel Aviv.
-However, during these days of covid-19 and post covid-19 - we're volunteering remotely and meet our teammates once a week via ZOOM.
-You are more than welcome to join us - [just email us first](mailto:anyway@anyway.co.il).
+On regular days, the team meets each Monday evening at Google Campus, Tel Aviv.
+However, during these days of covid-19 - we're volunteering remotely and meet our teammates once a week via ZOOM.
+You are more than welcome to join us - [email us](mailto:anyway@anyway.co.il).
 
 **Slack**
 

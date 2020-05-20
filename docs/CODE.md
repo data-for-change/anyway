@@ -15,7 +15,6 @@ All Python modules reside in the `anyway` subdirectory:
 * `base.py`, `config.py`, `database.py`: configuration for database and web access.
 * `oauth.py`: user authentication.
 * `utilities.py`: miscellaneous utilities.
-* `save_discussions.py`, `load_discussions.py`: used for saving/loading discussion markers to/from Disqus.
 
 One file, called `main.py` resides in the root of the repository. This file contains all commands needed to manipulate the database and run the server. Run `./main.py --help` for help.
 

@@ -18,7 +18,7 @@ Read more on the docker [Github project](https://github.com/docker/docker)
 
 Instructions
 -----------------------
-* **For Windows users please first install ubuntu VM**. See [UBUNTU_VM_ON_WINDOWS](docs/UBUNTU_VM_ON_WINDOWS.md)
+* **For Windows users please first install ubuntu VM**. See [UBUNTU_VM_ON_WINDOWS](https://github.com/hasadna/anyway/blob/dev/docs/UBUNTU_VM_ON_WINDOWS.md)
 
 * Please complete ANYWAY’s [“getting the code” section](https://github.com/hasadna/anyway#getting-the-code) before starting
 

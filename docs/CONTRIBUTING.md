@@ -10,8 +10,8 @@ guidelines useful to experienced open source contributors.
 
 ## Topics
 
-* [Issues and Bugs] (#issues-and-bugs)
-* [Feature Requests] (#feature-requests)
+* [Issues and Bugs](#issues-and-bugs)
+* [Feature Requests](#feature-requests)
 * [Coding Rules](#coding-rules)
 * [Contribution Tips](#contribution-tips)
 
@@ -66,8 +66,8 @@ When working on your own bug fix or feature, make the changes on your forked rep
 **Clean Code**
 
 See the following Python and JavaScript format guidelines and stick to them: 
-* [Airbnb JavaScript Guidelines] (https://github.com/airbnb/javascript)
-* [Python Style Guide] (https://www.python.org/dev/peps/pep-0008/)
+* [Airbnb JavaScript Guidelines](https://github.com/airbnb/javascript)
+* [Python Style Guide](https://www.python.org/dev/peps/pep-0008/)
 
 Universally formatted code is crucial in open source projects and promotes ease of writing, reading and maintenance.
 
@@ -103,8 +103,8 @@ Also, if you add an empty file, named `__init__.py` at tests folder, you'll be a
 **Pull Requests**
 
 Code review comments may be added to your pull requests, keep an eye out for necessary changes before merge approval. If the maintainer decides that your code is good, it will be merged to ANYWAY's Dev repository.
-On your pull requests, don't forget to reference to the fixed bug / feature by adding `Closes #XXXX` or `Fixes #XXXX` to the body of the requests. Also, shortly summarize the changes made and list any
-known-issues after the future merge (open new issues for them and reference to them as well).
+On your pull requests, don't forget to reference the fixed bug / feature by adding `Closes #XXXX` or `Fixes #XXXX` to the body of the requests. Also, shortly summarize the changes made and list any
+known-issues after the future merge (open new issues for them and reference them as well).
 
 
 

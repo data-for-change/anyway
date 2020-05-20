@@ -60,6 +60,7 @@ Contributing
 ## Getting the code
 1. [Fork](https://github.com/hasadna/anyway/fork) this repository on GitHub
 1. `git clone https://github.com/*you*/anyway`
+1. `cd anyway`
 1. Add the main repository as your upstream remote: `git remote add upstream https://github.com/hasadna/anyway`
 
 * Get updates whenever you start working: `git pull upstream dev`

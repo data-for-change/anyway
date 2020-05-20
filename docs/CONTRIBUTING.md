@@ -92,8 +92,8 @@ A standard procedure for working on an issue would be to:
 **Clean Code**
 
 See the following Python and JavaScript format guidelines and stick to them:
-* [Airbnb JavaScript Guidelines] (https://github.com/airbnb/javascript)
-* [Python Style Guide] (https://www.python.org/dev/peps/pep-0008/)
+* [Airbnb JavaScript Guidelines](https://github.com/airbnb/javascript)
+* [Python Style Guide](https://www.python.org/dev/peps/pep-0008/)
 
 Universally formatted code is crucial in open source projects and promotes ease of writing, reading and maintenance.
 
@@ -124,7 +124,7 @@ Also, if you add an empty file, named `__init__.py` at tests folder, you'll be a
 
 Code review comments may be added to your pull requests, keep an eye out for necessary changes before merge approval. If the maintainer decides that your code is good, it will be merged to ANYWAY's `dev` repository.
 On your pull requests, don't forget to add a reference to the issue using the Linked issues section of the Pull Request. Also, shortly summarize the changes made and list any
-known-issues after the future merge (open new issues for them and add a reference to them as well).
+known-issues after the future merge (open new issues for them and add a reference them as well).
 
 **Squash Comment**
 

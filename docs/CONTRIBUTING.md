@@ -123,7 +123,7 @@ Also, if you add an empty file, named `__init__.py` at tests folder, you'll be a
 **Pull Requests**
 
 Code review comments may be added to your pull requests, keep an eye out for necessary changes before merge approval. If the maintainer decides that your code is good, it will be merged to ANYWAY's `dev` repository.
-On your pull requests, don't forget to reference to the issue using the Linked issues section of the Pull Request. Also, shortly summarize the changes made and list any
+On your pull requests, don't forget to add a reference to the issue using the Linked issues section of the Pull Request. Also, shortly summarize the changes made and list any
 known-issues after the future merge (open new issues for them and reference to them as well).
 
 **Squash Comment**

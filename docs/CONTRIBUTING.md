@@ -99,7 +99,7 @@ Universally formatted code is crucial in open source projects and promotes ease 
 
 **Logging**
 
-Do not use `print` for messages in Python code! Instead, use the `logging` class.
+Do not use `print` for messages in Python code! Instead, use the `logging` module.
 Remember that log messages are very helpful for debugging server issues, so add as much information as you can.
 
 **Unit Tests**

@@ -58,7 +58,7 @@ def get_all_news_items(html_soup, site_name='walla'):
     news_items = []
     try:
         if site_name == 'walla':
-            news_items = html_soup.find_all('section', class_='css-qjvjzr ')
+            news_items = html_soup.find_all('section', class_='css-1huyuvt ')
         elif site_name == 'ynet':
             news_items = [i for i in html_soup.find_all('item') if i.category.get_text() == 'מבזקים']
     except Exception as _:

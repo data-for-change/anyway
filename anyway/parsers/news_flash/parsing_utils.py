@@ -4,6 +4,8 @@ from anyway.parsers.news_flash_classifiers import classify_ynet
 from ..location_extraction import manual_filter_location_of_text, geocode_extract, get_db_matching_location, \
     set_accident_resolution
 
+import logging
+
 
 def process_after_parsing(news_item, maps_key):
     location = None
@@ -54,15 +56,17 @@ def init_news_item(entry_parsed_date, site_name='walla'):
     return news_item
 
 
-def get_all_news_items(html_soup, site_name='walla'):
+def get_all_news_items(html_soup, site_name):
     news_items = []
     try:
         if site_name == 'walla':
-            news_items = html_soup.find_all('section', class_='css-qjvjzr ')
+            news_items = [s.find_parent('section') for s in html_soup.select('a[href^=/break/]')]
         elif site_name == 'ynet':
             news_items = [i for i in html_soup.find_all('item') if i.category.get_text() == 'מבזקים']
-    except Exception as _:
-        pass
+    except Exception as ex:
+        logging.exception(ex)
+    if not news_items:
+        logging.error("Parsing error: failed to read news flash from {}".format(site_name))
     return news_items
 
 

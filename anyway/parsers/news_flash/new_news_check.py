@@ -20,9 +20,12 @@ def is_new_flash_news(rss_link, site_name):
     elif site_name == 'walla':
         response = requests.get(rss_link)
         html_soup = BeautifulSoup(response.text, "html.parser")
-        first_news_item = parsing_utils.get_all_news_items(html_soup, site_name)[0]
+        news_items = parsing_utils.get_all_news_items(html_soup, site_name)
+        if not news_items:
+            # Probably an error, handled inside get_all_news_items()
+            return False
         date = parsing_utils.get_date(html_soup, site_name)
-        newest_entry = parsing_utils.get_date_time(first_news_item, date, site_name)
+        newest_entry = parsing_utils.get_date_time(news_items[0], date, site_name)
     else:
         return False
     newest_entry = newest_entry.replace(tzinfo=None)

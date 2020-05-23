@@ -24,8 +24,7 @@ def is_new_flash_news(rss_link, site_name):
         if not news_items:
             # Probably an error, handled inside get_all_news_items()
             return False
-        date = parsing_utils.get_date(html_soup, site_name)
-        newest_entry = parsing_utils.get_date_time(news_items[0], date, site_name)
+        newest_entry = parsing_utils.get_date_time(news_items[0], site_name)
     else:
         return False
     newest_entry = newest_entry.replace(tzinfo=None)

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+    <channel>
+        <title></title>
+        <link>https://news.walla.co.il/category/22</link>
+        <description>חדשות מתפרצות ודיווחים על אירועים בארץ ובעולם בזמן אמת, שניות לאחר התרחשותם  כל העדכונים באתר החדשות המוביל בישראל</description>
+        <lastBuildDate>Sat, 23 May 2020 17:26:55 GMT</lastBuildDate>
+        <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
+        <generator>Walla RnD</generator>
+        <language>he</language>
+        <image>
+            <title></title>
+            <url>https://img.wcdn.co.il/f_auto/2/5/4/2/2542044-46.jpg</url>
+            <link>https://news.walla.co.il/category/22</link>
+        </image>
+        <copyright>Copyright © Walla! Communications LTD. All rights reserved. The contents of this feed are available for non-commercial use only.</copyright>
+        <item>
+            <title><![CDATA[פרקליטי רה"מ יתלוננו נגד רביב דרוקר על שיבוש הליכי משפט]]></title>
+            <link>https://news.walla.co.il/break/3362504</link>
+            <guid>https://news.walla.co.il/break/3362504</guid>
+            <pubDate>Sat, 23 May 2020 16:55:00 GMT</pubDate>
+            <description><![CDATA[<p style="direction:rtl; clear:both"><a href="https://news.walla.co.il/break/3362504"></a><br/>פרקליטיו של ראש הממשלה בנימין נתניהו מתכוונים להגיש הערב (שבת) תלונה ליועץ המשפטי לממשלה, אביחי מנדלבליט, נגד העיתונאי רביב דרוקר בטענה ששיבש הליכי משפט והדיח עד בתוכניתו "המקור". התלונה מתייחסת לראיונות שנתנו לתוכנית עדי תביעה במשפטו של נתניהו, בהם שאול אלוביץ' ומומו פילבר.</p>]]></description>
+        </item>
+        <item>
+            <title><![CDATA[פקיסטן: לפחות נוסע אחד שרד את התרסקות המטוס]]></title>
+            <link>https://news.walla.co.il/break/3362389</link>
+            <guid>https://news.walla.co.il/break/3362389</guid>
+            <pubDate>Fri, 22 May 2020 13:14:00 GMT</pubDate>
+            <description><![CDATA[<p style="direction:rtl; clear:both"><a href="https://news.walla.co.il/break/3362389"></a><br/>לפחות נוסע אחד שרד מהתרסקות המטוס הפקיסטני היום (שישי) באזור מגורים בקראצ'י - כך אמר גורם בממשל המקומי. בהודעתו אמר דובר ממשלת המחוז כי בנקאי שהיה על המטוס אותר לאחר ששרד את ההתרסקות. מרשות התעופה האזרחית של פקיסטן נמסר כי היו 91 נוסעים ושמונה אנשי צוות על מטוס איירבוס A320.</p>]]></description>
+        </item>
+    </channel>
+</rss>

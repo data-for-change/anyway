@@ -17,12 +17,13 @@ from .app_and_db import db
     Widget structure:
     {
         'name': str,
-        'rank': int (Integer),
         'data': {
                  'items': list (Array) | dictionary (Object),
                  'text': dictionary (Object) - can be empty
                  }
-        'meta': dictionary (Object) - can be empty
+        'meta': {
+		 'rank': int (Integer)
+		 }
     }
 '''
 class Widget():

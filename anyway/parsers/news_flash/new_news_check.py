@@ -19,7 +19,7 @@ def is_new_flash_news(rss_link, site_name):
         newest_entry = datetime.strptime(d.entries[0].published[:-6], '%a, %d %b %Y %H:%M:%S')
     elif site_name == 'walla':
         response = requests.get(rss_link)
-        html_soup = BeautifulSoup(response.text, "html.parser")
+        html_soup = BeautifulSoup(response.text, "lxml")
         news_items = parsing_utils.get_all_news_items(html_soup, site_name)
         if not news_items:
             # Probably an error, handled inside get_all_news_items()

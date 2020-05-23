@@ -35,7 +35,9 @@ Instructions
 Otherwise, to build an existing environment with the most updated DB, remove DB volume by running `docker volume rm anyway_db_data`.
 Note - this will delete all of your local DB data!
 
-**5.** Build anyway container with updated DB data (in anyway main directory): `docker-compose -f docker-compose.yml build --build-arg RESTORE_DB=TRUE --build-arg GDRIVE_FILE_ID=<GDRIVE_FILE_ID value>`
+**5.** Build anyway container with updated DB data (in anyway main directory): `docker-compose -f docker-compose.yml build --build-arg RESTORE_DB=TRUE --build-arg GDRIVE_FILE_ID="<GDRIVE_FILE_ID value>"`
+*<GDRIVE_FILE_ID value> - see part 3
+*If you're having this kind of ERROR:Need service name for --build-arg option, make sure the docker-compose version is 1.25.5 and above(check with docker-compose --version)
 
 **6.** Start the container, go to the **anyway** directory and run:
     `docker-compose up`
@@ -53,7 +55,9 @@ If you need to see the map contact atalya via slack to get a developer key.
 Otherwise, to build an existing environment with the most updated DB, remove DB volume by running `sudo docker volume rm anyway_db_data`.
 Note - this will delete all of your local DB data!
 
-**5.** Build anyway container with updated DB data (in anyway main directory): `sudo docker-compose -f docker-compose.yml build --build-arg RESTORE_DB=TRUE --build-arg GDRIVE_FILE_ID=<GDRIVE_FILE_ID value>`
+**5.** Build anyway container with updated DB data (in anyway main directory): `sudo docker-compose -f docker-compose.yml build --build-arg RESTORE_DB=TRUE --build-arg GDRIVE_FILE_ID="<GDRIVE_FILE_ID value>"`
+*<GDRIVE_FILE_ID value> - see part 3
+*If you're having this kind of ERROR:Need service name for --build-arg option, make sure the docker-compose version is 1.25.5 and above(check with sudo docker-compose --version)
 
 **6.** Start the container, go to the **anyway** directory and run:
     `sudo docker-compose up`

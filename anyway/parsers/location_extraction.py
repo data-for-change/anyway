@@ -164,7 +164,7 @@ def geocode_extract(location, google_maps_key):
         if road_no is None and extract_road_number(location) is not None:
             road_no = extract_road_number(location)
     except Exception as _:
-        logging.info('geocode extract location {0} maps key {1}'.format(location, google_maps_key))
+        logging.exception('geocode extract location {}'.format(location))
 
     return {'street': street, 'road_no': road_no, 'intersection': intersection,
             'city': city, 'address': address, 'subdistrict': subdistrict,

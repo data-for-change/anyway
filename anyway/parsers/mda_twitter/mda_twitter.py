@@ -1,6 +1,6 @@
 import os
 
-from anyway.parsers.news_flash_parser import insert_new_flash_news, get_latest_tweet_id_from_db
+from anyway.parsers import news_flash_db_adapter
 from .get_mda_tweets import get_user_tweets
 
 
@@ -14,7 +14,9 @@ def mda_twitter():
 
     twitter_user = 'mda_israel'
 
-    latest_tweet_id = get_latest_tweet_id_from_db()
+    db = news_flash_db_adapter.init_db()
+
+    latest_tweet_id = db.get_latest_tweet_id_from_db()
 
     # check if there are any MDA tweets in the DB
     if latest_tweet_id:
@@ -40,7 +42,7 @@ def mda_twitter():
          region_hebrew, district_hebrew, yishuv_name, street1_hebrew, street2_hebrew,
          non_urban_intersection_hebrew, road1, road2, road_segment_name, accident, source) = row
 
-        insert_new_flash_news(title, link, date, author, description, location, lat, lon, resolution,
-                              region_hebrew, district_hebrew, yishuv_name, street1_hebrew, street2_hebrew,
-                              non_urban_intersection_hebrew, road1, road2, road_segment_name, accident, source,
-                              tweet_id=tweet_id)
+        db.insert_new_flash_news(title, link, date, author, description, location, lat, lon, resolution,
+                                 region_hebrew, district_hebrew, yishuv_name, street1_hebrew, street2_hebrew,
+                                 non_urban_intersection_hebrew, road1, road2, road_segment_name, accident, source,
+                                 tweet_id=tweet_id)

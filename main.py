@@ -57,8 +57,8 @@ def update(source, news_flash_id):
 
 @update_news_flash.command()
 def remove_duplicate_news_flash_rows():
-    from anyway.parsers.news_flash_parser import remove_duplicate_rows
-    remove_duplicate_rows()
+    from anyway.parsers import news_flash_db_adapter
+    news_flash_db_adapter.init_db().remove_duplicate_rows()
 
 @cli.group()
 def process():

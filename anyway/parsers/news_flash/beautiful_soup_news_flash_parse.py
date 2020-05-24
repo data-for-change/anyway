@@ -4,8 +4,8 @@ from bs4 import BeautifulSoup
 import logging
 
 from anyway.parsers.news_flash import parsing_utils
-from anyway.parsers.news_flash_parser import get_latest_date_from_db
-from anyway.parsers.news_flash_parser import insert_new_flash_news
+from anyway.parsers.news_flash_db_adapter import get_latest_date_from_db
+from anyway.parsers.news_flash_db_adapter import insert_new_flash_news
 
 
 def beautiful_soup_news_flash_parse(rss_link, site_name, maps_key):

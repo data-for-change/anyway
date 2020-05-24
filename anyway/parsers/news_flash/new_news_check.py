@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from anyway.parsers.news_flash import parsing_utils
-from anyway.parsers.news_flash_parser import get_latest_date_from_db
+from anyway.parsers.news_flash_db_adapter import get_latest_date_from_db
 
 
 def is_new_flash_news(rss_link, site_name):

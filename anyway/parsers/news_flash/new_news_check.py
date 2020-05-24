@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from anyway.parsers.news_flash import parsing_utils
-from anyway.parsers.news_flash_db_adapter import get_latest_date_from_db
+from anyway.parsers.news_flash_db_adapter import init_db
 
 
 def is_new_flash_news(rss_link, site_name):
@@ -13,7 +13,8 @@ def is_new_flash_news(rss_link, site_name):
     :param rss_link: rss link
     :return: true if there is a newer news flash, false otherwise
     """
-    latest_date = get_latest_date_from_db(site_name)
+    db = init_db()
+    latest_date = db.get_latest_date_from_db(site_name)
     if site_name == 'ynet':
         d = feedparser.parse(rss_link)
         newest_entry = datetime.strptime(d.entries[0].published[:-6], '%a, %d %b %Y %H:%M:%S')

@@ -8,10 +8,10 @@ from .beautiful_soup_news_flash_parse import beautiful_soup_news_flash_parse
 # import time
 
 
-def scrap_flash_news(site_name, maps_key):
+def scrape_flash_news(site_name, maps_key):
     """
     init scraping for a site
-    :param site_name: name of the site to scrap
+    :param site_name: name of the site to scrape
     :param maps_key: google maps key path
     """
     if site_name == 'ynet':
@@ -33,6 +33,6 @@ def main(google_maps_key):
     :param google_maps_key_path: path to google maps key
     """
     sys.path.append(os.path.dirname(os.path.realpath(__file__)))
-    scrap_flash_news('ynet', google_maps_key)
-    scrap_flash_news('walla', google_maps_key)
-    scrap_flash_news('twitter', google_maps_key)
+    scrape_flash_news('ynet', google_maps_key)
+    scrape_flash_news('walla', google_maps_key)
+    scrape_flash_news('twitter', google_maps_key)

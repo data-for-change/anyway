@@ -132,7 +132,7 @@ def main(input_csv_filename, start_date, end_date, distance, pedestrian_only, ou
         for row in csvfile:
             (city, name, lat, lon) = parse_csv_line(row.strip())
             print
-            u'{0} working on {1}'.format(i, name)
+            '{0} working on {1}'.format(i, name)
             i += 1
             if lat is None or lon is None:
                 continue
@@ -145,7 +145,7 @@ def main(input_csv_filename, start_date, end_date, distance, pedestrian_only, ou
         out_file.write(unicode('\t'.join(headers) + '\n'))
         for accidents_details in accidents_list:
             out_file.write(
-                u'{index}\t{city}\t{name}\t{grade}\t{deadly}\t{hard}\t{light}\t{ui_url}\t{markers_url}\n'.format(
+                '{index}\t{city}\t{name}\t{grade}\t{deadly}\t{hard}\t{light}\t{ui_url}\t{markers_url}\n'.format(
                     index=accidents_details['INDEX BY GRADE'],
                     city=accidents_details['CITY'],
                     name=accidents_details['NAME'],

@@ -43,7 +43,7 @@ def downgrade():
     op.create_table('minizipali_status',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('minizipali_status_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'minizipali_status_pkey')
+                    sa.PrimaryKeyConstraint('id', name='minizipali_status_pkey')
                     )
     op.drop_index(op.f('ix_municipal_status_id'), table_name='municipal_status')
     op.drop_table('municipal_status')

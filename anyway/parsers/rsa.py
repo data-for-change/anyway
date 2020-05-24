@@ -19,7 +19,7 @@ def _iter_rows(filename):
     sheet = workbook[u"Worksheet1"]
     rows = sheet.rows
     first_row = next(rows)
-    headers = [u'מזהה', u'תאריך דיווח', u'סטטוס', u'סוג עבירה', u'סוג רכב', u'סוג לוחית רישוי', u'רמת חומרה', u'נ״צ סופי']
+    headers = ['מזהה', 'תאריך דיווח', 'סטטוס', 'סוג עבירה', 'סוג רכב', 'סוג לוחית רישוי', 'רמת חומרה', 'נ״צ סופי']
     assert [cell.value for cell in first_row] == headers
     for row in rows:
         id_ = int(row[0].value)

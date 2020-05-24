@@ -65,7 +65,7 @@ def _click_a_cluster(selenium):
 def test_sanity(selenium, anyway_server):
     selenium.get(anyway_server)
 
-    _go_to_location(selenium, location=u'מגדל משה אביב')
+    _go_to_location(selenium, location='מגדל משה אביב')
     WebDriverWait(selenium, _WAIT_TIME).until(_ajax_finished)
 
     first_accidents = WebDriverWait(selenium, _WAIT_TIME).until(_check_accidents)

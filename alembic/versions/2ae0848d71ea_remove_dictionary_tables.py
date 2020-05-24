@@ -84,382 +84,382 @@ def downgrade():
                     sa.Column('injured_position_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'injured_position_pkey')
+                    sa.PrimaryKeyConstraint('id', name='injured_position_pkey')
                     )
     op.create_table('cross_location',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('cross_location_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'cross_location_pkey')
+                    sa.PrimaryKeyConstraint('id', name='cross_location_pkey')
                     )
     op.create_table('geo_area',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('geo_area_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'geo_area_pkey')
+                    sa.PrimaryKeyConstraint('id', name='geo_area_pkey')
                     )
     op.create_table('road_intactness',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('road_intactness_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'road_intactness_pkey')
+                    sa.PrimaryKeyConstraint('id', name='road_intactness_pkey')
                     )
     op.create_table('road_surface',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('road_surface_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'road_surface_pkey')
+                    sa.PrimaryKeyConstraint('id', name='road_surface_pkey')
                     )
     op.create_table('day_night',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('day_night_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'day_night_pkey')
+                    sa.PrimaryKeyConstraint('id', name='day_night_pkey')
                     )
     op.create_table('cross_direction',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('cross_direction_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'cross_direction_pkey')
+                    sa.PrimaryKeyConstraint('id', name='cross_direction_pkey')
                     )
     op.create_table('population_type',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('population_type_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'population_type_pkey')
+                    sa.PrimaryKeyConstraint('id', name='population_type_pkey')
                     )
     op.create_table('road_sign',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('road_sign_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'road_sign_pkey')
+                    sa.PrimaryKeyConstraint('id', name='road_sign_pkey')
                     )
     op.create_table('road_object',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('road_object_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'road_object_pkey')
+                    sa.PrimaryKeyConstraint('id', name='road_object_pkey')
                     )
     op.create_table('age_group',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('age_group_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'age_group_pkey')
+                    sa.PrimaryKeyConstraint('id', name='age_group_pkey')
                     )
     op.create_table('location_accuracy',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('location_accuracy_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'location_accuracy_pkey')
+                    sa.PrimaryKeyConstraint('id', name='location_accuracy_pkey')
                     )
     op.create_table('municipal_status',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('municipal_status_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'municipal_status_pkey')
+                    sa.PrimaryKeyConstraint('id', name='municipal_status_pkey')
                     )
     op.create_table('didnt_cross',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('didnt_cross_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'didnt_cross_pkey')
+                    sa.PrimaryKeyConstraint('id', name='didnt_cross_pkey')
                     )
     op.create_table('road_control',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('road_control_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'road_control_pkey')
+                    sa.PrimaryKeyConstraint('id', name='road_control_pkey')
                     )
     op.create_table('medical_type',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('medical_type_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'medical_type_pkey')
+                    sa.PrimaryKeyConstraint('id', name='medical_type_pkey')
                     )
     op.create_table('vehicle_attribution',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('vehicle_attribution_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'vehicle_attribution_pkey')
+                    sa.PrimaryKeyConstraint('id', name='vehicle_attribution_pkey')
                     )
     op.create_table('sex',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('sex_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'sex_pkey')
+                    sa.PrimaryKeyConstraint('id', name='sex_pkey')
                     )
     op.create_table('injury_severity',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('injury_severity_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'injury_severity_pkey')
+                    sa.PrimaryKeyConstraint('id', name='injury_severity_pkey')
                     )
     op.create_table('object_distance',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('object_distance_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'object_distance_pkey')
+                    sa.PrimaryKeyConstraint('id', name='object_distance_pkey')
                     )
     op.create_table('vehicle_type',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('vehicle_type_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'vehicle_type_pkey')
+                    sa.PrimaryKeyConstraint('id', name='vehicle_type_pkey')
                     )
     op.create_table('driving_directions',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('driving_directions_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'driving_directions_pkey')
+                    sa.PrimaryKeyConstraint('id', name='driving_directions_pkey')
                     )
     op.create_table('police_unit',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('police_unit_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'police_unit_pkey')
+                    sa.PrimaryKeyConstraint('id', name='police_unit_pkey')
                     )
     op.create_table('safety_measures_use',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('safety_measures_use_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'safety_measures_use_pkey')
+                    sa.PrimaryKeyConstraint('id', name='safety_measures_use_pkey')
                     )
     op.create_table('vehicle_status',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('vehicle_status_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'vehicle_status_pkey')
+                    sa.PrimaryKeyConstraint('id', name='vehicle_status_pkey')
                     )
     op.create_table('total_weight',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('total_weight_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'total_weight_pkey')
+                    sa.PrimaryKeyConstraint('id', name='total_weight_pkey')
                     )
     op.create_table('yishuv_shape',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('yishuv_shape_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'yishuv_shape_pkey')
+                    sa.PrimaryKeyConstraint('id', name='yishuv_shape_pkey')
                     )
     op.create_table('provider_code',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('provider_code_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'provider_code_pkey')
+                    sa.PrimaryKeyConstraint('id', name='provider_code_pkey')
                     )
     op.create_table('natural_area',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('natural_area_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'natural_area_pkey')
+                    sa.PrimaryKeyConstraint('id', name='natural_area_pkey')
                     )
     op.create_table('accident_month',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('accident_month_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'accident_month_pkey')
+                    sa.PrimaryKeyConstraint('id', name='accident_month_pkey')
                     )
     op.create_table('day_in_week',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('day_in_week_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'day_in_week_pkey')
+                    sa.PrimaryKeyConstraint('id', name='day_in_week_pkey')
                     )
     op.create_table('hospital_time',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('hospital_time_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'hospital_time_pkey')
+                    sa.PrimaryKeyConstraint('id', name='hospital_time_pkey')
                     )
     op.create_table('district',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('district_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'district_pkey')
+                    sa.PrimaryKeyConstraint('id', name='district_pkey')
                     )
     op.create_table('accident_type',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('accident_type_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'accident_type_pkey')
+                    sa.PrimaryKeyConstraint('id', name='accident_type_pkey')
                     )
     op.create_table('day_type',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('day_type_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'day_type_pkey')
+                    sa.PrimaryKeyConstraint('id', name='day_type_pkey')
                     )
     op.create_table('injured_type',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('injured_type_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'injured_type_pkey')
+                    sa.PrimaryKeyConstraint('id', name='injured_type_pkey')
                     )
     op.create_table('late_deceased',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('late_deceased_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'late_deceased_pkey')
+                    sa.PrimaryKeyConstraint('id', name='late_deceased_pkey')
                     )
     op.create_table('columns_description',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('column_description', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'columns_description_pkey')
+                    sa.PrimaryKeyConstraint('id', name='columns_description_pkey')
                     )
     op.create_table('engine_volume',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('engine_volume_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'engine_volume_pkey')
+                    sa.PrimaryKeyConstraint('id', name='engine_volume_pkey')
                     )
     op.create_table('road_width',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('road_width_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'road_width_pkey')
+                    sa.PrimaryKeyConstraint('id', name='road_width_pkey')
                     )
     op.create_table('release_dest',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('release_dest_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'release_dest_pkey')
+                    sa.PrimaryKeyConstraint('id', name='release_dest_pkey')
                     )
     op.create_table('one_lane',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('one_lane_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'one_lane_pkey')
+                    sa.PrimaryKeyConstraint('id', name='one_lane_pkey')
                     )
     op.create_table('road_light',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('road_light_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'road_light_pkey')
+                    sa.PrimaryKeyConstraint('id', name='road_light_pkey')
                     )
     op.create_table('region',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('region_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'region_pkey')
+                    sa.PrimaryKeyConstraint('id', name='region_pkey')
                     )
     op.create_table('road_type',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('road_type_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'road_type_pkey')
+                    sa.PrimaryKeyConstraint('id', name='road_type_pkey')
                     )
     op.create_table('accident_severity',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('accident_severity_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'accident_severity_pkey')
+                    sa.PrimaryKeyConstraint('id', name='accident_severity_pkey')
                     )
     op.create_table('safety_measures',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('safety_measures_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'safety_measures_pkey')
+                    sa.PrimaryKeyConstraint('id', name='safety_measures_pkey')
                     )
     op.create_table('traffic_light',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('traffic_light_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'traffic_light_pkey')
+                    sa.PrimaryKeyConstraint('id', name='traffic_light_pkey')
                     )
     op.create_table('speed_limit',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('speed_limit_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'speed_limit_pkey')
+                    sa.PrimaryKeyConstraint('id', name='speed_limit_pkey')
                     )
     op.create_table('accident_hour_raw',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('accident_hour_raw_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'accident_hour_raw_pkey')
+                    sa.PrimaryKeyConstraint('id', name='accident_hour_raw_pkey')
                     )
     op.create_table('involved_type',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('involved_type_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'involved_type_pkey')
+                    sa.PrimaryKeyConstraint('id', name='involved_type_pkey')
                     )
     op.create_table('cross_mode',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('cross_mode_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'cross_mode_pkey')
+                    sa.PrimaryKeyConstraint('id', name='cross_mode_pkey')
                     )
     op.create_table('road_shape',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('road_shape_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'road_shape_pkey')
+                    sa.PrimaryKeyConstraint('id', name='road_shape_pkey')
                     )
     op.create_table('multi_lane',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('multi_lane_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'multi_lane_pkey')
+                    sa.PrimaryKeyConstraint('id', name='multi_lane_pkey')
                     )
     op.create_table('weather',
                     sa.Column('id', sa.INTEGER(), nullable=False),
                     sa.Column('weather_hebrew', sa.TEXT(), autoincrement=False, nullable=True),
                     sa.Column('provider_code', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('year', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.PrimaryKeyConstraint('id', name=u'weather_pkey')
+                    sa.PrimaryKeyConstraint('id', name='weather_pkey')
                     )
     ### end Alembic commands ###

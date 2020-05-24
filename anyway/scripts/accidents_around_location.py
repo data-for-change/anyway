@@ -106,8 +106,6 @@ def get_accidents_around(city, name, lat, lon, start_date, end_date, distance, p
         markers = markers_res.json()['markers']
 
     except Exception as e:
-        print
-        'failed to parse:', markers_res.text
         raise e
     markers = [x for x in markers if x['location_accuracy'] not in (2, 9)]
     markers_data = calc_markers(markers)
@@ -131,8 +129,6 @@ def main(input_csv_filename, start_date, end_date, distance, pedestrian_only, ou
         i = 0
         for row in csvfile:
             (city, name, lat, lon) = parse_csv_line(row.strip())
-            print
-            '{0} working on {1}'.format(i, name)
             i += 1
             if lat is None or lon is None:
                 continue

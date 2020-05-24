@@ -64,8 +64,6 @@ Class is available under the open-source GDAL license (www.gdal.org).
 """
 # pylint: disable=W,C
 
-from __future__ import print_function
-
 import math
 
 

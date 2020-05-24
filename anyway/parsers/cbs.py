@@ -863,8 +863,8 @@ def create_provider_code_table():
     provider_code_class = ProviderCode
     table_entries = db.session.query(provider_code_class)
     table_entries.delete()
-    provider_code_dict = {1: u'הלשכה המרכזית לסטטיסטיקה - סוג תיק 1', 2: u'איחוד הצלה',
-                          3: u'הלשכה המרכזית לסטטיסטיקה - סוג תיק 3', 4: u'שומרי הדרך'}
+    provider_code_dict = {1: 'הלשכה המרכזית לסטטיסטיקה - סוג תיק 1', 2: 'איחוד הצלה',
+                          3: 'הלשכה המרכזית לסטטיסטיקה - סוג תיק 3', 4: 'שומרי הדרך'}
     for k, v in provider_code_dict.items():
         sql_insert = 'INSERT INTO ' + provider_code_table + ' VALUES (' + str(k) + ',' + "'" + v + "'" + ')'
         db.session.execute(sql_insert)

@@ -15,7 +15,7 @@ def _iter_rows(filename):
     sheet = workbook[u"tv_ktaim"]
     rows = sheet.rows
     first_row = next(rows)
-    headers = [u'mezahe_keta', u'kvish', u'keta', u'km_me', u'shem_km_me', u'ad_km', u'shem_km_ad']
+    headers = ['mezahe_keta', 'kvish', 'keta', 'km_me', 'shem_km_me', 'ad_km', 'shem_km_ad']
     assert [cell.value for cell in first_row] == headers
     for row in rows:
         segment_id = row[0].value

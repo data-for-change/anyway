@@ -858,9 +858,9 @@ def discussion():
                             identifier).first()
                 context['title'] = marker.title
             except AttributeError:
-                return index(message=gettext(u'Discussion not found:') + request.values['identifier'])
+                return index(message=gettext('Discussion not found:') + request.values['identifier'])
             except KeyError:
-                return index(message=gettext(u'Illegal Discussion'))
+                return index(message=gettext('Illegal Discussion'))
         return render_template('disqus.html', **context)
     else:
         marker = parse_data(DiscussionMarker, get_json_object(request))

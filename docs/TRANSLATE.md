@@ -1,4 +1,4 @@
-In the python code, instead of writing a message string like `'Message'`, use `gettext(u'Message In English')` (see `main.py`)
+In the python code, instead of writing a message string like `'Message'`, use `gettext('Message In English')` (see `main.py`)
 Dont forget to import gettext:
 
 ```from flask_babel import gettext, ngettext```

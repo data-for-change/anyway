@@ -153,7 +153,7 @@ class MarkerMixin(Point):
         if field in localization.get_supported_tables():
             value = decode_hebrew(localization.get_field(field, value), db_encoding)
         name = decode_hebrew(localization.get_field(field), db_encoding)
-        return u"{0}: {1}".format(name, value)
+        return "{0}: {1}".format(name, value)
 
 
 class HighlightPoint(Point, Base):

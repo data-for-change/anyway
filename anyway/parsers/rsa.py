@@ -16,7 +16,7 @@ db = SQLAlchemy(app)
 
 def _iter_rows(filename):
     workbook = load_workbook(filename, read_only=True)
-    sheet = workbook[u"Worksheet1"]
+    sheet = workbook["Worksheet1"]
     rows = sheet.rows
     first_row = next(rows)
     headers = ['מזהה', 'תאריך דיווח', 'סטטוס', 'סוג עבירה', 'סוג רכב', 'סוג לוחית רישוי', 'רמת חומרה', 'נ״צ סופי']

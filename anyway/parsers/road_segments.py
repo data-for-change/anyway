@@ -12,7 +12,7 @@ db = SQLAlchemy(app)
 
 def _iter_rows(filename):
     workbook = load_workbook(filename, read_only=True)
-    sheet = workbook[u"tv_ktaim"]
+    sheet = workbook["tv_ktaim"]
     rows = sheet.rows
     first_row = next(rows)
     headers = ['mezahe_keta', 'kvish', 'keta', 'km_me', 'shem_km_me', 'ad_km', 'shem_km_ad']

@@ -951,7 +951,7 @@ def index(marker=None, message=None):
             context['coordinates'] = (marker.latitude, marker.longitude)
             context['marker'] = marker.id
         else:
-            message = u"תאונה לא נמצאה: " + request.values['marker']
+            message = "תאונה לא נמצאה: " + request.values['marker']
     elif 'discussion' in request.values:
         discussions = DiscussionMarker.get_by_identifier(
             request.values['discussion'])
@@ -960,7 +960,7 @@ def index(marker=None, message=None):
             context['coordinates'] = (marker.latitude, marker.longitude)
             context['discussion'] = marker.identifier
         else:
-            message = gettext(u"Discussion not found:") + \
+            message = gettext("Discussion not found:") + \
                 request.values['discussion']
     if 'start_date' in request.values:
         context['start_date'] = string2timestamp(request.values['start_date'])
@@ -987,21 +987,21 @@ def index(marker=None, message=None):
     if message:
         context['message'] = message
     pref_accident_severity = []
-    pref_light = PreferenceObject('prefLight', '2', u"קלה")
-    pref_severe = PreferenceObject('prefSevere', '1', u"חמורה")
-    pref_fatal = PreferenceObject('prefFatal', '0', u"קטלנית")
+    pref_light = PreferenceObject('prefLight', '2', "קלה")
+    pref_severe = PreferenceObject('prefSevere', '1', "חמורה")
+    pref_fatal = PreferenceObject('prefFatal', '0', "קטלנית")
     pref_accident_severity.extend([pref_light, pref_severe, pref_fatal])
     context['pref_accident_severity'] = pref_accident_severity
     pref_accident_report_severity = []
-    pref_report_light = PreferenceObject('prefReportLight', '2', u"קלה")
-    pref_report_severe = PreferenceObject('prefReportSevere', '1', u"חמורה")
-    pref_report_fatal = PreferenceObject('prefReportFatal', '0', u"קטלנית")
+    pref_report_light = PreferenceObject('prefReportLight', '2', "קלה")
+    pref_report_severe = PreferenceObject('prefReportSevere', '1', "חמורה")
+    pref_report_fatal = PreferenceObject('prefReportFatal', '0', "קטלנית")
     pref_accident_report_severity.extend(
         [pref_report_light, pref_report_severe, pref_report_fatal])
     context['pref_accident_report_severity'] = pref_accident_report_severity
     pref_historical_report_periods = []
-    month_strings = [u"אחד", u"שניים", u"שלושה", u"ארבעה", u"חמישה", u"שישה", u"שבעה", u"שמונה", u"תשעה",
-                     u"עשרה", u"אחד עשר", u"שניים עשר"]
+    month_strings = ["אחד", "שניים", "שלושה", "ארבעה", "חמישה", "שישה", "שבעה", "שמונה", "תשעה",
+                     "עשרה", "אחד עשר", "שניים עשר"]
     for x in range(0, 12):
         pref_historical_report_periods.append(
             PreferenceObject('prefHistoricalReport' + str(x + 1) + 'Month', str(x + 1), month_strings[x]))

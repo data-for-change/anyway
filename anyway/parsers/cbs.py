@@ -243,11 +243,11 @@ def get_street(yishuv_symbol, street_sign, streets):
     """
     if yishuv_symbol not in streets:
         # Changed to return blank string instead of None for correct presentation (Omer)
-        return u""
+        return ""
     street_name = [x[field_names.street_name] for x in streets[yishuv_symbol] if
                    x[field_names.street_sign] == street_sign]
     # there should be only one street name, or none if it wasn't found.
-    return street_name[0] if len(street_name) == 1 else u""
+    return street_name[0] if len(street_name) == 1 else ""
 
 
 def get_address(accident, streets):
@@ -260,7 +260,7 @@ def get_address(accident, streets):
                         accident.get(field_names.street1),
                         streets)
     if not street:
-        return u""
+        return ""
 
     # the house_number field is invalid if it's empty or if it contains 9999
     house_number = int(accident.get(field_names.house_number)) if not pd.isnull(accident.get(field_names.house_number)) \
@@ -271,11 +271,11 @@ def get_address(accident, streets):
     if not house_number and not settlement:
         return street
     if not house_number and settlement:
-        return u"{}, {}".format(street, settlement)
+        return "{}, {}".format(street, settlement)
     if house_number and not settlement:
-        return u"{} {}".format(street, house_number)
+        return "{} {}".format(street, house_number)
 
-    return u"{} {}, {}".format(street, house_number, settlement)
+    return "{} {}, {}".format(street, house_number, settlement)
 
 
 def get_streets(accident, streets):
@@ -337,28 +337,28 @@ def get_junction(accident, roads):
         junction = roads.get(key, None)
         if junction:
             if accident.get(field_names.km) - junc_km > 0:
-                direction = u"צפונית" if accident.get(field_names.road1) % 2 == 0 else u"מזרחית"
+                direction = "צפונית" if accident.get(field_names.road1) % 2 == 0 else "מזרחית"
             else:
-                direction = u"דרומית" if accident.get(field_names.road1) % 2 == 0 else u"מערבית"
+                direction = "דרומית" if accident.get(field_names.road1) % 2 == 0 else "מערבית"
             if abs(float(accident["KM"] - junc_km) / 10) >= 1:
-                string = str(abs(float(accident["KM"]) - junc_km) / 10) + u" ק״מ " + direction + u" ל" + \
+                string = str(abs(float(accident["KM"]) - junc_km) / 10) + " ק״מ " + direction + " ל" + \
                          junction
             elif 0 < abs(float(accident["KM"] - junc_km) / 10) < 1:
                 string = str(int((abs(
-                    float(accident.get(field_names.km)) - junc_km) / 10) * 1000)) + u" מטרים " + direction + u" ל" + \
+                    float(accident.get(field_names.km)) - junc_km) / 10) * 1000)) + " מטרים " + direction + " ל" + \
                          junction
             else:
                 string = junction
             return string
         else:
-            return u""
+            return ""
 
     elif accident.get(field_names.non_urban_intersection) is not None:
         key = accident.get(field_names.road1), accident.get(field_names.road2), accident.get(field_names.km)
         junction = roads.get(key, None)
-        return junction if junction else u""
+        return junction if junction else ""
     else:
-        return u""
+        return ""
 
 
 def parse_date(accident):

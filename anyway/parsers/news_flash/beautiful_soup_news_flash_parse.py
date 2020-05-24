@@ -4,12 +4,12 @@ from bs4 import BeautifulSoup
 import logging
 
 from anyway.parsers.news_flash import parsing_utils
-from anyway.parsers.news_flash_parser import get_latest_date_from_db
-from anyway.parsers.news_flash_parser import insert_new_flash_news
+from anyway.parsers.news_flash_db_adapter import init_db
 
 
 def beautiful_soup_news_flash_parse(rss_link, site_name, maps_key):
-    latest_date = get_latest_date_from_db(site_name)
+    db = init_db()
+    latest_date = db.get_latest_date_from_db(site_name)
     response = requests.get(rss_link)
     html_soup = BeautifulSoup(response.text, "lxml")
     news_items = parsing_utils.get_all_news_items(html_soup, site_name)
@@ -34,5 +34,5 @@ def beautiful_soup_news_flash_parse(rss_link, site_name, maps_key):
 
         parsing_utils.process_after_parsing(news_item, maps_key)
 
-        insert_new_flash_news(**news_item)
+        db.insert_new_flash_news(**news_item)
         logging.info('new flash news added, is accident: ' + str(news_item['accident']))

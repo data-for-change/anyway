@@ -3,15 +3,14 @@ import logging
 from anyway.parsers.location_extraction import manual_filter_location_of_text, \
     geocode_extract, get_db_matching_location, set_accident_resolution
 from anyway.parsers.news_flash_classifiers import classify_ynet, classify_tweets
-from anyway.parsers.news_flash_parser import get_all_news_flash_data_for_updates, \
-    update_news_flash_bulk
+from anyway.parsers import news_flash_db_adapter
 
 news_flash_classifiers = {'ynet': classify_ynet,
                           'twitter': classify_tweets,
                           'walla': classify_ynet}
 
 
-def update_news_flash(maps_key, news_flash_data, bulk_size=100):
+def update_news_flash(db, maps_key, news_flash_data, bulk_size=100):
     news_flash_id_list = []
     params_dict_list = []
     for news_flash_id, title, description, item_source, old_location in news_flash_data:
@@ -49,7 +48,7 @@ def update_news_flash(maps_key, news_flash_data, bulk_size=100):
             news_flash_id_list.append(news_flash_id)
             params_dict_list.append(news_item)
             if len(news_flash_id_list) >= bulk_size:
-                update_news_flash_bulk(news_flash_id_list, params_dict_list)
+                db.update_news_flash_bulk(news_flash_id_list, params_dict_list)
                 news_flash_id_list = []
                 params_dict_list = []
             logging.info('new flash news updated, is accident: ' + str(news_item['accident']))
@@ -57,17 +56,18 @@ def update_news_flash(maps_key, news_flash_data, bulk_size=100):
             logging.info('new flash news failed to update, index: ' + str(news_flash_id))
             logging.info(e)
     if len(news_flash_id_list) > 0:
-        update_news_flash_bulk(news_flash_id_list, params_dict_list)
+        db.update_news_flash_bulk(news_flash_id_list, params_dict_list)
 
 
 def main(maps_key, source=None, news_flash_id=None):
+    db = news_flash_db_adapter.init_db()
     if news_flash_id is not None:
-        news_flash_data = get_all_news_flash_data_for_updates(id=news_flash_id)
+        news_flash_data = db.get_all_news_flash_data_for_updates(id=news_flash_id)
     elif source is not None:
-        news_flash_data = get_all_news_flash_data_for_updates(source=source)
+        news_flash_data = db.get_all_news_flash_data_for_updates(source=source)
     else:
-        news_flash_data = get_all_news_flash_data_for_updates()
+        news_flash_data = db.get_all_news_flash_data_for_updates()
     if len(news_flash_data) > 0:
-        update_news_flash(maps_key, news_flash_data)
+        update_news_flash(db, maps_key, news_flash_data)
     else:
         logging.info('no matching news flash found, source={0}, id={1}'.format(source, news_flash_id))

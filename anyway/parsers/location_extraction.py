@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from geographiclib.geodesic import Geodesic
 
-from anyway.parsers.news_flash_parser import get_markers_for_location_extraction
+from anyway.parsers.news_flash_db_adapter import init_db
 from . import resolution_dict
 
 
@@ -50,7 +50,7 @@ def get_db_matching_location(latitude, longitude, resolution, road_no=None):
         # READ MARKERS FROM DB
         geod = Geodesic.WGS84
         relevant_fields = resolution_dict[resolution]
-        markers = get_markers_for_location_extraction()
+        markers = init_db().get_markers_for_location_extraction()
         markers['geohash'] = markers.apply(lambda x: geohash.encode(x['latitude'], x['longitude'], precision=4), axis=1)
         markers_orig = markers.copy()
         if resolution != 'אחר':

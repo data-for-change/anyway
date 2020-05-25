@@ -12,6 +12,7 @@ from .constants import CONST
 from .models import (NewsFlash, AccidentMarkerView, InvolvedMarkerView, RoadSegments)
 from .parsers import resolution_dict
 from .app_and_db import db
+from .infographics_dictionaries import driver_type_hebrew_dict
 
 '''
     Widget structure:
@@ -284,13 +285,11 @@ def count_accidents_by_driver_type(data):
     for item in data:
         vehicle_type, count = item['involve_vehicle_type'], int(item['count'])
         if vehicle_type in CONST.PROFESSIONAL_DRIVER_VEHICLE_TYPES:
-            driver_types['professional_driver'] += count
+            driver_types[driver_type_hebrew_dict['professional_driver']] += count
         elif vehicle_type in CONST.PRIVATE_DRIVER_VEHICLE_TYPES:
-            driver_types['private_vehicle_driver'] += count
-        elif vehicle_type in CONST.PEDESTRIAN_VEHICLES_TYPES:
-            driver_types['pedestrian_driver'] += count
-        elif vehicle_type in CONST.OTHER_VEHICLES_TYPES:
-            driver_types['other_driver'] += count
+            driver_types[driver_type_hebrew_dict['private_vehicle_driver']] += count
+        elif vehicle_type in CONST.LIGHT_ELECTRIC_VEHICLE_TYPES or vehicle_type in CONST.OTHER_VEHICLES_TYPES:
+            driver_types[driver_type_hebrew_dict['other_driver']] += count
     return driver_types
 
 

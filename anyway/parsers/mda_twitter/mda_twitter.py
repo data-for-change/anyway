@@ -4,13 +4,11 @@ from anyway.parsers import news_flash_db_adapter
 from .get_mda_tweets import get_user_tweets
 
 
-def mda_twitter():
+def mda_twitter(google_maps_key):
     TWITTER_CONSUMER_KEY = os.environ.get('TWITTER_CONSUMER_KEY')
     TWITTER_CONSUMER_SECRET = os.environ.get('TWITTER_CONSUMER_SECRET')
     TWITTER_ACCESS_KEY = os.environ.get('TWITTER_ACCESS_KEY')
     TWITTER_ACCESS_SECRET = os.environ.get('TWITTER_ACCESS_SECRET')
-
-    GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_KEY')
 
     twitter_user = 'mda_israel'
 
@@ -22,11 +20,11 @@ def mda_twitter():
     if latest_tweet_id:
         mda_tweets = get_user_tweets(twitter_user, latest_tweet_id, TWITTER_CONSUMER_KEY,
                                      TWITTER_CONSUMER_SECRET, TWITTER_ACCESS_KEY, TWITTER_ACCESS_SECRET,
-                                     GOOGLE_MAPS_API_KEY)
+                                     google_maps_key)
     else:
         mda_tweets = get_user_tweets(
             twitter_user, 'no_tweets', TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, TWITTER_ACCESS_KEY,
-            TWITTER_ACCESS_SECRET, GOOGLE_MAPS_API_KEY)
+            TWITTER_ACCESS_SECRET, google_maps_key)
     if mda_tweets is None:
         return
 

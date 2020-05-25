@@ -7,7 +7,7 @@ from ..location_extraction import manual_filter_location_of_text, geocode_extrac
 import logging
 
 
-def process_after_parsing(news_item, maps_key):
+def process_after_parsing(news_item, google_maps_key):
     location = None
     news_item['accident'] = classify_ynet(news_item['title'])
     try:
@@ -17,7 +17,7 @@ def process_after_parsing(news_item, maps_key):
             if location is None:
                 location = manual_filter_location_of_text(news_item['title'])
             news_item['location'] = location
-            geo_location = geocode_extract(location, maps_key)
+            geo_location = geocode_extract(location, google_maps_key)
             if geo_location is not None:
                 news_item['lat'] = geo_location['geom']['lat']
                 news_item['lon'] = geo_location['geom']['lng']

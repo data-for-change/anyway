@@ -7,7 +7,7 @@ from anyway.parsers.news_flash import parsing_utils
 from anyway.parsers.news_flash_db_adapter import init_db
 
 
-def beautiful_soup_news_flash_parse(rss_link, site_name, maps_key):
+def beautiful_soup_news_flash_parse(rss_link, site_name, google_maps_key):
     db = init_db()
     latest_date = db.get_latest_date_from_db(site_name)
     response = requests.get(rss_link)
@@ -32,7 +32,7 @@ def beautiful_soup_news_flash_parse(rss_link, site_name, maps_key):
         news_item['author'] = parsing_utils.get_author(item_soup, site_name)
         news_item['description'] = parsing_utils.get_description(item_soup, site_name)
 
-        parsing_utils.process_after_parsing(news_item, maps_key)
+        parsing_utils.process_after_parsing(news_item, google_maps_key)
 
         db.insert_new_flash_news(**news_item)
         logging.info('new flash news added, is accident: ' + str(news_item['accident']))

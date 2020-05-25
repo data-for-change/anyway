@@ -4,13 +4,13 @@ import csv
 import datetime
 import json
 import logging
+from io import StringIO
 import os
 import time
 import flask_admin as admin
 import flask_login as login
 import jinja2
 import pandas as pd
-import six
 from flask import make_response, render_template, Response, jsonify, url_for, flash, abort
 from flask import request, redirect, session
 from flask_admin import helpers, expose, BaseView
@@ -22,7 +22,6 @@ from flask_cors import CORS
 from flask_security import Security, SQLAlchemyUserDatastore, roles_required, current_user, LoginForm, login_required
 from flask_sqlalchemy import SQLAlchemy
 from sendgrid import Mail
-from six import StringIO, iteritems
 from six.moves import http_client
 from sqlalchemy import and_, not_, or_
 from sqlalchemy import func
@@ -131,8 +130,8 @@ def generate_csv(results):
             output.writeheader()
 
         row = {k: v.encode('utf8')
-               if type(v) is six.text_type else v
-               for k, v in iteritems(serialized)}
+               if type(v) is str else v
+               for k, v in serialized.items()}
         output.writerow(row)
         yield output_file.getvalue()
         output_file.truncate(0)
@@ -153,8 +152,9 @@ ARG_TYPES = {'ne_lat': (float, 32.072427482938345), 'ne_lng': (float, 34.7992896
 
 
 def get_kwargs():
-    kwargs = {arg: arg_type(request.values.get(arg, default_value)) for (arg, (arg_type, default_value)) in
-              iteritems(ARG_TYPES)}
+    kwargs = {arg: arg_type(request.values.get(arg, default_value)) for
+              (arg, (arg_type, default_value)) in
+              ARG_TYPES.items()}
     if request.values.get('age_groups[]') == '1234' or request.values.get('age_groups') == '1234':
         kwargs['age_groups'] = '1,2,3,4'
     try:
@@ -1018,7 +1018,7 @@ def index(marker=None, message=None):
                                                               (today - datetime.timedelta(days=365)).strftime(
                                                                   '%Y-%m-%d'))
     context['entries_per_page'] = ENTRIES_PER_PAGE
-    context['iteritems'] = iteritems
+    context['iteritems'] = dict.items
     context['hide_search'] = True if request.values.get(
         'hide_search') == 'true' else False
     context['embedded_reports'] = get_embedded_reports()

@@ -60,9 +60,9 @@ def get_all_news_items(html_soup, site_name):
     news_items = []
     try:
         if site_name == 'walla':
-            news_items = [s.find_parent('section') for s in html_soup.select('a[href^=/break/]')]
+            news_items = html_soup.find_all('item')
         elif site_name == 'ynet':
-            news_items = [i for i in html_soup.find_all('item') if i.category.get_text() == 'מבזקים']
+            news_items = html_soup.find_all('item')
     except Exception as ex:
         logging.exception(ex)
     if not news_items:
@@ -88,16 +88,15 @@ def get_date(html_soup, site_name='walla'):
     return date
 
 
-def get_date_time(item_soup, date, site_name='walla'):
+def get_date_time(item_soup, site_name='walla'):
     entry_parsed_date = None
     try:
         if site_name == 'walla':
-            time_soup = item_soup.find("div", class_="time").get_text()
-            time = datetime.strptime(time_soup, "%H:%M")
-            entry_parsed_date = datetime.combine(date.date(), time.time())
+            time_soup = item_soup.pubdate.get_text()
+            entry_parsed_date = datetime.strptime(time_soup, '%a, %d %b %Y %H:%M:%S %Z')
         elif site_name == 'ynet':
             time_soup = item_soup.pubdate.get_text()
-            entry_parsed_date = datetime.strptime(time_soup[:-6], '%a, %d %b %Y %H:%M:%S')
+            entry_parsed_date = datetime.strptime(time_soup, '%a, %d %b %Y %H:%M:%S %z')
 
         entry_parsed_date = entry_parsed_date.replace(tzinfo=None)
     except Exception as _:
@@ -109,7 +108,7 @@ def get_author(item_soup, site_name='walla'):
     author = None
     try:
         if site_name == 'walla':
-            author = item_soup.find('div', class_='author').get_text()
+            author = item_soup.find('div', class_="author").get_text()
         elif site_name == 'ynet':
             author_text = item_soup.find('script', type="application/ld+json").get_text()
             author = author_text.split('(')[-1].split(')')[0]
@@ -122,7 +121,8 @@ def get_title(item_soup, site_name='walla'):
     title = None
     try:
         if site_name == 'walla':
-            title = item_soup.find('h2', class_='title').get_text()
+            # we still need html here since lxml strips CDATA
+            title = item_soup.find('h1', class_='title').get_text()
         elif site_name == 'ynet':
             title = item_soup.title.get_text()
     except Exception as _:
@@ -134,7 +134,7 @@ def get_link(item_soup, site_name='walla'):
     link = None
     try:
         if site_name == 'walla':
-            link = f'https://news.walla.co.il{item_soup.find("a").get("href")}'
+            link = item_soup.guid.get_text()
         elif site_name == 'ynet':
             link = item_soup.guid.get_text()
     except Exception as _:
@@ -146,7 +146,7 @@ def get_description(item_soup, site_name='walla'):
     description = None
     try:
         if site_name == 'walla':
-            description = item_soup.find('div', class_='content').find('p').get_text()
+            description = item_soup.description.get_text()
         if site_name == 'ynet':
             description_text = item_soup.find('script', type="application/ld+json").get_text()
             description = description_text.split('\"description\"')[1].split('(')[0]

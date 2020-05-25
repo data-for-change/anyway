@@ -5,82 +5,55 @@ import bs4
 from anyway.parsers.news_flash import parsing_utils
 
 
-def raw_item(section, date, site_name):
-    link = parsing_utils.get_link(section, site_name)
+def raw_item(item_soup, site_name):
+    link = parsing_utils.get_link(item_soup, site_name)
     if site_name == 'walla':
-        description = parsing_utils.get_description(section, site_name)
-        author = parsing_utils.get_author(section, site_name)
-    else:
-        with open('tests/' + link[-len('0,7340,L-5735229,00.html'):], encoding='utf-8') as f:
-            item = f.read()
-        item_soup = bs4.BeautifulSoup(item, "html.parser")
         description = parsing_utils.get_description(item_soup, site_name)
-        author = parsing_utils.get_author(item_soup, site_name)
+
+        with open('tests/' + link.split('/')[-1] + '.html', encoding='utf-8') as f:
+            html = f.read()
+        html_soup = bs4.BeautifulSoup(html, "html.parser")
+        author = parsing_utils.get_author(html_soup, site_name)
+        title = parsing_utils.get_title(html_soup, site_name)
+    else:
+        title = parsing_utils.get_title(item_soup, site_name)
+
+        with open('tests/' + link[-len('0,7340,L-5735229,00.html'):], encoding='utf-8') as f:
+            html = f.read()
+        html_soup = bs4.BeautifulSoup(html, "html.parser")
+        description = parsing_utils.get_description(html_soup, site_name)
+        author = parsing_utils.get_author(html_soup, site_name)
     return {
-        'date_time': parsing_utils.get_date_time(section, date, site_name),
+        'date_parsed': parsing_utils.get_date_time(item_soup, site_name),
+        'title': title,
         'link': link,
+        'source': site_name,
         'author': author,
-        'title': parsing_utils.get_title(section, site_name),
         'description': description
     }
 
 
 def test_parse_walla():
-    with open('tests/walla.html', encoding='utf-8') as f:
+    with open('tests/walla.xml', encoding='utf-8') as f:
         soup = bs4.BeautifulSoup(f.read(), "lxml")
     site_name = "walla"
 
-    # TODO: move to a walla.xml file
-    # TODO: date_time should also be textual
     items_expected = [
-        {'date_time': datetime.datetime(2020, 5, 22, 13, 39), 'link': 'https://news.walla.co.il/break/3362374',
-         'author': 'רויטרס', 'title': "פקיסטן: מטוס עם 107 נוסעים התרסק בעיר קראצ'י",
-         'description': "מטוס ועליו 107 נוסעים ואנשי צוות התרסק לפני זמן קצר (שישי) בעיר קראצ'י בפקיסטן - כך נמסר מגורמים רשמיים במדינה. במקום נמצאים חיילי צבא פקיסטן וכן כוחות הצלה ממשלתיים. לא דווח על קורבנות או ניצולים."},
-        {'date_time': datetime.datetime(2020, 5, 22, 13, 28), 'link': 'https://news.walla.co.il/break/3362372',
-         'author': 'יניר יגנה', 'title': 'הלוחם שנפצע קשה בפיגוע הדריסה שוחרר מטיפול נמרץ',
-         'description': 'שאדי איברהים, חייל צה"ל שנפצע קשה בפיגוע הדריסה בדרום הר חברון ורגלו נקטעה, שוחרר היום (שישי) מטיפול נמרץ בבית החולים סורוקה בבאר שבע. בסרטון שפירסם, אמר לתומכיו, "יצאתי מטיפול נמרץ, תודה רבה לכולם. אני אוהב אתכם".'},
-        {'date_time': datetime.datetime(2020, 5, 22, 13, 6), 'link': 'https://news.walla.co.il/break/3362368',
-         'author': 'יניר יגנה', 'title': 'גבר בן 71 במצב קשה ממכת חום בבאר שבע',
-         'description': 'גבר בן 71 נמצא היום (שישי) מחוסר הכרה בדירה בבאר שבע, ככל הנראה לאחר שנפגע ממכת חום. צוותי מד"א פינו אותו במצב קשה לבית החולים סורוקה.'},
-        {'date_time': datetime.datetime(2020, 5, 22, 12, 35), 'link': 'https://news.walla.co.il/break/3362366',
-         'author': 'אמיר בוחבוט', 'title': 'דיווח: צה"ל עצר בת 45 בחשד למעורבות בהרג לוחם גולני',
-         'description': 'כוחות צה"ל עצרו לפנות בוקר (שישי) בכפר יעבד אישה בת 45 ובתה בת ה-16 במסגרת חקירת הריגתו של לוחם סיירת גולני, עמית בן-יגאל - כך נמסר בכלי תקשורת פלסטיניים. בעלה של האישה חשוד גם הוא במעורבות באירוע ונעצר לפני עשרה ימים.'},
-        {'date_time': datetime.datetime(2020, 5, 22, 11, 41), 'link': 'https://news.walla.co.il/break/3362361',
-         'author': 'בועז אפרת', 'title': 'בת 85 במצב קשה ממכת חום בבני ברק',
-         'description': 'קשישה בת 85 איבדה הכרתה היום (שישי) בדירתה בבני ברק, ככל הנראה ממכת חום. צוותי מד"א פינו אותה במצב קשה לבית החולים מעייני הישועה, כשהיא מורדמת ומונשמת.'},
-        {'date_time': datetime.datetime(2020, 5, 22, 10, 43), 'link': 'https://news.walla.co.il/break/3362359',
-         'author': 'רויטרס', 'title': 'חמינאי: ישראל היא גידול סרטני במזרח התיכון',
-         'description': 'המנהיג העליון של איראן, עלי חמינאי, אמר היום (שישי) כי ישראל היא גידול סרטני במזרח התיכון, והוסיף כי "אין פשע נגד האנושות בזמנים האחרונים שמשתווה לכיבוש פלסטין". את הדברים אמר בתגובה לדברי נתניהו ביום רביעי על כך שמשטר המאיים בחורבן ישראל צפוי לעמוד בסכנה דומה. זאת, לאחר שחמינאי איים לבצע את "הפתרון הסופי" נגד ישראל.'},
-        {'date_time': datetime.datetime(2020, 5, 22, 10, 1), 'link': 'https://news.walla.co.il/break/3362353',
-         'author': 'אלי אשכנזי', 'title': 'טרקטור עלה באש בעמק יזרעאל; צוותי כיבוי אש במקום',
-         'description': 'טרקטור עלה באש לפני זמן קצר (שישי) בתענכים שבעמק יזרעאל. צוותי כיבוי אש ממחוז צפון במקום ופועלים להשתלטות על האש ומניעת התפשטותה לערימות החציר הסמוכות.'},
-        {'date_time': datetime.datetime(2020, 5, 22, 9, 53), 'link': 'https://news.walla.co.il/break/3362351',
-         'author': 'סוכנויות הידיעות', 'title': 'ארה"ב: מניין הנדבקים בקורונה עלה ב-294',
-         'description': "מניין הנדבקים בנגיף הקורונה בארצות הברית עלה ב-294 ביממה האחרונה ל-1,621,196 - כך נמסר היום (שישי) מאוניברסיטת ג'ון הופקינס. מניין המתים עלה בחמישה בני אדם ביממה האחרונה ל-96,359."},
-        {'date_time': datetime.datetime(2020, 5, 22, 8, 53), 'link': 'https://news.walla.co.il/break/3362347',
-         'author': 'דנה ירקצי', 'title': 'סערת הילדה והשמלה: הורים מוחים מול ביה"ס בפ"ת',
-         'description': 'עשרה הורים מוחים הבוקר (שישי) מול בית הספר בפתח תקווה בו מורה אילצה את הילדה בת השבע להוריד את שמלתה בשל אורך השרוולים, מה שהשאיר אותה בתחתונים. ההורים קראו לשר החינוך הנכנס, יואב גלנטף לפתוח בדוח חקירה מקיף על האירוע, ונשאו שלטים של "לחנך בלי להשפיל" ו"יש גבול לאטימות, המורה הביתה".'},
-        {'date_time': datetime.datetime(2020, 5, 22, 7, 52), 'link': 'https://news.walla.co.il/break/3362342',
-         'author': 'סוכנויות הידיעות', 'title': 'פקיסטן: מניין הנדבקים בקורורנה עלה ל-50,694',
-         'description': 'מניין הנדבקים בנגיף הקורונה בפקיסטן עלה ביממה האחרונה ב-2,603 ל-50,694 - כך נמסר היום (שישי) מהרשויות המקומיות. מניין המתים עלה ב-50 ביממה האחרונה ל-1,067.'},
-        {'date_time': datetime.datetime(2020, 5, 22, 6, 43), 'link': 'https://news.walla.co.il/break/3362339',
-         'author': 'יואב איתיאל', 'title': 'התחזית: מעונן חלקית וירידה ניכרת בטמפרטורות',
-         'description': 'מזג האוויר היום (שישי) יהיה מעונן חלקית. תחול ירידה ניכרת בטמפרטורות ועליה בלחות. בהרים ובפנים הארץ יוסיף להיות חם מהרגיל. במהלך הלילה יהיה מעונן חלקית עד מעונן, וייתכנו טפטופים.'},
-        {'date_time': datetime.datetime(2020, 5, 22, 5, 33), 'link': 'https://news.walla.co.il/break/3362337',
-         'author': 'רויטרס', 'title': 'גרמניה: 460 מקרי הידבקות בקורונה ביממה; 27 מתים',
-         'description': '460 מקרי הידבקות בנגיף הקורונה זוהו בגרמניה ביממה האחרונה - כך הודיעו הלילה (שישי) גורמי הבריאות במדינה. בכך, עלה מספר הנדבקים בגרמניה ל-177,212 בני אדם. עוד נמסר כי 27 בני אדם מתו מהנגיף ביממה החולפת, ומניין המתים במדינה עלה ל-8,174.'},
-        {'date_time': datetime.datetime(2020, 5, 22, 4, 38), 'link': 'https://news.walla.co.il/break/3362336',
-         'author': 'רויטרס', 'title': 'מקסיקו: 420 מתים מקורונה ביממה; שיא במספר הנדבקים',
-         'description': '2,973 מקרי הידבקות בנגיף הקורונה זוהו במקסיקו ביממה האחרונה - כך הודיעו הלילה (שישי) גורמי הבריאות במדינה. בכך, עלה סך הנדבקים במקסיקו ל-59,567 בני אדם. מדובר בשיא יומי במספר המקרים המאובחנים במדינה מאז פרוץ המגיפה. עוד נמסר כי ביממה החולפת מתו 420 חולי קורונה, ומניין המתים עלה ל-6,510 בני אדם.'},
-        {'date_time': datetime.datetime(2020, 5, 22, 3, 25), 'link': 'https://news.walla.co.il/break/3362334',
-         'author': 'יואב איתיאל', 'title': 'צום הרמדאן יחל בשעה 04:02 ויסתיים ב-19:40',
-         'description': 'צום הרמדאן יחל היום (שישי) לפנות בוקר בשעה 04:02, ויסתיים בשעה 19:40. העולם המוסלמי מציין את היום ה-29 לחודש הרמדאן.'},
+        {'date_parsed': datetime.datetime(2020, 5, 23, 16, 55),
+         'title': 'פרקליטי רה"מ יתלוננו נגד רביב דרוקר על שיבוש הליכי משפט',
+         'link': 'https://news.walla.co.il/break/3362504',
+         'source': 'walla',
+         'author': 'דניאל דולב',
+         'description': 'פרקליטיו של ראש הממשלה בנימין נתניהו מתכוונים להגיש הערב (שבת) תלונה ליועץ המשפטי לממשלה, אביחי מנדלבליט, נגד העיתונאי רביב דרוקר בטענה ששיבש הליכי משפט והדיח עד בתוכניתו "המקור". התלונה מתייחסת לראיונות שנתנו לתוכנית עדי תביעה במשפטו של נתניהו, בהם שאול אלוביץ\' ומומו פילבר.]]>'},
+        {'date_parsed': datetime.datetime(2020, 5, 22, 13, 14),
+         'title': 'פקיסטן: לפחות נוסע אחד שרד את התרסקות המטוס',
+         'link': 'https://news.walla.co.il/break/3362389',
+         'source': 'walla',
+         'author': 'רויטרס',
+         'description': "לפחות נוסע אחד שרד מהתרסקות המטוס הפקיסטני היום (שישי) באזור מגורים בקראצ'י - כך אמר גורם בממשל המקומי. בהודעתו אמר דובר ממשלת המחוז כי בנקאי שהיה על המטוס אותר לאחר ששרד את ההתרסקות. מרשות התעופה האזרחית של פקיסטן נמסר כי היו 91 נוסעים ושמונה אנשי צוות על מטוס איירבוס A320.]]>"}
     ]
 
-    date = parsing_utils.get_date(soup, site_name)
-    assert date == datetime.datetime(2020, 5, 22, 0, 0)
-
-    items_actual = [raw_item(section, date, site_name)
+    items_actual = [raw_item(section, site_name)
                     for section in parsing_utils.get_all_news_items(soup, site_name)]
     assert items_actual == items_expected
 
@@ -90,54 +63,22 @@ def test_parse_ynet():
         soup = bs4.BeautifulSoup(f.read(), "lxml")
     site_name = "ynet"
 
-    # TODO: date_time should also be textual
     items_expected = [
-        {'date_time': datetime.datetime(2020, 5, 22, 18, 27, 32),
-         'link': 'http://www.ynet.co.il/articles/0,7340,L-5735229,00.html', 'author': 'איתמר אייכנר',
+        {'date_parsed': datetime.datetime(2020, 5, 22, 18, 27, 32),
          'title': 'קפריסין הודיעה: ישראלים יוכלו להיכנס למדינה החל מה-9 ביוני',
+         'link': 'http://www.ynet.co.il/articles/0,7340,L-5735229,00.html',
+         'source': 'ynet',
+         'author': 'איתמר אייכנר',
          'description': ': "שר התחבורה של קפריסין הודיע על תוכנית לפתיחת שדות התעופה וחידוש הטיסות החל מה-9 ביוני. התוכנית שאושרה בידי הממשלה חולקה לשני שלבים לפי תאריכים ומדינות שיורשו להיכנס בשעריה. עד ה-19 ביוני נוסעים מכל המקומות יצטרכו להיבדק לקורונה 72 שעות לפני מועד הטיסה. מה-20 ביוני יידרשו לכך רק נוסעים משוויץ, פולין רומניה, קרואטיה, אסטוניה וצ\'כיה. בתי המלון ייפתחו ב-1 ביוני, וחובת הבידוד תבוטל ב-20 ביוני.   '},
-        {'date_time': datetime.datetime(2020, 5, 22, 17, 23, 29),
-         'link': 'http://www.ynet.co.il/articles/0,7340,L-5735210,00.html', 'author': 'דניאל סלאמה',
-         'title': 'נסראללה: "פלסטין שייכת לפלסטינים, מלחמות וחיסולים לא ישנו זאת"',
-         'description': ': "מזכ\\"ל חיזבאללה חסן נסראללה אמר בנאום לציון \\"יום אל-קודס\\" '},
-        {'date_time': datetime.datetime(2020, 5, 22, 17, 9, 50),
-         'link': 'http://www.ynet.co.il/articles/0,7340,L-5735206,00.html', 'author': 'אלישע בן קימון',
-         'title': 'לאחר שעות: הושגה שליטה על השריפה באזור יצהר שבשומרון',
-         'description': ': "משירותי הכבאות נמסר כי הושגה שליטה על השריפה שפרצה באזור ההתנחלות יצהר שבשומרון. זאת, \\"לאחר שעות של לחימה עיקשת באש\\". לא דווח על נפגעים או על נזק.   '},
-        {'date_time': datetime.datetime(2020, 5, 22, 17, 6, 44),
-         'link': 'http://www.ynet.co.il/articles/0,7340,L-5735205,00.html', 'author': 'גלעד כרמלי',
-         'title': 'רשות הטבע והגנים: "עקב עומס - מומלץ לא להגיע בקרוב לגן לאומי פלמחים"',
-         'description': ': "רשות הטבע והגנים הודיעה על עומסים כבדים באזור הכניסה לגן הלאומי חוף פלמחים. בשל כך, נמסר כי מומלץ למטיילים לא להגיע לאתר בשעות הקרובות.    '},
-        {'date_time': datetime.datetime(2020, 5, 22, 17, 1, 40),
-         'link': 'http://www.ynet.co.il/articles/0,7340,L-5735204,00.html', 'author': 'ynet',
-         'title': 'סופת הציקלון בדרום אסיה: "יותר מחמישה מיליון תושבים פונו למקלטים"',
-         'description': ': "סוכנות הידיעות \\"בלומברג\\" דיווחה כי יותר מחמישה מיליון תושבים באזורים שבהם הכה הציקלון \\"אמפאן\\" פונו למקלטים ולמקומות מחסה. הסופה שהגיעה שלשום ליבשה באזור הגבול בין הודו לבנגלדש נחשבת לאחת החזקות שפקדו את המקום, ואף ל\\"סופר-ציקלון\\" השני בלבד שנוצר במפרץ בנגל מאז שהחלו הרישומים.   '},
-        {'date_time': datetime.datetime(2020, 5, 22, 16, 34, 42),
-         'link': 'http://www.ynet.co.il/articles/0,7340,L-5735195,00.html', 'author': 'איתמר אייכנר',
-         'title': 'נתניהו מגיב לאיראן: "מי שמאיים על ישראל בהשמדה שם עצמו בסכנה דומה"',
-         'description': ': "ראש הממשלה בנימין נתניהו הגיב לדבריו של המנהיג העליון של איראן עלי חמינאי, שאמר קודם כי \\"וירוס הציונות לא ישרוד לאורך זמן וישראל תוכחד\\", ומסר: \\"אנחנו חוזרים ואומרים - מי שמאיים על ישראל בסכנת השמדה, שם את עצמו בסכנה דומה\\".   '},
-        {'date_time': datetime.datetime(2020, 5, 22, 16, 22, 32),
-         'link': 'http://www.ynet.co.il/articles/0,7340,L-5735191,00.html', 'author': 'אחיה ראב\\"ד',
-         'title': 'השריפה בצפת: הושגה שליטה על האש, נזק נגרם למבנים במקום',
-         'description': ': "המשטרה מסרה כי לוחמי האש השיגו שליטה על שריפת הקוצים שפרצה בצפת, סמוך לרחובות צה\\"ל וקרן היסוד. עוד נמסר כי תושבי הבתים שפונו יכולים לחזור לבתיהם, אולם יתר התושבים מתבקשים שלא להגיע לאזור הדליקה. בנוסף, איש לא נפגע אולם נזק נגרם לנגרייה ולכמה קרוונים במקום.   '},
-        {'date_time': datetime.datetime(2020, 5, 22, 15, 53, 30),
-         'link': 'http://www.ynet.co.il/articles/0,7340,L-5735188,00.html', 'author': 'תמר טרבלסי חדד',
-         'title': 'לאחר שסייעת בגן בראשל"צ נדבקה בנגיף: בדיקות הילדים והצוות שליליות',
-         'description': ': "עיריית ראשון לציון הודיעה כי תוצאות בדיקות הקורונה שנערכו לצוות ולילדים בגן \\"דני גיבור\\" בעיר נמצאו שליליות. הבדיקות נערכו לאחר שסייעת במקום אובחנה בנגיף.   '},
-        {'date_time': datetime.datetime(2020, 5, 22, 15, 26, 32),
-         'link': 'http://www.ynet.co.il/articles/0,7340,L-5735183,00.html', 'author': 'אחיה ראב\\"ד',
-         'title': 'שריפה פרצה בצפת, תושבים פונו מבתיהם',
-         'description': ': "שריפת קוצים פרצה סמוך לרחובות צה\\"ל וקרן היסוד בצפת. כוחות משטרה הוזנקו למקום ובעקבות העשן הסמיך ובמטרה למנוע סכנה, הוחלט יחד עם כוחות הכיבוי, על פינוי קו בתים ראשון בסמוך לזירה. לא ידוע על נפגעים. המשטרה מבקשת מכלל תושבי האזור להגיף את חלונותיהם ולהסתגר בבתים עד הודעה חדשה.   '},
-        {'date_time': datetime.datetime(2020, 5, 22, 15, 8, 48),
-         'link': 'http://www.ynet.co.il/articles/0,7340,L-5735178,00.html', 'author': 'אלישע בן קימון',
+        {'date_parsed': datetime.datetime(2020, 5, 22, 15, 8, 48),
+         'link': 'http://www.ynet.co.il/articles/0,7340,L-5735178,00.html',
+         'source': 'ynet',
+         'author': 'אלישע בן קימון',
          'title': 'צוותי כיבוי פועלים בשריפת קוצים שמתפשטת סמוך ליצהר שבשומרון',
          'description': ': "צוותי כיבוי פועלים בשריפת קוצים שמתפשטת לעבר ההתנחלות יצהר שבשומרון. לוחמי האש פועלים למניעת התקדמות השריפה ליצהר על ידי חתירה למגע עם האש ובסיוע מטוסי כיבוי. נמסר כי קיימת סכנה למוצב צבאי במקום.   '},
     ]
 
-    date = parsing_utils.get_date(soup, site_name)
-    assert date is None
-
-    items_actual = [raw_item(section, date, site_name)
+    items_actual = [raw_item(section, site_name)
                     for section in parsing_utils.get_all_news_items(soup, site_name)]
 
     assert items_actual == items_expected

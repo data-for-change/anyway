@@ -12,6 +12,7 @@ from .constants import CONST
 from .models import (NewsFlash, AccidentMarkerView, InvolvedMarkerView, RoadSegments)
 from .parsers import resolution_dict
 from .app_and_db import db
+from .infographics_dictionaries import driver_type_hebrew_dict
 
 '''
     Widget structure:
@@ -278,6 +279,19 @@ def get_most_severe_accidents_table(location_info, start_time, end_time):
         accident['injured_count'] = num
         del accident['accident_timestamp'], accident['accident_type'], accident['id'], accident['provider_code']
     return accidents
+
+def count_accidents_by_driver_type(data):
+    driver_types = defaultdict(int)
+    for item in data:
+        vehicle_type, count = item['involve_vehicle_type'], int(item['count'])
+        if vehicle_type in CONST.PROFESSIONAL_DRIVER_VEHICLE_TYPES:
+            driver_types[driver_type_hebrew_dict['professional_driver']] += count
+        elif vehicle_type in CONST.PRIVATE_DRIVER_VEHICLE_TYPES:
+            driver_types[driver_type_hebrew_dict['private_vehicle_driver']] += count
+        elif vehicle_type in CONST.LIGHT_ELECTRIC_VEHICLE_TYPES or vehicle_type in CONST.OTHER_VEHICLES_TYPES:
+            driver_types[driver_type_hebrew_dict['other_driver']] += count
+    return driver_types
+
 
 
 # count of dead and severely injured
@@ -566,5 +580,18 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
                          rank=15,
                          items=['vision_zero_2_plus_1'])
     output['widgets'].append(vision_zero.serialize())
+
+    # involved by driver type
+    involved_by_vehicle_type_data = get_accidents_stats(table_obj=InvolvedMarkerView,
+                                                        filters=get_injured_filters(location_info),
+                                                        group_by='involve_vehicle_type',
+                                                        count='involve_vehicle_type',
+                                                        start_time=start_time,
+                                                        end_time=end_time)
+    accident_count_by_driver_type = Widget(name='accident_count_by_driver_type',
+                                           rank=16,
+                                           items=count_accidents_by_driver_type(involved_by_vehicle_type_data))
+    output['widgets'].append(accident_count_by_driver_type.serialize())
+
 
     return Response(json.dumps(output, default=str), mimetype="application/json")

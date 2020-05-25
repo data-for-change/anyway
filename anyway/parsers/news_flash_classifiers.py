@@ -7,7 +7,7 @@ def tweet_with_accident_veichle_and_person(text):
     if (('הולך רגל' in text or 'הולכת רגל' in text or 'נהג' in text
          or 'אדם' in text)
             and ('רכב' in text or 'מכונית' in text or 'אופנוע' in text
-                 or u"ג'יפ" in text or 'טרקטור' in text or 'משאית' in text
+                 or "ג'יפ" in text or 'טרקטור' in text or 'משאית' in text
                  or 'אופניים' in text or 'קורקינט' in text)):
         return True
     return False
@@ -29,7 +29,7 @@ def tweet_with_veichles(text):
     :param text: tweet text
     :return: boolean, true if tweet contains veichle, false for others
     """
-    if 'רכב' in text or 'מכונית' in text or 'אופנוע' in text or u"ג'יפ" in text or 'טרקטור' in text or 'משאית' in text or \
+    if 'רכב' in text or 'מכונית' in text or 'אופנוע' in text or "ג'יפ" in text or 'טרקטור' in text or 'משאית' in text or \
         'אופניים' in text or 'קורקינט' in text:
         return True
     return False
@@ -53,7 +53,7 @@ def classify_ynet(text):
     """
     accident_words = ['תאונ', ]
     working_accidents_words = ['תאונת עבודה', 'תאונות עבודה']
-    involved_words = ['רכב', 'אוטובוס', u"ג'יפ", 'משאית', 'קטנוע', 'טרקטור',
+    involved_words = ['רכב', 'אוטובוס', "ג'יפ", 'משאית', 'קטנוע', 'טרקטור',
                       'אופנוע', 'אופניים', 'קורקינט', 'הולך רגל', 'הולכת רגל',
                       'הולכי רגל']
     hurt_words = ['פגע', 'פגיע', 'פגוע', 'הרג', 'הריג', 'הרוג', 'פצע', 'פציע',

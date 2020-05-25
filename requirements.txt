@@ -45,7 +45,6 @@ requests==2.23.0
 scrapy
 sendgrid==6.3.1
 setuptools
-six==1.14.0
 tweepy==3.8.0
 urllib3==1.25.9
 webassets==2.0

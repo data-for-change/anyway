@@ -8,7 +8,6 @@ from csv import DictReader
 from datetime import datetime
 from functools import partial
 
-import six
 from dateutil.relativedelta import relativedelta
 from flask import Flask
 from pyproj import Transformer
@@ -60,7 +59,7 @@ class CsvReader(object):
     _digit_pattern = re.compile(r'^-?\d*(\.\d+)?$')
 
     def __init__(self, filename, encoding=None):
-        self._file = open(filename) if six.PY2 else open(filename, encoding=encoding)
+        self._file = open(filename, encoding=encoding)
         self._lock = threading.RLock()
         self._closed = False
 
@@ -97,7 +96,7 @@ class CsvReader(object):
 
     def __iter__(self):
         for line in DictReader(self._file):
-            converted = dict([(key.upper(), self._convert(val)) for key, val in six.iteritems(line)])
+            converted = dict([(key.upper(), self._convert(val)) for key, val in line.items()])
             yield converted
 
 
@@ -127,14 +126,11 @@ def time_delta(since):
                     for attr in attrs if getattr(delta, attr))
 
 
-if six.PY3:
-    def decode_hebrew(s, encoding="cp1255"):
-        return s
-else:
-    def decode_hebrew(s, encoding="cp1255"):
-        return s.decode(encoding)
+def decode_hebrew(s):
+    return s
 
-open_utf8 = partial(open, encoding="utf-8") if six.PY3 else open
+
+open_utf8 = partial(open, encoding="utf-8")
 
 
 def truncate_tables(db, tables):
@@ -165,12 +161,13 @@ class ImporterUI(object):
                 return tkFileDialog.askdirectory(initialdir=self._source_path,
                                                  title='Please select a directory')
             else:
-                return six.moves.input('Please provide the directory path: ')
+                return input('Please provide the directory path: ')
         return self._source_path
 
     def is_delete_all(self):
         if self._delete_all and self._specific_folder:
-            confirm_delete_all = six.moves.input("Are you sure you want to delete all the current data? (y/n)\n")
+            confirm_delete_all = input(
+                "Are you sure you want to delete all the current data? (y/n)\n")
             if confirm_delete_all.lower() == 'n':
                 self._delete_all = False
         return self._delete_all
@@ -178,9 +175,5 @@ class ImporterUI(object):
 
 def chunks(l, n):
     """Yield successive n-sized chunks from l."""
-    try:
-        xrange
-    except NameError:
-        xrange = range
-    for i in xrange(0, len(l), n):
+    for i in range(0, len(l), n):
         yield l[i:i + n]

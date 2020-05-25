@@ -16,7 +16,6 @@ attrs==19.3.0
 beautifulsoup4==4.6.0
 chardet==3.0.4
 click==7.1.2
-enum34==1.1.10
 feedparser==5.2.1
 flask_cors
 fuzzywuzzy==0.18.0

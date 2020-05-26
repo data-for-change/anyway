@@ -1,43 +1,31 @@
 import datetime
 
-import bs4
+import pytest
 
-from anyway.parsers.news_flash import parsing_utils
+from anyway.parsers.news_flash import rss_sites
 
 
-def raw_item(item_soup, site_name):
-    link = parsing_utils.get_link(item_soup, site_name)
-    if site_name == 'walla':
-        description = parsing_utils.get_description(item_soup, site_name)
+def fetch_html_walla(link):
+    with open('tests/' + link.split('/')[-1] + '.html', encoding='utf-8') as f:
+        return f.read()
 
-        with open('tests/' + link.split('/')[-1] + '.html', encoding='utf-8') as f:
-            html = f.read()
-        html_soup = bs4.BeautifulSoup(html, "html.parser")
-        author = parsing_utils.get_author(html_soup, site_name)
-        title = parsing_utils.get_title(html_soup, site_name)
-    else:
-        title = parsing_utils.get_title(item_soup, site_name)
 
-        with open('tests/' + link[-len('0,7340,L-5735229,00.html'):], encoding='utf-8') as f:
-            html = f.read()
-        html_soup = bs4.BeautifulSoup(html, "html.parser")
-        description = parsing_utils.get_description(html_soup, site_name)
-        author = parsing_utils.get_author(html_soup, site_name)
-    return {
-        'date_parsed': parsing_utils.get_date_time(item_soup, site_name),
-        'title': title,
-        'link': link,
-        'source': site_name,
-        'author': author,
-        'description': description
-    }
+def fetch_html_ynet(link):
+    with open('tests/' + link[-len('0,7340,L-5735229,00.html'):], encoding='utf-8') as f:
+        return f.read()
+
+
+def fetch_rss_walla(link):
+    with open('tests/walla.xml', encoding='utf-8') as f:
+        return f.read()
+
+
+def fetch_rss_ynet(link):
+    with open('tests/ynet.xml', encoding='utf-8') as f:
+        return f.read()
 
 
 def test_parse_walla():
-    with open('tests/walla.xml', encoding='utf-8') as f:
-        soup = bs4.BeautifulSoup(f.read(), "lxml")
-    site_name = "walla"
-
     items_expected = [
         {'date_parsed': datetime.datetime(2020, 5, 23, 16, 55),
          'title': 'פרקליטי רה"מ יתלוננו נגד רביב דרוקר על שיבוש הליכי משפט',
@@ -53,16 +41,11 @@ def test_parse_walla():
          'description': "לפחות נוסע אחד שרד מהתרסקות המטוס הפקיסטני היום (שישי) באזור מגורים בקראצ'י - כך אמר גורם בממשל המקומי. בהודעתו אמר דובר ממשלת המחוז כי בנקאי שהיה על המטוס אותר לאחר ששרד את ההתרסקות. מרשות התעופה האזרחית של פקיסטן נמסר כי היו 91 נוסעים ושמונה אנשי צוות על מטוס איירבוס A320.]]>"}
     ]
 
-    items_actual = [raw_item(section, site_name)
-                    for section in parsing_utils.get_all_news_items(soup, site_name)]
+    items_actual = list(rss_sites.scrape('walla', fetch_rss=fetch_rss_walla, fetch_html=fetch_html_walla))
     assert items_actual == items_expected
 
 
 def test_parse_ynet():
-    with open('tests/ynet.xml', encoding='utf-8') as f:
-        soup = bs4.BeautifulSoup(f.read(), "lxml")
-    site_name = "ynet"
-
     items_expected = [
         {'date_parsed': datetime.datetime(2020, 5, 22, 18, 27, 32),
          'title': 'קפריסין הודיעה: ישראלים יוכלו להיכנס למדינה החל מה-9 ביוני',
@@ -78,7 +61,11 @@ def test_parse_ynet():
          'description': ': "צוותי כיבוי פועלים בשריפת קוצים שמתפשטת לעבר ההתנחלות יצהר שבשומרון. לוחמי האש פועלים למניעת התקדמות השריפה ליצהר על ידי חתירה למגע עם האש ובסיוע מטוסי כיבוי. נמסר כי קיימת סכנה למוצב צבאי במקום.   '},
     ]
 
-    items_actual = [raw_item(section, site_name)
-                    for section in parsing_utils.get_all_news_items(soup, site_name)]
-
+    items_actual = list(rss_sites.scrape('ynet', fetch_rss=fetch_rss_ynet, fetch_html=fetch_html_ynet))
     assert items_actual == items_expected
+
+
+@pytest.mark.slow
+def test_parse_sanity_online():
+    next(rss_sites.scrape('ynet'))
+    next(rss_sites.scrape('walla'))

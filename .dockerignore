@@ -1,5 +1,6 @@
-.dockerignore
-Dockerfile
-docker-compose-*
-db_docker/*
+**/Dockerfile
+**/docker-compose.yml
 db_docker
+**/.git
+**/__pycache__
+**/pytest_cache

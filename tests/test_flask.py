@@ -25,6 +25,7 @@ else:
     _text_data = lambda rv: rv.data.decode("utf-8")
 
 
+@pytest.mark.server
 def test_main(app):
     rv = app.get('/')
     assert rv.status_code == http_client.OK
@@ -32,6 +33,7 @@ def test_main(app):
 
 
 # It requires parameters to know which markers you want.
+@pytest.mark.server
 def test_markers_empty(app):
     rv = app.get('/markers')
     assert rv.status_code == http_client.BAD_REQUEST
@@ -46,6 +48,7 @@ def marker_counter():
     assert counter['markers'] == 1624
 
 
+@pytest.mark.server
 def test_bad_date(app):
     rv = app.get(
         "/markers?ne_lat=32.08656790211843&ne_lng=34.80611543655391&sw_lat=32.08003198103277&sw_lng=34.793884563446&zoom=17&thin_markers=false&start_date=a1104537600&end_date=1484697600&show_fatal=1&show_severe=1&show_light=1&approx=1&accurate=1&show_markers=1&show_discussions=1&show_urban=3&show_intersection=3&show_lane=3&show_day=7&show_holiday=0&show_time=24&start_time=25&end_time=25&weather=0&road=0&separation=0&surface=0&acctype=0&controlmeasure=0&district=0&case_type=0")
@@ -61,6 +64,7 @@ def test_bad_date(app):
 #         assert json.loads(_text_data(rv)) == json.load(fh)
 
 
+@pytest.mark.partial_db
 @query_flag("show_fatal")
 @query_flag("show_severe")
 @query_flag("show_light")

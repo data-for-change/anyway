@@ -9,19 +9,15 @@ import traceback
 import zipfile
 from collections import OrderedDict, defaultdict
 from datetime import datetime
-from functools import partial
 
 import math
 import pandas as pd
-import six
 from flask_sqlalchemy import SQLAlchemy
-from six import iteritems
 from sqlalchemy import or_, and_
 
 from . import preprocessing_cbs_files
 from .. import field_names, localization
 from .. import importmail_cbs
-from .. import models
 from ..constants import CONST
 from ..models import (AccidentMarker,
                       Involved,
@@ -234,8 +230,6 @@ coordinates_converter = ItmToWGS84()
 app = init_flask()
 db = SQLAlchemy(app)
 
-json_dumps = partial(json.dumps, encoding=models.db_encoding) if six.PY2 else json.dumps
-
 
 def get_street(yishuv_symbol, street_sign, streets):
     """
@@ -444,7 +438,7 @@ def create_marker(accident, streets, roads, non_urban_intersection):
         "provider_code": int(accident.get(field_names.file_type)),
         "file_type_police": get_data_value(accident.get(field_names.file_type_police)),
         "title": "Accident",
-        "description": json_dumps(load_extra_data(accident, streets, roads)),
+        "description": json.dumps(load_extra_data(accident, streets, roads)),
         "address": get_address(accident, streets),
         "latitude": lat,
         "longitude": lng,
@@ -607,7 +601,7 @@ def import_vehicles(vehicles, **kwargs):
 
 def get_files(directory):
     output_files_dict = {}
-    for name, filename in iteritems(cbs_files):
+    for name, filename in cbs_files.items():
         if name not in (STREETS, NON_URBAN_INTERSECTION, ACCIDENTS, INVOLVED, VEHICLES, DICTIONARY):
             continue
         files = [path for path in os.listdir(directory)
@@ -809,7 +803,7 @@ def get_provider_code(directory_name=None):
 
     ans = ""
     while not ans.isdigit():
-        ans = six.moves.input("Directory provider code is invalid. Please enter a valid code: ")
+        ans = input("Directory provider code is invalid. Please enter a valid code: ")
         if ans.isdigit():
             return int(ans)
 
@@ -978,7 +972,7 @@ def main(specific_folder,
         fill_db_geo_data()
 
         failed = ["\t'{0}' ({1})".format(directory, fail_reason) for directory, fail_reason in
-                  iteritems(failed_dirs)]
+                  failed_dirs.items()]
         logging.info("Finished processing all directories{0}{1}".format(", except:\n" if failed else "",
                                                                         "\n".join(failed)))
         logging.info("Total: {0} items in {1}".format(total, time_delta(started)))

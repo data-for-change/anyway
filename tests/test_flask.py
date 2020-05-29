@@ -5,8 +5,7 @@ from collections import Counter
 from functools import partial
 
 import pytest
-import six
-from six.moves import http_client
+from http import client as http_client
 from urlobject import URLObject
 
 from anyway import app as flask_app
@@ -19,17 +18,12 @@ def app():
 
 query_flag = partial(pytest.mark.parametrize, argvalues=["1", ""])
 
-if six.PY2:
-    _text_data = lambda rv: rv.data
-else:
-    _text_data = lambda rv: rv.data.decode("utf-8")
-
 
 @pytest.mark.server
 def test_main(app):
     rv = app.get('/')
     assert rv.status_code == http_client.OK
-    assert '<title>ANYWAY - משפיעים בכל דרך</title>' in _text_data(rv)
+    assert '<title>ANYWAY - משפיעים בכל דרך</title>' in rv.data.decode("utf-8")
 
 
 # It requires parameters to know which markers you want.
@@ -37,8 +31,7 @@ def test_main(app):
 def test_markers_empty(app):
     rv = app.get('/markers')
     assert rv.status_code == http_client.BAD_REQUEST
-    assert '<title>400 Bad Request</title>' in _text_data(rv)
-    # print(rv.data)
+    assert '<title>400 Bad Request</title>' in rv.data.decode("utf-8")
 
 
 @pytest.fixture(scope="module")
@@ -76,7 +69,7 @@ def test_markers(app, show_fatal, show_severe, show_light, show_accurate, show_a
     assert rv.status_code == http_client.OK
     assert rv.headers['Content-Type'] == 'application/json'
 
-    resp = json.loads(_text_data(rv))
+    resp = json.loads(rv.data.decode("utf-8"))
 
     marker_counter["markers"] += len(resp['markers'])
 

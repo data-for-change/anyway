@@ -55,15 +55,6 @@ def test_bad_date(app):
     assert rv.status_code == http_client.BAD_REQUEST
 
 
-# def test_markers_2014086707(app):
-#     # clicking on a car image
-#     rv = app.get("/markers/2014086707")
-#     assert rv.status_code == http_client.OK
-#     #print(rv.data)
-#     with open_utf8('tests/markers_2014086707.json') as fh:
-#         assert json.loads(_text_data(rv)) == json.load(fh)
-
-
 @pytest.mark.partial_db
 @query_flag("show_fatal")
 @query_flag("show_severe")
@@ -95,11 +86,3 @@ def test_markers(app, show_fatal, show_severe, show_light, show_accurate, show_a
         assert show_light or marker['accident_severity'] != 3
         assert show_accurate or marker['location_accuracy'] != 1
         assert show_approx or marker['location_accuracy'] == 1
-
-# def test_single_marker(app):
-#     rv = app.get("/markers/2014027147")
-#     assert rv.status_code == http_client.OK
-#     #print(rv.data)
-#     resp = json.loads(_text_data(rv))
-#     #assert 'clusters' in resp
-#     assert resp[0]['accident_id'] == 2014027147

@@ -121,7 +121,7 @@ def cbs(
 
 @process.command()
 def news_flash():
-    from parsers.scrape_flash_news import main
+    from anyway.parsers.scrape_flash_news import main
     key = get_google_maps_key()
     return main(key)
 

@@ -205,7 +205,7 @@ class DBAdapter:
         )
         self.commit()
 
-    def get_latest_tweet_id_from_db(self):
+    def get_latest_tweet_id(self):
         """
         get the latest tweet id
         :return: latest tweet id
@@ -267,7 +267,7 @@ class DBAdapter:
             ).fetchall()
         return res
 
-    def get_latest_date_from_db(self, source):
+    def get_latest_date_of_source(self, source):
         """
         returns latest date of news flash
         :return: latest date of news flash

@@ -76,7 +76,7 @@ def scrape(site_name, *, fetch_rss=_fetch, fetch_html=_fetch):
 
 
 def scrape_extract_store(site_name, google_maps_key, db):
-    latest_date = db.get_latest_date_from_db(site_name) or datetime.date.min
+    latest_date = db.get_latest_date_of_source(site_name) or datetime.date.min
     for raw_item in scrape(site_name):
         if raw_item["date_parsed"] < latest_date:
             break

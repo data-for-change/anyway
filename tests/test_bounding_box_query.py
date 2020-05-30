@@ -21,6 +21,7 @@ def base_kwargs():
             'show_holiday': 0, 'end_time': 25, 'road': 0, 'ne_lat': 32.072427482938345}
 
 
+@pytest.mark.partial_db
 def test_location_filters(base_kwargs):
     result = AccidentMarker.bounding_box_query(yield_per=50, **base_kwargs)
     accident_markers = result.accident_markers
@@ -33,6 +34,7 @@ def test_location_filters(base_kwargs):
         assert base_kwargs['sw_lng'] <= marker.longitude <= base_kwargs['ne_lng']
 
 
+@pytest.mark.partial_db
 def test_accurate_filter(base_kwargs):
     base_kwargs['approx'] = False
     result = AccidentMarker.bounding_box_query(yield_per=50, **base_kwargs)
@@ -41,6 +43,7 @@ def test_accurate_filter(base_kwargs):
         assert marker.location_accuracy == 1
 
 
+@pytest.mark.partial_db
 def test_approx_filter(base_kwargs):
     base_kwargs['accurate'] = False
     result = AccidentMarker.bounding_box_query(yield_per=50, **base_kwargs)
@@ -49,6 +52,7 @@ def test_approx_filter(base_kwargs):
         assert marker.location_accuracy != 1
 
 
+@pytest.mark.partial_db
 def test_fatal_severity_filter(base_kwargs):
     base_kwargs['show_fatal'] = False
     result = AccidentMarker.bounding_box_query(yield_per=50, **base_kwargs)
@@ -57,6 +61,7 @@ def test_fatal_severity_filter(base_kwargs):
         assert marker.accident_severity != 1
 
 
+@pytest.mark.partial_db
 def test_severe_severity_filter(base_kwargs):
     base_kwargs['show_severe'] = False
     result = AccidentMarker.bounding_box_query(yield_per=50, **base_kwargs)
@@ -65,6 +70,7 @@ def test_severe_severity_filter(base_kwargs):
         assert marker.accident_severity != 2
 
 
+@pytest.mark.partial_db
 def test_light_severity_filter(base_kwargs):
     base_kwargs['show_light'] = False
     result = AccidentMarker.bounding_box_query(yield_per=50, **base_kwargs)

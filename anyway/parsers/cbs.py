@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import print_function
-
 import glob
 import json
 import logging
@@ -12,19 +9,15 @@ import traceback
 import zipfile
 from collections import OrderedDict, defaultdict
 from datetime import datetime
-from functools import partial
 
 import math
 import pandas as pd
-import six
 from flask_sqlalchemy import SQLAlchemy
-from six import iteritems
 from sqlalchemy import or_, and_
 
 from . import preprocessing_cbs_files
 from .. import field_names, localization
 from .. import importmail_cbs
-from .. import models
 from ..constants import CONST
 from ..models import (AccidentMarker,
                       Involved,
@@ -237,8 +230,6 @@ coordinates_converter = ItmToWGS84()
 app = init_flask()
 db = SQLAlchemy(app)
 
-json_dumps = partial(json.dumps, encoding=models.db_encoding) if six.PY2 else json.dumps
-
 
 def get_street(yishuv_symbol, street_sign, streets):
     """
@@ -246,11 +237,11 @@ def get_street(yishuv_symbol, street_sign, streets):
     """
     if yishuv_symbol not in streets:
         # Changed to return blank string instead of None for correct presentation (Omer)
-        return u""
+        return ""
     street_name = [x[field_names.street_name] for x in streets[yishuv_symbol] if
                    x[field_names.street_sign] == street_sign]
     # there should be only one street name, or none if it wasn't found.
-    return street_name[0] if len(street_name) == 1 else u""
+    return street_name[0] if len(street_name) == 1 else ""
 
 
 def get_address(accident, streets):
@@ -263,7 +254,7 @@ def get_address(accident, streets):
                         accident.get(field_names.street1),
                         streets)
     if not street:
-        return u""
+        return ""
 
     # the house_number field is invalid if it's empty or if it contains 9999
     house_number = int(accident.get(field_names.house_number)) if not pd.isnull(accident.get(field_names.house_number)) \
@@ -274,11 +265,11 @@ def get_address(accident, streets):
     if not house_number and not settlement:
         return street
     if not house_number and settlement:
-        return u"{}, {}".format(street, settlement)
+        return "{}, {}".format(street, settlement)
     if house_number and not settlement:
-        return u"{} {}".format(street, house_number)
+        return "{} {}".format(street, house_number)
 
-    return u"{} {}, {}".format(street, house_number, settlement)
+    return "{} {}, {}".format(street, house_number, settlement)
 
 
 def get_streets(accident, streets):
@@ -340,28 +331,28 @@ def get_junction(accident, roads):
         junction = roads.get(key, None)
         if junction:
             if accident.get(field_names.km) - junc_km > 0:
-                direction = u"צפונית" if accident.get(field_names.road1) % 2 == 0 else u"מזרחית"
+                direction = "צפונית" if accident.get(field_names.road1) % 2 == 0 else "מזרחית"
             else:
-                direction = u"דרומית" if accident.get(field_names.road1) % 2 == 0 else u"מערבית"
+                direction = "דרומית" if accident.get(field_names.road1) % 2 == 0 else "מערבית"
             if abs(float(accident["KM"] - junc_km) / 10) >= 1:
-                string = str(abs(float(accident["KM"]) - junc_km) / 10) + u" ק״מ " + direction + u" ל" + \
+                string = str(abs(float(accident["KM"]) - junc_km) / 10) + " ק״מ " + direction + " ל" + \
                          junction
             elif 0 < abs(float(accident["KM"] - junc_km) / 10) < 1:
                 string = str(int((abs(
-                    float(accident.get(field_names.km)) - junc_km) / 10) * 1000)) + u" מטרים " + direction + u" ל" + \
+                    float(accident.get(field_names.km)) - junc_km) / 10) * 1000)) + " מטרים " + direction + " ל" + \
                          junction
             else:
                 string = junction
             return string
         else:
-            return u""
+            return ""
 
     elif accident.get(field_names.non_urban_intersection) is not None:
         key = accident.get(field_names.road1), accident.get(field_names.road2), accident.get(field_names.km)
         junction = roads.get(key, None)
-        return junction if junction else u""
+        return junction if junction else ""
     else:
-        return u""
+        return ""
 
 
 def parse_date(accident):
@@ -447,7 +438,7 @@ def create_marker(accident, streets, roads, non_urban_intersection):
         "provider_code": int(accident.get(field_names.file_type)),
         "file_type_police": get_data_value(accident.get(field_names.file_type_police)),
         "title": "Accident",
-        "description": json_dumps(load_extra_data(accident, streets, roads)),
+        "description": json.dumps(load_extra_data(accident, streets, roads)),
         "address": get_address(accident, streets),
         "latitude": lat,
         "longitude": lng,
@@ -610,7 +601,7 @@ def import_vehicles(vehicles, **kwargs):
 
 def get_files(directory):
     output_files_dict = {}
-    for name, filename in iteritems(cbs_files):
+    for name, filename in cbs_files.items():
         if name not in (STREETS, NON_URBAN_INTERSECTION, ACCIDENTS, INVOLVED, VEHICLES, DICTIONARY):
             continue
         files = [path for path in os.listdir(directory)
@@ -812,7 +803,7 @@ def get_provider_code(directory_name=None):
 
     ans = ""
     while not ans.isdigit():
-        ans = six.moves.input("Directory provider code is invalid. Please enter a valid code: ")
+        ans = input("Directory provider code is invalid. Please enter a valid code: ")
         if ans.isdigit():
             return int(ans)
 
@@ -866,8 +857,8 @@ def create_provider_code_table():
     provider_code_class = ProviderCode
     table_entries = db.session.query(provider_code_class)
     table_entries.delete()
-    provider_code_dict = {1: u'הלשכה המרכזית לסטטיסטיקה - סוג תיק 1', 2: u'איחוד הצלה',
-                          3: u'הלשכה המרכזית לסטטיסטיקה - סוג תיק 3', 4: u'שומרי הדרך'}
+    provider_code_dict = {1: 'הלשכה המרכזית לסטטיסטיקה - סוג תיק 1', 2: 'איחוד הצלה',
+                          3: 'הלשכה המרכזית לסטטיסטיקה - סוג תיק 3', 4: 'שומרי הדרך'}
     for k, v in provider_code_dict.items():
         sql_insert = 'INSERT INTO ' + provider_code_table + ' VALUES (' + str(k) + ',' + "'" + v + "'" + ')'
         db.session.execute(sql_insert)
@@ -981,7 +972,7 @@ def main(specific_folder,
         fill_db_geo_data()
 
         failed = ["\t'{0}' ({1})".format(directory, fail_reason) for directory, fail_reason in
-                  iteritems(failed_dirs)]
+                  failed_dirs.items()]
         logging.info("Finished processing all directories{0}{1}".format(", except:\n" if failed else "",
                                                                         "\n".join(failed)))
         logging.info("Total: {0} items in {1}".format(total, time_delta(started)))

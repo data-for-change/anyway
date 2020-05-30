@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from geographiclib.geodesic import Geodesic
 
-from anyway.parsers.news_flash_parser import get_markers_for_location_extraction
+from anyway.parsers.news_flash_db_adapter import init_db
 from . import resolution_dict
 
 
@@ -50,7 +50,7 @@ def get_db_matching_location(latitude, longitude, resolution, road_no=None):
         # READ MARKERS FROM DB
         geod = Geodesic.WGS84
         relevant_fields = resolution_dict[resolution]
-        markers = get_markers_for_location_extraction()
+        markers = init_db().get_markers_for_location_extraction()
         markers['geohash'] = markers.apply(lambda x: geohash.encode(x['latitude'], x['longitude'], precision=4), axis=1)
         markers_orig = markers.copy()
         if resolution != 'אחר':
@@ -122,12 +122,12 @@ def set_accident_resolution(accident_row):
             logging.info('bug in accident resolution')
 
 
-def geocode_extract(location, maps_key):
+def geocode_extract(location, google_maps_key):
     """
     this method takes a string representing location and a google maps key and returns a dict of the corresponding
     location found on google maps (by that string), describing details of the location found and the geometry
     :param location: string representing location
-    :param maps_key: google maps API key
+    :param google_maps_key: google maps API key
     :return: a dict containing data about the found location on google maps, with the keys: street,
     road_no [road number], intersection, city, address, district and the geometry of the location.
     """
@@ -140,7 +140,7 @@ def geocode_extract(location, maps_key):
     address = None
     geom = {'lat': None, 'lng': None}
     try:
-        gmaps = googlemaps.Client(key=maps_key)
+        gmaps = googlemaps.Client(key=google_maps_key)
         geocode_result = gmaps.geocode(location, region='il')
         if geocode_result is None or geocode_result == []:
             return None
@@ -164,7 +164,7 @@ def geocode_extract(location, maps_key):
         if road_no is None and extract_road_number(location) is not None:
             road_no = extract_road_number(location)
     except Exception as _:
-        logging.info('geocode extract location {0} maps key {1}'.format(location, maps_key))
+        logging.exception('geocode extract location {}'.format(location))
 
     return {'street': street, 'road_no': road_no, 'intersection': intersection,
             'city': city, 'address': address, 'subdistrict': subdistrict,

@@ -1,5 +1,3 @@
-from six import iteritems
-
 from anyway.flask_app import parse_data
 from anyway.models import AccidentMarker
 
@@ -15,5 +13,5 @@ def test_bad_data():
 def test_parse_marker():
     marker_dummy = dict(type=1, title="test title", description="test description", latitude=1, longitude=1)
     marker = parse_data(AccidentMarker, marker_dummy)
-    for key, value in iteritems(marker_dummy):
+    for key, value in marker_dummy.items():
         assert getattr(marker, key) == value

@@ -92,9 +92,9 @@ class DatastoreImporter(object):
 
         return {
             'year': self._report_year,
-            'name': decode_hebrew(name, 'utf-8'),
+            'name': decode_hebrew(name),
             'name_eng': row[COLUMN_CITY_NAME_ENG].strip(),
-            'search_name': decode_hebrew(search_name, 'utf-8'),
+            'search_name': decode_hebrew(search_name),
             'motorcycle': self.as_int(row[COLUMN_CITY_TOTAL_MOTORCYCLE]),
             'special': self.as_int(row[COLUMN_CITY_TOTAL_SPECIAL]),
             'taxi': self.as_int(row[COLUMN_CITY_TOTAL_TAXI]),

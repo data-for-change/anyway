@@ -18,6 +18,10 @@ def valid_date(date_string):
         raise argparse.ArgumentTypeError(msg)
 
 
+def get_google_maps_key():
+    return os.environ.get('GOOGLE_MAPS_KEY')
+
+
 @click.group()
 def cli():
     pass
@@ -48,17 +52,17 @@ def update_news_flash():
 @click.option('--news_flash_id',default='', type=str)
 def update(source, news_flash_id):
     from anyway.parsers.news_flash_updater import main
-    key = os.environ.get('GOOGLE_MAPS_KEY')
-    if source=='':
-        source=None
-    if news_flash_id=='':
-        news_flash_id=None
+    key = get_google_maps_key()
+    if not source:
+        source = None
+    if not news_flash_id:
+        news_flash_id = None
     return main(key, source, news_flash_id)
 
 @update_news_flash.command()
 def remove_duplicate_news_flash_rows():
-    from anyway.parsers.news_flash_parser import remove_duplicate_rows
-    remove_duplicate_rows()
+    from anyway.parsers import news_flash_db_adapter
+    news_flash_db_adapter.init_db().remove_duplicate_rows()
 
 @cli.group()
 def process():
@@ -93,8 +97,8 @@ def cbs(specific_folder, delete_all, path, batch_size, delete_start_date, load_s
 
 @process.command()
 def news_flash():
-    from anyway.parsers.news_flash.scrap_flash_news import main
-    key = os.environ.get('GOOGLE_MAPS_KEY')
+    from anyway.parsers.news_flash.scrape_flash_news import main
+    key = get_google_maps_key()
     return main(key)
 
 

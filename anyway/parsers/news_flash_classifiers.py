@@ -4,11 +4,11 @@ def tweet_with_accident_veichle_and_person(text):
     :param text: tweet text
     :return: boolean, true if tweet contains words, false for others
     """
-    if ((u'הולך רגל' in text or u'הולכת רגל' in text or u'נהג' in text
-         or u'אדם' in text)
-            and (u'רכב' in text or u'מכונית' in text or u'אופנוע' in text
-                 or u"ג'יפ" in text or u'טרקטור' in text or u'משאית' in text
-                 or u'אופניים' in text or u'קורקינט' in text)):
+    if (('הולך רגל' in text or 'הולכת רגל' in text or 'נהג' in text
+         or 'אדם' in text)
+            and ('רכב' in text or 'מכונית' in text or 'אופנוע' in text
+                 or "ג'יפ" in text or 'טרקטור' in text or 'משאית' in text
+                 or 'אופניים' in text or 'קורקינט' in text)):
         return True
     return False
 
@@ -18,7 +18,7 @@ def tweet_with_car_accident(text):
     :param text: tweet text
     :return: boolean, true if tweet contains words, false for others
     """
-    if u'תאונת דרכים' in text or u'ת.ד' in text:
+    if 'תאונת דרכים' in text or 'ת.ד' in text:
         return True
     return False
 
@@ -29,8 +29,8 @@ def tweet_with_veichles(text):
     :param text: tweet text
     :return: boolean, true if tweet contains veichle, false for others
     """
-    if u'רכב' in text or u'מכונית' in text or u'אופנוע' in text or u"ג'יפ" in text or u'טרקטור' in text or u'משאית' in text or \
-        u'אופניים' in text or u'קורקינט' in text:
+    if 'רכב' in text or 'מכונית' in text or 'אופנוע' in text or "ג'יפ" in text or 'טרקטור' in text or 'משאית' in text or \
+        'אופניים' in text or 'קורקינט' in text:
         return True
     return False
 
@@ -42,7 +42,7 @@ def classify_tweets(text):
     :param text: tweet text
     :return: boolean, true if tweet is about car accident, false for others
     """
-    return text.startswith(u'בשעה') and (tweet_with_accident_veichle_and_person(text) or tweet_with_car_accident(text) or tweet_with_veichles(text))
+    return text.startswith('בשעה') and (tweet_with_accident_veichle_and_person(text) or tweet_with_car_accident(text) or tweet_with_veichles(text))
 
 
 def classify_ynet(text):
@@ -51,15 +51,15 @@ def classify_ynet(text):
     :param text: news flash text
     :return: boolean, true if news flash is about car accident, false for others
     """
-    accident_words = [u'תאונ', ]
-    working_accidents_words = [u'תאונת עבודה', u'תאונות עבודה']
-    involved_words = [u'רכב', u'אוטובוס', u"ג'יפ", u'משאית', u'קטנוע', u'טרקטור',
-                      u'אופנוע', u'אופניים', u'קורקינט', u'הולך רגל', u'הולכת רגל',
-                      u'הולכי רגל']
-    hurt_words = [u'פגע', u'פגיע', u'פגוע', u'הרג', u'הריג', u'הרוג', u'פצע', 'פציע',
-                  u'פצוע', u'התנגש', u'התהפך', u'התהפכ']
-    shooting_words = [u' ירי ', u' ירייה ', u' יריות ']
-    shooting_startswith = [u' ירי', u' ירייה', u' יריות']
+    accident_words = ['תאונ', ]
+    working_accidents_words = ['תאונת עבודה', 'תאונות עבודה']
+    involved_words = ['רכב', 'אוטובוס', "ג'יפ", 'משאית', 'קטנוע', 'טרקטור',
+                      'אופנוע', 'אופניים', 'קורקינט', 'הולך רגל', 'הולכת רגל',
+                      'הולכי רגל']
+    hurt_words = ['פגע', 'פגיע', 'פגוע', 'הרג', 'הריג', 'הרוג', 'פצע', 'פציע',
+                  'פצוע', 'התנגש', 'התהפך', 'התהפכ']
+    shooting_words = [' ירי ', ' ירייה ', ' יריות ']
+    shooting_startswith = [' ירי', ' ירייה', ' יריות']
 
     explicit_accident = any([val in text for val in accident_words])
     not_work_accident = all([val not in text for val in working_accidents_words])

@@ -148,7 +148,7 @@ def upgrade():
                     sa.Column('release_dest', sa.Integer(), nullable=True),
                     sa.Column('safety_measures_use', sa.Integer(), nullable=True),
                     sa.Column('late_deceased', sa.Integer(), nullable=True),
-                    sa.ForeignKeyConstraint(['accident_id', 'provider_code'], [u'markers.id', u'markers.provider_code'],
+                    sa.ForeignKeyConstraint(['accident_id', 'provider_code'], ['markers.id', 'markers.provider_code'],
                                             ondelete='CASCADE'),
                     sa.PrimaryKeyConstraint('id'),
                     schema='public'
@@ -185,7 +185,7 @@ def upgrade():
                     sa.Column('vehicle_type', sa.Integer(), nullable=True),
                     sa.Column('seats', sa.Integer(), nullable=True),
                     sa.Column('total_weight', sa.Integer(), nullable=True),
-                    sa.ForeignKeyConstraint(['accident_id', 'provider_code'], [u'markers.id', u'markers.provider_code'],
+                    sa.ForeignKeyConstraint(['accident_id', 'provider_code'], ['markers.id', 'markers.provider_code'],
                                             ondelete='CASCADE'),
                     sa.PrimaryKeyConstraint('id'),
                     schema='public'

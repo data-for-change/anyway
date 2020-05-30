@@ -4,13 +4,13 @@ import csv
 import datetime
 import json
 import logging
+from io import StringIO
 import os
 import time
 import flask_admin as admin
 import flask_login as login
 import jinja2
 import pandas as pd
-import six
 from flask import make_response, render_template, Response, jsonify, url_for, flash, abort
 from flask import request, redirect, session
 from flask_admin import helpers, expose, BaseView
@@ -22,8 +22,7 @@ from flask_cors import CORS
 from flask_security import Security, SQLAlchemyUserDatastore, roles_required, current_user, LoginForm, login_required
 from flask_sqlalchemy import SQLAlchemy
 from sendgrid import Mail
-from six import StringIO, iteritems
-from six.moves import http_client
+from http import client as http_client
 from sqlalchemy import and_, not_, or_
 from sqlalchemy import func
 from sqlalchemy.orm import load_only
@@ -131,8 +130,8 @@ def generate_csv(results):
             output.writeheader()
 
         row = {k: v.encode('utf8')
-               if type(v) is six.text_type else v
-               for k, v in iteritems(serialized)}
+               if type(v) is str else v
+               for k, v in serialized.items()}
         output.writerow(row)
         yield output_file.getvalue()
         output_file.truncate(0)
@@ -153,8 +152,9 @@ ARG_TYPES = {'ne_lat': (float, 32.072427482938345), 'ne_lng': (float, 34.7992896
 
 
 def get_kwargs():
-    kwargs = {arg: arg_type(request.values.get(arg, default_value)) for (arg, (arg_type, default_value)) in
-              iteritems(ARG_TYPES)}
+    kwargs = {arg: arg_type(request.values.get(arg, default_value)) for
+              (arg, (arg_type, default_value)) in
+              ARG_TYPES.items()}
     if request.values.get('age_groups[]') == '1234' or request.values.get('age_groups') == '1234':
         kwargs['age_groups'] = '1,2,3,4'
     try:
@@ -858,9 +858,9 @@ def discussion():
                             identifier).first()
                 context['title'] = marker.title
             except AttributeError:
-                return index(message=gettext(u'Discussion not found:') + request.values['identifier'])
+                return index(message=gettext('Discussion not found:') + request.values['identifier'])
             except KeyError:
-                return index(message=gettext(u'Illegal Discussion'))
+                return index(message=gettext('Illegal Discussion'))
         return render_template('disqus.html', **context)
     else:
         marker = parse_data(DiscussionMarker, get_json_object(request))
@@ -951,7 +951,7 @@ def index(marker=None, message=None):
             context['coordinates'] = (marker.latitude, marker.longitude)
             context['marker'] = marker.id
         else:
-            message = u"תאונה לא נמצאה: " + request.values['marker']
+            message = "תאונה לא נמצאה: " + request.values['marker']
     elif 'discussion' in request.values:
         discussions = DiscussionMarker.get_by_identifier(
             request.values['discussion'])
@@ -960,7 +960,7 @@ def index(marker=None, message=None):
             context['coordinates'] = (marker.latitude, marker.longitude)
             context['discussion'] = marker.identifier
         else:
-            message = gettext(u"Discussion not found:") + \
+            message = gettext("Discussion not found:") + \
                 request.values['discussion']
     if 'start_date' in request.values:
         context['start_date'] = string2timestamp(request.values['start_date'])
@@ -987,21 +987,21 @@ def index(marker=None, message=None):
     if message:
         context['message'] = message
     pref_accident_severity = []
-    pref_light = PreferenceObject('prefLight', '2', u"קלה")
-    pref_severe = PreferenceObject('prefSevere', '1', u"חמורה")
-    pref_fatal = PreferenceObject('prefFatal', '0', u"קטלנית")
+    pref_light = PreferenceObject('prefLight', '2', "קלה")
+    pref_severe = PreferenceObject('prefSevere', '1', "חמורה")
+    pref_fatal = PreferenceObject('prefFatal', '0', "קטלנית")
     pref_accident_severity.extend([pref_light, pref_severe, pref_fatal])
     context['pref_accident_severity'] = pref_accident_severity
     pref_accident_report_severity = []
-    pref_report_light = PreferenceObject('prefReportLight', '2', u"קלה")
-    pref_report_severe = PreferenceObject('prefReportSevere', '1', u"חמורה")
-    pref_report_fatal = PreferenceObject('prefReportFatal', '0', u"קטלנית")
+    pref_report_light = PreferenceObject('prefReportLight', '2', "קלה")
+    pref_report_severe = PreferenceObject('prefReportSevere', '1', "חמורה")
+    pref_report_fatal = PreferenceObject('prefReportFatal', '0', "קטלנית")
     pref_accident_report_severity.extend(
         [pref_report_light, pref_report_severe, pref_report_fatal])
     context['pref_accident_report_severity'] = pref_accident_report_severity
     pref_historical_report_periods = []
-    month_strings = [u"אחד", u"שניים", u"שלושה", u"ארבעה", u"חמישה", u"שישה", u"שבעה", u"שמונה", u"תשעה",
-                     u"עשרה", u"אחד עשר", u"שניים עשר"]
+    month_strings = ["אחד", "שניים", "שלושה", "ארבעה", "חמישה", "שישה", "שבעה", "שמונה", "תשעה",
+                     "עשרה", "אחד עשר", "שניים עשר"]
     for x in range(0, 12):
         pref_historical_report_periods.append(
             PreferenceObject('prefHistoricalReport' + str(x + 1) + 'Month', str(x + 1), month_strings[x]))
@@ -1018,7 +1018,7 @@ def index(marker=None, message=None):
                                                               (today - datetime.timedelta(days=365)).strftime(
                                                                   '%Y-%m-%d'))
     context['entries_per_page'] = ENTRIES_PER_PAGE
-    context['iteritems'] = iteritems
+    context['iteritems'] = dict.items
     context['hide_search'] = True if request.values.get(
         'hide_search') == 'true' else False
     context['embedded_reports'] = get_embedded_reports()

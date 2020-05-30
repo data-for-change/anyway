@@ -8,7 +8,6 @@ from collections import namedtuple
 from flask_security import UserMixin, RoleMixin
 from flask_sqlalchemy import SQLAlchemy
 from geoalchemy2 import Geometry
-from six import iteritems
 from sqlalchemy import Column, BigInteger, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Index, desc, \
     sql, Table, \
     ForeignKeyConstraint, func, and_, TIMESTAMP
@@ -151,9 +150,9 @@ class MarkerMixin(Point):
     def format_description(field, value):
         # if the field's value is a static localizable field, fetch it.
         if field in localization.get_supported_tables():
-            value = decode_hebrew(localization.get_field(field, value), db_encoding)
-        name = decode_hebrew(localization.get_field(field), db_encoding)
-        return u"{0}: {1}".format(name, value)
+            value = decode_hebrew(localization.get_field(field, value))
+        name = decode_hebrew(localization.get_field(field))
+        return "{0}: {1}".format(name, value)
 
 
 class HighlightPoint(Point, Base):
@@ -273,7 +272,8 @@ class AccidentMarker(MarkerMixin, Base):
     @staticmethod
     def json_to_description(msg):
         description = json.loads(msg, encoding=db_encoding)
-        return "\n".join([AccidentMarker.format_description(field, value) for field, value in iteritems(description)])
+        return "\n".join([AccidentMarker.format_description(field, value) for field, value in
+                          description.items()])
 
     def serialize(self, is_thin=False):
         fields = {
@@ -328,7 +328,7 @@ class AccidentMarker(MarkerMixin, Base):
                 "road2": self.road2,
                 "km": self.km
             }
-            for name, value in iteritems(optional):
+            for name, value in optional.items():
                 if value != 0:
                     fields[name] = value
         return fields

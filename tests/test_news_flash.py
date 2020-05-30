@@ -2,7 +2,7 @@ import datetime
 
 import pytest
 
-from anyway.parsers.news_flash import rss_sites
+from anyway.parsers import rss_sites
 
 
 def fetch_html_walla(link):

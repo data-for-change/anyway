@@ -4,7 +4,7 @@ import logging
 import requests
 from bs4 import BeautifulSoup
 
-from . import parsing_utils
+from . import rss_sites_parsing_utils
 
 
 def parse_walla(rss_soup, html_soup):
@@ -80,6 +80,6 @@ def scrape_extract_store(site_name, google_maps_key, db):
     for raw_item in scrape(site_name):
         if raw_item["date_parsed"] < latest_date:
             break
-        news_item = parsing_utils.extract_geo_features(raw_item, google_maps_key)
+        news_item = rss_sites_parsing_utils.extract_geo_features(raw_item, google_maps_key)
         db.insert_new_flash_news(**news_item)
         logging.info("new flash news added, is accident: " + str(news_item["accident"]))

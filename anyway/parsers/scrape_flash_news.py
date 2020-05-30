@@ -1,7 +1,6 @@
 import os
 import sys
-from . import twitter
-from parsers.news_flash import rss_sites
+from . import twitter, rss_sites
 from anyway.parsers.news_flash_db_adapter import init_db
 
 

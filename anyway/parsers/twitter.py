@@ -5,8 +5,8 @@ import os
 import pandas as pd
 import tweepy
 
-from anyway.parsers.news_flash_classifiers import classify_tweets
-from parsers.location_extraction import geocode_extract, manual_filter_location_of_text, get_db_matching_location, \
+from .news_flash_classifiers import classify_tweets
+from .location_extraction import geocode_extract, manual_filter_location_of_text, get_db_matching_location, \
     set_accident_resolution
 
 
@@ -66,7 +66,7 @@ def extract_features(tweets, screen_name, google_maps_key) -> pd.DataFrame:
     tweets_df['accident_time'] = tweets_df['tweet_text'].apply(extract_accident_time)
     tweets_df['accident_date'] = tweets_df['tweet_ts'].apply(lambda ts: datetime.datetime.date(ts))
 
-    tweets_df['link'] = tweets_df['tweet_id'].apply(lambda t: 'https://twitter.com/{}/status/'.format(screen_name, t))
+    tweets_df['link'] = tweets_df['tweet_id'].apply(lambda t: 'https://twitter.com/{}/status/{}'.format(screen_name, t))
     tweets_df['author'] = [to_hebrew[screen_name]] * len(tweets_df)
     tweets_df['description'] = [None] * len(tweets_df)  # TODO: Maybe swap description and title
     tweets_df['source'] = ['twitter'] * len(tweets_df)

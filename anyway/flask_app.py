@@ -22,7 +22,7 @@ from flask_cors import CORS
 from flask_security import Security, SQLAlchemyUserDatastore, roles_required, current_user, LoginForm, login_required
 from flask_sqlalchemy import SQLAlchemy
 from sendgrid import Mail
-from six.moves import http_client
+from http import client as http_client
 from sqlalchemy import and_, not_, or_
 from sqlalchemy import func
 from sqlalchemy.orm import load_only

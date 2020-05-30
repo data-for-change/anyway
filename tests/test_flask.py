@@ -5,8 +5,7 @@ from collections import Counter
 from functools import partial
 
 import pytest
-import six
-from six.moves import http_client
+from http import client as http_client
 from urlobject import URLObject
 
 from anyway import app as flask_app
@@ -19,17 +18,12 @@ def app():
 
 query_flag = partial(pytest.mark.parametrize, argvalues=["1", ""])
 
-if six.PY2:
-    _text_data = lambda rv: rv.data
-else:
-    _text_data = lambda rv: rv.data.decode("utf-8")
-
 
 @pytest.mark.server
 def test_main(app):
     rv = app.get('/')
     assert rv.status_code == http_client.OK
-    assert '<title>ANYWAY - משפיעים בכל דרך</title>' in _text_data(rv)
+    assert '<title>ANYWAY - משפיעים בכל דרך</title>' in rv.data.decode("utf-8")
 
 
 # It requires parameters to know which markers you want.
@@ -37,8 +31,7 @@ def test_main(app):
 def test_markers_empty(app):
     rv = app.get('/markers')
     assert rv.status_code == http_client.BAD_REQUEST
-    assert '<title>400 Bad Request</title>' in _text_data(rv)
-    # print(rv.data)
+    assert '<title>400 Bad Request</title>' in rv.data.decode("utf-8")
 
 
 @pytest.fixture(scope="module")
@@ -53,15 +46,6 @@ def test_bad_date(app):
     rv = app.get(
         "/markers?ne_lat=32.08656790211843&ne_lng=34.80611543655391&sw_lat=32.08003198103277&sw_lng=34.793884563446&zoom=17&thin_markers=false&start_date=a1104537600&end_date=1484697600&show_fatal=1&show_severe=1&show_light=1&approx=1&accurate=1&show_markers=1&show_discussions=1&show_urban=3&show_intersection=3&show_lane=3&show_day=7&show_holiday=0&show_time=24&start_time=25&end_time=25&weather=0&road=0&separation=0&surface=0&acctype=0&controlmeasure=0&district=0&case_type=0")
     assert rv.status_code == http_client.BAD_REQUEST
-
-
-# def test_markers_2014086707(app):
-#     # clicking on a car image
-#     rv = app.get("/markers/2014086707")
-#     assert rv.status_code == http_client.OK
-#     #print(rv.data)
-#     with open_utf8('tests/markers_2014086707.json') as fh:
-#         assert json.loads(_text_data(rv)) == json.load(fh)
 
 
 @pytest.mark.partial_db
@@ -85,7 +69,7 @@ def test_markers(app, show_fatal, show_severe, show_light, show_accurate, show_a
     assert rv.status_code == http_client.OK
     assert rv.headers['Content-Type'] == 'application/json'
 
-    resp = json.loads(_text_data(rv))
+    resp = json.loads(rv.data.decode("utf-8"))
 
     marker_counter["markers"] += len(resp['markers'])
 
@@ -95,11 +79,3 @@ def test_markers(app, show_fatal, show_severe, show_light, show_accurate, show_a
         assert show_light or marker['accident_severity'] != 3
         assert show_accurate or marker['location_accuracy'] != 1
         assert show_approx or marker['location_accuracy'] == 1
-
-# def test_single_marker(app):
-#     rv = app.get("/markers/2014027147")
-#     assert rv.status_code == http_client.OK
-#     #print(rv.data)
-#     resp = json.loads(_text_data(rv))
-#     #assert 'clusters' in resp
-#     assert resp[0]['accident_id'] == 2014027147

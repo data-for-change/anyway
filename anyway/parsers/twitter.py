@@ -28,16 +28,17 @@ to_hebrew = {
 }
 
 
-def scrape(screen_name, latest_tweet_id, consumer_key, consumer_secret, access_key, access_secret):
+def scrape(screen_name, latest_tweet_id):
     """
     get all user's recent tweets
-    :param consumer_key: consumer_key for Twitter API
-    :param consumer_secret: consumer_secret for Twitter API
-    :param access_key: access_key for Twitter API
-    :param access_secret: access_secret for Twitter API
     """
-    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-    auth.set_access_token(access_key, access_secret)
+    TWITTER_CONSUMER_KEY = os.environ.get('TWITTER_CONSUMER_KEY')
+    TWITTER_CONSUMER_SECRET = os.environ.get('TWITTER_CONSUMER_SECRET')
+    TWITTER_ACCESS_KEY = os.environ.get('TWITTER_ACCESS_KEY')
+    TWITTER_ACCESS_SECRET = os.environ.get('TWITTER_ACCESS_SECRET')
+
+    auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
+    auth.set_access_token(TWITTER_ACCESS_KEY, TWITTER_ACCESS_SECRET)
     api = tweepy.API(auth)
 
     # fetch the last 100 tweets if there are no tweets in the DB
@@ -97,15 +98,10 @@ def extract_features(tweets, screen_name, google_maps_key) -> pd.DataFrame:
 
 
 def scrape_extract_store(screen_name, google_maps_key, db):
-    TWITTER_CONSUMER_KEY = os.environ.get('TWITTER_CONSUMER_KEY')
-    TWITTER_CONSUMER_SECRET = os.environ.get('TWITTER_CONSUMER_SECRET')
-    TWITTER_ACCESS_KEY = os.environ.get('TWITTER_ACCESS_KEY')
-    TWITTER_ACCESS_SECRET = os.environ.get('TWITTER_ACCESS_SECRET')
 
     latest_tweet_id = db.get_latest_tweet_id() or 'no_tweets'
 
-    raw_tweets = scrape(screen_name, latest_tweet_id,
-                        TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, TWITTER_ACCESS_KEY, TWITTER_ACCESS_SECRET)
+    raw_tweets = scrape(screen_name, latest_tweet_id)
 
     tweets_df = extract_features(raw_tweets, screen_name, google_maps_key)
     if tweets_df.empty:

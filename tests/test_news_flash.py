@@ -1,8 +1,10 @@
 import datetime
+import json
 
 import pytest
 
-from anyway.parsers import rss_sites
+
+from anyway.parsers import rss_sites, twitter
 
 
 def fetch_html_walla(link):
@@ -25,7 +27,7 @@ def fetch_rss_ynet(link):
         return f.read()
 
 
-def test_parse_walla():
+def test_scrape_walla():
     items_expected = [
         {
             "date_parsed": datetime.datetime(2020, 5, 23, 16, 55),
@@ -51,7 +53,7 @@ def test_parse_walla():
     assert items_actual == items_expected
 
 
-def test_parse_ynet():
+def test_scrape_ynet():
     items_expected = [
         {
             "date_parsed": datetime.datetime(2020, 5, 22, 18, 27, 32),
@@ -78,6 +80,7 @@ def test_parse_ynet():
 
 
 @pytest.mark.slow
-def test_parse_sanity_online():
-    next(rss_sites.scrape("ynet"))
-    next(rss_sites.scrape("walla"))
+def test_scrape_sanity_online():
+    next(rss_sites.scrape('ynet'))
+    next(rss_sites.scrape('walla'))
+    assert twitter.scrape('mda_israel', 'no_tweets', count=1)

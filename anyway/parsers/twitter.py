@@ -28,35 +28,30 @@ to_hebrew = {
 }
 
 
-def scrape(screen_name, latest_tweet_id):
+def scrape(screen_name, latest_tweet_id, count=100):
     """
     get all user's recent tweets
     """
-    TWITTER_CONSUMER_KEY = os.environ.get('TWITTER_CONSUMER_KEY')
-    TWITTER_CONSUMER_SECRET = os.environ.get('TWITTER_CONSUMER_SECRET')
-    TWITTER_ACCESS_KEY = os.environ.get('TWITTER_ACCESS_KEY')
-    TWITTER_ACCESS_SECRET = os.environ.get('TWITTER_ACCESS_SECRET')
-
-    auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
-    auth.set_access_token(TWITTER_ACCESS_KEY, TWITTER_ACCESS_SECRET)
-    api = tweepy.API(auth)
+    auth = tweepy.OAuthHandler(os.environ['TWITTER_CONSUMER_KEY'], os.environ['TWITTER_CONSUMER_SECRET'])
+    auth.set_access_token(os.environ['TWITTER_ACCESS_KEY'], os.environ['TWITTER_ACCESS_SECRET'])
+    api = tweepy.API(auth, parser=tweepy.parsers.JSONParser())
 
     # fetch the last 100 tweets if there are no tweets in the DB
     if latest_tweet_id == 'no_tweets':
         all_tweets = api.user_timeline(
-            screen_name=screen_name, count=100, tweet_mode='extended')
+            screen_name=screen_name, count=count, tweet_mode='extended')
     else:
         all_tweets = api.user_timeline(
-            screen_name=screen_name, count=100, tweet_mode='extended', since_id=latest_tweet_id)
-                                # ?? ^^^^^^^^^
+            screen_name=screen_name, count=count, tweet_mode='extended', since_id=latest_tweet_id)
+                                  # ?? ^^^^^^^^^
+    return all_tweets
 
-    yield from ([tweet.id_str, tweet.created_at, tweet.full_text] for tweet in all_tweets)
 
-
-def extract_features(tweets, screen_name, google_maps_key) -> pd.DataFrame:
+def extract_features(all_tweets, screen_name, google_maps_key) -> pd.DataFrame:
     """
     :return: DataFrame contains all of user's tweets
     """
+    tweets = ([tweet["id_str"], tweet["created_at"], tweet["full_text"]] for tweet in all_tweets)
     tweets_df = pd.DataFrame(tweets, columns=['tweet_id', 'tweet_ts', 'tweet_text'])
     tweets_df['accident'] = tweets_df['tweet_text'].apply(classify_tweets)
 

@@ -24,7 +24,7 @@ Instructions
 
 **1.** [Get the code](https://github.com/hasadna/anyway#getting-the-code)
 
-**2.** [Install Docker](https://docs.docker.com/install/)
+**2.** [Install Docker](https://docs.docker.com/install/) and [Install Docker Compose](https://docs.docker.com/compose/install/)
 
 **3.** Copy the GDRIVE_FILE_ID from [this file](https://drive.google.com/file/d/1IRnSsRwwHFtmGTNlSOfChg-H6R8JKMpl/view?usp=sharing) (You need to request access)
 **Continue with your OS, See below**

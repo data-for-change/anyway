@@ -27,6 +27,11 @@ RUN virtualenv /venv3 -p python3
 ENV VIRTUAL_ENV=/venv3
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
+ENV RESTORE_DB='FALSE'
+ENV DB_DUMP_PATH=/tmp/anyway_public.pgdump
+ENV GDRIVE_URL='https://drive.google.com/uc?id='
+ENV GDRIVE_FILE_ID=''
+
 RUN . /venv3/bin/activate && \
                     pip install -U setuptools wheel && \
                     pip install --upgrade pip && \

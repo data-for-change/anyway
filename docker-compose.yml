@@ -9,6 +9,8 @@ services:
       - "8080:5000"
     environment:
       - DATABASE_URL=postgresql://anyway:anyway@db/anyway
+      - RESTORE_DB=FALSE
+      - GDRIVE_FILE_ID=XYZ
     volumes:
       - .:/anyway
     restart: always
@@ -16,13 +18,12 @@ services:
       - db
 
   db:
-    build: db_docker
+    image: postgis/postgis:9.6-2.5-alpine
     container_name: db
     environment:
       - POSTGRES_PASSWORD=anyway
       - POSTGRES_USER=anyway
       - POSTGRES_DB=anyway
-      - DB_DUMP_PATH=/tmp/anyway_public.pgdump
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:

@@ -47,3 +47,4 @@ webassets==2.0
 xlrd==1.2.0
 yuicompressor==2.4.8
 lxml==4.5.1
+gdown==3.11.0

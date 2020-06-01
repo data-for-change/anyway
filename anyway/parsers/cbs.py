@@ -19,79 +19,81 @@ from . import preprocessing_cbs_files
 from .. import field_names, localization
 from .. import importmail_cbs
 from ..constants import CONST
-from ..models import (AccidentMarker,
-                      Involved,
-                      Vehicle,
-                      ColumnsDescription,
-                      PoliceUnit,
-                      RoadType,
-                      AccidentSeverity,
-                      AccidentType,
-                      RoadShape,
-                      OneLane,
-                      MultiLane,
-                      SpeedLimit,
-                      RoadIntactness,
-                      RoadWidth,
-                      RoadSign,
-                      RoadLight,
-                      RoadControl,
-                      Weather,
-                      RoadSurface,
-                      RoadObjecte,
-                      ObjectDistance,
-                      DidntCross,
-                      CrossMode,
-                      CrossLocation,
-                      CrossDirection,
-                      DrivingDirections,
-                      VehicleStatus,
-                      InvolvedType,
-                      SafetyMeasures,
-                      InjurySeverity,
-                      DayType,
-                      DayNight,
-                      DayInWeek,
-                      TrafficLight,
-                      VehicleAttribution,
-                      VehicleType,
-                      InjuredType,
-                      InjuredPosition,
-                      AccidentMonth,
-                      PopulationType,
-                      Sex,
-                      GeoArea,
-                      Region,
-                      MunicipalStatus,
-                      District,
-                      NaturalArea,
-                      YishuvShape,
-                      AgeGroup,
-                      AccidentHourRaw,
-                      EngineVolume,
-                      TotalWeight,
-                      HospitalTime,
-                      MedicalType,
-                      ReleaseDest,
-                      SafetyMeasuresUse,
-                      LateDeceased,
-                      LocationAccuracy,
-                      ProviderCode,
-                      VehicleDamage)
+from ..models import (
+    AccidentMarker,
+    Involved,
+    Vehicle,
+    ColumnsDescription,
+    PoliceUnit,
+    RoadType,
+    AccidentSeverity,
+    AccidentType,
+    RoadShape,
+    OneLane,
+    MultiLane,
+    SpeedLimit,
+    RoadIntactness,
+    RoadWidth,
+    RoadSign,
+    RoadLight,
+    RoadControl,
+    Weather,
+    RoadSurface,
+    RoadObjecte,
+    ObjectDistance,
+    DidntCross,
+    CrossMode,
+    CrossLocation,
+    CrossDirection,
+    DrivingDirections,
+    VehicleStatus,
+    InvolvedType,
+    SafetyMeasures,
+    InjurySeverity,
+    DayType,
+    DayNight,
+    DayInWeek,
+    TrafficLight,
+    VehicleAttribution,
+    VehicleType,
+    InjuredType,
+    InjuredPosition,
+    AccidentMonth,
+    PopulationType,
+    Sex,
+    GeoArea,
+    Region,
+    MunicipalStatus,
+    District,
+    NaturalArea,
+    YishuvShape,
+    AgeGroup,
+    AccidentHourRaw,
+    EngineVolume,
+    TotalWeight,
+    HospitalTime,
+    MedicalType,
+    ReleaseDest,
+    SafetyMeasuresUse,
+    LateDeceased,
+    LocationAccuracy,
+    ProviderCode,
+    VehicleDamage,
+)
 from ..utilities import ItmToWGS84, init_flask, time_delta, ImporterUI, truncate_tables, chunks
 from ..views import VIEWS
 
 failed_dirs = OrderedDict()
 
-CONTENT_ENCODING = 'cp1255'
+CONTENT_ENCODING = "cp1255"
 ACCIDENT_TYPE_REGEX = re.compile(r"accidents_type_(?P<type>\d)")
 
-ACCIDENTS = 'accidents'
-CITIES = 'cities'
-STREETS = 'streets'
+ACCIDENTS = "accidents"
+CITIES = "cities"
+STREETS = "streets"
 ROADS = "roads"
-URBAN_INTERSECTION = 'urban_intersection'
-NON_URBAN_INTERSECTION = 'non_urban_intersection'
+URBAN_INTERSECTION = "urban_intersection"
+NON_URBAN_INTERSECTION = "non_urban_intersection"
 DICTIONARY = "dictionary"
 INVOLVED = "involved"
 VEHICLES = "vehicles"
@@ -103,128 +105,130 @@ cbs_files = {
     STREETS: "DicStreets.csv",
     DICTIONARY: "Dictionary.csv",
     INVOLVED: "InvData.csv",
-    VEHICLES: "VehData.csv"
+    VEHICLES: "VehData.csv",
 }
 
 DICTCOLUMN1 = "MS_TAVLA"
 DICTCOLUMN2 = "KOD"
 DICTCOLUMN3 = "TEUR"
 
-CLASSES_DICT = {0: ColumnsDescription,
-                1: PoliceUnit,
-                2: RoadType,
-                4: AccidentSeverity,
-                5: AccidentType,
-                9: RoadShape,
-                10: OneLane,
-                11: MultiLane,
-                12: SpeedLimit,
-                13: RoadIntactness,
-                14: RoadWidth,
-                15: RoadSign,
-                16: RoadLight,
-                17: RoadControl,
-                18: Weather,
-                19: RoadSurface,
-                21: RoadObjecte,
-                22: ObjectDistance,
-                23: DidntCross,
-                24: CrossMode,
-                25: CrossLocation,
-                26: CrossDirection,
-                28: DrivingDirections,
-                30: VehicleStatus,
-                31: InvolvedType,
-                34: SafetyMeasures,
-                35: InjurySeverity,
-                37: DayType,
-                38: DayNight,
-                39: DayInWeek,
-                40: TrafficLight,
-                43: VehicleAttribution,
-                45: VehicleType,
-                50: InjuredType,
-                52: InjuredPosition,
-                60: AccidentMonth,
-                66: PopulationType,
-                67: Sex,
-                68: GeoArea,
-                77: Region,
-                78: MunicipalStatus,
-                79: District,
-                80: NaturalArea,
-                81: YishuvShape,
-                92: AgeGroup,
-                93: AccidentHourRaw,
-                111: EngineVolume,
-                112: TotalWeight,
-                200: HospitalTime,
-                201: MedicalType,
-                202: ReleaseDest,
-                203: SafetyMeasuresUse,
-                204: LateDeceased,
-                205: LocationAccuracy,
-                229: VehicleDamage,
-                245: VehicleType,
-                }
+CLASSES_DICT = {
+    0: ColumnsDescription,
+    1: PoliceUnit,
+    2: RoadType,
+    4: AccidentSeverity,
+    5: AccidentType,
+    9: RoadShape,
+    10: OneLane,
+    11: MultiLane,
+    12: SpeedLimit,
+    13: RoadIntactness,
+    14: RoadWidth,
+    15: RoadSign,
+    16: RoadLight,
+    17: RoadControl,
+    18: Weather,
+    19: RoadSurface,
+    21: RoadObjecte,
+    22: ObjectDistance,
+    23: DidntCross,
+    24: CrossMode,
+    25: CrossLocation,
+    26: CrossDirection,
+    28: DrivingDirections,
+    30: VehicleStatus,
+    31: InvolvedType,
+    34: SafetyMeasures,
+    35: InjurySeverity,
+    37: DayType,
+    38: DayNight,
+    39: DayInWeek,
+    40: TrafficLight,
+    43: VehicleAttribution,
+    45: VehicleType,
+    50: InjuredType,
+    52: InjuredPosition,
+    60: AccidentMonth,
+    66: PopulationType,
+    67: Sex,
+    68: GeoArea,
+    77: Region,
+    78: MunicipalStatus,
+    79: District,
+    80: NaturalArea,
+    81: YishuvShape,
+    92: AgeGroup,
+    93: AccidentHourRaw,
+    111: EngineVolume,
+    112: TotalWeight,
+    200: HospitalTime,
+    201: MedicalType,
+    202: ReleaseDest,
+    203: SafetyMeasuresUse,
+    204: LateDeceased,
+    205: LocationAccuracy,
+    229: VehicleDamage,
+    245: VehicleType,
+}
 
-TABLES_DICT = {0: 'columns_description',
-               1: 'police_unit',
-               2: 'road_type',
-               4: 'accident_severity',
-               5: 'accident_type',
-               9: 'road_shape',
-               10: 'one_lane',
-               11: 'multi_lane',
-               12: 'speed_limit',
-               13: 'road_intactness',
-               14: 'road_width',
-               15: 'road_sign',
-               16: 'road_light',
-               17: 'road_control',
-               18: 'weather',
-               19: 'road_surface',
-               21: 'road_object',
-               22: 'object_distance',
-               23: 'didnt_cross',
-               24: 'cross_mode',
-               25: 'cross_location',
-               26: 'cross_direction',
-               28: 'driving_directions',
-               30: 'vehicle_status',
-               31: 'involved_type',
-               34: 'safety_measures',
-               35: 'injury_severity',
-               37: 'day_type',
-               38: 'day_night',
-               39: 'day_in_week',
-               40: 'traffic_light',
-               43: 'vehicle_attribution',
-               45: 'vehicle_type',
-               50: 'injured_type',
-               52: 'injured_position',
-               60: 'accident_month',
-               66: 'population_type',
-               67: 'sex',
-               68: 'geo_area',
-               77: 'region',
-               78: 'municipal_status',
-               79: 'district',
-               80: 'natural_area',
-               81: 'yishuv_shape',
-               92: 'age_group',
-               93: 'accident_hour_raw',
-               111: 'engine_volume',
-               112: 'total_weight',
-               200: 'hospital_time',
-               201: 'medical_type',
-               202: 'release_dest',
-               203: 'safety_measures_use',
-               204: 'late_deceased',
-               205: 'location_accuracy',
-               229: 'vehicle_damage',
-               245: 'vehicle_type',
-               }
+TABLES_DICT = {
+    0: "columns_description",
+    1: "police_unit",
+    2: "road_type",
+    4: "accident_severity",
+    5: "accident_type",
+    9: "road_shape",
+    10: "one_lane",
+    11: "multi_lane",
+    12: "speed_limit",
+    13: "road_intactness",
+    14: "road_width",
+    15: "road_sign",
+    16: "road_light",
+    17: "road_control",
+    18: "weather",
+    19: "road_surface",
+    21: "road_object",
+    22: "object_distance",
+    23: "didnt_cross",
+    24: "cross_mode",
+    25: "cross_location",
+    26: "cross_direction",
+    28: "driving_directions",
+    30: "vehicle_status",
+    31: "involved_type",
+    34: "safety_measures",
+    35: "injury_severity",
+    37: "day_type",
+    38: "day_night",
+    39: "day_in_week",
+    40: "traffic_light",
+    43: "vehicle_attribution",
+    45: "vehicle_type",
+    50: "injured_type",
+    52: "injured_position",
+    60: "accident_month",
+    66: "population_type",
+    67: "sex",
+    68: "geo_area",
+    77: "region",
+    78: "municipal_status",
+    79: "district",
+    80: "natural_area",
+    81: "yishuv_shape",
+    92: "age_group",
+    93: "accident_hour_raw",
+    111: "engine_volume",
+    112: "total_weight",
+    200: "hospital_time",
+    201: "medical_type",
+    202: "release_dest",
+    203: "safety_measures_use",
+    204: "late_deceased",
+    205: "location_accuracy",
+    229: "vehicle_damage",
+    245: "vehicle_type",
+}
 
 coordinates_converter = ItmToWGS84()
 app = init_flask()
@@ -238,8 +242,11 @@ def get_street(yishuv_symbol, street_sign, streets):
     if yishuv_symbol not in streets:
         # Changed to return blank string instead of None for correct presentation (Omer)
         return ""
-    street_name = [x[field_names.street_name] for x in streets[yishuv_symbol] if
-                   x[field_names.street_sign] == street_sign]
+    street_name = [
+        x[field_names.street_name]
+        for x in streets[yishuv_symbol]
+        if x[field_names.street_sign] == street_sign
+    ]
     # there should be only one street name, or none if it wasn't found.
     return street_name[0] if len(street_name) == 1 else ""
 
@@ -250,16 +257,19 @@ def get_address(accident, streets):
     tries to build the full address: <street_name> <street_number>, <settlement>,
     but might return a partial one if unsuccessful.
     """
-    street = get_street(accident.get(field_names.yishuv_symbol),
-                        accident.get(field_names.street1),
-                        streets)
+    street = get_street(
+        accident.get(field_names.yishuv_symbol), accident.get(field_names.street1), streets
+    )
     if not street:
         return ""
 
     # the house_number field is invalid if it's empty or if it contains 9999
-    house_number = int(accident.get(field_names.house_number)) if not pd.isnull(accident.get(field_names.house_number)) \
-                                                                  and int(
-        accident.get(field_names.house_number)) != 9999 else None
+    house_number = (
+        int(accident.get(field_names.house_number))
+        if not pd.isnull(accident.get(field_names.house_number))
+        and int(accident.get(field_names.house_number)) != 9999
+        else None
+    )
     settlement = localization.get_city_name(accident.get(field_names.yishuv_symbol))
 
     if not house_number and not settlement:
@@ -279,7 +289,9 @@ def get_streets(accident, streets):
     :return: a tuple containing both streets.
     """
     main_street = get_address(accident, streets)
-    secondary_street = get_street(accident.get(field_names.yishuv_symbol), accident.get(field_names.street2), streets)
+    secondary_street = get_street(
+        accident.get(field_names.yishuv_symbol), accident.get(field_names.street2), streets
+    )
     return main_street, secondary_street
 
 
@@ -319,12 +331,18 @@ def get_junction(accident, roads):
     every non-urban accident shows nearest junction with distance and direction
     :return: returns the junction or None if it wasn't found
     """
-    if accident.get(field_names.km) is not None and accident.get(field_names.non_urban_intersection) is None:
+    if (
+        accident.get(field_names.km) is not None
+        and accident.get(field_names.non_urban_intersection) is None
+    ):
         min_dist = 100000
         key = (), ()
         junc_km = 0
         for option in roads:
-            if accident.get(field_names.road1) == option[0] and abs(accident["KM"] - option[2]) < min_dist:
+            if (
+                accident.get(field_names.road1) == option[0]
+                and abs(accident["KM"] - option[2]) < min_dist
+            ):
                 min_dist = abs(accident.get(field_names.km) - option[2])
                 key = accident.get(field_names.road1), option[1], option[2]
                 junc_km = option[2]
@@ -335,12 +353,21 @@ def get_junction(accident, roads):
             else:
                 direction = "דרומית" if accident.get(field_names.road1) % 2 == 0 else "מערבית"
             if abs(float(accident["KM"] - junc_km) / 10) >= 1:
-                string = str(abs(float(accident["KM"]) - junc_km) / 10) + " ק״מ " + direction + " ל" + \
-                         junction
+                string = (
+                    str(abs(float(accident["KM"]) - junc_km) / 10)
+                    + " ק״מ "
+                    + direction
+                    + " ל"
+                    + junction
+                )
             elif 0 < abs(float(accident["KM"] - junc_km) / 10) < 1:
-                string = str(int((abs(
-                    float(accident.get(field_names.km)) - junc_km) / 10) * 1000)) + " מטרים " + direction + " ל" + \
-                         junction
+                string = (
+                    str(int((abs(float(accident.get(field_names.km)) - junc_km) / 10) * 1000))
+                    + " מטרים "
+                    + direction
+                    + " ל"
+                    + junction
+                )
             else:
                 string = junction
             return string
@@ -348,7 +375,11 @@ def get_junction(accident, roads):
             return ""
 
     elif accident.get(field_names.non_urban_intersection) is not None:
-        key = accident.get(field_names.road1), accident.get(field_names.road2), accident.get(field_names.km)
+        key = (
+            accident.get(field_names.road1),
+            accident.get(field_names.road2),
+            accident.get(field_names.km),
+        )
         junction = roads.get(key, None)
         return junction if junction else ""
     else:
@@ -363,11 +394,11 @@ def parse_date(accident):
     month = int(accident.get(field_names.accident_month))
     day = int(accident.get(field_names.accident_day))
 
-    '''
+    """
     hours calculation explanation - The value of the hours is between 1 to 96.
     These values represent 15 minutes each that start at 00:00:
     1 equals 00:00, 2 equals 00:15, 3 equals 00:30 and so on.
-    '''
+    """
     minutes = accident.get(field_names.accident_hour) * 15 - 15
     hours = int(minutes // 60)
     minutes %= 60
@@ -418,10 +449,15 @@ def get_data_value(value):
 def create_marker(accident, streets, roads, non_urban_intersection):
     if field_names.x not in accident or field_names.y not in accident:
         raise ValueError("Missing x and y coordinates")
-    if accident.get(field_names.x) and not math.isnan(accident.get(field_names.x)) \
-            and accident.get(field_names.y) and not math.isnan(accident.get(field_names.y)):
-        lng, lat = coordinates_converter.convert(accident.get(field_names.x),
-                                                 accident.get(field_names.y))
+    if (
+        accident.get(field_names.x)
+        and not math.isnan(accident.get(field_names.x))
+        and accident.get(field_names.y)
+        and not math.isnan(accident.get(field_names.y))
+    ):
+        lng, lat = coordinates_converter.convert(
+            accident.get(field_names.x), accident.get(field_names.y)
+        )
     else:
         lng, lat = None, None  # Must insert everything to avoid foreign key failure
     main_street, secondary_street = get_streets(accident, streets)
@@ -429,12 +465,14 @@ def create_marker(accident, streets, roads, non_urban_intersection):
     km = None if km is None or math.isnan(km) else str(km)
     km_accurate = None
     if km is not None:
-        km_accurate = False if '-' in km else True
-        km = float(km.strip('-'))
+        km_accurate = False if "-" in km else True
+        km = float(km.strip("-"))
     accident_datetime = parse_date(accident)
     marker = {
         "id": int(accident.get(field_names.id)),
-        "provider_and_id": int(str(int(accident.get(field_names.file_type))) + str(int(accident.get(field_names.id)))),
+        "provider_and_id": int(
+            str(int(accident.get(field_names.file_type))) + str(int(accident.get(field_names.id)))
+        ),
         "provider_code": int(accident.get(field_names.file_type)),
         "file_type_police": get_data_value(accident.get(field_names.file_type_police)),
         "title": "Accident",
@@ -486,17 +524,20 @@ def create_marker(accident, streets, roads, non_urban_intersection):
         "municipal_status": get_data_value(accident.get(field_names.municipal_status)),
         "yishuv_shape": get_data_value(accident.get(field_names.yishuv_shape)),
         "street1": get_data_value(accident.get(field_names.street1)),
-        "street1_hebrew": get_street(accident.get(field_names.yishuv_symbol), accident.get(field_names.street1),
-                                     streets),
+        "street1_hebrew": get_street(
+            accident.get(field_names.yishuv_symbol), accident.get(field_names.street1), streets
+        ),
         "street2": get_data_value(accident.get(field_names.street2)),
-        "street2_hebrew": get_street(accident.get(field_names.yishuv_symbol), accident.get(field_names.street2),
-                                     streets),
+        "street2_hebrew": get_street(
+            accident.get(field_names.yishuv_symbol), accident.get(field_names.street2), streets
+        ),
         "house_number": get_data_value(accident.get(field_names.house_number)),
         "urban_intersection": get_data_value(accident.get(field_names.urban_intersection)),
         "non_urban_intersection": get_data_value(accident.get(field_names.non_urban_intersection)),
         "non_urban_intersection_hebrew": get_non_urban_intersection(accident, roads),
-        "non_urban_intersection_by_junction_number": get_non_urban_intersection_by_junction_number(accident,
-                                                                                                   non_urban_intersection),
+        "non_urban_intersection_by_junction_number": get_non_urban_intersection_by_junction_number(
+            accident, non_urban_intersection
+        ),
         "accident_year": get_data_value(accident.get(field_names.accident_year)),
         "accident_month": get_data_value(accident.get(field_names.accident_month)),
         "accident_day": get_data_value(accident.get(field_names.accident_day)),
@@ -507,94 +548,110 @@ def create_marker(accident, streets, roads, non_urban_intersection):
         "y": accident.get(field_names.y),
         "vehicle_type_rsa": None,
         "violation_type_rsa": None,
-        "geom": None
+        "geom": None,
     }
     return marker
 
 
 def import_accidents(accidents, streets, roads, non_urban_intersection, **kwargs):
-    logging.info('Importing markers')
+    logging.info("Importing markers")
     accidents_result = []
     for _, accident in accidents.iterrows():
         marker = create_marker(accident, streets, roads, non_urban_intersection)
         accidents_result.append(marker)
     db.session.bulk_insert_mappings(AccidentMarker, accidents_result)
     db.session.commit()
-    logging.info('Finished Importing markers')
-    logging.info('Inserted ' + str(len(accidents_result)) + ' new accident markers')
+    logging.info("Finished Importing markers")
+    logging.info("Inserted " + str(len(accidents_result)) + " new accident markers")
     fill_db_geo_data()
     return len(accidents_result)
 
 
 def import_involved(involved, **kwargs):
-    logging.info('Importing involved')
+    logging.info("Importing involved")
     involved_result = []
     for _, involve in involved.iterrows():
-        if not involve.get(field_names.id) or pd.isnull(involve.get(field_names.id)):  # skip lines with no accident id
+        if not involve.get(field_names.id) or pd.isnull(
+            involve.get(field_names.id)
+        ):  # skip lines with no accident id
             continue
-        involved_result.append({
-            "accident_id": int(involve.get(field_names.id)),
-            "provider_and_id": int(
-                str(int(involve.get(field_names.file_type))) + str(int(involve.get(field_names.id)))),
-            "provider_code": int(involve.get(field_names.file_type)),
-            "file_type_police": get_data_value(involve.get(field_names.file_type_police)),
-            "involved_type": int(involve.get(field_names.involved_type)),
-            "license_acquiring_date": int(involve.get(field_names.license_acquiring_date)),
-            "age_group": int(involve.get(field_names.age_group)),
-            "sex": get_data_value(involve.get(field_names.sex)),
-            "vehicle_type": get_data_value(involve.get(field_names.vehicle_type_involved)),
-            "safety_measures": get_data_value(involve.get(field_names.safety_measures)),
-            "involve_yishuv_symbol": get_data_value(involve.get(field_names.involve_yishuv_symbol)),
-            "involve_yishuv_name": localization.get_city_name(involve.get(field_names.involve_yishuv_symbol)),
-            "injury_severity": get_data_value(involve.get(field_names.injury_severity)),
-            "injured_type": get_data_value(involve.get(field_names.injured_type)),
-            "injured_position": get_data_value(involve.get(field_names.injured_position)),
-            "population_type": get_data_value(involve.get(field_names.population_type)),
-            "home_region": get_data_value(involve.get(field_names.home_region)),
-            "home_district": get_data_value(involve.get(field_names.home_district)),
-            "home_natural_area": get_data_value(involve.get(field_names.home_natural_area)),
-            "home_municipal_status": get_data_value(involve.get(field_names.home_municipal_status)),
-            "home_yishuv_shape": get_data_value(involve.get(field_names.home_yishuv_shape)),
-            "hospital_time": get_data_value(involve.get(field_names.hospital_time)),
-            "medical_type": get_data_value(involve.get(field_names.medical_type)),
-            "release_dest": get_data_value(involve.get(field_names.release_dest)),
-            "safety_measures_use": get_data_value(involve.get(field_names.safety_measures_use)),
-            "late_deceased": get_data_value(involve.get(field_names.late_deceased)),
-            "car_id": get_data_value(involve.get(field_names.car_id)),
-            "involve_id": get_data_value(involve.get(field_names.involve_id)),
-            "accident_year": get_data_value(involve.get(field_names.accident_year)),
-            "accident_month": get_data_value(involve.get(field_names.accident_month)),
-        })
+        involved_result.append(
+            {
+                "accident_id": int(involve.get(field_names.id)),
+                "provider_and_id": int(
+                    str(int(involve.get(field_names.file_type)))
+                    + str(int(involve.get(field_names.id)))
+                ),
+                "provider_code": int(involve.get(field_names.file_type)),
+                "file_type_police": get_data_value(involve.get(field_names.file_type_police)),
+                "involved_type": int(involve.get(field_names.involved_type)),
+                "license_acquiring_date": int(involve.get(field_names.license_acquiring_date)),
+                "age_group": int(involve.get(field_names.age_group)),
+                "sex": get_data_value(involve.get(field_names.sex)),
+                "vehicle_type": get_data_value(involve.get(field_names.vehicle_type_involved)),
+                "safety_measures": get_data_value(involve.get(field_names.safety_measures)),
+                "involve_yishuv_symbol": get_data_value(
+                    involve.get(field_names.involve_yishuv_symbol)
+                ),
+                "involve_yishuv_name": localization.get_city_name(
+                    involve.get(field_names.involve_yishuv_symbol)
+                ),
+                "injury_severity": get_data_value(involve.get(field_names.injury_severity)),
+                "injured_type": get_data_value(involve.get(field_names.injured_type)),
+                "injured_position": get_data_value(involve.get(field_names.injured_position)),
+                "population_type": get_data_value(involve.get(field_names.population_type)),
+                "home_region": get_data_value(involve.get(field_names.home_region)),
+                "home_district": get_data_value(involve.get(field_names.home_district)),
+                "home_natural_area": get_data_value(involve.get(field_names.home_natural_area)),
+                "home_municipal_status": get_data_value(
+                    involve.get(field_names.home_municipal_status)
+                ),
+                "home_yishuv_shape": get_data_value(involve.get(field_names.home_yishuv_shape)),
+                "hospital_time": get_data_value(involve.get(field_names.hospital_time)),
+                "medical_type": get_data_value(involve.get(field_names.medical_type)),
+                "release_dest": get_data_value(involve.get(field_names.release_dest)),
+                "safety_measures_use": get_data_value(involve.get(field_names.safety_measures_use)),
+                "late_deceased": get_data_value(involve.get(field_names.late_deceased)),
+                "car_id": get_data_value(involve.get(field_names.car_id)),
+                "involve_id": get_data_value(involve.get(field_names.involve_id)),
+                "accident_year": get_data_value(involve.get(field_names.accident_year)),
+                "accident_month": get_data_value(involve.get(field_names.accident_month)),
+            }
+        )
     db.session.bulk_insert_mappings(Involved, involved_result)
     db.session.commit()
-    logging.info('Finished Importing involved')
+    logging.info("Finished Importing involved")
     return len(involved_result)
 
 
 def import_vehicles(vehicles, **kwargs):
-    logging.info('Importing vehicles')
+    logging.info("Importing vehicles")
     vehicles_result = []
     for _, vehicle in vehicles.iterrows():
-        vehicles_result.append({
-            "accident_id": int(vehicle.get(field_names.id)),
-            "provider_and_id": int(
-                str(int(vehicle.get(field_names.file_type))) + str(int(vehicle.get(field_names.id)))),
-            "provider_code": int(vehicle.get(field_names.file_type)),
-            "file_type_police": get_data_value(vehicle.get(field_names.file_type_police)),
-            "engine_volume": int(vehicle.get(field_names.engine_volume)),
-            "manufacturing_year": get_data_value(vehicle.get(field_names.manufacturing_year)),
-            "driving_directions": get_data_value(vehicle.get(field_names.driving_directions)),
-            "vehicle_status": get_data_value(vehicle.get(field_names.vehicle_status)),
-            "vehicle_attribution": get_data_value(vehicle.get(field_names.vehicle_attribution)),
-            "vehicle_type": get_data_value(vehicle.get(field_names.vehicle_type_vehicles)),
-            "seats": get_data_value(vehicle.get(field_names.seats)),
-            "total_weight": get_data_value(vehicle.get(field_names.total_weight)),
-            "car_id": get_data_value(vehicle.get(field_names.car_id)),
-            "accident_year": get_data_value(vehicle.get(field_names.accident_year)),
-            "accident_month": get_data_value(vehicle.get(field_names.accident_month)),
-            "vehicle_damage": get_data_value(vehicle.get(field_names.vehicle_damage)),
-        })
-    logging.info('Finished Importing vehicles')
+        vehicles_result.append(
+            {
+                "accident_id": int(vehicle.get(field_names.id)),
+                "provider_and_id": int(
+                    str(int(vehicle.get(field_names.file_type)))
+                    + str(int(vehicle.get(field_names.id)))
+                ),
+                "provider_code": int(vehicle.get(field_names.file_type)),
+                "file_type_police": get_data_value(vehicle.get(field_names.file_type_police)),
+                "engine_volume": int(vehicle.get(field_names.engine_volume)),
+                "manufacturing_year": get_data_value(vehicle.get(field_names.manufacturing_year)),
+                "driving_directions": get_data_value(vehicle.get(field_names.driving_directions)),
+                "vehicle_status": get_data_value(vehicle.get(field_names.vehicle_status)),
+                "vehicle_attribution": get_data_value(vehicle.get(field_names.vehicle_attribution)),
+                "vehicle_type": get_data_value(vehicle.get(field_names.vehicle_type_vehicles)),
+                "seats": get_data_value(vehicle.get(field_names.seats)),
+                "total_weight": get_data_value(vehicle.get(field_names.total_weight)),
+                "car_id": get_data_value(vehicle.get(field_names.car_id)),
+                "accident_year": get_data_value(vehicle.get(field_names.accident_year)),
+                "accident_month": get_data_value(vehicle.get(field_names.accident_month)),
+                "vehicle_damage": get_data_value(vehicle.get(field_names.vehicle_damage)),
+            }
+        )
+    logging.info("Finished Importing vehicles")
     db.session.bulk_insert_mappings(Vehicle, vehicles_result)
     return len(vehicles_result)
 
@@ -604,8 +661,7 @@ def get_files(directory):
     for name, filename in cbs_files.items():
         if name not in (STREETS, NON_URBAN_INTERSECTION, ACCIDENTS, INVOLVED, VEHICLES, DICTIONARY):
             continue
-        files = [path for path in os.listdir(directory)
-                 if filename.lower() in path.lower()]
+        files = [path for path in os.listdir(directory) if filename.lower() in path.lower()]
         amount = len(files)
         if amount == 0:
             raise ValueError("Not found: '%s'" % filename)
@@ -625,16 +681,25 @@ def get_files(directory):
                 streets_map = {}
                 groups = df.groupby(field_names.settlement)
                 for key, settlement in groups:
-                    streets_map[key] = [{field_names.street_sign: x[field_names.street_sign],
-                                         field_names.street_name: x[field_names.street_name]} for _, x in
-                                        settlement.iterrows()]
+                    streets_map[key] = [
+                        {
+                            field_names.street_sign: x[field_names.street_sign],
+                            field_names.street_name: x[field_names.street_name],
+                        }
+                        for _, x in settlement.iterrows()
+                    ]
 
                 output_files_dict[name] = streets_map
             elif name == NON_URBAN_INTERSECTION:
-                roads = {(x[field_names.road1], x[field_names.road2], x[field_names.km]): x[field_names.junction_name]
-                         for _, x in df.iterrows()}
-                non_urban_intersection = {x[field_names.junction]: x[field_names.junction_name] for _, x in
-                                          df.iterrows()}
+                roads = {
+                    (x[field_names.road1], x[field_names.road2], x[field_names.km]): x[
+                        field_names.junction_name
+                    ]
+                    for _, x in df.iterrows()
+                }
+                non_urban_intersection = {
+                    x[field_names.junction]: x[field_names.junction_name] for _, x in df.iterrows()
+                }
                 output_files_dict[ROADS] = roads
                 output_files_dict[NON_URBAN_INTERSECTION] = non_urban_intersection
     return output_files_dict
@@ -679,33 +744,36 @@ def delete_invalid_entries(batch_size):
     first deletes from tables Involved and Vehicle, then from table AccidentMarker
     """
 
-    marker_ids_to_delete = db.session.query(AccidentMarker.id).filter(or_((AccidentMarker.longitude == None),
-                                                                          (AccidentMarker.latitude == None))).all()
+    marker_ids_to_delete = (
+        db.session.query(AccidentMarker.id)
+        .filter(or_((AccidentMarker.longitude == None), (AccidentMarker.latitude == None)))
+        .all()
+    )
 
     marker_ids_to_delete = [acc_id[0] for acc_id in marker_ids_to_delete]
 
-    logging.info('There are ' + str(len(marker_ids_to_delete)) + ' invalid accident_ids to delete')
+    logging.info("There are " + str(len(marker_ids_to_delete)) + " invalid accident_ids to delete")
 
     for ids_chunk in chunks(marker_ids_to_delete, batch_size):
 
-        logging.info('Deleting a chunk of ' + str(len(ids_chunk)))
+        logging.info("Deleting a chunk of " + str(len(ids_chunk)))
 
         q = db.session.query(Involved).filter(Involved.accident_id.in_(ids_chunk))
         if q.all():
-            logging.info('deleting invalid entries from Involved')
-            q.delete(synchronize_session='fetch')
+            logging.info("deleting invalid entries from Involved")
+            q.delete(synchronize_session="fetch")
             db.session.commit()
 
         q = db.session.query(Vehicle).filter(Vehicle.accident_id.in_(ids_chunk))
         if q.all():
-            logging.info('deleting invalid entries from Vehicle')
-            q.delete(synchronize_session='fetch')
+            logging.info("deleting invalid entries from Vehicle")
+            q.delete(synchronize_session="fetch")
             db.session.commit()
 
         q = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_(ids_chunk))
         if q.all():
-            logging.info('deleting invalid entries from AccidentMarker')
-            q.delete(synchronize_session='fetch')
+            logging.info("deleting invalid entries from AccidentMarker")
+            q.delete(synchronize_session="fetch")
             db.session.commit()
 
 
@@ -716,34 +784,46 @@ def delete_cbs_entries(start_date, batch_size):
     first deletes from tables InvolvedNoLocation and VehicleNoLocation, then from table AccidentsNoLocation
     """
 
-    marker_ids_to_delete = db.session.query(AccidentMarker.id) \
-        .filter(AccidentMarker.created >= datetime.strptime(start_date, '%Y-%m-%d')) \
-        .filter(or_((AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_1_CODE), \
-                    (AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_3_CODE))).all()
+    marker_ids_to_delete = (
+        db.session.query(AccidentMarker.id)
+        .filter(AccidentMarker.created >= datetime.strptime(start_date, "%Y-%m-%d"))
+        .filter(
+            or_(
+                (AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_1_CODE),
+                (AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_3_CODE),
+            )
+        )
+        .all()
+    )
 
     marker_ids_to_delete = [acc_id[0] for acc_id in marker_ids_to_delete]
 
-    logging.info('There are ' + str(len(marker_ids_to_delete)) + ' accident ids to delete starting ' + str(start_date))
+    logging.info(
+        "There are "
+        + str(len(marker_ids_to_delete))
+        + " accident ids to delete starting "
+        + str(start_date)
+    )
 
     for ids_chunk in chunks(marker_ids_to_delete, batch_size):
 
-        logging.info('Deleting a chunk of ' + str(len(ids_chunk)))
+        logging.info("Deleting a chunk of " + str(len(ids_chunk)))
 
         q = db.session.query(Involved).filter(Involved.accident_id.in_(ids_chunk))
         if q.all():
-            logging.info('deleting entries from Involved')
+            logging.info("deleting entries from Involved")
             q.delete(synchronize_session=False)
             db.session.commit()
 
         q = db.session.query(Vehicle).filter(Vehicle.accident_id.in_(ids_chunk))
         if q.all():
-            logging.info('deleting entries from Vehicle')
+            logging.info("deleting entries from Vehicle")
             q.delete(synchronize_session=False)
             db.session.commit()
 
         q = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_(ids_chunk))
         if q.all():
-            logging.info('deleting entries from AccidentMarker')
+            logging.info("deleting entries from AccidentMarker")
             q.delete(synchronize_session=False)
             db.session.commit()
 
@@ -755,32 +835,43 @@ def delete_cbs_entries_from_email(provider_code, year, batch_size):
     first deletes from tables InvolvedNoLocation and VehicleNoLocation, then from table AccidentsNoLocation
     """
 
-    marker_ids_to_delete = db.session.query(AccidentMarker.provider_and_id) \
-        .filter(and_(AccidentMarker.accident_year == year), AccidentMarker.provider_code == provider_code).all()
+    marker_ids_to_delete = (
+        db.session.query(AccidentMarker.provider_and_id)
+        .filter(
+            and_(AccidentMarker.accident_year == year),
+            AccidentMarker.provider_code == provider_code,
+        )
+        .all()
+    )
 
     marker_ids_to_delete = [acc_id[0] for acc_id in marker_ids_to_delete]
 
-    logging.info('There are ' + str(len(marker_ids_to_delete)) + ' accident ids to delete for year ' + str(year))
+    logging.info(
+        "There are "
+        + str(len(marker_ids_to_delete))
+        + " accident ids to delete for year "
+        + str(year)
+    )
 
     for ids_chunk in chunks(marker_ids_to_delete, batch_size):
 
-        logging.info('Deleting a chunk of ' + str(len(ids_chunk)))
+        logging.info("Deleting a chunk of " + str(len(ids_chunk)))
 
         q = db.session.query(Involved).filter(Involved.provider_and_id.in_(ids_chunk))
         if q.all():
-            logging.info('deleting entries from Involved')
+            logging.info("deleting entries from Involved")
             q.delete(synchronize_session=False)
             db.session.commit()
 
         q = db.session.query(Vehicle).filter(Vehicle.provider_and_id.in_(ids_chunk))
         if q.all():
-            logging.info('deleting entries from Vehicle')
+            logging.info("deleting entries from Vehicle")
             q.delete(synchronize_session=False)
             db.session.commit()
 
         q = db.session.query(AccidentMarker).filter(AccidentMarker.provider_and_id.in_(ids_chunk))
         if q.all():
-            logging.info('deleting entries from AccidentMarker')
+            logging.info("deleting entries from AccidentMarker")
             q.delete(synchronize_session=False)
             db.session.commit()
 
@@ -790,8 +881,10 @@ def fill_db_geo_data():
     Fills empty geometry object according to coordinates in database
     SRID = 4326
     """
-    db.session.execute('UPDATE markers SET geom = ST_SetSRID(ST_MakePoint(longitude,latitude),4326)\
-                           WHERE geom IS NULL;')
+    db.session.execute(
+        "UPDATE markers SET geom = ST_SetSRID(ST_MakePoint(longitude,latitude),4326)\
+                           WHERE geom IS NULL;"
+    )
     db.session.commit()
 
 
@@ -799,7 +892,7 @@ def get_provider_code(directory_name=None):
     if directory_name:
         match = ACCIDENT_TYPE_REGEX.match(directory_name)
         if match:
-            return int(match.groupdict()['type'])
+            return int(match.groupdict()["type"])
 
     ans = ""
     while not ans.isdigit():
@@ -825,18 +918,42 @@ def fill_dictionary_tables(cbs_dictionary, provider_code, year):
         try:
             curr_table = TABLES_DICT[k]
         except Exception as _:
-            logging.info('A key ' + str(k) + ' was added to dictionary - update models, tables and classes')
+            logging.info(
+                "A key " + str(k) + " was added to dictionary - update models, tables and classes"
+            )
             continue
         for inner_k, inner_v in v.items():
-            sql_delete = 'DELETE FROM ' + curr_table + ' WHERE provider_code=' + str(
-                provider_code) + ' AND year=' + str(year) + ' AND id=' + str(inner_k)
+            sql_delete = (
+                "DELETE FROM "
+                + curr_table
+                + " WHERE provider_code="
+                + str(provider_code)
+                + " AND year="
+                + str(year)
+                + " AND id="
+                + str(inner_k)
+            )
             db.session.execute(sql_delete)
             db.session.commit()
-            sql_insert = 'INSERT INTO ' + curr_table + ' VALUES (' + str(inner_k) + ',' + str(year) + ',' + str(
-                provider_code) + ',' + "'" + inner_v.replace("'", '') + "'" + ')' + ' ON CONFLICT DO NOTHING'
+            sql_insert = (
+                "INSERT INTO "
+                + curr_table
+                + " VALUES ("
+                + str(inner_k)
+                + ","
+                + str(year)
+                + ","
+                + str(provider_code)
+                + ","
+                + "'"
+                + inner_v.replace("'", "")
+                + "'"
+                + ")"
+                + " ON CONFLICT DO NOTHING"
+            )
             db.session.execute(sql_insert)
             db.session.commit()
-        logging.info('Inserted/Updated dictionary values into table ' + curr_table)
+        logging.info("Inserted/Updated dictionary values into table " + curr_table)
     create_provider_code_table()
 
 
@@ -846,38 +963,49 @@ def truncate_dictionary_tables(dictionary_file):
         if k == 97:
             continue
         curr_table = TABLES_DICT[k]
-        sql_truncate = 'TRUNCATE TABLE ' + curr_table
+        sql_truncate = "TRUNCATE TABLE " + curr_table
         db.session.execute(sql_truncate)
         db.session.commit()
-        logging.info('Truncated table ' + curr_table)
+        logging.info("Truncated table " + curr_table)
 
 
 def create_provider_code_table():
-    provider_code_table = 'provider_code'
+    provider_code_table = "provider_code"
     provider_code_class = ProviderCode
     table_entries = db.session.query(provider_code_class)
     table_entries.delete()
-    provider_code_dict = {1: 'הלשכה המרכזית לסטטיסטיקה - סוג תיק 1', 2: 'איחוד הצלה',
-                          3: 'הלשכה המרכזית לסטטיסטיקה - סוג תיק 3', 4: 'שומרי הדרך'}
+    provider_code_dict = {
+        1: "הלשכה המרכזית לסטטיסטיקה - סוג תיק 1",
+        2: "איחוד הצלה",
+        3: "הלשכה המרכזית לסטטיסטיקה - סוג תיק 3",
+        4: "שומרי הדרך",
+    }
     for k, v in provider_code_dict.items():
-        sql_insert = 'INSERT INTO ' + provider_code_table + ' VALUES (' + str(k) + ',' + "'" + v + "'" + ')'
+        sql_insert = (
+            "INSERT INTO " + provider_code_table + " VALUES (" + str(k) + "," + "'" + v + "'" + ")"
+        )
         db.session.execute(sql_insert)
         db.session.commit()
 
 
 def create_views():
-    db.session.execute('DROP VIEW IF EXISTS involved_markers_hebrew')
-    db.session.execute('DROP VIEW IF EXISTS vehicles_markers_hebrew')
-    db.session.execute('DROP VIEW IF EXISTS markers_hebrew')
-    db.session.execute('CREATE OR REPLACE VIEW markers_hebrew AS ' + VIEWS.MARKERS_HEBREW_VIEW)
-    db.session.execute('DROP VIEW IF EXISTS involved_hebrew')
-    db.session.execute('CREATE OR REPLACE VIEW involved_hebrew AS ' + VIEWS.INVOLVED_HEBREW_VIEW)
-    db.session.execute('DROP VIEW IF EXISTS vehicles_hebrew')
-    db.session.execute('CREATE OR REPLACE VIEW vehicles_hebrew AS ' + VIEWS.VEHICLES_HEBREW_VIEW)
-    db.session.execute('CREATE OR REPLACE VIEW involved_markers_hebrew AS ' + VIEWS.INVOLVED_HEBREW_MARKERS_HEBREW_VIEW)
-    db.session.execute('CREATE OR REPLACE VIEW vehicles_markers_hebrew AS ' + VIEWS.VEHICLES_MARKERS_HEBREW_VIEW)
+    db.session.execute("DROP VIEW IF EXISTS involved_markers_hebrew")
+    db.session.execute("DROP VIEW IF EXISTS vehicles_markers_hebrew")
+    db.session.execute("DROP VIEW IF EXISTS markers_hebrew")
+    db.session.execute("CREATE OR REPLACE VIEW markers_hebrew AS " + VIEWS.MARKERS_HEBREW_VIEW)
+    db.session.execute("DROP VIEW IF EXISTS involved_hebrew")
+    db.session.execute("CREATE OR REPLACE VIEW involved_hebrew AS " + VIEWS.INVOLVED_HEBREW_VIEW)
+    db.session.execute("DROP VIEW IF EXISTS vehicles_hebrew")
+    db.session.execute("CREATE OR REPLACE VIEW vehicles_hebrew AS " + VIEWS.VEHICLES_HEBREW_VIEW)
+    db.session.execute(
+        "CREATE OR REPLACE VIEW involved_markers_hebrew AS "
+        + VIEWS.INVOLVED_HEBREW_MARKERS_HEBREW_VIEW
+    )
+    db.session.execute(
+        "CREATE OR REPLACE VIEW vehicles_markers_hebrew AS " + VIEWS.VEHICLES_MARKERS_HEBREW_VIEW
+    )
     db.session.commit()
-    logging.info('Created DB Views')
+    logging.info("Created DB Views")
 
 
 def update_dictionary_tables(path):
@@ -887,7 +1015,7 @@ def update_dictionary_tables(path):
 
     for directory in sorted(dir_list, reverse=True):
         directory_name = os.path.basename(os.path.normpath(directory))
-        year = directory_name[1:5] if directory_name[0] == 'H' else directory_name[0:4]
+        year = directory_name[1:5] if directory_name[0] == "H" else directory_name[0:4]
         if int(year) < 2008:
             continue
         parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
@@ -907,16 +1035,18 @@ def get_file_type_and_year(file_path):
     return int(provider_code), int(year)
 
 
-def main(specific_folder,
-         delete_all,
-         path,
-         batch_size,
-         delete_start_date,
-         load_start_year,
-         from_email,
-         username='',
-         password='',
-         email_search_start_date=''):
+def main(
+    specific_folder,
+    delete_all,
+    path,
+    batch_size,
+    delete_start_date,
+    load_start_year,
+    from_email,
+    username="",
+    password="",
+    email_search_start_date="",
+):
     try:
         if not from_email:
             import_ui = ImporterUI(path, specific_folder, delete_all)
@@ -936,16 +1066,20 @@ def main(specific_folder,
             total = 0
             for directory in sorted(dir_list, reverse=False):
                 directory_name = os.path.basename(os.path.normpath(directory))
-                year = directory_name[1:5] if directory_name[0] == 'H' else directory_name[0:4]
+                year = directory_name[1:5] if directory_name[0] == "H" else directory_name[0:4]
                 if int(year) >= int(load_start_year):
-                    parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
+                    parent_directory = os.path.basename(
+                        os.path.dirname(os.path.join(os.pardir, directory))
+                    )
                     provider_code = get_provider_code(parent_directory)
                     logging.info("Importing Directory " + directory)
                     total += import_to_datastore(directory, provider_code, int(year), batch_size)
                 else:
-                    logging.info('Importing only starting year {0}. Directory {1} has year {2}'.format(load_start_year,
-                                                                                                       directory_name,
-                                                                                                       year))
+                    logging.info(
+                        "Importing only starting year {0}. Directory {1} has year {2}".format(
+                            load_start_year, directory_name, year
+                        )
+                    )
         else:
             logging.info("Importing data from mail...")
             temp_dir = tempfile.mkdtemp()
@@ -953,8 +1087,8 @@ def main(specific_folder,
             if zip_path is None:
                 logging.info("No new cbs files found")
                 return
-            zip_ref = zipfile.ZipFile(zip_path, 'r')
-            cbs_files_dir = os.path.join(temp_dir, 'cbsfiles')
+            zip_ref = zipfile.ZipFile(zip_path, "r")
+            cbs_files_dir = os.path.join(temp_dir, "cbsfiles")
             if not os.path.exists(cbs_files_dir):
                 os.makedirs(cbs_files_dir)
             zip_ref.extractall(cbs_files_dir)
@@ -971,10 +1105,15 @@ def main(specific_folder,
 
         fill_db_geo_data()
 
-        failed = ["\t'{0}' ({1})".format(directory, fail_reason) for directory, fail_reason in
-                  failed_dirs.items()]
-        logging.info("Finished processing all directories{0}{1}".format(", except:\n" if failed else "",
-                                                                        "\n".join(failed)))
+        failed = [
+            "\t'{0}' ({1})".format(directory, fail_reason)
+            for directory, fail_reason in failed_dirs.items()
+        ]
+        logging.info(
+            "Finished processing all directories{0}{1}".format(
+                ", except:\n" if failed else "", "\n".join(failed)
+            )
+        )
         logging.info("Total: {0} items in {1}".format(total, time_delta(started)))
 
         create_views()

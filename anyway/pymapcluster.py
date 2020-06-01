@@ -6,6 +6,7 @@ from . import globalmaptiles as globaltiles
 
 ##
 
+
 def center_geolocation(geolocations):
     """
     Provide a relatively accurate center lat, lon returned as a list pair, given
@@ -58,13 +59,13 @@ def cluster_markers(mercator, latlngs, zoom, gridsize=50):
     sizes = []
     latlngs = [{"latitude": latlng.latitude, "longitude": latlng.longitude} for latlng in latlngs]
     for i, latlng in enumerate(latlngs):
-        lat = latlng['latitude']
-        lng = latlng['longitude']
+        lat = latlng["latitude"]
+        lng = latlng["longitude"]
         point_pix = latlng_to_zoompixels(mercator, lat, lng, zoom)
         assigned = False
         for cidx, c in enumerate(centers):
             center = latlngs[c]
-            center = latlng_to_zoompixels(mercator, center['latitude'], center['longitude'], zoom)
+            center = latlng_to_zoompixels(mercator, center["latitude"], center["longitude"], zoom)
             if in_cluster(center, gridsize, point_pix):
                 # Assign point to cluster
                 clusters.append(cidx)
@@ -90,14 +91,15 @@ def create_clusters_centers(markers, zoom, radius):
 
 def get_cluster_json(clust_marker, clust_size):
     return {
-        'longitude': clust_marker.longitude,
-        'latitude': clust_marker.latitude,
-        'size': clust_size
+        "longitude": clust_marker.longitude,
+        "latitude": clust_marker.latitude,
+        "size": clust_size,
     }
 
 
 def get_cluster_size(index, clusters):
     from collections import Counter
+
     # TODO: don't call Counter for every cluster in the array
     return Counter(clusters)[index]
 
@@ -113,7 +115,7 @@ def calculate_clusters(markers, zoom, radius=50):
 
 
 ##
-if __name__ == '__main__':
+if __name__ == "__main__":
     ##
     mercator = globaltiles.GlobalMercator()
     latlngs = [(28.43, 8), (28.43, 8), (28.44, 8), (35, 8)]

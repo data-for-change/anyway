@@ -16,7 +16,7 @@ def _error_handler(e):
 def _iter_templates():
     for path, _, files in os.walk(_TEMPLATE_DIR, onerror=_error_handler):
         for filename in files:
-            if filename.endswith('.html'):
+            if filename.endswith(".html"):
                 yield os.path.join(path, filename)
 
 

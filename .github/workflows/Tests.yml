@@ -51,6 +51,8 @@ jobs:
         docker exec anyway ./main.py process registered-vehicles
         docker exec anyway ./main.py process cbs
     - name: Tests
+      env:
+        TWITTER_CONSUMER_KEY: ${{ secrets.TWITTER_CONSUMER_KEY }}
       run: |
         docker exec anyway pip install -r ./test_requirements.txt
         docker exec anyway pytest tests -m "not browser"

@@ -1,3 +1,4 @@
+black
 Flask==1.1.2
 Flask-Admin==1.5.6
 Flask-Assets==2.0

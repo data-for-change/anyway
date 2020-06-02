@@ -41,9 +41,8 @@ def run_migrations_offline():
     script output.
 
     """
-    url = os.environ.get('DATABASE_URL')
-    context.configure(
-        url=url, target_metadata=target_metadata, literal_binds=True)
+    url = os.environ.get("DATABASE_URL")
+    context.configure(url=url, target_metadata=target_metadata, literal_binds=True)
 
     with context.begin_transaction():
         context.run_migrations()
@@ -58,14 +57,12 @@ def run_migrations_online():
     """
     from anyway.utilities import init_flask
     from flask_sqlalchemy import SQLAlchemy
+
     app = init_flask()
     connectable = SQLAlchemy(app).engine
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection,
-            target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

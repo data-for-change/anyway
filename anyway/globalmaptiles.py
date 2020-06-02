@@ -5,7 +5,7 @@
 # Project:	GDAL2Tiles, Google Summer of Code 2007 & 2008
 #           Global Map Tiles Classes
 # Purpose:	Convert a raster into TMS tiles, create KML SuperOverlay EPSG:4326,
-#			generate a simple HTML viewers based on Google Maps and OpenLayers
+# 			generate a simple HTML viewers based on Google Maps and OpenLayers
 # Author:	Klokan Petr Pridal, klokan at klokan dot cz
 # Web:		http://www.klokan.cz/projects/gdal2tiles/
 #
@@ -281,6 +281,7 @@ class GlobalMercator(object):
 
 # ---------------------
 
+
 class GlobalGeodetic(object):
     """
     TMS Global Geodetic Profile
@@ -349,28 +350,34 @@ class GlobalGeodetic(object):
             tx * 256 * res - 180,
             ty * 256 * res - 90,
             (tx + 1) * 256 * res - 180,
-            (ty + 1) * 256 * res - 90
+            (ty + 1) * 256 * res - 90,
         )
 
 
 if __name__ == "__main__":
     import sys
 
-
     def Usage(s=""):
-        print("Usage: globalmaptiles.py [-profile 'mercator'|'geodetic'] zoomlevel lat lon [latmax lonmax]")
+        print(
+            "Usage: globalmaptiles.py [-profile 'mercator'|'geodetic'] zoomlevel lat lon [latmax lonmax]"
+        )
         print()
         if s:
             print(s)
             print()
-        print("This utility prints for given WGS84 lat/lon coordinates (or bounding box) the list of tiles")
-        print("covering specified area. Tiles are in the given 'profile' (default is Google Maps 'mercator')")
+        print(
+            "This utility prints for given WGS84 lat/lon coordinates (or bounding box) the list of tiles"
+        )
+        print(
+            "covering specified area. Tiles are in the given 'profile' (default is Google Maps 'mercator')"
+        )
         print("and in the given pyramid 'zoomlevel'.")
-        print("For each tile several information is printed including bonding box in EPSG:900913 and WGS84.")
+        print(
+            "For each tile several information is printed including bonding box in EPSG:900913 and WGS84."
+        )
         sys.exit(1)
 
-
-    profile = 'mercator'
+    profile = "mercator"
     zoomlevel = None
     lat, lon, latmax, lonmax = None, None, None, None
     boundingbox = False
@@ -380,7 +387,7 @@ if __name__ == "__main__":
     while i < len(argv):
         arg = argv[i]
 
-        if arg == '-profile':
+        if arg == "-profile":
             i = i + 1
             profile = argv[i]
 
@@ -399,7 +406,7 @@ if __name__ == "__main__":
 
         i = i + 1
 
-    if profile != 'mercator':
+    if profile != "mercator":
         Usage("ERROR: Sorry, given profile is not implemented yet.")
 
     if zoomlevel == None or lat == None or lon == None:
@@ -438,11 +445,22 @@ if __name__ == "__main__":
             gx, gy = mercator.GoogleTile(tx, ty, tz)
             print("\tGoogle:", gx, gy)
             quadkey = mercator.QuadTree(tx, ty, tz)
-            print("\tQuadkey:", quadkey, '(', int(quadkey, 4), ')')
+            print("\tQuadkey:", quadkey, "(", int(quadkey, 4), ")")
             bounds = mercator.TileBounds(tx, ty, tz)
             print(print("\tEPSG:900913 Extent: ", bounds))
             wgsbounds = mercator.TileLatLonBounds(tx, ty, tz)
             print("\tWGS84 Extent:", wgsbounds)
-            print("\tgdalwarp -ts 256 256 -te %s %s %s %s %s %s_%s_%s.tif" % (
-                bounds[0], bounds[1], bounds[2], bounds[3], "<your-raster-file-in-epsg900913.ext>", tz, tx, ty))
+            print(
+                "\tgdalwarp -ts 256 256 -te %s %s %s %s %s %s_%s_%s.tif"
+                % (
+                    bounds[0],
+                    bounds[1],
+                    bounds[2],
+                    bounds[3],
+                    "<your-raster-file-in-epsg900913.ext>",
+                    tz,
+                    tx,
+                    ty,
+                )
+            )
             print()

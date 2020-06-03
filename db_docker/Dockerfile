@@ -8,11 +8,13 @@ ARG RESTORE_DB='FALSE'
 ARG GDRIVE_URL='https://drive.google.com/uc?id='
 ARG DB_DUMP_PATH=/tmp/anyway_public.pgdump
 
-ENV GDRIVE_FILE_ID=$GDRIVE_FILE_ID
-ENV RESTORE_DB=$RESTORE_DB
-
 ADD ./download_dump.py /
 
-RUN if [ "$RESTORE_DB" == "TRUE" ] ; then python3 download_dump.py && chmod +rwx $DB_DUMP_PATH; else echo "RESTORE_DB!=TRUE, not downloading dump" ; fi
+RUN if [ -n "${GDRIVE_FILE_ID}" -a "${RESTORE_DB}" == "TRUE" ]; then python3 download_dump.py; else echo "No file ID provided or RESTORE_DB!=TRUE, not downloading dump" ; fi
+
+ENV GDRIVE_URL=$GDRIVE_URL
+ENV GDRIVE_FILE_ID=$GDRIVE_FILE_ID
+ENV RESTORE_DB=$RESTORE_DB
+ENV DB_DUMP_PATH=$DB_DUMP_PATH
 
 ADD ./restore_db.sh /docker-entrypoint-initdb.d/

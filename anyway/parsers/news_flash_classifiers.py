@@ -4,13 +4,19 @@ def tweet_with_accident_veichle_and_person(text):
     :param text: tweet text
     :return: boolean, true if tweet contains words, false for others
     """
-    if (('הולך רגל' in text or 'הולכת רגל' in text or 'נהג' in text
-         or 'אדם' in text)
-            and ('רכב' in text or 'מכונית' in text or 'אופנוע' in text
-                 or "ג'יפ" in text or 'טרקטור' in text or 'משאית' in text
-                 or 'אופניים' in text or 'קורקינט' in text)):
+    if ("הולך רגל" in text or "הולכת רגל" in text or "נהג" in text or "אדם" in text) and (
+        "רכב" in text
+        or "מכונית" in text
+        or "אופנוע" in text
+        or "ג'יפ" in text
+        or "טרקטור" in text
+        or "משאית" in text
+        or "אופניים" in text
+        or "קורקינט" in text
+    ):
         return True
     return False
+
 
 def tweet_with_car_accident(text):
     """
@@ -18,7 +24,7 @@ def tweet_with_car_accident(text):
     :param text: tweet text
     :return: boolean, true if tweet contains words, false for others
     """
-    if 'תאונת דרכים' in text or 'ת.ד' in text:
+    if "תאונת דרכים" in text or "ת.ד" in text:
         return True
     return False
 
@@ -29,11 +35,18 @@ def tweet_with_veichles(text):
     :param text: tweet text
     :return: boolean, true if tweet contains veichle, false for others
     """
-    if 'רכב' in text or 'מכונית' in text or 'אופנוע' in text or "ג'יפ" in text or 'טרקטור' in text or 'משאית' in text or \
-        'אופניים' in text or 'קורקינט' in text:
+    if (
+        "רכב" in text
+        or "מכונית" in text
+        or "אופנוע" in text
+        or "ג'יפ" in text
+        or "טרקטור" in text
+        or "משאית" in text
+        or "אופניים" in text
+        or "קורקינט" in text
+    ):
         return True
     return False
-
 
 
 def classify_tweets(text):
@@ -42,7 +55,11 @@ def classify_tweets(text):
     :param text: tweet text
     :return: boolean, true if tweet is about car accident, false for others
     """
-    return text.startswith('בשעה') and (tweet_with_accident_veichle_and_person(text) or tweet_with_car_accident(text) or tweet_with_veichles(text))
+    return text.startswith("בשעה") and (
+        tweet_with_accident_veichle_and_person(text)
+        or tweet_with_car_accident(text)
+        or tweet_with_veichles(text)
+    )
 
 
 def classify_ynet(text):
@@ -51,21 +68,45 @@ def classify_ynet(text):
     :param text: news flash text
     :return: boolean, true if news flash is about car accident, false for others
     """
-    accident_words = ['תאונ', ]
-    working_accidents_words = ['תאונת עבודה', 'תאונות עבודה']
-    involved_words = ['רכב', 'אוטובוס', "ג'יפ", 'משאית', 'קטנוע', 'טרקטור',
-                      'אופנוע', 'אופניים', 'קורקינט', 'הולך רגל', 'הולכת רגל',
-                      'הולכי רגל']
-    hurt_words = ['פגע', 'פגיע', 'פגוע', 'הרג', 'הריג', 'הרוג', 'פצע', 'פציע',
-                  'פצוע', 'התנגש', 'התהפך', 'התהפכ']
-    shooting_words = [' ירי ', ' ירייה ', ' יריות ']
-    shooting_startswith = [' ירי', ' ירייה', ' יריות']
+    accident_words = ["תאונ"]
+    working_accidents_words = ["תאונת עבודה", "תאונות עבודה"]
+    involved_words = [
+        "רכב",
+        "אוטובוס",
+        "ג'יפ",
+        "משאית",
+        "קטנוע",
+        "טרקטור",
+        "אופנוע",
+        "אופניים",
+        "קורקינט",
+        "הולך רגל",
+        "הולכת רגל",
+        "הולכי רגל",
+    ]
+    hurt_words = [
+        "פגע",
+        "פגיע",
+        "פגוע",
+        "הרג",
+        "הריג",
+        "הרוג",
+        "פצע",
+        "פציע",
+        "פצוע",
+        "התנגש",
+        "התהפך",
+        "התהפכ",
+    ]
+    shooting_words = [" ירי ", " ירייה ", " יריות "]
+    shooting_startswith = [" ירי", " ירייה", " יריות"]
 
     explicit_accident = any([val in text for val in accident_words])
     not_work_accident = all([val not in text for val in working_accidents_words])
     involved = any([val in text for val in involved_words])
     hurt = any([val in text for val in hurt_words])
     no_shooting = all([val not in text for val in shooting_words]) and all(
-        [not text.startswith(val) for val in shooting_startswith])
+        [not text.startswith(val) for val in shooting_startswith]
+    )
 
     return ((explicit_accident and not_work_accident) or (involved and hurt)) and no_shooting

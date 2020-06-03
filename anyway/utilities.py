@@ -21,8 +21,8 @@ try:
 except (ValueError, ImportError):
     _fileDialogExist = False
 
-DATE_INPUT_FORMAT = '%d-%m-%Y'
-_PROJECT_ROOT = os.path.join(os.path.dirname(__file__), '..')
+DATE_INPUT_FORMAT = "%d-%m-%Y"
+_PROJECT_ROOT = os.path.join(os.path.dirname(__file__), "..")
 
 
 def init_flask():
@@ -31,17 +31,18 @@ def init_flask():
     """
     app = Flask(
         "anyway",
-        template_folder=os.path.join(_PROJECT_ROOT, 'templates'),
-        static_folder=os.path.join(_PROJECT_ROOT, 'static'), )
+        template_folder=os.path.join(_PROJECT_ROOT, "templates"),
+        static_folder=os.path.join(_PROJECT_ROOT, "static"),
+    )
     app.config.from_object(config)
-    app.config['BABEL_TRANSLATION_DIRECTORIES'] = os.path.join(_PROJECT_ROOT, 'translations')
+    app.config["BABEL_TRANSLATION_DIRECTORIES"] = os.path.join(_PROJECT_ROOT, "translations")
     return app
 
 
 class ProgressSpinner(object):
     def __init__(self):
         self.counter = 0
-        self.chars = ['|', '/', '-', '\\']
+        self.chars = ["|", "/", "-", "\\"]
 
     def show(self):
         """
@@ -56,7 +57,8 @@ class CsvReader(object):
     """
     loads and handles csv files
     """
-    _digit_pattern = re.compile(r'^-?\d*(\.\d+)?$')
+
+    _digit_pattern = re.compile(r"^-?\d*(\.\d+)?$")
 
     def __init__(self, filename, encoding=None):
         self._file = open(filename, encoding=encoding)
@@ -87,7 +89,7 @@ class CsvReader(object):
         """
         converts an str value to a typed one
         """
-        if value == '' or value is None:
+        if value == "" or value is None:
             return None
         # the isdigit function doesn't match negative numbers
         if CsvReader._digit_pattern.match(value):
@@ -120,10 +122,12 @@ class ItmToWGS84(object):
 
 def time_delta(since):
     delta = relativedelta(datetime.now(), since)
-    attrs = ['years', 'months', 'days', 'hours', 'minutes', 'seconds']
-    return " ".join('%d %s' % (getattr(delta, attr),
-                               getattr(delta, attr) > 1 and attr or attr[:-1])
-                    for attr in attrs if getattr(delta, attr))
+    attrs = ["years", "months", "days", "hours", "minutes", "seconds"]
+    return " ".join(
+        "%d %s" % (getattr(delta, attr), getattr(delta, attr) > 1 and attr or attr[:-1])
+        for attr in attrs
+        if getattr(delta, attr)
+    )
 
 
 def decode_hebrew(s):
@@ -142,6 +146,7 @@ def truncate_tables(db, tables):
 
 def valid_date(date_string):
     from datetime import datetime
+
     try:
         return datetime.strptime(date_string, DATE_INPUT_FORMAT)
     except ValueError:
@@ -158,17 +163,19 @@ class ImporterUI(object):
     def source_path(self):
         if self._specific_folder:
             if _fileDialogExist:
-                return tkFileDialog.askdirectory(initialdir=self._source_path,
-                                                 title='Please select a directory')
+                return tkFileDialog.askdirectory(
+                    initialdir=self._source_path, title="Please select a directory"
+                )
             else:
-                return input('Please provide the directory path: ')
+                return input("Please provide the directory path: ")
         return self._source_path
 
     def is_delete_all(self):
         if self._delete_all and self._specific_folder:
             confirm_delete_all = input(
-                "Are you sure you want to delete all the current data? (y/n)\n")
-            if confirm_delete_all.lower() == 'n':
+                "Are you sure you want to delete all the current data? (y/n)\n"
+            )
+            if confirm_delete_all.lower() == "n":
                 self._delete_all = False
         return self._delete_all
 
@@ -176,4 +183,4 @@ class ImporterUI(object):
 def chunks(l, n):
     """Yield successive n-sized chunks from l."""
     for i in range(0, len(l), n):
-        yield l[i:i + n]
+        yield l[i : i + n]

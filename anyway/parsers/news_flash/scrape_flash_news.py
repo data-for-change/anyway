@@ -12,6 +12,6 @@ def main(google_maps_key):
     """
     sys.path.append(os.path.dirname(os.path.realpath(__file__)))
     db = init_db()
-    rss_sites.scrape_extract_store('ynet', google_maps_key, db)
-    rss_sites.scrape_extract_store('walla', google_maps_key, db)
+    rss_sites.scrape_extract_store("ynet", google_maps_key, db)
+    rss_sites.scrape_extract_store("walla", google_maps_key, db)
     mda_twitter(google_maps_key)

@@ -9,19 +9,25 @@ db = SQLAlchemy(app)
 
 
 def _iter_rows(filename):
-    df = pd.read_csv(filename,  encoding='utf8')
-    headers = ['id', 'report_name_english', 'report_name_hebrew', 'url']
+    df = pd.read_csv(filename, encoding="utf8")
+    headers = ["id", "report_name_english", "report_name_hebrew", "url"]
     assert (df.columns == headers).all()
     for _, row in df.iterrows():
-        yield {'id': int(row['id']),
-               'report_name_english': row['report_name_english'],
-               'report_name_hebrew': row['report_name_hebrew'],
-               'url': row['url']}
+        yield {
+            "id": int(row["id"]),
+            "report_name_english": row["report_name_english"],
+            "report_name_hebrew": row["report_name_hebrew"],
+            "url": row["url"],
+        }
 
 
 def parse(filename):
     for row in _iter_rows(filename):
-        current_report = db.session.query(EmbeddedReports).filter(EmbeddedReports.report_name_english == row['report_name_english']).all()
+        current_report = (
+            db.session.query(EmbeddedReports)
+            .filter(EmbeddedReports.report_name_english == row["report_name_english"])
+            .all()
+        )
         if not current_report:
             db.session.bulk_insert_mappings(EmbeddedReports, [row])
         else:

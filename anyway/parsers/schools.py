@@ -25,8 +25,11 @@ def get_schools(filepath):
     schools = []
     df = pd.read_csv(filepath)
     for _, school in df.iterrows():
-        longitude, latitude = float(school[school_fields.longitude]), float(school[school_fields.latitude]),
-        point_str = 'SRID=4326;POINT({0} {1})'.format(longitude, latitude)
+        longitude, latitude = (
+            float(school[school_fields.longitude]),
+            float(school[school_fields.latitude]),
+        )
+        point_str = "SRID=4326;POINT({0} {1})".format(longitude, latitude)
         school = {
             "id": int(school[school_fields.id]),
             "fcode_type": int(school[school_fields.fcode_type]),
@@ -57,10 +60,9 @@ def import_to_datastore(filepath, batch_size):
         started = datetime.now()
         schools = get_schools(filepath)
         new_items = 0
-        all_existing_schools_ids = set(map(lambda x: x[0],
-                                           db.session.query(School.id).all()))
-        schools = [school for school in schools if school['id'] not in all_existing_schools_ids]
-        logging.info('inserting ' + str(len(schools)) + ' new schools')
+        all_existing_schools_ids = set(map(lambda x: x[0], db.session.query(School.id).all()))
+        schools = [school for school in schools if school["id"] not in all_existing_schools_ids]
+        logging.info("inserting " + str(len(schools)) + " new schools")
         for schools_chunk in chunks(schools, batch_size):
             db.session.bulk_insert_mappings(School, schools_chunk)
             db.session.commit()

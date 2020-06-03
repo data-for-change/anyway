@@ -156,8 +156,8 @@ def get_accidents_stats(
         query = query.group_by(group_by)
         query = query.with_entities(group_by, func.count(count))
     df = pd.read_sql_query(query.statement, query.session.bind)
-    df.rename(columns={"count_1": "count"},
-              inplace=True)  # pylint: disable=no-member
+    df.rename(columns={"count_1": "count"}, # pylint: disable=no-member
+              inplace=True)
     df.columns = [c.replace("_hebrew", "") for c in df.columns]
     return (  # pylint: disable=no-member
         df.to_dict(orient="records") if group_by or count else df.to_dict()

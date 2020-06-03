@@ -82,4 +82,4 @@ def test_scrape_ynet():
 def test_scrape_sanity_online():
     next(rss_sites.scrape('ynet'))
     next(rss_sites.scrape('walla'))
-    assert twitter.scrape('mda_israel', 'no_tweets', count=1)
+    assert twitter.scrape('mda_israel', count=1)

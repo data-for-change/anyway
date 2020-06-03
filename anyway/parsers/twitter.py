@@ -30,7 +30,7 @@ def extract_accident_time(text):
 to_hebrew = {"mda_israel": "מגן דוד אדום"}
 
 
-def scrape(screen_name, latest_tweet_id, count=100):
+def scrape(screen_name, latest_tweet_id=None, count=100):
     """
     get all user's recent tweets
     """
@@ -41,40 +41,46 @@ def scrape(screen_name, latest_tweet_id, count=100):
     api = tweepy.API(auth, parser=tweepy.parsers.JSONParser())
 
     # fetch the last 100 tweets if there are no tweets in the DB
-    if latest_tweet_id == "no_tweets":
+    if latest_tweet_id is None:
         all_tweets = api.user_timeline(screen_name=screen_name, count=count, tweet_mode="extended")
     else:
         all_tweets = api.user_timeline(
             screen_name=screen_name, count=count, tweet_mode="extended", since_id=latest_tweet_id
         )
-        # ?? ^^^^^^^^^
-    return all_tweets
+        # FIX: why the count param here ^ ?
+    yield from (
+        {
+            "link": "https://twitter.com/{}/status/{}".format(screen_name, tweet["id_str"]),
+            "date_parsed": datetime.datetime.date(tweet["created_at"]),
+            "source": "twitter",
+            "author": to_hebrew[screen_name],
+            "title": tweet["full_text"],
+            "description": tweet["full_text"],
+            "tweet_id": tweet["id_str"],
+            "tweet_ts": tweet["created_at"],
+        }
+        for tweet in all_tweets
+    )
 
 
-def extract_features(all_tweets, screen_name, google_maps_key) -> pd.DataFrame:
+def extract_features(tweets, google_maps_key) -> pd.DataFrame:
     """
     :return: DataFrame contains all of user's tweets
     """
-    tweets = ([tweet["id_str"], tweet["created_at"], tweet["full_text"]] for tweet in all_tweets)
-    tweets_df = pd.DataFrame(tweets, columns=["tweet_id", "tweet_ts", "tweet_text"])
-    tweets_df["accident"] = tweets_df["tweet_text"].apply(classify_tweets)
+    tweets_df = pd.DataFrame(tweets)
+    tweets_df["accident"] = tweets_df["description"].apply(classify_tweets)
 
     # filter tweets that are not about accidents
     tweets_df = tweets_df[tweets_df["accident"] == True]
     if tweets_df.empty:
         return tweets_df
-    tweets_df["accident_time"] = tweets_df["tweet_text"].apply(extract_accident_time)
-    tweets_df["accident_date"] = tweets_df["tweet_ts"].apply(lambda ts: datetime.datetime.date(ts))
 
-    tweets_df["link"] = tweets_df["tweet_id"].apply(
-        lambda t: "https://twitter.com/{}/status/{}".format(screen_name, t)
+    tweets_df["date_parsed"] = (
+        tweets_df["date_parsed"].astype(str)
+        + " "
+        + tweets_df["description"].apply(extract_accident_time)
     )
-    tweets_df["author"] = [to_hebrew[screen_name]] * len(tweets_df)
-    tweets_df["description"] = [None] * len(tweets_df)  # TODO: Maybe swap description and title
-    tweets_df["source"] = ["twitter"] * len(tweets_df)
-
-    tweets_df["date"] = tweets_df["accident_date"].astype(str) + " " + tweets_df["accident_time"]
-    tweets_df["location"] = tweets_df["tweet_text"].apply(manual_filter_location_of_text)
+    tweets_df["location"] = tweets_df["description"].apply(manual_filter_location_of_text)
     tweets_df["google_location"] = tweets_df["location"].apply(
         geocode_extract, args=(google_maps_key,)
     )
@@ -88,7 +94,6 @@ def extract_features(all_tweets, screen_name, google_maps_key) -> pd.DataFrame:
 
     tweets_df.rename(
         {
-            "tweet_text": "title",
             "lng": "lon",
             "road_no": "geo_extracted_road_no",
             "street": "geo_extracted_street",
@@ -110,9 +115,7 @@ def extract_features(all_tweets, screen_name, google_maps_key) -> pd.DataFrame:
     tweets_df = pd.concat([tweets_df, tweets_df["location_db"].apply(pd.Series)], axis=1)
 
     tweets_df.drop(
-        ["google_location", "accident_date", "accident_time", "tweet_ts", "location_db"],
-        axis=1,
-        inplace=True,
+        ["google_location", "location_db"], axis=1, inplace=True,
     )
 
     return tweets_df
@@ -120,22 +123,21 @@ def extract_features(all_tweets, screen_name, google_maps_key) -> pd.DataFrame:
 
 def scrape_extract_store(screen_name, google_maps_key, db):
 
-    latest_tweet_id = db.get_latest_tweet_id() or "no_tweets"
+    latest_tweet_id = db.get_latest_tweet_id()
 
-    raw_tweets = scrape(screen_name, latest_tweet_id)
+    tweets = scrape(screen_name, latest_tweet_id)
 
-    tweets_df = extract_features(raw_tweets, screen_name, google_maps_key)
+    tweets_df = extract_features(tweets, google_maps_key)
     if tweets_df.empty:
         # NB: why do we avoid inserting non-accidents to the DB?
         return
-
-    tweets = tweets_df.loc[
+    tweets_df = tweets_df.loc[
         :,
         [
             "tweet_id",
             "title",
             "link",
-            "date",
+            "date_parsed",
             "author",
             "description",
             "location",
@@ -156,5 +158,51 @@ def scrape_extract_store(screen_name, google_maps_key, db):
         ],
     ]
 
-    for row in tweets.itertuples(index=False):
-        db.insert_new_flash_news(**row)
+    for row in tweets_df.itertuples(index=False):
+        (
+            tweet_id,
+            title,
+            link,
+            date_parsed,
+            author,
+            description,
+            location,
+            lat,
+            lon,
+            resolution,
+            region_hebrew,
+            district_hebrew,
+            yishuv_name,
+            street1_hebrew,
+            street2_hebrew,
+            non_urban_intersection_hebrew,
+            road1,
+            road2,
+            road_segment_name,
+            accident,
+            source,
+        ) = row
+
+        db.insert_new_flash_news(
+            title,
+            link,
+            date_parsed,
+            author,
+            description,
+            location,
+            lat,
+            lon,
+            resolution,
+            region_hebrew,
+            district_hebrew,
+            yishuv_name,
+            street1_hebrew,
+            street2_hebrew,
+            non_urban_intersection_hebrew,
+            road1,
+            road2,
+            road_segment_name,
+            accident,
+            source,
+            tweet_id=tweet_id,
+        )

@@ -10,11 +10,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Build and push Docker images
+    - name: Build and push anyway Docker image
       uses: docker/build-push-action@v1.0.1
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         repository: anywayteam/anyway
+        tag_with_ref: false
+        tag_with_sha: true
+    - name: Build and push database Docker image
+      uses: docker/build-push-action@v1.0.1
+      with:
+        path: 'db_docker'
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        repository: anywayteam/db
         tag_with_ref: false
         tag_with_sha: true

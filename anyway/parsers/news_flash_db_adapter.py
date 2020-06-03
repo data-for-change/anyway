@@ -199,7 +199,7 @@ class DBAdapter:
                 "road1": road1,
                 "road2": road2,
                 "road_segment_name": road_segment_name,
-                "accident": accident,
+                "accident": bool(accident),
                 "source": source,
             },
         )

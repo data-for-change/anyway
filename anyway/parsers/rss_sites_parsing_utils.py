@@ -1,6 +1,10 @@
 from .news_flash_classifiers import classify_ynet
-from .location_extraction import manual_filter_location_of_text, geocode_extract, get_db_matching_location, \
-    set_accident_resolution
+from .location_extraction import (
+    manual_filter_location_of_text,
+    geocode_extract,
+    get_db_matching_location,
+    set_accident_resolution,
+)
 
 
 def extract_geo_features(parsed_item, google_maps_key):

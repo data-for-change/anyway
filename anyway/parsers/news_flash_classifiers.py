@@ -55,7 +55,11 @@ def classify_tweets(text):
     :param text: tweet text
     :return: boolean, true if tweet is about car accident, false for others
     """
-    return text.startswith('בשעה') and (tweet_with_accident_vehicle_and_person(text) or tweet_with_car_accident(text) or tweet_with_vehicles(text))
+    return text.startswith("בשעה") and (
+        tweet_with_accident_vehicle_and_person(text)
+        or tweet_with_car_accident(text)
+        or tweet_with_vehicles(text)
+    )
 
 
 def classify_ynet(text):

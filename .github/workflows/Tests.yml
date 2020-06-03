@@ -67,9 +67,16 @@ jobs:
     - name: Tests
       env:
         TWITTER_CONSUMER_KEY: ${{ secrets.TWITTER_CONSUMER_KEY }}
+        TWITTER_CONSUMER_SECRET: ${{ secrets.TWITTER_CONSUMER_SECRET }}
+        TWITTER_ACCESS_KEY:  ${{ secrets.TWITTER_ACCESS_KEY }}
+        TWITTER_ACCESS_SECRET:  ${{ secrets.TWITTER_ACCESS_SECRET }}
       run: |
         docker exec anyway pip install -r ./test_requirements.txt
-        docker exec anyway pytest tests -m "not browser"
+        docker exec -e TWITTER_CONSUMER_KEY=$TWITTER_CONSUMER_KEY \
+                    -e TWITTER_CONSUMER_SECRET=$TWITTER_CONSUMER_SECRET \
+                    -e TWITTER_ACCESS_KEY=$TWITTER_ACCESS_KEY \
+                    -e TWITTER_ACCESS_SECRET= $TWITTER_ACCESS_SECRET \
+                    anyway pytest tests -m "not browser"
     - name: Logging docker in case of failure
       if: failure()
       run : |

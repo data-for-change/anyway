@@ -76,6 +76,8 @@ def test_parse_ynet():
     )
     assert items_actual == items_expected
 
+def test_dummy_secret():
+    assert os.environ.get("DUMMY_SECRET") == 'anywaysecret'
 
 @pytest.mark.slow
 def test_parse_sanity_online():

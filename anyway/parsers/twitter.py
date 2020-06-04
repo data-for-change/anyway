@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import re
 import os
 
@@ -37,7 +37,8 @@ def parse_creation_datetime(created_at):
     # Example: 'Sun May 31 11:26:18 +0000 2020'
     time_format = "%a %b %d %H:%M:%S %z %Y"
     time = datetime.strptime(created_at, time_format)
-    return time.replace(tzinfo=timezone.utc).astimezone(tz=None).replace(tzinfo=None)
+    summer_timezone = timezone(offset=timedelta(hours=3))
+    return time.replace(tzinfo=timezone.utc).astimezone(tz=summer_timezone).replace(tzinfo=None)
 
 
 def extract_accident_time(text):

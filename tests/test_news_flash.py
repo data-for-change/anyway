@@ -51,7 +51,9 @@ def test_scrape_walla():
     items_actual = list(
         rss_sites.scrape("walla", fetch_rss=fetch_rss_walla, fetch_html=fetch_html_walla)
     )
-    assert items_actual == items_expected
+    assert len(items_actual) == len(items_expected)
+    for i, (actual, expected) in enumerate(zip(items_actual, items_expected)):
+        assert (i, actual) == (i, expected)
 
 
 def test_scrape_ynet():
@@ -77,7 +79,9 @@ def test_scrape_ynet():
     items_actual = list(
         rss_sites.scrape("ynet", fetch_rss=fetch_rss_ynet, fetch_html=fetch_html_ynet)
     )
-    assert items_actual == items_expected
+    assert len(items_actual) == len(items_expected)
+    for i, (actual, expected) in enumerate(zip(items_actual, items_expected)):
+        assert (i, actual) == (i, expected)
 
 
 @pytest.mark.slow
@@ -136,7 +140,8 @@ def test_twitter_parse():
     actual_list = [twitter.parse_tweet(tweet, 'mda_israel') for tweet in tweets]
     for actual, expected in zip(actual_list, twitter_expected_list):
         # check only the parse-only part
-        assert all([actual[k] == expected[k] for k in actual])
+        for k in actual:
+            assert (k, actual[k]) == (k, expected[k])
 
         actual['accident'] = classify_tweets(actual['description'])
         assert actual['accident'] == expected['accident']
@@ -148,4 +153,5 @@ def test_twitter_parse():
         if actual['accident']:
             location_extraction.extract_geo_features(actual)
             # check only the extracted part
-            assert all([actual[k] == expected[k] for k in expected])
+            for k in expected:
+                assert (k, actual[k]) == (k, expected[k])

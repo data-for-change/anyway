@@ -102,7 +102,7 @@ class DBAdapter:
         source,
         title,
         link,
-        date_parsed,
+        date,
         author,
         description,
         location=None,
@@ -132,7 +132,7 @@ class DBAdapter:
         :param road_segment_name: urban segment name
         :param title: title of the news_flash
         :param link: link to the news_flash
-        :param date_parsed: parsed date of the news_flash
+        :param date: parsed date of the news_flash
         :param author: author of the news_flash
         :param description: description of the news flash
         :param location: location of the news flash (textual)
@@ -147,7 +147,7 @@ class DBAdapter:
         temp = [
             title,
             link,
-            date_parsed,
+            date,
             author,
             description,
             location,
@@ -167,7 +167,7 @@ class DBAdapter:
             source,
             tweet_id,
         ]
-        title, link, date_parsed, author, description, location, lat, lon, resolution, region_hebrew, district_hebrew, yishuv_name, street1_hebrew, street2_hebrew, non_urban_intersection_hebrew, road1, road2, road_segment_name, accident, source, tweet_id = pd.Series(
+        title, link, date, author, description, location, lat, lon, resolution, region_hebrew, district_hebrew, yishuv_name, street1_hebrew, street2_hebrew, non_urban_intersection_hebrew, road1, road2, road_segment_name, accident, source, tweet_id = pd.Series(
             temp
         ).replace(
             {pd.np.nan: None, "": None, 0: None, -1: None, " ": None}
@@ -186,7 +186,7 @@ class DBAdapter:
                 "tweet_id": tweet_id,
                 "title": title,
                 "link": link,
-                "date": date_parsed,
+                "date": date,
                 "author": author,
                 "description": description,
                 "location": location,

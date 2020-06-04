@@ -1,8 +1,5 @@
-# coding=utf-8
-
 import logging
 import re
-import os
 
 import geohash  # python-geohash package
 import googlemaps
@@ -12,6 +9,7 @@ from geographiclib.geodesic import Geodesic
 
 from anyway.parsers.news_flash_db_adapter import init_db
 from . import resolution_dict
+from . import secrets
 
 
 def extract_road_number(location):
@@ -156,7 +154,7 @@ def geocode_extract(location):
     address = None
     geom = {"lat": None, "lng": None}
     try:
-        gmaps = googlemaps.Client(key=os.environ["GOOGLE_MAPS_KEY"])
+        gmaps = googlemaps.Client(key=secrets.get("GOOGLE_MAPS_KEY"))
         geocode_result = gmaps.geocode(location, region="il")
         if geocode_result is None or geocode_result == []:
             return None

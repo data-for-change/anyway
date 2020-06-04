@@ -1,12 +1,11 @@
 from datetime import datetime, timezone, timedelta
 import re
-import os
 
 import tweepy
 
 from .news_flash_classifiers import classify_tweets
 from .location_extraction import extract_geo_features
-
+from . import secrets
 
 to_hebrew = {"mda_israel": "מגן דוד אדום"}
 
@@ -16,9 +15,9 @@ def scrape(screen_name, latest_tweet_id=None, count=100):
     get all user's recent tweets
     """
     auth = tweepy.OAuthHandler(
-        os.environ["TWITTER_CONSUMER_KEY"], os.environ["TWITTER_CONSUMER_SECRET"]
+        secrets.get("TWITTER_CONSUMER_KEY"), secrets.get("TWITTER_CONSUMER_SECRET")
     )
-    auth.set_access_token(os.environ["TWITTER_ACCESS_KEY"], os.environ["TWITTER_ACCESS_SECRET"])
+    auth.set_access_token(secrets.get("TWITTER_ACCESS_KEY"), secrets.get("TWITTER_ACCESS_SECRET"))
     api = tweepy.API(auth, parser=tweepy.parsers.JSONParser())
 
     # fetch the last 100 tweets if there are no tweets in the DB

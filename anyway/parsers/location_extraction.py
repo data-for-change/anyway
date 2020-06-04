@@ -2,6 +2,7 @@
 
 import logging
 import re
+import os
 
 import geohash  # python-geohash package
 import googlemaps
@@ -138,12 +139,11 @@ def set_accident_resolution(accident_row):
             logging.info("bug in accident resolution")
 
 
-def geocode_extract(location, google_maps_key):
+def geocode_extract(location):
     """
     this method takes a string representing location and a google maps key and returns a dict of the corresponding
     location found on google maps (by that string), describing details of the location found and the geometry
     :param location: string representing location
-    :param google_maps_key: google maps API key
     :return: a dict containing data about the found location on google maps, with the keys: street,
     road_no [road number], intersection, city, address, district and the geometry of the location.
     """
@@ -156,7 +156,7 @@ def geocode_extract(location, google_maps_key):
     address = None
     geom = {"lat": None, "lng": None}
     try:
-        gmaps = googlemaps.Client(key=google_maps_key)
+        gmaps = googlemaps.Client(key=os.environ["GOOGLE_MAPS_KEY"])
         geocode_result = gmaps.geocode(location, region="il")
         if geocode_result is None or geocode_result == []:
             return None
@@ -316,3 +316,21 @@ def manual_filter_location_of_text(text):
     if "ליד ה" in text:
         text = text[(text.find("ליד ה") + len("ליד ה")) :] + "ליד ה " + text[: text.find("ליד ה ")]
     return text
+
+
+def extract_geo_features(item) -> None:
+    location = None
+    if item["description"] is not None:
+        location = manual_filter_location_of_text(item["description"])
+    if location is None and item["title"] is not None:
+        location = manual_filter_location_of_text(item["title"])
+    item["location"] = location
+    geo_location = geocode_extract(location)
+    if geo_location is not None:
+        item["lat"] = geo_location["geom"]["lat"]
+        item["lon"] = geo_location["geom"]["lng"]
+        item["resolution"] = set_accident_resolution(geo_location)
+        db_location = get_db_matching_location(
+            item["lat"], item["lon"], item["resolution"], geo_location["road_no"],
+        )
+        item.update(db_location)

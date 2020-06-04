@@ -1,3 +1,5 @@
+import logging
+
 import pandas as pd
 from flask_sqlalchemy import SQLAlchemy
 
@@ -95,26 +97,27 @@ class DBAdapter:
 
     def insert_new_flash_news(
         self,
+        *,
+        accident,
+        source,
         title,
         link,
         date_parsed,
         author,
         description,
-        location,
-        lat,
-        lon,
-        resolution,
-        region_hebrew,
-        district_hebrew,
-        yishuv_name,
-        street1_hebrew,
-        street2_hebrew,
-        non_urban_intersection_hebrew,
-        road1,
-        road2,
-        road_segment_name,
-        accident,
-        source,
+        location=None,
+        lat=None,
+        lon=None,
+        resolution=None,
+        region_hebrew=None,
+        district_hebrew=None,
+        yishuv_name=None,
+        street1_hebrew=None,
+        street2_hebrew=None,
+        non_urban_intersection_hebrew=None,
+        road1=None,
+        road2=None,
+        road_segment_name=None,
         tweet_id=None,
     ):
         """
@@ -204,17 +207,7 @@ class DBAdapter:
             },
         )
         self.commit()
-
-    def get_latest_tweet_id(self):
-        """
-        get the latest tweet id
-        :return: latest tweet id
-        """
-        tweet_id = self.execute(
-            "SELECT tweet_id FROM news_flash where source='twitter' ORDER BY date DESC LIMIT 1"
-        ).fetchone()
-        if tweet_id:
-            return tweet_id[0]
+        logging.info("new flash news added, is accident: " + str(accident))
 
     def update_news_flash_bulk(self, news_flash_id_list, params_dict_list):
         if len(news_flash_id_list) > 0 and len(news_flash_id_list) == len(params_dict_list):
@@ -276,6 +269,17 @@ class DBAdapter:
             "SELECT date FROM news_flash WHERE source=:source ORDER BY date DESC LIMIT 1",
             {"source": source},
         ).fetchone()
-        if latest_date is None:
-            return None
-        return latest_date[0].replace(tzinfo=None)
+        if latest_date:
+            latest_date[0].replace(tzinfo=None)
+
+    def get_latest_tweet_id(self):
+        """
+        get the latest tweet id
+        :return: latest tweet id
+        """
+        latest_id = self.execute(
+            "SELECT tweet_id FROM news_flash where source='twitter' ORDER BY date DESC LIMIT 1"
+        ).fetchone()
+        if latest_id:
+            return latest_id[0]
+        return None

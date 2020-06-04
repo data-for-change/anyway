@@ -62,7 +62,7 @@ def classify_tweets(text):
     )
 
 
-def classify_ynet(text):
+def classify_rss(text):
     """
     classify ynet news flash for news flash about car accidents and others
     :param text: news flash text

@@ -1,10 +1,10 @@
 import datetime
-import logging
 
 import requests
 from bs4 import BeautifulSoup
 
-from . import rss_sites_parsing_utils
+from .location_extraction import extract_geo_features
+from .news_flash_classifiers import classify_rss
 
 
 def parse_walla(rss_soup, html_soup):
@@ -75,11 +75,13 @@ def scrape(site_name, *, fetch_rss=_fetch, fetch_html=_fetch):
         }
 
 
-def scrape_extract_store(site_name, google_maps_key, db):
+def scrape_extract_store(site_name, db):
     latest_date = db.get_latest_date_of_source(site_name) or datetime.date.min
-    for raw_item in scrape(site_name):
-        if raw_item["date_parsed"] < latest_date:
+    for item in scrape(site_name):
+        if item["date_parsed"] < latest_date:
             break
-        news_item = rss_sites_parsing_utils.extract_geo_features(raw_item, google_maps_key)
-        db.insert_new_flash_news(**news_item)
-        logging.info("new flash news added, is accident: " + str(news_item["accident"]))
+        item["accident"] = classify_rss(item["title"])
+        if item["accident"]:
+            # FIX: No accident-accurate date extracted
+            extract_geo_features(item)
+        db.insert_new_flash_news(**item)

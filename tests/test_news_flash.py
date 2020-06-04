@@ -1,9 +1,10 @@
 import datetime
+import json
 
 import pytest
 
-
-from anyway.parsers import rss_sites, twitter
+from anyway.parsers import rss_sites, twitter, location_extraction
+from anyway.parsers.news_flash_classifiers import classify_tweets
 
 
 def fetch_html_walla(link):
@@ -83,3 +84,56 @@ def test_scrape_sanity_online():
     next(rss_sites.scrape('ynet'))
     next(rss_sites.scrape('walla'))
     assert twitter.scrape('mda_israel', count=1)
+
+
+def test_extraction_twitter():
+    with open('tests/twitter.json') as f:
+        tweets = json.load(f)
+    expected_list = [
+        {
+             'link': 'https://twitter.com/mda_israel/status/1267054794587418630',
+             'date_parsed': datetime.datetime(2020, 5, 31, 14, 26, 18),
+             'source': 'twitter',
+             'author': 'מגן דוד אדום',
+             'title': 'בשעה 13:19 התקבל דיווח במוקד 101 של מד"א במרחב ירושלים על פועל שנפצע במהלך עבודתו במפעל באזור התעשיה עטרות בירושלים. חובשים ופראמדיקים של מד"א מעניקים טיפול רפואי ומפנים לבי"ח שערי צדק גבר בן 31 במצב קשה, עם חבלת ראש.',
+             'description': 'בשעה 13:19 התקבל דיווח במוקד 101 של מד"א במרחב ירושלים על פועל שנפצע במהלך עבודתו במפעל באזור התעשיה עטרות בירושלים. חובשים ופראמדיקים של מד"א מעניקים טיפול רפואי ומפנים לבי"ח שערי צדק גבר בן 31 במצב קשה, עם חבלת ראש.',
+             'tweet_id': '1267054794587418630', 'tweet_ts': 'Sun May 31 11:26:18 +0000 2020',
+             'accident': False
+        },
+        {
+             'link': 'https://twitter.com/mda_israel/status/1267037315869880321',
+             'date_parsed': datetime.datetime(2020, 5, 31, 13, 16, 51),
+             'source': 'twitter',
+             'author': 'מגן דוד אדום',
+             'title': 'בשעה 12:38 התקבל דיווח במוקד 101 של מד"א במרחב ירדן על ת.ד סמוך למסעדה. חובשים ופראמדיקים של מד"א מעניקים טיפול רפואי ל4 פצועים, בהם 1 מחוסר הכרה.',
+             'description': 'בשעה 12:38 התקבל דיווח במוקד 101 של מד"א במרחב ירדן על ת.ד סמוך למסעדה. חובשים ופראמדיקים של מד"א מעניקים טיפול רפואי ל4 פצועים, בהם 1 מחוסר הכרה.',
+             'tweet_id': '1267037315869880321',
+             'tweet_ts': 'Sun May 31 10:16:51 +0000 2020',
+             'accident': True,
+             'location': 'בשעה 12:38 התקבל דיווח במוקד 101 של מד"א במרחב ירדן על ת',  # Note: erroneous expected
+             'lat': 32.052603,
+             'lon': 34.7666179,
+             'resolution': 'רחוב',
+             'region_hebrew': None,
+             'district_hebrew': None,
+             'yishuv_name': None,
+             'street1_hebrew': None,
+             'street2_hebrew': None,
+             'non_urban_intersection_hebrew': None,
+             'road1': None,
+             'road2': None,
+             'road_segment_name': None
+         }
+    ]
+    for tweet, expected in zip(tweets, expected_list):
+        actual = twitter.parse_tweet(tweet, 'mda_israel')
+        # check only the parse-only part
+        assert all([actual[k] == expected[k] for k in actual])
+
+        actual['accident'] = classify_tweets(actual['description'])
+        assert actual['accident'] == expected['accident']
+
+        if actual['accident']:
+            location_extraction.extract_geo_features(actual)
+            # check only the extracted part
+            assert all([actual[k] == expected[k] for k in expected])

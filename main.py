@@ -19,10 +19,6 @@ def valid_date(date_string):
         raise argparse.ArgumentTypeError(msg)
 
 
-def get_google_maps_key():
-    return os.environ.get("GOOGLE_MAPS_KEY")
-
-
 @click.group()
 def cli():
     pass
@@ -60,12 +56,11 @@ def update_news_flash():
 def update(source, news_flash_id):
     from anyway.parsers.news_flash_updater import main
 
-    key = get_google_maps_key()
     if not source:
         source = None
     if not news_flash_id:
         news_flash_id = None
-    return main(key, source, news_flash_id)
+    return main(source, news_flash_id)
 
 
 @update_news_flash.command()
@@ -122,8 +117,7 @@ def cbs(
 @process.command()
 def news_flash():
     from anyway.parsers.scrape_flash_news import main
-    key = get_google_maps_key()
-    return main(key)
+    return main()
 
 
 @process.command()

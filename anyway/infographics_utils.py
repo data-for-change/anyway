@@ -737,16 +737,20 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     return json.dumps(output, default=str)
 
 
-def get_infographics_data(news_flash_id, number_of_years_ago):
+def get_infographics_data(news_flash_id, years_ago):
     try:
-        cache_data = infographics_data_cache_updater.get_infographics_data_from_cache(news_flash_id, number_of_years_ago)
-        logging.debug(f'returned value from cache:{type(cache_data)}:{cache_data}')
+        res = infographics_data_cache_updater.get_infographics_data_from_cache(news_flash_id, years_ago)
     except Exception as e:
-        logging.error(f'Exception while retrieving from infographics cache({news_flash_id},{number_of_years_ago})'
+        logging.error(f'Exception while retrieving from infographics cache({news_flash_id},{years_ago})'
                       f':cause:{e.__cause__}, class:{e.__class__}')
-        cache_data = {}
-    if cache_data:
-        return cache_data
+        res = {}
+    if res:
+        data_from_cache = True
     else:
-        return create_infographics_data(news_flash_id, number_of_years_ago)
+        data_from_cache = False
+        res = create_infographics_data(news_flash_id, years_ago)
+    logging.debug(f'infographics_data({news_flash_id}, {years_ago}) '
+                  f'{"from cache" if data_from_cache else "created"}')
+    return res
+
 

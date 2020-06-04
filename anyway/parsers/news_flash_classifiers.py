@@ -1,6 +1,6 @@
-def tweet_with_accident_veichle_and_person(text):
+def tweet_with_accident_vehicle_and_person(text):
     """
-    check if tweet contains words indicating an accident between person and veichle
+    check if tweet contains words indicating an accident between person and vehicle
     :param text: tweet text
     :return: boolean, true if tweet contains words, false for others
     """
@@ -29,11 +29,11 @@ def tweet_with_car_accident(text):
     return False
 
 
-def tweet_with_veichles(text):
+def tweet_with_vehicles(text):
     """
     check if tweet contains veichle word
     :param text: tweet text
-    :return: boolean, true if tweet contains veichle, false for others
+    :return: boolean, true if tweet contains vehicle, false for others
     """
     if (
         "רכב" in text
@@ -56,13 +56,13 @@ def classify_tweets(text):
     :return: boolean, true if tweet is about car accident, false for others
     """
     return text.startswith("בשעה") and (
-        tweet_with_accident_veichle_and_person(text)
+        tweet_with_accident_vehicle_and_person(text)
         or tweet_with_car_accident(text)
-        or tweet_with_veichles(text)
+        or tweet_with_vehicles(text)
     )
 
 
-def classify_ynet(text):
+def classify_rss(text):
     """
     classify ynet news flash for news flash about car accidents and others
     :param text: news flash text

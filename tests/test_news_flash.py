@@ -116,19 +116,6 @@ twitter_expected_list = [
          'tweet_id': '1267037315869880321',
          'tweet_ts': 'Sun May 31 10:16:51 +0000 2020',
          'accident': True,
-         'location': 'בשעה 12:38 התקבל דיווח במוקד 101 של מד"א במרחב ירדן על ת',  # Note: erroneous expected
-         'lat': 32.052603,
-         'lon': 34.7666179,
-         'resolution': 'רחוב',
-         'region_hebrew': None,
-         'district_hebrew': None,
-         'yishuv_name': None,
-         'street1_hebrew': None,
-         'street2_hebrew': None,
-         'non_urban_intersection_hebrew': None,
-         'road1': None,
-         'road2': None,
-         'road_segment_name': None
      }
 ]
 
@@ -146,12 +133,39 @@ def test_twitter_parse():
         actual['accident'] = classify_tweets(actual['description'])
         assert actual['accident'] == expected['accident']
 
+
+def test_extract_location():
     if not secrets.exists('GOOGLE_MAPS_KEY'):
         pytest.skip('Could not find GOOGLE_MAPS_KEY')
 
-    for actual, expected in zip(actual_list, twitter_expected_list):
-        if actual['accident']:
-            location_extraction.extract_geo_features(actual)
-            # check only the extracted part
-            for k in expected:
-                assert (k, actual[k]) == (k, expected[k])
+    parsed = {
+        'link': 'https://twitter.com/mda_israel/status/1253010741080326148',
+        'title': 'בשעה 19:39 התקבל דיווח במוקד 101 של מד"א במרחב דן על הולכת רגל שככל הנראה נפגעה מאופנוע ברחוב ביאליק ברמת גן. צוותי מד"א מעניקים טיפול ומפנים לבי"ח איכילוב 2 פצועים: אישה כבת 30 במצב קשה, עם חבלה רב מערכתית ורוכב האופנוע, צעיר בן 18 במצב בינוני, עם חבלות בראש ובגפיים.',
+        'description': 'בשעה 19:39 התקבל דיווח במוקד 101 של מד"א במרחב דן על הולכת רגל שככל הנראה נפגעה מאופנוע ברחוב ביאליק ברמת גן. צוותי מד"א מעניקים טיפול ומפנים לבי"ח איכילוב 2 פצועים: אישה כבת 30 במצב קשה, עם חבלה רב מערכתית ורוכב האופנוע, צעיר בן 18 במצב בינוני, עם חבלות בראש ובגפיים.',
+        'source': 'twitter',
+        'tweet_id': '1,253,010,741,080,326,144',
+        'accident': True,
+        'author': 'מגן דוד אדום',
+        'date': '2020-04-22 19:39',
+    }
+    expected = {
+        **parsed,
+        'lat': 32.0861791,
+        'lon': 34.8098462,
+        'resolution': 'רחוב',
+        'location': 'רחוב ביאליק ברמת גן',
+        'road_segment_name': None,  # 'צומת כיכר הציונות - צומת נווה ישראל',
+        'district_hebrew': None,
+        'non_urban_intersection_hebrew': None,
+        'region_hebrew': None,
+        'road1': None,  # '482',
+        'road2': None,
+        'street1_hebrew': None,  # FIX
+        'street2_hebrew': None,
+        'yishuv_name': None,  # FIX
+    }
+
+    actual = parsed.copy()
+    location_extraction.extract_geo_features(actual)
+    # check only the extracted part
+    assert actual == expected

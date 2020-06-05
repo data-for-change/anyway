@@ -41,7 +41,9 @@ MarkerResult = namedtuple("MarkerResult", ["accident_markers", "rsa_markers", "t
 
 db_encoding = "utf-8"
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
+                    level=logging.DEBUG,
+                    datefmt='%Y-%m-%d %H:%M:%S')
 
 roles_users = Table(
     "roles_users",

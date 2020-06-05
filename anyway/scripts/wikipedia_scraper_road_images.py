@@ -1,9 +1,8 @@
 """
 This script gets all Israeli road images from Wikipedia
 """
-
+import os
 import re
-import json
 import argparse
 import logging
 import urllib.request
@@ -15,9 +14,13 @@ WIKIPEDIA_ISRAELI_ROADS_LINK = "https://he.wikipedia.org/wiki/%D7%9B%D7%91%D7%99
 WIKIPEDIA_RELEVANT_DOMAIN = "https://he.wikipedia.org"
 
 
-def main(dest_folder, download_images):
+def main(dest_folder):
     all_road_page_links = set()
     road_num_to_link_map = {}
+
+    extra_svg_files = rf'{dest_folder}/extra_svg_files'
+    if not os.path.exists(extra_svg_files):
+        os.makedirs(extra_svg_files)
 
     # updates all_road_page_links with links to specific road page from the main page WIKIPEDIA_ISRAELI_ROADS_LINK
     update_all_road_page_links(all_road_page_links)
@@ -38,7 +41,7 @@ def main(dest_folder, download_images):
 
         for road_svg in all_road_svgs:
 
-            road_num, road_file_name = get_road_num_from_svg_link(
+            road_num = get_road_num_from_svg_link(
                 road_num_pattern, road_svg
             )
             if road_num is None:
@@ -49,27 +52,19 @@ def main(dest_folder, download_images):
                 continue
             svg_file = "https:" + svg_file
 
-            if road_num not in road_num_to_link_map:
+            if road_num in road_num_to_link_map:
+                file_path = f"{extra_svg_files}/{road_num}.svg"
+            else:
+                file_path = f"{dest_folder}/{road_num}.svg"
                 road_num_to_link_map[road_num] = set()
+
             road_num_to_link_map[road_num].add(svg_file)
 
-            if download_images:
-                svg_file_download = urllib.request.urlopen(svg_file)
-                file_path = f"{dest_folder}/{road_file_name}"
-                with open(file_path, "wb") as localFile:
-                    localFile.write(svg_file_download.read())
+            svg_file_download = urllib.request.urlopen(svg_file)
+            with open(file_path, "wb") as localFile:
+                localFile.write(svg_file_download.read())
 
-    logger.info("Saving road SVG links to file...")
-    file_path = f"{dest_folder}/road_num_to_svg_links_map.json"
-    with open(file_path, "w") as localFile:
-        json.dump(road_num_to_link_map, localFile, default=serialize_sets)
     logger.info("Done")
-
-
-def serialize_sets(obj):
-    if isinstance(obj, set):
-        return list(obj)
-    return obj
 
 
 def find_all_road_svg_links(link_suffix, svg_extension_pattern):
@@ -86,16 +81,18 @@ def find_all_road_svg_links(link_suffix, svg_extension_pattern):
             )
             return []
         soup = BeautifulSoup(road_page, "lxml")
-        road_info_box = soup.find("table", class_="infobox")
-        if road_info_box is None:
-            return []
+        road_info_boxes = soup.findAll("table", class_="infobox")
+        for road_info_box in road_info_boxes:
+            if road_info_box is None:
+                continue
 
-        road_info_box_first_cell = road_info_box.find("tr")
-        road_svgs_from_info_box = road_info_box_first_cell.findAll("a")
+            road_info_box_first_cell = road_info_box.find("tr")
+            road_svgs_from_info_box = road_info_box_first_cell.findAll("a")
 
-        for road_svg in road_svgs_from_info_box:
-            road_svg_link_suffix = road_svg.get("href")
-            all_road_svgs.append(road_svg_link_suffix)
+            for road_svg in road_svgs_from_info_box:
+                road_svg_link_suffix = road_svg.get("href")
+                if svg_extension_pattern.search(road_svg_link_suffix) is not None:
+                    all_road_svgs.append(road_svg_link_suffix)
 
     return all_road_svgs
 
@@ -103,10 +100,9 @@ def find_all_road_svg_links(link_suffix, svg_extension_pattern):
 def get_road_num_from_svg_link(road_num_pattern, road_svg_link_suffix):
     road_num_match = road_num_pattern.search(road_svg_link_suffix)
     if road_num_match is None:
-        return None, None
+        return None
     road_num = road_num_match.group(2)
-    road_file_name = road_num_match.group(0)
-    return road_num, road_file_name
+    return road_num
 
 
 def get_svg_file_from_svg_page(road_svg_link_suffix, svg_extension_pattern):
@@ -122,7 +118,7 @@ def get_svg_file_from_svg_page(road_svg_link_suffix, svg_extension_pattern):
         )
     except urllib.error.HTTPError as e:
         logger.debug(
-            f"could not get image file - {WIKIPEDIA_RELEVANT_DOMAIN + road_svg_link_suffix}. skipping..."
+            f"could not get SVG file - {WIKIPEDIA_RELEVANT_DOMAIN + road_svg_link_suffix}."
         )
         return None
     soup = BeautifulSoup(road_svg_file, "lxml")
@@ -181,12 +177,6 @@ if __name__ == "__main__":
         type=str,
         help="destination folder to download to road svgs data",
     )
-    parser.add_argument(
-        "--download_images",
-        default=False,
-        type=bool,
-        help="flag indicating if the script should download svg files to dest_folder",
-    )
     args = parser.parse_args()
 
-    main(args.dest_folder, args.download_images)
+    main(args.dest_folder)

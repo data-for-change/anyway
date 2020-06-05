@@ -154,15 +154,15 @@ def test_extract_location():
         'lon': 34.8098462,
         'resolution': 'רחוב',
         'location': 'רחוב ביאליק ברמת גן',
-        'road_segment_name': None,  # 'צומת כיכר הציונות - צומת נווה ישראל',
+        'road_segment_name': None,
         'district_hebrew': None,
         'non_urban_intersection_hebrew': None,
         'region_hebrew': None,
-        'road1': None,  # '482',
+        'road1': None,
         'road2': None,
-        'street1_hebrew': None,  # FIX
+        'street1_hebrew': 'ביאליק',
         'street2_hebrew': None,
-        'yishuv_name': None,  # FIX
+        'yishuv_name': 'רמת גן',
     }
 
     actual = parsed.copy()

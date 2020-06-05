@@ -41,6 +41,7 @@ def parse_creation_datetime(created_at):
 
 
 def extract_accident_time(text):
+    # Currently unused
     reg_exp = r"בשעה (\d{2}:\d{2})"
     time_search = re.search(reg_exp, text)
     if time_search:
@@ -51,7 +52,7 @@ def extract_accident_time(text):
 def parse_tweet(tweet, screen_name):
     return {
         "link": "https://twitter.com/{}/status/{}".format(screen_name, tweet["id_str"]),
-        "date_parsed": parse_creation_datetime(tweet["created_at"]),
+        "date": parse_creation_datetime(tweet["created_at"]),
         "source": "twitter",
         "author": to_hebrew[screen_name],
         "title": tweet["full_text"],
@@ -64,15 +65,10 @@ def parse_tweet(tweet, screen_name):
 def scrape_extract_store(screen_name, db):
     latest_date = db.get_latest_date_of_source("twitter")
     for item in scrape(screen_name, db.get_latest_tweet_id()):
-        if item["date_parsed"] < latest_date:
+        if item["date"] < latest_date:
             # We can break if we're guaranteed the order is descending
             continue
         item["accident"] = classify_tweets(item["title"])
         if item["accident"]:
-            item["date"] = (
-                item["date_parsed"].strftime("%Y-%m-%d")
-                + " "
-                + extract_accident_time(item["description"])
-            )
             extract_geo_features(item)
         db.insert_new_flash_news(**item)

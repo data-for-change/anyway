@@ -31,7 +31,7 @@ def fetch_rss_ynet(link):
 def test_scrape_walla():
     items_expected = [
         {
-            "date_parsed": datetime.datetime(2020, 5, 23, 16, 55),
+            "date": datetime.datetime(2020, 5, 23, 16, 55),
             "title": 'פרקליטי רה"מ יתלוננו נגד רביב דרוקר על שיבוש הליכי משפט',
             "link": "https://news.walla.co.il/break/3362504",
             "source": "walla",
@@ -39,7 +39,7 @@ def test_scrape_walla():
             "description": 'פרקליטיו של ראש הממשלה בנימין נתניהו מתכוונים להגיש הערב (שבת) תלונה ליועץ המשפטי לממשלה, אביחי מנדלבליט, נגד העיתונאי רביב דרוקר בטענה ששיבש הליכי משפט והדיח עד בתוכניתו "המקור". התלונה מתייחסת לראיונות שנתנו לתוכנית עדי תביעה במשפטו של נתניהו, בהם שאול אלוביץ\' ומומו פילבר.]]>',
         },
         {
-            "date_parsed": datetime.datetime(2020, 5, 22, 13, 14),
+            "date": datetime.datetime(2020, 5, 22, 13, 14),
             "title": "פקיסטן: לפחות נוסע אחד שרד את התרסקות המטוס",
             "link": "https://news.walla.co.il/break/3362389",
             "source": "walla",
@@ -59,7 +59,7 @@ def test_scrape_walla():
 def test_scrape_ynet():
     items_expected = [
         {
-            "date_parsed": datetime.datetime(2020, 5, 22, 18, 27, 32),
+            "date": datetime.datetime(2020, 5, 22, 18, 27, 32),
             "title": "קפריסין הודיעה: ישראלים יוכלו להיכנס למדינה החל מה-9 ביוני",
             "link": "http://www.ynet.co.il/articles/0,7340,L-5735229,00.html",
             "source": "ynet",
@@ -67,7 +67,7 @@ def test_scrape_ynet():
             "description": ": \"שר התחבורה של קפריסין הודיע על תוכנית לפתיחת שדות התעופה וחידוש הטיסות החל מה-9 ביוני. התוכנית שאושרה בידי הממשלה חולקה לשני שלבים לפי תאריכים ומדינות שיורשו להיכנס בשעריה. עד ה-19 ביוני נוסעים מכל המקומות יצטרכו להיבדק לקורונה 72 שעות לפני מועד הטיסה. מה-20 ביוני יידרשו לכך רק נוסעים משוויץ, פולין רומניה, קרואטיה, אסטוניה וצ'כיה. בתי המלון ייפתחו ב-1 ביוני, וחובת הבידוד תבוטל ב-20 ביוני.   ",
         },
         {
-            "date_parsed": datetime.datetime(2020, 5, 22, 15, 8, 48),
+            "date": datetime.datetime(2020, 5, 22, 15, 8, 48),
             "link": "http://www.ynet.co.il/articles/0,7340,L-5735178,00.html",
             "source": "ynet",
             "author": "אלישע בן קימון",
@@ -98,7 +98,7 @@ def test_scrape_sanity_online():
 twitter_expected_list = [
     {
          'link': 'https://twitter.com/mda_israel/status/1267054794587418630',
-         'date_parsed': datetime.datetime(2020, 5, 31, 14, 26, 18),
+         'date': datetime.datetime(2020, 5, 31, 14, 26, 18),
          'source': 'twitter',
          'author': 'מגן דוד אדום',
          'title': 'בשעה 13:19 התקבל דיווח במוקד 101 של מד"א במרחב ירושלים על פועל שנפצע במהלך עבודתו במפעל באזור התעשיה עטרות בירושלים. חובשים ופראמדיקים של מד"א מעניקים טיפול רפואי ומפנים לבי"ח שערי צדק גבר בן 31 במצב קשה, עם חבלת ראש.',
@@ -108,7 +108,7 @@ twitter_expected_list = [
     },
     {
          'link': 'https://twitter.com/mda_israel/status/1267037315869880321',
-         'date_parsed': datetime.datetime(2020, 5, 31, 13, 16, 51),
+         'date': datetime.datetime(2020, 5, 31, 13, 16, 51),
          'source': 'twitter',
          'author': 'מגן דוד אדום',
          'title': 'בשעה 12:38 התקבל דיווח במוקד 101 של מד"א במרחב ירדן על ת.ד סמוך למסעדה. חובשים ופראמדיקים של מד"א מעניקים טיפול רפואי ל4 פצועים, בהם 1 מחוסר הכרה.',

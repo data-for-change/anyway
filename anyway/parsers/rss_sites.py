@@ -57,9 +57,7 @@ def scrape(site_name, *, fetch_rss=_fetch, fetch_html=_fetch):
         raw_date = item_rss_soup.pubdate.get_text()
         link = item_rss_soup.guid.get_text()
 
-        date_parsed = datetime.datetime.strptime(raw_date, config["time_format"]).replace(
-            tzinfo=None
-        )
+        date = datetime.datetime.strptime(raw_date, config["time_format"]).replace(tzinfo=None)
 
         html_text = fetch_html(link)
         item_html_soup = BeautifulSoup(html_text, "lxml")
@@ -67,7 +65,7 @@ def scrape(site_name, *, fetch_rss=_fetch, fetch_html=_fetch):
         author, title, description = config["parser"](item_rss_soup, item_html_soup)
         yield {
             "link": link,
-            "date_parsed": date_parsed,
+            "date": date,
             "source": site_name,
             "author": author,
             "title": title,
@@ -78,7 +76,7 @@ def scrape(site_name, *, fetch_rss=_fetch, fetch_html=_fetch):
 def scrape_extract_store(site_name, db):
     latest_date = db.get_latest_date_of_source(site_name) or datetime.date.min
     for item in scrape(site_name):
-        if item["date_parsed"] < latest_date:
+        if item["date"] < latest_date:
             break
         item["accident"] = classify_rss(item["title"])
         if item["accident"]:

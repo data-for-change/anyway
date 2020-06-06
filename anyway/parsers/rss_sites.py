@@ -29,16 +29,20 @@ def parse_ynet(rss_soup, html_soup):
 
 sites_config = {
     "ynet": {
-        "rss": "https://www.ynet.co.il/Integration/StoryRss1854.xml",
-        "time_format": "%a, %d %b %Y %H:%M:%S %z",
+        "rss": "https://www.ynet.co.il:443/Integration/StoryRss1854.xml",
         "parser": parse_ynet,
     },
-    "walla": {
-        "rss": "https://rss.walla.co.il/feed/22",
-        "time_format": "%a, %d %b %Y %H:%M:%S %Z",
-        "parser": parse_walla,
-    },
+    "walla": {"rss": "https://rss.walla.co.il:443/feed/22", "parser": parse_walla,},
 }
+
+
+def parse_date(raw_date: str):
+    try:
+        date = datetime.datetime.strptime(raw_date, "%a, %d %b %Y %H:%M:%S %z")
+    except ValueError:
+        # Walla uses inconsistent date format
+        date = datetime.datetime.strptime(raw_date, "%a, %d %b %Y %H:%M:%S %Z")
+    return date.replace(tzinfo=None)
 
 
 def _fetch(url: str) -> str:
@@ -50,7 +54,7 @@ def scrape(site_name, *, fetch_rss=_fetch, fetch_html=_fetch):
     rss_text = fetch_rss(config["rss"])
 
     # Patch RSS issue in walla. This might create duplicate `guid` field
-    rss_text = rss_text.replace('link', 'guid')
+    rss_text = rss_text.replace("link", "guid")
 
     rss_soup = BeautifulSoup(rss_text, features="lxml")
     rss_soup_items = rss_soup.find_all("item")
@@ -58,12 +62,10 @@ def scrape(site_name, *, fetch_rss=_fetch, fetch_html=_fetch):
     assert rss_soup_items
 
     for item_rss_soup in rss_soup_items:
-        raw_date = item_rss_soup.pubdate.get_text()
         link = item_rss_soup.guid.get_text()
+        date = parse_date(item_rss_soup.pubdate.get_text())
 
-        date = datetime.datetime.strptime(raw_date, config["time_format"]).replace(tzinfo=None)
-
-        html_text = fetch_html(link)
+        html_text = fetch_html(link.replace(".com/", ".com:443/"))
         item_html_soup = BeautifulSoup(html_text, "lxml")
 
         author, title, description = config["parser"](item_rss_soup, item_html_soup)

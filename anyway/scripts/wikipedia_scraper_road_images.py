@@ -10,7 +10,10 @@ from bs4 import BeautifulSoup
 
 logger = logging.getLogger("wikipedia_road_scraper")
 
-WIKIPEDIA_ISRAELI_ROADS_LINK = "https://he.wikipedia.org/wiki/%D7%9B%D7%91%D7%99%D7%A9%D7%99_%D7%99%D7%A9%D7%A8%D7%90%D7%9C"
+WIKIPEDIA_ISRAELI_ROADS_LINK = (
+    "https://he.wikipedia.org/wiki/%D7%9B%D7%91%D7%99%D7%A9%D7%99_%D7"
+    "%99%D7%A9%D7%A8%D7%90%D7%9C "
+)
 WIKIPEDIA_RELEVANT_DOMAIN = "https://he.wikipedia.org"
 
 
@@ -18,11 +21,12 @@ def main(dest_folder):
     all_road_page_links = set()
     road_num_to_link_map = {}
 
-    extra_svg_files = rf'{dest_folder}/extra_svg_files'
+    extra_svg_files = rf"{dest_folder}/extra_svg_files"
     if not os.path.exists(extra_svg_files):
         os.makedirs(extra_svg_files)
 
-    # updates all_road_page_links with links to specific road page from the main page WIKIPEDIA_ISRAELI_ROADS_LINK
+    # updates all_road_page_links with links to specific road page from the main page
+    # WIKIPEDIA_ISRAELI_ROADS_LINK
     update_all_road_page_links(all_road_page_links)
 
     logger.info("Got all road page links, starting to process road links")
@@ -41,9 +45,7 @@ def main(dest_folder):
 
         for road_svg in all_road_svgs:
 
-            road_num = get_road_num_from_svg_link(
-                road_num_pattern, road_svg
-            )
+            road_num = get_road_num_from_svg_link(road_num_pattern, road_svg)
             if road_num is None:
                 continue
 

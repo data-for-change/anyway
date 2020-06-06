@@ -10,7 +10,10 @@ from bs4 import BeautifulSoup
 
 logger = logging.getLogger("wikipedia_road_scraper")
 
-WIKIPEDIA_ISRAELI_ROADS_LINK = "https://he.wikipedia.org/wiki/%D7%9B%D7%91%D7%99%D7%A9%D7%99_%D7%99%D7%A9%D7%A8%D7%90%D7%9C"
+WIKIPEDIA_ISRAELI_ROADS_LINK = (
+    "https://he.wikipedia.org/wiki/%D7%9B%D7%91%D7%99%D7%A9%D7%99_%D7"
+    "%99%D7%A9%D7%A8%D7%90%D7%9C "
+)
 WIKIPEDIA_RELEVANT_DOMAIN = "https://he.wikipedia.org"
 
 
@@ -18,11 +21,12 @@ def main(dest_folder):
     all_road_page_links = set()
     road_num_to_link_map = {}
 
-    extra_svg_files = rf'{dest_folder}/extra_svg_files'
+    extra_svg_files = rf"{dest_folder}/extra_svg_files"
     if not os.path.exists(extra_svg_files):
         os.makedirs(extra_svg_files)
 
-    # updates all_road_page_links with links to specific road page from the main page WIKIPEDIA_ISRAELI_ROADS_LINK
+    # updates all_road_page_links with links to specific road page from the main page
+    # WIKIPEDIA_ISRAELI_ROADS_LINK
     update_all_road_page_links(all_road_page_links)
 
     logger.info("Got all road page links, starting to process road links")
@@ -41,9 +45,7 @@ def main(dest_folder):
 
         for road_svg in all_road_svgs:
 
-            road_num = get_road_num_from_svg_link(
-                road_num_pattern, road_svg
-            )
+            road_num = get_road_num_from_svg_link(road_num_pattern, road_svg)
             if road_num is None:
                 continue
 
@@ -113,9 +115,7 @@ def get_svg_file_from_svg_page(road_svg_link_suffix, svg_extension_pattern):
 
     # get svg file
     try:
-        road_svg_file = urllib.request.urlopen(
-            WIKIPEDIA_RELEVANT_DOMAIN + road_svg_link_suffix
-        )
+        road_svg_file = urllib.request.urlopen(WIKIPEDIA_RELEVANT_DOMAIN + road_svg_link_suffix)
     except urllib.error.HTTPError as e:
         logger.debug(
             f"could not get SVG file - {WIKIPEDIA_RELEVANT_DOMAIN + road_svg_link_suffix}."
@@ -136,9 +136,7 @@ def update_all_road_page_links(all_road_links):
     try:
         page = urllib.request.urlopen(WIKIPEDIA_ISRAELI_ROADS_LINK)
     except urllib.error.HTTPError as e:
-        logger.debug(
-            f"could not get main page for all roads - {WIKIPEDIA_ISRAELI_ROADS_LINK}"
-        )
+        logger.debug(f"could not get main page for all roads - {WIKIPEDIA_ISRAELI_ROADS_LINK}")
         return
 
     soup = BeautifulSoup(page, "lxml")
@@ -165,17 +163,13 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
     sh = logging.StreamHandler()
     sh.setLevel(logging.DEBUG)
-    formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    )
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     sh.setFormatter(formatter)
     logger.addHandler(sh)
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--dest_folder",
-        type=str,
-        help="destination folder to download to road svgs data",
+        "--dest_folder", type=str, help="destination folder to download to road svgs data"
     )
     args = parser.parse_args()
 

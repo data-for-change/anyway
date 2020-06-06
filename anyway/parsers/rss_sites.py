@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 
 from .location_extraction import extract_geo_features
 from .news_flash_classifiers import classify_rss
+from . import timezones
 
 
 def parse_walla(rss_soup, html_soup):
@@ -36,15 +37,6 @@ sites_config = {
 }
 
 
-def parse_date(raw_date: str):
-    try:
-        date = datetime.datetime.strptime(raw_date, "%a, %d %b %Y %H:%M:%S %z")
-    except ValueError:
-        # Walla uses inconsistent date format
-        date = datetime.datetime.strptime(raw_date, "%a, %d %b %Y %H:%M:%S %Z")
-    return date.replace(tzinfo=None)
-
-
 def _fetch(url: str) -> str:
     return requests.get(url).text
 
@@ -63,7 +55,7 @@ def scrape(site_name, *, fetch_rss=_fetch, fetch_html=_fetch):
 
     for item_rss_soup in rss_soup_items:
         link = item_rss_soup.guid.get_text()
-        date = parse_date(item_rss_soup.pubdate.get_text())
+        date = timezones.parse_creation_datetime(item_rss_soup.pubdate.get_text())
 
         html_text = fetch_html(link.replace(".com/", ".com:443/"))
         item_html_soup = BeautifulSoup(html_text, "lxml")

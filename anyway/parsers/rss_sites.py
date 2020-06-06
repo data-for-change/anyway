@@ -48,7 +48,11 @@ def _fetch(url: str) -> str:
 def scrape(site_name, *, fetch_rss=_fetch, fetch_html=_fetch):
     config = sites_config[site_name]
     rss_text = fetch_rss(config["rss"])
-    rss_soup = BeautifulSoup(rss_text, "lxml")
+
+    # Patch RSS issue in walla. This might create duplicate `guid` field
+    rss_text = rss_text.replace('link', 'guid')
+
+    rss_soup = BeautifulSoup(rss_text, features="lxml")
     rss_soup_items = rss_soup.find_all("item")
 
     assert rss_soup_items

@@ -43,6 +43,8 @@ Note - this will delete all of your local DB data!
     `docker-compose up`
 It will take a few minutes until it's done.
 
+In case you didn't build the images with a backup data, you can prompt the DB image to download and restore the image at DB initialization time by specifying `RESTORE_DB=TRUE` and `GDRIVE_FILE_ID=<GDRIVE_FILE_ID value>` as environment variables for `db` in `docker-compose.yml`
+
 **7.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
 If you need to see the map contact atalya via slack to get a developer key.
@@ -62,6 +64,8 @@ Note - this will delete all of your local DB data!
 **6.** Start the container, go to the **anyway** directory and run:
     `sudo docker-compose up`
 It will take a few minutes until it's done.
+
+In case you didn't build the images with a backup data, you can prompt the DB image to download and restore the image at DB initialization time by specifying `RESTORE_DB=TRUE` and `GDRIVE_FILE_ID=<GDRIVE_FILE_ID value>` as environment variables for `db` in `docker-compose.yml`
 
 **7.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.

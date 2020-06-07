@@ -10,14 +10,10 @@ import os
 
 SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
 APP_SECRET_KEY = os.environ.get('APP_SECRET_KEY')
-if SQLALCHEMY_DATABASE_URI is None:
-    raise Exception('Please, set the DATABASE_URL environment variable to be postgresql://postgres@localhost/anyway')
+SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "postgresql://postgres@localhost/anyway")
 SQLALCHEMY_TRACK_MODIFICATIONS = True
-ENTRIES_PER_PAGE = os.environ.get('ENTRIES_PER_PAGE', 1000)
+ENTRIES_PER_PAGE = os.environ.get("ENTRIES_PER_PAGE", 1000)
 SQLALCHEMY_POOL_RECYCLE = 60
 
 # available languages
-LANGUAGES = {
-    'en': 'English',
-    'he': 'עברית',
-}
+LANGUAGES = {"en": "English", "he": "עברית"}

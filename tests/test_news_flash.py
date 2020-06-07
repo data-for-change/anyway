@@ -1,143 +1,171 @@
 import datetime
+import json
 
-import bs4
+import pytest
 
-from anyway.parsers.news_flash import parsing_utils
+from anyway.parsers import rss_sites, twitter, location_extraction
+from anyway.parsers.news_flash_classifiers import classify_tweets
+from anyway.parsers import secrets
 
 
-def raw_item(section, date, site_name):
-    link = parsing_utils.get_link(section, site_name)
-    if site_name == 'walla':
-        description = parsing_utils.get_description(section, site_name)
-        author = parsing_utils.get_author(section, site_name)
-    else:
-        with open('tests/' + link[-len('0,7340,L-5735229,00.html'):], encoding='utf-8') as f:
-            item = f.read()
-        item_soup = bs4.BeautifulSoup(item, "html.parser")
-        description = parsing_utils.get_description(item_soup, site_name)
-        author = parsing_utils.get_author(item_soup, site_name)
-    return {
-        'date_time': parsing_utils.get_date_time(section, date, site_name),
-        'link': link,
-        'author': author,
-        'title': parsing_utils.get_title(section, site_name),
-        'description': description
+def fetch_html_walla(link):
+    with open("tests/" + link.split("/")[-1] + ".html", encoding="utf-8") as f:
+        return f.read()
+
+
+def fetch_html_ynet(link):
+    with open("tests/" + link[-len("0,7340,L-5735229,00.html") :], encoding="utf-8") as f:
+        return f.read()
+
+
+def fetch_rss_walla(link):
+    with open("tests/walla.xml", encoding="utf-8") as f:
+        return f.read()
+
+
+def fetch_rss_ynet(link):
+    with open("tests/ynet.xml", encoding="utf-8") as f:
+        return f.read()
+
+
+def test_scrape_walla():
+    items_expected = [
+        {
+            "date": datetime.datetime(2020, 5, 23, 16, 55),
+            "title": 'פרקליטי רה"מ יתלוננו נגד רביב דרוקר על שיבוש הליכי משפט',
+            "link": "https://news.walla.co.il/break/3362504",
+            "source": "walla",
+            "author": "דניאל דולב",
+            "description": 'פרקליטיו של ראש הממשלה בנימין נתניהו מתכוונים להגיש הערב (שבת) תלונה ליועץ המשפטי לממשלה, אביחי מנדלבליט, נגד העיתונאי רביב דרוקר בטענה ששיבש הליכי משפט והדיח עד בתוכניתו "המקור". התלונה מתייחסת לראיונות שנתנו לתוכנית עדי תביעה במשפטו של נתניהו, בהם שאול אלוביץ\' ומומו פילבר.]]>',
+        },
+        {
+            "date": datetime.datetime(2020, 5, 22, 13, 14),
+            "title": "פקיסטן: לפחות נוסע אחד שרד את התרסקות המטוס",
+            "link": "https://news.walla.co.il/break/3362389",
+            "source": "walla",
+            "author": "רויטרס",
+            "description": "לפחות נוסע אחד שרד מהתרסקות המטוס הפקיסטני היום (שישי) באזור מגורים בקראצ'י - כך אמר גורם בממשל המקומי. בהודעתו אמר דובר ממשלת המחוז כי בנקאי שהיה על המטוס אותר לאחר ששרד את ההתרסקות. מרשות התעופה האזרחית של פקיסטן נמסר כי היו 91 נוסעים ושמונה אנשי צוות על מטוס איירבוס A320.]]>",
+        },
+    ]
+
+    items_actual = list(
+        rss_sites.scrape("walla", fetch_rss=fetch_rss_walla, fetch_html=fetch_html_walla)
+    )
+    assert len(items_actual) == len(items_expected)
+    for i, (actual, expected) in enumerate(zip(items_actual, items_expected)):
+        assert (i, actual) == (i, expected)
+
+
+def test_scrape_ynet():
+    items_expected = [
+        {
+            "date": datetime.datetime(2020, 5, 22, 18, 27, 32),
+            "title": "קפריסין הודיעה: ישראלים יוכלו להיכנס למדינה החל מה-9 ביוני",
+            "link": "http://www.ynet.co.il/articles/0,7340,L-5735229,00.html",
+            "source": "ynet",
+            "author": "איתמר אייכנר",
+            "description": ": \"שר התחבורה של קפריסין הודיע על תוכנית לפתיחת שדות התעופה וחידוש הטיסות החל מה-9 ביוני. התוכנית שאושרה בידי הממשלה חולקה לשני שלבים לפי תאריכים ומדינות שיורשו להיכנס בשעריה. עד ה-19 ביוני נוסעים מכל המקומות יצטרכו להיבדק לקורונה 72 שעות לפני מועד הטיסה. מה-20 ביוני יידרשו לכך רק נוסעים משוויץ, פולין רומניה, קרואטיה, אסטוניה וצ'כיה. בתי המלון ייפתחו ב-1 ביוני, וחובת הבידוד תבוטל ב-20 ביוני.   ",
+        },
+        {
+            "date": datetime.datetime(2020, 5, 22, 15, 8, 48),
+            "link": "http://www.ynet.co.il/articles/0,7340,L-5735178,00.html",
+            "source": "ynet",
+            "author": "אלישע בן קימון",
+            "title": "צוותי כיבוי פועלים בשריפת קוצים שמתפשטת סמוך ליצהר שבשומרון",
+            "description": ': "צוותי כיבוי פועלים בשריפת קוצים שמתפשטת לעבר ההתנחלות יצהר שבשומרון. לוחמי האש פועלים למניעת התקדמות השריפה ליצהר על ידי חתירה למגע עם האש ובסיוע מטוסי כיבוי. נמסר כי קיימת סכנה למוצב צבאי במקום.   ',
+        },
+    ]
+
+    items_actual = list(
+        rss_sites.scrape("ynet", fetch_rss=fetch_rss_ynet, fetch_html=fetch_html_ynet)
+    )
+    assert len(items_actual) == len(items_expected)
+    for i, (actual, expected) in enumerate(zip(items_actual, items_expected)):
+        assert (i, actual) == (i, expected)
+
+
+@pytest.mark.slow
+def test_scrape_sanity_online():
+    next(rss_sites.scrape('ynet'))
+    next(rss_sites.scrape('walla'))
+
+    if not secrets.exists('TWITTER_CONSUMER_SECRET'):
+        pytest.skip('Could not find TWITTER_CONSUMER_SECRET')
+
+    assert twitter.scrape('mda_israel', count=1)
+
+
+twitter_expected_list = [
+    {
+         'link': 'https://twitter.com/mda_israel/status/1267054794587418630',
+         'date': datetime.datetime(2020, 5, 31, 14, 26, 18),
+         'source': 'twitter',
+         'author': 'מגן דוד אדום',
+         'title': 'בשעה 13:19 התקבל דיווח במוקד 101 של מד"א במרחב ירושלים על פועל שנפצע במהלך עבודתו במפעל באזור התעשיה עטרות בירושלים. חובשים ופראמדיקים של מד"א מעניקים טיפול רפואי ומפנים לבי"ח שערי צדק גבר בן 31 במצב קשה, עם חבלת ראש.',
+         'description': 'בשעה 13:19 התקבל דיווח במוקד 101 של מד"א במרחב ירושלים על פועל שנפצע במהלך עבודתו במפעל באזור התעשיה עטרות בירושלים. חובשים ופראמדיקים של מד"א מעניקים טיפול רפואי ומפנים לבי"ח שערי צדק גבר בן 31 במצב קשה, עם חבלת ראש.',
+         'tweet_id': '1267054794587418630', 'tweet_ts': 'Sun May 31 11:26:18 +0000 2020',
+         'accident': False
+    },
+    {
+         'link': 'https://twitter.com/mda_israel/status/1267037315869880321',
+         'date': datetime.datetime(2020, 5, 31, 13, 16, 51),
+         'source': 'twitter',
+         'author': 'מגן דוד אדום',
+         'title': 'בשעה 12:38 התקבל דיווח במוקד 101 של מד"א במרחב ירדן על ת.ד סמוך למסעדה. חובשים ופראמדיקים של מד"א מעניקים טיפול רפואי ל4 פצועים, בהם 1 מחוסר הכרה.',
+         'description': 'בשעה 12:38 התקבל דיווח במוקד 101 של מד"א במרחב ירדן על ת.ד סמוך למסעדה. חובשים ופראמדיקים של מד"א מעניקים טיפול רפואי ל4 פצועים, בהם 1 מחוסר הכרה.',
+         'tweet_id': '1267037315869880321',
+         'tweet_ts': 'Sun May 31 10:16:51 +0000 2020',
+         'accident': True,
+     }
+]
+
+
+def test_twitter_parse():
+    with open('tests/twitter.json') as f:
+        tweets = json.load(f)
+
+    actual_list = [twitter.parse_tweet(tweet, 'mda_israel') for tweet in tweets]
+    for actual, expected in zip(actual_list, twitter_expected_list):
+        # check only the parse-only part
+        for k in actual:
+            assert (k, actual[k]) == (k, expected[k])
+
+        actual['accident'] = classify_tweets(actual['description'])
+        assert actual['accident'] == expected['accident']
+
+
+def test_extract_location():
+    if not secrets.exists('GOOGLE_MAPS_KEY'):
+        pytest.skip('Could not find GOOGLE_MAPS_KEY')
+
+    parsed = {
+        'link': 'https://twitter.com/mda_israel/status/1253010741080326148',
+        'title': 'בשעה 19:39 התקבל דיווח במוקד 101 של מד"א במרחב דן על הולכת רגל שככל הנראה נפגעה מאופנוע ברחוב ביאליק ברמת גן. צוותי מד"א מעניקים טיפול ומפנים לבי"ח איכילוב 2 פצועים: אישה כבת 30 במצב קשה, עם חבלה רב מערכתית ורוכב האופנוע, צעיר בן 18 במצב בינוני, עם חבלות בראש ובגפיים.',
+        'description': 'בשעה 19:39 התקבל דיווח במוקד 101 של מד"א במרחב דן על הולכת רגל שככל הנראה נפגעה מאופנוע ברחוב ביאליק ברמת גן. צוותי מד"א מעניקים טיפול ומפנים לבי"ח איכילוב 2 פצועים: אישה כבת 30 במצב קשה, עם חבלה רב מערכתית ורוכב האופנוע, צעיר בן 18 במצב בינוני, עם חבלות בראש ובגפיים.',
+        'source': 'twitter',
+        'tweet_id': '1,253,010,741,080,326,144',
+        'accident': True,
+        'author': 'מגן דוד אדום',
+        'date': '2020-04-22 19:39',
+    }
+    expected = {
+        **parsed,
+        'lat': 32.0861791,
+        'lon': 34.8098462,
+        'resolution': 'רחוב',
+        'location': 'רחוב ביאליק ברמת גן',
+        'road_segment_name': None,
+        'district_hebrew': None,
+        'non_urban_intersection_hebrew': None,
+        'region_hebrew': None,
+        'road1': None,
+        'road2': None,
+        'street1_hebrew': 'ביאליק',
+        'street2_hebrew': None,
+        'yishuv_name': 'רמת גן',
     }
 
-
-def test_parse_walla():
-    with open('tests/walla.html', encoding='utf-8') as f:
-        soup = bs4.BeautifulSoup(f.read(), "lxml")
-    site_name = "walla"
-
-    # TODO: move to a walla.xml file
-    # TODO: date_time should also be textual
-    items_expected = [
-        {'date_time': datetime.datetime(2020, 5, 22, 13, 39), 'link': 'https://news.walla.co.il/break/3362374',
-         'author': 'רויטרס', 'title': "פקיסטן: מטוס עם 107 נוסעים התרסק בעיר קראצ'י",
-         'description': "מטוס ועליו 107 נוסעים ואנשי צוות התרסק לפני זמן קצר (שישי) בעיר קראצ'י בפקיסטן - כך נמסר מגורמים רשמיים במדינה. במקום נמצאים חיילי צבא פקיסטן וכן כוחות הצלה ממשלתיים. לא דווח על קורבנות או ניצולים."},
-        {'date_time': datetime.datetime(2020, 5, 22, 13, 28), 'link': 'https://news.walla.co.il/break/3362372',
-         'author': 'יניר יגנה', 'title': 'הלוחם שנפצע קשה בפיגוע הדריסה שוחרר מטיפול נמרץ',
-         'description': 'שאדי איברהים, חייל צה"ל שנפצע קשה בפיגוע הדריסה בדרום הר חברון ורגלו נקטעה, שוחרר היום (שישי) מטיפול נמרץ בבית החולים סורוקה בבאר שבע. בסרטון שפירסם, אמר לתומכיו, "יצאתי מטיפול נמרץ, תודה רבה לכולם. אני אוהב אתכם".'},
-        {'date_time': datetime.datetime(2020, 5, 22, 13, 6), 'link': 'https://news.walla.co.il/break/3362368',
-         'author': 'יניר יגנה', 'title': 'גבר בן 71 במצב קשה ממכת חום בבאר שבע',
-         'description': 'גבר בן 71 נמצא היום (שישי) מחוסר הכרה בדירה בבאר שבע, ככל הנראה לאחר שנפגע ממכת חום. צוותי מד"א פינו אותו במצב קשה לבית החולים סורוקה.'},
-        {'date_time': datetime.datetime(2020, 5, 22, 12, 35), 'link': 'https://news.walla.co.il/break/3362366',
-         'author': 'אמיר בוחבוט', 'title': 'דיווח: צה"ל עצר בת 45 בחשד למעורבות בהרג לוחם גולני',
-         'description': 'כוחות צה"ל עצרו לפנות בוקר (שישי) בכפר יעבד אישה בת 45 ובתה בת ה-16 במסגרת חקירת הריגתו של לוחם סיירת גולני, עמית בן-יגאל - כך נמסר בכלי תקשורת פלסטיניים. בעלה של האישה חשוד גם הוא במעורבות באירוע ונעצר לפני עשרה ימים.'},
-        {'date_time': datetime.datetime(2020, 5, 22, 11, 41), 'link': 'https://news.walla.co.il/break/3362361',
-         'author': 'בועז אפרת', 'title': 'בת 85 במצב קשה ממכת חום בבני ברק',
-         'description': 'קשישה בת 85 איבדה הכרתה היום (שישי) בדירתה בבני ברק, ככל הנראה ממכת חום. צוותי מד"א פינו אותה במצב קשה לבית החולים מעייני הישועה, כשהיא מורדמת ומונשמת.'},
-        {'date_time': datetime.datetime(2020, 5, 22, 10, 43), 'link': 'https://news.walla.co.il/break/3362359',
-         'author': 'רויטרס', 'title': 'חמינאי: ישראל היא גידול סרטני במזרח התיכון',
-         'description': 'המנהיג העליון של איראן, עלי חמינאי, אמר היום (שישי) כי ישראל היא גידול סרטני במזרח התיכון, והוסיף כי "אין פשע נגד האנושות בזמנים האחרונים שמשתווה לכיבוש פלסטין". את הדברים אמר בתגובה לדברי נתניהו ביום רביעי על כך שמשטר המאיים בחורבן ישראל צפוי לעמוד בסכנה דומה. זאת, לאחר שחמינאי איים לבצע את "הפתרון הסופי" נגד ישראל.'},
-        {'date_time': datetime.datetime(2020, 5, 22, 10, 1), 'link': 'https://news.walla.co.il/break/3362353',
-         'author': 'אלי אשכנזי', 'title': 'טרקטור עלה באש בעמק יזרעאל; צוותי כיבוי אש במקום',
-         'description': 'טרקטור עלה באש לפני זמן קצר (שישי) בתענכים שבעמק יזרעאל. צוותי כיבוי אש ממחוז צפון במקום ופועלים להשתלטות על האש ומניעת התפשטותה לערימות החציר הסמוכות.'},
-        {'date_time': datetime.datetime(2020, 5, 22, 9, 53), 'link': 'https://news.walla.co.il/break/3362351',
-         'author': 'סוכנויות הידיעות', 'title': 'ארה"ב: מניין הנדבקים בקורונה עלה ב-294',
-         'description': "מניין הנדבקים בנגיף הקורונה בארצות הברית עלה ב-294 ביממה האחרונה ל-1,621,196 - כך נמסר היום (שישי) מאוניברסיטת ג'ון הופקינס. מניין המתים עלה בחמישה בני אדם ביממה האחרונה ל-96,359."},
-        {'date_time': datetime.datetime(2020, 5, 22, 8, 53), 'link': 'https://news.walla.co.il/break/3362347',
-         'author': 'דנה ירקצי', 'title': 'סערת הילדה והשמלה: הורים מוחים מול ביה"ס בפ"ת',
-         'description': 'עשרה הורים מוחים הבוקר (שישי) מול בית הספר בפתח תקווה בו מורה אילצה את הילדה בת השבע להוריד את שמלתה בשל אורך השרוולים, מה שהשאיר אותה בתחתונים. ההורים קראו לשר החינוך הנכנס, יואב גלנטף לפתוח בדוח חקירה מקיף על האירוע, ונשאו שלטים של "לחנך בלי להשפיל" ו"יש גבול לאטימות, המורה הביתה".'},
-        {'date_time': datetime.datetime(2020, 5, 22, 7, 52), 'link': 'https://news.walla.co.il/break/3362342',
-         'author': 'סוכנויות הידיעות', 'title': 'פקיסטן: מניין הנדבקים בקורורנה עלה ל-50,694',
-         'description': 'מניין הנדבקים בנגיף הקורונה בפקיסטן עלה ביממה האחרונה ב-2,603 ל-50,694 - כך נמסר היום (שישי) מהרשויות המקומיות. מניין המתים עלה ב-50 ביממה האחרונה ל-1,067.'},
-        {'date_time': datetime.datetime(2020, 5, 22, 6, 43), 'link': 'https://news.walla.co.il/break/3362339',
-         'author': 'יואב איתיאל', 'title': 'התחזית: מעונן חלקית וירידה ניכרת בטמפרטורות',
-         'description': 'מזג האוויר היום (שישי) יהיה מעונן חלקית. תחול ירידה ניכרת בטמפרטורות ועליה בלחות. בהרים ובפנים הארץ יוסיף להיות חם מהרגיל. במהלך הלילה יהיה מעונן חלקית עד מעונן, וייתכנו טפטופים.'},
-        {'date_time': datetime.datetime(2020, 5, 22, 5, 33), 'link': 'https://news.walla.co.il/break/3362337',
-         'author': 'רויטרס', 'title': 'גרמניה: 460 מקרי הידבקות בקורונה ביממה; 27 מתים',
-         'description': '460 מקרי הידבקות בנגיף הקורונה זוהו בגרמניה ביממה האחרונה - כך הודיעו הלילה (שישי) גורמי הבריאות במדינה. בכך, עלה מספר הנדבקים בגרמניה ל-177,212 בני אדם. עוד נמסר כי 27 בני אדם מתו מהנגיף ביממה החולפת, ומניין המתים במדינה עלה ל-8,174.'},
-        {'date_time': datetime.datetime(2020, 5, 22, 4, 38), 'link': 'https://news.walla.co.il/break/3362336',
-         'author': 'רויטרס', 'title': 'מקסיקו: 420 מתים מקורונה ביממה; שיא במספר הנדבקים',
-         'description': '2,973 מקרי הידבקות בנגיף הקורונה זוהו במקסיקו ביממה האחרונה - כך הודיעו הלילה (שישי) גורמי הבריאות במדינה. בכך, עלה סך הנדבקים במקסיקו ל-59,567 בני אדם. מדובר בשיא יומי במספר המקרים המאובחנים במדינה מאז פרוץ המגיפה. עוד נמסר כי ביממה החולפת מתו 420 חולי קורונה, ומניין המתים עלה ל-6,510 בני אדם.'},
-        {'date_time': datetime.datetime(2020, 5, 22, 3, 25), 'link': 'https://news.walla.co.il/break/3362334',
-         'author': 'יואב איתיאל', 'title': 'צום הרמדאן יחל בשעה 04:02 ויסתיים ב-19:40',
-         'description': 'צום הרמדאן יחל היום (שישי) לפנות בוקר בשעה 04:02, ויסתיים בשעה 19:40. העולם המוסלמי מציין את היום ה-29 לחודש הרמדאן.'},
-    ]
-
-    date = parsing_utils.get_date(soup, site_name)
-    assert date == datetime.datetime(2020, 5, 22, 0, 0)
-
-    items_actual = [raw_item(section, date, site_name)
-                    for section in parsing_utils.get_all_news_items(soup, site_name)]
-    assert items_actual == items_expected
-
-
-def test_parse_ynet():
-    with open('tests/ynet.xml', encoding='utf-8') as f:
-        soup = bs4.BeautifulSoup(f.read(), "lxml")
-    site_name = "ynet"
-
-    # TODO: date_time should also be textual
-    items_expected = [
-        {'date_time': datetime.datetime(2020, 5, 22, 18, 27, 32),
-         'link': 'http://www.ynet.co.il/articles/0,7340,L-5735229,00.html', 'author': 'איתמר אייכנר',
-         'title': 'קפריסין הודיעה: ישראלים יוכלו להיכנס למדינה החל מה-9 ביוני',
-         'description': ': "שר התחבורה של קפריסין הודיע על תוכנית לפתיחת שדות התעופה וחידוש הטיסות החל מה-9 ביוני. התוכנית שאושרה בידי הממשלה חולקה לשני שלבים לפי תאריכים ומדינות שיורשו להיכנס בשעריה. עד ה-19 ביוני נוסעים מכל המקומות יצטרכו להיבדק לקורונה 72 שעות לפני מועד הטיסה. מה-20 ביוני יידרשו לכך רק נוסעים משוויץ, פולין רומניה, קרואטיה, אסטוניה וצ\'כיה. בתי המלון ייפתחו ב-1 ביוני, וחובת הבידוד תבוטל ב-20 ביוני.   '},
-        {'date_time': datetime.datetime(2020, 5, 22, 17, 23, 29),
-         'link': 'http://www.ynet.co.il/articles/0,7340,L-5735210,00.html', 'author': 'דניאל סלאמה',
-         'title': 'נסראללה: "פלסטין שייכת לפלסטינים, מלחמות וחיסולים לא ישנו זאת"',
-         'description': ': "מזכ\\"ל חיזבאללה חסן נסראללה אמר בנאום לציון \\"יום אל-קודס\\" '},
-        {'date_time': datetime.datetime(2020, 5, 22, 17, 9, 50),
-         'link': 'http://www.ynet.co.il/articles/0,7340,L-5735206,00.html', 'author': 'אלישע בן קימון',
-         'title': 'לאחר שעות: הושגה שליטה על השריפה באזור יצהר שבשומרון',
-         'description': ': "משירותי הכבאות נמסר כי הושגה שליטה על השריפה שפרצה באזור ההתנחלות יצהר שבשומרון. זאת, \\"לאחר שעות של לחימה עיקשת באש\\". לא דווח על נפגעים או על נזק.   '},
-        {'date_time': datetime.datetime(2020, 5, 22, 17, 6, 44),
-         'link': 'http://www.ynet.co.il/articles/0,7340,L-5735205,00.html', 'author': 'גלעד כרמלי',
-         'title': 'רשות הטבע והגנים: "עקב עומס - מומלץ לא להגיע בקרוב לגן לאומי פלמחים"',
-         'description': ': "רשות הטבע והגנים הודיעה על עומסים כבדים באזור הכניסה לגן הלאומי חוף פלמחים. בשל כך, נמסר כי מומלץ למטיילים לא להגיע לאתר בשעות הקרובות.    '},
-        {'date_time': datetime.datetime(2020, 5, 22, 17, 1, 40),
-         'link': 'http://www.ynet.co.il/articles/0,7340,L-5735204,00.html', 'author': 'ynet',
-         'title': 'סופת הציקלון בדרום אסיה: "יותר מחמישה מיליון תושבים פונו למקלטים"',
-         'description': ': "סוכנות הידיעות \\"בלומברג\\" דיווחה כי יותר מחמישה מיליון תושבים באזורים שבהם הכה הציקלון \\"אמפאן\\" פונו למקלטים ולמקומות מחסה. הסופה שהגיעה שלשום ליבשה באזור הגבול בין הודו לבנגלדש נחשבת לאחת החזקות שפקדו את המקום, ואף ל\\"סופר-ציקלון\\" השני בלבד שנוצר במפרץ בנגל מאז שהחלו הרישומים.   '},
-        {'date_time': datetime.datetime(2020, 5, 22, 16, 34, 42),
-         'link': 'http://www.ynet.co.il/articles/0,7340,L-5735195,00.html', 'author': 'איתמר אייכנר',
-         'title': 'נתניהו מגיב לאיראן: "מי שמאיים על ישראל בהשמדה שם עצמו בסכנה דומה"',
-         'description': ': "ראש הממשלה בנימין נתניהו הגיב לדבריו של המנהיג העליון של איראן עלי חמינאי, שאמר קודם כי \\"וירוס הציונות לא ישרוד לאורך זמן וישראל תוכחד\\", ומסר: \\"אנחנו חוזרים ואומרים - מי שמאיים על ישראל בסכנת השמדה, שם את עצמו בסכנה דומה\\".   '},
-        {'date_time': datetime.datetime(2020, 5, 22, 16, 22, 32),
-         'link': 'http://www.ynet.co.il/articles/0,7340,L-5735191,00.html', 'author': 'אחיה ראב\\"ד',
-         'title': 'השריפה בצפת: הושגה שליטה על האש, נזק נגרם למבנים במקום',
-         'description': ': "המשטרה מסרה כי לוחמי האש השיגו שליטה על שריפת הקוצים שפרצה בצפת, סמוך לרחובות צה\\"ל וקרן היסוד. עוד נמסר כי תושבי הבתים שפונו יכולים לחזור לבתיהם, אולם יתר התושבים מתבקשים שלא להגיע לאזור הדליקה. בנוסף, איש לא נפגע אולם נזק נגרם לנגרייה ולכמה קרוונים במקום.   '},
-        {'date_time': datetime.datetime(2020, 5, 22, 15, 53, 30),
-         'link': 'http://www.ynet.co.il/articles/0,7340,L-5735188,00.html', 'author': 'תמר טרבלסי חדד',
-         'title': 'לאחר שסייעת בגן בראשל"צ נדבקה בנגיף: בדיקות הילדים והצוות שליליות',
-         'description': ': "עיריית ראשון לציון הודיעה כי תוצאות בדיקות הקורונה שנערכו לצוות ולילדים בגן \\"דני גיבור\\" בעיר נמצאו שליליות. הבדיקות נערכו לאחר שסייעת במקום אובחנה בנגיף.   '},
-        {'date_time': datetime.datetime(2020, 5, 22, 15, 26, 32),
-         'link': 'http://www.ynet.co.il/articles/0,7340,L-5735183,00.html', 'author': 'אחיה ראב\\"ד',
-         'title': 'שריפה פרצה בצפת, תושבים פונו מבתיהם',
-         'description': ': "שריפת קוצים פרצה סמוך לרחובות צה\\"ל וקרן היסוד בצפת. כוחות משטרה הוזנקו למקום ובעקבות העשן הסמיך ובמטרה למנוע סכנה, הוחלט יחד עם כוחות הכיבוי, על פינוי קו בתים ראשון בסמוך לזירה. לא ידוע על נפגעים. המשטרה מבקשת מכלל תושבי האזור להגיף את חלונותיהם ולהסתגר בבתים עד הודעה חדשה.   '},
-        {'date_time': datetime.datetime(2020, 5, 22, 15, 8, 48),
-         'link': 'http://www.ynet.co.il/articles/0,7340,L-5735178,00.html', 'author': 'אלישע בן קימון',
-         'title': 'צוותי כיבוי פועלים בשריפת קוצים שמתפשטת סמוך ליצהר שבשומרון',
-         'description': ': "צוותי כיבוי פועלים בשריפת קוצים שמתפשטת לעבר ההתנחלות יצהר שבשומרון. לוחמי האש פועלים למניעת התקדמות השריפה ליצהר על ידי חתירה למגע עם האש ובסיוע מטוסי כיבוי. נמסר כי קיימת סכנה למוצב צבאי במקום.   '},
-    ]
-
-    date = parsing_utils.get_date(soup, site_name)
-    assert date is None
-
-    items_actual = [raw_item(section, date, site_name)
-                    for section in parsing_utils.get_all_news_items(soup, site_name)]
-
-    assert items_actual == items_expected
+    actual = parsed.copy()
+    location_extraction.extract_geo_features(actual)
+    # check only the extracted part
+    assert actual == expected

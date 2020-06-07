@@ -44,7 +44,11 @@ class Constants(object):
         pass
 
     def to_dict(self):
-        return {a: getattr(self, a) for a in dir(self) if not a.startswith('__') and not callable(getattr(self, a))}
+        return {
+            a: getattr(self, a)
+            for a in dir(self)
+            if not a.startswith("__") and not callable(getattr(self, a))
+        }
 
 
 CONST = Constants()

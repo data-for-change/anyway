@@ -1,4 +1,3 @@
-from datetime import datetime, timezone, timedelta
 import re
 
 import tweepy
@@ -8,6 +7,7 @@ from .location_extraction import extract_geo_features
 from . import secrets
 from .news_flash_db_adapter import DBAdapter
 from ..models import NewsFlash
+from . import timezones
 
 to_hebrew = {"mda_israel": "מגן דוד אדום"}
 
@@ -35,16 +35,6 @@ def scrape(screen_name, latest_tweet_id=None, count=100):
         yield parse_tweet(tweet, screen_name)
 
 
-def parse_creation_datetime(created_at):
-    # Example: 'Sun May 31 11:26:18 +0000 2020'
-    time_format = "%a %b %d %H:%M:%S %z %Y"
-    time = datetime.strptime(created_at, time_format)
-    # +3 hours to avoid having to take into account changes in daylight saving time.
-    # It is important that the actual time of the accident is in the past of the tweet.
-    summer_timezone = timezone(offset=timedelta(hours=3))
-    return time.replace(tzinfo=timezone.utc).astimezone(tz=summer_timezone).replace(tzinfo=None)
-
-
 def extract_accident_time(text):
     # Currently unused
     reg_exp = r"בשעה (\d{2}:\d{2})"
@@ -57,7 +47,7 @@ def extract_accident_time(text):
 def parse_tweet(tweet, screen_name):
     return NewsFlash(
         link="https://twitter.com/{}/status/{}".format(screen_name, tweet["id_str"]),
-        date=parse_creation_datetime(tweet["created_at"]),
+        date=timezones.parse_creation_datetime(tweet["created_at"]),
         source="twitter",
         author=to_hebrew[screen_name],
         title=tweet["full_text"],

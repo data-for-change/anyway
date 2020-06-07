@@ -97,10 +97,17 @@ def test_scrape_ynet():
 
 
 @pytest.mark.slow
-def test_scrape_sanity_online():
+def test_scrape_sanity_online_ynet():
     next(rss_sites.scrape('ynet'))
+
+
+@pytest.mark.slow
+def test_scrape_sanity_online_walla():
     next(rss_sites.scrape('walla'))
 
+
+@pytest.mark.slow
+def test_scrape_sanity_online_twitter():
     if not secrets.exists('TWITTER_CONSUMER_SECRET'):
         pytest.skip('Could not find TWITTER_CONSUMER_SECRET')
 

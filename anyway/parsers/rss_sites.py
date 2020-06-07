@@ -58,7 +58,7 @@ def scrape(site_name, *, fetch_rss=_fetch, fetch_html=_fetch):
         link = item_rss_soup.guid.get_text()
         date = timezones.parse_creation_datetime(item_rss_soup.pubdate.get_text())
 
-        html_text = fetch_html(link.replace(".com/", ".com:443/"))
+        html_text = fetch_html(link)
         item_html_soup = BeautifulSoup(html_text, "lxml")
 
         author, title, description = config["parser"](item_rss_soup, item_html_soup)

@@ -19,10 +19,7 @@ services:
     build: db_docker
     container_name: db
     environment:
-      - POSTGRES_PASSWORD=anyway
-      - POSTGRES_USER=anyway
-      - POSTGRES_DB=anyway
-      - DB_DUMP_PATH=/tmp/anyway_public.pgdump
+      - GDRIVE_FILE_ID
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:

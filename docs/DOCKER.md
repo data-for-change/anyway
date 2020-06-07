@@ -35,15 +35,13 @@ Instructions
 Otherwise, to build an existing environment with the most updated DB, remove DB volume by running `docker volume rm anyway_db_data`.
 Note - this will delete all of your local DB data!
 
-**5.** Build anyway container with updated DB data (in anyway main directory): `docker-compose -f docker-compose.yml build --build-arg RESTORE_DB=TRUE --build-arg GDRIVE_FILE_ID="<GDRIVE_FILE_ID value>"`
-- To get <GDRIVE_FILE_ID value> - see part 3
-- If you're having this kind of ERROR:Need service name for --build-arg option, make sure the docker-compose version is 1.25.2 and above (check with `docker-compose --version`)
+**5.** Create a .env file in root of anyway directory with the following content:
+- `GDRIVE_FILE_ID=XXXXXXXXX-YYYYYYYY-ZZZZZZZ`
+- Replace the value with the actual value from part 3
 
 **6.** Start the container, go to the **anyway** directory and run:
     `docker-compose up`
 It will take a few minutes until it's done.
-
-In case you didn't build the images with a backup data, you can prompt the DB image to download and restore the image at DB initialization time by specifying `RESTORE_DB=TRUE` and `GDRIVE_FILE_ID=<GDRIVE_FILE_ID value>` as environment variables for `db` in `docker-compose.yml`
 
 **7.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
@@ -51,27 +49,29 @@ If you need to see the map contact atalya via slack to get a developer key.
 
 **8.** To stop the containers run: `docker-compose down`
 
+**9.** To restore fresh DB data, delete all existing volumes: `docker-compose down -v` then restart from step 6
+
 **For Ubuntu:**
 
 **4.** If this is your first time installing ANYWAY Docker environment - move on to stage 5.
 Otherwise, to build an existing environment with the most updated DB, remove DB volume by running `sudo docker volume rm anyway_db_data`.
 Note - this will delete all of your local DB data!
 
-**5.** Build anyway container with updated DB data (in anyway main directory): `sudo docker-compose -f docker-compose.yml build --build-arg RESTORE_DB=TRUE --build-arg GDRIVE_FILE_ID="<GDRIVE_FILE_ID value>"`
-- To get <GDRIVE_FILE_ID value> - see part 3
-- If you're having this kind of ERROR:Need service name for --build-arg option, make sure the docker-compose version is 1.25.2 and above (check with `sudo docker-compose --version`)
+**5.** Create a .env file in root of anyway directory with the following content:
+- `GDRIVE_FILE_ID=XXXXXXXXX-YYYYYYYY-ZZZZZZZ`
+- Replace the value with the actual value from part 3
 
 **6.** Start the container, go to the **anyway** directory and run:
     `sudo docker-compose up`
 It will take a few minutes until it's done.
-
-In case you didn't build the images with a backup data, you can prompt the DB image to download and restore the image at DB initialization time by specifying `RESTORE_DB=TRUE` and `GDRIVE_FILE_ID=<GDRIVE_FILE_ID value>` as environment variables for `db` in `docker-compose.yml`
 
 **7.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
 If you need to see the map for development email us [anyway@anyway.co.il](mailto:anyway@anyway.co.il) to get a developer key.
 
 **8.** To stop the containers run: `sudo docker-compose down`
+
+**9.** To restore fresh DB data, delete all existing volumes: `docker-compose down -v` then restart from step 6
 
 ## Additional Docker commands
 Use `sudo` before each docker commands if you are using ubuntu.

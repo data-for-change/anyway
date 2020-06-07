@@ -6,4 +6,3 @@ url = os.environ["GDRIVE_URL"]
 output = os.environ["DB_DUMP_PATH"]
 url_with_id = url + file_id
 gdown.download(url=url_with_id, output=output)
-os.chmod(output, 0o644)

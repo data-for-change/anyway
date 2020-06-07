@@ -3,14 +3,11 @@
 set -e
 set -x
 
-if [ "$RESTORE_DB" == "TRUE" ]; then
-    echo "******DEV Env - PostgreSQL initialisation******"
-    if [ ! -f $DB_DUMP_PATH ]
-    then
-        python3 /download_dump.py
-    fi
-    pg_restore -Fc "$DB_DUMP_PATH" -d "$POSTGRES_DB" --no-owner
-else
-    echo "Not DEV environment, not restoring db"
+if [ -z "${GDRIVE_FILE_ID}" ]; then
+    echo missing GDRIVE_FILE_ID env var for DB restore
+    exit 1
 fi
-
+export DB_DUMP_PATH=`mktemp`.pgdump
+export GDRIVE_URL="https://drive.google.com/uc?id="
+python3 /download_dump.py
+pg_restore -Fc "$DB_DUMP_PATH" -d "$POSTGRES_DB" --no-owner

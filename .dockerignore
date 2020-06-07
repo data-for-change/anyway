@@ -3,3 +3,10 @@ Dockerfile
 docker-compose-*
 db_docker/*
 db_docker
+.env
+.vscode
+.venv
+venv
+.DS_Store
+.idea
+.*

@@ -1,5 +1,3 @@
-# coding=utf-8
-
 import logging
 import re
 
@@ -11,6 +9,7 @@ from geographiclib.geodesic import Geodesic
 
 from anyway.parsers.news_flash_db_adapter import init_db
 from . import resolution_dict
+from . import secrets
 
 
 def extract_road_number(location):
@@ -20,15 +19,15 @@ def extract_road_number(location):
     :return: extracted road number
     """
     try:
-        road_number_regex = r'כביש (\d{1,4})'
+        road_number_regex = r"כביש (\d{1,4})"
         road_search = re.search(road_number_regex, location)
         if road_search:
             return int(road_search.group(1))
     except Exception as _:
         if location is not None:
-            logging.info('bug in extract road number {0}'.format(location))
+            logging.info("bug in extract road number {0}".format(location))
         else:
-            logging.info('bug in extract road number')
+            logging.info("bug in extract road number")
     return None
 
 
@@ -44,53 +43,69 @@ def get_db_matching_location(latitude, longitude, resolution, road_no=None):
     resolution dict, with values filled according to resolution
     """
     final_loc = {}
-    for field in resolution_dict['אחר']:
+    for field in resolution_dict["אחר"]:
         final_loc[field] = None
     try:
         # READ MARKERS FROM DB
         geod = Geodesic.WGS84
         relevant_fields = resolution_dict[resolution]
         markers = init_db().get_markers_for_location_extraction()
-        markers['geohash'] = markers.apply(lambda x: geohash.encode(x['latitude'], x['longitude'], precision=4), axis=1)
+        markers["geohash"] = markers.apply(
+            lambda x: geohash.encode(x["latitude"], x["longitude"], precision=4), axis=1
+        )
         markers_orig = markers.copy()
-        if resolution != 'אחר':
-            if road_no is not None and road_no > 0 and (
-                    'road1' in relevant_fields or 'road2' in relevant_fields):
-                markers = markers.loc[(markers['road1'] == road_no) | (markers['road2'] == road_no)]
+        if resolution != "אחר":
+            if (
+                road_no is not None
+                and road_no > 0
+                and ("road1" in relevant_fields or "road2" in relevant_fields)
+            ):
+                markers = markers.loc[(markers["road1"] == road_no) | (markers["road2"] == road_no)]
             for field in relevant_fields:
-                if field == 'road1':
+                if field == "road1":
                     markers = markers.loc[markers[field].notnull()]
                     markers = markers.loc[markers[field] > 0]
-                elif field == 'region_hebrew' or field == 'district_hebrew' or \
-                        field == 'yishuv_name' or field == 'street1_hebrew':
+                elif (
+                    field == "region_hebrew"
+                    or field == "district_hebrew"
+                    or field == "yishuv_name"
+                    or field == "street1_hebrew"
+                ):
                     markers = markers.loc[markers[field].notnull()]
-                    markers = markers.loc[markers[field] != '']
+                    markers = markers.loc[markers[field] != ""]
         if markers.count()[0] == 0:
             markers = markers_orig
 
         # FILTER BY GEOHASH
         curr_geohash = geohash.encode(latitude, longitude, precision=4)
-        if markers.loc[markers['geohash'] == curr_geohash].count()[0] > 0:
-            markers = markers.loc[markers['geohash'] == curr_geohash].copy()
+        if markers.loc[markers["geohash"] == curr_geohash].count()[0] > 0:
+            markers = markers.loc[markers["geohash"] == curr_geohash].copy()
 
         # CREATE DISTANCE FIELD
-        markers['dist_point'] = markers.apply(
-            lambda x: geod.Inverse(latitude, longitude, x['latitude'], x['longitude'])['s12'], axis=1)
+        markers["dist_point"] = markers.apply(
+            lambda x: geod.Inverse(latitude, longitude, x["latitude"], x["longitude"])["s12"],
+            axis=1,
+        )
         markers = markers.replace({pd.np.nan: None})
-        most_fit_loc = markers.loc[markers['dist_point'] == markers['dist_point'].min()].iloc[0].to_dict()
+        most_fit_loc = (
+            markers.loc[markers["dist_point"] == markers["dist_point"].min()].iloc[0].to_dict()
+        )
         for field in relevant_fields:
             if most_fit_loc[field] is not None:
-                if (type(most_fit_loc[field]) == str and (most_fit_loc[field] == '' or most_fit_loc[field] == 'nan')) \
-                        or (type(most_fit_loc[field]) == np.float64 and np.isnan(most_fit_loc[field])):
+                if (
+                    type(most_fit_loc[field]) == str
+                    and (most_fit_loc[field] == "" or most_fit_loc[field] == "nan")
+                ) or (type(most_fit_loc[field]) == np.float64 and np.isnan(most_fit_loc[field])):
                     final_loc[field] = None
                 else:
                     final_loc[field] = most_fit_loc[field]
 
     except Exception as _:
-        logging.info('db matching failed for latitude {0}, longitude {1}, resolution {2}, road no {3}'.format(latitude,
-                                                                                                              longitude,
-                                                                                                              resolution,
-                                                                                                              road_no))
+        logging.info(
+            "db matching failed for latitude {0}, longitude {1}, resolution {2}, road no {3}".format(
+                latitude, longitude, resolution, road_no
+            )
+        )
     return final_loc
 
 
@@ -101,33 +116,32 @@ def set_accident_resolution(accident_row):
     :return: resolution option
     """
     try:
-        if accident_row['intersection'] is not None and '/' in str(accident_row['intersection']):
-            return 'צומת עירוני'
-        elif accident_row['intersection'] is not None:
-            return 'צומת בינעירוני'
-        elif accident_row['road_no'] is not None:
-            return 'כביש בינעירוני'
-        elif accident_row['street'] is not None:
-            return 'רחוב'
-        elif accident_row['city'] is not None:
-            return 'עיר'
-        elif accident_row['subdistrict'] is not None:
-            return 'נפה'
-        elif accident_row['district'] is not None:
-            return 'מחוז'
+        if accident_row["intersection"] is not None and "/" in str(accident_row["intersection"]):
+            return "צומת עירוני"
+        elif accident_row["intersection"] is not None:
+            return "צומת בינעירוני"
+        elif accident_row["road_no"] is not None:
+            return "כביש בינעירוני"
+        elif accident_row["street"] is not None:
+            return "רחוב"
+        elif accident_row["city"] is not None:
+            return "עיר"
+        elif accident_row["subdistrict"] is not None:
+            return "נפה"
+        elif accident_row["district"] is not None:
+            return "מחוז"
         else:
-            return 'אחר'
+            return "אחר"
     except Exception as _:
         if accident_row is None:
-            logging.info('bug in accident resolution')
+            logging.info("bug in accident resolution")
 
 
-def geocode_extract(location, google_maps_key):
+def geocode_extract(location):
     """
     this method takes a string representing location and a google maps key and returns a dict of the corresponding
     location found on google maps (by that string), describing details of the location found and the geometry
     :param location: string representing location
-    :param google_maps_key: google maps API key
     :return: a dict containing data about the found location on google maps, with the keys: street,
     road_no [road number], intersection, city, address, district and the geometry of the location.
     """
@@ -138,37 +152,44 @@ def geocode_extract(location, google_maps_key):
     city = None
     district = None
     address = None
-    geom = {'lat': None, 'lng': None}
+    geom = {"lat": None, "lng": None}
     try:
-        gmaps = googlemaps.Client(key=google_maps_key)
-        geocode_result = gmaps.geocode(location, region='il')
+        gmaps = googlemaps.Client(key=secrets.get("GOOGLE_MAPS_KEY"))
+        geocode_result = gmaps.geocode(location, region="il")
         if geocode_result is None or geocode_result == []:
             return None
         response = geocode_result[0]
-        geom = response['geometry']['location']
-        for item in response['address_components']:
-            if 'route' in item['types']:
-                if item['short_name'].isdigit():
-                    road_no = int(item['short_name'])
+        geom = response["geometry"]["location"]
+        for item in response["address_components"]:
+            if "route" in item["types"]:
+                if item["short_name"].isdigit():
+                    road_no = int(item["short_name"])
                 else:
-                    street = item['long_name']
-            elif 'point_of_interest' in item['types'] or 'intersection' in item['types']:
-                intersection = item['long_name']
-            elif 'locality' in item['types']:
-                city = item['long_name']
-            elif 'administrative_area_level_2' in item['types']:
-                subdistrict = item['long_name']
-            elif 'administrative_area_level_1' in item['types']:
-                district = item['long_name']
-        address = response['formatted_address']
+                    street = item["long_name"]
+            elif "point_of_interest" in item["types"] or "intersection" in item["types"]:
+                intersection = item["long_name"]
+            elif "locality" in item["types"]:
+                city = item["long_name"]
+            elif "administrative_area_level_2" in item["types"]:
+                subdistrict = item["long_name"]
+            elif "administrative_area_level_1" in item["types"]:
+                district = item["long_name"]
+        address = response["formatted_address"]
         if road_no is None and extract_road_number(location) is not None:
             road_no = extract_road_number(location)
     except Exception as _:
-        logging.exception('geocode extract location {}'.format(location))
+        logging.exception("geocode extract location {}".format(location))
 
-    return {'street': street, 'road_no': road_no, 'intersection': intersection,
-            'city': city, 'address': address, 'subdistrict': subdistrict,
-            'district': district, 'geom': geom}
+    return {
+        "street": street,
+        "road_no": road_no,
+        "intersection": intersection,
+        "city": city,
+        "address": address,
+        "subdistrict": subdistrict,
+        "district": district,
+        "geom": geom,
+    }
 
 
 def manual_filter_location_of_text(text):
@@ -177,80 +198,137 @@ def manual_filter_location_of_text(text):
     :param text: text
     :return: filtered text - should catch the correct location most of the time.
     """
-    filter_ind = float('inf')
-    if text.find('.') != -1:
-        text = text[:text.find('.')]
+    filter_ind = float("inf")
+    if text.find(".") != -1:
+        text = text[: text.find(".")]
     try:
-        if text.find('.') != -1:
-            text = text[:text.find('.')]
-        forbid_words = ['תושב']
-        hospital_words = ['בבית החולים', 'בית חולים', 'בית החולים', 'מרכז רפואי']
-        hospital_names = ['שיבא', 'וולפסון', 'תל השומר', 'סוראסקי', 'הלל יפה', 'רמב"ם', 'רמבם', 'בני ציון', 'רוטשילד',
-                          'גליל מערבי', 'זיו', 'פוריה', 'ברזילי', 'אסף הרופא', 'סורוקה', 'רבין', 'בלינסון', 'גולדה',
-                          'כרמל', 'עמק', 'מאיר', 'קפלן', 'יוספטל', 'הדסה', 'שערי צדק', 'צאנז', 'לניאדו', 'אסותא',
-                          'מעיני הישועה', 'מדיקל סנטר', 'איטלקי', 'המשפחה הקדושה']
+        if text.find(".") != -1:
+            text = text[: text.find(".")]
+        forbid_words = ["תושב"]
+        hospital_words = ["בבית החולים", "בית חולים", "בית החולים", "מרכז רפואי"]
+        hospital_names = [
+            "שיבא",
+            "וולפסון",
+            "תל השומר",
+            "סוראסקי",
+            "הלל יפה",
+            'רמב"ם',
+            "רמבם",
+            "בני ציון",
+            "רוטשילד",
+            "גליל מערבי",
+            "זיו",
+            "פוריה",
+            "ברזילי",
+            "אסף הרופא",
+            "סורוקה",
+            "רבין",
+            "בלינסון",
+            "גולדה",
+            "כרמל",
+            "עמק",
+            "מאיר",
+            "קפלן",
+            "יוספטל",
+            "הדסה",
+            "שערי צדק",
+            "צאנז",
+            "לניאדו",
+            "אסותא",
+            "מעיני הישועה",
+            "מדיקל סנטר",
+            "איטלקי",
+            "המשפחה הקדושה",
+        ]
         forbid_words.extend(hospital_words)
         for forbid_word in forbid_words:
             found_hospital = False
             removed_punc = False
             if forbid_word in text:
                 forbid_ind = text.find(forbid_word)
-                for punc_to_try in [',', ' - ']:
+                for punc_to_try in [",", " - "]:
                     punc_before_ind = text.find(punc_to_try, 0, forbid_ind)
                     punc_after_ind = text.find(punc_to_try, forbid_ind)
                     if punc_before_ind != -1 or punc_after_ind != -1:
                         if punc_before_ind == -1:
-                            text = text[(punc_after_ind + 1):]
+                            text = text[(punc_after_ind + 1) :]
                         elif punc_after_ind == -1:
                             text = text[:punc_before_ind]
                         else:
-                            text = text[:punc_before_ind] + ' ' + text[(punc_after_ind + 1):]
+                            text = text[:punc_before_ind] + " " + text[(punc_after_ind + 1) :]
                         removed_punc = True
                         break
                 if (not removed_punc) and (forbid_word in hospital_words):
                     for hospital_name in hospital_names:
                         hospital_ind = text.find(hospital_name)
-                        if hospital_ind == forbid_ind + len(forbid_word) + 1 or hospital_ind == forbid_ind + len(
-                                forbid_word) + 2:
-                            text = text[:hospital_ind] + text[hospital_ind + len(hospital_name) + 1:]
+                        if (
+                            hospital_ind == forbid_ind + len(forbid_word) + 1
+                            or hospital_ind == forbid_ind + len(forbid_word) + 2
+                        ):
+                            text = (
+                                text[:hospital_ind] + text[hospital_ind + len(hospital_name) + 1 :]
+                            )
                             forbid_ind = text.find(forbid_word)
-                            text = text[:forbid_ind] + text[forbid_ind + len(forbid_word) + 1:]
+                            text = text[:forbid_ind] + text[forbid_ind + len(forbid_word) + 1 :]
                             found_hospital = True
                 if (not found_hospital) and (not removed_punc):
-                    text = text[:forbid_ind] + text[text.find(' ', forbid_ind + len(forbid_word) + 2):]
+                    text = (
+                        text[:forbid_ind]
+                        + text[text.find(" ", forbid_ind + len(forbid_word) + 2) :]
+                    )
 
     except Exception as _:
-        logging.info('could not filter text {0}'.format(text))
-    if 'כביש' in text:
-        filter_ind = min(filter_ind, text.find('כביש'))
-    if 'שדרות' in text:
-        filter_ind = min(filter_ind, text.find('שדרות'))
-    if 'רחוב' in text:
-        filter_ind = min(filter_ind, text.find('רחוב'))
-    if 'מחלף' in text:
-        filter_ind = min(filter_ind, text.find('מחלף'))
-    if 'צומת' in text:
-        filter_ind = min(filter_ind, text.find('צומת'))
-    if 'סמוך ל' in text:
-        filter_ind = min(filter_ind, text.find('סמוך ל') + len('סמוך ל'))
-    if 'ליד ה' in text:
-        filter_ind = min(filter_ind, text.find('ליד ה') + len('ליד ה'))
-    if 'יישוב' in text:
-        filter_ind = min(filter_ind, text.find('יישוב'))
-    if 'מושב' in text:
-        filter_ind = min(filter_ind, text.find('מושב'))
-    if 'קיבוץ' in text:
-        filter_ind = min(filter_ind, text.find('קיבוץ'))
-    if 'התנחלות' in text:
-        filter_ind = min(filter_ind, text.find('התנחלות'))
-    if 'שכונת' in text:
-        filter_ind = min(filter_ind, text.find('שכונת'))
-    if 'בדרך' in text:
-        filter_ind = min(filter_ind, text.find('בדרך'))
-    if filter_ind != float('inf'):
+        logging.info("could not filter text {0}".format(text))
+    if "כביש" in text:
+        filter_ind = min(filter_ind, text.find("כביש"))
+    if "שדרות" in text:
+        filter_ind = min(filter_ind, text.find("שדרות"))
+    if "רחוב" in text:
+        filter_ind = min(filter_ind, text.find("רחוב"))
+    if "מחלף" in text:
+        filter_ind = min(filter_ind, text.find("מחלף"))
+    if "צומת" in text:
+        filter_ind = min(filter_ind, text.find("צומת"))
+    if "סמוך ל" in text:
+        filter_ind = min(filter_ind, text.find("סמוך ל") + len("סמוך ל"))
+    if "ליד ה" in text:
+        filter_ind = min(filter_ind, text.find("ליד ה") + len("ליד ה"))
+    if "יישוב" in text:
+        filter_ind = min(filter_ind, text.find("יישוב"))
+    if "מושב" in text:
+        filter_ind = min(filter_ind, text.find("מושב"))
+    if "קיבוץ" in text:
+        filter_ind = min(filter_ind, text.find("קיבוץ"))
+    if "התנחלות" in text:
+        filter_ind = min(filter_ind, text.find("התנחלות"))
+    if "שכונת" in text:
+        filter_ind = min(filter_ind, text.find("שכונת"))
+    if "בדרך" in text:
+        filter_ind = min(filter_ind, text.find("בדרך"))
+    if filter_ind != float("inf"):
         text = text[filter_ind:]
-    if 'סמוך ל' in text:
-        text = text[(text.find('סמוך ל') + len('סמוך ל')):] + 'סמוך ל' + text[:text.find('סמוך ל')]
-    if 'ליד ה' in text:
-        text = text[(text.find('ליד ה') + len('ליד ה')):] + 'ליד ה ' + text[:text.find('ליד ה ')]
+    if "סמוך ל" in text:
+        text = (
+            text[(text.find("סמוך ל") + len("סמוך ל")) :] + "סמוך ל" + text[: text.find("סמוך ל")]
+        )
+    if "ליד ה" in text:
+        text = text[(text.find("ליד ה") + len("ליד ה")) :] + "ליד ה " + text[: text.find("ליד ה ")]
     return text
+
+
+def extract_geo_features(item) -> None:
+    location = None
+    if item["description"] is not None:
+        location = manual_filter_location_of_text(item["description"])
+    if location is None and item["title"] is not None:
+        location = manual_filter_location_of_text(item["title"])
+    item["location"] = location
+    geo_location = geocode_extract(location)
+    if geo_location is not None:
+        item["lat"] = geo_location["geom"]["lat"]
+        item["lon"] = geo_location["geom"]["lng"]
+        item["resolution"] = set_accident_resolution(geo_location)
+        db_location = get_db_matching_location(
+            item["lat"], item["lon"], item["resolution"], geo_location["road_no"],
+        )
+        item.update(db_location)

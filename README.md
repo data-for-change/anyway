@@ -71,8 +71,12 @@ We are using DOCKER. See [DOCKER](docs/DOCKER.md)
 For Windows users please first install ubuntu VM. See [UBUNTU_VM_ON_WINDOWS](docs/UBUNTU_VM_ON_WINDOWS.md)
 
 ## Testing
-To run tests: `pylint -j $(nproc) anyway tests && pytest -m "not browser" ./tests`
-
+### Pylint
+To run pylint tests: `pylint -j $(nproc) anyway tests && pytest -m "not browser" ./tests`
+### Black
+To format the code using black: `black anyway/**/*.py -l 100 anyway` should be executed from the root directory.
+Alternatively, one can execute `docker run -v $(pwd):/code jbbarth/black anyway -l 100` to run the command with docker.
+        
 If you also wish to run the real browser tests, replace`-m "not browser"` with `--driver Chrome` or specify the browser of your choice. To learn more, read about [pytest-selenium](http://pytest-selenium.readthedocs.io/en/latest/user_guide.html#specifying-a-browser).
 
 ## Altering the database schema

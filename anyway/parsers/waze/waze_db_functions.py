@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from anyway.utilities import init_flask
 from anyway.models import WazeAlert, WazeTrafficJams
 
+
 def insert_waze_alerts(waze_alerts):
     """
     insert new waze alerts to db

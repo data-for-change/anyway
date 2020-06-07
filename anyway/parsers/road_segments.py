@@ -15,7 +15,7 @@ def _iter_rows(filename):
     sheet = workbook["tv_ktaim"]
     rows = sheet.rows
     first_row = next(rows)
-    headers = ['mezahe_keta', 'kvish', 'keta', 'km_me', 'shem_km_me', 'ad_km', 'shem_km_ad']
+    headers = ["mezahe_keta", "kvish", "keta", "km_me", "shem_km_me", "ad_km", "shem_km_ad"]
     assert [cell.value for cell in first_row] == headers
     for row in rows:
         segment_id = row[0].value
@@ -31,13 +31,13 @@ def _iter_rows(filename):
         to_name = row[6].value
 
         yield {
-            'segment_id': segment_id,
-            'road': road,
-            'segment': segment,
-            'from_km': from_km,
-            'from_name': from_name,
-            'to_km': to_km,
-            'to_name': to_name,
+            "segment_id": segment_id,
+            "road": road,
+            "segment": segment,
+            "from_km": from_km,
+            "from_name": from_name,
+            "to_km": to_km,
+            "to_name": to_name,
         }
 
 

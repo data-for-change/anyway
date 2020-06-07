@@ -92,7 +92,6 @@ app.config["OAUTH_CREDENTIALS"] = {
     },
 }
 app.secret_key = APP_SECRET_KEY
-app.config['SESSION_TYPE'] = 'filesystem'
 assets = Environment()
 assets.init_app(app)
 assets_env = AssetsEnvironment(os.path.join(utilities._PROJECT_ROOT, "static"), "/static")

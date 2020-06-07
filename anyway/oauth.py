@@ -6,7 +6,7 @@ from rauth import OAuth2Service
 
 
 class OAuthSignIn(object):
-    providers = None
+    providers = {}
 
     def __init__(self, provider_name):
         self.provider_name = provider_name
@@ -25,7 +25,7 @@ class OAuthSignIn(object):
 
     @classmethod
     def get_provider(self, provider_name):
-        if self.providers is None:
+        if not self.providers:
             self.providers = {}
             for provider_class in self.__subclasses__():
                 provider = provider_class()

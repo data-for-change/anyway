@@ -9,6 +9,7 @@ import os
 #
 
 SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+APP_SECRET_KEY = os.environ.get('APP_SECRET_KEY')
 if SQLALCHEMY_DATABASE_URI is None:
     raise Exception('Please, set the DATABASE_URL environment variable to be postgresql://postgres@localhost/anyway')
 SQLALCHEMY_TRACK_MODIFICATIONS = True

@@ -30,8 +30,8 @@ class OAuthSignIn(object):
             self.providers = {}
             for provider_class in self.__subclasses__():
                 provider = provider_class()
-                setattr(self.providers, provider.provider_name, provider)
-        return getattr(self.providers, provider_name)
+                self.providers[provider.provider_name] = provider
+        return self.providers[provider_name]
 
 
 class FacebookSignIn(OAuthSignIn):

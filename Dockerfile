@@ -42,3 +42,5 @@ ENTRYPOINT ["/anyway/docker-entrypoint.sh"]
 CMD FLASK_APP=anyway flask run --host 0.0.0.0
 
 ENV ALLOW_ALEMBIC_UPGRADE=yes
+ENV FLASK_APP=anyway
+RUN flask assets clean

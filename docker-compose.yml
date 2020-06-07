@@ -3,8 +3,8 @@ version: '3'
 services:
   anyway:
     build: .
+    image: anywayteam/anyway:latest
     container_name: anyway
-    image: hasadna/anyway:latest
     ports:
       - "8080:5000"
     environment:
@@ -17,6 +17,7 @@ services:
 
   db:
     build: db_docker
+    image: anywayteam/db:latest
     container_name: db
     environment:
       - GDRIVE_FILE_ID

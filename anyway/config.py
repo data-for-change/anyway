@@ -8,7 +8,6 @@ import os
 # variables
 #
 
-SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
 APP_SECRET_KEY = os.environ.get('APP_SECRET_KEY')
 SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "postgresql://postgres@localhost/anyway")
 SQLALCHEMY_TRACK_MODIFICATIONS = True

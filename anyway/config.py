@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-from .parsers import secrets
 
 #
 # This is the configuration file of the application

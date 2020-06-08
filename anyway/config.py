@@ -9,7 +9,6 @@ from .parsers import secrets
 # variables
 #
 
-APP_SECRET_KEY = secrets.get('APP_SECRET_KEY')
 SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "postgresql://postgres@localhost/anyway")
 SQLALCHEMY_TRACK_MODIFICATIONS = True
 ENTRIES_PER_PAGE = os.environ.get("ENTRIES_PER_PAGE", 1000)

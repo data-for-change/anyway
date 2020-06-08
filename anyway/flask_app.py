@@ -41,7 +41,7 @@ from wtforms import form, fields, validators, StringField, PasswordField, Form
 from . import utilities
 from .base import user_optional
 from .clusters_calculator import retrieve_clusters
-from .config import ENTRIES_PER_PAGE, APP_SECRET_KEY
+from .config import ENTRIES_PER_PAGE
 from .constants import CONST
 from .models import (
     AccidentMarker,
@@ -91,7 +91,7 @@ app.config["OAUTH_CREDENTIALS"] = {
         "secret": os.environ.get("GOOGLE_LOGIN_CLIENT_SECRET"),
     },
 }
-app.secret_key = APP_SECRET_KEY
+app.secret_key = os.environ.get("APP_SECRET_KEY")
 assets = Environment()
 assets.init_app(app)
 assets_env = AssetsEnvironment(os.path.join(utilities._PROJECT_ROOT, "static"), "/static")

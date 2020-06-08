@@ -91,7 +91,7 @@ app.config["OAUTH_CREDENTIALS"] = {
         "secret": os.environ.get("GOOGLE_LOGIN_CLIENT_SECRET"),
     },
 }
-
+app.secret_key = os.environ.get("APP_SECRET_KEY")
 assets = Environment()
 assets.init_app(app)
 assets_env = AssetsEnvironment(os.path.join(utilities._PROJECT_ROOT, "static"), "/static")

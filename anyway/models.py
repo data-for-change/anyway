@@ -735,7 +735,7 @@ class Involved(Base):
 class NewsFlash(Base):
     __tablename__ = "news_flash"
     id = Column(BigInteger(), primary_key=True)
-    accident = Column(Boolean(), nullable=True)
+    accident = Column(Boolean(), nullable=False)
     author = Column(Text(), nullable=True)
     date = Column(TIMESTAMP(), nullable=True)
     description = Column(Text(), nullable=True)

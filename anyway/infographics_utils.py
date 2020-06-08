@@ -18,12 +18,13 @@ from .infographics_dictionaries import driver_type_hebrew_dict
     Widget structure:
     {
         'name': str,
-        'rank': int (Integer),
         'data': {
                  'items': list (Array) | dictionary (Object),
                  'text': dictionary (Object) - can be empty
+                 },
+        'meta': {
+                 'rank': int (Integer)
                  }
-        'meta': dictionary (Object) - can be empty
     }
 """
 
@@ -39,13 +40,15 @@ class Widget:
     def serialize(self):
         output = {}
         output["name"] = self.name
-        output["rank"] = self.rank
         output["data"] = {}
         output["data"]["items"] = self.items
         if self.text:
             output["data"]["text"] = self.text
         if self.meta:
             output["meta"] = self.meta
+        else:
+            output["meta"] = {}
+        output["meta"]["rank"] = self.rank
         return output
 
 

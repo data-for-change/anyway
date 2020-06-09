@@ -41,64 +41,50 @@ def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):
     :return: a dict containing all the geo fields stated in
     resolution dict, with values filled according to resolution
     """
-    final_loc = {}
-    try:
-        # READ MARKERS FROM DB
-        geod = Geodesic.WGS84
-        relevant_fields = resolution_dict[resolution]
-        markers = db.get_markers_for_location_extraction()
-        markers["geohash"] = markers.apply(
-            lambda x: geohash.encode(x["latitude"], x["longitude"], precision=4), axis=1
-        )
-        markers_orig = markers.copy()
-        if resolution != "אחר":
-            if (
-                road_no is not None
-                and road_no > 0
-                and ("road1" in relevant_fields or "road2" in relevant_fields)
-            ):
-                markers = markers.loc[(markers["road1"] == road_no) | (markers["road2"] == road_no)]
-            for field in relevant_fields:
-                if field == "road1":
-                    markers = markers.loc[markers[field].notnull()]
-                    markers = markers.loc[markers[field] > 0]
-                elif (
-                    field == "region_hebrew"
-                    or field == "district_hebrew"
-                    or field == "yishuv_name"
-                    or field == "street1_hebrew"
-                ):
-                    markers = markers.loc[markers[field].notnull()]
-                    markers = markers.loc[markers[field] != ""]
-        if markers.count()[0] == 0:
-            markers = markers_orig
-
-        # FILTER BY GEOHASH
-        curr_geohash = geohash.encode(latitude, longitude, precision=4)
-        if markers.loc[markers["geohash"] == curr_geohash].count()[0] > 0:
-            markers = markers.loc[markers["geohash"] == curr_geohash].copy()
-
-        # CREATE DISTANCE FIELD
-        markers["dist_point"] = markers.apply(
-            lambda x: geod.Inverse(latitude, longitude, x["latitude"], x["longitude"])["s12"],
-            axis=1,
-        )
-        markers = markers.fillna(None)
-        most_fit_loc = (
-            markers.loc[markers["dist_point"] == markers["dist_point"].min()].iloc[0].to_dict()
-        )
+    # READ MARKERS FROM DB
+    geod = Geodesic.WGS84
+    relevant_fields = resolution_dict[resolution]
+    markers = db.get_markers_for_location_extraction()
+    markers["geohash"] = markers.apply(
+        lambda x: geohash.encode(x["latitude"], x["longitude"], precision=4), axis=1
+    )
+    markers_orig = markers.copy()
+    if resolution != "אחר":
+        if (
+            road_no is not None
+            and road_no > 0
+            and ("road1" in relevant_fields or "road2" in relevant_fields)
+        ):
+            markers = markers.loc[(markers["road1"] == road_no) | (markers["road2"] == road_no)]
         for field in relevant_fields:
-            loc = most_fit_loc[field]
-            if loc not in [None, "", "nan"]:
-                if not (isinstance(loc, np.float64) and np.isnan(loc)):
-                    final_loc[field] = loc
+            if field == "road1":
+                markers = markers.loc[markers[field].notnull()]
+                markers = markers.loc[markers[field] > 0]
+            elif field in ["region_hebrew", "district_hebrew", "yishuv_name", "street1_hebrew"]:
+                markers = markers.loc[markers[field].notnull()]
+                markers = markers.loc[markers[field] != ""]
+    if markers.count()[0] == 0:
+        markers = markers_orig
 
-    except Exception as _:
-        logging.info(
-            "db matching failed for latitude {0}, longitude {1}, resolution {2}, road no {3}".format(
-                latitude, longitude, resolution, road_no
-            )
-        )
+    # FILTER BY GEOHASH
+    curr_geohash = geohash.encode(latitude, longitude, precision=4)
+    if markers.loc[markers["geohash"] == curr_geohash].count()[0] > 0:
+        markers = markers.loc[markers["geohash"] == curr_geohash].copy()
+
+    # CREATE DISTANCE FIELD
+    markers["dist_point"] = markers.apply(
+        lambda x: geod.Inverse(latitude, longitude, x["latitude"], x["longitude"])["s12"], axis=1,
+    )
+    most_fit_loc = (
+        markers.loc[markers["dist_point"] == markers["dist_point"].min()].iloc[0].to_dict()
+    )
+
+    final_loc = {}
+    for field in relevant_fields:
+        loc = most_fit_loc[field]
+        if loc not in [None, "", "nan"]:
+            if not (isinstance(loc, np.float64) and np.isnan(loc)):
+                final_loc[field] = loc
     return final_loc
 
 

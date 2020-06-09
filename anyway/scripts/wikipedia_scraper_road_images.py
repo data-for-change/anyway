@@ -52,8 +52,14 @@ def main(dest_folder):
             # try to get png
             png_img = soup.find(href=link_suffix).find("img")
             if png_img is not None:
-                png_link_suffix = png_img.get("src")
-                all_road_pngs = [png_link_suffix]
+                png_link_suffix_set = png_img.get("srcset")
+                if png_link_suffix_set is not None:
+                    last_png_highest_res = png_link_suffix_set.split(",")[-1].split()
+                    if last_png_highest_res[0] is not None:
+                        all_road_pngs = [last_png_highest_res[0]]
+                    else:
+                        png_link_suffix = png_img.get("src")
+                        all_road_pngs = [png_link_suffix]
 
         all_road_images = all_road_svgs + all_road_pngs
 

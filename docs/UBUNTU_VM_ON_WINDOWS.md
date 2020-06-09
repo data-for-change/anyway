@@ -12,7 +12,7 @@ Environment Configuration for Windows
 you need to enable virtualization in the BIOS Screen – Base on your computer, go to BIOS Screen to enable virtualization, see for example: 
 ['How to enable Virtualization (VT-x) in Bios'](https://www.youtube.com/watch?v=MOuTxfzCvMY)
 
-**4.** In the VM Settings storage - Download [Ubuntu 18.04 LTS iso for Desktop](https://releases.ubuntu.com/18.04.4/). Note: Ubuntu 20 has some docker bugs, please run 18.04
+**4.** In the VM Settings storage - Download [Ubuntu 18.04 LTS iso for Desktop](https://releases.ubuntu.com/20.04/).
 
 **5.** Power-On the VM and the Ubuntu installation should start
 

@@ -74,7 +74,8 @@ def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):
     # CREATE DISTANCE FIELD
     markers["dist_point"] = markers.apply(
         lambda x: geod.Inverse(latitude, longitude, x["latitude"], x["longitude"])["s12"], axis=1,
-    )
+    ).replace({np.nan: None})
+
     most_fit_loc = (
         markers.loc[markers["dist_point"] == markers["dist_point"].min()].iloc[0].to_dict()
     )

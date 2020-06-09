@@ -57,4 +57,4 @@ venv
 /static/js/years.js
 
 /.vscode
-/.env
+/.env*

@@ -6,7 +6,7 @@ db_docker
 **/.git
 **/__pycache__
 **/pytest_cache
-.env
+.env*
 .vscode
 .venv
 venv

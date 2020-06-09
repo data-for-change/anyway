@@ -26,7 +26,7 @@ Instructions
 
 **2.** [Install Docker](https://docs.docker.com/install/) and [Install Docker Compose](https://docs.docker.com/compose/install/)
 
-**3.** Copy the GDRIVE_FILE_ID from [this file](https://drive.google.com/file/d/1IRnSsRwwHFtmGTNlSOfChg-H6R8JKMpl/view?usp=sharing) (You need to request access)
+**3.** Get the `.env` file with the required secret values and place in the project root directory.
 **Continue with your OS, See below**
 
 **For Mac:**
@@ -35,21 +35,17 @@ Instructions
 Otherwise, to build an existing environment with the most updated DB, remove DB volume by running `docker volume rm anyway_db_data`.
 Note - this will delete all of your local DB data!
 
-**5.** Create a .env file in root of anyway directory with the following content:
-- `GDRIVE_FILE_ID=XXXXXXXXX-YYYYYYYY-ZZZZZZZ`
-- Replace the value with the actual value from part 3
-
-**6.** Start the container, go to the **anyway** directory and run:
+**5.** Start the container, go to the **anyway** directory and run:
     `docker-compose up`
 It will take a few minutes until it's done.
 
-**7.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
+**6.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
 If you need to see the map contact atalya via slack to get a developer key.
 
-**8.** To stop the containers run: `docker-compose down`
+**7.** To stop the containers run: `docker-compose down`
 
-**9.** To restore fresh DB data, delete all existing volumes: `docker-compose down -v` then restart from step 6
+**8.** To restore fresh DB data, delete all existing volumes: `docker-compose down -v` then restart from step 6
 
 **For Ubuntu:**
 
@@ -57,21 +53,17 @@ If you need to see the map contact atalya via slack to get a developer key.
 Otherwise, to build an existing environment with the most updated DB, remove DB volume by running `sudo docker volume rm anyway_db_data`.
 Note - this will delete all of your local DB data!
 
-**5.** Create a .env file in root of anyway directory with the following content:
-- `GDRIVE_FILE_ID=XXXXXXXXX-YYYYYYYY-ZZZZZZZ`
-- Replace the value with the actual value from part 3
-
-**6.** Start the container, go to the **anyway** directory and run:
+**5.** Start the container, go to the **anyway** directory and run:
     `sudo docker-compose up`
 It will take a few minutes until it's done.
 
-**7.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
+**6.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
 If you need to see the map for development email us [anyway@anyway.co.il](mailto:anyway@anyway.co.il) to get a developer key.
 
-**8.** To stop the containers run: `sudo docker-compose down`
+**7.** To stop the containers run: `sudo docker-compose down`
 
-**9.** To restore fresh DB data, delete all existing volumes: `docker-compose down -v` then restart from step 6
+**8.** To restore fresh DB data, delete all existing volumes: `docker-compose down -v` then restart from step 6
 
 ## Additional Docker commands
 Use `sudo` before each docker commands if you are using ubuntu.

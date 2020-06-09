@@ -1,6 +1,15 @@
-**/Dockerfile
-**/docker-compose.yml
+.dockerignore
+Dockerfile
+docker-compose-*
+db_docker/*
 db_docker
 **/.git
 **/__pycache__
 **/pytest_cache
+.env*
+.vscode
+.venv
+venv
+.DS_Store
+.idea
+.*

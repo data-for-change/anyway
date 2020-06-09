@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 
 from .location_extraction import extract_geo_features
 from .news_flash_classifiers import classify_rss
+from ..models import NewsFlash
 from . import timezones
 
 
@@ -57,27 +58,28 @@ def scrape(site_name, *, fetch_rss=_fetch, fetch_html=_fetch):
         link = item_rss_soup.guid.get_text()
         date = timezones.parse_creation_datetime(item_rss_soup.pubdate.get_text())
 
-        html_text = fetch_html(link.replace(".com/", ".com:443/"))
+        html_text = fetch_html(link)
         item_html_soup = BeautifulSoup(html_text, "lxml")
 
         author, title, description = config["parser"](item_rss_soup, item_html_soup)
-        yield {
-            "link": link,
-            "date": date,
-            "source": site_name,
-            "author": author,
-            "title": title,
-            "description": description,
-        }
+        yield NewsFlash(
+            link=link,
+            date=date,
+            source=site_name,
+            author=author,
+            title=title,
+            description=description,
+            accident=False,
+        )
 
 
 def scrape_extract_store(site_name, db):
     latest_date = db.get_latest_date_of_source(site_name) or datetime.date.min
-    for item in scrape(site_name):
-        if item["date"] < latest_date:
+    for newsflash in scrape(site_name):
+        if newsflash.date < latest_date:
             break
-        item["accident"] = classify_rss(item["title"])
-        if item["accident"]:
+        newsflash.accident = classify_rss(newsflash.title)
+        if newsflash.accident:
             # FIX: No accident-accurate date extracted
-            extract_geo_features(item)
-        db.insert_new_flash_news(**item)
+            extract_geo_features(db, newsflash)
+        db.insert_new_newsflash(newsflash)

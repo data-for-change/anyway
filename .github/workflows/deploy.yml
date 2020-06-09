@@ -4,6 +4,14 @@ on:
     branches:
       - master
       - dev
+      - integrate-k8s-final-for-real-this-time
+env:
+#  DOCKER_REPOSITORY_ANYWAY: "anywayteam/anyway"
+#  DOCKER_REPOSITORY_DB: "anywayteam/db"
+#  DOCKER_REPOSITORY_DB_BACKUP: "anywayteam/db_backup"
+  DOCKER_REPOSITORY_ANYWAY: "orihoch/anywayteam_anyway"
+  DOCKER_REPOSITORY_DB: "orihoch/anywayteam_db"
+  DOCKER_REPOSITORY_DB_BACKUP: "orihoch/anywayteam_db_backup"
 jobs:
   Deploy:
     if: github.repository == 'hasadna/anyway'
@@ -15,17 +23,28 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-        repository: anywayteam/anyway
+        repository: "$DOCKER_REPOSITORY_ANYWAY"
         tag_with_ref: true
         tag_with_sha: true
-        cache_froms: anywayteam/anyway:latest
+        cache_froms: "${DOCKER_REPOSITORY_ANYWAY}:dev"
     - name: Build and push database Docker image
       uses: docker/build-push-action@v1.0.1
       with:
         path: 'db_docker'
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-        repository: anywayteam/db
+        repository: "$DOCKER_REPOSITORY_DB"
         tag_with_ref: true
         tag_with_sha: true
-        cache_froms: anywayteam/db:latest
+        cache_froms: "${DOCKER_REPOSITORY_DB}:dev"
+    - name: Build and push database backup Docker image
+        uses: docker/build-push-action@v1.0.1
+        with:
+          path: 'db_docker'
+          dockerfile: 'db_docker/backup.Dockerfile'
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          repository: "$DOCKER_REPOSITORY_DB_BACKUP"
+          tag_with_ref: true
+          tag_with_sha: true
+          cache_froms: "${DOCKER_REPOSITORY_DB_BACKUP}:dev"

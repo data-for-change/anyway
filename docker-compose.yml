@@ -20,7 +20,8 @@ services:
     image: anywayteam/db:latest
     container_name: db
     environment:
-      - GDRIVE_FILE_ID
+      - DBRESTORE_AWS_ACCESS_KEY_ID
+      - DBRESTORE_AWS_SECRET_ACCESS_KEY
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:

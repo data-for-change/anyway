@@ -155,3 +155,80 @@ This loads the ./anyway dir (relative to the docker-compose file) as /anyway/any
 Questions and ideas
 -----------------
 Talk to Atalya on HASADNA's Slack (atalya) or email us [anyway@anyway.co.il](mailto:anyway@anyway.co.il).
+
+
+Testing production environment locally
+--------------------------------------
+
+This process allows to emulate a full production environment locally for testing. This is an advanced operation and not needed for normal development.
+
+Create a .env file for production (set relevant values):
+
+```
+# app env vars
+DATABASE_URL=postgresql://anyway:12345678@db/anyway
+GOOGLE_MAPS_KEY=
+TWITTER_CONSUMER_KEY=
+TWITTER_CONSUMER_SECRET=
+TWITTER_ACCESS_KEY=
+TWITTER_ACCESS_SECRET=
+FACEBOOK_KEY=
+FACEBOOK_SECRET=
+GOOGLE_LOGIN_CLIENT_ID=
+GOOGLE_LOGIN_CLIENT_SECRET=
+MAILUSER=
+MAILPASS=
+GOOGLE_APPLICATION_CREDENTIALS=/secrets/GOOGLE_APPLICATION_CREDENTIALS_KEY.json
+GOOGLE_APPLICATION_CREDENTIALS_HOST_PATH=/host/path/to/google_application_credentials.json
+APP_SECRET_KEY=
+
+# db env vars
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=123456
+POSTGRES_DB=postgres
+#   aws access/secret with permissions to read from full db dumps bucket
+DBRESTORE_AWS_ACCESS_KEY_ID=
+DBRESTORE_AWS_SECRET_ACCESS_KEY=
+DBRESTORE_AWS_BUCKET=anyway-full-db-dumps
+DBRESTORE_FILE_NAME=2020-06-09_anyway.pgdump
+#   should match the password set in app env vars
+DBRESTORE_SET_ANYWAY_PASSWORD=12345678
+
+# db-backup env vars
+DBDUMP_S3_FILE_PREFIX=testing_
+#   aws access/secret with permissions to write to both full and partial db dumps buckets
+DBDUMP_AWS_ACCESS_KEY_ID=
+DBDUMP_AWS_SECRET_ACCESS_KEY=
+#   db connection details to the postgres user
+DBDUMP_USER=postgres
+DBDUMP_PASSWORD=123456
+DBDUMP_HOST=db
+```
+
+Create a shell alias to run docker-compose for production
+
+```
+alias docker-compose-prod="docker-compose -f docker-compose.yml -f docker-compose-production.override.yml"
+```
+
+Restore the DB
+
+```
+docker-compose-prod down -v
+docker-compose-prod up --build db
+```
+
+Start the app
+
+```
+docker-compose-prod up --build nginx anyway
+```
+
+Access the app at http://localhost:8000
+
+Run the backup job
+
+```
+docker-compose-prod build db-backup
+docker-compose-prod run db-backup
+```

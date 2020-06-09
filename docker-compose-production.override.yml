@@ -1,18 +1,5 @@
 version: '3'
 
-# this override should be used along with an .env file like this:
-# DBDUMP_S3_ACCESS=
-# DBDUMP_S3_SECRET=
-# DBDUMP_S3_FILE_PREFIX=testing_
-# S3_RESTORE_ACCESS=
-# S3_RESTORE_SECRET=
-# S3_RESTORE_FILENAMES=2020-06-07_14-45-20_anyway_roles 2020-06-07_14-45-24_anyway_schema 2020-06-07_14-45-27_anyway_data
-# S3_RESTORE_ANYWAY_PASSWORD=12345678
-# POSTGRES_PASSWORD=123456
-# POSTGRES_USER=
-# POSTGRES_DB=
-# DATABASE_URL=postgresql://anyway:12345678@db/anyway
-
 services:
   nginx:
     build: nginx_docker
@@ -25,30 +12,42 @@ services:
   anyway:
     environment:
       - DATABASE_URL
-    command: "gunicorn -b 0.0.0.0:8000 -w 4 -t 120 anyway:app"
+      - GOOGLE_MAPS_KEY
+      - TWITTER_CONSUMER_KEY
+      - TWITTER_CONSUMER_SECRET
+      - TWITTER_ACCESS_KEY
+      - TWITTER_ACCESS_SECRET
+      - FACEBOOK_KEY
+      - FACEBOOK_SECRET
+      - GOOGLE_LOGIN_CLIENT_ID
+      - GOOGLE_LOGIN_CLIENT_SECRET
+      - MAILUSER
+      - MAILPASS
+      - GOOGLE_APPLICATION_CREDENTIALS
+      - GOOGLE_APPLICATION_CREDENTIALS_HOST_PATH
+      - APP_SECRET_KEY
+    volumes:
+      - "${GOOGLE_APPLICATION_CREDENTIALS_HOST_PATH}:${GOOGLE_APPLICATION_CREDENTIALS}"
+    command: "gunicorn -b 0.0.0.0:5000 -w 4 -t 120 anyway:app"
 
   db:
     environment:
-      - S3_RESTORE_ACCESS
-      - S3_RESTORE_SECRET
-      - S3_RESTORE_FILENAMES
-      # this is the password for postgres user, not for anyway user
-      - POSTGRES_PASSWORD
+      - DBRESTORE_AWS_BUCKET=anyway-full-db-dumps
+      - DBRESTORE_FILE_NAME
+      - DBRESTORE_SET_ANYWAY_PASSWORD
       - POSTGRES_USER
+      - POSTGRES_PASSWORD
       - POSTGRES_DB
-      # this is the password for anyway user, it will be set on initial restore only
-      - S3_RESTORE_ANYWAY_PASSWORD
 
   db-backup:
     build:
       context: db_docker
       dockerfile: backup.Dockerfile
     environment:
-      - DBDUMP_S3_ACCESS
-      - DBDUMP_S3_SECRET
+      - DBDUMP_AWS_ACCESS_KEY_ID
+      - DBDUMP_AWS_SECRET_ACCESS_KEY
       - DBDUMP_S3_FILE_PREFIX
-      - DBDUMP_HOST=db
-      - DBDUMP_DB=anyway
-      - DBDUMP_USER=anyway
-      - DBDUMP_PASSWORD=anyway
+      - DBDUMP_PASSWORD
+      - DBDUMP_HOST
+      - DBDUMP_USER
     restart: "no"

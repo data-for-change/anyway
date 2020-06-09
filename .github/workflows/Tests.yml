@@ -1,87 +1,87 @@
-#name: Tests
-#
-#on:
-#  pull_request:
-#      branches:
-#        - master
-#        - dev
-#  push:
-#    branches:
-#      - master
-#      - dev
-#jobs:
-#  Eslint:
-#    runs-on: ubuntu-latest
-#    steps:
-#    - uses: actions/checkout@v2
-#    - name: Setup Node.js environment
-#      uses: actions/setup-node@v1.4.1
-#      with:
-#          node-version: '8.17'
-#    - run: npm install -g eslint@6.8.0
-#    - run: eslint static/js --ignore-path=static/js/.eslintignore
-#  Pylint:
-#    runs-on: ubuntu-latest
-#    steps:
-#    - uses: actions/checkout@v2
-#    - name: Set up Python
-#      uses: actions/setup-python@v1
-#      with:
-#        python-version: '3.7'
-#    - name: Install Dependencies
-#      run: |
-#        python -m pip install --upgrade pip
-#        pip install -r test_requirements.txt -r requirements.txt
-#    - name: Pylint
-#      run: |
-#        pylint anyway tests main.py
-#  Black:
-#    runs-on: ubuntu-latest
-#    steps:
-#    - uses: actions/checkout@v2
-#    - name: Set up Python
-#      uses: actions/setup-python@v1
-#      with:
-#        python-version: '3.7'
-#    - name: Install Dependencies
-#      run: |
-#        python -m pip install --upgrade black
-#    - name: black formatting
-#      run: |
-#        black anyway/**/*.py -l 100 --verbose --check
-#  Tests:
-#    runs-on: ubuntu-latest
-#    steps:
-#    - uses: actions/checkout@v2
-#    - name: Starting Server and DB
-#      run: |
-#        docker-compose -f docker-compose.yml up -d --build
-#    - name: Waiting for DB startup
-#      run: |
-#        bash ./wait_for_postgres.sh
-#    - name: DB Initialization
-#      run: |
-#        docker exec anyway alembic upgrade head
-#        docker exec anyway ./main.py process registered-vehicles
-#        docker exec anyway ./main.py process cbs
-#    - name: Tests
-#      env:
-#        TWITTER_CONSUMER_KEY: ${{ secrets.TWITTER_CONSUMER_KEY }}
-#        TWITTER_CONSUMER_SECRET: ${{ secrets.TWITTER_CONSUMER_SECRET }}
-#        TWITTER_ACCESS_KEY:  ${{ secrets.TWITTER_ACCESS_KEY }}
-#        TWITTER_ACCESS_SECRET:  ${{ secrets.TWITTER_ACCESS_SECRET }}
-#        GOOGLE_MAPS_KEY: ${{ secrets.GOOGLE_MAPS_KEY }}
-#        APP_SECRET_KEY: ${{ secrets.APP_SECRET_KEY }}
-#
-#      run: |
-#        docker exec anyway pip install -r ./test_requirements.txt
-#        docker exec -e TWITTER_CONSUMER_KEY=$TWITTER_CONSUMER_KEY -e TWITTER_CONSUMER_SECRET=$TWITTER_CONSUMER_SECRET -e TWITTER_ACCESS_KEY=$TWITTER_ACCESS_KEY -e TWITTER_ACCESS_SECRET=$TWITTER_ACCESS_SECRET -e GOOGLE_MAPS_KEY=$GOOGLE_MAPS_KEY -e APP_SECRET_KEY=$APP_SECRET_KEY anyway pytest -v tests -m "not browser"
-#    - name: Logging docker in case of failure
-#      if: failure()
-#      run : |
-#        docker ps
-#        docker container inspect anyway
-#        docker logs --details anyway
-#        echo +-+-+-
-#        docker container inspect db
-#        docker logs --details db
+name: Tests
+
+on:
+  pull_request:
+      branches:
+        - master
+        - dev
+  push:
+    branches:
+      - master
+      - dev
+jobs:
+  Eslint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v1.4.1
+      with:
+          node-version: '8.17'
+    - run: npm install -g eslint@6.8.0
+    - run: eslint static/js --ignore-path=static/js/.eslintignore
+  Pylint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.7'
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r test_requirements.txt -r requirements.txt
+    - name: Pylint
+      run: |
+        pylint anyway tests main.py
+  Black:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.7'
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade black
+    - name: black formatting
+      run: |
+        black anyway/**/*.py -l 100 --verbose --check
+  Tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Starting Server and DB
+      run: |
+        docker-compose -f docker-compose.yml up -d --build
+    - name: Waiting for DB startup
+      run: |
+        bash ./wait_for_postgres.sh
+    - name: DB Initialization
+      run: |
+        docker exec anyway alembic upgrade head
+        docker exec anyway ./main.py process registered-vehicles
+        docker exec anyway ./main.py process cbs
+    - name: Tests
+      env:
+        TWITTER_CONSUMER_KEY: ${{ secrets.TWITTER_CONSUMER_KEY }}
+        TWITTER_CONSUMER_SECRET: ${{ secrets.TWITTER_CONSUMER_SECRET }}
+        TWITTER_ACCESS_KEY:  ${{ secrets.TWITTER_ACCESS_KEY }}
+        TWITTER_ACCESS_SECRET:  ${{ secrets.TWITTER_ACCESS_SECRET }}
+        GOOGLE_MAPS_KEY: ${{ secrets.GOOGLE_MAPS_KEY }}
+        APP_SECRET_KEY: ${{ secrets.APP_SECRET_KEY }}
+
+      run: |
+        docker exec anyway pip install -r ./test_requirements.txt
+        docker exec -e TWITTER_CONSUMER_KEY=$TWITTER_CONSUMER_KEY -e TWITTER_CONSUMER_SECRET=$TWITTER_CONSUMER_SECRET -e TWITTER_ACCESS_KEY=$TWITTER_ACCESS_KEY -e TWITTER_ACCESS_SECRET=$TWITTER_ACCESS_SECRET -e GOOGLE_MAPS_KEY=$GOOGLE_MAPS_KEY -e APP_SECRET_KEY=$APP_SECRET_KEY anyway pytest -v tests -m "not browser"
+    - name: Logging docker in case of failure
+      if: failure()
+      run : |
+        docker ps
+        docker container inspect anyway
+        docker logs --details anyway
+        echo +-+-+-
+        docker container inspect db
+        docker logs --details db

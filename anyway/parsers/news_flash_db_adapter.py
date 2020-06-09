@@ -1,9 +1,11 @@
+import datetime
 import logging
 
 import pandas as pd
 from flask_sqlalchemy import SQLAlchemy
 
 from anyway.utilities import init_flask
+from . import timezones
 from ..models import NewsFlash
 
 # fmt: off
@@ -157,11 +159,11 @@ class DBAdapter:
         :return: latest date of news flash
         """
         latest_date = self.execute(
-            "SELECT date FROM news_flash WHERE source=:source ORDER BY date DESC LIMIT 1",
+            "SELECT max(date) FROM news_flash WHERE source=:source",
             {"source": source},
-        ).fetchone()
-        if latest_date:
-            latest_date[0].replace(tzinfo=None)
+        ).fetchone()[0] or datetime.datetime(1900, 1, 1, 0, 0, 0)
+        # The replace is because the timezone is not kept in the DB
+        return latest_date.replace(tzinfo=timezones.ISREAL_SUMMER_TIMEZONE)
 
     def get_latest_tweet_id(self):
         """

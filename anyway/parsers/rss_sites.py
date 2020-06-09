@@ -1,5 +1,3 @@
-import datetime
-
 import requests
 from bs4 import BeautifulSoup
 
@@ -74,7 +72,7 @@ def scrape(site_name, *, fetch_rss=_fetch, fetch_html=_fetch):
 
 
 def scrape_extract_store(site_name, db):
-    latest_date = db.get_latest_date_of_source(site_name) or datetime.date.min
+    latest_date = db.get_latest_date_of_source(site_name)
     for newsflash in scrape(site_name):
         if newsflash.date < latest_date:
             break

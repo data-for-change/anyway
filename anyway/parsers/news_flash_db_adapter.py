@@ -4,7 +4,7 @@ import pandas as pd
 from flask_sqlalchemy import SQLAlchemy
 
 from anyway.utilities import init_flask
-
+from ..models import NewsFlash
 
 # fmt: off
 
@@ -95,119 +95,10 @@ class DBAdapter:
         ).fetchone()
         return source[0]
 
-    def insert_new_flash_news(
-        self,
-        *,
-        accident,
-        source,
-        title,
-        link,
-        date,
-        author,
-        description,
-        location=None,
-        lat=None,
-        lon=None,
-        resolution=None,
-        region_hebrew=None,
-        district_hebrew=None,
-        yishuv_name=None,
-        street1_hebrew=None,
-        street2_hebrew=None,
-        non_urban_intersection_hebrew=None,
-        road1=None,
-        road2=None,
-        road_segment_name=None,
-        tweet_id=None,
-    ):
-        """
-        insert new news_flash to db
-        :param tweet_id: tweet_id if there is
-        :param region_hebrew: region - mahuz
-        :param district_hebrew: district - napa
-        :param yishuv_name: yishuv name
-        :param street1_hebrew: street1
-        :param street2_hebrew: street2
-        :param non_urban_intersection_hebrew: non urban intersection
-        :param road_segment_name: urban segment name
-        :param title: title of the news_flash
-        :param link: link to the news_flash
-        :param date: parsed date of the news_flash
-        :param author: author of the news_flash
-        :param description: description of the news flash
-        :param location: location of the news flash (textual)
-        :param lat: latitude
-        :param lon: longitude
-        :param road1: road 1 if found
-        :param road2: road 2 if found
-        :param resolution: resolution of found location
-        :param accident: is the news flash an accident
-        :param source: source of the news flash
-        """
-        temp = [
-            title,
-            link,
-            date,
-            author,
-            description,
-            location,
-            lat,
-            lon,
-            resolution,
-            region_hebrew,
-            district_hebrew,
-            yishuv_name,
-            street1_hebrew,
-            street2_hebrew,
-            non_urban_intersection_hebrew,
-            road1,
-            road2,
-            road_segment_name,
-            accident,
-            source,
-            tweet_id,
-        ]
-        title, link, date, author, description, location, lat, lon, resolution, region_hebrew, district_hebrew, yishuv_name, street1_hebrew, street2_hebrew, non_urban_intersection_hebrew, road1, road2, road_segment_name, accident, source, tweet_id = pd.Series(
-            temp
-        ).replace(
-            {pd.np.nan: None, "": None, 0: None, -1: None, " ": None}
-        )
-        self.execute(
-            "INSERT INTO news_flash (tweet_id, title, link, date, author, description, location, lat, lon, "
-            "resolution, region_hebrew, district_hebrew, yishuv_name, street1_hebrew, street2_hebrew, "
-            "non_urban_intersection_hebrew, road1, road2, road_segment_name, "
-            "accident, source"
-            ") VALUES \
-                      (:tweet_id, :title, :link, :date, :author, :description, :location, :lat, :lon, :resolution, \
-                      :region_hebrew, :district_hebrew, :yishuv_name, :street1_hebrew, :street2_hebrew,"
-            " :non_urban_intersection_hebrew, :road1, :road2, :road_segment_name,"
-            " :accident, :source)",
-            {
-                "tweet_id": tweet_id,
-                "title": title,
-                "link": link,
-                "date": date,
-                "author": author,
-                "description": description,
-                "location": location,
-                "lat": lat,
-                "lon": lon,
-                "resolution": resolution,
-                "region_hebrew": region_hebrew,
-                "district_hebrew": district_hebrew,
-                "yishuv_name": yishuv_name,
-                "street1_hebrew": street1_hebrew,
-                "street2_hebrew": street2_hebrew,
-                "non_urban_intersection_hebrew": non_urban_intersection_hebrew,
-                "road1": road1,
-                "road2": road2,
-                "road_segment_name": road_segment_name,
-                "accident": accident,
-                "source": source,
-            },
-        )
-        self.commit()
-        logging.info("new flash news added, is accident: " + str(accident))
+    def insert_new_newsflash(self, newsflash: NewsFlash) -> None:
+        self.db.session.add(newsflash)
+        self.db.session.commit()
+        logging.info("newsflash added, is accident: " + str(newsflash.accident))
 
     def update_news_flash_bulk(self, news_flash_id_list, params_dict_list):
         if len(news_flash_id_list) > 0 and len(news_flash_id_list) == len(params_dict_list):

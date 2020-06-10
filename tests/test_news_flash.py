@@ -96,6 +96,13 @@ def test_scrape_ynet():
     assert_all_equal(items_actual, items_expected)
 
 
+def test_sanity_get_latest_date():
+    db = init_db()
+    db.get_latest_date_of_source('ynet')
+    db.get_latest_date_of_source('walla')
+    db.get_latest_date_of_source('twitter')
+
+
 @pytest.mark.slow
 def test_scrape_sanity_online_ynet():
     next(rss_sites.scrape('ynet'))

@@ -2055,3 +2055,56 @@ class EmbeddedReports(Base):
     report_name_english = Column(String(), primary_key=True)
     report_name_hebrew = Column(String())
     url = Column(String())
+
+
+class InfographicsDataCacheFields(object):
+    news_flash_id = Column(BigInteger(), primary_key=True)
+    years_ago = Column(Integer(), primary_key=True)
+    data = Column(sqlalchemy.types.JSON())
+
+
+class InfographicsDataCache(InfographicsDataCacheFields, Base):
+    __tablename__ = 'infographics_data_cache'
+    __table_args__ = (
+        Index('infographics_data_cache_id_years_idx', 'news_flash_id', 'years_ago', unique=True),
+
+    )
+
+
+    def get_data(self):
+        return self.data
+
+
+    def serialize(self):
+        return {
+            "news_flash_id": self.news_flash_id,
+            "years_ago": self.years_ago,
+            "data": self.data
+        }
+
+
+
+class InfographicsDataCacheTemp(InfographicsDataCacheFields, Base):
+    __tablename__ = 'infographics_data_cache_temp'
+
+
+    def serialize(self):
+        return {
+            "news_flash_id": self.news_flash_id,
+            "years_ago": self.years_ago,
+            "data": self.data
+        }
+
+    # Flask-Login integration
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.news_flash_id
+

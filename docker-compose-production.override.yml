@@ -11,6 +11,9 @@ services:
 
   anyway:
     environment:
+      - PROXYFIX_X_FOR=1
+      - PROXYFIX_X_PROTO=1
+      - PROXYFIX_X_HOST=1
       - DATABASE_URL
       - GOOGLE_MAPS_KEY
       - TWITTER_CONSUMER_KEY

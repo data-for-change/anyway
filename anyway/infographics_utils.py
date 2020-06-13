@@ -23,8 +23,8 @@ from .infographics_dictionaries import driver_type_hebrew_dict
                  'text': dictionary (Object) - can be empty
                  },
         'meta': {
-				 'rank': int (Integer)
-        		 }
+                 'rank': int (Integer)
+                 }
     }
 """
 

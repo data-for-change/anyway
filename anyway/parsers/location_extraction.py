@@ -4,10 +4,9 @@ import re
 import geohash  # python-geohash package
 import googlemaps
 import numpy as np
-import pandas as pd
 from geographiclib.geodesic import Geodesic
 
-from anyway.parsers.news_flash_db_adapter import init_db
+from ..models import NewsFlash
 from . import resolution_dict
 from . import secrets
 
@@ -31,7 +30,7 @@ def extract_road_number(location):
     return None
 
 
-def get_db_matching_location(latitude, longitude, resolution, road_no=None):
+def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):
     """
     extracts location from db by closest geo point to location found, using road number if provided and limits to
     requested resolution
@@ -42,70 +41,51 @@ def get_db_matching_location(latitude, longitude, resolution, road_no=None):
     :return: a dict containing all the geo fields stated in
     resolution dict, with values filled according to resolution
     """
-    final_loc = {}
-    for field in resolution_dict["אחר"]:
-        final_loc[field] = None
-    try:
-        # READ MARKERS FROM DB
-        geod = Geodesic.WGS84
-        relevant_fields = resolution_dict[resolution]
-        markers = init_db().get_markers_for_location_extraction()
-        markers["geohash"] = markers.apply(
-            lambda x: geohash.encode(x["latitude"], x["longitude"], precision=4), axis=1
-        )
-        markers_orig = markers.copy()
-        if resolution != "אחר":
-            if (
-                road_no is not None
-                and road_no > 0
-                and ("road1" in relevant_fields or "road2" in relevant_fields)
-            ):
-                markers = markers.loc[(markers["road1"] == road_no) | (markers["road2"] == road_no)]
-            for field in relevant_fields:
-                if field == "road1":
-                    markers = markers.loc[markers[field].notnull()]
-                    markers = markers.loc[markers[field] > 0]
-                elif (
-                    field == "region_hebrew"
-                    or field == "district_hebrew"
-                    or field == "yishuv_name"
-                    or field == "street1_hebrew"
-                ):
-                    markers = markers.loc[markers[field].notnull()]
-                    markers = markers.loc[markers[field] != ""]
-        if markers.count()[0] == 0:
-            markers = markers_orig
-
-        # FILTER BY GEOHASH
-        curr_geohash = geohash.encode(latitude, longitude, precision=4)
-        if markers.loc[markers["geohash"] == curr_geohash].count()[0] > 0:
-            markers = markers.loc[markers["geohash"] == curr_geohash].copy()
-
-        # CREATE DISTANCE FIELD
-        markers["dist_point"] = markers.apply(
-            lambda x: geod.Inverse(latitude, longitude, x["latitude"], x["longitude"])["s12"],
-            axis=1,
-        )
-        markers = markers.replace({pd.np.nan: None})
-        most_fit_loc = (
-            markers.loc[markers["dist_point"] == markers["dist_point"].min()].iloc[0].to_dict()
-        )
+    # READ MARKERS FROM DB
+    geod = Geodesic.WGS84
+    relevant_fields = resolution_dict[resolution]
+    markers = db.get_markers_for_location_extraction()
+    markers["geohash"] = markers.apply(
+        lambda x: geohash.encode(x["latitude"], x["longitude"], precision=4), axis=1
+    )
+    markers_orig = markers.copy()
+    if resolution != "אחר":
+        if (
+            road_no is not None
+            and road_no > 0
+            and ("road1" in relevant_fields or "road2" in relevant_fields)
+        ):
+            markers = markers.loc[(markers["road1"] == road_no) | (markers["road2"] == road_no)]
         for field in relevant_fields:
-            if most_fit_loc[field] is not None:
-                if (
-                    type(most_fit_loc[field]) == str
-                    and (most_fit_loc[field] == "" or most_fit_loc[field] == "nan")
-                ) or (type(most_fit_loc[field]) == np.float64 and np.isnan(most_fit_loc[field])):
-                    final_loc[field] = None
-                else:
-                    final_loc[field] = most_fit_loc[field]
+            if field == "road1":
+                markers = markers.loc[markers[field].notnull()]
+                markers = markers.loc[markers[field] > 0]
+            elif field in ["region_hebrew", "district_hebrew", "yishuv_name", "street1_hebrew"]:
+                markers = markers.loc[markers[field].notnull()]
+                markers = markers.loc[markers[field] != ""]
+    if markers.count()[0] == 0:
+        markers = markers_orig
 
-    except Exception as _:
-        logging.info(
-            "db matching failed for latitude {0}, longitude {1}, resolution {2}, road no {3}".format(
-                latitude, longitude, resolution, road_no
-            )
-        )
+    # FILTER BY GEOHASH
+    curr_geohash = geohash.encode(latitude, longitude, precision=4)
+    if markers.loc[markers["geohash"] == curr_geohash].count()[0] > 0:
+        markers = markers.loc[markers["geohash"] == curr_geohash].copy()
+
+    # CREATE DISTANCE FIELD
+    markers["dist_point"] = markers.apply(
+        lambda x: geod.Inverse(latitude, longitude, x["latitude"], x["longitude"])["s12"], axis=1,
+    ).replace({np.nan: None})
+
+    most_fit_loc = (
+        markers.loc[markers["dist_point"] == markers["dist_point"].min()].iloc[0].to_dict()
+    )
+
+    final_loc = {}
+    for field in relevant_fields:
+        loc = most_fit_loc[field]
+        if loc not in [None, "", "nan"]:
+            if not (isinstance(loc, np.float64) and np.isnan(loc)):
+                final_loc[field] = loc
     return final_loc
 
 
@@ -192,12 +172,14 @@ def geocode_extract(location):
     }
 
 
-def manual_filter_location_of_text(text):
+def extract_location_text(text):
     """
     filters the text so it will be easier to find corresponding geolocation, based on manual chosen filters.
     :param text: text
     :return: filtered text - should catch the correct location most of the time.
     """
+    if text is None:
+        return None
     filter_ind = float("inf")
     if text.find(".") != -1:
         text = text[: text.find(".")]
@@ -278,57 +260,53 @@ def manual_filter_location_of_text(text):
                     )
 
     except Exception as _:
-        logging.info("could not filter text {0}".format(text))
-    if "כביש" in text:
-        filter_ind = min(filter_ind, text.find("כביש"))
-    if "שדרות" in text:
-        filter_ind = min(filter_ind, text.find("שדרות"))
-    if "רחוב" in text:
-        filter_ind = min(filter_ind, text.find("רחוב"))
-    if "מחלף" in text:
-        filter_ind = min(filter_ind, text.find("מחלף"))
-    if "צומת" in text:
-        filter_ind = min(filter_ind, text.find("צומת"))
-    if "סמוך ל" in text:
-        filter_ind = min(filter_ind, text.find("סמוך ל") + len("סמוך ל"))
-    if "ליד ה" in text:
-        filter_ind = min(filter_ind, text.find("ליד ה") + len("ליד ה"))
-    if "יישוב" in text:
-        filter_ind = min(filter_ind, text.find("יישוב"))
-    if "מושב" in text:
-        filter_ind = min(filter_ind, text.find("מושב"))
-    if "קיבוץ" in text:
-        filter_ind = min(filter_ind, text.find("קיבוץ"))
-    if "התנחלות" in text:
-        filter_ind = min(filter_ind, text.find("התנחלות"))
-    if "שכונת" in text:
-        filter_ind = min(filter_ind, text.find("שכונת"))
-    if "בדרך" in text:
-        filter_ind = min(filter_ind, text.find("בדרך"))
+        logging.exception("could not filter text {0}".format(text))
+
+    loc_tokens = [
+        "כביש",
+        "שדרות",
+        "רחוב",
+        "מחלף",
+        "צומת",
+        "יישוב",
+        "מושב",
+        "קיבוץ",
+        "התנחלות",
+        "שכונת",
+        "בדרך",
+    ]
+    for token in loc_tokens:
+        i = text.find(token)
+        if i >= 0:
+            filter_ind = min(filter_ind, i)
+
+    near_tokens = ["סמוך ל", "ליד ה"]  # maybe add: "ליד "
+    for token in near_tokens:
+        i = text.find(token)
+        if i >= 0:
+            filter_ind = min(filter_ind, i + len(token))
+
     if filter_ind != float("inf"):
         text = text[filter_ind:]
-    if "סמוך ל" in text:
-        text = (
-            text[(text.find("סמוך ל") + len("סמוך ל")) :] + "סמוך ל" + text[: text.find("סמוך ל")]
-        )
-    if "ליד ה" in text:
-        text = text[(text.find("ליד ה") + len("ליד ה")) :] + "ליד ה " + text[: text.find("ליד ה ")]
+
+    for token in near_tokens:
+        i = text.find(token)
+        if i >= 0:
+            text = text[i + len(token) :] + token + text[:i]
     return text
 
 
-def extract_geo_features(item) -> None:
-    location = None
-    if item["description"] is not None:
-        location = manual_filter_location_of_text(item["description"])
-    if location is None and item["title"] is not None:
-        location = manual_filter_location_of_text(item["title"])
-    item["location"] = location
-    geo_location = geocode_extract(location)
+def extract_geo_features(db, newsflash: NewsFlash) -> None:
+    newsflash.location = extract_location_text(newsflash.description) or extract_location_text(
+        newsflash.title
+    )
+    geo_location = geocode_extract(newsflash.location)
     if geo_location is not None:
-        item["lat"] = geo_location["geom"]["lat"]
-        item["lon"] = geo_location["geom"]["lng"]
-        item["resolution"] = set_accident_resolution(geo_location)
-        db_location = get_db_matching_location(
-            item["lat"], item["lon"], item["resolution"], geo_location["road_no"],
+        newsflash.lat = geo_location["geom"]["lat"]
+        newsflash.lon = geo_location["geom"]["lng"]
+        newsflash.resolution = set_accident_resolution(geo_location)
+        location_from_db = get_db_matching_location(
+            db, newsflash.lat, newsflash.lon, newsflash.resolution, geo_location["road_no"],
         )
-        item.update(db_location)
+        for k, v in location_from_db.items():
+            setattr(newsflash, k, v)

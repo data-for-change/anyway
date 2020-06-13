@@ -36,6 +36,16 @@ def init_flask():
     )
     app.config.from_object(config)
     app.config["BABEL_TRANSLATION_DIRECTORIES"] = os.path.join(_PROJECT_ROOT, "translations")
+    if os.environ.get("PROXYFIX_X_FOR"):
+        from werkzeug.middleware.proxy_fix import ProxyFix
+        app.wsgi_app = ProxyFix(
+            app.wsgi_app,
+            x_for=int(os.environ["PROXYFIX_X_FOR"]),
+            x_host=int(os.environ.get("PROXYFIX_X_HOST", "0")),
+            x_port=int(os.environ.get("PROXYFIX_X_PORT", "0")),
+            x_prefix=int(os.environ.get("PROXYFIX_X_PREFIX", "0")),
+            x_proto=int(os.environ.get("PROXYFIX_X_PROTO", "0"))
+        )
     return app
 
 

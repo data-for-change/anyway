@@ -19,10 +19,10 @@ else:
 class TestInfographicApi:
     @pytest.fixture
     def infographic_from_existing_new_flash(self, app):
-        existing_news_flash_id = 15305
+        EXITING_NEWS_FLASH_ID = 15305
 
         rv = app.get(
-            f'/api/infographics-data?news_flash_id={existing_news_flash_id}')
+            f'/api/infographics-data?news_flash_id={EXITING_NEWS_FLASH_ID}')
 
         return rv.get_json()
 
@@ -48,29 +48,29 @@ class TestInfographicApi:
             "road1": 90.0,
             "road_segment_name": "כניסה למצפה שלם - צומת שדי תרומות"
         }
-    # cd tests && python -m pytest -s test_infographic_api.py
 
     def test_infographic_with_existing_news_flash(self, widgets):
-        self.accident_count_by_severity_test(widgets)
-        self.most_severe_accidents_table_test(widgets)
-        self.most_severe_accidents_test(widgets)
-        self.street_view_test(widgets)
-        self.head_on_collisions_comparison_test(widgets)
-        self.accident_count_by_accident_type_test(widgets)
-        self.accidents_heat_map_test(widgets)
-        self.accident_count_by_accident_year_test(widgets)
-        self.injured_count_by_accident_year_test(widgets)
-        self.accident_count_by_day_night_test(widgets)
-        self.accidents_count_by_hour_test(widgets)
-        self.accident_count_by_road_light_test(widgets)
-        self.top_road_segments_accidents_per_km_test(widgets)
-        self.injured_count_per_age_group_test(widgets)
+        self.__accident_count_by_severity_test(widgets)
+        self.__most_severe_accidents_table_test(widgets)
+        self.__most_severe_accidents_test(widgets)
+        self.__street_view_test(widgets)
+        self.__head_on_collisions_comparison_test(widgets)
+        self.__accident_count_by_accident_type_test(widgets)
+        self.__accidents_heat_map_test(widgets)
+        self.__accident_count_by_accident_year_test(widgets)
+        self.__injured_count_by_accident_year_test(widgets)
+        self.__accident_count_by_day_night_test(widgets)
+        self.__accidents_count_by_hour_test(widgets)
+        self.__accident_count_by_road_light_test(widgets)
+        self.__top_road_segments_accidents_per_km_test(widgets)
+        self.__injured_count_per_age_group_test(widgets)
+        self.__injured_vision_zero_test(widgets)
 
-    def accident_count_by_severity_test(self, widgets):
+    def __accident_count_by_severity_test(self, widgets):
         assert widgets[0]['name'] == 'accident_count_by_severity'
         assert widgets[0]['data']['items']['total_accidents_count'] > 250
 
-    def most_severe_accidents_table_test(self, widgets):
+    def __most_severe_accidents_table_test(self, widgets):
         assert widgets[1]['name'] == 'most_severe_accidents_table'
         assert len(widgets[1]['data']['items']) > 8
 
@@ -85,7 +85,7 @@ class TestInfographicApi:
 
         assert example in widgets[1]['data']['items']
 
-    def most_severe_accidents_test(self, widgets):
+    def __most_severe_accidents_test(self, widgets):
         assert widgets[2]['name'] == 'most_severe_accidents'
         assert len(widgets[2]['data']['items']) > 5
 
@@ -99,7 +99,7 @@ class TestInfographicApi:
 
         assert example in widgets[2]['data']['items']
 
-    def street_view_test(self, widgets):
+    def __street_view_test(self, widgets):
         assert widgets[3]['name'] == 'street_view'
 
         example = {
@@ -112,7 +112,7 @@ class TestInfographicApi:
         assert example in items if isinstance(
             items, list) else items == example
 
-    def head_on_collisions_comparison_test(self, widgets):
+    def __head_on_collisions_comparison_test(self, widgets):
         assert widgets[4]['name'] == 'head_on_collisions_comparison'
 
         schema = {
@@ -128,7 +128,7 @@ class TestInfographicApi:
         validate(items['specific_road_segment_fatal_accidents'][0], schema)
         validate(items['all_roads_fatal_accidents'][0], schema)
 
-    def accident_count_by_accident_type_test(self, widgets):
+    def __accident_count_by_accident_type_test(self, widgets):
         assert widgets[5]['name'] == 'accident_count_by_accident_type'
         assert len(widgets[5]['data']['items']) > 6
 
@@ -142,7 +142,7 @@ class TestInfographicApi:
 
         validate(widgets[5]['data']['items'][0], schema)
 
-    def accidents_heat_map_test(self, widgets):
+    def __accidents_heat_map_test(self, widgets):
         assert widgets[6]['name'] == 'accidents_heat_map'
         assert len(widgets[6]['data']['items']) > 250
 
@@ -168,7 +168,7 @@ class TestInfographicApi:
         assert all(element in widgets[6]['data']['items']
                    for element in example)
 
-    def accident_count_by_accident_year_test(self, widgets):
+    def __accident_count_by_accident_year_test(self, widgets):
         assert widgets[7]['name'] == 'accident_count_by_accident_year'
         assert len(widgets[7]['data']['items']) > 4
 
@@ -183,7 +183,7 @@ class TestInfographicApi:
         validate(widgets[7]['data']['items'][0], schema)
         assert widgets[7]['data']['text']['title'] == 'כמות תאונות'
 
-    def injured_count_by_accident_year_test(self, widgets):
+    def __injured_count_by_accident_year_test(self, widgets):
         assert widgets[8]['name'] == 'injured_count_by_accident_year'
         assert len(widgets[8]['data']['items']) > 4
 
@@ -198,7 +198,7 @@ class TestInfographicApi:
         validate(widgets[8]['data']['items'][0], schema)
         assert widgets[8]['data']['text']['title'] == 'כמות פצועים'
 
-    def accident_count_by_day_night_test(self, widgets):
+    def __accident_count_by_day_night_test(self, widgets):
         assert widgets[9]['name'] == 'accident_count_by_day_night'
         assert len(widgets[9]['data']['items']) > 1
 
@@ -213,7 +213,7 @@ class TestInfographicApi:
         validate(widgets[9]['data']['items'][0], schema)
         assert widgets[9]['data']['text']['title'] == 'כמות תאונות ביום ובלילה'
 
-    def accidents_count_by_hour_test(self, widgets):
+    def __accidents_count_by_hour_test(self, widgets):
         assert widgets[10]['name'] == 'accidents_count_by_hour'
         assert len(widgets[10]['data']['items']) > 20
 
@@ -228,7 +228,7 @@ class TestInfographicApi:
         validate(widgets[10]['data']['items'][0], schema)
         assert widgets[10]['data']['text']['title'] == 'כמות תאונות לפי שעה'
 
-    def accident_count_by_road_light_test(self, widgets):
+    def __accident_count_by_road_light_test(self, widgets):
         assert widgets[11]['name'] == 'accident_count_by_road_light'
         assert len(widgets[11]['data']['items']) > 6
         schema = {
@@ -242,7 +242,7 @@ class TestInfographicApi:
         validate(widgets[11]['data']['items'][0], schema)
         assert widgets[11]['data']['text']['title'] == 'כמות תאונות לפי תאורה'
 
-    def top_road_segments_accidents_per_km_test(self, widgets):
+    def __top_road_segments_accidents_per_km_test(self, widgets):
         assert widgets[12]['name'] == 'top_road_segments_accidents_per_km'
         assert len(widgets[12]['data']['items']) > 4
 
@@ -253,7 +253,9 @@ class TestInfographicApi:
             "accidents_per_km": {"type": "number"}
         }
 
-    def injured_count_per_age_group_test(self, widgets):
+        validate(widgets[12]['data']['items'][0], schema)
+
+    def __injured_count_per_age_group_test(self, widgets):
         assert widgets[13]['name'] == 'injured_count_per_age_group'
 
         schema = [
@@ -283,32 +285,20 @@ class TestInfographicApi:
         for i, s in zip(items, schema):
             validate(i, s)
 
-    # def insert_infographic_mock_data(self, app):
-    #     sql_insert = '''
-    #         insert into news_flash
-    #         (accident, author, date, description, lat, link, lon, title, source, location, road1, road2, resolution,
-    #         tweet_id, district_hebrew, non_urban_intersection_hebrew, region_hebrew, road_segment_name, street1_hebrew, street2_hebrew, yishuv_name)
-    #         values (
-    #         true,
-    #         'author',
-    #         '2020-02-20 17:47:00',
-    #         '',
-    #         32.1065843,
-    #         'link',
-    #         34.9972008,
-    #         '',
-    #         'twitter',
-    #         'road',
-    #         5,
-    #         null,
-    #         'כביש בינעירוני',
-    #         1230539057274421259,
-    #         null,
-    #         null,
-    #         null,
-    #         'כניסה לראש העין (מערב) - מחלף שער שומרון',
-    #         null,
-    #         null,
-    #         null) returning id;
-    #     '''
-    #     return db.session.execute(sql_insert).fetchone()
+    def __injured_vision_zero_test(self, widgets):
+        assert widgets[14]['name'] == 'vision_zero'
+
+        example = 'vision_zero_2_plus_1'
+
+        assert(example in widgets[14]['data']['items'])
+
+    def __accident_count_by_driver_type_test(self, widgets):
+        assert widgets[15]['name'] == 'accident_count_by_driver_type'
+
+        schema = {
+            "נהג פרטי": {"type": "number"},
+            "נהג מקצועי": {"type": "number"},
+            "לא ידוע": {"type": "number"}
+        }
+
+        validate(widgets[15]['data']['items'][0], schema)

@@ -9,7 +9,7 @@ class Test_get_infographics_data_from_cache(TestCase):
     def test_get_not_existing_from_cache(self):
         cache_data = anyway.parsers.infographics_data_cache_updater\
             .get_infographics_data_from_cache(17, 1)
-        self.assertIsNone(cache_data, 'returned value from cache should be None')
+        self.assertEqual(cache_data, {}, 'returned value from cache should be None')
 
     @patch('anyway.infographics_utils.infographics_data_cache_updater')
     def test_get_existing(self, get_from_cache):

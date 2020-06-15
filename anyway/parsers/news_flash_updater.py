@@ -1,7 +1,7 @@
 import logging
 
 from anyway.parsers.location_extraction import (
-    manual_filter_location_of_text,
+    extract_location_text,
     geocode_extract,
     get_db_matching_location,
     set_accident_resolution,
@@ -24,7 +24,7 @@ def update_news_flash(db, news_flash_data, bulk_size=100):
             accident = news_flash_classifiers[item_source](item_data)
             news_item["accident"] = accident
             if accident:
-                location = manual_filter_location_of_text(item_data)
+                location = extract_location_text(item_data)
                 if location != old_location:
                     news_item["location"] = location
                     geo_location = geocode_extract(location)

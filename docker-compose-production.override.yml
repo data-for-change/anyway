@@ -1,0 +1,56 @@
+version: '3'
+
+services:
+  nginx:
+    build: nginx_docker
+    image: anywayteam/nginx:latest
+    depends_on:
+      - anyway
+    ports:
+      - "8000:80"
+
+  anyway:
+    environment:
+      - PROXYFIX_X_FOR=1
+      - PROXYFIX_X_PROTO=1
+      - PROXYFIX_X_HOST=1
+      - DATABASE_URL
+      - GOOGLE_MAPS_KEY
+      - TWITTER_CONSUMER_KEY
+      - TWITTER_CONSUMER_SECRET
+      - TWITTER_ACCESS_KEY
+      - TWITTER_ACCESS_SECRET
+      - FACEBOOK_KEY
+      - FACEBOOK_SECRET
+      - GOOGLE_LOGIN_CLIENT_ID
+      - GOOGLE_LOGIN_CLIENT_SECRET
+      - MAILUSER
+      - MAILPASS
+      - GOOGLE_APPLICATION_CREDENTIALS
+      - GOOGLE_APPLICATION_CREDENTIALS_HOST_PATH
+      - APP_SECRET_KEY
+    volumes:
+      - "${GOOGLE_APPLICATION_CREDENTIALS_HOST_PATH}:${GOOGLE_APPLICATION_CREDENTIALS}"
+    command: "gunicorn -b 0.0.0.0:5000 -w 4 -t 120 anyway:app"
+
+  db:
+    environment:
+      - DBRESTORE_AWS_BUCKET=anyway-full-db-dumps
+      - DBRESTORE_FILE_NAME
+      - DBRESTORE_SET_ANYWAY_PASSWORD
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+
+  db-backup:
+    build:
+      context: db_docker
+      dockerfile: backup.Dockerfile
+    environment:
+      - DBDUMP_AWS_ACCESS_KEY_ID
+      - DBDUMP_AWS_SECRET_ACCESS_KEY
+      - DBDUMP_S3_FILE_PREFIX
+      - DBDUMP_PASSWORD
+      - DBDUMP_HOST
+      - DBDUMP_USER
+    restart: "no"

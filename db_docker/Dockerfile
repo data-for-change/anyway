@@ -1,18 +1,12 @@
-FROM postgis/postgis:9.6-2.5-alpine
+FROM postgis/postgis:9.6-2.5
 
-RUN apk add --update-cache python3 sudo &&\
-    pip3 install gdown
+RUN apt-get update && apt-get install -y curl unzip &&\
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" &&\
+    unzip awscliv2.zip && ./aws/install && rm -rf aws && aws --version
+COPY restore_db.sh /docker-entrypoint-initdb.d/
 
-ARG GDRIVE_FILE_ID=''
-ARG RESTORE_DB='FALSE'
-ARG GDRIVE_URL='https://drive.google.com/uc?id='
-ARG DB_DUMP_PATH=/tmp/anyway_public.pgdump
-
-ENV GDRIVE_FILE_ID=$GDRIVE_FILE_ID
-ENV RESTORE_DB=$RESTORE_DB
-
-ADD ./download_dump.py /
-
-RUN if [ "$RESTORE_DB" == "TRUE" ] ; then python3 download_dump.py && chmod +rwx $DB_DUMP_PATH; else echo "RESTORE_DB!=TRUE, not downloading dump" ; fi
-
-ADD ./restore_db.sh /docker-entrypoint-initdb.d/
+# values suitable for docker-compose environment
+ENV POSTGRES_PASSWORD anyway
+ENV POSTGRES_USER anyway
+ENV POSTGRES_DB anyway
+ENV DBRESTORE_AWS_BUCKET=anyway-partial-db-dumps

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 resolution_dict = {
     "מחוז": ["region_hebrew"],
     "נפה": ["district_hebrew"],

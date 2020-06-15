@@ -3,8 +3,8 @@ version: '3'
 services:
   anyway:
     build: .
+    image: anywayteam/anyway:latest
     container_name: anyway
-    image: hasadna/anyway:latest
     ports:
       - "8080:5000"
     environment:
@@ -17,12 +17,13 @@ services:
 
   db:
     build: db_docker
+    image: anywayteam/db:latest
     container_name: db
     environment:
-      - POSTGRES_PASSWORD=anyway
-      - POSTGRES_USER=anyway
-      - POSTGRES_DB=anyway
-      - DB_DUMP_PATH=/tmp/anyway_public.pgdump
+      - DBRESTORE_AWS_ACCESS_KEY_ID
+      - DBRESTORE_AWS_SECRET_ACCESS_KEY
+      # the following line can be removed once the db backup job is running daily on kubernetes
+      - DBRESTORE_FILE_NAME=2020-06-09_anyway_partial.pgdump
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:

@@ -1941,8 +1941,10 @@ def infographics_data():
     logging.debug(
         "getting infographics data for news_flash_id: {news_flash_id}, \
                   in time period:{number_of_years_ago}".format(
-    json_data = get_infographics_data(news_flash_id=news_flash_id, years_ago=number_of_years_ago)
+            news_flash_id=news_flash_id, number_of_years_ago=number_of_years_ago
         )
+    )
+    json_data = get_infographics_data(news_flash_id=news_flash_id, years_ago=number_of_years_ago)
     return Response(json_data, mimetype="application/json")
 
 

@@ -7,13 +7,13 @@ from collections import defaultdict
 from sqlalchemy import func
 from sqlalchemy import cast, Numeric
 from sqlalchemy import desc
-from flask import Response
 from .constants import CONST
 from .models import NewsFlash, AccidentMarkerView, InvolvedMarkerView, RoadSegments
 from .parsers import resolution_dict
 from .app_and_db import db
 from .infographics_dictionaries import driver_type_hebrew_dict
 from anyway.parsers import infographics_data_cache_updater
+from concurrent.futures import ThreadPoolExecutor
 
 """
     Widget structure:
@@ -460,7 +460,7 @@ def get_head_to_head_stat(news_flash_id, start_time, end_time):
     if news_flash_obj.road1 and news_flash_obj.road_segment_name:
         filter_dict.update(
             {"road1": news_flash_obj.road1,
-                "road_segment_name": news_flash_obj.road_segment_name}
+             "road_segment_name": news_flash_obj.road_segment_name}
         )
         road_data = get_accidents_stats(
             table_obj=AccidentMarkerView,
@@ -737,9 +737,15 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     return json.dumps(output, default=str)
 
 
+get_infographics_data_executor = ThreadPoolExecutor(max_workers=1)
+
+
 def get_infographics_data(news_flash_id, years_ago):
     try:
-        res = infographics_data_cache_updater.get_infographics_data_from_cache(news_flash_id, years_ago)
+        future = get_infographics_data_executor.submit(
+            infographics_data_cache_updater.get_infographics_data_from_cache,
+            news_flash_id, years_ago)
+        res = future.result(timeout=3)
     except Exception as e:
         logging.error(f'Exception while retrieving from infographics cache({news_flash_id},{years_ago})'
                       f':cause:{e.__cause__}, class:{e.__class__}')
@@ -752,5 +758,3 @@ def get_infographics_data(news_flash_id, years_ago):
     logging.debug(f'infographics_data({news_flash_id}, {years_ago}) '
                   f'{"from cache" if data_from_cache else "created"}')
     return res
-
-

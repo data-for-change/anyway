@@ -739,5 +739,5 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 def create_mock_infographics_data(news_flash_id, number_of_years_ago):
     json_file_path = 'static/data/news_flash_infographics_mock/mock_data.json'
     with open(json_file_path, 'r') as j:
-         contents = json.loads(j.read())
+        contents = json.loads(j.read())
     return Response(json.dumps(contents, default=str), mimetype="application/json")

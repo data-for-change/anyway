@@ -77,7 +77,7 @@ from .models import (
     EmbeddedReports,
 )
 from .oauth import OAuthSignIn
-from .infographics_utils import create_infographics_data, create_mock_infographics_data
+from .infographics_utils import create_mock_infographics_data
 from .app_and_db import app, db
 
 app.config.from_object(__name__)

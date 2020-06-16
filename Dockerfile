@@ -16,8 +16,6 @@ RUN apt-get clean && \
 WORKDIR /anyway
 
 COPY requirements.txt /anyway
-COPY  alembic.ini /anyway
-COPY  alembic /anyway/alembic
 
 
 # First copy only the requirement.txt, so changes in other files won't trigger
@@ -31,6 +29,9 @@ RUN . /venv3/bin/activate && \
                     pip install -U setuptools wheel && \
                     pip install --upgrade pip && \
                     pip install -r requirements.txt
+
+COPY  alembic.ini /anyway
+COPY  alembic /anyway/alembic
 
 
 COPY . /anyway

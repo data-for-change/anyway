@@ -59,7 +59,7 @@ def build_cache_into_temp():
     db.session.query(InfographicsDataCacheTemp).delete()
     db.session.commit()
     db.get_engine().execute(
-        InfographicsDataCacheTemp.__table__.insert(),
+        InfographicsDataCacheTemp.__table__.insert(),  # pylint: disable=no-member
         [{'news_flash_id': new_flash.get_id(),
           'years_ago': y,
           'data': anyway.infographics_utils.create_infographics_data(new_flash.get_id(), y)}
@@ -89,6 +89,4 @@ def main(update, info):
         logging.info(get_cache_info())
 
 
-if __name__ == "__main__":
-    main()
 

@@ -99,7 +99,7 @@ assets.register('css_all', AssetsBundle(
     "css/jquery.smartbanner.css", "css/bootstrap.rtl.css", "css/style.css",
     "css/daterangepicker.css", "css/accordion.css", "css/bootstrap-tour.min.css",
     "css/jquery-ui.min.css", "css/jquery.jspanel.min.css", "css/markers.css",
-    filters='yui_css', output='css/app.min.css'
+    filters='rcssmin', output='css/app.min.css'
 ))
 assets.register("js_all", AssetsBundle(
     "js/libs/jquery-1.11.3.min.js", "js/libs/spin.js", "js/libs/oms.min.js",

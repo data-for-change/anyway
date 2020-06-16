@@ -31,7 +31,6 @@ RUN apt-get clean && \
     apt-get -y update && \
     apt-get install -y \
         postgresql-client \
-        default-jre-headless \
         virtualenv && \
     apt-get clean
 

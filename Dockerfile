@@ -21,8 +21,7 @@ RUN . /venv3/bin/activate && \
                     pip install --upgrade pip && \
                     pip install -r requirements.txt
 
-COPY  alembic.ini /anyway
-COPY  alembic /anyway/alembic
+RUN find /venv3 -name '*.so' | xargs strip
 
 
 FROM ubuntu:19.10 AS runtime

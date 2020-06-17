@@ -15,15 +15,15 @@ class Test_get_infographics_data_from_cache(TestCase):
     def test_get_existing(self, get_from_cache):
         expected = {'data': 'data'}
         get_from_cache.get_infographics_data_from_cache.return_value = expected
-        create_infographics_data = Mock()
+        create_mock_infographics_data = Mock()
         res = get_infographics_data(7, 1)
         get_from_cache.get_infographics_data_from_cache.assert_called_with(7, 1)
-        get_from_cache.create_infographics_data.assert_not_called()
-        create_infographics_data.assert_not_called()
+        get_from_cache.create_mock_infographics_data.assert_not_called()
+        create_mock_infographics_data.assert_not_called()
         self.assertEqual(res, expected, f'{expected} should be found in cache')
 
 
-    @patch('anyway.infographics_utils.create_infographics_data')
+    @patch('anyway.infographics_utils.create_mock_infographics_data')
     @patch('anyway.infographics_utils.infographics_data_cache_updater')
     def test_get_not_existing(self, get_from_cache, utils):
         expected = {'data': "created"}
@@ -36,7 +36,7 @@ class Test_get_infographics_data_from_cache(TestCase):
         self.assertEqual(res, expected, f'{expected} should be found in cache')
 
 
-    @patch('anyway.infographics_utils.create_infographics_data')
+    @patch('anyway.infographics_utils.create_mock_infographics_data')
     @patch('anyway.infographics_utils.infographics_data_cache_updater')
     def test_get_throws_exception(self, get_from_cache, utils):
         expected = {'data': "created"}

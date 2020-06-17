@@ -22,8 +22,6 @@ services:
     environment:
       - DBRESTORE_AWS_ACCESS_KEY_ID
       - DBRESTORE_AWS_SECRET_ACCESS_KEY
-      # the following line can be removed once the db backup job is running daily on kubernetes
-      - DBRESTORE_FILE_NAME=2020-06-09_anyway_partial.pgdump
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:

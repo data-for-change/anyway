@@ -38,7 +38,7 @@ class Constants(object):
     DEFAULT_NUMBER_OF_YEARS_AGO = 5
 
     # years ago to store in cache
-    INFOGRAPHICS_CACHE_YEARS_AGO = [3, 5]
+    INFOGRAPHICS_CACHE_YEARS_AGO = [1, 3, 5, 8]
 
     def __setattr__(self, *_):
         """

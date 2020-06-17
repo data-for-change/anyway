@@ -42,9 +42,6 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 ENV ALLOW_ALEMBIC_UPGRADE=yes
 ENV FLASK_APP=anyway
 
-COPY  alembic.ini /anyway
-COPY  alembic /anyway/alembic
-
 COPY . /anyway
 
 EXPOSE 5000

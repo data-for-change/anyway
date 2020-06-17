@@ -448,6 +448,10 @@ def news_flash():
     news_flashes = news_flash_obj.all()
 
     news_flashes_jsons = [news_flash.serialize() for news_flash in news_flashes]
+    for news_flash in news_flashes_jsons:
+        news_flash["display_source"] = CONST.SOURCE_MAPPING.get(news_flash["source"], CONST.UNKNOWN)
+        if news_flash["display_source"] == CONST.UNKNOWN:
+            logging.warn("Unknown source of news-flash with id {}".format(news_flash.id))
     return Response(json.dumps(news_flashes_jsons, default=str), mimetype="application/json")
 
 

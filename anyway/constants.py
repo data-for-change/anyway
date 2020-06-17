@@ -39,6 +39,11 @@ class Constants(object):
 
     # years ago to store in cache
     INFOGRAPHICS_CACHE_YEARS_AGO = [1, 3, 5, 8]
+    SOURCE_MAPPING = {"walla": "וואלה",
+                       "twitter": "מד״א",
+                       "ynet": "ynet"}
+
+    UNKNOWN = "UNKNOWN"
 
     def __setattr__(self, *_):
         """

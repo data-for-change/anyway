@@ -12,7 +12,7 @@ def parse_creation_datetime(raw_date: str):
     walla: 'Sun, 31 May 2020 08:26:18 GMT' or like ynet
     """
     try:
-        # +0300 (ynet or walla)
+        # +0200 or +0300 depending on daylight saving time (ynet or walla)
         time = datetime.strptime(raw_date, "%a, %d %b %Y %H:%M:%S %z")
     except ValueError:
         try:
@@ -26,5 +26,5 @@ def parse_creation_datetime(raw_date: str):
 
 
 def from_db(date):
-    # The replace is because the timezone is not kept in the DB
-    return date.astimezone(tzinfo=ISREAL_SUMMER_TIMEZONE)
+    # DB holds timezone as UTC; to get local-timezone pretty-printing, we change it on load time
+    return date.astimezone(tz=ISREAL_SUMMER_TIMEZONE)

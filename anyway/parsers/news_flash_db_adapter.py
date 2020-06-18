@@ -98,9 +98,10 @@ class DBAdapter:
         return source[0]
 
     def insert_new_newsflash(self, newsflash: NewsFlash) -> None:
+        logging.info("Adding newsflash, is accident: {}, date: {}"
+                     .format(newsflash.accident, newsflash.date))
         self.db.session.add(newsflash)
         self.db.session.commit()
-        logging.info("newsflash added, is accident: " + str(newsflash.accident))
 
     def update_news_flash_bulk(self, news_flash_id_list, params_dict_list):
         if len(news_flash_id_list) > 0 and len(news_flash_id_list) == len(params_dict_list):
@@ -161,7 +162,10 @@ class DBAdapter:
             "SELECT max(date) FROM news_flash WHERE source=:source",
             {"source": source},
         ).fetchone()[0] or datetime.datetime(1900, 1, 1, 0, 0, 0)
-        return timezones.from_db(latest_date)
+        res = timezones.from_db(latest_date)
+        logging.info('Latest time fetched for source {} is {}'
+                     .format(source, res))
+        return res
 
     def get_latest_tweet_id(self):
         """

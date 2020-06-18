@@ -13,16 +13,18 @@ def parse_creation_datetime(raw_date: str):
     """
     try:
         # +0300 (ynet or walla)
-        return datetime.strptime(raw_date, "%a, %d %b %Y %H:%M:%S %z").replace(
-            tzinfo=ISREAL_SUMMER_TIMEZONE
-        )
-    except ValueError as ex:
-        print(ex)
+        time = datetime.strptime(raw_date, "%a, %d %b %Y %H:%M:%S %z")
+    except ValueError:
         try:
             # +0000 (twitter)
             time = datetime.strptime(raw_date, "%a %b %d %H:%M:%S %z %Y")
-        except ValueError as ex:
-            print(ex)
+        except ValueError:
             # GMT (walla)
             time = datetime.strptime(raw_date, "%a, %d %b %Y %H:%M:%S %Z")
-        return time.replace(tzinfo=timezone.utc).astimezone(tz=ISREAL_SUMMER_TIMEZONE)
+            time = time.replace(tzinfo=timezone.utc)
+    return time.astimezone(tz=ISREAL_SUMMER_TIMEZONE)
+
+
+def from_db(date):
+    # The replace is because the timezone is not kept in the DB
+    return date.astimezone(tzinfo=ISREAL_SUMMER_TIMEZONE)

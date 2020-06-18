@@ -155,19 +155,16 @@ class DBAdapter:
 
     def get_latest_date_of_source(self, source):
         """
-        returns latest date of news flash
         :return: latest date of news flash
         """
         latest_date = self.execute(
             "SELECT max(date) FROM news_flash WHERE source=:source",
             {"source": source},
         ).fetchone()[0] or datetime.datetime(1900, 1, 1, 0, 0, 0)
-        # The replace is because the timezone is not kept in the DB
-        return latest_date.replace(tzinfo=timezones.ISREAL_SUMMER_TIMEZONE)
+        return timezones.from_db(latest_date)
 
     def get_latest_tweet_id(self):
         """
-        get the latest tweet id
         :return: latest tweet id
         """
         latest_id = self.execute(

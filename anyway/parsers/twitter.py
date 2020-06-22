@@ -60,7 +60,7 @@ def parse_tweet(tweet, screen_name):
 def scrape_extract_store(screen_name, db: DBAdapter):
     latest_date = db.get_latest_date_of_source("twitter")
     for newsflash in scrape(screen_name, db.get_latest_tweet_id()):
-        if newsflash.date < latest_date:
+        if newsflash.date <= latest_date:
             # We can break if we're guaranteed the order is descending
             continue
         newsflash.accident = classify_tweets(newsflash.description)

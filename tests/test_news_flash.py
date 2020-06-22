@@ -72,8 +72,9 @@ def test_scrape_walla():
 
 def test_scrape_ynet():
     items_expected = [
+        # note: the file holds date in winter timezone, so here it is described as summer timezone - +1 hour
         NewsFlash(
-            date=datetime.datetime(2020, 5, 22, 18, 27, 32, tzinfo=timezones.ISREAL_SUMMER_TIMEZONE),
+            date=datetime.datetime(2020, 5, 22, 19, 27, 32, tzinfo=timezones.ISREAL_SUMMER_TIMEZONE),
             title="קפריסין הודיעה: ישראלים יוכלו להיכנס למדינה החל מה-9 ביוני",
             link="http://www.ynet.co.il/articles/0,7340,L-5735229,00.html",
             source="ynet",
@@ -81,7 +82,7 @@ def test_scrape_ynet():
             description=": \"שר התחבורה של קפריסין הודיע על תוכנית לפתיחת שדות התעופה וחידוש הטיסות החל מה-9 ביוני. התוכנית שאושרה בידי הממשלה חולקה לשני שלבים לפי תאריכים ומדינות שיורשו להיכנס בשעריה. עד ה-19 ביוני נוסעים מכל המקומות יצטרכו להיבדק לקורונה 72 שעות לפני מועד הטיסה. מה-20 ביוני יידרשו לכך רק נוסעים משוויץ, פולין רומניה, קרואטיה, אסטוניה וצ'כיה. בתי המלון ייפתחו ב-1 ביוני, וחובת הבידוד תבוטל ב-20 ביוני.   ",
         ),
         NewsFlash(
-            date=datetime.datetime(2020, 5, 22, 15, 8, 48, tzinfo=timezones.ISREAL_SUMMER_TIMEZONE),
+            date=datetime.datetime(2020, 5, 22, 16, 8, 48, tzinfo=timezones.ISREAL_SUMMER_TIMEZONE),
             link="http://www.ynet.co.il/articles/0,7340,L-5735178,00.html",
             source="ynet",
             author="אלישע בן קימון",

@@ -223,6 +223,17 @@ def embedded_reports(filename):
     return parse(filename)
 
 
+@process.command()
+@click.option('--update', 'update', is_flag=True,
+              help='Recalculates the cache (default is False)', default=False)
+@click.option('--no_info', 'info', is_flag=True,
+              help='Prints info on cache (default is True)', default=True)
+def infographics_data_cache(info, update):
+    """Will refresh the infographics data cache"""
+    from anyway.parsers.infographics_data_cache_updater import main
+    return main(update=update, info=info)
+
+
 @cli.group()
 def preprocess():
     pass

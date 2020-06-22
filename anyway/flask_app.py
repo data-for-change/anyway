@@ -77,7 +77,7 @@ from .models import (
     EmbeddedReports,
 )
 from .oauth import OAuthSignIn
-from .infographics_utils import create_mock_infographics_data
+from .infographics_utils import get_infographics_data
 from .app_and_db import app, db
 
 app.config.from_object(__name__)
@@ -448,6 +448,10 @@ def news_flash():
     news_flashes = news_flash_obj.all()
 
     news_flashes_jsons = [news_flash.serialize() for news_flash in news_flashes]
+    for news_flash in news_flashes_jsons:
+        news_flash["display_source"] = CONST.SOURCE_MAPPING.get(news_flash["source"], CONST.UNKNOWN)
+        if news_flash["display_source"] == CONST.UNKNOWN:
+            logging.warn("Unknown source of news-flash with id {}".format(news_flash.id))
     return Response(json.dumps(news_flashes_jsons, default=str), mimetype="application/json")
 
 
@@ -1967,9 +1971,8 @@ def infographics_data():
             news_flash_id=news_flash_id, number_of_years_ago=number_of_years_ago
         )
     )
-    return create_mock_infographics_data(
-        news_flash_id=news_flash_id, number_of_years_ago=number_of_years_ago
-    )
+    json_data = get_infographics_data(news_flash_id=news_flash_id, years_ago=number_of_years_ago)
+    return Response(json_data, mimetype="application/json")
 
 
 def get_embedded_reports():

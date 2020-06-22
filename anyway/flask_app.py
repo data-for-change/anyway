@@ -95,71 +95,29 @@ app.secret_key = os.environ.get("APP_SECRET_KEY")
 assets = Environment()
 assets.init_app(app)
 assets_env = AssetsEnvironment(os.path.join(utilities._PROJECT_ROOT, "static"), "/static")
-assets.register(
-    "css_all",
-    AssetsBundle(
-        "css/jquery.smartbanner.css",
-        "css/bootstrap.rtl.css",
-        "css/style.css",
-        "css/daterangepicker.css",
-        "css/accordion.css",
-        "css/bootstrap-tour.min.css",
-        "css/jquery-ui.min.css",
-        "css/jquery.jspanel.min.css",
-        "css/markers.css",
-        filters="yui_css",
-        output="css/app.min.css",
-    ),
-)
-assets.register(
-    "js_all",
-    AssetsBundle(
-        "js/libs/jquery-1.11.3.min.js",
-        "js/libs/spin.js",
-        "js/libs/oms.min.js",
-        "js/libs/markerclusterer.js",
-        "js/markerClustererAugment.js",
-        "js/libs/underscore.js",
-        "js/libs/backbone.js",
-        "js/libs/backbone.paginator.min.js",
-        "js/libs/bootstrap.js",
-        "js/libs/notify-combined.min.js",
-        "js/libs/moment-with-langs.min.js",
-        "js/libs/date.js",
-        "js/libs/daterangepicker.js",
-        "js/libs/js-itm.js",
-        "js/constants.js",
-        "js/marker.js",
-        "js/clusterView.js",
-        "js/featuredialog.js",
-        "js/subscriptiondialog.js",
-        "js/preferencesdialog.js",
-        "js/logindialog.js",
-        "js/sidebar.js",
-        "js/contextmenu.js",
-        "js/map_style.js",
-        "js/clipboard.js",
-        "js/libs/bootstrap-tour.min.js",
-        "js/app.js",
-        "js/localization.js",
-        "js/inv_dict.js",
-        "js/veh_dict.js",
-        "js/retina.js",
-        "js/statPanel.js",
-        "js/reports.js",
-        filters="rjsmin",
-        output="js/app.min.js",
-    ),
-)
-assets.register(
-    "email_all",
-    AssetsBundle(
-        "js/libs/jquery-1.11.3.min.js",
-        "js/libs/notify-combined.min.js",
-        filters="rjsmin",
-        output="js/app_send_email.min.js",
-    ),
-)
+assets.register('css_all', AssetsBundle(
+    "css/jquery.smartbanner.css", "css/bootstrap.rtl.css", "css/style.css",
+    "css/daterangepicker.css", "css/accordion.css", "css/bootstrap-tour.min.css",
+    "css/jquery-ui.min.css", "css/jquery.jspanel.min.css", "css/markers.css",
+    filters='rcssmin', output='css/app.min.css'
+))
+assets.register("js_all", AssetsBundle(
+    "js/libs/jquery-1.11.3.min.js", "js/libs/spin.js", "js/libs/oms.min.js",
+    "js/libs/markerclusterer.js", "js/markerClustererAugment.js", "js/libs/underscore.js",
+    "js/libs/backbone.js", "js/libs/backbone.paginator.min.js", "js/libs/bootstrap.js",
+    "js/libs/notify-combined.min.js", "js/libs/moment-with-langs.min.js", "js/libs/date.js",
+    "js/libs/daterangepicker.js", "js/libs/js-itm.js", "js/constants.js",
+    "js/marker.js", "js/clusterView.js", "js/featuredialog.js", "js/subscriptiondialog.js",
+    "js/preferencesdialog.js", "js/logindialog.js", "js/sidebar.js", "js/contextmenu.js",
+    "js/map_style.js", "js/clipboard.js", "js/libs/bootstrap-tour.min.js",
+    "js/app.js", "js/localization.js", "js/inv_dict.js", "js/veh_dict.js",
+    "js/retina.js", "js/statPanel.js", "js/reports.js",
+    filters="rjsmin", output="js/app.min.js"
+))
+assets.register("email_all", AssetsBundle(
+    "js/libs/jquery-1.11.3.min.js", "js/libs/notify-combined.min.js",
+    filters="rjsmin", output="js/app_send_email.min.js"
+))
 
 CORS(
     app,

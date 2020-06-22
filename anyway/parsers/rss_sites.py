@@ -74,7 +74,7 @@ def scrape(site_name, *, fetch_rss=_fetch, fetch_html=_fetch):
 def scrape_extract_store(site_name, db):
     latest_date = db.get_latest_date_of_source(site_name)
     for newsflash in scrape(site_name):
-        if newsflash.date < latest_date:
+        if newsflash.date <= latest_date:
             break
         newsflash.accident = classify_rss(newsflash.title)
         if newsflash.accident:

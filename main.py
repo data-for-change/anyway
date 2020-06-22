@@ -36,7 +36,9 @@ def cli():
 def testserver(open_server, debug_js):
     from anyway import app
 
-    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s %(message)s")
+    logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
+                        level=logging.DEBUG,
+                        datefmt='%Y-%m-%d %H:%M:%S')
 
     if debug_js:
         app.config["ASSETS_DEBUG"] = True

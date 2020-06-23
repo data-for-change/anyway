@@ -8,6 +8,7 @@ RUN apt-get clean && \
         build-essential \
         libpq-dev \
         virtualenv && \
+        tmux && \
     apt-get clean
 
 WORKDIR /anyway

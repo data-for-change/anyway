@@ -4,7 +4,7 @@ from datetime import datetime
 from ..utilities import init_flask
 from flask_sqlalchemy import SQLAlchemy
 from ..models import InfographicsDataCache, InfographicsDataCacheTemp, NewsFlash
-from ..constants import CONST
+from ..backend_constants import BE_CONST
 import anyway.infographics_utils
 import logging
 
@@ -72,7 +72,7 @@ def build_cache_into_temp():
                 "years_ago": y,
                 "data": anyway.infographics_utils.create_infographics_data(new_flash.get_id(), y),
             }
-            for y in CONST.INFOGRAPHICS_CACHE_YEARS_AGO
+            for y in BE_CONST.INFOGRAPHICS_CACHE_YEARS_AGO
             for new_flash in db.session.query(NewsFlash).filter(NewsFlash.accident).all()
         ],
     )

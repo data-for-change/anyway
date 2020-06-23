@@ -1,10 +1,4 @@
-class Constants(object):
-    # constants that used in javascript and python
-
-    # !!!Warning!!!: Do Not Modify this file unless modifying FE constants
-    # After modification - please check Map is still up
-
-    MINIMAL_ZOOM = 17
+class BackEndConstants(object):
 
     MARKER_TYPE_ACCIDENT = 1
     MARKER_TYPE_DISCUSSION = 2
@@ -14,14 +8,9 @@ class Constants(object):
     CBS_ACCIDENT_TYPE_3_CODE = 3
     RSA_PROVIDER_CODE = 4
 
-    HIGHLIGHT_TYPE_USER_SEARCH = 1
-    HIGHLIGHT_TYPE_USER_GPS = 2
-
     BIKE_ACCIDENTS = 21
 
     VEHICLE_TYPE_BIKE = 15
-
-    INVOLVED_TYPE_DRIVER_UNHARMED = 1
 
     PROFESSIONAL_DRIVER_VEHICLE_TYPES = [2, 3, 4, 5, 6, 7, 11, 12, 13, 14, 18, 24, 25]
     PRIVATE_DRIVER_VEHICLE_TYPES = [1, 8, 9, 10, 19]
@@ -41,18 +30,12 @@ class Constants(object):
     # other global constants (python only)
     DEFAULT_NUMBER_OF_YEARS_AGO = 5
 
-    def __setattr__(self, *_):
-        """
-        blocking changes in attributes
-        """
-        pass
+    # years ago to store in cache
+    INFOGRAPHICS_CACHE_YEARS_AGO = [1, 3, 5, 8]
+    SOURCE_MAPPING = {"walla": "וואלה",
+                       "twitter": "מד״א",
+                       "ynet": "ynet"}
 
-    def to_dict(self):
-        return {
-            a: getattr(self, a)
-            for a in dir(self)
-            if not a.startswith("__") and not callable(getattr(self, a))
-        }
+    UNKNOWN = "UNKNOWN"
 
-
-CONST = Constants()
+BE_CONST = BackEndConstants()

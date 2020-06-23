@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from openpyxl import load_workbook
 
 from .utils import batch_iterator
-from ..constants import CONST
+from ..backend_constants import BE_CONST
 from ..models import AccidentMarker
 from ..utilities import init_flask
 
@@ -32,7 +32,7 @@ def _iter_rows(filename):
     assert [cell.value for cell in first_row] == headers
     for row in rows:
         id_ = int(row[0].value)
-        provider_and_id_ = int(str(CONST.RSA_PROVIDER_CODE) + str(id_))
+        provider_and_id_ = int(str(BE_CONST.RSA_PROVIDER_CODE) + str(id_))
 
         violation = row[3].value
         vehicle_type = row[4].value
@@ -60,13 +60,13 @@ def _iter_rows(filename):
             "latitude": latitude,
             "longitude": longitude,
             "created": timestamp,
-            "provider_code": CONST.RSA_PROVIDER_CODE,
+            "provider_code": BE_CONST.RSA_PROVIDER_CODE,
             "accident_severity": 0,
             "rsa_severity": severity,
             "title": "שומרי הדרך",
             "description": json.dumps(description),
             "location_accuracy": 1,
-            "type": CONST.MARKER_TYPE_ACCIDENT,
+            "type": BE_CONST.MARKER_TYPE_ACCIDENT,
             "video_link": video_link,
             "vehicle_type_rsa": vehicle_type,
             "violation_type_rsa": violation,

@@ -9,7 +9,7 @@ import pandas as pd
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_, not_, and_
 
-from ..constants import CONST
+from ..backend_constants import BE_CONST
 from ..models import (
     AccidentMarker,
     Involved,
@@ -70,8 +70,8 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
         .filter(AccidentMarker.provider_and_id == Involved.provider_and_id)
         .filter(
             or_(
-                (AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_1_CODE),
-                (AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_3_CODE),
+                (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_1_CODE),
+                (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_3_CODE),
             )
         )
         .filter(AccidentMarker.created >= start_date)

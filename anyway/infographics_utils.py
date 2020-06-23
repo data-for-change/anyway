@@ -7,7 +7,7 @@ from collections import defaultdict
 from sqlalchemy import func
 from sqlalchemy import cast, Numeric
 from sqlalchemy import desc
-from .constants import CONST
+from .backend_constants import BE_CONST
 from .models import NewsFlash, AccidentMarkerView, InvolvedMarkerView, RoadSegments
 from .parsers import resolution_dict
 from .app_and_db import db
@@ -147,7 +147,7 @@ def get_accidents_stats(
     table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None
 ):
     filters = filters or {}
-    filters["provider_code"] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    filters["provider_code"] = [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
     # get stats
     query = get_query(table_obj, filters, start_time, end_time)
     if group_by:
@@ -177,7 +177,7 @@ def get_most_severe_accidents_with_entities(
     table_obj, filters, entities, start_time, end_time, limit=10
 ):
     filters = filters or {}
-    filters["provider_code"] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    filters["provider_code"] = [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
     query = get_query(table_obj, filters, start_time, end_time)
     query = query.with_entities(*entities)
     query = query.order_by(
@@ -204,7 +204,7 @@ def get_most_severe_accidents(table_obj, filters, start_time, end_time, limit=10
 
 def get_accidents_heat_map(table_obj, filters, start_time, end_time):
     filters = filters or {}
-    filters["provider_code"] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    filters["provider_code"] = [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
     query = get_query(table_obj, filters, start_time, end_time)
     query = query.with_entities("longitude", "latitude")
     df = pd.read_sql_query(query.statement, query.session.bind)
@@ -329,13 +329,13 @@ def count_accidents_by_driver_type(data):
     driver_types = defaultdict(int)
     for item in data:
         vehicle_type, count = item["involve_vehicle_type"], int(item["count"])
-        if vehicle_type in CONST.PROFESSIONAL_DRIVER_VEHICLE_TYPES:
+        if vehicle_type in BE_CONST.PROFESSIONAL_DRIVER_VEHICLE_TYPES:
             driver_types[driver_type_hebrew_dict["professional_driver"]] += count
-        elif vehicle_type in CONST.PRIVATE_DRIVER_VEHICLE_TYPES:
+        elif vehicle_type in BE_CONST.PRIVATE_DRIVER_VEHICLE_TYPES:
             driver_types[driver_type_hebrew_dict["private_vehicle_driver"]] += count
         elif (
-            vehicle_type in CONST.LIGHT_ELECTRIC_VEHICLE_TYPES
-            or vehicle_type in CONST.OTHER_VEHICLES_TYPES
+            vehicle_type in BE_CONST.LIGHT_ELECTRIC_VEHICLE_TYPES
+            or vehicle_type in BE_CONST.OTHER_VEHICLES_TYPES
         ):
             driver_types[driver_type_hebrew_dict["other_driver"]] += count
     return driver_types
@@ -428,8 +428,8 @@ def get_head_to_head_stat(news_flash_id, start_time, end_time):
     news_flash_obj = extract_news_flash_obj(news_flash_id)
     road_data = {}
     filter_dict = {
-        "road_type": CONST.ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION,
-        "accident_severity": CONST.ACCIDENT_SEVERITY_DEADLY,
+        "road_type": BE_CONST.ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION,
+        "accident_severity": BE_CONST.ACCIDENT_SEVERITY_DEADLY,
     }
     all_roads_data = get_accidents_stats(
         table_obj=AccidentMarkerView,
@@ -469,7 +469,7 @@ def get_head_to_head_stat(news_flash_id, start_time, end_time):
 # gets the latest date an accident has occured
 def get_latest_accident_date(table_obj, filters):
     filters = filters or {}
-    filters["provider_code"] = [CONST.CBS_ACCIDENT_TYPE_1_CODE, CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    filters["provider_code"] = [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
     query = db.session.query(func.max(table_obj.accident_timestamp))
     df = pd.read_sql_query(query.statement, query.session.bind)
     return (df.to_dict(orient="records"))[0].get("max_1")  # pylint: disable=no-member

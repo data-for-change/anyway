@@ -18,7 +18,7 @@ from sqlalchemy import or_, and_
 from . import preprocessing_cbs_files
 from .. import field_names, localization
 from .. import importmail_cbs
-from ..constants import CONST
+from ..backend_constants import BE_CONST
 from ..models import (
     AccidentMarker,
     Involved,
@@ -789,8 +789,8 @@ def delete_cbs_entries(start_date, batch_size):
         .filter(AccidentMarker.created >= datetime.strptime(start_date, "%Y-%m-%d"))
         .filter(
             or_(
-                (AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_1_CODE),
-                (AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_3_CODE),
+                (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_1_CODE),
+                (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_3_CODE),
             )
         )
         .all()

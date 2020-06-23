@@ -6,7 +6,7 @@ import sqlalchemy as sa
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_
 
-from anyway.constants import CONST
+from anyway.backend_constants import BE_CONST
 from anyway.models import AccidentMarker, Involved, School
 from anyway.utilities import init_flask
 
@@ -61,8 +61,8 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
         .filter(AccidentMarker.provider_and_id == Involved.provider_and_id)
         .filter(
             or_(
-                (AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_1_CODE),
-                (AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_3_CODE),
+                (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_1_CODE),
+                (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_3_CODE),
             )
         )
         .filter(AccidentMarker.created >= start_date)

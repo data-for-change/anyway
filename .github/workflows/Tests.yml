@@ -72,10 +72,18 @@ jobs:
         TWITTER_ACCESS_SECRET:  ${{ secrets.TWITTER_ACCESS_SECRET }}
         GOOGLE_MAPS_KEY: ${{ secrets.GOOGLE_MAPS_KEY }}
         APP_SECRET_KEY: ${{ secrets.APP_SECRET_KEY }}
-
+        github-token: ${{ secrets.GITHUB_TOKEN }}
       run: |
         docker exec anyway pip install -r ./test_requirements.txt
-        docker exec -e TWITTER_CONSUMER_KEY=$TWITTER_CONSUMER_KEY -e TWITTER_CONSUMER_SECRET=$TWITTER_CONSUMER_SECRET -e TWITTER_ACCESS_KEY=$TWITTER_ACCESS_KEY -e TWITTER_ACCESS_SECRET=$TWITTER_ACCESS_SECRET -e GOOGLE_MAPS_KEY=$GOOGLE_MAPS_KEY -e APP_SECRET_KEY=$APP_SECRET_KEY anyway pytest -v tests -m "not browser"
+        docker exec \
+          -e TWITTER_CONSUMER_KEY=$TWITTER_CONSUMER_KEY \
+          -e TWITTER_CONSUMER_SECRET=$TWITTER_CONSUMER_SECRET \
+          -e TWITTER_ACCESS_KEY=$TWITTER_ACCESS_KEY \
+          -e TWITTER_ACCESS_SECRET=$TWITTER_ACCESS_SECRET \
+          -e GOOGLE_MAPS_KEY=$GOOGLE_MAPS_KEY \
+          -e APP_SECRET_KEY=$APP_SECRET_KEY \
+          anyway pytest -v tests -m "not browser" --cov=. --cov-report=xml
+
     - name: Logging docker in case of failure
       if: failure()
       run : |
@@ -85,3 +93,12 @@ jobs:
         echo +-+-+-
         docker container inspect db
         docker logs --details db
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        env_vars: OS,PYTHON
+        name: codecov-umbrella
+        fail_ci_if_error: true

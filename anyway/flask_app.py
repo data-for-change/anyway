@@ -42,6 +42,7 @@ from . import utilities
 from .base import user_optional
 from .clusters_calculator import retrieve_clusters
 from .config import ENTRIES_PER_PAGE
+from .backend_constants import BE_CONST
 from .constants import CONST
 from .models import (
     AccidentMarker,
@@ -448,6 +449,10 @@ def news_flash():
     news_flashes = news_flash_obj.all()
 
     news_flashes_jsons = [news_flash.serialize() for news_flash in news_flashes]
+    for news_flash in news_flashes_jsons:
+        news_flash["display_source"] = BE_CONST.SOURCE_MAPPING.get(news_flash["source"], BE_CONST.UNKNOWN)
+        if news_flash["display_source"] == BE_CONST.UNKNOWN:
+            logging.warn("Unknown source of news-flash with id {}".format(news_flash.id))
     return Response(json.dumps(news_flashes_jsons, default=str), mimetype="application/json")
 
 
@@ -1240,7 +1245,6 @@ def log_bad_request(request):
 def index(marker=None, message=None):
     context = {"url": request.base_url, "index_url": request.url_root}
     context["CONST"] = CONST.to_dict()
-    # logging.debug("Debug CONST:{0}",context['CONST'])
     if "marker" in request.values:
         markers = AccidentMarker.get_marker(request.values["marker"])
         if markers.count() == 1:
@@ -1839,8 +1843,8 @@ def acc_in_area_query():
         .filter(AccidentMarker.geom.intersects(pol_str))
         .filter(
             or_(
-                (AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_1_CODE),
-                (AccidentMarker.provider_code == CONST.CBS_ACCIDENT_TYPE_3_CODE),
+                (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_1_CODE),
+                (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_3_CODE),
             )
         )
     )
@@ -1960,7 +1964,7 @@ def oauth_callback(provider):
 @app.route("/api/infographics-data", methods=["GET"])
 def infographics_data():
     news_flash_id = request.values.get("news_flash_id")
-    number_of_years_ago = request.values.get("years_ago", CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
+    number_of_years_ago = request.values.get("years_ago", BE_CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
     logging.debug(
         "getting infographics data for news_flash_id: {news_flash_id}, \
                   in time period:{number_of_years_ago}".format(

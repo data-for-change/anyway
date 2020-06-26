@@ -3,11 +3,11 @@
 from datetime import datetime
 from ..utilities import init_flask
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import not_
 from ..models import InfographicsDataCache, InfographicsDataCacheTemp, NewsFlash
 from ..constants import CONST
 import anyway.infographics_utils
 import logging
-
 
 app = init_flask()
 db = SQLAlchemy(app)
@@ -64,18 +64,25 @@ def build_cache_into_temp():
     start = datetime.now()
     db.session.query(InfographicsDataCacheTemp).delete()
     db.session.commit()
-    db.get_engine().execute(
-        InfographicsDataCacheTemp.__table__.insert(),  # pylint: disable=no-member
-        [
-            {
-                "news_flash_id": new_flash.get_id(),
-                "years_ago": y,
-                "data": anyway.infographics_utils.create_infographics_data(new_flash.get_id(), y),
-            }
-            for y in CONST.INFOGRAPHICS_CACHE_YEARS_AGO
-            for new_flash in db.session.query(NewsFlash).filter(NewsFlash.accident).all()
-        ],
-    )
+    for y in CONST.INFOGRAPHICS_CACHE_YEARS_AGO:
+        logging.debug(f"processing years_ago:{y}")
+        db.get_engine().execute(
+            InfographicsDataCacheTemp.__table__.insert(),  # pylint: disable=no-member
+            [
+                {
+                    "news_flash_id": new_flash.get_id(),
+                    "years_ago": y,
+                    "data": anyway.infographics_utils.create_infographics_data(
+                        new_flash.get_id(), y
+                    ),
+                }
+                for new_flash in db.session.query(NewsFlash)
+                .filter(NewsFlash.accident)
+                .filter(NewsFlash.resolution.in_(["כביש בינעירוני"]))
+                .filter(not_(NewsFlash.road_segment_name == None))
+                .all()
+            ],
+        )
     logging.info(f"cache rebuild took:{str(datetime.now() - start)}")
 
 
@@ -97,8 +104,15 @@ def get_cache_info():
         .count()
     )
     num_acc_flash_items = len(db.session.query(NewsFlash).filter(NewsFlash.accident).all())
+    num_acc_suburban_flash_items = (
+        db.session.query(NewsFlash)
+        .filter(NewsFlash.accident)
+        .filter(NewsFlash.resolution.in_(["כביש בינעירוני"]))
+        .filter(not_(NewsFlash.road_segment_name == None))
+        .count()
+    )
     db.session.commit()
-    return f"num items in cache: {cache_items3},{cache_items5}, temp table: {tmp_items3},{tmp_items5}, num flashes:{num_acc_flash_items}"
+    return f"num items in cache: {cache_items3},{cache_items5}, temp table: {tmp_items3},{tmp_items5}, accident flashes:{num_acc_flash_items}, flashes processed:{num_acc_suburban_flash_items}"
 
 
 def main(update, info):

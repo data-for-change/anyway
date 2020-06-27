@@ -41,6 +41,9 @@ class Constants(object):
     # other global constants (python only)
     DEFAULT_NUMBER_OF_YEARS_AGO = 5
 
+    # years ago to store in cache
+    INFOGRAPHICS_CACHE_YEARS_AGO = [1, 3, 5, 8]
+
     def __setattr__(self, *_):
         """
         blocking changes in attributes

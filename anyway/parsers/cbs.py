@@ -989,20 +989,19 @@ def create_provider_code_table():
 
 
 def create_views():
-    db.session.execute("DROP MATERIALIZED VIEW IF EXISTS involved_markers_hebrew")
-    db.session.execute("DROP MATERIALIZED VIEW IF EXISTS vehicles_markers_hebrew")
-    db.session.execute("DROP MATERIALIZED VIEW IF EXISTS markers_hebrew")
-    db.session.execute("CREATE MATERIALIZED VIEW  markers_hebrew AS " + VIEWS.MARKERS_HEBREW_VIEW)
-    db.session.execute("DROP MATERIALIZED VIEW IF EXISTS involved_hebrew")
-    db.session.execute("CREATE MATERIALIZED VIEW involved_hebrew AS " + VIEWS.INVOLVED_HEBREW_VIEW)
-    db.session.execute("DROP MATERIALIZED VIEW IF EXISTS vehicles_hebrew")
-    db.session.execute("CREATE MATERIALIZED VIEW vehicles_hebrew AS " + VIEWS.VEHICLES_HEBREW_VIEW)
+    db.session.execute("DROP VIEW IF EXISTS involved_markers_hebrew")
+    db.session.execute("DROP VIEW IF EXISTS vehicles_markers_hebrew")
+    db.session.execute("DROP VIEW IF EXISTS markers_hebrew")
+    db.session.execute("CREATE VIEW  markers_hebrew AS " + VIEWS.MARKERS_HEBREW_VIEW)
+    db.session.execute("DROP VIEW IF EXISTS involved_hebrew")
+    db.session.execute("CREATE VIEW involved_hebrew AS " + VIEWS.INVOLVED_HEBREW_VIEW)
+    db.session.execute("DROP VIEW IF EXISTS vehicles_hebrew")
+    db.session.execute("CREATE VIEW vehicles_hebrew AS " + VIEWS.VEHICLES_HEBREW_VIEW)
     db.session.execute(
-        "CREATE MATERIALIZED VIEW involved_markers_hebrew AS "
-        + VIEWS.INVOLVED_HEBREW_MARKERS_HEBREW_VIEW
+        "CREATE VIEW involved_markers_hebrew AS " + VIEWS.INVOLVED_HEBREW_MARKERS_HEBREW_VIEW
     )
     db.session.execute(
-        "CREATE MATERIALIZED VIEW vehicles_markers_hebrew AS " + VIEWS.VEHICLES_MARKERS_HEBREW_VIEW
+        "CREATE VIEW vehicles_markers_hebrew AS " + VIEWS.VEHICLES_MARKERS_HEBREW_VIEW
     )
     db.session.commit()
     logging.info("Created DB Views")

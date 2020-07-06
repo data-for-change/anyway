@@ -18,9 +18,11 @@ WIKIPEDIA_RELEVANT_DOMAIN = "https://he.wikipedia.org"
 
 def main(dest_folder):
     all_road_page_links = set()
+    all_highway_page_links = set()
     road_num_to_link_map = {}
 
     extra_svg_files = rf"{dest_folder}/extra_svg_files"
+    highway_svg_files = rf"{dest_folder}/highways"
     if not os.path.exists(extra_svg_files):
         os.makedirs(extra_svg_files)
 
@@ -31,9 +33,21 @@ def main(dest_folder):
         logger.debug(f"could not get main page for all roads - {WIKIPEDIA_ISRAELI_ROADS_LINK}")
     soup = BeautifulSoup(main_page, "lxml")
     update_all_road_page_links(all_road_page_links, soup)
+    update_all_highway_page_links(all_highway_page_links, soup)
 
     logger.info("Got all road page links, starting to process road links")
 
+    get_image_from_link(all_highway_page_links, highway_svg_files, None, road_num_to_link_map, soup)
+    get_image_from_link(
+        all_road_page_links, dest_folder, extra_svg_files, road_num_to_link_map, soup
+    )
+
+    logger.info("Done")
+
+
+def get_image_from_link(
+    all_road_page_links, dest_folder, extra_svg_files, road_num_to_link_map, soup
+):
     svg_extension_pattern = re.compile(r"\.svg$")
     road_num_pattern_svg = re.compile(r"ISR-(F|H)W-(\d+)\.svg$")
     road_num_pattern_png = re.compile(r"ISR-(F|H)W(\d+)\.png$")
@@ -79,8 +93,10 @@ def main(dest_folder):
             else:
                 img_file = "https:" + svg_file
 
-            if road_num in road_num_to_link_map:
+            if road_num in road_num_to_link_map and extra_svg_files is not None:
                 file_path = f"{extra_svg_files}/{road_num}.{file_suffix}"
+            elif road_num in road_num_to_link_map and extra_svg_files is None:
+                continue
             else:
                 file_path = f"{dest_folder}/{road_num}.{file_suffix}"
                 road_num_to_link_map[road_num] = set()
@@ -90,8 +106,6 @@ def main(dest_folder):
             img_file_download = urllib.request.urlopen(img_file)
             with open(file_path, "wb") as localFile:
                 localFile.write(img_file_download.read())
-
-    logger.info("Done")
 
 
 def find_all_road_svg_links(link_suffix, svg_extension_pattern):
@@ -176,6 +190,16 @@ def update_all_road_page_links(all_road_links, soup):
 
     for sub_cat_road_list in local_road_list:
         get_road_page_link(all_road_links, road_link_pattern, sub_cat_road_list)
+
+
+def update_all_highway_page_links(all_highway_page_links, soup):
+    road_link_pattern = re.compile(r"^/wiki/.*((?!\.png))$")
+
+    main_highway_road_table = soup.findAll("table", class_="wikitable")[1]
+    for row in main_highway_road_table.findAll("tr"):
+        cells = row.findAll("td")
+        if len(cells) > 0:
+            get_road_page_link(all_highway_page_links, road_link_pattern, cells[0])
 
 
 def get_road_page_link(all_road_links, road_link_pattern, sub_cat_road_list):

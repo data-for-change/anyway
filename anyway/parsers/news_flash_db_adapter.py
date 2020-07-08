@@ -74,7 +74,7 @@ class DBAdapter:
         return self.db.session.query(NewsFlash).filter(NewsFlash.id == id)
 
     def select_newsflash_where_source(self, source):
-        return self.db.session.query(NewsFlash).filter(NewsFlash.source == sorce)
+        return self.db.session.query(NewsFlash).filter(NewsFlash.source == source)
 
     def get_all_newsflash(self):
         return self.db.session.query(NewsFlash)

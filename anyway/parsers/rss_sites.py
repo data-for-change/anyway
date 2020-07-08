@@ -76,7 +76,7 @@ def scrape_extract_store(site_name, db):
     for newsflash in scrape(site_name):
         if newsflash.date <= latest_date:
             break
-        newsflash.accident = classify_rss(newsflash.title)
+        newsflash.accident = classify_rss(newsflash.description or newsflash.title)
         if newsflash.accident:
             # FIX: No accident-accurate date extracted
             extract_geo_features(db, newsflash)

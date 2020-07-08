@@ -50,28 +50,6 @@ class DBAdapter:
         df.columns = query_res.keys()
         return df
 
-    def get_description(self, news_flash_id):
-        """
-        get description by news_flash id
-        :param news_flash_id: news_flash id
-        :return: description of news_flash
-        """
-        description = self.execute(
-            "SELECT description FROM news_flash WHERE id=:id", {"id": news_flash_id}
-        ).fetchone()
-        return description[0]
-
-    def get_title(self, news_flash_id):
-        """
-        get title by news_flash id
-        :param news_flash_id: news_flash id
-        :return: title of news_flash
-        """
-        title = self.execute(
-            "SELECT title FROM news_flash WHERE id=:id", {"id": news_flash_id}
-        ).fetchone()
-        return title[0]
-
     def remove_duplicate_rows(self):
         """
         remove duplicate rows by link
@@ -86,73 +64,20 @@ class DBAdapter:
         )
         self.commit()
 
-    def get_source(self, news_flash_id):
-        """
-        get source by news_flash id
-        :param news_flash_id: news_flash id
-        :return: source of news_flash
-        """
-        source = self.execute(
-            "SELECT source FROM news_flash WHERE id=:id", {"id": news_flash_id}
-        ).fetchone()
-        return source[0]
-
     def insert_new_newsflash(self, newsflash: NewsFlash) -> None:
         logging.info("Adding newsflash, is accident: {}, date: {}"
                      .format(newsflash.accident, newsflash.date))
         self.db.session.add(newsflash)
         self.db.session.commit()
 
-    def update_news_flash_bulk(self, news_flash_id_list, params_dict_list):
-        if len(news_flash_id_list) > 0 and len(news_flash_id_list) == len(params_dict_list):
-            for i in range(len(news_flash_id_list)):
-                self.update_news_flash_by_id(
-                    news_flash_id_list[i], params_dict_list[i], commit=False
-                )
-            self.commit()
+    def get_newsflash_by_id(self, id):
+        return self.db.session.query(NewsFlash).filter(NewsFlash.id == id)
 
-    def update_news_flash_by_id(self, news_flash_id, params_dict, commit=True):
-        """
-        update news flash with new parameters
-        :return:
-        """
-        sql_query = "UPDATE news_flash SET "
-        if params_dict is not None and len(params_dict) > 0:
-            for k, _ in params_dict.items():
-                sql_query = sql_query + "{key} = :{key}, ".format(key=k)
-            if sql_query.endswith(", "):
-                sql_query = sql_query[:-2]
-            sql_query = sql_query + " WHERE id=:id"
-            params_dict["id"] = news_flash_id
-            self.execute(sql_query, params_dict)
-            if commit:
-                self.commit()
+    def select_newsflash_where_source(self, source):
+        return self.db.session.query(NewsFlash).filter(NewsFlash.source == sorce)
 
-    def get_all_news_flash_ids(self, source=None):
-        if source is not None:
-            res = self.execute(
-                "SELECT DISTINCT id FROM news_flash where source=:source", {"source": source}
-            ).fetchall()
-        else:
-            res = self.execute("SELECT DISTINCT id FROM news_flash").fetchall()
-        return [r[0] for r in res]
-
-    def get_all_news_flash_data_for_updates(self, source=None, id=None):
-        if id is not None:
-            res = self.execute(
-                "SELECT DISTINCT id, title, description, source, location FROM news_flash where id=:id",
-                {"id": id},
-            ).fetchall()
-        elif source is not None:
-            res = self.execute(
-                "SELECT DISTINCT id, title, description, source, location FROM news_flash where source=:source",
-                {"source": source},
-            ).fetchall()
-        else:
-            res = self.execute(
-                "SELECT DISTINCT id, title, description, source, location FROM news_flash"
-            ).fetchall()
-        return res
+    def get_all_newsflash(self):
+        return self.db.session.query(NewsFlash)
 
     def get_latest_date_of_source(self, source):
         """

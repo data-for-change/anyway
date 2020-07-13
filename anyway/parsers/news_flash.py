@@ -37,7 +37,8 @@ def scrape_extract_store_rss(site_name, db):
     for newsflash in rss_sites.scrape(site_name):
         if newsflash.date <= latest_date:
             break
-        newsflash.accident = classify_rss(newsflash.description or newsflash.title)
+        # TODO: pass both title and description, leaving this choice to the classifier
+        newsflash.accident = classify_rss(newsflash.title or newsflash.description)
         if newsflash.accident:
             # FIX: No accident-accurate date extracted
             extract_geo_features(db, newsflash)

@@ -56,13 +56,13 @@ def update_news_flash():
 @click.option("--source", default="", type=str)
 @click.option("--news_flash_id", default="", type=str)
 def update(source, news_flash_id):
-    from anyway.parsers.news_flash_updater import main
+    from anyway.parsers import news_flash
 
     if not source:
         source = None
     if not news_flash_id:
         news_flash_id = None
-    return main(source, news_flash_id)
+    return news_flash.update_all_in_db(source, news_flash_id)
 
 
 @update_news_flash.command()
@@ -118,8 +118,8 @@ def cbs(
 
 @process.command()
 def news_flash():
-    from anyway.parsers.scrape_flash_news import main
-    return main()
+    from anyway.parsers.news_flash import scrape_all
+    return scrape_all()
 
 
 @process.command()

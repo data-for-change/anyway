@@ -2,10 +2,7 @@ import re
 
 import tweepy
 
-from .news_flash_classifiers import classify_tweets
-from .location_extraction import extract_geo_features
 from . import secrets
-from .news_flash_db_adapter import DBAdapter
 from ..models import NewsFlash
 from . import timezones
 
@@ -55,15 +52,3 @@ def parse_tweet(tweet, screen_name):
         tweet_id=int(tweet["id_str"]),
         accident=False,
     )
-
-
-def scrape_extract_store(screen_name, db: DBAdapter):
-    latest_date = db.get_latest_date_of_source("twitter")
-    for newsflash in scrape(screen_name, db.get_latest_tweet_id()):
-        if newsflash.date <= latest_date:
-            # We can break if we're guaranteed the order is descending
-            continue
-        newsflash.accident = classify_tweets(newsflash.description)
-        if newsflash.accident:
-            extract_geo_features(db, newsflash)
-        db.insert_new_newsflash(newsflash)

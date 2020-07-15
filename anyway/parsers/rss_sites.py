@@ -1,8 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 
-from .location_extraction import extract_geo_features
-from .news_flash_classifiers import classify_rss
 from ..models import NewsFlash
 from . import timezones
 
@@ -69,15 +67,3 @@ def scrape(site_name, *, fetch_rss=_fetch, fetch_html=_fetch):
             description=description,
             accident=False,
         )
-
-
-def scrape_extract_store(site_name, db):
-    latest_date = db.get_latest_date_of_source(site_name)
-    for newsflash in scrape(site_name):
-        if newsflash.date <= latest_date:
-            break
-        newsflash.accident = classify_rss(newsflash.title)
-        if newsflash.accident:
-            # FIX: No accident-accurate date extracted
-            extract_geo_features(db, newsflash)
-        db.insert_new_newsflash(newsflash)

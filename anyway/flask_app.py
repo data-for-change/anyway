@@ -96,29 +96,71 @@ app.secret_key = os.environ.get("APP_SECRET_KEY")
 assets = Environment()
 assets.init_app(app)
 assets_env = AssetsEnvironment(os.path.join(utilities._PROJECT_ROOT, "static"), "/static")
-assets.register('css_all', AssetsBundle(
-    "css/jquery.smartbanner.css", "css/bootstrap.rtl.css", "css/style.css",
-    "css/daterangepicker.css", "css/accordion.css", "css/bootstrap-tour.min.css",
-    "css/jquery-ui.min.css", "css/jquery.jspanel.min.css", "css/markers.css",
-    filters='rcssmin', output='css/app.min.css'
-))
-assets.register("js_all", AssetsBundle(
-    "js/libs/jquery-1.11.3.min.js", "js/libs/spin.js", "js/libs/oms.min.js",
-    "js/libs/markerclusterer.js", "js/markerClustererAugment.js", "js/libs/underscore.js",
-    "js/libs/backbone.js", "js/libs/backbone.paginator.min.js", "js/libs/bootstrap.js",
-    "js/libs/notify-combined.min.js", "js/libs/moment-with-langs.min.js", "js/libs/date.js",
-    "js/libs/daterangepicker.js", "js/libs/js-itm.js", "js/constants.js",
-    "js/marker.js", "js/clusterView.js", "js/featuredialog.js", "js/subscriptiondialog.js",
-    "js/preferencesdialog.js", "js/logindialog.js", "js/sidebar.js", "js/contextmenu.js",
-    "js/map_style.js", "js/clipboard.js", "js/libs/bootstrap-tour.min.js",
-    "js/app.js", "js/localization.js", "js/inv_dict.js", "js/veh_dict.js",
-    "js/retina.js", "js/statPanel.js", "js/reports.js",
-    filters="rjsmin", output="js/app.min.js"
-))
-assets.register("email_all", AssetsBundle(
-    "js/libs/jquery-1.11.3.min.js", "js/libs/notify-combined.min.js",
-    filters="rjsmin", output="js/app_send_email.min.js"
-))
+assets.register(
+    "css_all",
+    AssetsBundle(
+        "css/jquery.smartbanner.css",
+        "css/bootstrap.rtl.css",
+        "css/style.css",
+        "css/daterangepicker.css",
+        "css/accordion.css",
+        "css/bootstrap-tour.min.css",
+        "css/jquery-ui.min.css",
+        "css/jquery.jspanel.min.css",
+        "css/markers.css",
+        filters="rcssmin",
+        output="css/app.min.css",
+    ),
+)
+assets.register(
+    "js_all",
+    AssetsBundle(
+        "js/libs/jquery-1.11.3.min.js",
+        "js/libs/spin.js",
+        "js/libs/oms.min.js",
+        "js/libs/markerclusterer.js",
+        "js/markerClustererAugment.js",
+        "js/libs/underscore.js",
+        "js/libs/backbone.js",
+        "js/libs/backbone.paginator.min.js",
+        "js/libs/bootstrap.js",
+        "js/libs/notify-combined.min.js",
+        "js/libs/moment-with-langs.min.js",
+        "js/libs/date.js",
+        "js/libs/daterangepicker.js",
+        "js/libs/js-itm.js",
+        "js/constants.js",
+        "js/marker.js",
+        "js/clusterView.js",
+        "js/featuredialog.js",
+        "js/subscriptiondialog.js",
+        "js/preferencesdialog.js",
+        "js/logindialog.js",
+        "js/sidebar.js",
+        "js/contextmenu.js",
+        "js/map_style.js",
+        "js/clipboard.js",
+        "js/libs/bootstrap-tour.min.js",
+        "js/app.js",
+        "js/localization.js",
+        "js/inv_dict.js",
+        "js/veh_dict.js",
+        "js/retina.js",
+        "js/statPanel.js",
+        "js/reports.js",
+        filters="rjsmin",
+        output="js/app.min.js",
+    ),
+)
+assets.register(
+    "email_all",
+    AssetsBundle(
+        "js/libs/jquery-1.11.3.min.js",
+        "js/libs/notify-combined.min.js",
+        filters="rjsmin",
+        output="js/app_send_email.min.js",
+    ),
+)
 
 CORS(
     app,
@@ -432,7 +474,9 @@ def news_flash():
 
     news_flashes_jsons = [news_flash.serialize() for news_flash in news_flashes]
     for news_flash in news_flashes_jsons:
-        news_flash["display_source"] = BE_CONST.SOURCE_MAPPING.get(news_flash["source"], BE_CONST.UNKNOWN)
+        news_flash["display_source"] = BE_CONST.SOURCE_MAPPING.get(
+            news_flash["source"], BE_CONST.UNKNOWN
+        )
         if news_flash["display_source"] == BE_CONST.UNKNOWN:
             logging.warn("Unknown source of news-flash with id {}".format(news_flash.id))
     return Response(json.dumps(news_flashes_jsons, default=str), mimetype="application/json")
@@ -1536,6 +1580,11 @@ def oauth_callback(provider):
 @app.route("/api/infographics-data", methods=["GET"])
 def infographics_data():
     news_flash_id = request.values.get("news_flash_id")
+
+    if news_flash_id == None:
+        log_bad_request(request)
+        return abort(http_client.BAD_REQUEST)
+
     number_of_years_ago = request.values.get("years_ago", BE_CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
     logging.debug(
         "getting infographics data for news_flash_id: {news_flash_id}, \
@@ -1544,6 +1593,11 @@ def infographics_data():
         )
     )
     json_data = get_infographics_data(news_flash_id=news_flash_id, years_ago=number_of_years_ago)
+
+    if not json_data:
+        log_bad_request(request)
+        return abort(http_client.NOT_FOUND)
+
     return Response(json_data, mimetype="application/json")
 
 

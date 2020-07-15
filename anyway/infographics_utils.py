@@ -147,7 +147,10 @@ def get_accidents_stats(
     table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None
 ):
     filters = filters or {}
-    filters["provider_code"] = [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    filters["provider_code"] = [
+        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
+        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+    ]
     # get stats
     query = get_query(table_obj, filters, start_time, end_time)
     if group_by:
@@ -177,7 +180,10 @@ def get_most_severe_accidents_with_entities(
     table_obj, filters, entities, start_time, end_time, limit=10
 ):
     filters = filters or {}
-    filters["provider_code"] = [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    filters["provider_code"] = [
+        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
+        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+    ]
     query = get_query(table_obj, filters, start_time, end_time)
     query = query.with_entities(*entities)
     query = query.order_by(
@@ -204,7 +210,10 @@ def get_most_severe_accidents(table_obj, filters, start_time, end_time, limit=10
 
 def get_accidents_heat_map(table_obj, filters, start_time, end_time):
     filters = filters or {}
-    filters["provider_code"] = [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    filters["provider_code"] = [
+        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
+        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+    ]
     query = get_query(table_obj, filters, start_time, end_time)
     query = query.with_entities("longitude", "latitude")
     df = pd.read_sql_query(query.statement, query.session.bind)
@@ -340,7 +349,7 @@ def count_accidents_by_driver_type(data):
             driver_types[driver_type_hebrew_dict["other_driver"]] += count
     output = []
     for driver_type, count in driver_types.items():
-        output.append({'driver_type': driver_type, 'count': count})
+        output.append({"driver_type": driver_type, "count": count})
     return output
 
 
@@ -472,7 +481,10 @@ def get_head_to_head_stat(news_flash_id, start_time, end_time):
 # gets the latest date an accident has occured
 def get_latest_accident_date(table_obj, filters):
     filters = filters or {}
-    filters["provider_code"] = [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    filters["provider_code"] = [
+        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
+        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+    ]
     query = db.session.query(func.max(table_obj.accident_timestamp))
     df = pd.read_sql_query(query.statement, query.session.bind)
     return (df.to_dict(orient="records"))[0].get("max_1")  # pylint: disable=no-member

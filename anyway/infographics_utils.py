@@ -24,8 +24,8 @@ from concurrent.futures import ThreadPoolExecutor
                  'text': dictionary (Object) - can be empty
                  },
         'meta': {
-				 'rank': int (Integer)
-        		 }
+                 'rank': int (Integer)
+                 }
     }
 """
 

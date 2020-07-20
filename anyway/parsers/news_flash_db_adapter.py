@@ -5,6 +5,7 @@ import pandas as pd
 from flask_sqlalchemy import SQLAlchemy
 
 from anyway.utilities import init_flask
+from anyway.parsers import infographics_data_cache_updater
 from . import timezones
 from ..models import NewsFlash
 
@@ -69,6 +70,8 @@ class DBAdapter:
                      .format(newsflash.accident, newsflash.date))
         self.db.session.add(newsflash)
         self.db.session.commit()
+        infographics_data_cache_updater.add_news_flash_to_cache(newsflash)
+        logging.debug(f"{newsflash.get_id()} added to cache")
 
     def get_newsflash_by_id(self, id):
         return self.db.session.query(NewsFlash).filter(NewsFlash.id == id)

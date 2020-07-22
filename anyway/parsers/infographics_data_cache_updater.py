@@ -13,12 +13,25 @@ app = init_flask()
 db = SQLAlchemy(app)
 
 
-def add_news_flash_to_cache(news_flash):
-    if not (
+def is_cache_eligible(news_flash):
+    return (
         news_flash.accident
         and news_flash.resolution in (["כביש בינעירוני"])
         and news_flash.road_segment_name is not None
-    ):
+    )
+
+
+def is_in_cache(nf):
+    return (
+        len(CONST.INFOGRAPHICS_CACHE_YEARS_AGO)
+        == db.session.query(InfographicsDataCache)
+        .filter(InfographicsDataCache.news_flash_id == nf.get_id())
+        .count()
+    )
+
+
+def add_news_flash_to_cache(news_flash):
+    if not is_cache_eligible(news_flash):
         logging.debug(
             f"add_news_flash_to_cache: news flash does not qualify:{news_flash.serialize()}"
         )

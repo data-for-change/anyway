@@ -8,7 +8,16 @@ from anyway.parsers.news_flash_classifiers import classify_tweets, classify_rss
 from anyway.parsers import secrets, timezones
 from anyway.parsers.news_flash_db_adapter import init_db
 from anyway.models import NewsFlash
+from anyway.parsers import timezones
+from anyway.parsers.infographics_data_cache_updater import is_cache_eligible, is_in_cache
 
+
+def are_in_cache(news_flash_list):
+    for nf in news_flash_list:
+        if is_cache_eligible(nf) and not is_in_cache(nf):
+            print(f"NewsFlash {nf.get_id()} not in cache")
+            return False
+    return True
 
 def fetch_html_walla(link):
     with open("tests/" + link.split("/")[-1] + ".html", encoding="utf-8") as f:
@@ -67,6 +76,7 @@ def test_scrape_walla():
         rss_sites.scrape("walla", fetch_rss=fetch_rss_walla, fetch_html=fetch_html_walla)
     )
     assert_all_equal(items_actual, items_expected)
+    assert are_in_cache(items_actual)
 
 
 def test_scrape_ynet():
@@ -94,6 +104,7 @@ def test_scrape_ynet():
         rss_sites.scrape("ynet", fetch_rss=fetch_rss_ynet, fetch_html=fetch_html_ynet)
     )
     assert_all_equal(items_actual, items_expected)
+    assert are_in_cache(items_actual)
 
 
 def test_sanity_get_latest_date():

@@ -53,24 +53,32 @@ class Test_infographics_data_from_cache(TestCase):
     @patch("anyway.infographics_utils.create_infographics_data")
     def test_add_unqualified_news_flash(self, utils):
         nf = NewsFlash(accident=False, resolution=["xxx"], road_segment_name="name")
-        add_news_flash_to_cache(nf)
+        res = add_news_flash_to_cache(nf)
         utils.assert_not_called()
+        assert res, "Should return True when no error occurred"
 
     @patch("anyway.parsers.infographics_data_cache_updater.db.get_engine")
     @patch("anyway.infographics_utils.create_infographics_data")
     def test_add_qualified_news_flash(self, utils, get_engine):
         nf = NewsFlash(id=17, accident=True, resolution="כביש בינעירוני", road_segment_name="name")
         get_engine.execute.return_value = {}
-        add_news_flash_to_cache(nf)
+        res = add_news_flash_to_cache(nf)
         invocations = utils.call_args_list
-        print(f"invocations:{invocations}")
         utils.assert_has_calls(
             [unittest.mock.call(17, y) for y in CONST.INFOGRAPHICS_CACHE_YEARS_AGO]
         )
         for i in range(len(invocations)):
-            print(f"invocations:{invocations[i]}")
             self.assertEqual(invocations[i][0][0], 17, "incorrect news flash id")
             self.assertEqual(invocations[i][0][1], CONST.INFOGRAPHICS_CACHE_YEARS_AGO[i])
+        assert res, "Should return True when no error occurred"
+
+    @patch("anyway.parsers.infographics_data_cache_updater.db.get_engine")
+    @patch("anyway.infographics_utils.create_infographics_data")
+    def test_add_news_flash_throws_exception(self, utils, get_engine):
+        nf = NewsFlash(id=17, accident=True, resolution="כביש בינעירוני", road_segment_name="name")
+        get_engine.side_effect = RuntimeError
+        res = add_news_flash_to_cache(nf)
+        assert not res, "Should return False when error occurred"
 
 
 if __name__ == "__main__":

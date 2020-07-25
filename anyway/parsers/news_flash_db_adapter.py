@@ -71,7 +71,6 @@ class DBAdapter:
         self.db.session.add(newsflash)
         self.db.session.commit()
         infographics_data_cache_updater.add_news_flash_to_cache(newsflash)
-        logging.debug(f"{newsflash.get_id()} added to cache")
 
     def get_newsflash_by_id(self, id):
         return self.db.session.query(NewsFlash).filter(NewsFlash.id == id)

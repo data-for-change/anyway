@@ -31,12 +31,12 @@ def is_in_cache(nf):
 
 
 def add_news_flash_to_cache(news_flash):
-    if not is_cache_eligible(news_flash):
-        logging.debug(
-            f"add_news_flash_to_cache: news flash does not qualify:{news_flash.serialize()}"
-        )
-        return
     try:
+        if not is_cache_eligible(news_flash):
+            logging.debug(
+                f"add_news_flash_to_cache: news flash does not qualify:{news_flash.serialize()}"
+            )
+            return True
         db.get_engine().execute(
             InfographicsDataCache.__table__.insert(),  # pylint: disable=no-member
             [
@@ -50,11 +50,13 @@ def add_news_flash_to_cache(news_flash):
                 for y in CONST.INFOGRAPHICS_CACHE_YEARS_AGO
             ],
         )
+        logging.info(f"{news_flash.get_id()} added to cache")
+        return True
     except Exception as e:
-        logging.error(
-            f"Exception while inserting to cache. flash_id:{news_flash})"
-            f":cause:{e.__cause__}, class:{e.__class__}"
+        logging.exception(
+            f"Exception while inserting to cache. flash_id:{news_flash}), cause:{e.__cause__}"
         )
+        return False
 
 
 def get_infographics_data_from_cache(news_flash_id, years_ago):

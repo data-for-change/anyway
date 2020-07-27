@@ -9,6 +9,7 @@ services:
       - "8080:5000"
     environment:
       - DATABASE_URL=postgresql://anyway:anyway@db/anyway
+      - FLASK_ENV=development
     volumes:
       - .:/anyway
     restart: always

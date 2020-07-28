@@ -36,6 +36,7 @@ from sqlalchemy.orm import load_only
 from webassets import Environment as AssetsEnvironment, Bundle as AssetsBundle
 from webassets.ext.jinja2 import AssetsExtension
 from werkzeug.security import check_password_hash
+from werkzeug.exceptions import BadRequestKeyError
 from wtforms import form, fields, validators, StringField, PasswordField, Form
 
 from . import utilities
@@ -255,7 +256,7 @@ def get_kwargs():
                 for arg in ("start_date", "end_date")
             }
         )
-    except ValueError:
+    except (ValueError, BadRequestKeyError):
         abort(http_client.BAD_REQUEST)
     return kwargs
 

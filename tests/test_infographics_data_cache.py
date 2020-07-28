@@ -32,7 +32,6 @@ class Test_infographics_data_from_cache(TestCase):
         expected = {"data": "created"}
         get_from_cache.get_infographics_data_from_cache.return_value = {}
         utils.return_value = expected
-        # create_infographics_data = Mock()
         res = get_infographics_data(7, 1)
         get_from_cache.get_infographics_data_from_cache.assert_called_with(7, 1)
         utils.assert_called_with(7, 1)
@@ -44,7 +43,6 @@ class Test_infographics_data_from_cache(TestCase):
         expected = {"data": "created"}
         get_from_cache.get_infographics_data_from_cache.side_effect = RuntimeError
         utils.return_value = expected
-        # create_infographics_data = Mock()
         res = get_infographics_data(7, 1)
         get_from_cache.get_infographics_data_from_cache.assert_called_with(7, 1)
         utils.assert_called_with(7, 1)

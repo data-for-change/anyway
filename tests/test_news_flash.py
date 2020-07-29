@@ -4,11 +4,10 @@ import json
 import pytest
 
 from anyway.parsers import rss_sites, twitter, location_extraction
-from anyway.parsers.news_flash_classifiers import classify_tweets
-from anyway.parsers import secrets
+from anyway.parsers.news_flash_classifiers import classify_tweets, classify_rss
+from anyway.parsers import secrets, timezones
 from anyway.parsers.news_flash_db_adapter import init_db
 from anyway.models import NewsFlash
-from anyway.parsers import timezones
 
 
 def fetch_html_walla(link):
@@ -206,3 +205,29 @@ def test_timeparse():
     ynet = timezones.parse_creation_datetime('Sun, 31 May 2020 11:26:18 +0300')
     walla = timezones.parse_creation_datetime('Sun, 31 May 2020 08:26:18 GMT')
     assert twitter == ynet == walla
+
+
+def test_classification_statistics_ynet():
+    # The classification in the file is "definitional", meaning:
+    # We don't care if it is "about" an accident, but rather whether it us "THE report".
+    # In other words, is it the _first_ report about a _recent_ accident
+    with open('tests/accidents_definitional_ynet.tsv', encoding='utf8') as f:
+        data = [line.split('\t') for line in f.read().split('\n')]
+
+    stats = {True: {True: 0, False: 0}, False: {True: 0, False: 0}}
+    for title, expected in data:
+        expected = bool(int(expected))
+        actual = classify_rss(title)
+        stats[expected][actual] += 1
+
+    tp = stats[True][True]
+    fp = stats[False][True]
+    fn = stats[True][False]
+    precision = tp / (tp + fp)
+    recall = tp / (tp + fn)
+    f1 = 2 * precision * recall / (precision + recall)
+
+    # These constants should (hopefully) only be updated upwards
+    assert precision > 0.68
+    assert recall > 0.92
+    assert f1 > 0.78

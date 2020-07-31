@@ -81,7 +81,7 @@ from ..models import (
     VehicleDamage,
 )
 from ..utilities import ItmToWGS84, init_flask, time_delta, ImporterUI, truncate_tables, chunks
-from ..views import VIEWS
+from ..db_views import VIEWS
 
 failed_dirs = OrderedDict()
 

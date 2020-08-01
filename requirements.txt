@@ -27,7 +27,7 @@ google-cloud-core==1.3.0
 google-cloud-language==1.3.0
 google-cloud-storage==1.28.1
 google-cloud-translate==2.0.1
-googlemaps==4.4.0
+googlemaps==4.4.2
 graphene-sqlalchemy==2.2.2
 gunicorn==20.0.4
 newrelic==5.12.1.141

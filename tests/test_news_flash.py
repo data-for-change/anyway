@@ -207,6 +207,11 @@ def test_timeparse():
     assert twitter == ynet == walla
 
 
+BEST_PRECISION_YNET = 0.68
+BEST_RECALL_YNET = 0.92
+BEST_F1_YNET = 0.78
+
+
 def test_classification_statistics_ynet():
     # The classification in the file is "definitional", meaning:
     # We don't care if it is "about" an accident, but rather whether it us "THE report".
@@ -228,6 +233,6 @@ def test_classification_statistics_ynet():
     f1 = 2 * precision * recall / (precision + recall)
 
     # These constants should (hopefully) only be updated upwards
-    assert precision > 0.68
-    assert recall > 0.92
-    assert f1 > 0.78
+    assert precision > BEST_PRECISION_YNET
+    assert recall > BEST_RECALL_YNET
+    assert f1 > BEST_F1_YNET

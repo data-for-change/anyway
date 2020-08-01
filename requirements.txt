@@ -18,7 +18,7 @@ click==7.1.2
 feedparser==5.2.1
 flask_cors==3.0.8
 fuzzywuzzy==0.18.0
-geoalchemy2==0.8.2
+geoalchemy2==0.8.4
 geographiclib==1.50
 google==2.0.3
 google-api-core==1.17.0

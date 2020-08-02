@@ -26,27 +26,19 @@ class Test_infographics_data_from_cache(TestCase):
         create_infographics_data.assert_not_called()
         self.assertEqual(res, expected, f"{expected} should be found in cache")
 
-    @patch("anyway.infographics_utils.create_mock_infographics_data")
     @patch("anyway.infographics_utils.infographics_data_cache_updater")
-    def test_get_not_existing(self, get_from_cache, utils):
-        expected = {"data": "created"}
+    def test_get_not_existing(self, get_from_cache):
         get_from_cache.get_infographics_data_from_cache.return_value = {}
-        utils.return_value = expected
         res = get_infographics_data(7, 1)
         get_from_cache.get_infographics_data_from_cache.assert_called_with(7, 1)
-        utils.assert_called_with(7, 1)
-        self.assertEqual(res, expected, f"{expected} should be found in cache")
+        self.assertEqual(res, {}, f"(7,1) should not be found in cache")
 
-    @patch("anyway.infographics_utils.create_mock_infographics_data")
     @patch("anyway.infographics_utils.infographics_data_cache_updater")
-    def test_get_throws_exception(self, get_from_cache, utils):
-        expected = {"data": "created"}
+    def test_get_throws_exception(self, get_from_cache):
         get_from_cache.get_infographics_data_from_cache.side_effect = RuntimeError
-        utils.return_value = expected
         res = get_infographics_data(7, 1)
         get_from_cache.get_infographics_data_from_cache.assert_called_with(7, 1)
-        utils.assert_called_with(7, 1)
-        self.assertEqual(res, expected, f"{expected} should be found in cache")
+        self.assertEqual(res, {}, f"returned value in case of exception should be empty dict")
 
     @patch("anyway.infographics_utils.create_infographics_data")
     def test_add_unqualified_news_flash(self, utils):

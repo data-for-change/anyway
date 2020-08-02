@@ -13,6 +13,52 @@ app = init_flask()
 db = SQLAlchemy(app)
 
 
+def is_cache_eligible(news_flash):
+    return (
+        news_flash.accident
+        and news_flash.resolution in (["כביש בינעירוני"])
+        and news_flash.road_segment_name is not None
+    )
+
+
+def is_in_cache(nf):
+    return (
+        len(CONST.INFOGRAPHICS_CACHE_YEARS_AGO)
+        == db.session.query(InfographicsDataCache)
+        .filter(InfographicsDataCache.news_flash_id == nf.get_id())
+        .count()
+    )
+
+
+def add_news_flash_to_cache(news_flash):
+    try:
+        if not is_cache_eligible(news_flash):
+            logging.debug(
+                f"add_news_flash_to_cache: news flash does not qualify:{news_flash.serialize()}"
+            )
+            return True
+        db.get_engine().execute(
+            InfographicsDataCache.__table__.insert(),  # pylint: disable=no-member
+            [
+                {
+                    "news_flash_id": news_flash.get_id(),
+                    "years_ago": y,
+                    "data": anyway.infographics_utils.create_infographics_data(
+                        news_flash.get_id(), y
+                    ),
+                }
+                for y in CONST.INFOGRAPHICS_CACHE_YEARS_AGO
+            ],
+        )
+        logging.info(f"{news_flash.get_id()} added to cache")
+        return True
+    except Exception as e:
+        logging.exception(
+            f"Exception while inserting to cache. flash_id:{news_flash}), cause:{e.__cause__}"
+        )
+        return False
+
+
 def get_infographics_data_from_cache(news_flash_id, years_ago):
     db_item = (
         db.session.query(InfographicsDataCache)
@@ -34,8 +80,8 @@ def get_infographics_data_from_cache(news_flash_id, years_ago):
 
 
 def copy_temp_into_cache():
-    num_items_cache = db.session.execute("SELECT * from infographics_data_cache").rowcount
-    num_items_temp = db.session.execute("SELECT * from infographics_data_cache_temp").rowcount
+    num_items_cache = db.session.query(InfographicsDataCache).count()
+    num_items_temp = db.session.query(InfographicsDataCacheTemp).count()
     logging.debug(f"num items in cache: {num_items_cache}, temp:{num_items_temp}")
     db.session.commit()
     start = datetime.now()
@@ -49,13 +95,13 @@ def copy_temp_into_cache():
         )
         logging.debug(f"in transaction, after insert into")
     logging.info(f"cache unavailable time: {str(datetime.now() - start)}")
-    num_items_cache = db.session.execute("SELECT * from infographics_data_cache").rowcount
-    num_items_temp = db.session.execute("SELECT * from infographics_data_cache_temp").rowcount
+    num_items_cache = db.session.query(InfographicsDataCache).count()
+    num_items_temp = db.session.query(InfographicsDataCacheTemp).count()
     logging.debug(f"num items in cache: {num_items_cache}, temp:{num_items_temp}")
     db.session.execute("truncate table infographics_data_cache_temp")
     db.session.commit()
-    num_items_cache = db.session.execute("SELECT * from infographics_data_cache").rowcount
-    num_items_temp = db.session.execute("SELECT * from infographics_data_cache_temp").rowcount
+    num_items_cache = db.session.query(InfographicsDataCache).count()
+    num_items_temp = db.session.query(InfographicsDataCacheTemp).count()
     logging.debug(f"num items in cache: {num_items_cache}, temp:{num_items_temp}")
     db.session.commit()
 
@@ -87,23 +133,9 @@ def build_cache_into_temp():
 
 
 def get_cache_info():
-    cache_items5 = (
-        db.session.query(InfographicsDataCache).filter(InfographicsDataCache.years_ago == 5).count()
-    )
-    cache_items3 = (
-        db.session.query(InfographicsDataCache).filter(InfographicsDataCache.years_ago == 3).count()
-    )
-    tmp_items5 = (
-        db.session.query(InfographicsDataCacheTemp)
-        .filter(InfographicsDataCacheTemp.years_ago == 5)
-        .count()
-    )
-    tmp_items3 = (
-        db.session.query(InfographicsDataCacheTemp)
-        .filter(InfographicsDataCacheTemp.years_ago == 3)
-        .count()
-    )
-    num_acc_flash_items = len(db.session.query(NewsFlash).filter(NewsFlash.accident).all())
+    cache_items = db.session.query(InfographicsDataCache).count()
+    tmp_items = db.session.query(InfographicsDataCacheTemp).count()
+    num_acc_flash_items = db.session.query(NewsFlash).filter(NewsFlash.accident).count()
     num_acc_suburban_flash_items = (
         db.session.query(NewsFlash)
         .filter(NewsFlash.accident)
@@ -112,7 +144,7 @@ def get_cache_info():
         .count()
     )
     db.session.commit()
-    return f"num items in cache: {cache_items3},{cache_items5}, temp table: {tmp_items3},{tmp_items5}, accident flashes:{num_acc_flash_items}, flashes processed:{num_acc_suburban_flash_items}"
+    return f"num items in cache: {cache_items}, temp table: {tmp_items}, accident flashes:{num_acc_flash_items}, flashes processed:{num_acc_suburban_flash_items}"
 
 
 def main(update, info):

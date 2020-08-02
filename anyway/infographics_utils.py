@@ -731,20 +731,7 @@ def get_infographics_data(news_flash_id, years_ago):
             f":cause:{e.__cause__}, class:{e.__class__}"
         )
         res = {}
-    if res:
-        data_from_cache = True
-    else:
-        data_from_cache = False
-        res = create_mock_infographics_data(news_flash_id, years_ago)
-    logging.debug(
-        f"infographics_data({news_flash_id}, {years_ago}) "
-        f'{"from cache" if data_from_cache else "created"}'
-    )
+    if not res:
+        logging.error(f"infographics_data({news_flash_id}, {years_ago}) not found in cache")
     return res
 
-
-def create_mock_infographics_data(news_flash_id, number_of_years_ago):
-    json_file_path = "static/data/news_flash_infographics_mock/mock_data.json"
-    with open(json_file_path, "r") as j:
-        contents = json.loads(j.read())
-    return json.dumps(contents, default=str)

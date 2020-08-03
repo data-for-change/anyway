@@ -2112,3 +2112,14 @@ class InfographicsDataCacheTemp(InfographicsDataCacheFields, Base):
         return self.news_flash_id
 
 
+class CasualtiesCosts(Base):
+    __tablename__ = "casualties_costs"
+    id = Column(Integer(), primary_key=True)
+    injured_type = Column(String())
+    injured_type_hebrew = Column(String())
+    injuries_cost_k = Column(Integer())
+    year = Column(Integer())
+    data_source_hebrew = Column(String())
+
+    def toStr(self):
+        return f"{self.id}:{self.injured_type}:{self.injuries_cost_k}"

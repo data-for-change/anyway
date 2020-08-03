@@ -345,5 +345,13 @@ def accidents_around_schools(start_date, end_date, distance, output_path):
     )
 
 
+@process.command()
+@click.argument("filename", type=str, default="static/data/casualties/casualties_costs.csv")
+def update_casualties_costs(filename):
+    from anyway.parsers.casualties_costs import parse
+
+    return parse(filename)
+
+
 if __name__ == "__main__":
     cli(sys.argv[1:])  # pylint: disable=too-many-function-args

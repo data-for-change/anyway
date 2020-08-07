@@ -6,7 +6,6 @@ import logging
 from collections import namedtuple
 
 from flask_security import UserMixin, RoleMixin
-from flask_sqlalchemy import SQLAlchemy
 from geoalchemy2 import Geometry
 from sqlalchemy import (
     Column,
@@ -30,21 +29,21 @@ from sqlalchemy import (
 import sqlalchemy
 from sqlalchemy.orm import relationship, load_only, backref
 
-from . import localization
-from .backend_constants import BE_CONST
-from .database import Base
-from .utilities import init_flask, decode_hebrew
-
-app = init_flask()
-db = SQLAlchemy(app)
+from anyway import localization
+from anyway.backend_constants import BE_CONST
+from anyway.database import Base
+from anyway.utilities import decode_hebrew
+from anyway.app_and_db import db
 
 MarkerResult = namedtuple("MarkerResult", ["accident_markers", "rsa_markers", "total_records"])
 
 db_encoding = "utf-8"
 
-logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
-                    level=logging.DEBUG,
-                    datefmt='%Y-%m-%d %H:%M:%S')
+logging.basicConfig(
+    format="%(asctime)s %(levelname)-8s %(message)s",
+    level=logging.DEBUG,
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 roles_users = Table(
     "roles_users",
@@ -2067,36 +2066,23 @@ class InfographicsDataCacheFields(object):
 
 
 class InfographicsDataCache(InfographicsDataCacheFields, Base):
-    __tablename__ = 'infographics_data_cache'
+    __tablename__ = "infographics_data_cache"
     __table_args__ = (
-        Index('infographics_data_cache_id_years_idx', 'news_flash_id', 'years_ago', unique=True),
-
+        Index("infographics_data_cache_id_years_idx", "news_flash_id", "years_ago", unique=True),
     )
-
 
     def get_data(self):
         return self.data
 
-
     def serialize(self):
-        return {
-            "news_flash_id": self.news_flash_id,
-            "years_ago": self.years_ago,
-            "data": self.data
-        }
-
+        return {"news_flash_id": self.news_flash_id, "years_ago": self.years_ago, "data": self.data}
 
 
 class InfographicsDataCacheTemp(InfographicsDataCacheFields, Base):
-    __tablename__ = 'infographics_data_cache_temp'
-
+    __tablename__ = "infographics_data_cache_temp"
 
     def serialize(self):
-        return {
-            "news_flash_id": self.news_flash_id,
-            "years_ago": self.years_ago,
-            "data": self.data
-        }
+        return {"news_flash_id": self.news_flash_id, "years_ago": self.years_ago, "data": self.data}
 
     # Flask-Login integration
     def is_authenticated(self):
@@ -2110,5 +2096,3 @@ class InfographicsDataCacheTemp(InfographicsDataCacheFields, Base):
 
     def get_id(self):
         return self.news_flash_id
-
-

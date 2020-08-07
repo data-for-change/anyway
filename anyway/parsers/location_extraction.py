@@ -6,9 +6,9 @@ import googlemaps
 import numpy as np
 from geographiclib.geodesic import Geodesic
 
-from ..models import NewsFlash
-from . import resolution_dict
-from . import secrets
+from anyway.models import NewsFlash
+from anyway.parsers import resolution_dict
+from anyway.parsers import secrets
 
 
 def extract_road_number(location):

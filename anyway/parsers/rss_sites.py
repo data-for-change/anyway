@@ -1,8 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 
-from ..models import NewsFlash
-from . import timezones
+from anyway.models import NewsFlash
+from anyway.parsers import timezones
 
 
 def parse_walla(rss_soup, html_soup):

@@ -39,13 +39,13 @@ from werkzeug.security import check_password_hash
 from werkzeug.exceptions import BadRequestKeyError
 from wtforms import form, fields, validators, StringField, PasswordField, Form
 
-from . import utilities
-from .base import user_optional
-from .clusters_calculator import retrieve_clusters
-from .config import ENTRIES_PER_PAGE
-from .backend_constants import BE_CONST
-from .constants import CONST
-from .models import (
+from anyway import utilities
+from anyway.base import user_optional
+from anyway.clusters_calculator import retrieve_clusters
+from anyway.config import ENTRIES_PER_PAGE
+from anyway.backend_constants import BE_CONST
+from anyway.constants import CONST
+from anyway.models import (
     AccidentMarker,
     DiscussionMarker,
     HighlightPoint,
@@ -71,9 +71,9 @@ from .models import (
     AccidentMarkerView,
     EmbeddedReports,
 )
-from .oauth import OAuthSignIn
-from .infographics_utils import get_infographics_data
-from .app_and_db import app, db
+from anyway.oauth import OAuthSignIn
+from anyway.infographics_utils import get_infographics_data
+from anyway.app_and_db import app, db
 from anyway.views.schools.api import (
     schools_description_api,schools_names_api, schools_yishuvs_api,
     schools_api,
@@ -96,29 +96,71 @@ app.secret_key = os.environ.get("APP_SECRET_KEY")
 assets = Environment()
 assets.init_app(app)
 assets_env = AssetsEnvironment(os.path.join(utilities._PROJECT_ROOT, "static"), "/static")
-assets.register('css_all', AssetsBundle(
-    "css/jquery.smartbanner.css", "css/bootstrap.rtl.css", "css/style.css",
-    "css/daterangepicker.css", "css/accordion.css", "css/bootstrap-tour.min.css",
-    "css/jquery-ui.min.css", "css/jquery.jspanel.min.css", "css/markers.css",
-    filters='rcssmin', output='css/app.min.css'
-))
-assets.register("js_all", AssetsBundle(
-    "js/libs/jquery-1.11.3.min.js", "js/libs/spin.js", "js/libs/oms.min.js",
-    "js/libs/markerclusterer.js", "js/markerClustererAugment.js", "js/libs/underscore.js",
-    "js/libs/backbone.js", "js/libs/backbone.paginator.min.js", "js/libs/bootstrap.js",
-    "js/libs/notify-combined.min.js", "js/libs/moment-with-langs.min.js", "js/libs/date.js",
-    "js/libs/daterangepicker.js", "js/libs/js-itm.js", "js/constants.js",
-    "js/marker.js", "js/clusterView.js", "js/featuredialog.js", "js/subscriptiondialog.js",
-    "js/preferencesdialog.js", "js/logindialog.js", "js/sidebar.js", "js/contextmenu.js",
-    "js/map_style.js", "js/clipboard.js", "js/libs/bootstrap-tour.min.js",
-    "js/app.js", "js/localization.js", "js/inv_dict.js", "js/veh_dict.js",
-    "js/retina.js", "js/statPanel.js", "js/reports.js",
-    filters="rjsmin", output="js/app.min.js"
-))
-assets.register("email_all", AssetsBundle(
-    "js/libs/jquery-1.11.3.min.js", "js/libs/notify-combined.min.js",
-    filters="rjsmin", output="js/app_send_email.min.js"
-))
+assets.register(
+    "css_all",
+    AssetsBundle(
+        "css/jquery.smartbanner.css",
+        "css/bootstrap.rtl.css",
+        "css/style.css",
+        "css/daterangepicker.css",
+        "css/accordion.css",
+        "css/bootstrap-tour.min.css",
+        "css/jquery-ui.min.css",
+        "css/jquery.jspanel.min.css",
+        "css/markers.css",
+        filters="rcssmin",
+        output="css/app.min.css",
+    ),
+)
+assets.register(
+    "js_all",
+    AssetsBundle(
+        "js/libs/jquery-1.11.3.min.js",
+        "js/libs/spin.js",
+        "js/libs/oms.min.js",
+        "js/libs/markerclusterer.js",
+        "js/markerClustererAugment.js",
+        "js/libs/underscore.js",
+        "js/libs/backbone.js",
+        "js/libs/backbone.paginator.min.js",
+        "js/libs/bootstrap.js",
+        "js/libs/notify-combined.min.js",
+        "js/libs/moment-with-langs.min.js",
+        "js/libs/date.js",
+        "js/libs/daterangepicker.js",
+        "js/libs/js-itm.js",
+        "js/constants.js",
+        "js/marker.js",
+        "js/clusterView.js",
+        "js/featuredialog.js",
+        "js/subscriptiondialog.js",
+        "js/preferencesdialog.js",
+        "js/logindialog.js",
+        "js/sidebar.js",
+        "js/contextmenu.js",
+        "js/map_style.js",
+        "js/clipboard.js",
+        "js/libs/bootstrap-tour.min.js",
+        "js/app.js",
+        "js/localization.js",
+        "js/inv_dict.js",
+        "js/veh_dict.js",
+        "js/retina.js",
+        "js/statPanel.js",
+        "js/reports.js",
+        filters="rjsmin",
+        output="js/app.min.js",
+    ),
+)
+assets.register(
+    "email_all",
+    AssetsBundle(
+        "js/libs/jquery-1.11.3.min.js",
+        "js/libs/notify-combined.min.js",
+        filters="rjsmin",
+        output="js/app_send_email.min.js",
+    ),
+)
 
 CORS(
     app,
@@ -432,7 +474,9 @@ def news_flash():
 
     news_flashes_jsons = [news_flash.serialize() for news_flash in news_flashes]
     for news_flash in news_flashes_jsons:
-        news_flash["display_source"] = BE_CONST.SOURCE_MAPPING.get(news_flash["source"], BE_CONST.UNKNOWN)
+        news_flash["display_source"] = BE_CONST.SOURCE_MAPPING.get(
+            news_flash["source"], BE_CONST.UNKNOWN
+        )
         if news_flash["display_source"] == BE_CONST.UNKNOWN:
             logging.warn("Unknown source of news-flash with id {}".format(news_flash.id))
     return Response(json.dumps(news_flashes_jsons, default=str), mimetype="application/json")

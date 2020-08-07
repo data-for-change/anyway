@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
 
-from . import field_names
+from anyway import field_names
 
 _tables = {
     "SUG_DEREH": {

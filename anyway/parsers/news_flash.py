@@ -1,10 +1,10 @@
 import os
 import sys
 
-from . import twitter, rss_sites
-from .news_flash_db_adapter import init_db
-from .news_flash_classifiers import classify_rss, classify_tweets
-from .location_extraction import extract_geo_features
+from anyway.parsers import twitter, rss_sites
+from anyway.parsers.news_flash_db_adapter import init_db
+from anyway.parsers.news_flash_classifiers import classify_rss, classify_tweets
+from anyway.parsers.location_extraction import extract_geo_features
 
 # FIX: classifier should be chosen by source (screen name), so `twitter` should be `mda`
 news_flash_classifiers = {"ynet": classify_rss, "twitter": classify_tweets, "walla": classify_rss}

@@ -1,17 +1,11 @@
 # -*- coding: utf-8 -*-
 import json
-
 from dateutil import parser
-from flask_sqlalchemy import SQLAlchemy
 from openpyxl import load_workbook
-
-from .utils import batch_iterator
-from ..backend_constants import BE_CONST
-from ..models import AccidentMarker
-from ..utilities import init_flask
-
-app = init_flask()
-db = SQLAlchemy(app)
+from anyway.parsers.utils import batch_iterator
+from anyway.backend_constants import BE_CONST
+from anyway.models import AccidentMarker
+from anyway.app_and_db import db
 
 
 def _iter_rows(filename):
@@ -76,9 +70,6 @@ def _iter_rows(filename):
 
 
 def parse(filename):
-    app = init_flask()
-    db = SQLAlchemy(app)
-
     for batch in batch_iterator(_iter_rows(filename), batch_size=5000):
         db.session.bulk_insert_mappings(AccidentMarker, batch)
         db.session.commit()

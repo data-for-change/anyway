@@ -2,9 +2,9 @@ import re
 
 import tweepy
 
-from . import secrets
-from ..models import NewsFlash
-from . import timezones
+from anyway.parsers import secrets
+from anyway.models import NewsFlash
+from anyway.parsers import timezones
 
 to_hebrew = {"mda_israel": "מגן דוד אדום"}
 

@@ -1,13 +1,8 @@
 # -*- coding: utf-8 -*-
-from ..models import CasualtiesCosts
-from ..utilities import init_flask
+from anyway.models import CasualtiesCosts
 import pandas as pd
-from flask_sqlalchemy import SQLAlchemy
 import logging
-
-
-app = init_flask()
-db = SQLAlchemy(app)
+from anyway.app_and_db import db
 
 
 def _iter_rows(filename):

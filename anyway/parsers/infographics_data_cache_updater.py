@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
-from ..utilities import init_flask
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import not_
-from ..models import InfographicsDataCache, InfographicsDataCacheTemp, NewsFlash
-from ..constants import CONST
+from anyway.models import InfographicsDataCache, InfographicsDataCacheTemp, NewsFlash
+from anyway.constants import CONST
+from anyway.app_and_db import db
 import anyway.infographics_utils
 import logging
-
-app = init_flask()
-db = SQLAlchemy(app)
 
 
 def is_cache_eligible(news_flash):

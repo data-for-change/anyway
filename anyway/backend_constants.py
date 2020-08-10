@@ -32,10 +32,9 @@ class BackEndConstants(object):
 
     # years ago to store in cache
     INFOGRAPHICS_CACHE_YEARS_AGO = [1, 3, 5, 8]
-    SOURCE_MAPPING = {"walla": "וואלה",
-                       "twitter": "מד״א",
-                       "ynet": "ynet"}
+    SOURCE_MAPPING = {"walla": "וואלה", "twitter": "מד״א", "ynet": "ynet"}
 
     UNKNOWN = "UNKNOWN"
+
 
 BE_CONST = BackEndConstants()

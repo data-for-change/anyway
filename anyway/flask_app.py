@@ -39,13 +39,13 @@ from werkzeug.security import check_password_hash
 from werkzeug.exceptions import BadRequestKeyError
 from wtforms import form, fields, validators, StringField, PasswordField, Form
 
-from . import utilities
-from .base import user_optional
-from .clusters_calculator import retrieve_clusters
-from .config import ENTRIES_PER_PAGE
-from .backend_constants import BE_CONST
-from .constants import CONST
-from .models import (
+from anyway import utilities
+from anyway.base import user_optional
+from anyway.clusters_calculator import retrieve_clusters
+from anyway.config import ENTRIES_PER_PAGE
+from anyway.backend_constants import BE_CONST
+from anyway.constants import CONST
+from anyway.models import (
     AccidentMarker,
     DiscussionMarker,
     HighlightPoint,
@@ -71,9 +71,9 @@ from .models import (
     AccidentMarkerView,
     EmbeddedReports,
 )
-from .oauth import OAuthSignIn
-from .infographics_utils import get_infographics_data
-from .app_and_db import app, db
+from anyway.oauth import OAuthSignIn
+from anyway.infographics_utils import get_infographics_data
+from anyway.app_and_db import app, db
 from anyway.views.schools.api import (
     schools_description_api,schools_names_api, schools_yishuvs_api,
     schools_api,

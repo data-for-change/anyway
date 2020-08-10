@@ -2,14 +2,11 @@ import logging
 from datetime import datetime
 
 import pandas as pd
-from flask_sqlalchemy import SQLAlchemy
 
 from static.data.schools import school_fields
-from ..models import School
-from ..utilities import init_flask, time_delta, chunks
-
-app = init_flask()
-db = SQLAlchemy(app)
+from anyway.models import School
+from anyway.utilities import time_delta, chunks
+from anyway.app_and_db import db
 
 
 def get_data_value(value):

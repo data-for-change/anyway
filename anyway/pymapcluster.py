@@ -1,7 +1,7 @@
 ##
 from math import cos, sin, atan2, sqrt
 
-from . import globalmaptiles as globaltiles
+from anyway import globalmaptiles as globaltiles
 
 
 ##

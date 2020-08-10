@@ -4,10 +4,10 @@ from datetime import datetime
 import math
 import numpy as np
 import pandas as pd
-from flask_sqlalchemy import SQLAlchemy
 
-from ..models import SchoolWithDescription
-from ..utilities import init_flask, time_delta, chunks, ItmToWGS84
+from anyway.models import SchoolWithDescription
+from anyway.utilities import time_delta, chunks, ItmToWGS84
+from anyway.app_and_db import db
 
 school_fields = {
     "data_year": "שנה",
@@ -32,8 +32,6 @@ school_fields = {
     "y": "Y",
 }
 
-app = init_flask()
-db = SQLAlchemy(app)
 coordinates_converter = ItmToWGS84()
 
 

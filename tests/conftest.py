@@ -6,7 +6,7 @@ import requests
 from urlobject import URLObject
 from werkzeug.serving import make_server
 
-from anyway import app
+from anyway.app_and_db import app
 
 
 class ServerThread(Thread):

@@ -1,4 +1,4 @@
-from . import utilities
+from anyway import utilities
 from flask_sqlalchemy import SQLAlchemy
 
 app = utilities.init_flask()

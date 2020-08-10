@@ -5,14 +5,12 @@ from datetime import datetime
 
 import math
 import pandas as pd
-from flask_sqlalchemy import SQLAlchemy
 
-from ..models import TrafficVolume
-from ..utilities import chunks
-from ..utilities import init_flask, time_delta
+from anyway.models import TrafficVolume
+from anyway.utilities import chunks
+from anyway.utilities import time_delta
+from anyway.app_and_db import db
 
-app = init_flask()
-db = SQLAlchemy(app)
 
 dictionary = {
     "shana": "year",

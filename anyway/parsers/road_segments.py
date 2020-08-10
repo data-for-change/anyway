@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
-from flask_sqlalchemy import SQLAlchemy
 from openpyxl import load_workbook
 
-from .utils import batch_iterator
-from ..models import RoadSegments
-from ..utilities import init_flask
-
-app = init_flask()
-db = SQLAlchemy(app)
+from anyway.parsers.utils import batch_iterator
+from anyway.models import RoadSegments
+from anyway.app_and_db import db
 
 
 def _iter_rows(filename):
@@ -42,9 +38,6 @@ def _iter_rows(filename):
 
 
 def parse(filename):
-    app = init_flask()
-    db = SQLAlchemy(app)
-
     for batch in batch_iterator(_iter_rows(filename), batch_size=50):
         db.session.bulk_insert_mappings(RoadSegments, batch)
         db.session.commit()

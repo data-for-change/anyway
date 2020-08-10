@@ -7,11 +7,11 @@ from collections import defaultdict
 from sqlalchemy import func
 from sqlalchemy import cast, Numeric
 from sqlalchemy import desc
-from .backend_constants import BE_CONST
-from .models import NewsFlash, AccidentMarkerView, InvolvedMarkerView, RoadSegments
-from .parsers import resolution_dict
-from .app_and_db import db
-from .infographics_dictionaries import driver_type_hebrew_dict
+from anyway.backend_constants import BE_CONST
+from anyway.models import NewsFlash, AccidentMarkerView, InvolvedMarkerView, RoadSegments
+from anyway.parsers import resolution_dict
+from anyway.app_and_db import db
+from anyway.infographics_dictionaries import driver_type_hebrew_dict
 from anyway.parsers import infographics_data_cache_updater
 from concurrent.futures import ThreadPoolExecutor
 
@@ -746,4 +746,3 @@ def get_infographics_data(news_flash_id, years_ago):
     if not res:
         logging.error(f"infographics_data({news_flash_id}, {years_ago}) not found in cache")
     return res
-

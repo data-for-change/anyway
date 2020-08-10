@@ -1,7 +1,7 @@
 import logging
 import time
-from .models import AccidentMarker
-from .pymapcluster import calculate_clusters
+from anyway.models import AccidentMarker
+from anyway.pymapcluster import calculate_clusters
 
 
 def retrieve_clusters(**kwargs):

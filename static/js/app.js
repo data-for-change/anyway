@@ -89,6 +89,8 @@ $(function() {
             this.district = 0;
             this.case_type = 0;
             this.total_markers = 0;
+            this.total_accidents = 0;
+            this.total_rsa = 0;
 
             this.dateRanges = [new Date($('#sdateInit').val()), new Date($('#edateInit').val())];
 
@@ -206,6 +208,7 @@ $(function() {
             }
         },
         markersFetched: function(params, reset) {
+            debugger;
             this.total_markers = this.markers.state.totalRecords;
             this.total_accidents = this.markers.state.totalAccidents;
             this.total_rsa = this.markers.state.totalRSA;

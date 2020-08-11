@@ -4,7 +4,8 @@ import datetime
 import json
 import logging
 from collections import namedtuple
-
+from operator import or_
+from sqlalchemy.sql import func
 from flask_security import UserMixin, RoleMixin
 from geoalchemy2 import Geometry
 from sqlalchemy import (
@@ -200,6 +201,7 @@ class AccidentMarker(MarkerMixin, Base):
         Index("id_idx_markers", "id", unique=False),
         Index("provider_and_id_idx_markers", "provider_and_id", unique=False),
         Index("idx_markers_geom", "geom", unique=False),
+        Index("idx_markers_created", "created", unique=False),
     )
 
     __mapper_args__ = {"polymorphic_identity": BE_CONST.MARKER_TYPE_ACCIDENT}
@@ -276,6 +278,25 @@ class AccidentMarker(MarkerMixin, Base):
     non_urban_intersection_by_junction_number = Column(Text())
     rsa_severity = Column(Integer())
     rsa_license_plate = Column(Text())
+
+    @staticmethod
+    def get_latest_marker_created_date():
+        latest_created_date = db.session \
+                    .query(func.max(AccidentMarker.created)) \
+                    .filter(
+                AccidentMarker.provider_code
+                    .in_(
+                    [
+                        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
+                        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE
+                    ]
+                )
+            ).first()
+
+        if latest_created_date is None:
+            return None
+        else:
+            return latest_created_date[0]
 
     @staticmethod
     def json_to_description(msg):

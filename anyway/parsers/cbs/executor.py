@@ -14,9 +14,8 @@ import math
 import pandas as pd
 from sqlalchemy import or_, and_
 
-from anyway.parsers import preprocessing_cbs_files
+from anyway.parsers.cbs import preprocessing_cbs_files, importmail_cbs
 from anyway import field_names, localization
-from anyway import importmail_cbs
 from anyway.backend_constants import BE_CONST
 from anyway.models import (
     AccidentMarker,

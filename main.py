@@ -100,7 +100,7 @@ def cbs(
     password,
     email_search_start_date,
 ):
-    from anyway.parsers.cbs import main
+    from anyway.parsers.cbs.executor import main
 
     return main(
         specific_folder=specific_folder,
@@ -242,7 +242,7 @@ def preprocess():
 @preprocess.command()
 @click.option("--path", type=str)
 def preprocess_cbs(path):
-    from anyway.parsers.preprocessing_cbs_files import update_cbs_files_names
+    from anyway.parsers.cbs.preprocessing_cbs_files import update_cbs_files_names
 
     return update_cbs_files_names(path)
 
@@ -254,7 +254,7 @@ def create_views():
 
 @create_views.command()
 def cbs_views():
-    from anyway.parsers.cbs import create_views
+    from anyway.parsers.cbs.executor import create_views
 
     return create_views()
 
@@ -267,7 +267,7 @@ def update_dictionary_tables():
 @update_dictionary_tables.command()
 @click.option("--path", type=str, default="static/data/cbs")
 def update_cbs(path):
-    from anyway.parsers.cbs import update_dictionary_tables
+    from anyway.parsers.cbs.executor import update_dictionary_tables
 
     return update_dictionary_tables(path)
 
@@ -280,7 +280,7 @@ def truncate_dictionary_tables():
 @truncate_dictionary_tables.command()
 @click.option("--path", type=str)
 def truncate_cbs(path):
-    from anyway.parsers.cbs import truncate_dictionary_tables
+    from anyway.parsers.cbs.executor import truncate_dictionary_tables
 
     return truncate_dictionary_tables(path)
 

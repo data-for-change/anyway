@@ -208,7 +208,6 @@ $(function() {
             }
         },
         markersFetched: function(params, reset) {
-            debugger;
             this.total_markers = this.markers.state.totalRecords;
             this.total_accidents = this.markers.state.totalAccidents;
             this.total_rsa = this.markers.state.totalRSA;

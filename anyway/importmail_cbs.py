@@ -7,7 +7,7 @@ import sys
 import time
 from datetime import datetime
 
-from .utilities import time_delta
+from anyway.utilities import time_delta
 
 mail_dir = "cbs/data"
 

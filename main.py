@@ -34,7 +34,7 @@ def cli():
 )
 @click.option("--debug-js", is_flag=True, help="Don't minify the JavaScript files")
 def testserver(open_server, debug_js):
-    from anyway import app
+    from anyway.app_and_db import app
 
     logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
                         level=logging.DEBUG,
@@ -289,11 +289,7 @@ def truncate_cbs(path):
 @click.argument("identifiers", nargs=-1)
 def load_discussions(identifiers):
     from anyway.models import DiscussionMarker
-    from flask_sqlalchemy import SQLAlchemy
-    from anyway.utilities import init_flask
-
-    app = init_flask()
-    db = SQLAlchemy(app)
+    from anyway.app_and_db import db
 
     identifiers = identifiers or sys.stdin
 

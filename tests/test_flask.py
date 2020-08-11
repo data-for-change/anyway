@@ -8,7 +8,7 @@ import pytest
 from http import client as http_client
 from urlobject import URLObject
 
-from anyway import app as flask_app
+from anyway.app_and_db import app as flask_app
 
 
 @pytest.fixture

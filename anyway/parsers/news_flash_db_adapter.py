@@ -1,20 +1,16 @@
 import datetime
 import logging
-
 import pandas as pd
 from flask_sqlalchemy import SQLAlchemy
-
-from anyway.utilities import init_flask
 from anyway.parsers import infographics_data_cache_updater
-from . import timezones
-from ..models import NewsFlash
+from anyway.parsers import timezones
+from anyway.models import NewsFlash
 
 # fmt: off
 
 
 def init_db() -> "DBAdapter":
-    app = init_flask()
-    db = SQLAlchemy(app)
+    from anyway.app_and_db import db
     return DBAdapter(db)
 
 

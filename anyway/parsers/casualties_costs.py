@@ -20,7 +20,6 @@ def _iter_rows(filename):
         }
 
 
-# todo 1 - what is the actual key? id, or injured_type and year?
 def parse(filename):
     for row in _iter_rows(filename):
         current_report = (

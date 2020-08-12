@@ -4,9 +4,9 @@ from datetime import datetime
 from sqlalchemy import not_
 from anyway.models import InfographicsDataCache, InfographicsDataCacheTemp, NewsFlash
 from anyway.constants import CONST
+from anyway.app_and_db import db
 import anyway.infographics_utils
 import logging
-from anyway.app_and_db import db
 
 
 def is_cache_eligible(news_flash):

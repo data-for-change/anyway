@@ -958,10 +958,16 @@ def index(marker=None, message=None):
     for x in range(1, 5):
         pref_radius.append(PreferenceObject("prefRadius" + str(x * 500), x * 500, x * 500))
     context["pref_radius"] = pref_radius
-    today = datetime.date.today()
-    context["default_end_date_format"] = request.values.get("end_date", today.strftime("%Y-%m-%d"))
+    latest_created_date = AccidentMarker.get_latest_marker_created_date()
+
+    if latest_created_date is None :
+        end_date = datetime.date.today()
+    else:
+        end_date = latest_created_date
+
+    context["default_end_date_format"] = request.values.get("end_date", end_date.strftime("%Y-%m-%d"))
     context["default_start_date_format"] = request.values.get(
-        "start_date", (today - datetime.timedelta(days=365)).strftime("%Y-%m-%d")
+        "start_date", (end_date - datetime.timedelta(days=365)).strftime("%Y-%m-%d")
     )
     context["entries_per_page"] = ENTRIES_PER_PAGE
     context["iteritems"] = dict.items

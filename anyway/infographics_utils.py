@@ -490,6 +490,14 @@ def get_latest_accident_date(table_obj, filters):
     return (df.to_dict(orient="records"))[0].get("max_1")  # pylint: disable=no-member
 
 
+def count_accidents_by_car_type(involved_by_vehicle_type_data):  # Temporary for Frontend
+    return [{'car_type': "רכב פרטי", 'percentage_segment': 78,
+            'percentage_country': 74}, {'car_type': "מסחרי/משאית",
+            'percentage_segment': 39, 'percentage_country': 34},
+            {'car_type': "אופנוע", 'percentage_segment': 28,
+            'percentage_country': 15}]
+
+
 def create_infographics_data(news_flash_id, number_of_years_ago):
     output = {}
     try:
@@ -722,6 +730,14 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         items=count_accidents_by_driver_type(involved_by_vehicle_type_data),
     )
     output["widgets"].append(accident_count_by_driver_type.serialize())
+
+    # involved by car type
+    accident_count_by_car_type = Widget(
+        name="accident_count_by_car_type",
+        rank=17,
+        items=count_accidents_by_car_type(involved_by_vehicle_type_data),
+    )
+    output["widgets"].append(accident_count_by_car_type.serialize())
 
     return json.dumps(output, default=str)
 

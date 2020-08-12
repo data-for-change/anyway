@@ -4,7 +4,6 @@ import datetime
 import json
 import logging
 from collections import namedtuple
-from operator import or_
 from sqlalchemy.sql import func
 from flask_security import UserMixin, RoleMixin
 from geoalchemy2 import Geometry

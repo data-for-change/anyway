@@ -2,13 +2,9 @@ from functools import wraps
 
 from flask import request
 from flask import session, redirect
-from flask_sqlalchemy import SQLAlchemy
 
-from .models import User
-from .utilities import init_flask
-
-app = init_flask()
-db = SQLAlchemy(app)
+from anyway.models import User
+from anyway.app_and_db import db
 
 
 def set_user(user):

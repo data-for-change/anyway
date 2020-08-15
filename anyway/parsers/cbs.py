@@ -12,14 +12,13 @@ from datetime import datetime
 
 import math
 import pandas as pd
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_, and_
 
-from . import preprocessing_cbs_files
-from .. import field_names, localization
-from .. import importmail_cbs
-from ..backend_constants import BE_CONST
-from ..models import (
+from anyway.parsers import preprocessing_cbs_files
+from anyway import field_names, localization
+from anyway import importmail_cbs
+from anyway.backend_constants import BE_CONST
+from anyway.models import (
     AccidentMarker,
     Involved,
     Vehicle,
@@ -80,8 +79,9 @@ from ..models import (
     ProviderCode,
     VehicleDamage,
 )
-from ..utilities import ItmToWGS84, init_flask, time_delta, ImporterUI, truncate_tables, chunks
-from ..views import VIEWS
+from anyway.utilities import ItmToWGS84, time_delta, ImporterUI, truncate_tables, chunks
+from anyway.db_views import VIEWS
+from anyway.app_and_db import db
 
 failed_dirs = OrderedDict()
 
@@ -231,8 +231,6 @@ TABLES_DICT = {
 }
 
 coordinates_converter = ItmToWGS84()
-app = init_flask()
-db = SQLAlchemy(app)
 
 
 def get_street(yishuv_symbol, street_sign, streets):

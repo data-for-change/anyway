@@ -36,15 +36,16 @@ from sqlalchemy.orm import load_only
 from webassets import Environment as AssetsEnvironment, Bundle as AssetsBundle
 from webassets.ext.jinja2 import AssetsExtension
 from werkzeug.security import check_password_hash
+from werkzeug.exceptions import BadRequestKeyError
 from wtforms import form, fields, validators, StringField, PasswordField, Form
 
-from . import utilities
-from .base import user_optional
-from .clusters_calculator import retrieve_clusters
-from .config import ENTRIES_PER_PAGE
-from .backend_constants import BE_CONST
-from .constants import CONST
-from .models import (
+from anyway import utilities
+from anyway.base import user_optional
+from anyway.clusters_calculator import retrieve_clusters
+from anyway.config import ENTRIES_PER_PAGE
+from anyway.backend_constants import BE_CONST
+from anyway.constants import CONST
+from anyway.models import (
     AccidentMarker,
     DiscussionMarker,
     HighlightPoint,
@@ -56,13 +57,6 @@ from .models import (
     Role,
     GeneralPreferences,
     NewsFlash,
-    School,
-    SchoolWithDescription,
-    InjuredAroundSchool,
-    InjuredAroundSchoolAllData,
-    Sex,
-    AccidentMonth,
-    InjurySeverity,
     ReportProblem,
     EngineVolume,
     PopulationType,
@@ -77,9 +71,15 @@ from .models import (
     AccidentMarkerView,
     EmbeddedReports,
 )
-from .oauth import OAuthSignIn
-from .infographics_utils import get_infographics_data
-from .app_and_db import app, db
+from anyway.oauth import OAuthSignIn
+from anyway.infographics_utils import get_infographics_data
+from anyway.app_and_db import app, db
+from anyway.views.schools.api import (
+    schools_description_api,schools_names_api, schools_yishuvs_api,
+    schools_api,
+    injured_around_schools_sex_graphs_data_api,
+    injured_around_schools_months_graphs_data_api,
+    )
 
 app.config.from_object(__name__)
 app.config["SECURITY_REGISTERABLE"] = False
@@ -96,29 +96,71 @@ app.secret_key = os.environ.get("APP_SECRET_KEY")
 assets = Environment()
 assets.init_app(app)
 assets_env = AssetsEnvironment(os.path.join(utilities._PROJECT_ROOT, "static"), "/static")
-assets.register('css_all', AssetsBundle(
-    "css/jquery.smartbanner.css", "css/bootstrap.rtl.css", "css/style.css",
-    "css/daterangepicker.css", "css/accordion.css", "css/bootstrap-tour.min.css",
-    "css/jquery-ui.min.css", "css/jquery.jspanel.min.css", "css/markers.css",
-    filters='rcssmin', output='css/app.min.css'
-))
-assets.register("js_all", AssetsBundle(
-    "js/libs/jquery-1.11.3.min.js", "js/libs/spin.js", "js/libs/oms.min.js",
-    "js/libs/markerclusterer.js", "js/markerClustererAugment.js", "js/libs/underscore.js",
-    "js/libs/backbone.js", "js/libs/backbone.paginator.min.js", "js/libs/bootstrap.js",
-    "js/libs/notify-combined.min.js", "js/libs/moment-with-langs.min.js", "js/libs/date.js",
-    "js/libs/daterangepicker.js", "js/libs/js-itm.js", "js/constants.js",
-    "js/marker.js", "js/clusterView.js", "js/featuredialog.js", "js/subscriptiondialog.js",
-    "js/preferencesdialog.js", "js/logindialog.js", "js/sidebar.js", "js/contextmenu.js",
-    "js/map_style.js", "js/clipboard.js", "js/libs/bootstrap-tour.min.js",
-    "js/app.js", "js/localization.js", "js/inv_dict.js", "js/veh_dict.js",
-    "js/retina.js", "js/statPanel.js", "js/reports.js",
-    filters="rjsmin", output="js/app.min.js"
-))
-assets.register("email_all", AssetsBundle(
-    "js/libs/jquery-1.11.3.min.js", "js/libs/notify-combined.min.js",
-    filters="rjsmin", output="js/app_send_email.min.js"
-))
+assets.register(
+    "css_all",
+    AssetsBundle(
+        "css/jquery.smartbanner.css",
+        "css/bootstrap.rtl.css",
+        "css/style.css",
+        "css/daterangepicker.css",
+        "css/accordion.css",
+        "css/bootstrap-tour.min.css",
+        "css/jquery-ui.min.css",
+        "css/jquery.jspanel.min.css",
+        "css/markers.css",
+        filters="rcssmin",
+        output="css/app.min.css",
+    ),
+)
+assets.register(
+    "js_all",
+    AssetsBundle(
+        "js/libs/jquery-1.11.3.min.js",
+        "js/libs/spin.js",
+        "js/libs/oms.min.js",
+        "js/libs/markerclusterer.js",
+        "js/markerClustererAugment.js",
+        "js/libs/underscore.js",
+        "js/libs/backbone.js",
+        "js/libs/backbone.paginator.min.js",
+        "js/libs/bootstrap.js",
+        "js/libs/notify-combined.min.js",
+        "js/libs/moment-with-langs.min.js",
+        "js/libs/date.js",
+        "js/libs/daterangepicker.js",
+        "js/libs/js-itm.js",
+        "js/constants.js",
+        "js/marker.js",
+        "js/clusterView.js",
+        "js/featuredialog.js",
+        "js/subscriptiondialog.js",
+        "js/preferencesdialog.js",
+        "js/logindialog.js",
+        "js/sidebar.js",
+        "js/contextmenu.js",
+        "js/map_style.js",
+        "js/clipboard.js",
+        "js/libs/bootstrap-tour.min.js",
+        "js/app.js",
+        "js/localization.js",
+        "js/inv_dict.js",
+        "js/veh_dict.js",
+        "js/retina.js",
+        "js/statPanel.js",
+        "js/reports.js",
+        filters="rjsmin",
+        output="js/app.min.js",
+    ),
+)
+assets.register(
+    "email_all",
+    AssetsBundle(
+        "js/libs/jquery-1.11.3.min.js",
+        "js/libs/notify-combined.min.js",
+        filters="rjsmin",
+        output="js/app_send_email.min.js",
+    ),
+)
 
 CORS(
     app,
@@ -255,7 +297,7 @@ def get_kwargs():
                 for arg in ("start_date", "end_date")
             }
         )
-    except ValueError:
+    except (ValueError, BadRequestKeyError):
         abort(http_client.BAD_REQUEST)
     return kwargs
 
@@ -267,24 +309,6 @@ def get_locale():
         return request.accept_languages.best_match(app.config["LANGUAGES"].keys())
     else:
         return lang
-
-
-@app.route("/schools", methods=["GET"])
-@user_optional
-def schools():
-    if request.method == "GET":
-        return render_template("schools_dashboard_react.html")
-    else:
-        return Response("Method Not Allowed", 405)
-
-
-@app.route("/schools-report", methods=["GET"])
-@user_optional
-def schools_report():
-    if request.method == "GET":
-        return render_template("schools_dashboard_react.html")
-    else:
-        return Response("Method Not Allowed", 405)
 
 
 @app.route("/markers", methods=["GET"])
@@ -450,7 +474,9 @@ def news_flash():
 
     news_flashes_jsons = [news_flash.serialize() for news_flash in news_flashes]
     for news_flash in news_flashes_jsons:
-        news_flash["display_source"] = BE_CONST.SOURCE_MAPPING.get(news_flash["source"], BE_CONST.UNKNOWN)
+        news_flash["display_source"] = BE_CONST.SOURCE_MAPPING.get(
+            news_flash["source"], BE_CONST.UNKNOWN
+        )
         if news_flash["display_source"] == BE_CONST.UNKNOWN:
             logging.warn("Unknown source of news-flash with id {}".format(news_flash.id))
     return Response(json.dumps(news_flashes_jsons, default=str), mimetype="application/json")
@@ -465,422 +491,6 @@ def single_news_flash(news_flash_id):
             json.dumps(news_flash_obj.serialize(), default=str), mimetype="application/json"
         )
     return Response(status=404)
-
-
-@app.route("/api/schools", methods=["GET"])
-@user_optional
-def schools_api():
-    logging.debug("getting schools")
-    schools = (
-        db.session.query(School)
-        .filter(
-            not_(and_(School.latitude == 0, School.longitude == 0)),
-            not_(and_(School.latitude == None, School.longitude == None)),
-        )
-        .with_entities(
-            School.yishuv_symbol,
-            School.yishuv_name,
-            School.school_name,
-            School.longitude,
-            School.latitude,
-        )
-        .all()
-    )
-    schools_list = [
-        {
-            "yishuv_symbol": x.yishuv_symbol,
-            "yishuv_name": x.yishuv_name,
-            "school_name": x.school_name,
-            "longitude": x.longitude,
-            "latitude": x.latitude,
-        }
-        for x in schools
-    ]
-    response = Response(json.dumps(schools_list, default=str), mimetype="application/json")
-    response.headers.add("Access-Control-Allow-Origin", "*")
-    return response
-
-
-@app.route("/api/schools-description", methods=["GET"])
-@user_optional
-def schools_description_api():
-    # Disable all the no-member violations in this function
-    # pylint: disable=no-member
-    logging.debug("getting schools with description")
-    query_obj = (
-        db.session.query(SchoolWithDescription)
-        .filter(
-            not_(and_(SchoolWithDescription.latitude == 0, SchoolWithDescription.longitude == 0)),
-            not_(
-                and_(
-                    SchoolWithDescription.latitude == None, SchoolWithDescription.longitude == None
-                )
-            ),
-            or_(
-                SchoolWithDescription.school_type == "גן ילדים",
-                SchoolWithDescription.school_type == "בית ספר",
-            ),
-        )
-        .with_entities(
-            SchoolWithDescription.school_id,
-            SchoolWithDescription.school_name,
-            SchoolWithDescription.students_number,
-            SchoolWithDescription.municipality_name,
-            SchoolWithDescription.yishuv_name,
-            SchoolWithDescription.geo_district,
-            SchoolWithDescription.school_type,
-            SchoolWithDescription.foundation_year,
-            SchoolWithDescription.location_accuracy,
-            SchoolWithDescription.longitude,
-            SchoolWithDescription.latitude,
-        )
-    )
-    df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-    schools_list = df.to_dict(orient="records")
-    response = Response(json.dumps(schools_list, default=str), mimetype="application/json")
-    response.headers.add("Access-Control-Allow-Origin", "*")
-    return response
-
-
-@app.route("/api/schools-yishuvs", methods=["GET"])
-@user_optional
-def schools_yishuvs_api():
-    logging.debug("getting schools yishuvs")
-    schools_yishuvs = (
-        db.session.query(SchoolWithDescription)
-        .filter(
-            not_(and_(SchoolWithDescription.latitude == 0, SchoolWithDescription.longitude == 0)),
-            not_(
-                and_(
-                    SchoolWithDescription.latitude == None, SchoolWithDescription.longitude == None
-                )
-            ),
-            or_(
-                SchoolWithDescription.school_type == "גן ילדים",
-                SchoolWithDescription.school_type == "בית ספר",
-            ),
-        )
-        .group_by(SchoolWithDescription.yishuv_name)
-        .with_entities(SchoolWithDescription.yishuv_name)
-        .all()
-    )
-    schools_yishuvs_list = sorted([x[0] for x in schools_yishuvs])
-    response = Response(json.dumps(schools_yishuvs_list, default=str), mimetype="application/json")
-    response.headers.add("Access-Control-Allow-Origin", "*")
-    return response
-
-
-@app.route("/api/schools-names", methods=["GET"])
-@user_optional
-def schools_names_api():
-    # Disable all the no-member violations in this function
-    # pylint: disable=no-member
-    logging.debug("getting schools names")
-    query_obj = (
-        db.session.query(SchoolWithDescription)
-        .filter(
-            not_(and_(SchoolWithDescription.latitude == 0, SchoolWithDescription.longitude == 0)),
-            not_(
-                and_(
-                    SchoolWithDescription.latitude == None, SchoolWithDescription.longitude == None
-                )
-            ),
-            or_(
-                SchoolWithDescription.school_type == "גן ילדים",
-                SchoolWithDescription.school_type == "בית ספר",
-            ),
-        )
-        .with_entities(
-            SchoolWithDescription.yishuv_name,
-            SchoolWithDescription.school_name,
-            SchoolWithDescription.longitude,
-            SchoolWithDescription.latitude,
-            SchoolWithDescription.school_id,
-        )
-    )
-    df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-    df = df.groupby(["yishuv_name", "school_name", "longitude", "latitude"]).min()
-    df = df.reset_index(drop=False)
-    schools_names_ids = df.to_dict(orient="records")
-    response = Response(json.dumps(schools_names_ids, default=str), mimetype="application/json")
-    response.headers.add("Access-Control-Allow-Origin", "*")
-    return response
-
-
-@app.route("/api/injured-around-schools", methods=["GET"])
-@user_optional
-def injured_around_schools_api():
-    # Disable all the no-member violations in this function
-    # pylint: disable=no-member
-    report_years = [2014, 2015, 2016, 2017, 2018]
-    logging.debug("getting injured around schools api")
-    school_id = request.values.get("school_id")
-    if school_id is not None:
-        query_obj = (
-            db.session.query(InjuredAroundSchool)
-            .filter(InjuredAroundSchool.school_id == school_id)
-            .with_entities(
-                InjuredAroundSchool.school_id,
-                InjuredAroundSchool.accident_year,
-                InjuredAroundSchool.killed_count,
-                InjuredAroundSchool.severly_injured_count,
-                InjuredAroundSchool.light_injured_count,
-                InjuredAroundSchool.total_injured_killed_count,
-                InjuredAroundSchool.rank_in_yishuv,
-            )
-        )
-        df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-        if not df.empty:
-            for year in report_years:
-                if year not in list(df.accident_year.unique()):
-                    df = df.append(
-                        {
-                            "school_id": df.school_id.values[0],
-                            "accident_year": year,
-                            "killed_count": 0,
-                            "severly_injured_count": 0,
-                            "light_injured_count": 0,
-                            "total_injured_killed_count": 0,
-                            "rank_in_yishuv": df.rank_in_yishuv.values[0],
-                        },
-                        ignore_index=True,
-                    )
-            final_list = df.to_dict(orient="records")
-            response = Response(json.dumps(final_list, default=str), mimetype="application/json")
-            response.headers.add("Access-Control-Allow-Origin", "*")
-            return response
-        else:
-            query_obj = (
-                db.session.query(SchoolWithDescription)
-                .filter(SchoolWithDescription.school_id == school_id)
-                .with_entities(SchoolWithDescription.school_id)
-            )
-            df_school_id = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-            if not df_school_id.empty:
-                final_list = []
-                for year in report_years:
-                    final_list.append(
-                        {
-                            "school_id": school_id,
-                            "accident_year": year,
-                            "killed_count": 0,
-                            "severly_injured_count": 0,
-                            "light_injured_count": 0,
-                            "total_injured_killed_count": 0,
-                            "rank_in_yishuv": None,
-                        }
-                    )
-                response = Response(
-                    json.dumps(final_list, default=str), mimetype="application/json"
-                )
-                response.headers.add("Access-Control-Allow-Origin", "*")
-                return response
-
-        response = Response(status=404)
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        return response
-    school_yishuv_name = request.values.get("school_yishuv_name")
-    if school_yishuv_name is not None:
-        query_obj = (
-            db.session.query(InjuredAroundSchool)
-            .filter(InjuredAroundSchool.school_yishuv_name == school_yishuv_name)
-            .with_entities(
-                InjuredAroundSchool.school_id,
-                InjuredAroundSchool.accident_year,
-                InjuredAroundSchool.killed_count,
-                InjuredAroundSchool.severly_injured_count,
-                InjuredAroundSchool.light_injured_count,
-                InjuredAroundSchool.total_injured_killed_count,
-                InjuredAroundSchool.rank_in_yishuv,
-            )
-        )
-        df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-        final_list = df.to_dict(orient="records")
-        if not df.empty:
-            response = Response(json.dumps(final_list, default=str), mimetype="application/json")
-            response.headers.add("Access-Control-Allow-Origin", "*")
-            return response
-        response = Response(status=404)
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        return response
-    query_obj = db.session.query(InjuredAroundSchool).with_entities(
-        InjuredAroundSchool.school_id,
-        InjuredAroundSchool.accident_year,
-        InjuredAroundSchool.killed_count,
-        InjuredAroundSchool.severly_injured_count,
-        InjuredAroundSchool.light_injured_count,
-        InjuredAroundSchool.total_injured_killed_count,
-        InjuredAroundSchool.rank_in_yishuv,
-    )
-    df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-    final_list = df.to_dict(orient="records")
-    response = Response(json.dumps(final_list, default=str), mimetype="application/json")
-    response.headers.add("Access-Control-Allow-Origin", "*")
-    return response
-
-
-@app.route("/api/injured-around-schools-sex-graphs-data", methods=["GET"])
-@user_optional
-def injured_around_schools_sex_graphs_data_api():
-    # Disable all the no-member violations in this function
-    # pylint: disable=no-member
-    logging.debug("getting injured around schools sex graphs data api")
-    school_id = request.values.get("school_id")
-    if school_id is not None:
-        query_obj = (
-            db.session.query(InjuredAroundSchoolAllData)
-            .filter(InjuredAroundSchoolAllData.school_id == school_id)
-            .join(
-                Sex,
-                and_(
-                    InjuredAroundSchoolAllData.involved_sex == Sex.id,
-                    InjuredAroundSchoolAllData.markers_accident_year == Sex.year,
-                    InjuredAroundSchoolAllData.markers_provider_code == Sex.provider_code,
-                ),
-            )
-            .with_entities(
-                InjuredAroundSchoolAllData.school_id,
-                Sex.sex_hebrew,
-                func.count(InjuredAroundSchoolAllData.school_id),
-            )
-            .group_by(InjuredAroundSchoolAllData.school_id, Sex.sex_hebrew)
-        )
-        df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-        query_obj = db.session.query(Sex).with_entities(Sex.sex_hebrew)
-        df_sex = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-        df_sex = df_sex.groupby(["sex_hebrew"]).size().reset_index(name="count")
-        query_obj = (
-            db.session.query(SchoolWithDescription)
-            .filter(SchoolWithDescription.school_id == school_id)
-            .with_entities(SchoolWithDescription.school_id)
-        )
-        df_school_id = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-        if not df.empty:
-            for sex in list(df_sex["sex_hebrew"].unique()):
-                if sex not in list(df["sex_hebrew"].unique()):
-                    df = df.append(
-                        {"school_id": school_id, "sex_hebrew": sex, "count_1": 0}, ignore_index=True
-                    )
-            final_list = df.to_dict(orient="records")
-            response = Response(json.dumps(final_list, default=str), mimetype="application/json")
-            response.headers.add("Access-Control-Allow-Origin", "*")
-            return response
-        else:
-            if not df_school_id.empty:
-                final_list = []
-                for sex in list(df_sex["sex_hebrew"].unique()):
-                    final_list.append({"school_id": school_id, "sex_hebrew": sex, "count_1": 0})
-                response = Response(
-                    json.dumps(final_list, default=str), mimetype="application/json"
-                )
-                response.headers.add("Access-Control-Allow-Origin", "*")
-                return response
-    response = Response(status=404)
-    response.headers.add("Access-Control-Allow-Origin", "*")
-    return response
-
-
-@app.route("/api/injured-around-schools-months-graphs-data", methods=["GET"])
-@user_optional
-def injured_around_schools_months_graphs_data_api():
-    logging.debug("getting injured around schools months graphs data api")
-    school_id = request.values.get("school_id")
-    if school_id is not None:
-        query_obj = (
-            db.session.query(InjuredAroundSchoolAllData)
-            .filter(InjuredAroundSchoolAllData.school_id == school_id)
-            .join(
-                AccidentMonth,
-                and_(
-                    InjuredAroundSchoolAllData.markers_accident_month == AccidentMonth.id,
-                    InjuredAroundSchoolAllData.markers_accident_year == AccidentMonth.year,
-                    InjuredAroundSchoolAllData.markers_provider_code == AccidentMonth.provider_code,
-                ),
-            )
-            .join(
-                InjurySeverity,
-                and_(
-                    InjuredAroundSchoolAllData.involved_injury_severity == InjurySeverity.id,
-                    InjuredAroundSchoolAllData.markers_accident_year == InjurySeverity.year,
-                    InjuredAroundSchoolAllData.markers_provider_code
-                    == InjurySeverity.provider_code,
-                ),
-            )
-            .with_entities(
-                InjuredAroundSchoolAllData.school_id,
-                AccidentMonth.accident_month_hebrew,
-                InjurySeverity.injury_severity_hebrew,
-                func.count(InjuredAroundSchoolAllData.school_id),
-            )
-            .group_by(
-                InjuredAroundSchoolAllData.school_id,
-                AccidentMonth.accident_month_hebrew,
-                InjurySeverity.injury_severity_hebrew,
-            )
-        )
-        df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-        query_obj = db.session.query(AccidentMonth).with_entities(
-            AccidentMonth.accident_month_hebrew
-        )
-        df_month = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-        df_month = df_month.groupby(["accident_month_hebrew"]).size().reset_index(name="count")
-        query_obj = db.session.query(InjurySeverity).with_entities(
-            InjurySeverity.injury_severity_hebrew
-        )
-        df_injury_severity = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-        df_injury_severity = (
-            df_injury_severity.groupby(["injury_severity_hebrew"]).size().reset_index(name="count")
-        )
-        if not df.empty:
-            for month in list(df_month["accident_month_hebrew"].unique()):
-                for injury_severity in list(df_injury_severity["injury_severity_hebrew"].unique()):
-                    if month not in list(
-                        df.accident_month_hebrew.unique()
-                    ) or injury_severity not in list(
-                        df[df.accident_month_hebrew == month].injury_severity_hebrew.unique()
-                    ):
-                        df = df.append(
-                            {
-                                "school_id": school_id,
-                                "accident_month_hebrew": month,
-                                "injury_severity_hebrew": injury_severity,
-                                "count_1": 0,
-                            },
-                            ignore_index=True,
-                        )
-            final_list = df.to_dict(orient="records")
-            response = Response(json.dumps(final_list, default=str), mimetype="application/json")
-            response.headers.add("Access-Control-Allow-Origin", "*")
-            return response
-        else:
-            query_obj = (
-                db.session.query(SchoolWithDescription)
-                .filter(SchoolWithDescription.school_id == school_id)
-                .with_entities(SchoolWithDescription.school_id)
-            )
-            df_school_id = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-            if not df_school_id.empty:
-                final_list = []
-                for month in list(df_month["accident_month_hebrew"].unique()):
-                    for injury_severity in list(
-                        df_injury_severity["injury_severity_hebrew"].unique()
-                    ):
-                        final_list.append(
-                            {
-                                "school_id": school_id,
-                                "accident_month_hebrew": month,
-                                "injury_severity_hebrew": injury_severity,
-                                "count_1": 0,
-                            }
-                        )
-                response = Response(
-                    json.dumps(final_list, default=str), mimetype="application/json"
-                )
-                response.headers.add("Access-Control-Allow-Origin", "*")
-                return response
-    response = Response(status=404)
-    response.headers.add("Access-Control-Allow-Origin", "*")
-    return response
 
 
 @app.route("/charts-data", methods=["GET"])
@@ -1348,10 +958,16 @@ def index(marker=None, message=None):
     for x in range(1, 5):
         pref_radius.append(PreferenceObject("prefRadius" + str(x * 500), x * 500, x * 500))
     context["pref_radius"] = pref_radius
-    today = datetime.date.today()
-    context["default_end_date_format"] = request.values.get("end_date", today.strftime("%Y-%m-%d"))
+    latest_created_date = AccidentMarker.get_latest_marker_created_date()
+
+    if latest_created_date is None :
+        end_date = datetime.date.today()
+    else:
+        end_date = latest_created_date
+
+    context["default_end_date_format"] = request.values.get("end_date", end_date.strftime("%Y-%m-%d"))
     context["default_start_date_format"] = request.values.get(
-        "start_date", (today - datetime.timedelta(days=365)).strftime("%Y-%m-%d")
+        "start_date", (end_date - datetime.timedelta(days=365)).strftime("%Y-%m-%d")
     )
     context["entries_per_page"] = ENTRIES_PER_PAGE
     context["iteritems"] = dict.items
@@ -1912,6 +1528,12 @@ def logout():
     login.logout_user()
     return redirect(url_for("index"))
 
+app.add_url_rule("/api/schools", endpoint=None, view_func=schools_api, methods=["GET"])
+app.add_url_rule("/api/schools-description", endpoint=None, view_func=schools_description_api, methods=["GET"])
+app.add_url_rule("/api/schools-yishuvs", endpoint=None, view_func=schools_yishuvs_api, methods=["GET"])
+app.add_url_rule("/api/schools-names", endpoint=None, view_func=schools_names_api, methods=["GET"])
+app.add_url_rule("/api/injured-around-schools-sex-graphs-data", endpoint=None, view_func=injured_around_schools_sex_graphs_data_api, methods=["GET"])
+app.add_url_rule("/api/injured-around-schools-months-graphs-data", endpoint=None, view_func=injured_around_schools_months_graphs_data_api, methods=["GET"])
 
 @app.route("/authorize/<provider>")
 def oauth_authorize(provider):
@@ -1964,6 +1586,11 @@ def oauth_callback(provider):
 @app.route("/api/infographics-data", methods=["GET"])
 def infographics_data():
     news_flash_id = request.values.get("news_flash_id")
+
+    if news_flash_id == None:
+        log_bad_request(request)
+        return abort(http_client.BAD_REQUEST)
+
     number_of_years_ago = request.values.get("years_ago", BE_CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
     logging.debug(
         "getting infographics data for news_flash_id: {news_flash_id}, \
@@ -1972,6 +1599,11 @@ def infographics_data():
         )
     )
     json_data = get_infographics_data(news_flash_id=news_flash_id, years_ago=number_of_years_ago)
+
+    if not json_data:
+        log_bad_request(request)
+        return abort(http_client.NOT_FOUND)
+
     return Response(json_data, mimetype="application/json")
 
 

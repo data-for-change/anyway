@@ -7,11 +7,11 @@ from collections import defaultdict
 from sqlalchemy import func
 from sqlalchemy import cast, Numeric
 from sqlalchemy import desc
-from .backend_constants import BE_CONST
-from .models import NewsFlash, AccidentMarkerView, InvolvedMarkerView, RoadSegments
-from .parsers import resolution_dict
-from .app_and_db import db
-from .infographics_dictionaries import driver_type_hebrew_dict
+from anyway.backend_constants import BE_CONST
+from anyway.models import NewsFlash, AccidentMarkerView, InvolvedMarkerView, RoadSegments
+from anyway.parsers import resolution_dict
+from anyway.app_and_db import db
+from anyway.infographics_dictionaries import driver_type_hebrew_dict
 from anyway.parsers import infographics_data_cache_updater
 from concurrent.futures import ThreadPoolExecutor
 
@@ -147,7 +147,10 @@ def get_accidents_stats(
     table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None
 ):
     filters = filters or {}
-    filters["provider_code"] = [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    filters["provider_code"] = [
+        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
+        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+    ]
     # get stats
     query = get_query(table_obj, filters, start_time, end_time)
     if group_by:
@@ -177,7 +180,10 @@ def get_most_severe_accidents_with_entities(
     table_obj, filters, entities, start_time, end_time, limit=10
 ):
     filters = filters or {}
-    filters["provider_code"] = [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    filters["provider_code"] = [
+        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
+        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+    ]
     query = get_query(table_obj, filters, start_time, end_time)
     query = query.with_entities(*entities)
     query = query.order_by(
@@ -204,7 +210,10 @@ def get_most_severe_accidents(table_obj, filters, start_time, end_time, limit=10
 
 def get_accidents_heat_map(table_obj, filters, start_time, end_time):
     filters = filters or {}
-    filters["provider_code"] = [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    filters["provider_code"] = [
+        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
+        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+    ]
     query = get_query(table_obj, filters, start_time, end_time)
     query = query.with_entities("longitude", "latitude")
     df = pd.read_sql_query(query.statement, query.session.bind)
@@ -340,7 +349,7 @@ def count_accidents_by_driver_type(data):
             driver_types[driver_type_hebrew_dict["other_driver"]] += count
     output = []
     for driver_type, count in driver_types.items():
-        output.append({'driver_type': driver_type, 'count': count})
+        output.append({"driver_type": driver_type, "count": count})
     return output
 
 
@@ -472,10 +481,21 @@ def get_head_to_head_stat(news_flash_id, start_time, end_time):
 # gets the latest date an accident has occured
 def get_latest_accident_date(table_obj, filters):
     filters = filters or {}
-    filters["provider_code"] = [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    filters["provider_code"] = [
+        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
+        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+    ]
     query = db.session.query(func.max(table_obj.accident_timestamp))
     df = pd.read_sql_query(query.statement, query.session.bind)
     return (df.to_dict(orient="records"))[0].get("max_1")  # pylint: disable=no-member
+
+
+def count_accidents_by_car_type(involved_by_vehicle_type_data):  # Temporary for Frontend
+    return [{'car_type': "רכב פרטי", 'percentage_segment': 78,
+            'percentage_country': 74}, {'car_type': "מסחרי/משאית",
+            'percentage_segment': 39, 'percentage_country': 34},
+            {'car_type': "אופנוע", 'percentage_segment': 28,
+            'percentage_country': 15}]
 
 
 def create_infographics_data(news_flash_id, number_of_years_ago):
@@ -711,6 +731,14 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     )
     output["widgets"].append(accident_count_by_driver_type.serialize())
 
+    # involved by car type
+    accident_count_by_car_type = Widget(
+        name="accident_count_by_car_type",
+        rank=17,
+        items=count_accidents_by_car_type(involved_by_vehicle_type_data),
+    )
+    output["widgets"].append(accident_count_by_car_type.serialize())
+
     return json.dumps(output, default=str)
 
 
@@ -731,20 +759,6 @@ def get_infographics_data(news_flash_id, years_ago):
             f":cause:{e.__cause__}, class:{e.__class__}"
         )
         res = {}
-    if res:
-        data_from_cache = True
-    else:
-        data_from_cache = False
-        res = create_mock_infographics_data(news_flash_id, years_ago)
-    logging.debug(
-        f"infographics_data({news_flash_id}, {years_ago}) "
-        f'{"from cache" if data_from_cache else "created"}'
-    )
+    if not res:
+        logging.error(f"infographics_data({news_flash_id}, {years_ago}) not found in cache")
     return res
-
-
-def create_mock_infographics_data(news_flash_id, number_of_years_ago):
-    json_file_path = "static/data/news_flash_infographics_mock/mock_data.json"
-    with open(json_file_path, "r") as j:
-        contents = json.loads(j.read())
-    return json.dumps(contents, default=str)

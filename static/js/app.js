@@ -89,6 +89,8 @@ $(function() {
             this.district = 0;
             this.case_type = 0;
             this.total_markers = 0;
+            this.total_accidents = 0;
+            this.total_rsa = 0;
 
             this.dateRanges = [new Date($('#sdateInit').val()), new Date($('#edateInit').val())];
 

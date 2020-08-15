@@ -34,7 +34,7 @@ def cli():
 )
 @click.option("--debug-js", is_flag=True, help="Don't minify the JavaScript files")
 def testserver(open_server, debug_js):
-    from anyway import app
+    from anyway.app_and_db import app
 
     logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
                         level=logging.DEBUG,
@@ -289,11 +289,7 @@ def truncate_cbs(path):
 @click.argument("identifiers", nargs=-1)
 def load_discussions(identifiers):
     from anyway.models import DiscussionMarker
-    from flask_sqlalchemy import SQLAlchemy
-    from anyway.utilities import init_flask
-
-    app = init_flask()
-    db = SQLAlchemy(app)
+    from anyway.app_and_db import db
 
     identifiers = identifiers or sys.stdin
 
@@ -343,6 +339,14 @@ def accidents_around_schools(start_date, end_date, distance, output_path):
     return main(
         start_date=start_date, end_date=end_date, distance=distance, output_path=output_path
     )
+
+
+@process.command()
+@click.argument("filename", type=str, default="static/data/casualties/casualties_costs.csv")
+def update_casualties_costs(filename):
+    from anyway.parsers.casualties_costs import parse
+
+    return parse(filename)
 
 
 if __name__ == "__main__":

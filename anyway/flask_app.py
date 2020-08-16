@@ -79,6 +79,7 @@ from anyway.views.schools.api import (
     schools_api,
     injured_around_schools_sex_graphs_data_api,
     injured_around_schools_months_graphs_data_api,
+    injured_around_schools_api,
     )
 
 app.config.from_object(__name__)
@@ -1534,6 +1535,7 @@ app.add_url_rule("/api/schools-yishuvs", endpoint=None, view_func=schools_yishuv
 app.add_url_rule("/api/schools-names", endpoint=None, view_func=schools_names_api, methods=["GET"])
 app.add_url_rule("/api/injured-around-schools-sex-graphs-data", endpoint=None, view_func=injured_around_schools_sex_graphs_data_api, methods=["GET"])
 app.add_url_rule("/api/injured-around-schools-months-graphs-data", endpoint=None, view_func=injured_around_schools_months_graphs_data_api, methods=["GET"])
+app.add_url_rule("/api/injured-around-schools", endpoint=None, view_func=injured_around_schools_api, methods=["GET"])
 
 @app.route("/authorize/<provider>")
 def oauth_authorize(provider):

@@ -769,6 +769,7 @@ class NewsFlash(Base):
     resolution = Column(Text(), nullable=True)
     title = Column(Text(), nullable=True)
     source = Column(Text(), nullable=True)
+    organization = Column(Text(), nullable=True)
     location = Column(Text(), nullable=True)
     tweet_id = Column(BigInteger(), nullable=True)
     region_hebrew = Column(Text(), nullable=True)
@@ -794,6 +795,7 @@ class NewsFlash(Base):
             "resolution": self.resolution,
             "title": self.title,
             "source": self.source,
+            "organization": self.organization,
             "location": self.location,
             "tweet_id": self.tweet_id,
             "region_hebrew": self.region_hebrew,

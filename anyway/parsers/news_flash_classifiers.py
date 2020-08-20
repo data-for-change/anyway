@@ -61,13 +61,11 @@ def classify_tweets(text):
         or tweet_with_vehicles(text)
     )
 
+
 def classify_organization(source):
-    source_to_organization_mapping = {
-        "twitter": "מד״א",
-        "ynet": "ynet",
-        "walla": "וואלה"
-    }
+    source_to_organization_mapping = {"twitter": "מד״א", "ynet": "ynet", "walla": "וואלה"}
     return source_to_organization_mapping.get(source, source)
+
 
 def classify_rss(text):
     """

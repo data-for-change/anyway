@@ -3,7 +3,11 @@ import sys
 
 from anyway.parsers import twitter, rss_sites
 from anyway.parsers.news_flash_db_adapter import init_db
-from anyway.parsers.news_flash_classifiers import classify_rss, classify_tweets, classify_organization
+from anyway.parsers.news_flash_classifiers import (
+    classify_rss,
+    classify_tweets,
+    classify_organization,
+)
 from anyway.parsers.location_extraction import extract_geo_features
 
 # FIX: classifier should be chosen by source (screen name), so `twitter` should be `mda`

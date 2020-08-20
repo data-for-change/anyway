@@ -280,17 +280,15 @@ class AccidentMarker(MarkerMixin, Base):
 
     @staticmethod
     def get_latest_marker_created_date():
-        latest_created_date = db.session \
-                    .query(func.max(AccidentMarker.created)) \
-                    .filter(
-                AccidentMarker.provider_code
-                    .in_(
-                    [
-                        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
-                        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE
-                    ]
+        latest_created_date = (
+            db.session.query(func.max(AccidentMarker.created))
+            .filter(
+                AccidentMarker.provider_code.in_(
+                    [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
                 )
-            ).first()
+            )
+            .first()
+        )
 
         if latest_created_date is None:
             return None

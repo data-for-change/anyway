@@ -803,17 +803,9 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     return json.dumps(output, default=str)
 
 
-get_infographics_data_executor = ThreadPoolExecutor(max_workers=1)
-
-
 def get_infographics_data(news_flash_id, years_ago):
     try:
-        future = get_infographics_data_executor.submit(
-            infographics_data_cache_updater.get_infographics_data_from_cache,
-            news_flash_id,
-            years_ago,
-        )
-        res = future.result(timeout=3)
+        res = infographics_data_cache_updater.get_infographics_data_from_cache(news_flash_id, years_ago)
     except Exception as e:
         logging.error(
             f"Exception while retrieving from infographics cache({news_flash_id},{years_ago})"

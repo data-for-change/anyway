@@ -4,12 +4,32 @@ on:
     branches:
       - master
       - dev
+      - add_anyway_report_docker
 env:
   DOCKER_REPOSITORY_ANYWAY: "anywayteam/anyway"
   DOCKER_REPOSITORY_DB: "anywayteam/db"
   DOCKER_REPOSITORY_DB_BACKUP: "anywayteam/db_backup"
   DOCKER_REPOSITORY_NGINX: "anywayteam/nginx"
 jobs:
+  Build-anyway-report:
+    #if: github.repository == 'hasadna/anyway'
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+      with:
+           #run: mkdir anyway-report && cd anyway-report 
+           repository: mickeyrouash/anyway-reports
+          # run: ls -R      
+    #- uses: actions/checkout@v2
+    - name: Build and push anyway Docker image
+      uses: docker/build-push-action@v1.0.1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        repository: mickeyrouash/anyway-report
+        tag_with_ref: true
+        tag_with_sha: true
+        cache_from: ${{ env.DOCKER_REPOSITORY_ANYWAY }}:dev
   Build-anyway:
     if: github.repository == 'hasadna/anyway'
     runs-on: ubuntu-18.04

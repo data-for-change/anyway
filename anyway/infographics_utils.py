@@ -2,6 +2,8 @@
 import logging
 import datetime
 import json
+from functools import lru_cache
+
 import pandas as pd
 from collections import defaultdict
 from sqlalchemy import func
@@ -490,12 +492,51 @@ def get_latest_accident_date(table_obj, filters):
     return (df.to_dict(orient="records"))[0].get("max_1")  # pylint: disable=no-member
 
 
-def count_accidents_by_car_type(involved_by_vehicle_type_data):  # Temporary for Frontend
-    return [{'car_type': "רכב פרטי", 'percentage_segment': 78,
-            'percentage_country': 74}, {'car_type': "מסחרי/משאית",
-            'percentage_segment': 39, 'percentage_country': 34},
-            {'car_type': "אופנוע", 'percentage_segment': 28,
-            'percentage_country': 15}]
+def percentage_accidents_by_car_type(involved_by_vehicle_type_data):
+    driver_types = defaultdict(int)
+    total_count = 0
+    for item in involved_by_vehicle_type_data:
+        vehicle_type, count = item["involve_vehicle_type"], int(item["count"])
+        total_count += count
+        if vehicle_type in BE_CONST.CAR_VEHICLE_TYPES:
+            driver_types["רכב פרטי"] += count
+        elif vehicle_type in BE_CONST.LARGE_VEHICLE_TYPES:
+            driver_types["מסחרי/משאית"] += count
+        elif vehicle_type in BE_CONST.MOTORCYCLE_VEHICLE_TYPES:
+            driver_types["אופנוע"] += count
+        elif vehicle_type in BE_CONST.BICYCLE_AND_SMALL_MOTOR_VEHICLE_TYPES:
+            driver_types["אופניים/קורקינט"] += count
+        else:
+            driver_types["אחר"] += count
+
+    output = {}
+    for k, v in driver_types.items():  # Calculate percentage
+        output[k] = int(100 * v / total_count)
+
+    return output
+
+
+@lru_cache
+def percentage_accidents_by_car_type_national_data_cache(start_time, end_time):
+    involved_by_vehicle_type_data = get_accidents_stats(
+        table_obj=InvolvedMarkerView,
+        group_by="involve_vehicle_type",
+        count="involve_vehicle_type",
+        start_time=start_time,
+        end_time=end_time,
+    )
+    return percentage_accidents_by_car_type(involved_by_vehicle_type_data)
+
+
+def stats_accidents_by_car_type_with_national_data(involved_by_vehicle_type_data, start_time, end_time):
+    out = []
+    data_by_segment = percentage_accidents_by_car_type(involved_by_vehicle_type_data)
+    national_data = percentage_accidents_by_car_type_national_data_cache(start_time, end_time)
+
+    for k, v in national_data.items():  # pylint: disable=W0612
+        out.append({'car_type': k, 'percentage_segment': data_by_segment[k], 'percentage_country': national_data[k]})
+
+    return out
 
 
 def create_infographics_data(news_flash_id, number_of_years_ago):
@@ -735,7 +776,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     accident_count_by_car_type = Widget(
         name="accident_count_by_car_type",
         rank=17,
-        items=count_accidents_by_car_type(involved_by_vehicle_type_data),
+        items=stats_accidents_by_car_type_with_national_data(involved_by_vehicle_type_data, start_time, end_time),
     )
     output["widgets"].append(accident_count_by_car_type.serialize())
 

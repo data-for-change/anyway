@@ -516,7 +516,7 @@ def percentage_accidents_by_car_type(involved_by_vehicle_type_data):
     return output
 
 
-@lru_cache
+@lru_cache(maxsize=64)
 def percentage_accidents_by_car_type_national_data_cache(start_time, end_time):
     involved_by_vehicle_type_data = get_accidents_stats(
         table_obj=InvolvedMarkerView,

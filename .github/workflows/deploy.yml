@@ -4,7 +4,7 @@ on:
     branches:
       - master
       - dev
-      - add_anyway_report_docker
+      
 env:
   DOCKER_REPOSITORY_ANYWAY: "anywayteam/anyway"
   DOCKER_REPOSITORY_DB: "anywayteam/db"

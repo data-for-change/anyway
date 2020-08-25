@@ -79,6 +79,7 @@ from anyway.views.schools.api import (
     schools_api,
     injured_around_schools_sex_graphs_data_api,
     injured_around_schools_months_graphs_data_api,
+    injured_around_schools_api,
     )
 
 app.config.from_object(__name__)
@@ -310,6 +311,13 @@ def get_locale():
     else:
         return lang
 
+@app.route('/schools', methods=["GET"])
+@user_optional
+def schools():
+    if request.method == "GET":
+        return render_template('schools_redirect.html')
+    else:
+        return Response("Method Not Allowed", 405)
 
 @app.route("/markers", methods=["GET"])
 @user_optional
@@ -958,10 +966,16 @@ def index(marker=None, message=None):
     for x in range(1, 5):
         pref_radius.append(PreferenceObject("prefRadius" + str(x * 500), x * 500, x * 500))
     context["pref_radius"] = pref_radius
-    today = datetime.date.today()
-    context["default_end_date_format"] = request.values.get("end_date", today.strftime("%Y-%m-%d"))
+    latest_created_date = AccidentMarker.get_latest_marker_created_date()
+
+    if latest_created_date is None :
+        end_date = datetime.date.today()
+    else:
+        end_date = latest_created_date
+
+    context["default_end_date_format"] = request.values.get("end_date", end_date.strftime("%Y-%m-%d"))
     context["default_start_date_format"] = request.values.get(
-        "start_date", (today - datetime.timedelta(days=365)).strftime("%Y-%m-%d")
+        "start_date", (end_date - datetime.timedelta(days=365)).strftime("%Y-%m-%d")
     )
     context["entries_per_page"] = ENTRIES_PER_PAGE
     context["iteritems"] = dict.items
@@ -1528,6 +1542,7 @@ app.add_url_rule("/api/schools-yishuvs", endpoint=None, view_func=schools_yishuv
 app.add_url_rule("/api/schools-names", endpoint=None, view_func=schools_names_api, methods=["GET"])
 app.add_url_rule("/api/injured-around-schools-sex-graphs-data", endpoint=None, view_func=injured_around_schools_sex_graphs_data_api, methods=["GET"])
 app.add_url_rule("/api/injured-around-schools-months-graphs-data", endpoint=None, view_func=injured_around_schools_months_graphs_data_api, methods=["GET"])
+app.add_url_rule("/api/injured-around-schools", endpoint=None, view_func=injured_around_schools_api, methods=["GET"])
 
 @app.route("/authorize/<provider>")
 def oauth_authorize(provider):

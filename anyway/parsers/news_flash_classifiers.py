@@ -97,6 +97,8 @@ def classify_rss(text):
         "התנגש",
         "התהפך",
         "התהפכ",
+        "החליק",
+        "החלק",
     ]
     shooting_words = [" ירי ", " ירייה ", " יריות "]
     shooting_startswith = [" ירי", " ירייה", " יריות"]

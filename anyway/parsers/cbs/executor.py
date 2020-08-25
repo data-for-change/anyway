@@ -1086,7 +1086,12 @@ def main(
             preprocessing_cbs_files.update_cbs_files_names(cbs_files_dir)
             acc_data_file_path = preprocessing_cbs_files.get_accidents_file_data(cbs_files_dir)
             provider_code, year = get_file_type_and_year(acc_data_file_path)
-            delete_cbs_entries_from_email(provider_code, year, batch_size)
+
+            """
+            Should be soon implemented as "delete_entries_from_S3"
+            """
+            # delete_cbs_entries_from_email(provider_code, year, batch_size)
+
             started = datetime.now()
             total = 0
             logging.info("Importing Directory " + cbs_files_dir)

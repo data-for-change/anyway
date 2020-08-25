@@ -88,7 +88,7 @@ def process():
 @click.option("--username", default="")
 @click.option("--password", default="")
 @click.option("--email_search_start_date", type=str, default="")  # format - DD.MM.YYYY
-@click.option("--from_S3", is_flag=True, default=False)
+@click.option("--from_s3", is_flag=True, default=False)
 def cbs(
     specific_folder,
     delete_all,

@@ -50,7 +50,8 @@ class S3Handler:
     def current_year(self):
         if self.__current_year is None:
             now = datetime.now()
-            self.__current_year = now.year
+            current_year = now.year
+            self.__current_year = int(current_year)
 
         return self.__current_year
 
@@ -99,6 +100,8 @@ class S3Handler:
             desired_accidents_types = self.__accidents_types
         else:
             desired_accidents_types = accidents_types
+
+        start_year = int(start_year)
 
         for accidents_type in desired_accidents_types:
             self.__download_accidents_type_files(accidents_type=accidents_type,

@@ -1,5 +1,5 @@
 from os import environ, makedirs
-from os.path import basename, dirname, abspath, \
+from os.path import dirname, abspath, \
     join as join_path, exists as does_path_exist
 from datetime import datetime
 from boto3 import resource as resource_builder
@@ -89,7 +89,7 @@ class S3Handler:
 
             for s3_object in s3_bucket.objects.filter(Prefix=s3_files_directory):
                 object_key = s3_object.key
-                s3_filename = basename(object_key)
+                s3_filename = str(object_key.split('/')[-1])
                 local_file_path = f'{local_directory}/{s3_filename}'
                 s3_bucket.download_file(object_key, local_file_path)
 

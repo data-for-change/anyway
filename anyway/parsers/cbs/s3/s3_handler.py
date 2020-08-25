@@ -42,7 +42,7 @@ class S3Handler:
     @property
     def s3_bucket(self):
         if self.__s3_bucket is None:
-            self.__s3_bucket = self.s3_resource(ANYWAY_BUCKET)
+            self.__s3_bucket = self.s3_resource.Bucket(ANYWAY_BUCKET)
 
         return self.__s3_bucket
 

@@ -1,5 +1,5 @@
 from os import environ, makedirs
-from os.path import dirname, abspath, \
+from os.path import basename, dirname, abspath, \
     join as join_path, exists as does_path_exist
 from datetime import datetime
 from boto3 import resource as resource_builder
@@ -27,6 +27,7 @@ class S3Handler:
         self.__temp_directory = None
         self.__local_files_directory = None
         self.__current_year = None
+        self.__download_from_s3_callback = None
 
     @property
     def s3_resource(self):
@@ -78,9 +79,19 @@ class S3Handler:
 
         return self.__local_files_directory
 
+    @property
+    def download_from_s3_callback(self):
+        if self.__download_from_s3_callback is None:
+            download_from_s3_callback = self.s3_resource.meta.client.download_file
+            self.__download_from_s3_callback = download_from_s3_callback
+
+        return self.__download_from_s3_callback
+
     def __download_accidents_type_files(self, accidents_type, start_year):
         current_year, s3_bucket, local_directory = self.current_year, self.s3_bucket, \
                                                    self.local_files_directory
+
+        download_from_s3_callback = self.download_from_s3_callback
 
         accidents_type_directory = f'{ACCIDENTS_TYPE_PREFIX}_{accidents_type}'
 
@@ -89,7 +100,9 @@ class S3Handler:
 
             for s3_object in s3_bucket.objects.filter(Prefix=s3_files_directory):
                 object_key = s3_object.key
-                s3_bucket.download_file(object_key, local_directory)
+                s3_filename = basename(object_key)
+                local_file_path = join_path(local_directory, s3_filename)
+                download_from_s3_callback(Bucket=ANYWAY_BUCKET, Key=object_key, Filename=local_file_path)
 
     def get_files_from_s3(self, start_year, accidents_types=None):
         desired_accidents_types = None

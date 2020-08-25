@@ -100,6 +100,7 @@ def cbs(
     username,
     password,
     email_search_start_date,
+    from_s3
 ):
     from anyway.parsers.cbs.executor import main
 
@@ -114,6 +115,7 @@ def cbs(
         username=username,
         password=password,
         email_search_start_date=email_search_start_date,
+        from_s3=from_s3
     )
 
 

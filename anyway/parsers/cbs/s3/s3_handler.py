@@ -89,9 +89,7 @@ class S3Handler:
 
             for s3_object in s3_bucket.objects.filter(Prefix=s3_files_directory):
                 object_key = s3_object.key
-                s3_filename = str(object_key.split('/')[-1])
-                local_file_path = f'{local_directory}/{s3_filename}'
-                s3_bucket.download_file(object_key, local_file_path)
+                s3_bucket.download_file(object_key, local_directory)
 
     def get_files_from_s3(self, start_year, accidents_types=None):
         desired_accidents_types = None

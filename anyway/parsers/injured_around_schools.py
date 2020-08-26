@@ -59,7 +59,7 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
     )
 
     query_obj = (
-         db.session.query(InvolvedMarkerView)
+        db.session.query(InvolvedMarkerView)
         .filter(InvolvedMarkerView.geom.intersects(pol_str))
         .filter(InvolvedMarkerView.provider_and_id == Involved.provider_and_id)
         .filter(
@@ -115,7 +115,8 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
 
 
 def select_columns_df_total(df):
-    return df.reindex(columns=[
+    return df.reindex(
+        columns=[
             "school_id",
             "markers_provider_and_id",
             "markers_provider_code",
@@ -371,8 +372,8 @@ def get_injured_around_schools(start_date, end_date, distance):
     joined_df.columns = [
         col if type(col) == str else "_".join(map(str, col)) for col in joined_df.columns.values
     ]
-    joined_df = joined_df.reindex(columns=
-        [
+    joined_df = joined_df.reindex(
+        columns=[
             "school_yishuv_name",
             "school_id",
             "school_name",

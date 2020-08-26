@@ -99,9 +99,9 @@ def set_accident_resolution(accident_row):
         if accident_row["intersection"] is not None and "/" in str(accident_row["intersection"]):
             return "צומת עירוני"
         elif accident_row["intersection"] is not None:
-            return "צומת בינעירוני"
+            return "צומת בין עירוני"
         elif accident_row["road_no"] is not None:
-            return "כביש בינעירוני"
+            return "כביש בין עירוני"
         elif accident_row["street"] is not None:
             return "רחוב"
         elif accident_row["city"] is not None:

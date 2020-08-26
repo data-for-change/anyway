@@ -110,7 +110,7 @@ def get_accident_count_by_accident_type(location_info, start_time, end_time):
 def get_top_road_segments_accidents_per_km(
     resolution, location_info, start_time=None, end_time=None, limit=5
 ):
-    if resolution != "כביש בינעירוני":  # relevent for non urban roads only
+    if resolution != "כביש בין עירוני":  # relevent for non urban roads only
         return {}
 
     query = get_query(
@@ -375,15 +375,15 @@ def get_news_flash_location_text(news_flash_id):
     road2 = str(int(nf["road2"])) if nf["road2"] else ""
     street1_hebrew = nf["street1_hebrew"] if nf["street1_hebrew"] else ""
     road_segment_name = nf["road_segment_name"] if nf["road_segment_name"] else ""
-    if resolution == "כביש בינעירוני" and road1 and road_segment_name:
+    if resolution == "כביש בין עירוני" and road1 and road_segment_name:
         res = "כביש " + road1 + " במקטע " + road_segment_name
     elif resolution == "עיר" and not yishuv_name:
         res = nf["location"]
     elif resolution == "עיר" and yishuv_name:
         res = nf["yishuv_name"]
-    elif resolution == "צומת בינעירוני" and road1 and road2:
+    elif resolution == "צומת בין עירוני" and road1 and road2:
         res = "צומת כביש " + road1 + " עם כביש " + road2
-    elif resolution == "צומת בינעירוני" and road1 and road_segment_name:
+    elif resolution == "צומת בין עירוני" and road1 and road_segment_name:
         res = "כביש " + road1 + " במקטע " + road_segment_name
     elif resolution == "רחוב" and yishuv_name and street1_hebrew:
         res = " רחוב " + street1_hebrew + " ב" + yishuv_name

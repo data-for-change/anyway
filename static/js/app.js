@@ -993,7 +993,7 @@ $(function() {
             if (selectObject.value === "0") {
                 return;
             }
-            window.open("https://anyway-reports.netlify.com/" + selectObject.value, '_self');
+            window.open("https://reports.anyway.co.il/" + selectObject.value, '_self');
             $("#embeddedReportsList").val("0");
         },
         handleSearchBox: function() {

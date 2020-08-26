@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=no-member
-import snoop
-
 import csv
 import datetime
 import json
@@ -1480,6 +1478,7 @@ def report_problem():
     response.headers.add("Access-Control-Allow-Headers", ["Content-Type", "Authorization"])
     return response
 
+
 @app.route("/preferences", methods=("GET", "POST"))
 def update_preferences():
     if not current_user.is_authenticated:
@@ -1917,7 +1916,6 @@ def logout():
 
 @app.route("/authorize/<provider>")
 def oauth_authorize(provider):
-    print(str(7))
     if not current_user.is_anonymous:
         return redirect(url_for("index"))
     oauth = OAuthSignIn.get_provider(provider)

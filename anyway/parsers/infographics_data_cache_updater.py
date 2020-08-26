@@ -117,7 +117,7 @@ def get_cache_info():
 
 def main(update, info):
     if update:
-        logging.info("Refreshing infographics cache...") #Logs a message with level INFO on the root logger
+        logging.info("Refreshing infographics cache...") 
         build_cache_into_temp()
         copy_temp_into_cache()
         logging.info("Refreshing infographics cache Done")

@@ -1,7 +1,5 @@
 # pylint: disable=no-member
 import logging
-import os
-import shutil
 from datetime import datetime
 
 import math
@@ -10,7 +8,7 @@ from sqlalchemy import or_, not_, and_
 
 from anyway.backend_constants import BE_CONST
 from anyway.models import (
-    AccidentMarker,
+    InvolvedMarkerView,
     Involved,
     SchoolWithDescription,
     InjuredAroundSchool,
@@ -22,6 +20,7 @@ from anyway.app_and_db import db
 SUBTYPE_ACCIDENT_WITH_PEDESTRIAN = 1
 LOCATION_ACCURACY_PRECISE = True
 LOCATION_ACCURACY_PRECISE_INT = 1
+AGE_GROUPS = [2, 3, 4]
 INJURED_TYPE_PEDESTRIAN = 1
 YISHUV_SYMBOL_NOT_EXIST = -1
 CONTENT_ENCODING = "utf-8"
@@ -60,23 +59,22 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
     )
 
     query_obj = (
-        db.session.query(Involved, AccidentMarker)
-        .join(AccidentMarker, AccidentMarker.provider_and_id == Involved.provider_and_id)
-        .filter(AccidentMarker.geom.intersects(pol_str))
-        .filter(Involved.injured_type == INJURED_TYPE_PEDESTRIAN)
-        .filter(AccidentMarker.provider_and_id == Involved.provider_and_id)
+         db.session.query(InvolvedMarkerView)
+        .filter(InvolvedMarkerView.geom.intersects(pol_str))
+        .filter(InvolvedMarkerView.provider_and_id == Involved.provider_and_id)
         .filter(
             or_(
-                (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_1_CODE),
-                (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_3_CODE),
+                (InvolvedMarkerView.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_1_CODE),
+                (InvolvedMarkerView.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_3_CODE),
             )
         )
-        .filter(AccidentMarker.created >= start_date)
-        .filter(AccidentMarker.created < end_date)
-        .filter(AccidentMarker.location_accuracy == LOCATION_ACCURACY_PRECISE_INT)
-        .filter(AccidentMarker.yishuv_symbol != YISHUV_SYMBOL_NOT_EXIST)
-        .filter(Involved.age_group.in_([1, 2, 3, 4]))
-    )  # ages 0-19
+        .filter(InvolvedMarkerView.accident_timestamp >= start_date)
+        .filter(InvolvedMarkerView.accident_timestamp < end_date)
+        .filter(InvolvedMarkerView.location_accuracy == LOCATION_ACCURACY_PRECISE_INT)
+        .filter(InvolvedMarkerView.age_group.in_(AGE_GROUPS))
+        .filter(InvolvedMarkerView.injury_severity <= 3)
+        .filter(InvolvedMarkerView.injury_severity >= 1)
+    )
 
     df = pd.read_sql_query(query_obj.with_labels().statement, query_obj.session.bind)
     if LOCATION_ACCURACY_PRECISE:
@@ -104,7 +102,6 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
         location_accurate=location_accurate,
         location_approx=location_approx,
     )
-
     df["school_anyway_link"] = ui_url_map_only
     df["anyway_link_with_filters"] = ui_url_with_filters
     df["school_id"] = school.school_id
@@ -113,14 +110,12 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
     df["school_yishuv_name"] = school.yishuv_name
     df["school_longitude"] = school.longitude
     df["school_latitude"] = school.latitude
-    df["accident_year"] = df["involved_accident_year"]
+    df["accident_year"] = df["involved_markers_hebrew_accident_year"]
     return df
 
 
 def select_columns_df_total(df):
-    return df.loc[
-        :,
-        [
+    return df.reindex(columns=[
             "school_id",
             "markers_provider_and_id",
             "markers_provider_code",
@@ -186,38 +181,38 @@ def select_columns_df_total(df):
             "markers_vehicle_type_rsa",
             "markers_violation_type_rsa",
             "markers_geom",
-            "involved_provider_and_id",
-            "involved_provider_code",
-            "involved_accident_id",
-            "involved_involved_type",
-            "involved_license_acquiring_date",
-            "involved_age_group",
-            "involved_sex",
-            "involved_vehicle_type",
-            "involved_safety_measures",
-            "involved_involve_yishuv_symbol",
-            "involved_involve_yishuv_name",
-            "involved_injury_severity",
-            "involved_injured_type",
-            "involved_injured_position",
-            "involved_population_type",
-            "involved_home_region",
-            "involved_home_district",
-            "involved_home_natural_area",
-            "involved_home_municipal_status",
-            "involved_home_yishuv_shape",
-            "involved_hospital_time",
-            "involved_medical_type",
-            "involved_release_dest",
-            "involved_safety_measures_use",
-            "involved_late_deceased",
-            "involved_car_id",
-            "involved_involve_id",
-            "involved_accident_year",
-            "involved_accident_month",
-            "involved_injury_severity_mais",
+            "involved_markers_hebrew_provider_and_id",
+            "involved_markers_hebrew_provider_code",
+            "involved_markers_hebrew_accident_id",
+            "involved_markers_hebrew_involved_markers_hebrew_type",
+            "involved_markers_hebrew_license_acquiring_date",
+            "involved_markers_hebrew_age_group",
+            "involved_markers_hebrew_sex",
+            "involved_markers_hebrew_vehicle_type",
+            "involved_markers_hebrew_safety_measures",
+            "involved_markers_hebrew_involve_yishuv_symbol",
+            "involved_markers_hebrew_involve_yishuv_name",
+            "involved_markers_hebrew_injury_severity",
+            "involved_markers_hebrew_injured_type",
+            "involved_markers_hebrew_injured_position",
+            "involved_markers_hebrew_population_type",
+            "involved_markers_hebrew_home_region",
+            "involved_markers_hebrew_home_district",
+            "involved_markers_hebrew_home_natural_area",
+            "involved_markers_hebrew_home_municipal_status",
+            "involved_markers_hebrew_home_yishuv_shape",
+            "involved_markers_hebrew_hospital_time",
+            "involved_markers_hebrew_medical_type",
+            "involved_markers_hebrew_release_dest",
+            "involved_markers_hebrew_safety_measures_use",
+            "involved_markers_hebrew_late_deceased",
+            "involved_markers_hebrew_car_id",
+            "involved_markers_hebrew_involve_id",
+            "involved_markers_hebrew_accident_year",
+            "involved_markers_hebrew_accident_month",
+            "involved_markers_hebrew_injury_severity_mais",
         ],
-    ]
+    )
 
 
 def get_injured_around_schools(start_date, end_date, distance):
@@ -237,10 +232,7 @@ def get_injured_around_schools(start_date, end_date, distance):
         )
         .all()
     )
-    data_dir = "tmp_school_data"
-    if os.path.exists(data_dir):
-        shutil.rmtree(data_dir)
-    os.mkdir(data_dir)
+    df_total = pd.DataFrame()
     for idx, school in enumerate(schools):
         if idx % 100 == 0:
             logging.info(idx)
@@ -252,15 +244,7 @@ def get_injured_around_schools(start_date, end_date, distance):
             end_date=end_date,
             school=school,
         )
-        curr_csv_path = os.path.join(data_dir, str(school.school_id))
-        df_curr.to_pickle(curr_csv_path)
-    df_total = pd.DataFrame()
-    for idx, filename in enumerate(os.listdir(data_dir)):
-        curr_csv_path = os.path.join(data_dir, filename)
-        df_total = pd.concat([df_total, pd.read_pickle(curr_csv_path)], axis=0)
-        if idx % 100 == 0:
-            logging.info(idx)
-    shutil.rmtree(data_dir)
+        df_total = pd.concat([df_total, df_curr])
 
     # df_total_injured
     logging.info("create df_total_injured")
@@ -275,7 +259,7 @@ def get_injured_around_schools(start_date, end_date, distance):
                 "school_longitude",
                 "school_latitude",
                 "accident_year",
-                "involved_injury_severity",
+                "involved_markers_hebrew_injury_severity",
             ]
         )
         .size()
@@ -288,7 +272,7 @@ def get_injured_around_schools(start_date, end_date, distance):
                 "school_name",
                 "school_type",
                 "school_anyway_link",
-                "involved_injury_severity",
+                "involved_markers_hebrew_injury_severity",
                 "injured_count",
                 "school_longitude",
                 "school_latitude",
@@ -306,7 +290,7 @@ def get_injured_around_schools(start_date, end_date, distance):
             "school_longitude",
             "school_latitude",
             "accident_year",
-            "involved_injury_severity",
+            "involved_markers_hebrew_injury_severity",
         ]
     ).unstack(-1)
     df_total_injured.fillna({"injured_count": 0, "total_injured_count": 0}, inplace=True)
@@ -387,8 +371,7 @@ def get_injured_around_schools(start_date, end_date, distance):
     joined_df.columns = [
         col if type(col) == str else "_".join(map(str, col)) for col in joined_df.columns.values
     ]
-    joined_df = joined_df.loc[
-        :,
+    joined_df = joined_df.reindex(columns=
         [
             "school_yishuv_name",
             "school_id",
@@ -404,7 +387,7 @@ def get_injured_around_schools(start_date, end_date, distance):
             "injured_count_3",
             "total_injured_count_",
         ],
-    ]
+    )
     joined_df.columns = [
         "school_yishuv_name",
         "school_id",
@@ -421,10 +404,12 @@ def get_injured_around_schools(start_date, end_date, distance):
         "total_injured_killed_count",
     ]
     joined_df["distance_in_km"] = distance
+    joined_df = joined_df.where(pd.notnull(joined_df), None)  # SQL insert fix
     joined_df = joined_df.to_dict(orient="records")
 
     logging.info("select_columns_df_total")
     df_total = select_columns_df_total(df_total)
+    df_total = df_total.where(pd.notnull(df_total), None)  # SQL insert fix
     df_total = df_total.to_dict(orient="records")
     logging.info("return joined_df, df_total")
     return joined_df, df_total
@@ -445,16 +430,16 @@ def truncate_injured_around_schools():
 
 
 def import_to_datastore(start_date, end_date, distance, batch_size):
+    started = datetime.now()
+    new_items = 0
     try:
         assert batch_size > 0
-        started = datetime.now()
         injured_around_schools, df_total = get_injured_around_schools(
             start_date, end_date, distance
         )
         truncate_injured_around_schools()
-        new_items = 0
         logging.info(
-            "inserting "
+            "Inserting "
             + str(len(injured_around_schools))
             + " new rows about to injured_around_school"
         )
@@ -464,7 +449,7 @@ def import_to_datastore(start_date, end_date, distance, batch_size):
                 logging.info(logging_chunk)
             db.session.bulk_insert_mappings(InjuredAroundSchool, schools_chunk)
             db.session.commit()
-        logging.info("inserting " + str(len(df_total)) + " new rows injured_around_school_all_data")
+        logging.info("Inserting " + str(len(df_total)) + " new rows injured_around_school_all_data")
         for chunk_idx, schools_chunk in enumerate(chunks(df_total, batch_size)):
             if chunk_idx % 10 == 0:
                 logging_chunk = "Chunk idx in injured_around_school_all_data: " + str(chunk_idx)
@@ -476,7 +461,7 @@ def import_to_datastore(start_date, end_date, distance, batch_size):
         return new_items
     except:
         logging.info("\tExecution took {0}".format(time_delta(started)))
-        error = "Schools import succeded partially with " + new_items + " schools"
+        error = "Schools import succeeded partially with " + str(new_items) + " schools"
         raise Exception(error)
 
 

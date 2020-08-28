@@ -87,6 +87,7 @@ failed_dirs = OrderedDict()
 
 CONTENT_ENCODING = "cp1255"
 ACCIDENT_TYPE_REGEX = re.compile(r"accidents_type_(?P<type>\d)")
+ACCIDENTS_TYPE_PREFIX = "accidents_type"
 
 ACCIDENTS = "accidents"
 CITIES = "cities"
@@ -921,6 +922,8 @@ def fill_dictionary_tables(cbs_dictionary, provider_code, year):
             )
             continue
         for inner_k, inner_v in v.items():
+            if inner_v is None or (isinstance(inner_v, float) and math.isnan(inner_v)):
+                continue
             sql_delete = (
                     "DELETE FROM "
                     + curr_table
@@ -1082,11 +1085,6 @@ def main(
             logging.info("Importing data from s3...")
             s3_handler = S3Handler()
             s3_handler.get_files_from_s3(start_year=load_start_year)
-            cbs_files_dir = s3_handler.local_files_directory
-            preprocessing_cbs_files.update_cbs_files_names(cbs_files_dir)
-            acc_data_file_path = preprocessing_cbs_files.get_accidents_file_data(cbs_files_dir)
-            provider_code, year = get_file_type_and_year(acc_data_file_path)
-
             """
             Should be soon implemented as "delete_entries_from_S3"
             """
@@ -1095,9 +1093,12 @@ def main(
                 delete_cbs_entries(delete_start_date, batch_size)
             started = datetime.now()
             total = 0
-            logging.info("Importing Directory " + cbs_files_dir)
             for provider_code in [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]:
                 for year in range(int(load_start_year), s3_handler.current_year + 1):
+                    cbs_files_dir = os.path.join(s3_handler.local_files_directory, ACCIDENTS_TYPE_PREFIX + '_' + str(provider_code), str(year))
+                    logging.info("Importing Directory " + cbs_files_dir)
+                    preprocessing_cbs_files.update_cbs_files_names(cbs_files_dir)
+                    acc_data_file_path = preprocessing_cbs_files.get_accidents_file_data(cbs_files_dir)
                     total += import_to_datastore(cbs_files_dir, provider_code, year, batch_size)
             shutil.rmtree(s3_handler.local_temp_directory)
         else:

@@ -1093,10 +1093,10 @@ def main(
                 delete_cbs_entries(delete_start_date, batch_size)
             started = datetime.now()
             total = 0
-            logging.info("Importing Directory " + cbs_files_dir)
             for provider_code in [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]:
                 for year in range(int(load_start_year), s3_handler.current_year + 1):
                     cbs_files_dir = os.path.join(s3_handler.local_files_directory, ACCIDENTS_TYPE_PREFIX + '_' + str(provider_code), str(year))
+                    logging.info("Importing Directory " + cbs_files_dir)
                     preprocessing_cbs_files.update_cbs_files_names(cbs_files_dir)
                     acc_data_file_path = preprocessing_cbs_files.get_accidents_file_data(cbs_files_dir)
                     total += import_to_datastore(cbs_files_dir, provider_code, year, batch_size)

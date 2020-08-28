@@ -1,6 +1,6 @@
 from os import environ, makedirs
 from os.path import basename, dirname, abspath, \
-    join as join_path, exists as does_path_exist
+    join as join_path, exists as does_path_exist, mkdir
 from datetime import datetime
 from boto3 import resource as resource_builder
 from tempfile import mkdtemp
@@ -99,9 +99,12 @@ class S3Handler:
             s3_files_directory = f'{accidents_type_directory}/{year}'
 
             for s3_object in s3_bucket.objects.filter(Prefix=s3_files_directory):
+                local_dir_path = join_path(local_directory, accidents_type_directory, str(year))
+                if not does_path_exists(local_dir_path):
+                    mkdir(local_dir_path)
                 object_key = s3_object.key
                 s3_filename = basename(object_key)
-                local_file_path = join_path(local_directory, s3_filename)
+                local_file_path = join_path(local_dir_path, s3_filename)
                 download_from_s3_callback(Bucket=ANYWAY_BUCKET, Key=object_key, Filename=local_file_path)
 
     def get_files_from_s3(self, start_year, accidents_types=None):

@@ -1,6 +1,6 @@
-from os import environ, makedirs
+from os import environ, makedirs, mkdir
 from os.path import basename, dirname, abspath, \
-    join as join_path, exists as does_path_exist, mkdir
+    join as join_path, exists as does_path_exist
 from datetime import datetime
 from boto3 import resource as resource_builder
 from tempfile import mkdtemp

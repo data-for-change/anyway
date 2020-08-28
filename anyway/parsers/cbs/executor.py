@@ -1091,7 +1091,8 @@ def main(
             Should be soon implemented as "delete_entries_from_S3"
             """
             # delete_cbs_entries_from_email(provider_code, year, batch_size)
-
+            if delete_start_date is not None:
+                delete_cbs_entries(delete_start_date, batch_size)
             started = datetime.now()
             total = 0
             logging.info("Importing Directory " + cbs_files_dir)

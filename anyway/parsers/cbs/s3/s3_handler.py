@@ -7,7 +7,7 @@ from tempfile import mkdtemp
 
 get_environment_variable = environ.get
 
-ANYWAY_BUCKET = "anyway-cbs-data"
+ANYWAY_BUCKET = "anyway-cbs"
 
 ACCIDENTS_TYPE_PREFIX = "accidents_type"
 ACCIDENTS_TYPE_1 = 1

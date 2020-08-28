@@ -1096,7 +1096,9 @@ def main(
             started = datetime.now()
             total = 0
             logging.info("Importing Directory " + cbs_files_dir)
-            total += import_to_datastore(cbs_files_dir, provider_code, year, batch_size)
+            for provider_code in [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]:
+                for year in range(int(load_start_year), s3_handler.current_year + 1):
+                    total += import_to_datastore(cbs_files_dir, provider_code, year, batch_size)
             shutil.rmtree(s3_handler.local_temp_directory)
         else:
             logging.info("Importing data from mail...")

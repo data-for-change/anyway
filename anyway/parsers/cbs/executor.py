@@ -921,6 +921,8 @@ def fill_dictionary_tables(cbs_dictionary, provider_code, year):
             )
             continue
         for inner_k, inner_v in v.items():
+            if inner_v is None or (isinstance(inner_v, float) and math.isnan(inner_v)):
+                continue
             sql_delete = (
                     "DELETE FROM "
                     + curr_table

@@ -99,7 +99,10 @@ class S3Handler:
             s3_files_directory = f'{accidents_type_directory}/{year}'
 
             for s3_object in s3_bucket.objects.filter(Prefix=s3_files_directory):
-                local_dir_path = join_path(local_directory, accidents_type_directory, str(year))
+                local_dir_path = join_path(local_directory, accidents_type_directory)
+                if not does_path_exist(local_dir_path):
+                    mkdir(local_dir_path)
+                local_dir_path = join_path(local_dir_path, str(year))
                 if not does_path_exist(local_dir_path):
                     mkdir(local_dir_path)
                 object_key = s3_object.key

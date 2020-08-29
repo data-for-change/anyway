@@ -189,6 +189,26 @@ def schools_with_description(
 
 
 @process.command()
+@click.argument(
+    "schools_description_filepath", type=str, default="static/data/schools/schools_description_2020.xlsx"
+)
+@click.argument(
+    "schools_coordinates_filepath", type=str, default="static/data/schools/schools_coordinates_2020.xlsx"
+)
+@click.option("--batch_size", type=int, default=5000)
+def schools_with_description_2020(
+    schools_description_filepath, schools_coordinates_filepath, batch_size
+):
+    from anyway.parsers.schools_with_description_2020 import parse
+
+    return parse(
+        schools_description_filepath=schools_description_filepath,
+        schools_coordinates_filepath=schools_coordinates_filepath,
+        batch_size=batch_size,
+    )
+
+
+@process.command()
 @click.option(
     "--start_date", default="01-01-2014", type=valid_date, help="The Start Date - format DD-MM-YYYY"
 )

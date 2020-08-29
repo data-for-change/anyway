@@ -5,17 +5,12 @@ import logging
 
 import pandas as pd
 from flask import Response, request
-from sqlalchemy import and_, not_, or_, func
+from sqlalchemy import and_, not_
 
 from anyway.base import db, user_optional
 from anyway.models import (
     School,
-    SchoolWithDescription2020,
-    InjuredAroundSchool,
-    Sex,
-    InjuredAroundSchoolAllData,
-    AccidentMonth,
-    InjurySeverity,
+    SchoolWithDescription2020
 )
 
 

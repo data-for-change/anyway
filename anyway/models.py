@@ -2129,3 +2129,21 @@ class CasualtiesCosts(Base):
 
     def toStr(self):
         return f"{self.id}:{self.injured_type}:{self.injuries_cost_k}"
+
+
+class SchoolWithDescription2020(Base):
+    __tablename__ = "schools_with_description2020"
+    id = Column(BigInteger(), autoincrement=True, primary_key=True, index=True)
+    school_id = Column(Integer(), nullable=True, index=True)
+    school_name = Column(Text(), nullable=True)
+    municipality_name = Column(Text(), nullable=True, index=True)
+    yishuv_name = Column(Text(), nullable=True, index=True)
+    institution_type = Column(Text(), nullable=True)
+    lowest_grade = Column(Text(), nullable=True)
+    highest_grade = Column(Text(), nullable=True)
+    location_accuracy = Column(Text(), nullable=True)
+    geom = Column(Geometry("POINT", srid=4326), index=True)
+    x = Column(Float(), nullable=True)
+    y = Column(Float(), nullable=True)
+    longitude = Column(Float(), nullable=True)
+    latitude = Column(Float(), nullable=True)

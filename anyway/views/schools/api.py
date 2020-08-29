@@ -113,7 +113,8 @@ def schools_names_api():
     # Disable all the no-member violations in this function
     # pylint: disable=no-member
     logging.debug("getting schools names")
-    response = Response(json.load(open('static/data/schools/schools_names.json')), mimetype="application/json")
+    schools_data = json.load(open('static/data/schools/schools_names.json'))
+    response = Response(json.dumps(schools_data, default=str), mimetype="application/json")
     response.headers.add("Access-Control-Allow-Origin", "*")
     return response
 

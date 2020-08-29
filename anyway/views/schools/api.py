@@ -8,8 +8,15 @@ from flask import Response, request
 from sqlalchemy import and_, not_, or_, func
 
 from anyway.base import db, user_optional
-from anyway.models import School, SchoolWithDescription, InjuredAroundSchool, Sex, InjuredAroundSchoolAllData, \
-    AccidentMonth, InjurySeverity
+from anyway.models import (
+    School,
+    SchoolWithDescription,
+    InjuredAroundSchool,
+    Sex,
+    InjuredAroundSchoolAllData,
+    AccidentMonth,
+    InjurySeverity,
+)
 
 
 @user_optional
@@ -85,7 +92,6 @@ def schools_description_api():
     return response
 
 
-
 @user_optional
 def schools_yishuvs_api():
     logging.debug("getting schools yishuvs")
@@ -111,6 +117,7 @@ def schools_yishuvs_api():
     response = Response(json.dumps(schools_yishuvs_list, default=str), mimetype="application/json")
     response.headers.add("Access-Control-Allow-Origin", "*")
     return response
+
 
 @user_optional
 def schools_names_api():

@@ -75,12 +75,14 @@ from anyway.oauth import OAuthSignIn
 from anyway.infographics_utils import get_infographics_data
 from anyway.app_and_db import app, db
 from anyway.views.schools.api import (
-    schools_description_api,schools_names_api, schools_yishuvs_api,
+    schools_description_api,
+    schools_names_api,
+    schools_yishuvs_api,
     schools_api,
     injured_around_schools_sex_graphs_data_api,
     injured_around_schools_months_graphs_data_api,
     injured_around_schools_api,
-    )
+)
 
 app.config.from_object(__name__)
 app.config["SECURITY_REGISTERABLE"] = False
@@ -968,12 +970,14 @@ def index(marker=None, message=None):
     context["pref_radius"] = pref_radius
     latest_created_date = AccidentMarker.get_latest_marker_created_date()
 
-    if latest_created_date is None :
+    if latest_created_date is None:
         end_date = datetime.date.today()
     else:
         end_date = latest_created_date
 
-    context["default_end_date_format"] = request.values.get("end_date", end_date.strftime("%Y-%m-%d"))
+    context["default_end_date_format"] = request.values.get(
+        "end_date", end_date.strftime("%Y-%m-%d")
+    )
     context["default_start_date_format"] = request.values.get(
         "start_date", (end_date - datetime.timedelta(days=365)).strftime("%Y-%m-%d")
     )
@@ -1536,13 +1540,34 @@ def logout():
     login.logout_user()
     return redirect(url_for("index"))
 
+
 app.add_url_rule("/api/schools", endpoint=None, view_func=schools_api, methods=["GET"])
-app.add_url_rule("/api/schools-description", endpoint=None, view_func=schools_description_api, methods=["GET"])
-app.add_url_rule("/api/schools-yishuvs", endpoint=None, view_func=schools_yishuvs_api, methods=["GET"])
+app.add_url_rule(
+    "/api/schools-description", endpoint=None, view_func=schools_description_api, methods=["GET"]
+)
+app.add_url_rule(
+    "/api/schools-yishuvs", endpoint=None, view_func=schools_yishuvs_api, methods=["GET"]
+)
 app.add_url_rule("/api/schools-names", endpoint=None, view_func=schools_names_api, methods=["GET"])
-app.add_url_rule("/api/injured-around-schools-sex-graphs-data", endpoint=None, view_func=injured_around_schools_sex_graphs_data_api, methods=["GET"])
-app.add_url_rule("/api/injured-around-schools-months-graphs-data", endpoint=None, view_func=injured_around_schools_months_graphs_data_api, methods=["GET"])
-app.add_url_rule("/api/injured-around-schools", endpoint=None, view_func=injured_around_schools_api, methods=["GET"])
+app.add_url_rule(
+    "/api/injured-around-schools-sex-graphs-data",
+    endpoint=None,
+    view_func=injured_around_schools_sex_graphs_data_api,
+    methods=["GET"],
+)
+app.add_url_rule(
+    "/api/injured-around-schools-months-graphs-data",
+    endpoint=None,
+    view_func=injured_around_schools_months_graphs_data_api,
+    methods=["GET"],
+)
+app.add_url_rule(
+    "/api/injured-around-schools",
+    endpoint=None,
+    view_func=injured_around_schools_api,
+    methods=["GET"],
+)
+
 
 @app.route("/authorize/<provider>")
 def oauth_authorize(provider):

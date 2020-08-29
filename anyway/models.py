@@ -280,17 +280,15 @@ class AccidentMarker(MarkerMixin, Base):
 
     @staticmethod
     def get_latest_marker_created_date():
-        latest_created_date = db.session \
-                    .query(func.max(AccidentMarker.created)) \
-                    .filter(
-                AccidentMarker.provider_code
-                    .in_(
-                    [
-                        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
-                        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE
-                    ]
+        latest_created_date = (
+            db.session.query(func.max(AccidentMarker.created))
+            .filter(
+                AccidentMarker.provider_code.in_(
+                    [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
                 )
-            ).first()
+            )
+            .first()
+        )
 
         if latest_created_date is None:
             return None
@@ -769,6 +767,7 @@ class NewsFlash(Base):
     resolution = Column(Text(), nullable=True)
     title = Column(Text(), nullable=True)
     source = Column(Text(), nullable=True)
+    organization = Column(Text(), nullable=True)
     location = Column(Text(), nullable=True)
     tweet_id = Column(BigInteger(), nullable=True)
     region_hebrew = Column(Text(), nullable=True)
@@ -794,6 +793,7 @@ class NewsFlash(Base):
             "resolution": self.resolution,
             "title": self.title,
             "source": self.source,
+            "organization": self.organization,
             "location": self.location,
             "tweet_id": self.tweet_id,
             "region_hebrew": self.region_hebrew,

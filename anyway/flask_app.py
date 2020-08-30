@@ -293,6 +293,9 @@ def get_kwargs():
     }
     if request.values.get("age_groups[]") == "1234" or request.values.get("age_groups") == "1234":
         kwargs["age_groups"] = "1,2,3,4"
+    if request.values.get("age_groups[]") == "234" or request.values.get("age_groups") == "234":
+        kwargs["age_groups"] = "2,3,4"
+        kwargs["light_transportation"] = True
     try:
         kwargs.update(
             {

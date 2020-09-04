@@ -561,16 +561,44 @@ class AccidentMarker(MarkerMixin, Base):
         else:
             markers = db.session.query(AccidentMarker).filter(sql.false())
 
-
         if kwargs.get("light_transportation", False) == True:
             age_groups_list = kwargs.get("age_groups").split(",")
             markers = markers.filter(
-                        or_(AccidentMarker.involved.any(and_(Involved.injured_type == 1, Involved.injury_severity >= 1, Involved.injury_severity <= 3, Involved.age_group.in_(age_groups_list))),
-                            AccidentMarker.involved.any(and_(Involved.vehicle_type == 15, Involved.injury_severity >= 1, Involved.injury_severity <= 3, Involved.age_group.in_(age_groups_list))),
-                            AccidentMarker.involved.any(and_(Involved.vehicle_type == 21, Involved.injury_severity >= 1, Involved.injury_severity <= 3, Involved.age_group.in_(age_groups_list))),
-                            AccidentMarker.involved.any(and_(Involved.vehicle_type == 23, Involved.injury_severity >= 1, Involved.injury_severity <= 3, Involved.age_group.in_(age_groups_list))),
+                or_(
+                    AccidentMarker.involved.any(
+                        and_(
+                            Involved.injured_type == 1,
+                            Involved.injury_severity >= 1,
+                            Involved.injury_severity <= 3,
+                            Involved.age_group.in_(age_groups_list),
                         )
-                    )
+                    ),
+                    AccidentMarker.involved.any(
+                        and_(
+                            Involved.vehicle_type == 15,
+                            Involved.injury_severity >= 1,
+                            Involved.injury_severity <= 3,
+                            Involved.age_group.in_(age_groups_list),
+                        )
+                    ),
+                    AccidentMarker.involved.any(
+                        and_(
+                            Involved.vehicle_type == 21,
+                            Involved.injury_severity >= 1,
+                            Involved.injury_severity <= 3,
+                            Involved.age_group.in_(age_groups_list),
+                        )
+                    ),
+                    AccidentMarker.involved.any(
+                        and_(
+                            Involved.vehicle_type == 23,
+                            Involved.injury_severity >= 1,
+                            Involved.injury_severity <= 3,
+                            Involved.age_group.in_(age_groups_list),
+                        )
+                    ),
+                )
+            )
 
         if page and per_page:
             markers = markers.offset((page - 1) * per_page).limit(per_page)

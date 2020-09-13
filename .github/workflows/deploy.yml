@@ -5,10 +5,10 @@ on:
       - test
       - dev
 env:
-  DOCKER_REPOSITORY_ANYWAY: "userdev0/anyway/anyway"
-  DOCKER_REPOSITORY_DB: "userdev0/anyway/db"
-  DOCKER_REPOSITORY_DB_BACKUP: "userdev0/anyway/db_backup"
-  DOCKER_REPOSITORY_NGINX: "userdev0/anyway/nginx"
+  DOCKER_REPOSITORY_ANYWAY: "anyway"
+  DOCKER_REPOSITORY_DB: "db"
+  DOCKER_REPOSITORY_DB_BACKUP: "db_backup"
+  DOCKER_REPOSITORY_NGINX: "nginx"
 jobs:
   Build-anyway:
     if: github.repository == 'userdev0/anyway'
@@ -22,7 +22,7 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         registry: docker.pkg.github.com
-        repository: ${{ github.repository }}/${{ github.event.repository.name }}
+        repository: ${{ github.repository }}/${{ env.DOCKER_REPOSITORY_ANYWAY }}
         tag_with_ref: true
         tag_with_sha: true
         cache_froms: ${{ env.DOCKER_REPOSITORY_ANYWAY }}:dev
@@ -34,10 +34,11 @@ jobs:
     - name: Build and push database Docker image
       uses: docker/build-push-action@v1.1.1
       with:
+        name: ${{ env.DOCKER_REPOSITORY_DB }}
         registry: docker.pkg.github.com
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-        repository: ${{ github.repository }}/${{ github.event.repository.name }}
+        repository: ${{ github.repository }}/${{ env.DOCKER_REPOSITORY_DB }}
         path: 'db_docker'
         tag_with_ref: true
         tag_with_sha: true
@@ -50,6 +51,7 @@ jobs:
     - name: Build and push database backup Docker image
       uses: docker/build-push-action@v1.1.1
       with:
+        name: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
         registry: docker.pkg.github.com
         repository: ${{ github.repository }}/${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
         dockerfile: 'db_docker/backup.Dockerfile'

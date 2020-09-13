@@ -40,7 +40,7 @@ jobs:
         repository: ${{ env.DOCKER_REPOSITORY_DB }}
         tag_with_ref: true
         tag_with_sha: true
-        cache_froms: ${{ env.DOCKER_REPOSITORY_DB }}:dev
+        # cache_froms: ${{ env.DOCKER_REPOSITORY_DB }}:dev
   Build-db-backup:
     if: github.repository == 'userdev0/anyway'
     runs-on: ubuntu-18.04
@@ -56,7 +56,7 @@ jobs:
         repository: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
         tag_with_ref: true
         tag_with_sha: true
-        cache_froms: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}:dev
+        # cache_froms: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}:dev
   # Build-nginx:
   #   if: github.repository == 'userdev0/anyway'
   #   needs: Build-anyway

@@ -5,10 +5,10 @@ on:
       - test
       - dev
 env:
-  DOCKER_REPOSITORY_ANYWAY: "anyway"
-  DOCKER_REPOSITORY_DB: "db"
-  DOCKER_REPOSITORY_DB_BACKUP: "db_backup"
-  DOCKER_REPOSITORY_NGINX: "nginx"
+  DOCKER_REPOSITORY_ANYWAY: "${{ github.repository }}/anyway"
+  DOCKER_REPOSITORY_DB: "${{ github.repository }}/db"
+  DOCKER_REPOSITORY_DB_BACKUP: "${{ github.repository }}/db_backup"
+  DOCKER_REPOSITORY_NGINX: "${{ github.repository }}/nginx"
 jobs:
   Build-anyway:
     if: github.repository == 'userdev0/anyway'
@@ -22,7 +22,7 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         registry: docker.pkg.github.com
-        repository: ${{ github.repository }}/${{ env.DOCKER_REPOSITORY_ANYWAY }}
+        repository: ${{ env.DOCKER_REPOSITORY_ANYWAY }}
         tag_with_ref: true
         tag_with_sha: true
         cache_froms: ${{ env.DOCKER_REPOSITORY_ANYWAY }}:dev
@@ -38,11 +38,11 @@ jobs:
         registry: docker.pkg.github.com
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-        repository: ${{ github.repository }}/${{ env.DOCKER_REPOSITORY_DB }}
+        repository: ${{ env.DOCKER_REPOSITORY_DB }}
         path: 'db_docker'
         tag_with_ref: true
         tag_with_sha: true
-        # cache_froms: ${{ env.DOCKER_REPOSITORY_DB }}:dev
+        cache_froms: ${{ env.DOCKER_REPOSITORY_DB }}:dev
   Build-db-backup:
     if: github.repository == 'userdev0/anyway'
     runs-on: ubuntu-18.04
@@ -53,14 +53,14 @@ jobs:
       with:
         name: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
         registry: docker.pkg.github.com
-        repository: ${{ github.repository }}/${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
+        repository: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
         dockerfile: 'db_docker/backup.Dockerfile'
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         path: 'db_docker'
         tag_with_ref: true
         tag_with_sha: true
-        # cache_froms: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}:dev
+        cache_froms: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}:dev
   # Build-nginx:
   #   if: github.repository == 'userdev0/anyway'
   #   needs: Build-anyway

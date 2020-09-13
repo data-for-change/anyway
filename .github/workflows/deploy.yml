@@ -37,10 +37,10 @@ jobs:
         path: 'db_docker'
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-        repository: ${{ env.DOCKER_REPOSITORY_DB }}
+        repository: ${{ github.repository }}/${{ github.event.repository.name }}
         tag_with_ref: true
         tag_with_sha: true
-        cache_froms: ${{ env.DOCKER_REPOSITORY_DB }}:dev
+        # cache_froms: ${{ env.DOCKER_REPOSITORY_DB }}:dev
   Build-db-backup:
     if: github.repository == 'userdev0/anyway'
     runs-on: ubuntu-18.04
@@ -53,10 +53,10 @@ jobs:
         dockerfile: 'db_docker/backup.Dockerfile'
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-        repository: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
+        repository: ${{ github.repository }}/${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
         tag_with_ref: true
         tag_with_sha: true
-        cache_froms: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}:dev
+        # cache_froms: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}:dev
   # Build-nginx:
   #   if: github.repository == 'userdev0/anyway'
   #   needs: Build-anyway

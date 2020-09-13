@@ -70,7 +70,6 @@ jobs:
     - uses: actions/checkout@v2
     - env:
         name: ${{ env.DOCKER_REPOSITORY_NGINX }}
-        registry: docker.pkg.github.com
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         DOCKER_REPOSITORY_ANYWAY: ${{ env.DOCKER_REPOSITORY_ANYWAY }}
@@ -80,6 +79,7 @@ jobs:
         SHA_TAG=sha-`git rev-parse --short $GITHUB_SHA` &&\
         echo REF_TAG=$REF_TAG &&\
         echo SHA_TAG=$SHA_TAG &&\
+        echo "${SERVER}/${DOCKER_REPOSITORY_ANYWAY}:${SHA_TAG}" &&\
         docker pull "${SERVER}/${DOCKER_REPOSITORY_ANYWAY}:${SHA_TAG}" &&\
         if docker pull "${SERVER}/${DOCKER_REPOSITORY_NGINX}:${REF_TAG}"; then
           CACHE_FROM=" --cache-from ${SERVER}/${DOCKER_REPOSITORY_NGINX}:${REF_TAG} "

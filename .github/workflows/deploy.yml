@@ -34,7 +34,7 @@ jobs:
     - name: Build and push database Docker image
       uses: docker/build-push-action@v1.1.1
       with:
-        name: ${{ env.DOCKER_REPOSITORY_DB }}
+        registry: docker.pkg.github.com
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         repository: ${{ github.repository }}/${{ github.event.repository.name }}
@@ -50,7 +50,7 @@ jobs:
     - name: Build and push database backup Docker image
       uses: docker/build-push-action@v1.1.1
       with:
-        name: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
+        registry: docker.pkg.github.com
         repository: ${{ github.repository }}/${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
         dockerfile: 'db_docker/backup.Dockerfile'
         username: ${{ secrets.DOCKER_USERNAME }}

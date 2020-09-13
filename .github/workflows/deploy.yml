@@ -16,7 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build and push anyway Docker image
-      uses: docker/build-push-action@v1
+      uses: docker/build-push-action@v1.1.1
       with:
         name: ${{ env.DOCKER_REPOSITORY_ANYWAY }}
         username: ${{ secrets.DOCKER_USERNAME }}
@@ -32,12 +32,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build and push database Docker image
-      uses: docker/build-push-action@v1.0.1
+      uses: docker/build-push-action@v1.1.1
       with:
-        path: 'db_docker'
+        name: ${{ env.DOCKER_REPOSITORY_DB }}
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         repository: ${{ github.repository }}/${{ github.event.repository.name }}
+        path: 'db_docker'
         tag_with_ref: true
         tag_with_sha: true
         # cache_froms: ${{ env.DOCKER_REPOSITORY_DB }}:dev
@@ -47,13 +48,14 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build and push database backup Docker image
-      uses: docker/build-push-action@v1.0.1
+      uses: docker/build-push-action@v1.1.1
       with:
-        path: 'db_docker'
+        name: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
+        repository: ${{ github.repository }}/${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
         dockerfile: 'db_docker/backup.Dockerfile'
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-        repository: ${{ github.repository }}/${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
+        path: 'db_docker'
         tag_with_ref: true
         tag_with_sha: true
         # cache_froms: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}:dev

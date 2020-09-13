@@ -1,4 +1,4 @@
-FROM anywayteam/anyway:latest AS builder
+FROM docker.pkg.github.com/userdev0/anyway/anyway:latest AS builder
 RUN flask assets build
 
 FROM nginx:stable

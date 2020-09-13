@@ -80,6 +80,7 @@ jobs:
         echo REF_TAG=$REF_TAG &&\
         echo SHA_TAG=$SHA_TAG &&\
         echo "${SERVER}/${DOCKER_REPOSITORY_ANYWAY}:${SHA_TAG}" &&\
+        echo "${DOCKER_PASSWORD}" | docker login ${SERVER} -u "${DOCKER_USERNAME}" --password-stdin &&\
         docker pull "${SERVER}/${DOCKER_REPOSITORY_ANYWAY}:${SHA_TAG}" &&\
         if docker pull "${SERVER}/${DOCKER_REPOSITORY_NGINX}:${REF_TAG}"; then
           CACHE_FROM=" --cache-from ${SERVER}/${DOCKER_REPOSITORY_NGINX}:${REF_TAG} "
@@ -89,7 +90,7 @@ jobs:
         docker tag "${SERVER}/${DOCKER_REPOSITORY_ANYWAY}:${SHA_TAG}" "${SERVER}/${DOCKER_REPOSITORY_ANYWAY}:latest" &&\
         docker build $CACHE_FROM -t "${SERVER}/${DOCKER_REPOSITORY_NGINX}:${SHA_TAG}" nginx_docker &&\
         docker tag "${SERVER}/${DOCKER_REPOSITORY_NGINX}:${SHA_TAG}" "${SERVER}/${DOCKER_REPOSITORY_NGINX}:${REF_TAG}" &&\
-        echo "${DOCKER_PASSWORD}" | docker login ${SERVER} -u "${DOCKER_USERNAME}" --password-stdin &&\
+        
         docker push "${SERVER}/${DOCKER_REPOSITORY_NGINX}:${SHA_TAG}" &&\
         docker push "${SERVER}/${DOCKER_REPOSITORY_NGINX}:${REF_TAG}"
   # deploy:

@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - test
+      - master
       - dev
 env:
   DOCKER_REPOSITORY_ANYWAY: "${{ github.repository }}/anyway"

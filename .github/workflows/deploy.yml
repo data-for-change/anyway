@@ -17,7 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build and push anyway Docker image
-      uses: docker/build-push-action@v1.1.1
+      uses: docker/build-push-action@v2
       with:
         name: ${{ env.DOCKER_REPOSITORY_ANYWAY }}
         username: ${{ github.repository_owner }}
@@ -33,7 +33,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build and push database Docker image
-      uses: docker/build-push-action@v1.1.1
+      uses: docker/build-push-action@v2
       with:
         registry: docker.pkg.github.com
         username: ${{ github.repository_owner }}
@@ -49,7 +49,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build and push database backup Docker image
-      uses: docker/build-push-action@v1.1.1
+      uses: docker/build-push-action@v2
       with:
         registry: docker.pkg.github.com
         repository: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
@@ -77,20 +77,10 @@ jobs:
         SHA_TAG=sha-`git rev-parse --short $GITHUB_SHA` &&\
         echo REF_TAG=$REF_TAG &&\
         echo SHA_TAG=$SHA_TAG &&\
-        echo "${DOCKER_PASSWORD}" | docker login ${SERVER} -u "${DOCKER_USERNAME}" --password-stdin &&\
-        echo "${SERVER}/${DOCKER_REPOSITORY_ANYWAY}:${SHA_TAG}" &&\
-        docker pull "${SERVER}/${DOCKER_REPOSITORY_ANYWAY}:${SHA_TAG}" &&\
-        if docker pull "${SERVER}/${DOCKER_REPOSITORY_NGINX}:${REF_TAG}"; then
-          CACHE_FROM=" --cache-from ${SERVER}/${DOCKER_REPOSITORY_NGINX}:${REF_TAG} "
-        else
-          CACHE_FROM=""
-        fi &&\
-        docker tag "${SERVER}/${DOCKER_REPOSITORY_ANYWAY}:${SHA_TAG}" "${SERVER}/${DOCKER_REPOSITORY_ANYWAY}:latest" &&\
-        docker build $CACHE_FROM -t "${SERVER}/${DOCKER_REPOSITORY_NGINX}:${SHA_TAG}" nginx_docker &&\
-        docker tag "${SERVER}/${DOCKER_REPOSITORY_NGINX}:${SHA_TAG}" "${SERVER}/${DOCKER_REPOSITORY_NGINX}:${REF_TAG}" &&\
-        
-        docker push "${SERVER}/${DOCKER_REPOSITORY_NGINX}:${SHA_TAG}" &&\
-        docker push "${SERVER}/${DOCKER_REPOSITORY_NGINX}:${REF_TAG}"
+        bin/docker_login.sh &&\        
+        bin/docker_build.sh &&\
+        bin/docker_push_latest.sh &&\
+        bin/docker_push_sha.sh
   deploy:
     if: github.repository == "${{ github.repository_owner }}/anyway" && github.ref == 'refs/heads/master'
     needs:

@@ -2,7 +2,6 @@ name: Deploy
 on:
   push:
     branches:
-      - test
       - master
       - dev
 env:
@@ -13,7 +12,7 @@ env:
   SERVER: "docker.pkg.github.com"
 jobs:
   Build-anyway:
-    if: github.repository == 'userdev0/anyway'
+    if: github.repository == "${{ github.repository_owner }}/anyway"
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
@@ -29,14 +28,13 @@ jobs:
         tag_with_sha: true
         cache_froms: ${{ env.DOCKER_REPOSITORY_ANYWAY }}:dev
   Build-db:
-    if: github.repository == 'userdev0/anyway'
+    if: github.repository == "${{ github.repository_owner }}/anyway"
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
     - name: Build and push database Docker image
       uses: docker/build-push-action@v1.1.1
       with:
-        name: ${{ env.DOCKER_REPOSITORY_DB }}
         registry: docker.pkg.github.com
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -46,14 +44,13 @@ jobs:
         tag_with_sha: true
         cache_froms: ${{ env.DOCKER_REPOSITORY_DB }}:dev
   Build-db-backup:
-    if: github.repository == 'userdev0/anyway'
+    if: github.repository == "${{ github.repository_owner }}/anyway"
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
     - name: Build and push database backup Docker image
       uses: docker/build-push-action@v1.1.1
       with:
-        name: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
         registry: docker.pkg.github.com
         repository: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
         dockerfile: 'db_docker/backup.Dockerfile'
@@ -64,7 +61,7 @@ jobs:
         tag_with_sha: true
         cache_froms: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}:dev
   Build-nginx:
-    if: github.repository == 'userdev0/anyway'
+    if: github.repository == "${{ github.repository_owner }}/anyway"
     needs: Build-anyway
     runs-on: ubuntu-18.04
     steps:
@@ -76,7 +73,6 @@ jobs:
         DOCKER_REPOSITORY_ANYWAY: ${{ env.DOCKER_REPOSITORY_ANYWAY }}
         DOCKER_REPOSITORY_NGINX: ${{ env.DOCKER_REPOSITORY_NGINX }}
       run: |
-        echo "${{ github.repository_owner }}" &&\
         REF_TAG="${GITHUB_REF##*/}" &&\
         SHA_TAG=sha-`git rev-parse --short $GITHUB_SHA` &&\
         echo REF_TAG=$REF_TAG &&\
@@ -96,7 +92,7 @@ jobs:
         docker push "${SERVER}/${DOCKER_REPOSITORY_NGINX}:${SHA_TAG}" &&\
         docker push "${SERVER}/${DOCKER_REPOSITORY_NGINX}:${REF_TAG}"
   deploy:
-    if: github.repository == 'hasadna/anyway' && github.ref == 'refs/heads/master'
+    if: github.repository == "${{ github.repository_owner }}/anyway" && github.ref == 'refs/heads/master'
     needs:
     - Build-anyway
     - Build-db

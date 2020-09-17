@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+ANYWAY_IMG_URL="${SERVER}/${DOCKER_REPOSITORY_ANYWAY}" &&\
 NGINX_IMG_URL"${SERVER}/${DOCKER_REPOSITORY_NGINX}" &&\
 
 docker pull "${ANYWAY_IMG_URL}:${SHA_TAG}" &&\

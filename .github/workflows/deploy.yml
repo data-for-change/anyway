@@ -102,10 +102,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - env:
-        DOCKER_REPOSITORY_ANYWAY: ${env.SERVER}/${{ env.DOCKER_REPOSITORY_ANYWAY }}
-        DOCKER_REPOSITORY_DB: ${env.SERVER}/${{ env.DOCKER_REPOSITORY_DB }}
-        DOCKER_REPOSITORY_DB_BACKUP: ${env.SERVER}/${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
-        DOCKER_REPOSITORY_NGINX: ${env.SERVER}/${{ env.DOCKER_REPOSITORY_NGINX }}
+        DOCKER_REPOSITORY_ANYWAY: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_ANYWAY }}
+        DOCKER_REPOSITORY_DB: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_DB }}
+        DOCKER_REPOSITORY_DB_BACKUP: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
+        DOCKER_REPOSITORY_NGINX: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_NGINX }}
         HASADNA_K8S_DEPLOY_KEY: ${{ secrets.HASADNA_K8S_DEPLOY_KEY }}
       run: |
         SHA_TAG=sha-`git rev-parse --short $GITHUB_SHA` &&\

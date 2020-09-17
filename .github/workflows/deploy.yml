@@ -83,8 +83,14 @@ jobs:
         echo "${DOCKER_PASSWORD}" | docker login ${SERVER} -u "${DOCKER_USERNAME}" --password-stdin &&\
         echo "${SERVER}/${DOCKER_REPOSITORY_ANYWAY}:${SHA_TAG}" &&\
         docker pull "${SERVER}/${DOCKER_REPOSITORY_ANYWAY}:${SHA_TAG}" &&\
+        if docker pull "${SERVER}/${DOCKER_REPOSITORY_NGINX}:${REF_TAG}"; then
+          CACHE_FROM=" --cache-from ${SERVER}/${DOCKER_REPOSITORY_NGINX}:${REF_TAG} "
+        else
+          CACHE_FROM=""
+        fi &&\
         docker tag "${SERVER}/${DOCKER_REPOSITORY_ANYWAY}:${SHA_TAG}" "${SERVER}/${DOCKER_REPOSITORY_ANYWAY}:latest" &&\
-        docker build "$CACHE_FROM" -t "${SERVER}/${DOCKER_REPOSITORY_NGINX}:${SHA_TAG}" nginx_docker &&\
+        echo "docker build $CACHE_FROM -t ${SERVER}/${DOCKER_REPOSITORY_NGINX}:${SHA_TAG} nginx_docker &&\"
+        docker build $CACHE_FROM -t "${SERVER}/${DOCKER_REPOSITORY_NGINX}:${SHA_TAG}" nginx_docker &&\
         docker tag "${SERVER}/${DOCKER_REPOSITORY_NGINX}:${SHA_TAG}" "${SERVER}/${DOCKER_REPOSITORY_NGINX}:${REF_TAG}" &&\
         
         docker push "${SERVER}/${DOCKER_REPOSITORY_NGINX}:${SHA_TAG}" &&\

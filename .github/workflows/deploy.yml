@@ -17,7 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build and push anyway Docker image
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v1.1.1
       with:
         name: ${{ env.DOCKER_REPOSITORY_ANYWAY }}
         username: ${{ github.repository_owner }}
@@ -33,7 +33,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build and push database Docker image
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v1.1.1
       with:
         registry: docker.pkg.github.com
         username: ${{ github.repository_owner }}
@@ -49,7 +49,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build and push database backup Docker image
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v1.1.1
       with:
         registry: docker.pkg.github.com
         repository: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
@@ -73,8 +73,8 @@ jobs:
         DOCKER_REPOSITORY_ANYWAY: ${{ env.DOCKER_REPOSITORY_ANYWAY }}
         DOCKER_REPOSITORY_NGINX: ${{ env.DOCKER_REPOSITORY_NGINX }}
       run: |
-        REF_TAG="${GITHUB_REF##*/}" &&\
-        SHA_TAG=sha-`git rev-parse --short $GITHUB_SHA` &&\
+        export REF_TAG="${GITHUB_REF##*/}" &&\
+        export SHA_TAG=sha-`git rev-parse --short $GITHUB_SHA` &&\
         echo REF_TAG=$REF_TAG &&\
         echo SHA_TAG=$SHA_TAG &&\
         bin/docker_login.sh &&\        

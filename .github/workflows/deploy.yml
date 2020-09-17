@@ -38,8 +38,8 @@ jobs:
       with:
         name: ${{ env.DOCKER_REPOSITORY_DB }}
         registry: docker.pkg.github.com
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
         repository: ${{ env.DOCKER_REPOSITORY_DB }}
         path: 'db_docker'
         tag_with_ref: true
@@ -76,6 +76,7 @@ jobs:
         DOCKER_REPOSITORY_ANYWAY: ${{ env.DOCKER_REPOSITORY_ANYWAY }}
         DOCKER_REPOSITORY_NGINX: ${{ env.DOCKER_REPOSITORY_NGINX }}
       run: |
+        echo "${{ github.repository_owner }}" &&\
         REF_TAG="${GITHUB_REF##*/}" &&\
         SHA_TAG=sha-`git rev-parse --short $GITHUB_SHA` &&\
         echo REF_TAG=$REF_TAG &&\
@@ -89,7 +90,6 @@ jobs:
           CACHE_FROM=""
         fi &&\
         docker tag "${SERVER}/${DOCKER_REPOSITORY_ANYWAY}:${SHA_TAG}" "${SERVER}/${DOCKER_REPOSITORY_ANYWAY}:latest" &&\
-        echo "docker build $CACHE_FROM -t ${SERVER}/${DOCKER_REPOSITORY_NGINX}:${SHA_TAG} nginx_docker" &&\
         docker build $CACHE_FROM -t "${SERVER}/${DOCKER_REPOSITORY_NGINX}:${SHA_TAG}" nginx_docker &&\
         docker tag "${SERVER}/${DOCKER_REPOSITORY_NGINX}:${SHA_TAG}" "${SERVER}/${DOCKER_REPOSITORY_NGINX}:${REF_TAG}" &&\
         

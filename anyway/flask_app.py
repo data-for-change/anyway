@@ -291,9 +291,12 @@ def get_kwargs():
         arg: arg_type(request.values.get(arg, default_value))
         for (arg, (arg_type, default_value)) in ARG_TYPES.items()
     }
-    if request.values.get("age_groups[]") == "1234" or request.values.get("age_groups") == "1234":
+
+    age_groups_arr = request.values.get("age_groups[]")
+    age_groups = request.values.get("age_groups")
+    if age_groups_arr == "1234" or age_groups == "1234":
         kwargs["age_groups"] = "1,2,3,4"
-    if request.values.get("age_groups[]") == "234" or request.values.get("age_groups") == "234":
+    if age_groups_arr == "234" or age_groups == "234":
         kwargs["age_groups"] = "2,3,4"
         kwargs["light_transportation"] = True
     try:

@@ -41,7 +41,9 @@ It will take a few minutes until it's done.
 
 **6.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
-If you need to see the map contact atalya via slack to get a developer key.
+If you need to see the map contact atalya via slack to get a developer key.  
+The developer key need to replace the production key in the file /anyway/blob/dev/templates/index.html where you can find: "https://maps.googleapis.com/maps/api/js?key=AIzaSyDUIWsBLkvIUwzLHMHos9qFebyJ63hEG2M&libraries=places,visualization&language=iw" (google maps url)
+So if the developer key is "12345" the new url need to be is: "https://maps.googleapis.com/maps/api/js?key=12345&libraries=places,visualization&language=iw"
 
 **7.** To stop the containers run: `docker-compose down`
 
@@ -59,7 +61,9 @@ It will take a few minutes until it's done.
 
 **6.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
-If you need to see the map for development email us [anyway@anyway.co.il](mailto:anyway@anyway.co.il) to get a developer key.
+If you need to see the map for development email us [anyway@anyway.co.il](mailto:anyway@anyway.co.il) to get a developer key.  
+The developer key need to replace the production key in the file /anyway/blob/dev/templates/index.html where you can find: "https://maps.googleapis.com/maps/api/js?key=AIzaSyDUIWsBLkvIUwzLHMHos9qFebyJ63hEG2M&libraries=places,visualization&language=iw" (google maps url)
+So if the developer key is "12345" the new url need to be is: "https://maps.googleapis.com/maps/api/js?key=12345&libraries=places,visualization&language=iw"
 
 **7.** To stop the containers run: `sudo docker-compose down`
 

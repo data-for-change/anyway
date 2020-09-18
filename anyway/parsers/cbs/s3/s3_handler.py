@@ -4,6 +4,7 @@ from os.path import basename, dirname, abspath, \
 from datetime import datetime
 from boto3 import resource as resource_builder
 from tempfile import mkdtemp
+from anyway import secrets
 
 get_environment_variable = environ.get
 
@@ -19,8 +20,8 @@ LOCAL_CBS_DIRECTORY = "cbsfiles"
 class S3Handler:
 
     def __init__(self):
-        self.__aws_access_key = get_environment_variable("AWS_ACCESS_KEY")
-        self.__aws_secret_key = get_environment_variable("AWS_SECRET_KEY")
+        self.__aws_access_key = secrets.get("AWS_ACCESS_KEY")
+        self.__aws_secret_key = secrets.get("AWS_SECRET_KEY")
         self.__accidents_types = [ACCIDENTS_TYPE_1, ACCIDENTS_TYPE_3]
         self.__s3_resource = None
         self.__s3_bucket = None

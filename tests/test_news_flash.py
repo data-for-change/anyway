@@ -5,7 +5,7 @@ import pytest
 
 from anyway.parsers import rss_sites, twitter, location_extraction
 from anyway.parsers.news_flash_classifiers import classify_tweets, classify_rss
-from anyway.parsers import secrets, timezones
+from anyway import secrets
 from anyway.parsers.news_flash_db_adapter import init_db
 from anyway.models import NewsFlash
 from anyway.parsers import timezones

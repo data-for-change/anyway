@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-
+from anyway import secrets
 #
 # This is the configuration file of the application
 #
@@ -10,7 +10,7 @@ import os
 
 SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "postgresql://postgres@localhost/anyway")
 SQLALCHEMY_TRACK_MODIFICATIONS = True
-ENTRIES_PER_PAGE = os.environ.get("ENTRIES_PER_PAGE", 1000)
+ENTRIES_PER_PAGE = int(secrets.get_with_default("ENTRIES_PER_PAGE", "1000"))
 SQLALCHEMY_ENGINE_OPTIONS = {}
 
 # available languages

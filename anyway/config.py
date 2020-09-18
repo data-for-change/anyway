@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 from anyway import secrets
+
 #
 # This is the configuration file of the application
 #

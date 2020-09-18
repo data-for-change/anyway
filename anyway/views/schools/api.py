@@ -8,10 +8,7 @@ from flask import Response, request
 from sqlalchemy import and_, not_
 
 from anyway.base import db, user_optional
-from anyway.models import (
-    School,
-    SchoolWithDescription2020
-)
+from anyway.models import School, SchoolWithDescription2020
 
 
 @user_optional
@@ -55,10 +52,16 @@ def schools_description_api():
     query_obj = (
         db.session.query(SchoolWithDescription2020)
         .filter(
-            not_(and_(SchoolWithDescription2020.latitude == 0, SchoolWithDescription2020.longitude == 0)),
             not_(
                 and_(
-                    SchoolWithDescription2020.latitude == None, SchoolWithDescription2020.longitude == None
+                    SchoolWithDescription2020.latitude == 0,
+                    SchoolWithDescription2020.longitude == 0,
+                )
+            ),
+            not_(
+                and_(
+                    SchoolWithDescription2020.latitude == None,
+                    SchoolWithDescription2020.longitude == None,
                 )
             ),
         )
@@ -86,10 +89,16 @@ def schools_yishuvs_api():
     schools_yishuvs = (
         db.session.query(SchoolWithDescription2020)
         .filter(
-            not_(and_(SchoolWithDescription2020.latitude == 0, SchoolWithDescription2020.longitude == 0)),
             not_(
                 and_(
-                    SchoolWithDescription2020.latitude == None, SchoolWithDescription2020.longitude == None
+                    SchoolWithDescription2020.latitude == 0,
+                    SchoolWithDescription2020.longitude == 0,
+                )
+            ),
+            not_(
+                and_(
+                    SchoolWithDescription2020.latitude == None,
+                    SchoolWithDescription2020.longitude == None,
                 )
             ),
         )
@@ -108,10 +117,11 @@ def schools_names_api():
     # Disable all the no-member violations in this function
     # pylint: disable=no-member
     logging.debug("getting schools names")
-    schools_data = json.load(open('static/data/schools/schools_names.json'))
+    schools_data = json.load(open("static/data/schools/schools_names.json"))
     response = Response(json.dumps(schools_data, default=str), mimetype="application/json")
     response.headers.add("Access-Control-Allow-Origin", "*")
     return response
+
 
 @user_optional
 def injured_around_schools_api():
@@ -119,7 +129,7 @@ def injured_around_schools_api():
     # pylint: disable=no-member
     logging.debug("getting injured around schools api")
     school_id = request.values.get("school_id")
-    all_data = json.load(open('static/data/schools/injured_around_schools_api_2020.json'))
+    all_data = json.load(open("static/data/schools/injured_around_schools_api_2020.json"))
     school_data = all_data[school_id]
     response = Response(json.dumps(school_data, default=str), mimetype="application/json")
     response.headers.add("Access-Control-Allow-Origin", "*")
@@ -132,19 +142,22 @@ def injured_around_schools_sex_graphs_data_api():
     # pylint: disable=no-member
     logging.debug("getting injured around schools sex graphs data api")
     school_id = request.values.get("school_id")
-    all_data = json.load(open('static/data/schools/injured_around_schools_sex_graphs_data_api_2020.json'))
+    all_data = json.load(
+        open("static/data/schools/injured_around_schools_sex_graphs_data_api_2020.json")
+    )
     school_data = all_data[school_id]
     response = Response(json.dumps(school_data, default=str), mimetype="application/json")
     response.headers.add("Access-Control-Allow-Origin", "*")
     return response
 
 
-
 @user_optional
 def injured_around_schools_months_graphs_data_api():
     logging.debug("getting injured around schools months graphs data api")
     school_id = request.values.get("school_id")
-    all_data = json.load(open('static/data/schools/injured_around_schools_months_graphs_data_api_2020.json'))
+    all_data = json.load(
+        open("static/data/schools/injured_around_schools_months_graphs_data_api_2020.json")
+    )
     school_data = all_data[school_id]
     response = Response(json.dumps(school_data, default=str), mimetype="application/json")
     response.headers.add("Access-Control-Allow-Origin", "*")

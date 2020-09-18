@@ -316,13 +316,15 @@ def get_locale():
     else:
         return lang
 
-@app.route('/schools', methods=["GET"])
+
+@app.route("/schools", methods=["GET"])
 @user_optional
 def schools():
     if request.method == "GET":
-        return render_template('schools_redirect.html')
+        return render_template("schools_redirect.html")
     else:
         return Response("Method Not Allowed", 405)
+
 
 @app.route("/markers", methods=["GET"])
 @user_optional

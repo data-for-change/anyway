@@ -17,7 +17,6 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
-    - name: Debug script
     - env:
         name: ${{ env.DOCKER_REPOSITORY_NGINX }} 
         DOCKER_USERNAME: ${{ github.repository_owner }}

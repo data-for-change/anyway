@@ -12,27 +12,6 @@ env:
   DOCKER_REPOSITORY_NGINX: "${{ github.repository }}/nginx"
   SERVER: "docker.pkg.github.com"
 jobs:
-  # Build-anyway:
-  #   if: github.repository == "${{ github.repository_owner }}/anyway"
-  #   runs-on: ubuntu-18.04
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - env:
-  #       name: ${{ env.DOCKER_REPOSITORY_NGINX }} 
-  #       DOCKER_USERNAME: ${{ github.repository_owner }}
-  #       DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-  #       DOCKER_REPOSITORY_ANYWAY: ${{ env.DOCKER_REPOSITORY_ANYWAY }}
-  #       DOCKER_REPOSITORY_NGINX: ${{ env.DOCKER_REPOSITORY_NGINX }}
-  #     run: |
-  #       set -x
-  #       export REF_TAG="${GITHUB_REF##*/}" &&\
-  #       export SHA_TAG=sha-`git rev-parse --short $GITHUB_SHA` &&\
-  #       echo REF_TAG=$REF_TAG &&\
-  #       echo SHA_TAG=$SHA_TAG &&\
-  #       bin/docker_login.sh &&\
-  #       bin/docker_build.sh &&\
-  #       bin/docker_push_latest.sh &&\
-  #       bin/docker_push_sha.sh
   Build-anyway:
     if: github.repository == "${{ github.repository_owner }}/anyway"
     runs-on: ubuntu-18.04
@@ -49,39 +28,39 @@ jobs:
         tag_with_ref: true
         tag_with_sha: true
         cache_froms: ${{ env.DOCKER_REPOSITORY_ANYWAY }}:dev
-  # Build-db:
-  #   if: github.repository == "${{ github.repository_owner }}/anyway"
-  #   runs-on: ubuntu-18.04
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - name: Build and push database Docker image
-  #     uses: docker/build-push-action@v1.1.1
-  #     with:
-  #       registry: docker.pkg.github.com
-  #       username: ${{ github.repository_owner }}
-  #       password: ${{ secrets.GITHUB_TOKEN }}
-  #       repository: ${{ env.DOCKER_REPOSITORY_DB }}
-  #       path: 'db_docker'
-  #       tag_with_ref: true
-  #       tag_with_sha: true
-  #       cache_froms: ${{ env.DOCKER_REPOSITORY_DB }}:dev
-  # Build-db-backup:
-  #   if: github.repository == "${{ github.repository_owner }}/anyway"
-  #   runs-on: ubuntu-18.04
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - name: Build and push database backup Docker image
-  #     uses: docker/build-push-action@v1.1.1
-  #     with:
-  #       registry: docker.pkg.github.com
-  #       repository: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
-  #       dockerfile: 'db_docker/backup.Dockerfile'
-  #       username: ${{ github.repository_owner }}
-  #       password: ${{ secrets.GITHUB_TOKEN }}
-  #       path: 'db_docker'
-  #       tag_with_ref: true
-  #       tag_with_sha: true
-  #       cache_froms: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}:dev
+  Build-db:
+    if: github.repository == "${{ github.repository_owner }}/anyway"
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build and push database Docker image
+      uses: docker/build-push-action@v1.1.1
+      with:
+        registry: docker.pkg.github.com
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        repository: ${{ env.DOCKER_REPOSITORY_DB }}
+        path: 'db_docker'
+        tag_with_ref: true
+        tag_with_sha: true
+        cache_froms: ${{ env.DOCKER_REPOSITORY_DB }}:dev
+  Build-db-backup:
+    if: github.repository == "${{ github.repository_owner }}/anyway"
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build and push database backup Docker image
+      uses: docker/build-push-action@v1.1.1
+      with:
+        registry: docker.pkg.github.com
+        repository: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
+        dockerfile: 'db_docker/backup.Dockerfile'
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        path: 'db_docker'
+        tag_with_ref: true
+        tag_with_sha: true
+        cache_froms: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}:dev
   Build-nginx:
     if: github.repository == "${{ github.repository_owner }}/anyway"
     needs: Build-anyway
@@ -95,52 +74,51 @@ jobs:
         DOCKER_REPOSITORY_ANYWAY: ${{ env.DOCKER_REPOSITORY_ANYWAY }}
         DOCKER_REPOSITORY_NGINX: ${{ env.DOCKER_REPOSITORY_NGINX }}
       run: |
-        set -xv
+        REF_TAG="${GITHUB_REF##*/}" &&\
+        SHA_TAG=sha-`git rev-parse --short $GITHUB_SHA` &&\
+        echo REF_TAG=$REF_TAG &&\
+        echo SHA_TAG=$SHA_TAG &&\
         bin/docker_login.sh &&\
         bin/docker_build.sh &&\
         bin/docker_push_latest.sh &&\
         bin/docker_push_sha.sh
-      # REF_TAG="${GITHUB_REF##*/}" &&\
-      # SHA_TAG=sha-`git rev-parse --short $GITHUB_SHA` &&\
-      # echo REF_TAG=$REF_TAG &&\
-      # echo SHA_TAG=$SHA_TAG &&\
-  # deploy:
-  #   if: github.repository == "${{ github.repository_owner }}/anyway" && github.ref == 'refs/heads/master'
-  #   needs:
-  #   - Build-anyway
-  #   - Build-db
-  #   - Build-db-backup
-  #   - Build-nginx
-  #   runs-on: ubuntu-18.04
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - env:
-  #       DOCKER_REPOSITORY_ANYWAY: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_ANYWAY }}
-  #       DOCKER_REPOSITORY_DB: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_DB }}
-  #       DOCKER_REPOSITORY_DB_BACKUP: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
-  #       DOCKER_REPOSITORY_NGINX: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_NGINX }}
-  #       HASADNA_K8S_DEPLOY_KEY: ${{ secrets.HASADNA_K8S_DEPLOY_KEY }}
-  #     run: |
-  #       SHA_TAG=sha-`git rev-parse --short $GITHUB_SHA` &&\
-  #       echo SHA_TAG=$SHA_TAG &&\
-  #       ANYWAY_IMAGE="${DOCKER_REPOSITORY_ANYWAY}:${SHA_TAG}" &&\
-  #       echo ANYWAY_IMAGE=$ANYWAY_IMAGE &&\
-  #       DB_IMAGE="${DOCKER_REPOSITORY_DB}:${SHA_TAG}" &&\
-  #       echo DB_IMAGE=$DB_IMAGE &&\
-  #       DB_BACKUP_IMAGE="${DOCKER_REPOSITORY_DB_BACKUP}:${SHA_TAG}" &&\
-  #       echo DB_BACKUP_IMAGE=$DB_BACKUP_IMAGE &&\
-  #       NGINX_IMAGE="${DOCKER_REPOSITORY_NGINX}:${SHA_TAG}" &&\
-  #       echo NGINX_IMAGE=$NGINX_IMAGE &&\
-  #       if ! git log -1 --pretty=format:"%s" | grep -- --no-deploy; then
-  #         cd `mktemp -d` &&\
-  #         echo "${HASADNA_K8S_DEPLOY_KEY}" > hasadna_k8s_deploy_key &&\
-  #         chmod 400 hasadna_k8s_deploy_key &&\
-  #         export GIT_SSH_COMMAND="ssh -i `pwd`/hasadna_k8s_deploy_key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" &&\
-  #         git clone git@github.com:hasadna/hasadna-k8s.git &&\
-  #         cd hasadna-k8s &&\
-  #         python update_yaml.py '{"anyway":{"image":"'${ANYWAY_IMAGE}'","dbImage":"'${DB_IMAGE}'","dbBackupImage":"'${DB_BACKUP_IMAGE}'","nginxImage":"'${NGINX_IMAGE}'"}}' ./values.auto-updated.yaml &&\
-  #         git config --global user.name "Anyway CI" &&\
-  #         git config --global user.email "anyway-ci@localhost" &&\
-  #         git add ./values.auto-updated.yaml && git commit -m "automatic update of anyway" &&\
-  #         git push origin master
-  #       fi
+  deploy:
+    if: github.repository == "${{ github.repository_owner }}/anyway" && github.ref == 'refs/heads/master'
+    needs:
+    - Build-anyway
+    - Build-db
+    - Build-db-backup
+    - Build-nginx
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+    - env:
+        DOCKER_REPOSITORY_ANYWAY: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_ANYWAY }}
+        DOCKER_REPOSITORY_DB: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_DB }}
+        DOCKER_REPOSITORY_DB_BACKUP: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
+        DOCKER_REPOSITORY_NGINX: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_NGINX }}
+        HASADNA_K8S_DEPLOY_KEY: ${{ secrets.HASADNA_K8S_DEPLOY_KEY }}
+      run: |
+        SHA_TAG=sha-`git rev-parse --short $GITHUB_SHA` &&\
+        echo SHA_TAG=$SHA_TAG &&\
+        ANYWAY_IMAGE="${DOCKER_REPOSITORY_ANYWAY}:${SHA_TAG}" &&\
+        echo ANYWAY_IMAGE=$ANYWAY_IMAGE &&\
+        DB_IMAGE="${DOCKER_REPOSITORY_DB}:${SHA_TAG}" &&\
+        echo DB_IMAGE=$DB_IMAGE &&\
+        DB_BACKUP_IMAGE="${DOCKER_REPOSITORY_DB_BACKUP}:${SHA_TAG}" &&\
+        echo DB_BACKUP_IMAGE=$DB_BACKUP_IMAGE &&\
+        NGINX_IMAGE="${DOCKER_REPOSITORY_NGINX}:${SHA_TAG}" &&\
+        echo NGINX_IMAGE=$NGINX_IMAGE &&\
+        if ! git log -1 --pretty=format:"%s" | grep -- --no-deploy; then
+          cd `mktemp -d` &&\
+          echo "${HASADNA_K8S_DEPLOY_KEY}" > hasadna_k8s_deploy_key &&\
+          chmod 400 hasadna_k8s_deploy_key &&\
+          export GIT_SSH_COMMAND="ssh -i `pwd`/hasadna_k8s_deploy_key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" &&\
+          git clone git@github.com:hasadna/hasadna-k8s.git &&\
+          cd hasadna-k8s &&\
+          python update_yaml.py '{"anyway":{"image":"'${ANYWAY_IMAGE}'","dbImage":"'${DB_IMAGE}'","dbBackupImage":"'${DB_BACKUP_IMAGE}'","nginxImage":"'${NGINX_IMAGE}'"}}' ./values.auto-updated.yaml &&\
+          git config --global user.name "Anyway CI" &&\
+          git config --global user.email "anyway-ci@localhost" &&\
+          git add ./values.auto-updated.yaml && git commit -m "automatic update of anyway" &&\
+          git push origin master
+        fi

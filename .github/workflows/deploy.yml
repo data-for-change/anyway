@@ -30,10 +30,9 @@ jobs:
         echo REF_TAG=$REF_TAG &&\
         echo SHA_TAG=$SHA_TAG &&\
         bin/docker_login.sh &&\
-        bin/docker_build.sh 
-      # set +x
-      # bin/docker_push_latest.sh &&\
-      # bin/docker_push_sha.sh
+        bin/docker_build.sh &&\
+        bin/docker_push_latest.sh &&\
+        bin/docker_push_sha.sh
   # Build-anyway:
   #   if: github.repository == "${{ github.repository_owner }}/anyway"
   #   runs-on: ubuntu-18.04

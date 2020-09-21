@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-echo docker_build.sh
+echo "docker_build.sh"
 
 # ANYWAY_IMG_URL="${SERVER}/${DOCKER_REPOSITORY_ANYWAY}"
 # NGINX_IMG_URL"${SERVER}/${DOCKER_REPOSITORY_NGINX}"

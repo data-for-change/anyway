@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-echo docker_push_sha.sh
+echo "docker_push_sha.sh"
 
 # IMG_URL="${SERVER}/${DOCKER_REPOSITORY_NGINX}" &&\
 

@@ -24,17 +24,19 @@ jobs:
         DOCKER_REPOSITORY_ANYWAY: ${{ env.DOCKER_REPOSITORY_ANYWAY }}
         DOCKER_REPOSITORY_NGINX: ${{ env.DOCKER_REPOSITORY_NGINX }}
       run: |
+        set -x
         export REF_TAG="${GITHUB_REF##*/}" &&\
         export SHA_TAG=sha-`git rev-parse --short $GITHUB_SHA` &&\
         echo REF_TAG=$REF_TAG &&\
         echo SHA_TAG=$SHA_TAG &&\
-        set -x
-        bin/docker_login.sh &&\      
-        echo after logged in &&\  
-        bin/docker_build.sh &&\
-        set +x
-        bin/docker_push_latest.sh &&\
-        bin/docker_push_sha.sh
+        bin/docker_login.sh     
+
+
+      # echo after logged in &&\  
+      # bin/docker_build.sh &&\
+      # set +x
+      # bin/docker_push_latest.sh &&\
+      # bin/docker_push_sha.sh
   # Build-anyway:
   #   if: github.repository == "${{ github.repository_owner }}/anyway"
   #   runs-on: ubuntu-18.04

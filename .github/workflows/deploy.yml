@@ -96,8 +96,7 @@ jobs:
         DOCKER_REPOSITORY_NGINX: ${{ env.DOCKER_REPOSITORY_NGINX }}
       run: |
         set -xv
-        bash bin/docker_login.sh &&\      
-        bash bin/docker_build.sh &&\
+        bash bin/docker_login.sh && bin/docker_build.sh &&\
         bin/docker_push_latest.sh &&\
         bin/docker_push_sha.sh
       # REF_TAG="${GITHUB_REF##*/}" &&\

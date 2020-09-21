@@ -74,9 +74,8 @@ jobs:
         DOCKER_REPOSITORY_ANYWAY: ${{ env.DOCKER_REPOSITORY_ANYWAY }}
         DOCKER_REPOSITORY_NGINX: ${{ env.DOCKER_REPOSITORY_NGINX }}
       run: |
-        set -xv
-        REF_TAG="${GITHUB_REF##*/}" &&\
-        SHA_TAG=sha-`git rev-parse --short $GITHUB_SHA` &&\
+        export REF_TAG="${GITHUB_REF##*/}" &&\
+        export SHA_TAG=sha-`git rev-parse --short $GITHUB_SHA` &&\
         echo REF_TAG=$REF_TAG &&\
         echo SHA_TAG=$SHA_TAG &&\
         bin/docker_login.sh &&\

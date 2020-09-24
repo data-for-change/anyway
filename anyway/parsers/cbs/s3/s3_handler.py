@@ -1,9 +1,9 @@
 from os import environ, makedirs, mkdir
-from os.path import basename, dirname, abspath, \
-    join as join_path, exists as does_path_exist
+from os.path import basename, dirname, abspath, join as join_path, exists as does_path_exist
 from datetime import datetime
 from boto3 import resource as resource_builder
 from tempfile import mkdtemp
+from anyway import secrets
 
 get_environment_variable = environ.get
 
@@ -17,10 +17,9 @@ LOCAL_CBS_DIRECTORY = "cbsfiles"
 
 
 class S3Handler:
-
     def __init__(self):
-        self.__aws_access_key = get_environment_variable("AWS_ACCESS_KEY")
-        self.__aws_secret_key = get_environment_variable("AWS_SECRET_KEY")
+        self.__aws_access_key = secrets.get("AWS_ACCESS_KEY")
+        self.__aws_secret_key = secrets.get("AWS_SECRET_KEY")
         self.__accidents_types = [ACCIDENTS_TYPE_1, ACCIDENTS_TYPE_3]
         self.__s3_resource = None
         self.__s3_bucket = None
@@ -33,9 +32,9 @@ class S3Handler:
     def s3_resource(self):
         if self.__s3_resource is None:
             self.__s3_resource = resource_builder(
-                's3',
+                "s3",
                 aws_access_key_id=self.__aws_access_key,
-                aws_secret_access_key=self.__aws_secret_key
+                aws_secret_access_key=self.__aws_secret_key,
             )
 
         return self.__s3_resource
@@ -88,15 +87,18 @@ class S3Handler:
         return self.__download_from_s3_callback
 
     def __download_accidents_type_files(self, accidents_type, start_year):
-        current_year, s3_bucket, local_directory = self.current_year, self.s3_bucket, \
-                                                   self.local_files_directory
+        current_year, s3_bucket, local_directory = (
+            self.current_year,
+            self.s3_bucket,
+            self.local_files_directory,
+        )
 
         download_from_s3_callback = self.download_from_s3_callback
 
-        accidents_type_directory = f'{ACCIDENTS_TYPE_PREFIX}_{accidents_type}'
+        accidents_type_directory = f"{ACCIDENTS_TYPE_PREFIX}_{accidents_type}"
 
         for year in range(start_year, current_year + 1):
-            s3_files_directory = f'{accidents_type_directory}/{year}'
+            s3_files_directory = f"{accidents_type_directory}/{year}"
 
             for s3_object in s3_bucket.objects.filter(Prefix=s3_files_directory):
                 local_dir_path = join_path(local_directory, accidents_type_directory)
@@ -108,7 +110,9 @@ class S3Handler:
                 object_key = s3_object.key
                 s3_filename = basename(object_key)
                 local_file_path = join_path(local_dir_path, s3_filename)
-                download_from_s3_callback(Bucket=ANYWAY_BUCKET, Key=object_key, Filename=local_file_path)
+                download_from_s3_callback(
+                    Bucket=ANYWAY_BUCKET, Key=object_key, Filename=local_file_path
+                )
 
     def get_files_from_s3(self, start_year, accidents_types=None):
         desired_accidents_types = None
@@ -121,5 +125,6 @@ class S3Handler:
         start_year = int(start_year)
 
         for accidents_type in desired_accidents_types:
-            self.__download_accidents_type_files(accidents_type=accidents_type,
-                                                 start_year=start_year)
+            self.__download_accidents_type_files(
+                accidents_type=accidents_type, start_year=start_year
+            )

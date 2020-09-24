@@ -12,7 +12,7 @@ def get(secret_name: str) -> str:
         with open(secrets_dir + secret_name) as secret_file:
             return secret_file.read()
     logging.info("No secret dir found.")
-    return os.environ[secret_name]
+    return os.environ.get(secret_name)
 
 
 def exists(secret_name: str) -> bool:

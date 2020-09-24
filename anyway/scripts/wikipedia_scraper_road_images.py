@@ -209,7 +209,6 @@ def get_road_page_link(all_road_links, road_link_pattern, sub_cat_road_list):
 
 
 if __name__ == "__main__":
-
     logger.setLevel(logging.DEBUG)
     sh = logging.StreamHandler()
     sh.setLevel(logging.DEBUG)
@@ -219,7 +218,9 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--dest_folder", type=str, help="destination folder to download to road svgs data",
+        "--dest_folder",
+        type=str,
+        help="destination folder to download to road svgs data",
     )
     args = parser.parse_args()
 

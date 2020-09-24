@@ -266,7 +266,7 @@ def get_address(accident, streets):
     house_number = (
         int(accident.get(field_names.house_number))
         if not pd.isnull(accident.get(field_names.house_number))
-           and int(accident.get(field_names.house_number)) != 9999
+        and int(accident.get(field_names.house_number)) != 9999
         else None
     )
     settlement = localization.get_city_name(accident.get(field_names.yishuv_symbol))
@@ -331,16 +331,16 @@ def get_junction(accident, roads):
     :return: returns the junction or None if it wasn't found
     """
     if (
-            accident.get(field_names.km) is not None
-            and accident.get(field_names.non_urban_intersection) is None
+        accident.get(field_names.km) is not None
+        and accident.get(field_names.non_urban_intersection) is None
     ):
         min_dist = 100000
         key = (), ()
         junc_km = 0
         for option in roads:
             if (
-                    accident.get(field_names.road1) == option[0]
-                    and abs(accident["KM"] - option[2]) < min_dist
+                accident.get(field_names.road1) == option[0]
+                and abs(accident["KM"] - option[2]) < min_dist
             ):
                 min_dist = abs(accident.get(field_names.km) - option[2])
                 key = accident.get(field_names.road1), option[1], option[2]
@@ -353,19 +353,19 @@ def get_junction(accident, roads):
                 direction = "דרומית" if accident.get(field_names.road1) % 2 == 0 else "מערבית"
             if abs(float(accident["KM"] - junc_km) / 10) >= 1:
                 string = (
-                        str(abs(float(accident["KM"]) - junc_km) / 10)
-                        + " ק״מ "
-                        + direction
-                        + " ל"
-                        + junction
+                    str(abs(float(accident["KM"]) - junc_km) / 10)
+                    + " ק״מ "
+                    + direction
+                    + " ל"
+                    + junction
                 )
             elif 0 < abs(float(accident["KM"] - junc_km) / 10) < 1:
                 string = (
-                        str(int((abs(float(accident.get(field_names.km)) - junc_km) / 10) * 1000))
-                        + " מטרים "
-                        + direction
-                        + " ל"
-                        + junction
+                    str(int((abs(float(accident.get(field_names.km)) - junc_km) / 10) * 1000))
+                    + " מטרים "
+                    + direction
+                    + " ל"
+                    + junction
                 )
             else:
                 string = junction
@@ -449,10 +449,10 @@ def create_marker(accident, streets, roads, non_urban_intersection):
     if field_names.x not in accident or field_names.y not in accident:
         raise ValueError("Missing x and y coordinates")
     if (
-            accident.get(field_names.x)
-            and not math.isnan(accident.get(field_names.x))
-            and accident.get(field_names.y)
-            and not math.isnan(accident.get(field_names.y))
+        accident.get(field_names.x)
+        and not math.isnan(accident.get(field_names.x))
+        and accident.get(field_names.y)
+        and not math.isnan(accident.get(field_names.y))
     ):
         lng, lat = coordinates_converter.convert(
             accident.get(field_names.x), accident.get(field_names.y)
@@ -571,7 +571,7 @@ def import_involved(involved, **kwargs):
     involved_result = []
     for _, involve in involved.iterrows():
         if not involve.get(field_names.id) or pd.isnull(
-                involve.get(field_names.id)
+            involve.get(field_names.id)
         ):  # skip lines with no accident id
             continue
         involved_result.append(
@@ -745,8 +745,8 @@ def delete_invalid_entries(batch_size):
 
     marker_ids_to_delete = (
         db.session.query(AccidentMarker.id)
-            .filter(or_((AccidentMarker.longitude == None), (AccidentMarker.latitude == None)))
-            .all()
+        .filter(or_((AccidentMarker.longitude == None), (AccidentMarker.latitude == None)))
+        .all()
     )
 
     marker_ids_to_delete = [acc_id[0] for acc_id in marker_ids_to_delete]
@@ -785,14 +785,14 @@ def delete_cbs_entries(start_date, batch_size):
 
     marker_ids_to_delete = (
         db.session.query(AccidentMarker.id)
-            .filter(AccidentMarker.created >= datetime.strptime(start_date, "%Y-%m-%d"))
-            .filter(
+        .filter(AccidentMarker.created >= datetime.strptime(start_date, "%Y-%m-%d"))
+        .filter(
             or_(
                 (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_1_CODE),
                 (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_3_CODE),
             )
         )
-            .all()
+        .all()
     )
 
     marker_ids_to_delete = [acc_id[0] for acc_id in marker_ids_to_delete]
@@ -836,11 +836,11 @@ def delete_cbs_entries_from_email(provider_code, year, batch_size):
 
     marker_ids_to_delete = (
         db.session.query(AccidentMarker.provider_and_id)
-            .filter(
+        .filter(
             and_(AccidentMarker.accident_year == year),
             AccidentMarker.provider_code == provider_code,
         )
-            .all()
+        .all()
     )
 
     marker_ids_to_delete = [acc_id[0] for acc_id in marker_ids_to_delete]
@@ -925,32 +925,32 @@ def fill_dictionary_tables(cbs_dictionary, provider_code, year):
             if inner_v is None or (isinstance(inner_v, float) and math.isnan(inner_v)):
                 continue
             sql_delete = (
-                    "DELETE FROM "
-                    + curr_table
-                    + " WHERE provider_code="
-                    + str(provider_code)
-                    + " AND year="
-                    + str(year)
-                    + " AND id="
-                    + str(inner_k)
+                "DELETE FROM "
+                + curr_table
+                + " WHERE provider_code="
+                + str(provider_code)
+                + " AND year="
+                + str(year)
+                + " AND id="
+                + str(inner_k)
             )
             db.session.execute(sql_delete)
             db.session.commit()
             sql_insert = (
-                    "INSERT INTO "
-                    + curr_table
-                    + " VALUES ("
-                    + str(inner_k)
-                    + ","
-                    + str(year)
-                    + ","
-                    + str(provider_code)
-                    + ","
-                    + "'"
-                    + inner_v.replace("'", "")
-                    + "'"
-                    + ")"
-                    + " ON CONFLICT DO NOTHING"
+                "INSERT INTO "
+                + curr_table
+                + " VALUES ("
+                + str(inner_k)
+                + ","
+                + str(year)
+                + ","
+                + str(provider_code)
+                + ","
+                + "'"
+                + inner_v.replace("'", "")
+                + "'"
+                + ")"
+                + " ON CONFLICT DO NOTHING"
             )
             db.session.execute(sql_insert)
             db.session.commit()
@@ -983,7 +983,7 @@ def create_provider_code_table():
     }
     for k, v in provider_code_dict.items():
         sql_insert = (
-                "INSERT INTO " + provider_code_table + " VALUES (" + str(k) + "," + "'" + v + "'" + ")"
+            "INSERT INTO " + provider_code_table + " VALUES (" + str(k) + "," + "'" + v + "'" + ")"
         )
         db.session.execute(sql_insert)
         db.session.commit()
@@ -1036,17 +1036,17 @@ def get_file_type_and_year(file_path):
 
 
 def main(
-        specific_folder,
-        delete_all,
-        path,
-        batch_size,
-        delete_start_date,
-        load_start_year,
-        from_email,
-        username="",
-        password="",
-        email_search_start_date="",
-        from_s3=False
+    specific_folder,
+    delete_all,
+    path,
+    batch_size,
+    delete_start_date,
+    load_start_year,
+    from_email,
+    username="",
+    password="",
+    email_search_start_date="",
+    from_s3=False,
 ):
     try:
         if not from_email and not from_s3:
@@ -1093,12 +1093,21 @@ def main(
                 delete_cbs_entries(delete_start_date, batch_size)
             started = datetime.now()
             total = 0
-            for provider_code in [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]:
+            for provider_code in [
+                BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
+                BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+            ]:
                 for year in range(int(load_start_year), s3_handler.current_year + 1):
-                    cbs_files_dir = os.path.join(s3_handler.local_files_directory, ACCIDENTS_TYPE_PREFIX + '_' + str(provider_code), str(year))
+                    cbs_files_dir = os.path.join(
+                        s3_handler.local_files_directory,
+                        ACCIDENTS_TYPE_PREFIX + "_" + str(provider_code),
+                        str(year),
+                    )
                     logging.info("Importing Directory " + cbs_files_dir)
                     preprocessing_cbs_files.update_cbs_files_names(cbs_files_dir)
-                    acc_data_file_path = preprocessing_cbs_files.get_accidents_file_data(cbs_files_dir)
+                    acc_data_file_path = preprocessing_cbs_files.get_accidents_file_data(
+                        cbs_files_dir
+                    )
                     total += import_to_datastore(cbs_files_dir, provider_code, year, batch_size)
             shutil.rmtree(s3_handler.local_temp_directory)
         else:

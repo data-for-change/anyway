@@ -2,10 +2,7 @@ version: '3'
 
 services:
   anyway:
-    build:
-      context: .
-      args:
-        - FLASK_ENV=development
+    build: .
     image: anywayteam/anyway:latest
     container_name: anyway
     ports:

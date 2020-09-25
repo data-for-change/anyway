@@ -8,7 +8,7 @@ from geographiclib.geodesic import Geodesic
 
 from anyway.models import NewsFlash
 from anyway.parsers import resolution_dict
-from anyway.parsers import secrets
+from anyway import secrets
 
 
 def extract_road_number(location):

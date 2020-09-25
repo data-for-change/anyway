@@ -39,7 +39,7 @@ from werkzeug.security import check_password_hash
 from werkzeug.exceptions import BadRequestKeyError
 from wtforms import form, fields, validators, StringField, PasswordField, Form
 
-from anyway import utilities
+from anyway import utilities, secrets
 from anyway.base import user_optional
 from anyway.clusters_calculator import retrieve_clusters
 from anyway.config import ENTRIES_PER_PAGE
@@ -92,13 +92,13 @@ app.config["SECURITY_REGISTERABLE"] = False
 app.config["SECURITY_USER_IDENTITY_ATTRIBUTES"] = "username"
 app.config["BABEL_DEFAULT_LOCALE"] = "he"
 app.config["OAUTH_CREDENTIALS"] = {
-    "facebook": {"id": os.environ.get("FACEBOOK_KEY"), "secret": os.environ.get("FACEBOOK_SECRET")},
+    "facebook": {"id": secrets.get("FACEBOOK_KEY"), "secret": secrets.get("FACEBOOK_SECRET")},
     "google": {
-        "id": os.environ.get("GOOGLE_LOGIN_CLIENT_ID"),
-        "secret": os.environ.get("GOOGLE_LOGIN_CLIENT_SECRET"),
+        "id": secrets.get("GOOGLE_LOGIN_CLIENT_ID"),
+        "secret": secrets.get("GOOGLE_LOGIN_CLIENT_SECRET"),
     },
 }
-app.secret_key = os.environ.get("APP_SECRET_KEY")
+app.secret_key = secrets.get("APP_SECRET_KEY")
 assets = Environment()
 assets.init_app(app)
 assets_env = AssetsEnvironment(os.path.join(utilities._PROJECT_ROOT, "static"), "/static")

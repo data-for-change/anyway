@@ -6,13 +6,17 @@ import logging
 
 
 def get(secret_name: str) -> str:
+    env = os.environ.get("FLASK_ENV")
     logging.info("Reading secret for " + repr(secret_name))
     secrets_dir = "/run/secrets/"
     if os.path.isdir(secrets_dir):
         with open(secrets_dir + secret_name) as secret_file:
             return secret_file.read()
     logging.info("No secret dir found.")
-    return os.environ[secret_name]
+    if env == "development":
+        return os.environ.get(secret_name)
+    else:
+        return os.environ[secret_name]
 
 
 def exists(secret_name: str) -> bool:

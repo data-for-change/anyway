@@ -28,6 +28,7 @@ from sqlalchemy import (
 )
 import sqlalchemy
 from sqlalchemy.orm import relationship, load_only, backref
+from sqlalchemy import or_, and_
 
 from anyway import localization
 from anyway.backend_constants import BE_CONST
@@ -280,17 +281,15 @@ class AccidentMarker(MarkerMixin, Base):
 
     @staticmethod
     def get_latest_marker_created_date():
-        latest_created_date = db.session \
-                    .query(func.max(AccidentMarker.created)) \
-                    .filter(
-                AccidentMarker.provider_code
-                    .in_(
-                    [
-                        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
-                        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE
-                    ]
+        latest_created_date = (
+            db.session.query(func.max(AccidentMarker.created))
+            .filter(
+                AccidentMarker.provider_code.in_(
+                    [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
                 )
-            ).first()
+            )
+            .first()
+        )
 
         if latest_created_date is None:
             return None
@@ -562,6 +561,45 @@ class AccidentMarker(MarkerMixin, Base):
         else:
             markers = db.session.query(AccidentMarker).filter(sql.false())
 
+        if kwargs.get("light_transportation", False) == True:
+            age_groups_list = kwargs.get("age_groups").split(",")
+            markers = markers.filter(
+                or_(
+                    AccidentMarker.involved.any(
+                        and_(
+                            Involved.injured_type == 1,
+                            Involved.injury_severity >= 1,
+                            Involved.injury_severity <= 3,
+                            Involved.age_group.in_(age_groups_list),
+                        )
+                    ),
+                    AccidentMarker.involved.any(
+                        and_(
+                            Involved.vehicle_type == 15,
+                            Involved.injury_severity >= 1,
+                            Involved.injury_severity <= 3,
+                            Involved.age_group.in_(age_groups_list),
+                        )
+                    ),
+                    AccidentMarker.involved.any(
+                        and_(
+                            Involved.vehicle_type == 21,
+                            Involved.injury_severity >= 1,
+                            Involved.injury_severity <= 3,
+                            Involved.age_group.in_(age_groups_list),
+                        )
+                    ),
+                    AccidentMarker.involved.any(
+                        and_(
+                            Involved.vehicle_type == 23,
+                            Involved.injury_severity >= 1,
+                            Involved.injury_severity <= 3,
+                            Involved.age_group.in_(age_groups_list),
+                        )
+                    ),
+                )
+            )
+
         if page and per_page:
             markers = markers.offset((page - 1) * per_page).limit(per_page)
 
@@ -769,6 +807,7 @@ class NewsFlash(Base):
     resolution = Column(Text(), nullable=True)
     title = Column(Text(), nullable=True)
     source = Column(Text(), nullable=True)
+    organization = Column(Text(), nullable=True)
     location = Column(Text(), nullable=True)
     tweet_id = Column(BigInteger(), nullable=True)
     region_hebrew = Column(Text(), nullable=True)
@@ -794,6 +833,7 @@ class NewsFlash(Base):
             "resolution": self.resolution,
             "title": self.title,
             "source": self.source,
+            "organization": self.organization,
             "location": self.location,
             "tweet_id": self.tweet_id,
             "region_hebrew": self.region_hebrew,
@@ -2129,3 +2169,21 @@ class CasualtiesCosts(Base):
 
     def toStr(self):
         return f"{self.id}:{self.injured_type}:{self.injuries_cost_k}"
+
+
+class SchoolWithDescription2020(Base):
+    __tablename__ = "schools_with_description2020"
+    id = Column(BigInteger(), autoincrement=True, primary_key=True, index=True)
+    school_id = Column(Integer(), nullable=True, index=True)
+    school_name = Column(Text(), nullable=True)
+    municipality_name = Column(Text(), nullable=True, index=True)
+    yishuv_name = Column(Text(), nullable=True, index=True)
+    institution_type = Column(Text(), nullable=True)
+    lowest_grade = Column(Text(), nullable=True)
+    highest_grade = Column(Text(), nullable=True)
+    location_accuracy = Column(Text(), nullable=True)
+    geom = Column(Geometry("POINT", srid=4326), index=True)
+    x = Column(Float(), nullable=True)
+    y = Column(Float(), nullable=True)
+    longitude = Column(Float(), nullable=True)
+    latitude = Column(Float(), nullable=True)

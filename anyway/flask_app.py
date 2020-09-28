@@ -39,7 +39,7 @@ from werkzeug.security import check_password_hash
 from werkzeug.exceptions import BadRequestKeyError
 from wtforms import form, fields, validators, StringField, PasswordField, Form
 
-from anyway import utilities
+from anyway import utilities, secrets
 from anyway.base import user_optional
 from anyway.clusters_calculator import retrieve_clusters
 from anyway.config import ENTRIES_PER_PAGE
@@ -56,7 +56,6 @@ from anyway.models import (
     Vehicle,
     Role,
     GeneralPreferences,
-    NewsFlash,
     ReportProblem,
     EngineVolume,
     PopulationType,
@@ -75,25 +74,31 @@ from anyway.oauth import OAuthSignIn
 from anyway.infographics_utils import get_infographics_data
 from anyway.app_and_db import app, db
 from anyway.views.schools.api import (
-    schools_description_api,schools_names_api, schools_yishuvs_api,
+    schools_description_api,
+    schools_names_api,
+    schools_yishuvs_api,
     schools_api,
     injured_around_schools_sex_graphs_data_api,
     injured_around_schools_months_graphs_data_api,
     injured_around_schools_api,
-    )
+)
+from anyway.views.news_flash.api import (
+    news_flash,
+    single_news_flash,
+)
 
 app.config.from_object(__name__)
 app.config["SECURITY_REGISTERABLE"] = False
 app.config["SECURITY_USER_IDENTITY_ATTRIBUTES"] = "username"
 app.config["BABEL_DEFAULT_LOCALE"] = "he"
 app.config["OAUTH_CREDENTIALS"] = {
-    "facebook": {"id": os.environ.get("FACEBOOK_KEY"), "secret": os.environ.get("FACEBOOK_SECRET")},
+    "facebook": {"id": secrets.get("FACEBOOK_KEY"), "secret": secrets.get("FACEBOOK_SECRET")},
     "google": {
-        "id": os.environ.get("GOOGLE_LOGIN_CLIENT_ID"),
-        "secret": os.environ.get("GOOGLE_LOGIN_CLIENT_SECRET"),
+        "id": secrets.get("GOOGLE_LOGIN_CLIENT_ID"),
+        "secret": secrets.get("GOOGLE_LOGIN_CLIENT_SECRET"),
     },
 }
-app.secret_key = os.environ.get("APP_SECRET_KEY")
+app.secret_key = secrets.get("APP_SECRET_KEY")
 assets = Environment()
 assets.init_app(app)
 assets_env = AssetsEnvironment(os.path.join(utilities._PROJECT_ROOT, "static"), "/static")
@@ -289,8 +294,14 @@ def get_kwargs():
         arg: arg_type(request.values.get(arg, default_value))
         for (arg, (arg_type, default_value)) in ARG_TYPES.items()
     }
-    if request.values.get("age_groups[]") == "1234" or request.values.get("age_groups") == "1234":
+
+    age_groups_arr = request.values.get("age_groups[]")
+    age_groups = request.values.get("age_groups")
+    if age_groups_arr == "1234" or age_groups == "1234":
         kwargs["age_groups"] = "1,2,3,4"
+    if age_groups_arr == "234" or age_groups == "234":
+        kwargs["age_groups"] = "2,3,4"
+        kwargs["light_transportation"] = True
     try:
         kwargs.update(
             {
@@ -310,6 +321,15 @@ def get_locale():
         return request.accept_languages.best_match(app.config["LANGUAGES"].keys())
     else:
         return lang
+
+
+@app.route("/schools", methods=["GET"])
+@user_optional
+def schools():
+    if request.method == "GET":
+        return render_template("schools_redirect.html")
+    else:
+        return Response("Method Not Allowed", 405)
 
 
 @app.route("/markers", methods=["GET"])
@@ -405,93 +425,6 @@ def yishuv_symbol_to_name():
     )
     entries = [{"yishuv_name": x.yishuv_name, "yishuv_symbol": x.yishuv_symbol} for x in markers]
     return Response(json.dumps(entries, default=str), mimetype="application/json")
-
-
-@app.route("/api/news-flash", methods=["GET"])
-@user_optional
-def news_flash():
-    logging.debug("getting news flash")
-    news_flash_id = request.values.get("id")
-    source = request.values.get("source")
-    count = request.values.get("news_flash_count")
-    start_date = request.values.get("start_date")
-    end_date = request.values.get("end_date")
-    interurban_only = request.values.get("interurban_only")
-    road_number = request.values.get("road_number")
-    road_segment = request.values.get("road_segment_only")
-    news_flash_obj = db.session.query(NewsFlash)
-
-    if news_flash_id is not None:
-        news_flash_obj = news_flash_obj.filter(NewsFlash.id == news_flash_id).first()
-        if news_flash_obj is not None:
-            return Response(
-                json.dumps(news_flash_obj.serialize(), default=str), mimetype="application/json"
-            )
-        return Response(status=404)
-
-    # get all possible sources
-    sources = [
-        str(source_name[0]) for source_name in db.session.query(NewsFlash.source).distinct().all()
-    ]
-    if source:
-        if source not in sources:
-            return Response(
-                '{"message": "Requested source does not exist"}',
-                status=404,
-                mimetype="application/json",
-            )
-        else:
-            news_flash_obj = news_flash_obj.filter(NewsFlash.source == source)
-
-    if start_date and end_date:
-        s = datetime.datetime.fromtimestamp(int(start_date))
-        e = datetime.datetime.fromtimestamp(int(end_date))
-        news_flash_obj = news_flash_obj.filter(and_(NewsFlash.date <= e, NewsFlash.date >= s))
-    # when only one of the dates is sent
-    elif start_date or end_date:
-        return Response(
-            '{"message": "Must send both start_date and end_date"}',
-            status=404,
-            mimetype="application/json",
-        )
-    if interurban_only == "true":
-        news_flash_obj = news_flash_obj.filter(NewsFlash.resolution.in_(["כביש בינעירוני"]))
-    if road_number:
-        news_flash_obj = news_flash_obj.filter(NewsFlash.road1 == road_number)
-    if road_segment == "true":
-        news_flash_obj = news_flash_obj.filter(not_(NewsFlash.road_segment_name == None))
-    news_flash_obj = news_flash_obj.filter(
-        and_(
-            NewsFlash.accident == True,
-            not_(and_(NewsFlash.lat == 0, NewsFlash.lon == 0)),
-            not_(and_(NewsFlash.lat == None, NewsFlash.lon == None)),
-        )
-    ).order_by(NewsFlash.date.desc())
-
-    if count:
-        news_flash_obj = news_flash_obj.limit(count)
-
-    news_flashes = news_flash_obj.all()
-
-    news_flashes_jsons = [news_flash.serialize() for news_flash in news_flashes]
-    for news_flash in news_flashes_jsons:
-        news_flash["display_source"] = BE_CONST.SOURCE_MAPPING.get(
-            news_flash["source"], BE_CONST.UNKNOWN
-        )
-        if news_flash["display_source"] == BE_CONST.UNKNOWN:
-            logging.warn("Unknown source of news-flash with id {}".format(news_flash.id))
-    return Response(json.dumps(news_flashes_jsons, default=str), mimetype="application/json")
-
-
-@app.route("/api/news-flash/<int:news_flash_id>", methods=["GET"])
-@user_optional
-def single_news_flash(news_flash_id):
-    news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == news_flash_id).first()
-    if news_flash_obj is not None:
-        return Response(
-            json.dumps(news_flash_obj.serialize(), default=str), mimetype="application/json"
-        )
-    return Response(status=404)
 
 
 @app.route("/charts-data", methods=["GET"])
@@ -961,12 +894,14 @@ def index(marker=None, message=None):
     context["pref_radius"] = pref_radius
     latest_created_date = AccidentMarker.get_latest_marker_created_date()
 
-    if latest_created_date is None :
+    if latest_created_date is None:
         end_date = datetime.date.today()
     else:
         end_date = latest_created_date
 
-    context["default_end_date_format"] = request.values.get("end_date", end_date.strftime("%Y-%m-%d"))
+    context["default_end_date_format"] = request.values.get(
+        "end_date", end_date.strftime("%Y-%m-%d")
+    )
     context["default_start_date_format"] = request.values.get(
         "start_date", (end_date - datetime.timedelta(days=365)).strftime("%Y-%m-%d")
     )
@@ -1529,13 +1464,41 @@ def logout():
     login.logout_user()
     return redirect(url_for("index"))
 
+
 app.add_url_rule("/api/schools", endpoint=None, view_func=schools_api, methods=["GET"])
-app.add_url_rule("/api/schools-description", endpoint=None, view_func=schools_description_api, methods=["GET"])
-app.add_url_rule("/api/schools-yishuvs", endpoint=None, view_func=schools_yishuvs_api, methods=["GET"])
+app.add_url_rule(
+    "/api/schools-description", endpoint=None, view_func=schools_description_api, methods=["GET"]
+)
+app.add_url_rule(
+    "/api/schools-yishuvs", endpoint=None, view_func=schools_yishuvs_api, methods=["GET"]
+)
 app.add_url_rule("/api/schools-names", endpoint=None, view_func=schools_names_api, methods=["GET"])
-app.add_url_rule("/api/injured-around-schools-sex-graphs-data", endpoint=None, view_func=injured_around_schools_sex_graphs_data_api, methods=["GET"])
-app.add_url_rule("/api/injured-around-schools-months-graphs-data", endpoint=None, view_func=injured_around_schools_months_graphs_data_api, methods=["GET"])
-app.add_url_rule("/api/injured-around-schools", endpoint=None, view_func=injured_around_schools_api, methods=["GET"])
+app.add_url_rule(
+    "/api/injured-around-schools-sex-graphs-data",
+    endpoint=None,
+    view_func=injured_around_schools_sex_graphs_data_api,
+    methods=["GET"],
+)
+app.add_url_rule(
+    "/api/injured-around-schools-months-graphs-data",
+    endpoint=None,
+    view_func=injured_around_schools_months_graphs_data_api,
+    methods=["GET"],
+)
+app.add_url_rule(
+    "/api/injured-around-schools",
+    endpoint=None,
+    view_func=injured_around_schools_api,
+    methods=["GET"],
+)
+app.add_url_rule(
+    "/api/news-flash/<int:news_flash_id>",
+    endpoint=None,
+    view_func=single_news_flash,
+    methods=["GET"],
+)
+app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
+
 
 @app.route("/authorize/<provider>")
 def oauth_authorize(provider):

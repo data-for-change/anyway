@@ -8,7 +8,7 @@ from geographiclib.geodesic import Geodesic
 
 from anyway.models import NewsFlash
 from anyway.parsers import resolution_dict
-from anyway.parsers import secrets
+from anyway import secrets
 
 
 def extract_road_number(location):
@@ -73,7 +73,8 @@ def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):
 
     # CREATE DISTANCE FIELD
     markers["dist_point"] = markers.apply(
-        lambda x: geod.Inverse(latitude, longitude, x["latitude"], x["longitude"])["s12"], axis=1,
+        lambda x: geod.Inverse(latitude, longitude, x["latitude"], x["longitude"])["s12"],
+        axis=1,
     ).replace({np.nan: None})
 
     most_fit_loc = (
@@ -306,7 +307,11 @@ def extract_geo_features(db, newsflash: NewsFlash) -> None:
         newsflash.lon = geo_location["geom"]["lng"]
         newsflash.resolution = set_accident_resolution(geo_location)
         location_from_db = get_db_matching_location(
-            db, newsflash.lat, newsflash.lon, newsflash.resolution, geo_location["road_no"],
+            db,
+            newsflash.lat,
+            newsflash.lon,
+            newsflash.resolution,
+            geo_location["road_no"],
         )
         for k, v in location_from_db.items():
             setattr(newsflash, k, v)

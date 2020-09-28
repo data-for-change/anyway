@@ -2,7 +2,7 @@ import re
 
 import tweepy
 
-from anyway.parsers import secrets
+from anyway import secrets
 from anyway.models import NewsFlash
 from anyway.parsers import timezones
 

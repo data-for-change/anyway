@@ -3,7 +3,7 @@ version: '3'
 services:
   anyway:
     build: .
-    image: anywayteam/anyway:latest
+    image: docker.pkg.github.com/hasadna/anyway/anyway:latest
     container_name: anyway
     ports:
       - "8080:5000"
@@ -18,7 +18,7 @@ services:
 
   db:
     build: db_docker
-    image: anywayteam/db:latest
+    image: docker.pkg.github.com/hasadna/anyway/db:latest
     container_name: db
     environment:
       - DBRESTORE_AWS_ACCESS_KEY_ID

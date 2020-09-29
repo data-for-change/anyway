@@ -23,7 +23,7 @@ def insert_infographic_mock_data(app):
         'מפגש הבקעה שבבקעת הירדןסמוך לכביש 90, ',
         90,
         null,
-        'כביש בינעירוני',
+        'כביש בין עירוני',
         null,
         null,
         null,
@@ -77,7 +77,7 @@ class Test_Infographic_Api:
 
     # def test_location_info(self):
     #     assert self.infographic_data["meta"]["location_info"] == {
-    #         "resolution": "כביש בינעירוני",
+    #         "resolution": "כביש בין עירוני",
     #         "road1": 90.0,
     #         "road_segment_name": "כניסה למצפה שלם - צומת שדי תרומות",
     #     }

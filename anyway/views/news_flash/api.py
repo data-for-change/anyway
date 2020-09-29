@@ -56,7 +56,7 @@ def news_flash():
             mimetype="application/json",
         )
     if interurban_only == "true":
-        news_flash_obj = news_flash_obj.filter(NewsFlash.resolution.in_(["כביש בינעירוני"]))
+        news_flash_obj = news_flash_obj.filter(NewsFlash.resolution.in_(["כביש בין עירוני"]))
     if road_number:
         news_flash_obj = news_flash_obj.filter(NewsFlash.road1 == road_number)
     if road_segment == "true":

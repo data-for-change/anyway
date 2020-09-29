@@ -50,7 +50,7 @@ class Test_infographics_data_from_cache(TestCase):
     @patch("anyway.parsers.infographics_data_cache_updater.db.get_engine")
     @patch("anyway.infographics_utils.create_infographics_data")
     def test_add_qualified_news_flash(self, utils, get_engine):
-        nf = NewsFlash(id=17, accident=True, resolution="כביש בינעירוני", road_segment_name="name")
+        nf = NewsFlash(id=17, accident=True, resolution="כביש בין עירוני", road_segment_name="name")
         get_engine.execute.return_value = {}
         res = add_news_flash_to_cache(nf)
         invocations = utils.call_args_list
@@ -65,7 +65,7 @@ class Test_infographics_data_from_cache(TestCase):
     @patch("anyway.parsers.infographics_data_cache_updater.db.get_engine")
     @patch("anyway.infographics_utils.create_infographics_data")
     def test_add_news_flash_throws_exception(self, utils, get_engine):
-        nf = NewsFlash(id=17, accident=True, resolution="כביש בינעירוני", road_segment_name="name")
+        nf = NewsFlash(id=17, accident=True, resolution="כביש בין עירוני", road_segment_name="name")
         get_engine.side_effect = RuntimeError
         res = add_news_flash_to_cache(nf)
         assert not res, "Should return False when error occurred"

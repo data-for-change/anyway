@@ -12,7 +12,7 @@ import logging
 def is_cache_eligible(news_flash):
     return (
         news_flash.accident
-        and news_flash.resolution in (["כביש בינעירוני"])
+        and news_flash.resolution in (["כביש בין עירוני"])
         and news_flash.road_segment_name is not None
     )
 
@@ -120,7 +120,7 @@ def build_cache_into_temp():
                 }
                 for new_flash in db.session.query(NewsFlash)
                 .filter(NewsFlash.accident)
-                .filter(NewsFlash.resolution.in_(["כביש בינעירוני"]))
+                .filter(NewsFlash.resolution.in_(["כביש בין עירוני"]))
                 .filter(not_(NewsFlash.road_segment_name == None))
                 .all()
             ],
@@ -135,7 +135,7 @@ def get_cache_info():
     num_acc_suburban_flash_items = (
         db.session.query(NewsFlash)
         .filter(NewsFlash.accident)
-        .filter(NewsFlash.resolution.in_(["כביש בינעירוני"]))
+        .filter(NewsFlash.resolution.in_(["כביש בבין עירוני"]))
         .filter(not_(NewsFlash.road_segment_name == None))
         .count()
     )

@@ -41,9 +41,9 @@ if you already logged in with docker to github source jump to the next step.
 #### **docker login**
 First, to login to github go to [this link](https://github.com/settings/tokens) of your github account and generate token with `read:packages` permission.
 
-Second, copy the token that you just generate to file and save the file, now run docker login command like this when `USERNAME` is your github username and `TOKEN.txt` is the file the stor the token.
+Second, copy the token that you just generate and run docker login command like this when `USERNAME` is your github username, and paste the token when prompt will ask the password.
 ```bash
-$ cat TOKEN.txt | docker login docker.pkg.github.com -u USERNAME --password-stdin
+$ docker login docker.pkg.github.com -u USERNAME 
 ```
 
 **6.** Start the container, go to the **anyway** directory and run:
@@ -72,9 +72,9 @@ if you already logged in with docker to github source jump to the next step.
 #### **docker login**
 First, to login to github go to [this link](https://github.com/settings/tokens) of your github account and generate token with `read:packages` permission.
 
-Second, copy the token that you just generate to file and save the file, now run docker login command like this when `USERNAME` is your github username and `TOKEN.txt` is the file the stor the token.
+Second, copy the token that you just generate and run docker login command like this when `USERNAME` is your github username, and paste the token when prompt will ask the password.
 ```bash
-$ cat TOKEN.txt | docker login docker.pkg.github.com -u USERNAME --password-stdin
+$ docker login docker.pkg.github.com -u USERNAME 
 ```
 
 **6.** Start the container, go to the **anyway** directory and run:

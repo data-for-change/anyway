@@ -80,7 +80,6 @@ class Test_Infographic_Api:
         assert rv.status_code == http_client.NOT_FOUND
 
     def test_accident_count_by_car_type(self, app):
-
         test_involved_by_vehicle_type_data = [{"involve_vehicle_type": 1, "count": 3}, {"involve_vehicle_type": 25, "count": 2},
          {"involve_vehicle_type": 15, "count": 1}]
         output_tmp = percentage_accidents_by_car_type(test_involved_by_vehicle_type_data)

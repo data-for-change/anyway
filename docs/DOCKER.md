@@ -35,19 +35,30 @@ Instructions
 Otherwise, to build an existing environment with the most updated DB, remove DB volume by running `docker volume rm anyway_db_data`.
 Note - this will delete all of your local DB data!
 
-**5.** Start the container, go to the **anyway** directory and run:
+**5.** Anyway images stored on github package, to be able to pull the images you need to login to github using docker login.
+if you already logged in with docker to github source jump to the next step.
+
+#### **docker login**
+First, to login to github go to [this link](https://github.com/settings/tokens) of your github account and generate token with `read:packages` permission.
+
+Second, copy the token that you just generate to file and save the file, now run docker login command like this when `USERNAME` is your github username and `TOKEN.txt` is the file the stor the token.
+```bash
+$ cat TOKEN.txt | docker login docker.pkg.github.com -u USERNAME --password-stdin
+```
+
+**6.** Start the container, go to the **anyway** directory and run:
     `docker-compose up`
 It will take a few minutes until it's done.
 
-**6.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
+**7.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
 If you need to see the map contact atalya via slack to get a developer key.  
 The developer key need to replace the production key in the file /anyway/blob/dev/templates/index.html where you can find: "https://maps.googleapis.com/maps/api/js?key=AIzaSyDUIWsBLkvIUwzLHMHos9qFebyJ63hEG2M&libraries=places,visualization&language=iw" (google maps url)
 So if the developer key is "12345" the new url need to be is: "https://maps.googleapis.com/maps/api/js?key=12345&libraries=places,visualization&language=iw"
 
-**7.** To stop the containers run: `docker-compose down`
+**8.** To stop the containers run: `docker-compose down`
 
-**8.** To restore fresh DB data, delete all existing volumes: `docker-compose down -v` then restart from step 6
+**9.** To restore fresh DB data, delete all existing volumes: `docker-compose down -v` then restart from step 7 
 
 **For Ubuntu:**
 
@@ -55,11 +66,22 @@ So if the developer key is "12345" the new url need to be is: "https://maps.goog
 Otherwise, to build an existing environment with the most updated DB, remove DB volume by running `sudo docker volume rm anyway_db_data`.
 Note - this will delete all of your local DB data!
 
-**5.** Start the container, go to the **anyway** directory and run:
+**5.** Anyway images stored on github package, to be able to pull the images you need to login to github using docker login.
+if you already logged in with docker to github source jump to the next step.
+
+#### **docker login**
+First, to login to github go to [this link](https://github.com/settings/tokens) of your github account and generate token with `read:packages` permission.
+
+Second, copy the token that you just generate to file and save the file, now run docker login command like this when `USERNAME` is your github username and `TOKEN.txt` is the file the stor the token.
+```bash
+$ cat TOKEN.txt | docker login docker.pkg.github.com -u USERNAME --password-stdin
+```
+
+**6.** Start the container, go to the **anyway** directory and run:
     `sudo docker-compose up`
 It will take a few minutes until it's done.
 
-**6.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
+**7.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
 If you need to see the map for development email us [anyway@anyway.co.il](mailto:anyway@anyway.co.il) to get a developer key.  
 The developer key need to replace the production key in the file /anyway/blob/dev/templates/index.html where you can find: "https://maps.googleapis.com/maps/api/js?key=AIzaSyDUIWsBLkvIUwzLHMHos9qFebyJ63hEG2M&libraries=places,visualization&language=iw" (google maps url)
@@ -67,7 +89,7 @@ So if the developer key is "12345" the new url need to be is: "https://maps.goog
 
 **7.** To stop the containers run: `sudo docker-compose down`
 
-**8.** To restore fresh DB data, delete all existing volumes: `docker-compose down -v` then restart from step 6
+**8.** To restore fresh DB data, delete all existing volumes: `docker-compose down -v` then restart from step 7
 
 ## Additional Docker commands
 Use `sudo` before each docker commands if you are using ubuntu.

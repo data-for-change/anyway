@@ -43,7 +43,7 @@ rcssmin==1.0.6
 requests==2.23.0
 sendgrid==6.3.1
 tweepy==3.8.0
-urllib3==1.25.9
+urllib3==1.25.10
 webassets==2.0
 xlrd==1.2.0
 lxml==4.5.1

@@ -509,49 +509,10 @@ def percentage_accidents_by_car_type(involved_by_vehicle_type_data):
         else:
             driver_types["אחר"] += count
 
-    # So we have a problem here, when we Calculate percentage and convert the value to int - we are losing some of the
-    # value - and so our sum is less then 100%
-    # For example:
-    # lets say we have:
-    # 3 cars
-    # 1 motorcycle
-    # 2 truck
-    # Then the Calculation will be:
-    # truck - int(100*2/6)= 33%
-    # cars - int(100*3/6)= 50%
-    # motorcycle - int(100*1/6)= 16%
-    #
-    # But 16+50+33 = 99 != 100
-    # So in the code bellow we are adding ones to the largest fractions and so our total percentage will be 100%
+    output = {}
+    for k, v in driver_types.items():  # Calculate percentage
+        output[k] = int(100 * v / total_count)
 
-    # Calculate percentage
-    output_tmp = {}
-    total_percentage = 0
-    for k, v in driver_types.items():
-        output_tmp[k] = 100 * v / total_count
-        total_percentage += int(output_tmp[k])
-
-    if total_percentage != 100:
-        need_to_add = 100 - total_percentage
-        val_dict = {}
-        for k, v in output_tmp.items():
-            val_dict[k] = (v - int(v))
-
-        val_dict = {k: v for k, v in sorted(val_dict.items(), key=lambda item: item[1], reverse=True)}
-        for k, v in val_dict.items():
-            if need_to_add <= 0:
-                break
-            output_tmp[k] = int(output_tmp[k]) + 1
-            need_to_add -= 1
-
-    # Convert to int
-    total_percentage = 0
-    output = defaultdict(int)
-    for k, v in output_tmp.items():
-        output[k] = int(output_tmp[k])
-        total_percentage += int(output_tmp[k])
-
-    assert total_percentage == 100
     return output
 
 

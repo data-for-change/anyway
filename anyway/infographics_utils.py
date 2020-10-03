@@ -493,7 +493,7 @@ def get_latest_accident_date(table_obj, filters):
 
 
 def percentage_accidents_by_car_type(involved_by_vehicle_type_data):
-    driver_types = defaultdict(int)
+    driver_types = defaultdict(float)
     total_count = 0
     for item in involved_by_vehicle_type_data:
         vehicle_type, count = item["involve_vehicle_type"], int(item["count"])
@@ -509,9 +509,9 @@ def percentage_accidents_by_car_type(involved_by_vehicle_type_data):
         else:
             driver_types["אחר"] += count
 
-    output = {}
+    output = defaultdict(float)
     for k, v in driver_types.items():  # Calculate percentage
-        output[k] = int(100 * v / total_count)
+        output[k] = 100 * v / total_count
 
     return output
 

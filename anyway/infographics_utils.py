@@ -432,7 +432,11 @@ def sum_road_accidents_by_specific_type(road_data, field_name):
 def convert_roads_fatal_accidents_to_frontend_view(data_dict):
     data_list = []
     for key, value in data_dict.items():
-        data_list.append({"desc": key, "count": value})
+        if key == "התנגשות חזית בחזית":
+            data_list.append({"desc": "חזיתיות", "count": value})
+        else:
+            data_list.append({"desc": key, "count": value})
+
     return data_list
 
 
@@ -465,8 +469,8 @@ def get_head_to_head_stat(news_flash_id, start_time, end_time):
             end_time=end_time,
         )
 
-    road_data_dict = sum_road_accidents_by_specific_type(road_data, "חזיתיות")
-    all_roads_data_dict = sum_road_accidents_by_specific_type(all_roads_data, "חזיתיות")
+    road_data_dict = sum_road_accidents_by_specific_type(road_data, "התנגשות חזית בחזית")
+    all_roads_data_dict = sum_road_accidents_by_specific_type(all_roads_data, "התנגשות חזית בחזית")
 
     return {
         "specific_road_segment_fatal_accidents": convert_roads_fatal_accidents_to_frontend_view(
@@ -746,6 +750,7 @@ get_infographics_data_executor = ThreadPoolExecutor(max_workers=1)
 
 
 def get_infographics_data(news_flash_id, years_ago):
+    return create_infographics_data(news_flash_id,years_ago)
     try:
         future = get_infographics_data_executor.submit(
             infographics_data_cache_updater.get_infographics_data_from_cache,

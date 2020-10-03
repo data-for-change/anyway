@@ -750,7 +750,6 @@ get_infographics_data_executor = ThreadPoolExecutor(max_workers=1)
 
 
 def get_infographics_data(news_flash_id, years_ago):
-    return create_infographics_data(news_flash_id,years_ago)
     try:
         future = get_infographics_data_executor.submit(
             infographics_data_cache_updater.get_infographics_data_from_cache,

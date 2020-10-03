@@ -18,11 +18,11 @@ class BackEndConstants(object):
     OTHER_VEHICLES_TYPES = [15, 16, 17]
 
     # For percentage_accidents_by_car_type function
-    CAR_VEHICLE_TYPES = [1]
-    LARGE_VEHICLE_TYPES = [25, 12, 11, 4, 18, 16, 6, 2, 3, 5, 13, 7, 24]
-    MOTORCYCLE_VEHICLE_TYPES = [8, 10, 19]
-    BICYCLE_AND_SMALL_MOTOR_VEHICLE_TYPES = [15, 21, 23, 9]
-    OTHER_VEHICLE_TYPES = [14, 17, 22]
+    CAR_VEHICLE_TYPES = [1, 12]
+    LARGE_VEHICLE_TYPES = [25, 11, 4, 18, 6, 2, 3, 5, 13, 7, 24, 14]
+    MOTORCYCLE_VEHICLE_TYPES = [8, 10, 19, 9]
+    BICYCLE_AND_SMALL_MOTOR_VEHICLE_TYPES = [15, 21, 23]
+    OTHER_VEHICLE_TYPES = [14, 17, 22, 16]
 
     AGE_GROUPS_NUMBER = 18
 

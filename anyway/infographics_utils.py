@@ -419,13 +419,13 @@ def extract_news_flash_obj(news_flash_id):
 def sum_road_accidents_by_specific_type(road_data, field_name):
     dict_merge = defaultdict(int)
     dict_merge[field_name] = 0
-    dict_merge["תאונות אחרות"] = 0
+    dict_merge["אחרות"] = 0
 
     for accident_data in road_data:
         if accident_data["accident_type"] == field_name:
             dict_merge[field_name] += accident_data["count"]
         else:
-            dict_merge["תאונות אחרות"] += accident_data["count"]
+            dict_merge["אחרות"] += accident_data["count"]
     return dict_merge
 
 
@@ -465,8 +465,8 @@ def get_head_to_head_stat(news_flash_id, start_time, end_time):
             end_time=end_time,
         )
 
-    road_data_dict = sum_road_accidents_by_specific_type(road_data, "התנגשות חזית בחזית")
-    all_roads_data_dict = sum_road_accidents_by_specific_type(all_roads_data, "התנגשות חזית בחזית")
+    road_data_dict = sum_road_accidents_by_specific_type(road_data, "חזיתיות")
+    all_roads_data_dict = sum_road_accidents_by_specific_type(all_roads_data, "חזיתיות")
 
     return {
         "specific_road_segment_fatal_accidents": convert_roads_fatal_accidents_to_frontend_view(

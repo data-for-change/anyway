@@ -85,8 +85,8 @@ class Test_Infographic_Api:
         output_tmp = percentage_accidents_by_car_type(test_involved_by_vehicle_type_data)
         assert len(output_tmp) == 3
         assert output_tmp["רכב פרטי"] == 50
-        assert output_tmp["מסחרי/משאית"] == 33.333333333333336
-        assert output_tmp["אופניים/קורקינט"] == 16.666666666666668
+        assert output_tmp["מסחרי/משאית"] == pytest.approx(33.333333333333336)
+        assert output_tmp["אופניים/קורקינט"] == pytest.approx(16.666666666666668)
 
         def mock_get_accidents_stats(table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None):
             return [{'involve_vehicle_type': nan, 'count': 2329}, {'involve_vehicle_type': 14.0, 'count': 112},
@@ -108,8 +108,8 @@ class Test_Infographic_Api:
         involved_by_vehicle_type_data_test = [{'involve_vehicle_type': 1, 'count': 11}]
         end_time = datetime.date(2020, 6, 30)
         start_time = datetime.date(2020, 1, 1)
-        out = stats_accidents_by_car_type_with_national_data(involved_by_vehicle_type_data_test, start_time, end_time)
-        good = [{'car_type': 'אחר',
+        actual = stats_accidents_by_car_type_with_national_data(involved_by_vehicle_type_data_test, start_time, end_time)
+        expected = [{'car_type': 'אחר',
                   'percentage_country': 9.84470391606119,
                   'percentage_segment': 0.0},
                  {'car_type': 'מסחרי/משאית',
@@ -126,8 +126,8 @@ class Test_Infographic_Api:
                   'percentage_segment': 0.0}]
 
         infographics_utils.get_accidents_stats = tmp_func  # Restore function ref - So we don't affect other tests
-        assert len(out) == len(good)
-        assert out == good
+        assert len(actual) == len(expected)
+        assert actual == expected
 
 
     # def test_location_info(self):

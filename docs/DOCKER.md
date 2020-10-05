@@ -35,9 +35,9 @@ Instructions
 Otherwise, to build an existing environment with the most updated DB, remove DB volume by running `docker volume rm anyway_db_data`.
 Note - this will delete all of your local DB data!
 
-**5.** Start the container, go to the **anyway** directory and run:
-    `docker-compose up`
-It will take a few minutes until it's done.
+**5.** Go to the `<project-home>/anyway` directory and run:
+    `docker-compose up -d`
+This will start the containers. It will take a few minutes until it's done.
 
 **6.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
@@ -55,9 +55,9 @@ So if the developer key is "12345" the new url need to be is: "https://maps.goog
 Otherwise, to build an existing environment with the most updated DB, remove DB volume by running `sudo docker volume rm anyway_db_data`.
 Note - this will delete all of your local DB data!
 
-**5.** Start the container, go to the **anyway** directory and run:
-    `sudo docker-compose up`
-It will take a few minutes until it's done.
+**5.** Go to the `<project-home>/anyway` directory and run:
+    `sudo docker-compose up -d`
+This will start the containers. It will take a few minutes until it's done.
 
 **6.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.

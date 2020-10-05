@@ -849,7 +849,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
                  'severe_injury_severity_count': 2,
                  'killed_injury_severity_text': "הרוג",
                  'killed_injury_severity_count': 0 }]
-    
+
     injured_accidents_with_pedestrians = Widget(
         name="injured_accidents_with_pedestrians",
         rank=18,
@@ -880,7 +880,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         items=accident_severity_by_cross_location_mock_data(),
     )
     output["widgets"].append(accident_severity_by_cross_location.serialize())
-    
+
     return json.dumps(output, default=str)
 
 

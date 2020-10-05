@@ -14,6 +14,7 @@ from anyway.models import NewsFlash, AccidentMarkerView, InvolvedMarkerView, Roa
 from anyway.parsers import resolution_dict
 from anyway.app_and_db import db
 from anyway.infographics_dictionaries import driver_type_hebrew_dict
+from anyway.infographics_dictionaries import head_on_collisions_comparison_dict
 from anyway.parsers import infographics_data_cache_updater
 from concurrent.futures import ThreadPoolExecutor
 
@@ -426,20 +427,24 @@ def extract_news_flash_obj(news_flash_id):
 def sum_road_accidents_by_specific_type(road_data, field_name):
     dict_merge = defaultdict(int)
     dict_merge[field_name] = 0
-    dict_merge["תאונות אחרות"] = 0
+    dict_merge[head_on_collisions_comparison_dict["others"]] = 0
 
     for accident_data in road_data:
         if accident_data["accident_type"] == field_name:
             dict_merge[field_name] += accident_data["count"]
         else:
-            dict_merge["תאונות אחרות"] += accident_data["count"]
+            dict_merge[head_on_collisions_comparison_dict["others"]] += accident_data["count"]
     return dict_merge
 
 
 def convert_roads_fatal_accidents_to_frontend_view(data_dict):
     data_list = []
     for key, value in data_dict.items():
-        data_list.append({"desc": key, "count": value})
+        if key == head_on_collisions_comparison_dict["head_to_head_collision"]:
+            data_list.append({"desc": head_on_collisions_comparison_dict["head_to_head"], "count": value})
+        else:
+            data_list.append({"desc": key, "count": value})
+
     return data_list
 
 

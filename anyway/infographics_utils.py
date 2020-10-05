@@ -799,6 +799,85 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     )
     output["widgets"].append(accident_count_by_car_type.serialize())
 
+def injured_accidents_with_pedestrians_mock_data():  # Temporary for Frontend
+    return [{'year': 2009, 
+             'light_injury_severity_text': "פצוע קל", 
+             'light_injury_severity_count': 12,
+             'severe_injury_severity_text': "פצוע קשה",
+             'severe_injury_severity_count': 3,
+             'killed_injury_severity_text': "הרוג",
+             'killed_injury_severity_count': 0 },
+            {'year': 2010, 
+             'light_injury_severity_text': "פצוע קל", 
+             'light_injury_severity_count': 24,
+             'severe_injury_severity_text': "פצוע קשה",
+             'severe_injury_severity_count': 0,
+             'killed_injury_severity_text': "הרוג",
+             'killed_injury_severity_count': 1 },
+            {'year': 2011, 
+             'light_injury_severity_text': "פצוע קל", 
+             'light_injury_severity_count': 9,
+             'severe_injury_severity_text': "פצוע קשה",
+             'severe_injury_severity_count': 2,
+             'killed_injury_severity_text': "הרוג",
+             'killed_injury_severity_count': 1 },
+            {'year': 2012, 
+             'light_injury_severity_text': "פצוע קל", 
+             'light_injury_severity_count': 21,
+             'severe_injury_severity_text': "פצוע קשה",
+             'severe_injury_severity_count': 2,
+             'killed_injury_severity_text': "הרוג",
+             'killed_injury_severity_count': 4 },
+            {'year': 2013, 
+             'light_injury_severity_text': "פצוע קל", 
+             'light_injury_severity_count': 21,
+             'severe_injury_severity_text': "פצוע קשה",
+             'severe_injury_severity_count': 2,
+             'killed_injury_severity_text': "הרוג",
+             'killed_injury_severity_count': 4 },
+            {'year': 2014, 
+             'light_injury_severity_text': "פצוע קל", 
+             'light_injury_severity_count': 10,
+             'severe_injury_severity_text': "פצוע קשה",
+             'severe_injury_severity_count': 0,
+             'killed_injury_severity_text': "הרוג",
+             'killed_injury_severity_count': 1 },
+            {'year': 2015, 
+             'light_injury_severity_text': "פצוע קל", 
+             'light_injury_severity_count': 13,
+             'severe_injury_severity_text': "פצוע קשה",
+             'severe_injury_severity_count': 2,
+             'killed_injury_severity_text': "הרוג",
+             'killed_injury_severity_count': 0 }]
+    
+    injured_accidents_with_pedestrians = Widget(
+        name="injured_accidents_with_pedestrians",
+        rank=18,
+        items=injured_accidents_with_pedestrians_mock_data(),
+        text={"title": "נפגעים בתאונות עם הולכי רגל"},
+    )
+    output["widgets"].append(injured_accidents_with_pedestrians.serialize())
+
+
+def accident_severity_by_cross_location_mock_data():  # Temporary for Frontend
+    return [{'cross_location_text': "במעבר חצייה",
+             'severe_injury_severity_text': "פצוע קשה",
+             'severe_injury_severity_count': 6,
+             'killed_injury_severity_text': "הרוג",
+             'killed_injury_severity_count': 0 },
+            {'cross_location_text': "לא במעבר חצייה",
+             'severe_injury_severity_text': "פצוע קשה",
+             'severe_injury_severity_count': 10,
+             'killed_injury_severity_text': "הרוג",
+             'killed_injury_severity_count': 0 },]
+    
+    accident_severity_by_cross_location = Widget(
+        name="accident_severity_by_cross_location",
+        rank=19,
+        items=accident_severity_by_cross_location_mock_data(),
+    )
+    output["widgets"].append(accident_severity_by_cross_location.serialize())
+    
     return json.dumps(output, default=str)
 
 

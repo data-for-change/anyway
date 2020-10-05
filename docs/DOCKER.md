@@ -46,9 +46,9 @@ Second, copy the token that you just generate and run docker login command like 
 $ docker login docker.pkg.github.com -u USERNAME 
 ```
 
-**6.** Start the container, go to the **anyway** directory and run:
-    `docker-compose up`
-It will take a few minutes until it's done.
+**6.** Go to the `<project-home>/anyway` directory and run:
+    `sudo docker-compose up -d`
+This will start the containers. It will take a few minutes until it's done.
 
 **7.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
@@ -77,9 +77,9 @@ Second, copy the token that you just generate and run docker login command like 
 $ docker login docker.pkg.github.com -u USERNAME 
 ```
 
-**6.** Start the container, go to the **anyway** directory and run:
-    `sudo docker-compose up`
-It will take a few minutes until it's done.
+**6.** Go to the `<project-home>/anyway` directory and run:
+    `sudo docker-compose up -d`
+This will start the containers. It will take a few minutes until it's done.
 
 **7.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.

@@ -861,11 +861,15 @@ def injured_accidents_with_pedestrians_mock_data():  # Temporary for Frontend
 
 def accident_severity_by_cross_location_mock_data():  # Temporary for Frontend
     return [{'cross_location_text': "במעבר חצייה",
+             'light_injury_severity_text': "פצוע קל", 
+             'light_injury_severity_count': 37,
              'severe_injury_severity_text': "פצוע קשה",
              'severe_injury_severity_count': 6,
              'killed_injury_severity_text': "הרוג",
              'killed_injury_severity_count': 0 },
             {'cross_location_text': "לא במעבר חצייה",
+             'light_injury_severity_text': "פצוע קל", 
+             'light_injury_severity_count': 11,
              'severe_injury_severity_text': "פצוע קשה",
              'severe_injury_severity_count': 10,
              'killed_injury_severity_text': "הרוג",

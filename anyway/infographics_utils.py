@@ -13,7 +13,6 @@ from anyway.parsers import resolution_dict
 from anyway.app_and_db import db
 from anyway.infographics_dictionaries import driver_type_hebrew_dict
 from anyway.parsers import infographics_data_cache_updater
-from concurrent.futures import ThreadPoolExecutor
 
 """
     Widget structure:

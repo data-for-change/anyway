@@ -854,7 +854,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         name="injured_accidents_with_pedestrians",
         rank=18,
         items=injured_accidents_with_pedestrians_mock_data(),
-        text={"title": "נפגעים בתאונות עם הולכי רגל"},
+        text={"title": "נפגעים בתאונות עם הולכי רגל ברחוב ז׳בוטינסקי, פתח תקווה (2009-2015)"},
     )
     output["widgets"].append(injured_accidents_with_pedestrians.serialize())
 

@@ -881,8 +881,6 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     )
     output["widgets"].append(accident_severity_by_cross_location.serialize())
 
-    return json.dumps(output, default=str)
-
     def motorcycle_accidents_vs_all_accidents_mock_data():  # Temporary for Frontend
         return [{
                 "location": "כביש 20",
@@ -914,6 +912,8 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     )
     output["widgets"].append(motorcycle_accidents_vs_all_accidents.serialize())
 
+    return json.dumps(output, default=str)
+    
 def get_infographics_data(news_flash_id, years_ago):
     try:
         res = infographics_data_cache_updater.get_infographics_data_from_cache(news_flash_id, years_ago)

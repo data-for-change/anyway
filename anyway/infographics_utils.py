@@ -883,6 +883,36 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 
     return json.dumps(output, default=str)
 
+    def motorcycle_accidents_vs_all_accidents_mock_data():  # Temporary for Frontend
+        return [{
+                "location": "כביש 20",
+                "vehicle": "אופנוע",
+                "percentage": 0.5
+                },
+                {
+                "location": "כביש 20",
+                "vehicle": "אחר",
+                "percentage": 0.5
+                },
+                {
+                "location": "כל הארץ",
+                "vehicle": "אחר",
+                "percentage": 0.802680566
+                },
+                {
+                "location": "כל הארץ",
+                "vehicle": "אופנוע",
+                "percentage": 0.197319434
+                }
+                ],
+
+    motorcycle_accidents_vs_all_accidents = Widget(
+        name="motorcycle_accidents_vs_all_accidents",
+        rank=20,
+        items=motorcycle_accidents_vs_all_accidents_mock_data(),
+        text={"title": "אחוז תאונות אופנוע מכלל התאונות הקשות והקטלניות"},
+    )
+    output["widgets"].append(motorcycle_accidents_vs_all_accidents.serialize())
 
 def get_infographics_data(news_flash_id, years_ago):
     try:

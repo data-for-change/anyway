@@ -878,7 +878,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         name="accident_severity_by_cross_location",
         rank=19,
         items=accident_severity_by_cross_location_mock_data(),
-        text={"title": "אחוז הפצועים וההרוגים לפי מיקום החציה - בן יהודה תל אביב"}
+        text={"comment": "בן יהודה תל אביב בין השנים 2008-2020"}
     )
     output["widgets"].append(accident_severity_by_cross_location.serialize())
 

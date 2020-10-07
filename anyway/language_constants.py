@@ -4,6 +4,8 @@ _WORDS = {}
 
 
 class HebrewWord(str):
+    value = None
+
     def __new__(cls, value):
         obj = str.__new__(cls, value)
         obj.value = value

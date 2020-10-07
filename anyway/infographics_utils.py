@@ -913,6 +913,62 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     )
     output["widgets"].append(motorcycle_accidents_vs_all_accidents.serialize())
 
+    def injured_accidents_with_pedestrians_mock_data():  # Temporary for Frontend
+        return [{
+                "location": "כל הארץ",
+                "vehicle": "מכונית",
+                "num_of_accidents": 61307
+                },
+                {
+                "location": "כל הארץ",
+                "vehicle": "רכב כבד",
+                "num_of_accidents": 15801
+                },
+                {
+                "location": "כל הארץ",
+                "vehicle": "אופנוע",
+                "num_of_accidents": 3884
+                },
+                {
+                "location": "כל הארץ",
+                "vehicle": "אופניים וקורקינט ממונע",
+                "num_of_accidents": 1867
+                },
+                {
+                "location": "כל הארץ",
+                "vehicle": "אחר",
+                "num_of_accidents": 229
+                },
+                {
+                "location": "בן יהודה",
+                "vehicle": "מכונית",
+                "num_of_accidents": 64
+                },
+                {
+                "location": "בן יהודה",
+                "vehicle": "אופנוע",
+                "num_of_accidents": 40
+                },
+                {
+                "location": "בן יהודה",
+                "vehicle": "רכב כבד",
+                "num_of_accidents": 22
+                },
+                {
+                "location": "בן יהודה",
+                "vehicle": "אופניים וקורקינט ממונע",
+                "num_of_accidents": 9
+                }
+                ]
+
+    injured_accidents_with_pedestrians = Widget(
+        name="injured_accidents_with_pedestrians",
+        rank=20,
+        items=injured_accidents_with_pedestrians_mock_data(),
+        text={"title": "פגיעות בהולכי רגל ברחוב בן יהודה בתל אביב לפי סוג רכב פוגע, בהשוואה לתאונות עירוניות בכל הארץ"},
+    )
+    output["widgets"].append(injured_accidents_with_pedestrians.serialize())
+
     return json.dumps(output, default=str)
 
 def get_infographics_data(news_flash_id, years_ago):

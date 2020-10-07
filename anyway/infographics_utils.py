@@ -909,11 +909,11 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         name="motorcycle_accidents_vs_all_accidents",
         rank=20,
         items=motorcycle_accidents_vs_all_accidents_mock_data(),
-        text={"title": "אחוז תאונות אופנוע מכלל התאונות הקשות והקטלניות"}
+        text={"title": "אחוז תאונות אופנוע מכלל התאונות הקשות והקטלניות"},
     )
     output["widgets"].append(motorcycle_accidents_vs_all_accidents.serialize())
 
-    def injured_accidents_with_pedestrians_mock_data():  # Temporary for Frontend
+    def accidents_count_pedestrians_per_vehicle_street_vs_all_mock_data():  # Temporary for Frontend
         return [{
                 "location": "כל הארץ",
                 "vehicle": "מכונית",
@@ -961,13 +961,13 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
                 }
                 ]
 
-    injured_accidents_with_pedestrians = Widget(
-        name="injured_accidents_with_pedestrians",
-        rank=20,
-        items=injured_accidents_with_pedestrians_mock_data(),
+    accidents_count_pedestrians_per_vehicle_street_vs_all = Widget(
+        name="accidents_count_pedestrians_per_vehicle_street_vs_all",
+        rank=21,
+        items=accidents_count_pedestrians_per_vehicle_street_vs_all_mock_data(),
         text={"title": "פגיעות בהולכי רגל ברחוב בן יהודה בתל אביב לפי סוג רכב פוגע, בהשוואה לתאונות עירוניות בכל הארץ"},
     )
-    output["widgets"].append(injured_accidents_with_pedestrians.serialize())
+    output["widgets"].append(accidents_count_pedestrians_per_vehicle_street_vs_all.serialize())
 
     return json.dumps(output, default=str)
 

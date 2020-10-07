@@ -902,7 +902,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
                 "vehicle": "אופנוע",
                 "percentage": 0.197319434
                 }
-                ],
+                ]
 
     motorcycle_accidents_vs_all_accidents = Widget(
         name="motorcycle_accidents_vs_all_accidents",

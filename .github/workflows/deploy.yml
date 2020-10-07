@@ -67,20 +67,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - env:
-        name: ${{ env.DOCKER_REPOSITORY_NGINX }} 
         DOCKER_USERNAME: ${{ github.repository_owner }}
         DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-        DOCKER_REPOSITORY_ANYWAY: ${{ env.DOCKER_REPOSITORY_ANYWAY }}
-        DOCKER_REPOSITORY_NGINX: ${{ env.DOCKER_REPOSITORY_NGINX }}
       run: |
-        export REF_TAG="${GITHUB_REF##*/}" &&\
-        export SHA_TAG=sha-`git rev-parse --short $GITHUB_SHA` &&\
-        echo REF_TAG=$REF_TAG &&\
-        echo SHA_TAG=$SHA_TAG &&\
-        bin/docker_login.sh &&\
-        bin/docker_build.sh &&\
-        bin/docker_push_latest.sh &&\
-        bin/docker_push_sha.sh
+        bin/nginx_docker_build_push.sh
   deploy:
     if: github.repository == "${{ github.repository_owner }}/anyway" && github.ref == 'refs/heads/master'
     needs:

@@ -647,12 +647,14 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     output["widgets"].append(accident_count_by_accident_type.serialize())
 
     # accidents heat map
+    accidents_heat_map_filters = location_info
+    accidents_heat_map_filters['accident_severity'] = [1, 2]
     accidents_heat_map = Widget(
         name="accidents_heat_map",
         rank=7,
         items=get_accidents_heat_map(
             table_obj=AccidentMarkerView,
-            filters=location_info,
+            filters=accidents_heat_map_filters,
             start_time=start_time,
             end_time=end_time,
         ),

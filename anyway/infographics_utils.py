@@ -16,6 +16,7 @@ from anyway.app_and_db import db
 from anyway.infographics_dictionaries import driver_type_hebrew_dict
 from anyway.infographics_dictionaries import head_on_collisions_comparison_dict
 from anyway.parsers import infographics_data_cache_updater
+from anyway.constants import CONST
 
 """
     Widget structure:
@@ -648,7 +649,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 
     # accidents heat map
     accidents_heat_map_filters = location_info
-    accidents_heat_map_filters['accident_severity'] = [1, 2]
+    accidents_heat_map_filters['accident_severity'] = [CONST.ACCIDENT_SEVERITY_DEADLY, CONST.ACCIDENT_SEVERITY_SEVERE]
     accidents_heat_map = Widget(
         name="accidents_heat_map",
         rank=7,

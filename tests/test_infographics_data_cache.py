@@ -9,7 +9,6 @@ from anyway.parsers.infographics_data_cache_updater import add_news_flash_to_cac
 import anyway.parsers.infographics_data_cache_updater
 
 
-@patch.dict(os.environ, {"FLASK_ENV": "test"})
 class Test_infographics_data_from_cache(TestCase):
     def test_get_not_existing_from_cache(self):
         cache_data = anyway.parsers.infographics_data_cache_updater.get_infographics_data_from_cache(
@@ -18,6 +17,7 @@ class Test_infographics_data_from_cache(TestCase):
         self.assertEqual(cache_data, {}, "returned value from cache should be None")
 
     @patch("anyway.infographics_utils.infographics_data_cache_updater")
+    @patch.dict(os.environ, {"FLASK_ENV": "test"})
     def test_get_existing(self, get_from_cache):
         expected = {"data": "data"}
         get_from_cache.get_infographics_data_from_cache.return_value = expected
@@ -29,6 +29,7 @@ class Test_infographics_data_from_cache(TestCase):
         self.assertEqual(res, expected, f"{expected} should be found in cache")
 
     @patch("anyway.infographics_utils.infographics_data_cache_updater")
+    @patch.dict(os.environ, {"FLASK_ENV": "test"})
     def test_get_not_existing(self, get_from_cache):
         get_from_cache.get_infographics_data_from_cache.return_value = {}
         res = get_infographics_data(7, 1)
@@ -36,6 +37,7 @@ class Test_infographics_data_from_cache(TestCase):
         self.assertEqual(res, {}, f"(7,1) should not be found in cache")
 
     @patch("anyway.infographics_utils.infographics_data_cache_updater")
+    @patch.dict(os.environ, {"FLASK_ENV": "test"})
     def test_get_throws_exception(self, get_from_cache):
         get_from_cache.get_infographics_data_from_cache.side_effect = RuntimeError
         res = get_infographics_data(7, 1)

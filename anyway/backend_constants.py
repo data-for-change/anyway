@@ -30,9 +30,11 @@ class BackEndConstants(object):
 
     # This is a type for the 'accident_severity' table field name
     ACCIDENT_SEVERITY_DEADLY = 1
+    ACCIDENT_SEVERITY_EASY = 3
 
     # This is a type for the 'road_type' table field name
     ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION = 4
+    ROAD_TYPE_NOT_IN_CITY_IN_INTERSECTION = 3
 
     # other global constants (python only)
     DEFAULT_NUMBER_OF_YEARS_AGO = 5

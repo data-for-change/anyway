@@ -6,7 +6,7 @@ from functools import lru_cache
 
 import pandas as pd
 from collections import defaultdict
-from sqlalchemy import func
+from sqlalchemy import func, case, and_, distinct
 from sqlalchemy import cast, Numeric
 from sqlalchemy import desc
 from anyway.backend_constants import BE_CONST
@@ -556,6 +556,39 @@ def stats_accidents_by_car_type_with_national_data(
     return out
 
 
+def get_injured_accidents_with_pedestrians(location_info, start_time, end_time):
+    if not ('yishuv_name' in location_info and 'street1_hebrew' in location_info):
+        return []
+
+    severity_of_accident = case(
+        [
+            (InvolvedMarkerView.accident_severity < BE_CONST.ACCIDENT_SEVERITY_EASY, 'פצוע קשה'),
+        ], else_='פצוע קל'
+    ).label("חומרת_פגיעה")
+
+    pedestrian_crossing = case(
+        [
+            (InvolvedMarkerView.cross_location_hebrew.like('%לא במעבר חצייה%') , 'לא במעבר חצייה'),
+            (and_(InvolvedMarkerView.cross_location_hebrew.notlike('%לא במעבר חצייה%'),
+                  InvolvedMarkerView.cross_location_hebrew.isnot(None),
+                  InvolvedMarkerView.cross_location_hebrew.notlike('%לא ידוע%')), 'במעבר חצייה'),
+        ]
+    ).label("מיקום_חציה")
+
+    filters = {"accident_type_hebrew": 'פגיעה בהולך רגל', 'accident_yishuv_name': location_info['yishuv_name'],
+               'street1_hebrew': location_info['street1_hebrew']}
+    query = get_query(InvolvedMarkerView, filters, start_time, end_time)
+    query = query.with_entities(severity_of_accident, pedestrian_crossing,
+                                func.count(distinct(InvolvedMarkerView.provider_and_id)).label("count"))
+    query = query.filter(InvolvedMarkerView.road_type < BE_CONST.ROAD_TYPE_NOT_IN_CITY_IN_INTERSECTION)
+    query = query.group_by("חומרת_פגיעה", "מיקום_חציה").order_by("count")
+
+    ret_list = []
+    for row in query.all():
+        ret_list.append(row._asdict())
+    return ret_list
+
+
 def create_infographics_data(news_flash_id, number_of_years_ago):
     output = {}
     try:
@@ -799,62 +832,13 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     )
     output["widgets"].append(accident_count_by_car_type.serialize())
 
-    def injured_accidents_with_pedestrians_mock_data():  # Temporary for Frontend
-        return [{'year': 2009,
-                 'light_injury_severity_text': "פצוע קל",
-                 'light_injury_severity_count': 12,
-                 'severe_injury_severity_text': "פצוע קשה",
-                 'severe_injury_severity_count': 3,
-                 'killed_injury_severity_text': "הרוג",
-                 'killed_injury_severity_count': 0 },
-                {'year': 2010,
-                 'light_injury_severity_text': "פצוע קל",
-                 'light_injury_severity_count': 24,
-                 'severe_injury_severity_text': "פצוע קשה",
-                 'severe_injury_severity_count': 0,
-                 'killed_injury_severity_text': "הרוג",
-                 'killed_injury_severity_count': 1 },
-                {'year': 2011,
-                 'light_injury_severity_text': "פצוע קל",
-                 'light_injury_severity_count': 9,
-                 'severe_injury_severity_text': "פצוע קשה",
-                 'severe_injury_severity_count': 2,
-                 'killed_injury_severity_text': "הרוג",
-                 'killed_injury_severity_count': 1 },
-                {'year': 2012,
-                 'light_injury_severity_text': "פצוע קל",
-                 'light_injury_severity_count': 21,
-                 'severe_injury_severity_text': "פצוע קשה",
-                 'severe_injury_severity_count': 2,
-                 'killed_injury_severity_text': "הרוג",
-                 'killed_injury_severity_count': 4 },
-                {'year': 2013,
-                 'light_injury_severity_text': "פצוע קל",
-                 'light_injury_severity_count': 21,
-                 'severe_injury_severity_text': "פצוע קשה",
-                 'severe_injury_severity_count': 2,
-                 'killed_injury_severity_text': "הרוג",
-                 'killed_injury_severity_count': 4 },
-                {'year': 2014,
-                 'light_injury_severity_text': "פצוע קל",
-                 'light_injury_severity_count': 10,
-                 'severe_injury_severity_text': "פצוע קשה",
-                 'severe_injury_severity_count': 0,
-                 'killed_injury_severity_text': "הרוג",
-                 'killed_injury_severity_count': 1 },
-                {'year': 2015,
-                 'light_injury_severity_text': "פצוע קל",
-                 'light_injury_severity_count': 13,
-                 'severe_injury_severity_text': "פצוע קשה",
-                 'severe_injury_severity_count': 2,
-                 'killed_injury_severity_text': "הרוג",
-                 'killed_injury_severity_count': 0 }]
-
+    text_of_injured_accidents_with_pedestrians = \
+        f"נפגעים בתאונות עם הולכי רגל ברחוב {location_info['street1_hebrew'] if 'street1_hebrew' in location_info else ''}, {location_info['yishuv_name'] if 'yishuv_name' in location_info else ''} ({start_time}-{end_time})"
     injured_accidents_with_pedestrians = Widget(
-        name="injured_accidents_with_pedestrians",
+        name="accident_severity_by_cross_location",
         rank=18,
-        items=injured_accidents_with_pedestrians_mock_data(),
-        text={"title": "נפגעים בתאונות עם הולכי רגל ברחוב ז׳בוטינסקי, פתח תקווה (2009-2015)"},
+        items=get_injured_accidents_with_pedestrians(location_info, start_time, end_time),
+        text={"title": text_of_injured_accidents_with_pedestrians},
     )
     output["widgets"].append(injured_accidents_with_pedestrians.serialize())
 

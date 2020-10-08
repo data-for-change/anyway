@@ -5,86 +5,74 @@ on:
       - master
       - dev
 env:
-  DOCKER_REPOSITORY_ANYWAY: "anywayteam/anyway"
-  DOCKER_REPOSITORY_DB: "anywayteam/db"
-  DOCKER_REPOSITORY_DB_BACKUP: "anywayteam/db_backup"
-  DOCKER_REPOSITORY_NGINX: "anywayteam/nginx"
+  DOCKER_REPOSITORY_ANYWAY: "${{ github.repository }}/anyway"
+  DOCKER_REPOSITORY_DB: "${{ github.repository }}/db"
+  DOCKER_REPOSITORY_DB_BACKUP: "${{ github.repository }}/db_backup"
+  DOCKER_REPOSITORY_NGINX: "${{ github.repository }}/nginx"
+  SERVER: "docker.pkg.github.com"
 jobs:
   Build-anyway:
-    if: github.repository == 'hasadna/anyway'
+    if: github.repository == "${{ github.repository_owner }}/anyway"
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
     - name: Build and push anyway Docker image
-      uses: docker/build-push-action@v1.0.1
+      uses: docker/build-push-action@v1.1.1
       with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+        name: ${{ env.DOCKER_REPOSITORY_ANYWAY }}
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        registry: docker.pkg.github.com
         repository: ${{ env.DOCKER_REPOSITORY_ANYWAY }}
         tag_with_ref: true
         tag_with_sha: true
         cache_froms: ${{ env.DOCKER_REPOSITORY_ANYWAY }}:dev
   Build-db:
-    if: github.repository == 'hasadna/anyway'
+    if: github.repository == "${{ github.repository_owner }}/anyway"
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
     - name: Build and push database Docker image
-      uses: docker/build-push-action@v1.0.1
+      uses: docker/build-push-action@v1.1.1
       with:
-        path: 'db_docker'
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+        registry: docker.pkg.github.com
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
         repository: ${{ env.DOCKER_REPOSITORY_DB }}
+        path: 'db_docker'
         tag_with_ref: true
         tag_with_sha: true
         cache_froms: ${{ env.DOCKER_REPOSITORY_DB }}:dev
   Build-db-backup:
-    if: github.repository == 'hasadna/anyway'
+    if: github.repository == "${{ github.repository_owner }}/anyway"
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
     - name: Build and push database backup Docker image
-      uses: docker/build-push-action@v1.0.1
+      uses: docker/build-push-action@v1.1.1
       with:
-        path: 'db_docker'
-        dockerfile: 'db_docker/backup.Dockerfile'
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+        registry: docker.pkg.github.com
         repository: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
+        dockerfile: 'db_docker/backup.Dockerfile'
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        path: 'db_docker'
         tag_with_ref: true
         tag_with_sha: true
         cache_froms: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}:dev
   Build-nginx:
-    if: github.repository == 'hasadna/anyway'
+    if: github.repository == "${{ github.repository_owner }}/anyway"
     needs: Build-anyway
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
     - env:
-        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        DOCKER_REPOSITORY_ANYWAY: ${{ env.DOCKER_REPOSITORY_ANYWAY }}
-        DOCKER_REPOSITORY_NGINX: ${{ env.DOCKER_REPOSITORY_NGINX }}
+        DOCKER_USERNAME: ${{ github.repository_owner }}
+        DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        REF_TAG="${GITHUB_REF##*/}" &&\
-        SHA_TAG=sha-`git rev-parse --short $GITHUB_SHA` &&\
-        echo REF_TAG=$REF_TAG &&\
-        echo SHA_TAG=$SHA_TAG &&\
-        docker pull "${DOCKER_REPOSITORY_ANYWAY}:${SHA_TAG}" &&\
-        if docker pull "${DOCKER_REPOSITORY_NGINX}:${REF_TAG}"; then
-          CACHE_FROM=" --cache-from ${DOCKER_REPOSITORY_NGINX}:${REF_TAG} "
-        else
-          CACHE_FROM=""
-        fi &&\
-        docker tag "${DOCKER_REPOSITORY_ANYWAY}:${SHA_TAG}" anywayteam/anyway:latest &&\
-        docker build $CACHE_FROM -t "${DOCKER_REPOSITORY_NGINX}:${SHA_TAG}" nginx_docker &&\
-        docker tag "${DOCKER_REPOSITORY_NGINX}:${SHA_TAG}" "${DOCKER_REPOSITORY_NGINX}:${REF_TAG}" &&\
-        echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin &&\
-        docker push "${DOCKER_REPOSITORY_NGINX}:${SHA_TAG}" &&\
-        docker push "${DOCKER_REPOSITORY_NGINX}:${REF_TAG}"
+        bin/nginx_docker_build_push.sh
   deploy:
-    if: github.repository == 'hasadna/anyway' && github.ref == 'refs/heads/master'
+    if: github.repository == "${{ github.repository_owner }}/anyway" && github.ref == 'refs/heads/master'
     needs:
     - Build-anyway
     - Build-db
@@ -94,10 +82,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - env:
-        DOCKER_REPOSITORY_ANYWAY: ${{ env.DOCKER_REPOSITORY_ANYWAY }}
-        DOCKER_REPOSITORY_DB: ${{ env.DOCKER_REPOSITORY_DB }}
-        DOCKER_REPOSITORY_DB_BACKUP: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
-        DOCKER_REPOSITORY_NGINX: ${{ env.DOCKER_REPOSITORY_NGINX }}
+        DOCKER_REPOSITORY_ANYWAY: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_ANYWAY }}
+        DOCKER_REPOSITORY_DB: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_DB }}
+        DOCKER_REPOSITORY_DB_BACKUP: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
+        DOCKER_REPOSITORY_NGINX: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_NGINX }}
         HASADNA_K8S_DEPLOY_KEY: ${{ secrets.HASADNA_K8S_DEPLOY_KEY }}
       run: |
         SHA_TAG=sha-`git rev-parse --short $GITHUB_SHA` &&\

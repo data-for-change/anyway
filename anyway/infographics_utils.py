@@ -14,8 +14,8 @@ from anyway.models import NewsFlash, AccidentMarkerView, InvolvedMarkerView, Roa
 from anyway.parsers import resolution_dict
 from anyway.app_and_db import db
 from anyway.infographics_dictionaries import driver_type_hebrew_dict
+from anyway.infographics_dictionaries import head_on_collisions_comparison_dict
 from anyway.parsers import infographics_data_cache_updater
-from concurrent.futures import ThreadPoolExecutor
 
 """
     Widget structure:
@@ -426,20 +426,24 @@ def extract_news_flash_obj(news_flash_id):
 def sum_road_accidents_by_specific_type(road_data, field_name):
     dict_merge = defaultdict(int)
     dict_merge[field_name] = 0
-    dict_merge["תאונות אחרות"] = 0
+    dict_merge[head_on_collisions_comparison_dict["others"]] = 0
 
     for accident_data in road_data:
         if accident_data["accident_type"] == field_name:
             dict_merge[field_name] += accident_data["count"]
         else:
-            dict_merge["תאונות אחרות"] += accident_data["count"]
+            dict_merge[head_on_collisions_comparison_dict["others"]] += accident_data["count"]
     return dict_merge
 
 
 def convert_roads_fatal_accidents_to_frontend_view(data_dict):
     data_list = []
     for key, value in data_dict.items():
-        data_list.append({"desc": key, "count": value})
+        if key == head_on_collisions_comparison_dict["head_to_head_collision"]:
+            data_list.append({"desc": head_on_collisions_comparison_dict["head_to_head"], "count": value})
+        else:
+            data_list.append({"desc": key, "count": value})
+
     return data_list
 
 
@@ -795,20 +799,181 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     )
     output["widgets"].append(accident_count_by_car_type.serialize())
 
+    def injured_accidents_with_pedestrians_mock_data():  # Temporary for Frontend
+        return [{'year': 2009,
+                 'light_injury_severity_text': "פצוע קל",
+                 'light_injury_severity_count': 12,
+                 'severe_injury_severity_text': "פצוע קשה",
+                 'severe_injury_severity_count': 3,
+                 'killed_injury_severity_text': "הרוג",
+                 'killed_injury_severity_count': 0 },
+                {'year': 2010,
+                 'light_injury_severity_text': "פצוע קל",
+                 'light_injury_severity_count': 24,
+                 'severe_injury_severity_text': "פצוע קשה",
+                 'severe_injury_severity_count': 0,
+                 'killed_injury_severity_text': "הרוג",
+                 'killed_injury_severity_count': 1 },
+                {'year': 2011,
+                 'light_injury_severity_text': "פצוע קל",
+                 'light_injury_severity_count': 9,
+                 'severe_injury_severity_text': "פצוע קשה",
+                 'severe_injury_severity_count': 2,
+                 'killed_injury_severity_text': "הרוג",
+                 'killed_injury_severity_count': 1 },
+                {'year': 2012,
+                 'light_injury_severity_text': "פצוע קל",
+                 'light_injury_severity_count': 21,
+                 'severe_injury_severity_text': "פצוע קשה",
+                 'severe_injury_severity_count': 2,
+                 'killed_injury_severity_text': "הרוג",
+                 'killed_injury_severity_count': 4 },
+                {'year': 2013,
+                 'light_injury_severity_text': "פצוע קל",
+                 'light_injury_severity_count': 21,
+                 'severe_injury_severity_text': "פצוע קשה",
+                 'severe_injury_severity_count': 2,
+                 'killed_injury_severity_text': "הרוג",
+                 'killed_injury_severity_count': 4 },
+                {'year': 2014,
+                 'light_injury_severity_text': "פצוע קל",
+                 'light_injury_severity_count': 10,
+                 'severe_injury_severity_text': "פצוע קשה",
+                 'severe_injury_severity_count': 0,
+                 'killed_injury_severity_text': "הרוג",
+                 'killed_injury_severity_count': 1 },
+                {'year': 2015,
+                 'light_injury_severity_text': "פצוע קל",
+                 'light_injury_severity_count': 13,
+                 'severe_injury_severity_text': "פצוע קשה",
+                 'severe_injury_severity_count': 2,
+                 'killed_injury_severity_text': "הרוג",
+                 'killed_injury_severity_count': 0 }]
+
+    injured_accidents_with_pedestrians = Widget(
+        name="injured_accidents_with_pedestrians",
+        rank=18,
+        items=injured_accidents_with_pedestrians_mock_data(),
+        text={"title": "נפגעים בתאונות עם הולכי רגל ברחוב ז׳בוטינסקי, פתח תקווה (2009-2015)"},
+    )
+    output["widgets"].append(injured_accidents_with_pedestrians.serialize())
+
+    def accident_severity_by_cross_location_mock_data():  # Temporary for Frontend
+        return [{'cross_location_text': "במעבר חצייה",
+                 'light_injury_severity_text': "פצוע קל",
+                 'light_injury_severity_count': 37,
+                 'severe_injury_severity_text': "פצוע קשה",
+                 'severe_injury_severity_count': 6,
+                 'killed_injury_severity_text': "הרוג",
+                 'killed_injury_severity_count': 0 },
+                {'cross_location_text': "לא במעבר חצייה",
+                 'light_injury_severity_text': "פצוע קל",
+                 'light_injury_severity_count': 11,
+                 'severe_injury_severity_text': "פצוע קשה",
+                 'severe_injury_severity_count': 10,
+                 'killed_injury_severity_text': "הרוג",
+                 'killed_injury_severity_count': 0 }]
+
+    accident_severity_by_cross_location = Widget(
+        name="accident_severity_by_cross_location",
+        rank=19,
+        items=accident_severity_by_cross_location_mock_data(),
+        text={"comment": "בן יהודה תל אביב בין השנים 2008-2020"}
+    )
+    output["widgets"].append(accident_severity_by_cross_location.serialize())
+
+    def motorcycle_accidents_vs_all_accidents_mock_data():  # Temporary for Frontend
+        return [{
+                "location": "כביש 20",
+                "vehicle": "אופנוע",
+                "percentage": 0.5
+                },
+                {
+                "location": "כביש 20",
+                "vehicle": "אחר",
+                "percentage": 0.5
+                },
+                {
+                "location": "כל הארץ",
+                "vehicle": "אחר",
+                "percentage": 0.802680566
+                },
+                {
+                "location": "כל הארץ",
+                "vehicle": "אופנוע",
+                "percentage": 0.197319434
+                }
+                ]
+
+    motorcycle_accidents_vs_all_accidents = Widget(
+        name="motorcycle_accidents_vs_all_accidents",
+        rank=20,
+        items=motorcycle_accidents_vs_all_accidents_mock_data(),
+        text={"title": "אחוז תאונות אופנוע מכלל התאונות הקשות והקטלניות"},
+    )
+    output["widgets"].append(motorcycle_accidents_vs_all_accidents.serialize())
+
+    def accidents_count_pedestrians_per_vehicle_street_vs_all_mock_data():  # Temporary for Frontend
+        return [{
+                "location": "כל הארץ",
+                "vehicle": "מכונית",
+                "num_of_accidents": 61307
+                },
+                {
+                "location": "כל הארץ",
+                "vehicle": "רכב כבד",
+                "num_of_accidents": 15801
+                },
+                {
+                "location": "כל הארץ",
+                "vehicle": "אופנוע",
+                "num_of_accidents": 3884
+                },
+                {
+                "location": "כל הארץ",
+                "vehicle": "אופניים וקורקינט ממונע",
+                "num_of_accidents": 1867
+                },
+                {
+                "location": "כל הארץ",
+                "vehicle": "אחר",
+                "num_of_accidents": 229
+                },
+                {
+                "location": "בן יהודה",
+                "vehicle": "מכונית",
+                "num_of_accidents": 64
+                },
+                {
+                "location": "בן יהודה",
+                "vehicle": "אופנוע",
+                "num_of_accidents": 40
+                },
+                {
+                "location": "בן יהודה",
+                "vehicle": "רכב כבד",
+                "num_of_accidents": 22
+                },
+                {
+                "location": "בן יהודה",
+                "vehicle": "אופניים וקורקינט ממונע",
+                "num_of_accidents": 9
+                }
+                ]
+
+    accidents_count_pedestrians_per_vehicle_street_vs_all = Widget(
+        name="accidents_count_pedestrians_per_vehicle_street_vs_all",
+        rank=21,
+        items=accidents_count_pedestrians_per_vehicle_street_vs_all_mock_data(),
+        text={"title": "פגיעות בהולכי רגל ברחוב בן יהודה בתל אביב לפי סוג רכב פוגע, בהשוואה לתאונות עירוניות בכל הארץ"},
+    )
+    output["widgets"].append(accidents_count_pedestrians_per_vehicle_street_vs_all.serialize())
+
     return json.dumps(output, default=str)
-
-
-get_infographics_data_executor = ThreadPoolExecutor(max_workers=1)
-
 
 def get_infographics_data(news_flash_id, years_ago):
     try:
-        future = get_infographics_data_executor.submit(
-            infographics_data_cache_updater.get_infographics_data_from_cache,
-            news_flash_id,
-            years_ago,
-        )
-        res = future.result(timeout=3)
+        res = infographics_data_cache_updater.get_infographics_data_from_cache(news_flash_id, years_ago)
     except Exception as e:
         logging.error(
             f"Exception while retrieving from infographics cache({news_flash_id},{years_ago})"

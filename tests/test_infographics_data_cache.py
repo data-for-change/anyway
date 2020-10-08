@@ -1,3 +1,4 @@
+import os
 import unittest
 from unittest import TestCase
 from unittest.mock import Mock, patch
@@ -8,6 +9,7 @@ from anyway.parsers.infographics_data_cache_updater import add_news_flash_to_cac
 import anyway.parsers.infographics_data_cache_updater
 
 
+@patch.dict(os.environ, {"FLASK_ENV": "test"})
 class Test_infographics_data_from_cache(TestCase):
     def test_get_not_existing_from_cache(self):
         cache_data = anyway.parsers.infographics_data_cache_updater.get_infographics_data_from_cache(

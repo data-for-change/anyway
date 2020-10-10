@@ -1,48 +1,34 @@
-from anyway.map_class import Map
+class Hebrew(object):
+    ROAD = "כביש"
+    INTERCITY = "בינעירוני"
 
-_WORDS = {}
-
-
-class HebrewWord(str):
-    value = None
-
-    def __new__(cls, value):
-        obj = str.__new__(cls, value)
-        obj.value = value
-        return obj
-
-    @property
-    def IN(self):
-        return HebrewWord("ב" + self.value)
-
-    @property
-    def AT(self):
-        return HebrewWord("ב" + self.value)
-
-    @property
-    def THE(self):
-        return HebrewWord("ה" + self.value)
-
-    @property
-    def AND(self):
-        return HebrewWord("ו" + self.value)
-
-    @property
-    def THAT(self):
-        return HebrewWord("ש" + self.value)
-
-    @property
-    def TO(self):
-        return HebrewWord("ל" + self.value)
-
-
-class HebrewConstants(Map):
-    def __init__(self):
-        super(HebrewConstants, self).__init__(_WORDS, value_func=lambda x: HebrewWord(x))
+    def __init__(self, *args, **kwargs):
+        super(Hebrew, self).__init__(*args, **kwargs)
 
     @staticmethod
     def concat(*words, sep=" "):
         return sep.join(words)
 
+    @staticmethod
+    def IN(word):
+        return "ב" + word
 
-hebrew = HebrewConstants()
+    @staticmethod
+    def AT(word):
+        return "ב" + word
+
+    @staticmethod
+    def THE(word):
+        return "ה" + word
+
+    @staticmethod
+    def AND(word):
+        return "ו" + word
+
+    @staticmethod
+    def THAT(word):
+        return "ש" + word
+
+    @staticmethod
+    def TO(word):
+        return "ל" + word

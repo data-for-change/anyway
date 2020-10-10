@@ -2,6 +2,7 @@
 import logging
 import datetime
 import json
+import os
 from functools import lru_cache
 
 import pandas as pd
@@ -952,16 +953,19 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 
 
 def get_infographics_data(news_flash_id, years_ago):
-    try:
-        res = infographics_data_cache_updater.get_infographics_data_from_cache(
-            news_flash_id, years_ago
-        )
-    except Exception as e:
-        logging.error(
-            f"Exception while retrieving from infographics cache({news_flash_id},{years_ago})"
-            f":cause:{e.__cause__}, class:{e.__class__}"
-        )
-        res = {}
-    if not res:
-        logging.error(f"infographics_data({news_flash_id}, {years_ago}) not found in cache")
-    return res
+    if os.environ.get("FLASK_ENV") == "development":
+        return create_infographics_data(news_flash_id, years_ago)
+    else:
+        try:
+            res = infographics_data_cache_updater.get_infographics_data_from_cache(
+                news_flash_id, years_ago
+            )
+        except Exception as e:
+            logging.error(
+                f"Exception while retrieving from infographics cache({news_flash_id},{years_ago})"
+                f":cause:{e.__cause__}, class:{e.__class__}"
+            )
+            res = {}
+        if not res:
+            logging.error(f"infographics_data({news_flash_id}, {years_ago}) not found in cache")
+        return res

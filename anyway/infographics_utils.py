@@ -2,6 +2,7 @@
 import logging
 import datetime
 import json
+import os
 from functools import lru_cache
 
 import pandas as pd
@@ -16,6 +17,7 @@ from anyway.app_and_db import db
 from anyway.infographics_dictionaries import driver_type_hebrew_dict
 from anyway.infographics_dictionaries import head_on_collisions_comparison_dict
 from anyway.parsers import infographics_data_cache_updater
+from anyway.constants import CONST
 
 """
     Widget structure:
@@ -110,7 +112,7 @@ def get_accident_count_by_accident_type(location_info, start_time, end_time):
 
 
 def get_top_road_segments_accidents_per_km(
-        resolution, location_info, start_time=None, end_time=None, limit=5
+    resolution, location_info, start_time=None, end_time=None, limit=5
 ):
     if resolution != "כביש בינעירוני":  # relevent for non urban roads only
         return {}
@@ -126,19 +128,19 @@ def get_top_road_segments_accidents_per_km(
             (RoadSegments.to_km - RoadSegments.from_km).label("segment_length"),
             cast(
                 (
-                        func.count(AccidentMarkerView.road_segment_name)
-                        / (RoadSegments.to_km - RoadSegments.from_km)
+                    func.count(AccidentMarkerView.road_segment_name)
+                    / (RoadSegments.to_km - RoadSegments.from_km)
                 ),
                 Numeric(10, 4),
             ).label("accidents_per_km"),
         )
-            .filter(AccidentMarkerView.road1 == RoadSegments.road)
-            .filter(AccidentMarkerView.road_segment_number == RoadSegments.segment)
-            .filter(AccidentMarkerView.road1 == location_info["road1"])
-            .filter(AccidentMarkerView.road_segment_name is not None)
-            .group_by(AccidentMarkerView.road_segment_name, RoadSegments.from_km, RoadSegments.to_km)
-            .order_by(desc("accidents_per_km"))
-            .limit(limit)
+        .filter(AccidentMarkerView.road1 == RoadSegments.road)
+        .filter(AccidentMarkerView.road_segment_number == RoadSegments.segment)
+        .filter(AccidentMarkerView.road1 == location_info["road1"])
+        .filter(AccidentMarkerView.road_segment_name is not None)
+        .group_by(AccidentMarkerView.road_segment_name, RoadSegments.from_km, RoadSegments.to_km)
+        .order_by(desc("accidents_per_km"))
+        .limit(limit)
     )
 
     result = pd.read_sql_query(query.statement, query.session.bind)
@@ -146,7 +148,7 @@ def get_top_road_segments_accidents_per_km(
 
 
 def get_accidents_stats(
-        table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None
+    table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None
 ):
     filters = filters or {}
     filters["provider_code"] = [
@@ -179,7 +181,7 @@ def get_injured_filters(location_info):
 
 
 def get_most_severe_accidents_with_entities(
-        table_obj, filters, entities, start_time, end_time, limit=10
+    table_obj, filters, entities, start_time, end_time, limit=10
 ):
     filters = filters or {}
     filters["provider_code"] = [
@@ -255,8 +257,8 @@ def filter_and_group_injured_count_per_age_group(data_of_ages):
         for item in range_dict.items():
             item_min_range, item_max_range = item
             if (
-                    item_min_range <= min_age <= item_max_range
-                    and item_min_range <= max_age <= item_max_range
+                item_min_range <= min_age <= item_max_range
+                and item_min_range <= max_age <= item_max_range
             ):
                 string_age_range = f"{item_min_range:02}-{item_max_range:02}"
                 dict_by_required_age_group[string_age_range] += count
@@ -330,7 +332,7 @@ def get_most_severe_accidents_table(location_info, start_time, end_time):
         )
         # TODO: remove injured_count after FE adaptation to light and severe counts
         accident["injured_count"] = (
-                accident["severe_injured_count"] + accident["light_injured_count"]
+            accident["severe_injured_count"] + accident["light_injured_count"]
         )
         del (
             accident["accident_timestamp"],
@@ -350,8 +352,8 @@ def count_accidents_by_driver_type(data):
         elif vehicle_type in BE_CONST.PRIVATE_DRIVER_VEHICLE_TYPES:
             driver_types[driver_type_hebrew_dict["private_vehicle_driver"]] += count
         elif (
-                vehicle_type in BE_CONST.LIGHT_ELECTRIC_VEHICLE_TYPES
-                or vehicle_type in BE_CONST.OTHER_VEHICLES_TYPES
+            vehicle_type in BE_CONST.LIGHT_ELECTRIC_VEHICLE_TYPES
+            or vehicle_type in BE_CONST.OTHER_VEHICLES_TYPES
         ):
             driver_types[driver_type_hebrew_dict["other_driver"]] += count
     output = []
@@ -440,7 +442,9 @@ def convert_roads_fatal_accidents_to_frontend_view(data_dict):
     data_list = []
     for key, value in data_dict.items():
         if key == head_on_collisions_comparison_dict["head_to_head_collision"]:
-            data_list.append({"desc": head_on_collisions_comparison_dict["head_to_head"], "count": value})
+            data_list.append(
+                {"desc": head_on_collisions_comparison_dict["head_to_head"], "count": value}
+            )
         else:
             data_list.append({"desc": key, "count": value})
 
@@ -538,7 +542,7 @@ def percentage_accidents_by_car_type_national_data_cache(start_time, end_time):
 
 
 def stats_accidents_by_car_type_with_national_data(
-        involved_by_vehicle_type_data, start_time, end_time
+    involved_by_vehicle_type_data, start_time, end_time
 ):
     out = []
     data_by_segment = percentage_accidents_by_car_type(involved_by_vehicle_type_data)
@@ -680,12 +684,14 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     output["widgets"].append(accident_count_by_accident_type.serialize())
 
     # accidents heat map
+    accidents_heat_map_filters = location_info
+    accidents_heat_map_filters['accident_severity'] = [CONST.ACCIDENT_SEVERITY_DEADLY, CONST.ACCIDENT_SEVERITY_SEVERE]
     accidents_heat_map = Widget(
         name="accidents_heat_map",
         rank=7,
         items=get_accidents_heat_map(
             table_obj=AccidentMarkerView,
-            filters=location_info,
+            filters=accidents_heat_map_filters,
             start_time=start_time,
             end_time=end_time,
         ),
@@ -843,51 +849,42 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     output["widgets"].append(injured_accidents_with_pedestrians.serialize())
 
     def accident_severity_by_cross_location_mock_data():  # Temporary for Frontend
-        return [{'cross_location_text': "במעבר חצייה",
-                 'light_injury_severity_text': "פצוע קל",
-                 'light_injury_severity_count': 37,
-                 'severe_injury_severity_text': "פצוע קשה",
-                 'severe_injury_severity_count': 6,
-                 'killed_injury_severity_text': "הרוג",
-                 'killed_injury_severity_count': 0 },
-                {'cross_location_text': "לא במעבר חצייה",
-                 'light_injury_severity_text': "פצוע קל",
-                 'light_injury_severity_count': 11,
-                 'severe_injury_severity_text': "פצוע קשה",
-                 'severe_injury_severity_count': 10,
-                 'killed_injury_severity_text': "הרוג",
-                 'killed_injury_severity_count': 0 }]
+        return [
+            {
+                "cross_location_text": "במעבר חצייה",
+                "light_injury_severity_text": "פצוע קל",
+                "light_injury_severity_count": 37,
+                "severe_injury_severity_text": "פצוע קשה",
+                "severe_injury_severity_count": 6,
+                "killed_injury_severity_text": "הרוג",
+                "killed_injury_severity_count": 0,
+            },
+            {
+                "cross_location_text": "לא במעבר חצייה",
+                "light_injury_severity_text": "פצוע קל",
+                "light_injury_severity_count": 11,
+                "severe_injury_severity_text": "פצוע קשה",
+                "severe_injury_severity_count": 10,
+                "killed_injury_severity_text": "הרוג",
+                "killed_injury_severity_count": 0,
+            },
+        ]
 
     accident_severity_by_cross_location = Widget(
         name="accident_severity_by_cross_location",
         rank=19,
         items=accident_severity_by_cross_location_mock_data(),
-        text={"comment": "בן יהודה תל אביב בין השנים 2008-2020"}
+        text={"comment": "בן יהודה תל אביב בין השנים 2008-2020"},
     )
     output["widgets"].append(accident_severity_by_cross_location.serialize())
 
     def motorcycle_accidents_vs_all_accidents_mock_data():  # Temporary for Frontend
-        return [{
-                "location": "כביש 20",
-                "vehicle": "אופנוע",
-                "percentage": 0.5
-                },
-                {
-                "location": "כביש 20",
-                "vehicle": "אחר",
-                "percentage": 0.5
-                },
-                {
-                "location": "כל הארץ",
-                "vehicle": "אחר",
-                "percentage": 0.802680566
-                },
-                {
-                "location": "כל הארץ",
-                "vehicle": "אופנוע",
-                "percentage": 0.197319434
-                }
-                ]
+        return [
+            {"location": "כביש 20", "vehicle": "אופנוע", "percentage": 0.5},
+            {"location": "כביש 20", "vehicle": "אחר", "percentage": 0.5},
+            {"location": "כל הארץ", "vehicle": "אחר", "percentage": 0.802680566},
+            {"location": "כל הארץ", "vehicle": "אופנוע", "percentage": 0.197319434},
+        ]
 
     motorcycle_accidents_vs_all_accidents = Widget(
         name="motorcycle_accidents_vs_all_accidents",
@@ -898,72 +895,45 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     output["widgets"].append(motorcycle_accidents_vs_all_accidents.serialize())
 
     def accidents_count_pedestrians_per_vehicle_street_vs_all_mock_data():  # Temporary for Frontend
-        return [{
-                "location": "כל הארץ",
-                "vehicle": "מכונית",
-                "num_of_accidents": 61307
-                },
-                {
-                "location": "כל הארץ",
-                "vehicle": "רכב כבד",
-                "num_of_accidents": 15801
-                },
-                {
-                "location": "כל הארץ",
-                "vehicle": "אופנוע",
-                "num_of_accidents": 3884
-                },
-                {
-                "location": "כל הארץ",
-                "vehicle": "אופניים וקורקינט ממונע",
-                "num_of_accidents": 1867
-                },
-                {
-                "location": "כל הארץ",
-                "vehicle": "אחר",
-                "num_of_accidents": 229
-                },
-                {
-                "location": "בן יהודה",
-                "vehicle": "מכונית",
-                "num_of_accidents": 64
-                },
-                {
-                "location": "בן יהודה",
-                "vehicle": "אופנוע",
-                "num_of_accidents": 40
-                },
-                {
-                "location": "בן יהודה",
-                "vehicle": "רכב כבד",
-                "num_of_accidents": 22
-                },
-                {
-                "location": "בן יהודה",
-                "vehicle": "אופניים וקורקינט ממונע",
-                "num_of_accidents": 9
-                }
-                ]
+        return [
+            {"location": "כל הארץ", "vehicle": "מכונית", "num_of_accidents": 61307},
+            {"location": "כל הארץ", "vehicle": "רכב כבד", "num_of_accidents": 15801},
+            {"location": "כל הארץ", "vehicle": "אופנוע", "num_of_accidents": 3884},
+            {"location": "כל הארץ", "vehicle": "אופניים וקורקינט ממונע", "num_of_accidents": 1867},
+            {"location": "כל הארץ", "vehicle": "אחר", "num_of_accidents": 229},
+            {"location": "בן יהודה", "vehicle": "מכונית", "num_of_accidents": 64},
+            {"location": "בן יהודה", "vehicle": "אופנוע", "num_of_accidents": 40},
+            {"location": "בן יהודה", "vehicle": "רכב כבד", "num_of_accidents": 22},
+            {"location": "בן יהודה", "vehicle": "אופניים וקורקינט ממונע", "num_of_accidents": 9},
+        ]
 
     accidents_count_pedestrians_per_vehicle_street_vs_all = Widget(
         name="accidents_count_pedestrians_per_vehicle_street_vs_all",
         rank=21,
         items=accidents_count_pedestrians_per_vehicle_street_vs_all_mock_data(),
-        text={"title": "פגיעות בהולכי רגל ברחוב בן יהודה בתל אביב לפי סוג רכב פוגע, בהשוואה לתאונות עירוניות בכל הארץ"},
+        text={
+            "title": "פגיעות בהולכי רגל ברחוב בן יהודה בתל אביב לפי סוג רכב פוגע, בהשוואה לתאונות עירוניות בכל הארץ"
+        },
     )
     output["widgets"].append(accidents_count_pedestrians_per_vehicle_street_vs_all.serialize())
 
     return json.dumps(output, default=str)
 
+
 def get_infographics_data(news_flash_id, years_ago):
-    try:
-        res = infographics_data_cache_updater.get_infographics_data_from_cache(news_flash_id, years_ago)
-    except Exception as e:
-        logging.error(
-            f"Exception while retrieving from infographics cache({news_flash_id},{years_ago})"
-            f":cause:{e.__cause__}, class:{e.__class__}"
-        )
-        res = {}
-    if not res:
-        logging.error(f"infographics_data({news_flash_id}, {years_ago}) not found in cache")
-    return res
+    if os.environ.get("FLASK_ENV") == "development":
+        return create_infographics_data(news_flash_id, years_ago)
+    else:
+        try:
+            res = infographics_data_cache_updater.get_infographics_data_from_cache(
+                news_flash_id, years_ago
+            )
+        except Exception as e:
+            logging.error(
+                f"Exception while retrieving from infographics cache({news_flash_id},{years_ago})"
+                f":cause:{e.__cause__}, class:{e.__class__}"
+            )
+            res = {}
+        if not res:
+            logging.error(f"infographics_data({news_flash_id}, {years_ago}) not found in cache")
+        return res

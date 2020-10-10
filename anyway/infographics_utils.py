@@ -838,8 +838,12 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     )
     output["widgets"].append(accident_count_by_car_type.serialize())
 
-    text_of_injured_accidents_with_pedestrians = \
-        f"נפגעים בתאונות עם הולכי רגל ברחוב {location_info['street1_hebrew'] if 'street1_hebrew' in location_info else ''}, {location_info['yishuv_name'] if 'yishuv_name' in location_info else ''} ({start_time}-{end_time})"
+    if 'street1_hebrew' in location_info and 'yishuv_name' in location_info:
+        text_of_injured_accidents_with_pedestrians = \
+            f"נפגעים בתאונות עם הולכי רגל ברחוב {location_info['street1_hebrew']}, {location_info['yishuv_name']} ({start_time}-{end_time})"
+    else:
+        text_of_injured_accidents_with_pedestrians = "אין מידע במקטע זה"
+        
     injured_accidents_with_pedestrians = Widget(
         name="accident_severity_by_cross_location",
         rank=18,

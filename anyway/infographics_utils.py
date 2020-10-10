@@ -843,7 +843,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
             f"נפגעים בתאונות עם הולכי רגל ברחוב {location_info['street1_hebrew']}, {location_info['yishuv_name']} ({start_time}-{end_time})"
     else:
         text_of_injured_accidents_with_pedestrians = "אין מידע במקטע זה"
-        
+
     injured_accidents_with_pedestrians = Widget(
         name="accident_severity_by_cross_location",
         rank=18,

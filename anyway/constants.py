@@ -34,6 +34,7 @@ class Constants(object):
 
     # This is a type for the 'accident_severity' table field name
     ACCIDENT_SEVERITY_DEADLY = 1
+    ACCIDENT_SEVERITY_SEVERE = 2
 
     # This is a type for the 'road_type' table field name
     ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION = 4

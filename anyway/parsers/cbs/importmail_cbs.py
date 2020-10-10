@@ -8,14 +8,15 @@ import time
 from datetime import datetime
 
 from anyway.utilities import time_delta
+from anyway import secrets
 
 mail_dir = "cbs/data"
 
 
 def main(detach_dir, username=None, password=None, email_search_start_date=""):
     try:
-        username = username or os.environ.get("MAILUSER")
-        password = password or os.environ.get("MAILPASS")
+        username = username or secrets.get("MAILUSER")
+        password = password or secrets.get("MAILPASS")
         if not username:
             logging.error(
                 "Username not set. Please set env var MAILUSER or use the --username argument"

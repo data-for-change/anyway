@@ -2,6 +2,9 @@
 import logging
 import datetime
 import json
+import os
+from functools import lru_cache
+
 import pandas as pd
 from collections import defaultdict
 from sqlalchemy import func
@@ -12,8 +15,9 @@ from anyway.models import NewsFlash, AccidentMarkerView, InvolvedMarkerView, Roa
 from anyway.parsers import resolution_dict
 from anyway.app_and_db import db
 from anyway.infographics_dictionaries import driver_type_hebrew_dict
+from anyway.infographics_dictionaries import head_on_collisions_comparison_dict
 from anyway.parsers import infographics_data_cache_updater
-from concurrent.futures import ThreadPoolExecutor
+from anyway.constants import CONST
 
 """
     Widget structure:
@@ -56,11 +60,11 @@ class Widget:
 def extract_news_flash_location(news_flash_id):
     news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == news_flash_id).first()
     if not news_flash_obj:
-        logging.warn("could not find news flash id {}".format(news_flash_id))
+        logging.warning(f"could not find news flash id {str(news_flash_id)}")
         return None
     resolution = news_flash_obj.resolution if news_flash_obj.resolution else None
     if not news_flash_obj or not resolution or resolution not in resolution_dict:
-        logging.warn("could not find valid resolution for news flash id {}".format(news_flash_id))
+        logging.warning(f"could not find valid resolution for news flash id {str(news_flash_id)}")
         return None
     data = {"resolution": resolution}
     for field in resolution_dict[resolution]:
@@ -317,14 +321,19 @@ def get_most_severe_accidents_table(location_info, start_time, end_time):
         dt = accident["accident_timestamp"].to_pydatetime()
         accident["date"] = dt.strftime("%d/%m/%y")
         accident["hour"] = dt.strftime("%H:%M")
-        num = get_casualties_count_in_accident(
+        accident["killed_count"] = get_casualties_count_in_accident(
             accident["id"], accident["provider_code"], 1, accident["accident_year"]
         )
-        accident["killed_count"] = num
-        num = get_casualties_count_in_accident(
-            accident["id"], accident["provider_code"], [2, 3], accident["accident_year"]
+        accident["severe_injured_count"] = get_casualties_count_in_accident(
+            accident["id"], accident["provider_code"], 2, accident["accident_year"]
         )
-        accident["injured_count"] = num
+        accident["light_injured_count"] = get_casualties_count_in_accident(
+            accident["id"], accident["provider_code"], 3, accident["accident_year"]
+        )
+        # TODO: remove injured_count after FE adaptation to light and severe counts
+        accident["injured_count"] = (
+            accident["severe_injured_count"] + accident["light_injured_count"]
+        )
         del (
             accident["accident_timestamp"],
             accident["accident_type"],
@@ -419,20 +428,26 @@ def extract_news_flash_obj(news_flash_id):
 def sum_road_accidents_by_specific_type(road_data, field_name):
     dict_merge = defaultdict(int)
     dict_merge[field_name] = 0
-    dict_merge["תאונות אחרות"] = 0
+    dict_merge[head_on_collisions_comparison_dict["others"]] = 0
 
     for accident_data in road_data:
         if accident_data["accident_type"] == field_name:
             dict_merge[field_name] += accident_data["count"]
         else:
-            dict_merge["תאונות אחרות"] += accident_data["count"]
+            dict_merge[head_on_collisions_comparison_dict["others"]] += accident_data["count"]
     return dict_merge
 
 
 def convert_roads_fatal_accidents_to_frontend_view(data_dict):
     data_list = []
     for key, value in data_dict.items():
-        data_list.append({"desc": key, "count": value})
+        if key == head_on_collisions_comparison_dict["head_to_head_collision"]:
+            data_list.append(
+                {"desc": head_on_collisions_comparison_dict["head_to_head"], "count": value}
+            )
+        else:
+            data_list.append({"desc": key, "count": value})
+
     return data_list
 
 
@@ -490,12 +505,59 @@ def get_latest_accident_date(table_obj, filters):
     return (df.to_dict(orient="records"))[0].get("max_1")  # pylint: disable=no-member
 
 
-def count_accidents_by_car_type(involved_by_vehicle_type_data):  # Temporary for Frontend
-    return [
-        {"car_type": "רכב פרטי", "percentage_segment": 78, "percentage_country": 74},
-        {"car_type": "מסחרי/משאית", "percentage_segment": 39, "percentage_country": 34},
-        {"car_type": "אופנוע", "percentage_segment": 28, "percentage_country": 15},
-    ]
+def percentage_accidents_by_car_type(involved_by_vehicle_type_data):
+    driver_types = defaultdict(float)
+    total_count = 0
+    for item in involved_by_vehicle_type_data:
+        vehicle_type, count = item["involve_vehicle_type"], int(item["count"])
+        total_count += count
+        if vehicle_type in BE_CONST.CAR_VEHICLE_TYPES:
+            driver_types["רכב פרטי"] += count
+        elif vehicle_type in BE_CONST.LARGE_VEHICLE_TYPES:
+            driver_types["מסחרי/משאית"] += count
+        elif vehicle_type in BE_CONST.MOTORCYCLE_VEHICLE_TYPES:
+            driver_types["אופנוע"] += count
+        elif vehicle_type in BE_CONST.BICYCLE_AND_SMALL_MOTOR_VEHICLE_TYPES:
+            driver_types["אופניים/קורקינט"] += count
+        else:
+            driver_types["אחר"] += count
+
+    output = defaultdict(float)
+    for k, v in driver_types.items():  # Calculate percentage
+        output[k] = 100 * v / total_count
+
+    return output
+
+
+@lru_cache(maxsize=64)
+def percentage_accidents_by_car_type_national_data_cache(start_time, end_time):
+    involved_by_vehicle_type_data = get_accidents_stats(
+        table_obj=InvolvedMarkerView,
+        group_by="involve_vehicle_type",
+        count="involve_vehicle_type",
+        start_time=start_time,
+        end_time=end_time,
+    )
+    return percentage_accidents_by_car_type(involved_by_vehicle_type_data)
+
+
+def stats_accidents_by_car_type_with_national_data(
+    involved_by_vehicle_type_data, start_time, end_time
+):
+    out = []
+    data_by_segment = percentage_accidents_by_car_type(involved_by_vehicle_type_data)
+    national_data = percentage_accidents_by_car_type_national_data_cache(start_time, end_time)
+
+    for k, v in national_data.items():  # pylint: disable=W0612
+        out.append(
+            {
+                "car_type": k,
+                "percentage_segment": data_by_segment[k],
+                "percentage_country": national_data[k],
+            }
+        )
+
+    return out
 
 
 def create_infographics_data(news_flash_id, number_of_years_ago):
@@ -589,12 +651,14 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     output["widgets"].append(accident_count_by_accident_type.serialize())
 
     # accidents heat map
+    accidents_heat_map_filters = location_info
+    accidents_heat_map_filters['accident_severity'] = [CONST.ACCIDENT_SEVERITY_DEADLY, CONST.ACCIDENT_SEVERITY_SEVERE]
     accidents_heat_map = Widget(
         name="accidents_heat_map",
         rank=7,
         items=get_accidents_heat_map(
             table_obj=AccidentMarkerView,
-            filters=location_info,
+            filters=accidents_heat_map_filters,
             start_time=start_time,
             end_time=end_time,
         ),
@@ -735,30 +799,173 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     accident_count_by_car_type = Widget(
         name="accident_count_by_car_type",
         rank=17,
-        items=count_accidents_by_car_type(involved_by_vehicle_type_data),
+        items=stats_accidents_by_car_type_with_national_data(
+            involved_by_vehicle_type_data, start_time, end_time
+        ),
     )
     output["widgets"].append(accident_count_by_car_type.serialize())
+
+    def injured_accidents_with_pedestrians_mock_data():  # Temporary for Frontend
+        return [
+            {
+                "year": 2009,
+                "light_injury_severity_text": "פצוע קל",
+                "light_injury_severity_count": 12,
+                "severe_injury_severity_text": "פצוע קשה",
+                "severe_injury_severity_count": 3,
+                "killed_injury_severity_text": "הרוג",
+                "killed_injury_severity_count": 0,
+            },
+            {
+                "year": 2010,
+                "light_injury_severity_text": "פצוע קל",
+                "light_injury_severity_count": 24,
+                "severe_injury_severity_text": "פצוע קשה",
+                "severe_injury_severity_count": 0,
+                "killed_injury_severity_text": "הרוג",
+                "killed_injury_severity_count": 1,
+            },
+            {
+                "year": 2011,
+                "light_injury_severity_text": "פצוע קל",
+                "light_injury_severity_count": 9,
+                "severe_injury_severity_text": "פצוע קשה",
+                "severe_injury_severity_count": 2,
+                "killed_injury_severity_text": "הרוג",
+                "killed_injury_severity_count": 1,
+            },
+            {
+                "year": 2012,
+                "light_injury_severity_text": "פצוע קל",
+                "light_injury_severity_count": 21,
+                "severe_injury_severity_text": "פצוע קשה",
+                "severe_injury_severity_count": 2,
+                "killed_injury_severity_text": "הרוג",
+                "killed_injury_severity_count": 4,
+            },
+            {
+                "year": 2013,
+                "light_injury_severity_text": "פצוע קל",
+                "light_injury_severity_count": 21,
+                "severe_injury_severity_text": "פצוע קשה",
+                "severe_injury_severity_count": 2,
+                "killed_injury_severity_text": "הרוג",
+                "killed_injury_severity_count": 4,
+            },
+            {
+                "year": 2014,
+                "light_injury_severity_text": "פצוע קל",
+                "light_injury_severity_count": 10,
+                "severe_injury_severity_text": "פצוע קשה",
+                "severe_injury_severity_count": 0,
+                "killed_injury_severity_text": "הרוג",
+                "killed_injury_severity_count": 1,
+            },
+            {
+                "year": 2015,
+                "light_injury_severity_text": "פצוע קל",
+                "light_injury_severity_count": 13,
+                "severe_injury_severity_text": "פצוע קשה",
+                "severe_injury_severity_count": 2,
+                "killed_injury_severity_text": "הרוג",
+                "killed_injury_severity_count": 0,
+            },
+        ]
+
+    injured_accidents_with_pedestrians = Widget(
+        name="injured_accidents_with_pedestrians",
+        rank=18,
+        items=injured_accidents_with_pedestrians_mock_data(),
+        text={"title": "נפגעים בתאונות עם הולכי רגל ברחוב ז׳בוטינסקי, פתח תקווה (2009-2015)"},
+    )
+    output["widgets"].append(injured_accidents_with_pedestrians.serialize())
+
+    def accident_severity_by_cross_location_mock_data():  # Temporary for Frontend
+        return [
+            {
+                "cross_location_text": "במעבר חצייה",
+                "light_injury_severity_text": "פצוע קל",
+                "light_injury_severity_count": 37,
+                "severe_injury_severity_text": "פצוע קשה",
+                "severe_injury_severity_count": 6,
+                "killed_injury_severity_text": "הרוג",
+                "killed_injury_severity_count": 0,
+            },
+            {
+                "cross_location_text": "לא במעבר חצייה",
+                "light_injury_severity_text": "פצוע קל",
+                "light_injury_severity_count": 11,
+                "severe_injury_severity_text": "פצוע קשה",
+                "severe_injury_severity_count": 10,
+                "killed_injury_severity_text": "הרוג",
+                "killed_injury_severity_count": 0,
+            },
+        ]
+
+    accident_severity_by_cross_location = Widget(
+        name="accident_severity_by_cross_location",
+        rank=19,
+        items=accident_severity_by_cross_location_mock_data(),
+        text={"comment": "בן יהודה תל אביב בין השנים 2008-2020"},
+    )
+    output["widgets"].append(accident_severity_by_cross_location.serialize())
+
+    def motorcycle_accidents_vs_all_accidents_mock_data():  # Temporary for Frontend
+        return [
+            {"location": "כביש 20", "vehicle": "אופנוע", "percentage": 0.5},
+            {"location": "כביש 20", "vehicle": "אחר", "percentage": 0.5},
+            {"location": "כל הארץ", "vehicle": "אחר", "percentage": 0.802680566},
+            {"location": "כל הארץ", "vehicle": "אופנוע", "percentage": 0.197319434},
+        ]
+
+    motorcycle_accidents_vs_all_accidents = Widget(
+        name="motorcycle_accidents_vs_all_accidents",
+        rank=20,
+        items=motorcycle_accidents_vs_all_accidents_mock_data(),
+        text={"title": "אחוז תאונות אופנוע מכלל התאונות הקשות והקטלניות"},
+    )
+    output["widgets"].append(motorcycle_accidents_vs_all_accidents.serialize())
+
+    def accidents_count_pedestrians_per_vehicle_street_vs_all_mock_data():  # Temporary for Frontend
+        return [
+            {"location": "כל הארץ", "vehicle": "מכונית", "num_of_accidents": 61307},
+            {"location": "כל הארץ", "vehicle": "רכב כבד", "num_of_accidents": 15801},
+            {"location": "כל הארץ", "vehicle": "אופנוע", "num_of_accidents": 3884},
+            {"location": "כל הארץ", "vehicle": "אופניים וקורקינט ממונע", "num_of_accidents": 1867},
+            {"location": "כל הארץ", "vehicle": "אחר", "num_of_accidents": 229},
+            {"location": "בן יהודה", "vehicle": "מכונית", "num_of_accidents": 64},
+            {"location": "בן יהודה", "vehicle": "אופנוע", "num_of_accidents": 40},
+            {"location": "בן יהודה", "vehicle": "רכב כבד", "num_of_accidents": 22},
+            {"location": "בן יהודה", "vehicle": "אופניים וקורקינט ממונע", "num_of_accidents": 9},
+        ]
+
+    accidents_count_pedestrians_per_vehicle_street_vs_all = Widget(
+        name="accidents_count_pedestrians_per_vehicle_street_vs_all",
+        rank=21,
+        items=accidents_count_pedestrians_per_vehicle_street_vs_all_mock_data(),
+        text={
+            "title": "פגיעות בהולכי רגל ברחוב בן יהודה בתל אביב לפי סוג רכב פוגע, בהשוואה לתאונות עירוניות בכל הארץ"
+        },
+    )
+    output["widgets"].append(accidents_count_pedestrians_per_vehicle_street_vs_all.serialize())
 
     return json.dumps(output, default=str)
 
 
-get_infographics_data_executor = ThreadPoolExecutor(max_workers=1)
-
-
 def get_infographics_data(news_flash_id, years_ago):
-    try:
-        future = get_infographics_data_executor.submit(
-            infographics_data_cache_updater.get_infographics_data_from_cache,
-            news_flash_id,
-            years_ago,
-        )
-        res = future.result(timeout=3)
-    except Exception as e:
-        logging.error(
-            f"Exception while retrieving from infographics cache({news_flash_id},{years_ago})"
-            f":cause:{e.__cause__}, class:{e.__class__}"
-        )
-        res = {}
-    if not res:
-        logging.error(f"infographics_data({news_flash_id}, {years_ago}) not found in cache")
-    return res
+    if os.environ.get("FLASK_ENV") == "development":
+        return create_infographics_data(news_flash_id, years_ago)
+    else:
+        try:
+            res = infographics_data_cache_updater.get_infographics_data_from_cache(
+                news_flash_id, years_ago
+            )
+        except Exception as e:
+            logging.error(
+                f"Exception while retrieving from infographics cache({news_flash_id},{years_ago})"
+                f":cause:{e.__cause__}, class:{e.__class__}"
+            )
+            res = {}
+        if not res:
+            logging.error(f"infographics_data({news_flash_id}, {years_ago}) not found in cache")
+        return res

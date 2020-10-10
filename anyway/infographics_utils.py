@@ -33,6 +33,8 @@ from anyway.constants import CONST
     }
 """
 
+SPECIFIC_ROAD_SEGMENT_FATAL_ACCIDENTS = "specific_road_segment_fatal_accidents"
+ALL_ROADS_FATAL_ACCIDENTS = "all_roads_fatal_accidents"
 
 class Widget:
     def __init__(self, name, rank, items, text=None, meta=None):
@@ -484,13 +486,21 @@ def get_head_to_head_stat(news_flash_id, start_time, end_time):
     all_roads_data_dict = sum_road_accidents_by_specific_type(all_roads_data, "התנגשות חזית בחזית")
 
     return {
-        "specific_road_segment_fatal_accidents": convert_roads_fatal_accidents_to_frontend_view(
+        SPECIFIC_ROAD_SEGMENT_FATAL_ACCIDENTS: convert_roads_fatal_accidents_to_frontend_view(
             road_data_dict
         ),
-        "all_roads_fatal_accidents": convert_roads_fatal_accidents_to_frontend_view(
+        ALL_ROADS_FATAL_ACCIDENTS: convert_roads_fatal_accidents_to_frontend_view(
             all_roads_data_dict
         ),
     }
+
+
+def should_display_head_to_head_stat(items):
+    spec_h2h = next(d['count'] for d in items[SPECIFIC_ROAD_SEGMENT_FATAL_ACCIDENTS] if d['desc'] == "חזיתיות")
+    all_h2h = next(d['count'] for d in items[ALL_ROADS_FATAL_ACCIDENTS] if d['desc'] == "חזיתיות")
+    spec_total = sum([d['count'] for d in items[SPECIFIC_ROAD_SEGMENT_FATAL_ACCIDENTS]])
+    all_total = sum([d['count'] for d in items[ALL_ROADS_FATAL_ACCIDENTS]])
+    return spec_h2h > all_h2h or (spec_total > 0 and all_total > 0 and spec_h2h/spec_total > all_h2h/all_total)
 
 
 # gets the latest date an accident has occured
@@ -638,7 +648,10 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
             news_flash_id=news_flash_id, start_time=start_time, end_time=end_time
         ),
     )
-    output["widgets"].append(head_on_collisions_comparison.serialize())
+    if should_display_head_to_head_stat(head_on_collisions_comparison.items):
+        output["widgets"].append(head_on_collisions_comparison.serialize())
+    else:
+        logging.info("Removing head_on_collisions_comparison widget from output")
 
     # accident_type count
     accident_count_by_accident_type = Widget(

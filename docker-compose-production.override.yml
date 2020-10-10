@@ -14,6 +14,7 @@ services:
       - PROXYFIX_X_FOR=1
       - PROXYFIX_X_PROTO=1
       - PROXYFIX_X_HOST=1
+      - FLASK_ENV=production
       - DATABASE_URL
       - GOOGLE_MAPS_KEY
       - TWITTER_CONSUMER_KEY

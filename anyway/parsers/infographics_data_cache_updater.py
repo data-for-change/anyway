@@ -135,7 +135,7 @@ def get_cache_info():
     num_acc_suburban_flash_items = (
         db.session.query(NewsFlash)
         .filter(NewsFlash.accident)
-        .filter(NewsFlash.resolution.in_(["כביש בבין עירוני"]))
+        .filter(NewsFlash.resolution.in_(["כביש בין עירוני"]))
         .filter(not_(NewsFlash.road_segment_name == None))
         .count()
     )

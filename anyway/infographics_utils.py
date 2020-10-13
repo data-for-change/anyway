@@ -3,6 +3,7 @@ import logging
 import datetime
 import json
 from functools import lru_cache
+from typing import Optional, Dict, List, Any, Callable
 
 import pandas as pd
 from collections import defaultdict
@@ -53,6 +54,27 @@ class Widget:
             output["meta"] = {}
         output["meta"]["rank"] = self.rank
         return output
+
+
+class Selection_params:
+    def __init__(self, location_text: str,
+                 location_info: Optional[dict],
+                 start_time: datetime.date,
+                 end_time: datetime.date):
+        self.location_text = location_text
+        self.location_info = location_info
+        self.start_time = start_time
+        self.end_time = end_time
+
+
+class Widget_data:
+    def __init__(self,
+                 name: str,
+                 rank: int,
+                 items_func):
+        self.name = name,
+        self.rank = rank,
+        self.items_func: Callable[[Selection_params, Widget_data], Dict] = items_func
 
 
 def extract_news_flash_location(news_flash_id):
@@ -278,20 +300,20 @@ def get_most_severe_accidents_table_title(location_text):
     return "תאונות חמורות ב" + location_text
 
 
-def get_accident_count_by_severity(location_info, location_text, start_time, end_time):
+def get_accident_count_by_severity(data: Selection_params, widget_data: Widget_data) -> Dict:
     count_by_severity = get_accidents_stats(
         table_obj=AccidentMarkerView,
-        filters=location_info,
+        filters=data.location_info,
         group_by="accident_severity_hebrew",
         count="accident_severity_hebrew",
-        start_time=start_time,
-        end_time=end_time,
+        start_time=data.start_time,
+        end_time=data.end_time,
     )
     severity_dict = {"קטלנית": "fatal", "קשה": "severe", "קלה": "light"}
     items = {}
     total_accidents_count = 0
-    start_year = start_time.year
-    end_year = end_time.year
+    start_year = data.start_time.year
+    end_year = data.end_time.year
     for severity_and_count in count_by_severity:
         accident_severity_hebrew = severity_and_count["accident_severity"]
         severity_english = severity_dict[accident_severity_hebrew]
@@ -301,7 +323,11 @@ def get_accident_count_by_severity(location_info, location_text, start_time, end
     items["start_year"] = start_year
     items["end_year"] = end_year
     items["total_accidents_count"] = total_accidents_count
-    return items
+    widget = Widget(
+        name=widget_data.name,
+        rank=widget_data.rank,
+        items=items)
+    return widget.serialize()
 
 
 def get_most_severe_accidents_table(location_info, start_time, end_time):
@@ -556,6 +582,20 @@ def stats_accidents_by_car_type_with_national_data(
     return out
 
 
+widgets_data = [
+    Widget_data("accident_count_by_severity", 1, get_accident_count_by_severity)
+    # {'name': 'severity', 'rank': 2, 'items_func': accident_count},
+    # {'name': 'color', 'rank': 3, 'items_func': accident_count, 'text': "text"}
+]
+
+
+def generate_widgets(data: Selection_params, widgets: List[Widget_data]) -> List[Dict]:
+    res = []
+    for item in widgets:
+        res.append(item.items_func(data, item))
+    return res
+
+
 def create_infographics_data(news_flash_id, number_of_years_ago):
     output = {}
     try:
@@ -587,16 +627,23 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 
     start_time = datetime.date(end_time.year + 1 - number_of_years_ago, 1, 1)
 
-    # accident_severity count
-    items = get_accident_count_by_severity(
-        location_info=location_info,
+    selection_params = Selection_params(
         location_text=location_text,
+        location_info=location_info,
         start_time=start_time,
-        end_time=end_time,
-    )
+        end_time=end_time)
 
-    accident_count_by_severity = Widget(name="accident_count_by_severity", rank=1, items=items)
-    output["widgets"].append(accident_count_by_severity.serialize())
+    output["widgets"].append(generate_widgets(selection_params, widgets=widgets_data))
+    # accident_severity count
+    # items = get_accident_count_by_severity(
+    #     location_info=location_info,
+    #     location_text=location_text,
+    #     start_time=start_time,
+    #     end_time=end_time,
+    # )
+    #
+    # accident_count_by_severity = Widget(name="accident_count_by_severity", rank=1, items=items)
+    # output["widgets"].append(accident_count_by_severity.serialize())
 
     # most severe accidents table
     most_severe_accidents_table = Widget(

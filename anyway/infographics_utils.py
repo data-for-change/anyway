@@ -552,8 +552,8 @@ def stats_accidents_by_car_type_with_national_data(
         out.append(
             {
                 "car_type": k,
-                "percentage_segment": round(data_by_segment[k], 1),
-                "percentage_country": round(national_data[k], 1),
+                "percentage_segment": data_by_segment[k],
+                "percentage_country": national_data[k],
             }
         )
 
@@ -951,6 +951,41 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         },
     )
     output["widgets"].append(accidents_count_pedestrians_per_vehicle_street_vs_all.serialize())
+
+    def top_road_segments_accidents_mock_data():  # Temporary for Frontend
+        return [
+            {"segment name": "מחלף לה גרדיה - מחלף השלום", "count": 70},
+            {"segment name": "מחלף השלום - מחלף הרכבת", "count": 48},
+            {"segment name": "מחלף וולפסון - מחלף חולון", "count": 48},
+            {"segment name": "מחלף קוממיות - מחלף יוספטל", "count": 34},
+            {"segment name": "מחלף ההלכה - מחלף רוקח ", "count": 31},
+        ]
+
+    top_road_segments_accidents = Widget(
+        name="top_road_segments_accidents",
+        rank=22,
+        items=top_road_segments_accidents_mock_data(),
+        text={"title": "5 המקטעים עם כמות התאונות הגדולה ביותר"},
+    )
+    output["widgets"].append(top_road_segments_accidents.serialize())
+
+    def pedestrian_injured_in_junctions_mock_data():  # Temporary for Frontend
+        return [
+            {"street name": "גורדון י ל", "count": 18},
+            {"street name": "אידלסון אברהם", "count": 10},
+            {"street name": "פרישמן", "count": 7},
+            {"street name": "בוגרשוב", "count": 6},
+            {"street name": "מנדלי מוכר ספרים", "count": 6},
+            {"street name": "שד נורדאו", "count": 6},
+        ]
+
+    pedestrian_injured_in_junctions = Widget(
+        name="pedestrian_injured_in_junctions",
+        rank=23,
+        items=pedestrian_injured_in_junctions_mock_data(),
+        text={"title": "הצמתים המסוכנים להולכי רגל ברחוב בן יהודה בתל אביב"},
+    )
+    output["widgets"].append(pedestrian_injured_in_junctions.serialize())
 
     return json.dumps(output, default=str)
 

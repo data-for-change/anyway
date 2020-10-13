@@ -552,8 +552,8 @@ def stats_accidents_by_car_type_with_national_data(
         out.append(
             {
                 "car_type": k,
-                "percentage_segment": data_by_segment[k],
-                "percentage_country": national_data[k],
+                "percentage_segment": round(data_by_segment[k], 1),
+                "percentage_country": round(national_data[k], 1),
             }
         )
 
@@ -652,7 +652,10 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 
     # accidents heat map
     accidents_heat_map_filters = location_info
-    accidents_heat_map_filters['accident_severity'] = [CONST.ACCIDENT_SEVERITY_DEADLY, CONST.ACCIDENT_SEVERITY_SEVERE]
+    accidents_heat_map_filters["accident_severity"] = [
+        CONST.ACCIDENT_SEVERITY_DEADLY,
+        CONST.ACCIDENT_SEVERITY_SEVERE,
+    ]
     accidents_heat_map = Widget(
         name="accidents_heat_map",
         rank=7,
@@ -880,7 +883,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     )
     output["widgets"].append(injured_accidents_with_pedestrians.serialize())
 
-    def accident_severity_by_cross_location_mock_data():  # Temporary for Frontend
+    def injury_severity_by_cross_location_mock_data():  # Temporary for Frontend
         return [
             {
                 "cross_location_text": "במעבר חצייה",
@@ -902,20 +905,20 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
             },
         ]
 
-    accident_severity_by_cross_location = Widget(
-        name="accident_severity_by_cross_location",
+    injury_severity_by_cross_location = Widget(
+        name="injury_severity_by_cross_location",
         rank=19,
-        items=accident_severity_by_cross_location_mock_data(),
+        items=injury_severity_by_cross_location_mock_data(),
         text={"comment": "בן יהודה תל אביב בין השנים 2008-2020"},
     )
-    output["widgets"].append(accident_severity_by_cross_location.serialize())
+    output["widgets"].append(injury_severity_by_cross_location.serialize())
 
     def motorcycle_accidents_vs_all_accidents_mock_data():  # Temporary for Frontend
         return [
-            {"location": "כביש 20", "vehicle": "אופנוע", "percentage": 0.5},
-            {"location": "כביש 20", "vehicle": "אחר", "percentage": 0.5},
-            {"location": "כל הארץ", "vehicle": "אחר", "percentage": 0.802680566},
-            {"location": "כל הארץ", "vehicle": "אופנוע", "percentage": 0.197319434},
+            {"location": "כביש 20", "vehicle": "אופנוע", "percentage": 0.50},
+            {"location": "כביש 20", "vehicle": "אחר", "percentage": 0.50},
+            {"location": "כל הארץ", "vehicle": "אחר", "percentage": 0.80},
+            {"location": "כל הארץ", "vehicle": "אופנוע", "percentage": 0.20},
         ]
 
     motorcycle_accidents_vs_all_accidents = Widget(

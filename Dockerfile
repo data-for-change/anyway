@@ -7,11 +7,7 @@ RUN apt-get clean && \
         python3.7-dev \
         build-essential \
         libpq-dev \
-        pkg-config \
-        virtualenv \
-        libagg-dev \
-        libfreetype6-dev \
-        libpng-dev && \
+        virtualenv && \
     apt-get clean
 
 WORKDIR /anyway

@@ -21,7 +21,7 @@ to ```CMD python -m ptvsd --host 0.0.0.0 --port 5678 --wait --multiprocess -m fl
             "pathMappings": [
                 {
                     "localRoot": "${workspaceFolder}/",
-                    "remoteRoot": "/anyway"
+                    "remoteRoot": "/anyway" 
                 }
             ],
             "port": 5678,

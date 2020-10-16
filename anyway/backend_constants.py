@@ -43,5 +43,11 @@ class BackEndConstants(object):
 
     UNKNOWN = "UNKNOWN"
 
+    #directions
+    RIGHT=2
+    LEFT=4
+    UP=1
+    BOTTOM=5
+
 
 BE_CONST = BackEndConstants()

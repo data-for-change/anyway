@@ -30,4 +30,4 @@ to ```CMD python -m ptvsd --host 0.0.0.0 --port 5678 --wait --multiprocess -m fl
   ```
  
  #### Note: everytime you change something in dockerfile you have to rebuild the docker using the command:
- `sudo docker-compse build`
+ `sudo docker-compose build`

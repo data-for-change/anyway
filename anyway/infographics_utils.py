@@ -652,7 +652,10 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 
     # accidents heat map
     accidents_heat_map_filters = location_info
-    accidents_heat_map_filters['accident_severity'] = [CONST.ACCIDENT_SEVERITY_DEADLY, CONST.ACCIDENT_SEVERITY_SEVERE]
+    accidents_heat_map_filters["accident_severity"] = [
+        CONST.ACCIDENT_SEVERITY_DEADLY,
+        CONST.ACCIDENT_SEVERITY_SEVERE,
+    ]
     accidents_heat_map = Widget(
         name="accidents_heat_map",
         rank=7,
@@ -880,7 +883,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     )
     output["widgets"].append(injured_accidents_with_pedestrians.serialize())
 
-    def accident_severity_by_cross_location_mock_data():  # Temporary for Frontend
+    def injury_severity_by_cross_location_mock_data():  # Temporary for Frontend
         return [
             {
                 "cross_location_text": "במעבר חצייה",
@@ -902,20 +905,20 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
             },
         ]
 
-    accident_severity_by_cross_location = Widget(
-        name="accident_severity_by_cross_location",
+    injury_severity_by_cross_location = Widget(
+        name="injury_severity_by_cross_location",
         rank=19,
-        items=accident_severity_by_cross_location_mock_data(),
+        items=injury_severity_by_cross_location_mock_data(),
         text={"comment": "בן יהודה תל אביב בין השנים 2008-2020"},
     )
-    output["widgets"].append(accident_severity_by_cross_location.serialize())
+    output["widgets"].append(injury_severity_by_cross_location.serialize())
 
     def motorcycle_accidents_vs_all_accidents_mock_data():  # Temporary for Frontend
         return [
-            {"location": "כביש 20", "vehicle": "אופנוע", "percentage": 0.5},
-            {"location": "כביש 20", "vehicle": "אחר", "percentage": 0.5},
-            {"location": "כל הארץ", "vehicle": "אחר", "percentage": 0.802680566},
-            {"location": "כל הארץ", "vehicle": "אופנוע", "percentage": 0.197319434},
+            {"location": "כביש 20", "vehicle": "אופנוע", "percentage": 0.50},
+            {"location": "כביש 20", "vehicle": "אחר", "percentage": 0.50},
+            {"location": "כל הארץ", "vehicle": "אחר", "percentage": 0.80},
+            {"location": "כל הארץ", "vehicle": "אופנוע", "percentage": 0.20},
         ]
 
     motorcycle_accidents_vs_all_accidents = Widget(
@@ -948,6 +951,41 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         },
     )
     output["widgets"].append(accidents_count_pedestrians_per_vehicle_street_vs_all.serialize())
+
+    def top_road_segments_accidents_mock_data():  # Temporary for Frontend
+        return [
+            {"segment name": "מחלף לה גרדיה - מחלף השלום", "count": 70},
+            {"segment name": "מחלף השלום - מחלף הרכבת", "count": 48},
+            {"segment name": "מחלף וולפסון - מחלף חולון", "count": 48},
+            {"segment name": "מחלף קוממיות - מחלף יוספטל", "count": 34},
+            {"segment name": "מחלף ההלכה - מחלף רוקח ", "count": 31},
+        ]
+
+    top_road_segments_accidents = Widget(
+        name="top_road_segments_accidents",
+        rank=22,
+        items=top_road_segments_accidents_mock_data(),
+        text={"title": "5 המקטעים עם כמות התאונות הגדולה ביותר"},
+    )
+    output["widgets"].append(top_road_segments_accidents.serialize())
+
+    def pedestrian_injured_in_junctions_mock_data():  # Temporary for Frontend
+        return [
+            {"street name": "גורדון י ל", "count": 18},
+            {"street name": "אידלסון אברהם", "count": 10},
+            {"street name": "פרישמן", "count": 7},
+            {"street name": "בוגרשוב", "count": 6},
+            {"street name": "מנדלי מוכר ספרים", "count": 6},
+            {"street name": "שד נורדאו", "count": 6},
+        ]
+
+    pedestrian_injured_in_junctions = Widget(
+        name="pedestrian_injured_in_junctions",
+        rank=23,
+        items=pedestrian_injured_in_junctions_mock_data(),
+        text={"title": "הצמתים המסוכנים להולכי רגל ברחוב בן יהודה בתל אביב"},
+    )
+    output["widgets"].append(pedestrian_injured_in_junctions.serialize())
 
     return json.dumps(output, default=str)
 

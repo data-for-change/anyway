@@ -606,6 +606,8 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 
     start_time = datetime.date(end_time.year + 1 - number_of_years_ago, 1, 1)
 
+    output["meta"]["dates_comment"] = str(start_time.year) + '-' + str(end_time.year) + ', עדכון אחרון: ' + str(end_time)
+
     # accident_severity count
     items = get_accident_count_by_severity(
         location_info=location_info,

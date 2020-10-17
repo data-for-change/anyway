@@ -279,8 +279,8 @@ def filter_and_group_injured_count_per_age_group(data_of_ages):
     return items
 
 
-def get_most_severe_accidents_table_title(location_text):
-    return "תאונות חמורות ב" + location_text
+def get_most_severe_accidents_table_title(location_info):
+    return "תאונות בסדר חומרה יורד במקטע " + location_info['road_segment_name']
 
 
 def get_accident_count_by_severity(location_info, location_text, start_time, end_time):
@@ -620,7 +620,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         name="most_severe_accidents_table",
         rank=2,
         items=get_most_severe_accidents_table(location_info, start_time, end_time),
-        text={"title": get_most_severe_accidents_table_title(location_text)},
+        text={"title": get_most_severe_accidents_table_title(location_info)},
     )
     output["widgets"].append(most_severe_accidents_table.serialize())
 

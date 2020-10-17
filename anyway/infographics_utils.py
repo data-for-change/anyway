@@ -115,7 +115,7 @@ def get_accident_count_by_accident_type(location_info, start_time, end_time):
 
 
 def get_top_road_segments_accidents_per_km(
-    resolution, location_info, start_time=None, end_time=None, limit=5
+    resolution, location_info, start_time=None, end_time=None, limit=3
 ):
     if resolution != "כביש בינעירוני":  # relevent for non urban roads only
         return {}
@@ -759,6 +759,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
             start_time=start_time,
             end_time=end_time,
         ),
+        text={"title": "תאונות לכל ק״מ כביש על פי מקטע בכביש " + str(int(location_info['road1']))},
     )
     output["widgets"].append(top_road_segments_accidents_per_km.serialize())
 

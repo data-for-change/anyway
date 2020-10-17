@@ -282,6 +282,8 @@ def filter_and_group_injured_count_per_age_group(data_of_ages):
 def get_most_severe_accidents_table_title(location_info):
     return "תאונות בסדר חומרה יורד במקטע " + location_info['road_segment_name']
 
+def get_heat_map_title(location_info):
+    return 'מוקדי תאונות קטלניות וקשות במקטע ' + location_info['road_segment_name']
 
 def get_accident_count_by_severity(location_info, location_text, start_time, end_time):
     count_by_severity = get_accidents_stats(
@@ -679,6 +681,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
             start_time=start_time,
             end_time=end_time,
         ),
+        text={"title": get_heat_map_title(location_info)},
     )
     output["widgets"].append(accidents_heat_map.serialize())
 

@@ -749,22 +749,6 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     )
     output["widgets"].append(accidents_count_by_hour.serialize())
 
-    # accident count by road_light
-    accident_count_by_road_light = Widget(
-        name="accident_count_by_road_light",
-        rank=12,
-        items=get_accidents_stats(
-            table_obj=AccidentMarkerView,
-            filters=location_info,
-            group_by="road_light_hebrew",
-            count="road_light_hebrew",
-            start_time=start_time,
-            end_time=end_time,
-        ),
-        text={"title": "כמות תאונות לפי תאורה"},
-    )
-    output["widgets"].append(accident_count_by_road_light.serialize())
-
     # accident count by road_segment
     top_road_segments_accidents_per_km = Widget(
         name="top_road_segments_accidents_per_km",

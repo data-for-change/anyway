@@ -979,16 +979,13 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
             {"street name": "גורדון י ל", "count": 18},
             {"street name": "אידלסון אברהם", "count": 10},
             {"street name": "פרישמן", "count": 7},
-            {"street name": "בוגרשוב", "count": 6},
-            {"street name": "מנדלי מוכר ספרים", "count": 6},
-            {"street name": "שד נורדאו", "count": 6},
         ]
 
     pedestrian_injured_in_junctions = Widget(
         name="pedestrian_injured_in_junctions",
         rank=23,
         items=pedestrian_injured_in_junctions_mock_data(),
-        text={"title": "הצמתים המסוכנים להולכי רגל ברחוב בן יהודה בתל אביב"},
+        text={"title": "מספר נפגעים הולכי רגל בצמתים - רחוב בן יהודה, תל אביב"},
     )
     output["widgets"].append(pedestrian_injured_in_junctions.serialize())
 

@@ -954,7 +954,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         rank=21,
         items=accidents_count_pedestrians_per_vehicle_street_vs_all_mock_data(),
         text={
-            "title": "פגיעות בהולכי רגל ברחוב בן יהודה בתל אביב לפי סוג רכב פוגע, בהשוואה לתאונות עירוניות בכל הארץ"
+            "title": "פגיעות בהולכי רגל לפי סוג רכב פוגע ברחוב בן יהודה, תל אביב "
         },
     )
     output["widgets"].append(accidents_count_pedestrians_per_vehicle_street_vs_all.serialize())

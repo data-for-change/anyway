@@ -31,3 +31,40 @@ to ```CMD python -m ptvsd --host 0.0.0.0 --port 5678 --wait --multiprocess -m fl
  
  #### Note: everytime you change something in dockerfile you have to rebuild the docker using the command:
  `sudo docker-compose build`
+6. in docker-compose.yaml there is this code:
+```
+ersion: '3'
+
+services:
+  anyway:
+    build: .
+    image: docker.pkg.github.com/hasadna/anyway/anyway:latest
+    container_name: anyway
+    ports:
+      - "8080:5000"
+    environment:
+      - DATABASE_URL=postgresql://anyway:anyway@db/anyway
+      - FLASK_ENV=development
+    volumes:
+      - .:/anyway
+    restart: always
+    depends_on:
+      - db
+
+  db:
+    build: db_docker
+    image: docker.pkg.github.com/hasadna/anyway/db:latest
+    container_name: db
+    environment:
+      - DBRESTORE_AWS_ACCESS_KEY_ID
+      - DBRESTORE_AWS_SECRET_ACCESS_KEY
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "9876:5432"
+    restart: always
+
+volumes:
+  db_data:
+```
+comment this line:`image: docker.pkg.github.com/hasadna/anyway/anyway:latest` in anyway container

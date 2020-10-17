@@ -697,7 +697,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
             start_time=start_time,
             end_time=end_time,
         ),
-        text={"title": "כמות תאונות"},
+        text={"title": 'כמות התאונות לפי שנה במקטע ' + location_info['road_segment_name']},
     )
     output["widgets"].append(accident_count_by_accident_year.serialize())
 

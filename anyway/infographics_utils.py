@@ -811,7 +811,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         items=stats_accidents_by_car_type_with_national_data(
             involved_by_vehicle_type_data, start_time, end_time
         ),
-        text={"title": 'השוואת האחוז הרכבים בתאונות במקטע ' + location_info['road_segment_name'] + ' לעומת ממוצע ארצי'},
+        text={"title": 'השוואת אחוז הרכבים בתאונות במקטע ' + location_info['road_segment_name'] + ' לעומת ממוצע ארצי'},
     )
     output["widgets"].append(accident_count_by_car_type.serialize())
 

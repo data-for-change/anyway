@@ -14,8 +14,11 @@ from anyway.backend_constants import BE_CONST
 from anyway.models import NewsFlash, AccidentMarkerView, InvolvedMarkerView, RoadSegments
 from anyway.parsers import resolution_dict
 from anyway.app_and_db import db
-from anyway.infographics_dictionaries import driver_type_hebrew_dict
-from anyway.infographics_dictionaries import head_on_collisions_comparison_dict
+from anyway.infographics_dictionaries import (
+    driver_type_hebrew_dict,
+    head_on_collisions_comparison_dict,
+    english_accident_severity_dict,
+)
 from anyway.parsers import infographics_data_cache_updater
 from anyway.constants import CONST
 
@@ -307,7 +310,14 @@ def get_accident_count_by_severity(location_info, location_text, start_time, end
 
 
 def get_most_severe_accidents_table(location_info, start_time, end_time):
-    entities = "id", "provider_code", "accident_timestamp", "accident_type_hebrew", "accident_year"
+    entities = (
+        "id",
+        "provider_code",
+        "accident_timestamp",
+        "accident_type_hebrew",
+        "accident_year",
+        "accident_severity",
+    )
     accidents = get_most_severe_accidents_with_entities(
         table_obj=AccidentMarkerView,
         filters=location_info,
@@ -340,6 +350,9 @@ def get_most_severe_accidents_table(location_info, start_time, end_time):
             accident["id"],
             accident["provider_code"],
         )
+        accident["accident_severity"] = english_accident_severity_dict[
+            accident["accident_severity"]
+        ]
     return accidents
 
 

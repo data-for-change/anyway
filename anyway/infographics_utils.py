@@ -2,6 +2,7 @@
 import logging
 import datetime
 import json
+import enum
 from functools import lru_cache
 from typing import Optional, Dict, List, Any, Callable
 
@@ -33,10 +34,50 @@ from anyway.parsers import infographics_data_cache_updater
 """
 
 
+@enum.unique
+class WidgetId(enum.Enum):
+    accident_count_by_severity = [1, 'accident_count_by_severity']
+    most_severe_accidents_table = [2, 'most_severe_accidents_table']
+    most_severe_accidents = [3, 'most_severe_accidents']
+    street_view = [4, 'street_view']
+    head_on_collisions_comparison = [5, "head_on_collisions_comparison"]
+    accident_count_by_accident_type = [6, "accident_count_by_accident_type"]
+    accidents_heat_map = [7, "accidents_heat_map"]
+    accident_count_by_accident_year = [8, "accident_count_by_accident_year"]
+    injured_count_by_accident_year = [9, "injured_count_by_accident_year"]
+    accident_count_by_day_night = [10, "accident_count_by_day_night"]
+    accidents_count_by_hour = [11, "accidents_count_by_hour"]
+    accident_count_by_road_light = [12, "accident_count_by_road_light"]
+    top_road_segments_accidents_per_km = [13, "top_road_segments_accidents_per_km"]
+    injured_count_per_age_group = [14, "injured_count_per_age_group"]
+    vision_zero = [15, "vision_zero"]
+    accident_count_by_driver_type = [16, "accident_count_by_driver_type"]
+    accident_count_by_car_type = [17, "accident_count_by_car_type"]
+    injured_accidents_with_pedestrians = [18, "injured_accidents_with_pedestrians"]
+    accident_severity_by_cross_location = [19, "accident_severity_by_cross_location"]
+    motorcycle_accidents_vs_all_accidents = \
+        [20, "motorcycle_accidents_vs_all_accidents"]
+    accidents_count_pedestrians_per_vehicle_street_vs_all = \
+        [21, "accidents_count_pedestrians_per_vehicle_street_vs_all"]
+
+    def get_rank(self) -> int:
+        return self.value[0]
+
+    def get_name(self) -> str:
+        return self.value[1]
+
+
 class Widget:
-    def __init__(self, name, rank, items, text=None, meta=None):
-        self.name = name
-        self.rank = rank
+    # def __init__(self, name, rank, items, text=None, meta=None):
+    #     self.name = name
+    #     self.rank = rank
+    #     self.items = items
+    #     self.text = text
+    #     self.meta = meta
+    #
+    def __init__(self, widget_id: WidgetId, items, text=None, meta=None):
+        self.name = widget_id.get_name()
+        self.rank = widget_id.get_rank()
         self.items = items
         self.text = text
         self.meta = meta
@@ -56,25 +97,48 @@ class Widget:
         return output
 
 
-class Selection_params:
-    def __init__(self, location_text: str,
+class RequestParams:
+    """
+    Input for infographics data generation, per api call
+    """
+    def __init__(self,
+                 news_flash_id: int,
+                 location_text: str,
                  location_info: Optional[dict],
                  start_time: datetime.date,
                  end_time: datetime.date):
+        self.news_flash_is = news_flash_id
         self.location_text = location_text
         self.location_info = location_info
         self.start_time = start_time
         self.end_time = end_time
 
+    def __str__(self):
+        return f'RequestParams(location_text:{self.location_text}, start_time:{self.start_time}, end_time:{self.end_time} '
 
-class Widget_data:
+
+class WidgetDef:
+    """
+    Static info per widget that is needed to generate the widget data
+    """
     def __init__(self,
-                 name: str,
-                 rank: int,
-                 items_func):
-        self.name = name,
-        self.rank = rank,
-        self.items_func: Callable[[Selection_params, Widget_data], Dict] = items_func
+                 widget_id,
+                 generate_items,
+                 is_included_in_response=None,
+                 is_included_in_cache=True):
+        self.widget_id: WidgetId = widget_id
+        self.generate_items: Callable[[RequestParams, WidgetDef], Widget] = generate_items
+        self.is_included_in_response: Optional[Callable[[Widget], bool]] = is_included_in_response
+        self.is_included_in_cache: bool = is_included_in_cache
+
+    def get_name(self) -> str:
+        return self.widget_id.get_name()
+
+    def get_rank(self) -> int:
+        return self.widget_id.get_rank()
+
+    def __str__(self):
+        return f"WidgetDef(name:{self.get_name()}, rank:{self.get_rank()}, items_func:{self.generate_items})"
 
 
 def extract_news_flash_location(news_flash_id):
@@ -300,7 +364,7 @@ def get_most_severe_accidents_table_title(location_text):
     return "תאונות חמורות ב" + location_text
 
 
-def get_accident_count_by_severity(data: Selection_params, widget_data: Widget_data) -> Dict:
+def get_accident_count_by_severity(data: RequestParams, widget_def: WidgetDef) -> Widget:
     count_by_severity = get_accidents_stats(
         table_obj=AccidentMarkerView,
         filters=data.location_info,
@@ -324,10 +388,9 @@ def get_accident_count_by_severity(data: Selection_params, widget_data: Widget_d
     items["end_year"] = end_year
     items["total_accidents_count"] = total_accidents_count
     widget = Widget(
-        name=widget_data.name,
-        rank=widget_data.rank,
+        widget_id=widget_def.widget_id,
         items=items)
-    return widget.serialize()
+    return widget
 
 
 def get_most_severe_accidents_table(location_info, start_time, end_time):
@@ -582,17 +645,22 @@ def stats_accidents_by_car_type_with_national_data(
     return out
 
 
-widgets_data = [
-    Widget_data("accident_count_by_severity", 1, get_accident_count_by_severity)
-    # {'name': 'severity', 'rank': 2, 'items_func': accident_count},
-    # {'name': 'color', 'rank': 3, 'items_func': accident_count, 'text': "text"}
-]
+def get_widgets_def() -> List[WidgetDef]:
+    return [
+        WidgetDef(WidgetId.accident_count_by_severity, get_accident_count_by_severity)
+        # {'name': 'severity', 'rank': 2, 'generate_items': accident_count},
+        # {'name': 'color', 'rank': 3, 'generate_items': accident_count, 'text': "text"}
+    ]
 
 
-def generate_widgets(data: Selection_params, widgets: List[Widget_data]) -> List[Dict]:
+def generate_widgets(request_params: RequestParams, widgets_def: List[WidgetDef]) -> List[Dict]:
+    logging.debug(f"generate_widgets: selection params:{request_params}")
     res = []
-    for item in widgets:
-        res.append(item.items_func(data, item))
+    for item in widgets_def:
+        logging.debug(f"generate_widgets: processing widget:{item}")
+        item_widget = item.generate_items(request_params, item)
+        if item.is_included_in_response and item.is_included_in_response(item_widget):
+            res.append(item_widget.serialize())
     return res
 
 
@@ -627,13 +695,14 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 
     start_time = datetime.date(end_time.year + 1 - number_of_years_ago, 1, 1)
 
-    selection_params = Selection_params(
+    request_params = RequestParams(
+        news_flash_id=news_flash_id,
         location_text=location_text,
         location_info=location_info,
         start_time=start_time,
         end_time=end_time)
 
-    output["widgets"].append(generate_widgets(selection_params, widgets=widgets_data))
+    output["widgets"].append(generate_widgets(request_params, get_widgets_def()))
     # accident_severity count
     # items = get_accident_count_by_severity(
     #     location_info=location_info,
@@ -647,8 +716,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 
     # most severe accidents table
     most_severe_accidents_table = Widget(
-        name="most_severe_accidents_table",
-        rank=2,
+        WidgetId.most_severe_accidents_table,
         items=get_most_severe_accidents_table(location_info, start_time, end_time),
         text={"title": get_most_severe_accidents_table_title(location_text)},
     )
@@ -656,8 +724,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 
     # most severe accidents
     most_severe_accidents = Widget(
-        name="most_severe_accidents",
-        rank=3,
+        WidgetId.most_severe_accidents,
         items=get_most_severe_accidents(
             table_obj=AccidentMarkerView,
             filters=location_info,
@@ -669,14 +736,13 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 
     # street view
     street_view = Widget(
-        name="street_view", rank=4, items={"longitude": gps["lon"], "latitude": gps["lat"]}
+        WidgetId.street_view, items={"longitude": gps["lon"], "latitude": gps["lat"]}
     )
     output["widgets"].append(street_view.serialize())
 
     # head to head accidents
     head_on_collisions_comparison = Widget(
-        name="head_on_collisions_comparison",
-        rank=5,
+        WidgetId.head_on_collisions_comparison,
         items=get_head_to_head_stat(
             news_flash_id=news_flash_id, start_time=start_time, end_time=end_time
         ),
@@ -685,8 +751,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 
     # accident_type count
     accident_count_by_accident_type = Widget(
-        name="accident_count_by_accident_type",
-        rank=6,
+        WidgetId.accident_count_by_accident_type,
         items=get_accident_count_by_accident_type(
             location_info=location_info, start_time=start_time, end_time=end_time
         ),
@@ -695,8 +760,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 
     # accidents heat map
     accidents_heat_map = Widget(
-        name="accidents_heat_map",
-        rank=7,
+        WidgetId.accidents_heat_map,
         items=get_accidents_heat_map(
             table_obj=AccidentMarkerView,
             filters=location_info,
@@ -708,8 +772,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 
     # accident count by accident year
     accident_count_by_accident_year = Widget(
-        name="accident_count_by_accident_year",
-        rank=8,
+        WidgetId.accident_count_by_accident_year,
         items=get_accidents_stats(
             table_obj=AccidentMarkerView,
             filters=location_info,
@@ -724,8 +787,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 
     # injured count by accident year
     injured_count_by_accident_year = Widget(
-        name="injured_count_by_accident_year",
-        rank=9,
+        WidgetId.injured_count_by_accident_year,
         items=get_accidents_stats(
             table_obj=InvolvedMarkerView,
             filters=get_injured_filters(location_info),
@@ -740,8 +802,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 
     # accident count on day light
     accident_count_by_day_night = Widget(
-        name="accident_count_by_day_night",
-        rank=10,
+        WidgetId.accident_count_by_day_night,
         items=get_accidents_stats(
             table_obj=AccidentMarkerView,
             filters=location_info,
@@ -756,8 +817,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 
     # accidents distribution count by hour
     accidents_count_by_hour = Widget(
-        name="accidents_count_by_hour",
-        rank=11,
+        WidgetId.accidents_count_by_hour,
         items=get_accidents_stats(
             table_obj=AccidentMarkerView,
             filters=location_info,
@@ -772,8 +832,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 
     # accident count by road_light
     accident_count_by_road_light = Widget(
-        name="accident_count_by_road_light",
-        rank=12,
+        WidgetId.accident_count_by_road_light,
         items=get_accidents_stats(
             table_obj=AccidentMarkerView,
             filters=location_info,
@@ -788,8 +847,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 
     # accident count by road_segment
     top_road_segments_accidents_per_km = Widget(
-        name="top_road_segments_accidents_per_km",
-        rank=13,
+        WidgetId.top_road_segments_accidents_per_km,
         items=get_top_road_segments_accidents_per_km(
             resolution=resolution,
             location_info=location_info,
@@ -812,12 +870,12 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         data_of_injured_count_per_age_group_raw
     )
     injured_count_per_age_group = Widget(
-        name="injured_count_per_age_group", rank=14, items=data_of_injured_count_per_age_group
+        WidgetId.injured_count_per_age_group, items=data_of_injured_count_per_age_group
     )
     output["widgets"].append(injured_count_per_age_group.serialize())
 
     # vision zero
-    vision_zero = Widget(name="vision_zero", rank=15, items=["vision_zero_2_plus_1"])
+    vision_zero = Widget(WidgetId.vision_zero, items=["vision_zero_2_plus_1"])
     output["widgets"].append(vision_zero.serialize())
 
     # involved by driver type
@@ -830,16 +888,14 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         end_time=end_time,
     )
     accident_count_by_driver_type = Widget(
-        name="accident_count_by_driver_type",
-        rank=16,
+        WidgetId.accident_count_by_driver_type,
         items=count_accidents_by_driver_type(involved_by_vehicle_type_data),
     )
     output["widgets"].append(accident_count_by_driver_type.serialize())
 
     # involved by car type
     accident_count_by_car_type = Widget(
-        name="accident_count_by_car_type",
-        rank=17,
+        WidgetId.accident_count_by_car_type,
         items=stats_accidents_by_car_type_with_national_data(
             involved_by_vehicle_type_data, start_time, end_time
         ),
@@ -898,8 +954,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
                  'killed_injury_severity_count': 0 }]
 
     injured_accidents_with_pedestrians = Widget(
-        name="injured_accidents_with_pedestrians",
-        rank=18,
+        WidgetId.injured_accidents_with_pedestrians,
         items=injured_accidents_with_pedestrians_mock_data(),
         text={"title": "נפגעים בתאונות עם הולכי רגל ברחוב ז׳בוטינסקי, פתח תקווה (2009-2015)"},
     )
@@ -922,8 +977,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
                  'killed_injury_severity_count': 0 }]
 
     accident_severity_by_cross_location = Widget(
-        name="accident_severity_by_cross_location",
-        rank=19,
+        WidgetId.accident_severity_by_cross_location,
         items=accident_severity_by_cross_location_mock_data(),
         text={"comment": "בן יהודה תל אביב בין השנים 2008-2020"}
     )
@@ -953,8 +1007,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
                 ]
 
     motorcycle_accidents_vs_all_accidents = Widget(
-        name="motorcycle_accidents_vs_all_accidents",
-        rank=20,
+        WidgetId.motorcycle_accidents_vs_all_accidents,
         items=motorcycle_accidents_vs_all_accidents_mock_data(),
         text={"title": "אחוז תאונות אופנוע מכלל התאונות הקשות והקטלניות"},
     )
@@ -1009,14 +1062,14 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
                 ]
 
     accidents_count_pedestrians_per_vehicle_street_vs_all = Widget(
-        name="accidents_count_pedestrians_per_vehicle_street_vs_all",
-        rank=21,
+        WidgetId.accidents_count_pedestrians_per_vehicle_street_vs_all,
         items=accidents_count_pedestrians_per_vehicle_street_vs_all_mock_data(),
         text={"title": "פגיעות בהולכי רגל ברחוב בן יהודה בתל אביב לפי סוג רכב פוגע, בהשוואה לתאונות עירוניות בכל הארץ"},
     )
     output["widgets"].append(accidents_count_pedestrians_per_vehicle_street_vs_all.serialize())
 
     return json.dumps(output, default=str)
+
 
 def get_infographics_data(news_flash_id, years_ago):
     try:

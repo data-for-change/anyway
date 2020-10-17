@@ -930,7 +930,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         name="motorcycle_accidents_vs_all_accidents",
         rank=20,
         items=motorcycle_accidents_vs_all_accidents_mock_data(),
-        text={"title": "אחוז תאונות אופנוע מכלל התאונות הקשות והקטלניות"},
+        text={"title": "תאונות אופנועים קשות וקטלניות בכביש 20 בהשוואה לכל הארץ"},
     )
     output["widgets"].append(motorcycle_accidents_vs_all_accidents.serialize())
 

@@ -650,6 +650,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         items=get_head_to_head_stat(
             news_flash_id=news_flash_id, start_time=start_time, end_time=end_time
         ),
+        text={"title": 'תאונות קטלניות ע״פ סוג'},
     )
     output["widgets"].append(head_on_collisions_comparison.serialize())
 

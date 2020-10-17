@@ -797,6 +797,8 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         name="accident_count_by_driver_type",
         rank=16,
         items=count_accidents_by_driver_type(involved_by_vehicle_type_data),
+        text={"title": 'מעורבות נהגים בתאונות לפי סוג במקטע ' + location_info['road_segment_name']},
+
     )
     output["widgets"].append(accident_count_by_driver_type.serialize())
 

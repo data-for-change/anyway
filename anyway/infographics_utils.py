@@ -667,7 +667,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     output["widgets"].append(accident_count_by_accident_type.serialize())
 
     # accidents heat map
-    accidents_heat_map_filters = location_info
+    accidents_heat_map_filters = location_info.copy()
     accidents_heat_map_filters["accident_severity"] = [
         CONST.ACCIDENT_SEVERITY_DEADLY,
         CONST.ACCIDENT_SEVERITY_SEVERE,

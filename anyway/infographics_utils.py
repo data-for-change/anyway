@@ -4,9 +4,8 @@ import datetime
 import json
 import os
 from functools import lru_cache
-
-import pandas as pd
 from collections import defaultdict
+import pandas as pd
 from sqlalchemy import func
 from sqlalchemy import cast, Numeric
 from sqlalchemy import desc
@@ -20,7 +19,12 @@ from anyway.infographics_dictionaries import (
     english_accident_severity_dict,
 )
 from anyway.parsers import infographics_data_cache_updater
+from concurrent.futures import ThreadPoolExecutor
 from anyway.constants import CONST
+from sklearn import linear_model
+import numpy as np
+import matplotlib.pyplot as plt
+from skspatial.objects import Point, Line
 
 """
     Widget structure:
@@ -63,11 +67,11 @@ class Widget:
 def extract_news_flash_location(news_flash_id):
     news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == news_flash_id).first()
     if not news_flash_obj:
-        logging.warning(f"could not find news flash id {str(news_flash_id)}")
+       logging.warning(f"could not find news flash id {str(news_flash_id)}")
         return None
     resolution = news_flash_obj.resolution if news_flash_obj.resolution else None
     if not news_flash_obj or not resolution or resolution not in resolution_dict:
-        logging.warning(f"could not find valid resolution for news flash id {str(news_flash_id)}")
+         logging.warning(f"could not find valid resolution for news flash id {str(news_flash_id)}")
         return None
     data = {"resolution": resolution}
     for field in resolution_dict[resolution]:
@@ -333,10 +337,10 @@ def get_most_severe_accidents_table(location_info, start_time, end_time):
         dt = accident["accident_timestamp"].to_pydatetime()
         accident["date"] = dt.strftime("%d/%m/%y")
         accident["hour"] = dt.strftime("%H:%M")
-        accident["killed_count"] = get_casualties_count_in_accident(
+          accident["killed_count"] = get_casualties_count_in_accident(
             accident["id"], accident["provider_code"], 1, accident["accident_year"]
         )
-        accident["severe_injured_count"] = get_casualties_count_in_accident(
+       accident["severe_injured_count"] = get_casualties_count_in_accident(
             accident["id"], accident["provider_code"], 2, accident["accident_year"]
         )
         accident["light_injured_count"] = get_casualties_count_in_accident(
@@ -457,7 +461,7 @@ def convert_roads_fatal_accidents_to_frontend_view(data_dict):
     data_list = []
     for key, value in data_dict.items():
         if key == head_on_collisions_comparison_dict["head_to_head_collision"]:
-            data_list.append(
+              data_list.append(
                 {"desc": head_on_collisions_comparison_dict["head_to_head"], "count": value}
             )
         else:
@@ -519,7 +523,6 @@ def get_latest_accident_date(table_obj, filters):
     df = pd.read_sql_query(query.statement, query.session.bind)
     return (df.to_dict(orient="records"))[0].get("max_1")  # pylint: disable=no-member
 
-
 def percentage_accidents_by_car_type(involved_by_vehicle_type_data):
     driver_types = defaultdict(float)
     total_count = 0
@@ -574,6 +577,50 @@ def stats_accidents_by_car_type_with_national_data(
 
     return out
 
+def calculate_linear_regression_formula(start_time,end_time,location_info):
+    severe_accidents=get_most_severe_accidents(AccidentMarkerView,location_info,start_time,end_time,limit=10)
+    latitude_list=[]
+    longitude_list=[]
+    projections_dict={}
+    reg=linear_model.LinearRegression()
+    for index in range(len(severe_accidents)):
+        latitude_list.append(severe_accidents[index]['latitude'])
+        longitude_list.append(severe_accidents[index]['longitude'])
+    #lat is y longitude is x
+    reg.fit(np.reshape(longitude_list,(-1,1)),np.reshape(latitude_list,(-1,1)))
+    #list of all the projected point onto the linear regression line
+    projections=[]
+    #calculating 2 points on the linear regression line
+    point_y=reg.coef_ * longitude_list[0] +reg.intercept_
+    reg_line = Line.from_points([float(longitude_list[0]), float(point_y)],[0, float(reg.intercept_)])
+    for index in range(len(longitude_list)):
+        point = Point([longitude_list[index], latitude_list[index]])
+        projections.append(reg_line.project_point(point))
+
+    sorted_projections = sorted(projections, key=lambda x: x[1])
+    for index in range(len(sorted_projections)):
+        if location_info['road1'] % 2==0:
+            if index % 2 == 0:
+                #right
+                projections_dict[(sorted_projections[index][0],sorted_projections[index][1],index)]= BE_CONST.RIGHT
+            else:
+                #left
+                projections_dict[(sorted_projections[index][0],sorted_projections[index][1],index)]= BE_CONST.LEFT
+        else:
+            if index % 2 == 0:
+                 #up
+                projections_dict[(sorted_projections[index][0],sorted_projections[index][1],index)]= BE_CONST.UP
+            else:
+                 #bottom
+                projections_dict[(sorted_projections[index][0],sorted_projections[index][1],index)]= BE_CONST.BOTTOM
+    return sorted_projections
+
+def count_accidents_by_car_type(involved_by_vehicle_type_data):  # Temporary for Frontend
+    return [
+        {"car_type": "רכב פרטי", "percentage_segment": 78, "percentage_country": 74},
+        {"car_type": "מסחרי/משאית", "percentage_segment": 39, "percentage_country": 34},
+        {"car_type": "אופנוע", "percentage_segment": 28, "percentage_country": 15},
+    ]
 
 def create_infographics_data(news_flash_id, number_of_years_ago):
     output = {}
@@ -993,21 +1040,23 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 
     return json.dumps(output, default=str)
 
+get_infographics_data_executor = ThreadPoolExecutor(max_workers=1)
 
 def get_infographics_data(news_flash_id, years_ago):
-    if os.environ.get("FLASK_ENV") == "development":
+      if os.environ.get("FLASK_ENV") == "development":
         return create_infographics_data(news_flash_id, years_ago)
     else:
         try:
             res = infographics_data_cache_updater.get_infographics_data_from_cache(
                 news_flash_id, years_ago
-            )
-        except Exception as e:
-            logging.error(
-                f"Exception while retrieving from infographics cache({news_flash_id},{years_ago})"
-                f":cause:{e.__cause__}, class:{e.__class__}"
-            )
-            res = {}
-        if not res:
-            logging.error(f"infographics_data({news_flash_id}, {years_ago}) not found in cache")
-        return res
+        )
+        res = future.result(timeout=3)
+    except Exception as e:
+        logging.error(
+            f"Exception while retrieving from infographics cache({news_flash_id},{years_ago})"
+            f":cause:{e.__cause__}, class:{e.__class__}"
+        )
+        res = {}
+    if not res:
+        logging.error(f"infographics_data({news_flash_id}, {years_ago}) not found in cache")
+    return res

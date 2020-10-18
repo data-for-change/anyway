@@ -42,6 +42,10 @@ class BackEndConstants(object):
     SOURCE_MAPPING = {"walla": "וואלה", "twitter": "מד״א", "ynet": "ynet"}
 
     UNKNOWN = "UNKNOWN"
+    RIGHT=2
+    LEFT=4
+    UP=1
+    BOTTOM=5
 
 
 BE_CONST = BackEndConstants()

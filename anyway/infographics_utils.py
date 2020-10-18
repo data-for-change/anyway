@@ -105,11 +105,15 @@ class RequestParams:
                  news_flash_id: int,
                  location_text: str,
                  location_info: Optional[dict],
+                 resolution: Dict,
+                 gps: Dict,
                  start_time: datetime.date,
                  end_time: datetime.date):
         self.news_flash_is = news_flash_id
         self.location_text = location_text
         self.location_info = location_info
+        self.resolution = resolution,
+        self.gps = gps
         self.start_time = start_time
         self.end_time = end_time
 
@@ -393,14 +397,14 @@ def get_accident_count_by_severity(data: RequestParams, widget_def: WidgetDef) -
     return widget
 
 
-def get_most_severe_accidents_table(location_info, start_time, end_time):
+def get_most_severe_accidents_table(request_params: RequestParams, widget_def: WidgetDef):
     entities = "id", "provider_code", "accident_timestamp", "accident_type_hebrew", "accident_year"
     accidents = get_most_severe_accidents_with_entities(
         table_obj=AccidentMarkerView,
-        filters=location_info,
+        filters=request_params.location_info,
         entities=entities,
-        start_time=start_time,
-        end_time=end_time,
+        start_time=request_params.start_time,
+        end_time=request_params.end_time,
     )
     # Add casualties
     for accident in accidents:
@@ -427,7 +431,14 @@ def get_most_severe_accidents_table(location_info, start_time, end_time):
             accident["id"],
             accident["provider_code"],
         )
-    return accidents
+
+    res = Widget(
+        WidgetId.most_severe_accidents_table,
+        items=accidents,
+        text={"title": get_most_severe_accidents_table_title(request_params.location_text)},
+    )
+
+    return res
 
 
 def count_accidents_by_driver_type(data):
@@ -647,47 +658,45 @@ def stats_accidents_by_car_type_with_national_data(
 
 def get_widgets_def() -> List[WidgetDef]:
     return [
-        WidgetDef(WidgetId.accident_count_by_severity, get_accident_count_by_severity)
+        WidgetDef(WidgetId.accident_count_by_severity, get_accident_count_by_severity),
+        WidgetDef(WidgetId.most_severe_accidents_table, get_most_severe_accidents_table)
         # {'name': 'severity', 'rank': 2, 'generate_items': accident_count},
         # {'name': 'color', 'rank': 3, 'generate_items': accident_count, 'text': "text"}
     ]
 
 
-def generate_widgets(request_params: RequestParams, widgets_def: List[WidgetDef]) -> List[Dict]:
+def generate_widgets(request_params: RequestParams, widgets_def: List[WidgetDef], to_cache: bool=True) -> List[Dict]:
     logging.debug(f"generate_widgets: selection params:{request_params}")
     res = []
-    for item in widgets_def:
-        logging.debug(f"generate_widgets: processing widget:{item}")
+    for item in list(filter(lambda wd: wd.is_included_in_cache == to_cache, widgets_def)):
+        logging.debug(f"generate_widgets: processing widget:{item.get_name()}")
         item_widget = item.generate_items(request_params, item)
         if item.is_included_in_response and item.is_included_in_response(item_widget):
             res.append(item_widget.serialize())
     return res
 
 
-def create_infographics_data(news_flash_id, number_of_years_ago):
-    output = {}
+def get_request_params(news_flash_id: int, number_of_years_ago: int) -> Optional[RequestParams]:
     try:
         number_of_years_ago = int(number_of_years_ago)
     except ValueError:
-        return {}
+        return None
     if number_of_years_ago < 0 or number_of_years_ago > 100:
-        return {}
+        return None
     location_info = extract_news_flash_location(news_flash_id)
     if location_info is None:
-        return {}
+        return None
     logging.debug("location_info:{}".format(location_info))
     location_text = get_news_flash_location_text(news_flash_id)
     logging.debug("location_text:{}".format(location_text))
     gps = location_info["gps"]
     location_info = location_info["data"]
-    output["meta"] = {"location_info": location_info.copy(), "location_text": location_text}
-    output["widgets"] = []
     resolution = location_info.pop("resolution")
     if resolution is None:
-        return {}
+        return None
 
     if all(value is None for value in location_info.values()):
-        return {}
+        return None
 
     last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
     # converting to datetime object to get the date
@@ -699,9 +708,27 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         news_flash_id=news_flash_id,
         location_text=location_text,
         location_info=location_info,
+        resolution=resolution,
+        gps=gps,
         start_time=start_time,
         end_time=end_time)
+    return request_params
 
+
+def create_infographics_data(news_flash_id, number_of_years_ago):
+    request_params = get_request_params(news_flash_id, number_of_years_ago)
+    location_info = request_params.location_info
+    resolution = request_params.resolution
+    start_time = request_params.start_time
+    end_time = request_params.end_time
+    location_text = request_params.location_text
+
+    if request_params is None:
+        return {}
+
+    output = {}
+    output["meta"] = {"location_info": location_info.copy(), "location_text": location_text}
+    output["widgets"] = []
     output["widgets"].append(generate_widgets(request_params, get_widgets_def()))
     # accident_severity count
     # items = get_accident_count_by_severity(
@@ -715,12 +742,12 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     # output["widgets"].append(accident_count_by_severity.serialize())
 
     # most severe accidents table
-    most_severe_accidents_table = Widget(
-        WidgetId.most_severe_accidents_table,
-        items=get_most_severe_accidents_table(location_info, start_time, end_time),
-        text={"title": get_most_severe_accidents_table_title(location_text)},
-    )
-    output["widgets"].append(most_severe_accidents_table.serialize())
+    # most_severe_accidents_table = Widget(
+    #     WidgetId.most_severe_accidents_table,
+    #     items=get_most_severe_accidents_table(location_info, start_time, end_time),
+    #     text={"title": get_most_severe_accidents_table_title(location_text)},
+    # )
+    # output["widgets"].append(most_severe_accidents_table.serialize())
 
     # most severe accidents
     most_severe_accidents = Widget(
@@ -736,7 +763,8 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 
     # street view
     street_view = Widget(
-        WidgetId.street_view, items={"longitude": gps["lon"], "latitude": gps["lat"]}
+        WidgetId.street_view, items={"longitude": request_params.gps["lon"],
+                                     "latitude": request_params.gps["lat"]}
     )
     output["widgets"].append(street_view.serialize())
 
@@ -1074,6 +1102,9 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 def get_infographics_data(news_flash_id, years_ago):
     try:
         res = infographics_data_cache_updater.get_infographics_data_from_cache(news_flash_id, years_ago)
+        # temporary: add mocked data that is not included in cache
+        request_params = get_request_params(news_flash_id, years_ago)
+        res.append(generate_widgets(request_params, get_widgets_def(), False))
     except Exception as e:
         logging.error(
             f"Exception while retrieving from infographics cache({news_flash_id},{years_ago})"

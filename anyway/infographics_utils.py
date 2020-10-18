@@ -68,11 +68,11 @@ def extract_news_flash_location(news_flash_id):
     news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == news_flash_id).first()
     if not news_flash_obj:
        logging.warning(f"could not find news flash id {str(news_flash_id)}")
-        return None
+       return None
     resolution = news_flash_obj.resolution if news_flash_obj.resolution else None
     if not news_flash_obj or not resolution or resolution not in resolution_dict:
          logging.warning(f"could not find valid resolution for news flash id {str(news_flash_id)}")
-        return None
+         return None
     data = {"resolution": resolution}
     for field in resolution_dict[resolution]:
         curr_field = getattr(news_flash_obj, field)

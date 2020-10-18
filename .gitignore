@@ -57,3 +57,5 @@ venv
 
 /.vscode
 /.env*
+
+GOOGLE_APPLICATION_CREDENTIALS_KEY.json

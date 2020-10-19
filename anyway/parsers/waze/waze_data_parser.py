@@ -141,7 +141,7 @@ def ingest_waze_from_api():
     waze_data = json.loads(response.content)
 
     alerts_count, jams_count = _ingest_waze_jsons([waze_data])
-    print(f"Ingested {alerts_count} alerts, {jams_count} jams")
+    print(f"Created {alerts_count} alerts, {jams_count} jams")
 
 
 def _ingest_waze_jsons(waze_jsons):
@@ -152,8 +152,8 @@ def _ingest_waze_jsons(waze_jsons):
         waze_alerts.extend(parse_waze_alerts_data(waze_data["alerts"]))
         waze_traffic_jams.extend(parse_waze_traffic_jams_data(waze_data.get("jams")))
     print(f"Ingesting #{len(waze_alerts)} waze_alert records")
-    insert_waze_alerts(waze_alerts)
+    alerts_inserted = insert_waze_alerts(waze_alerts)
     print(f"Ingesting #{len(waze_traffic_jams)} waze_traffic_jams records")
-    insert_waze_traffic_jams(waze_traffic_jams)
+    jams_inserted = insert_waze_traffic_jams(waze_traffic_jams)
 
-    return len(waze_alerts), len(waze_traffic_jams)
+    return alerts_inserted, jams_inserted

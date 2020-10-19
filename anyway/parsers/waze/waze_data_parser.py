@@ -3,6 +3,14 @@ import pandas as pd
 from pandas.io.json import json_normalize
 import json
 from anyway.parsers.waze.waze_db_functions import insert_waze_alerts, insert_waze_traffic_jams
+import requests
+
+
+WAZE_ALERTS_API_URL = "https://il-georss.waze.com/rtserver/web/TGeoRSS" + \
+                      "?tk=ccp_partner&ccp_partner_name=The%20Public%20Knowledge%20Workshop&format=JSON" + \
+                      "&types=traffic,alerts,irregularities&polygon=33.717000,32.547000;34.722000,33.004000;" + \
+                      "35.793000,33.331000;35.914000,32.953000;35.750000,32.723000;35.395000,31.084000;" + \
+                      "34.931000,29.473000;33.717000,32.547000;33.717000,32.547000"
 
 
 def list_blobs(bucket_name):
@@ -78,7 +86,7 @@ def parse_waze_traffic_jams_data(waze_jams):
     return waze_df.to_dict("records")
 
 
-def waze_parser(bucket_name, start_date, end_date):
+def ingest_waze_from_files(bucket_name, start_date, end_date):
     """
     iterate over waze files in google cloud bucket, parse them and insert them to db
     param bucket_name: google cloud bucket name
@@ -86,8 +94,7 @@ def waze_parser(bucket_name, start_date, end_date):
     param end_date: date to end fetch waze files
     return: parsed Dataframe
     """
-    waze_alerts = []
-    waze_traffic_jams = []
+    waze_jsons = []
     blobs = []
 
     dates_range = pd.date_range(start=start_date, end=end_date, freq="D")
@@ -101,8 +108,34 @@ def waze_parser(bucket_name, start_date, end_date):
     for waze_file in blobs:
         waze_data = waze_file.download_as_string()
         waze_json = json.loads(waze_data)
-        waze_alerts.extend(parse_waze_alerts_data(waze_json["alerts"]))
-        waze_traffic_jams.extend(parse_waze_traffic_jams_data(waze_json["jams"]))
+        print(waze_json)
+        waze_jsons.append(waze_json)
+
+    _ingest_waze_jsons(waze_jsons)
+
+
+def ingest_waze_from_api():
+    """
+    iterate over waze files in google cloud bucket, parse them and insert them to db
+    param bucket_name: google cloud bucket name
+    param start_date: date to start fetch waze files
+    param end_date: date to end fetch waze files
+    return: parsed Dataframe
+    """
+    response = requests.get(WAZE_ALERTS_API_URL)
+    response.raise_for_status()
+    waze_data = json.loads(response.content)
+
+    _ingest_waze_jsons([waze_data])
+
+
+def _ingest_waze_jsons(waze_jsons):
+    waze_alerts = []
+    waze_traffic_jams = []
+
+    for waze_data in waze_jsons:
+        waze_alerts.extend(parse_waze_alerts_data(waze_data["alerts"]))
+        waze_traffic_jams.extend(parse_waze_traffic_jams_data(waze_data.get("jams")))
 
     insert_waze_alerts(waze_alerts)
     insert_waze_traffic_jams(waze_traffic_jams)

@@ -38,9 +38,12 @@ def parse_waze_alerts_data(waze_alerts):
     waze_df.rename(
         {
             "location.x": "latitude",
-            "location.y": "lontitude",
+            "location.y": "longitude",
             "nThumbsUp": "number_thumbs_up",
             "reportRating": "report_rating",
+            "reportDescription": "report_description",
+            "reportByMunicipalityUser": "report_by_municipality_user",
+            "jamUuid": "jam_uuid",
             "type": "alert_type",
             "subtype": "alert_subtype",
             "roadType": "road_type",
@@ -49,10 +52,10 @@ def parse_waze_alerts_data(waze_alerts):
         inplace=True,
     )
     waze_df["geom"] = waze_df.apply(
-        lambda row: "POINT({} {})".format(row["lontitude"], row["latitude"]), axis=1
+        lambda row: "POINT({} {})".format(row["longitude"], row["latitude"]), axis=1
     )
     waze_df["road_type"] = waze_df["road_type"].fillna(-1)
-    waze_df.drop(["country", "pubMillis", "reportDescription"], axis=1, inplace=True)
+    waze_df.drop(["country", "pubMillis"], axis=1, inplace=True)
 
     return waze_df.to_dict("records")
 
@@ -73,6 +76,8 @@ def parse_waze_traffic_jams_data(waze_jams):
     waze_df["segments"] = waze_df["segments"].apply(str)
     waze_df["turnType"] = waze_df["roadType"].fillna(-1)
     waze_df.drop(["country", "pubMillis"], axis=1, inplace=True)
+    if "turnLine" in waze_df:
+        waze_df.drop(["turnLine"], axis=1, inplace=True)
     waze_df.rename(
         {
             "speedKMH": "speed_kmh",
@@ -151,6 +156,7 @@ def _ingest_waze_jsons(waze_jsons):
     for waze_data in waze_jsons:
         waze_alerts.extend(parse_waze_alerts_data(waze_data["alerts"]))
         waze_traffic_jams.extend(parse_waze_traffic_jams_data(waze_data.get("jams")))
+
     logger.debug(f"Ingesting #{len(waze_alerts)} waze_alert records in bulk")
     insert_waze_alerts(waze_alerts)
     logger.debug(f"Ingesting #{len(waze_traffic_jams)} waze_traffic_jams records in bulk")

@@ -1,3 +1,4 @@
+import logging
 from google.cloud import storage
 import pandas as pd
 from pandas import json_normalize
@@ -11,6 +12,8 @@ WAZE_ALERTS_API_URL = "https://il-georss.waze.com/rtserver/web/TGeoRSS" + \
                       "&types=traffic,alerts,irregularities&polygon=33.717000,32.547000;34.722000,33.004000;" + \
                       "35.793000,33.331000;35.914000,32.953000;35.750000,32.723000;35.395000,31.084000;" + \
                       "34.931000,29.473000;33.717000,32.547000;33.717000,32.547000"
+
+logger = logging.getLogger("waze_data")
 
 
 def list_blobs(bucket_name):
@@ -122,7 +125,7 @@ def ingest_waze_from_files(bucket_name, start_date, end_date):
     alerts_count, jams_count = _ingest_waze_jsons(bulk_jsons)
     total_ingested_alerts += alerts_count
     total_ingested_traffic += jams_count
-    print(f"Ingested {total_ingested_alerts} alerts, {jams_count} jams")
+    logger.info(f"Ingested {total_ingested_alerts} alerts, {jams_count} jams")
 
 
 def ingest_waze_from_api():
@@ -138,7 +141,7 @@ def ingest_waze_from_api():
     waze_data = json.loads(response.content)
 
     alerts_count, jams_count = _ingest_waze_jsons([waze_data])
-    print(f"Ingested {alerts_count} alerts, {jams_count} jams")
+    logger.info(f"Ingested {alerts_count} alerts, {jams_count} jams")
 
 
 def _ingest_waze_jsons(waze_jsons):
@@ -148,9 +151,12 @@ def _ingest_waze_jsons(waze_jsons):
     for waze_data in waze_jsons:
         waze_alerts.extend(parse_waze_alerts_data(waze_data["alerts"]))
         waze_traffic_jams.extend(parse_waze_traffic_jams_data(waze_data.get("jams")))
-    print(f"Ingesting #{len(waze_alerts)} waze_alert records")
+    logger.debug(f"Ingesting #{len(waze_alerts)} waze_alert records in bulk")
     insert_waze_alerts(waze_alerts)
-    print(f"Ingesting #{len(waze_traffic_jams)} waze_traffic_jams records")
+    logger.debug(f"Ingesting #{len(waze_traffic_jams)} waze_traffic_jams records in bulk")
     insert_waze_traffic_jams(waze_traffic_jams)
 
     return len(waze_alerts), len(waze_traffic_jams)
+
+
+#python -m main process waze-data --start_date=01-01-2020 --end_date=02-01-2020

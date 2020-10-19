@@ -35,9 +35,12 @@ def parse_waze_alerts_data(waze_alerts):
     waze_df.rename(
         {
             "location.x": "latitude",
-            "location.y": "lontitude",
+            "location.y": "longitude",
             "nThumbsUp": "number_thumbs_up",
             "reportRating": "report_rating",
+            "reportDescription": "report_description",
+            "reportByMunicipalityUser": "report_by_municipality_user",
+            "jamUuid": "jam_uuid",
             "type": "alert_type",
             "subtype": "alert_subtype",
             "roadType": "road_type",
@@ -69,7 +72,7 @@ def parse_waze_traffic_jams_data(waze_jams):
     waze_df["line"] = waze_df["line"].apply(str)
     waze_df["segments"] = waze_df["segments"].apply(str)
     waze_df["turnType"] = waze_df["roadType"].fillna(-1)
-    waze_df.drop(["country", "pubMillis"], axis=1, inplace=True)
+    waze_df.drop(["country", "pubMillis", "turnLine"], axis=1, inplace=True)
     waze_df.rename(
         {
             "speedKMH": "speed_kmh",

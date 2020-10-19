@@ -337,10 +337,10 @@ def get_most_severe_accidents_table(location_info, start_time, end_time):
         dt = accident["accident_timestamp"].to_pydatetime()
         accident["date"] = dt.strftime("%d/%m/%y")
         accident["hour"] = dt.strftime("%H:%M")
-          accident["killed_count"] = get_casualties_count_in_accident(
+        accident["killed_count"] = get_casualties_count_in_accident(
             accident["id"], accident["provider_code"], 1, accident["accident_year"]
         )
-       accident["severe_injured_count"] = get_casualties_count_in_accident(
+        accident["severe_injured_count"] = get_casualties_count_in_accident(
             accident["id"], accident["provider_code"], 2, accident["accident_year"]
         )
         accident["light_injured_count"] = get_casualties_count_in_accident(
@@ -597,7 +597,7 @@ def calculate_linear_regression_formula(start_time,end_time,location_info):
         point = Point([longitude_list[index], latitude_list[index]])
         projections.append(reg_line.project_point(point))
 
-    sorted_projections = sorted(projections, key=lambda x: x[1])
+    sorted_projections = sorted(projections, key=lambda x: x[0])
     for index in range(len(sorted_projections)):
         if location_info['road1'] % 2==0:
             if index % 2 == 0:
@@ -613,7 +613,8 @@ def calculate_linear_regression_formula(start_time,end_time,location_info):
             else:
                  #bottom
                 projections_dict[(sorted_projections[index][0],sorted_projections[index][1],index)]= BE_CONST.BOTTOM
-    return sorted_projections
+    logging.debug("location_textttt:{}".format(projections_dict))
+    return projections_dict
 
 def count_accidents_by_car_type(involved_by_vehicle_type_data):  # Temporary for Frontend
     return [
@@ -652,6 +653,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     end_time = last_accident_date.to_pydatetime().date()
 
     start_time = datetime.date(end_time.year + 1 - number_of_years_ago, 1, 1)
+    calculate_linear_regression_formula(start_time,end_time,location_info)
 
     output["meta"]["dates_comment"] = str(start_time.year) + '-' + str(end_time.year) + ', עדכון אחרון: ' + str(end_time)
 
@@ -1043,19 +1045,18 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 get_infographics_data_executor = ThreadPoolExecutor(max_workers=1)
 
 def get_infographics_data(news_flash_id, years_ago):
-      if os.environ.get("FLASK_ENV") == "development":
+    if os.environ.get("FLASK_ENV") == "development":
         return create_infographics_data(news_flash_id, years_ago)
     else:
         try:
             res = infographics_data_cache_updater.get_infographics_data_from_cache(
                 news_flash_id, years_ago
         )
-        res = future.result(timeout=3)
-    except Exception as e:
-        logging.error(
+        except Exception as e:
+             logging.error(
             f"Exception while retrieving from infographics cache({news_flash_id},{years_ago})"
             f":cause:{e.__cause__}, class:{e.__class__}"
-        )
+        )     
         res = {}
     if not res:
         logging.error(f"infographics_data({news_flash_id}, {years_ago}) not found in cache")

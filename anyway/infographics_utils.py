@@ -23,7 +23,6 @@ from concurrent.futures import ThreadPoolExecutor
 from anyway.constants import CONST
 from sklearn import linear_model
 import numpy as np
-import matplotlib.pyplot as plt
 from skspatial.objects import Point, Line
 
 """
@@ -67,12 +66,12 @@ class Widget:
 def extract_news_flash_location(news_flash_id):
     news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == news_flash_id).first()
     if not news_flash_obj:
-       logging.warning(f"could not find news flash id {str(news_flash_id)}")
-       return None
+        logging.warning(f"could not find news flash id {str(news_flash_id)}")
+        return None
     resolution = news_flash_obj.resolution if news_flash_obj.resolution else None
     if not news_flash_obj or not resolution or resolution not in resolution_dict:
-         logging.warning(f"could not find valid resolution for news flash id {str(news_flash_id)}")
-         return None
+        logging.warning(f"could not find valid resolution for news flash id {str(news_flash_id)}")
+        return None
     data = {"resolution": resolution}
     for field in resolution_dict[resolution]:
         curr_field = getattr(news_flash_obj, field)
@@ -461,7 +460,7 @@ def convert_roads_fatal_accidents_to_frontend_view(data_dict):
     data_list = []
     for key, value in data_dict.items():
         if key == head_on_collisions_comparison_dict["head_to_head_collision"]:
-              data_list.append(
+            data_list.append(
                 {"desc": head_on_collisions_comparison_dict["head_to_head"], "count": value}
             )
         else:
@@ -1053,10 +1052,10 @@ def get_infographics_data(news_flash_id, years_ago):
                 news_flash_id, years_ago
         )
         except Exception as e:
-             logging.error(
+            logging.error(
             f"Exception while retrieving from infographics cache({news_flash_id},{years_ago})"
             f":cause:{e.__cause__}, class:{e.__class__}"
-        )     
+        )
         res = {}
     if not res:
         logging.error(f"infographics_data({news_flash_id}, {years_ago}) not found in cache")

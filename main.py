@@ -10,13 +10,17 @@ import click
 
 def valid_date(date_string):
     DATE_INPUT_FORMAT = "%d-%m-%Y"
+    DATE_INPUT_FORMAT_ALT = '%Y-%m-%dT%H:%M'
     from datetime import datetime
 
     try:
         return datetime.strptime(date_string, DATE_INPUT_FORMAT)
     except ValueError:
-        msg = "Not a valid date: '{0}'.".format(date_string)
-        raise argparse.ArgumentTypeError(msg)
+        try:
+            return datetime.strptime(date_string, DATE_INPUT_FORMAT_ALT)
+        except ValueError:
+            msg = "Not a valid date: '{0}'.".format(date_string)
+            raise argparse.ArgumentTypeError(msg)
 
 
 @click.group()
@@ -225,17 +229,37 @@ def injured_around_schools(start_date, end_date, distance, batch_size):
 
 @process.command()
 @click.option(
+    "--from_s3",
+    "-f",
+    is_flag=True,
+    help="get the data from files, instead of waze api",
+)
+@click.option(
     "--start_date", default="01-01-2019", type=valid_date, help="The Start Date - format DD-MM-YYYY"
 )
 @click.option(
     "--end_date", default="01-01-2020", type=valid_date, help="The End Date - format DD-MM-YYYY"
 )
-def waze_data(start_date, end_date):
-    from anyway.parsers.waze.waze_data_parser import waze_parser
+def waze_data(from_s3, start_date, end_date):
+    """
+    Get waze data from existing files or from waze api.
+    Examples for running the script:
 
-    return waze_parser(
-        bucket_name="anyway-hasadna.appspot.com", start_date=start_date, end_date=end_date
-    )
+     - For getting data from waze RTS HTTP API, run:
+       python -m main process waze-data
+
+     - For getting data from the S3 stored json files, run (change the start and end date as you need):
+       python -m main process waze-data --from-s3 --start_date=01-01-2020 --end_date=01-01-2020
+    """
+
+    from anyway.parsers.waze.waze_data_parser import ingest_waze_from_files, ingest_waze_from_api
+
+    if from_s3:
+        return ingest_waze_from_files(
+            bucket_name="anyway-hasadna.appspot.com", start_date=start_date, end_date=end_date
+        )
+    else:
+        return ingest_waze_from_api()
 
 
 @process.command()

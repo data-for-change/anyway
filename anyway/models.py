@@ -2073,7 +2073,7 @@ class WazeAlert(Base):
     city = Column(Text())
     confidence = Column(Integer())
     created_at = Column(DateTime, index=True)
-    lontitude = Column(Float())
+    longitude = Column(Float())
     latitude = Column(Float())
     magvar = Column(Integer())
     number_thumbs_up = Column(Integer())
@@ -2081,14 +2081,17 @@ class WazeAlert(Base):
     reliability = Column(Integer())
     alert_type = Column(Text())
     alert_subtype = Column(Text())
-    uuid = Column(Text())
+    uuid = Column(Text(), unique=True, index=True)
+    report_by_municipality_user = Column(Boolean(), default=False)
     street = Column(Text())
     road_type = Column(Integer())
+    report_description = Column(Text())
+    jam_uuid = Column(Text())
     geom = Column(Geometry("POINT"))
 
 
 class WazeTrafficJams(Base):
-    __tablename__ = "waze_trafic_jams"
+    __tablename__ = "waze_traffic_jams"
 
     id = Column(BigInteger(), primary_key=True)
     level = Column(Integer())
@@ -2097,7 +2100,7 @@ class WazeTrafficJams(Base):
     turn_type = Column(Integer())
     length = Column(Float())
     type = Column(Text())
-    uuid = Column(Text())
+    uuid = Column(Text(), unique=True, index=True)
     speed = Column(Integer())
     segments = Column(Text())
     road_type = Column(Integer())

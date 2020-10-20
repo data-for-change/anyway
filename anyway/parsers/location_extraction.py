@@ -14,6 +14,7 @@ from anyway import secrets
 
 WAZE_ALERT_NEWSFLASH_DELTA_IN_HOURS = 3
 
+
 def extract_road_number(location):
     """
     extract road number from location if exist
@@ -302,7 +303,7 @@ def extract_location_text(text):
 
 def get_related_waze_accident_alert(db, geo_location, newsflash):
 
-    # determine what distance (in kilometers) to look for accidents in, according to the accident resolution
+    # determine what distance (in kilometers) to look for waze accidents in, according to the newsflash's resolution
     if newsflash.resolution in short_distance_resolutions:
         distance = 0.3
     elif newsflash.resolution in long_distance_resolutions:
@@ -313,15 +314,23 @@ def get_related_waze_accident_alert(db, geo_location, newsflash):
         return None
 
     # create the bounding box according to the coordinate we have, and the resolution distance
-    bounding_box_polygon_str = get_bounding_box_polygon(geo_location["lat"], geo_location["lon"], distance)
+    bounding_box_polygon_str = get_bounding_box_polygon(
+        geo_location["lat"], geo_location["lon"], distance
+    )
 
     # find waze alerts in that bounding box, from the recent time delta - and return the first as the related waze alert
-    matching_alert = db.session.query(WazeAlert) \
-        .filter(WazeAlert.alert_type == "ACCIDENT") \
-        .filter(WazeAlert.created_at.between(newsflash.date - timedelta(hours=WAZE_ALERT_NEWSFLASH_DELTA_IN_HOURS),
-                                             datetime.now())) \
-        .filter(WazeAlert.geom.intersects(bounding_box_polygon_str)) \
+    matching_alert = (
+        db.session.query(WazeAlert)
+        .filter(WazeAlert.alert_type == "ACCIDENT")
+        .filter(
+            WazeAlert.created_at.between(
+                newsflash.date - timedelta(hours=WAZE_ALERT_NEWSFLASH_DELTA_IN_HOURS),
+                datetime.now(),
+            )
+        )
+        .filter(WazeAlert.geom.intersects(bounding_box_polygon_str))
         .first()
+    )
 
     return matching_alert
 

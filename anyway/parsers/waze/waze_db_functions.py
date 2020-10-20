@@ -25,7 +25,9 @@ def _upsert_waze_objects_by_uuid(model, waze_objects):
     with db.session.no_autoflush:
         for waze_object in waze_objects:
             db.session.flush()
-            existing_objects = db.session.query(model).filter(model.uuid == str(waze_object["uuid"]))
+            existing_objects = db.session.query(model).filter(
+                model.uuid == str(waze_object["uuid"])
+            )
             object_count = existing_objects.count()
             if object_count == 0:
                 new_object = model(**waze_object)
@@ -34,7 +36,7 @@ def _upsert_waze_objects_by_uuid(model, waze_objects):
             elif object_count > 1:
 
                 # sanity: as the uuid field is unique - this should never happen
-                raise RuntimeError('Too many waze objects with the same uuid')
+                raise RuntimeError("Too many waze objects with the same uuid")
             else:
 
                 # update the existing alert

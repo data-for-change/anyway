@@ -73,9 +73,11 @@ def parse_waze_alerts_data(waze_alerts):
     )
     waze_df["road_type"] = int(waze_df["road_type"].fillna(-1)[0])
     waze_df["number_thumbs_up"] = int(waze_df.get("number_thumbs_up").fillna(0)[0])
-    waze_df["report_by_municipality_user"] = _convert_to_bool(waze_df.get("report_by_municipality_user", False))
+    waze_df["report_by_municipality_user"] = _convert_to_bool(
+        waze_df.get("report_by_municipality_user", False)
+    )
 
-    waze_df.drop(["country", "pubMillis"], axis=1, inplace=True, errors='ignore')
+    waze_df.drop(["country", "pubMillis"], axis=1, inplace=True, errors="ignore")
     for key in waze_df.keys():
         if waze_df[key] is None or key not in [field.name for field in WazeAlert.__table__.columns]:
             waze_df.drop([key], axis=1, inplace=True)
@@ -112,7 +114,9 @@ def parse_waze_traffic_jams_data(waze_jams):
         inplace=True,
     )
     for key in waze_df.keys():
-        if waze_df[key] is None or key not in [field.name for field in WazeTrafficJams.__table__.columns]:
+        if waze_df[key] is None or key not in [
+            field.name for field in WazeTrafficJams.__table__.columns
+        ]:
             waze_df.drop([key], axis=1, inplace=True)
 
     return waze_df.to_dict("records")

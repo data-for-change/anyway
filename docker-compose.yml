@@ -10,6 +10,11 @@ services:
     environment:
       - DATABASE_URL=postgresql://anyway:anyway@db/anyway
       - FLASK_ENV=development
+      - TWITTER_CONSUMER_KEY
+      - TWITTER_CONSUMER_SECRET
+      - TWITTER_ACCESS_KEY
+      - TWITTER_ACCESS_SECRET
+      - GOOGLE_APPLICATION_CREDENTIALS=GOOGLE_APPLICATION_CREDENTIALS_KEY.json
     volumes:
       - .:/anyway
     restart: always

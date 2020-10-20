@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import logging
 import re
 
@@ -6,8 +7,9 @@ import googlemaps
 import numpy as np
 from geographiclib.geodesic import Geodesic
 
-from anyway.models import NewsFlash
+from anyway.models import NewsFlash, WazeAlert
 from anyway.parsers import resolution_dict
+from anyway.parsers.utils import get_bounding_box_polygon
 from anyway import secrets
 
 
@@ -297,15 +299,40 @@ def extract_location_text(text):
     return text
 
 
+def get_closest_waze_alert_accident_coordinates(db, geo_location, resolution) -> (float, float):
+
+    # TODO: choose distance according to resolution
+    distance = 1
+
+    bounding_box_polygon_str = get_bounding_box_polygon(geo_location["lat"], geo_location["lon"], distance)
+
+    # TODO: filter by time of the news-flash
+    # .filter(WazeAlert.created_at.between(datetime.now() - timedelta(hours=1), datetime.now())) \
+    matching_alert = db.session.query(WazeAlert) \
+        .filter(WazeAlert.alert_type == "ACCIDENT") \
+        .filter(WazeAlert.geom.intersects(bounding_box_polygon_str)) \
+        .first()
+
+    return matching_alert
+
+
 def extract_geo_features(db, newsflash: NewsFlash) -> None:
     newsflash.location = extract_location_text(newsflash.description) or extract_location_text(
         newsflash.title
     )
     geo_location = geocode_extract(newsflash.location)
     if geo_location is not None:
-        newsflash.lat = geo_location["geom"]["lat"]
-        newsflash.lon = geo_location["geom"]["lng"]
         newsflash.resolution = set_accident_resolution(geo_location)
+
+        # improve location using waze
+        related_waze_accident = get_closest_waze_alert_accident_coordinates(db, geo_location, newsflash.resolution)
+        if related_waze_accident:
+            newsflash.lat = related_waze_accident["lat"]
+            newsflash.lon = related_waze_accident["lon"]
+        else:
+            newsflash.lat = geo_location["geom"]["lat"]
+            newsflash.lon = geo_location["geom"]["lng"]
+
         location_from_db = get_db_matching_location(
             db,
             newsflash.lat,

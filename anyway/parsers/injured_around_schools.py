@@ -4,7 +4,6 @@ import os
 import shutil
 from datetime import datetime
 
-import math
 import pandas as pd
 from sqlalchemy import or_, not_, and_
 
@@ -17,6 +16,7 @@ from anyway.models import (
     InjuredAroundSchoolAllData,
 )
 from anyway.utilities import time_delta, chunks
+from anyway.parsers.utils import get_bounding_box_polygon
 from anyway.app_and_db import db
 
 SUBTYPE_ACCIDENT_WITH_PEDESTRIAN = 1
@@ -32,37 +32,13 @@ DATE_INPUT_FORMAT = "%d-%m-%Y"
 DATE_URL_FORMAT = "%Y-%m-%d"
 
 
-def get_bounding_box(latitude, longitude, distance_in_km):
-    latitude = math.radians(latitude)
-    longitude = math.radians(longitude)
-
-    radius = 6371
-    # Radius of the parallel at given latitude
-    parallel_radius = radius * math.cos(latitude)
-
-    lat_min = latitude - distance_in_km / radius
-    lat_max = latitude + distance_in_km / radius
-    lon_min = longitude - distance_in_km / parallel_radius
-    lon_max = longitude + distance_in_km / parallel_radius
-    rad2deg = math.degrees
-
-    return rad2deg(lat_min), rad2deg(lon_min), rad2deg(lat_max), rad2deg(lon_max)
-
-
 def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
-    lat_min, lon_min, lat_max, lon_max = get_bounding_box(latitude, longitude, distance)
-    baseX = lon_min
-    baseY = lat_min
-    distanceX = lon_max
-    distanceY = lat_max
-    pol_str = "POLYGON(({0} {1},{0} {3},{2} {3},{2} {1},{0} {1}))".format(
-        baseX, baseY, distanceX, distanceY
-    )
+    polygon_str = get_bounding_box_polygon(latitude, longitude, distance)
 
     query_obj = (
         db.session.query(Involved, AccidentMarker)
         .join(AccidentMarker, AccidentMarker.provider_and_id == Involved.provider_and_id)
-        .filter(AccidentMarker.geom.intersects(pol_str))
+        .filter(AccidentMarker.geom.intersects(polygon_str))
         .filter(Involved.injured_type == INJURED_TYPE_PEDESTRIAN)
         .filter(AccidentMarker.provider_and_id == Involved.provider_and_id)
         .filter(

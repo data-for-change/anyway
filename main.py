@@ -245,10 +245,10 @@ def waze_data(from_s3, start_date, end_date):
     Get waze data from existing files or from waze api.
     Examples for running the script:
 
-     - For getting data from the api, run:
+     - For getting data from waze RTS HTTP API, run:
        python -m main process waze-data
 
-     - For getting data from the files, run (change the start and end date as you need):
+     - For getting data from the S3 stored json files, run (change the start and end date as you need):
        python -m main process waze-data --from-s3 --start_date=01-01-2020 --end_date=01-01-2020
     """
 

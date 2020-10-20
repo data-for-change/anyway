@@ -3,12 +3,13 @@ import json
 
 import pytest
 
+from anyway.app_and_db import db
 from anyway.parsers import rss_sites, twitter, location_extraction
 from anyway.parsers.news_flash_classifiers import classify_tweets, classify_rss
 from anyway import secrets
 from anyway.parsers.news_flash_db_adapter import init_db
-from anyway.models import NewsFlash
-from anyway.parsers import timezones
+from anyway.models import NewsFlash, WazeAlert
+from anyway.parsers import timezones, short_distance_resolutions, long_distance_resolutions
 from anyway.parsers.infographics_data_cache_updater import is_cache_eligible, is_in_cache
 
 
@@ -232,6 +233,57 @@ def test_extract_location_text():
         assert expected_location_text == actual_location_text
 
 
+def test_waze_alert():
+
+    # create a waze alert
+    waze_alert = _create_waze_accident_alert()
+
+    try:
+        newsflash = NewsFlash(date=datetime.datetime.now())
+
+        # set the geo_location to be close to the waze accident alert location
+        geo_location = {
+            "lon": waze_alert.longitude + 0.001,
+            "lat": waze_alert.latitude + 0.0001,
+        }
+
+        # check that we successfully get the related waze accident event
+        for resolution in short_distance_resolutions:
+            newsflash.resolution = resolution
+            related_waze_accident_alert = location_extraction.get_related_waze_accident_alert(db,
+                                                                                              geo_location,
+                                                                                              newsflash)
+
+            assert waze_alert == related_waze_accident_alert
+
+        # set geo_location to a further location
+        geo_location = {
+            "lon": waze_alert.longitude + 0.01,
+            "lat": waze_alert.latitude + 0.0001,
+        }
+
+        # make sure short_distance_resolutions *do not* get any waze accident alert
+        for resolution in short_distance_resolutions:
+            newsflash.resolution = resolution
+            related_waze_accident_alert = location_extraction.get_related_waze_accident_alert(db,
+                                                                                              geo_location,
+                                                                                              newsflash)
+
+            assert related_waze_accident_alert is None
+
+        # make sure we successfully get the related waze accident for long_distance_resolutions
+        for resolution in long_distance_resolutions:
+            newsflash.resolution = resolution
+            related_waze_accident_alert = location_extraction.get_related_waze_accident_alert(db,
+                                                                                              geo_location,
+                                                                                              newsflash)
+
+            assert waze_alert == related_waze_accident_alert
+
+    finally:
+        _delete_waze_alert(waze_alert.id)
+
+
 def test_timeparse():
     twitter = timezones.parse_creation_datetime("Sun May 31 08:26:18 +0000 2020")
     ynet = timezones.parse_creation_datetime("Sun, 31 May 2020 11:26:18 +0300")
@@ -268,3 +320,40 @@ def test_classification_statistics_ynet():
     assert precision > BEST_PRECISION_YNET
     assert recall > BEST_RECALL_YNET
     assert f1 > BEST_F1_YNET
+
+
+def _create_waze_accident_alert():
+    id = db.session.query(WazeAlert).count() + 1,
+
+    longitude, latitude = (
+        float(31.0),
+        float(34.0),
+    )
+    point_str = "POINT({0} {1})".format(longitude, latitude)
+
+    waze_alert = WazeAlert(
+        id=id[0],
+        city='באר שבע',
+        confidence=2,
+        created_at=datetime.datetime.now(),
+        longitude=longitude,
+        latitude=latitude,
+        magvar=190,
+        number_thumbs_up=1,
+        report_rating=5,
+        reliability=10,
+        alert_type='ACCIDENT',
+        alert_subtype='',
+        street='דרך מצדה',
+        road_type=3,
+        geom=point_str,
+    )
+    db.session.add(waze_alert)
+    db.session.commit()
+
+    return waze_alert
+
+
+def _delete_waze_alert(waze_alert_id):
+    db.session.query(WazeAlert).filter_by(id=waze_alert_id).delete()
+    db.session.commit()

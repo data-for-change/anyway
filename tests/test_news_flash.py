@@ -24,7 +24,7 @@ def fetch_html_walla(link):
 
 
 def fetch_html_ynet(link):
-    with open("tests/" + link[-len("0,7340,L-5735229,00.html") :], encoding="utf-8") as f:
+    with open("tests/" + link[-len("0,7340,L-5735229,00.html"):], encoding="utf-8") as f:
         return f.read()
 
 
@@ -220,16 +220,34 @@ def test_extract_location_text():
         ),
         (
                 'רוכב אופנוע בן 23 נפצע היום (שבת) באורח בינוני לאחר שהחליק בכביש ליד כפר חיטים הסמוך לטבריה. צוות מד"א העניק לו טיפול ראשוני ופינה אותו לבית החולים פוריה בטבריה.]]>'
-                ,'כביש ליד כפר חיטים הסמוך לטבריה'
+                , 'כביש ליד כפר חיטים הסמוך לטבריה'
 
         ),
         (
                 'רוכב אופנוע בן 23 החליק הלילה (שבת) בנסיעה בכביש 3 סמוך למושב בקוע, ליד בית שמש. מצבו מוגדר בינוני. צוות מד"א העניק לו טיפול רפואי ופינה אותו עם חבלה רב מערכתית לבית החולים שמיר אסף הרופא בבאר יעקב.]]>'
-                ,'כביש 3 סמוך למושב בקוע, ליד בית שמש'
+                , 'כביש 3 סמוך למושב בקוע, ליד בית שמש'
         ),
     ]:
         actual_location_text = location_extraction.extract_location_text(description)
         assert expected_location_text == actual_location_text
+
+
+def test_extract_location():
+    if not secrets.exists("GOOGLE_MAPS_KEY"):
+        pytest.skip("Could not find GOOGLE_MAPS_KEY")
+
+    expected_location = {
+        'street': None,
+        'road_no': None,
+        'intersection': None,
+        'city': None,
+        'address': 'Lower Galilee, Israel',
+        'subdistrict': 'Kinneret',
+        'district': 'North District',
+        'geom': {'lat': 32.7461638, 'lng': 35.5028379},
+    }
+    location = location_extraction.geocode_extract("גבר נהרג בתאונת דרכים בגליל התחתון")
+    assert location == expected_location
 
 
 def test_timeparse():

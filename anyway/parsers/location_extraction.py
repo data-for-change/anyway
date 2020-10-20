@@ -118,7 +118,7 @@ def set_accident_resolution(accident_row):
             logging.info("bug in accident resolution")
 
 
-def geocode_extract(location):
+def geocode_extract(location, try_rectify=True):
     """
     this method takes a string representing location and a google maps key and returns a dict of the corresponding
     location found on google maps (by that string), describing details of the location found and the geometry
@@ -138,6 +138,10 @@ def geocode_extract(location):
         gmaps = googlemaps.Client(key=secrets.get("GOOGLE_MAPS_KEY"))
         geocode_result = gmaps.geocode(location, region="il")
         if geocode_result is None or geocode_result == []:
+
+            # let's try and help google
+            if try_rectify:
+                return geocode_extract(try_rectify_location_string(location), try_rectify=False)
             return None
         response = geocode_result[0]
         geom = response["geometry"]["location"]
@@ -315,3 +319,26 @@ def extract_geo_features(db, newsflash: NewsFlash) -> None:
         )
         for k, v in location_from_db.items():
             setattr(newsflash, k, v)
+
+
+def try_rectify_location_string(location_string):
+    """
+    This will try to get a gmap location in cases where google can't extract a response from the original
+    sentence but will be able to from a sub-sentence
+    e.g.
+    "גבר נהרג בתאונת דרכים בגליל התחתון"
+    ->no results
+    "בתאונת דרכים בגליל התחתון"
+    ->results
+    """
+
+    # find first location hint and trim prefix
+    trimmed_location_string = ''
+    found = False
+    for word in location_string.split():
+        if word.startswith('ב'):
+            found = True
+        if found:
+            trimmed_location_string += ' '
+            trimmed_location_string += word
+    return trimmed_location_string

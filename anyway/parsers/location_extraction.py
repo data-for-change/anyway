@@ -333,12 +333,12 @@ def try_rectify_location_string(location_string):
     """
 
     # find first location hint and trim prefix
-    trimmed_location_string = ''
+    trimmed_location_string = ""
     found = False
     for word in location_string.split():
-        if word.startswith('ב'):
+        if word.startswith("ב"):
             found = True
         if found:
-            trimmed_location_string += ' '
+            trimmed_location_string += " "
             trimmed_location_string += word
     return trimmed_location_string

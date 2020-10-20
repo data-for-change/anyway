@@ -175,7 +175,7 @@ def test_twitter_parse():
         assert actual.accident == expected.accident
 
 
-def test_extract_location():
+def test_location_extraction_extract_geo_features():
     if not secrets.exists("GOOGLE_MAPS_KEY"):
         pytest.skip("Could not find GOOGLE_MAPS_KEY")
 
@@ -212,7 +212,7 @@ def test_extract_location():
         assert getattr(actual, k) == getattr(expected, k)
 
 
-def test_extract_location_text():
+def test_location_extraction_extract_location_text():
     for description, expected_location_text in [
         (
                 'רוכב אופנוע כבן 20 נפצע באורח בינוני מפגיעת רכב היום (ראשון) בכביש 65 סמוך לצומת אלון. צוות מד"א שהגיע למקום העניק לו טיפול רפואי ופינה אותו לבית החולים הלל יפה בחדרה.]]>'
@@ -232,10 +232,11 @@ def test_extract_location_text():
         assert expected_location_text == actual_location_text
 
 
-def test_extract_location():
+def test_location_extraction_geocode_extract():
     if not secrets.exists("GOOGLE_MAPS_KEY"):
         pytest.skip("Could not find GOOGLE_MAPS_KEY")
 
+    # this sentence would return nothing without try_rectify_location_string()
     expected_location = {
         'street': None,
         'road_no': None,

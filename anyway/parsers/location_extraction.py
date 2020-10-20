@@ -293,7 +293,7 @@ def extract_location_text(text):
     for token in near_tokens:
         i = text.find(token)
         if i >= 0:
-            text = text[:i] + token + text[i + len(token):]
+            text = text[:i] + token + text[i + len(token) :]
     return text
 
 

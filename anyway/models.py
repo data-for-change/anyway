@@ -2085,7 +2085,6 @@ class WazeAlert(Base):
     street = Column(Text())
     road_type = Column(Integer())
     report_description = Column(Text())
-    report_by_municipality_user = Column(Boolean())
     jam_uuid = Column(Text())
     geom = Column(Geometry("POINT"))
 

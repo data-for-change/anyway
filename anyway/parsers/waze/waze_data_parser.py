@@ -1,10 +1,14 @@
+import os
 import logging
-from google.cloud import storage
-import pandas as pd
-from pandas import json_normalize
 import json
-from anyway.parsers.waze.waze_db_functions import insert_waze_alerts, insert_waze_traffic_jams
+import hashlib
 import requests
+from pandas import json_normalize
+import pandas as pd
+from google.cloud import storage
+
+from anyway.parsers.waze.waze_db_functions import insert_waze_alerts, insert_waze_traffic_jams
+from anyway.models import WazeAlert, WazeTrafficJams
 
 
 WAZE_ALERTS_API_URL = "https://il-georss.waze.com/rtserver/web/TGeoRSS" + \
@@ -37,12 +41,12 @@ def parse_waze_alerts_data(waze_alerts):
     waze_df["created_at"] = pd.to_datetime(waze_df["pubMillis"], unit="ms")
     waze_df.rename(
         {
-            "location.x": "latitude",
-            "location.y": "longitude",
+            "location.x": "longitude",
+            "location.y": "latitude",
             "nThumbsUp": "number_thumbs_up",
             "reportRating": "report_rating",
             "reportDescription": "report_description",
-            "reportByMunicipalityUser": "report_by_municipality_user",
+            # "reportByMunicipalityUser": "report_by_municipality_user",
             "jamUuid": "jam_uuid",
             "type": "alert_type",
             "subtype": "alert_subtype",
@@ -55,7 +59,10 @@ def parse_waze_alerts_data(waze_alerts):
         lambda row: "POINT({} {})".format(row["longitude"], row["latitude"]), axis=1
     )
     waze_df["road_type"] = waze_df["road_type"].fillna(-1)
-    waze_df.drop(["country", "pubMillis"], axis=1, inplace=True)
+    waze_df.drop(["country", "pubMillis", "reportByMunicipalityUser"], axis=1, inplace=True, errors='ignore')
+    for key in waze_df.keys():
+        if waze_df[key] is None or key not in [field.name for field in WazeAlert.__table__.columns]:
+            waze_df.drop([key], axis=1, inplace=True)
 
     return waze_df.to_dict("records")
 
@@ -76,8 +83,6 @@ def parse_waze_traffic_jams_data(waze_jams):
     waze_df["segments"] = waze_df["segments"].apply(str)
     waze_df["turnType"] = waze_df["roadType"].fillna(-1)
     waze_df.drop(["country", "pubMillis"], axis=1, inplace=True)
-    if "turnLine" in waze_df:
-        waze_df.drop(["turnLine"], axis=1, inplace=True)
     waze_df.rename(
         {
             "speedKMH": "speed_kmh",
@@ -90,6 +95,9 @@ def parse_waze_traffic_jams_data(waze_jams):
         axis=1,
         inplace=True,
     )
+    for key in waze_df.keys():
+        if waze_df[key] is None or key not in [field.name for field in WazeTrafficJams.__table__.columns]:
+            waze_df.drop([key], axis=1, inplace=True)
 
     return waze_df.to_dict("records")
 

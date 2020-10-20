@@ -2074,6 +2074,8 @@ class WazeAlert(Base):
     city = Column(Text())
     confidence = Column(Integer())
     created_at = Column(DateTime, index=True)
+    ended_at_estimate = Column(DateTime, index=True, nullable=True)
+    back_filled = Column(Boolean(), index=True, default=False)
     longitude = Column(Float())
     latitude = Column(Float())
     magvar = Column(Integer())
@@ -2112,6 +2114,8 @@ class WazeTrafficJams(Base):
     blocking_alert_uuid = Column(Text())
     start_node = Column(Text())
     created_at = Column(DateTime, index=True)
+    ended_at_estimate = Column(DateTime, index=True, nullable=True)
+    back_filled = Column(Boolean(), index=True, default=False)
     geom = Column(Geometry("LINESTRING"))
 
 

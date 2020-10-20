@@ -1,7 +1,5 @@
-import os
 import logging
 import json
-import hashlib
 import requests
 from pandas import json_normalize
 import pandas as pd
@@ -11,11 +9,26 @@ from anyway.parsers.waze.waze_db_functions import insert_waze_alerts, insert_waz
 from anyway.models import WazeAlert, WazeTrafficJams
 
 
-WAZE_ALERTS_API_URL = "https://il-georss.waze.com/rtserver/web/TGeoRSS" + \
-                      "?tk=ccp_partner&ccp_partner_name=The%20Public%20Knowledge%20Workshop&format=JSON" + \
-                      "&types=traffic,alerts,irregularities&polygon=33.717000,32.547000;34.722000,33.004000;" + \
-                      "35.793000,33.331000;35.914000,32.953000;35.750000,32.723000;35.395000,31.084000;" + \
-                      "34.931000,29.473000;33.717000,32.547000;33.717000,32.547000"
+ISRAEL_POLYGON = [
+    ("33.717000", "32.547000"),
+    ("34.722000", "33.004000"),
+    ("35.793000", "33.331000"),
+    ("35.914000", "32.953000"),
+    ("35.750000", "32.723000"),
+    ("35.395000", "31.084000"),
+    ("34.931000", "29.473000"),
+    ("33.717000", "32.547000"),
+    ("33.717000", "32.547000"),
+]
+WAZE_ALERTS_API_PARAMS = {
+    "format": "JSON",
+    "tk": "ccp_partner",
+    "ccp_partner_name": "The Public Knowledge Workshop",
+    "types": "traffic,alerts,irregularities",
+    "polygon": ";".join([",".join(point) for point in ISRAEL_POLYGON]),
+}
+WAZE_ALERTS_API_URL = "https://il-georss.waze.com/rtserver/web/TGeoRSS"
+
 
 logger = logging.getLogger("waze_data")
 
@@ -46,7 +59,7 @@ def parse_waze_alerts_data(waze_alerts):
             "nThumbsUp": "number_thumbs_up",
             "reportRating": "report_rating",
             "reportDescription": "report_description",
-            # "reportByMunicipalityUser": "report_by_municipality_user",
+            "reportByMunicipalityUser": "report_by_municipality_user",
             "jamUuid": "jam_uuid",
             "type": "alert_type",
             "subtype": "alert_subtype",
@@ -58,8 +71,11 @@ def parse_waze_alerts_data(waze_alerts):
     waze_df["geom"] = waze_df.apply(
         lambda row: "POINT({} {})".format(row["longitude"], row["latitude"]), axis=1
     )
-    waze_df["road_type"] = waze_df["road_type"].fillna(-1)
-    waze_df.drop(["country", "pubMillis", "reportByMunicipalityUser"], axis=1, inplace=True, errors='ignore')
+    waze_df["road_type"] = int(waze_df["road_type"].fillna(-1)[0])
+    waze_df["number_thumbs_up"] = int(waze_df.get("number_thumbs_up").fillna(0)[0])
+    waze_df["report_by_municipality_user"] = _convert_to_bool(waze_df.get("report_by_municipality_user", False))
+
+    waze_df.drop(["country", "pubMillis"], axis=1, inplace=True, errors='ignore')
     for key in waze_df.keys():
         if waze_df[key] is None or key not in [field.name for field in WazeAlert.__table__.columns]:
             waze_df.drop([key], axis=1, inplace=True)
@@ -149,7 +165,7 @@ def ingest_waze_from_api():
     param end_date: date to end fetch waze files
     return: parsed Dataframe
     """
-    response = requests.get(WAZE_ALERTS_API_URL)
+    response = requests.get(WAZE_ALERTS_API_URL, params=WAZE_ALERTS_API_PARAMS)
     response.raise_for_status()
     waze_data = json.loads(response.content)
 
@@ -173,4 +189,8 @@ def _ingest_waze_jsons(waze_jsons):
     return len(waze_alerts), len(waze_traffic_jams)
 
 
-#python -m main process waze-data --start_date=01-01-2020 --end_date=02-01-2020
+def _convert_to_bool(value):
+    if isinstance(value, bool):
+        return value
+    else:
+        return str(value).lower() in ("yes", "true", "t", "1")

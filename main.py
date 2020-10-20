@@ -229,17 +229,37 @@ def injured_around_schools(start_date, end_date, distance, batch_size):
 
 @process.command()
 @click.option(
+    "--from-s3",
+    "-f",
+    is_flag=True,
+    help="get the data from files, instead of waze api",
+)
+@click.option(
     "--start_date", default="01-01-2019", type=valid_date, help="The Start Date - format DD-MM-YYYY"
 )
 @click.option(
     "--end_date", default="01-01-2020", type=valid_date, help="The End Date - format DD-MM-YYYY"
 )
-def waze_data(start_date, end_date):
-    from anyway.parsers.waze.waze_data_parser import ingest_waze_from_files
+def waze_data(files, start_date, end_date):
+    """
+    Get waze data from existing files or from waze api.
+    Examples for running the script:
 
-    return ingest_waze_from_files(
-        bucket_name="anyway-hasadna.appspot.com", start_date=start_date, end_date=end_date
-    )
+     - For getting data from the api, run:
+       python -m main process waze-data
+
+     - For getting data from the files, run (change the start and end date as you need):
+       python -m main process waze-data --from-s3 --start_date=01-01-2020 --end_date=01-01-2020
+    """
+
+    from anyway.parsers.waze.waze_data_parser import ingest_waze_from_files, ingest_waze_from_api
+
+    if files:
+        return ingest_waze_from_files(
+            bucket_name="anyway-hasadna.appspot.com", start_date=start_date, end_date=end_date
+        )
+    else:
+        return ingest_waze_from_api()
 
 
 @process.command()

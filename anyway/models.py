@@ -2082,6 +2082,7 @@ class WazeAlert(Base):
     alert_type = Column(Text())
     alert_subtype = Column(Text())
     uuid = Column(Text(), unique=True, index=True)
+    report_by_municipality_user = Column(Boolean(), default=False)
     street = Column(Text())
     road_type = Column(Integer())
     report_description = Column(Text())

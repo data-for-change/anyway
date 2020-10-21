@@ -1,3 +1,4 @@
+import datetime
 import logging
 import json
 import requests
@@ -5,7 +6,12 @@ from pandas import json_normalize
 import pandas as pd
 from google.cloud import storage
 
-from anyway.parsers.waze.waze_db_functions import insert_waze_alerts, insert_waze_traffic_jams
+from anyway.parsers.waze.waze_db_functions import (
+    insert_waze_alerts,
+    insert_waze_traffic_jams,
+    enrich_waze_alerts_ended_at_timestamp,
+    enrich_waze_traffic_jams_ended_at_timestamp,
+)
 from anyway.models import WazeAlert, WazeTrafficJams
 
 
@@ -43,7 +49,7 @@ def list_blobs(bucket_name):
     return blobs
 
 
-def parse_waze_alerts_data(waze_alerts):
+def parse_waze_alerts_data(waze_alerts, back_filled=False):
     """
     parse waze alert json into a Dataframe.
     param waze_alerts: waze raw alert json data
@@ -76,6 +82,7 @@ def parse_waze_alerts_data(waze_alerts):
     waze_df["report_by_municipality_user"] = _convert_to_bool(
         waze_df.get("report_by_municipality_user", False)
     )
+    waze_df["back_filled"] = back_filled
 
     waze_df.drop(["country", "pubMillis"], axis=1, inplace=True, errors="ignore")
     for key in waze_df.keys():
@@ -85,7 +92,7 @@ def parse_waze_alerts_data(waze_alerts):
     return waze_df.to_dict("records")
 
 
-def parse_waze_traffic_jams_data(waze_jams):
+def parse_waze_traffic_jams_data(waze_jams, back_filled=False):
     """
     parse waze traffic jams json into a Dataframe.
     param waze_jams: waze raw traffic jams json data
@@ -113,6 +120,8 @@ def parse_waze_traffic_jams_data(waze_jams):
         axis=1,
         inplace=True,
     )
+    waze_df["back_filled"] = back_filled
+
     for key in waze_df.keys():
         if waze_df[key] is None or key not in [
             field.name for field in WazeTrafficJams.__table__.columns
@@ -149,13 +158,13 @@ def ingest_waze_from_files(bucket_name, start_date, end_date):
         waze_json = json.loads(waze_data)
         bulk_jsons.append(waze_json)
         if len(bulk_jsons) % bulk_size == 0:
-            alerts_count, jams_count = _ingest_waze_jsons(bulk_jsons)
+            alerts_count, jams_count = _ingest_waze_jsons(bulk_jsons, True)
             total_ingested_alerts += alerts_count
             total_ingested_traffic += jams_count
             bulk_jsons = []
 
     # ingest remaining
-    alerts_count, jams_count = _ingest_waze_jsons(bulk_jsons)
+    alerts_count, jams_count = _ingest_waze_jsons(bulk_jsons, True)
     total_ingested_alerts += alerts_count
     total_ingested_traffic += jams_count
     logger.info(f"Ingested {total_ingested_alerts} alerts, {jams_count} jams")
@@ -177,18 +186,23 @@ def ingest_waze_from_api():
     logger.info(f"Ingested {alerts_count} alerts, {jams_count} jams")
 
 
-def _ingest_waze_jsons(waze_jsons):
+def _ingest_waze_jsons(waze_jsons, back_filled=False):
     waze_alerts = []
     waze_traffic_jams = []
+    waze_file_timestamp = None
 
     for waze_data in waze_jsons:
-        waze_alerts.extend(parse_waze_alerts_data(waze_data["alerts"]))
-        waze_traffic_jams.extend(parse_waze_traffic_jams_data(waze_data.get("jams")))
+        waze_file_timestamp = datetime.datetime.fromisoformat(waze_data["endTime"])
+        waze_alerts.extend(parse_waze_alerts_data(waze_data["alerts"], back_filled))
+        waze_traffic_jams.extend(parse_waze_traffic_jams_data(waze_data.get("jams"), back_filled))
 
     logger.debug(f"Ingesting #{len(waze_alerts)} waze_alert records in bulk")
     insert_waze_alerts(waze_alerts)
     logger.debug(f"Ingesting #{len(waze_traffic_jams)} waze_traffic_jams records in bulk")
     insert_waze_traffic_jams(waze_traffic_jams)
+
+    enrich_waze_alerts_ended_at_timestamp(waze_file_timestamp, waze_alerts, back_filled)
+    enrich_waze_traffic_jams_ended_at_timestamp(waze_file_timestamp, waze_traffic_jams, back_filled)
 
     return len(waze_alerts), len(waze_traffic_jams)
 

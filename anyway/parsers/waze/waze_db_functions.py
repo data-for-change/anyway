@@ -20,6 +20,14 @@ def insert_waze_traffic_jams(waze_traffic_jams):
     return _upsert_waze_objects_by_uuid(WazeTrafficJams, waze_traffic_jams)
 
 
+def enrich_waze_alerts_ended_at_timestamp(timestamp, latest_waze_objects, back_filled):
+    return _enrich_ended_at_timestamp(WazeAlert, timestamp, latest_waze_objects, back_filled)
+
+
+def enrich_waze_traffic_jams_ended_at_timestamp(timestamp, latest_waze_objects, back_filled):
+    return _enrich_ended_at_timestamp(WazeTrafficJams, timestamp, latest_waze_objects, back_filled)
+
+
 def _upsert_waze_objects_by_uuid(model, waze_objects):
     new_records = 0
     with db.session.no_autoflush:
@@ -46,3 +54,15 @@ def _upsert_waze_objects_by_uuid(model, waze_objects):
 
         db.session.commit()
     return new_records
+
+
+def _enrich_ended_at_timestamp(model, timestamp, latest_waze_objects, back_filled):
+    latest_waze_objects_uuids = [waze_object["uuid"] for waze_object in latest_waze_objects]
+    query = db.session.query(model).filter(
+        model.ended_at_estimate.is_(None),
+        model.uuid.in_(latest_waze_objects_uuids),
+        model.back_filled.is_(back_filled),
+    )
+    for waze_object in query:
+        waze_object.ended_at_estimate = timestamp
+    db.session.commit()

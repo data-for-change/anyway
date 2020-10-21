@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 import datetime
 import json
 
@@ -9,7 +10,7 @@ from anyway.parsers.news_flash_classifiers import classify_tweets, classify_rss
 from anyway import secrets
 from anyway.parsers.news_flash_db_adapter import init_db
 from anyway.models import NewsFlash, WazeAlert
-from anyway.parsers import timezones, short_distance_resolutions, long_distance_resolutions
+from anyway.parsers import timezones
 from anyway.parsers.infographics_data_cache_updater import is_cache_eligible, is_in_cache
 
 
@@ -234,12 +235,11 @@ def test_extract_location_text():
 
 
 def test_waze_alert():
-
-    # create a waze alert
-    waze_alert = _create_waze_accident_alert()
-
-    try:
+    with _managed_waze_accident_alert() as waze_alert:
         newsflash = NewsFlash(date=datetime.datetime.now())
+
+        short_distance_resolutions = ["צומת עירוני", "צומת בינעירוני", "רחוב"]
+        long_distance_resolutions = ["עיר", "נפה", "מחוז", "כביש בינעירוני"]
 
         # set the geo_location to be close to the waze accident alert location
         geo_location = {
@@ -280,9 +280,6 @@ def test_waze_alert():
 
             assert waze_alert == related_waze_accident_alert
 
-    finally:
-        _delete_waze_alert(waze_alert.id)
-
 
 def test_timeparse():
     twitter = timezones.parse_creation_datetime("Sun May 31 08:26:18 +0000 2020")
@@ -320,6 +317,15 @@ def test_classification_statistics_ynet():
     assert precision > BEST_PRECISION_YNET
     assert recall > BEST_RECALL_YNET
     assert f1 > BEST_F1_YNET
+
+
+@contextmanager
+def _managed_waze_accident_alert():
+    waze_alert = _create_waze_accident_alert()
+    try:
+        yield waze_alert
+    finally:
+        _delete_waze_alert(waze_alert.id)
 
 
 def _create_waze_accident_alert():

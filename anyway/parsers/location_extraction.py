@@ -8,7 +8,7 @@ import numpy as np
 from geographiclib.geodesic import Geodesic
 
 from anyway.models import NewsFlash, WazeAlert
-from anyway.parsers import resolution_dict, short_distance_resolutions, long_distance_resolutions
+from anyway.parsers import resolution_dict, resolution_to_distance
 from anyway.parsers.utils import get_bounding_box_polygon
 from anyway import secrets
 
@@ -304,13 +304,9 @@ def extract_location_text(text):
 def get_related_waze_accident_alert(db, geo_location, newsflash):
 
     # determine what distance (in kilometers) to look for waze accidents in, according to the newsflash's resolution
-    if newsflash.resolution in short_distance_resolutions:
-        distance = 0.3
-    elif newsflash.resolution in long_distance_resolutions:
-        distance = 5
-    else:
-
-        # unknown resolution - skip this optimization
+    distance = resolution_to_distance.get(newsflash.resolution, None)
+    if distance is None:
+        # unknown resolution. skip this optimization
         return None
 
     # create the bounding box according to the coordinate we have, and the resolution distance

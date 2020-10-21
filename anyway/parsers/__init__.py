@@ -1,5 +1,12 @@
-short_distance_resolutions = ["צומת עירוני", "צומת בינעירוני", "רחוב"]
-long_distance_resolutions = ["עיר", "נפה", "מחוז", "כביש בינעירוני"]
+resolution_to_distance = {
+    "מחוז": 5,
+    "נפה": 5,
+    "עיר": 5,
+    "כביש בינעירוני": 5,
+    "רחוב": 0.3,
+    "צומת עירוני": 0.3,
+    "צומת בינעירוני": 0.3,
+}
 resolution_dict = {
     "מחוז": ["region_hebrew"],
     "נפה": ["district_hebrew"],

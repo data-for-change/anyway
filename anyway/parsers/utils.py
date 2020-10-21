@@ -31,13 +31,11 @@ def get_bounding_box_polygon(latitude, longitude, distance_in_km):
     lat_max = latitude + distance_in_km / radius
     lon_min = longitude - distance_in_km / parallel_radius
     lon_max = longitude + distance_in_km / parallel_radius
-    rad2deg = math.degrees
 
+    rad2deg = math.degrees
     baseX = rad2deg(lon_min)
     baseY = rad2deg(lat_min)
     distanceX = rad2deg(lon_max)
     distanceY = rad2deg(lat_max)
 
-    return "POLYGON(({0} {1},{0} {3},{2} {3},{2} {1},{0} {1}))".format(
-        baseX, baseY, distanceX, distanceY
-    )
+    return f"POLYGON(({baseX} {baseY},{baseX} {distanceY},{distanceX} {distanceY},{distanceX} {baseY},{baseX} {baseY}))"

@@ -5,6 +5,7 @@ import json
 import enum
 from functools import lru_cache
 from typing import Optional, Dict, List, Any, Callable
+from dataclasses import dataclass, field
 
 import pandas as pd
 from collections import defaultdict
@@ -20,7 +21,8 @@ from anyway.infographics_dictionaries import head_on_collisions_comparison_dict
 from anyway.parsers import infographics_data_cache_updater
 
 """
-    Widget structure:
+    Base class for widgets. Each widget will be a class that is derived from Widget, and instantiated with RequestParams instance. It will need to implement the methods in the base class
+    The Serialize() method returns the data that the API returns, and has the following structure:
     {
         'name': str,
         'data': {
@@ -67,36 +69,6 @@ class WidgetId(enum.Enum):
         return self.value[1]
 
 
-class Widget:
-    # def __init__(self, name, rank, items, text=None, meta=None):
-    #     self.name = name
-    #     self.rank = rank
-    #     self.items = items
-    #     self.text = text
-    #     self.meta = meta
-    #
-    def __init__(self, widget_id: WidgetId, items, text=None, meta=None):
-        self.name = widget_id.get_name()
-        self.rank = widget_id.get_rank()
-        self.items = items
-        self.text = text
-        self.meta = meta
-
-    def serialize(self):
-        output = {}
-        output["name"] = self.name
-        output["data"] = {}
-        output["data"]["items"] = self.items
-        if self.text:
-            output["data"]["text"] = self.text
-        if self.meta:
-            output["meta"] = self.meta
-        else:
-            output["meta"] = {}
-        output["meta"]["rank"] = self.rank
-        return output
-
-
 class RequestParams:
     """
     Input for infographics data generation, per api call
@@ -119,6 +91,39 @@ class RequestParams:
 
     def __str__(self):
         return f'RequestParams(location_text:{self.location_text}, start_time:{self.start_time}, end_time:{self.end_time} '
+
+
+@dataclass
+class Widget:
+    request_params: RequestParams
+    name: str = field(init=False)
+    rank: int = field(init=False, default=-1)
+    items: Dict = field(init=False)
+    text: str = field(init=False, default=None)
+    meta: Optional[Dict] = field(init=False, default=None)
+
+    def get_name(self) -> str:
+        pass
+
+    def get_rank(self) -> int:
+        pass
+
+    def get_widget_id(self) -> WidgetId:
+        pass
+
+    def serialize(self):
+        output = {}
+        output["name"] = self.name
+        output["data"] = {}
+        output["data"]["items"] = self.items
+        if self.text:
+            output["data"]["text"] = self.text
+        if self.meta:
+            output["meta"] = self.meta
+        else:
+            output["meta"] = {}
+        output["meta"]["rank"] = self.rank
+        return output
 
 
 class WidgetDef:

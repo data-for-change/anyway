@@ -10,13 +10,17 @@ import click
 
 def valid_date(date_string):
     DATE_INPUT_FORMAT = "%d-%m-%Y"
+    DATE_INPUT_FORMAT_ALT = "%Y-%m-%dT%H:%M"
     from datetime import datetime
 
     try:
         return datetime.strptime(date_string, DATE_INPUT_FORMAT)
     except ValueError:
-        msg = "Not a valid date: '{0}'.".format(date_string)
-        raise argparse.ArgumentTypeError(msg)
+        try:
+            return datetime.strptime(date_string, DATE_INPUT_FORMAT_ALT)
+        except ValueError:
+            msg = "Not a valid date: '{0}'.".format(date_string)
+            raise argparse.ArgumentTypeError(msg)
 
 
 @click.group()
@@ -36,9 +40,11 @@ def cli():
 def testserver(open_server, debug_js):
     from anyway.app_and_db import app
 
-    logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
-                        level=logging.DEBUG,
-                        datefmt='%Y-%m-%d %H:%M:%S')
+    logging.basicConfig(
+        format="%(asctime)s %(levelname)-8s %(message)s",
+        level=logging.DEBUG,
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
 
     if debug_js:
         app.config["ASSETS_DEBUG"] = True
@@ -100,7 +106,7 @@ def cbs(
     username,
     password,
     email_search_start_date,
-    from_s3
+    from_s3,
 ):
     from anyway.parsers.cbs.executor import main
 
@@ -115,13 +121,14 @@ def cbs(
         username=username,
         password=password,
         email_search_start_date=email_search_start_date,
-        from_s3=from_s3
+        from_s3=from_s3,
     )
 
 
 @process.command()
 def news_flash():
     from anyway.parsers.news_flash import scrape_all
+
     return scrape_all()
 
 
@@ -190,10 +197,14 @@ def schools_with_description(
 
 @process.command()
 @click.argument(
-    "schools_description_filepath", type=str, default="static/data/schools/schools_description_2020.xlsx"
+    "schools_description_filepath",
+    type=str,
+    default="static/data/schools/schools_description_2020.xlsx",
 )
 @click.argument(
-    "schools_coordinates_filepath", type=str, default="static/data/schools/schools_coordinates_2020.xlsx"
+    "schools_coordinates_filepath",
+    type=str,
+    default="static/data/schools/schools_coordinates_2020.xlsx",
 )
 @click.option("--batch_size", type=int, default=5000)
 def schools_with_description_2020(
@@ -225,17 +236,37 @@ def injured_around_schools(start_date, end_date, distance, batch_size):
 
 @process.command()
 @click.option(
+    "--from_s3",
+    "-f",
+    is_flag=True,
+    help="get the data from files, instead of waze api",
+)
+@click.option(
     "--start_date", default="01-01-2019", type=valid_date, help="The Start Date - format DD-MM-YYYY"
 )
 @click.option(
     "--end_date", default="01-01-2020", type=valid_date, help="The End Date - format DD-MM-YYYY"
 )
-def waze_data(start_date, end_date):
-    from anyway.parsers.waze.waze_data_parser import waze_parser
+def waze_data(from_s3, start_date, end_date):
+    """
+    Get waze data from existing files or from waze api.
+    Examples for running the script:
 
-    return waze_parser(
-        bucket_name="anyway-hasadna.appspot.com", start_date=start_date, end_date=end_date
-    )
+     - For getting data from waze RTS HTTP API, run:
+       python -m main process waze-data
+
+     - For getting data from the S3 stored json files, run (change the start and end date as you need):
+       python -m main process waze-data --from_s3 --start_date=01-01-2020 --end_date=01-01-2020
+    """
+
+    from anyway.parsers.waze.waze_data_parser import ingest_waze_from_files, ingest_waze_from_api
+
+    if from_s3:
+        return ingest_waze_from_files(
+            bucket_name="anyway-hasadna.appspot.com", start_date=start_date, end_date=end_date
+        )
+    else:
+        return ingest_waze_from_api()
 
 
 @process.command()
@@ -247,13 +278,20 @@ def embedded_reports(filename):
 
 
 @process.command()
-@click.option('--update', 'update', is_flag=True,
-              help='Recalculates the cache (default is False)', default=False)
-@click.option('--no_info', 'info', is_flag=True,
-              help='Prints info on cache (default is True)', default=True)
+@click.option(
+    "--update",
+    "update",
+    is_flag=True,
+    help="Recalculates the cache (default is False)",
+    default=False,
+)
+@click.option(
+    "--no_info", "info", is_flag=True, help="Prints info on cache (default is True)", default=True
+)
 def infographics_data_cache(info, update):
     """Will refresh the infographics data cache"""
     from anyway.parsers.infographics_data_cache_updater import main
+
     return main(update=update, info=info)
 
 

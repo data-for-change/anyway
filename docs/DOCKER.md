@@ -46,7 +46,7 @@ Second, copy the token that you just generate and run docker login command like 
 $ docker login docker.pkg.github.com -u USERNAME 
 ```
 
-**6.** Go to the `<project-home>/anyway` directory and run:
+**6.** Go to the project's root directory and run:
     `sudo docker-compose up -d`
 This will start the containers. It will take a few minutes until it's done.
 
@@ -77,7 +77,7 @@ Second, copy the token that you just generate and run docker login command like 
 $ docker login docker.pkg.github.com -u USERNAME 
 ```
 
-**6.** Go to the `<project-home>/anyway` directory and run:
+**6.** Go to the project's root directory and run:
     `sudo docker-compose up -d`
 This will start the containers. It will take a few minutes until it's done.
 

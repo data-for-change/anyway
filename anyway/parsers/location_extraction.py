@@ -318,7 +318,11 @@ def get_related_waze_accident_alert(db, geo_location, newsflash):
     matching_alert = (
         db.session.query(WazeAlert)
         .filter(WazeAlert.alert_type == "ACCIDENT")
-        .filter(WazeAlert.created_at.between(newsflash.date - WAZE_ALERT_NEWSFLASH_TIME_DELTA, datetime.now()))
+        .filter(
+            WazeAlert.created_at.between(
+                newsflash.date - WAZE_ALERT_NEWSFLASH_TIME_DELTA, datetime.now()
+            )
+        )
         .filter(WazeAlert.geom.intersects(bounding_box_polygon_str))
         .first()
     )

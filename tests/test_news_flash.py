@@ -1,10 +1,9 @@
-from contextlib import contextmanager
 import datetime
 import json
+from unittest.mock import Mock
 
 import pytest
 
-from anyway.app_and_db import db
 from anyway.parsers import rss_sites, twitter, location_extraction
 from anyway.parsers.news_flash_classifiers import classify_tweets, classify_rss
 from anyway import secrets
@@ -191,6 +190,24 @@ def test_extract_location():
         date=datetime.datetime(2020, 4, 22, 19, 39, 51),
         accident=True,
     )
+    waze_alert = WazeAlert(
+        id='some-waze-alert-id',
+        city='באר שבע',
+        confidence=2,
+        created_at=datetime.datetime.now(),
+        longitude=32.1,
+        latitude=34.9,
+        magvar=190,
+        number_thumbs_up=1,
+        report_rating=5,
+        reliability=10,
+        alert_type='ACCIDENT',
+        alert_subtype='',
+        street='דרך מצדה',
+        road_type=3,
+    )
+    location_extraction.get_related_waze_accident_alert = Mock(return_value=waze_alert)
+
     expected = NewsFlash(
         **parsed,
         lat=32.0861791,
@@ -206,6 +223,7 @@ def test_extract_location():
         street1_hebrew="ביאליק",
         street2_hebrew=None,
         yishuv_name="רמת גן",
+        waze_alert=waze_alert.id
     )
 
     actual = NewsFlash(**parsed)
@@ -222,63 +240,15 @@ def test_extract_location_text():
         ),
         (
                 'רוכב אופנוע בן 23 נפצע היום (שבת) באורח בינוני לאחר שהחליק בכביש ליד כפר חיטים הסמוך לטבריה. צוות מד"א העניק לו טיפול ראשוני ופינה אותו לבית החולים פוריה בטבריה.]]>'
-                ,'כביש ליד כפר חיטים הסמוך לטבריה'
-
+                , 'כביש ליד כפר חיטים הסמוך לטבריה'
         ),
         (
                 'רוכב אופנוע בן 23 החליק הלילה (שבת) בנסיעה בכביש 3 סמוך למושב בקוע, ליד בית שמש. מצבו מוגדר בינוני. צוות מד"א העניק לו טיפול רפואי ופינה אותו עם חבלה רב מערכתית לבית החולים שמיר אסף הרופא בבאר יעקב.]]>'
-                ,'כביש 3 סמוך למושב בקוע, ליד בית שמש'
+                , 'כביש 3 סמוך למושב בקוע, ליד בית שמש'
         ),
     ]:
         actual_location_text = location_extraction.extract_location_text(description)
         assert expected_location_text == actual_location_text
-
-
-def test_waze_alert():
-    with _managed_waze_accident_alert() as waze_alert:
-        newsflash = NewsFlash(date=datetime.datetime.now())
-
-        short_distance_resolutions = ["צומת עירוני", "צומת בינעירוני", "רחוב"]
-        long_distance_resolutions = ["עיר", "נפה", "מחוז", "כביש בינעירוני"]
-
-        # set the geo_location to be close to the waze accident alert location
-        geo_location = {
-            "lon": waze_alert.longitude + 0.001,
-            "lat": waze_alert.latitude + 0.0001,
-        }
-
-        # check that we successfully get the related waze accident event
-        for resolution in short_distance_resolutions:
-            newsflash.resolution = resolution
-            related_waze_accident_alert = location_extraction.get_related_waze_accident_alert(db,
-                                                                                              geo_location,
-                                                                                              newsflash)
-
-            assert waze_alert == related_waze_accident_alert
-
-        # set geo_location to a further location
-        geo_location = {
-            "lon": waze_alert.longitude + 0.01,
-            "lat": waze_alert.latitude + 0.0001,
-        }
-
-        # make sure short_distance_resolutions *do not* get any waze accident alert
-        for resolution in short_distance_resolutions:
-            newsflash.resolution = resolution
-            related_waze_accident_alert = location_extraction.get_related_waze_accident_alert(db,
-                                                                                              geo_location,
-                                                                                              newsflash)
-
-            assert related_waze_accident_alert is None
-
-        # make sure we successfully get the related waze accident for long_distance_resolutions
-        for resolution in long_distance_resolutions:
-            newsflash.resolution = resolution
-            related_waze_accident_alert = location_extraction.get_related_waze_accident_alert(db,
-                                                                                              geo_location,
-                                                                                              newsflash)
-
-            assert waze_alert == related_waze_accident_alert
 
 
 def test_timeparse():
@@ -318,48 +288,3 @@ def test_classification_statistics_ynet():
     assert recall > BEST_RECALL_YNET
     assert f1 > BEST_F1_YNET
 
-
-@contextmanager
-def _managed_waze_accident_alert():
-    waze_alert = _create_waze_accident_alert()
-    try:
-        yield waze_alert
-    finally:
-        _delete_waze_alert(waze_alert.id)
-
-
-def _create_waze_accident_alert():
-    id = db.session.query(WazeAlert).count() + 1,
-
-    longitude, latitude = (
-        float(31.0),
-        float(34.0),
-    )
-    point_str = "POINT({0} {1})".format(longitude, latitude)
-
-    waze_alert = WazeAlert(
-        id=id[0],
-        city='באר שבע',
-        confidence=2,
-        created_at=datetime.datetime.now(),
-        longitude=longitude,
-        latitude=latitude,
-        magvar=190,
-        number_thumbs_up=1,
-        report_rating=5,
-        reliability=10,
-        alert_type='ACCIDENT',
-        alert_subtype='',
-        street='דרך מצדה',
-        road_type=3,
-        geom=point_str,
-    )
-    db.session.add(waze_alert)
-    db.session.commit()
-
-    return waze_alert
-
-
-def _delete_waze_alert(waze_alert_id):
-    db.session.query(WazeAlert).filter_by(id=waze_alert_id).delete()
-    db.session.commit()

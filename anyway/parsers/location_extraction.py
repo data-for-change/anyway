@@ -12,7 +12,7 @@ from anyway.parsers import resolution_dict, resolution_to_distance
 from anyway.parsers.utils import get_bounding_box_polygon
 from anyway import secrets
 
-WAZE_ALERT_NEWSFLASH_DELTA_IN_HOURS = 3
+WAZE_ALERT_NEWSFLASH_TIME_DELTA = timedelta(hours=3)
 
 
 def extract_road_number(location):
@@ -318,12 +318,7 @@ def get_related_waze_accident_alert(db, geo_location, newsflash):
     matching_alert = (
         db.session.query(WazeAlert)
         .filter(WazeAlert.alert_type == "ACCIDENT")
-        .filter(
-            WazeAlert.created_at.between(
-                newsflash.date - timedelta(hours=WAZE_ALERT_NEWSFLASH_DELTA_IN_HOURS),
-                datetime.now(),
-            )
-        )
+        .filter(WazeAlert.created_at.between(newsflash.date - WAZE_ALERT_NEWSFLASH_TIME_DELTA, datetime.now()))
         .filter(WazeAlert.geom.intersects(bounding_box_polygon_str))
         .first()
     )

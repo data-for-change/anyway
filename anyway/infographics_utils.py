@@ -4,6 +4,12 @@ import datetime
 import json
 import os
 from functools import lru_cache
+import enum
+from enum import Enum, auto
+from typing import Optional, Dict, List
+import dataclasses
+from dataclasses import dataclass
+import traceback
 
 import pandas as pd
 from collections import defaultdict
@@ -59,6 +65,244 @@ class Widget:
             output["meta"] = {}
         output["meta"]["rank"] = self.rank
         return output
+
+
+@enum.unique
+class WidgetId(Enum):
+    accident_count_by_severity = auto()
+    most_severe_accidents_table = auto()
+    most_severe_accidents = auto()
+    street_view = auto()
+    head_on_collisions_comparison = auto()
+    accident_count_by_accident_type = auto()
+    accidents_heat_map = auto()
+    accident_count_by_accident_year = auto()
+    injured_count_by_accident_year = auto()
+    accident_count_by_day_night = auto()
+    accidents_count_by_hour = auto()
+    accident_count_by_road_light = auto()
+    top_road_segments_accidents_per_km = auto()
+    injured_count_per_age_group = auto()
+    vision_zero = auto()
+    accident_count_by_driver_type = auto()
+    accident_count_by_car_type = auto()
+    injured_accidents_with_pedestrians = auto()
+    accident_severity_by_cross_location = auto()
+    motorcycle_accidents_vs_all_accidents = auto()
+    accidents_count_pedestrians_per_vehicle_street_vs_all = auto()
+
+
+@dataclass
+class RequestParams:
+    """
+    Input for infographics data generation, per api call
+    """
+
+    news_flash_id: int
+    location_text: str
+    location_info: Optional[Dict]
+    resolution: Dict
+    gps: Dict
+    start_time: datetime.date
+    end_time: datetime.date
+
+    def __str__(self):
+        return f"RequestParams(location_text:{self.location_text}, start_time:{self.start_time}, end_time:{self.end_time} "
+
+
+@dataclass
+class NewWidget:
+    '''
+    Base class for widgets. Each widget will be a class that is derived from NewWidget, and instantiated
+    with RequestParams instance. It will need to implement the methods in the base class
+    The Serialize() method returns the data that the API returns, and has the following structure:
+    NewWidget is a temporary name. When the move of all widgets to the new structure will be
+    completed, it will be renamed to Widget, and replace the current Widget class
+    '''
+    request_params: RequestParams
+    name: str = dataclasses.field(init=False)
+    rank: int = dataclasses.field(init=False, default=-1)
+    items: Dict = dataclasses.field(init=False, default_factory=dict)
+    text: str = dataclasses.field(init=False, default=None)
+    meta: Optional[Dict] = dataclasses.field(init=False, default=None)
+
+    def get_name(self) -> str:
+        pass
+
+    def get_rank(self) -> int:
+        pass
+
+    def get_widget_id(self) -> WidgetId:
+        pass
+
+    def is_in_cache(self) -> bool:
+        pass
+
+    def is_included(self) -> bool:
+        pass
+
+    def generate_items(self) -> None:
+        pass
+
+    def serialize(self):
+        if not self.items:
+            self.generate_items()
+        output = {}
+        output["name"] = self.name
+        output["data"] = {}
+        output["data"]["items"] = self.items
+        if self.text:
+            output["data"]["text"] = self.text
+        if self.meta:
+            output["meta"] = self.meta
+        else:
+            output["meta"] = {}
+        output["meta"]["rank"] = self.rank
+        return output
+
+
+class AccidentCountBySeverityWidget(NewWidget):
+    widget_id: WidgetId = dataclasses.field(init=False, default=WidgetId.accident_count_by_severity)
+
+    def __init__(self, request_params: RequestParams):
+        logging.debug("starting AccidentCountBySeverityWidget.__init__()create_widget")
+        NewWidget.__init__(self, request_params)
+
+    def get_name(self) -> str:
+        return self.widget_id.name
+
+    def get_rank(self) -> int:
+        return 1
+
+    def get_widget_id(self) -> WidgetId:
+        return self.widget_id
+
+    def is_in_cache(self) -> bool:
+        return True
+
+    def is_included(self) -> bool:
+        return True
+
+    def generate_items(self) -> None:
+        self.items = self.get_accident_count_by_severity(
+            self.request_params.location_info,
+            self.request_params.location_text,
+            self.request_params.start_time,
+            self.request_params.end_time,
+        )
+
+    def get_accident_count_by_severity(self, location_info, location_text, start_time, end_time):
+        count_by_severity = get_accidents_stats(
+            table_obj=AccidentMarkerView,
+            filters=location_info,
+            group_by="accident_severity_hebrew",
+            count="accident_severity_hebrew",
+            start_time=start_time,
+            end_time=end_time,
+        )
+        severity_dict = {"קטלנית": "fatal", "קשה": "severe", "קלה": "light"}
+        items = {}
+        total_accidents_count = 0
+        start_year = start_time.year
+        end_year = end_time.year
+        for severity_and_count in count_by_severity:
+            accident_severity_hebrew = severity_and_count["accident_severity"]
+            severity_english = severity_dict[accident_severity_hebrew]
+            severity_count_text = "severity_{}_count".format(severity_english)
+            items[severity_count_text] = severity_and_count["count"]
+            total_accidents_count += severity_and_count["count"]
+        items["start_year"] = start_year
+        items["end_year"] = end_year
+        items["total_accidents_count"] = total_accidents_count
+        return items
+
+
+class MostSevereAccidentsTableWidget(NewWidget):
+    widget_id: WidgetId = dataclasses.field(
+        init=False, default=WidgetId.most_severe_accidents_table
+    )
+
+    def __init__(self, request_params: RequestParams):
+        NewWidget.__init__(self, request_params)
+
+    def get_name(self) -> str:
+        return self.widget_id.name
+
+    def get_rank(self) -> int:
+        return 1
+
+    def get_widget_id(self) -> WidgetId:
+        return self.widget_id
+
+    def is_in_cache(self) -> bool:
+        return True
+
+    def is_included(self) -> bool:
+        return True
+
+    def generate_items(self) -> None:
+        self.items = self.get_most_severe_accidents_table(
+            self.request_params.location_info,
+            self.request_params.start_time,
+            self.request_params.end_time,
+        )
+
+    def get_most_severe_accidents_table(self, location_info, start_time, end_time):
+        entities = (
+            "id",
+            "provider_code",
+            "accident_timestamp",
+            "accident_type_hebrew",
+            "accident_year",
+            "accident_severity",
+        )
+        accidents = get_most_severe_accidents_with_entities(
+            table_obj=AccidentMarkerView,
+            filters=location_info,
+            entities=entities,
+            start_time=start_time,
+            end_time=end_time,
+        )
+        # Add casualties
+        for accident in accidents:
+            accident["type"] = accident["accident_type"]
+            dt = accident["accident_timestamp"].to_pydatetime()
+            accident["date"] = dt.strftime("%d/%m/%y")
+            accident["hour"] = dt.strftime("%H:%M")
+            accident["killed_count"] = get_casualties_count_in_accident(
+                accident["id"], accident["provider_code"], 1, accident["accident_year"]
+            )
+            accident["severe_injured_count"] = get_casualties_count_in_accident(
+                accident["id"], accident["provider_code"], 2, accident["accident_year"]
+            )
+            accident["light_injured_count"] = get_casualties_count_in_accident(
+                accident["id"], accident["provider_code"], 3, accident["accident_year"]
+            )
+            # TODO: remove injured_count after FE adaptation to light and severe counts
+            accident["injured_count"] = (
+                accident["severe_injured_count"] + accident["light_injured_count"]
+            )
+            del (
+                accident["accident_timestamp"],
+                accident["accident_type"],
+                accident["id"],
+                accident["provider_code"],
+            )
+            accident["accident_severity"] = english_accident_severity_dict[
+                accident["accident_severity"]
+            ]
+        return accidents
+
+
+def create_widget(widget_id: WidgetId, request_params: RequestParams) -> Optional[NewWidget]:
+    # todo: complete implementation for all values of WidgetId
+    logging.debug("starting create_widget")
+    if widget_id == WidgetId.accident_count_by_severity:
+        return AccidentCountBySeverityWidget(request_params)
+    elif widget_id == WidgetId.most_severe_accidents_table:
+        return MostSevereAccidentsTableWidget(request_params)
+    else:
+        return None
 
 
 def extract_news_flash_location(news_flash_id):
@@ -288,79 +532,6 @@ def get_heat_map_title(location_info):
     return "מוקדי תאונות קטלניות וקשות במקטע " + location_info["road_segment_name"]
 
 
-def get_accident_count_by_severity(location_info, location_text, start_time, end_time):
-    count_by_severity = get_accidents_stats(
-        table_obj=AccidentMarkerView,
-        filters=location_info,
-        group_by="accident_severity_hebrew",
-        count="accident_severity_hebrew",
-        start_time=start_time,
-        end_time=end_time,
-    )
-    severity_dict = {"קטלנית": "fatal", "קשה": "severe", "קלה": "light"}
-    items = {}
-    total_accidents_count = 0
-    start_year = start_time.year
-    end_year = end_time.year
-    for severity_and_count in count_by_severity:
-        accident_severity_hebrew = severity_and_count["accident_severity"]
-        severity_english = severity_dict[accident_severity_hebrew]
-        severity_count_text = "severity_{}_count".format(severity_english)
-        items[severity_count_text] = severity_and_count["count"]
-        total_accidents_count += severity_and_count["count"]
-    items["start_year"] = start_year
-    items["end_year"] = end_year
-    items["total_accidents_count"] = total_accidents_count
-    return items
-
-
-def get_most_severe_accidents_table(location_info, start_time, end_time):
-    entities = (
-        "id",
-        "provider_code",
-        "accident_timestamp",
-        "accident_type_hebrew",
-        "accident_year",
-        "accident_severity",
-    )
-    accidents = get_most_severe_accidents_with_entities(
-        table_obj=AccidentMarkerView,
-        filters=location_info,
-        entities=entities,
-        start_time=start_time,
-        end_time=end_time,
-    )
-    # Add casualties
-    for accident in accidents:
-        accident["type"] = accident["accident_type"]
-        dt = accident["accident_timestamp"].to_pydatetime()
-        accident["date"] = dt.strftime("%d/%m/%y")
-        accident["hour"] = dt.strftime("%H:%M")
-        accident["killed_count"] = get_casualties_count_in_accident(
-            accident["id"], accident["provider_code"], 1, accident["accident_year"]
-        )
-        accident["severe_injured_count"] = get_casualties_count_in_accident(
-            accident["id"], accident["provider_code"], 2, accident["accident_year"]
-        )
-        accident["light_injured_count"] = get_casualties_count_in_accident(
-            accident["id"], accident["provider_code"], 3, accident["accident_year"]
-        )
-        # TODO: remove injured_count after FE adaptation to light and severe counts
-        accident["injured_count"] = (
-            accident["severe_injured_count"] + accident["light_injured_count"]
-        )
-        del (
-            accident["accident_timestamp"],
-            accident["accident_type"],
-            accident["id"],
-            accident["provider_code"],
-        )
-        accident["accident_severity"] = english_accident_severity_dict[
-            accident["accident_severity"]
-        ]
-    return accidents
-
-
 def count_accidents_by_driver_type(data):
     driver_types = defaultdict(int)
     for item in data:
@@ -578,30 +749,39 @@ def stats_accidents_by_car_type_with_national_data(
     return out
 
 
-def create_infographics_data(news_flash_id, number_of_years_ago):
-    output = {}
+def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> List[NewWidget]:
+    logging.debug(f"generate_widgets: selection params:{request_params}, to_cache:{to_cache}")
+    widgets = []
+    for w in WidgetId:
+        widget: NewWidget = create_widget(w, request_params)
+        logging.debug("generate_widgets: after create_widget")
+        if widget and widget.is_in_cache() == to_cache and widget.is_included():
+            widgets.append(widget)
+    return widgets
+
+
+def get_request_params(news_flash_id: int, number_of_years_ago: int) -> Optional[RequestParams]:
+    logging.debug("starting get_request_params")
     try:
         number_of_years_ago = int(number_of_years_ago)
     except ValueError:
-        return {}
+        return None
     if number_of_years_ago < 0 or number_of_years_ago > 100:
-        return {}
+        return None
     location_info = extract_news_flash_location(news_flash_id)
     if location_info is None:
-        return {}
+        return None
     logging.debug("location_info:{}".format(location_info))
     location_text = get_news_flash_location_text(news_flash_id)
     logging.debug("location_text:{}".format(location_text))
     gps = location_info["gps"]
     location_info = location_info["data"]
-    output["meta"] = {"location_info": location_info.copy(), "location_text": location_text}
-    output["widgets"] = []
     resolution = location_info.pop("resolution")
     if resolution is None:
-        return {}
+        return None
 
     if all(value is None for value in location_info.values()):
-        return {}
+        return None
 
     last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
     # converting to datetime object to get the date
@@ -609,398 +789,464 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 
     start_time = datetime.date(end_time.year + 1 - number_of_years_ago, 1, 1)
 
-    output["meta"]["dates_comment"] = (
-        str(start_time.year) + "-" + str(end_time.year) + ", עדכון אחרון: " + str(end_time)
-    )
-
-    # accident_severity count
-    items = get_accident_count_by_severity(
-        location_info=location_info,
+    request_params = RequestParams(
+        news_flash_id=news_flash_id,
         location_text=location_text,
+        location_info=location_info,
+        resolution=resolution,
+        gps=gps,
         start_time=start_time,
         end_time=end_time,
     )
+    logging.debug(f"Ending get_request_params. params: {request_params}")
+    return request_params
 
-    accident_count_by_severity = Widget(name="accident_count_by_severity", rank=1, items=items)
-    output["widgets"].append(accident_count_by_severity.serialize())
 
-    # most severe accidents table
-    most_severe_accidents_table = Widget(
-        name="most_severe_accidents_table",
-        rank=2,
-        items=get_most_severe_accidents_table(location_info, start_time, end_time),
-        text={"title": get_most_severe_accidents_table_title(location_info)},
-    )
-    output["widgets"].append(most_severe_accidents_table.serialize())
+def create_infographics_data(news_flash_id, number_of_years_ago):
+    try:
+        request_params = get_request_params(news_flash_id, number_of_years_ago)
+        location_info = request_params.location_info
+        resolution = request_params.resolution
+        start_time = request_params.start_time
+        end_time = request_params.end_time
+        location_text = request_params.location_text
 
-    # most severe accidents
-    most_severe_accidents = Widget(
-        name="most_severe_accidents",
-        rank=3,
-        items=get_most_severe_accidents(
-            table_obj=AccidentMarkerView,
-            filters=location_info,
-            start_time=start_time,
-            end_time=end_time,
-        ),
-    )
-    output["widgets"].append(most_severe_accidents.serialize())
+        if request_params is None:
+            return {}
 
-    # street view
-    street_view = Widget(
-        name="street_view", rank=4, items={"longitude": gps["lon"], "latitude": gps["lat"]}
-    )
-    output["widgets"].append(street_view.serialize())
+        output = {}
+        try:
+            number_of_years_ago = int(number_of_years_ago)
+        except ValueError:
+            return {}
+        if number_of_years_ago < 0 or number_of_years_ago > 100:
+            return {}
+        location_info = extract_news_flash_location(news_flash_id)
+        if location_info is None:
+            return {}
+        logging.debug("location_info:{}".format(location_info))
+        location_text = get_news_flash_location_text(news_flash_id)
+        logging.debug("location_text:{}".format(location_text))
+        gps = location_info["gps"]
+        location_info = location_info["data"]
+        output["meta"] = {"location_info": location_info.copy(), "location_text": location_text}
+        output["widgets"] = []
+        resolution = location_info.pop("resolution")
+        if resolution is None:
+            return {}
 
-    # head to head accidents
-    head_on_collisions_comparison = Widget(
-        name="head_on_collisions_comparison",
-        rank=5,
-        items=get_head_to_head_stat(
-            news_flash_id=news_flash_id, start_time=start_time, end_time=end_time
-        ),
-        text={"title": "תאונות קטלניות ע״פ סוג"},
-    )
-    output["widgets"].append(head_on_collisions_comparison.serialize())
+        if all(value is None for value in location_info.values()):
+            return {}
 
-    # accident_type count
-    accident_count_by_accident_type = Widget(
-        name="accident_count_by_accident_type",
-        rank=6,
-        items=get_accident_count_by_accident_type(
-            location_info=location_info, start_time=start_time, end_time=end_time
-        ),
-    )
-    output["widgets"].append(accident_count_by_accident_type.serialize())
+        last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
+        # converting to datetime object to get the date
+        end_time = last_accident_date.to_pydatetime().date()
 
-    # accidents heat map
-    accidents_heat_map_filters = location_info.copy()
-    accidents_heat_map_filters["accident_severity"] = [
-        CONST.ACCIDENT_SEVERITY_DEADLY,
-        CONST.ACCIDENT_SEVERITY_SEVERE,
-    ]
-    accidents_heat_map = Widget(
-        name="accidents_heat_map",
-        rank=7,
-        items=get_accidents_heat_map(
-            table_obj=AccidentMarkerView,
-            filters=accidents_heat_map_filters,
-            start_time=start_time,
-            end_time=end_time,
-        ),
-        text={"title": get_heat_map_title(location_info)},
-    )
-    output["widgets"].append(accidents_heat_map.serialize())
+        start_time = datetime.date(end_time.year + 1 - number_of_years_ago, 1, 1)
 
-    # accident count by accident year
-    accident_count_by_accident_year = Widget(
-        name="accident_count_by_accident_year",
-        rank=8,
-        items=get_accidents_stats(
-            table_obj=AccidentMarkerView,
-            filters=location_info,
-            group_by="accident_year",
-            count="accident_year",
-            start_time=start_time,
-            end_time=end_time,
-        ),
-        text={"title": "כמות התאונות לפי שנה במקטע " + location_info["road_segment_name"]},
-    )
-    output["widgets"].append(accident_count_by_accident_year.serialize())
+        output["meta"]["dates_comment"] = (
+            str(start_time.year) + "-" + str(end_time.year) + ", עדכון אחרון: " + str(end_time)
+        )
+        # todo: sort and to_cache will be implemented shortly, after generation of all widgets will be
+        # todo: moved to the new scheme
+        widgets: List[NewWidget] = generate_widgets(request_params=request_params, to_cache=True)
+        widgets.extend(generate_widgets(request_params=request_params, to_cache=False))
 
-    # injured count by accident year
-    injured_count_by_accident_year = Widget(
-        name="injured_count_by_accident_year",
-        rank=9,
-        items=get_accidents_stats(
+        # most severe accidents table
+        # most_severe_accidents_table = Widget(
+        #     name="most_severe_accidents_table",
+        #     rank=2,
+        #     items=get_most_severe_accidents_table(location_info, start_time, end_time),
+        #     text={"title": get_most_severe_accidents_table_title(location_info)},
+        # )
+        # output["widgets"].append(most_severe_accidents_table.serialize())
+
+        # most severe accidents
+        most_severe_accidents = Widget(
+            name="most_severe_accidents",
+            rank=3,
+            items=get_most_severe_accidents(
+                table_obj=AccidentMarkerView,
+                filters=location_info,
+                start_time=start_time,
+                end_time=end_time,
+            ),
+        )
+        output["widgets"].append(most_severe_accidents.serialize())
+
+        # street view
+        street_view = Widget(
+            name="street_view", rank=4, items={"longitude": gps["lon"], "latitude": gps["lat"]}
+        )
+        output["widgets"].append(street_view.serialize())
+
+        # head to head accidents
+        head_on_collisions_comparison = Widget(
+            name="head_on_collisions_comparison",
+            rank=5,
+            items=get_head_to_head_stat(
+                news_flash_id=news_flash_id, start_time=start_time, end_time=end_time
+            ),
+            text={"title": "תאונות קטלניות ע״פ סוג"},
+        )
+        output["widgets"].append(head_on_collisions_comparison.serialize())
+
+        # accident_type count
+        accident_count_by_accident_type = Widget(
+            name="accident_count_by_accident_type",
+            rank=6,
+            items=get_accident_count_by_accident_type(
+                location_info=location_info, start_time=start_time, end_time=end_time
+            ),
+        )
+        output["widgets"].append(accident_count_by_accident_type.serialize())
+        logging.debug("after accident_count_by_accident_type")
+
+        # accidents heat map
+        accidents_heat_map_filters = location_info.copy()
+        accidents_heat_map_filters["accident_severity"] = [
+            CONST.ACCIDENT_SEVERITY_DEADLY,
+            CONST.ACCIDENT_SEVERITY_SEVERE,
+        ]
+        accidents_heat_map = Widget(
+            name="accidents_heat_map",
+            rank=7,
+            items=get_accidents_heat_map(
+                table_obj=AccidentMarkerView,
+                filters=accidents_heat_map_filters,
+                start_time=start_time,
+                end_time=end_time,
+            ),
+            text={"title": get_heat_map_title(location_info)},
+        )
+        output["widgets"].append(accidents_heat_map.serialize())
+
+        logging.debug("after accidents_heat_map")
+        # accident count by accident year
+        accident_count_by_accident_year = Widget(
+            name="accident_count_by_accident_year",
+            rank=8,
+            items=get_accidents_stats(
+                table_obj=AccidentMarkerView,
+                filters=location_info,
+                group_by="accident_year",
+                count="accident_year",
+                start_time=start_time,
+                end_time=end_time,
+            ),
+            text={"title": "כמות התאונות לפי שנה במקטע " + location_info["road_segment_name"]},
+        )
+        output["widgets"].append(accident_count_by_accident_year.serialize())
+
+        # injured count by accident year
+        injured_count_by_accident_year = Widget(
+            name="injured_count_by_accident_year",
+            rank=9,
+            items=get_accidents_stats(
+                table_obj=InvolvedMarkerView,
+                filters=get_injured_filters(location_info),
+                group_by="accident_year",
+                count="accident_year",
+                start_time=start_time,
+                end_time=end_time,
+            ),
+            text={"title": "נפגעים בתאונות במקטע " + location_info["road_segment_name"]},
+        )
+        output["widgets"].append(injured_count_by_accident_year.serialize())
+        logging.debug("after injured_count_by_accident_year")
+
+        # accident count on day light
+        accident_count_by_day_night = Widget(
+            name="accident_count_by_day_night",
+            rank=10,
+            items=get_accidents_stats(
+                table_obj=AccidentMarkerView,
+                filters=location_info,
+                group_by="day_night_hebrew",
+                count="day_night_hebrew",
+                start_time=start_time,
+                end_time=end_time,
+            ),
+            text={"title": "כמות תאונות ביום ובלילה"},
+        )
+        output["widgets"].append(accident_count_by_day_night.serialize())
+        logging.debug("after accident_count_by_day_night")
+
+        # accidents distribution count by hour
+        accidents_count_by_hour = Widget(
+            name="accidents_count_by_hour",
+            rank=11,
+            items=get_accidents_stats(
+                table_obj=AccidentMarkerView,
+                filters=location_info,
+                group_by="accident_hour",
+                count="accident_hour",
+                start_time=start_time,
+                end_time=end_time,
+            ),
+            text={"title": "כמות תאונות לפי שעה"},
+        )
+        output["widgets"].append(accidents_count_by_hour.serialize())
+
+        # accident count by road_segment
+        top_road_segments_accidents_per_km = Widget(
+            name="top_road_segments_accidents_per_km",
+            rank=13,
+            items=get_top_road_segments_accidents_per_km(
+                resolution=resolution,
+                location_info=location_info,
+                start_time=start_time,
+                end_time=end_time,
+            ),
+            text={
+                "title": "תאונות לכל ק״מ כביש על פי מקטע בכביש " + str(int(location_info["road1"]))
+            },
+        )
+        output["widgets"].append(top_road_segments_accidents_per_km.serialize())
+
+        # injured count per age group
+        data_of_injured_count_per_age_group_raw = get_accidents_stats(
             table_obj=InvolvedMarkerView,
             filters=get_injured_filters(location_info),
-            group_by="accident_year",
-            count="accident_year",
+            group_by="age_group_hebrew",
+            count="age_group_hebrew",
             start_time=start_time,
             end_time=end_time,
-        ),
-        text={"title": "נפגעים בתאונות במקטע " + location_info["road_segment_name"]},
-    )
-    output["widgets"].append(injured_count_by_accident_year.serialize())
+        )
+        data_of_injured_count_per_age_group = filter_and_group_injured_count_per_age_group(
+            data_of_injured_count_per_age_group_raw
+        )
+        injured_count_per_age_group = Widget(
+            name="injured_count_per_age_group", rank=14, items=data_of_injured_count_per_age_group
+        )
+        output["widgets"].append(injured_count_per_age_group.serialize())
 
-    # accident count on day light
-    accident_count_by_day_night = Widget(
-        name="accident_count_by_day_night",
-        rank=10,
-        items=get_accidents_stats(
-            table_obj=AccidentMarkerView,
-            filters=location_info,
-            group_by="day_night_hebrew",
-            count="day_night_hebrew",
+        # vision zero
+        vision_zero = Widget(name="vision_zero", rank=15, items=["vision_zero_2_plus_1"])
+        output["widgets"].append(vision_zero.serialize())
+
+        # involved by driver type
+        involved_by_vehicle_type_data = get_accidents_stats(
+            table_obj=InvolvedMarkerView,
+            filters=get_injured_filters(location_info),
+            group_by="involve_vehicle_type",
+            count="involve_vehicle_type",
             start_time=start_time,
             end_time=end_time,
-        ),
-        text={"title": "כמות תאונות ביום ובלילה"},
-    )
-    output["widgets"].append(accident_count_by_day_night.serialize())
-
-    # accidents distribution count by hour
-    accidents_count_by_hour = Widget(
-        name="accidents_count_by_hour",
-        rank=11,
-        items=get_accidents_stats(
-            table_obj=AccidentMarkerView,
-            filters=location_info,
-            group_by="accident_hour",
-            count="accident_hour",
-            start_time=start_time,
-            end_time=end_time,
-        ),
-        text={"title": "כמות תאונות לפי שעה"},
-    )
-    output["widgets"].append(accidents_count_by_hour.serialize())
-
-    # accident count by road_segment
-    top_road_segments_accidents_per_km = Widget(
-        name="top_road_segments_accidents_per_km",
-        rank=13,
-        items=get_top_road_segments_accidents_per_km(
-            resolution=resolution,
-            location_info=location_info,
-            start_time=start_time,
-            end_time=end_time,
-        ),
-        text={"title": "תאונות לכל ק״מ כביש על פי מקטע בכביש " + str(int(location_info["road1"]))},
-    )
-    output["widgets"].append(top_road_segments_accidents_per_km.serialize())
-
-    # injured count per age group
-    data_of_injured_count_per_age_group_raw = get_accidents_stats(
-        table_obj=InvolvedMarkerView,
-        filters=get_injured_filters(location_info),
-        group_by="age_group_hebrew",
-        count="age_group_hebrew",
-        start_time=start_time,
-        end_time=end_time,
-    )
-    data_of_injured_count_per_age_group = filter_and_group_injured_count_per_age_group(
-        data_of_injured_count_per_age_group_raw
-    )
-    injured_count_per_age_group = Widget(
-        name="injured_count_per_age_group", rank=14, items=data_of_injured_count_per_age_group
-    )
-    output["widgets"].append(injured_count_per_age_group.serialize())
-
-    # vision zero
-    vision_zero = Widget(name="vision_zero", rank=15, items=["vision_zero_2_plus_1"])
-    output["widgets"].append(vision_zero.serialize())
-
-    # involved by driver type
-    involved_by_vehicle_type_data = get_accidents_stats(
-        table_obj=InvolvedMarkerView,
-        filters=get_injured_filters(location_info),
-        group_by="involve_vehicle_type",
-        count="involve_vehicle_type",
-        start_time=start_time,
-        end_time=end_time,
-    )
-    accident_count_by_driver_type = Widget(
-        name="accident_count_by_driver_type",
-        rank=16,
-        items=count_accidents_by_driver_type(involved_by_vehicle_type_data),
-        text={"title": "מעורבות נהגים בתאונות לפי סוג במקטע " + location_info["road_segment_name"]},
-    )
-    output["widgets"].append(accident_count_by_driver_type.serialize())
-
-    # involved by car type
-    accident_count_by_car_type = Widget(
-        name="accident_count_by_car_type",
-        rank=17,
-        items=stats_accidents_by_car_type_with_national_data(
-            involved_by_vehicle_type_data, start_time, end_time
-        ),
-        text={
-            "title": "השוואת אחוז הרכבים בתאונות במקטע "
-            + location_info["road_segment_name"]
-            + " לעומת ממוצע ארצי"
-        },
-    )
-    output["widgets"].append(accident_count_by_car_type.serialize())
-
-    def injured_accidents_with_pedestrians_mock_data():  # Temporary for Frontend
-        return [
-            {
-                "year": 2009,
-                "light_injury_severity_text": "פצוע קל",
-                "light_injury_severity_count": 12,
-                "severe_injury_severity_text": "פצוע קשה",
-                "severe_injury_severity_count": 3,
-                "killed_injury_severity_text": "הרוג",
-                "killed_injury_severity_count": 0,
+        )
+        accident_count_by_driver_type = Widget(
+            name="accident_count_by_driver_type",
+            rank=16,
+            items=count_accidents_by_driver_type(involved_by_vehicle_type_data),
+            text={
+                "title": "מעורבות נהגים בתאונות לפי סוג במקטע " + location_info["road_segment_name"]
             },
-            {
-                "year": 2010,
-                "light_injury_severity_text": "פצוע קל",
-                "light_injury_severity_count": 24,
-                "severe_injury_severity_text": "פצוע קשה",
-                "severe_injury_severity_count": 0,
-                "killed_injury_severity_text": "הרוג",
-                "killed_injury_severity_count": 1,
+        )
+        output["widgets"].append(accident_count_by_driver_type.serialize())
+
+        # involved by car type
+        accident_count_by_car_type = Widget(
+            name="accident_count_by_car_type",
+            rank=17,
+            items=stats_accidents_by_car_type_with_national_data(
+                involved_by_vehicle_type_data, start_time, end_time
+            ),
+            text={
+                "title": "השוואת אחוז הרכבים בתאונות במקטע "
+                + location_info["road_segment_name"]
+                + " לעומת ממוצע ארצי"
             },
-            {
-                "year": 2011,
-                "light_injury_severity_text": "פצוע קל",
-                "light_injury_severity_count": 9,
-                "severe_injury_severity_text": "פצוע קשה",
-                "severe_injury_severity_count": 2,
-                "killed_injury_severity_text": "הרוג",
-                "killed_injury_severity_count": 1,
+        )
+        output["widgets"].append(accident_count_by_car_type.serialize())
+
+        def injured_accidents_with_pedestrians_mock_data():  # Temporary for Frontend
+            return [
+                {
+                    "year": 2009,
+                    "light_injury_severity_text": "פצוע קל",
+                    "light_injury_severity_count": 12,
+                    "severe_injury_severity_text": "פצוע קשה",
+                    "severe_injury_severity_count": 3,
+                    "killed_injury_severity_text": "הרוג",
+                    "killed_injury_severity_count": 0,
+                },
+                {
+                    "year": 2010,
+                    "light_injury_severity_text": "פצוע קל",
+                    "light_injury_severity_count": 24,
+                    "severe_injury_severity_text": "פצוע קשה",
+                    "severe_injury_severity_count": 0,
+                    "killed_injury_severity_text": "הרוג",
+                    "killed_injury_severity_count": 1,
+                },
+                {
+                    "year": 2011,
+                    "light_injury_severity_text": "פצוע קל",
+                    "light_injury_severity_count": 9,
+                    "severe_injury_severity_text": "פצוע קשה",
+                    "severe_injury_severity_count": 2,
+                    "killed_injury_severity_text": "הרוג",
+                    "killed_injury_severity_count": 1,
+                },
+                {
+                    "year": 2012,
+                    "light_injury_severity_text": "פצוע קל",
+                    "light_injury_severity_count": 21,
+                    "severe_injury_severity_text": "פצוע קשה",
+                    "severe_injury_severity_count": 2,
+                    "killed_injury_severity_text": "הרוג",
+                    "killed_injury_severity_count": 4,
+                },
+                {
+                    "year": 2013,
+                    "light_injury_severity_text": "פצוע קל",
+                    "light_injury_severity_count": 21,
+                    "severe_injury_severity_text": "פצוע קשה",
+                    "severe_injury_severity_count": 2,
+                    "killed_injury_severity_text": "הרוג",
+                    "killed_injury_severity_count": 4,
+                },
+                {
+                    "year": 2014,
+                    "light_injury_severity_text": "פצוע קל",
+                    "light_injury_severity_count": 10,
+                    "severe_injury_severity_text": "פצוע קשה",
+                    "severe_injury_severity_count": 0,
+                    "killed_injury_severity_text": "הרוג",
+                    "killed_injury_severity_count": 1,
+                },
+                {
+                    "year": 2015,
+                    "light_injury_severity_text": "פצוע קל",
+                    "light_injury_severity_count": 13,
+                    "severe_injury_severity_text": "פצוע קשה",
+                    "severe_injury_severity_count": 2,
+                    "killed_injury_severity_text": "הרוג",
+                    "killed_injury_severity_count": 0,
+                },
+            ]
+
+        injured_accidents_with_pedestrians = Widget(
+            name="injured_accidents_with_pedestrians",
+            rank=18,
+            items=injured_accidents_with_pedestrians_mock_data(),
+            text={"title": "נפגעים הולכי רגל ברחוב ז׳בוטינסקי, פתח תקווה"},
+        )
+        output["widgets"].append(injured_accidents_with_pedestrians.serialize())
+
+        def injury_severity_by_cross_location_mock_data():  # Temporary for Frontend
+            return [
+                {
+                    "cross_location_text": "במעבר חצייה",
+                    "light_injury_severity_text": "פצוע קל",
+                    "light_injury_severity_count": 37,
+                    "severe_injury_severity_text": "פצוע קשה",
+                    "severe_injury_severity_count": 6,
+                    "killed_injury_severity_text": "הרוג",
+                    "killed_injury_severity_count": 0,
+                },
+                {
+                    "cross_location_text": "לא במעבר חצייה",
+                    "light_injury_severity_text": "פצוע קל",
+                    "light_injury_severity_count": 11,
+                    "severe_injury_severity_text": "פצוע קשה",
+                    "severe_injury_severity_count": 10,
+                    "killed_injury_severity_text": "הרוג",
+                    "killed_injury_severity_count": 0,
+                },
+            ]
+
+        injury_severity_by_cross_location = Widget(
+            name="injury_severity_by_cross_location",
+            rank=19,
+            items=injury_severity_by_cross_location_mock_data(),
+            text={"title": "הולכי רגל הרוגים ופצועים קשה ברחוב בן יהודה, תל אביב"},
+        )
+        output["widgets"].append(injury_severity_by_cross_location.serialize())
+
+        def motorcycle_accidents_vs_all_accidents_mock_data():  # Temporary for Frontend
+            return [
+                {"location": "כביש 20", "vehicle": "אופנוע", "percentage": 0.50},
+                {"location": "כביש 20", "vehicle": "אחר", "percentage": 0.50},
+                {"location": "כל הארץ", "vehicle": "אחר", "percentage": 0.80},
+                {"location": "כל הארץ", "vehicle": "אופנוע", "percentage": 0.20},
+            ]
+
+        motorcycle_accidents_vs_all_accidents = Widget(
+            name="motorcycle_accidents_vs_all_accidents",
+            rank=20,
+            items=motorcycle_accidents_vs_all_accidents_mock_data(),
+            text={"title": "תאונות אופנועים קשות וקטלניות בכביש 20 בהשוואה לכל הארץ"},
+        )
+        output["widgets"].append(motorcycle_accidents_vs_all_accidents.serialize())
+
+        def accidents_count_pedestrians_per_vehicle_street_vs_all_mock_data():  # Temporary for Frontend
+            return [
+                {"location": "כל הארץ", "vehicle": "מכונית", "num_of_accidents": 61307},
+                {"location": "כל הארץ", "vehicle": "רכב כבד", "num_of_accidents": 15801},
+                {"location": "כל הארץ", "vehicle": "אופנוע", "num_of_accidents": 3884},
+                {
+                    "location": "כל הארץ",
+                    "vehicle": "אופניים וקורקינט ממונע",
+                    "num_of_accidents": 1867,
+                },
+                {"location": "כל הארץ", "vehicle": "אחר", "num_of_accidents": 229},
+                {"location": "בן יהודה", "vehicle": "מכונית", "num_of_accidents": 64},
+                {"location": "בן יהודה", "vehicle": "אופנוע", "num_of_accidents": 40},
+                {"location": "בן יהודה", "vehicle": "רכב כבד", "num_of_accidents": 22},
+                {
+                    "location": "בן יהודה",
+                    "vehicle": "אופניים וקורקינט ממונע",
+                    "num_of_accidents": 9,
+                },
+            ]
+
+        accidents_count_pedestrians_per_vehicle_street_vs_all = Widget(
+            name="accidents_count_pedestrians_per_vehicle_street_vs_all",
+            rank=21,
+            items=accidents_count_pedestrians_per_vehicle_street_vs_all_mock_data(),
+            text={
+                "title": _(
+                    "Pedestrian Injuries on Ben Yehuda Street in Tel Aviv by Type of hitting Vehicle, Compared to Urban Accidents Across the country"
+                )
             },
-            {
-                "year": 2012,
-                "light_injury_severity_text": "פצוע קל",
-                "light_injury_severity_count": 21,
-                "severe_injury_severity_text": "פצוע קשה",
-                "severe_injury_severity_count": 2,
-                "killed_injury_severity_text": "הרוג",
-                "killed_injury_severity_count": 4,
-            },
-            {
-                "year": 2013,
-                "light_injury_severity_text": "פצוע קל",
-                "light_injury_severity_count": 21,
-                "severe_injury_severity_text": "פצוע קשה",
-                "severe_injury_severity_count": 2,
-                "killed_injury_severity_text": "הרוג",
-                "killed_injury_severity_count": 4,
-            },
-            {
-                "year": 2014,
-                "light_injury_severity_text": "פצוע קל",
-                "light_injury_severity_count": 10,
-                "severe_injury_severity_text": "פצוע קשה",
-                "severe_injury_severity_count": 0,
-                "killed_injury_severity_text": "הרוג",
-                "killed_injury_severity_count": 1,
-            },
-            {
-                "year": 2015,
-                "light_injury_severity_text": "פצוע קל",
-                "light_injury_severity_count": 13,
-                "severe_injury_severity_text": "פצוע קשה",
-                "severe_injury_severity_count": 2,
-                "killed_injury_severity_text": "הרוג",
-                "killed_injury_severity_count": 0,
-            },
-        ]
+        )
+        output["widgets"].append(accidents_count_pedestrians_per_vehicle_street_vs_all.serialize())
 
-    injured_accidents_with_pedestrians = Widget(
-        name="injured_accidents_with_pedestrians",
-        rank=18,
-        items=injured_accidents_with_pedestrians_mock_data(),
-        text={"title": "נפגעים הולכי רגל ברחוב ז׳בוטינסקי, פתח תקווה"},
-    )
-    output["widgets"].append(injured_accidents_with_pedestrians.serialize())
+        def top_road_segments_accidents_mock_data():  # Temporary for Frontend
+            return [
+                {"segment name": "מחלף לה גרדיה - מחלף השלום", "count": 70},
+                {"segment name": "מחלף השלום - מחלף הרכבת", "count": 48},
+                {"segment name": "מחלף וולפסון - מחלף חולון", "count": 48},
+                {"segment name": "מחלף קוממיות - מחלף יוספטל", "count": 34},
+                {"segment name": "מחלף ההלכה - מחלף רוקח ", "count": 31},
+            ]
 
-    def injury_severity_by_cross_location_mock_data():  # Temporary for Frontend
-        return [
-            {
-                "cross_location_text": "במעבר חצייה",
-                "light_injury_severity_text": "פצוע קל",
-                "light_injury_severity_count": 37,
-                "severe_injury_severity_text": "פצוע קשה",
-                "severe_injury_severity_count": 6,
-                "killed_injury_severity_text": "הרוג",
-                "killed_injury_severity_count": 0,
-            },
-            {
-                "cross_location_text": "לא במעבר חצייה",
-                "light_injury_severity_text": "פצוע קל",
-                "light_injury_severity_count": 11,
-                "severe_injury_severity_text": "פצוע קשה",
-                "severe_injury_severity_count": 10,
-                "killed_injury_severity_text": "הרוג",
-                "killed_injury_severity_count": 0,
-            },
-        ]
+        top_road_segments_accidents = Widget(
+            name="top_road_segments_accidents",
+            rank=22,
+            items=top_road_segments_accidents_mock_data(),
+            text={"title": "5 המקטעים עם כמות התאונות הגדולה ביותר"},
+        )
+        output["widgets"].append(top_road_segments_accidents.serialize())
 
-    injury_severity_by_cross_location = Widget(
-        name="injury_severity_by_cross_location",
-        rank=19,
-        items=injury_severity_by_cross_location_mock_data(),
-        text={"title": "הולכי רגל הרוגים ופצועים קשה ברחוב בן יהודה, תל אביב"},
-    )
-    output["widgets"].append(injury_severity_by_cross_location.serialize())
+        def pedestrian_injured_in_junctions_mock_data():  # Temporary for Frontend
+            return [
+                {"street name": "גורדון י ל", "count": 18},
+                {"street name": "אידלסון אברהם", "count": 10},
+                {"street name": "פרישמן", "count": 7},
+            ]
 
-    def motorcycle_accidents_vs_all_accidents_mock_data():  # Temporary for Frontend
-        return [
-            {"location": "כביש 20", "vehicle": "אופנוע", "percentage": 0.50},
-            {"location": "כביש 20", "vehicle": "אחר", "percentage": 0.50},
-            {"location": "כל הארץ", "vehicle": "אחר", "percentage": 0.80},
-            {"location": "כל הארץ", "vehicle": "אופנוע", "percentage": 0.20},
-        ]
-
-    motorcycle_accidents_vs_all_accidents = Widget(
-        name="motorcycle_accidents_vs_all_accidents",
-        rank=20,
-        items=motorcycle_accidents_vs_all_accidents_mock_data(),
-        text={"title": "תאונות אופנועים קשות וקטלניות בכביש 20 בהשוואה לכל הארץ"},
-    )
-    output["widgets"].append(motorcycle_accidents_vs_all_accidents.serialize())
-
-    def accidents_count_pedestrians_per_vehicle_street_vs_all_mock_data():  # Temporary for Frontend
-        return [
-            {"location": "כל הארץ", "vehicle": "מכונית", "num_of_accidents": 61307},
-            {"location": "כל הארץ", "vehicle": "רכב כבד", "num_of_accidents": 15801},
-            {"location": "כל הארץ", "vehicle": "אופנוע", "num_of_accidents": 3884},
-            {"location": "כל הארץ", "vehicle": "אופניים וקורקינט ממונע", "num_of_accidents": 1867},
-            {"location": "כל הארץ", "vehicle": "אחר", "num_of_accidents": 229},
-            {"location": "בן יהודה", "vehicle": "מכונית", "num_of_accidents": 64},
-            {"location": "בן יהודה", "vehicle": "אופנוע", "num_of_accidents": 40},
-            {"location": "בן יהודה", "vehicle": "רכב כבד", "num_of_accidents": 22},
-            {"location": "בן יהודה", "vehicle": "אופניים וקורקינט ממונע", "num_of_accidents": 9},
-        ]
-
-    accidents_count_pedestrians_per_vehicle_street_vs_all = Widget(
-        name="accidents_count_pedestrians_per_vehicle_street_vs_all",
-        rank=21,
-        items=accidents_count_pedestrians_per_vehicle_street_vs_all_mock_data(),
-        text={
-            "title": _(
-                "Pedestrian Injuries on Ben Yehuda Street in Tel Aviv by Type of hitting Vehicle, Compared to Urban Accidents Across the country"
-            )
-        },
-    )
-    output["widgets"].append(accidents_count_pedestrians_per_vehicle_street_vs_all.serialize())
-
-    def top_road_segments_accidents_mock_data():  # Temporary for Frontend
-        return [
-            {"segment name": "מחלף לה גרדיה - מחלף השלום", "count": 70},
-            {"segment name": "מחלף השלום - מחלף הרכבת", "count": 48},
-            {"segment name": "מחלף וולפסון - מחלף חולון", "count": 48},
-            {"segment name": "מחלף קוממיות - מחלף יוספטל", "count": 34},
-            {"segment name": "מחלף ההלכה - מחלף רוקח ", "count": 31},
-        ]
-
-    top_road_segments_accidents = Widget(
-        name="top_road_segments_accidents",
-        rank=22,
-        items=top_road_segments_accidents_mock_data(),
-        text={"title": "5 המקטעים עם כמות התאונות הגדולה ביותר"},
-    )
-    output["widgets"].append(top_road_segments_accidents.serialize())
-
-    def pedestrian_injured_in_junctions_mock_data():  # Temporary for Frontend
-        return [
-            {"street name": "גורדון י ל", "count": 18},
-            {"street name": "אידלסון אברהם", "count": 10},
-            {"street name": "פרישמן", "count": 7},
-        ]
-
-    pedestrian_injured_in_junctions = Widget(
-        name="pedestrian_injured_in_junctions",
-        rank=23,
-        items=pedestrian_injured_in_junctions_mock_data(),
-        text={"title": "מספר נפגעים הולכי רגל בצמתים - רחוב בן יהודה, תל אביב"},
-    )
-    output["widgets"].append(pedestrian_injured_in_junctions.serialize())
-
+        pedestrian_injured_in_junctions = Widget(
+            name="pedestrian_injured_in_junctions",
+            rank=23,
+            items=pedestrian_injured_in_junctions_mock_data(),
+            text={"title": "מספר נפגעים הולכי רגל בצמתים - רחוב בן יהודה, תל אביב"},
+        )
+        output["widgets"].append(pedestrian_injured_in_junctions.serialize())
+    except Exception as e:
+        logging.error(f"exception in create_infographics_data:{e}:{traceback.format_exc()}")
+        output = {}
     return json.dumps(output, default=str)
 
 

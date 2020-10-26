@@ -110,21 +110,21 @@ class RequestParams:
         return f"RequestParams(location_text:{self.location_text}, start_time:{self.start_time}, end_time:{self.end_time} "
 
 
-@dataclass
 class NewWidget:
-    '''
+    """
     Base class for widgets. Each widget will be a class that is derived from NewWidget, and instantiated
     with RequestParams instance. It will need to implement the methods in the base class
     The Serialize() method returns the data that the API returns, and has the following structure:
     NewWidget is a temporary name. When the move of all widgets to the new structure will be
     completed, it will be renamed to Widget, and replace the current Widget class
-    '''
-    request_params: RequestParams
-    name: str = dataclasses.field(init=False)
-    rank: int = dataclasses.field(init=False, default=-1)
-    items: Dict = dataclasses.field(init=False, default_factory=dict)
-    text: str = dataclasses.field(init=False, default=None)
-    meta: Optional[Dict] = dataclasses.field(init=False, default=None)
+    """
+    def __init__(self, request_params: RequestParams):
+        self.request_params: RequestParams = request_params
+        self.name: str = ""
+        self.rank: int = -1
+        self.items: Dict = {}
+        self.text: str = ""
+        self.meta: Optional[Dict] = None
 
     def get_name(self) -> str:
         pass
@@ -165,8 +165,9 @@ class AccidentCountBySeverityWidget(NewWidget):
     widget_id: WidgetId = dataclasses.field(init=False, default=WidgetId.accident_count_by_severity)
 
     def __init__(self, request_params: RequestParams):
-        logging.debug("starting AccidentCountBySeverityWidget.__init__()create_widget")
         NewWidget.__init__(self, request_params)
+        self.widget_id = WidgetId.accident_count_by_severity
+        self.name = self.widget_id.name
 
     def get_name(self) -> str:
         return self.widget_id.name
@@ -218,12 +219,11 @@ class AccidentCountBySeverityWidget(NewWidget):
 
 
 class MostSevereAccidentsTableWidget(NewWidget):
-    widget_id: WidgetId = dataclasses.field(
-        init=False, default=WidgetId.most_severe_accidents_table
-    )
 
     def __init__(self, request_params: RequestParams):
         NewWidget.__init__(self, request_params)
+        self.widget_id = WidgetId.most_severe_accidents_table
+        self.name = self.widget_id.name
 
     def get_name(self) -> str:
         return self.widget_id.name
@@ -294,15 +294,61 @@ class MostSevereAccidentsTableWidget(NewWidget):
         return accidents
 
 
+class MostSevereAccidentsWidget(NewWidget):
+
+    def __init__(self, request_params: RequestParams):
+        NewWidget.__init__(self, request_params)
+        self.widget_id = WidgetId.most_severe_accidents
+        self.name = self.widget_id.name
+
+    def get_name(self) -> str:
+        return self.widget_id.name
+
+    def get_rank(self) -> int:
+        return 1
+
+    def get_widget_id(self) -> WidgetId:
+        return self.widget_id
+
+    def is_in_cache(self) -> bool:
+        return True
+
+    def is_included(self) -> bool:
+        return True
+
+    def generate_items(self) -> None:
+        self.items = MostSevereAccidentsWidget.get_most_severe_accidents(
+            AccidentMarkerView,
+            self.request_params.location_info,
+            self.request_params.start_time,
+            self.request_params.end_time,
+        )
+
+    @staticmethod
+    def get_most_severe_accidents(table_obj, filters, start_time, end_time, limit=10):
+        entities = (
+            "longitude",
+            "latitude",
+            "accident_severity_hebrew",
+            "accident_timestamp",
+            "accident_type_hebrew",
+        )
+        return get_most_severe_accidents_with_entities(
+            table_obj, filters, entities, start_time, end_time, limit
+        )
+
+
 def create_widget(widget_id: WidgetId, request_params: RequestParams) -> Optional[NewWidget]:
     # todo: complete implementation for all values of WidgetId
-    logging.debug("starting create_widget")
     if widget_id == WidgetId.accident_count_by_severity:
-        return AccidentCountBySeverityWidget(request_params)
+        res = AccidentCountBySeverityWidget(request_params)
     elif widget_id == WidgetId.most_severe_accidents_table:
-        return MostSevereAccidentsTableWidget(request_params)
+        res = MostSevereAccidentsTableWidget(request_params)
+    elif widget_id == WidgetId.most_severe_accidents:
+        res = MostSevereAccidentsWidget(request_params)
     else:
-        return None
+        res = None
+    return res
 
 
 def extract_news_flash_location(news_flash_id):
@@ -445,19 +491,6 @@ def get_most_severe_accidents_with_entities(
     df = pd.read_sql_query(query.statement, query.session.bind)
     df.columns = [c.replace("_hebrew", "") for c in df.columns]
     return df.to_dict(orient="records")  # pylint: disable=no-member
-
-
-def get_most_severe_accidents(table_obj, filters, start_time, end_time, limit=10):
-    entities = (
-        "longitude",
-        "latitude",
-        "accident_severity_hebrew",
-        "accident_timestamp",
-        "accident_type_hebrew",
-    )
-    return get_most_severe_accidents_with_entities(
-        table_obj, filters, entities, start_time, end_time, limit
-    )
 
 
 def get_accidents_heat_map(table_obj, filters, start_time, end_time):
@@ -750,18 +783,15 @@ def stats_accidents_by_car_type_with_national_data(
 
 
 def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> List[NewWidget]:
-    logging.debug(f"generate_widgets: selection params:{request_params}, to_cache:{to_cache}")
     widgets = []
     for w in WidgetId:
         widget: NewWidget = create_widget(w, request_params)
-        logging.debug("generate_widgets: after create_widget")
-        if widget and widget.is_in_cache() == to_cache and widget.is_included():
+        if widget is not None and widget.is_in_cache() == to_cache and widget.is_included():
             widgets.append(widget)
     return widgets
 
 
 def get_request_params(news_flash_id: int, number_of_years_ago: int) -> Optional[RequestParams]:
-    logging.debug("starting get_request_params")
     try:
         number_of_years_ago = int(number_of_years_ago)
     except ValueError:
@@ -851,28 +881,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         # todo: moved to the new scheme
         widgets: List[NewWidget] = generate_widgets(request_params=request_params, to_cache=True)
         widgets.extend(generate_widgets(request_params=request_params, to_cache=False))
-
-        # most severe accidents table
-        # most_severe_accidents_table = Widget(
-        #     name="most_severe_accidents_table",
-        #     rank=2,
-        #     items=get_most_severe_accidents_table(location_info, start_time, end_time),
-        #     text={"title": get_most_severe_accidents_table_title(location_info)},
-        # )
-        # output["widgets"].append(most_severe_accidents_table.serialize())
-
-        # most severe accidents
-        most_severe_accidents = Widget(
-            name="most_severe_accidents",
-            rank=3,
-            items=get_most_severe_accidents(
-                table_obj=AccidentMarkerView,
-                filters=location_info,
-                start_time=start_time,
-                end_time=end_time,
-            ),
-        )
-        output["widgets"].append(most_severe_accidents.serialize())
+        output["widgets"].extend(list(map(lambda w: w.serialize(), widgets)))
 
         # street view
         street_view = Widget(

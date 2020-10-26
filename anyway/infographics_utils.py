@@ -805,14 +805,14 @@ def get_request_params(news_flash_id: int, number_of_years_ago: int) -> Optional
 def create_infographics_data(news_flash_id, number_of_years_ago):
     try:
         request_params = get_request_params(news_flash_id, number_of_years_ago)
+        if request_params is None:
+            return {}
+
         location_info = request_params.location_info
         resolution = request_params.resolution
         start_time = request_params.start_time
         end_time = request_params.end_time
         location_text = request_params.location_text
-
-        if request_params is None:
-            return {}
 
         output = {}
         try:

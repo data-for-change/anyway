@@ -6,7 +6,7 @@ from six.moves import http_client
 from anyway import app as flask_app
 from jsonschema import validate
 from anyway.app_and_db import db
-from anyway.infographics_utils import percentage_accidents_by_car_type, stats_accidents_by_car_type_with_national_data
+from anyway.infographics_utils import AccidentCountByCarTypeWidget
 
 
 def insert_infographic_mock_data(app):
@@ -82,7 +82,7 @@ class Test_Infographic_Api:
     def test_accident_count_by_car_type(self, app):
         test_involved_by_vehicle_type_data = [{"involve_vehicle_type": 1, "count": 3}, {"involve_vehicle_type": 25, "count": 2},
          {"involve_vehicle_type": 15, "count": 1}]
-        output_tmp = percentage_accidents_by_car_type(test_involved_by_vehicle_type_data)
+        output_tmp = AccidentCountByCarTypeWidget.percentage_accidents_by_car_type(test_involved_by_vehicle_type_data)
         assert len(output_tmp) == 3
         assert output_tmp["רכב פרטי"] == 50
         assert output_tmp["מסחרי/משאית"] == pytest.approx(33.333333333333336)
@@ -108,7 +108,18 @@ class Test_Infographic_Api:
         involved_by_vehicle_type_data_test = [{'involve_vehicle_type': 1, 'count': 11}]
         end_time = datetime.date(2020, 6, 30)
         start_time = datetime.date(2020, 1, 1)
-        actual = stats_accidents_by_car_type_with_national_data(involved_by_vehicle_type_data_test, start_time, end_time)
+        request_params = infographics_utils.RequestParams(
+            news_flash_obj=None,
+            location_text='',
+            location_info=None,
+            resolution={},
+            gps={},
+            start_time=start_time,
+            end_time=end_time
+        )
+        actual = AccidentCountByCarTypeWidget.get_stats_accidents_by_car_type_with_national_data(
+            request_params,
+            involved_by_vehicle_type_data=involved_by_vehicle_type_data_test)
         expected = [{'car_type': 'אחר',
                   'percentage_country': 9.84470391606119,
                   'percentage_segment': 0.0},
@@ -279,7 +290,7 @@ class Test_Infographic_Api:
         assert widget["data"]["text"]["title"] == "כמות תאונות ביום ובלילה"
 
     def _accidents_count_by_hour_test(self):
-        widget = self._get_widget_by_name(name="accidents_count_by_hour")
+        widget = self._get_widget_by_name(name="accident_count_by_hour")
         assert len(widget["data"]["items"]) > 20
 
         schema = {

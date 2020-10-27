@@ -98,7 +98,7 @@ class RequestParams:
     Input for infographics data generation, per api call
     """
 
-    news_flash_id: int
+    news_flash_obj: Optional[NewsFlash]
     location_text: str
     location_info: Optional[Dict]
     resolution: Dict
@@ -123,7 +123,7 @@ class NewWidget:
         self.name: str = ""
         self.rank: int = -1
         self.items: Dict = {}
-        self.text: str = ""
+        self.text: Dict = {}
         self.meta: Optional[Dict] = None
 
     def get_name(self) -> str:
@@ -168,12 +168,13 @@ class AccidentCountBySeverityWidget(NewWidget):
         NewWidget.__init__(self, request_params)
         self.widget_id = WidgetId.accident_count_by_severity
         self.name = self.widget_id.name
+        self.rank = 1
 
     def get_name(self) -> str:
         return self.widget_id.name
 
     def get_rank(self) -> int:
-        return 1
+        return self.rank
 
     def get_widget_id(self) -> WidgetId:
         return self.widget_id
@@ -224,12 +225,13 @@ class MostSevereAccidentsTableWidget(NewWidget):
         NewWidget.__init__(self, request_params)
         self.widget_id = WidgetId.most_severe_accidents_table
         self.name = self.widget_id.name
+        self.rank = 2
 
     def get_name(self) -> str:
         return self.widget_id.name
 
     def get_rank(self) -> int:
-        return 1
+        return self.rank
 
     def get_widget_id(self) -> WidgetId:
         return self.widget_id
@@ -300,12 +302,13 @@ class MostSevereAccidentsWidget(NewWidget):
         NewWidget.__init__(self, request_params)
         self.widget_id = WidgetId.most_severe_accidents
         self.name = self.widget_id.name
+        self.rank = 3
 
     def get_name(self) -> str:
         return self.widget_id.name
 
     def get_rank(self) -> int:
-        return 1
+        return self.rank
 
     def get_widget_id(self) -> WidgetId:
         return self.widget_id
@@ -338,6 +341,107 @@ class MostSevereAccidentsWidget(NewWidget):
         )
 
 
+class StreetViewWidget(NewWidget):
+
+    def __init__(self, request_params: RequestParams):
+        NewWidget.__init__(self, request_params)
+        self.widget_id = WidgetId.street_view
+        self.name = self.widget_id.name
+        self.rank = 4
+
+    def get_name(self) -> str:
+        return self.widget_id.name
+
+    def get_rank(self) -> int:
+        return self.rank
+
+    def get_widget_id(self) -> WidgetId:
+        return self.widget_id
+
+    def is_in_cache(self) -> bool:
+        return True
+
+    def is_included(self) -> bool:
+        return True
+
+    def generate_items(self) -> None:
+        self.items = {"longitude": self.request_params.gps["lon"],
+                      "latitude": self.request_params.gps["lat"]}
+
+
+class HeadOnCollisionsComparisonWidget(NewWidget):
+
+    def __init__(self, request_params: RequestParams):
+        NewWidget.__init__(self, request_params)
+        self.widget_id = WidgetId.head_on_collisions_comparison
+        self.name = self.widget_id.name
+        self.rank = 5
+        self.text = {"title": "תאונות קטלניות ע״פ סוג"}
+
+    def get_name(self) -> str:
+        return self.widget_id.name
+
+    def get_rank(self) -> int:
+        return self.rank
+
+    def get_widget_id(self) -> WidgetId:
+        return self.widget_id
+
+    def is_in_cache(self) -> bool:
+        return True
+
+    def is_included(self) -> bool:
+        return True
+
+    def generate_items(self) -> None:
+        self.items = HeadOnCollisionsComparisonWidget.get_head_to_head_stat(
+            news_flash_obj=self.request_params.news_flash_obj,
+            start_time=self.request_params.start_time,
+            end_time=self.request_params.end_time
+        )
+
+    @staticmethod
+    def get_head_to_head_stat(news_flash_obj: NewsFlash, start_time, end_time) -> Dict:
+        road_data = {}
+        filter_dict = {
+            "road_type": BE_CONST.ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION,
+            "accident_severity": BE_CONST.ACCIDENT_SEVERITY_DEADLY,
+        }
+        all_roads_data = get_accidents_stats(
+            table_obj=AccidentMarkerView,
+            filters=filter_dict,
+            group_by="accident_type_hebrew",
+            count="accident_type_hebrew",
+            start_time=start_time,
+            end_time=end_time,
+        )
+
+        if news_flash_obj.road1 and news_flash_obj.road_segment_name:
+            filter_dict.update(
+                {"road1": news_flash_obj.road1, "road_segment_name": news_flash_obj.road_segment_name}
+            )
+            road_data = get_accidents_stats(
+                table_obj=AccidentMarkerView,
+                filters=filter_dict,
+                group_by="accident_type_hebrew",
+                count="accident_type_hebrew",
+                start_time=start_time,
+                end_time=end_time,
+            )
+
+        road_data_dict = sum_road_accidents_by_specific_type(road_data, "התנגשות חזית בחזית")
+        all_roads_data_dict = sum_road_accidents_by_specific_type(all_roads_data, "התנגשות חזית בחזית")
+
+        return {
+            "specific_road_segment_fatal_accidents": convert_roads_fatal_accidents_to_frontend_view(
+                road_data_dict
+            ),
+            "all_roads_fatal_accidents": convert_roads_fatal_accidents_to_frontend_view(
+                all_roads_data_dict
+            ),
+        }
+
+
 def create_widget(widget_id: WidgetId, request_params: RequestParams) -> Optional[NewWidget]:
     # todo: complete implementation for all values of WidgetId
     if widget_id == WidgetId.accident_count_by_severity:
@@ -346,19 +450,20 @@ def create_widget(widget_id: WidgetId, request_params: RequestParams) -> Optiona
         res = MostSevereAccidentsTableWidget(request_params)
     elif widget_id == WidgetId.most_severe_accidents:
         res = MostSevereAccidentsWidget(request_params)
+    elif widget_id == WidgetId.street_view:
+        res = StreetViewWidget(request_params)
+    elif widget_id == WidgetId.head_on_collisions_comparison:
+        res = HeadOnCollisionsComparisonWidget(request_params)
     else:
+        logging.error(f"create_widget: failed to create:{widget_id}")
         res = None
     return res
 
 
-def extract_news_flash_location(news_flash_id):
-    news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == news_flash_id).first()
-    if not news_flash_obj:
-        logging.warning(f"could not find news flash id {str(news_flash_id)}")
-        return None
+def extract_news_flash_location(news_flash_obj):
     resolution = news_flash_obj.resolution if news_flash_obj.resolution else None
     if not news_flash_obj or not resolution or resolution not in resolution_dict:
-        logging.warning(f"could not find valid resolution for news flash id {str(news_flash_id)}")
+        logging.warning(f"could not find valid resolution for news flash id {str(news_flash_obj.id)}")
         return None
     data = {"resolution": resolution}
     for field in resolution_dict[resolution]:
@@ -606,9 +711,8 @@ def get_casualties_count_in_accident(accident_id, provider_code, injury_severity
 
 # generate text describing location or road segment of news flash
 # to be used by most severe accidents additional info widget
-def get_news_flash_location_text(news_flash_id):
-    news_flash_item = db.session.query(NewsFlash).filter(NewsFlash.id == news_flash_id).first()
-    nf = news_flash_item.serialize()
+def get_news_flash_location_text(news_flash_obj: NewsFlash):
+    nf = news_flash_obj.serialize()
     resolution = nf["resolution"] if nf["resolution"] else ""
     yishuv_name = nf["yishuv_name"] if nf["yishuv_name"] else ""
     road1 = str(int(nf["road1"])) if nf["road1"] else ""
@@ -671,48 +775,6 @@ def convert_roads_fatal_accidents_to_frontend_view(data_dict):
             data_list.append({"desc": key, "count": value})
 
     return data_list
-
-
-def get_head_to_head_stat(news_flash_id, start_time, end_time):
-    news_flash_obj = extract_news_flash_obj(news_flash_id)
-    road_data = {}
-    filter_dict = {
-        "road_type": BE_CONST.ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION,
-        "accident_severity": BE_CONST.ACCIDENT_SEVERITY_DEADLY,
-    }
-    all_roads_data = get_accidents_stats(
-        table_obj=AccidentMarkerView,
-        filters=filter_dict,
-        group_by="accident_type_hebrew",
-        count="accident_type_hebrew",
-        start_time=start_time,
-        end_time=end_time,
-    )
-
-    if news_flash_obj.road1 and news_flash_obj.road_segment_name:
-        filter_dict.update(
-            {"road1": news_flash_obj.road1, "road_segment_name": news_flash_obj.road_segment_name}
-        )
-        road_data = get_accidents_stats(
-            table_obj=AccidentMarkerView,
-            filters=filter_dict,
-            group_by="accident_type_hebrew",
-            count="accident_type_hebrew",
-            start_time=start_time,
-            end_time=end_time,
-        )
-
-    road_data_dict = sum_road_accidents_by_specific_type(road_data, "התנגשות חזית בחזית")
-    all_roads_data_dict = sum_road_accidents_by_specific_type(all_roads_data, "התנגשות חזית בחזית")
-
-    return {
-        "specific_road_segment_fatal_accidents": convert_roads_fatal_accidents_to_frontend_view(
-            road_data_dict
-        ),
-        "all_roads_fatal_accidents": convert_roads_fatal_accidents_to_frontend_view(
-            all_roads_data_dict
-        ),
-    }
 
 
 # gets the latest date an accident has occured
@@ -798,11 +860,14 @@ def get_request_params(news_flash_id: int, number_of_years_ago: int) -> Optional
         return None
     if number_of_years_ago < 0 or number_of_years_ago > 100:
         return None
-    location_info = extract_news_flash_location(news_flash_id)
+    news_flash_obj: Optional[NewsFlash] = extract_news_flash_obj(news_flash_id)
+    if news_flash_obj is None:
+        return None
+    location_info = extract_news_flash_location(news_flash_obj)
     if location_info is None:
         return None
     logging.debug("location_info:{}".format(location_info))
-    location_text = get_news_flash_location_text(news_flash_id)
+    location_text = get_news_flash_location_text(news_flash_obj)
     logging.debug("location_text:{}".format(location_text))
     gps = location_info["gps"]
     location_info = location_info["data"]
@@ -820,7 +885,7 @@ def get_request_params(news_flash_id: int, number_of_years_ago: int) -> Optional
     start_time = datetime.date(end_time.year + 1 - number_of_years_ago, 1, 1)
 
     request_params = RequestParams(
-        news_flash_id=news_flash_id,
+        news_flash_obj=news_flash_obj,
         location_text=location_text,
         location_info=location_info,
         resolution=resolution,
@@ -851,22 +916,10 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
             return {}
         if number_of_years_ago < 0 or number_of_years_ago > 100:
             return {}
-        location_info = extract_news_flash_location(news_flash_id)
-        if location_info is None:
-            return {}
         logging.debug("location_info:{}".format(location_info))
-        location_text = get_news_flash_location_text(news_flash_id)
         logging.debug("location_text:{}".format(location_text))
-        gps = location_info["gps"]
-        location_info = location_info["data"]
         output["meta"] = {"location_info": location_info.copy(), "location_text": location_text}
         output["widgets"] = []
-        resolution = location_info.pop("resolution")
-        if resolution is None:
-            return {}
-
-        if all(value is None for value in location_info.values()):
-            return {}
 
         last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
         # converting to datetime object to get the date
@@ -882,23 +935,6 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         widgets: List[NewWidget] = generate_widgets(request_params=request_params, to_cache=True)
         widgets.extend(generate_widgets(request_params=request_params, to_cache=False))
         output["widgets"].extend(list(map(lambda w: w.serialize(), widgets)))
-
-        # street view
-        street_view = Widget(
-            name="street_view", rank=4, items={"longitude": gps["lon"], "latitude": gps["lat"]}
-        )
-        output["widgets"].append(street_view.serialize())
-
-        # head to head accidents
-        head_on_collisions_comparison = Widget(
-            name="head_on_collisions_comparison",
-            rank=5,
-            items=get_head_to_head_stat(
-                news_flash_id=news_flash_id, start_time=start_time, end_time=end_time
-            ),
-            text={"title": "תאונות קטלניות ע״פ סוג"},
-        )
-        output["widgets"].append(head_on_collisions_comparison.serialize())
 
         # accident_type count
         accident_count_by_accident_type = Widget(

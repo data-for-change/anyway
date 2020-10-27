@@ -442,6 +442,144 @@ class HeadOnCollisionsComparisonWidget(NewWidget):
         }
 
 
+class AccidentCountByAccidentTypeWidget(NewWidget):
+
+    def __init__(self, request_params: RequestParams):
+        NewWidget.__init__(self, request_params)
+        self.widget_id = WidgetId.accident_count_by_accident_type
+        self.name = self.widget_id.name
+        self.rank = 6
+
+    def get_name(self) -> str:
+        return self.widget_id.name
+
+    def get_rank(self) -> int:
+        return self.rank
+
+    def get_widget_id(self) -> WidgetId:
+        return self.widget_id
+
+    def is_in_cache(self) -> bool:
+        return True
+
+    def is_included(self) -> bool:
+        return True
+
+    def generate_items(self) -> None:
+        self.items = AccidentCountByAccidentTypeWidget.get_accident_count_by_accident_type(
+            location_info=self.request_params.location_info,
+            start_time=self.request_params.start_time,
+            end_time=self.request_params.end_time
+        )
+
+    @staticmethod
+    def get_accident_count_by_accident_type(location_info, start_time, end_time):
+        all_accident_type_count = get_accidents_stats(
+            table_obj=AccidentMarkerView,
+            filters=location_info,
+            group_by="accident_type_hebrew",
+            count="accident_type_hebrew",
+            start_time=start_time,
+            end_time=end_time,
+        )
+        merged_accident_type_count = [{"accident_type": "התנגשות", "count": 0}]
+        for item in all_accident_type_count:
+            if "התנגשות" in item["accident_type"]:
+                merged_accident_type_count[0]["count"] += item["count"]
+            else:
+                merged_accident_type_count.append(item)
+        return merged_accident_type_count
+
+
+class AccidentsHeatMapWidget(NewWidget):
+
+    def __init__(self, request_params: RequestParams):
+        NewWidget.__init__(self, request_params)
+        self.widget_id = WidgetId.accidents_heat_map
+        self.name = self.widget_id.name
+        self.rank = 7
+        self.text = {"title": AccidentsHeatMapWidget.get_heat_map_title(request_params.location_info)}
+
+    def get_name(self) -> str:
+        return self.widget_id.name
+
+    def get_rank(self) -> int:
+        return self.rank
+
+    def get_widget_id(self) -> WidgetId:
+        return self.widget_id
+
+    def is_in_cache(self) -> bool:
+        return True
+
+    def is_included(self) -> bool:
+        return True
+
+    def generate_items(self) -> None:
+        accidents_heat_map_filters = self.request_params.location_info.copy()
+        accidents_heat_map_filters["accident_severity"] = [
+            CONST.ACCIDENT_SEVERITY_DEADLY,
+            CONST.ACCIDENT_SEVERITY_SEVERE,
+        ]
+        self.items = AccidentsHeatMapWidget.get_accidents_heat_map(
+            filters=accidents_heat_map_filters,
+            start_time=self.request_params.start_time,
+            end_time=self.request_params.end_time
+        )
+
+    @staticmethod
+    def get_heat_map_title(location_info):
+        return "מוקדי תאונות קטלניות וקשות במקטע " + location_info["road_segment_name"]
+
+    @staticmethod
+    def get_accidents_heat_map(filters, start_time, end_time):
+        filters = filters or {}
+        filters["provider_code"] = [
+            BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
+            BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+        ]
+        query = get_query(AccidentMarkerView, filters, start_time, end_time)
+        query = query.with_entities("longitude", "latitude")
+        df = pd.read_sql_query(query.statement, query.session.bind)
+        return df.to_dict(orient="records")  # pylint: disable=no-member
+
+
+class AccidentCountByAccidentYearWidget(NewWidget):
+
+    def __init__(self, request_params: RequestParams):
+        NewWidget.__init__(self, request_params)
+        self.widget_id = WidgetId.accident_count_by_accident_year
+        self.name = self.widget_id.name
+        self.rank = 8
+        self.text = {"title": "כמות התאונות לפי שנה במקטע " +
+                              self.request_params.location_info["road_segment_name"]}
+
+    def get_name(self) -> str:
+        return self.widget_id.name
+
+    def get_rank(self) -> int:
+        return self.rank
+
+    def get_widget_id(self) -> WidgetId:
+        return self.widget_id
+
+    def is_in_cache(self) -> bool:
+        return True
+
+    def is_included(self) -> bool:
+        return True
+
+    def generate_items(self) -> None:
+        self.items = get_accidents_stats(
+            table_obj=AccidentMarkerView,
+            filters=self.request_params.location_info,
+            group_by="accident_year",
+            count="accident_year",
+            start_time=self.request_params.start_time,
+            end_time=self.request_params.end_time
+        )
+
+
 def create_widget(widget_id: WidgetId, request_params: RequestParams) -> Optional[NewWidget]:
     # todo: complete implementation for all values of WidgetId
     if widget_id == WidgetId.accident_count_by_severity:
@@ -454,6 +592,12 @@ def create_widget(widget_id: WidgetId, request_params: RequestParams) -> Optiona
         res = StreetViewWidget(request_params)
     elif widget_id == WidgetId.head_on_collisions_comparison:
         res = HeadOnCollisionsComparisonWidget(request_params)
+    elif widget_id == WidgetId.accident_count_by_accident_type:
+        res = AccidentCountByAccidentTypeWidget(request_params)
+    elif widget_id == WidgetId.accidents_heat_map:
+        res = AccidentsHeatMapWidget(request_params)
+    elif widget_id == WidgetId.accident_count_by_accident_year:
+        res = AccidentCountByAccidentYearWidget(request_params)
     else:
         logging.error(f"create_widget: failed to create:{widget_id}")
         res = None
@@ -490,24 +634,6 @@ def get_query(table_obj, filters, start_time, end_time):
                 values = [value]
             query = query.filter((getattr(table_obj, field_name)).in_(values))
     return query
-
-
-def get_accident_count_by_accident_type(location_info, start_time, end_time):
-    all_accident_type_count = get_accidents_stats(
-        table_obj=AccidentMarkerView,
-        filters=location_info,
-        group_by="accident_type_hebrew",
-        count="accident_type_hebrew",
-        start_time=start_time,
-        end_time=end_time,
-    )
-    merged_accident_type_count = [{"accident_type": "התנגשות", "count": 0}]
-    for item in all_accident_type_count:
-        if "התנגשות" in item["accident_type"]:
-            merged_accident_type_count[0]["count"] += item["count"]
-        else:
-            merged_accident_type_count.append(item)
-    return merged_accident_type_count
 
 
 def get_top_road_segments_accidents_per_km(
@@ -547,8 +673,7 @@ def get_top_road_segments_accidents_per_km(
 
 
 def get_accidents_stats(
-    table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None
-):
+    table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None):
     filters = filters or {}
     filters["provider_code"] = [
         BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
@@ -595,18 +720,6 @@ def get_most_severe_accidents_with_entities(
     query = query.limit(limit)
     df = pd.read_sql_query(query.statement, query.session.bind)
     df.columns = [c.replace("_hebrew", "") for c in df.columns]
-    return df.to_dict(orient="records")  # pylint: disable=no-member
-
-
-def get_accidents_heat_map(table_obj, filters, start_time, end_time):
-    filters = filters or {}
-    filters["provider_code"] = [
-        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
-        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
-    ]
-    query = get_query(table_obj, filters, start_time, end_time)
-    query = query.with_entities("longitude", "latitude")
-    df = pd.read_sql_query(query.statement, query.session.bind)
     return df.to_dict(orient="records")  # pylint: disable=no-member
 
 
@@ -664,10 +777,6 @@ def filter_and_group_injured_count_per_age_group(data_of_ages):
 
 def get_most_severe_accidents_table_title(location_info):
     return "תאונות בסדר חומרה יורד במקטע " + location_info["road_segment_name"]
-
-
-def get_heat_map_title(location_info):
-    return "מוקדי תאונות קטלניות וקשות במקטע " + location_info["road_segment_name"]
 
 
 def count_accidents_by_driver_type(data):
@@ -935,53 +1044,6 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         widgets: List[NewWidget] = generate_widgets(request_params=request_params, to_cache=True)
         widgets.extend(generate_widgets(request_params=request_params, to_cache=False))
         output["widgets"].extend(list(map(lambda w: w.serialize(), widgets)))
-
-        # accident_type count
-        accident_count_by_accident_type = Widget(
-            name="accident_count_by_accident_type",
-            rank=6,
-            items=get_accident_count_by_accident_type(
-                location_info=location_info, start_time=start_time, end_time=end_time
-            ),
-        )
-        output["widgets"].append(accident_count_by_accident_type.serialize())
-        logging.debug("after accident_count_by_accident_type")
-
-        # accidents heat map
-        accidents_heat_map_filters = location_info.copy()
-        accidents_heat_map_filters["accident_severity"] = [
-            CONST.ACCIDENT_SEVERITY_DEADLY,
-            CONST.ACCIDENT_SEVERITY_SEVERE,
-        ]
-        accidents_heat_map = Widget(
-            name="accidents_heat_map",
-            rank=7,
-            items=get_accidents_heat_map(
-                table_obj=AccidentMarkerView,
-                filters=accidents_heat_map_filters,
-                start_time=start_time,
-                end_time=end_time,
-            ),
-            text={"title": get_heat_map_title(location_info)},
-        )
-        output["widgets"].append(accidents_heat_map.serialize())
-
-        logging.debug("after accidents_heat_map")
-        # accident count by accident year
-        accident_count_by_accident_year = Widget(
-            name="accident_count_by_accident_year",
-            rank=8,
-            items=get_accidents_stats(
-                table_obj=AccidentMarkerView,
-                filters=location_info,
-                group_by="accident_year",
-                count="accident_year",
-                start_time=start_time,
-                end_time=end_time,
-            ),
-            text={"title": "כמות התאונות לפי שנה במקטע " + location_info["road_segment_name"]},
-        )
-        output["widgets"].append(accident_count_by_accident_year.serialize())
 
         # injured count by accident year
         injured_count_by_accident_year = Widget(

@@ -719,7 +719,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
             start_time=start_time,
             end_time=end_time,
         ),
-        text={"title": _("Accidents' injuries in section {}").format(location_info['road_segment_name']},
+        text={"title": _("Accidents\' injuries in section {}").format(location_info['road_segment_name'])},
     )
     output["widgets"].append(injured_count_by_accident_year.serialize())
 

@@ -79,7 +79,7 @@ class WidgetId(Enum):
     accident_count_by_accident_year = auto()
     injured_count_by_accident_year = auto()
     accident_count_by_day_night = auto()
-    accidents_count_by_hour = auto()
+    accident_count_by_hour = auto()
     accident_count_by_road_light = auto()
     top_road_segments_accidents_per_km = auto()
     injured_count_per_age_group = auto()
@@ -125,21 +125,23 @@ class NewWidget:
         self.items: Dict = {}
         self.text: Dict = {}
         self.meta: Optional[Dict] = None
+        # noinspection PyTypeChecker
+        self.widget_id: WidgetId = None
 
     def get_name(self) -> str:
-        pass
+        return self.widget_id.name
 
     def get_rank(self) -> int:
-        pass
+        return self.rank
 
     def get_widget_id(self) -> WidgetId:
-        pass
+        return self.widget_id
 
     def is_in_cache(self) -> bool:
-        pass
+        return True
 
     def is_included(self) -> bool:
-        pass
+        return True
 
     def generate_items(self) -> None:
         pass
@@ -169,21 +171,6 @@ class AccidentCountBySeverityWidget(NewWidget):
         self.widget_id = WidgetId.accident_count_by_severity
         self.name = self.widget_id.name
         self.rank = 1
-
-    def get_name(self) -> str:
-        return self.widget_id.name
-
-    def get_rank(self) -> int:
-        return self.rank
-
-    def get_widget_id(self) -> WidgetId:
-        return self.widget_id
-
-    def is_in_cache(self) -> bool:
-        return True
-
-    def is_included(self) -> bool:
-        return True
 
     def generate_items(self) -> None:
         self.items = self.get_accident_count_by_severity(
@@ -226,21 +213,6 @@ class MostSevereAccidentsTableWidget(NewWidget):
         self.widget_id = WidgetId.most_severe_accidents_table
         self.name = self.widget_id.name
         self.rank = 2
-
-    def get_name(self) -> str:
-        return self.widget_id.name
-
-    def get_rank(self) -> int:
-        return self.rank
-
-    def get_widget_id(self) -> WidgetId:
-        return self.widget_id
-
-    def is_in_cache(self) -> bool:
-        return True
-
-    def is_included(self) -> bool:
-        return True
 
     def generate_items(self) -> None:
         self.items = self.get_most_severe_accidents_table(
@@ -304,21 +276,6 @@ class MostSevereAccidentsWidget(NewWidget):
         self.name = self.widget_id.name
         self.rank = 3
 
-    def get_name(self) -> str:
-        return self.widget_id.name
-
-    def get_rank(self) -> int:
-        return self.rank
-
-    def get_widget_id(self) -> WidgetId:
-        return self.widget_id
-
-    def is_in_cache(self) -> bool:
-        return True
-
-    def is_included(self) -> bool:
-        return True
-
     def generate_items(self) -> None:
         self.items = MostSevereAccidentsWidget.get_most_severe_accidents(
             AccidentMarkerView,
@@ -349,21 +306,6 @@ class StreetViewWidget(NewWidget):
         self.name = self.widget_id.name
         self.rank = 4
 
-    def get_name(self) -> str:
-        return self.widget_id.name
-
-    def get_rank(self) -> int:
-        return self.rank
-
-    def get_widget_id(self) -> WidgetId:
-        return self.widget_id
-
-    def is_in_cache(self) -> bool:
-        return True
-
-    def is_included(self) -> bool:
-        return True
-
     def generate_items(self) -> None:
         self.items = {"longitude": self.request_params.gps["lon"],
                       "latitude": self.request_params.gps["lat"]}
@@ -377,21 +319,6 @@ class HeadOnCollisionsComparisonWidget(NewWidget):
         self.name = self.widget_id.name
         self.rank = 5
         self.text = {"title": "תאונות קטלניות ע״פ סוג"}
-
-    def get_name(self) -> str:
-        return self.widget_id.name
-
-    def get_rank(self) -> int:
-        return self.rank
-
-    def get_widget_id(self) -> WidgetId:
-        return self.widget_id
-
-    def is_in_cache(self) -> bool:
-        return True
-
-    def is_included(self) -> bool:
-        return True
 
     def generate_items(self) -> None:
         self.items = HeadOnCollisionsComparisonWidget.get_head_to_head_stat(
@@ -450,21 +377,6 @@ class AccidentCountByAccidentTypeWidget(NewWidget):
         self.name = self.widget_id.name
         self.rank = 6
 
-    def get_name(self) -> str:
-        return self.widget_id.name
-
-    def get_rank(self) -> int:
-        return self.rank
-
-    def get_widget_id(self) -> WidgetId:
-        return self.widget_id
-
-    def is_in_cache(self) -> bool:
-        return True
-
-    def is_included(self) -> bool:
-        return True
-
     def generate_items(self) -> None:
         self.items = AccidentCountByAccidentTypeWidget.get_accident_count_by_accident_type(
             location_info=self.request_params.location_info,
@@ -499,21 +411,6 @@ class AccidentsHeatMapWidget(NewWidget):
         self.name = self.widget_id.name
         self.rank = 7
         self.text = {"title": AccidentsHeatMapWidget.get_heat_map_title(request_params.location_info)}
-
-    def get_name(self) -> str:
-        return self.widget_id.name
-
-    def get_rank(self) -> int:
-        return self.rank
-
-    def get_widget_id(self) -> WidgetId:
-        return self.widget_id
-
-    def is_in_cache(self) -> bool:
-        return True
-
-    def is_included(self) -> bool:
-        return True
 
     def generate_items(self) -> None:
         accidents_heat_map_filters = self.request_params.location_info.copy()
@@ -554,21 +451,6 @@ class AccidentCountByAccidentYearWidget(NewWidget):
         self.text = {"title": "כמות התאונות לפי שנה במקטע " +
                               self.request_params.location_info["road_segment_name"]}
 
-    def get_name(self) -> str:
-        return self.widget_id.name
-
-    def get_rank(self) -> int:
-        return self.rank
-
-    def get_widget_id(self) -> WidgetId:
-        return self.widget_id
-
-    def is_in_cache(self) -> bool:
-        return True
-
-    def is_included(self) -> bool:
-        return True
-
     def generate_items(self) -> None:
         self.items = get_accidents_stats(
             table_obj=AccidentMarkerView,
@@ -578,6 +460,219 @@ class AccidentCountByAccidentYearWidget(NewWidget):
             start_time=self.request_params.start_time,
             end_time=self.request_params.end_time
         )
+
+
+class InjuredCountByAccidentYearWidget(NewWidget):
+
+    def __init__(self, request_params: RequestParams):
+        NewWidget.__init__(self, request_params)
+        self.widget_id = WidgetId.injured_count_by_accident_year
+        self.name = self.widget_id.name
+        self.rank = 9
+        self.text = {"title": "נפגעים בתאונות במקטע " +
+                              self.request_params.location_info["road_segment_name"]}
+
+    def generate_items(self) -> None:
+        self.items = get_accidents_stats(
+            table_obj=InvolvedMarkerView,
+            filters=get_injured_filters(self.request_params.location_info),
+            group_by="accident_year",
+            count="accident_year",
+            start_time=self.request_params.start_time,
+            end_time=self.request_params.end_time
+        )
+
+
+class AccidentCountByDayNightWidget(NewWidget):
+
+    def __init__(self, request_params: RequestParams):
+        NewWidget.__init__(self, request_params)
+        self.widget_id = WidgetId.accident_count_by_day_night
+        self.name = self.widget_id.name
+        self.rank = 10
+        self.text = {"title": "כמות תאונות ביום ובלילה"}
+
+    def generate_items(self) -> None:
+        self.items = get_accidents_stats(
+            table_obj=AccidentMarkerView,
+            filters=self.request_params.location_info,
+            group_by="day_night_hebrew",
+            count="day_night_hebrew",
+            start_time=self.request_params.start_time,
+            end_time=self.request_params.end_time
+        )
+
+
+class AccidentCountByHourWidget(NewWidget):
+
+    def __init__(self, request_params: RequestParams):
+        NewWidget.__init__(self, request_params)
+        self.widget_id = WidgetId.accident_count_by_hour
+        self.name = self.widget_id.name
+        self.rank = 11
+        self.text = {"title": "כמות תאונות לפי שעה"}
+
+    def generate_items(self) -> None:
+        self.items = get_accidents_stats(
+            table_obj=AccidentMarkerView,
+            filters=self.request_params.location_info,
+            group_by="accident_hour",
+            count="accident_hour",
+            start_time=self.request_params.start_time,
+            end_time=self.request_params.end_time
+        )
+
+
+class AccidentCountByRoadLightWidget(NewWidget):
+
+    def __init__(self, request_params: RequestParams):
+        NewWidget.__init__(self, request_params)
+        self.widget_id = WidgetId.accident_count_by_road_light
+        self.name = self.widget_id.name
+        self.rank = 12
+        self.text = {"title": "כמות תאונות לפי תאורה"}
+
+    def generate_items(self) -> None:
+        self.items = get_accidents_stats(
+            table_obj=AccidentMarkerView,
+            filters=self.request_params.location_info,
+            group_by="road_light_hebrew",
+            count="road_light_hebrew",
+            start_time=self.request_params.start_time,
+            end_time=self.request_params.end_time
+        )
+
+
+class TopRoadSegmentsAccidentsPerKmWidget(NewWidget):
+
+    def __init__(self, request_params: RequestParams):
+        NewWidget.__init__(self, request_params)
+        self.widget_id = WidgetId.accident_count_by_road_light
+        self.name = self.widget_id.name
+        self.rank = 13
+        self.text = {"title": "תאונות לכל ק״מ כביש על פי מקטע בכביש " +
+                              str(int(self.request_params.location_info["road1"]))
+                     }
+
+    def generate_items(self) -> None:
+        self.items = TopRoadSegmentsAccidentsPerKmWidget.get_top_road_segments_accidents_per_km(
+            resolution=self.request_params.resolution,
+            location_info=self.request_params.location_info,
+            start_time=self.request_params.start_time,
+            end_time=self.request_params.end_time,
+        )
+
+    @staticmethod
+    def get_top_road_segments_accidents_per_km(
+            resolution,
+            location_info,
+            start_time=None,
+            end_time=None,
+            limit=3):
+        if resolution != "כביש בינעירוני":  # relevent for non urban roads only
+            return {}
+
+        query = get_query(
+            table_obj=AccidentMarkerView, filters=None, start_time=start_time, end_time=end_time
+        )
+
+        query = (
+            query.with_entities(
+                AccidentMarkerView.road_segment_name,
+                func.count(AccidentMarkerView.road_segment_name).label("total_accidents"),
+                (RoadSegments.to_km - RoadSegments.from_km).label("segment_length"),
+                cast(
+                    (
+                            func.count(AccidentMarkerView.road_segment_name)
+                            / (RoadSegments.to_km - RoadSegments.from_km)
+                    ),
+                    Numeric(10, 4),
+                ).label("accidents_per_km"),
+            )
+                .filter(AccidentMarkerView.road1 == RoadSegments.road)
+                .filter(AccidentMarkerView.road_segment_number == RoadSegments.segment)
+                .filter(AccidentMarkerView.road1 == location_info["road1"])
+                .filter(AccidentMarkerView.road_segment_name is not None)
+                .group_by(AccidentMarkerView.road_segment_name, RoadSegments.from_km, RoadSegments.to_km)
+                .order_by(desc("accidents_per_km"))
+                .limit(limit)
+        )
+
+        result = pd.read_sql_query(query.statement, query.session.bind)
+        return result.to_dict(orient="records")  # pylint: disable=no-member
+
+
+class InjuredCountPerAgeGroupWidget(NewWidget):
+
+    def __init__(self, request_params: RequestParams):
+        NewWidget.__init__(self, request_params)
+        self.widget_id = WidgetId.injured_count_per_age_group
+        self.name = self.widget_id.name
+        self.rank = 14
+
+    def generate_items(self) -> None:
+        self.items = \
+            InjuredCountPerAgeGroupWidget.filter_and_group_injured_count_per_age_group(self.request_params)
+
+    @staticmethod
+    def filter_and_group_injured_count_per_age_group(request_params: RequestParams):
+        import re
+
+        data_of_ages = get_accidents_stats(
+            table_obj=InvolvedMarkerView,
+            filters=get_injured_filters(request_params.location_info),
+            group_by="age_group_hebrew",
+            count="age_group_hebrew",
+            start_time=request_params.start_time,
+            end_time=request_params.end_time,
+        )
+        range_dict = {0: 14, 15: 24, 25: 64, 65: 200}
+        dict_by_required_age_group = defaultdict(int)
+
+        for age_range_and_count in data_of_ages:
+            age_range = age_range_and_count["age_group"]
+            count = age_range_and_count["count"]
+
+            # Parse the db age range
+            match_parsing = re.match("([0-9]{2})\\-([0-9]{2})", age_range)
+            if match_parsing:
+                regex_age_matches = match_parsing.groups()
+                if len(regex_age_matches) != 2:
+                    dict_by_required_age_group["unknown"] += count
+                    continue
+                min_age_raw, max_age_raw = regex_age_matches
+            else:
+                match_parsing = re.match("([0-9]{2})\\+", age_range)  # e.g  85+
+                if match_parsing:
+                    # We assume that no body live beyond age 200
+                    min_age_raw, max_age_raw = match_parsing.group(1), 200
+                else:
+                    dict_by_required_age_group["unknown"] += count
+                    continue
+
+            # Find to what "bucket" to aggregate the data
+            min_age = int(min_age_raw)
+            max_age = int(max_age_raw)
+            for item in range_dict.items():
+                item_min_range, item_max_range = item
+                if (
+                        item_min_range <= min_age <= item_max_range
+                        and item_min_range <= max_age <= item_max_range
+                ):
+                    string_age_range = f"{item_min_range:02}-{item_max_range:02}"
+                    dict_by_required_age_group[string_age_range] += count
+                    break
+
+        # Rename the last key
+        dict_by_required_age_group["65+"] = dict_by_required_age_group["65-200"]
+        del dict_by_required_age_group["65-200"]
+
+        # Modify return value to wanted format
+        items = []
+        for key in dict_by_required_age_group:
+            items.append({"age_group": key, "count": dict_by_required_age_group[key]})
+
+        return items
 
 
 def create_widget(widget_id: WidgetId, request_params: RequestParams) -> Optional[NewWidget]:
@@ -598,6 +693,18 @@ def create_widget(widget_id: WidgetId, request_params: RequestParams) -> Optiona
         res = AccidentsHeatMapWidget(request_params)
     elif widget_id == WidgetId.accident_count_by_accident_year:
         res = AccidentCountByAccidentYearWidget(request_params)
+    elif widget_id == WidgetId.injured_count_by_accident_year:
+        res = InjuredCountByAccidentYearWidget(request_params)
+    elif widget_id == WidgetId.accident_count_by_day_night:
+        res = AccidentCountByDayNightWidget(request_params)
+    elif widget_id == WidgetId.accident_count_by_hour:
+        res = AccidentCountByHourWidget(request_params)
+    elif widget_id == WidgetId.accident_count_by_road_light:
+        res = AccidentCountByRoadLightWidget(request_params)
+    elif widget_id == WidgetId.top_road_segments_accidents_per_km:
+        res = TopRoadSegmentsAccidentsPerKmWidget(request_params)
+    elif widget_id == WidgetId.injured_count_per_age_group:
+        res = InjuredCountPerAgeGroupWidget(request_params)
     else:
         logging.error(f"create_widget: failed to create:{widget_id}")
         res = None
@@ -634,42 +741,6 @@ def get_query(table_obj, filters, start_time, end_time):
                 values = [value]
             query = query.filter((getattr(table_obj, field_name)).in_(values))
     return query
-
-
-def get_top_road_segments_accidents_per_km(
-    resolution, location_info, start_time=None, end_time=None, limit=3
-):
-    if resolution != "כביש בינעירוני":  # relevent for non urban roads only
-        return {}
-
-    query = get_query(
-        table_obj=AccidentMarkerView, filters=None, start_time=start_time, end_time=end_time
-    )
-
-    query = (
-        query.with_entities(
-            AccidentMarkerView.road_segment_name,
-            func.count(AccidentMarkerView.road_segment_name).label("total_accidents"),
-            (RoadSegments.to_km - RoadSegments.from_km).label("segment_length"),
-            cast(
-                (
-                    func.count(AccidentMarkerView.road_segment_name)
-                    / (RoadSegments.to_km - RoadSegments.from_km)
-                ),
-                Numeric(10, 4),
-            ).label("accidents_per_km"),
-        )
-        .filter(AccidentMarkerView.road1 == RoadSegments.road)
-        .filter(AccidentMarkerView.road_segment_number == RoadSegments.segment)
-        .filter(AccidentMarkerView.road1 == location_info["road1"])
-        .filter(AccidentMarkerView.road_segment_name is not None)
-        .group_by(AccidentMarkerView.road_segment_name, RoadSegments.from_km, RoadSegments.to_km)
-        .order_by(desc("accidents_per_km"))
-        .limit(limit)
-    )
-
-    result = pd.read_sql_query(query.statement, query.session.bind)
-    return result.to_dict(orient="records")  # pylint: disable=no-member
 
 
 def get_accidents_stats(
@@ -721,58 +792,6 @@ def get_most_severe_accidents_with_entities(
     df = pd.read_sql_query(query.statement, query.session.bind)
     df.columns = [c.replace("_hebrew", "") for c in df.columns]
     return df.to_dict(orient="records")  # pylint: disable=no-member
-
-
-def filter_and_group_injured_count_per_age_group(data_of_ages):
-    import re
-
-    range_dict = {0: 14, 15: 24, 25: 64, 65: 200}
-    dict_by_required_age_group = defaultdict(int)
-
-    for age_range_and_count in data_of_ages:
-        age_range = age_range_and_count["age_group"]
-        count = age_range_and_count["count"]
-
-        # Parse the db age range
-        match_parsing = re.match("([0-9]{2})\\-([0-9]{2})", age_range)
-        if match_parsing:
-            regex_age_matches = match_parsing.groups()
-            if len(regex_age_matches) != 2:
-                dict_by_required_age_group["unknown"] += count
-                continue
-            min_age_raw, max_age_raw = regex_age_matches
-        else:
-            match_parsing = re.match("([0-9]{2})\\+", age_range)  # e.g  85+
-            if match_parsing:
-                # We assume that no body live beyond age 200
-                min_age_raw, max_age_raw = match_parsing.group(1), 200
-            else:
-                dict_by_required_age_group["unknown"] += count
-                continue
-
-        # Find to what "bucket" to aggregate the data
-        min_age = int(min_age_raw)
-        max_age = int(max_age_raw)
-        for item in range_dict.items():
-            item_min_range, item_max_range = item
-            if (
-                item_min_range <= min_age <= item_max_range
-                and item_min_range <= max_age <= item_max_range
-            ):
-                string_age_range = f"{item_min_range:02}-{item_max_range:02}"
-                dict_by_required_age_group[string_age_range] += count
-                break
-
-    # Rename the last key
-    dict_by_required_age_group["65+"] = dict_by_required_age_group["65-200"]
-    del dict_by_required_age_group["65-200"]
-
-    # Modify return value to wanted format
-    items = []
-    for key in dict_by_required_age_group:
-        items.append({"age_group": key, "count": dict_by_required_age_group[key]})
-
-    return items
 
 
 def get_most_severe_accidents_table_title(location_info):
@@ -1044,89 +1063,6 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         widgets: List[NewWidget] = generate_widgets(request_params=request_params, to_cache=True)
         widgets.extend(generate_widgets(request_params=request_params, to_cache=False))
         output["widgets"].extend(list(map(lambda w: w.serialize(), widgets)))
-
-        # injured count by accident year
-        injured_count_by_accident_year = Widget(
-            name="injured_count_by_accident_year",
-            rank=9,
-            items=get_accidents_stats(
-                table_obj=InvolvedMarkerView,
-                filters=get_injured_filters(location_info),
-                group_by="accident_year",
-                count="accident_year",
-                start_time=start_time,
-                end_time=end_time,
-            ),
-            text={"title": "נפגעים בתאונות במקטע " + location_info["road_segment_name"]},
-        )
-        output["widgets"].append(injured_count_by_accident_year.serialize())
-        logging.debug("after injured_count_by_accident_year")
-
-        # accident count on day light
-        accident_count_by_day_night = Widget(
-            name="accident_count_by_day_night",
-            rank=10,
-            items=get_accidents_stats(
-                table_obj=AccidentMarkerView,
-                filters=location_info,
-                group_by="day_night_hebrew",
-                count="day_night_hebrew",
-                start_time=start_time,
-                end_time=end_time,
-            ),
-            text={"title": "כמות תאונות ביום ובלילה"},
-        )
-        output["widgets"].append(accident_count_by_day_night.serialize())
-        logging.debug("after accident_count_by_day_night")
-
-        # accidents distribution count by hour
-        accidents_count_by_hour = Widget(
-            name="accidents_count_by_hour",
-            rank=11,
-            items=get_accidents_stats(
-                table_obj=AccidentMarkerView,
-                filters=location_info,
-                group_by="accident_hour",
-                count="accident_hour",
-                start_time=start_time,
-                end_time=end_time,
-            ),
-            text={"title": "כמות תאונות לפי שעה"},
-        )
-        output["widgets"].append(accidents_count_by_hour.serialize())
-
-        # accident count by road_segment
-        top_road_segments_accidents_per_km = Widget(
-            name="top_road_segments_accidents_per_km",
-            rank=13,
-            items=get_top_road_segments_accidents_per_km(
-                resolution=resolution,
-                location_info=location_info,
-                start_time=start_time,
-                end_time=end_time,
-            ),
-            text={
-                "title": "תאונות לכל ק״מ כביש על פי מקטע בכביש " + str(int(location_info["road1"]))
-            },
-        )
-        output["widgets"].append(top_road_segments_accidents_per_km.serialize())
-
-        # injured count per age group
-        data_of_injured_count_per_age_group_raw = get_accidents_stats(
-            table_obj=InvolvedMarkerView,
-            filters=get_injured_filters(location_info),
-            group_by="age_group_hebrew",
-            count="age_group_hebrew",
-            start_time=start_time,
-            end_time=end_time,
-        )
-        data_of_injured_count_per_age_group = filter_and_group_injured_count_per_age_group(
-            data_of_injured_count_per_age_group_raw
-        )
-        injured_count_per_age_group = Widget(
-            name="injured_count_per_age_group", rank=14, items=data_of_injured_count_per_age_group
-        )
-        output["widgets"].append(injured_count_per_age_group.serialize())
 
         # vision zero
         vision_zero = Widget(name="vision_zero", rank=15, items=["vision_zero_2_plus_1"])

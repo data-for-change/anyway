@@ -279,7 +279,7 @@ class Test_Infographic_Api:
         assert widget["data"]["text"]["title"] == "כמות תאונות ביום ובלילה"
 
     def _accidents_count_by_hour_test(self):
-        widget = self._get_widget_by_name(name="accidents_count_by_hour")
+        widget = self._get_widget_by_name(name="accident_count_by_hour")
         assert len(widget["data"]["items"]) > 20
 
         schema = {

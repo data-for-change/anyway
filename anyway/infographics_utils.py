@@ -5,12 +5,12 @@ import json
 import os
 from functools import lru_cache
 
+import gettext
 import pandas as pd
 from collections import defaultdict
 from sqlalchemy import func
 from sqlalchemy import cast, Numeric
 from sqlalchemy import desc
-from flask_babel import _
 from anyway.backend_constants import BE_CONST
 from anyway.models import NewsFlash, AccidentMarkerView, InvolvedMarkerView, RoadSegments
 from anyway.parsers import resolution_dict
@@ -22,6 +22,8 @@ from anyway.infographics_dictionaries import (
 )
 from anyway.parsers import infographics_data_cache_updater
 from anyway.constants import CONST
+
+_ = gettext.gettext
 
 """
     Widget structure:
@@ -281,12 +283,10 @@ def filter_and_group_injured_count_per_age_group(data_of_ages):
 
 
 def get_most_severe_accidents_table_title(location_info):
-    return "תאונות בסדר חומרה יורד במקטע " + location_info["road_segment_name"]
-
+    return _('Accidents in descending order by severity for section {}').format(location_info['road_segment_name'])
 
 def get_heat_map_title(location_info):
-    return "מוקדי תאונות קטלניות וקשות במקטע " + location_info["road_segment_name"]
-
+    return _('Locations for deadly and severe accidents in section {}').format(location_info['road_segment_name'])
 
 def get_accident_count_by_severity(location_info, location_text, start_time, end_time):
     count_by_severity = get_accidents_stats(
@@ -418,11 +418,11 @@ def get_news_flash_location_text(news_flash_id):
     elif resolution == "עיר" and yishuv_name:
         res = nf["yishuv_name"]
     elif resolution == "צומת בינעירוני" and road1 and road2:
-        res = "צומת כביש " + road1 + " עם כביש " + road2
+        res = "צומת כביש {} עם כביש {}".format(road1,road2)
     elif resolution == "צומת בינעירוני" and road1 and road_segment_name:
-        res = "כביש " + road1 + " במקטע " + road_segment_name
+        res = "כביש {} במקטע {}".format(road1,road_segment_name)
     elif resolution == "רחוב" and yishuv_name and street1_hebrew:
-        res = " רחוב " + street1_hebrew + " ב" + yishuv_name
+        res = "רחוב {} ב{}".format(street1_hebrew,yishuv_name)
     else:
         logging.warning(
             "Did not found quality resolution. Using location field. News Flash id:{}".format(
@@ -609,9 +609,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
 
     start_time = datetime.date(end_time.year + 1 - number_of_years_ago, 1, 1)
 
-    output["meta"]["dates_comment"] = (
-        str(start_time.year) + "-" + str(end_time.year) + ", עדכון אחרון: " + str(end_time)
-    )
+    output["meta"]["dates_comment"] = str(start_time.year) + '-' + str(end_time.year) + ', עדכון אחרון: ' + str(end_time)
 
     # accident_severity count
     items = get_accident_count_by_severity(
@@ -659,7 +657,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         items=get_head_to_head_stat(
             news_flash_id=news_flash_id, start_time=start_time, end_time=end_time
         ),
-        text={"title": "תאונות קטלניות ע״פ סוג"},
+        text={"title": 'תאונות קטלניות ע״פ סוג'},
     )
     output["widgets"].append(head_on_collisions_comparison.serialize())
 
@@ -704,7 +702,8 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
             start_time=start_time,
             end_time=end_time,
         ),
-        text={"title": "כמות התאונות לפי שנה במקטע " + location_info["road_segment_name"]},
+        text={"title": _('Amount of accidents per year for section {}').format(location_info['road_segment_name'])},
+    
     )
     output["widgets"].append(accident_count_by_accident_year.serialize())
 
@@ -720,7 +719,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
             start_time=start_time,
             end_time=end_time,
         ),
-        text={"title": "נפגעים בתאונות במקטע " + location_info["road_segment_name"]},
+        text={"title": _("Accidents' injuries in section {}").format(location_info['road_segment_name']},
     )
     output["widgets"].append(injured_count_by_accident_year.serialize())
 
@@ -736,7 +735,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
             start_time=start_time,
             end_time=end_time,
         ),
-        text={"title": "כמות תאונות ביום ובלילה"},
+        text={"title": _("Amount of accidents by day and night")},
     )
     output["widgets"].append(accident_count_by_day_night.serialize())
 
@@ -752,7 +751,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
             start_time=start_time,
             end_time=end_time,
         ),
-        text={"title": "כמות תאונות לפי שעה"},
+        text={"title": _("Amount of accidents by hour")},
     )
     output["widgets"].append(accidents_count_by_hour.serialize())
 
@@ -766,7 +765,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
             start_time=start_time,
             end_time=end_time,
         ),
-        text={"title": "תאונות לכל ק״מ כביש על פי מקטע בכביש " + str(int(location_info["road1"]))},
+        text={"title": _("Accidents per road kilometer by section on road {}").format(str(int(location_info['road1'])))},
     )
     output["widgets"].append(top_road_segments_accidents_per_km.serialize())
 
@@ -804,7 +803,8 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         name="accident_count_by_driver_type",
         rank=16,
         items=count_accidents_by_driver_type(involved_by_vehicle_type_data),
-        text={"title": "מעורבות נהגים בתאונות לפי סוג במקטע " + location_info["road_segment_name"]},
+        text={"title": _('Drivers\' involvement in accidents by type in section {}').format(location_info['road_segment_name'])},
+
     )
     output["widgets"].append(accident_count_by_driver_type.serialize())
 
@@ -815,11 +815,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         items=stats_accidents_by_car_type_with_national_data(
             involved_by_vehicle_type_data, start_time, end_time
         ),
-        text={
-            "title": "השוואת אחוז הרכבים בתאונות במקטע "
-            + location_info["road_segment_name"]
-            + " לעומת ממוצע ארצי"
-        },
+        text={"title": _('Comparing the percentage of cars in accidents in section {} compared to national average').format(location_info['road_segment_name'])},
     )
     output["widgets"].append(accident_count_by_car_type.serialize())
 
@@ -894,7 +890,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         name="injured_accidents_with_pedestrians",
         rank=18,
         items=injured_accidents_with_pedestrians_mock_data(),
-        text={"title": "נפגעים הולכי רגל ברחוב ז׳בוטינסקי, פתח תקווה"},
+        text={"title": _("Injured passengers on Jhabotinsky street, Petah Tikva")},
     )
     output["widgets"].append(injured_accidents_with_pedestrians.serialize())
 
@@ -924,8 +920,8 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         name="injury_severity_by_cross_location",
         rank=19,
         items=injury_severity_by_cross_location_mock_data(),
-        text={"title": "הולכי רגל הרוגים ופצועים קשה ברחוב בן יהודה, תל אביב"},
-    )
+        text={"title": _("Deceased and severely injured passengers on Ben Yehuda street, Tel Aviv")},
+    ) 
     output["widgets"].append(injury_severity_by_cross_location.serialize())
 
     def motorcycle_accidents_vs_all_accidents_mock_data():  # Temporary for Frontend
@@ -940,7 +936,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         name="motorcycle_accidents_vs_all_accidents",
         rank=20,
         items=motorcycle_accidents_vs_all_accidents_mock_data(),
-        text={"title": "תאונות אופנועים קשות וקטלניות בכביש 20 בהשוואה לכל הארץ"},
+        text={"title": _("Severe and deadly motorcycle accidents on road 20 comparing to the rest of the country")},
     )
     output["widgets"].append(motorcycle_accidents_vs_all_accidents.serialize())
 
@@ -962,9 +958,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         rank=21,
         items=accidents_count_pedestrians_per_vehicle_street_vs_all_mock_data(),
         text={
-            "title": _(
-                "Pedestrian Injuries on Ben Yehuda Street in Tel Aviv by Type of hitting Vehicle, Compared to Urban Accidents Across the country"
-            )
+            "title": _("Amount of passengers hit by type of coliding vehicle on Ben Yehuda street, Tel Aviv")
         },
     )
     output["widgets"].append(accidents_count_pedestrians_per_vehicle_street_vs_all.serialize())
@@ -982,7 +976,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         name="top_road_segments_accidents",
         rank=22,
         items=top_road_segments_accidents_mock_data(),
-        text={"title": "5 המקטעים עם כמות התאונות הגדולה ביותר"},
+        text={"title": _("5 top sections with largest amount of accidents")},
     )
     output["widgets"].append(top_road_segments_accidents.serialize())
 
@@ -997,7 +991,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         name="pedestrian_injured_in_junctions",
         rank=23,
         items=pedestrian_injured_in_junctions_mock_data(),
-        text={"title": "מספר נפגעים הולכי רגל בצמתים - רחוב בן יהודה, תל אביב"},
+        text={"title": _("Amount of injured passengers on junctions - Ben Yehuda street, Tel Aviv")},
     )
     output["widgets"].append(pedestrian_injured_in_junctions.serialize())
 

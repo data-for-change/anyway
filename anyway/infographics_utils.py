@@ -703,7 +703,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
             end_time=end_time,
         ),
         text={"title": _('Amount of accidents per year for section {}').format(location_info['road_segment_name'])},
-    
+
     )
     output["widgets"].append(accident_count_by_accident_year.serialize())
 
@@ -921,7 +921,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         rank=19,
         items=injury_severity_by_cross_location_mock_data(),
         text={"title": _("Deceased and severely injured passengers on Ben Yehuda street, Tel Aviv")},
-    ) 
+    )
     output["widgets"].append(injury_severity_by_cross_location.serialize())
 
     def motorcycle_accidents_vs_all_accidents_mock_data():  # Temporary for Frontend

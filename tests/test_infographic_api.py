@@ -108,7 +108,15 @@ class Test_Infographic_Api:
         involved_by_vehicle_type_data_test = [{'involve_vehicle_type': 1, 'count': 11}]
         end_time = datetime.date(2020, 6, 30)
         start_time = datetime.date(2020, 1, 1)
-        actual = AccidentCountByCarTypeWidget.stats_accidents_by_car_type_with_national_data(involved_by_vehicle_type_data_test, start_time, end_time)
+        request_params = infographics_utils.RequestParams(
+            news_flash_obj=None,
+            location_text='',
+            location_info=None,
+            gps={},
+            start_time=start_time,
+            end_time=end_time
+        )
+        actual = AccidentCountByCarTypeWidget.get_stats_accidents_by_car_type_with_national_data(request_params)
         expected = [{'car_type': 'אחר',
                   'percentage_country': 9.84470391606119,
                   'percentage_segment': 0.0},

@@ -116,7 +116,9 @@ class Test_Infographic_Api:
             start_time=start_time,
             end_time=end_time
         )
-        actual = AccidentCountByCarTypeWidget.get_stats_accidents_by_car_type_with_national_data(request_params)
+        actual = AccidentCountByCarTypeWidget.get_stats_accidents_by_car_type_with_national_data(
+            request_params,
+            involved_by_vehicle_type_data=involved_by_vehicle_type_data_test)
         expected = [{'car_type': 'אחר',
                   'percentage_country': 9.84470391606119,
                   'percentage_segment': 0.0},

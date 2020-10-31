@@ -727,16 +727,18 @@ class AccidentCountByCarTypeWidget(Widget):
             AccidentCountByCarTypeWidget.get_stats_accidents_by_car_type_with_national_data(self.request_params)
 
     @staticmethod
-    def get_stats_accidents_by_car_type_with_national_data(request_params: RequestParams):
+    def get_stats_accidents_by_car_type_with_national_data(request_params: RequestParams,
+                                                           involved_by_vehicle_type_data=None):
         out = []
-        involved_by_vehicle_type_data = get_accidents_stats(
-            table_obj=InvolvedMarkerView,
-            filters=get_injured_filters(request_params.location_info),
-            group_by="involve_vehicle_type",
-            count="involve_vehicle_type",
-            start_time=request_params.start_time,
-            end_time=request_params.end_time,
-        )
+        if involved_by_vehicle_type_data is None:
+            involved_by_vehicle_type_data = get_accidents_stats(
+                table_obj=InvolvedMarkerView,
+                filters=get_injured_filters(request_params.location_info),
+                group_by="involve_vehicle_type",
+                count="involve_vehicle_type",
+                start_time=request_params.start_time,
+                end_time=request_params.end_time,
+            )
 
         start_time = request_params.start_time
         end_time = request_params.end_time

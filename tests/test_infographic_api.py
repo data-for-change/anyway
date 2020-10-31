@@ -112,6 +112,7 @@ class Test_Infographic_Api:
             news_flash_obj=None,
             location_text='',
             location_info=None,
+            resolution={},
             gps={},
             start_time=start_time,
             end_time=end_time

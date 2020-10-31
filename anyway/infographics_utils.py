@@ -29,43 +29,6 @@ from anyway.infographics_dictionaries import (
 from anyway.parsers import infographics_data_cache_updater
 from anyway.constants import CONST
 
-"""
-    Widget structure:
-    {
-        'name': str,
-        'data': {
-                 'items': list (Array) | dictionary (Object),
-                 'text': dictionary (Object) - can be empty
-                 },
-        'meta': {
-                 'rank': int (Integer)
-                 }
-    }
-"""
-
-
-class Widget:
-    def __init__(self, name, rank, items, text=None, meta=None):
-        self.name = name
-        self.rank = rank
-        self.items = items
-        self.text = text
-        self.meta = meta
-
-    def serialize(self):
-        output = {}
-        output["name"] = self.name
-        output["data"] = {}
-        output["data"]["items"] = self.items
-        if self.text:
-            output["data"]["text"] = self.text
-        if self.meta:
-            output["meta"] = self.meta
-        else:
-            output["meta"] = {}
-        output["meta"]["rank"] = self.rank
-        return output
-
 
 @enum.unique
 class WidgetId(Enum):
@@ -112,16 +75,26 @@ class RequestParams:
         return f"RequestParams(location_text:{self.location_text}, start_time:{self.start_time}, end_time:{self.end_time} "
 
 
-class NewWidget:
+class Widget:
     """
-    Base class for widgets. Each widget will be a class that is derived from NewWidget, and instantiated
-    with RequestParams instance. It will need to implement the methods in the base class
-    The Serialize() method returns the data that the API returns, and has structure that is specified in the module's doc string.
+    Base class for widgets. Each widget will be a class that is derived from Widget, and instantiated
+    with RequestParams instance.
+    The Serialize() method returns the data that the API returns, and has structure that is specified below.
     Each new widget sub-class:
     - Needs to set attributes name, rank, items
     - It can set additional attributes if needed, and can alter the returned values of is_in_cache() and is_included() when needed.
-    NewWidget is a temporary name. When the move of all widgets to the new structure will be
-    completed, it will be renamed to Widget, and replace the current Widget class
+    - In addition, and `elif` entry needs to be added in `create_widget()`
+    Widget structure:
+    {
+        'name': str,
+        'data': {
+                 'items': list (Array) | dictionary (Object),
+                 'text': dictionary (Object) - can be empty
+                 },
+        'meta': {
+                 'rank': int (Integer)
+                 }
+    }
     """
     def __init__(self, request_params: RequestParams):
         self.request_params: RequestParams = request_params
@@ -170,11 +143,11 @@ class NewWidget:
         return output
 
 
-class AccidentCountBySeverityWidget(NewWidget):
+class AccidentCountBySeverityWidget(Widget):
     widget_id: WidgetId = dataclasses.field(init=False, default=WidgetId.accident_count_by_severity)
 
     def __init__(self, request_params: RequestParams):
-        NewWidget.__init__(self, request_params)
+        Widget.__init__(self, request_params)
         self.widget_id = WidgetId.accident_count_by_severity
         self.name = self.widget_id.name
         self.rank = 1
@@ -213,10 +186,10 @@ class AccidentCountBySeverityWidget(NewWidget):
         return items
 
 
-class MostSevereAccidentsTableWidget(NewWidget):
+class MostSevereAccidentsTableWidget(Widget):
 
     def __init__(self, request_params: RequestParams):
-        NewWidget.__init__(self, request_params)
+        Widget.__init__(self, request_params)
         self.widget_id = WidgetId.most_severe_accidents_table
         self.name = self.widget_id.name
         self.rank = 2
@@ -275,10 +248,10 @@ class MostSevereAccidentsTableWidget(NewWidget):
         return accidents
 
 
-class MostSevereAccidentsWidget(NewWidget):
+class MostSevereAccidentsWidget(Widget):
 
     def __init__(self, request_params: RequestParams):
-        NewWidget.__init__(self, request_params)
+        Widget.__init__(self, request_params)
         self.widget_id = WidgetId.most_severe_accidents
         self.name = self.widget_id.name
         self.rank = 3
@@ -305,10 +278,10 @@ class MostSevereAccidentsWidget(NewWidget):
         )
 
 
-class StreetViewWidget(NewWidget):
+class StreetViewWidget(Widget):
 
     def __init__(self, request_params: RequestParams):
-        NewWidget.__init__(self, request_params)
+        Widget.__init__(self, request_params)
         self.widget_id = WidgetId.street_view
         self.name = self.widget_id.name
         self.rank = 4
@@ -318,10 +291,10 @@ class StreetViewWidget(NewWidget):
                       "latitude": self.request_params.gps["lat"]}
 
 
-class HeadOnCollisionsComparisonWidget(NewWidget):
+class HeadOnCollisionsComparisonWidget(Widget):
 
     def __init__(self, request_params: RequestParams):
-        NewWidget.__init__(self, request_params)
+        Widget.__init__(self, request_params)
         self.widget_id = WidgetId.head_on_collisions_comparison
         self.name = self.widget_id.name
         self.rank = 5
@@ -376,10 +349,10 @@ class HeadOnCollisionsComparisonWidget(NewWidget):
         }
 
 
-class AccidentCountByAccidentTypeWidget(NewWidget):
+class AccidentCountByAccidentTypeWidget(Widget):
 
     def __init__(self, request_params: RequestParams):
-        NewWidget.__init__(self, request_params)
+        Widget.__init__(self, request_params)
         self.widget_id = WidgetId.accident_count_by_accident_type
         self.name = self.widget_id.name
         self.rank = 6
@@ -410,10 +383,10 @@ class AccidentCountByAccidentTypeWidget(NewWidget):
         return merged_accident_type_count
 
 
-class AccidentsHeatMapWidget(NewWidget):
+class AccidentsHeatMapWidget(Widget):
 
     def __init__(self, request_params: RequestParams):
-        NewWidget.__init__(self, request_params)
+        Widget.__init__(self, request_params)
         self.widget_id = WidgetId.accidents_heat_map
         self.name = self.widget_id.name
         self.rank = 7
@@ -448,10 +421,10 @@ class AccidentsHeatMapWidget(NewWidget):
         return df.to_dict(orient="records")  # pylint: disable=no-member
 
 
-class AccidentCountByAccidentYearWidget(NewWidget):
+class AccidentCountByAccidentYearWidget(Widget):
 
     def __init__(self, request_params: RequestParams):
-        NewWidget.__init__(self, request_params)
+        Widget.__init__(self, request_params)
         self.widget_id = WidgetId.accident_count_by_accident_year
         self.name = self.widget_id.name
         self.rank = 8
@@ -469,10 +442,10 @@ class AccidentCountByAccidentYearWidget(NewWidget):
         )
 
 
-class InjuredCountByAccidentYearWidget(NewWidget):
+class InjuredCountByAccidentYearWidget(Widget):
 
     def __init__(self, request_params: RequestParams):
-        NewWidget.__init__(self, request_params)
+        Widget.__init__(self, request_params)
         self.widget_id = WidgetId.injured_count_by_accident_year
         self.name = self.widget_id.name
         self.rank = 9
@@ -490,10 +463,10 @@ class InjuredCountByAccidentYearWidget(NewWidget):
         )
 
 
-class AccidentCountByDayNightWidget(NewWidget):
+class AccidentCountByDayNightWidget(Widget):
 
     def __init__(self, request_params: RequestParams):
-        NewWidget.__init__(self, request_params)
+        Widget.__init__(self, request_params)
         self.widget_id = WidgetId.accident_count_by_day_night
         self.name = self.widget_id.name
         self.rank = 10
@@ -510,10 +483,10 @@ class AccidentCountByDayNightWidget(NewWidget):
         )
 
 
-class AccidentCountByHourWidget(NewWidget):
+class AccidentCountByHourWidget(Widget):
 
     def __init__(self, request_params: RequestParams):
-        NewWidget.__init__(self, request_params)
+        Widget.__init__(self, request_params)
         self.widget_id = WidgetId.accident_count_by_hour
         self.name = self.widget_id.name
         self.rank = 11
@@ -530,10 +503,10 @@ class AccidentCountByHourWidget(NewWidget):
         )
 
 
-class AccidentCountByRoadLightWidget(NewWidget):
+class AccidentCountByRoadLightWidget(Widget):
 
     def __init__(self, request_params: RequestParams):
-        NewWidget.__init__(self, request_params)
+        Widget.__init__(self, request_params)
         self.widget_id = WidgetId.accident_count_by_road_light
         self.name = self.widget_id.name
         self.rank = 12
@@ -550,10 +523,10 @@ class AccidentCountByRoadLightWidget(NewWidget):
         )
 
 
-class TopRoadSegmentsAccidentsPerKmWidget(NewWidget):
+class TopRoadSegmentsAccidentsPerKmWidget(Widget):
 
     def __init__(self, request_params: RequestParams):
-        NewWidget.__init__(self, request_params)
+        Widget.__init__(self, request_params)
         self.widget_id = WidgetId.top_road_segments_accidents_per_km
         self.name = self.widget_id.name
         self.rank = 13
@@ -609,10 +582,10 @@ class TopRoadSegmentsAccidentsPerKmWidget(NewWidget):
         return result.to_dict(orient="records")  # pylint: disable=no-member
 
 
-class InjuredCountPerAgeGroupWidget(NewWidget):
+class InjuredCountPerAgeGroupWidget(Widget):
 
     def __init__(self, request_params: RequestParams):
-        NewWidget.__init__(self, request_params)
+        Widget.__init__(self, request_params)
         self.widget_id = WidgetId.injured_count_per_age_group
         self.name = self.widget_id.name
         self.rank = 14
@@ -683,10 +656,10 @@ class InjuredCountPerAgeGroupWidget(NewWidget):
         return items
 
 
-class VisionZeroWidget(NewWidget):
+class VisionZeroWidget(Widget):
 
     def __init__(self, request_params: RequestParams):
-        NewWidget.__init__(self, request_params)
+        Widget.__init__(self, request_params)
         self.widget_id = WidgetId.vision_zero
         self.name = self.widget_id.name
         self.rank = 15
@@ -695,10 +668,10 @@ class VisionZeroWidget(NewWidget):
         self.items = ["vision_zero_2_plus_1"]
 
 
-class AccidentCountByDriverTypeWidget(NewWidget):
+class AccidentCountByDriverTypeWidget(Widget):
 
     def __init__(self, request_params: RequestParams):
-        NewWidget.__init__(self, request_params)
+        Widget.__init__(self, request_params)
         self.widget_id = WidgetId.accident_count_by_driver_type
         self.name = self.widget_id.name
         self.rank = 16
@@ -736,10 +709,10 @@ class AccidentCountByDriverTypeWidget(NewWidget):
         return output
 
 
-class AccidentCountByCarTypeWidget(NewWidget):
+class AccidentCountByCarTypeWidget(Widget):
 
     def __init__(self, request_params: RequestParams):
-        NewWidget.__init__(self, request_params)
+        Widget.__init__(self, request_params)
         self.widget_id = WidgetId.accident_count_by_car_type
         self.name = self.widget_id.name
         self.rank = 17
@@ -822,10 +795,10 @@ class AccidentCountByCarTypeWidget(NewWidget):
         return AccidentCountByCarTypeWidget.percentage_accidents_by_car_type(involved_by_vehicle_type_data)
 
 
-class InjuredAccidentsWithPedestriansWidget(NewWidget):
+class InjuredAccidentsWithPedestriansWidget(Widget):
 
     def __init__(self, request_params: RequestParams):
-        NewWidget.__init__(self, request_params)
+        Widget.__init__(self, request_params)
         self.widget_id = WidgetId.injured_accidents_with_pedestrians
         self.name = self.widget_id.name
         self.rank = 18
@@ -908,10 +881,10 @@ class InjuredAccidentsWithPedestriansWidget(NewWidget):
         ]
 
 
-class AccidentSeverityByCrossLocationWidget(NewWidget):
+class AccidentSeverityByCrossLocationWidget(Widget):
 
     def __init__(self, request_params: RequestParams):
-        NewWidget.__init__(self, request_params)
+        Widget.__init__(self, request_params)
         self.widget_id = WidgetId.accident_severity_by_cross_location
         self.name = self.widget_id.name
         self.rank = 19
@@ -949,10 +922,10 @@ class AccidentSeverityByCrossLocationWidget(NewWidget):
         ]
 
 
-class MotorcycleAccidentsVsAllAccidentsWidget(NewWidget):
+class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
 
     def __init__(self, request_params: RequestParams):
-        NewWidget.__init__(self, request_params)
+        Widget.__init__(self, request_params)
         self.widget_id = WidgetId.motorcycle_accidents_vs_all_accidents
         self.name = self.widget_id.name
         self.rank = 20
@@ -976,10 +949,10 @@ class MotorcycleAccidentsVsAllAccidentsWidget(NewWidget):
         ]
 
 
-class AccidentCountPedestriansPerVehicleStreetVsAllWidget(NewWidget):
+class AccidentCountPedestriansPerVehicleStreetVsAllWidget(Widget):
 
     def __init__(self, request_params: RequestParams):
-        NewWidget.__init__(self, request_params)
+        Widget.__init__(self, request_params)
         self.widget_id = WidgetId.accident_count_pedestrians_per_vehicle_street_vs_all
         self.name = self.widget_id.name
         self.rank = 21
@@ -1020,10 +993,10 @@ class AccidentCountPedestriansPerVehicleStreetVsAllWidget(NewWidget):
         ]
 
 
-class TopRoadSegmentsAccidentsWidget(NewWidget):
+class TopRoadSegmentsAccidentsWidget(Widget):
 
     def __init__(self, request_params: RequestParams):
-        NewWidget.__init__(self, request_params)
+        Widget.__init__(self, request_params)
         self.widget_id = WidgetId.top_road_segments_accidents
         self.name = self.widget_id.name
         self.rank = 22
@@ -1044,10 +1017,10 @@ class TopRoadSegmentsAccidentsWidget(NewWidget):
         ]
 
 
-class PedestrianInjuredInJunctionsWidget(NewWidget):
+class PedestrianInjuredInJunctionsWidget(Widget):
 
     def __init__(self, request_params: RequestParams):
-        NewWidget.__init__(self, request_params)
+        Widget.__init__(self, request_params)
         self.widget_id = WidgetId.pedestrian_injured_in_junctions
         self.name = self.widget_id.name
         self.rank = 23
@@ -1066,7 +1039,7 @@ class PedestrianInjuredInJunctionsWidget(NewWidget):
         ]
 
 
-def create_widget(widget_id: WidgetId, request_params: RequestParams) -> Optional[NewWidget]:
+def create_widget(widget_id: WidgetId, request_params: RequestParams) -> Optional[Widget]:
     # todo: complete implementation for all values of WidgetId
     if widget_id == WidgetId.accident_count_by_severity:
         res = AccidentCountBySeverityWidget(request_params)
@@ -1307,10 +1280,10 @@ def get_latest_accident_date(table_obj, filters):
     return (df.to_dict(orient="records"))[0].get("max_1")  # pylint: disable=no-member
 
 
-def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> List[NewWidget]:
+def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> List[Widget]:
     widgets = []
     for w in WidgetId:
-        widget: NewWidget = create_widget(w, request_params)
+        widget: Widget = create_widget(w, request_params)
         if widget is not None and widget.is_in_cache() == to_cache and widget.is_included():
             widgets.append(widget)
     return widgets
@@ -1366,12 +1339,6 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
         if request_params is None:
             return {}
 
-        location_info = request_params.location_info
-        resolution = request_params.resolution
-        start_time = request_params.start_time
-        end_time = request_params.end_time
-        location_text = request_params.location_text
-
         output = {}
         try:
             number_of_years_ago = int(number_of_years_ago)
@@ -1379,23 +1346,16 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
             return {}
         if number_of_years_ago < 0 or number_of_years_ago > 100:
             return {}
-        logging.debug("location_info:{}".format(location_info))
-        logging.debug("location_text:{}".format(location_text))
-        output["meta"] = {"location_info": location_info.copy(), "location_text": location_text}
+        logging.debug("location_info:{}".format(request_params.location_info))
+        logging.debug("location_text:{}".format(request_params.location_text))
+        output["meta"] = {"location_info": request_params.location_info.copy(),
+                          "location_text": request_params.location_text}
         output["widgets"] = []
-
-        last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
-        # converting to datetime object to get the date
-        end_time = last_accident_date.to_pydatetime().date()
-
-        start_time = datetime.date(end_time.year + 1 - number_of_years_ago, 1, 1)
-
         output["meta"]["dates_comment"] = (
-            str(start_time.year) + "-" + str(end_time.year) + ", עדכון אחרון: " + str(end_time)
+            str(request_params.start_time.year) + "-" +
+            str(request_params.end_time.year) + ", עדכון אחרון: " + str(request_params.end_time)
         )
-        # todo: sort and to_cache will be implemented shortly, after generation of all widgets will be
-        # todo: moved to the new scheme
-        widgets: List[NewWidget] = generate_widgets(request_params=request_params, to_cache=True)
+        widgets: List[Widget] = generate_widgets(request_params=request_params, to_cache=True)
         widgets.extend(generate_widgets(request_params=request_params, to_cache=False))
         output["widgets"].extend(list(map(lambda w: w.serialize(), widgets)))
 

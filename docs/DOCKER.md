@@ -46,7 +46,7 @@ $ docker login docker.pkg.github.com -u USERNAME
 ```
 
 **6.** Go to the project's root directory and run:
-    `sudo docker-compose up -d`
+    `sudo docker-compose up`
 This will start the containers. It will take a few minutes until it's done.
 
 **7.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
@@ -85,7 +85,7 @@ $ docker login docker.pkg.github.com -u USERNAME
 ```
 
 **6.** Go to the project's root directory and run:
-    `sudo docker-compose up -d`
+    `sudo docker-compose up`
 This will start the containers. It will take a few minutes until it's done.
 
 **7.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080

@@ -61,7 +61,8 @@ So if the developer key is "12345" the new url need to be is: "https://maps.goog
 
 **For Windows:**
 You have two options: 
-Use [wsl](https://ubuntu.com/wsl) OR install ubuntu VM (See [UBUNTU_VM_ON_WINDOWS](UBUNTU_VM_ON_WINDOWS.md)).
+Use [WSL](https://docs.microsoft.com/en-us/windows/wsl/about) OR install ubuntu VM (See [UBUNTU_VM_ON_WINDOWS](UBUNTU_VM_ON_WINDOWS.md)).
+For WSL - see also [ubuntu for wsl](https://ubuntu.com/wsl)
 
 Pick one option and continue to the instructions section **For Ubuntu**.
 

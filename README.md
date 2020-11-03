@@ -68,7 +68,6 @@ Contributing
 
 ## Docker
 We are using DOCKER. See [DOCKER](docs/DOCKER.md)
-For Windows users please first install ubuntu VM. See [UBUNTU_VM_ON_WINDOWS](docs/UBUNTU_VM_ON_WINDOWS.md)
 
 ## Testing
 ### Pylint

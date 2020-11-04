@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 **Name**
-Internal issue description (e.g. "query for pedestrian injury types at a spcific street").
+Internal issue description (e.g. "query for pedestrian injury types at a specific street").
 
 **Title**
 Infographic name to be used in FE.
@@ -16,7 +16,7 @@ Infographic name to be used in FE.
 **Visualization**
 Sample graphic image of the diagram that will be displayed by FE.
 
-**Methodology**
+**Visualization explanation**
 Explain visualization content.
 
 **Use case**

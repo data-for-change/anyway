@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 import logging
 import re
 
@@ -320,7 +320,7 @@ def get_related_waze_accident_alert(db, geo_location, newsflash):
         .filter(WazeAlert.alert_type == "ACCIDENT")
         .filter(
             WazeAlert.created_at.between(
-                newsflash.date - WAZE_ALERT_NEWSFLASH_TIME_DELTA, datetime.now()
+                newsflash.date - WAZE_ALERT_NEWSFLASH_TIME_DELTA, newsflash.date
             )
         )
         .filter(WazeAlert.geom.intersects(bounding_box_polygon_str))

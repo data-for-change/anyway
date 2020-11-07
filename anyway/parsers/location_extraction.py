@@ -118,7 +118,7 @@ def set_accident_resolution(accident_row):
             logging.info("bug in accident resolution")
 
 
-def geocode_extract(location, try_rectify=True):
+def geocode_extract(location):
     """
     this method takes a string representing location and a google maps key and returns a dict of the corresponding
     location found on google maps (by that string), describing details of the location found and the geometry
@@ -134,47 +134,55 @@ def geocode_extract(location, try_rectify=True):
     district = None
     address = None
     geom = {"lat": None, "lng": None}
-    try:
-        gmaps = googlemaps.Client(key=secrets.get("GOOGLE_MAPS_KEY"))
-        geocode_result = gmaps.geocode(location, region="il")
-        if geocode_result is None or geocode_result == []:
+    location_gen = get_rectified_location_strings(location)
+    while location:
+        try:
+            location = next(location_gen)
+            logging.debug(f"using location string: \"{location}\"")
+            gmaps = googlemaps.Client(key=secrets.get("GOOGLE_MAPS_KEY"))
+            geocode_result = gmaps.geocode(location, region="il")
 
-            # let's try and help google
-            if try_rectify:
-                return geocode_extract(try_rectify_location_string(location), try_rectify=False)
-            return None
-        response = geocode_result[0]
-        geom = response["geometry"]["location"]
-        for item in response["address_components"]:
-            if "route" in item["types"]:
-                if item["short_name"].isdigit():
-                    road_no = int(item["short_name"])
-                else:
-                    street = item["long_name"]
-            elif "point_of_interest" in item["types"] or "intersection" in item["types"]:
-                intersection = item["long_name"]
-            elif "locality" in item["types"]:
-                city = item["long_name"]
-            elif "administrative_area_level_2" in item["types"]:
-                subdistrict = item["long_name"]
-            elif "administrative_area_level_1" in item["types"]:
-                district = item["long_name"]
-        address = response["formatted_address"]
-        if road_no is None and extract_road_number(location) is not None:
-            road_no = extract_road_number(location)
-    except Exception as _:
-        logging.exception("geocode extract location {}".format(location))
+            # if we got no results, move to next iteration of location string
+            if not geocode_result:
+                logging.warning(f"location string: \"location\" returned no results from gmaps")
+                continue
 
-    return {
-        "street": street,
-        "road_no": road_no,
-        "intersection": intersection,
-        "city": city,
-        "address": address,
-        "subdistrict": subdistrict,
-        "district": district,
-        "geom": geom,
-    }
+            response = geocode_result[0]
+            geom = response["geometry"]["location"]
+            for item in response["address_components"]:
+                if "route" in item["types"]:
+                    if item["short_name"].isdigit():
+                        road_no = int(item["short_name"])
+                    else:
+                        street = item["long_name"]
+                elif "point_of_interest" in item["types"] or "intersection" in item["types"]:
+                    intersection = item["long_name"]
+                elif "locality" in item["types"]:
+                    city = item["long_name"]
+                elif "administrative_area_level_2" in item["types"]:
+                    subdistrict = item["long_name"]
+                elif "administrative_area_level_1" in item["types"]:
+                    district = item["long_name"]
+            address = response["formatted_address"]
+            if road_no is None and extract_road_number(location) is not None:
+                road_no = extract_road_number(location)
+        except Exception as exc:
+            logging.exception(f"exception caught while extracting geocode location for: \"{location}\". exc: {exc}")
+
+        return {
+            "street": street,
+            "road_no": road_no,
+            "intersection": intersection,
+            "city": city,
+            "address": address,
+            "subdistrict": subdistrict,
+            "district": district,
+            "geom": geom,
+        }
+
+    # we can no longer rectify the location string, log and return None
+    logging.exception(f"Failed to extract location for {location}")
+    return None
 
 
 def extract_location_text(text):
@@ -321,10 +329,20 @@ def extract_geo_features(db, newsflash: NewsFlash) -> None:
             setattr(newsflash, k, v)
 
 
-def try_rectify_location_string(location_string):
+def get_rectified_location_strings(location_string):
     """
-    This will try to get a gmap location in cases where google can't extract a response from the original
-    sentence but will be able to from a sub-sentence
+    Here, we iteratively try to make basic modifications on the original location string
+    in case gmaps.geocode() can't make sense of it
+    """
+    yield location_string
+    trimmed_location_string = first_location_preposition(location_string)
+    yield trimmed_location_string
+
+
+def first_location_preposition(location_string):
+    """
+    In some cases google can't extract a response from the original
+    sentence but will be able to do so from a sub-sentence starting at the first location indicator
     e.g.
     "גבר נהרג בתאונת דרכים בגליל התחתון"
     ->no results
@@ -332,13 +350,17 @@ def try_rectify_location_string(location_string):
     ->results
     """
 
-    # find first location hint and trim prefix
-    trimmed_location_string = ""
-    found = False
-    for word in location_string.split():
-        if word.startswith("ב"):
-            found = True
+    # iterate over sentences, find first location preposition (very crudely) and trim the prefix of that sentence
+    for sentence in location_string.split('.'):
+        trimmed_location_tokens = []
+        found = False
+        for token in sentence.split():
+            if token.startswith("ב"):
+                found = True
+            if found:
+                trimmed_location_tokens.append(token)
+
         if found:
-            trimmed_location_string += " "
-            trimmed_location_string += word
-    return trimmed_location_string
+            return " ".join(trimmed_location_tokens)
+
+    return ""

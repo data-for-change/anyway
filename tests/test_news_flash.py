@@ -1,5 +1,6 @@
 import datetime
 import json
+import mock
 
 import pytest
 
@@ -233,10 +234,10 @@ def test_location_extraction_extract_location_text():
 
 
 def test_location_extraction_geocode_extract():
+
     if not secrets.exists("GOOGLE_MAPS_KEY"):
         pytest.skip("Could not find GOOGLE_MAPS_KEY")
 
-    # this sentence would return nothing without try_rectify_location_string()
     expected_location = {
         'street': None,
         'road_no': None,
@@ -245,9 +246,12 @@ def test_location_extraction_geocode_extract():
         'address': 'Lower Galilee, Israel',
         'subdistrict': 'Kinneret',
         'district': 'North District',
-        'geom': {'lat': 32.7461638, 'lng': 35.5028379},
+        'geom': mock.ANY,
     }
     location = location_extraction.geocode_extract("גבר נהרג בתאונת דרכים בגליל התחתון")
+    assert location == expected_location
+
+    location = location_extraction.geocode_extract("משפט כלשהו. גבר נהרג בתאונת דרכים בגליל התחתון")
     assert location == expected_location
 
 

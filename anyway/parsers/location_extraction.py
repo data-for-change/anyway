@@ -73,8 +73,7 @@ def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):
 
     # CREATE DISTANCE FIELD
     markers["dist_point"] = markers.apply(
-        lambda x: geod.Inverse(latitude, longitude, x["latitude"], x["longitude"])["s12"],
-        axis=1,
+        lambda x: geod.Inverse(latitude, longitude, x["latitude"], x["longitude"])["s12"], axis=1
     ).replace({np.nan: None})
 
     most_fit_loc = (
@@ -138,13 +137,13 @@ def geocode_extract(location):
     while location:
         try:
             location = next(location_gen)
-            logging.debug(f"using location string: \"{location}\"")
+            logging.debug(f'using location string: "{location}"')
             gmaps = googlemaps.Client(key=secrets.get("GOOGLE_MAPS_KEY"))
             geocode_result = gmaps.geocode(location, region="il")
 
             # if we got no results, move to next iteration of location string
             if not geocode_result:
-                logging.warning(f"location string: \"location\" returned no results from gmaps")
+                logging.warning(f'location string: "location" returned no results from gmaps')
                 continue
 
             response = geocode_result[0]
@@ -167,7 +166,9 @@ def geocode_extract(location):
             if road_no is None and extract_road_number(location) is not None:
                 road_no = extract_road_number(location)
         except Exception as exc:
-            logging.exception(f"exception caught while extracting geocode location for: \"{location}\". exc: {exc}")
+            logging.exception(
+                f'exception caught while extracting geocode location for: "{location}". exc: {exc}'
+            )
 
         return {
             "street": street,
@@ -319,11 +320,7 @@ def extract_geo_features(db, newsflash: NewsFlash) -> None:
         newsflash.lon = geo_location["geom"]["lng"]
         newsflash.resolution = set_accident_resolution(geo_location)
         location_from_db = get_db_matching_location(
-            db,
-            newsflash.lat,
-            newsflash.lon,
-            newsflash.resolution,
-            geo_location["road_no"],
+            db, newsflash.lat, newsflash.lon, newsflash.resolution, geo_location["road_no"]
         )
         for k, v in location_from_db.items():
             setattr(newsflash, k, v)
@@ -351,7 +348,7 @@ def first_location_preposition(location_string):
     """
 
     # iterate over sentences, find first location preposition (very crudely) and trim the prefix of that sentence
-    for sentence in location_string.split('.'):
+    for sentence in location_string.split("."):
         trimmed_location_tokens = []
         found = False
         for token in sentence.split():

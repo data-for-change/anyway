@@ -82,10 +82,7 @@ from anyway.views.schools.api import (
     injured_around_schools_months_graphs_data_api,
     injured_around_schools_api,
 )
-from anyway.views.news_flash.api import (
-    news_flash,
-    single_news_flash,
-)
+from anyway.views.news_flash.api import news_flash, single_news_flash
 
 app.config.from_object(__name__)
 app.config["SECURITY_REGISTERABLE"] = False

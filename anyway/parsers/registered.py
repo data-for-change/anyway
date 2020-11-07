@@ -6,13 +6,7 @@ import os
 import re
 from datetime import datetime
 from anyway.models import RegisteredVehicle, City
-from anyway.utilities import (
-    time_delta,
-    CsvReader,
-    ImporterUI,
-    truncate_tables,
-    decode_hebrew,
-)
+from anyway.utilities import time_delta, CsvReader, ImporterUI, truncate_tables, decode_hebrew
 from anyway.app_and_db import db
 
 

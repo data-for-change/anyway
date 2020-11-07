@@ -165,7 +165,7 @@ def geocode_extract(location):
             address = response["formatted_address"]
             if road_no is None and extract_road_number(candidate_location_string) is not None:
                 road_no = extract_road_number(candidate_location_string)
-        except Exception as e:
+        except Exception as _:
             logging.exception(
                 f'exception caught while extracting geocode location for: "{candidate_location_string}"'
             )

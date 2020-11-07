@@ -141,7 +141,9 @@ def geocode_extract(location):
 
             # if we got no results, move to next iteration of location string
             if not geocode_result:
-                logging.warning(f'location string: "{candidate_location_string}" returned no results from gmaps')
+                logging.warning(
+                    f'location string: "{candidate_location_string}" returned no results from gmaps'
+                )
                 continue
 
             response = geocode_result[0]

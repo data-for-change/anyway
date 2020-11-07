@@ -78,15 +78,16 @@ class RequestParams:
 class Widget:
     """
     Base class for widgets. Each widget will be a class that is derived from Widget, and instantiated
-    with RequestParams instance.
+    with RequestParams and WidgetId instances.
     The Serialize() method returns the data that the API returns, and has structure that is specified below.
-    Each new widget sub-class needs to:
+    To add a new widget sub-class:
+    - Make is subclass of Widget
     - Add an additional value in WidgetId class, and set it as a parameter to the super constructor.
-    - Add an entry to the `create_widget_dict`, that holds a key for each WidgetId, and the class as its value.
-    - Set attributes rank and items
-    - Can set additional attributes if needed, and can alter the returned values of `is_in_cache()` and
+    - Set attribute rank
+    - Implement method generate_items()
+    - Optionally set additional attributes if needed, and alter the returned values of `is_in_cache()` and
       `is_included()` when needed.
-    Widget structure:
+    Returned Widget structure:
     `{
         'name': str,
         'data': {
@@ -127,13 +128,16 @@ class Widget:
 
     # noinspection PyMethodMayBeStatic
     def is_in_cache(self) -> bool:
+        """Whether this widget is stored in the cache"""
         return True
 
     # noinspection PyMethodMayBeStatic
     def is_included(self) -> bool:
+        """Whether this widget is included in the response"""
         return True
 
     def generate_items(self) -> None:
+        """ Generates the data of the widget and set it to self.items"""
         pass
 
     def serialize(self):

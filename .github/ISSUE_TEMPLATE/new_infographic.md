@@ -1,8 +1,8 @@
 ---
 name: Infographic Definition
 about: Provide description and implementation details
-title: ''
-labels: ''
+title: 'Widget: '
+labels: 'infographics-API'
 assignees: ''
 
 ---

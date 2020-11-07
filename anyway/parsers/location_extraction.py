@@ -133,17 +133,15 @@ def geocode_extract(location):
     district = None
     address = None
     geom = {"lat": None, "lng": None}
-    location_gen = get_rectified_location_strings(location)
-    while location:
+    for candidate_location_string in get_candidate_location_strings(location):
         try:
-            location = next(location_gen)
-            logging.debug(f'using location string: "{location}"')
+            logging.debug(f'using location string: "{candidate_location_string}"')
             gmaps = googlemaps.Client(key=secrets.get("GOOGLE_MAPS_KEY"))
-            geocode_result = gmaps.geocode(location, region="il")
+            geocode_result = gmaps.geocode(candidate_location_string, region="il")
 
             # if we got no results, move to next iteration of location string
             if not geocode_result:
-                logging.warning(f'location string: "location" returned no results from gmaps')
+                logging.warning(f'location string: "{candidate_location_string}" returned no results from gmaps')
                 continue
 
             response = geocode_result[0]
@@ -163,11 +161,11 @@ def geocode_extract(location):
                 elif "administrative_area_level_1" in item["types"]:
                     district = item["long_name"]
             address = response["formatted_address"]
-            if road_no is None and extract_road_number(location) is not None:
-                road_no = extract_road_number(location)
-        except Exception as exc:
+            if road_no is None and extract_road_number(candidate_location_string) is not None:
+                road_no = extract_road_number(candidate_location_string)
+        except Exception as e:
             logging.exception(
-                f'exception caught while extracting geocode location for: "{location}". exc: {exc}'
+                f'exception caught while extracting geocode location for: "{candidate_location_string}"'
             )
 
         return {
@@ -326,7 +324,7 @@ def extract_geo_features(db, newsflash: NewsFlash) -> None:
             setattr(newsflash, k, v)
 
 
-def get_rectified_location_strings(location_string):
+def get_candidate_location_strings(location_string):
     """
     Here, we iteratively try to make basic modifications on the original location string
     in case gmaps.geocode() can't make sense of it

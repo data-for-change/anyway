@@ -85,6 +85,7 @@ from anyway.views.schools.api import (
 from anyway.views.news_flash.api import (
     news_flash,
     single_news_flash,
+    get_road_type
 )
 
 app.config.from_object(__name__)
@@ -1464,7 +1465,7 @@ def logout():
     login.logout_user()
     return redirect(url_for("index"))
 
-
+#---------------------------------api------------------------------------------------------------
 app.add_url_rule("/api/schools", endpoint=None, view_func=schools_api, methods=["GET"])
 app.add_url_rule(
     "/api/schools-description", endpoint=None, view_func=schools_description_api, methods=["GET"]
@@ -1499,7 +1500,9 @@ app.add_url_rule(
 )
 app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
 
+app.add_url_rule("/api/road-type/<float:lat>/<float:lon>", endpoint=None, view_func=get_road_type, methods=["GET"])
 
+#---------------------------------api------------------------------------------------------------
 @app.route("/authorize/<provider>")
 def oauth_authorize(provider):
     if not current_user.is_anonymous:

@@ -9,6 +9,8 @@ from anyway.app_and_db import db
 from anyway.backend_constants import BE_CONST
 from anyway.base import user_optional
 from anyway.models import NewsFlash
+from anyway.models import WazeAllerts
+
 
 
 @user_optional
@@ -103,3 +105,16 @@ def single_news_flash(news_flash_id: int):
             json.dumps(news_flash_obj.serialize(), default=str), mimetype="application/json"
         )
     return Response(status=404)
+from sys import maxsize
+@user_optional
+def get_road_type(lat: float, lon: float):
+    offset = 0.00001
+    result = db.session.query(WazeAllerts).filter(
+        and_(WazeAllerts.latitude <= lat + offset,
+             WazeAllerts.latitude >= lat - offset,
+             WazeAllerts.longitude <= lon + offset,
+             WazeAllerts.longitude >= lon - offset)).first()
+
+    return Response(
+        json.dumps(result.road_type, default=str), mimetype="application/json"
+    )

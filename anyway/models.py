@@ -27,6 +27,7 @@ from sqlalchemy import (
     TIMESTAMP,
 )
 import sqlalchemy
+import geoalchemy2
 from sqlalchemy.orm import relationship, load_only, backref
 from sqlalchemy import or_, and_
 
@@ -776,6 +777,68 @@ class Involved(Base):
             "release_dest": self.release_dest,
             "safety_measures_use": self.safety_measures_use,
             "late_deceased": self.late_deceased,
+        }
+
+    # Flask-Login integration
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.id
+
+class WazeAllerts(Base):
+    __tablename__ = "waze_alerts"
+
+    alert_subtype = Column(BigInteger(), nullable=True)
+    alert_type = Column(Text(), nullable=True)
+    back_filled = Column(Boolean(), nullable = True)
+    city = Column(Text(), nullable = True)
+    confidence = Column(Integer(), nullable = True)
+    created_at = Column(DateTime(), nullable = True)
+    ended_at_estimate = Column(DateTime(), nullable = True)
+    geom = Column(geoalchemy2.types.Geometry(geometry_type='LINESTRING', from_text='ST_GeomFromEWKT', name='geometry'), nullable=True)
+    id = Column(BigInteger(), nullable=False,primary_key=True)
+    jam_uuid = Column(Text(), nullable=True)
+    latitude = Column(Float(), nullable=True)
+    longitude = Column(Float(), nullable=True)
+    magvar = Column(Integer(), nullable=True)
+    number_thumbs_up = Column(Integer(), nullable=True)
+    reliability = Column(Integer(), nullable=True)
+    report_by_municipality_user = Column(Boolean(), nullable=True)
+    report_description = Column(Text(), nullable=True)
+    report_rating = Column()
+    road_type = Column(Integer(), nullable=True)
+    street = Column(Text(), nullable=True)
+    uuid = Column(Text(), nullable=True)
+    def serialize(self):
+        return {
+            "alert_subtype": self.alert_subtype,
+            "alert_type": self.alert_type,
+            "back_filled": self.back_filled,
+            "city": self.city,
+            "confidence": self.confidence,
+            "created_at": self.created_at,
+            "ended_at_estimate": self.ended_at_estimate,
+            "geom": self.geom,
+            "id": self.id,
+            "jam_uuid": self.jam_uuid,
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+            "magvar": self.magvar,
+            "number_thumbs_up": self.number_thumbs_up,
+            "reliability": self.reliability,
+            "report_by_municipality_user": self.report_by_municipality_user,
+            "report_description": self.report_description,
+            "report_rating": self.report_rating,
+            "road_type": self.road_type,
+            "street": self.street,
+            "uuid": self.uuid
         }
 
     # Flask-Login integration
@@ -2069,6 +2132,7 @@ class InvolvedMarkerView(Base):
 
 class WazeAlert(Base):
     __tablename__ = "waze_alerts"
+    __table_args__ = {'extend_existing': True}
 
     id = Column(BigInteger(), primary_key=True)
     city = Column(Text())

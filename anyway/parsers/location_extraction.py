@@ -1,3 +1,4 @@
+from datetime import timedelta
 import logging
 import re
 
@@ -6,9 +7,12 @@ import googlemaps
 import numpy as np
 from geographiclib.geodesic import Geodesic
 
-from anyway.models import NewsFlash
-from anyway.parsers import resolution_dict
+from anyway.models import NewsFlash, WazeAlert
+from anyway.parsers import resolution_dict, resolution_to_distance
+from anyway.parsers.utils import get_bounding_box_polygon
 from anyway import secrets
+
+WAZE_ALERT_NEWSFLASH_TIME_DELTA = timedelta(hours=3)
 
 
 def extract_road_number(location):
@@ -297,15 +301,55 @@ def extract_location_text(text):
     return text
 
 
+def get_related_waze_accident_alert(db, geo_location, newsflash):
+
+    # determine what distance (in kilometers) to look for waze accidents in, according to the newsflash's resolution
+    distance = resolution_to_distance.get(newsflash.resolution, None)
+    if distance is None:
+        # unknown resolution. skip this optimization
+        return None
+
+    # create the bounding box according to the coordinate we have, and the resolution distance
+    bounding_box_polygon_str = get_bounding_box_polygon(
+        geo_location["lat"], geo_location["lon"], distance
+    )
+
+    # find waze alerts in that bounding box, from the recent time delta - and return the first as the related waze alert
+    matching_alert = (
+        db.session.query(WazeAlert)
+        .filter(WazeAlert.alert_type == "ACCIDENT")
+        .filter(
+            WazeAlert.created_at.between(
+                newsflash.date - WAZE_ALERT_NEWSFLASH_TIME_DELTA, newsflash.date
+            )
+        )
+        .filter(WazeAlert.geom.intersects(bounding_box_polygon_str))
+        .first()
+    )
+
+    return matching_alert
+
+
 def extract_geo_features(db, newsflash: NewsFlash) -> None:
     newsflash.location = extract_location_text(newsflash.description) or extract_location_text(
         newsflash.title
     )
     geo_location = geocode_extract(newsflash.location)
     if geo_location is not None:
+        newsflash.resolution = set_accident_resolution(geo_location)
+
         newsflash.lat = geo_location["geom"]["lat"]
         newsflash.lon = geo_location["geom"]["lng"]
-        newsflash.resolution = set_accident_resolution(geo_location)
+
+        # improve location using waze
+        related_waze_accident = get_related_waze_accident_alert(db, geo_location, newsflash)
+        if related_waze_accident:
+            newsflash.waze_alert = related_waze_accident.id
+
+            # TODO: uncomment this after testing the related waze accidents mechanism is working properly on real data
+            # newsflash.lat = related_waze_accident.latitude
+            # newsflash.lon = related_waze_accident.longitude
+
         location_from_db = get_db_matching_location(
             db,
             newsflash.lat,

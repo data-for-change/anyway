@@ -1,5 +1,6 @@
 import datetime
 import json
+from unittest.mock import Mock
 
 import pytest
 
@@ -7,7 +8,7 @@ from anyway.parsers import rss_sites, twitter, location_extraction
 from anyway.parsers.news_flash_classifiers import classify_tweets, classify_rss
 from anyway import secrets
 from anyway.parsers.news_flash_db_adapter import init_db
-from anyway.models import NewsFlash
+from anyway.models import NewsFlash, WazeAlert
 from anyway.parsers import timezones
 from anyway.parsers.infographics_data_cache_updater import is_cache_eligible, is_in_cache
 
@@ -189,6 +190,24 @@ def test_extract_location():
         date=datetime.datetime(2020, 4, 22, 19, 39, 51),
         accident=True,
     )
+    waze_alert = WazeAlert(
+        id='some-waze-alert-id',
+        city='באר שבע',
+        confidence=2,
+        created_at=datetime.datetime.now(),
+        longitude=32.1,
+        latitude=34.9,
+        magvar=190,
+        number_thumbs_up=1,
+        report_rating=5,
+        reliability=10,
+        alert_type='ACCIDENT',
+        alert_subtype='',
+        street='דרך מצדה',
+        road_type=3,
+    )
+    location_extraction.get_related_waze_accident_alert = Mock(return_value=waze_alert)
+
     expected = NewsFlash(
         **parsed,
         lat=32.0861791,
@@ -204,6 +223,7 @@ def test_extract_location():
         street1_hebrew="ביאליק",
         street2_hebrew=None,
         yishuv_name="רמת גן",
+        waze_alert=waze_alert.id
     )
 
     actual = NewsFlash(**parsed)
@@ -220,12 +240,11 @@ def test_extract_location_text():
         ),
         (
                 'רוכב אופנוע בן 23 נפצע היום (שבת) באורח בינוני לאחר שהחליק בכביש ליד כפר חיטים הסמוך לטבריה. צוות מד"א העניק לו טיפול ראשוני ופינה אותו לבית החולים פוריה בטבריה.]]>'
-                ,'כביש ליד כפר חיטים הסמוך לטבריה'
-
+                , 'כביש ליד כפר חיטים הסמוך לטבריה'
         ),
         (
                 'רוכב אופנוע בן 23 החליק הלילה (שבת) בנסיעה בכביש 3 סמוך למושב בקוע, ליד בית שמש. מצבו מוגדר בינוני. צוות מד"א העניק לו טיפול רפואי ופינה אותו עם חבלה רב מערכתית לבית החולים שמיר אסף הרופא בבאר יעקב.]]>'
-                ,'כביש 3 סמוך למושב בקוע, ליד בית שמש'
+                , 'כביש 3 סמוך למושב בקוע, ליד בית שמש'
         ),
     ]:
         actual_location_text = location_extraction.extract_location_text(description)
@@ -268,3 +287,4 @@ def test_classification_statistics_ynet():
     assert precision > BEST_PRECISION_YNET
     assert recall > BEST_RECALL_YNET
     assert f1 > BEST_F1_YNET
+

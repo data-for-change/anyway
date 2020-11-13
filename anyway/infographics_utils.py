@@ -730,8 +730,10 @@ class AccidentCountByCarTypeWidget(Widget):
         }
 
     def generate_items(self) -> None:
-        self.items = AccidentCountByCarTypeWidget.get_stats_accidents_by_car_type_with_national_data(
-            self.request_params
+        self.items = (
+            AccidentCountByCarTypeWidget.get_stats_accidents_by_car_type_with_national_data(
+                self.request_params
+            )
         )
 
     @staticmethod
@@ -754,8 +756,10 @@ class AccidentCountByCarTypeWidget(Widget):
         data_by_segment = AccidentCountByCarTypeWidget.percentage_accidents_by_car_type(
             involved_by_vehicle_type_data
         )
-        national_data = AccidentCountByCarTypeWidget.percentage_accidents_by_car_type_national_data_cache(
-            start_time, end_time
+        national_data = (
+            AccidentCountByCarTypeWidget.percentage_accidents_by_car_type_national_data_cache(
+                start_time, end_time
+            )
         )
 
         for k, v in national_data.items():  # pylint: disable=W0612
@@ -798,6 +802,12 @@ class AccidentCountByCarTypeWidget(Widget):
     def percentage_accidents_by_car_type_national_data_cache(start_time, end_time):
         involved_by_vehicle_type_data = get_accidents_stats(
             table_obj=InvolvedMarkerView,
+            filters={
+                "road_type": [
+                    BE_CONST.ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION,
+                    BE_CONST.ROAD_TYPE_NOT_IN_CITY_IN_INTERSECTION,
+                ]
+            },
             group_by="involve_vehicle_type",
             count="involve_vehicle_type",
             start_time=start_time,

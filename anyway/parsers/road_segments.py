@@ -38,6 +38,7 @@ def _iter_rows(filename):
 
 
 def parse(filename):
+    RoadSegments.query.delete()
     for batch in batch_iterator(_iter_rows(filename), batch_size=50):
         db.session.bulk_insert_mappings(RoadSegments, batch)
         db.session.commit()

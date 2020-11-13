@@ -1103,7 +1103,7 @@ def get_accidents_stats(
 def get_injured_filters(location_info):
     new_filters = {}
     for curr_filter, curr_values in location_info.items():
-        if curr_filter in ["region_hebrew", "district_hebrew", "district_hebrew", "yishuv_name"]:
+        if curr_filter in ["region_hebrew", "district_hebrew", "yishuv_name"]:
             new_filter_name = "accident_" + curr_filter
             new_filters[new_filter_name] = curr_values
         else:

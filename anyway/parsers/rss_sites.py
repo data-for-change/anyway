@@ -30,10 +30,7 @@ sites_config = {
         "rss": "https://www.ynet.co.il:443/Integration/StoryRss1854.xml",
         "parser": parse_ynet,
     },
-    "walla": {
-        "rss": "https://rss.walla.co.il:443/feed/22",
-        "parser": parse_walla,
-    },
+    "walla": {"rss": "https://rss.walla.co.il:443/feed/22", "parser": parse_walla},
 }
 
 

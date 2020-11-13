@@ -218,9 +218,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--dest_folder",
-        type=str,
-        help="destination folder to download to road svgs data",
+        "--dest_folder", type=str, help="destination folder to download to road svgs data"
     )
     args = parser.parse_args()
 

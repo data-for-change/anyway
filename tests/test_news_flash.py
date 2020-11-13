@@ -1,5 +1,6 @@
 import datetime
 import json
+import mock
 
 import pytest
 
@@ -24,7 +25,7 @@ def fetch_html_walla(link):
 
 
 def fetch_html_ynet(link):
-    with open("tests/" + link[-len("0,7340,L-5735229,00.html") :], encoding="utf-8") as f:
+    with open("tests/" + link[-len("0,7340,L-5735229,00.html"):], encoding="utf-8") as f:
         return f.read()
 
 
@@ -175,7 +176,7 @@ def test_twitter_parse():
         assert actual.accident == expected.accident
 
 
-def test_extract_location():
+def test_location_extraction_extract_geo_features():
     if not secrets.exists("GOOGLE_MAPS_KEY"):
         pytest.skip("Could not find GOOGLE_MAPS_KEY")
 
@@ -212,11 +213,11 @@ def test_extract_location():
         assert getattr(actual, k) == getattr(expected, k)
 
 
-def test_extract_location_text():
+def test_location_extraction_extract_location_text():
     for description, expected_location_text in [
         (
                 'רוכב אופנוע כבן 20 נפצע באורח בינוני מפגיעת רכב היום (ראשון) בכביש 65 סמוך לצומת אלון. צוות מד"א שהגיע למקום העניק לו טיפול רפואי ופינה אותו לבית החולים הלל יפה בחדרה.]]>'
-                , 'כביש 65 סמוך לצומת אלון'
+                ,'כביש 65 סמוך לצומת אלון'
         ),
         (
                 'רוכב אופנוע בן 23 נפצע היום (שבת) באורח בינוני לאחר שהחליק בכביש ליד כפר חיטים הסמוך לטבריה. צוות מד"א העניק לו טיפול ראשוני ופינה אותו לבית החולים פוריה בטבריה.]]>'
@@ -230,6 +231,28 @@ def test_extract_location_text():
     ]:
         actual_location_text = location_extraction.extract_location_text(description)
         assert expected_location_text == actual_location_text
+
+
+def test_location_extraction_geocode_extract():
+
+    if not secrets.exists("GOOGLE_MAPS_KEY"):
+        pytest.skip("Could not find GOOGLE_MAPS_KEY")
+
+    expected_location = {
+        'street': None,
+        'road_no': None,
+        'intersection': None,
+        'city': None,
+        'address': 'Lower Galilee, Israel',
+        'subdistrict': 'Kinneret',
+        'district': 'North District',
+        'geom': mock.ANY,
+    }
+    location = location_extraction.geocode_extract("גבר נהרג בתאונת דרכים בגליל התחתון")
+    assert location == expected_location
+
+    location = location_extraction.geocode_extract("משפט כלשהו. גבר נהרג בתאונת דרכים בגליל התחתון")
+    assert location == expected_location
 
 
 def test_timeparse():

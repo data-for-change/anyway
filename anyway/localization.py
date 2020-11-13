@@ -3,6 +3,11 @@
 import pandas as pd
 
 from anyway import field_names
+from typing import Optional
+
+import logging
+
+logger = logging.getLogger("localizations")
 
 _tables = {
     "SUG_DEREH": {
@@ -209,9 +214,10 @@ def get_supported_tables():
     return _tables.keys()
 
 
-def get_city_name(symbol_id):
+def get_city_name(symbol_id, lang: str = "he") -> Optional[str]:
+    column_to_fetch = field_names.name if lang == "he" else "ENGLISH_NAME"
     try:
-        city = _cities.loc[symbol_id, field_names.name]
-        return city
-    except Exception as _:
+        return _cities.loc[symbol_id, column_to_fetch]
+    except Exception:
+        logger.warning(f"symbol_id={ symbol_id } could not be found.")
         return None

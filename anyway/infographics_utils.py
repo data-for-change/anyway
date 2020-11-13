@@ -18,7 +18,7 @@ from sqlalchemy import cast, Numeric
 from sqlalchemy import desc
 from flask_babel import _
 from anyway.backend_constants import BE_CONST
-from anyway.models import NewsFlash, AccidentMarkerView, InvolvedMarkerView, RoadSegments
+from anyway.models import NewsFlash, AccidentMarkerView, InvolvedMarkerView
 from anyway.parsers import resolution_dict
 from anyway.app_and_db import db
 from anyway.infographics_dictionaries import (
@@ -567,30 +567,25 @@ class TopRoadSegmentsAccidentsPerKmWidget(Widget):
     ):
         if resolution != "כביש בינעירוני":  # relevent for non urban roads only
             return {}
-
+        filters = {}
+        filters["road1"] = location_info["road1"]
         query = get_query(
-            table_obj=AccidentMarkerView, filters=None, start_time=start_time, end_time=end_time
+            table_obj=AccidentMarkerView, filters=filters, start_time=start_time, end_time=end_time
         )
 
         query = (
             query.with_entities(
                 AccidentMarkerView.road_segment_name,
-                func.count(AccidentMarkerView.road_segment_name).label("total_accidents"),
-                (RoadSegments.to_km - RoadSegments.from_km).label("segment_length"),
+                AccidentMarkerView.road_segment_length_km.label("segment_length"),
                 cast(
-                    (
-                        func.count(AccidentMarkerView.road_segment_name)
-                        / (RoadSegments.to_km - RoadSegments.from_km)
-                    ),
+                    (func.count(AccidentMarkerView.id) / AccidentMarkerView.road_segment_length_km),
                     Numeric(10, 4),
                 ).label("accidents_per_km"),
+                func.count(AccidentMarkerView.id).label("total_accidents"),
             )
-            .filter(AccidentMarkerView.road1 == RoadSegments.road)
-            .filter(AccidentMarkerView.road_segment_number == RoadSegments.segment)
-            .filter(AccidentMarkerView.road1 == location_info["road1"])
-            .filter(AccidentMarkerView.road_segment_name is not None)
+            .filter(AccidentMarkerView.road_segment_name.isnot(None))
             .group_by(
-                AccidentMarkerView.road_segment_name, RoadSegments.from_km, RoadSegments.to_km
+                AccidentMarkerView.road_segment_name, AccidentMarkerView.road_segment_length_km
             )
             .order_by(desc("accidents_per_km"))
             .limit(limit)

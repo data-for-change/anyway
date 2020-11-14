@@ -22,7 +22,7 @@ class Test_infographics_data_from_cache(TestCase):
         expected = {"data": "data"}
         get_from_cache.get_infographics_data_from_cache.return_value = expected
         create_infographics_data = Mock()
-        res = get_infographics_data(7, 1)
+        res = get_infographics_data(7, 1, "he")
         get_from_cache.get_infographics_data_from_cache.assert_called_with(7, 1)
         get_from_cache.create_infographics_data.assert_not_called()
         create_infographics_data.assert_not_called()
@@ -32,7 +32,7 @@ class Test_infographics_data_from_cache(TestCase):
     @patch.dict(os.environ, {"FLASK_ENV": "test"})
     def test_get_not_existing(self, get_from_cache):
         get_from_cache.get_infographics_data_from_cache.return_value = {}
-        res = get_infographics_data(7, 1)
+        res = get_infographics_data(7, 1, "he")
         get_from_cache.get_infographics_data_from_cache.assert_called_with(7, 1)
         self.assertEqual(res, {}, f"(7,1) should not be found in cache")
 
@@ -40,7 +40,7 @@ class Test_infographics_data_from_cache(TestCase):
     @patch.dict(os.environ, {"FLASK_ENV": "test"})
     def test_get_throws_exception(self, get_from_cache):
         get_from_cache.get_infographics_data_from_cache.side_effect = RuntimeError
-        res = get_infographics_data(7, 1)
+        res = get_infographics_data(7, 1, "he")
         get_from_cache.get_infographics_data_from_cache.assert_called_with(7, 1)
         self.assertEqual(res, {}, f"returned value in case of exception should be empty dict")
 

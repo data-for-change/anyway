@@ -21,5 +21,5 @@ Create a dictionary containing using the DB code as a key and not the Hebrew tra
 Current Widget Title for localization, if exists.
 
 **Additional context**
-- Existing translation to CBS fields - [see here](https://docs.google.com/spreadsheets/d/1qaVV7NKXVYNmnxKZ4he2MKZDAjWPHiHfq-U5dcNZM5k/edit#gid=375223389)
+- Existing translation to CBS fields - [see here](https://docs.google.com/spreadsheets/d/1gjeMsPEWayMZ4Z0tGDKkL0mDsXgIRQ4-aAadRpEP9Oc/edit?usp=sharing)
 (Note - if translation in file is not adequate - please create a better translation)

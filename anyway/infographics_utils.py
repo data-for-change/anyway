@@ -25,6 +25,8 @@ from anyway.infographics_dictionaries import (
     driver_type_hebrew_dict,
     head_on_collisions_comparison_dict,
     english_accident_severity_dict,
+    accident_type_dict,
+    segment_dictionary
 )
 from anyway.parsers import infographics_data_cache_updater
 from anyway.constants import CONST
@@ -225,6 +227,7 @@ class MostSevereAccidentsTableWidget(Widget):
             self.request_params.start_time,
             self.request_params.end_time,
         )
+        self.text = {"title": get_most_severe_accidents_table_title(self.request_params.location_info)}
 
     @staticmethod
     def prepare_table(location_info, start_time, end_time):
@@ -232,7 +235,7 @@ class MostSevereAccidentsTableWidget(Widget):
             "id",
             "provider_code",
             "accident_timestamp",
-            "accident_type_hebrew",
+            "accident_type",
             "accident_year",
             "accident_severity",
         )
@@ -245,7 +248,7 @@ class MostSevereAccidentsTableWidget(Widget):
         )
         # Add casualties
         for accident in accidents:
-            accident["type"] = accident["accident_type"]
+            accident["type"] = accident_type_dict[accident["accident_type"]]
             dt = accident["accident_timestamp"].to_pydatetime()
             accident["date"] = dt.strftime("%d/%m/%y")
             accident["hour"] = dt.strftime("%H:%M")
@@ -1126,7 +1129,7 @@ def get_most_severe_accidents_with_entities(
 
 
 def get_most_severe_accidents_table_title(location_info):
-    return "תאונות בסדר חומרה יורד במקטע " + location_info["road_segment_name"]
+    return _("Accidents in descending order by severity for segment") + ' ' + segment_dictionary[location_info['road_segment_name']]
 
 
 # count of dead and severely injured

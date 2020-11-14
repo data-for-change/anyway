@@ -115,7 +115,8 @@ class Test_Infographic_Api:
             resolution={},
             gps={},
             start_time=start_time,
-            end_time=end_time
+            end_time=end_time,
+            lang="he"
         )
         actual = AccidentCountByCarTypeWidget.get_stats_accidents_by_car_type_with_national_data(
             request_params,

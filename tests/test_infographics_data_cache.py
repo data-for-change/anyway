@@ -59,7 +59,7 @@ class Test_infographics_data_from_cache(TestCase):
         res = add_news_flash_to_cache(nf)
         invocations = utils.call_args_list
         utils.assert_has_calls(
-            [unittest.mock.call(17, y) for y in CONST.INFOGRAPHICS_CACHE_YEARS_AGO]
+            [unittest.mock.call(17, y, "he") for y in CONST.INFOGRAPHICS_CACHE_YEARS_AGO]
         )
         for i in range(len(invocations)):
             self.assertEqual(invocations[i][0][0], 17, "incorrect news flash id")

@@ -15,7 +15,7 @@ Fields in Widget to localize (For example - accident_severity)
 
 **Dictionaries Missing**
 Dictionaries to create (For example - Accident Severity Dictionary)
-Create a dictionary containing using the DB code as a key and not the Hebrew translation (for example {1: 'fatal'} rather than {'קטלנית': 'fatal'})
+Create a dictionary containing using the DB code as a key and not the Hebrew translation (for example `{1: 'fatal'}` rather than `{'קטלנית': 'fatal'}`)
 
 **Widget Title**
 Current Widget Title for localization, if exists.

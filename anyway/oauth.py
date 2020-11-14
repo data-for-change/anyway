@@ -1,8 +1,11 @@
 import json
 
 import requests
+import typing
 from flask import current_app, url_for, request, redirect
 from rauth import OAuth2Service
+
+from anyway.dataclasses.user_data import UserData
 
 
 class OAuthSignIn(object):
@@ -17,7 +20,7 @@ class OAuthSignIn(object):
     def authorize(self):
         pass
 
-    def callback(self):
+    def callback(self) -> typing.Optional[UserData]:
         pass
 
     def get_callback_url(self):
@@ -25,6 +28,10 @@ class OAuthSignIn(object):
 
     @classmethod
     def get_provider(self, provider_name):
+        # This is quick fix for the DEMO - to make sure that anyway.co.il is fully compatible with https://anyway-infographics-staging.web.app/
+        if provider_name != "google":
+            return None
+
         if not self.providers:
             self.providers = {}
             for provider_class in self.__subclasses__():
@@ -52,9 +59,9 @@ class FacebookSignIn(OAuthSignIn):
             )
         )
 
-    def callback(self):
+    def callback(self) -> typing.Optional[UserData]:
         if "code" not in request.args:
-            return None, None, None
+            return None
         oauth_session = self.service.get_auth_session(
             data={
                 "code": request.args["code"],
@@ -63,14 +70,13 @@ class FacebookSignIn(OAuthSignIn):
             },
             decoder=json.loads,
         )
+        # TODO: enrich facebook data collection
         me = oauth_session.get("me?fields=id,email").json()
-        return (
-            "facebook$" + me["id"],
-            me.get("email").split("@")[0],  # Facebook does not provide
-            # username, so the email's user
-            # is used instead
-            me.get("email"),
-        )
+        name = me.get("email").split("@")[0],  # Facebook does not provide username, so the email's user is used instead
+        data_of_user = UserData(name=name, email=me.get("email"), service_user_id="facebook$" + me["id"])
+
+
+        return data_of_user
 
 
 class GoogleSignIn(OAuthSignIn):
@@ -95,9 +101,9 @@ class GoogleSignIn(OAuthSignIn):
             )
         )
 
-    def callback(self):
+    def callback(self) -> typing.Optional[UserData]:
         if "code" not in request.args:
-            return None, None, None
+            return None
         oauth_session = self.service.get_auth_session(
             data={
                 "code": request.args["code"],
@@ -107,4 +113,23 @@ class GoogleSignIn(OAuthSignIn):
             decoder=json.loads,
         )
         me = oauth_session.get("").json()
-        return (me["name"], me["email"])
+        # The data in me dict includes information about the user, as described in
+        # OpenID Connect Standard Claims(https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims) and the
+        # claims_supported metadata value of the Discovery document(https://accounts.google.com/.well-known/openid-configuration)
+        # So in the best case we have "aud", "email", "email_verified", "exp", "family_name", "given_name", "iat",
+        # "iss", "locale", "name", "picture", "sub"
+        # and in the worst case we only have "sub".
+        # Note - in some places in the docs there is an indication that more fields exists.
+        name = me.get("name")
+        if not name:
+            if me.get("given_name"):
+                name = me.get("given_name")
+            if me.get("family_name"):
+                name = f"{name} {me.get('family_name')}" if name else me.get("family_name")
+
+        data_of_user = UserData(name=name, email=me.get("email"), service_user_id=me["sub"],
+                                service_user_domain=me.get("hd"), service_user_locale=me.get("locale"),
+                                picture_url=me.get("picture"), user_profile_url=me.get("profile"))
+
+        return data_of_user
+

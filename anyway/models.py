@@ -54,6 +54,23 @@ roles_users = Table(
 )
 
 
+class UserOAuth(Base, UserMixin):
+    __tablename__ = "user_oauth"
+    id = Column(BigInteger, autoincrement=True, nullable=False, primary_key=True, index=True)
+    user_register_date = Column(DateTime, nullable=False)
+    user_last_login_date = Column(DateTime, nullable=False)
+    email = Column(String(255), nullable=True, index=True)
+    name = Column(String(255), nullable=True)
+    is_active = Column(Boolean)
+    oauth_provider = Column(String(64), nullable=False, index=True)
+    oauth_provider_user_id = Column(String, nullable=False, index=True)
+    oauth_provider_user_domain = Column(String, nullable=True)
+    oauth_provider_user_picture_url = Column(String, nullable=True)
+    oauth_provider_user_locale = Column(String(64), nullable=True)
+    oauth_provider_user_profile_url = Column(String, nullable=True)
+    work_on_behalf_of_organization = Column(String(128), nullable=True)
+
+
 class User(Base, UserMixin):
     __tablename__ = "users"
     id = Column(BigInteger(), primary_key=True)

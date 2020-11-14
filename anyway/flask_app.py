@@ -1554,13 +1554,15 @@ def infographics_data():
         return abort(http_client.BAD_REQUEST)
 
     number_of_years_ago = request.values.get("years_ago", BE_CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
+    lang: str = request.values.get("lang", "he")
     logging.debug(
-        "getting infographics data for news_flash_id: {news_flash_id}, \
-                  in time period:{number_of_years_ago}".format(
-            news_flash_id=news_flash_id, number_of_years_ago=number_of_years_ago
+        ("getting infographics data for news_flash_id: {news_flash_id}, " +
+                  "in time period:{number_of_years_ago}, lang:{lang}").format(
+            news_flash_id=news_flash_id, number_of_years_ago=number_of_years_ago,
+            lang=lang
         )
     )
-    json_data = get_infographics_data(news_flash_id=news_flash_id, years_ago=number_of_years_ago)
+    json_data = get_infographics_data(news_flash_id=news_flash_id, years_ago=number_of_years_ago, lang=lang)
 
     if not json_data:
         log_bad_request(request)

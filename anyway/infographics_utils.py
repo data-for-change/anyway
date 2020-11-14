@@ -70,9 +70,10 @@ class RequestParams:
     gps: Dict
     start_time: datetime.date
     end_time: datetime.date
+    lang: str
 
     def __str__(self):
-        return f"RequestParams(location_text:{self.location_text}, start_time:{self.start_time}, end_time:{self.end_time})"
+        return f"RequestParams(location_text:{self.location_text}, start_time:{self.start_time}, end_time:{self.end_time}, lang:{self.lang})"
 
 
 class Widget:
@@ -1244,7 +1245,8 @@ def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> Li
     return widgets
 
 
-def get_request_params(news_flash_id: int, number_of_years_ago: int) -> Optional[RequestParams]:
+def get_request_params(news_flash_id: int, number_of_years_ago: int, lang: str)\
+        -> Optional[RequestParams]:
     try:
         number_of_years_ago = int(number_of_years_ago)
     except ValueError:
@@ -1283,14 +1285,15 @@ def get_request_params(news_flash_id: int, number_of_years_ago: int) -> Optional
         gps=gps,
         start_time=start_time,
         end_time=end_time,
+        lang=lang
     )
     logging.debug(f"Ending get_request_params. params: {request_params}")
     return request_params
 
 
-def create_infographics_data(news_flash_id, number_of_years_ago):
+def create_infographics_data(news_flash_id, number_of_years_ago, lang: str):
     try:
-        request_params = get_request_params(news_flash_id, number_of_years_ago)
+        request_params = get_request_params(news_flash_id, number_of_years_ago, lang)
         if request_params is None:
             return {}
 
@@ -1325,9 +1328,9 @@ def create_infographics_data(news_flash_id, number_of_years_ago):
     return json.dumps(output, default=str)
 
 
-def get_infographics_data(news_flash_id, years_ago):
+def get_infographics_data(news_flash_id, years_ago, lang):
     if os.environ.get("FLASK_ENV") == "development":
-        return create_infographics_data(news_flash_id, years_ago)
+        return create_infographics_data(news_flash_id, years_ago, lang)
     else:
         try:
             res = infographics_data_cache_updater.get_infographics_data_from_cache(

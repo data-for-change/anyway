@@ -57,7 +57,7 @@ So if the developer key is "12345" the new url need to be is: "https://maps.goog
 
 **8.** To stop the containers run: `docker-compose down`
 
-**9.** To restore fresh DB data, delete all existing volumes: `docker-compose down -v` then restart from step 7 
+**9.** To restore fresh DB data, delete all existing volumes: `docker-compose down -v` then restart from step 6 
 
 **For Windows:**
 You have two options: 

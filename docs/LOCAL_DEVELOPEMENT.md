@@ -29,7 +29,7 @@ The project is currently in Python 3.
 ### Windows
 See the [Wiki](https://github.com/hasadna/anyway/wiki/Setting-up-a-Python-development-environment-in-Windows).
 
-## Local Developement: Local first run (all platforms)
+## Local Development: Local first run (all platforms)
 1. Set up a PostgreSQL server and create a database for anyway. The instructions for doing that
    depend on your operating system
 1. Define connection string (needs to be defined whenever you start working):

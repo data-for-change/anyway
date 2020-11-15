@@ -14,6 +14,7 @@ class UserData:
     user_profile_url is profile
     *When a field is missing(most of the time most of the fields will be missing) the value will be None
     """
+
     name: str
     email: str
     service_user_id: str

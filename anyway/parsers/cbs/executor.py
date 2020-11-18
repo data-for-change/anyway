@@ -15,6 +15,7 @@ import pandas as pd
 from sqlalchemy import or_, and_
 
 from anyway.parsers.cbs import preprocessing_cbs_files, importmail_cbs
+from anyway.parsers.cbs.weather_data import ensure_accidents_weather_data
 from anyway import field_names, localization
 from anyway.backend_constants import BE_CONST
 from anyway.models import (
@@ -1145,6 +1146,8 @@ def main(
             )
         )
         logging.info("Total: {0} items in {1}".format(total, time_delta(started)))
+
+        ensure_accidents_weather_data()
 
         create_views()
     except Exception as ex:

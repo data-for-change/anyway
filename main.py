@@ -270,6 +270,20 @@ def waze_data(from_s3, start_date, end_date):
 
 
 @process.command()
+@click.option(
+    "--start_date", default=None, type=valid_date, help="The Start Date - format DD-MM-YYYY"
+)
+def weather_data(start_date):
+    """
+    Looping on the accidents from the cbs and ensuring they have weather data
+    Start date can be given to filter out accident before the given date
+    """
+
+    from anyway.parsers.cbs.weather_data import ensure_accidents_weather_data
+    ensure_accidents_weather_data(start_date)
+
+
+@process.command()
 @click.argument("filename", type=str, default="static/data/embedded_reports/embedded_reports.csv")
 def embedded_reports(filename):
     from anyway.parsers.embedded_reports import parse

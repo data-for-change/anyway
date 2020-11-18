@@ -239,6 +239,7 @@ class AccidentMarker(MarkerMixin, Base):
     cross_direction = Column(Integer())
     involved = relationship("Involved")
     vehicles = relationship("Vehicle")
+    weather_data = relationship("AccidentWeather", uselist=False)
     video_link = Column(Text())
     road1 = Column(Integer())
     road2 = Column(Integer())
@@ -647,6 +648,47 @@ class AccidentMarker(MarkerMixin, Base):
             latitude=data["latitude"],
             longitude=data["longitude"],
         )
+
+
+class AccidentWeather(Base):
+    __tablename__ = "accident_weathers"
+    id = Column(BigInteger(), primary_key=True)
+    provider_and_id = Column(BigInteger())
+    provider_code = Column(Integer())
+    accident_id = Column(BigInteger())
+    accident_year = Column(Integer())
+    rain_rate = Column(Integer())
+    __table_args__ = (
+        ForeignKeyConstraint(
+            [accident_id, provider_code, accident_year],
+            [AccidentMarker.id, AccidentMarker.provider_code, AccidentMarker.accident_year],
+            ondelete="CASCADE",
+        ),
+        Index("accident_id_idx_accident_weather", "accident_id", unique=False),
+        Index("provider_and_id_idx_accident_weather", "provider_and_id", unique=False),
+        {},
+    )
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "provider_code": self.provider_code,
+            "accident_id": self.accident_id,
+            "rain_rate": self.rain_rate,
+        }
+
+    # Flask-Login integration
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.id
 
 
 class DiscussionMarker(MarkerMixin, Base):
@@ -1772,6 +1814,7 @@ class AccidentMarkerView(Base):
     road_segment_id = Column(Integer())
     road_segment_name = Column(Text())
     road_segment_number = Column(Integer())
+    accident_rain_rate = Column(Integer())
 
     def serialize(self):
         return {
@@ -1866,6 +1909,7 @@ class AccidentMarkerView(Base):
             "longitude": self.longitude,
             "x": self.x,
             "y": self.y,
+            "accident_rain_rate": self.accident_rain_rate,
         }
 
 

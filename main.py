@@ -410,5 +410,30 @@ def update_casualties_costs(filename):
     return parse(filename)
 
 
+@process.command()
+@click.option("--latitude", type=float)
+@click.option("--longitude", type=float)
+@click.option("--interpolation_points", type=int, default=3)
+@click.option(
+    "--timestamp",
+    type=str,
+    help="ISO formatted timestamp: 2011-11-04T00:05:23 / 2011-11-04 00:05:23.283 / 2011-11-04 00:05:23.283"
+)
+def get_weather(
+    latitude,
+    longitude,
+    interpolation_points,
+    timestamp
+):
+    from anyway.parsers.cbs.weather_interpolator import get_weather
+
+    return get_weather(
+        latitude=latitude,
+        longitude=longitude,
+        interpolation_points=interpolation_points,
+        timestamp=timestamp,
+    )
+
+
 if __name__ == "__main__":
     cli(sys.argv[1:])  # pylint: disable=too-many-function-args

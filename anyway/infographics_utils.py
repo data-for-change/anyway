@@ -49,6 +49,7 @@ class WidgetId(Enum):
     vision_zero = auto()
     accident_count_by_driver_type = auto()
     accident_count_by_car_type = auto()
+    rain_accidents_by_severity = auto()
     injured_accidents_with_pedestrians = auto()
     accident_severity_by_cross_location = auto()
     motorcycle_accidents_vs_all_accidents = auto()
@@ -735,8 +736,10 @@ class AccidentCountByCarTypeWidget(Widget):
         }
 
     def generate_items(self) -> None:
-        self.items = AccidentCountByCarTypeWidget.get_stats_accidents_by_car_type_with_national_data(
-            self.request_params
+        self.items = (
+            AccidentCountByCarTypeWidget.get_stats_accidents_by_car_type_with_national_data(
+                self.request_params
+            )
         )
 
     @staticmethod
@@ -759,8 +762,10 @@ class AccidentCountByCarTypeWidget(Widget):
         data_by_segment = AccidentCountByCarTypeWidget.percentage_accidents_by_car_type(
             involved_by_vehicle_type_data
         )
-        national_data = AccidentCountByCarTypeWidget.percentage_accidents_by_car_type_national_data_cache(
-            start_time, end_time
+        national_data = (
+            AccidentCountByCarTypeWidget.percentage_accidents_by_car_type_national_data_cache(
+                start_time, end_time
+            )
         )
 
         for k, v in national_data.items():  # pylint: disable=W0612
@@ -1041,6 +1046,66 @@ class PedestrianInjuredInJunctionsWidget(Widget):
         ]
 
 
+@WidgetCollection.register
+class AccidentCausedByRainWidget(Widget):
+    # the rain rate threshold after which we count the accident as a cause of the rain
+    ACCIDENT_RAIN_RATE_THRESHOLD = 4
+
+    def __init__(self, request_params: RequestParams):
+        super().__init__(request_params, WidgetId.rain_accidents_by_severity)
+        self.rank = 24
+        self.text = {
+            "title": "תאונות שהתרחשו בזמן גשם במקטע "
+            + self.request_params.location_info["road_segment_name"]
+        }
+
+    def generate_items(self) -> None:
+        self.items = AccidentCausedByRainWidget.stats_accidents_caused_by_rain_by_severity(
+            self.request_params.location_info,
+            self.request_params.start_time,
+            self.request_params.end_time,
+        )
+
+    @staticmethod
+    def stats_accidents_caused_by_rain_by_severity(location_info, start_time, end_time):
+        all_segment_accidents = get_accidents_stats(
+            table_obj=AccidentMarkerView,
+            filters=location_info,
+            start_time=start_time,
+            end_time=end_time,
+            raw=True,
+        )
+
+        severity_to_severity_hebrew = {}
+        accidents_by_severity = defaultdict(int)
+        rain_accidents_by_severity = defaultdict(int)
+        for accident in all_segment_accidents:
+            severity = accident["accident_severity"]
+            severity_hebrew = accident["accident_severity_hebrew"]
+            severity_to_severity_hebrew[severity] = severity_hebrew
+            accidents_by_severity[severity] += 1
+            if (
+                accident["accident_rain_rate"]
+                > AccidentCausedByRainWidget.ACCIDENT_RAIN_RATE_THRESHOLD
+            ):
+                rain_accidents_by_severity[severity] += 1
+
+        stats = []
+        for severity, rain_accidents_amount in rain_accidents_by_severity.items():
+            stats.append(
+                {
+                    "severity": severity,
+                    "severity_hebrew": severity_to_severity_hebrew[severity],
+                    "amount_of_accidents_caused_by_rain": rain_accidents_amount,
+                    "accidents_caused_by_rain_percentage": int(
+                        rain_accidents_amount / accidents_by_severity[severity] * 100
+                    ),
+                }
+            )
+
+        return stats
+
+
 def extract_news_flash_location(news_flash_obj):
     resolution = news_flash_obj.resolution or None
     if not news_flash_obj or not resolution or resolution not in resolution_dict:
@@ -1074,7 +1139,7 @@ def get_query(table_obj, filters, start_time, end_time):
 
 
 def get_accidents_stats(
-    table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None
+    table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None, raw=False
 ):
     filters = filters or {}
     filters["provider_code"] = [
@@ -1088,10 +1153,9 @@ def get_accidents_stats(
         query = query.with_entities(group_by, func.count(count))
     df = pd.read_sql_query(query.statement, query.session.bind)
     df.rename(columns={"count_1": "count"}, inplace=True)  # pylint: disable=no-member
-    df.columns = [c.replace("_hebrew", "") for c in df.columns]
-    return (  # pylint: disable=no-member
-        df.to_dict(orient="records") if group_by or count else df.to_dict()
-    )
+    if not raw:
+        df.columns = [c.replace("_hebrew", "") for c in df.columns]
+    return df.to_dict(orient="records")  # pylint: disable=no-member
 
 
 def get_injured_filters(location_info):

@@ -1,7 +1,7 @@
 """remove cbs views create tables
 
 Revision ID: 2a849701bd03
-Revises: 9687ef04f99d
+Revises: 262d7c789220
 Create Date: 2020-11-13 20:25:05.729735
 
 """
@@ -225,8 +225,8 @@ def upgrade():
     sa.Column('accident_hour', sa.Integer(), nullable=True),
     sa.Column('accident_minute', sa.Integer(), nullable=True),
     sa.Column('geom', geoalchemy2.types.Geometry(geometry_type='POINT', from_text='ST_GeomFromEWKT', name='geometry'), nullable=True),
-    sa.Column('latitude', sa.Float(), nullable=True),
     sa.Column('longitude', sa.Float(), nullable=True),
+    sa.Column('latitude', sa.Float(), nullable=True),
     sa.Column('x', sa.Float(), nullable=True),
     sa.Column('y', sa.Float(), nullable=True),
     sa.Column('engine_volume', sa.Integer(), nullable=True),
@@ -368,8 +368,8 @@ def upgrade():
     sa.Column('accident_hour', sa.Integer(), nullable=True),
     sa.Column('accident_minute', sa.Integer(), nullable=True),
     sa.Column('geom', geoalchemy2.types.Geometry(geometry_type='POINT', from_text='ST_GeomFromEWKT', name='geometry'), nullable=True),
-    sa.Column('latitude', sa.Float(), nullable=True),
     sa.Column('longitude', sa.Float(), nullable=True),
+    sa.Column('latitude', sa.Float(), nullable=True),
     sa.Column('x', sa.Float(), nullable=True),
     sa.Column('y', sa.Float(), nullable=True),
     sa.PrimaryKeyConstraint('id', 'provider_code', 'accident_year')
@@ -515,8 +515,8 @@ def upgrade():
     sa.Column('accident_year', sa.Integer(), nullable=False),
     sa.Column('accident_month', sa.Integer(), nullable=True),
     sa.Column('geom', geoalchemy2.types.Geometry(geometry_type='POINT', from_text='ST_GeomFromEWKT', name='geometry'), nullable=True),
-    sa.Column('latitude', sa.Float(), nullable=True),
     sa.Column('longitude', sa.Float(), nullable=True),
+    sa.Column('latitude', sa.Float(), nullable=True),
     sa.Column('x', sa.Float(), nullable=True),
     sa.Column('y', sa.Float(), nullable=True),
     sa.Column('id', sa.BigInteger(), nullable=False),

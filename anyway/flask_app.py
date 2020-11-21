@@ -1502,9 +1502,9 @@ app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash, methods
 def oauth_authorize(provider):
     # This is quick fix for the DEMO - to make sure that anyway.co.il is fully compatible with https://anyway-infographics-staging.web.app/
     if provider != "google":
-        return redirect(url_for("index"))
+        return redirect("https://anyway-infographics-staging.web.app/", code=302)
     if not current_user.is_anonymous:
-        return redirect(url_for("index"))
+        return redirect("https://anyway-infographics-staging.web.app/", code=302)
     oauth = OAuthSignIn.get_provider(provider)
     return oauth.authorize()
 
@@ -1513,14 +1513,14 @@ def oauth_authorize(provider):
 def oauth_callback(provider):
     # This is quick fix for the DEMO - to make sure that anyway.co.il is fully compatible with https://anyway-infographics-staging.web.app/
     if provider != "google":
-        return redirect(url_for("index"))
+        return redirect("https://anyway-infographics-staging.web.app/", code=302)
     if not current_user.is_anonymous:
-        return redirect(url_for("index"))
+        return redirect("https://anyway-infographics-staging.web.app/", code=302)
     oauth = OAuthSignIn.get_provider(provider)
     user_data: UserData = oauth.callback()
     if not user_data.service_user_id:
         flash("Authentication failed.")
-        return redirect(url_for("index"))
+        return redirect("https://anyway-infographics-staging.web.app/", code=302)
 
     # TODO: merge google and facebook code?
     if provider == "google":
@@ -1551,9 +1551,9 @@ def oauth_callback(provider):
             db.session.commit()
     else:
         flash("Authentication failed.")
-        return redirect(url_for("index"))
+        return redirect("https://anyway-infographics-staging.web.app/", code=302)
     login.login_user(user, True)
-    return redirect(url_for("index"))
+    return redirect("https://anyway-infographics-staging.web.app/", code=302)
 
 
 """

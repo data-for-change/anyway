@@ -309,15 +309,15 @@ def preprocess_cbs(path):
 
 
 @cli.group()
-def create_views():
+def create_tables():
     pass
 
 
-@create_views.command()
-def cbs_views():
-    from anyway.parsers.cbs.executor import create_views
+@create_tables.command()
+def create_cbs_tables():
+    from anyway.parsers.cbs.executor import create_tables
 
-    return create_views()
+    return create_tables()
 
 
 @cli.group()

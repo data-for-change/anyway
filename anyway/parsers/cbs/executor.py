@@ -989,23 +989,19 @@ def create_provider_code_table():
         db.session.commit()
 
 
-def create_views():
-    db.session.execute("DROP VIEW IF EXISTS involved_markers_hebrew")
-    db.session.execute("DROP VIEW IF EXISTS vehicles_markers_hebrew")
-    db.session.execute("DROP VIEW IF EXISTS markers_hebrew")
-    db.session.execute("CREATE VIEW  markers_hebrew AS " + VIEWS.MARKERS_HEBREW_VIEW)
-    db.session.execute("DROP VIEW IF EXISTS involved_hebrew")
-    db.session.execute("CREATE VIEW involved_hebrew AS " + VIEWS.INVOLVED_HEBREW_VIEW)
-    db.session.execute("DROP VIEW IF EXISTS vehicles_hebrew")
-    db.session.execute("CREATE VIEW vehicles_hebrew AS " + VIEWS.VEHICLES_HEBREW_VIEW)
-    db.session.execute(
-        "CREATE VIEW involved_markers_hebrew AS " + VIEWS.INVOLVED_HEBREW_MARKERS_HEBREW_VIEW
-    )
-    db.session.execute(
-        "CREATE VIEW vehicles_markers_hebrew AS " + VIEWS.VEHICLES_MARKERS_HEBREW_VIEW
-    )
-    db.session.commit()
-    logging.info("Created DB Views")
+def create_tables():
+    with db.get_engine().begin() as conn:
+        conn.execute("TRUNCATE involved_markers_hebrew")
+        conn.execute("TRUNCATE vehicles_markers_hebrew")
+        conn.execute("TRUNCATE vehicles_hebrew")
+        conn.execute("TRUNCATE involved_hebrew")
+        conn.execute("TRUNCATE markers_hebrew")
+        conn.execute("INSERT INTO markers_hebrew " + VIEWS.MARKERS_HEBREW_VIEW)
+        conn.execute("INSERT INTO involved_hebrew " + VIEWS.INVOLVED_HEBREW_VIEW)
+        conn.execute("INSERT INTO vehicles_hebrew " + VIEWS.VEHICLES_HEBREW_VIEW)
+        conn.execute("INSERT INTO vehicles_markers_hebrew " + VIEWS.VEHICLES_MARKERS_HEBREW_VIEW)
+        conn.execute("INSERT INTO involved_markers_hebrew " + VIEWS.INVOLVED_HEBREW_MARKERS_HEBREW_VIEW)
+        logging.info("Created DB Hebrew Tables")
 
 
 def update_dictionary_tables(path):
@@ -1146,7 +1142,7 @@ def main(
         )
         logging.info("Total: {0} items in {1}".format(total, time_delta(started)))
 
-        create_views()
+        create_tables()
     except Exception as ex:
         print("Exception occured while loading the cbs data: {0}".format(str(ex)))
         print("Traceback: {0}".format(traceback.format_exc()))

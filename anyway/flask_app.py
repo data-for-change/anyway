@@ -68,11 +68,12 @@ from anyway.models import (
     DrivingDirections,
     AgeGroup,
     AccidentMarkerView,
-    EmbeddedReports,
+    EmbeddedReports, UserOAuth,
 )
 from anyway.oauth import OAuthSignIn
 from anyway.infographics_utils import get_infographics_data
 from anyway.app_and_db import app, db
+from anyway.dataclasses.user_data import UserData
 from anyway.views.schools.api import (
     schools_description_api,
     schools_names_api,
@@ -1032,7 +1033,7 @@ def update_preferences():
     if not current_user.is_authenticated:
         return jsonify(respo="user not authenticated")
     cur_id = current_user.get_id()
-    cur_user = db.session.query(User).filter(User.id == cur_id).first()
+    cur_user = db.session.query(UserOAuth).filter(UserOAuth.id == cur_id).first()
     if cur_user is None:
         return jsonify(respo="user not found")
     cur_report_preferences = db.session.query(ReportPreferences).filter(User.id == cur_id).first()
@@ -1175,7 +1176,7 @@ def init_login():
     # Create user loader function
     @login_manager.user_loader
     def load_user(user_id):  # pylint: disable=unused-variable
-        return db.session.query(User).get(user_id)
+        return db.session.query(UserOAuth).get(user_id)
 
 
 class AdminView(sqla.ModelView):
@@ -1453,7 +1454,7 @@ def get_current_user_first_name():
 
 @lm.user_loader
 def load_user(id):
-    return db.session.query(User).get(int(id))
+    return db.session.query(UserOAuth).get(id)
 
 
 @app.route("/logout")
@@ -1499,6 +1500,9 @@ app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash, methods
 
 @app.route("/authorize/<provider>")
 def oauth_authorize(provider):
+    # This is quick fix for the DEMO - to make sure that anyway.co.il is fully compatible with https://anyway-infographics-staging.web.app/
+    if provider != "google":
+        return redirect(url_for("index"))
     if not current_user.is_anonymous:
         return redirect(url_for("index"))
     oauth = OAuthSignIn.get_provider(provider)
@@ -1507,35 +1511,47 @@ def oauth_authorize(provider):
 
 @app.route("/callback/<provider>")
 def oauth_callback(provider):
+    # This is quick fix for the DEMO - to make sure that anyway.co.il is fully compatible with https://anyway-infographics-staging.web.app/
+    if provider != "google":
+        return redirect(url_for("index"))
     if not current_user.is_anonymous:
         return redirect(url_for("index"))
     oauth = OAuthSignIn.get_provider(provider)
+    user_data: UserData = oauth.callback()
+    if not user_data.service_user_id:
+        flash("Authentication failed.")
+        return redirect(url_for("index"))
+
+    # TODO: merge google and facebook code?
     if provider == "google":
-        username, email = oauth.callback()
-        if email is None:
-            flash("Authentication failed.")
-            return redirect(url_for("index"))
-        user = db.session.query(User).filter_by(email=email).first()
+        user = db.session.query(UserOAuth).filter_by(oauth_provider=provider, oauth_provider_user_id=user_data.service_user_id).first()
         if not user:
-            user = User(nickname=username, email=email, provider=provider)
+            user = UserOAuth(
+                user_register_date=datetime.datetime.now(),
+                user_last_login_date=datetime.datetime.now(),
+                email=user_data.email,
+                name=user_data.name,
+                is_active=True,
+                oauth_provider=provider,
+                oauth_provider_user_id=user_data.service_user_id,
+                oauth_provider_user_domain=user_data.service_user_domain,
+                oauth_provider_user_picture_url=user_data.picture_url,
+                oauth_provider_user_locale=user_data.service_user_locale,
+                oauth_provider_user_profile_url=user_data.user_profile_url)
+
             db.session.add(user)
             db.session.commit()
-    else:  # facebook authentication
-        social_id, username, email = oauth.callback()
-        if social_id is None:
-            flash("Authentication failed.")
-            return redirect(url_for("index"))
-        user = db.session.query(User).filter_by(social_id=social_id).first()
+    elif provider == "facebook": #TODO: fix
+        user = db.session.query(User).filter_by(oauth_provider=provider, oauth_provider_user_id=user_data.service_user_id).first()
         if not user:
-            curr_max_id = db.session.query(func.max(User.id)).scalar()
-            if curr_max_id is None:
-                curr_max_id = 0
-            user_id = curr_max_id + 1
             user = User(
-                id=user_id, social_id=social_id, nickname=username, email=email, provider=provider
+                social_id=user_data.service_user_id, email=user_data.email, provider=provider
             )
             db.session.add(user)
             db.session.commit()
+    else:
+        flash("Authentication failed.")
+        return redirect(url_for("index"))
     login.login_user(user, True)
     return redirect(url_for("index"))
 

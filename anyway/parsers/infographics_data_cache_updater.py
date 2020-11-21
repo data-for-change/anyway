@@ -40,7 +40,7 @@ def add_news_flash_to_cache(news_flash):
                     "news_flash_id": news_flash.get_id(),
                     "years_ago": y,
                     "data": anyway.infographics_utils.create_infographics_data(
-                        news_flash.get_id(), y
+                        news_flash.get_id(), y, "he"
                     ),
                 }
                 for y in CONST.INFOGRAPHICS_CACHE_YEARS_AGO
@@ -115,7 +115,7 @@ def build_cache_into_temp():
                     "news_flash_id": new_flash.get_id(),
                     "years_ago": y,
                     "data": anyway.infographics_utils.create_infographics_data(
-                        new_flash.get_id(), y
+                        new_flash.get_id(), y, "he"
                     ),
                 }
                 for new_flash in db.session.query(NewsFlash)

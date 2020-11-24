@@ -7,7 +7,6 @@ from functools import lru_cache
 import enum
 from enum import Enum, auto
 from typing import Optional, Dict, List, Union, Any, Type
-import dataclasses
 from dataclasses import dataclass
 import traceback
 
@@ -18,7 +17,7 @@ from sqlalchemy import cast, Numeric
 from sqlalchemy import desc
 from flask_babel import _
 from anyway.backend_constants import BE_CONST
-from anyway.models import NewsFlash, AccidentMarkerView, InvolvedMarkerView, RoadSegments
+from anyway.models import NewsFlash, AccidentMarkerView, InvolvedMarkerView
 from anyway.parsers import resolution_dict
 from anyway.app_and_db import db
 from anyway.infographics_dictionaries import (
@@ -64,6 +63,7 @@ class RequestParams:
     """
 
     news_flash_obj: NewsFlash
+    years_ago: int
     location_text: str
     location_info: Optional[Dict[str, Any]]
     resolution: Dict
@@ -140,6 +140,14 @@ class Widget:
     def generate_items(self) -> None:
         """ Generates the data of the widget and set it to self.items"""
         pass
+
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        if "name" in items:
+            logging.debug(f"Widget.localize_items: widget {items['name']} should implement localize_items method")
+        else:
+            logging.error(f"Widget.localize_items: bad input (missing 'name' key):{items}")
+        return items
 
     def serialize(self):
         if not self.items:
@@ -336,9 +344,9 @@ class HeadOnCollisionsComparisonWidget(Widget):
     widget_id: WidgetId = WidgetId.head_on_collisions_comparison
 
     def __init__(self, request_params: RequestParams):
-            super().__init__(request_params, WidgetId.head_on_collisions_comparison)
-            self.rank = 5
-            self.text = {"title": "תאונות קטלניות ע״פ סוג"}
+        super().__init__(request_params, WidgetId.head_on_collisions_comparison)
+        self.rank = 5
+        self.text = {"title": "תאונות קטלניות ע״פ סוג"}
 
     def generate_items(self) -> None:
         self.items = HeadOnCollisionsComparisonWidget.get_head_to_head_stat(
@@ -1325,7 +1333,6 @@ def get_latest_accident_date(table_obj, filters):
 
 def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> List[Widget]:
     widgets = []
-    logging.debug(f"{WidgetCollection.widgets_dict}")
     # for w in WidgetId:
     for w in WidgetCollection.get():
         # widget: Optional[Widget] = create_widget(w, request_params)
@@ -1374,6 +1381,7 @@ def get_request_params(news_flash_id: int, number_of_years_ago: int, lang: str)\
 
     request_params = RequestParams(
         news_flash_obj=news_flash_obj,
+        years_ago=number_of_years_ago,
         location_text=location_text,
         location_info=location_info,
         resolution=resolution,
@@ -1386,15 +1394,25 @@ def get_request_params(news_flash_id: int, number_of_years_ago: int, lang: str)\
     return request_params
 
 
-def create_infographics_data(news_flash_id, number_of_years_ago, lang: str) -> Dict:
+def create_infographics_data(news_flash_id, number_of_years_ago, lang: str) -> str:
+    request_params = get_request_params(news_flash_id, number_of_years_ago, lang)
+    output = create_infographics_items(request_params)
+    return json.dumps(output, default=str)
+
+
+# def create_infographics_data_1(request_params: RequestParams) -> str:
+#     output = create_infographics_items(request_params)
+#     return json.dumps(output, default=str)
+
+
+def create_infographics_items(request_params: RequestParams) -> Dict:
     try:
-        request_params = get_request_params(news_flash_id, number_of_years_ago, lang)
         if request_params is None:
             return {}
 
         output = {}
         try:
-            number_of_years_ago = int(number_of_years_ago)
+            number_of_years_ago = int(request_params.years_ago)
         except ValueError:
             return {}
         if number_of_years_ago < 0 or number_of_years_ago > 100:
@@ -1420,15 +1438,16 @@ def create_infographics_data(news_flash_id, number_of_years_ago, lang: str) -> D
     except Exception as e:
         logging.error(f"exception in create_infographics_data:{e}:{traceback.format_exc()}")
         output = {}
-    return json.dumps(output, default=str)
+    return output
 
 
 def get_infographics_data(news_flash_id, years_ago, lang: str) -> Dict:
+    request_params = get_request_params(news_flash_id, years_ago, lang)
     if os.environ.get("FLASK_ENV") == "development":
-        return create_infographics_data(news_flash_id, years_ago, lang)
+        output = create_infographics_items(request_params)
     else:
         try:
-            res = infographics_data_cache_updater.get_infographics_data_from_cache(
+            output = infographics_data_cache_updater.get_infographics_data_from_cache(
                 news_flash_id, years_ago
             )
         except Exception as e:
@@ -1436,7 +1455,21 @@ def get_infographics_data(news_flash_id, years_ago, lang: str) -> Dict:
                 f"Exception while retrieving from infographics cache({news_flash_id},{years_ago})"
                 f":cause:{e.__cause__}, class:{e.__class__}"
             )
-            res = {}
-        if not res:
-            logging.error(f"infographics_data({news_flash_id}, {years_ago}) not found in cache")
-        return res
+            output = {}
+    if not output:
+        logging.error(f"infographics_data({news_flash_id}, {years_ago}) not found in cache")
+    elif "widgets" not in output:
+        logging.error(f"get_infographics_data: 'widgets' key missing from output:{output}")
+    else:
+        output["widgets"] = localize_after_cache(request_params, output["widgets"])
+    return output
+
+
+def localize_after_cache(request_params: RequestParams, items_list: List[Dict]) -> List[Dict]:
+    res = []
+    for items in items_list:
+        if "name" in items:
+            res.append(WidgetCollection.widgets_dict[items["name"]].localize_items(request_params, items))
+        else:
+            logging.error(f"localize_after_cache: bad input (missing 'name' key):{items}")
+    return res

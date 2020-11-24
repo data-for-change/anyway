@@ -1578,12 +1578,12 @@ def infographics_data():
             lang=lang
         )
     )
-    json_data = get_infographics_data(news_flash_id=news_flash_id, years_ago=number_of_years_ago, lang=lang)
-
-    if not json_data:
+    output = get_infographics_data(news_flash_id=news_flash_id, years_ago=number_of_years_ago, lang=lang)
+    if not output:
         log_bad_request(request)
         return abort(http_client.NOT_FOUND)
 
+    json_data = json.dumps(output, default=str)
     return Response(json_data, mimetype="application/json")
 
 

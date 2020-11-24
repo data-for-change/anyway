@@ -1,4 +1,5 @@
 import os
+import ast
 import unittest
 from unittest import TestCase
 from unittest.mock import Mock, patch
@@ -19,14 +20,14 @@ class Test_infographics_data_from_cache(TestCase):
     @patch("anyway.infographics_utils.infographics_data_cache_updater")
     @patch.dict(os.environ, {"FLASK_ENV": "test"})
     def test_get_existing(self, get_from_cache):
-        expected = {"data": "data"}
+        expected = {"data": "data", "widgets": []}
         get_from_cache.get_infographics_data_from_cache.return_value = expected
         create_infographics_data = Mock()
         res = get_infographics_data(7, 1, "he")
         get_from_cache.get_infographics_data_from_cache.assert_called_with(7, 1)
         get_from_cache.create_infographics_data.assert_not_called()
         create_infographics_data.assert_not_called()
-        self.assertEqual(res, expected, f"{expected} should be found in cache")
+        self.assertEqual(res, expected, f"got:{str}, but {expected} should be found in cache")
 
     @patch("anyway.infographics_utils.infographics_data_cache_updater")
     @patch.dict(os.environ, {"FLASK_ENV": "test"})
@@ -42,7 +43,7 @@ class Test_infographics_data_from_cache(TestCase):
         get_from_cache.get_infographics_data_from_cache.side_effect = RuntimeError
         res = get_infographics_data(7, 1, "he")
         get_from_cache.get_infographics_data_from_cache.assert_called_with(7, 1)
-        self.assertEqual(res, {}, f"returned value in case of exception should be empty dict")
+        self.assertEqual(res, {}, f"returned value in case of exception should be None")
 
     @patch("anyway.infographics_utils.create_infographics_data")
     def test_add_unqualified_news_flash(self, utils):

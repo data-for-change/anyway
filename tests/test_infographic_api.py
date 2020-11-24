@@ -110,6 +110,7 @@ class Test_Infographic_Api:
         start_time = datetime.date(2020, 1, 1)
         request_params = infographics_utils.RequestParams(
             news_flash_obj=None,
+            years_ago=1,
             location_text='',
             location_info=None,
             resolution={},

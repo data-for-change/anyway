@@ -18,7 +18,7 @@ from sqlalchemy import cast, Numeric
 from sqlalchemy import desc
 from flask_babel import _
 from anyway.backend_constants import BE_CONST
-from anyway.models import NewsFlash, AccidentMarkerView, InvolvedMarkerView
+from anyway.models import NewsFlash, AccidentMarkerView, InvolvedMarkerView, RoadSegments
 from anyway.parsers import resolution_dict
 from anyway.app_and_db import db
 from anyway.infographics_dictionaries import (
@@ -158,6 +158,7 @@ class Widget:
 
 class WidgetCollection:
     widgets: List[Type[Widget]] = []
+    widgets_dict: Dict[str, Widget] = {}
 
     def __init__(self):
         pass
@@ -169,16 +170,21 @@ class WidgetCollection:
     @staticmethod
     def register(widget_class: Type[Widget]) -> Type[Widget]:
         WidgetCollection.widgets.append(widget_class)
+        WidgetCollection.widgets_dict[widget_class.widget_id.name] = widget_class
+        logging.debug(f"register:{widget_class.widget_id.name}:{widget_class}\n")
         return widget_class
 
 
 @WidgetCollection.register
 class AccidentCountBySeverityWidget(Widget):
-    widget_id: WidgetId = dataclasses.field(init=False, default=WidgetId.accident_count_by_severity)
+    widget_id: WidgetId = WidgetId.accident_count_by_severity
+    name: str = widget_id.name
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, WidgetId.accident_count_by_severity)
+        super().__init__(request_params, type(self).widget_id)
+        self.name = type(self).widget_id.name
         self.rank = 1
+        logging.debug(f"AccidentCountBySeverityWidget.__init__:name:{self.name}:{WidgetId.accident_count_by_severity}")
 
     def generate_items(self) -> None:
         self.items = AccidentCountBySeverityWidget.get_accident_count_by_severity(
@@ -216,8 +222,12 @@ class AccidentCountBySeverityWidget(Widget):
 
 @WidgetCollection.register
 class MostSevereAccidentsTableWidget(Widget):
+    widget_id: WidgetId = WidgetId.most_severe_accidents_table
+    name: str = widget_id.name
+
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, WidgetId.most_severe_accidents_table)
+        super().__init__(request_params, type(self).widget_id)
+        self.name = type(self).widget_id.name
         self.rank = 2
 
     def generate_items(self) -> None:
@@ -277,8 +287,11 @@ class MostSevereAccidentsTableWidget(Widget):
 
 @WidgetCollection.register
 class MostSevereAccidentsWidget(Widget):
+    widget_id: WidgetId = WidgetId.most_severe_accidents
+
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, WidgetId.most_severe_accidents)
+        super().__init__(request_params, type(self).widget_id)
+        self.name = type(self).widget_id.name
         self.rank = 3
 
     def generate_items(self) -> None:
@@ -305,6 +318,8 @@ class MostSevereAccidentsWidget(Widget):
 
 @WidgetCollection.register
 class StreetViewWidget(Widget):
+    widget_id: WidgetId = WidgetId.street_view
+
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, WidgetId.street_view)
         self.rank = 4
@@ -318,10 +333,12 @@ class StreetViewWidget(Widget):
 
 @WidgetCollection.register
 class HeadOnCollisionsComparisonWidget(Widget):
+    widget_id: WidgetId = WidgetId.head_on_collisions_comparison
+
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, WidgetId.head_on_collisions_comparison)
-        self.rank = 5
-        self.text = {"title": "תאונות קטלניות ע״פ סוג"}
+            super().__init__(request_params, WidgetId.head_on_collisions_comparison)
+            self.rank = 5
+            self.text = {"title": "תאונות קטלניות ע״פ סוג"}
 
     def generate_items(self) -> None:
         self.items = HeadOnCollisionsComparisonWidget.get_head_to_head_stat(
@@ -379,8 +396,12 @@ class HeadOnCollisionsComparisonWidget(Widget):
 
 @WidgetCollection.register
 class AccidentCountByAccidentTypeWidget(Widget):
+    widget_id: WidgetId = WidgetId.accident_count_by_accident_type
+    name: str = widget_id.name
+
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, WidgetId.accident_count_by_accident_type)
+        super().__init__(request_params, type(self).widget_id)
+        self.name = type(self).widget_id.name
         self.rank = 6
 
     def generate_items(self) -> None:
@@ -411,8 +432,12 @@ class AccidentCountByAccidentTypeWidget(Widget):
 
 @WidgetCollection.register
 class AccidentsHeatMapWidget(Widget):
+    widget_id: WidgetId = WidgetId.accidents_heat_map
+    name: str = widget_id.name
+
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, WidgetId.accidents_heat_map)
+        super().__init__(request_params, type(self).widget_id)
+        self.name = type(self).widget_id.name
         self.rank = 7
         self.text = {
             "title": AccidentsHeatMapWidget.get_heat_map_title(request_params.location_info)
@@ -449,8 +474,12 @@ class AccidentsHeatMapWidget(Widget):
 
 @WidgetCollection.register
 class AccidentCountByAccidentYearWidget(Widget):
+    widget_id: WidgetId = WidgetId.accident_count_by_accident_year
+    name: str = widget_id.name
+
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, WidgetId.accident_count_by_accident_year)
+        super().__init__(request_params, type(self).widget_id)
+        self.name = type(self).widget_id.name
         self.rank = 8
         self.text = {
             "title": "כמות התאונות לפי שנה במקטע "
@@ -470,8 +499,12 @@ class AccidentCountByAccidentYearWidget(Widget):
 
 @WidgetCollection.register
 class InjuredCountByAccidentYearWidget(Widget):
+    widget_id: WidgetId = WidgetId.injured_count_by_accident_year
+    name: str = widget_id.name
+
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, WidgetId.injured_count_by_accident_year)
+        super().__init__(request_params, type(self).widget_id)
+        self.name = type(self).widget_id.name
         self.rank = 9
         self.text = {
             "title": "נפגעים בתאונות במקטע "
@@ -491,8 +524,12 @@ class InjuredCountByAccidentYearWidget(Widget):
 
 @WidgetCollection.register
 class AccidentCountByDayNightWidget(Widget):
+    widget_id: WidgetId = WidgetId.accident_count_by_day_night
+    name: str = widget_id.name
+
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, WidgetId.accident_count_by_day_night)
+        super().__init__(request_params, type(self).widget_id)
+        self.name = type(self).widget_id.name
         self.rank = 10
         self.text = {"title": "כמות תאונות ביום ובלילה"}
 
@@ -509,8 +546,12 @@ class AccidentCountByDayNightWidget(Widget):
 
 @WidgetCollection.register
 class AccidentCountByHourWidget(Widget):
+    widget_id: WidgetId = WidgetId.accident_count_by_hour
+    name: str = widget_id.name
+
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, WidgetId.accident_count_by_hour)
+        super().__init__(request_params, type(self).widget_id)
+        self.name = type(self).widget_id.name
         self.rank = 11
         self.text = {"title": "כמות תאונות לפי שעה"}
 
@@ -527,8 +568,12 @@ class AccidentCountByHourWidget(Widget):
 
 @WidgetCollection.register
 class AccidentCountByRoadLightWidget(Widget):
+    widget_id: WidgetId = WidgetId.accident_count_by_road_light
+    name: str = widget_id.name
+
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, WidgetId.accident_count_by_road_light)
+        super().__init__(request_params, type(self).widget_id)
+        self.name = type(self).widget_id.name
         self.rank = 12
         self.text = {"title": "כמות תאונות לפי תאורה"}
 
@@ -545,8 +590,12 @@ class AccidentCountByRoadLightWidget(Widget):
 
 @WidgetCollection.register
 class TopRoadSegmentsAccidentsPerKmWidget(Widget):
+    widget_id: WidgetId = WidgetId.top_road_segments_accidents_per_km
+    name: str = widget_id.name
+
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, WidgetId.top_road_segments_accidents_per_km)
+        super().__init__(request_params, type(self).widget_id)
+        self.name = type(self).widget_id.name
         self.rank = 13
         self.text = {
             "title": "תאונות לכל ק״מ כביש על פי מקטע בכביש "
@@ -597,8 +646,12 @@ class TopRoadSegmentsAccidentsPerKmWidget(Widget):
 
 @WidgetCollection.register
 class InjuredCountPerAgeGroupWidget(Widget):
+    widget_id: WidgetId = WidgetId.injured_count_per_age_group
+    name: str = widget_id.name
+
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, WidgetId.injured_count_per_age_group)
+        super().__init__(request_params, type(self).widget_id)
+        self.name = type(self).widget_id.name
         self.rank = 14
 
     def generate_items(self) -> None:
@@ -667,8 +720,12 @@ class InjuredCountPerAgeGroupWidget(Widget):
 
 @WidgetCollection.register
 class VisionZeroWidget(Widget):
+    widget_id: WidgetId = WidgetId.vision_zero
+    name: str = widget_id.name
+
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, WidgetId.vision_zero)
+        super().__init__(request_params, type(self).widget_id)
+        self.name = type(self).widget_id.name
         self.rank = 15
 
     def generate_items(self) -> None:
@@ -677,8 +734,12 @@ class VisionZeroWidget(Widget):
 
 @WidgetCollection.register
 class AccidentCountByDriverTypeWidget(Widget):
+    widget_id: WidgetId = WidgetId.accident_count_by_driver_type
+    name: str = widget_id.name
+
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, WidgetId.accident_count_by_driver_type)
+        super().__init__(request_params, type(self).widget_id)
+        self.name = type(self).widget_id.name
         self.rank = 16
         self.text = {
             "title": "מעורבות נהגים בתאונות לפי סוג במקטע "
@@ -721,8 +782,12 @@ class AccidentCountByDriverTypeWidget(Widget):
 
 @WidgetCollection.register
 class AccidentCountByCarTypeWidget(Widget):
+    widget_id: WidgetId = WidgetId.accident_count_by_car_type
+    name: str = widget_id.name
+
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, WidgetId.accident_count_by_car_type)
+        super().__init__(request_params, type(self).widget_id)
+        self.name = type(self).widget_id.name
         self.rank = 17
         self.text = {
             "title": "השוואת אחוז הרכבים בתאונות במקטע "
@@ -821,8 +886,12 @@ class AccidentCountByCarTypeWidget(Widget):
 
 @WidgetCollection.register
 class InjuredAccidentsWithPedestriansWidget(Widget):
+    widget_id: WidgetId = WidgetId.injured_accidents_with_pedestrians
+    name: str = widget_id.name
+
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, WidgetId.injured_accidents_with_pedestrians)
+        super().__init__(request_params, type(self).widget_id)
+        self.name = type(self).widget_id.name
         self.rank = 18
         self.text = {"title": "נפגעים הולכי רגל ברחוב ז׳בוטינסקי, פתח תקווה"}
 
@@ -906,8 +975,12 @@ class InjuredAccidentsWithPedestriansWidget(Widget):
 
 @WidgetCollection.register
 class AccidentSeverityByCrossLocationWidget(Widget):
+    widget_id: WidgetId = WidgetId.accident_severity_by_cross_location
+    name: str = widget_id.name
+
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, WidgetId.accident_severity_by_cross_location)
+        super().__init__(request_params, type(self).widget_id)
+        self.name = type(self).widget_id.name
         self.rank = 19
         self.text = {"title": "הולכי רגל הרוגים ופצועים קשה ברחוב בן יהודה, תל אביב"}
 
@@ -946,8 +1019,12 @@ class AccidentSeverityByCrossLocationWidget(Widget):
 
 @WidgetCollection.register
 class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
+    widget_id: WidgetId = WidgetId.motorcycle_accidents_vs_all_accidents
+    name: str = widget_id.name
+
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, WidgetId.motorcycle_accidents_vs_all_accidents)
+        super().__init__(request_params, type(self).widget_id)
+        self.name = type(self).widget_id.name
         self.rank = 20
         self.text = {"title": "תאונות אופנועים קשות וקטלניות בכביש 20 בהשוואה לכל הארץ"}
 
@@ -972,10 +1049,13 @@ class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
 
 @WidgetCollection.register
 class AccidentCountPedestriansPerVehicleStreetVsAllWidget(Widget):
+    widget_id: WidgetId = WidgetId.accident_count_pedestrians_per_vehicle_street_vs_all
+    name: str = widget_id.name
+
     def __init__(self, request_params: RequestParams):
         Widget.__init__(
-            self, request_params, WidgetId.accident_count_pedestrians_per_vehicle_street_vs_all
-        )
+            self, request_params, type(self).widget_id)
+        self.name = type(self).widget_id.name
         self.rank = 21
         self.text = {
             "title": _(
@@ -1009,8 +1089,12 @@ class AccidentCountPedestriansPerVehicleStreetVsAllWidget(Widget):
 
 @WidgetCollection.register
 class TopRoadSegmentsAccidentsWidget(Widget):
+    widget_id: WidgetId = WidgetId.top_road_segments_accidents
+    name: str = widget_id.name
+
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, WidgetId.top_road_segments_accidents)
+        super().__init__(request_params, type(self).widget_id)
+        self.name = type(self).widget_id.name
         self.rank = 22
         self.text = {"title": "5 המקטעים עם כמות התאונות הגדולה ביותר"}
 
@@ -1030,8 +1114,12 @@ class TopRoadSegmentsAccidentsWidget(Widget):
 
 @WidgetCollection.register
 class PedestrianInjuredInJunctionsWidget(Widget):
+    widget_id: WidgetId = WidgetId.pedestrian_injured_in_junctions
+    name: str = widget_id.name
+
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, WidgetId.pedestrian_injured_in_junctions)
+        super().__init__(request_params, type(self).widget_id)
+        self.name = type(self).widget_id.name
         self.rank = 23
         self.text = {"title": "מספר נפגעים הולכי רגל בצמתים - רחוב בן יהודה, תל אביב"}
 
@@ -1237,6 +1325,7 @@ def get_latest_accident_date(table_obj, filters):
 
 def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> List[Widget]:
     widgets = []
+    logging.debug(f"{WidgetCollection.widgets_dict}")
     # for w in WidgetId:
     for w in WidgetCollection.get():
         # widget: Optional[Widget] = create_widget(w, request_params)
@@ -1247,6 +1336,7 @@ def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> Li
             )
         elif widget.is_in_cache() == to_cache and widget.is_included():
             widgets.append(widget)
+            logging.debug(f"name:{widget.name}, class:{WidgetCollection.widgets_dict[widget.name]}")
     return widgets
 
 
@@ -1296,7 +1386,7 @@ def get_request_params(news_flash_id: int, number_of_years_ago: int, lang: str)\
     return request_params
 
 
-def create_infographics_data(news_flash_id, number_of_years_ago, lang: str):
+def create_infographics_data(news_flash_id, number_of_years_ago, lang: str) -> Dict:
     try:
         request_params = get_request_params(news_flash_id, number_of_years_ago, lang)
         if request_params is None:
@@ -1333,7 +1423,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago, lang: str):
     return json.dumps(output, default=str)
 
 
-def get_infographics_data(news_flash_id, years_ago, lang):
+def get_infographics_data(news_flash_id, years_ago, lang: str) -> Dict:
     if os.environ.get("FLASK_ENV") == "development":
         return create_infographics_data(news_flash_id, years_ago, lang)
     else:

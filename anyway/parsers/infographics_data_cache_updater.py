@@ -153,4 +153,4 @@ def main(update, info):
     if info:
         logging.info(get_cache_info())
     else:
-        logging.debug(f'{info}')
+        logging.debug(f"{info}")

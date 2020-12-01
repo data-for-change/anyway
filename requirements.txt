@@ -46,5 +46,5 @@ tweepy==3.8.0
 urllib3==1.25.9
 webassets==2.0
 xlrd==1.2.0
-lxml==4.5.1
+lxml==4.6.2
 boto3==1.14.48

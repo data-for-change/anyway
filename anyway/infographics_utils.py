@@ -165,20 +165,24 @@ class Widget:
 
 
 class WidgetCollection:
-    widgets: List[Type[Widget]] = []
-    widgets_dict: Dict[str, Widget] = {}
+    # widgets: List[Type[Widget]] = []
+    __widgets_dict: Dict[str, Type[Widget]] = {}
 
     def __init__(self):
         pass
 
     @staticmethod
     def get() -> List[Type[Widget]]:
-        return WidgetCollection.widgets
+        return list(WidgetCollection.__widgets_dict.values())
+
+    @staticmethod
+    def get_widget_class(name: str) -> Type[Widget]:
+        return WidgetCollection.__widgets_dict[name]
 
     @staticmethod
     def register(widget_class: Type[Widget]) -> Type[Widget]:
-        WidgetCollection.widgets.append(widget_class)
-        WidgetCollection.widgets_dict[widget_class.widget_id.name] = widget_class
+        # WidgetCollection.widgets.append(widget_class)
+        WidgetCollection.__widgets_dict[widget_class.widget_id.name] = widget_class
         logging.debug(f"register:{widget_class.widget_id.name}:{widget_class}\n")
         return widget_class
 
@@ -1343,7 +1347,7 @@ def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> Li
             )
         elif widget.is_in_cache() == to_cache and widget.is_included():
             widgets.append(widget)
-            logging.debug(f"name:{widget.name}, class:{WidgetCollection.widgets_dict[widget.name]}")
+            logging.debug(f"name:{widget.name}, class:{WidgetCollection.get_widget_class(widget.name)}")
     return widgets
 
 
@@ -1469,7 +1473,7 @@ def localize_after_cache(request_params: RequestParams, items_list: List[Dict]) 
     res = []
     for items in items_list:
         if "name" in items:
-            res.append(WidgetCollection.widgets_dict[items["name"]].localize_items(request_params, items))
+            res.append(WidgetCollection.get_widget_class(items["name"]).localize_items(request_params, items))
         else:
             logging.error(f"localize_after_cache: bad input (missing 'name' key):{items}")
     return res

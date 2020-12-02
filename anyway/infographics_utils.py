@@ -144,7 +144,9 @@ class Widget:
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         if "name" in items:
-            logging.debug(f"Widget.localize_items: widget {items['name']} should implement localize_items method")
+            logging.debug(
+                f"Widget.localize_items: widget {items['name']} should implement localize_items method"
+            )
         else:
             logging.error(f"Widget.localize_items: bad input (missing 'name' key):{items}")
         return items
@@ -164,30 +166,24 @@ class Widget:
         return output
 
 
-class WidgetCollection:
-    # widgets: List[Type[Widget]] = []
-    __widgets_dict: Dict[str, Type[Widget]] = {}
-
-    def __init__(self):
-        pass
-
-    @staticmethod
-    def get() -> List[Type[Widget]]:
-        return list(WidgetCollection.__widgets_dict.values())
-
-    @staticmethod
-    def get_widget_class(name: str) -> Type[Widget]:
-        return WidgetCollection.__widgets_dict[name]
-
-    @staticmethod
-    def register(widget_class: Type[Widget]) -> Type[Widget]:
-        # WidgetCollection.widgets.append(widget_class)
-        WidgetCollection.__widgets_dict[widget_class.widget_id.name] = widget_class
-        logging.debug(f"register:{widget_class.widget_id.name}:{widget_class}\n")
-        return widget_class
+widgets_dict: Dict[str, Type[Widget]] = {}
 
 
-@WidgetCollection.register
+def get_widget_classes() -> List[Type[Widget]]:
+    return list(widgets_dict.values())
+
+
+def get_widget_class_by_name(name: str) -> Type[Widget]:
+    return widgets_dict[name]
+
+
+def register(widget_class: Type[Widget]) -> Type[Widget]:
+    widgets_dict[widget_class.widget_id.name] = widget_class
+    logging.debug(f"register:{widget_class.widget_id.name}:{widget_class}\n")
+    return widget_class
+
+
+@register
 class AccidentCountBySeverityWidget(Widget):
     widget_id: WidgetId = WidgetId.accident_count_by_severity
     name: str = widget_id.name
@@ -196,7 +192,9 @@ class AccidentCountBySeverityWidget(Widget):
         super().__init__(request_params, type(self).widget_id)
         self.name = type(self).widget_id.name
         self.rank = 1
-        logging.debug(f"AccidentCountBySeverityWidget.__init__:name:{self.name}:{WidgetId.accident_count_by_severity}")
+        logging.debug(
+            f"AccidentCountBySeverityWidget.__init__:name:{self.name}:{WidgetId.accident_count_by_severity}"
+        )
 
     def generate_items(self) -> None:
         self.items = AccidentCountBySeverityWidget.get_accident_count_by_severity(
@@ -232,7 +230,7 @@ class AccidentCountBySeverityWidget(Widget):
         return items
 
 
-@WidgetCollection.register
+@register
 class MostSevereAccidentsTableWidget(Widget):
     widget_id: WidgetId = WidgetId.most_severe_accidents_table
     name: str = widget_id.name
@@ -297,7 +295,7 @@ class MostSevereAccidentsTableWidget(Widget):
         return accidents
 
 
-@WidgetCollection.register
+@register
 class MostSevereAccidentsWidget(Widget):
     widget_id: WidgetId = WidgetId.most_severe_accidents
 
@@ -328,7 +326,7 @@ class MostSevereAccidentsWidget(Widget):
         )
 
 
-@WidgetCollection.register
+@register
 class StreetViewWidget(Widget):
     widget_id: WidgetId = WidgetId.street_view
 
@@ -343,7 +341,7 @@ class StreetViewWidget(Widget):
         }
 
 
-@WidgetCollection.register
+@register
 class HeadOnCollisionsComparisonWidget(Widget):
     widget_id: WidgetId = WidgetId.head_on_collisions_comparison
 
@@ -406,7 +404,7 @@ class HeadOnCollisionsComparisonWidget(Widget):
         }
 
 
-@WidgetCollection.register
+@register
 class AccidentCountByAccidentTypeWidget(Widget):
     widget_id: WidgetId = WidgetId.accident_count_by_accident_type
     name: str = widget_id.name
@@ -442,7 +440,7 @@ class AccidentCountByAccidentTypeWidget(Widget):
         return merged_accident_type_count
 
 
-@WidgetCollection.register
+@register
 class AccidentsHeatMapWidget(Widget):
     widget_id: WidgetId = WidgetId.accidents_heat_map
     name: str = widget_id.name
@@ -484,7 +482,7 @@ class AccidentsHeatMapWidget(Widget):
         return df.to_dict(orient="records")  # pylint: disable=no-member
 
 
-@WidgetCollection.register
+@register
 class AccidentCountByAccidentYearWidget(Widget):
     widget_id: WidgetId = WidgetId.accident_count_by_accident_year
     name: str = widget_id.name
@@ -509,7 +507,7 @@ class AccidentCountByAccidentYearWidget(Widget):
         )
 
 
-@WidgetCollection.register
+@register
 class InjuredCountByAccidentYearWidget(Widget):
     widget_id: WidgetId = WidgetId.injured_count_by_accident_year
     name: str = widget_id.name
@@ -534,7 +532,7 @@ class InjuredCountByAccidentYearWidget(Widget):
         )
 
 
-@WidgetCollection.register
+@register
 class AccidentCountByDayNightWidget(Widget):
     widget_id: WidgetId = WidgetId.accident_count_by_day_night
     name: str = widget_id.name
@@ -556,7 +554,7 @@ class AccidentCountByDayNightWidget(Widget):
         )
 
 
-@WidgetCollection.register
+@register
 class AccidentCountByHourWidget(Widget):
     widget_id: WidgetId = WidgetId.accident_count_by_hour
     name: str = widget_id.name
@@ -578,7 +576,7 @@ class AccidentCountByHourWidget(Widget):
         )
 
 
-@WidgetCollection.register
+@register
 class AccidentCountByRoadLightWidget(Widget):
     widget_id: WidgetId = WidgetId.accident_count_by_road_light
     name: str = widget_id.name
@@ -600,7 +598,7 @@ class AccidentCountByRoadLightWidget(Widget):
         )
 
 
-@WidgetCollection.register
+@register
 class TopRoadSegmentsAccidentsPerKmWidget(Widget):
     widget_id: WidgetId = WidgetId.top_road_segments_accidents_per_km
     name: str = widget_id.name
@@ -656,7 +654,7 @@ class TopRoadSegmentsAccidentsPerKmWidget(Widget):
         return result.to_dict(orient="records")  # pylint: disable=no-member
 
 
-@WidgetCollection.register
+@register
 class InjuredCountPerAgeGroupWidget(Widget):
     widget_id: WidgetId = WidgetId.injured_count_per_age_group
     name: str = widget_id.name
@@ -730,7 +728,7 @@ class InjuredCountPerAgeGroupWidget(Widget):
         return items
 
 
-@WidgetCollection.register
+@register
 class VisionZeroWidget(Widget):
     widget_id: WidgetId = WidgetId.vision_zero
     name: str = widget_id.name
@@ -744,7 +742,7 @@ class VisionZeroWidget(Widget):
         self.items = ["vision_zero_2_plus_1"]
 
 
-@WidgetCollection.register
+@register
 class AccidentCountByDriverTypeWidget(Widget):
     widget_id: WidgetId = WidgetId.accident_count_by_driver_type
     name: str = widget_id.name
@@ -792,7 +790,7 @@ class AccidentCountByDriverTypeWidget(Widget):
         return output
 
 
-@WidgetCollection.register
+@register
 class AccidentCountByCarTypeWidget(Widget):
     widget_id: WidgetId = WidgetId.accident_count_by_car_type
     name: str = widget_id.name
@@ -896,7 +894,7 @@ class AccidentCountByCarTypeWidget(Widget):
         )
 
 
-@WidgetCollection.register
+@register
 class InjuredAccidentsWithPedestriansWidget(Widget):
     widget_id: WidgetId = WidgetId.injured_accidents_with_pedestrians
     name: str = widget_id.name
@@ -985,7 +983,7 @@ class InjuredAccidentsWithPedestriansWidget(Widget):
         ]
 
 
-@WidgetCollection.register
+@register
 class AccidentSeverityByCrossLocationWidget(Widget):
     widget_id: WidgetId = WidgetId.accident_severity_by_cross_location
     name: str = widget_id.name
@@ -1029,7 +1027,7 @@ class AccidentSeverityByCrossLocationWidget(Widget):
         ]
 
 
-@WidgetCollection.register
+@register
 class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
     widget_id: WidgetId = WidgetId.motorcycle_accidents_vs_all_accidents
     name: str = widget_id.name
@@ -1059,14 +1057,13 @@ class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
         ]
 
 
-@WidgetCollection.register
+@register
 class AccidentCountPedestriansPerVehicleStreetVsAllWidget(Widget):
     widget_id: WidgetId = WidgetId.accident_count_pedestrians_per_vehicle_street_vs_all
     name: str = widget_id.name
 
     def __init__(self, request_params: RequestParams):
-        Widget.__init__(
-            self, request_params, type(self).widget_id)
+        Widget.__init__(self, request_params, type(self).widget_id)
         self.name = type(self).widget_id.name
         self.rank = 21
         self.text = {
@@ -1099,7 +1096,7 @@ class AccidentCountPedestriansPerVehicleStreetVsAllWidget(Widget):
         ]
 
 
-@WidgetCollection.register
+@register
 class TopRoadSegmentsAccidentsWidget(Widget):
     widget_id: WidgetId = WidgetId.top_road_segments_accidents
     name: str = widget_id.name
@@ -1124,7 +1121,7 @@ class TopRoadSegmentsAccidentsWidget(Widget):
         ]
 
 
-@WidgetCollection.register
+@register
 class PedestrianInjuredInJunctionsWidget(Widget):
     widget_id: WidgetId = WidgetId.pedestrian_injured_in_junctions
     name: str = widget_id.name
@@ -1338,7 +1335,7 @@ def get_latest_accident_date(table_obj, filters):
 def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> List[Widget]:
     widgets = []
     # for w in WidgetId:
-    for w in WidgetCollection.get():
+    for w in get_widget_classes():
         # widget: Optional[Widget] = create_widget(w, request_params)
         widget: Optional[Widget] = w(request_params)
         if widget is None:
@@ -1347,12 +1344,13 @@ def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> Li
             )
         elif widget.is_in_cache() == to_cache and widget.is_included():
             widgets.append(widget)
-            logging.debug(f"name:{widget.name}, class:{WidgetCollection.get_widget_class(widget.name)}")
+            logging.debug(f"name:{widget.name}, class:{get_widget_class_by_name(widget.name)}")
     return widgets
 
 
-def get_request_params(news_flash_id: int, number_of_years_ago: int, lang: str)\
-        -> Optional[RequestParams]:
+def get_request_params(
+    news_flash_id: int, number_of_years_ago: int, lang: str
+) -> Optional[RequestParams]:
     try:
         number_of_years_ago = int(number_of_years_ago)
     except ValueError:
@@ -1392,7 +1390,7 @@ def get_request_params(news_flash_id: int, number_of_years_ago: int, lang: str)\
         gps=gps,
         start_time=start_time,
         end_time=end_time,
-        lang=lang
+        lang=lang,
     )
     logging.debug(f"Ending get_request_params. params: {request_params}")
     return request_params
@@ -1473,7 +1471,9 @@ def localize_after_cache(request_params: RequestParams, items_list: List[Dict]) 
     res = []
     for items in items_list:
         if "name" in items:
-            res.append(WidgetCollection.get_widget_class(items["name"]).localize_items(request_params, items))
+            res.append(
+                get_widget_class_by_name(items["name"]).localize_items(request_params, items)
+            )
         else:
             logging.error(f"localize_after_cache: bad input (missing 'name' key):{items}")
     return res

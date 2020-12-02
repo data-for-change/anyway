@@ -13,7 +13,7 @@ import traceback
 
 import pandas as pd
 from collections import defaultdict
-from sqlalchemy import func
+from sqlalchemy import func, distinct, literal_column, case
 from sqlalchemy import cast, Numeric
 from sqlalchemy import desc
 from flask_babel import _
@@ -261,7 +261,7 @@ class MostSevereAccidentsTableWidget(Widget):
             )
             # TODO: remove injured_count after FE adaptation to light and severe counts
             accident["injured_count"] = (
-                accident["severe_injured_count"] + accident["light_injured_count"]
+                    accident["severe_injured_count"] + accident["light_injured_count"]
             )
             del (
                 accident["accident_timestamp"],
@@ -454,7 +454,7 @@ class AccidentCountByAccidentYearWidget(Widget):
         self.rank = 8
         self.text = {
             "title": "כמות התאונות לפי שנה במקטע "
-            + self.request_params.location_info["road_segment_name"]
+                     + self.request_params.location_info["road_segment_name"]
         }
 
     def generate_items(self) -> None:
@@ -475,7 +475,7 @@ class InjuredCountByAccidentYearWidget(Widget):
         self.rank = 9
         self.text = {
             "title": "נפגעים בתאונות במקטע "
-            + self.request_params.location_info["road_segment_name"]
+                     + self.request_params.location_info["road_segment_name"]
         }
 
     def generate_items(self) -> None:
@@ -550,7 +550,7 @@ class TopRoadSegmentsAccidentsPerKmWidget(Widget):
         self.rank = 13
         self.text = {
             "title": "תאונות לכל ק״מ כביש על פי מקטע בכביש "
-            + str(int(self.request_params.location_info["road1"]))
+                     + str(int(self.request_params.location_info["road1"]))
         }
 
     def generate_items(self) -> None:
@@ -563,7 +563,7 @@ class TopRoadSegmentsAccidentsPerKmWidget(Widget):
 
     @staticmethod
     def get_top_road_segments_accidents_per_km(
-        resolution, location_info, start_time=None, end_time=None, limit=3
+            resolution, location_info, start_time=None, end_time=None, limit=3
     ):
         if resolution != "כביש בינעירוני":  # relevent for non urban roads only
             return {}
@@ -583,12 +583,12 @@ class TopRoadSegmentsAccidentsPerKmWidget(Widget):
                 ).label("accidents_per_km"),
                 func.count(AccidentMarkerView.id).label("total_accidents"),
             )
-            .filter(AccidentMarkerView.road_segment_name.isnot(None))
-            .group_by(
+                .filter(AccidentMarkerView.road_segment_name.isnot(None))
+                .group_by(
                 AccidentMarkerView.road_segment_name, AccidentMarkerView.road_segment_length_km
             )
-            .order_by(desc("accidents_per_km"))
-            .limit(limit)
+                .order_by(desc("accidents_per_km"))
+                .limit(limit)
         )
 
         result = pd.read_sql_query(query.statement, query.session.bind)
@@ -682,7 +682,7 @@ class AccidentCountByDriverTypeWidget(Widget):
         self.rank = 16
         self.text = {
             "title": "מעורבות נהגים בתאונות לפי סוג במקטע "
-            + self.request_params.location_info["road_segment_name"]
+                     + self.request_params.location_info["road_segment_name"]
         }
 
     def generate_items(self) -> None:
@@ -708,8 +708,8 @@ class AccidentCountByDriverTypeWidget(Widget):
             elif vehicle_type in BE_CONST.PRIVATE_DRIVER_VEHICLE_TYPES:
                 driver_types[driver_type_hebrew_dict["private_vehicle_driver"]] += count
             elif (
-                vehicle_type in BE_CONST.LIGHT_ELECTRIC_VEHICLE_TYPES
-                or vehicle_type in BE_CONST.OTHER_VEHICLES_TYPES
+                    vehicle_type in BE_CONST.LIGHT_ELECTRIC_VEHICLE_TYPES
+                    or vehicle_type in BE_CONST.OTHER_VEHICLES_TYPES
             ):
                 driver_types[driver_type_hebrew_dict["other_driver"]] += count
         output = [
@@ -726,8 +726,8 @@ class AccidentCountByCarTypeWidget(Widget):
         self.rank = 17
         self.text = {
             "title": "השוואת אחוז הרכבים בתאונות במקטע "
-            + self.request_params.location_info["road_segment_name"]
-            + " לעומת ממוצע ארצי"
+                     + self.request_params.location_info["road_segment_name"]
+                     + " לעומת ממוצע ארצי"
         }
 
     def generate_items(self) -> None:
@@ -739,7 +739,7 @@ class AccidentCountByCarTypeWidget(Widget):
 
     @staticmethod
     def get_stats_accidents_by_car_type_with_national_data(
-        request_params: RequestParams, involved_by_vehicle_type_data=None
+            request_params: RequestParams, involved_by_vehicle_type_data=None
     ):
         out = []
         if involved_by_vehicle_type_data is None:
@@ -949,7 +949,8 @@ class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, WidgetId.motorcycle_accidents_vs_all_accidents)
         self.rank = 20
-        self.text = {"title": "תאונות אופנועים קשות וקטלניות בכביש 20 בהשוואה לכל הארץ"}
+        self.road_number = request_params.location_info["road1"]
+        self.text = {"title": f"תאונות אופנועים קשות וקטלניות בכביש {int(self.road_number)} בהשוואה לכל הארץ"}
 
     # noinspection PyMethodMayBeStatic
     def is_in_cache(self) -> bool:
@@ -957,17 +958,96 @@ class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
 
     def generate_items(self) -> None:
         self.items = (
-            MotorcycleAccidentsVsAllAccidentsWidget.motorcycle_accidents_vs_all_accidents_mock_data()
+            MotorcycleAccidentsVsAllAccidentsWidget.motorcycle_accidents_vs_all_accidents(
+                self.request_params.start_time, self.request_params.end_time, self.road_number)
         )
 
+    '''with ROAD_NUMBER as (
+        select 20 as val
+    )
+    SELECT 
+    LOCATION, vehicle, num_of_accidents/sum(num_of_accidents) 
+        over(PARTITION BY LOCATION):: decimal AS percentage 
+    FROM 
+    (SELECT CASE WHEN road1=(select * from ROAD_NUMBER) or road2 = (select * from ROAD_NUMBER) 
+                    THEN CONCAT('כביש ',(select * from ROAD_NUMBER)::text)  
+                 ELSE 'כל הארץ' END AS LOCATION, 
+    -- grouping of vehicles 
+    CASE WHEN involve_vehicle_type IN (8, 10, 19, 9) THEN 'אופנוע' ELSE 'אחר' END AS vehicle,
+    COUNT(DISTINCT provider_and_id) num_of_accidents 
+    FROM involved_markers_hebrew 
+    WHERE road_type in (3,4) -- only inter-city 
+    AND accident_severity in (1,2) GROUP BY 1,2 ORDER BY 3 DESC) as ACCIDENTS_COUNT'''
+
     @staticmethod
-    def motorcycle_accidents_vs_all_accidents_mock_data():  # Temporary for Frontend
+    def motorcycle_accidents_vs_all_accidents(start_time, end_time, road_number):
+        location_label = "location"
+        location_all = "כל הארץ"
+        location_road = f'כביש {int(road_number)}'
+        case_location = case([
+            ((InvolvedMarkerView.road1 == road_number) | (InvolvedMarkerView.road2 == road_number),
+             location_road)
+        ],
+            else_=literal_column(f"'{location_all}'")
+        ).label(location_label)
+
+        vehicle_label = "vehicle"
+        vehicle_other = "אחר"
+        vehicle_motorcycle = "אופנוע"
+        case_vehicle = case([(
+            InvolvedMarkerView.involve_vehicle_type.in_([8, 10, 19, 9]), literal_column(f"'{vehicle_motorcycle}'")
+        )],
+            else_=literal_column(f"'{vehicle_other}'")
+        ).label(vehicle_label)
+
+        query = get_query(table_obj=InvolvedMarkerView, filters={}, start_time=start_time,
+                          end_time=end_time)
+
+        query_columns = [InvolvedMarkerView.accident_id, InvolvedMarkerView.provider_and_id,
+                         InvolvedMarkerView.road_type, InvolvedMarkerView.accident_severity,
+                         InvolvedMarkerView.provider_code, InvolvedMarkerView.involve_vehicle_type,
+                         InvolvedMarkerView.road1, InvolvedMarkerView.road2]
+
+        num_accidents_label = "num_of_accidents"
+        query = (query.with_entities(*query_columns, case_location, case_vehicle,
+                                     func.count(distinct(InvolvedMarkerView.provider_and_id))
+                                     .label(num_accidents_label))
+                 .filter(InvolvedMarkerView.road_type.in_([3, 4]))
+                 .filter(InvolvedMarkerView.accident_severity.in_([1, 2]))
+                 .group_by(*query_columns)
+                 .order_by(desc(InvolvedMarkerView.provider_code))
+                 )
+        query_result = pd.read_sql_query(query.statement, query.session.bind)
+
+        counter_road_motorcycle = 0
+        counter_all_motorcycle = 0
+        counter_road_other = 0
+        counter_all_other = 0
+        for record in query_result.to_dict(orient="records"):
+            if record[location_label] == location_all:
+                if record[vehicle_label] == vehicle_other:
+                    counter_all_other += 1
+                else:
+                    counter_all_motorcycle += 1
+            else:
+                if record[vehicle_label] == vehicle_other:
+                    counter_road_other += 1
+                else:
+                    counter_road_motorcycle += 1
+        sum_road = counter_road_other + counter_road_motorcycle
+        sum_all = counter_all_other + counter_all_motorcycle
+        percentage_label = "percentage"
+
         return [
-            {"location": "כביש 20", "vehicle": "אופנוע", "percentage": 0.50},
-            {"location": "כביש 20", "vehicle": "אחר", "percentage": 0.50},
-            {"location": "כל הארץ", "vehicle": "אחר", "percentage": 0.80},
-            {"location": "כל הארץ", "vehicle": "אופנוע", "percentage": 0.20},
-        ]
+            {location_label: location_road, vehicle_label: vehicle_motorcycle,
+             percentage_label: counter_road_motorcycle / sum_road},
+            {location_label: location_road, vehicle_label: vehicle_other,
+             percentage_label: counter_road_other / sum_road},
+            {location_label: location_all, vehicle_label: vehicle_motorcycle,
+             percentage_label: counter_all_motorcycle / sum_all},
+            {location_label: location_all, vehicle_label: vehicle_other,
+             percentage_label: counter_all_other / sum_all},
+            ]
 
 
 @WidgetCollection.register
@@ -1080,7 +1160,7 @@ def get_query(table_obj, filters, start_time, end_time):
 
 
 def get_accidents_stats(
-    table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None
+        table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None
 ):
     filters = filters or {}
     filters["provider_code"] = [
@@ -1113,7 +1193,7 @@ def get_injured_filters(location_info):
 
 
 def get_most_severe_accidents_with_entities(
-    table_obj, filters, entities, start_time, end_time, limit=10
+        table_obj, filters, entities, start_time, end_time, limit=10
 ):
     filters = filters or {}
     filters["provider_code"] = [
@@ -1250,7 +1330,7 @@ def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> Li
     return widgets
 
 
-def get_request_params(news_flash_id: int, number_of_years_ago: int, lang: str)\
+def get_request_params(news_flash_id: int, number_of_years_ago: int, lang: str) \
         -> Optional[RequestParams]:
     try:
         number_of_years_ago = int(number_of_years_ago)
@@ -1317,11 +1397,11 @@ def create_infographics_data(news_flash_id, number_of_years_ago, lang: str):
         }
         output["widgets"] = []
         output["meta"]["dates_comment"] = (
-            str(request_params.start_time.year)
-            + "-"
-            + str(request_params.end_time.year)
-            + ", עדכון אחרון: "
-            + str(request_params.end_time)
+                str(request_params.start_time.year)
+                + "-"
+                + str(request_params.end_time.year)
+                + ", עדכון אחרון: "
+                + str(request_params.end_time)
         )
         widgets: List[Widget] = generate_widgets(request_params=request_params, to_cache=True)
         widgets.extend(generate_widgets(request_params=request_params, to_cache=False))

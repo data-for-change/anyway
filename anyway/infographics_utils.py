@@ -962,23 +962,6 @@ class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
                 self.request_params.start_time, self.request_params.end_time, self.road_number)
         )
 
-    '''with ROAD_NUMBER as (
-        select 20 as val
-    )
-    SELECT 
-    LOCATION, vehicle, num_of_accidents/sum(num_of_accidents) 
-        over(PARTITION BY LOCATION):: decimal AS percentage 
-    FROM 
-    (SELECT CASE WHEN road1=(select * from ROAD_NUMBER) or road2 = (select * from ROAD_NUMBER) 
-                    THEN CONCAT('כביש ',(select * from ROAD_NUMBER)::text)  
-                 ELSE 'כל הארץ' END AS LOCATION, 
-    -- grouping of vehicles 
-    CASE WHEN involve_vehicle_type IN (8, 10, 19, 9) THEN 'אופנוע' ELSE 'אחר' END AS vehicle,
-    COUNT(DISTINCT provider_and_id) num_of_accidents 
-    FROM involved_markers_hebrew 
-    WHERE road_type in (3,4) -- only inter-city 
-    AND accident_severity in (1,2) GROUP BY 1,2 ORDER BY 3 DESC) as ACCIDENTS_COUNT'''
-
     @staticmethod
     def motorcycle_accidents_vs_all_accidents(start_time, end_time, road_number):
         location_label = "location"
@@ -995,7 +978,8 @@ class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
         vehicle_other = "אחר"
         vehicle_motorcycle = "אופנוע"
         case_vehicle = case([(
-            InvolvedMarkerView.involve_vehicle_type.in_([8, 10, 19, 9]), literal_column(f"'{vehicle_motorcycle}'")
+            InvolvedMarkerView.involve_vehicle_type.in_(BE_CONST.MOTORCYCLE_VEHICLE_TYPES),
+            literal_column(f"'{vehicle_motorcycle}'")
         )],
             else_=literal_column(f"'{vehicle_other}'")
         ).label(vehicle_label)
@@ -1012,8 +996,9 @@ class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
         query = (query.with_entities(*query_columns, case_location, case_vehicle,
                                      func.count(distinct(InvolvedMarkerView.provider_and_id))
                                      .label(num_accidents_label))
-                 .filter(InvolvedMarkerView.road_type.in_([3, 4]))
-                 .filter(InvolvedMarkerView.accident_severity.in_([1, 2]))
+                 .filter(InvolvedMarkerView.road_type.in_(BE_CONST.NON_CITY_ROAD_TYPES))
+                 .filter(InvolvedMarkerView.accident_severity.in_([BE_CONST.ACCIDENT_SEVERITY_DEADLY,
+                                                                   BE_CONST.ACCIDENT_SEVERITY_SEVERE]))
                  .group_by(*query_columns)
                  .order_by(desc(InvolvedMarkerView.provider_code))
                  )

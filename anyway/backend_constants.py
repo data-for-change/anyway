@@ -43,6 +43,6 @@ class BackEndConstants(object):
     SOURCE_MAPPING = {"walla": "וואלה", "twitter": "מד״א", "ynet": "ynet"}
 
     UNKNOWN = "UNKNOWN"
-
+    DEFAULT_REDIRECT_URL = "https://anyway-infographics-staging.web.app/"
 
 BE_CONST = BackEndConstants()

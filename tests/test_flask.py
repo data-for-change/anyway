@@ -9,6 +9,7 @@ from http import client as http_client
 from urlobject import URLObject
 
 from anyway.app_and_db import app as flask_app
+from anyway.flask_app import check_is_a_safe_redirect_url
 
 
 @pytest.fixture
@@ -17,6 +18,55 @@ def app():
 
 
 query_flag = partial(pytest.mark.parametrize, argvalues=["1", ""])
+
+
+def test_url_redirect_checker(app):
+    bad_urls = [
+        "127,0.0.1",
+        "127,0.0.1:50",
+        "127.0.0.a:50",
+        "127.0.0.1:50a",
+        "https://127.0.0.a:50",
+        "https://127.0.0.2:50",
+        "https://127.0.0.1:50a",
+        "https://127.0.0.1:a",
+        "https://127.0.0.1:12345678",
+        "https://127.0.0.1:12345678",
+        "https://127.0.0.1.com",
+        "127.0.0.1:50/test" "127.0.0.1",
+        "127.0.0.1:50",
+        "www.anyway.co.il",
+        "https://www.anyway.com",
+        "anyway.co.il",
+        "https//cnn.com",
+        "https//www.cnn.com" "https://www.anyway.co.il.com",
+        "http://www.anyway.co.il.com",
+        "https://anyway.com" "www.anyway-infographics-staging.web.app",
+        "https://anyway-infographics-staging.web.app.com" "anyway-infographics-staging.web.app.com",
+        "anyway-infographics-staging.web.app",
+        "anyway-infographics-staging.web.app/test",
+        "localhost",
+        "localhost:8000",
+        "localhost.com",
+    ]
+
+    good_urls = [
+        "https://127.0.0.1",
+        "https://127.0.0.1:50",
+        "http://localhost",
+        "http://localhost:8000",
+        "https://127.0.0.1:50/test",
+        "https://www.anyway.co.il/test",
+        "https://www.anyway.co.il",
+        "https://anyway-infographics-staging.web.app",
+        "https://anyway-infographics-staging.web.app/test",
+    ]
+
+    for url in bad_urls:
+        assert check_is_a_safe_redirect_url(url) is False
+
+    for url in good_urls:
+        assert check_is_a_safe_redirect_url(url) is True
 
 
 @pytest.mark.server

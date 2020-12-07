@@ -10,16 +10,16 @@ on:
       - master
       - dev
 jobs:
-  Eslint:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Setup Node.js environment
-      uses: actions/setup-node@v1.2.6
-      with:
-          node-version: '8.17'
-    - run: npm install -g eslint@6.8.0
-    - run: eslint static/js --ignore-path=static/js/.eslintignore
+  #Eslint:
+  #  runs-on: ubuntu-latest
+  #  steps:
+  #  - uses: actions/checkout@v2
+  #  - name: Setup Node.js environment
+  #    uses: actions/setup-node@v1.4.1
+  #    with:
+  #        node-version: '8.17'
+  #  - run: npm install -g eslint@6.8.0
+  #  - run: eslint static/js --ignore-path=static/js/.eslintignore
   Pylint:
     runs-on: ubuntu-latest
     steps:

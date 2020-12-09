@@ -965,13 +965,13 @@ class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
     @staticmethod
     def motorcycle_accidents_vs_all_accidents(start_time, end_time, road_number):
         location_label = "location"
-        location_all = "כל הארץ"
+        location_other = "שאר הארץ"
         location_road = f'כביש {int(road_number)}'
         case_location = case([
             ((InvolvedMarkerView.road1 == road_number) | (InvolvedMarkerView.road2 == road_number),
              location_road)
         ],
-            else_=literal_column(f"'{location_all}'")
+            else_=literal_column(f"'{location_other}'")
         ).label(location_label)
 
         vehicle_label = "vehicle"
@@ -987,51 +987,50 @@ class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
         query = get_query(table_obj=InvolvedMarkerView, filters={}, start_time=start_time,
                           end_time=end_time)
 
-        query_columns = [InvolvedMarkerView.accident_id, InvolvedMarkerView.provider_and_id,
-                         InvolvedMarkerView.road_type, InvolvedMarkerView.accident_severity,
-                         InvolvedMarkerView.provider_code, InvolvedMarkerView.involve_vehicle_type,
-                         InvolvedMarkerView.road1, InvolvedMarkerView.road2]
-
         num_accidents_label = "num_of_accidents"
-        query = (query.with_entities(*query_columns, case_location, case_vehicle,
+        query = (query.with_entities(case_location, case_vehicle,
                                      func.count(distinct(InvolvedMarkerView.provider_and_id))
                                      .label(num_accidents_label))
                  .filter(InvolvedMarkerView.road_type.in_(BE_CONST.NON_CITY_ROAD_TYPES))
                  .filter(InvolvedMarkerView.accident_severity.in_([BE_CONST.ACCIDENT_SEVERITY_DEADLY,
                                                                    BE_CONST.ACCIDENT_SEVERITY_SEVERE]))
-                 .group_by(*query_columns)
-                 .order_by(desc(InvolvedMarkerView.provider_code))
+                 .group_by(location_label, vehicle_label)
+                 .order_by(desc(num_accidents_label))
                  )
-        query_result = pd.read_sql_query(query.statement, query.session.bind)
+        results = pd.read_sql_query(query.statement, query.session.bind)\
+            .to_dict(orient="records")  # pylint: disable=no-member
 
         counter_road_motorcycle = 0
-        counter_all_motorcycle = 0
+        counter_other_motorcycle = 0
         counter_road_other = 0
-        counter_all_other = 0
-        for record in query_result.to_dict(orient="records"):
-            if record[location_label] == location_all:
+        counter_other_other = 0
+        for record in results:
+            if record[location_label] == location_other:
                 if record[vehicle_label] == vehicle_other:
-                    counter_all_other += 1
+                    counter_other_other = record[num_accidents_label]
                 else:
-                    counter_all_motorcycle += 1
+                    counter_other_motorcycle = record[num_accidents_label]
             else:
                 if record[vehicle_label] == vehicle_other:
-                    counter_road_other += 1
+                    counter_road_other = record[num_accidents_label]
                 else:
-                    counter_road_motorcycle += 1
+                    counter_road_motorcycle = record[num_accidents_label]
         sum_road = counter_road_other + counter_road_motorcycle
-        sum_all = counter_all_other + counter_all_motorcycle
+        if sum_road == 0:
+            sum_road = 1  # prevent division by zero
+        sum_all = counter_other_other + counter_other_motorcycle + sum_road
         percentage_label = "percentage"
+        location_all_label = "כל הארץ"
 
         return [
             {location_label: location_road, vehicle_label: vehicle_motorcycle,
              percentage_label: counter_road_motorcycle / sum_road},
             {location_label: location_road, vehicle_label: vehicle_other,
              percentage_label: counter_road_other / sum_road},
-            {location_label: location_all, vehicle_label: vehicle_motorcycle,
-             percentage_label: counter_all_motorcycle / sum_all},
-            {location_label: location_all, vehicle_label: vehicle_other,
-             percentage_label: counter_all_other / sum_all},
+            {location_label: location_all_label, vehicle_label: vehicle_motorcycle,
+             percentage_label: (counter_other_motorcycle + counter_road_motorcycle) / sum_all},
+            {location_label: location_all_label, vehicle_label: vehicle_other,
+             percentage_label: (counter_other_other + counter_road_other) / sum_all},
             ]
 
 
@@ -1044,7 +1043,8 @@ class AccidentCountPedestriansPerVehicleStreetVsAllWidget(Widget):
         self.rank = 21
         self.text = {
             "title": _(
-                "Pedestrian Injuries on Ben Yehuda Street in Tel Aviv by Type of hitting Vehicle, Compared to Urban Accidents Across the country"
+                "Pedestrian Injuries on Ben Yehuda Street in Tel Aviv by Type of hitting Vehicle, Compared to Urban "
+                "Accidents Across the country "
             )
         }
 

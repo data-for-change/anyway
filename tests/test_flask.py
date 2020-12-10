@@ -1,15 +1,22 @@
 # -*- coding: utf-8 -*-
 # from anyway.utilities import open_utf8
 import json
+import os
 from collections import Counter
 from functools import partial
+from unittest import mock
+from unittest.mock import patch
 
 import pytest
 from http import client as http_client
+
+import typing
+
+from flask import Response
+from flask.testing import FlaskClient
 from urlobject import URLObject
 
 from anyway.app_and_db import app as flask_app
-from anyway.flask_app import check_is_a_safe_redirect_url
 
 
 @pytest.fixture
@@ -18,55 +25,6 @@ def app():
 
 
 query_flag = partial(pytest.mark.parametrize, argvalues=["1", ""])
-
-
-def test_url_redirect_checker(app):
-    bad_urls = [
-        "127,0.0.1",
-        "127,0.0.1:50",
-        "127.0.0.a:50",
-        "127.0.0.1:50a",
-        "https://127.0.0.a:50",
-        "https://127.0.0.2:50",
-        "https://127.0.0.1:50a",
-        "https://127.0.0.1:a",
-        "https://127.0.0.1:12345678",
-        "https://127.0.0.1:12345678",
-        "https://127.0.0.1.com",
-        "127.0.0.1:50/test" "127.0.0.1",
-        "127.0.0.1:50",
-        "www.anyway.co.il",
-        "https://www.anyway.com",
-        "anyway.co.il",
-        "https//cnn.com",
-        "https//www.cnn.com" "https://www.anyway.co.il.com",
-        "http://www.anyway.co.il.com",
-        "https://anyway.com" "www.anyway-infographics-staging.web.app",
-        "https://anyway-infographics-staging.web.app.com" "anyway-infographics-staging.web.app.com",
-        "anyway-infographics-staging.web.app",
-        "anyway-infographics-staging.web.app/test",
-        "localhost",
-        "localhost:8000",
-        "localhost.com",
-    ]
-
-    good_urls = [
-        "https://127.0.0.1",
-        "https://127.0.0.1:50",
-        "http://localhost",
-        "http://localhost:8000",
-        "https://127.0.0.1:50/test",
-        "https://www.anyway.co.il/test",
-        "https://www.anyway.co.il",
-        "https://anyway-infographics-staging.web.app",
-        "https://anyway-infographics-staging.web.app/test",
-    ]
-
-    for url in bad_urls:
-        assert check_is_a_safe_redirect_url(url) is False
-
-    for url in good_urls:
-        assert check_is_a_safe_redirect_url(url) is True
 
 
 @pytest.mark.server
@@ -160,3 +118,99 @@ def test_markers(
         assert show_light or marker["accident_severity"] != 3
         assert show_accurate or marker["location_accuracy"] != 1
         assert show_approx or marker["location_accuracy"] == 1
+
+
+@patch.dict(os.environ, {"FLASK_ENV": "test"})
+def test_user_update(app):
+    rv = user_update_post(app)
+    assert rv.status_code == 401
+    assert rv.data == b"User not login"
+
+    with patch("flask_login.utils._get_user") as current_user:
+        user = mock.MagicMock()
+        current_user.return_value = user
+        current_user.return_value.is_anonymous = False
+
+        rv = user_update_post(app)
+        assert rv.status_code == 400
+        assert rv.data == b"Bad response(not a JSON or mimetype does not indicate JSON)"
+
+        rv = user_update_post_json(app)
+        assert rv.status_code == 400
+        assert b"Failed to decode JSON object" in rv.data
+
+        rv = user_update_post_json(app, json={})
+        assert rv.status_code == 400
+        assert rv.data == b"Bad response(not a JSON or mimetype does not indicate JSON)"
+
+        rv = user_update_post_json(app, json={"a": "a"})
+        assert rv.status_code == 400
+        assert rv.data == b"Bad response(Unknown field a)"
+
+        rv = user_update_post_json(app, json={"first_name": "a"})
+        assert rv.status_code == 400
+        assert rv.data == b"Bad response(First name or Last name is missing)"
+
+        rv = user_update_post_json(app, json={"last_name": "a"})
+        assert rv.status_code == 400
+        assert rv.data == b"Bad response(First name or Last name is missing)"
+
+        with patch("anyway.flask_app.get_current_user_email") as get_current_user_email:
+            get_current_user_email.side_effect = lambda: None
+            rv = user_update_post_json(app, json={"first_name": "a", "last_name": "a"})
+            assert rv.status_code == 400
+            assert (
+                rv.data
+                == b"Bad response(There is no email in our DB and there is no email in the json)"
+            )
+
+            rv = user_update_post_json(
+                app, json={"first_name": "a", "last_name": "a", "email": "aaaa"}
+            )
+            assert rv.status_code == 400
+            assert rv.data == b"Bad response(Bad email address)"
+
+            get_current_user_email.side_effect = lambda: "aa@bb.com"
+            rv = user_update_post_json(
+                app, json={"first_name": "a", "last_name": "a", "force_update_email": "1"}
+            )
+            assert rv.status_code == 400
+            assert (
+                rv.data == b"Bad response(You set force_update_email but didn't gave us an email)"
+            )
+
+            rv = user_update_post_json(
+                app, json={"first_name": "a", "last_name": "a", "phone": "1234567"}
+            )
+            assert rv.status_code == 400
+            assert rv.data == b"Bad response(Bad phone number)"
+
+            rv = user_update_post_json(
+                app, json={"first_name": "a", "last_name": "a", "phone": "0541234567"}
+            )
+            assert rv.status_code == 200
+
+            rv = user_update_post_json(app, json={"first_name": "a", "last_name": "a"})
+            assert rv.status_code == 200
+
+            send_json = {
+                "first_name": "a",
+                "last_name": "a",
+                "force_update_email": 1,
+                "email": "aa@gmail.com",
+                "phone": "0541234567",
+                "user_type": "journalist",
+                "user_work_place": "ynet",
+                "user_url": "http:\\www.a.com",
+                "self_desc": "a",
+            }
+            rv = user_update_post_json(app, json=send_json)
+            assert rv.status_code == 200
+
+
+def user_update_post_json(app: FlaskClient, json: typing.Optional[dict] = None) -> Response:
+    return app.post("/user/update", json=json, follow_redirects=True, mimetype="application/json")
+
+
+def user_update_post(app: FlaskClient) -> Response:
+    return app.post("/user/update", follow_redirects=True)

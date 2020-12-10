@@ -3,7 +3,7 @@ import json
 
 import requests
 import typing
-from flask import current_app, url_for, request, redirect
+from flask import current_app, url_for, request, redirect, Response
 from rauth import OAuth2Service
 
 from anyway.dataclasses.user_data import UserData
@@ -12,7 +12,7 @@ from anyway.dataclasses.user_data import UserData
 class OAuthSignIn(object):
     providers = {}
 
-    def __init__(self, provider_name):
+    def __init__(self, provider_name: str):
         self.provider_name = provider_name
         credentials = current_app.config["OAUTH_CREDENTIALS"][provider_name]
         self.consumer_id = credentials["id"]
@@ -28,56 +28,14 @@ class OAuthSignIn(object):
         return url_for("oauth_callback", provider=self.provider_name, _external=True)
 
     @classmethod
-    def get_provider(self, provider_name):
-        # This is quick fix for the DEMO - to make sure that anyway.co.il is fully compatible with https://anyway-infographics-staging.web.app/
-        if provider_name != "google":
-            return None
-
+    def get_provider(self, provider_name: str):
         if not self.providers:
             self.providers = {}
             for provider_class in self.__subclasses__():
+                # noinspection PyArgumentList
                 provider = provider_class()
                 self.providers[provider.provider_name] = provider
         return self.providers[provider_name]
-
-
-class FacebookSignIn(OAuthSignIn):
-    def __init__(self):
-        super(FacebookSignIn, self).__init__("facebook")
-        self.service = OAuth2Service(
-            name="facebook",
-            client_id=self.consumer_id,
-            client_secret=self.consumer_secret,
-            authorize_url="https://graph.facebook.com/oauth/authorize",
-            access_token_url="https://graph.facebook.com/oauth/access_token",
-            base_url="https://graph.facebook.com/",
-        )
-
-    def authorize(self, **kwargs):
-        return redirect(
-            self.service.get_authorize_url(
-                scope="email", response_type="code", redirect_uri=self.get_callback_url()
-            )
-        )
-
-    def callback(self) -> typing.Optional[UserData]:
-        if "code" not in request.args:
-            return None
-        oauth_session = self.service.get_auth_session(
-            data={
-                "code": request.args["code"],
-                "grant_type": "authorization_code",
-                "redirect_uri": self.get_callback_url(),
-            },
-            decoder=json.loads,
-        )
-        # TODO: enrich facebook data collection
-        me = oauth_session.get("me?fields=id,email").json()
-        name = me.get("email").split("@")[0],  # Facebook does not provide username, so the email's user is used instead
-        data_of_user = UserData(name=name, email=me.get("email"), service_user_id="facebook$" + me["id"])
-
-
-        return data_of_user
 
 
 class GoogleSignIn(OAuthSignIn):
@@ -95,7 +53,7 @@ class GoogleSignIn(OAuthSignIn):
             access_token_url=google_params.get("token_endpoint"),
         )
 
-    def authorize(self, **kwargs):
+    def authorize(self, **kwargs) -> Response:
         redirect_url = kwargs["redirect_url"]
         state = {"redirect_url": redirect_url}
         state_json = json.dumps(state)

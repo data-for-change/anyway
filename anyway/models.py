@@ -60,15 +60,22 @@ class UserOAuth(Base, UserMixin):
     user_register_date = Column(DateTime, nullable=False)
     user_last_login_date = Column(DateTime, nullable=False)
     email = Column(String(255), nullable=True, index=True)
-    name = Column(String(255), nullable=True)
     is_active = Column(Boolean)
     oauth_provider = Column(String(64), nullable=False, index=True)
+    oauth_provider_user_name = Column(String(255), nullable=True)
     oauth_provider_user_id = Column(String, nullable=False, index=True)
     oauth_provider_user_domain = Column(String, nullable=True)
     oauth_provider_user_picture_url = Column(String, nullable=True)
     oauth_provider_user_locale = Column(String(64), nullable=True)
     oauth_provider_user_profile_url = Column(String, nullable=True)
     work_on_behalf_of_organization = Column(String(128), nullable=True)
+    first_name = Column(String(255))
+    last_name = Column(String(255))
+    phone = Column(String(17))
+    user_type = Column(String(64), index=True)
+    user_url = Column(String(2083))
+    user_desc = Column(String(2048))
+    is_user_completed_registration = Column(Boolean)
 
 
 class User(Base, UserMixin):

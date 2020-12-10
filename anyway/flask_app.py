@@ -5,11 +5,9 @@ import csv
 import datetime
 import json
 import logging
-import re
 from io import StringIO
 import os
 import time
-from urllib.parse import urlparse
 
 import flask_admin as admin
 import flask_login as login
@@ -37,6 +35,7 @@ from http import client as http_client
 from sqlalchemy import and_, not_, or_
 from sqlalchemy import func
 from sqlalchemy.orm import load_only
+from validate_email import validate_email
 from webassets import Environment as AssetsEnvironment, Bundle as AssetsBundle
 from webassets.ext.jinja2 import AssetsExtension
 from werkzeug.security import check_password_hash
@@ -72,12 +71,14 @@ from anyway.models import (
     DrivingDirections,
     AgeGroup,
     AccidentMarkerView,
-    EmbeddedReports, UserOAuth,
+    EmbeddedReports,
+    UserOAuth,
 )
 from anyway.oauth import OAuthSignIn
 from anyway.infographics_utils import get_infographics_data
 from anyway.app_and_db import app, db
 from anyway.dataclasses.user_data import UserData
+from anyway.utilities import is_valid_number, check_is_a_safe_redirect_url
 from anyway.views.schools.api import (
     schools_description_api,
     schools_names_api,
@@ -1502,95 +1503,83 @@ app.add_url_rule(
 app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
 
 
-def check_is_a_safe_redirect_url(url: str) -> bool:
-    url_obj = urlparse(url)
-    if url_obj.scheme not in ['https', 'http']:
-        return False
-
-    netloc = url_obj.netloc
-    if not netloc:
-        return False
-
-    # Note that we don't support ipv6 localhost address or ipv4 localhost full range of address
-    if netloc in ["www.anyway.co.il", "anyway-infographics-staging.web.app", "localhost", "127.0.0.1"]:
-        return True
-    else:  # Check localhost with port
-        localhost_regex = re.compile(r'^127\.0\.0\.1\:[0-9]{1,7}$|^localhost\:[0-9]{1,7}$')
-        if localhost_regex.match(netloc):
-            return True
-
-    return False
-
-
 @app.route("/authorize/<provider>")
-def oauth_authorize(provider):
-    # This is quick fix for the DEMO - to make sure that anyway.co.il is fully compatible with https://anyway-infographics-staging.web.app/
-    redirect_url_from_url = request.args.get('redirect_url', type=str)
+def oauth_authorize(provider: str) -> Response:
+    if provider != "google":
+        return Response(
+            "Google is the only support OAuth 2.0 provider.",
+            status=422,
+        )
+    if not current_user.is_anonymous:
+        return Response(
+            "User is already login.",
+            status=400,
+        )
+
+    redirect_url_from_url = request.args.get("redirect_url", type=str)
     redirect_url = BE_CONST.DEFAULT_REDIRECT_URL
     if redirect_url_from_url and check_is_a_safe_redirect_url(redirect_url_from_url):
         redirect_url = redirect_url_from_url
-
-    if provider != "google":
-        return redirect(redirect_url, code=302)
-    if not current_user.is_anonymous:
-        return redirect(redirect_url, code=302)
 
     oauth = OAuthSignIn.get_provider(provider)
     return oauth.authorize(redirect_url=redirect_url)
 
 
 @app.route("/callback/<provider>")
-def oauth_callback(provider):
-    # This is quick fix for the DEMO - to make sure that anyway.co.il is fully compatible with https://anyway-infographics-staging.web.app/
+def oauth_callback(provider: str) -> Response:
+    if provider != "google":
+        return Response(
+            "Google is the only support OAuth 2.0 provider.",
+            status=422,
+        )
+    if not current_user.is_anonymous:
+        return Response(
+            "User is already login",
+            status=400,
+        )
+
+    oauth = OAuthSignIn.get_provider(provider)
+    user_data: UserData = oauth.callback()
+    if not user_data.service_user_id:
+        return Response(
+            "Couldn't get user id from the OAuth provider.",
+            status=500,
+        )
+
+    user = (
+        db.session.query(UserOAuth)
+        .filter_by(oauth_provider=provider, oauth_provider_user_id=user_data.service_user_id)
+        .first()
+    )
+    if not user:
+        user = UserOAuth(
+            user_register_date=datetime.datetime.now(),
+            user_last_login_date=datetime.datetime.now(),
+            email=user_data.email,
+            oauth_provider_user_name=user_data.name,
+            is_active=True,
+            oauth_provider=provider,
+            oauth_provider_user_id=user_data.service_user_id,
+            oauth_provider_user_domain=user_data.service_user_domain,
+            oauth_provider_user_picture_url=user_data.picture_url,
+            oauth_provider_user_locale=user_data.service_user_locale,
+            oauth_provider_user_profile_url=user_data.user_profile_url,
+        )
+        db.session.add(user)
+    else:
+        user.user_last_login_date = datetime.datetime.now()
+
+    db.session.commit()
+
 
     redirect_url = BE_CONST.DEFAULT_REDIRECT_URL
-    redirect_url_json_base64 = request.args.get('state', type=str)
+    redirect_url_json_base64 = request.args.get("state", type=str)
     if redirect_url_json_base64:
         redirect_url_json = json.loads(base64.b64decode(redirect_url_json_base64.encode("UTF8")))
         redirect_url_to_check = redirect_url_json.get("redirect_url")
         if redirect_url_to_check and check_is_a_safe_redirect_url(redirect_url_to_check):
             redirect_url = redirect_url_to_check
 
-    if provider != "google":
-        return redirect(redirect_url, code=302)
-    if not current_user.is_anonymous:
-        return redirect(redirect_url, code=302)
-    oauth = OAuthSignIn.get_provider(provider)
-    user_data: UserData = oauth.callback()
-    if not user_data.service_user_id:
-        flash("Authentication failed.")
-        return redirect(redirect_url, code=302)
-
-    # TODO: merge google and facebook code?
-    if provider == "google":
-        user = db.session.query(UserOAuth).filter_by(oauth_provider=provider, oauth_provider_user_id=user_data.service_user_id).first()
-        if not user:
-            user = UserOAuth(
-                user_register_date=datetime.datetime.now(),
-                user_last_login_date=datetime.datetime.now(),
-                email=user_data.email,
-                name=user_data.name,
-                is_active=True,
-                oauth_provider=provider,
-                oauth_provider_user_id=user_data.service_user_id,
-                oauth_provider_user_domain=user_data.service_user_domain,
-                oauth_provider_user_picture_url=user_data.picture_url,
-                oauth_provider_user_locale=user_data.service_user_locale,
-                oauth_provider_user_profile_url=user_data.user_profile_url)
-
-            db.session.add(user)
-            db.session.commit()
-    elif provider == "facebook": #TODO: fix
-        user = db.session.query(User).filter_by(oauth_provider=provider, oauth_provider_user_id=user_data.service_user_id).first()
-        if not user:
-            user = User(
-                social_id=user_data.service_user_id, email=user_data.email, provider=provider
-            )
-            db.session.add(user)
-            db.session.commit()
-    else:
-        flash("Authentication failed.")
-        return redirect(redirect_url, code=302)
     login.login_user(user, True)
     return redirect(redirect_url, code=302)
 
@@ -1648,3 +1637,126 @@ def embedded_reports_api():
     response = Response(json.dumps(embedded_reports_list, default=str), mimetype="application/json")
     response.headers.add("Access-Control-Allow-Origin", "*")
     return response
+
+
+def get_current_user_email():
+    cur_id = current_user.get_id()
+    cur_user = (
+        db.session.query(UserOAuth).with_entities(UserOAuth.email).filter(User.id == cur_id).first()
+    )
+    if cur_user is not None:
+        return cur_user.email
+    return None
+
+
+@app.route("/user/have_email")
+def user_have_email() -> Response:
+    if current_user.is_anonymous:
+        return Response(
+            "User not login.",
+            status=401,
+        )
+
+    return jsonify({"have_email": bool(get_current_user_email())})
+
+
+# This code is also used as part of the user first registration
+@app.route("/user/update", methods=["POST"])
+def user_update() -> Response:
+    allowed_fields = [
+        "first_name",
+        "last_name",
+        "force_update_email",
+        "email",
+        "phone",
+        "user_type",
+        "user_work_place",
+        "user_url",
+        "self_desc",
+    ]
+
+    if current_user.is_anonymous:
+        return Response(
+            "User not login",
+            status=401,
+        )
+
+    reg_dict = request.json
+    if not reg_dict:
+        return Response(
+            "Bad response(not a JSON or mimetype does not indicate JSON)",
+            status=400,
+        )
+
+    for key in reg_dict:
+        if key not in allowed_fields:
+            return Response(
+                f"Bad response(Unknown field {key})",
+                status=400,
+            )
+
+    first_name = reg_dict.get("first_name")
+    last_name = reg_dict.get("last_name")
+    if not first_name or not last_name:
+        return Response(
+            "Bad response(First name or Last name is missing)",
+            status=400,
+        )
+
+    # If we don't have the user email then we have to get it else only update if the user want.
+    force_update_email = reg_dict.get("force_update_email")
+    user_db_email = get_current_user_email()
+    if not user_db_email or force_update_email:
+        if not reg_dict.get("email"):
+            if not user_db_email:
+                return Response(
+                    "Bad response(There is no email in our DB and there is no email in the json)",
+                    status=400,
+                )
+            elif force_update_email:
+                return Response(
+                    "Bad response(You set force_update_email but didn't gave us an email)",
+                    status=400,
+                )
+            else:
+                return Response(
+                    "Bad response(Unknown error, Try to set email address)",
+                    status=400,
+                )
+
+        is_valid = validate_email(
+            email_address=reg_dict["email"], check_regex=True, check_mx=False, use_blacklist=False
+        )
+        if not is_valid:
+            return Response(
+                "Bad response(Bad email address)",
+                status=400,
+            )
+
+        user_db_email = reg_dict["email"]
+
+    phone = reg_dict.get("phone")
+    if phone:
+        is_valid = is_valid_number(phone)
+
+        if not is_valid:
+            return Response(
+                "Bad response(Bad phone number)",
+                status=400,
+            )
+
+    user_type = reg_dict.get("user_type")
+    user_work_place = reg_dict.get("user_work_place")
+    user_url = reg_dict.get("user_url")
+    self_desc = reg_dict.get("self_desc")
+
+    current_user.email = user_db_email
+    current_user.phone = phone
+    current_user.user_type = user_type
+    current_user.work_on_behalf_of_organization = user_work_place
+    current_user.user_url = user_url
+    current_user.self_desc = self_desc
+    current_user.is_user_completed_registration = True
+    if os.environ.get("FLASK_ENV") != "test":
+        db.session.commit()
+    return Response(status=200)

@@ -70,3 +70,69 @@ msgstr ""
 msgid "Login with Google"
 msgstr ""
 
+msgid "fatal"
+msgstr "קטלני"
+
+msgid "severe"
+msgstr "חמור"
+
+msgid "light"
+msgstr "קל"
+
+msgid "Pedestrian injury"
+msgstr "פגיעה בהולך רגל"
+
+msgid "Collision of front to side"
+msgstr "התנגשות חזית אל צד"
+
+msgid "Collision of front to rear-end"
+msgstr "התנגשות חזית באחור"
+
+msgid "Collision of side to side (lateral)"
+msgstr "התנגשות צד בצד"
+
+msgid "Head-on frontal collision"
+msgstr "התנגשות חזית בחזית"
+
+msgid "Collision with a stopped non-parked vehicle"
+msgstr "התנגשות עם רכב שנעצר ללא חניה"
+
+msgid "Collision with a parked vehicle"
+msgstr "התנגשות עם רכב חונה"
+
+msgid "Collision with an inanimate object"
+msgstr "התנגשות עם עצם דומם"
+
+msgid "Swerving off the road or onto the pavement"
+msgstr "ירידה מהכביש או עלייה למדרכה"
+
+msgid "Overturned vehicle"
+msgstr "התהפכות"
+
+msgid "Skid"
+msgstr "החלקה"
+
+msgid "Injury of a passenger in a vehicle"
+msgstr "פגיעה בנוסע בתוך כלי הרכב"
+
+msgid "A fall from a moving vehicle"
+msgstr "נפילה מרכב נע"
+
+msgid "Fire"
+msgstr "שריפה"
+
+msgid "Other"
+msgstr "אחר"
+
+msgid "Collision of rear-end to front"
+msgstr "התנגשות אחור אל חזית"
+
+msgid "Collision of rear-end to side"
+msgstr "התנגשות אחור אל צד"
+
+msgid "Collision with an animal"
+msgstr "התנגשות עם בעל חיים"
+
+msgid "Damage caused by a falling load off a vehicle"
+msgstr "פגיעה ממטען של רכב"
+

@@ -31,6 +31,32 @@ class BackEndConstants(object):
     # This is a type for the 'accident_severity' table field name
     ACCIDENT_SEVERITY_DEADLY = 1
 
+    class AccidentSeverity:
+        FATAL = 1
+        SEVERE = 2
+        LIGHT = 3
+
+    class AccidentType:
+        PEDESTRIAN_INJURY = 1
+        COLLISION_OF_FRONT_TO_SIDE = 2
+        COLLISION_OF_FRONT_TO_REAR_end = 3
+        COLLISION_OF_SIDE_TO_SIDE_LATERAL = 4
+        HEAD_ON_FRONTAL_COLLISION = 5
+        COLLISION_WITH_A_STOPPED_NON_parked_vehicle = 6
+        COLLISION_WITH_A_PARKED_VEHICLE = 7
+        COLLISION_WITH_AN_INANIMATE_OBJECT = 8
+        SWERVING_OFF_THE_ROAD_OR_ONTO_THE_PAVEMENT = 9
+        OVERTURNED_VEHICLE = 10
+        SKID = 11
+        INJURY_OF_A_PASSENGER_IN_A_VEHICLE = 12
+        A_FALL_FROM_A_MOVING_VEHICLE = 13
+        FIRE = 14
+        OTHER = 15
+        COLLISION_OF_REAR_end_to_front = 17
+        COLLISION_OF_REAR_end_to_side = 18
+        COLLISION_WITH_AN_ANIMAL = 19
+        DAMAGE_CAUSED_BY_A_FALLING_LOAD_OFF_A_VEHICL = 20
+
     # This is a type for the 'road_type' table field name
     ROAD_TYPE_NOT_IN_CITY_IN_INTERSECTION = 3
     ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION = 4
@@ -44,5 +70,6 @@ class BackEndConstants(object):
 
     UNKNOWN = "UNKNOWN"
     DEFAULT_REDIRECT_URL = "https://anyway-infographics-staging.web.app/"
+
 
 BE_CONST = BackEndConstants()

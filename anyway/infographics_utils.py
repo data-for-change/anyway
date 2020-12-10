@@ -22,6 +22,7 @@ from anyway.infographics_dictionaries import (
     driver_type_hebrew_dict,
     head_on_collisions_comparison_dict,
     english_accident_severity_dict,
+    english_accident_type_dict,
 )
 from anyway.parsers import infographics_data_cache_updater
 from anyway.constants import CONST
@@ -275,13 +276,27 @@ class MostSevereAccidentsWidget(Widget):
         entities = (
             "longitude",
             "latitude",
-            "accident_severity_hebrew",
+            "accident_severity",
             "accident_timestamp",
-            "accident_type_hebrew",
+            "accident_type",
         )
         return get_most_severe_accidents_with_entities(
             table_obj, filters, entities, start_time, end_time, limit
         )
+
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        for item in items["data"]["items"]:
+            try:
+                item["accident_severity"] = _(
+                    english_accident_severity_dict[item["accident_severity"]]
+                )
+                item["accident_type"] = _(english_accident_type_dict[item["accident_type"]])
+            except Exception as e:
+                logging.error(
+                    f"MostSevereAccidentsWidget.localize_items: Exception while translating {item}. Error:{e},cause:{e.__cause__}"
+                )
+        return items
 
 
 @register

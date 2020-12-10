@@ -954,7 +954,7 @@ class AccidentSeverityByCrossLocationWidget(Widget):
                 "killed_injury_severity_text": "הרוג",
                 "killed_injury_severity_count": 0,
             },
-        ] 
+        ]
 
 
 @register

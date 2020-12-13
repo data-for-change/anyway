@@ -286,13 +286,12 @@ class MostSevereAccidentsWidget(Widget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         for item in items["data"]["items"]:
-            # noinspection PyBroadException
             try:
                 item["accident_severity"] = _(
                     english_accident_severity_dict[item["accident_severity"]]
                 )
                 item["accident_type"] = _(english_accident_type_dict[item["accident_type"]])
-            except Exception:
+            except KeyError:
                 logging.exception(
                     f"MostSevereAccidentsWidget.localize_items: Exception while translating {item}."
                 )

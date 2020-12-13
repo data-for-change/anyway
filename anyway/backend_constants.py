@@ -29,10 +29,6 @@ class BackEndConstants(object):
     ALL_AGE_GROUPS_LIST = list(range(1, AGE_GROUPS_NUMBER + 1)) + [99]
 
     # This is a type for the 'accident_severity' table field name
-    ACCIDENT_SEVERITY_DEADLY = 1
-    ACCIDENT_SEVERITY_SEVERE = 2
-    ACCIDENT_SEVERITY_LIGHT = 3
-
     class AccidentSeverity:
         FATAL = 1
         SEVERE = 2

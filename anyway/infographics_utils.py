@@ -25,7 +25,6 @@ from anyway.infographics_dictionaries import (
     english_accident_type_dict,
 )
 from anyway.parsers import infographics_data_cache_updater
-from anyway.constants import CONST
 
 
 @dataclass
@@ -287,14 +286,15 @@ class MostSevereAccidentsWidget(Widget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         for item in items["data"]["items"]:
+            # noinspection PyBroadException
             try:
                 item["accident_severity"] = _(
                     english_accident_severity_dict[item["accident_severity"]]
                 )
                 item["accident_type"] = _(english_accident_type_dict[item["accident_type"]])
-            except Exception as e:
-                logging.error(
-                    f"MostSevereAccidentsWidget.localize_items: Exception while translating {item}. Error:{e},cause:{e.__cause__}"
+            except Exception:
+                logging.exception(
+                    f"MostSevereAccidentsWidget.localize_items: Exception while translating {item}."
                 )
         return items
 
@@ -335,7 +335,7 @@ class HeadOnCollisionsComparisonWidget(Widget):
         road_data = {}
         filter_dict = {
             "road_type": BE_CONST.ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION,
-            "accident_severity": BE_CONST.ACCIDENT_SEVERITY_DEADLY,
+            "accident_severity": BE_CONST.AccidentSeverity.FATAL,
         }
         all_roads_data = get_accidents_stats(
             table_obj=AccidentMarkerView,
@@ -425,8 +425,8 @@ class AccidentsHeatMapWidget(Widget):
     def generate_items(self) -> None:
         accidents_heat_map_filters = self.request_params.location_info.copy()
         accidents_heat_map_filters["accident_severity"] = [
-            CONST.ACCIDENT_SEVERITY_DEADLY,
-            CONST.ACCIDENT_SEVERITY_SEVERE,
+            BE_CONST.AccidentSeverity.FATAL,
+            BE_CONST.AccidentSeverity.SEVERE,
         ]
         self.items = AccidentsHeatMapWidget.get_accidents_heat_map(
             filters=accidents_heat_map_filters,

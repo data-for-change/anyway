@@ -1042,6 +1042,7 @@ class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
             .group_by(location_label, vehicle_label)
             .order_by(desc(num_accidents_label))
         )
+        # pylint: disable=no-member
         results = pd.read_sql_query(query.statement, query.session.bind).to_dict(
             orient="records"
         )  # pylint: disable=no-member

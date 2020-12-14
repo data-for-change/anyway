@@ -22,9 +22,9 @@ from anyway.infographics_dictionaries import (
     driver_type_hebrew_dict,
     head_on_collisions_comparison_dict,
     english_accident_severity_dict,
+    english_accident_type_dict,
 )
 from anyway.parsers import infographics_data_cache_updater
-from anyway.constants import CONST
 
 
 @dataclass
@@ -275,13 +275,27 @@ class MostSevereAccidentsWidget(Widget):
         entities = (
             "longitude",
             "latitude",
-            "accident_severity_hebrew",
+            "accident_severity",
             "accident_timestamp",
-            "accident_type_hebrew",
+            "accident_type",
         )
         return get_most_severe_accidents_with_entities(
             table_obj, filters, entities, start_time, end_time, limit
         )
+
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        for item in items["data"]["items"]:
+            try:
+                item["accident_severity"] = _(
+                    english_accident_severity_dict[item["accident_severity"]]
+                )
+                item["accident_type"] = _(english_accident_type_dict[item["accident_type"]])
+            except KeyError:
+                logging.exception(
+                    f"MostSevereAccidentsWidget.localize_items: Exception while translating {item}."
+                )
+        return items
 
 
 @register
@@ -320,7 +334,7 @@ class HeadOnCollisionsComparisonWidget(Widget):
         road_data = {}
         filter_dict = {
             "road_type": BE_CONST.ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION,
-            "accident_severity": BE_CONST.ACCIDENT_SEVERITY_DEADLY,
+            "accident_severity": BE_CONST.AccidentSeverity.FATAL,
         }
         all_roads_data = get_accidents_stats(
             table_obj=AccidentMarkerView,
@@ -410,8 +424,8 @@ class AccidentsHeatMapWidget(Widget):
     def generate_items(self) -> None:
         accidents_heat_map_filters = self.request_params.location_info.copy()
         accidents_heat_map_filters["accident_severity"] = [
-            CONST.ACCIDENT_SEVERITY_DEADLY,
-            CONST.ACCIDENT_SEVERITY_SEVERE,
+            BE_CONST.AccidentSeverity.FATAL,
+            BE_CONST.AccidentSeverity.SEVERE,
         ]
         self.items = AccidentsHeatMapWidget.get_accidents_heat_map(
             filters=accidents_heat_map_filters,
@@ -965,55 +979,72 @@ class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
         super().__init__(request_params, type(self).name)
         self.rank = 20
         self.road_number = request_params.location_info["road1"]
-        self.text = {"title": f"תאונות אופנועים קשות וקטלניות בכביש {int(self.road_number)} בהשוואה לכל הארץ"}
+        self.text = {
+            "title": f"תאונות אופנועים קשות וקטלניות בכביש {int(self.road_number)} בהשוואה לכל הארץ"
+        }
 
     # noinspection PyMethodMayBeStatic
     def is_in_cache(self) -> bool:
         return False
 
     def generate_items(self) -> None:
-        self.items = (
-            MotorcycleAccidentsVsAllAccidentsWidget.motorcycle_accidents_vs_all_accidents(
-                self.request_params.start_time, self.request_params.end_time, self.road_number)
+        self.items = MotorcycleAccidentsVsAllAccidentsWidget.motorcycle_accidents_vs_all_accidents(
+            self.request_params.start_time, self.request_params.end_time, self.road_number
         )
 
     @staticmethod
     def motorcycle_accidents_vs_all_accidents(start_time, end_time, road_number):
         location_label = "location"
         location_other = "שאר הארץ"
-        location_road = f'כביש {int(road_number)}'
-        case_location = case([
-            ((InvolvedMarkerView.road1 == road_number) | (InvolvedMarkerView.road2 == road_number),
-             location_road)
-        ],
-            else_=literal_column(f"'{location_other}'")
+        location_road = f"כביש {int(road_number)}"
+        case_location = case(
+            [
+                (
+                    (InvolvedMarkerView.road1 == road_number)
+                    | (InvolvedMarkerView.road2 == road_number),
+                    location_road,
+                )
+            ],
+            else_=literal_column(f"'{location_other}'"),
         ).label(location_label)
 
         vehicle_label = "vehicle"
         vehicle_other = "אחר"
         vehicle_motorcycle = "אופנוע"
-        case_vehicle = case([(
-            InvolvedMarkerView.involve_vehicle_type.in_(BE_CONST.MOTORCYCLE_VEHICLE_TYPES),
-            literal_column(f"'{vehicle_motorcycle}'")
-        )],
-            else_=literal_column(f"'{vehicle_other}'")
+        case_vehicle = case(
+            [
+                (
+                    InvolvedMarkerView.involve_vehicle_type.in_(BE_CONST.MOTORCYCLE_VEHICLE_TYPES),
+                    literal_column(f"'{vehicle_motorcycle}'"),
+                )
+            ],
+            else_=literal_column(f"'{vehicle_other}'"),
         ).label(vehicle_label)
 
-        query = get_query(table_obj=InvolvedMarkerView, filters={}, start_time=start_time,
-                          end_time=end_time)
+        query = get_query(
+            table_obj=InvolvedMarkerView, filters={}, start_time=start_time, end_time=end_time
+        )
 
         num_accidents_label = "num_of_accidents"
-        query = (query.with_entities(case_location, case_vehicle,
-                                     func.count(distinct(InvolvedMarkerView.provider_and_id))
-                                     .label(num_accidents_label))
-                 .filter(InvolvedMarkerView.road_type.in_(BE_CONST.NON_CITY_ROAD_TYPES))
-                 .filter(InvolvedMarkerView.accident_severity.in_([BE_CONST.ACCIDENT_SEVERITY_DEADLY,
-                                                                   BE_CONST.ACCIDENT_SEVERITY_SEVERE]))
-                 .group_by(location_label, vehicle_label)
-                 .order_by(desc(num_accidents_label))
-                 )
-        results = pd.read_sql_query(query.statement, query.session.bind)\
-            .to_dict(orient="records")  # pylint: disable=no-member
+        query = (
+            query.with_entities(
+                case_location,
+                case_vehicle,
+                func.count(distinct(InvolvedMarkerView.provider_and_id)).label(num_accidents_label),
+            )
+            .filter(InvolvedMarkerView.road_type.in_(BE_CONST.NON_CITY_ROAD_TYPES))
+            .filter(
+                InvolvedMarkerView.accident_severity.in_(
+                    [BE_CONST.AccidentSeverity.FATAL, BE_CONST.AccidentSeverity.SEVERE]
+                )
+            )
+            .group_by(location_label, vehicle_label)
+            .order_by(desc(num_accidents_label))
+        )
+        # pylint: disable=no-member
+        results = pd.read_sql_query(query.statement, query.session.bind).to_dict(
+            orient="records"
+        )  # pylint: disable=no-member
 
         counter_road_motorcycle = 0
         counter_other_motorcycle = 0
@@ -1038,15 +1069,27 @@ class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
         location_all_label = "כל הארץ"
 
         return [
-            {location_label: location_road, vehicle_label: vehicle_motorcycle,
-             percentage_label: counter_road_motorcycle / sum_road},
-            {location_label: location_road, vehicle_label: vehicle_other,
-             percentage_label: counter_road_other / sum_road},
-            {location_label: location_all_label, vehicle_label: vehicle_motorcycle,
-             percentage_label: (counter_other_motorcycle + counter_road_motorcycle) / sum_all},
-            {location_label: location_all_label, vehicle_label: vehicle_other,
-             percentage_label: (counter_other_other + counter_road_other) / sum_all},
-            ]
+            {
+                location_label: location_road,
+                vehicle_label: vehicle_motorcycle,
+                percentage_label: counter_road_motorcycle / sum_road,
+            },
+            {
+                location_label: location_road,
+                vehicle_label: vehicle_other,
+                percentage_label: counter_road_other / sum_road,
+            },
+            {
+                location_label: location_all_label,
+                vehicle_label: vehicle_motorcycle,
+                percentage_label: (counter_other_motorcycle + counter_road_motorcycle) / sum_all,
+            },
+            {
+                location_label: location_all_label,
+                vehicle_label: vehicle_other,
+                percentage_label: (counter_other_other + counter_road_other) / sum_all,
+            },
+        ]
 
 
 @register

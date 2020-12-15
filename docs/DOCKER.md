@@ -72,6 +72,7 @@ For WSL - see also [ubuntu for wsl](https://ubuntu.com/wsl)
 - `db_docker/restore_db.sh`
 - `bin/docker_login.sh`
 - `bin/nginx_docker_build_push.sh`
+Alternatively, in order to evade line ending issues, clone the repository inside WSL terminal.
 
 Pick one option and continue to the instructions section **For Ubuntu**.
 

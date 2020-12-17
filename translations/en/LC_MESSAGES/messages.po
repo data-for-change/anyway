@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-10-17 12:05+0300\n"
+"POT-Creation-Date: 2020-12-17 17:33+0200\n"
 "PO-Revision-Date: 2020-11-26 16:45+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -18,18 +18,118 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.8.0\n"
 
-#: anyway/flask_app.py:699 anyway/flask_app.py:806
+#: anyway/flask_app.py:702 anyway/flask_app.py:809
 msgid "Discussion not found:"
 msgstr ""
 
-#: anyway/flask_app.py:702
+#: anyway/flask_app.py:705
 msgid "Illegal Discussion"
 msgstr ""
 
-#: anyway/infographics_utils.py:969
+#: anyway/infographics_dictionaries.py:46
+msgid "fatal"
+msgstr "fatal"
+
+#: anyway/infographics_dictionaries.py:47
+msgid "severe"
+msgstr "severe"
+
+#: anyway/infographics_dictionaries.py:48
+msgid "light"
+msgstr "light"
+
+#: anyway/infographics_dictionaries.py:50
+msgid "Pedestrian injury"
+msgstr ""
+
+#: anyway/infographics_dictionaries.py:51
+msgid "Collision of front to side"
+msgstr ""
+
+#: anyway/infographics_dictionaries.py:52
+msgid "Collision of front to rear-end"
+msgstr ""
+
+#: anyway/infographics_dictionaries.py:53
+msgid "Collision of side to side (lateral)"
+msgstr ""
+
+#: anyway/infographics_dictionaries.py:54
+msgid "Head-on frontal collision"
+msgstr ""
+
+#: anyway/infographics_dictionaries.py:55
+msgid "Collision with a stopped non-parked vehicle"
+msgstr ""
+
+#: anyway/infographics_dictionaries.py:56
+msgid "Collision with a parked vehicle"
+msgstr ""
+
+#: anyway/infographics_dictionaries.py:57
+msgid "Collision with an inanimate object"
+msgstr ""
+
+#: anyway/infographics_dictionaries.py:58
+msgid "Swerving off the road or onto the pavement"
+msgstr ""
+
+#: anyway/infographics_dictionaries.py:59
+msgid "Overturned vehicle"
+msgstr ""
+
+#: anyway/infographics_dictionaries.py:60
+msgid "Skid"
+msgstr ""
+
+#: anyway/infographics_dictionaries.py:61
+msgid "Injury of a passenger in a vehicle"
+msgstr ""
+
+#: anyway/infographics_dictionaries.py:62
+msgid "A fall from a moving vehicle"
+msgstr ""
+
+#: anyway/infographics_dictionaries.py:63
+msgid "Fire"
+msgstr ""
+
+#: anyway/infographics_dictionaries.py:64
+msgid "Other"
+msgstr ""
+
+#: anyway/infographics_dictionaries.py:65
+msgid "Collision of rear-end to front"
+msgstr ""
+
+#: anyway/infographics_dictionaries.py:66
+msgid "Collision of rear-end to side"
+msgstr ""
+
+#: anyway/infographics_dictionaries.py:67
+msgid "Collision with an animal"
+msgstr ""
+
+#: anyway/infographics_dictionaries.py:68
+msgid "Damage caused by a falling load off a vehicle"
+msgstr ""
+
+#: anyway/infographics_utils.py:291
+msgid "accident_severity"
+msgstr ""
+
+#: anyway/infographics_utils.py:294
+msgid "accident_type"
+msgstr ""
+
+#: anyway/infographics_utils.py:1104
 msgid ""
 "Pedestrian Injuries on Ben Yehuda Street in Tel Aviv by Type of hitting "
 "Vehicle, Compared to Urban Accidents Across the country"
+msgstr ""
+
+#: anyway/infographics_utils.py:1262
+msgid "Accidents in descending order by severity for segment"
 msgstr ""
 
 #: templates/index.html:4 templates/index.html:10
@@ -68,72 +168,6 @@ msgstr ""
 
 #: templates/index.html:490
 msgid "Login with Google"
-msgstr ""
-
-msgid "fatal"
-msgstr "fatal"
-
-msgid "severe"
-msgstr "severe"
-
-msgid "light"
-msgstr "light"
-
-msgid "Pedestrian injury"
-msgstr ""
-
-msgid "Collision of front to side"
-msgstr ""
-
-msgid "Collision of front to rear-end"
-msgstr ""
-
-msgid "Collision of side to side (lateral)"
-msgstr ""
-
-msgid "Head-on frontal collision"
-msgstr ""
-
-msgid "Collision with a stopped non-parked vehicle"
-msgstr ""
-
-msgid "Collision with a parked vehicle"
-msgstr ""
-
-msgid "Collision with an inanimate object"
-msgstr ""
-
-msgid "Swerving off the road or onto the pavement"
-msgstr ""
-
-msgid "Overturned vehicle"
-msgstr ""
-
-msgid "Skid"
-msgstr ""
-
-msgid "Injury of a passenger in a vehicle"
-msgstr ""
-
-msgid "A fall from a moving vehicle"
-msgstr ""
-
-msgid "Fire"
-msgstr ""
-
-msgid "Other"
-msgstr ""
-
-msgid "Collision of rear-end to front"
-msgstr ""
-
-msgid "Collision of rear-end to side"
-msgstr ""
-
-msgid "Collision with an animal"
-msgstr ""
-
-msgid "Damage caused by a falling load off a vehicle"
 msgstr ""
 
 #~ msgid "Pedestrian injury"

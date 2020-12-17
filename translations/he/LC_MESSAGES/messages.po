@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-10-17 12:05+0300\n"
+"POT-Creation-Date: 2020-12-17 17:33+0200\n"
 "PO-Revision-Date: 2020-10-16 15:42+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: he\n"
@@ -18,19 +18,119 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.8.0\n"
 
-#: anyway/flask_app.py:699 anyway/flask_app.py:806
+#: anyway/flask_app.py:702 anyway/flask_app.py:809
 msgid "Discussion not found:"
 msgstr ""
 
-#: anyway/flask_app.py:702
+#: anyway/flask_app.py:705
 msgid "Illegal Discussion"
 msgstr ""
 
-#: anyway/infographics_utils.py:969
+#: anyway/infographics_dictionaries.py:46
+msgid "fatal"
+msgstr "קטלני"
+
+#: anyway/infographics_dictionaries.py:47
+msgid "severe"
+msgstr "חמור"
+
+#: anyway/infographics_dictionaries.py:48
+msgid "light"
+msgstr "קל"
+
+#: anyway/infographics_dictionaries.py:50
+msgid "Pedestrian injury"
+msgstr "פגיעה בהולך רגל"
+
+#: anyway/infographics_dictionaries.py:51
+msgid "Collision of front to side"
+msgstr "התנגשות חזית אל צד"
+
+#: anyway/infographics_dictionaries.py:52
+msgid "Collision of front to rear-end"
+msgstr "התנגשות חזית באחור"
+
+#: anyway/infographics_dictionaries.py:53
+msgid "Collision of side to side (lateral)"
+msgstr "התנגשות צד בצד"
+
+#: anyway/infographics_dictionaries.py:54
+msgid "Head-on frontal collision"
+msgstr "התנגשות חזית בחזית"
+
+#: anyway/infographics_dictionaries.py:55
+msgid "Collision with a stopped non-parked vehicle"
+msgstr "התנגשות עם רכב שנעצר ללא חניה"
+
+#: anyway/infographics_dictionaries.py:56
+msgid "Collision with a parked vehicle"
+msgstr "התנגשות עם רכב חונה"
+
+#: anyway/infographics_dictionaries.py:57
+msgid "Collision with an inanimate object"
+msgstr "התנגשות עם עצם דומם"
+
+#: anyway/infographics_dictionaries.py:58
+msgid "Swerving off the road or onto the pavement"
+msgstr "ירידה מהכביש או עלייה למדרכה"
+
+#: anyway/infographics_dictionaries.py:59
+msgid "Overturned vehicle"
+msgstr "התהפכות"
+
+#: anyway/infographics_dictionaries.py:60
+msgid "Skid"
+msgstr "החלקה"
+
+#: anyway/infographics_dictionaries.py:61
+msgid "Injury of a passenger in a vehicle"
+msgstr "פגיעה בנוסע בתוך כלי הרכב"
+
+#: anyway/infographics_dictionaries.py:62
+msgid "A fall from a moving vehicle"
+msgstr "נפילה מרכב נע"
+
+#: anyway/infographics_dictionaries.py:63
+msgid "Fire"
+msgstr "שריפה"
+
+#: anyway/infographics_dictionaries.py:64
+msgid "Other"
+msgstr "אחר"
+
+#: anyway/infographics_dictionaries.py:65
+msgid "Collision of rear-end to front"
+msgstr "התנגשות אחור אל חזית"
+
+#: anyway/infographics_dictionaries.py:66
+msgid "Collision of rear-end to side"
+msgstr "התנגשות אחור אל צד"
+
+#: anyway/infographics_dictionaries.py:67
+msgid "Collision with an animal"
+msgstr "התנגשות עם בעל חיים"
+
+#: anyway/infographics_dictionaries.py:68
+msgid "Damage caused by a falling load off a vehicle"
+msgstr "פגיעה ממטען של רכב"
+
+#: anyway/infographics_utils.py:291
+msgid "accident_severity"
+msgstr "חומרת תאונה"
+
+#: anyway/infographics_utils.py:294
+msgid "accident_type"
+msgstr "סוג תאונה"
+
+#: anyway/infographics_utils.py:1104
 msgid ""
 "Pedestrian Injuries on Ben Yehuda Street in Tel Aviv by Type of hitting "
 "Vehicle, Compared to Urban Accidents Across the country"
 msgstr ""
+
+#: anyway/infographics_utils.py:1262
+msgid "Accidents in descending order by severity for segment"
+msgstr " תאונות בסדר חומרה יורד במקטע"
 
 #: templates/index.html:4 templates/index.html:10
 msgid "ANYWAY - Making a difference in any way"
@@ -69,70 +169,4 @@ msgstr ""
 #: templates/index.html:490
 msgid "Login with Google"
 msgstr ""
-
-msgid "fatal"
-msgstr "קטלני"
-
-msgid "severe"
-msgstr "חמור"
-
-msgid "light"
-msgstr "קל"
-
-msgid "Pedestrian injury"
-msgstr "פגיעה בהולך רגל"
-
-msgid "Collision of front to side"
-msgstr "התנגשות חזית אל צד"
-
-msgid "Collision of front to rear-end"
-msgstr "התנגשות חזית באחור"
-
-msgid "Collision of side to side (lateral)"
-msgstr "התנגשות צד בצד"
-
-msgid "Head-on frontal collision"
-msgstr "התנגשות חזית בחזית"
-
-msgid "Collision with a stopped non-parked vehicle"
-msgstr "התנגשות עם רכב שנעצר ללא חניה"
-
-msgid "Collision with a parked vehicle"
-msgstr "התנגשות עם רכב חונה"
-
-msgid "Collision with an inanimate object"
-msgstr "התנגשות עם עצם דומם"
-
-msgid "Swerving off the road or onto the pavement"
-msgstr "ירידה מהכביש או עלייה למדרכה"
-
-msgid "Overturned vehicle"
-msgstr "התהפכות"
-
-msgid "Skid"
-msgstr "החלקה"
-
-msgid "Injury of a passenger in a vehicle"
-msgstr "פגיעה בנוסע בתוך כלי הרכב"
-
-msgid "A fall from a moving vehicle"
-msgstr "נפילה מרכב נע"
-
-msgid "Fire"
-msgstr "שריפה"
-
-msgid "Other"
-msgstr "אחר"
-
-msgid "Collision of rear-end to front"
-msgstr "התנגשות אחור אל חזית"
-
-msgid "Collision of rear-end to side"
-msgstr "התנגשות אחור אל צד"
-
-msgid "Collision with an animal"
-msgstr "התנגשות עם בעל חיים"
-
-msgid "Damage caused by a falling load off a vehicle"
-msgstr "פגיעה ממטען של רכב"
 

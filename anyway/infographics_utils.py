@@ -4,7 +4,7 @@ import datetime
 import json
 import os
 from functools import lru_cache
-from typing import Optional, Dict, List, Union, Any, Type
+from typing import Optional, Dict, List, Union, Any, Type, Callable
 from dataclasses import dataclass
 import traceback
 
@@ -79,10 +79,7 @@ class Widget:
     text: Dict
     meta: Optional[Dict]
 
-    def __init__(self, request_params: RequestParams, name: str = ""):
-        # name is mandatory only here. In the derived classes it is not needed The
-        # default is set to avoid type checking error.
-        assert name != ""
+    def __init__(self, request_params: RequestParams, name: str):
         self.request_params = request_params
         self.name = name
         self.rank = -1
@@ -138,7 +135,8 @@ class Widget:
 widgets_dict: Dict[str, Type[Widget]] = {}
 
 
-def get_widget_classes() -> List[Type[Widget]]:
+def get_widget_factories() -> List[Callable[[RequestParams], Widget]]:
+    """Returns list of callables that generate all widget instances"""
     return list(widgets_dict.values())
 
 
@@ -1388,7 +1386,7 @@ def get_latest_accident_date(table_obj, filters):
 def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> List[Widget]:
     widgets = []
     # noinspection PyArgumentList
-    for w in get_widget_classes():
+    for w in get_widget_factories():
         widget: Widget = w(request_params)
         if widget.is_in_cache() == to_cache and widget.is_included():
             widgets.append(widget)

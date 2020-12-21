@@ -1406,11 +1406,9 @@ def get_request_params(
     news_flash_obj: Optional[NewsFlash] = extract_news_flash_obj(news_flash_id)
     if news_flash_obj is None:
         return None
-    tmp = extract_news_flash_location(news_flash_obj)
-    if tmp is None:
+    location_info = extract_news_flash_location(news_flash_obj)
+    if location_info is None:
         return None
-    else:
-        location_info = tmp
     logging.debug("location_info:{}".format(location_info))
     location_text = get_news_flash_location_text(news_flash_obj)
     logging.debug("location_text:{}".format(location_text))

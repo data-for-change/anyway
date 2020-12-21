@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-12-17 17:33+0200\n"
+"POT-Creation-Date: 2020-12-23 17:42+0200\n"
 "PO-Revision-Date: 2020-11-26 16:45+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -26,109 +26,133 @@ msgstr ""
 msgid "Illegal Discussion"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:46
+#: anyway/infographics_dictionaries.py:52
 msgid "fatal"
 msgstr "fatal"
 
-#: anyway/infographics_dictionaries.py:47
+#: anyway/infographics_dictionaries.py:53
 msgid "severe"
 msgstr "severe"
 
-#: anyway/infographics_dictionaries.py:48
+#: anyway/infographics_dictionaries.py:54
 msgid "light"
 msgstr "light"
 
-#: anyway/infographics_dictionaries.py:50
+#: anyway/infographics_dictionaries.py:56
 msgid "Pedestrian injury"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:51
+#: anyway/infographics_dictionaries.py:57
 msgid "Collision of front to side"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:52
+#: anyway/infographics_dictionaries.py:58
 msgid "Collision of front to rear-end"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:53
+#: anyway/infographics_dictionaries.py:59
 msgid "Collision of side to side (lateral)"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:54
+#: anyway/infographics_dictionaries.py:60
 msgid "Head-on frontal collision"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:55
+#: anyway/infographics_dictionaries.py:61
 msgid "Collision with a stopped non-parked vehicle"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:56
+#: anyway/infographics_dictionaries.py:62
 msgid "Collision with a parked vehicle"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:57
+#: anyway/infographics_dictionaries.py:63
 msgid "Collision with an inanimate object"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:58
+#: anyway/infographics_dictionaries.py:64
 msgid "Swerving off the road or onto the pavement"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:59
+#: anyway/infographics_dictionaries.py:65
 msgid "Overturned vehicle"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:60
+#: anyway/infographics_dictionaries.py:66
 msgid "Skid"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:61
+#: anyway/infographics_dictionaries.py:67
 msgid "Injury of a passenger in a vehicle"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:62
+#: anyway/infographics_dictionaries.py:68
 msgid "A fall from a moving vehicle"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:63
+#: anyway/infographics_dictionaries.py:69
 msgid "Fire"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:64
+#: anyway/infographics_dictionaries.py:70
 msgid "Other"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:65
+#: anyway/infographics_dictionaries.py:71
 msgid "Collision of rear-end to front"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:66
+#: anyway/infographics_dictionaries.py:72
 msgid "Collision of rear-end to side"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:67
+#: anyway/infographics_dictionaries.py:73
 msgid "Collision with an animal"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:68
+#: anyway/infographics_dictionaries.py:74
 msgid "Damage caused by a falling load off a vehicle"
 msgstr ""
 
-#: anyway/infographics_utils.py:291
+#: anyway/infographics_dictionaries.py:76
+msgid "professional_driver"
+msgstr ""
+
+#: anyway/infographics_dictionaries.py:77
+msgid "private_vehicle_driver"
+msgstr ""
+
+#: anyway/infographics_dictionaries.py:78
+msgid "other_driver"
+msgstr ""
+
+#: anyway/infographics_utils.py:263 anyway/infographics_utils.py:308
 msgid "accident_severity"
 msgstr ""
 
-#: anyway/infographics_utils.py:294
+#: anyway/infographics_utils.py:264
+msgid "type"
+msgstr ""
+
+#: anyway/infographics_utils.py:311
 msgid "accident_type"
 msgstr ""
 
-#: anyway/infographics_utils.py:1104
+#: anyway/infographics_utils.py:766
+msgid "driver_type"
+msgstr ""
+
+#: anyway/infographics_utils.py:773
+msgid "accident count by driver type "
+msgstr ""
+
+#: anyway/infographics_utils.py:1138
 msgid ""
 "Pedestrian Injuries on Ben Yehuda Street in Tel Aviv by Type of hitting "
 "Vehicle, Compared to Urban Accidents Across the country"
 msgstr ""
 
-#: anyway/infographics_utils.py:1262
+#: anyway/infographics_utils.py:1297
 msgid "Accidents in descending order by severity for segment"
 msgstr ""
 

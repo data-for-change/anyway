@@ -3,9 +3,12 @@ from anyway.backend_constants import BE_CONST
 # noinspection PyProtectedMember
 from flask_babel import _
 
-driver_type_hebrew_dict = dict(
-    professional_driver="נהג מקצועי", private_vehicle_driver="נהג פרטי", other_driver="לא ידוע"
-)
+english_driver_type_dict = {
+    BE_CONST.DriverType.PROFESSIONAL_DRIVER: "professional_driver",
+    BE_CONST.DriverType.PRIVATE_VEHICLE_DRIVER: "private_vehicle_driver",
+    BE_CONST.DriverType.OTHER_DRIVER: "other_driver",
+}
+
 head_on_collisions_comparison_dict = dict(
     head_to_head_collision="התנגשות חזית בחזית", others="אחרות", head_to_head="חזיתיות"
 )
@@ -69,3 +72,7 @@ _("Collision of rear-end to front")
 _("Collision of rear-end to side")
 _("Collision with an animal")
 _("Damage caused by a falling load off a vehicle")
+
+_("professional_driver")  # "נהג מקצועי")
+_("private_vehicle_driver")  #  "נהג פרטי")
+_("other_driver")  # "לא ידוע")

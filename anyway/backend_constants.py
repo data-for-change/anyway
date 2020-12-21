@@ -55,10 +55,18 @@ class BackEndConstants(object):
         COLLISION_WITH_AN_ANIMAL = 19
         DAMAGE_CAUSED_BY_A_FALLING_LOAD_OFF_A_VEHICLE = 20
 
+    class DriverType(object):
+        PROFESSIONAL_DRIVER = 1
+        PRIVATE_VEHICLE_DRIVER = 2
+        OTHER_DRIVER = 3
+
     # This is a type for the 'road_type' table field name
     ROAD_TYPE_NOT_IN_CITY_IN_INTERSECTION = 3
     ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION = 4
-    NON_CITY_ROAD_TYPES = [ROAD_TYPE_NOT_IN_CITY_IN_INTERSECTION, ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION]
+    NON_CITY_ROAD_TYPES = [
+        ROAD_TYPE_NOT_IN_CITY_IN_INTERSECTION,
+        ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION,
+    ]
 
     # other global constants (python only)
     DEFAULT_NUMBER_OF_YEARS_AGO = 5

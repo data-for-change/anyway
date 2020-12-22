@@ -1,5 +1,8 @@
 from anyway.backend_constants import BE_CONST
 
+# noinspection PyProtectedMember
+from flask_babel import _
+
 driver_type_hebrew_dict = dict(
     professional_driver="נהג מקצועי", private_vehicle_driver="נהג פרטי", other_driver="לא ידוע"
 )
@@ -33,3 +36,36 @@ english_accident_type_dict = {
     BE_CONST.AccidentType.COLLISION_WITH_AN_ANIMAL: "Collision with an animal",
     BE_CONST.AccidentType.DAMAGE_CAUSED_BY_A_FALLING_LOAD_OFF_A_VEHICLE: "Damage caused by a falling load off a vehicle",
 }
+
+# temporary until we'll create translations
+class smart_dict(dict):
+    def __missing__(self, key):
+        return key
+
+
+segment_dictionary = smart_dict()
+
+# bogus calls to gettext to get pybabel extract to recofnize the strings
+_("fatal")
+_("severe")
+_("light")
+
+_("Pedestrian injury")
+_("Collision of front to side")
+_("Collision of front to rear-end")
+_("Collision of side to side (lateral)")
+_("Head-on frontal collision")
+_("Collision with a stopped non-parked vehicle")
+_("Collision with a parked vehicle")
+_("Collision with an inanimate object")
+_("Swerving off the road or onto the pavement")
+_("Overturned vehicle")
+_("Skid")
+_("Injury of a passenger in a vehicle")
+_("A fall from a moving vehicle")
+_("Fire")
+_("Other")
+_("Collision of rear-end to front")
+_("Collision of rear-end to side")
+_("Collision with an animal")
+_("Damage caused by a falling load off a vehicle")

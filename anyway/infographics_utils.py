@@ -4,7 +4,7 @@ import datetime
 import json
 import os
 from functools import lru_cache
-from typing import Optional, Dict, List, Union, Any, Type
+from typing import Optional, Dict, List, Union, Any, Type, Callable
 from dataclasses import dataclass
 import traceback
 
@@ -23,6 +23,7 @@ from anyway.infographics_dictionaries import (
     head_on_collisions_comparison_dict,
     english_accident_severity_dict,
     english_accident_type_dict,
+    segment_dictionary,
 )
 from anyway.parsers import infographics_data_cache_updater
 
@@ -36,7 +37,7 @@ class RequestParams:
     news_flash_obj: NewsFlash
     years_ago: int
     location_text: str
-    location_info: Optional[Dict[str, Any]]
+    location_info: Dict[str, Any]
     resolution: Dict
     gps: Dict
     start_time: datetime.date
@@ -134,7 +135,8 @@ class Widget:
 widgets_dict: Dict[str, Type[Widget]] = {}
 
 
-def get_widget_classes() -> List[Type[Widget]]:
+def get_widget_factories() -> List[Callable[[RequestParams], Widget]]:
+    """Returns list of callables that generate all widget instances"""
     return list(widgets_dict.values())
 
 
@@ -212,7 +214,7 @@ class MostSevereAccidentsTableWidget(Widget):
             "id",
             "provider_code",
             "accident_timestamp",
-            "accident_type_hebrew",
+            "accident_type",
             "accident_year",
             "accident_severity",
         )
@@ -225,7 +227,7 @@ class MostSevereAccidentsTableWidget(Widget):
         )
         # Add casualties
         for accident in accidents:
-            accident["type"] = accident["accident_type"]
+            accident["type"] = english_accident_type_dict[accident["accident_type"]]
             dt = accident["accident_timestamp"].to_pydatetime()
             accident["date"] = dt.strftime("%d/%m/%y")
             accident["hour"] = dt.strftime("%H:%M")
@@ -252,6 +254,22 @@ class MostSevereAccidentsTableWidget(Widget):
                 accident["accident_severity"]
             ]
         return accidents
+
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        if request_params.lang != "en":
+            for item in items["data"]["items"]:
+                try:
+                    item["accident_severity"] = _(item["accident_severity"])
+                    item["type"] = _(item["type"])
+                except KeyError:
+                    logging.exception(
+                        f"MostSevereAccidentsWidget.localize_items: Exception while translating {item}."
+                    )
+        items["data"]["text"] = {
+            "title": get_most_severe_accidents_table_title(request_params.location_info)
+        }
+        return items
 
 
 @register
@@ -1258,7 +1276,11 @@ def get_most_severe_accidents_with_entities(
 
 
 def get_most_severe_accidents_table_title(location_info):
-    return "תאונות בסדר חומרה יורד במקטע " + location_info["road_segment_name"]
+    return (
+        _("Accidents in descending order by severity for segment")
+        + " "
+        + segment_dictionary[location_info["road_segment_name"]]
+    )
 
 
 # count of dead and severely injured
@@ -1364,7 +1386,7 @@ def get_latest_accident_date(table_obj, filters):
 def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> List[Widget]:
     widgets = []
     # noinspection PyArgumentList
-    for w in get_widget_classes():
+    for w in get_widget_factories():
         widget: Widget = w(request_params)
         if widget.is_in_cache() == to_cache and widget.is_included():
             widgets.append(widget)

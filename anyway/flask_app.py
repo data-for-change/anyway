@@ -1642,7 +1642,7 @@ def embedded_reports_api():
 def get_current_user_email():
     cur_id = current_user.get_id()
     cur_user = (
-        db.session.query(UserOAuth).with_entities(UserOAuth.email).filter(User.id == cur_id).first()
+        db.session.query(UserOAuth).with_entities(UserOAuth.email).filter(UserOAuth.id == cur_id).first()
     )
     if cur_user is not None:
         return cur_user.email
@@ -1666,32 +1666,31 @@ def user_update() -> Response:
     allowed_fields = [
         "first_name",
         "last_name",
-        "force_update_email",
         "email",
         "phone",
         "user_type",
         "user_work_place",
         "user_url",
-        "self_desc",
+        "user_desc",
     ]
 
     if current_user.is_anonymous:
         return Response(
-            "User not login",
+            "User not login.",
             status=401,
         )
 
     reg_dict = request.json
     if not reg_dict:
         return Response(
-            "Bad response(not a JSON or mimetype does not indicate JSON)",
+            "Bad response(not a JSON or mimetype does not indicate JSON).",
             status=400,
         )
 
     for key in reg_dict:
         if key not in allowed_fields:
             return Response(
-                f"Bad response(Unknown field {key})",
+                f"Bad response(Unknown field {key}).",
                 status=400,
             )
 
@@ -1699,41 +1698,30 @@ def user_update() -> Response:
     last_name = reg_dict.get("last_name")
     if not first_name or not last_name:
         return Response(
-            "Bad response(First name or Last name is missing)",
+            "Bad response(First name or Last name is missing).",
             status=400,
         )
 
     # If we don't have the user email then we have to get it else only update if the user want.
-    force_update_email = reg_dict.get("force_update_email")
+    tmp_given_user_email = reg_dict.get("email")
     user_db_email = get_current_user_email()
-    if not user_db_email or force_update_email:
-        if not reg_dict.get("email"):
-            if not user_db_email:
-                return Response(
-                    "Bad response(There is no email in our DB and there is no email in the json)",
-                    status=400,
-                )
-            elif force_update_email:
-                return Response(
-                    "Bad response(You set force_update_email but didn't gave us an email)",
-                    status=400,
-                )
-            else:
-                return Response(
-                    "Bad response(Unknown error, Try to set email address)",
-                    status=400,
-                )
-
-        is_valid = validate_email(
-            email_address=reg_dict["email"], check_regex=True, check_mx=False, use_blacklist=False
-        )
-        if not is_valid:
+    if not user_db_email or tmp_given_user_email:
+        if not tmp_given_user_email:
             return Response(
-                "Bad response(Bad email address)",
+                "Bad response(There is no email in our DB and there is no email in the json).",
                 status=400,
             )
 
-        user_db_email = reg_dict["email"]
+        is_valid = validate_email(
+            email_address=tmp_given_user_email, check_regex=True, check_mx=False, use_blacklist=False
+        )
+        if not is_valid:
+            return Response(
+                "Bad response(Bad email address).",
+                status=400,
+            )
+
+        user_db_email = tmp_given_user_email
 
     phone = reg_dict.get("phone")
     if phone:
@@ -1741,21 +1729,23 @@ def user_update() -> Response:
 
         if not is_valid:
             return Response(
-                "Bad response(Bad phone number)",
+                "Bad response(Bad phone number).",
                 status=400,
             )
 
     user_type = reg_dict.get("user_type")
     user_work_place = reg_dict.get("user_work_place")
     user_url = reg_dict.get("user_url")
-    self_desc = reg_dict.get("self_desc")
+    user_desc = reg_dict.get("user_desc")
 
+    current_user.first_name = first_name
+    current_user.last_name = last_name
     current_user.email = user_db_email
     current_user.phone = phone
     current_user.user_type = user_type
     current_user.work_on_behalf_of_organization = user_work_place
     current_user.user_url = user_url
-    current_user.self_desc = self_desc
+    current_user.user_desc = user_desc
     current_user.is_user_completed_registration = True
     if os.environ.get("FLASK_ENV") != "test":
         db.session.commit()

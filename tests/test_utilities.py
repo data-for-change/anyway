@@ -1,4 +1,4 @@
-from anyway.utilities import is_valid_number, check_is_a_safe_redirect_url
+from anyway.utilities import is_valid_number, is_a_safe_redirect_url
 
 
 # The main logic is implemented in external library, the only reason for this test is to make sure that this library
@@ -36,13 +36,14 @@ def test_validate_phone():
         "0541234567",
         "054-1234567",
         "054-123-4567",
+        "+972-054-123-4567",
     ]
 
     for phone in short_numbers + long_numbers:
-        assert is_valid_number(phone) is False
+        assert not is_valid_number(phone)
 
     for phone in good_numbers:
-        assert is_valid_number(phone) is True
+        assert is_valid_number(phone)
 
 
 def test_url_redirect_checker():
@@ -88,8 +89,8 @@ def test_url_redirect_checker():
     ]
 
     for url in bad_urls:
-        assert check_is_a_safe_redirect_url(url) is False
+        assert not is_a_safe_redirect_url(url)
 
     for url in good_urls:
         print(url)
-        assert check_is_a_safe_redirect_url(url) is True
+        assert is_a_safe_redirect_url(url)

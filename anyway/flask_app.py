@@ -79,7 +79,7 @@ from anyway.oauth import OAuthSignIn
 from anyway.infographics_utils import get_infographics_data
 from anyway.app_and_db import app, db
 from anyway.dataclasses.user_data import UserData
-from anyway.utilities import is_valid_number, check_is_a_safe_redirect_url
+from anyway.utilities import is_valid_number, is_a_safe_redirect_url
 from anyway.views.schools.api import (
     schools_description_api,
     schools_names_api,
@@ -1503,18 +1503,18 @@ app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash, methods
 def oauth_authorize(provider: str) -> Response:
     if provider != "google":
         return Response(
-            "Google is the only support OAuth 2.0 provider.",
+            "Google is the only supported OAuth 2.0 provider.",
             status=422,
         )
     if not current_user.is_anonymous:
         return Response(
-            "User is already login.",
+            "User is already logged in.",
             status=400,
         )
 
     redirect_url_from_url = request.args.get("redirect_url", type=str)
     redirect_url = BE_CONST.DEFAULT_REDIRECT_URL
-    if redirect_url_from_url and check_is_a_safe_redirect_url(redirect_url_from_url):
+    if redirect_url_from_url and is_a_safe_redirect_url(redirect_url_from_url):
         redirect_url = redirect_url_from_url
 
     oauth = OAuthSignIn.get_provider(provider)
@@ -1525,7 +1525,7 @@ def oauth_authorize(provider: str) -> Response:
 def oauth_callback(provider: str) -> Response:
     if provider != "google":
         return Response(
-            "Google is the only support OAuth 2.0 provider.",
+            "Google is the only supported OAuth 2.0 provider.",
             status=422,
         )
 
@@ -1567,7 +1567,7 @@ def oauth_callback(provider: str) -> Response:
     if redirect_url_json_base64:
         redirect_url_json = json.loads(base64.b64decode(redirect_url_json_base64.encode("UTF8")))
         redirect_url_to_check = redirect_url_json.get("redirect_url")
-        if redirect_url_to_check and check_is_a_safe_redirect_url(redirect_url_to_check):
+        if redirect_url_to_check and is_a_safe_redirect_url(redirect_url_to_check):
             redirect_url = redirect_url_to_check
 
     login.login_user(user, True)
@@ -1638,7 +1638,7 @@ def load_user(id):
 def user_have_email() -> Response:
     if current_user.is_anonymous:
         return Response(
-            "User not login.",
+            "User not logged in.",
             status=401,
         )
     return jsonify({"have_email": bool(get_current_user_email())})
@@ -1660,21 +1660,21 @@ def user_update() -> Response:
 
     if current_user.is_anonymous:
         return Response(
-            "User not login.",
+            "User not logged in.",
             status=401,
         )
 
     reg_dict = request.json
     if not reg_dict:
         return Response(
-            "Bad response(not a JSON or mimetype does not indicate JSON).",
+            "Bad Request (not a JSON or mimetype does not indicate JSON).",
             status=400,
         )
 
     for key in reg_dict:
         if key not in allowed_fields:
             return Response(
-                f"Bad response(Unknown field {key}).",
+                f"Bad Request (Unknown field {key}).",
                 status=400,
             )
 
@@ -1682,7 +1682,7 @@ def user_update() -> Response:
     last_name = reg_dict.get("last_name")
     if not first_name or not last_name:
         return Response(
-            "Bad response(First name or Last name is missing).",
+            "Bad Request (first name or last name is missing).",
             status=400,
         )
 
@@ -1692,7 +1692,7 @@ def user_update() -> Response:
     if not user_db_email or tmp_given_user_email:
         if not tmp_given_user_email:
             return Response(
-                "Bad response(There is no email in our DB and there is no email in the json).",
+                "Bad Request (There is no email in our DB and there is no email in the json).",
                 status=400,
             )
 
@@ -1704,7 +1704,7 @@ def user_update() -> Response:
         )
         if not is_valid:
             return Response(
-                "Bad response(Bad email address).",
+                "Bad Request (Bad email address).",
                 status=400,
             )
 
@@ -1716,7 +1716,7 @@ def user_update() -> Response:
 
         if not is_valid:
             return Response(
-                "Bad response(Bad phone number).",
+                "Bad Request (Bad phone number).",
                 status=400,
             )
 

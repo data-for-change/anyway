@@ -208,7 +208,7 @@ def is_valid_number(phone: str) -> bool:
         return False
 
 
-def check_is_a_safe_redirect_url(url: str) -> bool:
+def is_a_safe_redirect_url(url: str) -> bool:
     url_obj = urlparse(url)
     if url_obj.scheme not in ["https", "http"]:
         return False
@@ -219,8 +219,6 @@ def check_is_a_safe_redirect_url(url: str) -> bool:
 
     # Note that we don't support ipv6 localhost address or ipv4 localhost full range of address
     if netloc in [
-        "www.anyway.co.il",
-        "anyway-infographics-staging.web.app",
         "localhost",
         "127.0.0.1",
     ]:
@@ -229,5 +227,11 @@ def check_is_a_safe_redirect_url(url: str) -> bool:
         localhost_regex = re.compile(r"^127\.0\.0\.1:[0-9]{1,7}$|^localhost:[0-9]{1,7}$")
         if localhost_regex.match(netloc):
             return True
+
+    if url_obj.scheme == "https" and netloc in [
+        "www.anyway.co.il",
+        "anyway-infographics-staging.web.app",
+    ]:
+        return True
 
     return False

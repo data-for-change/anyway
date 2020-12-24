@@ -124,7 +124,7 @@ def test_markers(
 def test_user_update(app):
     rv = user_update_post(app)
     assert rv.status_code == 401
-    assert rv.data == b"User not login."
+    assert rv.data == b"User not logged in."
 
     with patch("flask_login.utils._get_user") as current_user:
         user = mock.MagicMock()
@@ -133,7 +133,7 @@ def test_user_update(app):
 
         rv = user_update_post(app)
         assert rv.status_code == 400
-        assert rv.data == b"Bad response(not a JSON or mimetype does not indicate JSON)."
+        assert rv.data == b"Bad Request (not a JSON or mimetype does not indicate JSON)."
 
         rv = user_update_post_json(app)
         assert rv.status_code == 400
@@ -141,19 +141,19 @@ def test_user_update(app):
 
         rv = user_update_post_json(app, json={})
         assert rv.status_code == 400
-        assert rv.data == b"Bad response(not a JSON or mimetype does not indicate JSON)."
+        assert rv.data == b"Bad Request (not a JSON or mimetype does not indicate JSON)."
 
         rv = user_update_post_json(app, json={"a": "a"})
         assert rv.status_code == 400
-        assert rv.data == b"Bad response(Unknown field a)."
+        assert rv.data == b"Bad Request (Unknown field a)."
 
         rv = user_update_post_json(app, json={"first_name": "a"})
         assert rv.status_code == 400
-        assert rv.data == b"Bad response(First name or Last name is missing)."
+        assert rv.data == b"Bad Request (first name or last name is missing)."
 
         rv = user_update_post_json(app, json={"last_name": "a"})
         assert rv.status_code == 400
-        assert rv.data == b"Bad response(First name or Last name is missing)."
+        assert rv.data == b"Bad Request (first name or last name is missing)."
 
         with patch("anyway.flask_app.get_current_user_email") as get_current_user_email:
             get_current_user_email.side_effect = lambda: None
@@ -161,17 +161,19 @@ def test_user_update(app):
             assert rv.status_code == 400
             assert (
                 rv.data
-                == b"Bad response(There is no email in our DB and there is no email in the json)."
+                == b"Bad Request (There is no email in our DB and there is no email in the json)."
             )
 
-            rv = user_update_post_json(app, json={"first_name": "a", "last_name": "a", "email": "aa@gmail.com"})
+            rv = user_update_post_json(
+                app, json={"first_name": "a", "last_name": "a", "email": "aa@gmail.com"}
+            )
             assert rv.status_code == 200
 
             rv = user_update_post_json(
                 app, json={"first_name": "a", "last_name": "a", "email": "aaaa"}
             )
             assert rv.status_code == 400
-            assert rv.data == b"Bad response(Bad email address)."
+            assert rv.data == b"Bad Request (Bad email address)."
 
             get_current_user_email.side_effect = lambda: "aa@bb.com"
 
@@ -179,7 +181,7 @@ def test_user_update(app):
                 app, json={"first_name": "a", "last_name": "a", "phone": "1234567"}
             )
             assert rv.status_code == 400
-            assert rv.data == b"Bad response(Bad phone number)."
+            assert rv.data == b"Bad Request (Bad phone number)."
 
             rv = user_update_post_json(
                 app, json={"first_name": "a", "last_name": "a", "phone": "0541234567"}

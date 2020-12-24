@@ -28,14 +28,14 @@ class OAuthSignIn(object):
         return url_for("oauth_callback", provider=self.provider_name, _external=True)
 
     @classmethod
-    def get_provider(self, provider_name: str):
-        if not self.providers:
-            self.providers = {}
-            for provider_class in self.__subclasses__():
+    def get_provider(cls, provider_name: str):
+        if not cls.providers:
+            cls.providers = {}
+            for provider_class in cls.__subclasses__():
                 # noinspection PyArgumentList
                 provider = provider_class()
-                self.providers[provider.provider_name] = provider
-        return self.providers[provider_name]
+                cls.providers[provider.provider_name] = provider
+        return cls.providers[provider_name]
 
 
 class GoogleSignIn(OAuthSignIn):

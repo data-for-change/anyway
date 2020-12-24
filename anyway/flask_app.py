@@ -48,6 +48,7 @@ from anyway.clusters_calculator import retrieve_clusters
 from anyway.config import ENTRIES_PER_PAGE
 from anyway.backend_constants import BE_CONST
 from anyway.constants import CONST
+from anyway.current_user_functions import get_current_user_email
 from anyway.models import (
     AccidentMarker,
     DiscussionMarker,
@@ -1457,11 +1458,6 @@ def get_current_user_first_name():
 ######## rauth integration (login through facebook) ##################
 
 
-@lm.user_loader
-def load_user(id):
-    return db.session.query(UserOAuth).get(id)
-
-
 @app.route("/logout")
 def logout():
     login.logout_user()
@@ -1532,11 +1528,6 @@ def oauth_callback(provider: str) -> Response:
             "Google is the only support OAuth 2.0 provider.",
             status=422,
         )
-    if not current_user.is_anonymous:
-        return Response(
-            "User is already login",
-            status=400,
-        )
 
     oauth = OAuthSignIn.get_provider(provider)
     user_data: UserData = oauth.callback()
@@ -1570,7 +1561,6 @@ def oauth_callback(provider: str) -> Response:
         user.user_last_login_date = datetime.datetime.now()
 
     db.session.commit()
-
 
     redirect_url = BE_CONST.DEFAULT_REDIRECT_URL
     redirect_url_json_base64 = request.args.get("state", type=str)
@@ -1639,14 +1629,9 @@ def embedded_reports_api():
     return response
 
 
-def get_current_user_email():
-    cur_id = current_user.get_id()
-    cur_user = (
-        db.session.query(UserOAuth).with_entities(UserOAuth.email).filter(UserOAuth.id == cur_id).first()
-    )
-    if cur_user is not None:
-        return cur_user.email
-    return None
+@lm.user_loader
+def load_user(id):
+    return db.session.query(UserOAuth).get(id)
 
 
 @app.route("/user/have_email")
@@ -1656,7 +1641,6 @@ def user_have_email() -> Response:
             "User not login.",
             status=401,
         )
-
     return jsonify({"have_email": bool(get_current_user_email())})
 
 
@@ -1713,7 +1697,10 @@ def user_update() -> Response:
             )
 
         is_valid = validate_email(
-            email_address=tmp_given_user_email, check_regex=True, check_mx=False, use_blacklist=False
+            email_address=tmp_given_user_email,
+            check_regex=True,
+            check_mx=False,
+            use_blacklist=False,
         )
         if not is_valid:
             return Response(

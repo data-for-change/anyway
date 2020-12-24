@@ -1,7 +1,7 @@
 from anyway.utilities import is_valid_number, check_is_a_safe_redirect_url
 
 
-# The main logic in implemented in external library, the only reason for this test is to make sure that this library
+# The main logic is implemented in external library, the only reason for this test is to make sure that this library
 # will continue to support israeli numbers
 def test_validate_phone():
     # Bad numbers

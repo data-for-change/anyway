@@ -1,3 +1,4 @@
+import base64
 import json
 
 import requests
@@ -17,7 +18,7 @@ class OAuthSignIn(object):
         self.consumer_id = credentials["id"]
         self.consumer_secret = credentials["secret"]
 
-    def authorize(self):
+    def authorize(self, **kwargs):
         pass
 
     def callback(self) -> typing.Optional[UserData]:
@@ -52,7 +53,7 @@ class FacebookSignIn(OAuthSignIn):
             base_url="https://graph.facebook.com/",
         )
 
-    def authorize(self):
+    def authorize(self, **kwargs):
         return redirect(
             self.service.get_authorize_url(
                 scope="email", response_type="code", redirect_uri=self.get_callback_url()
@@ -94,10 +95,18 @@ class GoogleSignIn(OAuthSignIn):
             access_token_url=google_params.get("token_endpoint"),
         )
 
-    def authorize(self):
+    def authorize(self, **kwargs):
+        redirect_url = kwargs["redirect_url"]
+        state = {"redirect_url": redirect_url}
+        state_json = json.dumps(state)
+        state_encoded_for_url = base64.b64encode(state_json.encode("UTF8"))
+
         return redirect(
             self.service.get_authorize_url(
-                scope="email", response_type="code", redirect_uri=self.get_callback_url()
+                scope="email",
+                response_type="code",
+                redirect_uri=self.get_callback_url(),
+                state=state_encoded_for_url,
             )
         )
 
@@ -127,9 +136,14 @@ class GoogleSignIn(OAuthSignIn):
             if me.get("family_name"):
                 name = f"{name} {me.get('family_name')}" if name else me.get("family_name")
 
-        data_of_user = UserData(name=name, email=me.get("email"), service_user_id=me["sub"],
-                                service_user_domain=me.get("hd"), service_user_locale=me.get("locale"),
-                                picture_url=me.get("picture"), user_profile_url=me.get("profile"))
+        data_of_user = UserData(
+            name=name,
+            email=me.get("email"),
+            service_user_id=me["sub"],
+            service_user_domain=me.get("hd"),
+            service_user_locale=me.get("locale"),
+            picture_url=me.get("picture"),
+            user_profile_url=me.get("profile"),
+        )
 
         return data_of_user
-

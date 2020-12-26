@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=no-member
+import base64
 import csv
 import datetime
 import json
 import logging
+import re
 from io import StringIO
 import os
 import time
+from urllib.parse import urlparse
+
 import flask_admin as admin
 import flask_login as login
 import jinja2
@@ -1498,29 +1502,64 @@ app.add_url_rule(
 app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
 
 
+def check_is_a_safe_redirect_url(url: str) -> bool:
+    url_obj = urlparse(url)
+    if url_obj.scheme not in ['https', 'http']:
+        return False
+
+    netloc = url_obj.netloc
+    if not netloc:
+        return False
+
+    # Note that we don't support ipv6 localhost address or ipv4 localhost full range of address
+    if netloc in ["www.anyway.co.il", "anyway-infographics-staging.web.app", "localhost", "127.0.0.1"]:
+        return True
+    else:  # Check localhost with port
+        localhost_regex = re.compile(r'^127\.0\.0\.1\:[0-9]{1,7}$|^localhost\:[0-9]{1,7}$')
+        if localhost_regex.match(netloc):
+            return True
+
+    return False
+
+
 @app.route("/authorize/<provider>")
 def oauth_authorize(provider):
     # This is quick fix for the DEMO - to make sure that anyway.co.il is fully compatible with https://anyway-infographics-staging.web.app/
+    redirect_url_from_url = request.args.get('redirect_url', type=str)
+    redirect_url = BE_CONST.DEFAULT_REDIRECT_URL
+    if redirect_url_from_url and check_is_a_safe_redirect_url(redirect_url_from_url):
+        redirect_url = redirect_url_from_url
+
     if provider != "google":
-        return redirect(url_for("index"))
+        return redirect(redirect_url, code=302)
     if not current_user.is_anonymous:
-        return redirect(url_for("index"))
+        return redirect(redirect_url, code=302)
+
     oauth = OAuthSignIn.get_provider(provider)
-    return oauth.authorize()
+    return oauth.authorize(redirect_url=redirect_url)
 
 
 @app.route("/callback/<provider>")
 def oauth_callback(provider):
     # This is quick fix for the DEMO - to make sure that anyway.co.il is fully compatible with https://anyway-infographics-staging.web.app/
+
+    redirect_url = BE_CONST.DEFAULT_REDIRECT_URL
+    redirect_url_json_base64 = request.args.get('state', type=str)
+    if redirect_url_json_base64:
+        redirect_url_json = json.loads(base64.b64decode(redirect_url_json_base64.encode("UTF8")))
+        redirect_url_to_check = redirect_url_json.get("redirect_url")
+        if redirect_url_to_check and check_is_a_safe_redirect_url(redirect_url_to_check):
+            redirect_url = redirect_url_to_check
+
     if provider != "google":
-        return redirect(url_for("index"))
+        return redirect(redirect_url, code=302)
     if not current_user.is_anonymous:
-        return redirect(url_for("index"))
+        return redirect(redirect_url, code=302)
     oauth = OAuthSignIn.get_provider(provider)
     user_data: UserData = oauth.callback()
     if not user_data.service_user_id:
         flash("Authentication failed.")
-        return redirect(url_for("index"))
+        return redirect(redirect_url, code=302)
 
     # TODO: merge google and facebook code?
     if provider == "google":
@@ -1551,9 +1590,9 @@ def oauth_callback(provider):
             db.session.commit()
     else:
         flash("Authentication failed.")
-        return redirect(url_for("index"))
+        return redirect(redirect_url, code=302)
     login.login_user(user, True)
-    return redirect(url_for("index"))
+    return redirect(redirect_url, code=302)
 
 
 """
@@ -1578,12 +1617,12 @@ def infographics_data():
             lang=lang
         )
     )
-    json_data = get_infographics_data(news_flash_id=news_flash_id, years_ago=number_of_years_ago, lang=lang)
-
-    if not json_data:
+    output = get_infographics_data(news_flash_id=news_flash_id, years_ago=number_of_years_ago, lang=lang)
+    if not output:
         log_bad_request(request)
         return abort(http_client.NOT_FOUND)
 
+    json_data = json.dumps(output, default=str)
     return Response(json_data, mimetype="application/json")
 
 

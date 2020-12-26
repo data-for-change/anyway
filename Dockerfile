@@ -1,10 +1,10 @@
-FROM ubuntu:19.10 AS builder
+FROM ubuntu:20.04 AS builder
 
 # Install system tools
 RUN apt-get clean && \
     apt-get -y update && \
     apt-get install -y \
-        python3.7-dev \
+        python3-dev \
         build-essential \
         libpq-dev \
         virtualenv && \
@@ -24,7 +24,7 @@ RUN . /venv3/bin/activate && \
 RUN find /venv3 -name '*.so' | xargs strip
 
 
-FROM ubuntu:19.10 AS runtime
+FROM ubuntu:20.04 AS runtime
 
 RUN apt-get clean && \
     apt-get -y update && \

@@ -55,7 +55,7 @@ class BackEndConstants(object):
         COLLISION_WITH_AN_ANIMAL = 19
         DAMAGE_CAUSED_BY_A_FALLING_LOAD_OFF_A_VEHICLE = 20
 
-    class DriverType(object):
+    class DriverType:
         PROFESSIONAL_DRIVER = 1
         PRIVATE_VEHICLE_DRIVER = 2
         OTHER_DRIVER = 3

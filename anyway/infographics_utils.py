@@ -19,7 +19,7 @@ from anyway.models import NewsFlash, AccidentMarkerView, InvolvedMarkerView
 from anyway.parsers import resolution_dict
 from anyway.app_and_db import db
 from anyway.infographics_dictionaries import (
-    driver_type_hebrew_dict,
+    english_driver_type_dict,
     head_on_collisions_comparison_dict,
     english_accident_severity_dict,
     english_accident_type_dict,
@@ -719,10 +719,6 @@ class AccidentCountByDriverTypeWidget(Widget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 16
-        self.text = {
-            "title": "מעורבות נהגים בתאונות לפי סוג במקטע "
-            + self.request_params.location_info["road_segment_name"]
-        }
 
     def generate_items(self) -> None:
         self.items = AccidentCountByDriverTypeWidget.count_accidents_by_driver_type(
@@ -743,19 +739,38 @@ class AccidentCountByDriverTypeWidget(Widget):
         for item in involved_by_vehicle_type_data:
             vehicle_type, count = item["involve_vehicle_type"], int(item["count"])
             if vehicle_type in BE_CONST.PROFESSIONAL_DRIVER_VEHICLE_TYPES:
-                driver_types[driver_type_hebrew_dict["professional_driver"]] += count
+                driver_types[
+                    english_driver_type_dict[BE_CONST.DriverType.PROFESSIONAL_DRIVER]
+                ] += count
             elif vehicle_type in BE_CONST.PRIVATE_DRIVER_VEHICLE_TYPES:
-                driver_types[driver_type_hebrew_dict["private_vehicle_driver"]] += count
+                driver_types[
+                    english_driver_type_dict[BE_CONST.DriverType.PRIVATE_VEHICLE_DRIVER]
+                ] += count
             elif (
                 vehicle_type in BE_CONST.LIGHT_ELECTRIC_VEHICLE_TYPES
                 or vehicle_type in BE_CONST.OTHER_VEHICLES_TYPES
             ):
-                driver_types[driver_type_hebrew_dict["other_driver"]] += count
+                driver_types[english_driver_type_dict[BE_CONST.DriverType.OTHER_DRIVER]] += count
         output = [
             {"driver_type": driver_type, "count": count}
             for driver_type, count in driver_types.items()
         ]
         return output
+
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        for item in items["data"]["items"]:
+            try:
+                item["driver_type"] = _(item["driver_type"])
+            except KeyError:
+                logging.exception(
+                    f"AccidentCountByDriverTypeWidget.localize_items: Exception while translating {item}."
+                )
+        items["data"]["text"] = {
+            "title": _("accident count by driver type ")
+            + request_params.location_info["road_segment_name"]
+        }
+        return items
 
 
 @register

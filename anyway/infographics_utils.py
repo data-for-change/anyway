@@ -1222,9 +1222,8 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(Widget):
             .group_by(AccidentMarker.accident_type)
             .order_by(desc(num_accidents_label))
         )
-        all_roads_query_result = pd.read_sql_query(all_roads_query.statement, all_roads_query.session.bind).to_dict(
-            orient="records"
-        )  # pylint: disable=no-member
+        all_roads_query_result = pd.read_sql_query(all_roads_query.statement, all_roads_query.session.bind)\
+            .to_dict(orient="records")  # pylint: disable=no-member
         all_roads_sum_accidents = 0
         all_roads_map = {}
         for record in all_roads_query_result:

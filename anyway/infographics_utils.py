@@ -27,7 +27,6 @@ from anyway.infographics_dictionaries import (
 )
 from anyway.parsers import infographics_data_cache_updater
 
-
 @dataclass
 class RequestParams:
     """
@@ -1190,6 +1189,7 @@ class PedestrianInjuredInJunctionsWidget(Widget):
 @register
 class AccidentTypeVehicleTypeRoadComparisonWidget(Widget):
     name: str = "vehicle_accident_vs_all_accidents"  # WIP: change by vehicle type
+    MAX_ACCIDENT_TYPES_TO_RETURN = 5
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
@@ -1205,58 +1205,55 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(Widget):
 
     @staticmethod
     def accident_type_road_vs_all_count(start_time, end_time, road_number):
+        num_accidents_label = "num_of_accidents"
         location_all = "כל הארץ"
         location_road = f"כביש {int(road_number)}"
-        logging.debug(f"start_time: {start_time} end_time: {end_time}")
 
-        num_accidents_label = "num_of_accidents"
         vehicle_types = BE_CONST.MOTORCYCLE_VEHICLE_TYPES  # WIP: change by vehicle type
-        all_roads_query = (
-            db.session.query(AccidentMarker, Vehicle)
-            .with_entities(AccidentMarker.accident_type,
-                           func.count(distinct(AccidentMarker.provider_and_id)).label(num_accidents_label))
-            .join(Vehicle, Vehicle.provider_and_id == AccidentMarker.provider_and_id)
-            .filter(AccidentMarker.created >= start_time)
-            .filter(AccidentMarker.created < end_time)
-            .filter(Vehicle.vehicle_type.in_(vehicle_types))
-            .group_by(AccidentMarker.accident_type)
-            .order_by(desc(num_accidents_label))
-        )
-        all_roads_query_result = pd.read_sql_query(all_roads_query.statement, all_roads_query.session.bind)\
-            .to_dict(orient="records")  # pylint: disable=no-member
+
+        all_roads_query = AccidentTypeVehicleTypeRoadComparisonWidget.get_accident_count_by_vehicle_type(
+            start_time, end_time, num_accidents_label, vehicle_types)
+        all_roads_query_result = AccidentTypeVehicleTypeRoadComparisonWidget.run_query(all_roads_query)
         all_roads_sum_accidents = 0
         all_roads_map = {}
         for record in all_roads_query_result:
             all_roads_sum_accidents += record[num_accidents_label]
             all_roads_map[record[AccidentMarker.accident_type.name]] = record[num_accidents_label]
 
-        road_query = (
-            db.session.query(AccidentMarker, Vehicle)
-            .with_entities(AccidentMarker.accident_type,
-                           func.count(distinct(AccidentMarker.provider_and_id)).label(num_accidents_label))
-            .join(Vehicle, Vehicle.provider_and_id == AccidentMarker.provider_and_id)
-            .filter((AccidentMarker.road1 == road_number) | (AccidentMarker.road2 == road_number))
-            .filter(AccidentMarker.created >= start_time)
-            .filter(AccidentMarker.created <= end_time)
-            .filter(Vehicle.vehicle_type.in_(vehicle_types))
-            .group_by(AccidentMarker.accident_type)
-            .order_by(desc(num_accidents_label))
-        )
-        road_query_result = pd.read_sql_query(road_query.statement, road_query.session.bind).\
-            to_dict(orient="records")  # pylint: disable=no-member
+        road_query = all_roads_query.filter((AccidentMarker.road1 == road_number) | (AccidentMarker.road2 == road_number))
+        road_query_result = AccidentTypeVehicleTypeRoadComparisonWidget.run_query(road_query)
         road_sum_accidents = 0
         types_to_report = []
         for record in road_query_result:
             road_sum_accidents += record[num_accidents_label]
 
         for record in road_query_result:
-            if len(types_to_report) == 5:
+            if len(types_to_report) == AccidentTypeVehicleTypeRoadComparisonWidget.MAX_ACCIDENT_TYPES_TO_RETURN:
                 break
             accident_type = record[AccidentMarker.accident_type.name]
             types_to_report.append({AccidentMarker.accident_type.name: accident_type,
                                     location_road: record[num_accidents_label] / road_sum_accidents,
                                     location_all: all_roads_map[accident_type] / all_roads_sum_accidents})
         return types_to_report
+
+    @staticmethod
+    def get_accident_count_by_vehicle_type(start_time, end_time, num_accidents_label, vehicle_types):
+        return (db.session.query(AccidentMarker, Vehicle)
+                .with_entities(AccidentMarker.accident_type,
+                               func.count(distinct(AccidentMarker.provider_and_id)).label(num_accidents_label))
+                .join(Vehicle, Vehicle.provider_and_id == AccidentMarker.provider_and_id)
+                .filter(AccidentMarker.created >= start_time)
+                .filter(AccidentMarker.created < end_time)
+                .filter(Vehicle.vehicle_type.in_(vehicle_types))
+                .group_by(AccidentMarker.accident_type)
+                .order_by(desc(num_accidents_label))
+                )
+
+    @staticmethod
+    def run_query(query):
+        # pylint: disable=no-member
+        return pd.read_sql_query(query.statement, query.session.bind) \
+            .to_dict(orient="records")
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:

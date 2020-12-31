@@ -337,21 +337,20 @@ class StreetViewWidget(Widget):
 @register
 class HeadOnCollisionsComparisonWidget(Widget):
     name: str = "head_on_collisions_comparison"
+    SPECIFIC_ROAD_SUBTITLE = "specific_road_segment_fatal_accidents"
+    ALL_ROADS_SUBTITLE = "all_roads_fatal_accidents"
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 5
-        self.text = {"title": "תאונות קטלניות ע״פ סוג"}
+        # self.text = {"title": "תאונות קטלניות ע״פ סוג"}
+        # self.text = {"title": "fatal accidents by type"}
 
     def generate_items(self) -> None:
-        self.items = HeadOnCollisionsComparisonWidget.get_head_to_head_stat(
-            news_flash_obj=self.request_params.news_flash_obj,
-            start_time=self.request_params.start_time,
-            end_time=self.request_params.end_time,
-        )
+        self.items = self.get_head_to_head_stat()
 
-    @staticmethod
-    def get_head_to_head_stat(news_flash_obj: NewsFlash, start_time, end_time) -> Dict:
+    def get_head_to_head_stat(self) -> Dict:
+        news_flash = self.request_params.news_flash_obj
         road_data = {}
         filter_dict = {
             "road_type": BE_CONST.ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION,
@@ -360,41 +359,89 @@ class HeadOnCollisionsComparisonWidget(Widget):
         all_roads_data = get_accidents_stats(
             table_obj=AccidentMarkerView,
             filters=filter_dict,
-            group_by="accident_type_hebrew",
-            count="accident_type_hebrew",
-            start_time=start_time,
-            end_time=end_time,
+            group_by="accident_type",
+            count="accident_type",
+            start_time=self.request_params.start_time,
+            end_time=self.request_params.end_time,
         )
 
-        if news_flash_obj.road1 and news_flash_obj.road_segment_name:
+        if news_flash.road1 and news_flash.road_segment_name:
             filter_dict.update(
                 {
-                    "road1": news_flash_obj.road1,
-                    "road_segment_name": news_flash_obj.road_segment_name,
+                    "road1": news_flash.road1,
+                    "road_segment_name": news_flash.road_segment_name,
                 }
             )
             road_data = get_accidents_stats(
                 table_obj=AccidentMarkerView,
                 filters=filter_dict,
-                group_by="accident_type_hebrew",
-                count="accident_type_hebrew",
-                start_time=start_time,
-                end_time=end_time,
+                group_by="accident_type",
+                count="accident_type",
+                start_time=self.request_params.start_time,
+                end_time=self.request_params.end_time,
             )
 
-        road_data_dict = sum_road_accidents_by_specific_type(road_data, "התנגשות חזית בחזית")
+        road_data_dict = sum_road_accidents_by_specific_type(
+            road_data,
+            BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION
+        )
         all_roads_data_dict = sum_road_accidents_by_specific_type(
-            all_roads_data, "התנגשות חזית בחזית"
+            all_roads_data,
+            BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION
         )
 
-        return {
-            "specific_road_segment_fatal_accidents": convert_roads_fatal_accidents_to_frontend_view(
-                road_data_dict
-            ),
-            "all_roads_fatal_accidents": convert_roads_fatal_accidents_to_frontend_view(
-                all_roads_data_dict
-            ),
+        road_sums = self.sum_count_of_accident_type(
+            road_data, BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION)
+        all_roads_sums = self.sum_count_of_accident_type(
+            all_roads_data, BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION)
+        logging.debug(f"get_head_to_head_stat:\n" +
+                      f"road_sums:{road_sums}\n" +
+                      f"all_roads_sums:{all_roads_sums}\n" +
+                      f"road_data_dict:{road_data_dict}\n" +
+                      f"all_roads_data_dict:{all_roads_data_dict}"
+                      )
+
+        res = {self.SPECIFIC_ROAD_SUBTITLE: [
+            {"desc": english_accident_type_dict[BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION],
+             "count": road_sums["given"]
+             },
+            {"desc": "others",
+             "count": road_sums["others"]}
+        ],
+            self.ALL_ROADS_SUBTITLE: [
+                {"desc": english_accident_type_dict[BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION], "count": all_roads_sums["given"]},
+                {"desc": "others", "count": all_roads_sums["others"]}
+            ]
         }
+        logging.debug(f"get_head_to_head_stat: res:\n{res}")
+        return res
+
+    @staticmethod
+    def sum_count_of_accident_type(data: Dict, acc_type: int) -> Dict:
+        given = sum([d["count"] for d in data if d["accident_type"] == acc_type])
+        others = sum([d["count"] for d in data if d["accident_type"] != acc_type])
+        return {"given": given, "others": others}
+
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        i = items["data"]["items"]
+        i[_(HeadOnCollisionsComparisonWidget.SPECIFIC_ROAD_SUBTITLE)] = i.pop(HeadOnCollisionsComparisonWidget.SPECIFIC_ROAD_SUBTITLE)
+        i[_(HeadOnCollisionsComparisonWidget.ALL_ROADS_SUBTITLE)] = i.pop(HeadOnCollisionsComparisonWidget.ALL_ROADS_SUBTITLE)
+        items["data"]["text"] = {"title": _("fatal accidents by type")}
+        for val in i.values():
+            logging.debug(f"HeadOn:localize_items:val:{val}")
+            for e in val:
+                e["desc"] = _(e["desc"])
+            logging.debug(f"HeadOn:localize_items:val-after:{val}")
+        return items
+
+
+# adding calls to _() for pybabel extraction
+_(HeadOnCollisionsComparisonWidget.SPECIFIC_ROAD_SUBTITLE)
+_(HeadOnCollisionsComparisonWidget.ALL_ROADS_SUBTITLE)
+_("others")
+_("all_roads_fatal_accidents")
+_("specific_road_segment_fatal_accidents")
 
 
 @register
@@ -1475,9 +1522,11 @@ def sum_road_accidents_by_specific_type(road_data, field_name):
 
 
 def convert_roads_fatal_accidents_to_frontend_view(data_dict):
+    logging.debug(f"convert_roads_fatal_accidents_to_frontend_view:input:{data_dict}")
     data_list = []
     for key, value in data_dict.items():
-        if key == head_on_collisions_comparison_dict["head_to_head_collision"]:
+        logging.debug(f"convert_roads_fatal:key:{key}:value:{value}")
+        if key == BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION:
             data_list.append(
                 {"desc": head_on_collisions_comparison_dict["head_to_head"], "count": value}
             )

@@ -1016,10 +1016,6 @@ class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
             "title": f"תאונות אופנועים קשות וקטלניות בכביש {int(self.road_number)} בהשוואה לכל הארץ"
         }
 
-    # noinspection PyMethodMayBeStatic
-    def is_in_cache(self) -> bool:
-        return False
-
     def generate_items(self) -> None:
         self.items = MotorcycleAccidentsVsAllAccidentsWidget.motorcycle_accidents_vs_all_accidents(
             self.request_params.start_time, self.request_params.end_time, self.road_number

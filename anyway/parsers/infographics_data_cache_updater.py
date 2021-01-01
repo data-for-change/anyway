@@ -8,6 +8,7 @@ from anyway.constants import CONST
 from anyway.app_and_db import db
 import anyway.infographics_utils
 import logging
+import json
 
 
 def is_cache_eligible(news_flash):
@@ -66,7 +67,10 @@ def get_infographics_data_from_cache(news_flash_id, years_ago) -> Dict:
     logging.debug(f"retrieved from cache {type(db_item)}:{db_item}"[:70])
     db.session.commit()
     try:
-        return db_item.get_data() if db_item else {}
+        if db_item:
+            return json.loads(db_item.get_data())
+        else:
+            return {}
     except Exception as e:
         logging.error(
             f"Exception while extracting data from returned cache item flash_id:{news_flash_id},years:{years_ago})"

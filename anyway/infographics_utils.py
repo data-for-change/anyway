@@ -1011,7 +1011,7 @@ class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 20
-        self.road_number = request_params.location_info["road1"]
+        self.road_number: str = request_params.location_info["road1"]
         self.text = {
             "title": f"תאונות אופנועים קשות וקטלניות בכביש {int(self.road_number)} בהשוואה לכל הארץ"
         }
@@ -1022,7 +1022,7 @@ class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
         )
 
     @staticmethod
-    def motorcycle_accidents_vs_all_accidents(start_time, end_time, road_number):
+    def motorcycle_accidents_vs_all_accidents(start_time, end_time, road_number) -> List:
         location_label = "location"
         location_other = "שאר הארץ"
         location_road = f"כביש {int(road_number)}"
@@ -1205,11 +1205,11 @@ class PedestrianInjuredInJunctionsWidget(Widget):
 @register
 class AccidentTypeVehicleTypeRoadComparisonWidget(Widget):
     name: str = "vehicle_accident_vs_all_accidents"  # WIP: change by vehicle type
-    MAX_ACCIDENT_TYPES_TO_RETURN = 5
+    MAX_ACCIDENT_TYPES_TO_RETURN: int = 5
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
-        self.road_number = request_params.location_info["road1"]
+        self.road_number: str = request_params.location_info["road1"]
         # WIP: change rank, text by vehicle type
         self.rank = 24
         self.text = {"title": f"סוגי תאונות אופנועים בכביש {int(self.road_number)} בהשוואה לכל הארץ"}
@@ -1220,16 +1220,16 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(Widget):
         )
 
     @staticmethod
-    def accident_type_road_vs_all_count(start_time, end_time, road_number):
+    def accident_type_road_vs_all_count(start_time, end_time, road_number) -> List:
         num_accidents_label = "num_of_accidents"
         location_all = "כל הארץ"
         location_road = f"כביש {int(road_number)}"
 
         vehicle_types = BE_CONST.MOTORCYCLE_VEHICLE_TYPES  # WIP: change by vehicle type
 
-        all_roads_query = AccidentTypeVehicleTypeRoadComparisonWidget.get_accident_count_by_vehicle_type(
+        all_roads_query = AccidentTypeVehicleTypeRoadComparisonWidget.get_accident_count_by_vehicle_type_query(
             start_time, end_time, num_accidents_label, vehicle_types)
-        all_roads_query_result = AccidentTypeVehicleTypeRoadComparisonWidget.run_query(all_roads_query)
+        all_roads_query_result = run_query(all_roads_query)
         all_roads_sum_accidents = 0
         all_roads_map = {}
         for record in all_roads_query_result:
@@ -1238,7 +1238,7 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(Widget):
 
         road_query = all_roads_query.filter((VehicleMarkerView.road1 == road_number) |
                                             (VehicleMarkerView.road2 == road_number))
-        road_query_result = AccidentTypeVehicleTypeRoadComparisonWidget.run_query(road_query)
+        road_query_result = run_query(road_query)
         road_sum_accidents = 0
         types_to_report = []
         for record in road_query_result:
@@ -1254,7 +1254,8 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(Widget):
         return types_to_report
 
     @staticmethod
-    def get_accident_count_by_vehicle_type(start_time, end_time, num_accidents_label, vehicle_types):
+    def get_accident_count_by_vehicle_type_query(start_time, end_time, num_accidents_label, vehicle_types)\
+            -> db.session.query:
         return (get_query(table_obj=VehicleMarkerView, start_time=start_time, end_time=end_time,
                           filters={VehicleMarkerView.vehicle_type.name: vehicle_types})
                 .with_entities(VehicleMarkerView.accident_type,
@@ -1262,12 +1263,6 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(Widget):
                 .group_by(VehicleMarkerView.accident_type)
                 .order_by(desc(num_accidents_label))
                 )
-
-    @staticmethod
-    def run_query(query):
-        # pylint: disable=no-member
-        return pd.read_sql_query(query.statement, query.session.bind) \
-            .to_dict(orient="records")
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
@@ -1279,6 +1274,12 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(Widget):
                     f"AccidentTypeVehicleTypeRoadComparisonWidget.localize_items: Exception while translating {item}."
                 )
         return items
+
+
+def run_query(query) -> Dict:
+    # pylint: disable=no-member
+    return pd.read_sql_query(query.statement, query.session.bind) \
+        .to_dict(orient="records")
 
 
 def extract_news_flash_location(news_flash_obj):

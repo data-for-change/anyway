@@ -1022,7 +1022,8 @@ class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
         )
 
     @staticmethod
-    def motorcycle_accidents_vs_all_accidents(start_time, end_time, road_number) -> List:
+    def motorcycle_accidents_vs_all_accidents(start_time: datetime.date,
+                                              end_time: datetime.date, road_number: str) -> List:
         location_label = "location"
         location_other = "שאר הארץ"
         location_road = f"כביש {int(road_number)}"
@@ -1220,7 +1221,8 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(Widget):
         )
 
     @staticmethod
-    def accident_type_road_vs_all_count(start_time, end_time, road_number) -> List:
+    def accident_type_road_vs_all_count(start_time: datetime.date,
+                                        end_time: datetime.date, road_number: str) -> List:
         num_accidents_label = "num_of_accidents"
         location_all = "כל הארץ"
         location_road = f"כביש {int(road_number)}"
@@ -1254,7 +1256,9 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(Widget):
         return types_to_report
 
     @staticmethod
-    def get_accident_count_by_vehicle_type_query(start_time, end_time, num_accidents_label, vehicle_types)\
+    def get_accident_count_by_vehicle_type_query(start_time: datetime.date,
+                                                 end_time: datetime.date,
+                                                 num_accidents_label: str, vehicle_types: List[int])\
             -> db.session.query:
         return (get_query(table_obj=VehicleMarkerView, start_time=start_time, end_time=end_time,
                           filters={VehicleMarkerView.vehicle_type.name: vehicle_types})
@@ -1276,7 +1280,7 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(Widget):
         return items
 
 
-def run_query(query) -> Dict:
+def run_query(query: db.session.query) -> Dict:
     # pylint: disable=no-member
     return pd.read_sql_query(query.statement, query.session.bind) \
         .to_dict(orient="records")

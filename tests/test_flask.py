@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # from anyway.utilities import open_utf8
 import json
-import os
 from collections import Counter
 from functools import partial
 from unittest import mock

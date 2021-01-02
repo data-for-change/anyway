@@ -92,5 +92,4 @@ def test_url_redirect_checker():
         assert not is_a_safe_redirect_url(url)
 
     for url in good_urls:
-        print(url)
         assert is_a_safe_redirect_url(url)

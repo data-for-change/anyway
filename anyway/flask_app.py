@@ -1734,6 +1734,11 @@ def user_update() -> Response:
     current_user.user_url = user_url
     current_user.user_desc = user_desc
     current_user.is_user_completed_registration = True
-    if os.environ.get("FLASK_ENV") != "test":
-        db.session.commit()
+    session_commit()
+
     return Response(status=200)
+
+
+def session_commit() -> None:
+    # This method was created to allow easier mocking for testing
+    db.session.commit()

@@ -120,7 +120,6 @@ def test_markers(
         assert show_approx or marker["location_accuracy"] == 1
 
 
-@patch.dict(os.environ, {"FLASK_ENV": "test"})
 def test_user_update(app):
     rv = user_update_post(app)
     assert rv.status_code == 401
@@ -164,10 +163,11 @@ def test_user_update(app):
                 == b"Bad Request (There is no email in our DB and there is no email in the json)."
             )
 
-            rv = user_update_post_json(
-                app, json={"first_name": "a", "last_name": "a", "email": "aa@gmail.com"}
-            )
-            assert rv.status_code == 200
+            with patch("anyway.flask_app.session_commit"):
+                rv = user_update_post_json(
+                    app, json={"first_name": "a", "last_name": "a", "email": "aa@gmail.com"}
+                )
+                assert rv.status_code == 200
 
             rv = user_update_post_json(
                 app, json={"first_name": "a", "last_name": "a", "email": "aaaa"}
@@ -183,26 +183,27 @@ def test_user_update(app):
             assert rv.status_code == 400
             assert rv.data == b"Bad Request (Bad phone number)."
 
-            rv = user_update_post_json(
-                app, json={"first_name": "a", "last_name": "a", "phone": "0541234567"}
-            )
-            assert rv.status_code == 200
+            with patch("anyway.flask_app.session_commit"):
+                rv = user_update_post_json(
+                    app, json={"first_name": "a", "last_name": "a", "phone": "0541234567"}
+                )
+                assert rv.status_code == 200
 
-            rv = user_update_post_json(app, json={"first_name": "a", "last_name": "a"})
-            assert rv.status_code == 200
+                rv = user_update_post_json(app, json={"first_name": "a", "last_name": "a"})
+                assert rv.status_code == 200
 
-            send_json = {
-                "first_name": "a",
-                "last_name": "a",
-                "email": "aa@gmail.com",
-                "phone": "0541234567",
-                "user_type": "journalist",
-                "user_work_place": "ynet",
-                "user_url": "http:\\www.a.com",
-                "user_desc": "a",
-            }
-            rv = user_update_post_json(app, json=send_json)
-            assert rv.status_code == 200
+                send_json = {
+                    "first_name": "a",
+                    "last_name": "a",
+                    "email": "aa@gmail.com",
+                    "phone": "0541234567",
+                    "user_type": "journalist",
+                    "user_work_place": "ynet",
+                    "user_url": "http:\\www.a.com",
+                    "user_desc": "a",
+                }
+                rv = user_update_post_json(app, json=send_json)
+                assert rv.status_code == 200
 
 
 def user_update_post_json(app: FlaskClient, json: typing.Optional[dict] = None) -> Response:

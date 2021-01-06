@@ -232,6 +232,8 @@ def is_a_safe_redirect_url(url: str) -> bool:
     if url_obj.scheme == "https" and netloc in [
         "www.anyway.co.il",
         "anyway-infographics-staging.web.app",
+        "anyway-infographics.web.app",
+        "anyway-infographics-demo.web.app",
     ]:
         return True
 

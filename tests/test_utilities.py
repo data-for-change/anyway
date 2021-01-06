@@ -74,6 +74,8 @@ def test_url_redirect_checker():
         "localhost",
         "localhost:8000",
         "localhost.com",
+        "anyway-infographics.web.app",
+        "anyway-infographics-demo.web.app",
     ]
 
     good_urls = [
@@ -86,6 +88,8 @@ def test_url_redirect_checker():
         "https://www.anyway.co.il",
         "https://anyway-infographics-staging.web.app",
         "https://anyway-infographics-staging.web.app/test",
+        "https://anyway-infographics.web.app",
+        "https://anyway-infographics-demo.web.app",
     ]
 
     for url in bad_urls:

@@ -129,6 +129,7 @@ class Widget:
         else:
             output["meta"] = {}
         output["meta"]["rank"] = self.rank
+        output["meta"]["information"] = "Placeholder: This Widget shows information of accidenents in Israel with comparison of vehicle types / locations / injured types."
         return output
 
 

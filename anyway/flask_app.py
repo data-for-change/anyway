@@ -5,11 +5,9 @@ import csv
 import datetime
 import json
 import logging
-import re
 from io import StringIO
 import os
 import time
-from urllib.parse import urlparse
 
 import flask_admin as admin
 import flask_login as login
@@ -23,6 +21,11 @@ from flask_assets import Environment
 from flask_babel import Babel, gettext
 from flask_compress import Compress
 from flask_cors import CORS
+from anyway.error_code_and_strings import (
+    Errors as Es,
+    ERROR_TO_HTTP_CODE_DICT,
+    build_json_for_user_api_error,
+)
 from flask_security import (
     Security,
     SQLAlchemyUserDatastore,
@@ -33,7 +36,7 @@ from flask_security import (
 )
 from flask_sqlalchemy import SQLAlchemy
 from sendgrid import Mail
-from http import client as http_client
+from http import client as http_client, HTTPStatus
 from sqlalchemy import and_, not_, or_
 from sqlalchemy import func
 from sqlalchemy.orm import load_only
@@ -49,6 +52,7 @@ from anyway.clusters_calculator import retrieve_clusters
 from anyway.config import ENTRIES_PER_PAGE
 from anyway.backend_constants import BE_CONST
 from anyway.constants import CONST
+from anyway.current_user_functions import get_current_user_email
 from anyway.models import (
     AccidentMarker,
     DiscussionMarker,
@@ -72,12 +76,14 @@ from anyway.models import (
     DrivingDirections,
     AgeGroup,
     AccidentMarkerView,
-    EmbeddedReports, UserOAuth,
+    EmbeddedReports,
+    UserOAuth,
 )
 from anyway.oauth import OAuthSignIn
 from anyway.infographics_utils import get_infographics_data
 from anyway.app_and_db import app, db
 from anyway.dataclasses.user_data import UserData
+from anyway.utilities import is_valid_number, is_a_safe_redirect_url, is_a_valid_email
 from anyway.views.schools.api import (
     schools_description_api,
     schools_names_api,
@@ -88,6 +94,7 @@ from anyway.views.schools.api import (
     injured_around_schools_api,
 )
 from anyway.views.news_flash.api import news_flash, single_news_flash
+
 
 app.config.from_object(__name__)
 app.config["SECURITY_REGISTERABLE"] = False
@@ -1456,11 +1463,6 @@ def get_current_user_first_name():
 ######## rauth integration (login through facebook) ##################
 
 
-@lm.user_loader
-def load_user(id):
-    return db.session.query(UserOAuth).get(id)
-
-
 @app.route("/logout")
 def logout():
     login.logout_user()
@@ -1502,97 +1504,76 @@ app.add_url_rule(
 app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
 
 
-def check_is_a_safe_redirect_url(url: str) -> bool:
-    url_obj = urlparse(url)
-    if url_obj.scheme not in ['https', 'http']:
-        return False
-
-    netloc = url_obj.netloc
-    if not netloc:
-        return False
-
-    # Note that we don't support ipv6 localhost address or ipv4 localhost full range of address
-    if netloc in ["www.anyway.co.il", "anyway-infographics-staging.web.app", "localhost", "127.0.0.1"]:
-        return True
-    else:  # Check localhost with port
-        localhost_regex = re.compile(r'^127\.0\.0\.1\:[0-9]{1,7}$|^localhost\:[0-9]{1,7}$')
-        if localhost_regex.match(netloc):
-            return True
-
-    return False
+def return_json_error(error_code: int, extra: str = None) -> Response:
+    return app.response_class(
+        response=json.dumps(build_json_for_user_api_error(error_code, extra)),
+        status=ERROR_TO_HTTP_CODE_DICT[error_code],
+        mimetype="application/json",
+    )
 
 
 @app.route("/authorize/<provider>")
-def oauth_authorize(provider):
-    # This is quick fix for the DEMO - to make sure that anyway.co.il is fully compatible with https://anyway-infographics-staging.web.app/
-    redirect_url_from_url = request.args.get('redirect_url', type=str)
-    redirect_url = BE_CONST.DEFAULT_REDIRECT_URL
-    if redirect_url_from_url and check_is_a_safe_redirect_url(redirect_url_from_url):
-        redirect_url = redirect_url_from_url
-
+def oauth_authorize(provider: str) -> Response:
     if provider != "google":
-        return redirect(redirect_url, code=302)
+        return return_json_error(Es.BR_ONLY_SUPPORT_GOOGLE)
+
     if not current_user.is_anonymous:
-        return redirect(redirect_url, code=302)
+        return return_json_error(Es.BR_USER_ALREADY_LOGGED_IN)
+
+    redirect_url_from_url = request.args.get("redirect_url", type=str)
+    redirect_url = BE_CONST.DEFAULT_REDIRECT_URL
+    if redirect_url_from_url and is_a_safe_redirect_url(redirect_url_from_url):
+        redirect_url = redirect_url_from_url
 
     oauth = OAuthSignIn.get_provider(provider)
     return oauth.authorize(redirect_url=redirect_url)
 
 
 @app.route("/callback/<provider>")
-def oauth_callback(provider):
-    # This is quick fix for the DEMO - to make sure that anyway.co.il is fully compatible with https://anyway-infographics-staging.web.app/
-
-    redirect_url = BE_CONST.DEFAULT_REDIRECT_URL
-    redirect_url_json_base64 = request.args.get('state', type=str)
-    if redirect_url_json_base64:
-        redirect_url_json = json.loads(base64.b64decode(redirect_url_json_base64.encode("UTF8")))
-        redirect_url_to_check = redirect_url_json.get("redirect_url")
-        if redirect_url_to_check and check_is_a_safe_redirect_url(redirect_url_to_check):
-            redirect_url = redirect_url_to_check
-
+def oauth_callback(provider: str) -> Response:
     if provider != "google":
-        return redirect(redirect_url, code=302)
-    if not current_user.is_anonymous:
-        return redirect(redirect_url, code=302)
+        return return_json_error(Es.BR_ONLY_SUPPORT_GOOGLE)
+
     oauth = OAuthSignIn.get_provider(provider)
     user_data: UserData = oauth.callback()
     if not user_data.service_user_id:
-        flash("Authentication failed.")
-        return redirect(redirect_url, code=302)
+        return return_json_error(Es.BR_NO_USER_ID)
 
-    # TODO: merge google and facebook code?
-    if provider == "google":
-        user = db.session.query(UserOAuth).filter_by(oauth_provider=provider, oauth_provider_user_id=user_data.service_user_id).first()
-        if not user:
-            user = UserOAuth(
-                user_register_date=datetime.datetime.now(),
-                user_last_login_date=datetime.datetime.now(),
-                email=user_data.email,
-                name=user_data.name,
-                is_active=True,
-                oauth_provider=provider,
-                oauth_provider_user_id=user_data.service_user_id,
-                oauth_provider_user_domain=user_data.service_user_domain,
-                oauth_provider_user_picture_url=user_data.picture_url,
-                oauth_provider_user_locale=user_data.service_user_locale,
-                oauth_provider_user_profile_url=user_data.user_profile_url)
-
-            db.session.add(user)
-            db.session.commit()
-    elif provider == "facebook": #TODO: fix
-        user = db.session.query(User).filter_by(oauth_provider=provider, oauth_provider_user_id=user_data.service_user_id).first()
-        if not user:
-            user = User(
-                social_id=user_data.service_user_id, email=user_data.email, provider=provider
-            )
-            db.session.add(user)
-            db.session.commit()
+    user = (
+        db.session.query(UserOAuth)
+        .filter_by(oauth_provider=provider, oauth_provider_user_id=user_data.service_user_id)
+        .first()
+    )
+    if not user:
+        user = UserOAuth(
+            user_register_date=datetime.datetime.now(),
+            user_last_login_date=datetime.datetime.now(),
+            email=user_data.email,
+            oauth_provider_user_name=user_data.name,
+            is_active=True,
+            oauth_provider=provider,
+            oauth_provider_user_id=user_data.service_user_id,
+            oauth_provider_user_domain=user_data.service_user_domain,
+            oauth_provider_user_picture_url=user_data.picture_url,
+            oauth_provider_user_locale=user_data.service_user_locale,
+            oauth_provider_user_profile_url=user_data.user_profile_url,
+        )
+        db.session.add(user)
     else:
-        flash("Authentication failed.")
-        return redirect(redirect_url, code=302)
+        user.user_last_login_date = datetime.datetime.now()
+
+    db.session.commit()
+
+    redirect_url = BE_CONST.DEFAULT_REDIRECT_URL
+    redirect_url_json_base64 = request.args.get("state", type=str)
+    if redirect_url_json_base64:
+        redirect_url_json = json.loads(base64.b64decode(redirect_url_json_base64.encode("UTF8")))
+        redirect_url_to_check = redirect_url_json.get("redirect_url")
+        if redirect_url_to_check and is_a_safe_redirect_url(redirect_url_to_check):
+            redirect_url = redirect_url_to_check
+
     login.login_user(user, True)
-    return redirect(redirect_url, code=302)
+    return redirect(redirect_url, code=HTTPStatus.FOUND)
 
 
 """
@@ -1648,3 +1629,95 @@ def embedded_reports_api():
     response = Response(json.dumps(embedded_reports_list, default=str), mimetype="application/json")
     response.headers.add("Access-Control-Allow-Origin", "*")
     return response
+
+
+@lm.user_loader
+def load_user(id: str) -> UserOAuth:
+    return db.session.query(UserOAuth).get(id)
+
+
+@app.route("/user/have_email")
+def user_have_email() -> Response:
+    if current_user.is_anonymous:
+        return return_json_error(Es.BR_USER_NOT_LOGGED_IN)
+    return jsonify({"have_email": bool(get_current_user_email())})
+
+
+# This code is also used as part of the user first registration
+@app.route("/user/update", methods=["POST"])
+def user_update() -> Response:
+    allowed_fields = [
+        "first_name",
+        "last_name",
+        "email",
+        "phone",
+        "user_type",
+        "user_work_place",
+        "user_url",
+        "user_desc",
+    ]
+
+    if current_user.is_anonymous:
+        return return_json_error(Es.BR_USER_NOT_LOGGED_IN)
+
+    reg_dict = request.json
+    if not reg_dict:
+        return return_json_error(Es.BR_BAD_JSON)
+
+    for key in reg_dict:
+        if key not in allowed_fields:
+            return return_json_error(Es.BR_UNKNOWN_FIELD, key)
+
+    first_name = reg_dict.get("first_name")
+    last_name = reg_dict.get("last_name")
+    if not first_name or not last_name:
+        return return_json_error(Es.BR_FIRST_NAME_OR_LAST_NAME_MISSING)
+
+    # If we don't have the user email then we have to get it else only update if the user want.
+    tmp_given_user_email = reg_dict.get("email")
+    user_db_email = get_current_user_email()
+    if not user_db_email or tmp_given_user_email:
+        if not tmp_given_user_email:
+            return return_json_error(Es.BR_NO_EMAIL)
+
+        if not is_a_valid_email(tmp_given_user_email):
+            return return_json_error(Es.BR_BAD_EMAIL)
+
+        user_db_email = tmp_given_user_email
+
+    phone = reg_dict.get("phone")
+    if phone and not is_valid_number(phone):
+        return return_json_error(Es.BR_BAD_PHONE)
+
+    user_type = reg_dict.get("user_type")
+    user_work_place = reg_dict.get("user_work_place")
+    user_url = reg_dict.get("user_url")
+    user_desc = reg_dict.get("user_desc")
+
+    update_user_in_db(
+        first_name, last_name, phone, user_db_email, user_desc, user_type, user_url, user_work_place
+    )
+
+    return Response(status=HTTPStatus.OK)
+
+
+def update_user_in_db(
+    first_name: str,
+    last_name: str,
+    phone: str,
+    user_db_email: str,
+    user_desc: str,
+    user_type: str,
+    user_url: str,
+    user_work_place: str,
+) -> None:
+    current_user.first_name = first_name
+    current_user.last_name = last_name
+    current_user.email = user_db_email
+    current_user.phone = phone
+    current_user.user_type = user_type
+    current_user.work_on_behalf_of_organization = user_work_place
+    current_user.user_url = user_url
+    current_user.user_desc = user_desc
+    current_user.is_user_completed_registration = True
+    db.session.commit()

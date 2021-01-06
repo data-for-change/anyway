@@ -7,10 +7,14 @@ import threading
 from csv import DictReader
 from datetime import datetime
 from functools import partial
+from urllib.parse import urlparse
 
+import phonenumbers
 from dateutil.relativedelta import relativedelta
 from flask import Flask
+from phonenumbers import NumberParseException
 from pyproj import Transformer
+from validate_email import validate_email
 
 from anyway import config
 
@@ -195,3 +199,50 @@ def chunks(l, n):
     """Yield successive n-sized chunks from l."""
     for i in range(0, len(l), n):
         yield l[i : i + n]
+
+
+def is_valid_number(phone: str) -> bool:
+    try:
+        phone_obj = phonenumbers.parse(phone, "IL")
+        return phonenumbers.is_valid_number(phone_obj)
+    except NumberParseException:
+        return False
+
+
+def is_a_safe_redirect_url(url: str) -> bool:
+    url_obj = urlparse(url)
+    if url_obj.scheme not in ["https", "http"]:
+        return False
+
+    netloc = url_obj.netloc
+    if not netloc:
+        return False
+
+    # Note that we don't support ipv6 localhost address or ipv4 localhost full range of address
+    if netloc in [
+        "localhost",
+        "127.0.0.1",
+    ]:
+        return True
+    else:  # Check localhost with port
+        localhost_regex = re.compile(r"^127\.0\.0\.1:[0-9]{1,7}$|^localhost:[0-9]{1,7}$")
+        if localhost_regex.match(netloc):
+            return True
+
+    if url_obj.scheme == "https" and netloc in [
+        "www.anyway.co.il",
+        "anyway-infographics-staging.web.app",
+    ]:
+        return True
+
+    return False
+
+
+def is_a_valid_email(tmp_given_user_email: str) -> bool:
+    is_valid = validate_email(
+        email_address=tmp_given_user_email,
+        check_regex=True,
+        check_mx=False,
+        use_blacklist=False,
+    )
+    return is_valid

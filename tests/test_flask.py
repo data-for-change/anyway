@@ -7,7 +7,7 @@ from unittest import mock
 from unittest.mock import patch
 
 import pytest
-from http import client as http_client
+from http import client as http_client, HTTPStatus
 
 import typing
 
@@ -16,6 +16,7 @@ from flask.testing import FlaskClient
 from urlobject import URLObject
 
 from anyway.app_and_db import app as flask_app
+from anyway.error_code_and_strings import ERROR_TO_HTTP_CODE_DICT, build_json_for_user_api_error, Errors
 
 
 @pytest.fixture
@@ -119,77 +120,109 @@ def test_markers(
         assert show_approx or marker["location_accuracy"] == 1
 
 
-def test_user_update(app):
-    rv = user_update_post(app)
-    assert rv.status_code == 401
-    assert rv.data == b"User not logged in."
+def assert_return_code_for_user_update(error_code: int, rv: Response, extra: str = None) -> None:
+    assert rv.status_code == ERROR_TO_HTTP_CODE_DICT[error_code]
+    assert rv.json == build_json_for_user_api_error(error_code, extra)
 
+
+def user_update_post_json(app: FlaskClient, json: typing.Optional[dict] = None) -> Response:
+    return app.post("/user/update", json=json, follow_redirects=True, mimetype="application/json")
+
+
+def user_update_post(app: FlaskClient) -> Response:
+    return app.post("/user/update", follow_redirects=True)
+
+
+def test_user_update_not_logged_in(app):
+    rv = user_update_post(app)
+    assert_return_code_for_user_update(Errors.BR_USER_NOT_LOGGED_IN, rv)
+
+
+def test_user_update_bad_json(app):
     with patch("flask_login.utils._get_user") as current_user:
-        user = mock.MagicMock()
-        current_user.return_value = user
+        current_user.return_value = mock.MagicMock()
         current_user.return_value.is_anonymous = False
 
         rv = user_update_post(app)
-        assert rv.status_code == 400
-        assert rv.data == b"Bad Request (not a JSON or mimetype does not indicate JSON)."
+        assert_return_code_for_user_update(Errors.BR_BAD_JSON, rv)
 
         rv = user_update_post_json(app)
-        assert rv.status_code == 400
+        assert rv.status_code == HTTPStatus.BAD_REQUEST
         assert b"Failed to decode JSON object" in rv.data
 
         rv = user_update_post_json(app, json={})
-        assert rv.status_code == 400
-        assert rv.data == b"Bad Request (not a JSON or mimetype does not indicate JSON)."
+        assert_return_code_for_user_update(Errors.BR_BAD_JSON, rv)
 
         rv = user_update_post_json(app, json={"a": "a"})
-        assert rv.status_code == 400
-        assert rv.data == b"Bad Request (Unknown field a)."
+        assert_return_code_for_user_update(Errors.BR_UNKNOWN_FIELD, rv, "a")
+
+
+def test_user_update_names(app):
+    with patch("flask_login.utils._get_user") as current_user:
+        current_user.return_value = mock.MagicMock()
+        current_user.return_value.is_anonymous = False
 
         rv = user_update_post_json(app, json={"first_name": "a"})
-        assert rv.status_code == 400
-        assert rv.data == b"Bad Request (first name or last name is missing)."
+        assert_return_code_for_user_update(Errors.BR_FIRST_NAME_OR_LAST_NAME_MISSING, rv)
 
         rv = user_update_post_json(app, json={"last_name": "a"})
-        assert rv.status_code == 400
-        assert rv.data == b"Bad Request (first name or last name is missing)."
+        assert_return_code_for_user_update(Errors.BR_FIRST_NAME_OR_LAST_NAME_MISSING, rv)
+
+
+def test_user_fail_on_email(app):
+    with patch("flask_login.utils._get_user") as current_user:
+        current_user.return_value = mock.MagicMock()
+        current_user.return_value.is_anonymous = False
 
         with patch("anyway.flask_app.get_current_user_email") as get_current_user_email:
             get_current_user_email.side_effect = lambda: None
-            rv = user_update_post_json(app, json={"first_name": "a", "last_name": "a"})
-            assert rv.status_code == 400
-            assert (
-                rv.data
-                == b"Bad Request (There is no email in our DB and there is no email in the json)."
-            )
 
-            with patch("anyway.flask_app.session_commit"):
-                rv = user_update_post_json(
-                    app, json={"first_name": "a", "last_name": "a", "email": "aa@gmail.com"}
-                )
-                assert rv.status_code == 200
+            rv = user_update_post_json(app, json={"first_name": "a", "last_name": "a"})
+            assert_return_code_for_user_update(Errors.BR_NO_EMAIL, rv)
 
             rv = user_update_post_json(
                 app, json={"first_name": "a", "last_name": "a", "email": "aaaa"}
             )
-            assert rv.status_code == 400
-            assert rv.data == b"Bad Request (Bad email address)."
+            assert_return_code_for_user_update(Errors.BR_BAD_EMAIL, rv)
 
+
+def test_user_fail_on_phone(app):
+    with patch("flask_login.utils._get_user") as current_user:
+        current_user.return_value = mock.MagicMock()
+        current_user.return_value.is_anonymous = False
+
+        with patch("anyway.flask_app.get_current_user_email") as get_current_user_email:
             get_current_user_email.side_effect = lambda: "aa@bb.com"
 
             rv = user_update_post_json(
                 app, json={"first_name": "a", "last_name": "a", "phone": "1234567"}
             )
-            assert rv.status_code == 400
-            assert rv.data == b"Bad Request (Bad phone number)."
+            assert_return_code_for_user_update(Errors.BR_BAD_PHONE, rv)
 
-            with patch("anyway.flask_app.session_commit"):
+
+def test_user_update_success(app):
+    with patch("flask_login.utils._get_user") as current_user:
+        current_user.return_value = mock.MagicMock()
+        current_user.return_value.is_anonymous = False
+
+        with patch("anyway.flask_app.get_current_user_email") as get_current_user_email:
+            get_current_user_email.side_effect = lambda: None
+
+            with patch("anyway.flask_app.update_user_in_db"):
+                rv = user_update_post_json(
+                    app, json={"first_name": "a", "last_name": "a", "email": "aa@gmail.com"}
+                )
+                assert rv.status_code == HTTPStatus.OK
+
+                get_current_user_email.side_effect = lambda: "aa@bb.com"
+
                 rv = user_update_post_json(
                     app, json={"first_name": "a", "last_name": "a", "phone": "0541234567"}
                 )
-                assert rv.status_code == 200
+                assert rv.status_code == HTTPStatus.OK
 
                 rv = user_update_post_json(app, json={"first_name": "a", "last_name": "a"})
-                assert rv.status_code == 200
+                assert rv.status_code == HTTPStatus.OK
 
                 send_json = {
                     "first_name": "a",
@@ -202,12 +235,4 @@ def test_user_update(app):
                     "user_desc": "a",
                 }
                 rv = user_update_post_json(app, json=send_json)
-                assert rv.status_code == 200
-
-
-def user_update_post_json(app: FlaskClient, json: typing.Optional[dict] = None) -> Response:
-    return app.post("/user/update", json=json, follow_redirects=True, mimetype="application/json")
-
-
-def user_update_post(app: FlaskClient) -> Response:
-    return app.post("/user/update", follow_redirects=True)
+                assert rv.status_code == HTTPStatus.OK

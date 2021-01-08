@@ -10,19 +10,23 @@ from anyway.backend_constants import BE_CONST
 from anyway.base import user_optional
 from anyway.models import NewsFlash
 
+DEFAULT_OFFSET_REQ_PARAMETER = 0
+DEFAULT_LIMIT_REQ_PARAMETER = 100
 
 @user_optional
 def news_flash():
     logging.debug("getting news flash")
     news_flash_id = request.values.get("id")
     source = request.values.get("source")
-    count = request.values.get("news_flash_count")
     start_date = request.values.get("start_date")
     end_date = request.values.get("end_date")
     interurban_only = request.values.get("interurban_only")
     road_number = request.values.get("road_number")
     road_segment = request.values.get("road_segment_only")
+    offset = request.values.get("offset", DEFAULT_OFFSET_REQ_PARAMETER)
+    limit = request.values.get("limit", DEFAULT_LIMIT_REQ_PARAMETER)
     news_flash_obj = db.session.query(NewsFlash)
+    news_flash_obj.offset(offset)
 
     if news_flash_id is not None:
         news_flash_obj = news_flash_obj.filter(NewsFlash.id == news_flash_id).first()
@@ -69,8 +73,7 @@ def news_flash():
         )
     ).order_by(NewsFlash.date.desc())
 
-    if count:
-        news_flash_obj = news_flash_obj.limit(count)
+    news_flash_obj = news_flash_obj.limit(limit)
 
     news_flashes = news_flash_obj.all()
 

@@ -1,5 +1,4 @@
 from anyway.utilities import is_valid_number, is_a_safe_redirect_url
-from anyway.utilities import parse_age_from_range
 
 
 # The main logic is implemented in external library, the only reason for this test is to make sure that this library
@@ -98,38 +97,3 @@ def test_url_redirect_checker():
 
     for url in good_urls:
         assert is_a_safe_redirect_url(url)
-
-
-def test_parse_age_from_range():
-    bad_values = [
-        "",
-        "adf",
-        "0-1234",
-        "12-23-45",
-        "12+14",
-        "1a-12",
-        "12",
-        "12123123",
-        "1213-123",
-        "12++",
-        "12--",
-        "0-5",
-        "14-r3",
-    ]
-
-    good_values = {
-        "01-25": (1, 25),
-        "06-89": (6, 89),
-        "98-99": (98, 99),
-        "99-120": (99, 120),
-        "101-120": (101, 120),
-        "01-03": (1, 3),
-        "12+": (12, 200),
-        "123+": (123, 200),
-    }
-
-    for bad in bad_values:
-        assert parse_age_from_range(bad) is None
-
-    for key, value in good_values.items():
-        assert parse_age_from_range(key) == value

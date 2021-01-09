@@ -9,7 +9,6 @@ from csv import DictReader
 from datetime import datetime
 from functools import partial
 from urllib.parse import urlparse
-from typing import Optional
 
 import phonenumbers
 from dateutil.relativedelta import relativedelta
@@ -203,29 +202,12 @@ def chunks(l, n):
         yield l[i : i + n]
 
 
-def parse_age_from_range(age_range: str) -> Optional[typing.Tuple[int, int]]:
-    match_parsing = re.match("^([0-9]{2,3})-([0-9]{2,3})$", age_range)
-    min_age_raw = None
-    max_age_raw = None
-    if match_parsing:
-        regex_age_matches = match_parsing.groups()
-        if len(regex_age_matches) != 2:
-            return None
-        min_age_raw, max_age_raw = regex_age_matches
-    else:
-        match_parsing = re.match("^([0-9]{2,3})\\+$", age_range)  # e.g  85+
-        if not match_parsing:
-            return None
-
-        # We assume that no body live beyond age 200
-        min_age_raw, max_age_raw = match_parsing.group(1), 200
-
-    if not min_age_raw or not max_age_raw:
-        return None
-
-    min_age = int(min_age_raw)
-    max_age = int(max_age_raw)
-    return min_age, max_age
+def parse_age_from_range(age_range: int) -> typing.Optional[typing.Tuple[int, int]]:
+    # Convert from 'age_group' field in the table 'involved_markers_hebrew' to age range numbers
+    ret_age_code_to_age_range = {1: (0, 4), 2: (5, 9), 3: (10, 14), 4: (15, 19), 5: (20, 24), 6: (25, 29), 7: (30, 34),
+                                 8: (35, 39), 9: (40, 44), 10: (45, 49), 11: (50, 54), 12: (55,59), 13: (60, 64),
+                                 14: (65, 69),15: (70, 74), 16: (75, 79), 17: (80, 84), 18: (85, 200), 99: None}
+    return ret_age_code_to_age_range[age_range]
 
 
 def is_valid_number(phone: str) -> bool:

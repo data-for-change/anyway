@@ -672,8 +672,8 @@ class InjuredCountPerAgeGroupWidget(Widget):
                 (InvolvedMarkerView.road1 == road_number)
                 | (InvolvedMarkerView.road2 == road_number)
             )
-            .group_by("age_group_hebrew", "injury_severity")
-            .with_entities("age_group_hebrew", "injury_severity", func.count().label("count"))
+            .group_by("age_group", "injury_severity")
+            .with_entities("age_group", "injury_severity", func.count().label("count"))
         )
 
         range_dict = {0: 4, 5: 9, 10: 14, 15: 19, 20: 24, 25: 34, 35: 44, 45: 54, 55: 64, 65: 200}
@@ -684,10 +684,11 @@ class InjuredCountPerAgeGroupWidget(Widget):
         dict_grouped = defaultdict(defaultdict_int_factory())
 
         for row in query:
-            age_range = row.age_group_hebrew
+            age_range = row.age_group
             injury_name = english_injury_severity_dict[row.injury_severity]
             count = row.count
 
+            # The age groups in the DB are not the same age groups in the Widget - so we need to merge some of the groups
             age_parse = parse_age_from_range(age_range)
             if not age_parse:
                 dict_grouped["unknown"][injury_name] += count

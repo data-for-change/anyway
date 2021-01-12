@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import threading
+import typing
 from csv import DictReader
 from datetime import datetime
 from functools import partial
@@ -199,6 +200,14 @@ def chunks(l, n):
     """Yield successive n-sized chunks from l."""
     for i in range(0, len(l), n):
         yield l[i : i + n]
+
+
+def parse_age_from_range(age_range: int) -> typing.Optional[typing.Tuple[int, int]]:
+    # Convert from 'age_group' field in the table 'involved_markers_hebrew' to age range numbers
+    ret_age_code_to_age_range = {1: (0, 4), 2: (5, 9), 3: (10, 14), 4: (15, 19), 5: (20, 24), 6: (25, 29), 7: (30, 34),
+                                 8: (35, 39), 9: (40, 44), 10: (45, 49), 11: (50, 54), 12: (55,59), 13: (60, 64),
+                                 14: (65, 69),15: (70, 74), 16: (75, 79), 17: (80, 84), 18: (85, 200), 99: None}
+    return ret_age_code_to_age_range[age_range]
 
 
 def is_valid_number(phone: str) -> bool:

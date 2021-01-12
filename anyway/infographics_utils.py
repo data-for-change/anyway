@@ -10,6 +10,7 @@ import traceback
 
 import pandas as pd
 from collections import defaultdict
+
 from sqlalchemy import func, distinct, literal_column, case
 from sqlalchemy import cast, Numeric
 from sqlalchemy import desc
@@ -24,8 +25,10 @@ from anyway.infographics_dictionaries import (
     english_accident_severity_dict,
     english_accident_type_dict,
     segment_dictionary,
+    english_injury_severity_dict,
 )
 from anyway.parsers import infographics_data_cache_updater
+from anyway.utilities import parse_age_from_range
 
 
 @dataclass
@@ -643,60 +646,78 @@ class InjuredCountPerAgeGroupWidget(Widget):
 
     @staticmethod
     def filter_and_group_injured_count_per_age_group(request_params: RequestParams):
-        import re
+        road_number = request_params.location_info["road1"]
 
-        data_of_ages = get_accidents_stats(
-            table_obj=InvolvedMarkerView,
-            filters=get_injured_filters(request_params.location_info),
-            group_by="age_group_hebrew",
-            count="age_group_hebrew",
-            start_time=request_params.start_time,
-            end_time=request_params.end_time,
+        query = (
+            db.session.query(InvolvedMarkerView)
+            .filter(InvolvedMarkerView.accident_timestamp >= request_params.start_time)
+            .filter(InvolvedMarkerView.accident_timestamp <= request_params.end_time)
+            .filter(
+                InvolvedMarkerView.provider_code.in_(
+                    [
+                        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
+                        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+                    ]
+                )
+            )
+            .filter(
+                InvolvedMarkerView.injury_severity.in_(
+                    [
+                        BE_CONST.InjurySeverity.DEAD,
+                        BE_CONST.InjurySeverity.SEVERE,
+                    ]
+                )
+            )
+            .filter(
+                (InvolvedMarkerView.road1 == road_number)
+                | (InvolvedMarkerView.road2 == road_number)
+            )
+            .group_by("age_group", "injury_severity")
+            .with_entities("age_group", "injury_severity", func.count().label("count"))
         )
-        range_dict = {0: 14, 15: 24, 25: 64, 65: 200}
-        dict_by_required_age_group = defaultdict(int)
 
-        for age_range_and_count in data_of_ages:
-            age_range = age_range_and_count["age_group"]
-            count = age_range_and_count["count"]
+        range_dict = {0: 4, 5: 9, 10: 14, 15: 19, 20: 24, 25: 34, 35: 44, 45: 54, 55: 64, 65: 200}
 
-            # Parse the db age range
-            # noinspection RegExpRedundantEscape
-            match_parsing = re.match("([0-9]{2})\\-([0-9]{2})", age_range)
-            if match_parsing:
-                regex_age_matches = match_parsing.groups()
-                if len(regex_age_matches) != 2:
-                    dict_by_required_age_group["unknown"] += count
-                    continue
-                min_age_raw, max_age_raw = regex_age_matches
+        def defaultdict_int_factory() -> Callable:
+            return lambda: defaultdict(int)
+
+        dict_grouped = defaultdict(defaultdict_int_factory())
+
+        for row in query:
+            age_range = row.age_group
+            injury_name = english_injury_severity_dict[row.injury_severity]
+            count = row.count
+
+            # The age groups in the DB are not the same age groups in the Widget - so we need to merge some of the groups
+            age_parse = parse_age_from_range(age_range)
+            if not age_parse:
+                dict_grouped["unknown"][injury_name] += count
             else:
-                match_parsing = re.match("([0-9]{2})\\+", age_range)  # e.g  85+
-                if match_parsing:
-                    # We assume that no body live beyond age 200
-                    min_age_raw, max_age_raw = match_parsing.group(1), 200
-                else:
-                    dict_by_required_age_group["unknown"] += count
-                    continue
+                min_age, max_age = age_parse
+                found_age_range = False
+                # Find to what "bucket" to aggregate the data
+                for item_min_range, item_max_range in range_dict.items():
+                    if item_min_range <= min_age <= max_age <= item_max_range:
+                        string_age_range = f"{item_min_range:02}-{item_max_range:02}"
+                        dict_grouped[string_age_range][injury_name] += count
+                        found_age_range = True
+                        break
 
-            # Find to what "bucket" to aggregate the data
-            min_age = int(min_age_raw)
-            max_age = int(max_age_raw)
-            for item_min_range, item_max_range in range_dict.items():
-                if item_min_range <= min_age <= item_max_range <= max_age <= item_max_range:
-                    string_age_range = f"{item_min_range:02}-{item_max_range:02}"
-                    dict_by_required_age_group[string_age_range] += count
-                    break
+                if not found_age_range:
+                    dict_grouped["unknown"][injury_name] += count
 
         # Rename the last key
-        dict_by_required_age_group["65+"] = dict_by_required_age_group["65-200"]
-        del dict_by_required_age_group["65-200"]
+        dict_grouped["65+"] = dict_grouped["65-200"]
+        del dict_grouped["65-200"]
 
-        # Modify return value to wanted format
-        items = [
-            {"age_group": age_group, "count": count}
-            for age_group, count in dict_by_required_age_group.items()
-        ]
+        return dict_grouped
 
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        items["data"]["text"] = {
+            "title": _("Injury severity per age group in ")
+            + request_params.location_info["road_segment_name"]
+        }
         return items
 
 

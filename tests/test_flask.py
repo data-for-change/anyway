@@ -16,7 +16,11 @@ from flask.testing import FlaskClient
 from urlobject import URLObject
 
 from anyway.app_and_db import app as flask_app
-from anyway.error_code_and_strings import ERROR_TO_HTTP_CODE_DICT, build_json_for_user_api_error, Errors
+from anyway.error_code_and_strings import (
+    ERROR_TO_HTTP_CODE_DICT,
+    build_json_for_user_api_error,
+    Errors,
+)
 
 
 @pytest.fixture
@@ -137,6 +141,9 @@ def test_user_update_not_logged_in(app):
     rv = user_update_post(app)
     assert_return_code_for_user_update(Errors.BR_USER_NOT_LOGGED_IN, rv)
 
+    rv = app.get("/user/update", follow_redirects=True)
+    assert rv.status_code == HTTPStatus.METHOD_NOT_ALLOWED
+
 
 def test_user_update_bad_json(app):
     with patch("flask_login.utils._get_user") as current_user:
@@ -236,3 +243,59 @@ def test_user_update_success(app):
                 }
                 rv = user_update_post_json(app, json=send_json)
                 assert rv.status_code == HTTPStatus.OK
+
+
+# Used in test_get_current_user
+USER_ID = 5
+USER_EMAIL = "aa@bb.com"
+USER_ACTIVE = True
+OAUTH_PROVIDER = "google"
+FIRST_NAME = "test"
+LAST_NAME = "last"
+USER_COMPLETED = True
+
+
+def test_get_current_user(app):
+    rv = app.get("/user/info", follow_redirects=True)
+    assert_return_code_for_user_update(Errors.BR_USER_NOT_LOGGED_IN, rv)
+    with patch("flask_login.utils._get_user") as current_user:
+        current_user.return_value = mock.MagicMock()
+        current_user.return_value.is_anonymous = False
+        with patch("anyway.flask_app.get_current_user") as get_current_user:
+            ret_obj = mock.MagicMock()
+            ret_obj.id = USER_ID
+            ret_obj.user_register_date = None
+            ret_obj.email = USER_EMAIL
+            ret_obj.is_active = USER_ACTIVE
+            ret_obj.oauth_provider = OAUTH_PROVIDER
+            ret_obj.oauth_provider_user_name = None
+            ret_obj.oauth_provider_user_picture_url = None
+            ret_obj.work_on_behalf_of_organization = None
+            ret_obj.phone = None
+            ret_obj.user_type = None
+            ret_obj.user_url = None
+            ret_obj.user_desc = None
+            ret_obj.first_name = FIRST_NAME
+            ret_obj.last_name = LAST_NAME
+            ret_obj.is_user_completed_registration = USER_COMPLETED
+
+            get_current_user.side_effect = lambda: ret_obj
+            rv = app.get("/user/info", follow_redirects=True)
+            assert rv.status_code == HTTPStatus.OK
+            assert rv.json == {
+                "id": USER_ID,
+                "email": USER_EMAIL,
+                "is_active": USER_ACTIVE,
+                "oauth_provider": OAUTH_PROVIDER,
+                "first_name": FIRST_NAME,
+                "last_name": LAST_NAME,
+                "is_user_completed_registration": USER_COMPLETED,
+                "oauth_provider_user_name": None,
+                "oauth_provider_user_picture_url": None,
+                "phone": None,
+                "user_desc": None,
+                "user_register_date": None,
+                "user_type": None,
+                "user_url": None,
+                "work_on_behalf_of_organization": None,
+            }

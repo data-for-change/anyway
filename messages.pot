@@ -137,7 +137,27 @@ msgstr ""
 msgid "accident_type"
 msgstr ""
 
-#: anyway/infographics_utils.py:717
+#: anyway/infographics_utils.py:427
+msgid "fatal accidents by type"
+msgstr ""
+
+#: anyway/infographics_utils.py:431
+msgid "desc"
+msgstr ""
+
+#: anyway/infographics_utils.py:439
+msgid "others"
+msgstr ""
+
+#: anyway/infographics_utils.py:440
+msgid "all_roads_fatal_accidents"
+msgstr ""
+
+#: anyway/infographics_utils.py:441
+msgid "specific_road_segment_fatal_accidents"
+msgstr ""
+
+#: anyway/infographics_utils.py:811
 msgid "Injury severity per age group in "
 msgstr ""
 

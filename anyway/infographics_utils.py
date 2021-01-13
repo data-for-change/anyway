@@ -438,8 +438,6 @@ class HeadOnCollisionsComparisonWidget(Widget):
 _(HeadOnCollisionsComparisonWidget.SPECIFIC_ROAD_SUBTITLE)
 _(HeadOnCollisionsComparisonWidget.ALL_ROADS_SUBTITLE)
 _("others")
-_("all_roads_fatal_accidents")
-_("specific_road_segment_fatal_accidents")
 
 
 @register

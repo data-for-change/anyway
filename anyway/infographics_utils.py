@@ -425,8 +425,6 @@ class HeadOnCollisionsComparisonWidget(Widget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         i = items["data"]["items"]
-        i[_(HeadOnCollisionsComparisonWidget.SPECIFIC_ROAD_SUBTITLE)] = i.pop(HeadOnCollisionsComparisonWidget.SPECIFIC_ROAD_SUBTITLE)
-        i[_(HeadOnCollisionsComparisonWidget.ALL_ROADS_SUBTITLE)] = i.pop(HeadOnCollisionsComparisonWidget.ALL_ROADS_SUBTITLE)
         items["data"]["text"] = {"title": _("fatal accidents by type")}
         for val in i.values():
             logging.debug(f"HeadOn:localize_items:val:{val}")

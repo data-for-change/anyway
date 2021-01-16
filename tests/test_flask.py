@@ -247,11 +247,11 @@ def test_user_update_success(app):
 
 # Used in test_get_current_user
 USER_ID = 5
-USER_EMAIL = "aa@bb.com"
+USER_EMAIL = "YossiCohen@gmail.com"
 USER_ACTIVE = True
 OAUTH_PROVIDER = "google"
-FIRST_NAME = "test"
-LAST_NAME = "last"
+FIRST_NAME = "Yossi"
+LAST_NAME = "Cohen"
 USER_COMPLETED = True
 
 

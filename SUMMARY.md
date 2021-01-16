@@ -1,0 +1,21 @@
+# Table of contents
+
+* [ANYWAY](README.md)
+* [Custom Queries](custom_queries.md)
+* [docs](docs/README.md)
+  * [Code Directory Tree Structure](docs/code.md)
+  * [Contributing to ANYWAY](docs/contributing.md)
+  * [TRANSLATE](docs/translate.md)
+  * [ANYWAY’s docker environment](docs/docker.md)
+  * [Anyway Local environment](docs/local_developement.md)
+  * [PRODUCTION](docs/production.md)
+  * [Postgres](docs/postgres.md)
+  * [Environment Configuration for Windows](docs/ubuntu_vm_on_windows.md)
+* [data\_scripts](data_scripts/README.md)
+  * [GUIDE](data_scripts/guide.md)
+* [CBS](cbs.md)
+* [.github](.github/README.md)
+  * [ISSUE\_TEMPLATE](.github/issue_template/README.md)
+    * [new\_infographic](.github/issue_template/new_infographic.md)
+    * [localize\_widget](.github/issue_template/localize_widget.md)
+

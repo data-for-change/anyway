@@ -52,7 +52,7 @@ from anyway.clusters_calculator import retrieve_clusters
 from anyway.config import ENTRIES_PER_PAGE
 from anyway.backend_constants import BE_CONST
 from anyway.constants import CONST
-from anyway.current_user_functions import get_current_user_email
+from anyway.current_user_functions import get_current_user_email, get_current_user
 from anyway.models import (
     AccidentMarker,
     DiscussionMarker,
@@ -1636,11 +1636,31 @@ def load_user(id: str) -> UserOAuth:
     return db.session.query(UserOAuth).get(id)
 
 
-@app.route("/user/have_email")
+@app.route("/user/info")
 def user_have_email() -> Response:
     if current_user.is_anonymous:
         return return_json_error(Es.BR_USER_NOT_LOGGED_IN)
-    return jsonify({"have_email": bool(get_current_user_email())})
+
+    user_obj = get_current_user()
+    return jsonify(
+        {
+            "id": user_obj.id,
+            "user_register_date": user_obj.user_register_date,
+            "email": user_obj.email,
+            "is_active": user_obj.is_active,
+            "oauth_provider": user_obj.oauth_provider,
+            "oauth_provider_user_name": user_obj.oauth_provider_user_name,
+            "oauth_provider_user_picture_url": user_obj.oauth_provider_user_picture_url,
+            "work_on_behalf_of_organization": user_obj.work_on_behalf_of_organization,
+            "first_name": user_obj.first_name,
+            "last_name": user_obj.last_name,
+            "phone": user_obj.phone,
+            "user_type": user_obj.user_type,
+            "user_url": user_obj.user_url,
+            "user_desc": user_obj.user_desc,
+            "is_user_completed_registration": user_obj.is_user_completed_registration,
+        }
+    )
 
 
 # This code is also used as part of the user first registration

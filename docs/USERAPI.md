@@ -6,9 +6,9 @@ This is the documentation for the new user API (and only the new one) that was c
 
 ### Description
 
-User authorization is been done with OAuth 2.0 and Google as the provider. When calling the authentication URL you will
-be redirected to Google OAuth system, and after Google will authenticate the user he will be redirected
-to https://www.anyway.co.il/authorize/google/callback/google that will redirect the flow to the URL that was given in
+User authorization is been done with OAuth 2.0 and Google as the OAuth 2.0 provider. When calling the authentication URL you will
+be redirected to Google OAuth system (So the user need to be able to see the screen), after Google will authenticate the user he will be redirected
+to https://www.anyway.co.il/authorize/google/callback/google and from there the flow will be redirected to the URL that was given in
 the param `redirect_url` or to the default URL.
 
 ### URL struct
@@ -30,19 +30,20 @@ the param `redirect_url` or to the default URL.
 ### Parameters
 
 **redirect_url** - _string_ This parameter is optional. The param is a URL, if set it will redirect(HTTP 302 code) to
-the given URL, there is validation on the URL to prevent errors and malicious use - for local address(127.0.0.1,
-localhost) you can access by one of the following scheme:
-https or http, you can also add a port number and add a path after the domain. For non-local address you can only access
-one of the following domain:
-> www.anyway.co.il
-> anyway-infographics-staging.web.app
-> anyway-infographics.web.app
-> anyway-infographics-demo.web.app and only in https but you can add any path you want after the domain
+the given URL after the authentication is finished, there is validation on the URL to prevent errors and malicious use:
+For local address(127.0.0.1, localhost) you can access by one of the following scheme:
+https or http, you can also add a port number and add a path after the domain. 
+For non-local address you can only access one of the following domain:
+> www.anyway.co.il  
+> anyway-infographics-staging.web.app  
+> anyway-infographics.web.app  
+> anyway-infographics-demo.web.app  
 
+only in https but you can add any path you want after the domain.
 ### Returns
 
-If no errors has occurred then you will be redirected to the given URL or to the default
-URL(https://anyway-infographics.web.app/). Otherwise, you will get one of the errors described in the errors section of
+If no error has occurred then you will be redirected to the given URL or to the default
+URL(https://anyway-infographics.web.app/). Otherwise, you will get one of the errors described in the [errors](#Errors) section of
 this document.
 
 ## User info update
@@ -66,25 +67,24 @@ Update the user personal info. User must be logged in.
 ### Parameters
 
 There are no params that are passed in the URL query. All params should be passed as JSON in body of the POST request -
-the following fields can be present in the JSON:
-**first_name** - _string_ ,Required, the user first name.
-**last_name** - _string_ ,Required, the user last name
+the following fields can be present in the JSON:  
+**first_name** - _string_ ,Required, the user first name.  
+**last_name** - _string_ ,Required, the user last name  
 **email** - _string_ ,Required/Optional, if it was not given in the past(By the OAuth provider, or the user) then it is
-Required else this Optional, this an email of the user
-**phone** - _string_ ,Optional, phone number, can be given with or without israeli calling code(+972).
-**user_type** - _string_ ,Optional, this param describe if the user is journalist / academic research or something else,
-valid values are:
+Required else this Optional, this the email of the user  
+**phone** - _string_ ,Optional, phone number, can be given with or without israeli calling code `+972`, can contain `-`, e.g. 03-1234567, 0541234567, 054-123-1234, +972-054-123-1234  
+**user_type** - _string_ ,Optional, this param describe if the user is journalist / academic researcher or something else, valid values are:  
 
 1. journalist
-2. academic research
+2. academic researcher
 3. student
 4. police
 5. non-relevant professional
 6. other
 
-**user_work_place** - _string_ ,Optional, the place the user work - Ynet, Police, Tel aviv university . . .
-**user_url** - _string_ ,Optional, a URL to the user site
-**user_desc** - _string_ ,Optional, a self description of the user
+**user_work_place** - _string_ ,Optional, the place the user work - Ynet, Police, Tel aviv university . . .  
+**user_url** - _string_ ,Optional, a URL to the user site  
+**user_desc** - _string_ ,Optional, a self description of the user  
 
 Examples for good JSON:
 
@@ -111,20 +111,19 @@ Examples for good JSON:
 
 ### Returns
 
-If no errors has occurred then you will get an empty HTTP 200 response. Otherwise, you will get one of the errors
-described in the errors section of this document.
+If no error has occurred then you will get an empty HTTP 200 response. Otherwise, you will get one of the errors
+described in the [errors](#Errors) section of this document.
 
 ## User registration
 
-Registering a user is the same as running [Authorization](#Authorization) and after
-that [User info update](#User-info-update). After the user has updated his info for the first time the user entry in the
-DB will be mark as registration completed.
+Registering a user is the same as running [Authorization](#Authorization) and after that [User info update](#User-info-update).
+After the user has updated his info for the first time the user entry in the DB will be mark as registration completed.
 
 ## Get user info
 
 ### Description
 
-Return a JSON with the user data from the DB, User must be logged in.
+Return a JSON with the user info from the DB, User must be logged in.
 
 ### URL struct
 
@@ -140,11 +139,11 @@ Return a JSON with the user data from the DB, User must be logged in.
 
 ### Parameters
 
-There are no params that are passed.
+There are no params to pass.
 
 ### Returns
 
-If no errors has occurred then you will get a JSON with an HTTP 200 response. Example of expected result:
+If no error has occurred then you will get a JSON with an HTTP 200 response. Example of expected result:
 
 ```json
 {
@@ -166,21 +165,22 @@ If no errors has occurred then you will get a JSON with an HTTP 200 response. Ex
 }
 ```
 
-**email** - _string_ ,What was given by the OAuth provider or by the user.
-**id** - _int_ ,Our id for this user.
-**is_active** - _bool_ ,Is the user active.
-**is_user_completed_registration** - _bool_ ,Have the user completed the registration process.
-**oauth_provider_user_name** - _string_ ,Sometimes we are given a username by the OAuth provider.
+**email** - _string_ ,What was given by the OAuth provider or by the user.  
+**id** - _int_ ,Our id for this user.  
+**is_active** - _bool_ ,Is the user active.  
+**is_user_completed_registration** - _bool_ ,Have the user completed the registration process.  
+**oauth_provider_user_name** - _string_ ,Sometimes we are given a username by the OAuth provider.  
 **oauth_provider_user_picture_url** - _string_ ,A URL for a picture of the user(only available if the OAuth provider
-have given us it, Sometimes the OAuth provider has given us a black picture).
-**phone** - _string_ , Phone number - e.g. 03-1234567, 0541234567, 054-123-1234, +972-054-123-1234
+have given us, Sometimes the OAuth provider is given us a blank picture).  
+**phone** - _string_ , Phone number - e.g. 03-1234567, 0541234567, 054-123-1234, +972-054-123-1234 
 
-Otherwise, you will get one of the errors described in the errors section of this document.
+Other fields are self-explanatory, so they are not described here.  
+Otherwise, you will get one of the errors described in the [errors](#Errors) section of this document.
 
 ## Errors
 
 There are 2 types of error - Application errors(created by our code and described in this document) and framework
-errors(e.g. Flask error, those can be in difference format then what describe here like HTML). Example for error:
+errors(e.g. Flask error, those can be in difference format then what describe here, like HTML). Example for an error:
 
 ```json
 {

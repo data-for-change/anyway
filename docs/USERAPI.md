@@ -178,7 +178,7 @@ errors(e.g. Flask error, those can be in difference format then what describe he
 }
 ```
 
-####Error table:
+#### Error table:
 
 | Error name                          | Error code | Error msg                                                                                    | HTTP return Code |
 |-------------------------------------|------------|----------------------------------------------------------------------------------------------|------------------|

@@ -1,25 +1,22 @@
 # User API documentation
 
-This is the documentation for the new user API (and only the new one) that was created in 2020.
+This is the documentation for the new user API (Version 2) that was created in 2020.
 
-## Authorization
 
-### Description
+### Authorization
+
+#### Description
 
 User authorization is been done with OAuth 2.0 and Google as the OAuth 2.0 provider. When calling the authentication URL you will
 be redirected to Google OAuth system (So the user need to be able to see the screen), after Google will authenticate the user he will be redirected
 to https://www.anyway.co.il/authorize/google/callback/google and from there the flow will be redirected to the URL that was given in
 the param `redirect_url` or to the default URL.
 
-### URL struct
+#### URL struct
 
-> https://www.anyway.co.il/authorize/google
+> GET https://www.anyway.co.il/authorize/google
 
-### Method
-
-> GET
-
-### Example
+#### Examples
 
 > https://www.anyway.co.il/authorize/google
 
@@ -27,7 +24,7 @@ the param `redirect_url` or to the default URL.
 
 > http://127.0.0.1:5000/authorize/google?redirect_url=https%3A%2F%2Fanyway-infographics-staging.web.app%2Fxxxxxxxxxxxxxxxxxxxx
 
-### Parameters
+#### Parameters
 
 **redirect_url** - _string_ This parameter is optional. The param is a URL, if set it will redirect(HTTP 302 code) to
 the given URL after the authentication is finished, there is validation on the URL to prevent errors and malicious use:
@@ -40,31 +37,27 @@ For non-local address you can only access one of the following domain:
 > anyway-infographics-demo.web.app  
 
 only in https but you can add any path you want after the domain.
-### Returns
+#### Returns
 
 If no error has occurred then you will be redirected to the given URL or to the default
 URL(https://anyway-infographics.web.app/). Otherwise, you will get one of the errors described in the [errors](#Errors) section of
 this document.
 
-## User info update
+### User info update
 
-### Description
+#### Description
 
 Update the user personal info. User must be logged in.
 
-### URL struct
+#### URL struct
+
+> POST https://www.anyway.co.il/user/update
+
+#### Example
 
 > https://www.anyway.co.il/user/update
 
-### Method
-
-> POST
-
-### Example
-
-> https://www.anyway.co.il/user/update
-
-### Parameters
+#### Parameters
 
 There are no params that are passed in the URL query. All params should be passed as JSON in body of the POST request -
 the following fields can be present in the JSON:  
@@ -109,39 +102,35 @@ Examples for good JSON:
 }
 ```
 
-### Returns
+#### Returns
 
 If no error has occurred then you will get an empty HTTP 200 response. Otherwise, you will get one of the errors
 described in the [errors](#Errors) section of this document.
 
-## User registration
+### User registration
 
 Registering a user is the same as running [Authorization](#Authorization) and after that [User info update](#User-info-update).
 After the user has updated his info for the first time the user entry in the DB will be mark as registration completed.
 
-## Get user info
+### Get user info
 
-### Description
+#### Description
 
 Return a JSON with the user info from the DB, User must be logged in.
 
-### URL struct
+#### URL struct
+
+> GET https://www.anyway.co.il/user/info
+
+#### Example
 
 > https://www.anyway.co.il/user/info
 
-### Method
-
-> GET
-
-### Example
-
-> https://www.anyway.co.il/user/info
-
-### Parameters
+#### Parameters
 
 There are no params to pass.
 
-### Returns
+#### Returns
 
 If no error has occurred then you will get a JSON with an HTTP 200 response. Example of expected result:
 
@@ -177,7 +166,7 @@ have given us, Sometimes the OAuth provider is given us a blank picture).
 Other fields are self-explanatory, so they are not described here.  
 Otherwise, you will get one of the errors described in the [errors](#Errors) section of this document.
 
-## Errors
+### Errors
 
 There are 2 types of error - Application errors(created by our code and described in this document) and framework
 errors(e.g. Flask error, those can be in difference format then what describe here, like HTML). Example for an error:
@@ -189,8 +178,7 @@ errors(e.g. Flask error, those can be in difference format then what describe he
 }
 ```
 
-Error table:
-------------
+####Error table:
 
 | Error name                          | Error code | Error msg                                                                                    | HTTP return Code |
 |-------------------------------------|------------|----------------------------------------------------------------------------------------------|------------------|

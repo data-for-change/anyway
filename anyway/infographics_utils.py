@@ -10,6 +10,7 @@ import traceback
 
 import pandas as pd
 from collections import defaultdict
+
 from sqlalchemy import func, distinct, literal_column, case
 from sqlalchemy import cast, Numeric
 from sqlalchemy import desc
@@ -24,8 +25,10 @@ from anyway.infographics_dictionaries import (
     english_accident_severity_dict,
     english_accident_type_dict,
     segment_dictionary,
+    english_injury_severity_dict,
 )
 from anyway.parsers import infographics_data_cache_updater
+from anyway.utilities import parse_age_from_range
 
 
 @dataclass
@@ -129,6 +132,7 @@ class Widget:
         else:
             output["meta"] = {}
         output["meta"]["rank"] = self.rank
+        output["meta"]["information"] = "Placeholder: This Widget shows information of accidenents in Israel with comparison of vehicle types / locations / injured types."
         return output
 
 
@@ -334,21 +338,20 @@ class StreetViewWidget(Widget):
 @register
 class HeadOnCollisionsComparisonWidget(Widget):
     name: str = "head_on_collisions_comparison"
+    SPECIFIC_ROAD_SUBTITLE = "specific_road_segment_fatal_accidents"
+    ALL_ROADS_SUBTITLE = "all_roads_fatal_accidents"
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 5
-        self.text = {"title": "תאונות קטלניות ע״פ סוג"}
+        # self.text = {"title": "תאונות קטלניות ע״פ סוג"}
+        # self.text = {"title": "fatal accidents by type"}
 
     def generate_items(self) -> None:
-        self.items = HeadOnCollisionsComparisonWidget.get_head_to_head_stat(
-            news_flash_obj=self.request_params.news_flash_obj,
-            start_time=self.request_params.start_time,
-            end_time=self.request_params.end_time,
-        )
+        self.items = self.get_head_to_head_stat()
 
-    @staticmethod
-    def get_head_to_head_stat(news_flash_obj: NewsFlash, start_time, end_time) -> Dict:
+    def get_head_to_head_stat(self) -> Dict:
+        news_flash = self.request_params.news_flash_obj
         road_data = {}
         filter_dict = {
             "road_type": BE_CONST.ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION,
@@ -357,41 +360,85 @@ class HeadOnCollisionsComparisonWidget(Widget):
         all_roads_data = get_accidents_stats(
             table_obj=AccidentMarkerView,
             filters=filter_dict,
-            group_by="accident_type_hebrew",
-            count="accident_type_hebrew",
-            start_time=start_time,
-            end_time=end_time,
+            group_by="accident_type",
+            count="accident_type",
+            start_time=self.request_params.start_time,
+            end_time=self.request_params.end_time,
         )
 
-        if news_flash_obj.road1 and news_flash_obj.road_segment_name:
+        if news_flash.road1 and news_flash.road_segment_name:
             filter_dict.update(
                 {
-                    "road1": news_flash_obj.road1,
-                    "road_segment_name": news_flash_obj.road_segment_name,
+                    "road1": news_flash.road1,
+                    "road_segment_name": news_flash.road_segment_name,
                 }
             )
             road_data = get_accidents_stats(
                 table_obj=AccidentMarkerView,
                 filters=filter_dict,
-                group_by="accident_type_hebrew",
-                count="accident_type_hebrew",
-                start_time=start_time,
-                end_time=end_time,
+                group_by="accident_type",
+                count="accident_type",
+                start_time=self.request_params.start_time,
+                end_time=self.request_params.end_time,
             )
 
-        road_data_dict = sum_road_accidents_by_specific_type(road_data, "התנגשות חזית בחזית")
+        road_data_dict = sum_road_accidents_by_specific_type(
+            road_data,
+            BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION
+        )
         all_roads_data_dict = sum_road_accidents_by_specific_type(
-            all_roads_data, "התנגשות חזית בחזית"
+            all_roads_data,
+            BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION
         )
 
-        return {
-            "specific_road_segment_fatal_accidents": convert_roads_fatal_accidents_to_frontend_view(
-                road_data_dict
-            ),
-            "all_roads_fatal_accidents": convert_roads_fatal_accidents_to_frontend_view(
-                all_roads_data_dict
-            ),
+        road_sums = self.sum_count_of_accident_type(
+            road_data, BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION)
+        all_roads_sums = self.sum_count_of_accident_type(
+            all_roads_data, BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION)
+        logging.debug(f"get_head_to_head_stat:\n" +
+                      f"road_sums:{road_sums}\n" +
+                      f"all_roads_sums:{all_roads_sums}\n" +
+                      f"road_data_dict:{road_data_dict}\n" +
+                      f"all_roads_data_dict:{all_roads_data_dict}"
+                      )
+
+        res = {self.SPECIFIC_ROAD_SUBTITLE: [
+            {"desc": english_accident_type_dict[BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION],
+             "count": road_sums["given"]
+             },
+            {"desc": "others",
+             "count": road_sums["others"]}
+        ],
+            self.ALL_ROADS_SUBTITLE: [
+                {"desc": english_accident_type_dict[BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION], "count": all_roads_sums["given"]},
+                {"desc": "others", "count": all_roads_sums["others"]}
+            ]
         }
+        logging.debug(f"get_head_to_head_stat: res:\n{res}")
+        return res
+
+    @staticmethod
+    def sum_count_of_accident_type(data: Dict, acc_type: int) -> Dict:
+        given = sum([d["count"] for d in data if d["accident_type"] == acc_type])
+        others = sum([d["count"] for d in data if d["accident_type"] != acc_type])
+        return {"given": given, "others": others}
+
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        i = items["data"]["items"]
+        items["data"]["text"] = {"title": _("fatal accidents by type")}
+        for val in i.values():
+            logging.debug(f"HeadOn:localize_items:val:{val}")
+            for e in val:
+                e["desc"] = _(e["desc"])
+            logging.debug(f"HeadOn:localize_items:val-after:{val}")
+        return items
+
+
+# adding calls to _() for pybabel extraction
+_(HeadOnCollisionsComparisonWidget.SPECIFIC_ROAD_SUBTITLE)
+_(HeadOnCollisionsComparisonWidget.ALL_ROADS_SUBTITLE)
+_("others")
 
 
 @register
@@ -643,60 +690,78 @@ class InjuredCountPerAgeGroupWidget(Widget):
 
     @staticmethod
     def filter_and_group_injured_count_per_age_group(request_params: RequestParams):
-        import re
+        road_number = request_params.location_info["road1"]
 
-        data_of_ages = get_accidents_stats(
-            table_obj=InvolvedMarkerView,
-            filters=get_injured_filters(request_params.location_info),
-            group_by="age_group_hebrew",
-            count="age_group_hebrew",
-            start_time=request_params.start_time,
-            end_time=request_params.end_time,
+        query = (
+            db.session.query(InvolvedMarkerView)
+            .filter(InvolvedMarkerView.accident_timestamp >= request_params.start_time)
+            .filter(InvolvedMarkerView.accident_timestamp <= request_params.end_time)
+            .filter(
+                InvolvedMarkerView.provider_code.in_(
+                    [
+                        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
+                        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+                    ]
+                )
+            )
+            .filter(
+                InvolvedMarkerView.injury_severity.in_(
+                    [
+                        BE_CONST.InjurySeverity.DEAD,
+                        BE_CONST.InjurySeverity.SEVERE,
+                    ]
+                )
+            )
+            .filter(
+                (InvolvedMarkerView.road1 == road_number)
+                | (InvolvedMarkerView.road2 == road_number)
+            )
+            .group_by("age_group", "injury_severity")
+            .with_entities("age_group", "injury_severity", func.count().label("count"))
         )
-        range_dict = {0: 14, 15: 24, 25: 64, 65: 200}
-        dict_by_required_age_group = defaultdict(int)
 
-        for age_range_and_count in data_of_ages:
-            age_range = age_range_and_count["age_group"]
-            count = age_range_and_count["count"]
+        range_dict = {0: 4, 5: 9, 10: 14, 15: 19, 20: 24, 25: 34, 35: 44, 45: 54, 55: 64, 65: 200}
 
-            # Parse the db age range
-            # noinspection RegExpRedundantEscape
-            match_parsing = re.match("([0-9]{2})\\-([0-9]{2})", age_range)
-            if match_parsing:
-                regex_age_matches = match_parsing.groups()
-                if len(regex_age_matches) != 2:
-                    dict_by_required_age_group["unknown"] += count
-                    continue
-                min_age_raw, max_age_raw = regex_age_matches
+        def defaultdict_int_factory() -> Callable:
+            return lambda: defaultdict(int)
+
+        dict_grouped = defaultdict(defaultdict_int_factory())
+
+        for row in query:
+            age_range = row.age_group
+            injury_name = english_injury_severity_dict[row.injury_severity]
+            count = row.count
+
+            # The age groups in the DB are not the same age groups in the Widget - so we need to merge some of the groups
+            age_parse = parse_age_from_range(age_range)
+            if not age_parse:
+                dict_grouped["unknown"][injury_name] += count
             else:
-                match_parsing = re.match("([0-9]{2})\\+", age_range)  # e.g  85+
-                if match_parsing:
-                    # We assume that no body live beyond age 200
-                    min_age_raw, max_age_raw = match_parsing.group(1), 200
-                else:
-                    dict_by_required_age_group["unknown"] += count
-                    continue
+                min_age, max_age = age_parse
+                found_age_range = False
+                # Find to what "bucket" to aggregate the data
+                for item_min_range, item_max_range in range_dict.items():
+                    if item_min_range <= min_age <= max_age <= item_max_range:
+                        string_age_range = f"{item_min_range:02}-{item_max_range:02}"
+                        dict_grouped[string_age_range][injury_name] += count
+                        found_age_range = True
+                        break
 
-            # Find to what "bucket" to aggregate the data
-            min_age = int(min_age_raw)
-            max_age = int(max_age_raw)
-            for item_min_range, item_max_range in range_dict.items():
-                if item_min_range <= min_age <= item_max_range <= max_age <= item_max_range:
-                    string_age_range = f"{item_min_range:02}-{item_max_range:02}"
-                    dict_by_required_age_group[string_age_range] += count
-                    break
+                if not found_age_range:
+                    dict_grouped["unknown"][injury_name] += count
 
         # Rename the last key
-        dict_by_required_age_group["65+"] = dict_by_required_age_group["65-200"]
-        del dict_by_required_age_group["65-200"]
+        dict_grouped["65+"] = dict_grouped["65-200"]
+        del dict_grouped["65-200"]
 
-        # Modify return value to wanted format
-        items = [
-            {"age_group": age_group, "count": count}
-            for age_group, count in dict_by_required_age_group.items()
-        ]
+        return dict_grouped
 
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        items["data"]["text"] = {
+            "title": _("Injury severity per age group in ")
+            + request_params.location_info["road_segment_name"]
+        }
         return items
 
 
@@ -1454,9 +1519,11 @@ def sum_road_accidents_by_specific_type(road_data, field_name):
 
 
 def convert_roads_fatal_accidents_to_frontend_view(data_dict):
+    logging.debug(f"convert_roads_fatal_accidents_to_frontend_view:input:{data_dict}")
     data_list = []
     for key, value in data_dict.items():
-        if key == head_on_collisions_comparison_dict["head_to_head_collision"]:
+        logging.debug(f"convert_roads_fatal:key:{key}:value:{value}")
+        if key == BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION:
             data_list.append(
                 {"desc": head_on_collisions_comparison_dict["head_to_head"], "count": value}
             )

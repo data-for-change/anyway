@@ -40,6 +40,12 @@ english_accident_type_dict = {
     BE_CONST.AccidentType.DAMAGE_CAUSED_BY_A_FALLING_LOAD_OFF_A_VEHICLE: "Damage caused by a falling load off a vehicle",
 }
 
+english_injury_severity_dict = {
+    BE_CONST.InjurySeverity.DEAD: "fatal",
+    BE_CONST.InjurySeverity.SEVERE: "severe",
+    BE_CONST.InjurySeverity.LIGHT: "light",
+}
+
 # temporary until we'll create translations
 class smart_dict(dict):
     def __missing__(self, key):

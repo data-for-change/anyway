@@ -73,6 +73,13 @@ class Test_Infographic_Api:
 
         assert rv.status_code == http_client.BAD_REQUEST
 
+    def test_limit(self, app):
+        """Should process the limit parameter successfully"""
+        insert_infographic_mock_data(app)
+        rv = app.get("/api/news-flash?limit=1")
+        assert len(rv.get_json()) == 1
+        assert rv.status_code == http_client.OK
+
     def test_bad_news_flash_id(self, app):
         """Should success and be empty when bad news flash id"""
         rv = app.get("/api/infographics-data?news_flash_id=-1")

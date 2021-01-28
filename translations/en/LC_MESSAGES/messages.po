@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-01-30 07:20+0200\n"
+"POT-Creation-Date: 2021-02-05 11:11+0200\n"
 "PO-Revision-Date: 2020-11-26 16:45+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -138,32 +138,38 @@ msgstr ""
 msgid "accident_type"
 msgstr ""
 
-#: anyway/infographics_utils.py:429
+#: anyway/infographics_utils.py:413
 msgid "fatal accidents by type"
 msgstr ""
 
-#: anyway/infographics_utils.py:433
+#: anyway/infographics_utils.py:416
 msgid "desc"
 msgstr ""
 
-#: anyway/infographics_utils.py:441
+#: anyway/infographics_utils.py:421
 msgid "others"
 msgstr ""
 
-#: anyway/infographics_utils.py:481
+#: anyway/infographics_utils.py:493
 msgid "Fatal and severe accidents heat map"
 msgstr ""
 
-#: anyway/infographics_utils.py:764
+#: anyway/infographics_utils.py:743
 msgid "Injury severity per age group in "
 msgstr ""
 
-#: anyway/infographics_utils.py:831
+#: anyway/infographics_utils.py:820
 msgid "driver_type"
 msgstr ""
 
-#: anyway/infographics_utils.py:837
+#: anyway/infographics_utils.py:826
 msgid "accident count by driver type "
+msgstr ""
+
+#: anyway/infographics_utils.py:935
+msgid ""
+"comparing vehicle type percentage in accidents in {} relative to national"
+" average"
 msgstr ""
 
 #: anyway/infographics_utils.py:1200
@@ -174,6 +180,130 @@ msgstr ""
 
 #: anyway/infographics_utils.py:1442
 msgid "Accidents in descending order by severity for segment"
+msgstr ""
+
+#: anyway/vehicle_type.py:43 anyway/vehicle_type.py:179
+msgid "private car"
+msgstr ""
+
+#: anyway/vehicle_type.py:44
+msgid "truck upto 4 tons"
+msgstr ""
+
+#: anyway/vehicle_type.py:45
+msgid "pickup upto 4 tons"
+msgstr ""
+
+#: anyway/vehicle_type.py:46
+msgid "truck 4 to 10 tons"
+msgstr ""
+
+#: anyway/vehicle_type.py:47
+msgid "truck 12 to 16 tons"
+msgstr ""
+
+#: anyway/vehicle_type.py:48
+msgid "truck 16 to 34 tons"
+msgstr ""
+
+#: anyway/vehicle_type.py:49
+msgid "truck above 34 tons"
+msgstr ""
+
+#: anyway/vehicle_type.py:50
+msgid "motorcycle upto 50 cc"
+msgstr ""
+
+#: anyway/vehicle_type.py:51
+msgid "motorcycle 50 to 250 cc"
+msgstr ""
+
+#: anyway/vehicle_type.py:52
+msgid "motorcycle 250 to 500 cc"
+msgstr ""
+
+#: anyway/vehicle_type.py:53
+msgid "bus"
+msgstr ""
+
+#: anyway/vehicle_type.py:54
+msgid "taxi"
+msgstr ""
+
+#: anyway/vehicle_type.py:55
+msgid "work vehicle"
+msgstr ""
+
+#: anyway/vehicle_type.py:56
+msgid "tractor"
+msgstr ""
+
+#: anyway/vehicle_type.py:57
+msgid "bike"
+msgstr ""
+
+#: anyway/vehicle_type.py:58
+msgid "train"
+msgstr ""
+
+#: anyway/vehicle_type.py:59
+msgid "other and unknown"
+msgstr ""
+
+#: anyway/vehicle_type.py:60
+msgid "minibus"
+msgstr ""
+
+#: anyway/vehicle_type.py:61
+msgid "motorcycle above 500 cc"
+msgstr ""
+
+#: anyway/vehicle_type.py:62
+msgid "electric scooter"
+msgstr ""
+
+#: anyway/vehicle_type.py:63
+msgid "mobility scooter"
+msgstr ""
+
+#: anyway/vehicle_type.py:64
+msgid "electric bike"
+msgstr ""
+
+#: anyway/vehicle_type.py:65
+msgid "truck 3.5 to 10 tons"
+msgstr ""
+
+#: anyway/vehicle_type.py:66
+msgid "truck 10 to 12 tons"
+msgstr ""
+
+#: anyway/vehicle_type.py:176
+msgid "professional driver"
+msgstr ""
+
+#: anyway/vehicle_type.py:177
+msgid "private driver"
+msgstr ""
+
+#: anyway/vehicle_type.py:178
+msgid "light electric vehicles"
+msgstr ""
+
+#: anyway/vehicle_type.py:180
+msgid "large vehicle"
+msgstr ""
+
+#: anyway/vehicle_type.py:181
+msgid "motorcycle"
+msgstr ""
+
+#: anyway/vehicle_type.py:182
+msgid "bicycle and small motor vehicles"
+msgstr ""
+
+#: anyway/vehicle_type.py:183
+msgid "other"
 msgstr ""
 
 #: templates/index.html:4 templates/index.html:10
@@ -281,5 +411,8 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "specific_road_segment_fatal_accidents"
+#~ msgstr ""
+
+#~ msgid "car_type"
 #~ msgstr ""
 

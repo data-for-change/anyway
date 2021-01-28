@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-01-30 07:20+0200\n"
+"POT-Creation-Date: 2021-02-05 11:11+0200\n"
 "PO-Revision-Date: 2020-10-16 15:42+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: he\n"
@@ -138,33 +138,39 @@ msgstr "סוג"
 msgid "accident_type"
 msgstr "סוג תאונה"
 
-#: anyway/infographics_utils.py:429
+#: anyway/infographics_utils.py:413
 msgid "fatal accidents by type"
 msgstr "תאונות קטלניות לפי סוג"
 
-#: anyway/infographics_utils.py:433
+#: anyway/infographics_utils.py:416
 msgid "desc"
 msgstr "תאור"
 
-#: anyway/infographics_utils.py:441
+#: anyway/infographics_utils.py:421
 msgid "others"
 msgstr "אחרות"
 
-#: anyway/infographics_utils.py:481
+#: anyway/infographics_utils.py:493
 msgid "Fatal and severe accidents heat map"
 msgstr "מוקדי תאונות קטלניות וקשות במקטע"
 
-#: anyway/infographics_utils.py:764
+#: anyway/infographics_utils.py:743
 msgid "Injury severity per age group in "
 msgstr "חומרת פגיעה פר גיל בכביש "
 
-#: anyway/infographics_utils.py:831
+#: anyway/infographics_utils.py:820
 msgid "driver_type"
 msgstr "סוג נהג"
 
-#: anyway/infographics_utils.py:837
+#: anyway/infographics_utils.py:826
 msgid "accident count by driver type "
 msgstr "מעורבות נהגים בתאונות לפי סוג במקטע "
+
+#: anyway/infographics_utils.py:935
+msgid ""
+"comparing vehicle type percentage in accidents in {} relative to national"
+" average"
+msgstr "השוואת אחוז הרכבים בתאונות במקטע {} לעומת ממוצע ארצי"
 
 #: anyway/infographics_utils.py:1200
 msgid ""
@@ -175,6 +181,131 @@ msgstr ""
 #: anyway/infographics_utils.py:1442
 msgid "Accidents in descending order by severity for segment"
 msgstr " תאונות בסדר חומרה יורד במקטע"
+
+#: anyway/vehicle_type.py:43 anyway/vehicle_type.py:179
+msgid "private car"
+msgstr "רכב נוסעים פרטי"
+
+#: anyway/vehicle_type.py:44
+msgid "truck upto 4 tons"
+msgstr "משא עד 4 טון - אחוד (טרנזיט)"
+
+#: anyway/vehicle_type.py:45
+msgid "pickup upto 4 tons"
+msgstr "משא עד 4 טון - לא אחוד (טנדר)"
+
+#: anyway/vehicle_type.py:46
+msgid "truck 4 to 10 tons"
+msgstr "משא 4.1 עד 9.9 טון"
+
+#: anyway/vehicle_type.py:47
+msgid "truck 12 to 16 tons"
+msgstr "משא 10.0 עד 15.9 טון"
+
+#: anyway/vehicle_type.py:48
+msgid "truck 16 to 34 tons"
+msgstr "משא 16.0 עד 33.9 טון"
+
+#: anyway/vehicle_type.py:49
+msgid "truck above 34 tons"
+msgstr "משא 34.0+ טון"
+
+#: anyway/vehicle_type.py:50
+msgid "motorcycle upto 50 cc"
+msgstr "אופנוע עד 50 סמ\"ק"
+
+#: anyway/vehicle_type.py:51
+msgid "motorcycle 50 to 250 cc"
+msgstr "אופנוע 51 עד 250 סמ\"ק"
+
+#: anyway/vehicle_type.py:52
+msgid "motorcycle 250 to 500 cc"
+msgstr "אופנוע 251 עד 500 סמ\"ק"
+
+#: anyway/vehicle_type.py:53
+msgid "bus"
+msgstr "אוטובוס"
+
+#: anyway/vehicle_type.py:54
+msgid "taxi"
+msgstr "מונית"
+
+#: anyway/vehicle_type.py:55
+msgid "work vehicle"
+msgstr "רכב עבודה"
+
+#: anyway/vehicle_type.py:56
+msgid "tractor"
+msgstr "טרקטור"
+
+#: anyway/vehicle_type.py:57
+msgid "bike"
+msgstr "אופניים"
+
+#: anyway/vehicle_type.py:58
+msgid "train"
+msgstr "רכבת"
+
+#: anyway/vehicle_type.py:59
+msgid "other and unknown"
+msgstr "אחר ולא ידוע"
+
+#: anyway/vehicle_type.py:60
+msgid "minibus"
+msgstr "אוטובוס זעיר"
+
+#: anyway/vehicle_type.py:61
+msgid "motorcycle above 500 cc"
+msgstr "אופנוע 501+ סמ\"ק"
+
+#: anyway/vehicle_type.py:62
+msgid "electric scooter"
+msgstr "קורקינט חשמלי"
+
+#: anyway/vehicle_type.py:63
+msgid "mobility scooter"
+msgstr "קלנועית חשמלית"
+
+#: anyway/vehicle_type.py:64
+msgid "electric bike"
+msgstr "אופניים חשמליים"
+
+#: anyway/vehicle_type.py:65
+msgid "truck 3.5 to 10 tons"
+msgstr "משא 3.6 עד 9.9 טון"
+
+#: anyway/vehicle_type.py:66
+msgid "truck 10 to 12 tons"
+msgstr "משא 10.0 עד 12.0 טון"
+
+#: anyway/vehicle_type.py:176
+msgid "professional driver"
+msgstr "נהג מקצועי"
+
+#: anyway/vehicle_type.py:177
+#, fuzzy
+msgid "private driver"
+msgstr "נהג רכב פרטי"
+
+#: anyway/vehicle_type.py:178
+msgid "light electric vehicles"
+msgstr "רכבים חשמליים קלים"
+
+#: anyway/vehicle_type.py:180
+msgid "large vehicle"
+msgstr "מסחרי/משאית"
+
+#: anyway/vehicle_type.py:181
+msgid "motorcycle"
+msgstr "אופנוע"
+
+#: anyway/vehicle_type.py:182
+msgid "bicycle and small motor vehicles"
+msgstr "אופניים/קורקינט"
+
+#: anyway/vehicle_type.py:183
+msgid "other"
+msgstr "אחרות"
 
 #: templates/index.html:4 templates/index.html:10
 msgid "ANYWAY - Making a difference in any way"
@@ -222,4 +353,7 @@ msgstr ""
 
 #~ msgid "specific_road_segment_fatal_accidents"
 #~ msgstr "תאונות קטלניות בקטע הזה"
+
+#~ msgid "car_type"
+#~ msgstr "סוג"
 

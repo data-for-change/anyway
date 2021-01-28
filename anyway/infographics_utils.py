@@ -29,6 +29,7 @@ from anyway.infographics_dictionaries import (
 )
 from anyway.parsers import infographics_data_cache_updater
 from anyway.utilities import parse_age_from_range
+from anyway.vehicle_type import VehicleCategory
 
 
 @dataclass
@@ -161,7 +162,6 @@ class AccidentCountBySeverityWidget(Widget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 1
-        logging.debug(f"AccidentCountBySeverityWidget.__init__:name:{self.name}:{type(self).name}")
 
     def generate_items(self) -> None:
         self.items = AccidentCountBySeverityWidget.get_accident_count_by_severity(
@@ -382,25 +382,10 @@ class HeadOnCollisionsComparisonWidget(Widget):
                 end_time=self.request_params.end_time,
             )
 
-        road_data_dict = sum_road_accidents_by_specific_type(
-            road_data,
-            BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION
-        )
-        all_roads_data_dict = sum_road_accidents_by_specific_type(
-            all_roads_data,
-            BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION
-        )
-
         road_sums = self.sum_count_of_accident_type(
             road_data, BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION)
         all_roads_sums = self.sum_count_of_accident_type(
             all_roads_data, BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION)
-        logging.debug(f"get_head_to_head_stat:\n" +
-                      f"road_sums:{road_sums}\n" +
-                      f"all_roads_sums:{all_roads_sums}\n" +
-                      f"road_data_dict:{road_data_dict}\n" +
-                      f"all_roads_data_dict:{all_roads_data_dict}"
-                      )
 
         res = {self.SPECIFIC_ROAD_SUBTITLE: [
             {"desc": english_accident_type_dict[BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION],
@@ -414,7 +399,6 @@ class HeadOnCollisionsComparisonWidget(Widget):
                 {"desc": "others", "count": all_roads_sums["others"]}
             ]
         }
-        logging.debug(f"get_head_to_head_stat: res:\n{res}")
         return res
 
     @staticmethod
@@ -428,16 +412,12 @@ class HeadOnCollisionsComparisonWidget(Widget):
         i = items["data"]["items"]
         items["data"]["text"] = {"title": _("fatal accidents by type")}
         for val in i.values():
-            logging.debug(f"HeadOn:localize_items:val:{val}")
             for e in val:
                 e["desc"] = _(e["desc"])
-            logging.debug(f"HeadOn:localize_items:val-after:{val}")
         return items
 
 
 # adding calls to _() for pybabel extraction
-_(HeadOnCollisionsComparisonWidget.SPECIFIC_ROAD_SUBTITLE)
-_(HeadOnCollisionsComparisonWidget.ALL_ROADS_SUBTITLE)
 _("others")
 
 
@@ -478,7 +458,6 @@ class AccidentCountByAccidentTypeWidget(Widget):
 @register
 class AccidentsHeatMapWidget(Widget):
     name: str = "accidents_heat_map"
-    BASE_TITLE = _("Fatal and severe accidents heat map")
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
@@ -511,7 +490,7 @@ class AccidentsHeatMapWidget(Widget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
-            "title": _(AccidentsHeatMapWidget.BASE_TITLE)
+            "title": _("Fatal and severe accidents heat map")
             + " "
             + segment_dictionary[request_params.location_info["road_segment_name"]]
         }
@@ -815,17 +794,17 @@ class AccidentCountByDriverTypeWidget(Widget):
         driver_types = defaultdict(int)
         for item in involved_by_vehicle_type_data:
             vehicle_type, count = item["involve_vehicle_type"], int(item["count"])
-            if vehicle_type in BE_CONST.PROFESSIONAL_DRIVER_VEHICLE_TYPES:
+            if vehicle_type in VehicleCategory.PROFESSIONAL_DRIVER.get_codes():
                 driver_types[
                     english_driver_type_dict[BE_CONST.DriverType.PROFESSIONAL_DRIVER]
                 ] += count
-            elif vehicle_type in BE_CONST.PRIVATE_DRIVER_VEHICLE_TYPES:
+            elif vehicle_type in VehicleCategory.PRIVATE_DRIVER.get_codes():
                 driver_types[
                     english_driver_type_dict[BE_CONST.DriverType.PRIVATE_VEHICLE_DRIVER]
                 ] += count
             elif (
-                vehicle_type in BE_CONST.LIGHT_ELECTRIC_VEHICLE_TYPES
-                or vehicle_type in BE_CONST.OTHER_VEHICLES_TYPES
+                vehicle_type in VehicleCategory.LIGHT_ELECTRIC.get_codes()
+                or vehicle_type in VehicleCategory.OTHER.get_codes()
             ):
                 driver_types[english_driver_type_dict[BE_CONST.DriverType.OTHER_DRIVER]] += count
         output = [
@@ -857,11 +836,6 @@ class AccidentCountByCarTypeWidget(Widget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 17
-        self.text = {
-            "title": "השוואת אחוז הרכבים בתאונות במקטע "
-            + self.request_params.location_info["road_segment_name"]
-            + " לעומת ממוצע ארצי"
-        }
 
     def generate_items(self) -> None:
         self.items = (
@@ -914,16 +888,16 @@ class AccidentCountByCarTypeWidget(Widget):
         for item in involved_by_vehicle_type_data:
             vehicle_type, count = item["involve_vehicle_type"], int(item["count"])
             total_count += count
-            if vehicle_type in BE_CONST.CAR_VEHICLE_TYPES:
-                driver_types["רכב פרטי"] += count
-            elif vehicle_type in BE_CONST.LARGE_VEHICLE_TYPES:
-                driver_types["מסחרי/משאית"] += count
-            elif vehicle_type in BE_CONST.MOTORCYCLE_VEHICLE_TYPES:
-                driver_types["אופנוע"] += count
-            elif vehicle_type in BE_CONST.BICYCLE_AND_SMALL_MOTOR_VEHICLE_TYPES:
-                driver_types["אופניים/קורקינט"] += count
+            if vehicle_type in VehicleCategory.CAR.get_codes():
+                driver_types[VehicleCategory.CAR.value] += count
+            elif vehicle_type in VehicleCategory.LARGE.get_codes():
+                driver_types[VehicleCategory.LARGE.value] += count
+            elif vehicle_type in VehicleCategory.MOTORCYCLE.get_codes():
+                driver_types[VehicleCategory.MOTORCYCLE.value] += count
+            elif vehicle_type in VehicleCategory.BICYCLE_AND_SMALL_MOTOR.get_codes():
+                driver_types[VehicleCategory.BICYCLE_AND_SMALL_MOTOR.value] += count
             else:
-                driver_types["אחר"] += count
+                driver_types[VehicleCategory.OTHER.value] += count
 
         output = defaultdict(float)
         for k, v in driver_types.items():  # Calculate percentage
@@ -950,6 +924,22 @@ class AccidentCountByCarTypeWidget(Widget):
         return AccidentCountByCarTypeWidget.percentage_accidents_by_car_type(
             involved_by_vehicle_type_data
         )
+
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        for item in items["data"]["items"]:
+            try:
+                item["car_type"] = _(VehicleCategory(item["car_type"]).get_english_display_name())
+            except ValueError:
+                logging.exception(f'AccidentCountByCarType.localize_items: item:{item}')
+        base_title = _("comparing vehicle type percentage in accidents in"
+                       " {} "
+                       "relative to national average")
+        items["data"]["text"] = {
+            "title": base_title.format(
+                segment_dictionary[request_params.location_info["road_segment_name"]])
+        }
+        return items
 
 
 @register
@@ -1121,7 +1111,7 @@ class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
         case_vehicle = case(
             [
                 (
-                    InvolvedMarkerView.involve_vehicle_type.in_(BE_CONST.MOTORCYCLE_VEHICLE_TYPES),
+                    InvolvedMarkerView.involve_vehicle_type.in_(VehicleCategory.MOTORCYCLE.get_codes()),
                     literal_column(f"'{vehicle_motorcycle}'"),
                 )
             ],
@@ -1304,7 +1294,7 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(Widget):
         location_all = "כל הארץ"
         location_road = f"כביש {int(road_number)}"
 
-        vehicle_types = BE_CONST.MOTORCYCLE_VEHICLE_TYPES  # WIP: change by vehicle type
+        vehicle_types = VehicleCategory.MOTORCYCLE.get_codes()  # WIP: change by vehicle type
 
         all_roads_query = AccidentTypeVehicleTypeRoadComparisonWidget.get_accident_count_by_vehicle_type_query(
             start_time, end_time, num_accidents_label, vehicle_types)
@@ -1531,10 +1521,8 @@ def sum_road_accidents_by_specific_type(road_data, field_name):
 
 
 def convert_roads_fatal_accidents_to_frontend_view(data_dict):
-    logging.debug(f"convert_roads_fatal_accidents_to_frontend_view:input:{data_dict}")
     data_list = []
     for key, value in data_dict.items():
-        logging.debug(f"convert_roads_fatal:key:{key}:value:{value}")
         if key == BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION:
             data_list.append(
                 {"desc": head_on_collisions_comparison_dict["head_to_head"], "count": value}

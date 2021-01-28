@@ -35,6 +35,7 @@ from anyway.backend_constants import BE_CONST
 from anyway.database import Base
 from anyway.utilities import decode_hebrew
 from anyway.app_and_db import db
+from anyway.vehicle_type import VehicleType as BE_VehicleType
 
 MarkerResult = namedtuple("MarkerResult", ["accident_markers", "rsa_markers", "total_records"])
 
@@ -563,7 +564,7 @@ class AccidentMarker(MarkerMixin, Base):
                 markers = markers.filter(AccidentMarker.accident_type == kwargs["acctype"])
             elif kwargs["acctype"] == BE_CONST.BIKE_ACCIDENTS:
                 markers = markers.filter(
-                    AccidentMarker.vehicles.any(Vehicle.vehicle_type == BE_CONST.VEHICLE_TYPE_BIKE)
+                    AccidentMarker.vehicles.any(Vehicle.vehicle_type == BE_VehicleType.BIKE.value)
                 )
         if kwargs.get("controlmeasure", 0) != 0:
             markers = markers.filter(AccidentMarker.road_control == kwargs["controlmeasure"])

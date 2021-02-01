@@ -41,7 +41,7 @@ python-geohash==0.8.5
 rauth==0.7.3
 rcssmin==1.0.6
 requests==2.23.0
-sendgrid==6.3.1
+sendgrid==6.5.0
 tweepy==3.8.0
 urllib3==1.25.9
 webassets==2.0

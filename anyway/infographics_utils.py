@@ -478,13 +478,11 @@ class AccidentCountByAccidentTypeWidget(Widget):
 @register
 class AccidentsHeatMapWidget(Widget):
     name: str = "accidents_heat_map"
+    BASE_TITLE = _("Fatal and severe accidents heat map")
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 7
-        self.text = {
-            "title": AccidentsHeatMapWidget.get_heat_map_title(request_params.location_info)
-        }
 
     def generate_items(self) -> None:
         accidents_heat_map_filters = self.request_params.location_info.copy()
@@ -499,10 +497,6 @@ class AccidentsHeatMapWidget(Widget):
         )
 
     @staticmethod
-    def get_heat_map_title(location_info):
-        return "מוקדי תאונות קטלניות וקשות במקטע " + location_info["road_segment_name"]
-
-    @staticmethod
     def get_accidents_heat_map(filters, start_time, end_time):
         filters = filters or {}
         filters["provider_code"] = [
@@ -514,6 +508,14 @@ class AccidentsHeatMapWidget(Widget):
         df = pd.read_sql_query(query.statement, query.session.bind)
         return df.to_dict(orient="records")  # pylint: disable=no-member
 
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        items["data"]["text"] = {
+            "title": _(AccidentsHeatMapWidget.BASE_TITLE)
+            + " "
+            + segment_dictionary[request_params.location_info["road_segment_name"]]
+        }
+        return items
 
 @register
 class AccidentCountByAccidentYearWidget(Widget):

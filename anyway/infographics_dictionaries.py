@@ -54,7 +54,7 @@ class smart_dict(dict):
 
 segment_dictionary = smart_dict()
 
-# bogus calls to gettext to get pybabel extract to recofnize the strings
+# bogus calls to gettext to get pybabel extract to recognize the strings
 _("fatal")
 _("severe")
 _("light")

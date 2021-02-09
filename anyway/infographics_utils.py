@@ -213,6 +213,16 @@ class MostSevereAccidentsTableWidget(Widget):
         )
 
     @staticmethod
+    def get_accident_severity_type(type: int) -> str:
+        types = {
+            0: None,
+            1: 'light',
+            2: 'fatal',
+            3: 'sever'
+        }
+        return types.get(type, None)
+
+    @staticmethod
     def prepare_table(location_info, start_time, end_time):
         entities = (
             "id",
@@ -248,6 +258,7 @@ class MostSevereAccidentsTableWidget(Widget):
             accident["injured_count"] = (
                 accident["severe_injured_count"] + accident["light_injured_count"]
             )
+            accident["accident_severity_type"] = location_info.get_accident_severity_type(accident["accident_type"])
             del (
                 accident["accident_timestamp"],
                 accident["accident_type"],

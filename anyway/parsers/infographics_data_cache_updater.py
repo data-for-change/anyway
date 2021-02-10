@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from sqlalchemy import not_
-from anyway.models import InfographicsDataCache, InfographicsDataCacheTemp, NewsFlash
+from anyway.models import InfographicsDataCache, InfographicsDataCacheTemp, NewsFlash, NewsflashFeatures
 from anyway.constants import CONST
 from anyway.app_and_db import db
 import anyway.infographics_utils
@@ -26,7 +26,7 @@ def is_in_cache(nf):
     )
 
 
-def add_news_flash_to_cache(news_flash):
+def add_news_flash_to_cache(news_flash: NewsFlash):
     try:
         if not is_cache_eligible(news_flash):
             logging.debug(

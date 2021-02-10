@@ -877,6 +877,46 @@ class NewsFlash(Base):
         return self.id
 
 
+class NewsflashFeatures(Base):
+    __tablename__ = "newsflash_features"
+
+    id = Column(BigInteger(), primary_key=True)
+    newsflash_id = Column(BigInteger(), ForeignKey('news_flash.id'))
+
+    """ 
+    version is the feature calculation version number. Can be used to compare results between veresions, and
+    also to re-calculate results
+    """
+    version = Column(Integer(), nullable=False)
+
+    """When did this calculation take place"""
+    timestamp = Column(DateTime(), nullable=False)
+
+    is_urban = Column(Boolean())
+
+    def seriazlize(self):
+        return {
+            "id": self.id,
+            "newsflash_id": self.newsflash_id,
+            "timestamp": self.timestamp,
+            "version": self.version,
+            "is_urban": self.is_urban,
+        }
+
+    # Flask-Login integration
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.id
+
+
 class City(Base):
     __tablename__ = "cities"
     id = Column(Integer(), primary_key=True)

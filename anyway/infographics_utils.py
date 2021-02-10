@@ -6,7 +6,7 @@ import os
 from functools import lru_cache
 import enum
 from enum import Enum, auto
-from typing import Optional, Dict, List, Union, Any, Type
+from typing import Optional, Dict, List, Union, Any, Set, Type
 import dataclasses
 from dataclasses import dataclass
 import traceback
@@ -18,7 +18,7 @@ from sqlalchemy import cast, Numeric
 from sqlalchemy import desc
 from flask_babel import _
 from anyway.backend_constants import BE_CONST
-from anyway.models import NewsFlash, AccidentMarkerView, InvolvedMarkerView
+from anyway.models import NewsFlash, AccidentMarkerView, InvolvedMarkerView, NewsflashFeatures
 from anyway.parsers import resolution_dict
 from anyway.app_and_db import db
 from anyway.infographics_dictionaries import (
@@ -28,6 +28,7 @@ from anyway.infographics_dictionaries import (
 )
 from anyway.parsers import infographics_data_cache_updater
 from anyway.constants import CONST
+from anyway.rules.newsflash_feature_generator import NewsflashFeatureGenerator
 
 
 @enum.unique
@@ -64,6 +65,7 @@ class RequestParams:
     """
 
     news_flash_obj: NewsFlash
+    newsflash_featuers: int
     location_text: str
     location_info: Optional[Dict[str, Any]]
     resolution: Dict
@@ -104,7 +106,7 @@ class Widget:
     request_params: RequestParams
     widget_id: WidgetId
     name: str
-    rank: int
+    rank: float
     items: Union[Dict, List]
     text: Dict
     meta: Optional[Dict]
@@ -121,7 +123,7 @@ class Widget:
     def get_name(self) -> str:
         return self.widget_id.name
 
-    def get_rank(self) -> int:
+    def get_rank(self) -> float:
         return self.rank
 
     def get_widget_id(self) -> WidgetId:
@@ -133,9 +135,10 @@ class Widget:
         return True
 
     # noinspection PyMethodMayBeStatic
-    def is_included(self) -> bool:
+    def calc_rank(self, requestParams: RequestParams) -> float:
         """Whether this widget is included in the response"""
-        return True
+        self.rank = 1.0
+        return self.rank
 
     def generate_items(self) -> None:
         """ Generates the data of the widget and set it to self.items"""
@@ -157,18 +160,18 @@ class Widget:
 
 
 class WidgetCollection:
-    widgets: List[Type[Widget]] = []
-
     def __init__(self):
         pass
 
+    widgets: Set[Type[Widget]] = []
+
     @staticmethod
-    def get() -> List[Type[Widget]]:
-        return WidgetCollection.widgets
+    def get_widgets() -> List[Type[Widget]]:
+        return list(WidgetCollection.widgets)  # Return a copy
 
     @staticmethod
     def register(widget_class: Type[Widget]) -> Type[Widget]:
-        WidgetCollection.widgets.append(widget_class)
+        WidgetCollection.widgets.add(widget_class)
         return widget_class
 
 
@@ -1197,6 +1200,15 @@ def extract_news_flash_obj(news_flash_id):
     return news_flash_obj
 
 
+def get_newsflash_features(newsflash_id: int) -> Optional[NewsflashFeatures]:
+    by_id_and_version = [
+        NewsflashFeatures.newsflash_id == newsflash_id,
+        NewsflashFeatures.version == NewsflashFeatureGenerator.VERSION,
+    ]
+    latest = NewsflashFeatures.timestamp.desc()
+    return db.session.query(NewsflashFeatures).filter(by_id_and_version).order_by(latest).first()
+
+
 def sum_road_accidents_by_specific_type(road_data, field_name):
     dict_merge = defaultdict(int)
     dict_merge[field_name] = 0
@@ -1236,18 +1248,23 @@ def get_latest_accident_date(table_obj, filters):
 
 
 def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> List[Widget]:
-    widgets = []
     # for w in WidgetId:
-    for w in WidgetCollection.get():
+    widgets_by_score_and_order = []
+    for i, w_cls in enumerate(WidgetCollection.get_widgets()):
         # widget: Optional[Widget] = create_widget(w, request_params)
-        widget: Optional[Widget] = w(request_params)
+        # TODO this may break - we can't guarantee init signature. Better to use a factory here
+        widget: Optional[Widget] = w_cls(request_params)
         if widget is None:
             logging.error(
-                f"generate_widgets: failed to generate widget for {w} and {request_params}"
+                f"generate_widgets: failed to generate widget for {w_cls} and {request_params}"
             )
-        elif widget.is_in_cache() == to_cache and widget.is_included():
-            widgets.append(widget)
-    return widgets
+        elif widget.is_in_cache() == to_cache:
+            rank = widget.calc_rank(request_params)
+            # Adding the index (i) for strong ordering, because when sorting the tuples, we can't
+            # sort by the third tuple member - Type
+            widgets_by_score_and_order.append((rank, i, widget))
+    widgets_by_score_and_order.sort()
+    return [w[2] for w in widgets_by_score_and_order]  # Extracting only widgets, in order
 
 
 def get_request_params(news_flash_id: int, number_of_years_ago: int, lang: str)\
@@ -1281,9 +1298,11 @@ def get_request_params(news_flash_id: int, number_of_years_ago: int, lang: str)\
     end_time = last_accident_date.to_pydatetime().date()
 
     start_time = datetime.date(end_time.year + 1 - number_of_years_ago, 1, 1)
+    features = get_newsflash_features(news_flash_id)
 
     request_params = RequestParams(
         news_flash_obj=news_flash_obj,
+        newsflash_featuers=features,
         location_text=location_text,
         location_info=location_info,
         resolution=resolution,

@@ -11,6 +11,8 @@ from anyway.parsers.news_flash_classifiers import (
 from anyway.parsers.location_extraction import extract_geo_features
 
 # FIX: classifier should be chosen by source (screen name), so `twitter` should be `mda`
+from anyway.rules.newsflash_feature_generator import NewsflashFeatureGenerator
+
 news_flash_classifiers = {"ynet": classify_rss, "twitter": classify_tweets, "walla": classify_rss}
 
 
@@ -48,7 +50,8 @@ def scrape_extract_store_rss(site_name, db):
         if newsflash.accident:
             # FIX: No accident-accurate date extracted
             extract_geo_features(db, newsflash)
-        db.insert_new_newsflash(newsflash)
+        features = NewsflashFeatureGenerator().generate(newsflash)
+        db.insert_new_newsflash(newsflash, features)
 
 
 def scrape_extract_store_twitter(screen_name, db):
@@ -61,7 +64,8 @@ def scrape_extract_store_twitter(screen_name, db):
         newsflash.organization = classify_organization("twitter")
         if newsflash.accident:
             extract_geo_features(db, newsflash)
-        db.insert_new_newsflash(newsflash)
+        features = NewsflashFeatureGenerator().generate(newsflash)
+        db.insert_new_newsflash(newsflash, features)
 
 
 def scrape_all():

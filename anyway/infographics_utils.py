@@ -416,6 +416,26 @@ class HeadOnCollisionsComparisonWidget(Widget):
                 e["desc"] = _(e["desc"])
         return items
 
+    def is_included(self) -> bool:
+        segment_items = self.items[self.SPECIFIC_ROAD_SUBTITLE]
+        for item in segment_items:
+            if item["desc"] == "frontal":
+                segment_h2h = item["count"]
+            elif item["desc"] == "others":
+                segment_others = item["count"]
+            else:
+                raise ValueError
+        segment_total = segment_h2h + segment_others
+        all_items = self.items[self.ALL_ROADS_SUBTITLE]
+        for item in all_items:
+            if item["desc"] == "frontal":
+                all_h2h = item["count"]
+            elif item["desc"] == "others":
+                all_others = item["count"]
+            else:
+                raise ValueError
+        all_total = all_h2h + all_others
+        return (segment_h2h > 0 and (segment_h2h/segment_total) > all_h2h/all_total)
 
 # adding calls to _() for pybabel extraction
 _("others")
@@ -1550,10 +1570,16 @@ def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> Li
     # noinspection PyArgumentList
     for w in get_widget_factories():
         widget: Widget = w(request_params)
-        if widget.is_in_cache() == to_cache and widget.is_included():
+        if widget.is_in_cache() == to_cache:
             widgets.append(widget)
             logging.debug(f"name:{widget.name}, class:{get_widget_class_by_name(widget.name)}")
-    return widgets
+    for w in widgets:
+        w.generate_items()
+    filtered_widgets = []
+    for w in widgets:
+        if widget.is_included():
+            filtered_widgets.append(widget)
+    return filtered_widgets
 
 
 def get_request_params(

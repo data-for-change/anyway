@@ -390,14 +390,14 @@ class HeadOnCollisionsComparisonWidget(Widget):
             all_roads_data, BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION)
 
         res = {self.SPECIFIC_ROAD_SUBTITLE: [
-            {"desc": english_accident_type_dict[BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION],
+            {"desc": "frontal",
              "count": road_sums["given"]
              },
             {"desc": "others",
              "count": road_sums["others"]}
         ],
             self.ALL_ROADS_SUBTITLE: [
-                {"desc": english_accident_type_dict[BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION], "count": all_roads_sums["given"]},
+                {"desc": "frontal", "count": all_roads_sums["given"]},
                 {"desc": "others", "count": all_roads_sums["others"]}
             ]
         }
@@ -421,6 +421,7 @@ class HeadOnCollisionsComparisonWidget(Widget):
 
 # adding calls to _() for pybabel extraction
 _("others")
+_("frontal")
 
 
 @register

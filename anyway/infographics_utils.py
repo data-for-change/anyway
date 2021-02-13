@@ -1429,9 +1429,7 @@ def get_most_severe_accidents_with_entities(
     filters["accident_severity"] = [BE_CONST.AccidentSeverity.FATAL, BE_CONST.AccidentSeverity.SEVERE]
     query = get_query(table_obj, filters, start_time, end_time)
     query = query.with_entities(*entities)
-    query = query.order_by(
-        getattr(table_obj, "accident_severity"), getattr(table_obj, "accident_timestamp").desc()
-    )
+    query = query.order_by(getattr(table_obj, "accident_timestamp").desc())
     query = query.limit(limit)
     df = pd.read_sql_query(query.statement, query.session.bind)
     df.columns = [c.replace("_hebrew", "") for c in df.columns]

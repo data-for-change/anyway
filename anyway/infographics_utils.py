@@ -602,7 +602,6 @@ class AccidentCountByRoadLightWidget(Widget):
         )
 
 
-@register
 class TopRoadSegmentsAccidentsPerKmWidget(Widget):
     name: str = "top_road_segments_accidents_per_km"
 
@@ -656,7 +655,6 @@ class TopRoadSegmentsAccidentsPerKmWidget(Widget):
         return result.to_dict(orient="records")  # pylint: disable=no-member
 
 
-@register
 class InjuredCountPerAgeGroupWidget(Widget):
     name: str = "injured_count_per_age_group"
 
@@ -1071,7 +1069,6 @@ class AccidentSeverityByCrossLocationWidget(Widget):
         ]
 
 
-@register
 class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
     name: str = "motorcycle_accidents_vs_all_accidents"
 
@@ -1189,7 +1186,6 @@ class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
         ]
 
 
-@register
 class AccidentCountPedestriansPerVehicleStreetVsAllWidget(Widget):
     name: str = "accident_count_pedestrians_per_vehicle_street_vs_all"
 
@@ -1270,7 +1266,6 @@ class PedestrianInjuredInJunctionsWidget(Widget):
         ]
 
 
-@register
 class AccidentTypeVehicleTypeRoadComparisonWidget(Widget):
     name: str = "vehicle_accident_vs_all_accidents"  # WIP: change by vehicle type
     MAX_ACCIDENT_TYPES_TO_RETURN: int = 5

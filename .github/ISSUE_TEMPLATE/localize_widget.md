@@ -28,3 +28,5 @@ Current Widget Title for localization, if exists.
 **Flask Babel**
 For updating messages.pot with all strings for translation - use the following command: `pybabel extract -F babel.cfg -o messages.pot .`
 For updating existing po files with new strings: `pybabel update -i messages.pot -d translations`
+For compiling pybabel mo files use: `pybabel compile -d translations`
+It's important to compile the files for the transations to take place

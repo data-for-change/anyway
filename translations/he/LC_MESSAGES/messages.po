@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-02-05 11:11+0200\n"
+"POT-Creation-Date: 2021-02-13 15:09+0000\n"
 "PO-Revision-Date: 2020-10-16 15:42+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: he\n"
@@ -32,7 +32,7 @@ msgstr "קטלנית"
 
 #: anyway/infographics_dictionaries.py:59
 msgid "severe"
-msgstr "חמורה"
+msgstr "קשה"
 
 #: anyway/infographics_dictionaries.py:60
 msgid "light"
@@ -178,11 +178,11 @@ msgid ""
 "Vehicle, Compared to Urban Accidents Across the country"
 msgstr ""
 
-#: anyway/infographics_utils.py:1442
-msgid "Accidents in descending order by severity for segment"
-msgstr " תאונות בסדר חומרה יורד במקטע"
+#: anyway/infographics_utils.py:1443
+msgid "Most severe accidents in segment"
+msgstr "תאונות חמורות במקטע"
 
-#: anyway/vehicle_type.py:43 anyway/vehicle_type.py:179
+#: anyway/vehicle_type.py:43 anyway/vehicle_type.py:171
 msgid "private car"
 msgstr "רכב נוסעים פרטי"
 
@@ -278,32 +278,32 @@ msgstr "משא 3.6 עד 9.9 טון"
 msgid "truck 10 to 12 tons"
 msgstr "משא 10.0 עד 12.0 טון"
 
-#: anyway/vehicle_type.py:176
+#: anyway/vehicle_type.py:168
 msgid "professional driver"
 msgstr "נהג מקצועי"
 
-#: anyway/vehicle_type.py:177
+#: anyway/vehicle_type.py:169
 #, fuzzy
 msgid "private driver"
 msgstr "נהג רכב פרטי"
 
-#: anyway/vehicle_type.py:178
+#: anyway/vehicle_type.py:170
 msgid "light electric vehicles"
 msgstr "רכבים חשמליים קלים"
 
-#: anyway/vehicle_type.py:180
+#: anyway/vehicle_type.py:172
 msgid "large vehicle"
 msgstr "מסחרי/משאית"
 
-#: anyway/vehicle_type.py:181
+#: anyway/vehicle_type.py:173
 msgid "motorcycle"
 msgstr "אופנוע"
 
-#: anyway/vehicle_type.py:182
+#: anyway/vehicle_type.py:174
 msgid "bicycle and small motor vehicles"
 msgstr "אופניים/קורקינט"
 
-#: anyway/vehicle_type.py:183
+#: anyway/vehicle_type.py:175
 msgid "other"
 msgstr "אחרות"
 

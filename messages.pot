@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-02-05 11:11+0200\n"
+"POT-Creation-Date: 2021-02-13 15:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -177,11 +177,11 @@ msgid ""
 "Vehicle, Compared to Urban Accidents Across the country"
 msgstr ""
 
-#: anyway/infographics_utils.py:1442
-msgid "Accidents in descending order by severity for segment"
+#: anyway/infographics_utils.py:1443
+msgid "Most severe accidents in segment"
 msgstr ""
 
-#: anyway/vehicle_type.py:43 anyway/vehicle_type.py:179
+#: anyway/vehicle_type.py:43 anyway/vehicle_type.py:171
 msgid "private car"
 msgstr ""
 
@@ -277,31 +277,31 @@ msgstr ""
 msgid "truck 10 to 12 tons"
 msgstr ""
 
-#: anyway/vehicle_type.py:176
+#: anyway/vehicle_type.py:168
 msgid "professional driver"
 msgstr ""
 
-#: anyway/vehicle_type.py:177
+#: anyway/vehicle_type.py:169
 msgid "private driver"
 msgstr ""
 
-#: anyway/vehicle_type.py:178
+#: anyway/vehicle_type.py:170
 msgid "light electric vehicles"
 msgstr ""
 
-#: anyway/vehicle_type.py:180
+#: anyway/vehicle_type.py:172
 msgid "large vehicle"
 msgstr ""
 
-#: anyway/vehicle_type.py:181
+#: anyway/vehicle_type.py:173
 msgid "motorcycle"
 msgstr ""
 
-#: anyway/vehicle_type.py:182
+#: anyway/vehicle_type.py:174
 msgid "bicycle and small motor vehicles"
 msgstr ""
 
-#: anyway/vehicle_type.py:183
+#: anyway/vehicle_type.py:175
 msgid "other"
 msgstr ""
 

@@ -1440,7 +1440,7 @@ def get_most_severe_accidents_with_entities(
 
 def get_most_severe_accidents_table_title(location_info):
     return (
-        _("Accidents in descending order by severity for segment")
+        _("Most severe accidents in segment")
         + " "
         + segment_dictionary[location_info["road_segment_name"]]
     )

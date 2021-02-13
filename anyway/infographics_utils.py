@@ -26,6 +26,7 @@ from anyway.infographics_dictionaries import (
     english_accident_type_dict,
     segment_dictionary,
     english_injury_severity_dict,
+    hebrew_accident_severity_dict
 )
 from anyway.parsers import infographics_data_cache_updater
 from anyway.utilities import parse_age_from_range
@@ -301,17 +302,18 @@ class MostSevereAccidentsWidget(Widget):
             "accident_timestamp",
             "accident_type",
         )
-        return get_most_severe_accidents_with_entities(
+
+        items = get_most_severe_accidents_with_entities(
             table_obj, filters, entities, start_time, end_time, limit
         )
+        for item in items:
+            item["accident_severity"] = hebrew_accident_severity_dict[item["accident_severity"]]
+        return items
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         for item in items["data"]["items"]:
             try:
-                item["accident_severity"] = _(
-                    english_accident_severity_dict[item["accident_severity"]]
-                )
                 item["accident_type"] = _(english_accident_type_dict[item["accident_type"]])
             except KeyError:
                 logging.exception(

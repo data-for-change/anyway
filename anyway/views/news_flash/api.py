@@ -64,7 +64,7 @@ def news_flash():
     if road_number:
         news_flash_obj = news_flash_obj.filter(NewsFlash.road1 == road_number)
     if road_segment == "true":
-        news_flash_obj = news_flash_obj.filter(not_(NewsFlash.road_segment_name is None))
+        news_flash_obj = news_flash_obj.filter(not_(NewsFlash.road_segment_name == None))
     news_flash_obj = news_flash_obj.filter(
         and_(
             NewsFlash.accident == True,

@@ -3,6 +3,7 @@ import logging
 import datetime
 import json
 import os
+import copy
 from functools import lru_cache
 from typing import Optional, Dict, List, Union, Any, Type, Callable
 from dataclasses import dataclass
@@ -487,7 +488,7 @@ class AccidentsHeatMapWidget(Widget):
         self.rank = 7
 
     def generate_items(self) -> None:
-        accidents_heat_map_filters = self.request_params.location_info.copy()
+        accidents_heat_map_filters = copy.deepcopy(self.request_params.location_info)
         accidents_heat_map_filters["accident_severity"] = [
             BE_CONST.AccidentSeverity.FATAL,
             BE_CONST.AccidentSeverity.SEVERE,
@@ -500,7 +501,8 @@ class AccidentsHeatMapWidget(Widget):
 
     @staticmethod
     def get_accidents_heat_map(filters, start_time, end_time):
-        filters = filters or {}
+        if filters:
+            filters = copy.deepcopy(filters)
         filters["provider_code"] = [
             BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
             BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
@@ -1394,6 +1396,7 @@ def get_query(table_obj, filters, start_time, end_time):
     if end_time:
         query = query.filter(getattr(table_obj, "accident_timestamp") <= end_time)
     if filters:
+        filters = copy.deepcopy(filters)
         for field_name, value in filters.items():
             if isinstance(value, list):
                 values = value
@@ -1404,9 +1407,10 @@ def get_query(table_obj, filters, start_time, end_time):
 
 
 def get_accidents_stats(
-    table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None
+    table_obj, filters={}, group_by=None, count=None, start_time=None, end_time=None
 ):
-    filters = filters or {}
+    if filters:
+        filters = copy.deepcopy(filters)
     filters["provider_code"] = [
         BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
         BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
@@ -1432,14 +1436,15 @@ def get_injured_filters(location_info):
             new_filters[new_filter_name] = curr_values
         else:
             new_filters[curr_filter] = curr_values
-    new_filters["injury_severity"] = [1, 2, 3, 4, 5]
+    new_filters["injury_severity"] = [1, 2, 3]
     return new_filters
 
 
 def get_most_severe_accidents_with_entities(
     table_obj, filters, entities, start_time, end_time, limit=10
 ):
-    filters = filters or {}
+    if filters:
+        filters = copy.deepcopy(filters)
     filters["provider_code"] = [
         BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
         BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
@@ -1552,7 +1557,8 @@ def convert_roads_fatal_accidents_to_frontend_view(data_dict):
 
 # gets the latest date an accident has occured
 def get_latest_accident_date(table_obj, filters):
-    filters = filters or {}
+    if filters:
+        filters = copy.deepcopy(filters)
     filters["provider_code"] = [
         BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
         BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
@@ -1606,7 +1612,7 @@ def get_request_params(
     if all(value is None for value in location_info.values()):
         return None
 
-    last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
+    last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters={})
     # converting to datetime object to get the date
     end_time = last_accident_date.to_pydatetime().date()
 

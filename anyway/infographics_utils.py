@@ -26,6 +26,7 @@ from anyway.infographics_dictionaries import (
     english_accident_type_dict,
     segment_dictionary,
     english_injury_severity_dict,
+    hebrew_accident_severity_dict
 )
 from anyway.parsers import infographics_data_cache_updater
 from anyway.utilities import parse_age_from_range
@@ -301,17 +302,18 @@ class MostSevereAccidentsWidget(Widget):
             "accident_timestamp",
             "accident_type",
         )
-        return get_most_severe_accidents_with_entities(
+
+        items = get_most_severe_accidents_with_entities(
             table_obj, filters, entities, start_time, end_time, limit
         )
+        for item in items:
+            item["accident_severity"] = hebrew_accident_severity_dict[item["accident_severity"]]
+        return items
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         for item in items["data"]["items"]:
             try:
-                item["accident_severity"] = _(
-                    english_accident_severity_dict[item["accident_severity"]]
-                )
                 item["accident_type"] = _(english_accident_type_dict[item["accident_type"]])
             except KeyError:
                 logging.exception(
@@ -388,14 +390,14 @@ class HeadOnCollisionsComparisonWidget(Widget):
             all_roads_data, BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION)
 
         res = {self.SPECIFIC_ROAD_SUBTITLE: [
-            {"desc": english_accident_type_dict[BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION],
+            {"desc": "frontal",
              "count": road_sums["given"]
              },
             {"desc": "others",
              "count": road_sums["others"]}
         ],
             self.ALL_ROADS_SUBTITLE: [
-                {"desc": english_accident_type_dict[BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION], "count": all_roads_sums["given"]},
+                {"desc": "frontal", "count": all_roads_sums["given"]},
                 {"desc": "others", "count": all_roads_sums["others"]}
             ]
         }
@@ -439,6 +441,7 @@ class HeadOnCollisionsComparisonWidget(Widget):
 
 # adding calls to _() for pybabel extraction
 _("others")
+_("frontal")
 
 
 @register
@@ -622,7 +625,6 @@ class AccidentCountByRoadLightWidget(Widget):
         )
 
 
-@register
 class TopRoadSegmentsAccidentsPerKmWidget(Widget):
     name: str = "top_road_segments_accidents_per_km"
 
@@ -676,7 +678,6 @@ class TopRoadSegmentsAccidentsPerKmWidget(Widget):
         return result.to_dict(orient="records")  # pylint: disable=no-member
 
 
-@register
 class InjuredCountPerAgeGroupWidget(Widget):
     name: str = "injured_count_per_age_group"
 
@@ -1091,7 +1092,6 @@ class AccidentSeverityByCrossLocationWidget(Widget):
         ]
 
 
-@register
 class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
     name: str = "motorcycle_accidents_vs_all_accidents"
 
@@ -1209,7 +1209,6 @@ class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
         ]
 
 
-@register
 class AccidentCountPedestriansPerVehicleStreetVsAllWidget(Widget):
     name: str = "accident_count_pedestrians_per_vehicle_street_vs_all"
 
@@ -1290,7 +1289,6 @@ class PedestrianInjuredInJunctionsWidget(Widget):
         ]
 
 
-@register
 class AccidentTypeVehicleTypeRoadComparisonWidget(Widget):
     name: str = "vehicle_accident_vs_all_accidents"  # WIP: change by vehicle type
     MAX_ACCIDENT_TYPES_TO_RETURN: int = 5
@@ -1446,11 +1444,10 @@ def get_most_severe_accidents_with_entities(
         BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
         BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
     ]
+    filters["accident_severity"] = [BE_CONST.AccidentSeverity.FATAL, BE_CONST.AccidentSeverity.SEVERE]
     query = get_query(table_obj, filters, start_time, end_time)
     query = query.with_entities(*entities)
-    query = query.order_by(
-        getattr(table_obj, "accident_severity"), getattr(table_obj, "accident_timestamp").desc()
-    )
+    query = query.order_by(getattr(table_obj, "accident_timestamp").desc())
     query = query.limit(limit)
     df = pd.read_sql_query(query.statement, query.session.bind)
     df.columns = [c.replace("_hebrew", "") for c in df.columns]
@@ -1459,7 +1456,7 @@ def get_most_severe_accidents_with_entities(
 
 def get_most_severe_accidents_table_title(location_info):
     return (
-        _("Accidents in descending order by severity for segment")
+        _("Most severe accidents in segment")
         + " "
         + segment_dictionary[location_info["road_segment_name"]]
     )

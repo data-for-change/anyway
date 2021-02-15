@@ -18,6 +18,12 @@ english_accident_severity_dict = {
     BE_CONST.AccidentSeverity.LIGHT: "light",
 }
 
+hebrew_accident_severity_dict = {
+    BE_CONST.AccidentSeverity.FATAL: "קטלנית",
+    BE_CONST.AccidentSeverity.SEVERE: "קשה",
+    BE_CONST.AccidentSeverity.LIGHT: "קלה",
+}
+
 english_accident_type_dict = {
     BE_CONST.AccidentType.PEDESTRIAN_INJURY: "Pedestrian injury",
     BE_CONST.AccidentType.COLLISION_OF_FRONT_TO_SIDE: "Collision of front to side",

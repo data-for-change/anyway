@@ -18,6 +18,12 @@ english_accident_severity_dict = {
     BE_CONST.AccidentSeverity.LIGHT: "light",
 }
 
+hebrew_accident_severity_dict = {
+    BE_CONST.AccidentSeverity.FATAL: "קטלנית",
+    BE_CONST.AccidentSeverity.SEVERE: "קשה",
+    BE_CONST.AccidentSeverity.LIGHT: "קלה",
+}
+
 english_accident_type_dict = {
     BE_CONST.AccidentType.PEDESTRIAN_INJURY: "Pedestrian injury",
     BE_CONST.AccidentType.COLLISION_OF_FRONT_TO_SIDE: "Collision of front to side",
@@ -54,7 +60,7 @@ class smart_dict(dict):
 
 segment_dictionary = smart_dict()
 
-# bogus calls to gettext to get pybabel extract to recofnize the strings
+# bogus calls to gettext to get pybabel extract to recognize the strings
 _("fatal")
 _("severe")
 _("light")

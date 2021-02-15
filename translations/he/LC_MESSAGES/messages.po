@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-01-07 21:18+0200\n"
+"POT-Creation-Date: 2021-02-13 16:05+0000\n"
 "PO-Revision-Date: 2020-10-16 15:42+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: he\n"
@@ -16,7 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.8.0\n"
+"Generated-By: Babel 2.9.0\n"
 
 #: anyway/flask_app.py:709 anyway/flask_app.py:816
 msgid "Discussion not found:"
@@ -26,159 +26,290 @@ msgstr ""
 msgid "Illegal Discussion"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:58
+#: anyway/infographics_dictionaries.py:64
 msgid "fatal"
 msgstr "קטלנית"
 
-#: anyway/infographics_dictionaries.py:59
+#: anyway/infographics_dictionaries.py:65
 msgid "severe"
-msgstr "חמורה"
+msgstr "קשה"
 
-#: anyway/infographics_dictionaries.py:60
+#: anyway/infographics_dictionaries.py:66
 msgid "light"
 msgstr "קלה"
 
-#: anyway/infographics_dictionaries.py:62
+#: anyway/infographics_dictionaries.py:68
 msgid "Pedestrian injury"
 msgstr "פגיעה בהולך רגל"
 
-#: anyway/infographics_dictionaries.py:63
+#: anyway/infographics_dictionaries.py:69
 msgid "Collision of front to side"
 msgstr "התנגשות חזית אל צד"
 
-#: anyway/infographics_dictionaries.py:64
+#: anyway/infographics_dictionaries.py:70
 msgid "Collision of front to rear-end"
 msgstr "התנגשות חזית באחור"
 
-#: anyway/infographics_dictionaries.py:65
+#: anyway/infographics_dictionaries.py:71
 msgid "Collision of side to side (lateral)"
 msgstr "התנגשות צד בצד"
 
-#: anyway/infographics_dictionaries.py:66
+#: anyway/infographics_dictionaries.py:72
 msgid "Head-on frontal collision"
 msgstr "התנגשות חזית בחזית"
 
-#: anyway/infographics_dictionaries.py:67
+#: anyway/infographics_dictionaries.py:73
 msgid "Collision with a stopped non-parked vehicle"
 msgstr "התנגשות עם רכב שנעצר ללא חניה"
 
-#: anyway/infographics_dictionaries.py:68
+#: anyway/infographics_dictionaries.py:74
 msgid "Collision with a parked vehicle"
 msgstr "התנגשות עם רכב חונה"
 
-#: anyway/infographics_dictionaries.py:69
+#: anyway/infographics_dictionaries.py:75
 msgid "Collision with an inanimate object"
 msgstr "התנגשות עם עצם דומם"
 
-#: anyway/infographics_dictionaries.py:70
+#: anyway/infographics_dictionaries.py:76
 msgid "Swerving off the road or onto the pavement"
 msgstr "ירידה מהכביש או עלייה למדרכה"
 
-#: anyway/infographics_dictionaries.py:71
+#: anyway/infographics_dictionaries.py:77
 msgid "Overturned vehicle"
 msgstr "התהפכות"
 
-#: anyway/infographics_dictionaries.py:72
+#: anyway/infographics_dictionaries.py:78
 msgid "Skid"
 msgstr "החלקה"
 
-#: anyway/infographics_dictionaries.py:73
+#: anyway/infographics_dictionaries.py:79
 msgid "Injury of a passenger in a vehicle"
 msgstr "פגיעה בנוסע בתוך כלי הרכב"
 
-#: anyway/infographics_dictionaries.py:74
+#: anyway/infographics_dictionaries.py:80
 msgid "A fall from a moving vehicle"
 msgstr "נפילה מרכב נע"
 
-#: anyway/infographics_dictionaries.py:75
+#: anyway/infographics_dictionaries.py:81
 msgid "Fire"
 msgstr "שריפה"
 
-#: anyway/infographics_dictionaries.py:76
+#: anyway/infographics_dictionaries.py:82
 msgid "Other"
 msgstr "אחר"
 
-#: anyway/infographics_dictionaries.py:77
+#: anyway/infographics_dictionaries.py:83
 msgid "Collision of rear-end to front"
 msgstr "התנגשות אחור אל חזית"
 
-#: anyway/infographics_dictionaries.py:78
+#: anyway/infographics_dictionaries.py:84
 msgid "Collision of rear-end to side"
 msgstr "התנגשות אחור אל צד"
 
-#: anyway/infographics_dictionaries.py:79
+#: anyway/infographics_dictionaries.py:85
 msgid "Collision with an animal"
 msgstr "התנגשות עם בעל חיים"
 
-#: anyway/infographics_dictionaries.py:80
+#: anyway/infographics_dictionaries.py:86
 msgid "Damage caused by a falling load off a vehicle"
 msgstr "פגיעה ממטען של רכב"
 
-#: anyway/infographics_dictionaries.py:82
+#: anyway/infographics_dictionaries.py:88
 msgid "professional_driver"
 msgstr "נהג מקצועי"
 
-#: anyway/infographics_dictionaries.py:83
+#: anyway/infographics_dictionaries.py:89
 msgid "private_vehicle_driver"
 msgstr "נהג רכב פרטי"
 
-#: anyway/infographics_dictionaries.py:84
+#: anyway/infographics_dictionaries.py:90
 msgid "other_driver"
 msgstr "אחר"
 
-#: anyway/infographics_utils.py:266 anyway/infographics_utils.py:311
+#: anyway/infographics_utils.py:268
 msgid "accident_severity"
 msgstr "חומרת תאונה"
 
-#: anyway/infographics_utils.py:267
+#: anyway/infographics_utils.py:269
 msgid "type"
 msgstr "סוג"
 
-#: anyway/infographics_utils.py:314 anyway/infographics_utils.py:1295
+#: anyway/infographics_utils.py:317 anyway/infographics_utils.py:1340
 msgid "accident_type"
 msgstr "סוג תאונה"
 
-#: anyway/infographics_utils.py:427
+#: anyway/infographics_utils.py:415
 msgid "fatal accidents by type"
 msgstr "תאונות קטלניות לפי סוג"
 
-#: anyway/infographics_utils.py:717
-msgid "Injury severity per age group in "
-msgstr "חומרת פגיעה פר גיל בכביש "
-
-#: anyway/infographics_utils.py:431
+#: anyway/infographics_utils.py:418
 msgid "desc"
 msgstr "תאור"
 
-#: anyway/infographics_utils.py:439
+#: anyway/infographics_utils.py:423
 msgid "others"
 msgstr "אחרות"
 
-#: anyway/infographics_utils.py:440
-msgid "all_roads_fatal_accidents"
-msgstr "תאונות קטלניות בכל הארץ"
+#: anyway/infographics_utils.py:424
+msgid "frontal"
+msgstr "חזיתיות"
 
-#: anyway/infographics_utils.py:441
-msgid "specific_road_segment_fatal_accidents"
-msgstr "תאונות קטלניות בקטע הזה"
+#: anyway/infographics_utils.py:496
+msgid "Fatal and severe accidents heat map"
+msgstr "מוקדי תאונות קטלניות וקשות במקטע"
 
-#: anyway/infographics_utils.py:784
+#: anyway/infographics_utils.py:744
+msgid "Injury severity per age group in "
+msgstr "חומרת פגיעה פר גיל בכביש "
+
+#: anyway/infographics_utils.py:821
 msgid "driver_type"
 msgstr "סוג נהג"
 
-#: anyway/infographics_utils.py:817
+#: anyway/infographics_utils.py:827
 msgid "accident count by driver type "
 msgstr "מעורבות נהגים בתאונות לפי סוג במקטע "
 
-#: anyway/infographics_utils.py:1183
+#: anyway/infographics_utils.py:936
+msgid ""
+"comparing vehicle type percentage in accidents in {} relative to national"
+" average"
+msgstr "השוואת אחוז הרכבים בתאונות במקטע {} לעומת ממוצע ארצי"
+
+#: anyway/infographics_utils.py:1199
 msgid ""
 "Pedestrian Injuries on Ben Yehuda Street in Tel Aviv by Type of hitting "
 "Vehicle, Compared to Urban Accidents Across the country"
 msgstr ""
 
-#: anyway/infographics_utils.py:1342
-msgid "Accidents in descending order by severity for segment"
-msgstr " תאונות בסדר חומרה יורד במקטע"
+#: anyway/infographics_utils.py:1439
+msgid "Most severe accidents in segment"
+msgstr "תאונות חמורות במקטע"
+
+#: anyway/vehicle_type.py:43 anyway/vehicle_type.py:171
+msgid "private car"
+msgstr "רכב נוסעים פרטי"
+
+#: anyway/vehicle_type.py:44
+msgid "truck upto 4 tons"
+msgstr "משא עד 4 טון - אחוד (טרנזיט)"
+
+#: anyway/vehicle_type.py:45
+msgid "pickup upto 4 tons"
+msgstr "משא עד 4 טון - לא אחוד (טנדר)"
+
+#: anyway/vehicle_type.py:46
+msgid "truck 4 to 10 tons"
+msgstr "משא 4.1 עד 9.9 טון"
+
+#: anyway/vehicle_type.py:47
+msgid "truck 12 to 16 tons"
+msgstr "משא 10.0 עד 15.9 טון"
+
+#: anyway/vehicle_type.py:48
+msgid "truck 16 to 34 tons"
+msgstr "משא 16.0 עד 33.9 טון"
+
+#: anyway/vehicle_type.py:49
+msgid "truck above 34 tons"
+msgstr "משא 34.0+ טון"
+
+#: anyway/vehicle_type.py:50
+msgid "motorcycle upto 50 cc"
+msgstr "אופנוע עד 50 סמ\"ק"
+
+#: anyway/vehicle_type.py:51
+msgid "motorcycle 50 to 250 cc"
+msgstr "אופנוע 51 עד 250 סמ\"ק"
+
+#: anyway/vehicle_type.py:52
+msgid "motorcycle 250 to 500 cc"
+msgstr "אופנוע 251 עד 500 סמ\"ק"
+
+#: anyway/vehicle_type.py:53
+msgid "bus"
+msgstr "אוטובוס"
+
+#: anyway/vehicle_type.py:54
+msgid "taxi"
+msgstr "מונית"
+
+#: anyway/vehicle_type.py:55
+msgid "work vehicle"
+msgstr "רכב עבודה"
+
+#: anyway/vehicle_type.py:56
+msgid "tractor"
+msgstr "טרקטור"
+
+#: anyway/vehicle_type.py:57
+msgid "bike"
+msgstr "אופניים"
+
+#: anyway/vehicle_type.py:58
+msgid "train"
+msgstr "רכבת"
+
+#: anyway/vehicle_type.py:59
+msgid "other and unknown"
+msgstr "אחר ולא ידוע"
+
+#: anyway/vehicle_type.py:60
+msgid "minibus"
+msgstr "אוטובוס זעיר"
+
+#: anyway/vehicle_type.py:61
+msgid "motorcycle above 500 cc"
+msgstr "אופנוע 501+ סמ\"ק"
+
+#: anyway/vehicle_type.py:62
+msgid "electric scooter"
+msgstr "קורקינט חשמלי"
+
+#: anyway/vehicle_type.py:63
+msgid "mobility scooter"
+msgstr "קלנועית חשמלית"
+
+#: anyway/vehicle_type.py:64
+msgid "electric bike"
+msgstr "אופניים חשמליים"
+
+#: anyway/vehicle_type.py:65
+msgid "truck 3.5 to 10 tons"
+msgstr "משא 3.6 עד 9.9 טון"
+
+#: anyway/vehicle_type.py:66
+msgid "truck 10 to 12 tons"
+msgstr "משא 10.0 עד 12.0 טון"
+
+#: anyway/vehicle_type.py:168
+msgid "professional driver"
+msgstr "נהג מקצועי"
+
+#: anyway/vehicle_type.py:169
+#, fuzzy
+msgid "private driver"
+msgstr "נהג רכב פרטי"
+
+#: anyway/vehicle_type.py:170
+msgid "light electric vehicles"
+msgstr "רכבים חשמליים קלים"
+
+#: anyway/vehicle_type.py:172
+msgid "large vehicle"
+msgstr "מסחרי/משאית"
+
+#: anyway/vehicle_type.py:173
+msgid "motorcycle"
+msgstr "אופנוע"
+
+#: anyway/vehicle_type.py:174
+msgid "bicycle and small motor vehicles"
+msgstr "אופניים/קורקינט"
+
+#: anyway/vehicle_type.py:175
+msgid "other"
+msgstr "אחרות"
 
 #: templates/index.html:4 templates/index.html:10
 msgid "ANYWAY - Making a difference in any way"
@@ -220,4 +351,13 @@ msgstr ""
 
 #~ msgid "unknown"
 #~ msgstr "לא ידוע"
+
+#~ msgid "all_roads_fatal_accidents"
+#~ msgstr "תאונות קטלניות בכל הארץ"
+
+#~ msgid "specific_road_segment_fatal_accidents"
+#~ msgstr "תאונות קטלניות בקטע הזה"
+
+#~ msgid "car_type"
+#~ msgstr "סוג"
 

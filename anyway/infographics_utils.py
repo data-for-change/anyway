@@ -1574,8 +1574,8 @@ def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> Li
         w.generate_items()
     filtered_widgets = []
     for w in widgets:
-        if widget.is_included():
-            filtered_widgets.append(widget)
+        if w.is_included():
+            filtered_widgets.append(w)
     return filtered_widgets
 
 

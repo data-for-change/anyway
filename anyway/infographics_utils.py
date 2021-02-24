@@ -1510,15 +1510,16 @@ def extract_news_flash_obj(news_flash_id):
 
 
 def get_newsflash_features(newsflash_id: int) -> Optional[NewsflashFeatures]:
-    by_id_and_version = [
+    by_newsflash_id_and_current_version = [
         NewsflashFeatures.newsflash_id == newsflash_id,
         NewsflashFeatures.version == NewsflashFeatureGenerator.VERSION,
     ]
     latest = NewsflashFeatures.timestamp.desc()
-    t = db.session.query(NewsflashFeatures)
-    f = t.filter(*by_id_and_version)
-    o = f.order_by(latest)
-    return o.first()
+
+    return (db.session.
+            query(NewsflashFeatures).
+            filter(*by_newsflash_id_and_current_version).
+            order_by(latest)).first()
 
 
 def sum_road_accidents_by_specific_type(road_data, field_name):

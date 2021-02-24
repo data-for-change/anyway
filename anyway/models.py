@@ -819,7 +819,7 @@ class Involved(Base):
 
 class NewsFlash(Base):
     __tablename__ = "news_flash"
-    id = Column(BigInteger(), primary_key=True)
+    id = Column(BigInteger(), primary_key=True, unique=True)
     accident = Column(Boolean(), nullable=False)
     author = Column(Text(), nullable=True)
     date = Column(TIMESTAMP(), nullable=True)
@@ -889,7 +889,7 @@ class NewsflashFeatures(Base):
     __tablename__ = "newsflash_features"
 
     id = Column(BigInteger(), primary_key=True)
-    newsflash_id = Column(BigInteger(), ForeignKey('news_flash.id'))
+    newsflash_id = Column(BigInteger(), ForeignKey(NewsFlash.id))
 
     """ 
     version is the feature calculation version number. Can be used to compare results between veresions, and

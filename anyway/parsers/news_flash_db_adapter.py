@@ -61,12 +61,11 @@ class DBAdapter:
         )
         self.commit()
 
-    def insert_new_newsflash(self, newsflash: NewsFlash, features: NewsflashFeatures) -> None:
+    def insert_new_newsflash(self, newsflash: NewsFlash) -> None:
         logging.info("Adding newsflash, is accident: {}, date: {}"
                      .format(newsflash.accident, newsflash.date))
         with self.db.session as s:
             s.add(newsflash)
-            s.add(features)
             s.commit()
         infographics_data_cache_updater.add_news_flash_to_cache(newsflash)
 

@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
+from typing import Dict
 from sqlalchemy import not_
 from anyway.models import InfographicsDataCache, InfographicsDataCacheTemp, NewsFlash, NewsflashFeatures
 from anyway.constants import CONST
 from anyway.app_and_db import db
 import anyway.infographics_utils
 import logging
+import json
 
 
 def is_cache_eligible(news_flash):
@@ -55,7 +57,7 @@ def add_news_flash_to_cache(news_flash: NewsFlash):
         return False
 
 
-def get_infographics_data_from_cache(news_flash_id, years_ago):
+def get_infographics_data_from_cache(news_flash_id, years_ago) -> Dict:
     db_item = (
         db.session.query(InfographicsDataCache)
         .filter(InfographicsDataCache.news_flash_id == news_flash_id)
@@ -65,7 +67,10 @@ def get_infographics_data_from_cache(news_flash_id, years_ago):
     logging.debug(f"retrieved from cache {type(db_item)}:{db_item}"[:70])
     db.session.commit()
     try:
-        return db_item.get_data() if db_item else {}
+        if db_item:
+            return json.loads(db_item.get_data())
+        else:
+            return {}
     except Exception as e:
         logging.error(
             f"Exception while extracting data from returned cache item flash_id:{news_flash_id},years:{years_ago})"
@@ -151,3 +156,5 @@ def main(update, info):
         logging.info("Refreshing infographics cache Done")
     if info:
         logging.info(get_cache_info())
+    else:
+        logging.debug(f"{info}")

@@ -7,6 +7,7 @@ from anyway import app as flask_app
 from jsonschema import validate
 from anyway.app_and_db import db
 from anyway.infographics_utils import AccidentCountByCarTypeWidget
+from anyway.vehicle_type import VehicleCategory
 
 
 def insert_infographic_mock_data(app):
@@ -73,6 +74,13 @@ class Test_Infographic_Api:
 
         assert rv.status_code == http_client.BAD_REQUEST
 
+    def test_limit(self, app):
+        """Should process the limit parameter successfully"""
+        insert_infographic_mock_data(app)
+        rv = app.get("/api/news-flash?limit=1")
+        assert len(rv.get_json()) == 1
+        assert rv.status_code == http_client.OK
+
     def test_bad_news_flash_id(self, app):
         """Should success and be empty when bad news flash id"""
         rv = app.get("/api/infographics-data?news_flash_id=-1")
@@ -84,9 +92,9 @@ class Test_Infographic_Api:
          {"involve_vehicle_type": 15, "count": 1}]
         output_tmp = AccidentCountByCarTypeWidget.percentage_accidents_by_car_type(test_involved_by_vehicle_type_data)
         assert len(output_tmp) == 3
-        assert output_tmp["רכב פרטי"] == 50
-        assert output_tmp["מסחרי/משאית"] == pytest.approx(33.333333333333336)
-        assert output_tmp["אופניים/קורקינט"] == pytest.approx(16.666666666666668)
+        assert output_tmp[VehicleCategory.CAR.value] == 50
+        assert output_tmp[VehicleCategory.LARGE.value] == pytest.approx(33.333333333333336)
+        assert output_tmp[VehicleCategory.BICYCLE_AND_SMALL_MOTOR.value] == pytest.approx(16.666666666666668)
 
         def mock_get_accidents_stats(table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None):
             return [{'involve_vehicle_type': nan, 'count': 2329}, {'involve_vehicle_type': 14.0, 'count': 112},
@@ -110,6 +118,7 @@ class Test_Infographic_Api:
         start_time = datetime.date(2020, 1, 1)
         request_params = infographics_utils.RequestParams(
             news_flash_obj=None,
+            years_ago=1,
             location_text='',
             location_info=None,
             resolution={},
@@ -121,19 +130,19 @@ class Test_Infographic_Api:
         actual = AccidentCountByCarTypeWidget.get_stats_accidents_by_car_type_with_national_data(
             request_params,
             involved_by_vehicle_type_data=involved_by_vehicle_type_data_test)
-        expected = [{'car_type': 'אחר',
+        expected = [{'car_type': VehicleCategory.OTHER.value,
                   'percentage_country': 9.84470391606119,
                   'percentage_segment': 0.0},
-                 {'car_type': 'מסחרי/משאית',
+                 {'car_type': VehicleCategory.LARGE.value,
                   'percentage_country': 12.641890480280415,
                   'percentage_segment': 0.0},
-                 {'car_type': 'רכב פרטי',
+                 {'car_type': VehicleCategory.CAR.value,
                   'percentage_country': 68.45562803221988,
                   'percentage_segment': 100.0},
-                 {'car_type': 'אופנוע',
+                 {'car_type': VehicleCategory.MOTORCYCLE.value,
                   'percentage_country': 6.262912323870099,
                   'percentage_segment': 0.0},
-                 {'car_type': 'אופניים/קורקינט',
+                 {'car_type': VehicleCategory.BICYCLE_AND_SMALL_MOTOR.value,
                   'percentage_country': 2.794865247568421,
                   'percentage_segment': 0.0}]
 

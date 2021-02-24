@@ -163,7 +163,7 @@ class WidgetCollection:
     def __init__(self):
         pass
 
-    widgets: Set[Type[Widget]] = []
+    widgets: Set[Type[Widget]] = set()
 
     @staticmethod
     def get_widgets() -> List[Type[Widget]]:

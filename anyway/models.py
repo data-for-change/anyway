@@ -894,7 +894,7 @@ class NewsflashFeatures(Base):
 
     is_urban = Column(Boolean())
 
-    def seriazlize(self):
+    def serialize(self):
         return {
             "id": self.id,
             "newsflash_id": self.newsflash_id,

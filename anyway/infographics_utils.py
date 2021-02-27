@@ -1424,14 +1424,12 @@ class PedestriansAccidentsInStreetVsCity(Widget):
                 street_sum_other += record[STREET_COUNT]
                 city_sum_other += record[CITY_COUNT]
 
-        LIGHT_TITLE = "קלה"
-        SEVERE_TITLE = "קשה וקטלנית"
-        return {STREET_SUBTITLE: [
-            {"desc": LIGHT_TITLE,
-             "count": street_sum_light
-             },
-            {"desc": SEVERE_TITLE,
-             "count": street_sum_other}
+        LIGHT_TITLE = hebrew_accident_severity_dict[BE_CONST.AccidentSeverity.LIGHT]
+        SEVERE_TITLE = f"{hebrew_accident_severity_dict[BE_CONST.AccidentSeverity.SEVERE]} ו{hebrew_accident_severity_dict[BE_CONST.AccidentSeverity.FATAL]}"
+        return {
+            STREET_SUBTITLE: [
+                {"desc": LIGHT_TITLE, "count": street_sum_light},
+                {"desc": SEVERE_TITLE,"count": street_sum_other}
         ],
             CITY_SUBTITLE: [
                 {"desc": LIGHT_TITLE, "count": city_sum_light},

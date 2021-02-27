@@ -1369,13 +1369,88 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(Widget):
         return items
 
 
+@register
+class PedestriansAccidentsInStreetVsCity(Widget):
+    name: str = "total_accidents_involving_Pedestrians_by_accident_severity_street_vs_city"
+
+    def __init__(self, request_params: RequestParams):
+        super().__init__(request_params, type(self).name)
+        self.rank = 3
+
+    @staticmethod
+    def is_urban() -> bool:
+        return True
+
+    def generate_items(self) -> None:
+        street = self.request_params.location_info["street1_hebrew"]
+        yishuv = self.request_params.location_info["yishuv_name"]
+        self.text = {"title": f"השוואת מספר התאונות עם הולך רגל לפי חומרה - רחוב {street} בהשוואה לעיר {yishuv}"}
+        self.items = (
+            PedestriansAccidentsInStreetVsCity.injured_accidents_with_pedestrians(
+                self.request_params.start_time, self.request_params.end_time,
+                street,
+                yishuv)
+            )
+
+    @staticmethod
+    def injured_accidents_with_pedestrians(start_time: datetime.date, end_time: datetime.date,
+                                           street: str, yishuv: str) -> Dict:
+        STREET_SUBTITLE = f"תאונות הולכי רגל ברחוב {street}"
+        CITY_SUBTITLE = f"תאונות הולכי רגל בעיר {yishuv}"
+        STREET_COUNT = "total_street_accidents"
+        CITY_COUNT = "total_city_accidents"
+        case_location = case([((InvolvedMarkerView.street1_hebrew == street) |
+                               (InvolvedMarkerView.street2_hebrew == street), InvolvedMarkerView.provider_and_id)])
+        query = (get_query(table_obj=InvolvedMarkerView, start_time=None, end_time=None,
+                           filters={})
+                 .with_entities(InvolvedMarkerView.accident_severity,
+                                func.count(distinct(InvolvedMarkerView.provider_and_id)).label(CITY_COUNT),
+                                func.count(distinct(case_location)).label(STREET_COUNT))
+                 .filter(InvolvedMarkerView.accident_yishuv_name == yishuv)
+                 .filter(InvolvedMarkerView.injured_type == BE_CONST.AccidentType.PEDESTRIAN_INJURY)
+                 .group_by(InvolvedMarkerView.accident_severity)
+                 )
+        query_result = run_query(query)
+        street_sum_light = 0
+        street_sum_other = 0
+        city_sum_light = 0
+        city_sum_other = 0
+
+        for record in query_result:
+            if record[InvolvedMarkerView.accident_severity.name] == BE_CONST.AccidentSeverity.LIGHT:
+                street_sum_light = record[STREET_COUNT]
+                city_sum_light = record[CITY_COUNT]
+            else:
+                street_sum_other += record[STREET_COUNT]
+                city_sum_other += record[CITY_COUNT]
+
+        LIGHT_TITLE = "קלה"
+        SEVERE_TITLE = "קשה וקטלנית"
+        return {STREET_SUBTITLE: [
+            {"desc": LIGHT_TITLE,
+             "count": street_sum_light
+             },
+            {"desc": SEVERE_TITLE,
+             "count": street_sum_other}
+        ],
+            CITY_SUBTITLE: [
+                {"desc": LIGHT_TITLE, "count": city_sum_light},
+                {"desc": SEVERE_TITLE, "count": city_sum_other}
+            ]
+        }
+
+
+def is_location_inner_city(location_info: Dict) -> bool:
+    return "yishuv_name" in location_info
+
+
 def run_query(query: db.session.query) -> Dict:
     # pylint: disable=no-member
     return pd.read_sql_query(query.statement, query.session.bind) \
         .to_dict(orient="records")
 
 
-def extract_news_flash_location(news_flash_obj):
+def extract_news_flash_location(news_flash_obj) -> Optional[Dict]:
     resolution = news_flash_obj.resolution or None
     if not news_flash_obj or not resolution or resolution not in resolution_dict:
         logging.warning(

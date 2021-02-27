@@ -98,6 +98,10 @@ class Widget:
     def get_rank(self) -> int:
         return self.rank
 
+    @staticmethod
+    def is_urban() -> bool:
+        return False
+
     # noinspection PyMethodMayBeStatic
     def is_in_cache(self) -> bool:
         """Whether this widget is stored in the cache"""
@@ -526,12 +530,12 @@ class AccidentCountByAccidentYearWidget(Widget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 8
+
+    def generate_items(self) -> None:
         self.text = {
             "title": "כמות התאונות לפי שנה במקטע "
             + self.request_params.location_info["road_segment_name"]
         }
-
-    def generate_items(self) -> None:
         self.items = get_accidents_stats(
             table_obj=AccidentMarkerView,
             filters=self.request_params.location_info,
@@ -549,12 +553,12 @@ class InjuredCountByAccidentYearWidget(Widget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 9
+
+    def generate_items(self) -> None:
         self.text = {
             "title": "נפגעים בתאונות במקטע "
             + self.request_params.location_info["road_segment_name"]
         }
-
-    def generate_items(self) -> None:
         self.items = get_accidents_stats(
             table_obj=InvolvedMarkerView,
             filters=get_injured_filters(self.request_params.location_info),
@@ -572,9 +576,9 @@ class AccidentCountByDayNightWidget(Widget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 10
-        self.text = {"title": "כמות תאונות ביום ובלילה"}
 
     def generate_items(self) -> None:
+        self.text = {"title": "כמות תאונות ביום ובלילה"}
         self.items = get_accidents_stats(
             table_obj=AccidentMarkerView,
             filters=self.request_params.location_info,
@@ -592,9 +596,9 @@ class AccidentCountByHourWidget(Widget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 11
-        self.text = {"title": "כמות תאונות לפי שעה"}
 
     def generate_items(self) -> None:
+        self.text = {"title": "כמות תאונות לפי שעה"}
         self.items = get_accidents_stats(
             table_obj=AccidentMarkerView,
             filters=self.request_params.location_info,
@@ -612,9 +616,9 @@ class AccidentCountByRoadLightWidget(Widget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 12
-        self.text = {"title": "כמות תאונות לפי תאורה"}
 
     def generate_items(self) -> None:
+        self.text = {"title": "כמות תאונות לפי תאורה"}
         self.items = get_accidents_stats(
             table_obj=AccidentMarkerView,
             filters=self.request_params.location_info,
@@ -631,12 +635,12 @@ class TopRoadSegmentsAccidentsPerKmWidget(Widget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 13
+
+    def generate_items(self) -> None:
         self.text = {
             "title": "תאונות לכל ק״מ כביש על פי מקטע בכביש "
             + str(int(self.request_params.location_info["road1"]))
         }
-
-    def generate_items(self) -> None:
         self.items = TopRoadSegmentsAccidentsPerKmWidget.get_top_road_segments_accidents_per_km(
             resolution=self.request_params.resolution,
             location_info=self.request_params.location_info,
@@ -970,13 +974,13 @@ class InjuredAccidentsWithPedestriansWidget(Widget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 18
-        self.text = {"title": "נפגעים הולכי רגל ברחוב ז׳בוטינסקי, פתח תקווה"}
 
     # noinspection PyMethodMayBeStatic
     def is_in_cache(self) -> bool:
         return False
 
     def generate_items(self) -> None:
+        self.text = {"title": "נפגעים הולכי רגל ברחוב ז׳בוטינסקי, פתח תקווה"}
         self.items = (
             InjuredAccidentsWithPedestriansWidget.injured_accidents_with_pedestrians_mock_data()
         )
@@ -1057,13 +1061,13 @@ class AccidentSeverityByCrossLocationWidget(Widget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 19
-        self.text = {"title": "הולכי רגל הרוגים ופצועים קשה ברחוב בן יהודה, תל אביב"}
 
     # noinspection PyMethodMayBeStatic
     def is_in_cache(self) -> bool:
         return False
 
     def generate_items(self) -> None:
+        self.text = {"title": "הולכי רגל הרוגים ופצועים קשה ברחוב בן יהודה, תל אביב"}
         self.items = (
             AccidentSeverityByCrossLocationWidget.injury_severity_by_cross_location_mock_data()
         )
@@ -1099,11 +1103,11 @@ class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
         super().__init__(request_params, type(self).name)
         self.rank = 20
         self.road_number: str = request_params.location_info["road1"]
+
+    def generate_items(self) -> None:
         self.text = {
             "title": f"תאונות אופנועים קשות וקטלניות בכביש {int(self.road_number)} בהשוואה לכל הארץ"
         }
-
-    def generate_items(self) -> None:
         self.items = MotorcycleAccidentsVsAllAccidentsWidget.motorcycle_accidents_vs_all_accidents(
             self.request_params.start_time, self.request_params.end_time, self.road_number
         )
@@ -1215,17 +1219,17 @@ class AccidentCountPedestriansPerVehicleStreetVsAllWidget(Widget):
     def __init__(self, request_params: RequestParams):
         Widget.__init__(self, request_params, type(self).name)
         self.rank = 21
-        self.text = {
-            "title": _(
-                "Pedestrian Injuries on Ben Yehuda Street in Tel Aviv by Type of hitting Vehicle, Compared to Urban Accidents Across the country"
-            )
-        }
 
     # noinspection PyMethodMayBeStatic
     def is_in_cache(self) -> bool:
         return False
 
     def generate_items(self) -> None:
+        self.text = {
+            "title": _(
+                "Pedestrian Injuries on Ben Yehuda Street in Tel Aviv by Type of hitting Vehicle, Compared to Urban Accidents Across the country"
+            )
+        }
         self.items = (
             AccidentCountPedestriansPerVehicleStreetVsAllWidget.accidents_count_pedestrians_per_vehicle_street_vs_all_mock_data()
         )
@@ -1252,9 +1256,9 @@ class TopRoadSegmentsAccidentsWidget(Widget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 22
-        self.text = {"title": "5 המקטעים עם כמות התאונות הגדולה ביותר"}
 
     def generate_items(self) -> None:
+        self.text = {"title": "5 המקטעים עם כמות התאונות הגדולה ביותר"}
         self.items = TopRoadSegmentsAccidentsWidget.top_road_segments_accidents_mock_data()
 
     @staticmethod
@@ -1275,9 +1279,9 @@ class PedestrianInjuredInJunctionsWidget(Widget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 23
-        self.text = {"title": "מספר נפגעים הולכי רגל בצמתים - רחוב בן יהודה, תל אביב"}
 
     def generate_items(self) -> None:
+        self.text = {"title": "מספר נפגעים הולכי רגל בצמתים - רחוב בן יהודה, תל אביב"}
         self.items = PedestrianInjuredInJunctionsWidget.pedestrian_injured_in_junctions_mock_data()
 
     @staticmethod
@@ -1296,11 +1300,11 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(Widget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.road_number: str = request_params.location_info["road1"]
+
+    def generate_items(self) -> None:
         # WIP: change rank, text by vehicle type
         self.rank = 24
         self.text = {"title": f"סוגי תאונות אופנועים בכביש {int(self.road_number)} בהשוואה לכל הארץ"}
-
-    def generate_items(self) -> None:
         self.items = AccidentTypeVehicleTypeRoadComparisonWidget.accident_type_road_vs_all_count(
             self.request_params.start_time, self.request_params.end_time, self.road_number
         )
@@ -1565,8 +1569,11 @@ def get_latest_accident_date(table_obj, filters):
 def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> List[Widget]:
     widgets = []
     # noinspection PyArgumentList
+    is_urban = is_location_inner_city(request_params.location_info)
     for w in get_widget_factories():
         widget: Widget = w(request_params)
+        if is_urban != widget.is_urban():
+            continue
         if widget.is_in_cache() == to_cache:
             widgets.append(widget)
             logging.debug(f"name:{widget.name}, class:{get_widget_class_by_name(widget.name)}")

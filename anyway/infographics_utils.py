@@ -26,7 +26,7 @@ from anyway.infographics_dictionaries import (
     english_accident_type_dict,
     segment_dictionary,
     english_injury_severity_dict,
-    hebrew_accident_severity_dict
+    hebrew_accident_severity_dict,
 )
 from anyway.parsers import infographics_data_cache_updater
 from anyway.utilities import parse_age_from_range
@@ -138,7 +138,9 @@ class Widget:
         else:
             output["meta"] = {}
         output["meta"]["rank"] = self.rank
-        output["meta"]["information"] = "Placeholder: This Widget shows information of accidenents in Israel with comparison of vehicle types / locations / injured types."
+        output["meta"][
+            "information"
+        ] = "Placeholder: This Widget shows information of accidenents in Israel with comparison of vehicle types / locations / injured types."
         return output
 
 
@@ -388,22 +390,18 @@ class HeadOnCollisionsComparisonWidget(Widget):
                 end_time=self.request_params.end_time,
             )
 
-        road_sums = self.sum_count_of_accident_type(
-            road_data, BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION)
-        all_roads_sums = self.sum_count_of_accident_type(
-            all_roads_data, BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION)
+        road_sums = self.sum_count_of_accident_type(road_data, BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION)
+        all_roads_sums = self.sum_count_of_accident_type(all_roads_data, BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION)
 
-        res = {self.SPECIFIC_ROAD_SUBTITLE: [
-            {"desc": "frontal",
-             "count": road_sums["given"]
-             },
-            {"desc": "others",
-             "count": road_sums["others"]}
-        ],
+        res = {
+            self.SPECIFIC_ROAD_SUBTITLE: [
+                {"desc": "frontal", "count": road_sums["given"]},
+                {"desc": "others", "count": road_sums["others"]},
+            ],
             self.ALL_ROADS_SUBTITLE: [
                 {"desc": "frontal", "count": all_roads_sums["given"]},
-                {"desc": "others", "count": all_roads_sums["others"]}
-            ]
+                {"desc": "others", "count": all_roads_sums["others"]},
+            ],
         }
         return res
 
@@ -441,7 +439,8 @@ class HeadOnCollisionsComparisonWidget(Widget):
             else:
                 raise ValueError
         all_total = all_h2h + all_others
-        return (segment_h2h > 0 and (segment_h2h/segment_total) > all_h2h/all_total)
+        return segment_h2h > 0 and (segment_h2h / segment_total) > all_h2h / all_total
+
 
 # adding calls to _() for pybabel extraction
 _("others")
@@ -522,6 +521,7 @@ class AccidentsHeatMapWidget(Widget):
             + segment_dictionary[request_params.location_info["road_segment_name"]]
         }
         return items
+
 
 @register
 class AccidentCountByAccidentYearWidget(Widget):
@@ -782,6 +782,7 @@ class VisionZeroWidget(Widget):
     def generate_items(self) -> None:
         self.items = ["vision_zero_2_plus_1"]
 
+
 @register
 class Road2Plus1Widget(Widget):
     name: str = "vision_zero_2_plus_1"
@@ -792,6 +793,7 @@ class Road2Plus1Widget(Widget):
 
     def generate_items(self) -> None:
         self.items = ["vision_zero_2_plus_1"]
+
 
 @register
 class AccidentCountByDriverTypeWidget(Widget):
@@ -956,13 +958,16 @@ class AccidentCountByCarTypeWidget(Widget):
             try:
                 item["car_type"] = _(VehicleCategory(item["car_type"]).get_english_display_name())
             except ValueError:
-                logging.exception(f'AccidentCountByCarType.localize_items: item:{item}')
-        base_title = _("comparing vehicle type percentage in accidents in"
-                       " {} "
-                       "relative to national average")
+                logging.exception(f"AccidentCountByCarType.localize_items: item:{item}")
+        base_title = _(
+            "comparing vehicle type percentage in accidents in"
+            " {} "
+            "relative to national average"
+        )
         items["data"]["text"] = {
             "title": base_title.format(
-                segment_dictionary[request_params.location_info["road_segment_name"]])
+                segment_dictionary[request_params.location_info["road_segment_name"]]
+            )
         }
         return items
 
@@ -1113,8 +1118,9 @@ class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
         )
 
     @staticmethod
-    def motorcycle_accidents_vs_all_accidents(start_time: datetime.date,
-                                              end_time: datetime.date, road_number: str) -> List:
+    def motorcycle_accidents_vs_all_accidents(
+        start_time: datetime.date, end_time: datetime.date, road_number: str
+    ) -> List:
         location_label = "location"
         location_other = "שאר הארץ"
         location_road = f"כביש {int(road_number)}"
@@ -1135,7 +1141,9 @@ class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
         case_vehicle = case(
             [
                 (
-                    InvolvedMarkerView.involve_vehicle_type.in_(VehicleCategory.MOTORCYCLE.get_codes()),
+                    InvolvedMarkerView.involve_vehicle_type.in_(
+                        VehicleCategory.MOTORCYCLE.get_codes()
+                    ),
                     literal_column(f"'{vehicle_motorcycle}'"),
                 )
             ],
@@ -1304,31 +1312,40 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(Widget):
     def generate_items(self) -> None:
         # WIP: change rank, text by vehicle type
         self.rank = 24
-        self.text = {"title": f"סוגי תאונות אופנועים בכביש {int(self.road_number)} בהשוואה לכל הארץ"}
+        self.text = {
+            "title": f"סוגי תאונות אופנועים בכביש {int(self.road_number)} בהשוואה לכל הארץ"
+        }
         self.items = AccidentTypeVehicleTypeRoadComparisonWidget.accident_type_road_vs_all_count(
             self.request_params.start_time, self.request_params.end_time, self.road_number
         )
 
     @staticmethod
-    def accident_type_road_vs_all_count(start_time: datetime.date,
-                                        end_time: datetime.date, road_number: str) -> List:
+    def accident_type_road_vs_all_count(
+        start_time: datetime.date, end_time: datetime.date, road_number: str
+    ) -> List:
         num_accidents_label = "num_of_accidents"
         location_all = "כל הארץ"
         location_road = f"כביש {int(road_number)}"
 
         vehicle_types = VehicleCategory.MOTORCYCLE.get_codes()  # WIP: change by vehicle type
 
-        all_roads_query = AccidentTypeVehicleTypeRoadComparisonWidget.get_accident_count_by_vehicle_type_query(
-            start_time, end_time, num_accidents_label, vehicle_types)
+        all_roads_query = (
+            AccidentTypeVehicleTypeRoadComparisonWidget.get_accident_count_by_vehicle_type_query(
+                start_time, end_time, num_accidents_label, vehicle_types
+            )
+        )
         all_roads_query_result = run_query(all_roads_query)
         all_roads_sum_accidents = 0
         all_roads_map = {}
         for record in all_roads_query_result:
             all_roads_sum_accidents += record[num_accidents_label]
-            all_roads_map[record[VehicleMarkerView.accident_type.name]] = record[num_accidents_label]
+            all_roads_map[record[VehicleMarkerView.accident_type.name]] = record[
+                num_accidents_label
+            ]
 
-        road_query = all_roads_query.filter((VehicleMarkerView.road1 == road_number) |
-                                            (VehicleMarkerView.road2 == road_number))
+        road_query = all_roads_query.filter(
+            (VehicleMarkerView.road1 == road_number) | (VehicleMarkerView.road2 == road_number)
+        )
         road_query_result = run_query(road_query)
         road_sum_accidents = 0
         types_to_report = []
@@ -1336,32 +1353,50 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(Widget):
             road_sum_accidents += record[num_accidents_label]
 
         for record in road_query_result:
-            if len(types_to_report) == AccidentTypeVehicleTypeRoadComparisonWidget.MAX_ACCIDENT_TYPES_TO_RETURN:
+            if (
+                len(types_to_report)
+                == AccidentTypeVehicleTypeRoadComparisonWidget.MAX_ACCIDENT_TYPES_TO_RETURN
+            ):
                 break
             accident_type = record[VehicleMarkerView.accident_type.name]
-            types_to_report.append({VehicleMarkerView.accident_type.name: accident_type,
-                                    location_road: record[num_accidents_label] / road_sum_accidents,
-                                    location_all: all_roads_map[accident_type] / all_roads_sum_accidents})
+            types_to_report.append(
+                {
+                    VehicleMarkerView.accident_type.name: accident_type,
+                    location_road: record[num_accidents_label] / road_sum_accidents,
+                    location_all: all_roads_map[accident_type] / all_roads_sum_accidents,
+                }
+            )
         return types_to_report
 
     @staticmethod
-    def get_accident_count_by_vehicle_type_query(start_time: datetime.date,
-                                                 end_time: datetime.date,
-                                                 num_accidents_label: str, vehicle_types: List[int])\
-            -> db.session.query:
-        return (get_query(table_obj=VehicleMarkerView, start_time=start_time, end_time=end_time,
-                          filters={VehicleMarkerView.vehicle_type.name: vehicle_types})
-                .with_entities(VehicleMarkerView.accident_type,
-                               func.count(distinct(VehicleMarkerView.provider_and_id)).label(num_accidents_label))
-                .group_by(VehicleMarkerView.accident_type)
-                .order_by(desc(num_accidents_label))
-                )
+    def get_accident_count_by_vehicle_type_query(
+        start_time: datetime.date,
+        end_time: datetime.date,
+        num_accidents_label: str,
+        vehicle_types: List[int],
+    ) -> db.session.query:
+        return (
+            get_query(
+                table_obj=VehicleMarkerView,
+                start_time=start_time,
+                end_time=end_time,
+                filters={VehicleMarkerView.vehicle_type.name: vehicle_types},
+            )
+            .with_entities(
+                VehicleMarkerView.accident_type,
+                func.count(distinct(VehicleMarkerView.provider_and_id)).label(num_accidents_label),
+            )
+            .group_by(VehicleMarkerView.accident_type)
+            .order_by(desc(num_accidents_label))
+        )
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         for item in items["data"]["items"]:
             try:
-                item[VehicleMarkerView.accident_type.name] = _(english_accident_type_dict[item["accident_type"]])
+                item[VehicleMarkerView.accident_type.name] = _(
+                    english_accident_type_dict[item["accident_type"]]
+                )
             except KeyError:
                 logging.exception(
                     f"AccidentTypeVehicleTypeRoadComparisonWidget.localize_items: Exception while translating {item}."
@@ -1384,32 +1419,41 @@ class PedestriansAccidentsInStreetVsCity(Widget):
     def generate_items(self) -> None:
         street = self.request_params.location_info["street1_hebrew"]
         yishuv = self.request_params.location_info["yishuv_name"]
-        self.text = {"title": f"השוואת מספר התאונות עם הולך רגל לפי חומרה - רחוב {street} בהשוואה לעיר {yishuv}"}
-        self.items = (
-            PedestriansAccidentsInStreetVsCity.injured_accidents_with_pedestrians(
-                self.request_params.start_time, self.request_params.end_time,
-                street,
-                yishuv)
-            )
+        self.text = {
+            "title": f"השוואת מספר התאונות עם הולך רגל לפי חומרה - רחוב {street} בהשוואה לעיר {yishuv}"
+        }
+        self.items = PedestriansAccidentsInStreetVsCity.injured_accidents_with_pedestrians(
+            self.request_params.start_time, self.request_params.end_time, street, yishuv
+        )
 
     @staticmethod
-    def injured_accidents_with_pedestrians(start_time: datetime.date, end_time: datetime.date,
-                                           street: str, yishuv: str) -> Dict:
+    def injured_accidents_with_pedestrians(
+        start_time: datetime.date, end_time: datetime.date, street: str, yishuv: str
+    ) -> Dict:
         STREET_SUBTITLE = f"תאונות הולכי רגל ברחוב {street}"
         CITY_SUBTITLE = f"תאונות הולכי רגל בעיר {yishuv}"
         STREET_COUNT = "total_street_accidents"
         CITY_COUNT = "total_city_accidents"
-        case_location = case([((InvolvedMarkerView.street1_hebrew == street) |
-                               (InvolvedMarkerView.street2_hebrew == street), InvolvedMarkerView.provider_and_id)])
-        query = (get_query(table_obj=InvolvedMarkerView, start_time=None, end_time=None,
-                           filters={})
-                 .with_entities(InvolvedMarkerView.accident_severity,
-                                func.count(distinct(InvolvedMarkerView.provider_and_id)).label(CITY_COUNT),
-                                func.count(distinct(case_location)).label(STREET_COUNT))
-                 .filter(InvolvedMarkerView.accident_yishuv_name == yishuv)
-                 .filter(InvolvedMarkerView.injured_type == BE_CONST.AccidentType.PEDESTRIAN_INJURY)
-                 .group_by(InvolvedMarkerView.accident_severity)
-                 )
+        case_location = case(
+            [
+                (
+                    (InvolvedMarkerView.street1_hebrew == street)
+                    | (InvolvedMarkerView.street2_hebrew == street),
+                    InvolvedMarkerView.provider_and_id,
+                )
+            ]
+        )
+        query = (
+            get_query(table_obj=InvolvedMarkerView, start_time=None, end_time=None, filters={})
+            .with_entities(
+                InvolvedMarkerView.accident_severity,
+                func.count(distinct(InvolvedMarkerView.provider_and_id)).label(CITY_COUNT),
+                func.count(distinct(case_location)).label(STREET_COUNT),
+            )
+            .filter(InvolvedMarkerView.accident_yishuv_name == yishuv)
+            .filter(InvolvedMarkerView.injured_type == BE_CONST.AccidentType.PEDESTRIAN_INJURY)
+            .group_by(InvolvedMarkerView.accident_severity)
+        )
         query_result = run_query(query)
         street_sum_light = 0
         street_sum_other = 0
@@ -1429,12 +1473,12 @@ class PedestriansAccidentsInStreetVsCity(Widget):
         return {
             STREET_SUBTITLE: [
                 {"desc": LIGHT_TITLE, "count": street_sum_light},
-                {"desc": SEVERE_TITLE,"count": street_sum_other}
-        ],
+                {"desc": SEVERE_TITLE, "count": street_sum_other},
+            ],
             CITY_SUBTITLE: [
                 {"desc": LIGHT_TITLE, "count": city_sum_light},
-                {"desc": SEVERE_TITLE, "count": city_sum_other}
-            ]
+                {"desc": SEVERE_TITLE, "count": city_sum_other},
+            ],
         }
 
 
@@ -1444,8 +1488,7 @@ def is_location_inner_city(location_info: Dict) -> bool:
 
 def run_query(query: db.session.query) -> Dict:
     # pylint: disable=no-member
-    return pd.read_sql_query(query.statement, query.session.bind) \
-        .to_dict(orient="records")
+    return pd.read_sql_query(query.statement, query.session.bind).to_dict(orient="records")
 
 
 def extract_news_flash_location(news_flash_obj) -> Optional[Dict]:
@@ -1521,7 +1564,10 @@ def get_most_severe_accidents_with_entities(
         BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
         BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
     ]
-    filters["accident_severity"] = [BE_CONST.AccidentSeverity.FATAL, BE_CONST.AccidentSeverity.SEVERE]
+    filters["accident_severity"] = [
+        BE_CONST.AccidentSeverity.FATAL,
+        BE_CONST.AccidentSeverity.SEVERE,
+    ]
     query = get_query(table_obj, filters, start_time, end_time)
     query = query.with_entities(*entities)
     query = query.order_by(getattr(table_obj, "accident_timestamp").desc())

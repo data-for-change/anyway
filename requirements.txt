@@ -33,7 +33,7 @@ gunicorn==20.0.4
 newrelic==5.12.1.141
 numpy==1.18.4
 openpyxl==3.0.3
-pandas==1.0.3
+pandas==1.2.2
 psycopg2==2.8.5
 pyproj==2.6.1.post1
 python-dateutil==2.8.1

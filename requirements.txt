@@ -48,5 +48,5 @@ webassets==2.0
 xlrd==1.2.0
 lxml==4.5.1
 boto3==1.14.48
-py3-validate-email==0.2.12
+py3-validate-email==0.2.16
 phonenumbers==8.12.15

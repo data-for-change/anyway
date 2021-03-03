@@ -185,6 +185,11 @@ CORS(
         r"/api/infographics-data": {"origins": "*"},
         r"/api/news-flash": {"origins": "*"},
         r"/api/embedded-reports": {"origins": "*"},
+        r"/authorize/*": {"origins": BE_CONST.ANYWAY_CORS_SITE_LIST},
+        r"/callback/*": {"origins": BE_CONST.ANYWAY_CORS_SITE_LIST},
+        r"/user/info": {"origins": BE_CONST.ANYWAY_CORS_SITE_LIST},
+        r"/user/update": {"origins": BE_CONST.ANYWAY_CORS_SITE_LIST},
+        r"/logout": {"origins": BE_CONST.ANYWAY_CORS_SITE_LIST},
     },
 )
 

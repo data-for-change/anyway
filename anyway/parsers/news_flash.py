@@ -11,8 +11,6 @@ from anyway.parsers.news_flash_classifiers import (
 from anyway.parsers.location_extraction import extract_geo_features
 
 # FIX: classifier should be chosen by source (screen name), so `twitter` should be `mda`
-from anyway.rules.newsflash_feature_generator import NewsflashFeatureGenerator
-
 news_flash_classifiers = {"ynet": classify_rss, "twitter": classify_tweets, "walla": classify_rss}
 
 

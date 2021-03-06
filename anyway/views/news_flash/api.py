@@ -13,6 +13,7 @@ from anyway.models import NewsFlash
 DEFAULT_OFFSET_REQ_PARAMETER = 0
 DEFAULT_LIMIT_REQ_PARAMETER = 100
 
+
 @user_optional
 def news_flash():
     logging.debug("getting news flash")

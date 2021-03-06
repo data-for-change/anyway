@@ -891,8 +891,8 @@ class NewsflashFeatures(Base):
     id = Column(BigInteger(), primary_key=True)
     newsflash_id = Column(BigInteger(), ForeignKey(NewsFlash.id))
 
-    """ 
-    version is the feature calculation version number. Can be used to compare results between veresions, and
+    """
+    version is the feature calculation version number. Can be used to compare results between versions, and
     also to re-calculate results
     """
     version = Column(Integer(), nullable=False)

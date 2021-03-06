@@ -56,8 +56,11 @@ def get_infographic_data():
 
 
 def delete_new_infographic_data(new_infographic_data_id):
-    sql_delete = f"DELETE FROM news_flash where id = {new_infographic_data_id}"
-    db.session.execute(sql_delete)
+    delete_newsflash = f"DELETE FROM news_flash where id = {new_infographic_data_id}"
+    # Deleting linked row by foreign key as well
+    delete_features = f"DELETE FROM newsflash_features where newsflash_id = {new_infographic_data_id}"
+    db.session.execute(delete_features)
+    db.session.execute(delete_newsflash)
     db.session.commit()
 
 

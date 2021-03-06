@@ -5,7 +5,7 @@ import pandas as pd
 from flask_sqlalchemy import SQLAlchemy
 from anyway.parsers import infographics_data_cache_updater
 from anyway.parsers import timezones
-from anyway.models import NewsFlash, NewsflashFeatures
+from anyway.models import NewsFlash
 
 # fmt: off
 

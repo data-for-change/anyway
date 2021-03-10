@@ -7,16 +7,11 @@ from anyway import secrets
 
 get_environment_variable = environ.get
 
-ANYWAY_BUCKET = "anyway-cbs"
-
-ACCIDENTS_TYPE_PREFIX = "accidents_type"
-ACCIDENTS_TYPE_1 = 1
-ACCIDENTS_TYPE_3 = 3
-
-LOCAL_CBS_DIRECTORY = "cbsfiles"
+from .config import ACCIDENTS_TYPE_1, ACCIDENTS_TYPE_3, \
+    ANYWAY_BUCKET, LOCAL_CBS_DIRECTORY, ACCIDENTS_TYPE_PREFIX
 
 
-class S3Handler:
+class S3DataRetriever:
     def __init__(self):
         self.__aws_access_key = secrets.get("AWS_ACCESS_KEY")
         self.__aws_secret_key = secrets.get("AWS_SECRET_KEY")

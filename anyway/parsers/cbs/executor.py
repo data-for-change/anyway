@@ -81,7 +81,7 @@ from anyway.models import (
 from anyway.utilities import ItmToWGS84, time_delta, ImporterUI, truncate_tables, chunks
 from anyway.db_views import VIEWS
 from anyway.app_and_db import db
-from anyway.parsers.cbs.s3.s3_handler import S3Handler
+from anyway.parsers.cbs.s3 import S3DataRetriever
 
 failed_dirs = OrderedDict()
 
@@ -1079,8 +1079,8 @@ def main(
                     )
         elif from_s3:
             logging.info("Importing data from s3...")
-            s3_handler = S3Handler()
-            s3_handler.get_files_from_s3(start_year=load_start_year)
+            s3_data_retriever = S3DataRetriever()
+            s3_data_retriever.get_files_from_s3(start_year=load_start_year)
             """
             Should be soon implemented as "delete_entries_from_S3"
             """
@@ -1093,9 +1093,9 @@ def main(
                 BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
                 BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
             ]:
-                for year in range(int(load_start_year), s3_handler.current_year + 1):
+                for year in range(int(load_start_year), s3_data_retriever.current_year + 1):
                     cbs_files_dir = os.path.join(
-                        s3_handler.local_files_directory,
+                        s3_data_retriever.local_files_directory,
                         ACCIDENTS_TYPE_PREFIX + "_" + str(provider_code),
                         str(year),
                     )
@@ -1105,7 +1105,7 @@ def main(
                         cbs_files_dir
                     )
                     total += import_to_datastore(cbs_files_dir, provider_code, year, batch_size)
-            shutil.rmtree(s3_handler.local_temp_directory)
+            shutil.rmtree(s3_data_retriever.local_temp_directory)
         else:
             logging.info("Importing data from mail...")
             temp_dir = tempfile.mkdtemp()

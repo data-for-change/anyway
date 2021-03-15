@@ -81,7 +81,9 @@ from anyway.models import (
 from anyway.utilities import ItmToWGS84, time_delta, ImporterUI, truncate_tables, chunks
 from anyway.db_views import VIEWS
 from anyway.app_and_db import db
-from anyway.parsers.cbs.s3 import S3DataRetriever
+from anyway.parsers.cbs.s3 import S3DataRetriever, S3Uploader
+
+import botocore
 
 failed_dirs = OrderedDict()
 
@@ -1122,11 +1124,32 @@ def main(
             preprocessing_cbs_files.update_cbs_files_names(cbs_files_dir)
             acc_data_file_path = preprocessing_cbs_files.get_accidents_file_data(cbs_files_dir)
             provider_code, year = get_file_type_and_year(acc_data_file_path)
-            delete_cbs_entries_from_email(provider_code, year, batch_size)
+
+            logging.info("Uploading data to S3...")
+
+            try:
+
+                s3_uploader = S3Uploader()            
+
+                s3_uploader.upload_to_S3(
+                    local_file_path=acc_data_file_path,
+                    provider_code=provider_code,
+                    year=year
+                )
+
+                delete_cbs_entries_from_email(provider_code, year, batch_size)
+
+            except botocore.exceptions.ClientError as err:
+                if err.response['Error']['Code'] == 'InternalError':
+                    print('S3 Error Message: {}'.format(err.response['Error']['Message']))
+                    print('S3 Request ID: {}'.format(err.response['ResponseMetadata']['RequestId']))
+                    print('S3 Response Http code: {}'.format(err.response['ResponseMetadata']['HTTPStatusCode']))
+                else:
+                    raise err
+            
             started = datetime.now()
             total = 0
-            logging.info("Importing Directory " + cbs_files_dir)
-            total += import_to_datastore(cbs_files_dir, provider_code, year, batch_size)
+
             shutil.rmtree(temp_dir)
 
         fill_db_geo_data()

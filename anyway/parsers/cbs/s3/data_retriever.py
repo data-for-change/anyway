@@ -1,45 +1,24 @@
 from os import environ, makedirs, mkdir
 from os.path import basename, dirname, abspath, join as join_path, exists as does_path_exist
 from datetime import datetime
-from boto3 import resource as resource_builder
 from tempfile import mkdtemp
-from anyway import secrets
 
 get_environment_variable = environ.get
 
 from .config import ACCIDENTS_TYPE_1, ACCIDENTS_TYPE_3, \
     ANYWAY_BUCKET, LOCAL_CBS_DIRECTORY, ACCIDENTS_TYPE_PREFIX
 
+from .base import S3DataClass
 
-class S3DataRetriever:
+
+class S3DataRetriever(S3DataClass):
     def __init__(self):
-        self.__aws_access_key = secrets.get("AWS_ACCESS_KEY")
-        self.__aws_secret_key = secrets.get("AWS_SECRET_KEY")
+        super().__init__()
         self.__accidents_types = [ACCIDENTS_TYPE_1, ACCIDENTS_TYPE_3]
-        self.__s3_resource = None
-        self.__s3_bucket = None
         self.__temp_directory = None
         self.__local_files_directory = None
         self.__current_year = None
         self.__download_from_s3_callback = None
-
-    @property
-    def s3_resource(self):
-        if self.__s3_resource is None:
-            self.__s3_resource = resource_builder(
-                "s3",
-                aws_access_key_id=self.__aws_access_key,
-                aws_secret_access_key=self.__aws_secret_key,
-            )
-
-        return self.__s3_resource
-
-    @property
-    def s3_bucket(self):
-        if self.__s3_bucket is None:
-            self.__s3_bucket = self.s3_resource.Bucket(ANYWAY_BUCKET)
-
-        return self.__s3_bucket
 
     @property
     def current_year(self):

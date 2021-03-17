@@ -98,6 +98,8 @@ from anyway.views.news_flash.api import news_flash, single_news_flash
 
 app.config.from_object(__name__)
 app.config["SECURITY_REGISTERABLE"] = False
+app.config["SESSION_COOKIE_SAMESITE"] = 'none'
+app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SECURITY_USER_IDENTITY_ATTRIBUTES"] = "username"
 app.config["BABEL_DEFAULT_LOCALE"] = "he"
 app.config["OAUTH_CREDENTIALS"] = {
@@ -185,11 +187,11 @@ CORS(
         r"/api/infographics-data": {"origins": "*"},
         r"/api/news-flash": {"origins": "*"},
         r"/api/embedded-reports": {"origins": "*"},
-        r"/authorize/*": {"origins": BE_CONST.ANYWAY_CORS_SITE_LIST},
-        r"/callback/*": {"origins": BE_CONST.ANYWAY_CORS_SITE_LIST},
-        r"/user/info": {"origins": BE_CONST.ANYWAY_CORS_SITE_LIST},
-        r"/user/update": {"origins": BE_CONST.ANYWAY_CORS_SITE_LIST},
-        r"/logout": {"origins": BE_CONST.ANYWAY_CORS_SITE_LIST},
+        r"/authorize/*": {"origins": BE_CONST.ANYWAY_CORS_SITE_LIST, "supports_credentials": True},
+        r"/callback/*": {"origins": BE_CONST.ANYWAY_CORS_SITE_LIST, "supports_credentials": True},
+        r"/user/info": {"origins": BE_CONST.ANYWAY_CORS_SITE_LIST, "supports_credentials": True},
+        r"/user/update": {"origins": BE_CONST.ANYWAY_CORS_SITE_LIST, "supports_credentials": True},
+        r"/logout": {"origins": BE_CONST.ANYWAY_CORS_SITE_LIST, "supports_credentials": True},
     },
 )
 

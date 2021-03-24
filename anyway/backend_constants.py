@@ -69,11 +69,15 @@ class BackEndConstants(object):
 
     UNKNOWN = "UNKNOWN"
     DEFAULT_REDIRECT_URL = "https://anyway-infographics.web.app/"
-    ANYWAY_CORS_SITE_LIST = [
+    ANYWAY_CORS_SITE_LIST_PROD = [
         "https://anyway-infographics-staging.web.app/*",
         "https://anyway-infographics.web.app/*",
         "https://www.anyway.co.il/*",
         "https://anyway-infographics-demo.web.app/*",
+    ]
+
+    ANYWAY_CORS_SITE_LIST_DEV = ANYWAY_CORS_SITE_LIST_PROD + [
+        "https://dev.anyway.co.il/*",
     ]
 
 

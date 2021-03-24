@@ -15,3 +15,5 @@ SQLALCHEMY_ENGINE_OPTIONS = {}
 
 # available languages
 LANGUAGES = {"en": "English", "he": "עברית"}
+
+SERVER_ENV = os.getenv("SERVER_ENV", "prod")

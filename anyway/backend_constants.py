@@ -78,6 +78,10 @@ class BackEndConstants(object):
 
     ANYWAY_CORS_SITE_LIST_DEV = ANYWAY_CORS_SITE_LIST_PROD + [
         "https://dev.anyway.co.il/*",
+        "http://localhost:3000/*",
+        "https://localhost:3000/*",
+        "http://127.0.0.1:3000/*",
+        "https://127.0.0.1:3000/*",
     ]
 
 

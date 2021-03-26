@@ -3,6 +3,7 @@ import logging
 import datetime
 import json
 import os
+import copy
 from functools import lru_cache
 from typing import Optional, Dict, List, Union, Any, Type, Callable
 from dataclasses import dataclass
@@ -85,7 +86,7 @@ class Widget:
     meta: Optional[Dict]
 
     def __init__(self, request_params: RequestParams, name: str):
-        self.request_params = request_params
+        self.request_params = copy.deepcopy(request_params)
         self.name = name
         self.rank = -1
         self.items = {}

@@ -2,6 +2,7 @@
 
 This is the documentation for the new user API (Version 2) that was created in 2020.
 
+Note: All the info about https://www.anyway.co.il is relevant to https://dev.anyway.co.il as well
 
 ### Authorization
 

@@ -1,3 +1,4 @@
+from anyway import config
 from anyway.utilities import is_valid_number, is_a_safe_redirect_url
 
 
@@ -65,10 +66,13 @@ def test_url_redirect_checker():
         "https://www.anyway.com",
         "anyway.co.il",
         "https//cnn.com",
-        "https//www.cnn.com" "https://www.anyway.co.il.com",
+        "https//www.cnn.com",
+        "https://www.anyway.co.il.com",
         "http://www.anyway.co.il.com",
-        "https://anyway.com" "www.anyway-infographics-staging.web.app",
-        "https://anyway-infographics-staging.web.app.com" "anyway-infographics-staging.web.app.com",
+        "https://anyway.com",
+        "www.anyway-infographics-staging.web.app",
+        "https://anyway-infographics-staging.web.app.com",
+        "anyway-infographics-staging.web.app.com",
         "anyway-infographics-staging.web.app",
         "anyway-infographics-staging.web.app/test",
         "localhost",
@@ -76,6 +80,9 @@ def test_url_redirect_checker():
         "localhost.com",
         "anyway-infographics.web.app",
         "anyway-infographics-demo.web.app",
+        "https://www.dev.anyway.co.il",
+        "dev.anyway.co.il",
+        "www.dev.anyway.co.il",
     ]
 
     good_urls = [
@@ -90,6 +97,25 @@ def test_url_redirect_checker():
         "https://anyway-infographics-staging.web.app/test",
         "https://anyway-infographics.web.app",
         "https://anyway-infographics-demo.web.app",
+    ]
+
+    for url in bad_urls:
+        assert not is_a_safe_redirect_url(url)
+
+    for url in good_urls:
+        assert is_a_safe_redirect_url(url)
+
+
+def test_url_redirect_checker_dev():
+    config.SERVER_ENV = "dev"
+    bad_urls =[
+        "dev.anyway.co.il",
+        "www.dev.anyway.co.il",
+    ]
+
+    good_urls = [
+        "https://www.dev.anyway.co.il",
+        "https://dev.anyway.co.il",
     ]
 
     for url in bad_urls:

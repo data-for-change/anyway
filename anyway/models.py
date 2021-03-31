@@ -819,7 +819,7 @@ class Involved(Base):
 
 class NewsFlash(Base):
     __tablename__ = "news_flash"
-    id = Column(BigInteger(), primary_key=True)
+    id = Column(BigInteger(), primary_key=True, unique=True)
     accident = Column(Boolean(), nullable=False)
     author = Column(Text(), nullable=True)
     date = Column(TIMESTAMP(), nullable=True)
@@ -869,6 +869,46 @@ class NewsFlash(Base):
             "street2_hebrew": self.street2_hebrew,
             "non_urban_intersection_hebrew": self.non_urban_intersection_hebrew,
             "road_segment_name": self.road_segment_name,
+        }
+
+    # Flask-Login integration
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.id
+
+
+class NewsflashFeatures(Base):
+    __tablename__ = "newsflash_features"
+
+    id = Column(BigInteger(), primary_key=True)
+    newsflash_id = Column(BigInteger(), ForeignKey(NewsFlash.id))
+
+    """
+    version is the feature calculation version number. Can be used to compare results between versions, and
+    also to re-calculate results
+    """
+    version = Column(Integer(), nullable=False)
+
+    """When did this calculation take place"""
+    timestamp = Column(DateTime(), nullable=False)
+
+    is_urban = Column(Boolean())
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "newsflash_id": self.newsflash_id,
+            "timestamp": self.timestamp,
+            "version": self.version,
+            "is_urban": self.is_urban,
         }
 
     # Flask-Login integration

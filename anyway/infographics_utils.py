@@ -5,6 +5,8 @@ import json
 import os
 from functools import lru_cache
 from typing import Optional, Dict, List, Union, Any, Type, Callable
+
+# noinspection PyUnresolvedReferences
 from dataclasses import dataclass
 import traceback
 
@@ -14,6 +16,8 @@ from collections import defaultdict
 from sqlalchemy import func, distinct, literal_column, case
 from sqlalchemy import cast, Numeric
 from sqlalchemy import desc
+
+# noinspection PyProtectedMember
 from flask_babel import _
 from anyway.backend_constants import BE_CONST
 from anyway.models import NewsFlash, AccidentMarkerView, InvolvedMarkerView, VehicleMarkerView
@@ -26,7 +30,7 @@ from anyway.infographics_dictionaries import (
     english_accident_type_dict,
     segment_dictionary,
     english_injury_severity_dict,
-    hebrew_accident_severity_dict
+    hebrew_accident_severity_dict,
 )
 from anyway.parsers import infographics_data_cache_updater
 from anyway.utilities import parse_age_from_range
@@ -98,8 +102,8 @@ class Widget:
     def get_rank(self) -> int:
         return self.rank
 
-    # noinspection PyMethodMayBeStatic
-    def is_in_cache(self) -> bool:
+    @staticmethod
+    def is_in_cache() -> bool:
         """Whether this widget is stored in the cache"""
         return True
 
@@ -111,6 +115,10 @@ class Widget:
     def generate_items(self) -> None:
         """ Generates the data of the widget and set it to self.items"""
         pass
+
+    @staticmethod
+    def is_relevant(request_params: RequestParams) -> bool:
+        return True
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
@@ -134,11 +142,39 @@ class Widget:
         else:
             output["meta"] = {}
         output["meta"]["rank"] = self.rank
-        output["meta"]["information"] = "Placeholder: This Widget shows information of accidenents in Israel with comparison of vehicle types / locations / injured types."
+        output["meta"][
+            "information"
+        ] = "Placeholder: This Widget shows information of accidenents in Israel with comparison of vehicle types / locations / injured types."
         return output
 
 
 widgets_dict: Dict[str, Type[Widget]] = {}
+
+
+class SubUrbanWidget(Widget):
+    def __init__(self, request_params: RequestParams, name: str):
+        if not is_sub_urban(request_params):
+            logging.error(
+                f"SubUrbanWidget initialized with missing location fields:{request_params}"
+            )
+            raise ValueError("SubUrban fields missing")
+        super().__init__(request_params, name)
+
+    @staticmethod
+    def is_relevant(request_params: RequestParams) -> bool:
+        return is_sub_urban(request_params)
+
+
+class UrbanWidget(Widget):
+    def __init__(self, request_params: RequestParams, name: str):
+        if not is_urban(request_params):
+            logging.error(f"UrbanWidget initialized with missing location fields:{request_params}")
+            raise ValueError("Urban fields missing")
+        super().__init__(request_params, name)
+
+    @staticmethod
+    def is_relevant(request_params: RequestParams) -> bool:
+        return is_urban(request_params)
 
 
 def get_widget_factories() -> List[Callable[[RequestParams], Widget]]:
@@ -157,7 +193,7 @@ def register(widget_class: Type[Widget]) -> Type[Widget]:
 
 
 @register
-class AccidentCountBySeverityWidget(Widget):
+class AccidentCountBySeverityWidget(SubUrbanWidget):
     name: str = "accident_count_by_severity"
 
     def __init__(self, request_params: RequestParams):
@@ -199,7 +235,7 @@ class AccidentCountBySeverityWidget(Widget):
 
 
 @register
-class MostSevereAccidentsTableWidget(Widget):
+class MostSevereAccidentsTableWidget(SubUrbanWidget):
     name: str = "most_severe_accidents_table"
 
     def __init__(self, request_params: RequestParams):
@@ -278,7 +314,7 @@ class MostSevereAccidentsTableWidget(Widget):
 
 
 @register
-class MostSevereAccidentsWidget(Widget):
+class MostSevereAccidentsWidget(SubUrbanWidget):
     name: str = "most_severe_accidents"
 
     def __init__(self, request_params: RequestParams):
@@ -323,7 +359,7 @@ class MostSevereAccidentsWidget(Widget):
 
 
 @register
-class StreetViewWidget(Widget):
+class StreetViewWidget(SubUrbanWidget):
     name: str = "street_view"
 
     def __init__(self, request_params: RequestParams):
@@ -338,7 +374,7 @@ class StreetViewWidget(Widget):
 
 
 @register
-class HeadOnCollisionsComparisonWidget(Widget):
+class HeadOnCollisionsComparisonWidget(SubUrbanWidget):
     name: str = "head_on_collisions_comparison"
     SPECIFIC_ROAD_SUBTITLE = "specific_road_segment_fatal_accidents"
     ALL_ROADS_SUBTITLE = "all_roads_fatal_accidents"
@@ -385,21 +421,21 @@ class HeadOnCollisionsComparisonWidget(Widget):
             )
 
         road_sums = self.sum_count_of_accident_type(
-            road_data, BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION)
+            road_data, BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION
+        )
         all_roads_sums = self.sum_count_of_accident_type(
-            all_roads_data, BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION)
+            all_roads_data, BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION
+        )
 
-        res = {self.SPECIFIC_ROAD_SUBTITLE: [
-            {"desc": "frontal",
-             "count": road_sums["given"]
-             },
-            {"desc": "others",
-             "count": road_sums["others"]}
-        ],
+        res = {
+            self.SPECIFIC_ROAD_SUBTITLE: [
+                {"desc": "frontal", "count": road_sums["given"]},
+                {"desc": "others", "count": road_sums["others"]},
+            ],
             self.ALL_ROADS_SUBTITLE: [
                 {"desc": "frontal", "count": all_roads_sums["given"]},
-                {"desc": "others", "count": all_roads_sums["others"]}
-            ]
+                {"desc": "others", "count": all_roads_sums["others"]},
+            ],
         }
         return res
 
@@ -418,6 +454,7 @@ class HeadOnCollisionsComparisonWidget(Widget):
                 e["desc"] = _(e["desc"])
         return items
 
+    # noinspection PyUnboundLocalVariable
     def is_included(self) -> bool:
         segment_items = self.items[self.SPECIFIC_ROAD_SUBTITLE]
         for item in segment_items:
@@ -437,7 +474,8 @@ class HeadOnCollisionsComparisonWidget(Widget):
             else:
                 raise ValueError
         all_total = all_h2h + all_others
-        return (segment_h2h > 0 and (segment_h2h/segment_total) > all_h2h/all_total)
+        return segment_h2h > 0 and (segment_h2h / segment_total) > all_h2h / all_total
+
 
 # adding calls to _() for pybabel extraction
 _("others")
@@ -445,7 +483,7 @@ _("frontal")
 
 
 @register
-class AccidentCountByAccidentTypeWidget(Widget):
+class AccidentCountByAccidentTypeWidget(SubUrbanWidget):
     name: str = "accident_count_by_accident_type"
 
     def __init__(self, request_params: RequestParams):
@@ -479,7 +517,7 @@ class AccidentCountByAccidentTypeWidget(Widget):
 
 
 @register
-class AccidentsHeatMapWidget(Widget):
+class AccidentsHeatMapWidget(SubUrbanWidget):
     name: str = "accidents_heat_map"
 
     def __init__(self, request_params: RequestParams):
@@ -519,8 +557,9 @@ class AccidentsHeatMapWidget(Widget):
         }
         return items
 
+
 @register
-class AccidentCountByAccidentYearWidget(Widget):
+class AccidentCountByAccidentYearWidget(SubUrbanWidget):
     name: str = "accident_count_by_accident_year"
 
     def __init__(self, request_params: RequestParams):
@@ -543,7 +582,7 @@ class AccidentCountByAccidentYearWidget(Widget):
 
 
 @register
-class InjuredCountByAccidentYearWidget(Widget):
+class InjuredCountByAccidentYearWidget(SubUrbanWidget):
     name: str = "injured_count_by_accident_year"
 
     def __init__(self, request_params: RequestParams):
@@ -566,7 +605,7 @@ class InjuredCountByAccidentYearWidget(Widget):
 
 
 @register
-class AccidentCountByDayNightWidget(Widget):
+class AccidentCountByDayNightWidget(SubUrbanWidget):
     name: str = "accident_count_by_day_night"
 
     def __init__(self, request_params: RequestParams):
@@ -586,7 +625,7 @@ class AccidentCountByDayNightWidget(Widget):
 
 
 @register
-class AccidentCountByHourWidget(Widget):
+class AccidentCountByHourWidget(SubUrbanWidget):
     name: str = "accident_count_by_hour"
 
     def __init__(self, request_params: RequestParams):
@@ -606,7 +645,7 @@ class AccidentCountByHourWidget(Widget):
 
 
 @register
-class AccidentCountByRoadLightWidget(Widget):
+class AccidentCountByRoadLightWidget(SubUrbanWidget):
     name: str = "accident_count_by_road_light"
 
     def __init__(self, request_params: RequestParams):
@@ -625,7 +664,7 @@ class AccidentCountByRoadLightWidget(Widget):
         )
 
 
-class TopRoadSegmentsAccidentsPerKmWidget(Widget):
+class TopRoadSegmentsAccidentsPerKmWidget(SubUrbanWidget):
     name: str = "top_road_segments_accidents_per_km"
 
     def __init__(self, request_params: RequestParams):
@@ -678,7 +717,7 @@ class TopRoadSegmentsAccidentsPerKmWidget(Widget):
         return result.to_dict(orient="records")  # pylint: disable=no-member
 
 
-class InjuredCountPerAgeGroupWidget(Widget):
+class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
     name: str = "injured_count_per_age_group"
 
     def __init__(self, request_params: RequestParams):
@@ -768,7 +807,7 @@ class InjuredCountPerAgeGroupWidget(Widget):
 
 
 @register
-class VisionZeroWidget(Widget):
+class VisionZeroWidget(SubUrbanWidget):
     name: str = "vision_zero"
 
     def __init__(self, request_params: RequestParams):
@@ -778,8 +817,9 @@ class VisionZeroWidget(Widget):
     def generate_items(self) -> None:
         self.items = ["vision_zero_2_plus_1"]
 
+
 @register
-class Road2Plus1Widget(Widget):
+class Road2Plus1Widget(SubUrbanWidget):
     name: str = "vision_zero_2_plus_1"
 
     def __init__(self, request_params: RequestParams):
@@ -789,8 +829,9 @@ class Road2Plus1Widget(Widget):
     def generate_items(self) -> None:
         self.items = ["vision_zero_2_plus_1"]
 
+
 @register
-class AccidentCountByDriverTypeWidget(Widget):
+class AccidentCountByDriverTypeWidget(SubUrbanWidget):
     name: str = "accident_count_by_driver_type"
 
     def __init__(self, request_params: RequestParams):
@@ -851,7 +892,7 @@ class AccidentCountByDriverTypeWidget(Widget):
 
 
 @register
-class AccidentCountByCarTypeWidget(Widget):
+class AccidentCountByCarTypeWidget(SubUrbanWidget):
     name: str = "accident_count_by_car_type"
 
     def __init__(self, request_params: RequestParams):
@@ -952,19 +993,22 @@ class AccidentCountByCarTypeWidget(Widget):
             try:
                 item["car_type"] = _(VehicleCategory(item["car_type"]).get_english_display_name())
             except ValueError:
-                logging.exception(f'AccidentCountByCarType.localize_items: item:{item}')
-        base_title = _("comparing vehicle type percentage in accidents in"
-                       " {} "
-                       "relative to national average")
+                logging.exception(f"AccidentCountByCarType.localize_items: item:{item}")
+        base_title = _(
+            "comparing vehicle type percentage in accidents in"
+            " {} "
+            "relative to national average"
+        )
         items["data"]["text"] = {
             "title": base_title.format(
-                segment_dictionary[request_params.location_info["road_segment_name"]])
+                segment_dictionary[request_params.location_info["road_segment_name"]]
+            )
         }
         return items
 
 
 @register
-class InjuredAccidentsWithPedestriansWidget(Widget):
+class InjuredAccidentsWithPedestriansWidget(SubUrbanWidget):
     name: str = "injured_accidents_with_pedestrians"
 
     def __init__(self, request_params: RequestParams):
@@ -972,8 +1016,8 @@ class InjuredAccidentsWithPedestriansWidget(Widget):
         self.rank = 18
         self.text = {"title": "נפגעים הולכי רגל ברחוב ז׳בוטינסקי, פתח תקווה"}
 
-    # noinspection PyMethodMayBeStatic
-    def is_in_cache(self) -> bool:
+    @staticmethod
+    def is_in_cache() -> bool:
         return False
 
     def generate_items(self) -> None:
@@ -1051,7 +1095,7 @@ class InjuredAccidentsWithPedestriansWidget(Widget):
 
 
 @register
-class AccidentSeverityByCrossLocationWidget(Widget):
+class AccidentSeverityByCrossLocationWidget(SubUrbanWidget):
     name: str = "accident_severity_by_cross_location"
 
     def __init__(self, request_params: RequestParams):
@@ -1059,8 +1103,8 @@ class AccidentSeverityByCrossLocationWidget(Widget):
         self.rank = 19
         self.text = {"title": "הולכי רגל הרוגים ופצועים קשה ברחוב בן יהודה, תל אביב"}
 
-    # noinspection PyMethodMayBeStatic
-    def is_in_cache(self) -> bool:
+    @staticmethod
+    def is_in_cache() -> bool:
         return False
 
     def generate_items(self) -> None:
@@ -1092,7 +1136,7 @@ class AccidentSeverityByCrossLocationWidget(Widget):
         ]
 
 
-class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
+class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
     name: str = "motorcycle_accidents_vs_all_accidents"
 
     def __init__(self, request_params: RequestParams):
@@ -1109,8 +1153,9 @@ class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
         )
 
     @staticmethod
-    def motorcycle_accidents_vs_all_accidents(start_time: datetime.date,
-                                              end_time: datetime.date, road_number: str) -> List:
+    def motorcycle_accidents_vs_all_accidents(
+        start_time: datetime.date, end_time: datetime.date, road_number: str
+    ) -> List:
         location_label = "location"
         location_other = "שאר הארץ"
         location_road = f"כביש {int(road_number)}"
@@ -1131,7 +1176,9 @@ class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
         case_vehicle = case(
             [
                 (
-                    InvolvedMarkerView.involve_vehicle_type.in_(VehicleCategory.MOTORCYCLE.get_codes()),
+                    InvolvedMarkerView.involve_vehicle_type.in_(
+                        VehicleCategory.MOTORCYCLE.get_codes()
+                    ),
                     literal_column(f"'{vehicle_motorcycle}'"),
                 )
             ],
@@ -1209,7 +1256,7 @@ class MotorcycleAccidentsVsAllAccidentsWidget(Widget):
         ]
 
 
-class AccidentCountPedestriansPerVehicleStreetVsAllWidget(Widget):
+class AccidentCountPedestriansPerVehicleStreetVsAllWidget(SubUrbanWidget):
     name: str = "accident_count_pedestrians_per_vehicle_street_vs_all"
 
     def __init__(self, request_params: RequestParams):
@@ -1221,8 +1268,8 @@ class AccidentCountPedestriansPerVehicleStreetVsAllWidget(Widget):
             )
         }
 
-    # noinspection PyMethodMayBeStatic
-    def is_in_cache(self) -> bool:
+    @staticmethod
+    def is_in_cache() -> bool:
         return False
 
     def generate_items(self) -> None:
@@ -1246,7 +1293,7 @@ class AccidentCountPedestriansPerVehicleStreetVsAllWidget(Widget):
 
 
 @register
-class TopRoadSegmentsAccidentsWidget(Widget):
+class TopRoadSegmentsAccidentsWidget(SubUrbanWidget):
     name: str = "top_road_segments_accidents"
 
     def __init__(self, request_params: RequestParams):
@@ -1269,7 +1316,7 @@ class TopRoadSegmentsAccidentsWidget(Widget):
 
 
 @register
-class PedestrianInjuredInJunctionsWidget(Widget):
+class PedestrianInjuredInJunctionsWidget(SubUrbanWidget):
     name: str = "pedestrian_injured_in_junctions"
 
     def __init__(self, request_params: RequestParams):
@@ -1289,7 +1336,7 @@ class PedestrianInjuredInJunctionsWidget(Widget):
         ]
 
 
-class AccidentTypeVehicleTypeRoadComparisonWidget(Widget):
+class AccidentTypeVehicleTypeRoadComparisonWidget(SubUrbanWidget):
     name: str = "vehicle_accident_vs_all_accidents"  # WIP: change by vehicle type
     MAX_ACCIDENT_TYPES_TO_RETURN: int = 5
 
@@ -1298,7 +1345,9 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(Widget):
         self.road_number: str = request_params.location_info["road1"]
         # WIP: change rank, text by vehicle type
         self.rank = 24
-        self.text = {"title": f"סוגי תאונות אופנועים בכביש {int(self.road_number)} בהשוואה לכל הארץ"}
+        self.text = {
+            "title": f"סוגי תאונות אופנועים בכביש {int(self.road_number)} בהשוואה לכל הארץ"
+        }
 
     def generate_items(self) -> None:
         self.items = AccidentTypeVehicleTypeRoadComparisonWidget.accident_type_road_vs_all_count(
@@ -1306,25 +1355,32 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(Widget):
         )
 
     @staticmethod
-    def accident_type_road_vs_all_count(start_time: datetime.date,
-                                        end_time: datetime.date, road_number: str) -> List:
+    def accident_type_road_vs_all_count(
+        start_time: datetime.date, end_time: datetime.date, road_number: str
+    ) -> List:
         num_accidents_label = "num_of_accidents"
         location_all = "כל הארץ"
         location_road = f"כביש {int(road_number)}"
 
         vehicle_types = VehicleCategory.MOTORCYCLE.get_codes()  # WIP: change by vehicle type
 
-        all_roads_query = AccidentTypeVehicleTypeRoadComparisonWidget.get_accident_count_by_vehicle_type_query(
-            start_time, end_time, num_accidents_label, vehicle_types)
+        all_roads_query = (
+            AccidentTypeVehicleTypeRoadComparisonWidget.get_accident_count_by_vehicle_type_query(
+                start_time, end_time, num_accidents_label, vehicle_types
+            )
+        )
         all_roads_query_result = run_query(all_roads_query)
         all_roads_sum_accidents = 0
         all_roads_map = {}
         for record in all_roads_query_result:
             all_roads_sum_accidents += record[num_accidents_label]
-            all_roads_map[record[VehicleMarkerView.accident_type.name]] = record[num_accidents_label]
+            all_roads_map[record[VehicleMarkerView.accident_type.name]] = record[
+                num_accidents_label
+            ]
 
-        road_query = all_roads_query.filter((VehicleMarkerView.road1 == road_number) |
-                                            (VehicleMarkerView.road2 == road_number))
+        road_query = all_roads_query.filter(
+            (VehicleMarkerView.road1 == road_number) | (VehicleMarkerView.road2 == road_number)
+        )
         road_query_result = run_query(road_query)
         road_sum_accidents = 0
         types_to_report = []
@@ -1332,32 +1388,50 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(Widget):
             road_sum_accidents += record[num_accidents_label]
 
         for record in road_query_result:
-            if len(types_to_report) == AccidentTypeVehicleTypeRoadComparisonWidget.MAX_ACCIDENT_TYPES_TO_RETURN:
+            if (
+                len(types_to_report)
+                == AccidentTypeVehicleTypeRoadComparisonWidget.MAX_ACCIDENT_TYPES_TO_RETURN
+            ):
                 break
             accident_type = record[VehicleMarkerView.accident_type.name]
-            types_to_report.append({VehicleMarkerView.accident_type.name: accident_type,
-                                    location_road: record[num_accidents_label] / road_sum_accidents,
-                                    location_all: all_roads_map[accident_type] / all_roads_sum_accidents})
+            types_to_report.append(
+                {
+                    VehicleMarkerView.accident_type.name: accident_type,
+                    location_road: record[num_accidents_label] / road_sum_accidents,
+                    location_all: all_roads_map[accident_type] / all_roads_sum_accidents,
+                }
+            )
         return types_to_report
 
     @staticmethod
-    def get_accident_count_by_vehicle_type_query(start_time: datetime.date,
-                                                 end_time: datetime.date,
-                                                 num_accidents_label: str, vehicle_types: List[int])\
-            -> db.session.query:
-        return (get_query(table_obj=VehicleMarkerView, start_time=start_time, end_time=end_time,
-                          filters={VehicleMarkerView.vehicle_type.name: vehicle_types})
-                .with_entities(VehicleMarkerView.accident_type,
-                               func.count(distinct(VehicleMarkerView.provider_and_id)).label(num_accidents_label))
-                .group_by(VehicleMarkerView.accident_type)
-                .order_by(desc(num_accidents_label))
-                )
+    def get_accident_count_by_vehicle_type_query(
+        start_time: datetime.date,
+        end_time: datetime.date,
+        num_accidents_label: str,
+        vehicle_types: List[int],
+    ) -> db.session.query:
+        return (
+            get_query(
+                table_obj=VehicleMarkerView,
+                start_time=start_time,
+                end_time=end_time,
+                filters={VehicleMarkerView.vehicle_type.name: vehicle_types},
+            )
+            .with_entities(
+                VehicleMarkerView.accident_type,
+                func.count(distinct(VehicleMarkerView.provider_and_id)).label(num_accidents_label),
+            )
+            .group_by(VehicleMarkerView.accident_type)
+            .order_by(desc(num_accidents_label))
+        )
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         for item in items["data"]["items"]:
             try:
-                item[VehicleMarkerView.accident_type.name] = _(english_accident_type_dict[item["accident_type"]])
+                item[VehicleMarkerView.accident_type.name] = _(
+                    english_accident_type_dict[item["accident_type"]]
+                )
             except KeyError:
                 logging.exception(
                     f"AccidentTypeVehicleTypeRoadComparisonWidget.localize_items: Exception while translating {item}."
@@ -1367,8 +1441,7 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(Widget):
 
 def run_query(query: db.session.query) -> Dict:
     # pylint: disable=no-member
-    return pd.read_sql_query(query.statement, query.session.bind) \
-        .to_dict(orient="records")
+    return pd.read_sql_query(query.statement, query.session.bind).to_dict(orient="records")
 
 
 def extract_news_flash_location(news_flash_obj):
@@ -1444,7 +1517,10 @@ def get_most_severe_accidents_with_entities(
         BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
         BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
     ]
-    filters["accident_severity"] = [BE_CONST.AccidentSeverity.FATAL, BE_CONST.AccidentSeverity.SEVERE]
+    filters["accident_severity"] = [
+        BE_CONST.AccidentSeverity.FATAL,
+        BE_CONST.AccidentSeverity.SEVERE,
+    ]
     query = get_query(table_obj, filters, start_time, end_time)
     query = query.with_entities(*entities)
     query = query.order_by(getattr(table_obj, "accident_timestamp").desc())
@@ -1562,12 +1638,13 @@ def get_latest_accident_date(table_obj, filters):
     return (df.to_dict(orient="records"))[0].get("max_1")  # pylint: disable=no-member
 
 
+# noinspection PyArgumentList
 def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> List[Widget]:
     widgets = []
     # noinspection PyArgumentList
-    for w in get_widget_factories():
-        widget: Widget = w(request_params)
-        if widget.is_in_cache() == to_cache:
+    for w in widgets_dict.values():
+        if w.is_relevant(request_params) and w.is_in_cache() == to_cache:
+            widget: Widget = w(request_params)
             widgets.append(widget)
             logging.debug(f"name:{widget.name}, class:{get_widget_class_by_name(widget.name)}")
     for w in widgets:
@@ -1708,3 +1785,19 @@ def localize_after_cache(request_params: RequestParams, items_list: List[Dict]) 
         else:
             logging.error(f"localize_after_cache: bad input (missing 'name' key):{items}")
     return res
+
+
+def is_urban(request_params: RequestParams) -> bool:
+    return (
+        request_params is not None
+        and "yishuv_name" in request_params.location_info
+        and "street1_hebrew" in request_params.location_info
+    )
+
+
+def is_sub_urban(request_params: RequestParams) -> bool:
+    return (
+        request_params is not None
+        and "road1" in request_params.location_info
+        and "road_segment_name" in request_params.location_info
+    )

@@ -108,6 +108,10 @@ So if the developer key is "12345" the new url need to be is: "https://maps.goog
 
 **8.** To restore fresh DB data, delete all existing volumes: `docker-compose down -v` then restart from step 7
 
+Using VSCODE
+-----------------------
+In order to use VSCODE in debugging mode with DOCKER, check out [VSCODE_CONFIGURATION](VSCODE_CONFIGURATION.md)
+
 ## Additional Docker commands
 Use `sudo` before each docker commands if you are using ubuntu.
 

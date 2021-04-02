@@ -4,7 +4,7 @@ CONFIGURING VSCODE
 In order to debug our flask app using VSCODE python debugger, follow the following steps:
 
 1. Install [VSCODE](https://code.visualstudio.com)
-2. In VSCODE Install the following extensions: Microsoft Python Extension](https://github.com/Microsoft/vscode-python), [Docker Extension](https://github.com/microsoft/vscode-docker), [Microsoft Remote Development](https://github.com/Microsoft/vscode-remote-release)
+2. In VSCODE Install the following extensions: [Microsoft Python Extension](https://github.com/Microsoft/vscode-python), [Docker Extension](https://github.com/microsoft/vscode-docker), [Microsoft Remote Development](https://github.com/Microsoft/vscode-remote-release)
 [A guide for installing VSCODE extensions](https://code.visualstudio.com/learn/get-started/extensions)
 3. Modify docker-compose.yml: add the following to the ports section in anyway service: `- "5678:5678"` This will add the port mapping exposing it to the debugger.
 4. Modify Dockerfile: remove the following command: `CMD FLASK_APP=anyway flask run --host 0.0.0.0` and add the following commands instead:

@@ -4,6 +4,7 @@ from datetime import datetime
 from boto3 import resource as resource_builder
 from tempfile import mkdtemp
 from anyway import secrets
+import logging
 
 get_environment_variable = environ.get
 
@@ -99,8 +100,9 @@ class S3Handler:
 
         for year in range(start_year, current_year + 1):
             s3_files_directory = f"{accidents_type_directory}/{year}"
-
+            logging.info(f"{s3_files_directory} directory about to be downloaded")
             for s3_object in s3_bucket.objects.filter(Prefix=s3_files_directory):
+                logging.info(f"s3_object: {s3_object}")
                 local_dir_path = join_path(local_directory, accidents_type_directory)
                 if not does_path_exist(local_dir_path):
                     mkdir(local_dir_path)
@@ -110,6 +112,7 @@ class S3Handler:
                 object_key = s3_object.key
                 s3_filename = basename(object_key)
                 local_file_path = join_path(local_dir_path, s3_filename)
+                logging.info(f"{local_file_path} file about to be downloaded")
                 download_from_s3_callback(
                     Bucket=ANYWAY_BUCKET, Key=object_key, Filename=local_file_path
                 )

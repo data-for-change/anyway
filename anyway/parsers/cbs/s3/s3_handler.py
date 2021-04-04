@@ -87,6 +87,10 @@ class S3Handler:
 
         return self.__download_from_s3_callback
 
+    @staticmethod
+    def is_a_directory(s3_object):
+        return s3_object.key[-1] == '/'
+
     def __download_accidents_type_files(self, accidents_type, start_year):
         current_year, s3_bucket, local_directory = (
             self.current_year,
@@ -102,6 +106,8 @@ class S3Handler:
             s3_files_directory = f"{accidents_type_directory}/{year}"
             logging.info(f"{s3_files_directory} directory about to be downloaded")
             for s3_object in s3_bucket.objects.filter(Prefix=s3_files_directory):
+                if self.is_a_directory(s3_object):
+                    continue
                 logging.info(f"s3_object: {s3_object}")
                 local_dir_path = join_path(local_directory, accidents_type_directory)
                 if not does_path_exist(local_dir_path):

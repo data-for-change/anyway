@@ -2,7 +2,6 @@
 
 from datetime import datetime
 from typing import Dict
-from sqlalchemy import not_
 from anyway.models import InfographicsDataCache, InfographicsDataCacheTemp, NewsFlash
 from anyway.constants import CONST
 from anyway.app_and_db import db
@@ -12,11 +11,7 @@ import json
 
 
 def is_cache_eligible(news_flash):
-    return (
-        news_flash.accident
-        and news_flash.resolution in (["כביש בינעירוני"])
-        and news_flash.road_segment_name is not None
-    )
+    return news_flash.accident
 
 
 def is_in_cache(nf):
@@ -28,6 +23,7 @@ def is_in_cache(nf):
     )
 
 
+# noinspection PyUnresolvedReferences
 def add_news_flash_to_cache(news_flash):
     try:
         if not is_cache_eligible(news_flash):
@@ -107,6 +103,7 @@ def copy_temp_into_cache():
     db.session.commit()
 
 
+# noinspection PyUnresolvedReferences
 def build_cache_into_temp():
     start = datetime.now()
     db.session.query(InfographicsDataCacheTemp).delete()
@@ -123,11 +120,7 @@ def build_cache_into_temp():
                         new_flash.get_id(), y, "he"
                     ),
                 }
-                for new_flash in db.session.query(NewsFlash)
-                .filter(NewsFlash.accident)
-                .filter(NewsFlash.resolution.in_(["כביש בינעירוני"]))
-                .filter(not_(NewsFlash.road_segment_name == None))
-                .all()
+                for new_flash in db.session.query(NewsFlash).filter(NewsFlash.accident).all()
             ],
         )
     logging.info(f"cache rebuild took:{str(datetime.now() - start)}")
@@ -137,13 +130,7 @@ def get_cache_info():
     cache_items = db.session.query(InfographicsDataCache).count()
     tmp_items = db.session.query(InfographicsDataCacheTemp).count()
     num_acc_flash_items = db.session.query(NewsFlash).filter(NewsFlash.accident).count()
-    num_acc_suburban_flash_items = (
-        db.session.query(NewsFlash)
-        .filter(NewsFlash.accident)
-        .filter(NewsFlash.resolution.in_(["כביש בינעירוני"]))
-        .filter(not_(NewsFlash.road_segment_name == None))
-        .count()
-    )
+    num_acc_suburban_flash_items = db.session.query(NewsFlash).filter(NewsFlash.accident).count()
     db.session.commit()
     return f"num items in cache: {cache_items}, temp table: {tmp_items}, accident flashes:{num_acc_flash_items}, flashes processed:{num_acc_suburban_flash_items}"
 

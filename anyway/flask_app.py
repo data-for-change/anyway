@@ -81,7 +81,7 @@ from anyway.models import (
 )
 from anyway.oauth import OAuthSignIn
 from anyway.infographics_utils import get_infographics_data
-from anyway.app_and_db import app, db
+from anyway.app_and_db import app, db, get_cors_config
 from anyway.dataclasses.user_data import UserData
 from anyway.utilities import is_valid_number, is_a_safe_redirect_url, is_a_valid_email
 from anyway.views.schools.api import (
@@ -98,7 +98,7 @@ from anyway.views.news_flash.api import news_flash, single_news_flash
 
 app.config.from_object(__name__)
 app.config["SECURITY_REGISTERABLE"] = False
-app.config["SESSION_COOKIE_SAMESITE"] = 'none'
+app.config["SESSION_COOKIE_SAMESITE"] = "none"
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SECURITY_USER_IDENTITY_ATTRIBUTES"] = "username"
 app.config["BABEL_DEFAULT_LOCALE"] = "he"
@@ -181,18 +181,7 @@ assets.register(
 
 CORS(
     app,
-    resources={
-        r"/location-subscription": {"origins": "*"},
-        r"/report-problem": {"origins": "*"},
-        r"/api/infographics-data": {"origins": "*"},
-        r"/api/news-flash": {"origins": "*"},
-        r"/api/embedded-reports": {"origins": "*"},
-        r"/authorize/*": {"origins": BE_CONST.ANYWAY_CORS_SITE_LIST, "supports_credentials": True},
-        r"/callback/*": {"origins": BE_CONST.ANYWAY_CORS_SITE_LIST, "supports_credentials": True},
-        r"/user/info": {"origins": BE_CONST.ANYWAY_CORS_SITE_LIST, "supports_credentials": True},
-        r"/user/update": {"origins": BE_CONST.ANYWAY_CORS_SITE_LIST, "supports_credentials": True},
-        r"/logout": {"origins": BE_CONST.ANYWAY_CORS_SITE_LIST, "supports_credentials": True},
-    },
+    resources=get_cors_config(),
 )
 
 jinja_environment = jinja2.Environment(

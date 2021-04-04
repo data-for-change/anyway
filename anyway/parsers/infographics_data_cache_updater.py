@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from typing import Dict
+from sqlalchemy import not_
 from anyway.models import InfographicsDataCache, InfographicsDataCacheTemp, NewsFlash
 from anyway.constants import CONST
 from anyway.app_and_db import db
@@ -11,7 +12,11 @@ import json
 
 
 def is_cache_eligible(news_flash):
-    return news_flash.accident
+    return (
+        news_flash.accident
+        and news_flash.resolution in (["כביש בינעירוני"])
+        and news_flash.road_segment_name is not None
+    )
 
 
 def is_in_cache(nf):
@@ -120,7 +125,11 @@ def build_cache_into_temp():
                         new_flash.get_id(), y, "he"
                     ),
                 }
-                for new_flash in db.session.query(NewsFlash).filter(NewsFlash.accident).all()
+                for new_flash in db.session.query(NewsFlash)
+                .filter(NewsFlash.accident)
+                .filter(NewsFlash.resolution.in_(["כביש בינעירוני"]))
+                .filter(not_(NewsFlash.road_segment_name == None))
+                .all()
             ],
         )
     logging.info(f"cache rebuild took:{str(datetime.now() - start)}")
@@ -130,7 +139,13 @@ def get_cache_info():
     cache_items = db.session.query(InfographicsDataCache).count()
     tmp_items = db.session.query(InfographicsDataCacheTemp).count()
     num_acc_flash_items = db.session.query(NewsFlash).filter(NewsFlash.accident).count()
-    num_acc_suburban_flash_items = db.session.query(NewsFlash).filter(NewsFlash.accident).count()
+    num_acc_suburban_flash_items = (
+        db.session.query(NewsFlash)
+        .filter(NewsFlash.accident)
+        .filter(NewsFlash.resolution.in_(["כביש בינעירוני"]))
+        .filter(not_(NewsFlash.road_segment_name == None))
+        .count()
+    )
     db.session.commit()
     return f"num items in cache: {cache_items}, temp table: {tmp_items}, accident flashes:{num_acc_flash_items}, flashes processed:{num_acc_suburban_flash_items}"
 

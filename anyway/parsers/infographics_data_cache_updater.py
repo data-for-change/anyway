@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from typing import Dict
+from sqlalchemy import not_
 from anyway.models import InfographicsDataCache, InfographicsDataCacheTemp, NewsFlash
 from anyway.constants import CONST
 from anyway.app_and_db import db

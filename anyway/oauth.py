@@ -6,7 +6,7 @@ import typing
 from flask import current_app, url_for, request, redirect, Response
 from rauth import OAuth2Service
 
-from anyway.dataclasses.user_data import UserData
+from anyway.anyway_dataclasses.user_data import UserData
 
 
 class OAuthSignIn(object):

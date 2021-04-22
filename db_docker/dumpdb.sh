@@ -29,7 +29,7 @@ dumpdb "pg_dumpall" \
        "`date +%Y-%m-%d`_${DBDUMP_S3_FILE_PREFIX}anyway.pgdump" \
        "anyway-full-db-dumps" &&\
  echo dumping partial db &&\
-dumpdb "pg_dump -d anyway --no-privileges -N topology -T users -T roles -T roles_users -T locationsubscribers -T report_preferences -T general_preferences -T user_oauth" \
+dumpdb "pg_dump -d anyway --no-privileges -N topology -T users -T roles -T roles_users -T locationsubscribers -T report_preferences -T general_preferences -T user_oauth -T roles2 -T users_to_roles2" \
        "`date +%Y-%m-%d`_${DBDUMP_S3_FILE_PREFIX}anyway_partial.pgdump" \
         "anyway-partial-db-dumps" &&\
 echo Great Success && exit 0

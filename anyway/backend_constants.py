@@ -52,6 +52,10 @@ class BackEndConstants(object):
         PRIVATE_VEHICLE_DRIVER = 2
         OTHER_DRIVER = 3
 
+    # This class should be correlated with the Roles2 table
+    class Roles2Names:
+        Admins = "admins"
+
     # This is a type for the 'road_type' table field name
     ROAD_TYPE_NOT_IN_CITY_IN_INTERSECTION = 3
     ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION = 4

@@ -9,45 +9,41 @@ from io import StringIO
 import os
 import time
 
-import flask_admin as admin
-import flask_login as login
+from flask_login import login_user, logout_user, LoginManager, current_user
 import jinja2
 import pandas as pd
-from flask import make_response, render_template, Response, jsonify, url_for, flash, abort
+from flask import make_response, render_template, Response, jsonify, abort, current_app, g
 from flask import request, redirect, session
-from flask_admin import helpers, expose, BaseView
-from flask_admin.contrib import sqla
 from flask_assets import Environment
 from flask_babel import Babel, gettext
 from flask_compress import Compress
 from flask_cors import CORS
+from flask_principal import (
+    Principal,
+    identity_changed,
+    Identity,
+    AnonymousIdentity,
+    identity_loaded,
+    UserNeed,
+    RoleNeed,
+    Permission,
+)
+
 from anyway.error_code_and_strings import (
     Errors as Es,
     ERROR_TO_HTTP_CODE_DICT,
     build_json_for_user_api_error,
 )
-from flask_security import (
-    Security,
-    SQLAlchemyUserDatastore,
-    roles_required,
-    current_user,
-    LoginForm,
-    login_required,
-)
-from flask_sqlalchemy import SQLAlchemy
-from sendgrid import Mail
+
 from http import client as http_client, HTTPStatus
 from sqlalchemy import and_, not_, or_
 from sqlalchemy import func
-from sqlalchemy.orm import load_only
 from webassets import Environment as AssetsEnvironment, Bundle as AssetsBundle
 from webassets.ext.jinja2 import AssetsExtension
-from werkzeug.security import check_password_hash
 from werkzeug.exceptions import BadRequestKeyError
-from wtforms import form, fields, validators, StringField, PasswordField, Form
 
 from anyway import utilities, secrets
-from anyway.base import user_optional
+from anyway.base import user_optional, _set_cookie_hijack, _clear_cookie_hijack
 from anyway.clusters_calculator import retrieve_clusters
 from anyway.config import ENTRIES_PER_PAGE
 from anyway.backend_constants import BE_CONST
@@ -58,12 +54,8 @@ from anyway.models import (
     DiscussionMarker,
     HighlightPoint,
     Involved,
-    User,
-    ReportPreferences,
     LocationSubscribers,
     Vehicle,
-    Role,
-    GeneralPreferences,
     ReportProblem,
     EngineVolume,
     PopulationType,
@@ -78,11 +70,13 @@ from anyway.models import (
     AccidentMarkerView,
     EmbeddedReports,
     UserOAuth,
+    Roles2,
+    users_to_roles2,
 )
 from anyway.oauth import OAuthSignIn
 from anyway.infographics_utils import get_infographics_data
 from anyway.app_and_db import app, db, get_cors_config
-from anyway.dataclasses.user_data import UserData
+from anyway.structs.user_data import UserData
 from anyway.utilities import is_valid_number, is_a_safe_redirect_url, is_a_valid_email
 from anyway.views.schools.api import (
     schools_description_api,
@@ -97,10 +91,9 @@ from anyway.views.news_flash.api import news_flash, single_news_flash
 
 
 app.config.from_object(__name__)
-app.config["SECURITY_REGISTERABLE"] = False
 app.config["SESSION_COOKIE_SAMESITE"] = "none"
 app.config["SESSION_COOKIE_SECURE"] = True
-app.config["SECURITY_USER_IDENTITY_ATTRIBUTES"] = "username"
+app.config["REMEMBER_COOKIE_SECURE"] = True
 app.config["BABEL_DEFAULT_LOCALE"] = "he"
 app.config["OAUTH_CREDENTIALS"] = {
     "facebook": {"id": secrets.get("FACEBOOK_KEY"), "secret": secrets.get("FACEBOOK_SECRET")},
@@ -203,6 +196,14 @@ cbs_dict_files = {DICTIONARY: "Dictionary.csv"}
 content_encoding = "cp1255"
 
 Compress(app)
+# Setup Flask-login
+login_manager = LoginManager()
+# Those 2 function hijack are a temporary fix - more info in base.py
+login_manager._set_cookie = _set_cookie_hijack
+login_manager._clear_cookie = _clear_cookie_hijack
+login_manager.init_app(app)
+# Setup Flask-Principal
+principals = Principal(app)
 
 
 @app.teardown_appcontext
@@ -1035,106 +1036,6 @@ def report_problem():
     return response
 
 
-@app.route("/preferences", methods=("GET", "POST"))
-def update_preferences():
-    if not current_user.is_authenticated:
-        return jsonify(respo="user not authenticated")
-    cur_id = current_user.get_id()
-    cur_user = db.session.query(UserOAuth).filter(UserOAuth.id == cur_id).first()
-    if cur_user is None:
-        return jsonify(respo="user not found")
-    cur_report_preferences = db.session.query(ReportPreferences).filter(User.id == cur_id).first()
-    cur_general_preferences = db.session.query(GeneralPreferences).filter(User.id == cur_id).first()
-    if request.method == "GET":
-        if cur_report_preferences is None and cur_general_preferences is None:
-            return jsonify(
-                accident_severity="0",
-                pref_accidents_cbs=True,
-                pref_accidents_ihud=True,
-                produce_accidents_report=False,
-            )
-        else:
-            resource_types = cur_general_preferences.resource_type.split(",")
-            if cur_report_preferences is None:
-                return jsonify(
-                    accident_severity=cur_general_preferences.minimum_displayed_severity,
-                    pref_resource_types=resource_types,
-                    produce_accidents_report=False,
-                )
-            else:
-                return jsonify(
-                    accident_severity=cur_general_preferences.minimum_displayed_severity,
-                    pref_resource_types=resource_types,
-                    produce_accidents_report=True,
-                    lat=cur_report_preferences.latitude,
-                    lon=cur_report_preferences.longitude,
-                    pref_radius=cur_report_preferences.radius,
-                    pref_accident_severity_for_report=cur_report_preferences.minimum_severity,
-                    how_many_months_back=cur_report_preferences.how_many_months_back,
-                )
-    else:
-        json_data = request.get_json(force=True)
-        accident_severity = json_data["accident_severity"]
-        resources = json_data["pref_resource_types"]
-        produce_accidents_report = json_data["produce_accidents_report"]
-        lat = json_data["lat"]
-        lon = json_data["lon"]
-        pref_radius = json_data["pref_radius"]
-        pref_accident_severity_for_report = json_data["pref_accident_severity_for_report"]
-        history_report = json_data["history_report"]
-        is_history_report = history_report != "0"
-        resource_types = ",".join(resources)
-        cur_general_preferences = (
-            db.session.query(GeneralPreferences).filter(User.id == cur_id).first()
-        )
-        if cur_general_preferences is None:
-            general_pref = GeneralPreferences(
-                user_id=cur_id,
-                minimum_displayed_severity=accident_severity,
-                resource_type=resource_types,
-            )
-            db.session.add(general_pref)
-            db.session.commit()
-        else:
-            cur_general_preferences.minimum_displayed_severity = accident_severity
-            cur_general_preferences.resource_type = resource_types
-            db.session.add(cur_general_preferences)
-            db.session.commit()
-
-        if produce_accidents_report:
-            if lat == "":
-                lat = None
-            if lon == "":
-                lon = None
-            if cur_report_preferences is None:
-                report_pref = ReportPreferences(
-                    user_id=cur_id,
-                    line_number=1,
-                    historical_report=is_history_report,
-                    how_many_months_back=history_report,
-                    latitude=lat,
-                    longitude=lon,
-                    radius=pref_radius,
-                    minimum_severity=pref_accident_severity_for_report,
-                )
-                db.session.add(report_pref)
-                db.session.commit()
-            else:
-                cur_report_preferences.historical_report = is_history_report
-                cur_report_preferences.latitude = lat
-                cur_report_preferences.longitude = lon
-                cur_report_preferences.radius = pref_radius
-                cur_report_preferences.minimum_severity = pref_accident_severity_for_report
-                cur_report_preferences.how_many_months_back = history_report
-                db.session.add(cur_report_preferences)
-                db.session.commit()
-        else:
-            if cur_report_preferences is not None:
-                db.session.delete(cur_report_preferences)
-                db.session.commit()
-        return jsonify(respo="ok")
-
-
 class PreferenceObject:
     def __init__(self, id, value, string):
         self.id = id
@@ -1147,235 +1048,6 @@ class HistoricalReportPeriods:
         self.period_id = period_id
         self.period_value = period_value
         self.severity_string = severity_string
-
-
-class LoginFormAdmin(form.Form):
-    username = fields.StringField(validators=[validators.required()])
-    password = fields.PasswordField(validators=[validators.required()])
-
-    def validate_login(self, field):
-        user = self.get_user()
-
-        if user is None:
-            raise validators.ValidationError("Invalid user")
-
-        if not check_password_hash(user.password.encode("utf8"), self.password.data.encode("utf8")):
-            raise validators.ValidationError("Invalid password")
-
-    def get_user(self):
-        return db.session.query(User).filter_by(username=self.username.data).first()
-
-
-class RegistrationForm(form.Form):
-    username = fields.StringField(validators=[validators.required()])
-    email = fields.StringField()
-    password = fields.PasswordField(validators=[validators.required()])
-
-    def validate_login(self, field):
-        if db.session.query(User).filter_by(username=self.username.data).count() > 0:
-            raise validators.ValidationError("Duplicate username")
-
-
-def init_login():
-    login_manager = login.LoginManager()
-    login_manager.init_app(app)
-
-    # Create user loader function
-    @login_manager.user_loader
-    def load_user(user_id):  # pylint: disable=unused-variable
-        return db.session.query(UserOAuth).get(user_id)
-
-
-class AdminView(sqla.ModelView):
-    def is_accessible(self):
-        return login.current_user.is_authenticated
-
-
-class AdminIndexView(admin.AdminIndexView):
-    @expose("/")
-    def index(self):
-        if login.current_user.is_authenticated:
-            if current_user.has_role("admin"):
-                return super(AdminIndexView, self).index()
-            else:
-                return make_response("Unauthorized User")
-        else:
-            return redirect(url_for(".login_view"))
-
-    @expose("/login/", methods=("GET", "POST"))
-    def login_view(self):
-        # handle user login
-        form = LoginFormAdmin(request.form)
-        if helpers.validate_form_on_submit(form):
-            user = form.get_user()
-            login.login_user(user)
-
-        if login.current_user.is_authenticated:
-            return redirect(url_for(".index"))
-        # link = '<p>Don\'t have an account? <a href="' + url_for('.register_view') + '">Click here to register.</a></p>'
-        self._template_args["form"] = form
-        # self._template_args['link'] = link
-        return super(AdminIndexView, self).index()
-
-    # @expose('/register/', methods=('GET', 'POST'))
-    # def register_view(self):
-    #    form = RegistrationForm(request.form)
-    #    if helpers.validate_form_on_submit(form):
-    #        user = User()
-    #        admin_role = db.session.query(Role).filter_by(name='admin').first()
-    #        form.populate_obj(user)
-    #        # we hash the users password to avoid saving it as plaintext in the db,
-    #        # remove to use plain text:
-    #        user.password = generate_password_hash(form.password.data)
-    #        user.is_admin = True
-    #        user.nickname = user.username
-    #        user.roles.append(admin_role) #adding admin role
-    #
-    #        db.session.add(user)
-    #        db.session.commit()
-    #
-    #        login.login_user(user)
-    #        return redirect(url_for('.index'))
-    #    link = '<p>Already have an account? <a href="' + url_for('.login_view') + '">Click here to log in.</a></p>'
-    #    self._template_args['form'] = form
-    #    self._template_args['link'] = link
-    #    return super(AdminIndexView, self).index()
-
-    @expose("/logout/")
-    def logout_view(self):
-        login.logout_user()
-        return redirect(url_for(".index"))
-
-
-class SendToSubscribersView(BaseView):
-    @roles_required("admin")
-    @expose("/", methods=("GET", "POST"))
-    def index(self):
-        if request.method == "GET":
-            user_emails = db.session.query(User).filter(User.new_features_subscription == True)
-            email_list = []
-            for user in user_emails:
-                email_list.append(user.email)
-                email_list.append(";")
-            context = {"user_emails": email_list}
-            return self.render("sendemail.html", **context)
-        else:
-            jsondata = request.get_json(force=True)
-            users_send_email_to = db.session.query(User).filter(
-                User.new_features_subscription == True
-            )
-            message = Mail(
-                subject=jsondata["subject"].encode("utf8"),
-                html_content=jsondata["message"].encode("utf8"),
-                from_email="ANYWAY Team <feedback@anyway.co.il>",
-            )
-            for user in users_send_email_to:
-                message.add_bcc(user.email)
-            # try:
-            # sg.send(message)
-            # except Exception as _:
-            #    return "Error occurred while trying to send the emails"
-            return "Email/s was not Sent"
-
-    def is_visible(self):
-        return login.current_user.is_authenticated
-
-
-class ViewHighlightedMarkersData(BaseView):
-    @roles_required("admin")
-    @expose("/")
-    def index(self):
-        highlightedpoints = db.session.query(HighlightPoint).options(
-            load_only("id", "latitude", "longitude", "type")
-        )
-        points = []
-        for point in highlightedpoints:
-            p = HighlightPoint()
-            p.id = point.id
-            p.latitude = point.latitude
-            p.longitude = point.longitude
-            p.created = point.created
-            p.type = point.type
-            points.append(p)
-        context = {"points": points}
-        return self.render("viewhighlighteddata.html", **context)
-
-    def is_visible(self):
-        return login.current_user.is_authenticated
-
-
-class ViewHighlightedMarkersMap(BaseView):
-    @roles_required("admin")
-    @expose("/")
-    def index1(self):
-        return index(marker=None, message=None)
-
-    def is_visible(self):
-        return login.current_user.is_authenticated
-
-
-class OpenAccountForm(Form):
-    username = StringField("Username", validators=[validators.DataRequired()])
-    password = PasswordField("Password", validators=[validators.DataRequired()])
-
-    def validate_on_submit(self):
-        if self.username.data == "":
-            return False
-
-        if self.password.data == "":
-            return False
-        return True
-
-
-class OpenNewOrgAccount(BaseView):
-    @roles_required("admin")
-    @expose("/", methods=("GET", "POST"))
-    def index(self):
-        formAccount = OpenAccountForm(request.form)
-        if request.method == "POST" and formAccount.validate_on_submit():
-            user = User(username=formAccount.username.data, password=formAccount.password.data)
-            role = db.session.query(Role).filter(Role.id == 2).first()
-            user.roles.append(role)
-            db.session.add(user)
-            db.session.commit()
-            flash("The user was created successfully")
-        return self.render("open_account.html", form=formAccount)
-
-    def is_visible(self):
-        return login.current_user.is_authenticated
-
-
-init_login()
-
-admin = admin.Admin(
-    app,
-    "ANYWAY Administration Panel",
-    index_view=AdminIndexView(),
-    base_template="admin_master.html",
-)
-
-admin.add_view(AdminView(User, db.session, name="Users", endpoint="Users", category="Users"))
-admin.add_view(AdminView(Role, db.session, name="Roles", endpoint="Roles"))
-admin.add_view(
-    OpenNewOrgAccount(
-        name="Open new organization account", endpoint="OpenAccount", category="Users"
-    )
-)
-admin.add_view(SendToSubscribersView(name="Send To Subscribers"))
-admin.add_view(
-    ViewHighlightedMarkersData(
-        name="View Highlighted Markers Data",
-        endpoint="ViewHighlightedMarkersData",
-        category="View Highlighted Markers",
-    )
-)
-admin.add_view(
-    ViewHighlightedMarkersMap(
-        name="View Highlighted Markers Map",
-        endpoint="ViewHighlightedMarkersMap",
-        category="View Highlighted Markers",
-    )
-)
 
 
 @app.route("/markers/polygon/", methods=["GET"])
@@ -1412,57 +1084,37 @@ def acc_in_area_query():
     return response
 
 
-class ExtendedLoginForm(LoginForm):
-    username = StringField("User Name", [validators.DataRequired()])
-
-    def validate(self):
-        if not super(ExtendedLoginForm, self).validate():
-            return False
-        if self.username.data.strip() == "":
-            return False
-        self.user = db.session.query(User).filter(User.username == self.username.data).first()
-        if self.user is None:
-            return False
-        if self.password.data == self.user.password:
-            return True
-        return False
-
-
-user_datastore = SQLAlchemyUserDatastore(SQLAlchemy(app), User, Role)
-security = Security(app, user_datastore, login_form=ExtendedLoginForm)
-lm = login.LoginManager(app)
-lm.login_view = "index"
-
-
-@login_required
-@roles_required("privileged_user")
-@app.route("/testroles")
-def TestLogin():
-    if current_user.is_authenticated:
-        if current_user.has_role("privileged_user"):
-            context = {"user_name": get_current_user_first_name()}
-            return render_template("testroles.html", **context)
-        else:
-            return make_response("Unauthorized User")
-    else:
-        return redirect("/login")
-
-
-def get_current_user_first_name():
-    cur_id = current_user.get_id()
-    cur_user = db.session.query(User).filter(User.id == cur_id).first()
-    if cur_user is not None:
-        return cur_user.first_name
-    return "User"
-
-
 ######## rauth integration (login through facebook) ##################
 
 
 @app.route("/logout")
-def logout():
-    login.logout_user()
-    return redirect(url_for("index"))
+def logout() -> Response:
+    logout_user()
+    identity_changed.send(current_app._get_current_object(), identity=AnonymousIdentity())
+    return Response(status=HTTPStatus.OK)
+
+
+# noinspection PyUnusedLocal
+@identity_loaded.connect_via(app)
+def on_identity_loaded(sender, identity):
+    # Set the identity user object
+    identity.user = current_user
+
+    # Add the UserNeed to the identity
+    if hasattr(current_user, "id"):
+        identity.provides.add(UserNeed(current_user.id))
+
+    # Assuming the User model has a list of roles, update the
+    # identity with the roles that the user provides
+    if hasattr(current_user, "roles2"):
+        for role in current_user.roles2:
+            identity.provides.add(RoleNeed(role.name))
+
+
+@principals.identity_loader
+def load_identity_when_session_expires():
+    if hasattr(current_user, "id"):
+        return Identity(current_user.id)
 
 
 app.add_url_rule("/api/schools", endpoint=None, view_func=schools_api, methods=["GET"])
@@ -1500,9 +1152,9 @@ app.add_url_rule(
 app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
 
 
-def return_json_error(error_code: int, extra: str = None) -> Response:
+def return_json_error(error_code: int, *argv) -> Response:
     return app.response_class(
-        response=json.dumps(build_json_for_user_api_error(error_code, extra)),
+        response=json.dumps(build_json_for_user_api_error(error_code, argv)),
         status=ERROR_TO_HTTP_CODE_DICT[error_code],
         mimetype="application/json",
     )
@@ -1532,7 +1184,7 @@ def oauth_callback(provider: str) -> Response:
 
     oauth = OAuthSignIn.get_provider(provider)
     user_data: UserData = oauth.callback()
-    if not user_data.service_user_id:
+    if not user_data or not user_data.service_user_id:
         return return_json_error(Es.BR_NO_USER_ID)
 
     user = (
@@ -1540,6 +1192,14 @@ def oauth_callback(provider: str) -> Response:
         .filter_by(oauth_provider=provider, oauth_provider_user_id=user_data.service_user_id)
         .first()
     )
+
+    if not user:
+        user = (
+            db.session.query(UserOAuth)
+                .filter_by(oauth_provider=provider, email=user_data.email)
+                .first()
+        )
+
     if not user:
         user = UserOAuth(
             user_register_date=datetime.datetime.now(),
@@ -1557,6 +1217,13 @@ def oauth_callback(provider: str) -> Response:
         db.session.add(user)
     else:
         user.user_last_login_date = datetime.datetime.now()
+        if user.oauth_provider_user_id == "unknown-manual-insert":  # Only for anyway@anyway.co.il first login
+            user.oauth_provider_user_id = user_data.service_user_id
+            user.oauth_provider_user_name = user_data.name
+            user.oauth_provider_user_domain=user_data.service_user_domain
+            user.oauth_provider_user_picture_url=user_data.picture_url
+            user.oauth_provider_user_locale=user_data.service_user_locale
+            user.oauth_provider_user_profile_url=user_data.user_profile_url
 
     db.session.commit()
 
@@ -1568,7 +1235,9 @@ def oauth_callback(provider: str) -> Response:
         if redirect_url_to_check and is_a_safe_redirect_url(redirect_url_to_check):
             redirect_url = redirect_url_to_check
 
-    login.login_user(user, True)
+    login_user(user, True)
+    identity_changed.send(current_app._get_current_object(), identity=Identity(user.id))
+
     return redirect(redirect_url, code=HTTPStatus.FOUND)
 
 
@@ -1627,7 +1296,7 @@ def embedded_reports_api():
     return response
 
 
-@lm.user_loader
+@login_manager.user_loader
 def load_user(id: str) -> UserOAuth:
     return db.session.query(UserOAuth).get(id)
 
@@ -1638,6 +1307,7 @@ def user_have_email() -> Response:
         return return_json_error(Es.BR_USER_NOT_LOGGED_IN)
 
     user_obj = get_current_user()
+    roles = user_obj.roles2
     return jsonify(
         {
             "id": user_obj.id,
@@ -1655,8 +1325,93 @@ def user_have_email() -> Response:
             "user_url": user_obj.user_url,
             "user_desc": user_obj.user_desc,
             "is_user_completed_registration": user_obj.is_user_completed_registration,
+            "roles": [r.name for r in roles],
         }
     )
+
+
+@app.route("/user/remove_from_group", methods=["POST"])
+def remove_from_group() -> Response:
+    return change_user_groups("remove")
+
+
+@app.route("/user/add_to_group", methods=["POST"])
+def add_to_group() -> Response:
+    return change_user_groups("add")
+
+
+def change_user_groups(action: str) -> Response:
+    allowed_fields = [
+        "group",
+        "email",
+    ]
+
+    if current_user.is_anonymous:
+        return return_json_error(Es.BR_USER_NOT_LOGGED_IN)
+
+    admin_permission = Permission(RoleNeed(BE_CONST.Roles2Names.Admins))
+    if not admin_permission.can():
+        return return_json_error(Es.BR_MISSING_PERMISSION, BE_CONST.Roles2Names.Admins)
+
+    # Validate input
+    reg_dict = request.json
+    if not reg_dict:
+        return return_json_error(Es.BR_BAD_JSON)
+    for key in reg_dict:
+        if key not in allowed_fields:
+            return return_json_error(Es.BR_UNKNOWN_FIELD, key)
+
+    role2_name = reg_dict.get("group")
+    if not role2_name:
+        return return_json_error(Es.BR_GROUP_NAME_MISSING)
+    role2 = get_role2_object(role2_name)
+    if role2 is None:
+        return return_json_error(Es.BR_GROUP_NOT_EXIST, role2_name)
+
+    email = reg_dict.get("email")
+    if not email:
+        return return_json_error(Es.BR_NO_EMAIL)
+    if not is_a_valid_email(email):
+        return return_json_error(Es.BR_BAD_EMAIL)
+    user = db.session.query(UserOAuth).filter(UserOAuth.email == email).first()
+    if user is None:
+        return return_json_error(Es.BR_USER_NOT_FOUND, email)
+
+    if action == "add":
+        # Add user to group
+        for user_group in user.roles2:
+            if role2.name == user_group.name:
+                return return_json_error(Es.BR_USER_ALREADY_IN_GROUP, email, role2_name)
+        user.roles2.append(role2)
+        # Add user to group in the current instance
+        if current_user.email == user.email:
+            # g is flask global data
+            g.identity.provides.add(RoleNeed(role2.name))
+    elif action == "remove":
+        # Remove user from group
+        removed = False
+        for user_role in user.roles2:
+            if role2.name == user_role.name:
+                d = users_to_roles2.delete().where(  # noqa pylint: disable=no-value-for-parameter
+                    (users_to_roles2.c.user_id == user.id)
+                    & (users_to_roles2.c.roles2_id == role2.id)
+                )
+                db.session.execute(d)
+                removed = True
+        if not removed:
+            return return_json_error(Es.BR_USER_NOT_IN_GROUP, email, role2_name)
+    db.session.commit()
+
+    return Response(status=HTTPStatus.OK)
+
+
+def get_role2_object(role_name):
+    group = (
+        db.session.query(Roles2)
+        .filter(Roles2.name == role_name)
+        .first()
+    )
+    return group
 
 
 # This code is also used as part of the user first registration

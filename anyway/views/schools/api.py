@@ -7,7 +7,8 @@ import pandas as pd
 from flask import Response, request
 from sqlalchemy import and_, not_
 
-from anyway.base import db, user_optional
+from anyway.app_and_db import db
+from anyway.base import user_optional
 from anyway.models import School, SchoolWithDescription2020
 
 

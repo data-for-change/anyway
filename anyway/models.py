@@ -4,8 +4,8 @@ import datetime
 import json
 import logging
 from collections import namedtuple
-from sqlalchemy.sql import func
-from flask_security import UserMixin, RoleMixin
+
+from flask_login import UserMixin
 from geoalchemy2 import Geometry
 from sqlalchemy import (
     Column,
@@ -23,7 +23,6 @@ from sqlalchemy import (
     Table,
     ForeignKeyConstraint,
     func,
-    and_,
     TIMESTAMP,
 )
 import sqlalchemy
@@ -47,12 +46,22 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
-roles_users = Table(
-    "roles_users",
+users_to_roles2 = Table(
+    "users_to_roles2",
     Base.metadata,
-    Column("user_id", Integer(), ForeignKey("users.id")),
-    Column("role_id", Integer(), ForeignKey("roles.id")),
+    Column("id", Integer(), primary_key=True, autoincrement=True, nullable=False),
+    Column("user_id", BigInteger(), ForeignKey("user_oauth.id"), index=True, nullable=False),
+    Column("roles2_id", Integer(), ForeignKey("roles2.id"), index=True, nullable=False),
+    Column("create_date", DateTime(), nullable=False),
 )
+
+# This table is not in use - it was create a long time ago and is replaced by 'users_to_roles2'
+# roles_users = Table(
+#     "roles_users",
+#     Base.metadata,
+#     Column("user_id", Integer(), ForeignKey("users.id")),
+#     Column("role_id", Integer(), ForeignKey("roles.id")),
+# )
 
 
 class UserOAuth(Base, UserMixin):
@@ -77,56 +86,62 @@ class UserOAuth(Base, UserMixin):
     user_url = Column(String(2083))
     user_desc = Column(String(2048))
     is_user_completed_registration = Column(Boolean)
+    roles2 = relationship(
+        "Roles2",
+        secondary=users_to_roles2,
+        backref=backref("user_oauth", lazy="dynamic"),
+    )
 
 
-class User(Base, UserMixin):
-    __tablename__ = "users"
-    id = Column(BigInteger(), primary_key=True)
-    email = Column(String(120), unique=True)
-    first_name = Column(String(50))
-    last_name = Column(String(50))
-    access_token = Column(String(100))
-    username = Column(String(50), unique=True)
-    facebook_id = Column(String(50))
-    facebook_url = Column(String(100))
-    is_admin = Column(Boolean(), default=False)
-    new_features_subscription = Column(Boolean(), default=False)
-    password = Column(String(256))
-    active = Column(Boolean())
-    confirmed_at = Column(DateTime())
-    social_id = Column(String(64), nullable=True, unique=True)
-    nickname = Column(String(64), nullable=True)
-    provider = Column(String(64), nullable=True)
-    roles = relationship("Role", secondary=roles_users, backref=backref("users", lazy="dynamic"))
-
-    def serialize(self):
-        return {
-            "id": str(self.id),
-            "first_name": self.first_name,
-            "last_name": self.last_name,
-            "username": self.username,
-            "facebook_id": self.facebook_id,
-            "facebook_url": self.facebook_url,
-            "is_admin": self.is_admin,
-            "new_features_subscription": self.new_features_subscription,
-        }
-
-    # Flask-Login integration
-    def is_authenticated(self):
-        return True
-
-    def is_active(self):
-        return True
-
-    def is_anonymous(self):
-        return False
-
-    def get_id(self):
-        return self.id
-
-    # Required for administrative interface
-    def __unicode__(self):
-        return self.username
+# This table is not in use - it was create a long time ago and is replaced by 'UserOAuth'
+# class User(Base, UserMixin):
+#     __tablename__ = "users"
+#     id = Column(BigInteger(), primary_key=True)
+#     email = Column(String(120), unique=True)
+#     first_name = Column(String(50))
+#     last_name = Column(String(50))
+#     access_token = Column(String(100))
+#     username = Column(String(50), unique=True)
+#     facebook_id = Column(String(50))
+#     facebook_url = Column(String(100))
+#     is_admin = Column(Boolean(), default=False)
+#     new_features_subscription = Column(Boolean(), default=False)
+#     password = Column(String(256))
+#     active = Column(Boolean())
+#     confirmed_at = Column(DateTime())
+#     social_id = Column(String(64), nullable=True, unique=True)
+#     nickname = Column(String(64), nullable=True)
+#     provider = Column(String(64), nullable=True)
+#     roles = relationship("Role", secondary=roles_users, backref=backref("users", lazy="dynamic"))
+#
+#     def serialize(self):
+#         return {
+#             "id": str(self.id),
+#             "first_name": self.first_name,
+#             "last_name": self.last_name,
+#             "username": self.username,
+#             "facebook_id": self.facebook_id,
+#             "facebook_url": self.facebook_url,
+#             "is_admin": self.is_admin,
+#             "new_features_subscription": self.new_features_subscription,
+#         }
+#
+#     # Flask-Login integration
+#     def is_authenticated(self):
+#         return True
+#
+#     def is_active(self):
+#         return True
+#
+#     def is_anonymous(self):
+#         return False
+#
+#     def get_id(self):
+#         return self.id
+#
+#     # Required for administrative interface
+#     def __unicode__(self):
+#         return self.username
 
 
 class LocationSubscribers(Base, UserMixin):
@@ -167,14 +182,23 @@ class LocationSubscribers(Base, UserMixin):
         return self.id
 
 
-class Role(Base, RoleMixin):
-    __tablename__ = "roles"
-    id = Column(Integer(), primary_key=True)
-    name = Column(String(80), unique=True)
+class Roles2(Base):
+    __tablename__ = "roles2"
+    id = Column(Integer(), primary_key=True, autoincrement=True, nullable=False)
+    name = Column(String(127), unique=True, index=True, nullable=False)
     description = Column(String(255))
+    create_date = Column(DateTime(), nullable=False)
 
-    def __unicode__(self):
-        return self.name
+
+# This table is not in use - it was create a long time ago and is replaced by 'Roles2'
+# class Role(Base, RoleMixin):
+#     __tablename__ = "roles"
+#     id = Column(Integer(), primary_key=True)
+#     name = Column(String(80), unique=True)
+#     description = Column(String(255))
+#
+#     def __unicode__(self):
+#         return self.name
 
 
 class Point(object):
@@ -1032,42 +1056,44 @@ class Vehicle(Base):
         return self.id
 
 
-class GeneralPreferences(Base):
-    __tablename__ = "general_preferences"
-    user_id = Column(Integer(), ForeignKey("users.id"), primary_key=True)
-    minimum_displayed_severity = Column(Integer(), nullable=True)
-    resource_type = Column(String(64), nullable=True)
+# This table was used in the old user system to save the user preferences, it is no longer at use
+# class GeneralPreferences(Base):
+#     __tablename__ = "general_preferences"
+#     user_id = Column(Integer(), ForeignKey("users.id"), primary_key=True)
+#     minimum_displayed_severity = Column(Integer(), nullable=True)
+#     resource_type = Column(String(64), nullable=True)
+#
+#     def serialize(self):
+#         return {
+#             "user_id": self.user_id,
+#             "minimum_displayed_severity": self.minimum_displayed_severity,
+#             "resource_type": self.resource_type,
+#         }
 
-    def serialize(self):
-        return {
-            "user_id": self.user_id,
-            "minimum_displayed_severity": self.minimum_displayed_severity,
-            "resource_type": self.resource_type,
-        }
 
-
-class ReportPreferences(Base):
-    __tablename__ = "report_preferences"
-    user_id = Column(Integer(), ForeignKey("users.id"), primary_key=True)
-    line_number = Column(Integer(), primary_key=True)
-    historical_report = Column(Boolean(), default=False)
-    how_many_months_back = Column(Integer(), nullable=True)
-    latitude = Column(Float())
-    longitude = Column(Float())
-    radius = Column(Float())
-    minimum_severity = Column(Integer())
-
-    def serialize(self):
-        return {
-            "user_id": self.user_id,
-            "line_number": self.line_number,
-            "historical_report": self.historical_report,
-            "how_many_months_back": self.how_many_months_back,
-            "latitude": self.latitude,
-            "longitude": self.longitude,
-            "radius": self.radius,
-            "minimum_severity": self.minimum_severity,
-        }
+# This table was used in the old user system to save the user preferences, it is no longer at use
+# class ReportPreferences(Base):
+#     __tablename__ = "report_preferences"
+#     user_id = Column(Integer(), ForeignKey("users.id"), primary_key=True)
+#     line_number = Column(Integer(), primary_key=True)
+#     historical_report = Column(Boolean(), default=False)
+#     how_many_months_back = Column(Integer(), nullable=True)
+#     latitude = Column(Float())
+#     longitude = Column(Float())
+#     radius = Column(Float())
+#     minimum_severity = Column(Integer())
+#
+#     def serialize(self):
+#         return {
+#             "user_id": self.user_id,
+#             "line_number": self.line_number,
+#             "historical_report": self.historical_report,
+#             "how_many_months_back": self.how_many_months_back,
+#             "latitude": self.latitude,
+#             "longitude": self.longitude,
+#             "radius": self.radius,
+#             "minimum_severity": self.minimum_severity,
+#         }
 
 
 class School(Base):

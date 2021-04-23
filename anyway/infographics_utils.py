@@ -383,8 +383,6 @@ class HeadOnCollisionsComparisonWidget(SubUrbanWidget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 5
-        # self.text = {"title": "תאונות קטלניות ע״פ סוג"}
-        # self.text = {"title": "fatal accidents by type"}
 
     def generate_items(self) -> None:
         self.items = self.get_head_to_head_stat()

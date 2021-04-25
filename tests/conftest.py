@@ -12,7 +12,6 @@ from anyway.app_and_db import app
 class ServerThread(Thread):
     def __init__(self):
         super(ServerThread, self).__init__()
-        app.secret_key = "Test_secret_key_dont_use_in_prod"
         self.srv = make_server("127.0.0.1", 5000, app)
         self.ctx = app.app_context()
         self.ctx.push()

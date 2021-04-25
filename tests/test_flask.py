@@ -26,6 +26,7 @@ from anyway.error_code_and_strings import (
 
 @pytest.fixture
 def app():
+    flask_app.secret_key = "test_key_dont_use_in_prod"
     return flask_app.test_client()
 
 

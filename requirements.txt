@@ -37,13 +37,13 @@ python-dateutil==2.8.1
 python-geohash==0.8.5
 rauth==0.7.3
 rcssmin==1.0.6
-requests==2.23.0
+requests==2.25.1
 tweepy==3.8.0
 urllib3==1.25.9
 webassets==2.0
 xlrd==1.2.0
 lxml==4.6.3
 boto3==1.14.48
-py3-validate-email==1.0.0
+py3-validate-email==0.2.16
 phonenumbers==8.12.21
 flask-principal==0.4.0

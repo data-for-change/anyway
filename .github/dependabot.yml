@@ -1,0 +1,64 @@
+version: 2
+updates:
+- package-ecosystem: pip
+  directory: "/"
+  schedule:
+    interval: monthly
+    time: "03:00"
+  open-pull-requests-limit: 10
+  target-branch: dev
+  ignore:
+  - dependency-name: alembic
+    versions:
+    - 1.5.5
+  - dependency-name: attrs
+    versions:
+    - 20.3.0
+  - dependency-name: google-cloud-storage
+    versions:
+    - 1.35.0
+    - 1.36.1
+  - dependency-name: py3-validate-email
+    versions:
+    - 0.2.16
+  - dependency-name: numpy
+    versions:
+    - 1.20.1
+  - dependency-name: google-cloud-core
+    versions:
+    - 1.5.0
+    - 1.6.0
+  - dependency-name: phonenumbers
+    versions:
+    - 8.12.17
+    - 8.12.18
+  - dependency-name: pytest-cov
+    versions:
+    - 2.11.1
+  - dependency-name: requests
+    versions:
+    - 2.25.1
+  - dependency-name: pandas
+    versions:
+    - 1.2.2
+  - dependency-name: sendgrid
+    versions:
+    - 6.5.0
+  - dependency-name: urllib3
+    versions:
+    - 1.26.3
+  - dependency-name: openpyxl
+    versions:
+    - 3.0.6
+  - dependency-name: flask-cors
+    versions:
+    - 3.0.10
+  - dependency-name: jinja2
+    versions:
+    - 2.11.3
+  - dependency-name: tweepy
+    versions:
+    - 3.10.0
+  - dependency-name: newrelic
+    versions:
+    - 6.0.1.155

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-02-13 16:05+0000\n"
+"POT-Creation-Date: 2021-05-01 21:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,11 +17,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.0\n"
 
-#: anyway/flask_app.py:709 anyway/flask_app.py:816
+#: anyway/flask_app.py:705 anyway/flask_app.py:812
 msgid "Discussion not found:"
 msgstr ""
 
-#: anyway/flask_app.py:712
+#: anyway/flask_app.py:708
 msgid "Illegal Discussion"
 msgstr ""
 
@@ -125,63 +125,98 @@ msgstr ""
 msgid "other_driver"
 msgstr ""
 
-#: anyway/infographics_utils.py:268
+#: anyway/infographics_utils.py:243 anyway/infographics_utils.py:321
+#: anyway/infographics_utils.py:379 anyway/infographics_utils.py:485
+#: anyway/infographics_utils.py:907
+msgid "metainformation"
+msgstr ""
+
+#: anyway/infographics_utils.py:252
+msgid "Fatal, severe and light accidents count in the specified location."
+msgstr ""
+
+#: anyway/infographics_utils.py:328
 msgid "accident_severity"
 msgstr ""
 
-#: anyway/infographics_utils.py:269
+#: anyway/infographics_utils.py:329
 msgid "type"
 msgstr ""
 
-#: anyway/infographics_utils.py:317 anyway/infographics_utils.py:1340
+#: anyway/infographics_utils.py:340
+msgid ""
+"Most recent fatal and severe accidents in location, ordered by date. Up "
+"to 10 accidents are presented."
+msgstr ""
+
+#: anyway/infographics_utils.py:386 anyway/infographics_utils.py:1463
 msgid "accident_type"
 msgstr ""
 
-#: anyway/infographics_utils.py:415
+#: anyway/infographics_utils.py:395
+msgid ""
+"Most recent fatal and severe accidents displayed on a map. Up to 10 "
+"accidents are presented."
+msgstr ""
+
+#: anyway/infographics_utils.py:487
 msgid "fatal accidents by type"
 msgstr ""
 
-#: anyway/infographics_utils.py:418
+#: anyway/infographics_utils.py:490
 msgid "desc"
 msgstr ""
 
-#: anyway/infographics_utils.py:423
+#: anyway/infographics_utils.py:517
 msgid "others"
 msgstr ""
 
-#: anyway/infographics_utils.py:424
+#: anyway/infographics_utils.py:518
 msgid "frontal"
 msgstr ""
 
-#: anyway/infographics_utils.py:496
+#: anyway/infographics_utils.py:519
+msgid ""
+"Fatal accidents distribution in percentages by accident type - head on "
+"collisions vs other accidents."
+msgstr ""
+
+#: anyway/infographics_utils.py:591
 msgid "Fatal and severe accidents heat map"
 msgstr ""
 
-#: anyway/infographics_utils.py:744
+#: anyway/infographics_utils.py:840
 msgid "Injury severity per age group in "
 msgstr ""
 
-#: anyway/infographics_utils.py:821
+#: anyway/infographics_utils.py:910
 msgid "driver_type"
 msgstr ""
 
-#: anyway/infographics_utils.py:827
+#: anyway/infographics_utils.py:916
 msgid "accident count by driver type "
 msgstr ""
 
-#: anyway/infographics_utils.py:936
+#: anyway/infographics_utils.py:922
+msgid ""
+"Driver involvement in accident by driver type: professional - trucks, "
+"taxi, bus, work, minibus, tractor, private - private car, motorcycle, "
+"light electric - electric scooter, mobility scooter, electric bike."
+msgstr ""
+
+#: anyway/infographics_utils.py:1028
 msgid ""
 "comparing vehicle type percentage in accidents in {} relative to national"
 " average"
 msgstr ""
 
-#: anyway/infographics_utils.py:1199
+#: anyway/infographics_utils.py:1297
 msgid ""
 "Pedestrian Injuries on Ben Yehuda Street in Tel Aviv by Type of hitting "
 "Vehicle, Compared to Urban Accidents Across the country"
 msgstr ""
 
-#: anyway/infographics_utils.py:1439
+#: anyway/infographics_utils.py:1566
 msgid "Most severe accidents in segment"
 msgstr ""
 

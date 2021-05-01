@@ -96,6 +96,7 @@ class Widget:
         self.items = {}
         self.text = {}
         self.meta = None
+        self.information = ""
 
     def get_name(self) -> str:
         return self.name
@@ -145,7 +146,7 @@ class Widget:
         output["meta"]["rank"] = self.rank
         output["meta"][
             "information"
-        ] = "Placeholder: This Widget shows information of accidenents in Israel with comparison of vehicle types / locations / injured types."
+        ] = self.information
         return output
 
 
@@ -200,6 +201,7 @@ class AccidentCountBySeverityWidget(SubUrbanWidget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 1
+        self.information = "Fatal, severe and light accidents count in the specified location."
 
     def generate_items(self) -> None:
         self.items = AccidentCountBySeverityWidget.get_accident_count_by_severity(
@@ -234,6 +236,21 @@ class AccidentCountBySeverityWidget(SubUrbanWidget):
         items["total_accidents_count"] = total_accidents_count
         return items
 
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        if request_params.lang != "en":
+            try:
+                items["meta"]["information"] = _(items["meta"]["information"])
+            except KeyError:
+                information = items["meta"]["information"]
+                logging.exception(
+                    f"AccidentCountBySeverityWidget.localize_items: Exception while translating {information}."
+                )
+
+        return items
+
+# adding calls to _() for pybabel extraction
+_("Fatal, severe and light accidents count in the specified location.")
 
 @register
 class MostSevereAccidentsTableWidget(SubUrbanWidget):
@@ -242,6 +259,7 @@ class MostSevereAccidentsTableWidget(SubUrbanWidget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 2
+        self.information = "Most recent fatal and severe accidents in location, ordered by date. Up to 10 accidents are presented."
 
     def generate_items(self) -> None:
         self.items = MostSevereAccidentsTableWidget.prepare_table(
@@ -300,19 +318,28 @@ class MostSevereAccidentsTableWidget(SubUrbanWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         if request_params.lang != "en":
+            try:
+                items["meta"]["information"] = _(items["meta"]["information"])
+            except KeyError:
+                information = items["meta"]["information"]
+                logging.exception(
+                    f"MostSevereAccidentsTableWidget.localize_items: Exception while translating {information}."
+                )
             for item in items["data"]["items"]:
                 try:
                     item["accident_severity"] = _(item["accident_severity"])
                     item["type"] = _(item["type"])
                 except KeyError:
                     logging.exception(
-                        f"MostSevereAccidentsWidget.localize_items: Exception while translating {item}."
+                        f"MostSevereAccidentsTableWidget.localize_items: Exception while translating {item}."
                     )
         items["data"]["text"] = {
             "title": get_most_severe_accidents_table_title(request_params.location_info)
         }
         return items
 
+# adding calls to _() for pybabel extraction
+_("Most recent fatal and severe accidents in location, ordered by date. Up to 10 accidents are presented.")
 
 @register
 class MostSevereAccidentsWidget(SubUrbanWidget):
@@ -321,6 +348,7 @@ class MostSevereAccidentsWidget(SubUrbanWidget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 3
+        self.information = "Most recent fatal and severe accidents displayed on a map. Up to 10 accidents are presented."
 
     def generate_items(self) -> None:
         self.items = MostSevereAccidentsWidget.get_most_severe_accidents(
@@ -349,6 +377,13 @@ class MostSevereAccidentsWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        try:
+            items["meta"]["information"] = _(items["meta"]["information"])
+        except KeyError:
+            information = items["meta"]["information"]
+            logging.exception(
+                f"MostSevereAccidentsWidget.localize_items: Exception while translating {information}."
+            )
         for item in items["data"]["items"]:
             try:
                 item["accident_type"] = _(english_accident_type_dict[item["accident_type"]])
@@ -358,6 +393,9 @@ class MostSevereAccidentsWidget(SubUrbanWidget):
                 )
         return items
 
+
+# adding calls to _() for pybabel extraction
+_("Most recent fatal and severe accidents displayed on a map. Up to 10 accidents are presented.")
 
 @register
 class StreetViewWidget(SubUrbanWidget):
@@ -383,6 +421,7 @@ class HeadOnCollisionsComparisonWidget(SubUrbanWidget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 5
+        self.information = "Fatal accidents distribution in percentages by accident type - head on collisions vs other accidents."
 
     def generate_items(self) -> None:
         self.items = self.get_head_to_head_stat()
@@ -446,6 +485,7 @@ class HeadOnCollisionsComparisonWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        items["meta"]["information"] = _(items["meta"]["information"])
         i = items["data"]["items"]
         items["data"]["text"] = {"title": _("fatal accidents by type")}
         for val in i.values():
@@ -479,6 +519,7 @@ class HeadOnCollisionsComparisonWidget(SubUrbanWidget):
 # adding calls to _() for pybabel extraction
 _("others")
 _("frontal")
+_("Fatal accidents distribution in percentages by accident type - head on collisions vs other accidents.")
 
 
 @register
@@ -836,6 +877,7 @@ class AccidentCountByDriverTypeWidget(SubUrbanWidget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 16
+        self.information = "Driver involvement in accident by driver type: professional - trucks, taxi, bus, work, minibus, tractor, private - private car, motorcycle, light electric - electric scooter, mobility scooter, electric bike."
 
     def generate_items(self) -> None:
         self.items = AccidentCountByDriverTypeWidget.count_accidents_by_driver_type(
@@ -876,6 +918,7 @@ class AccidentCountByDriverTypeWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        items["meta"]["information"] = _(items["meta"]["information"])
         for item in items["data"]["items"]:
             try:
                 item["driver_type"] = _(item["driver_type"])
@@ -888,6 +931,9 @@ class AccidentCountByDriverTypeWidget(SubUrbanWidget):
             + request_params.location_info["road_segment_name"]
         }
         return items
+
+# adding calls to _() for pybabel extraction
+_("Driver involvement in accident by driver type: professional - trucks, taxi, bus, work, minibus, tractor, private - private car, motorcycle, light electric - electric scooter, mobility scooter, electric bike.")
 
 
 @register

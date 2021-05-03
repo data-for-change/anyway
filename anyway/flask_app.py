@@ -82,7 +82,7 @@ from anyway.models import (
 from anyway.oauth import OAuthSignIn
 from anyway.infographics_utils import get_infographics_data
 from anyway.app_and_db import app, db, get_cors_config
-from anyway.dataclasses.user_data import UserData
+from anyway.anyway_dataclasses.user_data import UserData
 from anyway.utilities import is_valid_number, is_a_safe_redirect_url, is_a_valid_email
 from anyway.views.schools.api import (
     schools_description_api,

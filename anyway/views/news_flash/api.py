@@ -25,7 +25,7 @@ def news_flash():
         if news_flash_obj is not None:
             if is_news_flash_resolution_supported(news_flash_obj):
                 return Response(
-                    json.dumps(query.serialize(), default=str),
+                    json.dumps(news_flash_obj.serialize(), default=str),
                     mimetype="application/json"
                 )
             else:
@@ -42,7 +42,6 @@ def news_flash():
 
 
 def gen_news_flash_query(session):
-    news_flash_id = request.values.get("id")
     source = request.values.get("source")
     start_date = request.values.get("start_date")
     end_date = request.values.get("end_date")
@@ -52,15 +51,6 @@ def gen_news_flash_query(session):
     offset = request.values.get("offset", DEFAULT_OFFSET_REQ_PARAMETER)
     limit = request.values.get("limit", DEFAULT_LIMIT_REQ_PARAMETER)
     query = session.query(NewsFlash)
-    query.offset(offset)
-
-    if news_flash_id is not None:
-        query = query.filter(NewsFlash.id == news_flash_id).first()
-        if query is not None:
-            return Response(
-                json.dumps(query.serialize(), default=str), mimetype="application/json"
-            )
-        return Response(status=404)
 
     # get all possible sources
     sources = [
@@ -101,6 +91,7 @@ def gen_news_flash_query(session):
             )
     ).order_by(NewsFlash.date.desc())
 
+    query = query.offset(offset)
     query = query.limit(limit)
 
     return query

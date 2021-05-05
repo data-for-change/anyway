@@ -236,18 +236,6 @@ class AccidentCountBySeverityWidget(SubUrbanWidget):
         items["total_accidents_count"] = total_accidents_count
         return items
 
-    @staticmethod
-    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        if request_params.lang != "en":
-            try:
-                items["meta"]["information"] = _(items["meta"]["information"])
-            except KeyError:
-                information = items["meta"]["information"]
-                logging.exception(
-                    f"AccidentCountBySeverityWidget.localize_items: Exception while translating {information}."
-                )
-
-        return items
 
 # adding calls to _() for pybabel extraction
 _("Fatal, severe and light accidents count in the specified location.")
@@ -318,13 +306,6 @@ class MostSevereAccidentsTableWidget(SubUrbanWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         if request_params.lang != "en":
-            try:
-                items["meta"]["information"] = _(items["meta"]["information"])
-            except KeyError:
-                information = items["meta"]["information"]
-                logging.exception(
-                    f"MostSevereAccidentsTableWidget.localize_items: Exception while translating {information}."
-                )
             for item in items["data"]["items"]:
                 try:
                     item["accident_severity"] = _(item["accident_severity"])
@@ -377,13 +358,6 @@ class MostSevereAccidentsWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        try:
-            items["meta"]["information"] = _(items["meta"]["information"])
-        except KeyError:
-            information = items["meta"]["information"]
-            logging.exception(
-                f"MostSevereAccidentsWidget.localize_items: Exception while translating {information}."
-            )
         for item in items["data"]["items"]:
             try:
                 item["accident_type"] = _(english_accident_type_dict[item["accident_type"]])
@@ -485,7 +459,6 @@ class HeadOnCollisionsComparisonWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        items["meta"]["information"] = _(items["meta"]["information"])
         i = items["data"]["items"]
         items["data"]["text"] = {"title": _("fatal accidents by type")}
         for val in i.values():
@@ -918,7 +891,6 @@ class AccidentCountByDriverTypeWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        items["meta"]["information"] = _(items["meta"]["information"])
         for item in items["data"]["items"]:
             try:
                 item["driver_type"] = _(item["driver_type"])
@@ -1829,6 +1801,8 @@ def localize_after_cache(request_params: RequestParams, items_list: List[Dict]) 
             )
         else:
             logging.error(f"localize_after_cache: bad input (missing 'name' key):{items}")
+        if request_params.lang != "en":
+            items["meta"]["information"] = _(items["meta"]["information"])
     return res
 
 

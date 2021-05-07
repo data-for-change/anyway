@@ -45,7 +45,7 @@ sendgrid==6.3.1
 tweepy==3.8.0
 urllib3==1.25.9
 webassets==2.0
-xlrd==1.2.0
+xlrd==2.0.1
 lxml==4.6.3
 boto3==1.14.48
 py3-validate-email==0.2.12

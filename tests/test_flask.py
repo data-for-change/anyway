@@ -315,15 +315,15 @@ def set_current_user_mock(current_user: mock.MagicMock) -> None:
     current_user.return_value.id = USER_ID
 
 
-def test_user_remove_from_group(app):
-    user_add_or_remove_group(app, "/user/remove_from_group")
+def test_user_remove_from_role(app):
+    user_add_or_remove_role(app, "/user/remove_from_role")
 
 
-def test_user_add_to_group(app):
-    user_add_or_remove_group(app, "/user/add_to_group")
+def test_user_add_to_role(app):
+    user_add_or_remove_role(app, "/user/add_to_role")
 
 
-def user_add_or_remove_group(app: FlaskClient, path: str) -> None:
+def user_add_or_remove_role(app: FlaskClient, path: str) -> None:
     rv = app.get(path, follow_redirects=True)
     assert rv.status_code == HTTPStatus.METHOD_NOT_ALLOWED
     with patch("flask_login.utils._get_user") as current_user:
@@ -340,11 +340,11 @@ def user_add_or_remove_group(app: FlaskClient, path: str) -> None:
         rv = post_json(app, path, json={"email": "a"})
         assert_return_code_for_user_update(Errors.BR_ROLE_NAME_MISSING, rv)
 
-        with patch("anyway.flask_app.get_role_object") as get_group_object:
-            get_group_object.return_value = mock.MagicMock()
-            get_group_object.return_value.name = BE_CONST.Roles2Names.Admins.value
+        with patch("anyway.flask_app.get_role_object") as get_role_object:
+            get_role_object.return_value = mock.MagicMock()
+            get_role_object.return_value.name = BE_CONST.Roles2Names.Admins.value
 
             rv = post_json(
-                app, path, json={"group": BE_CONST.Roles2Names.Admins.value, "email": "a"}
+                app, path, json={"role": BE_CONST.Roles2Names.Admins.value, "email": "a"}
             )
             assert_return_code_for_user_update(Errors.BR_BAD_EMAIL, rv)

@@ -331,10 +331,10 @@ def user_add_or_remove_group(app: FlaskClient, path: str) -> None:
 
         rv = app.post(path, follow_redirects=True)
         assert_return_code_for_user_update(
-            Errors.BR_MISSING_PERMISSION, rv, BE_CONST.Roles2Names.Admins
+            Errors.BR_MISSING_PERMISSION, rv, BE_CONST.Roles2Names.Admins.value
         )
         role = mock.MagicMock()
-        role.name = BE_CONST.Roles2Names.Admins
+        role.name = BE_CONST.Roles2Names.Admins.value
         current_user.return_value.roles = [role]
 
         rv = post_json(app, path, json={"email": "a"})
@@ -342,9 +342,9 @@ def user_add_or_remove_group(app: FlaskClient, path: str) -> None:
 
         with patch("anyway.flask_app.get_role_object") as get_group_object:
             get_group_object.return_value = mock.MagicMock()
-            get_group_object.return_value.name = BE_CONST.Roles2Names.Admins
+            get_group_object.return_value.name = BE_CONST.Roles2Names.Admins.value
 
             rv = post_json(
-                app, path, json={"group": BE_CONST.Roles2Names.Admins, "email": "a"}
+                app, path, json={"group": BE_CONST.Roles2Names.Admins.value, "email": "a"}
             )
             assert_return_code_for_user_update(Errors.BR_BAD_EMAIL, rv)

@@ -23,31 +23,6 @@ def news_flash():
         if news_flash_obj is not None:
             if is_news_flash_resolution_supported(news_flash_obj):
                 return Response(
-                    json.dumps(query.serialize(), default=str),
-                    mimetype="application/json"
-                )
-            else:
-                return Response("News flash location not supported", 406)
-        return Response(status=404)
-
-    query = gen_news_flash_query(db.session)
-    news_flashes = query.all()
-
-    news_flashes_jsons = [n.serialize() for n in news_flashes]
-    for news_flash in news_flashes_jsons:
-        set_display_source(news_flash, news_flash_id)
-    return Response(json.dumps(news_flashes_jsons, default=str), mimetype="application/json")
-
-
-def gen_news_flash_query(session):
-    news_flash_id = request.values.get("id")
-
-    if news_flash_id is not None:
-        query = db.session.query(NewsFlash)
-        news_flash_obj = query.filter(NewsFlash.id == news_flash_id).first()
-        if news_flash_obj is not None:
-            if is_news_flash_resolution_supported(news_flash_obj):
-                return Response(
                     json.dumps(news_flash_obj.serialize(), default=str),
                     mimetype="application/json"
                 )

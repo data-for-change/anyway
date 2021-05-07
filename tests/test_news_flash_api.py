@@ -23,7 +23,7 @@ class NewsFlashApiTestCase(unittest.TestCase):
         self.trans = self.connection.begin()
         # bind an individual Session to the connection
         self.session = Session(bind=self.connection)
-        #add data
+        # add data
         self.region_description = 'test_region_description'
         nf_region = NewsFlash(road1=12345678,
                               description=self.region_description,

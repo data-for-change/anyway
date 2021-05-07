@@ -73,7 +73,7 @@ def upgrade():
     session = orm.Session(bind=bind)
 
     role_admins = Roles(
-        name=BackEndConstants.Roles2Names.Admins,
+        name=BackEndConstants.Roles2Names.Admins.value,
         description="This is the default admin role.",
         create_date=datetime.datetime.now(),
     )

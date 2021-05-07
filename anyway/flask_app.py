@@ -1340,9 +1340,9 @@ def change_user_roles(action: str) -> Response:
     if current_user.is_anonymous:
         return return_json_error(Es.BR_USER_NOT_LOGGED_IN)
 
-    admin_permission = Permission(RoleNeed(BE_CONST.Roles2Names.Admins))
+    admin_permission = Permission(RoleNeed(BE_CONST.Roles2Names.Admins.value))
     if not admin_permission.can():
-        return return_json_error(Es.BR_MISSING_PERMISSION, BE_CONST.Roles2Names.Admins)
+        return return_json_error(Es.BR_MISSING_PERMISSION, BE_CONST.Roles2Names.Admins.value)
 
     # Validate input
     reg_dict = request.json
@@ -1385,7 +1385,7 @@ def change_user_roles(action: str) -> Response:
             if role.name == user_role.name:
                 d = users_to_roles.delete().where(  # noqa pylint: disable=no-value-for-parameter
                     (users_to_roles.c.user_id == user.id)
-                    & (users_to_roles.c.roles_id == role.id)
+                    & (users_to_roles.c.role_id == role.id)
                 )
                 db.session.execute(d)
                 removed = True

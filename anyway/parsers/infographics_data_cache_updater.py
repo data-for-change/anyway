@@ -5,18 +5,11 @@ from typing import Dict
 from sqlalchemy import not_
 from anyway.models import InfographicsDataCache, InfographicsDataCacheTemp, NewsFlash
 from anyway.constants import CONST
+from anyway.backend_constants import BE_CONST
 from anyway.app_and_db import db
 import anyway.infographics_utils
 import logging
 import json
-
-
-def is_cache_eligible(news_flash):
-    return (
-        news_flash.accident
-        and news_flash.resolution in (["כביש בינעירוני"])
-        and news_flash.road_segment_name is not None
-    )
 
 
 def is_in_cache(nf):
@@ -29,9 +22,12 @@ def is_in_cache(nf):
 
 
 # noinspection PyUnresolvedReferences
-def add_news_flash_to_cache(news_flash):
+def add_news_flash_to_cache(news_flash: NewsFlash):
     try:
-        if not is_cache_eligible(news_flash):
+        if not (
+            news_flash.accident
+            and anyway.infographics_utils.is_news_flash_resolution_supported(news_flash)
+        ):
             logging.debug(
                 f"add_news_flash_to_cache: news flash does not qualify:{news_flash.serialize()}"
             )
@@ -113,6 +109,7 @@ def build_cache_into_temp():
     start = datetime.now()
     db.session.query(InfographicsDataCacheTemp).delete()
     db.session.commit()
+    supported_resolutions = set([x.value for x in BE_CONST.SUPPORTED_RESOLUTIONS])
     for y in CONST.INFOGRAPHICS_CACHE_YEARS_AGO:
         logging.debug(f"processing years_ago:{y}")
         db.get_engine().execute(
@@ -127,8 +124,7 @@ def build_cache_into_temp():
                 }
                 for new_flash in db.session.query(NewsFlash)
                 .filter(NewsFlash.accident)
-                .filter(NewsFlash.resolution.in_(["כביש בינעירוני"]))
-                .filter(not_(NewsFlash.road_segment_name == None))
+                .filter(NewsFlash.resolution.in_(supported_resolutions))
                 .all()
             ],
         )

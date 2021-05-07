@@ -10,12 +10,13 @@ from anyway import secrets
 from anyway.parsers.news_flash_db_adapter import init_db
 from anyway.models import NewsFlash
 from anyway.parsers import timezones
-from anyway.parsers.infographics_data_cache_updater import is_cache_eligible, is_in_cache
+from anyway.infographics_utils import is_news_flash_resolution_supported
+from anyway.parsers.infographics_data_cache_updater import is_in_cache
 
 
 def verify_cache(news_flash_list):
     for nf in news_flash_list:
-        if is_cache_eligible(nf):
+        if is_news_flash_resolution_supported(nf):
             assert is_in_cache(nf), f"NewsFlash {nf.get_id()} not in cache"
 
 

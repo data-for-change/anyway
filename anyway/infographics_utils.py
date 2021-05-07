@@ -1802,3 +1802,14 @@ def is_sub_urban(request_params: RequestParams) -> bool:
         and "road1" in request_params.location_info
         and "road_segment_name" in request_params.location_info
     )
+
+
+def is_news_flash_resolution_supported(news_flash_obj: NewsFlash) -> bool:
+    location_data = extract_news_flash_location(news_flash_obj)
+    if location_data is None or location_data["data"]["resolution"] is None:
+        return False
+    location = location_data["data"]
+    for cat in BE_CONST.SUPPORTED_RESOLUTIONS:
+        if cat.value in resolution_dict and set(resolution_dict[cat.value]) <= location.keys():
+            return True
+    return False

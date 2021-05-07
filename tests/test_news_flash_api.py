@@ -15,6 +15,7 @@ from anyway.models import NewsFlash
 Session = sessionmaker()
 
 
+# pylint: disable=E1101
 class NewsFlashApiTestCase(unittest.TestCase):
     def setUp(self) -> None:
         self.connection = db.get_engine().connect()
@@ -47,7 +48,8 @@ class NewsFlashApiTestCase(unittest.TestCase):
             {'name': 'location',
              'data': {'resolution': 'רחוב',
                       'yishuv_name': 'נצרת',
-                      'street1_hebrew': 'רח 6021'
+                      'street1_hebrew': 'רח 6021',
+                      'road1': 17
                       },
              'gps': {'lat': 32.6994161, 'lon': 35.2960886}
              }

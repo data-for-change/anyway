@@ -304,7 +304,7 @@ def get_mock_current_user(get_current_user: mock.MagicMock) -> mock.MagicMock:
     ret_obj.first_name = FIRST_NAME
     ret_obj.last_name = LAST_NAME
     ret_obj.is_user_completed_registration = USER_COMPLETED
-    ret_obj.roles2 = []
+    ret_obj.roles = []
     get_current_user.side_effect = lambda: ret_obj
     return ret_obj
 
@@ -335,12 +335,12 @@ def user_add_or_remove_group(app: FlaskClient, path: str) -> None:
         )
         role = mock.MagicMock()
         role.name = BE_CONST.Roles2Names.Admins
-        current_user.return_value.roles2 = [role]
+        current_user.return_value.roles = [role]
 
         rv = post_json(app, path, json={"email": "a"})
-        assert_return_code_for_user_update(Errors.BR_GROUP_NAME_MISSING, rv)
+        assert_return_code_for_user_update(Errors.BR_ROLE_NAME_MISSING, rv)
 
-        with patch("anyway.flask_app.get_role2_object") as get_group_object:
+        with patch("anyway.flask_app.get_role_object") as get_group_object:
             get_group_object.return_value = mock.MagicMock()
             get_group_object.return_value.name = BE_CONST.Roles2Names.Admins
 

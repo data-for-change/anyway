@@ -1,18 +1,7 @@
-from functools import wraps
-
 from flask import current_app, session, Response
 from flask_login import COOKIE_NAME, COOKIE_SECURE, COOKIE_HTTPONLY, COOKIE_DURATION, encode_cookie
 from flask_login._compat import text_type
 from datetime import timedelta, datetime
-
-
-# TODO: Do we want to delete it?
-def user_optional(handler):
-    @wraps(handler)
-    def check_login(*args, **kwargs):
-        return handler(*args, **kwargs)
-
-    return check_login
 
 # Here I copied 2 function from flask_login/login_manager.py to preform a temporary fix for the Cross-origin problem:
 # Flask-Login version 0.5.0 (the current version in the pip repo) doesn't support Cross-origin for

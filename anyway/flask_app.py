@@ -43,7 +43,7 @@ from webassets.ext.jinja2 import AssetsExtension
 from werkzeug.exceptions import BadRequestKeyError
 
 from anyway import utilities, secrets
-from anyway.base import user_optional, _set_cookie_hijack, _clear_cookie_hijack
+from anyway.base import _set_cookie_hijack, _clear_cookie_hijack
 from anyway.clusters_calculator import retrieve_clusters
 from anyway.config import ENTRIES_PER_PAGE
 from anyway.backend_constants import BE_CONST
@@ -69,9 +69,9 @@ from anyway.models import (
     AgeGroup,
     AccidentMarkerView,
     EmbeddedReports,
-    UserOAuth,
-    Roles2,
-    users_to_roles2,
+    Users,
+    Roles,
+    users_to_roles,
 )
 from anyway.oauth import OAuthSignIn
 from anyway.infographics_utils import get_infographics_data
@@ -330,7 +330,6 @@ def get_locale():
 
 
 @app.route("/schools", methods=["GET"])
-@user_optional
 def schools():
     if request.method == "GET":
         return render_template("schools_redirect.html")
@@ -339,7 +338,6 @@ def schools():
 
 
 @app.route("/markers", methods=["GET"])
-@user_optional
 def markers():
     logging.debug("getting markers")
     kwargs = get_kwargs()
@@ -377,7 +375,6 @@ def markers():
 
 
 @app.route("/markers_by_yishuv_symbol", methods=["GET"])
-@user_optional
 def markers_by_yishuv_symbol():
     logging.debug("getting markers by yishuv symbol")
     yishuv_symbol = request.values.get("yishuv_symbol")
@@ -389,7 +386,6 @@ def markers_by_yishuv_symbol():
 
 
 @app.route("/markers_hebrew_by_yishuv_symbol", methods=["GET"])
-@user_optional
 def markers_hebrew_by_yishuv_symbol():
     logging.debug("getting hebrew markers by yishuv symbol")
     yishuv_symbol = request.values.get("yishuv_symbol")
@@ -403,7 +399,6 @@ def markers_hebrew_by_yishuv_symbol():
 
 
 @app.route("/yishuv_symbol_to_yishuv_name", methods=["GET"])
-@user_optional
 def yishuv_symbol_to_name():
     """
     output example:
@@ -434,7 +429,6 @@ def yishuv_symbol_to_name():
 
 
 @app.route("/charts-data", methods=["GET"])
-@user_optional
 def charts_data():
     logging.debug("getting charts data")
     kwargs = get_kwargs()
@@ -680,7 +674,6 @@ def marker_all():
 
 
 @app.route("/discussion", methods=["GET", "POST"])
-@user_optional
 def discussion():
     if request.method == "GET":
         identifier = request.values["identifier"]
@@ -728,7 +721,6 @@ def clusters():
 
 
 @app.route("/highlightpoints", methods=["POST"])
-@user_optional
 def highlightpoint():
     highlight = parse_data(HighlightPoint, get_json_object(request))
     if highlight is None:
@@ -1106,8 +1098,8 @@ def on_identity_loaded(sender, identity):
 
     # Assuming the User model has a list of roles, update the
     # identity with the roles that the user provides
-    if hasattr(current_user, "roles2"):
-        for role in current_user.roles2:
+    if hasattr(current_user, "roles"):
+        for role in current_user.roles:
             identity.provides.add(RoleNeed(role.name))
 
 
@@ -1188,20 +1180,20 @@ def oauth_callback(provider: str) -> Response:
         return return_json_error(Es.BR_NO_USER_ID)
 
     user = (
-        db.session.query(UserOAuth)
+        db.session.query(Users)
         .filter_by(oauth_provider=provider, oauth_provider_user_id=user_data.service_user_id)
         .first()
     )
 
     if not user:
         user = (
-            db.session.query(UserOAuth)
+            db.session.query(Users)
                 .filter_by(oauth_provider=provider, email=user_data.email)
                 .first()
         )
 
     if not user:
-        user = UserOAuth(
+        user = Users(
             user_register_date=datetime.datetime.now(),
             user_last_login_date=datetime.datetime.now(),
             email=user_data.email,
@@ -1288,7 +1280,6 @@ def get_embedded_reports():
 
 
 @app.route("/api/embedded-reports", methods=["GET"])
-@user_optional
 def embedded_reports_api():
     embedded_reports_list = get_embedded_reports()
     response = Response(json.dumps(embedded_reports_list, default=str), mimetype="application/json")
@@ -1297,8 +1288,8 @@ def embedded_reports_api():
 
 
 @login_manager.user_loader
-def load_user(id: str) -> UserOAuth:
-    return db.session.query(UserOAuth).get(id)
+def load_user(id: str) -> Users:
+    return db.session.query(Users).get(id)
 
 
 @app.route("/user/info")
@@ -1307,7 +1298,7 @@ def user_have_email() -> Response:
         return return_json_error(Es.BR_USER_NOT_LOGGED_IN)
 
     user_obj = get_current_user()
-    roles = user_obj.roles2
+    roles = user_obj.roles
     return jsonify(
         {
             "id": user_obj.id,
@@ -1330,19 +1321,19 @@ def user_have_email() -> Response:
     )
 
 
-@app.route("/user/remove_from_group", methods=["POST"])
-def remove_from_group() -> Response:
-    return change_user_groups("remove")
+@app.route("/user/remove_from_role", methods=["POST"])
+def remove_from_role() -> Response:
+    return change_user_roles("remove")
 
 
-@app.route("/user/add_to_group", methods=["POST"])
-def add_to_group() -> Response:
-    return change_user_groups("add")
+@app.route("/user/add_to_role", methods=["POST"])
+def add_to_role() -> Response:
+    return change_user_roles("add")
 
 
-def change_user_groups(action: str) -> Response:
+def change_user_roles(action: str) -> Response:
     allowed_fields = [
-        "group",
+        "role",
         "email",
     ]
 
@@ -1361,57 +1352,57 @@ def change_user_groups(action: str) -> Response:
         if key not in allowed_fields:
             return return_json_error(Es.BR_UNKNOWN_FIELD, key)
 
-    role2_name = reg_dict.get("group")
-    if not role2_name:
-        return return_json_error(Es.BR_GROUP_NAME_MISSING)
-    role2 = get_role2_object(role2_name)
-    if role2 is None:
-        return return_json_error(Es.BR_GROUP_NOT_EXIST, role2_name)
+    role_name = reg_dict.get("role")
+    if not role_name:
+        return return_json_error(Es.BR_ROLE_NAME_MISSING)
+    role = get_role_object(role_name)
+    if role is None:
+        return return_json_error(Es.BR_ROLE_NOT_EXIST, role_name)
 
     email = reg_dict.get("email")
     if not email:
         return return_json_error(Es.BR_NO_EMAIL)
     if not is_a_valid_email(email):
         return return_json_error(Es.BR_BAD_EMAIL)
-    user = db.session.query(UserOAuth).filter(UserOAuth.email == email).first()
+    user = db.session.query(Users).filter(Users.email == email).first()
     if user is None:
         return return_json_error(Es.BR_USER_NOT_FOUND, email)
 
     if action == "add":
-        # Add user to group
-        for user_group in user.roles2:
-            if role2.name == user_group.name:
-                return return_json_error(Es.BR_USER_ALREADY_IN_GROUP, email, role2_name)
-        user.roles2.append(role2)
-        # Add user to group in the current instance
+        # Add user to role
+        for user_role in user.roles:
+            if role.name == user_role.name:
+                return return_json_error(Es.BR_USER_ALREADY_IN_ROLE, email, role_name)
+        user.roles.append(role)
+        # Add user to role in the current instance
         if current_user.email == user.email:
             # g is flask global data
-            g.identity.provides.add(RoleNeed(role2.name))
+            g.identity.provides.add(RoleNeed(role.name))
     elif action == "remove":
-        # Remove user from group
+        # Remove user from role
         removed = False
-        for user_role in user.roles2:
-            if role2.name == user_role.name:
-                d = users_to_roles2.delete().where(  # noqa pylint: disable=no-value-for-parameter
-                    (users_to_roles2.c.user_id == user.id)
-                    & (users_to_roles2.c.roles2_id == role2.id)
+        for user_role in user.roles:
+            if role.name == user_role.name:
+                d = users_to_roles.delete().where(  # noqa pylint: disable=no-value-for-parameter
+                    (users_to_roles.c.user_id == user.id)
+                    & (users_to_roles.c.roles_id == role.id)
                 )
                 db.session.execute(d)
                 removed = True
         if not removed:
-            return return_json_error(Es.BR_USER_NOT_IN_GROUP, email, role2_name)
+            return return_json_error(Es.BR_USER_NOT_IN_ROLE, email, role_name)
     db.session.commit()
 
     return Response(status=HTTPStatus.OK)
 
 
-def get_role2_object(role_name):
-    group = (
-        db.session.query(Roles2)
-        .filter(Roles2.name == role_name)
+def get_role_object(role_name):
+    role = (
+        db.session.query(Roles)
+        .filter(Roles.name == role_name)
         .first()
     )
-    return group
+    return role
 
 
 # This code is also used as part of the user first registration

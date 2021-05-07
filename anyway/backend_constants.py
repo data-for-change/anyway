@@ -52,7 +52,7 @@ class BackEndConstants(object):
         PRIVATE_VEHICLE_DRIVER = 2
         OTHER_DRIVER = 3
 
-    # This class should be correlated with the Roles2 table
+    # This class should be correlated with the Roles table
     class Roles2Names:
         Admins = "admins"
 

@@ -10,6 +10,7 @@ Create Date: 2021-03-31 21:31:47.278834
 import datetime
 
 from sqlalchemy import orm, text
+from sqlalchemy.engine.reflection import Inspector
 
 from anyway.backend_constants import BackEndConstants
 
@@ -24,45 +25,63 @@ import sqlalchemy as sa
 ADMIN_EMAIL = "anyway@anyway.co.il"
 
 
+def get_tables_names() -> [str]:
+    conn = op.get_bind()
+    inspector = Inspector.from_engine(conn)
+    tables = inspector.get_table_names()
+    return tables
+
+
 def upgrade():
+    # In cases of downgrade and upgrade those tables will no longer exits - and so the transaction will fail
+    tables_names = get_tables_names()
+    for table_name in [
+        "roles_users",
+        "roles",
+        "report_preferences",
+        "general_preferences",
+    ]:
+        if table_name in tables_names:
+            op.drop_table(table_name)
+
+    if "user_oauth" in tables_names:
+        if "users" in tables_names:
+            op.drop_table("users")
+        op.rename_table("user_oauth", "users")
+
     op.create_table(
-        "roles2",
+        "roles",
         sa.Column("id", sa.Integer(), primary_key=True, autoincrement=True, nullable=False),
         sa.Column("name", sa.String(127), unique=True, index=True, nullable=False),
         sa.Column("description", sa.String(255)),
-        sa.Column("create_date", sa.DateTime(), nullable=False, server_default=text('now()')),
+        sa.Column("create_date", sa.DateTime(), nullable=False, server_default=text("now()")),
     )
 
     op.create_table(
-        "users_to_roles2",
-        sa.Column("id", sa.Integer(), primary_key=True, autoincrement=True, nullable=False),
+        "users_to_roles",
         sa.Column(
-            "user_id", sa.BigInteger(), sa.ForeignKey("user_oauth.id"), index=True, nullable=False
+            "user_id", sa.BigInteger(), sa.ForeignKey("users.id"), index=True, nullable=False
         ),
-        sa.Column("roles2_id", sa.Integer(), sa.ForeignKey("roles2.id"), index=True, nullable=False),
-        sa.Column("create_date", sa.DateTime(), nullable=False, server_default=text('now()')),
+        sa.Column("role_id", sa.Integer(), sa.ForeignKey("roles.id"), index=True, nullable=False),
+        sa.Column("create_date", sa.DateTime(), nullable=False, server_default=text("now()")),
+        sa.PrimaryKeyConstraint("user_id", "role_id"),
     )
 
-    from anyway.models import Roles2, UserOAuth, users_to_roles2
+    from anyway.models import Roles, Users, users_to_roles
 
     bind = op.get_bind()
     session = orm.Session(bind=bind)
 
-    role_admins = Roles2(
+    role_admins = Roles(
         name=BackEndConstants.Roles2Names.Admins,
         description="This is the default admin role.",
         create_date=datetime.datetime.now(),
     )
     session.add(role_admins)
 
-    res = (
-        session.query(UserOAuth)
-        .with_entities(UserOAuth.email)
-        .filter(UserOAuth.email == ADMIN_EMAIL)
-        .first()
-    )
+    res = session.query(Users).with_entities(Users.email).filter(Users.email == ADMIN_EMAIL).first()
     if res is None:
-        user = UserOAuth(
+        user = Users(
             user_register_date=datetime.datetime.now(),
             user_last_login_date=datetime.datetime.now(),
             email=ADMIN_EMAIL,
@@ -75,26 +94,22 @@ def upgrade():
         session.add(user)
 
     user_id = (
-        session.query(UserOAuth)
-        .with_entities(UserOAuth.id)
-        .filter(UserOAuth.email == ADMIN_EMAIL)
-        .first()
+        session.query(Users).with_entities(Users.id).filter(Users.email == ADMIN_EMAIL).first()
     )
 
-    role_id = (
-        session.query(Roles2).with_entities(Roles2.id).filter(Roles2.name == "admins").first()
-    )
+    role_id = session.query(Roles).with_entities(Roles.id).filter(Roles.name == "admins").first()
 
-    insert_users_to_roles2 = users_to_roles2.insert().values(
+    insert_users_to_roles = users_to_roles.insert().values(
         user_id=user_id.id,
-        roles2_id=role_id.id,
+        role_id=role_id.id,
         create_date=datetime.datetime.now(),
     )
-    session.execute(insert_users_to_roles2)
+    session.execute(insert_users_to_roles)
 
     session.commit()
 
 
 def downgrade():
-    op.drop_table("users_to_roles2")
-    op.drop_table("roles2")
+    op.drop_table("users_to_roles")
+    op.drop_table("roles")
+    # Some of the changes are irreversible

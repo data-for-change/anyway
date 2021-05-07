@@ -8,11 +8,9 @@ from flask import Response, request
 from sqlalchemy import and_, not_
 
 from anyway.app_and_db import db
-from anyway.base import user_optional
 from anyway.models import School, SchoolWithDescription2020
 
 
-@user_optional
 def schools_api():
     logging.debug("getting schools")
     schools = (
@@ -45,7 +43,6 @@ def schools_api():
     return response
 
 
-@user_optional
 def schools_description_api():
     # Disable all the no-member violations in this function
     # pylint: disable=no-member
@@ -84,7 +81,6 @@ def schools_description_api():
     return response
 
 
-@user_optional
 def schools_yishuvs_api():
     logging.debug("getting schools yishuvs")
     schools_yishuvs = (
@@ -113,7 +109,6 @@ def schools_yishuvs_api():
     return response
 
 
-@user_optional
 def schools_names_api():
     # Disable all the no-member violations in this function
     # pylint: disable=no-member
@@ -124,7 +119,6 @@ def schools_names_api():
     return response
 
 
-@user_optional
 def injured_around_schools_api():
     # Disable all the no-member violations in this function
     # pylint: disable=no-member
@@ -137,7 +131,6 @@ def injured_around_schools_api():
     return response
 
 
-@user_optional
 def injured_around_schools_sex_graphs_data_api():
     # Disable all the no-member violations in this function
     # pylint: disable=no-member
@@ -152,7 +145,6 @@ def injured_around_schools_sex_graphs_data_api():
     return response
 
 
-@user_optional
 def injured_around_schools_months_graphs_data_api():
     logging.debug("getting injured around schools months graphs data api")
     school_id = request.values.get("school_id")

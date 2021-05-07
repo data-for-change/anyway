@@ -43,7 +43,7 @@ urllib3==1.25.9
 webassets==2.0
 xlrd==2.0.1
 lxml==4.6.3
-boto3==1.17.62
+boto3==1.17.68
 py3-validate-email==0.2.16
 phonenumbers==8.12.21
 flask-principal==0.4.0

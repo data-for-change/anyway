@@ -144,9 +144,7 @@ class Widget:
         else:
             output["meta"] = {}
         output["meta"]["rank"] = self.rank
-        output["meta"][
-            "information"
-        ] = self.information
+        output["meta"]["information"] = self.information
         return output
 
 
@@ -240,6 +238,7 @@ class AccidentCountBySeverityWidget(SubUrbanWidget):
 # adding calls to _() for pybabel extraction
 _("Fatal, severe and light accidents count in the specified location.")
 
+
 @register
 class MostSevereAccidentsTableWidget(SubUrbanWidget):
     name: str = "most_severe_accidents_table"
@@ -319,8 +318,12 @@ class MostSevereAccidentsTableWidget(SubUrbanWidget):
         }
         return items
 
+
 # adding calls to _() for pybabel extraction
-_("Most recent fatal and severe accidents in location, ordered by date. Up to 10 accidents are presented.")
+_(
+    "Most recent fatal and severe accidents in location, ordered by date. Up to 10 accidents are presented."
+)
+
 
 @register
 class MostSevereAccidentsWidget(SubUrbanWidget):
@@ -370,6 +373,7 @@ class MostSevereAccidentsWidget(SubUrbanWidget):
 
 # adding calls to _() for pybabel extraction
 _("Most recent fatal and severe accidents displayed on a map. Up to 10 accidents are presented.")
+
 
 @register
 class StreetViewWidget(SubUrbanWidget):
@@ -492,7 +496,9 @@ class HeadOnCollisionsComparisonWidget(SubUrbanWidget):
 # adding calls to _() for pybabel extraction
 _("others")
 _("frontal")
-_("Fatal accidents distribution in percentages by accident type - head on collisions vs other accidents.")
+_(
+    "Fatal accidents distribution in percentages by accident type - head on collisions vs other accidents."
+)
 
 
 @register
@@ -904,8 +910,11 @@ class AccidentCountByDriverTypeWidget(SubUrbanWidget):
         }
         return items
 
+
 # adding calls to _() for pybabel extraction
-_("Driver involvement in accident by driver type: professional - trucks, taxi, bus, work, minibus, tractor, private - private car, motorcycle, light electric - electric scooter, mobility scooter, electric bike.")
+_(
+    "Driver involvement in accident by driver type: professional - trucks, taxi, bus, work, minibus, tractor, private - private car, motorcycle, light electric - electric scooter, mobility scooter, electric bike."
+)
 
 
 @register
@@ -1361,7 +1370,7 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(SubUrbanWidget):
         super().__init__(request_params, type(self).name)
         self.road_number: str = request_params.location_info["road1"]
         # WIP: change rank, text by vehicle type
-        self.rank = 24
+        self.rank = 25
         self.text = {
             "title": f"סוגי תאונות אופנועים בכביש {int(self.road_number)} בהשוואה לכל הארץ"
         }
@@ -1831,3 +1840,22 @@ def is_news_flash_resolution_supported(news_flash_obj: NewsFlash) -> bool:
         if cat.value in resolution_dict and set(resolution_dict[cat.value]) <= location.keys():
             return True
     return False
+
+
+def get_infographics_mock_data():
+    mock_data = {"meta": None, "widgets": []}
+    widgets_path = os.path.join("static", "data", "widgets")
+    meta_path = os.path.join("static", "data", "widgets_meta")
+
+    assert len(os.listdir(meta_path)) == 1
+
+    meta_file = os.listdir(meta_path)[0]
+    with open(os.path.join(meta_path, meta_file)) as f:
+        mock_data["meta"] = json.loads(f.read())
+
+    for file in os.listdir(widgets_path):
+        with open(os.path.join(widgets_path, file)) as f:
+            widget = json.loads(f.read())
+            mock_data["widgets"].append(widget)
+    mock_data["widgets"] = sorted(mock_data["widgets"], key=lambda widget: widget["meta"]["rank"])
+    return mock_data

@@ -1,0 +1,32 @@
+{
+  "name": "top_road_segments_accidents_per_km",
+  "data": {
+    "items": [
+      {
+        "road_segment_name": "צומת ראש פינה - צומת מחניים",
+        "segment_length": 3.19999999999999,
+        "accidents_per_km": 23.4375,
+        "total_accidents": 75
+      },
+      {
+        "road_segment_name": "צומת צמח - צומת כנרת",
+        "segment_length": 2.69999999999999,
+        "accidents_per_km": 22.963,
+        "total_accidents": 62
+      },
+      {
+        "road_segment_name": "צומת טירת צבי - כניסה לבית שאן (דרום)",
+        "segment_length": 1.09999999999997,
+        "accidents_per_km": 18.1818,
+        "total_accidents": 20
+      }
+    ],
+    "text": {
+      "title": "תאונות לכל ק״מ כביש על פי מקטע בכביש 90"
+    }
+  },
+  "meta": {
+    "rank": 13,
+    "information": ""
+  }
+}

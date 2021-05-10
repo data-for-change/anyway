@@ -1,3 +1,7 @@
+from enum import Enum
+from typing import List
+
+
 class BackEndConstants(object):
 
     MARKER_TYPE_ACCIDENT = 1
@@ -52,6 +56,10 @@ class BackEndConstants(object):
         PRIVATE_VEHICLE_DRIVER = 2
         OTHER_DRIVER = 3
 
+    # This class should be correlated with the Roles table
+    class Roles2Names(Enum):
+        Admins = "admins"
+
     # This is a type for the 'road_type' table field name
     ROAD_TYPE_NOT_IN_CITY_IN_INTERSECTION = 3
     ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION = 4
@@ -84,5 +92,19 @@ class BackEndConstants(object):
         "https://127.0.0.1:3000/*",
     ]
 
+    class ResolutionCategories(Enum):
+        REGION = "מחוז"
+        DISTRICT = "נפה"
+        CITY = "עיר"
+        STREET = "רחוב"
+        URBAN_JUNCTION = "צומת עירוני"
+        SUBURBAN_ROAD = "כביש בינעירוני"
+        SUBURBAN_JUNCTION = "צומת בינעירוני"
+        OTHER = "אחר"
+
+    SUPPORTED_RESOLUTIONS: List[ResolutionCategories] = [
+        ResolutionCategories.STREET,
+        ResolutionCategories.SUBURBAN_ROAD
+    ]
 
 BE_CONST = BackEndConstants()

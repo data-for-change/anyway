@@ -96,6 +96,7 @@ class Widget:
         self.items = {}
         self.text = {}
         self.meta = None
+        self.information = ""
 
     def get_name(self) -> str:
         return self.name
@@ -145,7 +146,7 @@ class Widget:
         output["meta"]["rank"] = self.rank
         output["meta"][
             "information"
-        ] = "Placeholder: This Widget shows information of accidenents in Israel with comparison of vehicle types / locations / injured types."
+        ] = self.information
         return output
 
 
@@ -200,6 +201,7 @@ class AccidentCountBySeverityWidget(SubUrbanWidget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 1
+        self.information = "Fatal, severe and light accidents count in the specified location."
 
     def generate_items(self) -> None:
         self.items = AccidentCountBySeverityWidget.get_accident_count_by_severity(
@@ -235,6 +237,9 @@ class AccidentCountBySeverityWidget(SubUrbanWidget):
         return items
 
 
+# adding calls to _() for pybabel extraction
+_("Fatal, severe and light accidents count in the specified location.")
+
 @register
 class MostSevereAccidentsTableWidget(SubUrbanWidget):
     name: str = "most_severe_accidents_table"
@@ -242,6 +247,7 @@ class MostSevereAccidentsTableWidget(SubUrbanWidget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 2
+        self.information = "Most recent fatal and severe accidents in location, ordered by date. Up to 10 accidents are presented."
 
     def generate_items(self) -> None:
         self.items = MostSevereAccidentsTableWidget.prepare_table(
@@ -306,13 +312,15 @@ class MostSevereAccidentsTableWidget(SubUrbanWidget):
                     item["type"] = _(item["type"])
                 except KeyError:
                     logging.exception(
-                        f"MostSevereAccidentsWidget.localize_items: Exception while translating {item}."
+                        f"MostSevereAccidentsTableWidget.localize_items: Exception while translating {item}."
                     )
         items["data"]["text"] = {
             "title": get_most_severe_accidents_table_title(request_params.location_info)
         }
         return items
 
+# adding calls to _() for pybabel extraction
+_("Most recent fatal and severe accidents in location, ordered by date. Up to 10 accidents are presented.")
 
 @register
 class MostSevereAccidentsWidget(SubUrbanWidget):
@@ -321,6 +329,7 @@ class MostSevereAccidentsWidget(SubUrbanWidget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 3
+        self.information = "Most recent fatal and severe accidents displayed on a map. Up to 10 accidents are presented."
 
     def generate_items(self) -> None:
         self.items = MostSevereAccidentsWidget.get_most_severe_accidents(
@@ -359,6 +368,9 @@ class MostSevereAccidentsWidget(SubUrbanWidget):
         return items
 
 
+# adding calls to _() for pybabel extraction
+_("Most recent fatal and severe accidents displayed on a map. Up to 10 accidents are presented.")
+
 @register
 class StreetViewWidget(SubUrbanWidget):
     name: str = "street_view"
@@ -383,8 +395,7 @@ class HeadOnCollisionsComparisonWidget(SubUrbanWidget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 5
-        # self.text = {"title": "תאונות קטלניות ע״פ סוג"}
-        # self.text = {"title": "fatal accidents by type"}
+        self.information = "Fatal accidents distribution in percentages by accident type - head on collisions vs other accidents."
 
     def generate_items(self) -> None:
         self.items = self.get_head_to_head_stat()
@@ -481,6 +492,7 @@ class HeadOnCollisionsComparisonWidget(SubUrbanWidget):
 # adding calls to _() for pybabel extraction
 _("others")
 _("frontal")
+_("Fatal accidents distribution in percentages by accident type - head on collisions vs other accidents.")
 
 
 @register
@@ -838,6 +850,7 @@ class AccidentCountByDriverTypeWidget(SubUrbanWidget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 16
+        self.information = "Driver involvement in accident by driver type: professional - trucks, taxi, bus, work, minibus, tractor, private - private car, motorcycle, light electric - electric scooter, mobility scooter, electric bike."
 
     def generate_items(self) -> None:
         self.items = AccidentCountByDriverTypeWidget.count_accidents_by_driver_type(
@@ -890,6 +903,9 @@ class AccidentCountByDriverTypeWidget(SubUrbanWidget):
             + request_params.location_info["road_segment_name"]
         }
         return items
+
+# adding calls to _() for pybabel extraction
+_("Driver involvement in accident by driver type: professional - trucks, taxi, bus, work, minibus, tractor, private - private car, motorcycle, light electric - electric scooter, mobility scooter, electric bike.")
 
 
 @register
@@ -1785,6 +1801,8 @@ def localize_after_cache(request_params: RequestParams, items_list: List[Dict]) 
             )
         else:
             logging.error(f"localize_after_cache: bad input (missing 'name' key):{items}")
+        if request_params.lang != "en":
+            items["meta"]["information"] = _(items["meta"]["information"])
     return res
 
 
@@ -1802,3 +1820,14 @@ def is_sub_urban(request_params: RequestParams) -> bool:
         and "road1" in request_params.location_info
         and "road_segment_name" in request_params.location_info
     )
+
+
+def is_news_flash_resolution_supported(news_flash_obj: NewsFlash) -> bool:
+    location_data = extract_news_flash_location(news_flash_obj)
+    if location_data is None or location_data["data"]["resolution"] is None:
+        return False
+    location = location_data["data"]
+    for cat in BE_CONST.SUPPORTED_RESOLUTIONS:
+        if cat.value in resolution_dict and set(resolution_dict[cat.value]) <= location.keys():
+            return True
+    return False

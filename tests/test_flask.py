@@ -16,6 +16,7 @@ from flask.testing import FlaskClient
 from urlobject import URLObject
 
 from anyway.app_and_db import app as flask_app
+from anyway.backend_constants import BE_CONST
 from anyway.error_code_and_strings import (
     ERROR_TO_HTTP_CODE_DICT,
     build_json_for_user_api_error,
@@ -25,6 +26,7 @@ from anyway.error_code_and_strings import (
 
 @pytest.fixture
 def app():
+    flask_app.secret_key = "test_key_dont_use_in_prod"
     return flask_app.test_client()
 
 
@@ -130,7 +132,13 @@ def assert_return_code_for_user_update(error_code: int, rv: Response, extra: str
 
 
 def user_update_post_json(app: FlaskClient, json: typing.Optional[dict] = None) -> Response:
-    return app.post("/user/update", json=json, follow_redirects=True, mimetype="application/json")
+    return post_json(app, "/user/update", json)
+
+
+def post_json(
+    app: FlaskClient, path: str, json: typing.Optional[dict] = None
+) -> Response:
+    return app.post(path, json=json, follow_redirects=True, mimetype="application/json")
 
 
 def user_update_post(app: FlaskClient) -> Response:
@@ -147,8 +155,7 @@ def test_user_update_not_logged_in(app):
 
 def test_user_update_bad_json(app):
     with patch("flask_login.utils._get_user") as current_user:
-        current_user.return_value = mock.MagicMock()
-        current_user.return_value.is_anonymous = False
+        set_current_user_mock(current_user)
 
         rv = user_update_post(app)
         assert_return_code_for_user_update(Errors.BR_BAD_JSON, rv)
@@ -166,8 +173,7 @@ def test_user_update_bad_json(app):
 
 def test_user_update_names(app):
     with patch("flask_login.utils._get_user") as current_user:
-        current_user.return_value = mock.MagicMock()
-        current_user.return_value.is_anonymous = False
+        set_current_user_mock(current_user)
 
         rv = user_update_post_json(app, json={"first_name": "a"})
         assert_return_code_for_user_update(Errors.BR_FIRST_NAME_OR_LAST_NAME_MISSING, rv)
@@ -178,8 +184,7 @@ def test_user_update_names(app):
 
 def test_user_fail_on_email(app):
     with patch("flask_login.utils._get_user") as current_user:
-        current_user.return_value = mock.MagicMock()
-        current_user.return_value.is_anonymous = False
+        set_current_user_mock(current_user)
 
         with patch("anyway.flask_app.get_current_user_email") as get_current_user_email:
             get_current_user_email.side_effect = lambda: None
@@ -195,8 +200,7 @@ def test_user_fail_on_email(app):
 
 def test_user_fail_on_phone(app):
     with patch("flask_login.utils._get_user") as current_user:
-        current_user.return_value = mock.MagicMock()
-        current_user.return_value.is_anonymous = False
+        set_current_user_mock(current_user)
 
         with patch("anyway.flask_app.get_current_user_email") as get_current_user_email:
             get_current_user_email.side_effect = lambda: "aa@bb.com"
@@ -209,8 +213,7 @@ def test_user_fail_on_phone(app):
 
 def test_user_update_success(app):
     with patch("flask_login.utils._get_user") as current_user:
-        current_user.return_value = mock.MagicMock()
-        current_user.return_value.is_anonymous = False
+        set_current_user_mock(current_user)
 
         with patch("anyway.flask_app.get_current_user_email") as get_current_user_email:
             get_current_user_email.side_effect = lambda: None
@@ -259,27 +262,9 @@ def test_get_current_user(app):
     rv = app.get("/user/info", follow_redirects=True)
     assert_return_code_for_user_update(Errors.BR_USER_NOT_LOGGED_IN, rv)
     with patch("flask_login.utils._get_user") as current_user:
-        current_user.return_value = mock.MagicMock()
-        current_user.return_value.is_anonymous = False
+        set_current_user_mock(current_user)
         with patch("anyway.flask_app.get_current_user") as get_current_user:
-            ret_obj = mock.MagicMock()
-            ret_obj.id = USER_ID
-            ret_obj.user_register_date = None
-            ret_obj.email = USER_EMAIL
-            ret_obj.is_active = USER_ACTIVE
-            ret_obj.oauth_provider = OAUTH_PROVIDER
-            ret_obj.oauth_provider_user_name = None
-            ret_obj.oauth_provider_user_picture_url = None
-            ret_obj.work_on_behalf_of_organization = None
-            ret_obj.phone = None
-            ret_obj.user_type = None
-            ret_obj.user_url = None
-            ret_obj.user_desc = None
-            ret_obj.first_name = FIRST_NAME
-            ret_obj.last_name = LAST_NAME
-            ret_obj.is_user_completed_registration = USER_COMPLETED
-
-            get_current_user.side_effect = lambda: ret_obj
+            get_mock_current_user(get_current_user)
             rv = app.get("/user/info", follow_redirects=True)
             assert rv.status_code == HTTPStatus.OK
             assert rv.json == {
@@ -298,4 +283,68 @@ def test_get_current_user(app):
                 "user_type": None,
                 "user_url": None,
                 "work_on_behalf_of_organization": None,
+                "roles": [],
             }
+
+
+def get_mock_current_user(get_current_user: mock.MagicMock) -> mock.MagicMock:
+    ret_obj = mock.MagicMock()
+    ret_obj.id = USER_ID
+    ret_obj.user_register_date = None
+    ret_obj.email = USER_EMAIL
+    ret_obj.is_active = USER_ACTIVE
+    ret_obj.oauth_provider = OAUTH_PROVIDER
+    ret_obj.oauth_provider_user_name = None
+    ret_obj.oauth_provider_user_picture_url = None
+    ret_obj.work_on_behalf_of_organization = None
+    ret_obj.phone = None
+    ret_obj.user_type = None
+    ret_obj.user_url = None
+    ret_obj.user_desc = None
+    ret_obj.first_name = FIRST_NAME
+    ret_obj.last_name = LAST_NAME
+    ret_obj.is_user_completed_registration = USER_COMPLETED
+    ret_obj.roles = []
+    get_current_user.side_effect = lambda: ret_obj
+    return ret_obj
+
+
+def set_current_user_mock(current_user: mock.MagicMock) -> None:
+    current_user.return_value = mock.MagicMock()
+    current_user.return_value.is_anonymous = False
+    current_user.return_value.id = USER_ID
+
+
+def test_user_remove_from_role(app):
+    user_add_or_remove_role(app, "/user/remove_from_role")
+
+
+def test_user_add_to_role(app):
+    user_add_or_remove_role(app, "/user/add_to_role")
+
+
+def user_add_or_remove_role(app: FlaskClient, path: str) -> None:
+    rv = app.get(path, follow_redirects=True)
+    assert rv.status_code == HTTPStatus.METHOD_NOT_ALLOWED
+    with patch("flask_login.utils._get_user") as current_user:
+        set_current_user_mock(current_user)
+
+        rv = app.post(path, follow_redirects=True)
+        assert_return_code_for_user_update(
+            Errors.BR_MISSING_PERMISSION, rv, BE_CONST.Roles2Names.Admins.value
+        )
+        role = mock.MagicMock()
+        role.name = BE_CONST.Roles2Names.Admins.value
+        current_user.return_value.roles = [role]
+
+        rv = post_json(app, path, json={"email": "a"})
+        assert_return_code_for_user_update(Errors.BR_ROLE_NAME_MISSING, rv)
+
+        with patch("anyway.flask_app.get_role_object") as get_role_object:
+            get_role_object.return_value = mock.MagicMock()
+            get_role_object.return_value.name = BE_CONST.Roles2Names.Admins.value
+
+            rv = post_json(
+                app, path, json={"role": BE_CONST.Roles2Names.Admins.value, "email": "a"}
+            )
+            assert_return_code_for_user_update(Errors.BR_BAD_EMAIL, rv)

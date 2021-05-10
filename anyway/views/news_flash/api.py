@@ -25,8 +25,7 @@ def news_flash():
         if news_flash_obj is not None:
             if is_news_flash_resolution_supported(news_flash_obj):
                 return Response(
-                    json.dumps(news_flash_obj.serialize(), default=str),
-                    mimetype="application/json"
+                    json.dumps(news_flash_obj.serialize(), default=str), mimetype="application/json"
                 )
             else:
                 return Response("News flash location not supported", 406)
@@ -88,7 +87,7 @@ def gen_news_flash_query(session):
             NewsFlash.accident == True,
             not_(and_(NewsFlash.lat == 0, NewsFlash.lon == 0)),
             not_(and_(NewsFlash.lat == None, NewsFlash.lon == None)),
-            )
+        )
     ).order_by(NewsFlash.date.desc())
 
     query = query.offset(offset)

@@ -100,7 +100,8 @@ class BackEndConstants(object):
 
     SUPPORTED_RESOLUTIONS: List[ResolutionCategories] = [
         ResolutionCategories.STREET,
-        ResolutionCategories.SUBURBAN_ROAD
+        ResolutionCategories.SUBURBAN_ROAD,
     ]
+
 
 BE_CONST = BackEndConstants()

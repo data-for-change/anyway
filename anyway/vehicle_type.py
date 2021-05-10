@@ -82,8 +82,10 @@ class VehicleType(Enum):
         elif isinstance(db_val, int):
             return db_val
         else:
-            logging.error(f"VehicleType.fo_type_code: unknown value: {db_val}({type(db_val)})"
-                          '. returning OTHER_AND_UNKNOWN')
+            logging.error(
+                f"VehicleType.fo_type_code: unknown value: {db_val}({type(db_val)})"
+                ". returning OTHER_AND_UNKNOWN"
+            )
             return VehicleType.OTHER_AND_UNKNOWN.value
 
 
@@ -128,7 +130,7 @@ class VehicleCategory(Enum):
             VehicleCategory.LIGHT_ELECTRIC: [
                 VehicleType.ELECTRIC_SCOOTER,
                 VehicleType.MOBILITY_SCOOTER,
-                VehicleType.ELECTRIC_BIKE
+                VehicleType.ELECTRIC_BIKE,
             ],
             VehicleCategory.CAR: [VehicleType.CAR, VehicleType.TAXI],
             VehicleCategory.LARGE: [
@@ -151,8 +153,16 @@ class VehicleCategory(Enum):
                 VehicleType.MOTORCYCLE_250_TO_500,
                 VehicleType.MOTORCYCLE_ABOVE_500,
             ],
-            VehicleCategory.BICYCLE_AND_SMALL_MOTOR: [VehicleType.BIKE, VehicleType.ELECTRIC_SCOOTER, VehicleType.ELECTRIC_BIKE],
-            VehicleCategory.OTHER: [VehicleType.BIKE, VehicleType.TRAIN, VehicleType.OTHER_AND_UNKNOWN]
+            VehicleCategory.BICYCLE_AND_SMALL_MOTOR: [
+                VehicleType.BIKE,
+                VehicleType.ELECTRIC_SCOOTER,
+                VehicleType.ELECTRIC_BIKE,
+            ],
+            VehicleCategory.OTHER: [
+                VehicleType.BIKE,
+                VehicleType.TRAIN,
+                VehicleType.OTHER_AND_UNKNOWN,
+            ],
         }
         return list(map(lambda x: x.value, category_vehicle_types[self]))
 

@@ -399,7 +399,7 @@ class HeadOnCollisionsComparisonWidget(SubUrbanWidget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 5
-        self.information = "Fatal accidents distribution in percentages by accident type - head on collisions vs other accidents."
+        self.information = "Fatal accidents distribution by accident type - head on collisions vs other accidents."
 
     def generate_items(self) -> None:
         self.items = self.get_head_to_head_stat()
@@ -496,9 +496,7 @@ class HeadOnCollisionsComparisonWidget(SubUrbanWidget):
 # adding calls to _() for pybabel extraction
 _("others")
 _("frontal")
-_(
-    "Fatal accidents distribution in percentages by accident type - head on collisions vs other accidents."
-)
+_("Fatal accidents distribution by accident type - head on collisions vs other accidents.")
 
 
 @register
@@ -1810,8 +1808,7 @@ def localize_after_cache(request_params: RequestParams, items_list: List[Dict]) 
             )
         else:
             logging.error(f"localize_after_cache: bad input (missing 'name' key):{items}")
-        if request_params.lang != "en":
-            items["meta"]["information"] = _(items["meta"]["information"])
+        items["meta"]["information"] = _(items.get("meta", {}).get("information", ""))
     return res
 
 

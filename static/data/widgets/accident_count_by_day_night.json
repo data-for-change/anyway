@@ -1,0 +1,22 @@
+{
+  "name": "accident_count_by_day_night",
+  "data": {
+    "items": [
+      {
+        "day_night": "יום",
+        "count": 121
+      },
+      {
+        "day_night": "לילה",
+        "count": 67
+      }
+    ],
+    "text": {
+      "title": "כמות תאונות ביום ובלילה"
+    }
+  },
+  "meta": {
+    "rank": 10,
+    "information": ""
+  }
+}

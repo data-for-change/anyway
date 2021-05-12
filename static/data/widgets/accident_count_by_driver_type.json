@@ -1,0 +1,26 @@
+{
+  "name": "accident_count_by_driver_type",
+  "data": {
+    "items": [
+      {
+        "driver_type": "נהג רכב פרטי",
+        "count": 348
+      },
+      {
+        "driver_type": "נהג מקצועי",
+        "count": 65
+      },
+      {
+        "driver_type": "אחר",
+        "count": 23
+      }
+    ],
+    "text": {
+      "title": "מעורבות נהגים בתאונות לפי סוג במקטע כניסה למצפה שלם - צומת שדי תרומות"
+    }
+  },
+  "meta": {
+    "rank": 16,
+    "information": ""
+  }
+}

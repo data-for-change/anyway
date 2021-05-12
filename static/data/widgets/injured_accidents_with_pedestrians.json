@@ -1,0 +1,77 @@
+{
+  "name": "injured_accidents_with_pedestrians",
+  "data": {
+    "items": [
+      {
+        "year": 2009,
+        "light_injury_severity_text": "פצוע קל",
+        "light_injury_severity_count": 12,
+        "severe_injury_severity_text": "פצוע קשה",
+        "severe_injury_severity_count": 3,
+        "killed_injury_severity_text": "הרוג",
+        "killed_injury_severity_count": 0
+      },
+      {
+        "year": 2010,
+        "light_injury_severity_text": "פצוע קל",
+        "light_injury_severity_count": 24,
+        "severe_injury_severity_text": "פצוע קשה",
+        "severe_injury_severity_count": 0,
+        "killed_injury_severity_text": "הרוג",
+        "killed_injury_severity_count": 1
+      },
+      {
+        "year": 2011,
+        "light_injury_severity_text": "פצוע קל",
+        "light_injury_severity_count": 9,
+        "severe_injury_severity_text": "פצוע קשה",
+        "severe_injury_severity_count": 2,
+        "killed_injury_severity_text": "הרוג",
+        "killed_injury_severity_count": 1
+      },
+      {
+        "year": 2012,
+        "light_injury_severity_text": "פצוע קל",
+        "light_injury_severity_count": 21,
+        "severe_injury_severity_text": "פצוע קשה",
+        "severe_injury_severity_count": 2,
+        "killed_injury_severity_text": "הרוג",
+        "killed_injury_severity_count": 4
+      },
+      {
+        "year": 2013,
+        "light_injury_severity_text": "פצוע קל",
+        "light_injury_severity_count": 21,
+        "severe_injury_severity_text": "פצוע קשה",
+        "severe_injury_severity_count": 2,
+        "killed_injury_severity_text": "הרוג",
+        "killed_injury_severity_count": 4
+      },
+      {
+        "year": 2014,
+        "light_injury_severity_text": "פצוע קל",
+        "light_injury_severity_count": 10,
+        "severe_injury_severity_text": "פצוע קשה",
+        "severe_injury_severity_count": 0,
+        "killed_injury_severity_text": "הרוג",
+        "killed_injury_severity_count": 1
+      },
+      {
+        "year": 2015,
+        "light_injury_severity_text": "פצוע קל",
+        "light_injury_severity_count": 13,
+        "severe_injury_severity_text": "פצוע קשה",
+        "severe_injury_severity_count": 2,
+        "killed_injury_severity_text": "הרוג",
+        "killed_injury_severity_count": 0
+      }
+    ],
+    "text": {
+      "title": "נפגעים הולכי רגל ברחוב ז׳בוטינסקי, פתח תקווה"
+    }
+  },
+  "meta": {
+    "rank": 18,
+    "information": ""
+  }
+}

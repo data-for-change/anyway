@@ -56,6 +56,10 @@ class BackEndConstants(object):
         PRIVATE_VEHICLE_DRIVER = 2
         OTHER_DRIVER = 3
 
+    # This class should be correlated with the Roles table
+    class Roles2Names(Enum):
+        Admins = "admins"
+
     # This is a type for the 'road_type' table field name
     ROAD_TYPE_NOT_IN_CITY_IN_INTERSECTION = 3
     ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION = 4
@@ -100,7 +104,8 @@ class BackEndConstants(object):
 
     SUPPORTED_RESOLUTIONS: List[ResolutionCategories] = [
         ResolutionCategories.STREET,
-        ResolutionCategories.SUBURBAN_ROAD
+        ResolutionCategories.SUBURBAN_ROAD,
     ]
+
 
 BE_CONST = BackEndConstants()

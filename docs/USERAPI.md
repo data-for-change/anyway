@@ -37,7 +37,7 @@ For non-local address you can only access one of the following domain:
 > anyway-infographics.web.app  
 > anyway-infographics-demo.web.app  
 
-only in https but you can add any path you want after the domain.
+only in https, but you can add any path you want after the domain.
 #### Returns
 
 If no error has occurred then you will be redirected to the given URL or to the default
@@ -78,7 +78,7 @@ Required else this Optional, this the email of the user
 
 **user_work_place** - _string_ ,Optional, the place the user work - Ynet, Police, Tel aviv university . . .  
 **user_url** - _string_ ,Optional, a URL to the user site  
-**user_desc** - _string_ ,Optional, a self description of the user  
+**user_desc** - _string_ ,Optional, a self-description of the user  
 
 Examples for good JSON:
 
@@ -151,7 +151,8 @@ If no error has occurred then you will get a JSON with an HTTP 200 response. Exa
   "user_register_date": "Thu, 24 Dec 2020 13:59:11 GMT",
   "user_type": "journalist",
   "user_url": "http:\\www.ynet.com",
-  "work_on_behalf_of_organization": "ynet"
+  "work_on_behalf_of_organization": "ynet",
+  "roles": ["admins"]
 }
 ```
 
@@ -163,9 +164,31 @@ If no error has occurred then you will get a JSON with an HTTP 200 response. Exa
 **oauth_provider_user_picture_url** - _string_ ,A URL for a picture of the user(only available if the OAuth provider
 have given us, Sometimes the OAuth provider is given us a blank picture).  
 **phone** - _string_ , Phone number - e.g. 03-1234567, 0541234567, 054-123-1234, +972-054-123-1234 
-
+**roles** - _[string]_ ,The roles assigned to the user - e.g. admins . . .   
 Other fields are self-explanatory, so they are not described here.  
 Otherwise, you will get one of the errors described in the [errors](#Errors) section of this document.
+
+### Logout
+
+#### Description
+
+Logging out the user.
+
+#### URL struct
+
+> GET https://www.anyway.co.il/logout
+
+#### Example
+
+> https://www.anyway.co.il/logout
+
+#### Parameters
+
+There are no params to pass.
+
+#### Returns
+
+You will get HTTP 200 response.
 
 ### Errors
 

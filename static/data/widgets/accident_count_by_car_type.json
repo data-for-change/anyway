@@ -1,0 +1,39 @@
+{
+  "name": "accident_count_by_car_type",
+  "data": {
+    "items": [
+      {
+        "car_type": "אחרות",
+        "percentage_segment": 7.174887892376682,
+        "percentage_country": 4.939380665661913
+      },
+      {
+        "car_type": "מסחרי/משאית",
+        "percentage_segment": 13.452914798206278,
+        "percentage_country": 13.792105009169
+      },
+      {
+        "car_type": "רכב נוסעים פרטי",
+        "percentage_segment": 76.68161434977578,
+        "percentage_country": 76.88966761450112
+      },
+      {
+        "car_type": "אופנוע",
+        "percentage_segment": 2.4663677130044843,
+        "percentage_country": 3.897010238097006
+      },
+      {
+        "car_type": "אופניים/קורקינט",
+        "percentage_segment": 0.2242152466367713,
+        "percentage_country": 0.4818364725709577
+      }
+    ],
+    "text": {
+      "title": "השוואת אחוז הרכבים בתאונות במקטע כניסה למצפה שלם - צומת שדי תרומות לעומת ממוצע ארצי"
+    }
+  },
+  "meta": {
+    "rank": 17,
+    "information": ""
+  }
+}

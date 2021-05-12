@@ -7,7 +7,6 @@ from sqlalchemy import and_, not_
 
 from anyway.app_and_db import db
 from anyway.backend_constants import BE_CONST
-from anyway.base import user_optional
 from anyway.models import NewsFlash
 from anyway.infographics_utils import is_news_flash_resolution_supported
 
@@ -15,7 +14,6 @@ DEFAULT_OFFSET_REQ_PARAMETER = 0
 DEFAULT_LIMIT_REQ_PARAMETER = 100
 
 
-@user_optional
 def news_flash():
     news_flash_id = request.values.get("id")
 
@@ -25,8 +23,7 @@ def news_flash():
         if news_flash_obj is not None:
             if is_news_flash_resolution_supported(news_flash_obj):
                 return Response(
-                    json.dumps(news_flash_obj.serialize(), default=str),
-                    mimetype="application/json"
+                    json.dumps(news_flash_obj.serialize(), default=str), mimetype="application/json"
                 )
             else:
                 return Response("News flash location not supported", 406)
@@ -88,7 +85,7 @@ def gen_news_flash_query(session):
             NewsFlash.accident == True,
             not_(and_(NewsFlash.lat == 0, NewsFlash.lon == 0)),
             not_(and_(NewsFlash.lat == None, NewsFlash.lon == None)),
-            )
+        )
     ).order_by(NewsFlash.date.desc())
 
     query = query.offset(offset)
@@ -112,7 +109,6 @@ def filter_by_timeframe(end_date, news_flash_obj, start_date):
     return news_flash_obj
 
 
-@user_optional
 def single_news_flash(news_flash_id: int):
     news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == news_flash_id).first()
     if news_flash_obj is not None:

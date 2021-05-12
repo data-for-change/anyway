@@ -1,0 +1,32 @@
+{
+  "name": "accident_severity_by_cross_location",
+  "data": {
+    "items": [
+      {
+        "cross_location_text": "במעבר חצייה",
+        "light_injury_severity_text": "פצוע קל",
+        "light_injury_severity_count": 37,
+        "severe_injury_severity_text": "פצוע קשה",
+        "severe_injury_severity_count": 6,
+        "killed_injury_severity_text": "הרוג",
+        "killed_injury_severity_count": 0
+      },
+      {
+        "cross_location_text": "לא במעבר חצייה",
+        "light_injury_severity_text": "פצוע קל",
+        "light_injury_severity_count": 11,
+        "severe_injury_severity_text": "פצוע קשה",
+        "severe_injury_severity_count": 10,
+        "killed_injury_severity_text": "הרוג",
+        "killed_injury_severity_count": 0
+      }
+    ],
+    "text": {
+      "title": "הולכי רגל הרוגים ופצועים קשה ברחוב בן יהודה, תל אביב"
+    }
+  },
+  "meta": {
+    "rank": 19,
+    "information": ""
+  }
+}

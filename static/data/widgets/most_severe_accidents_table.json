@@ -1,0 +1,124 @@
+{
+  "name": "most_severe_accidents_table",
+  "data": {
+    "items": [
+      {
+        "accident_year": 2021,
+        "accident_severity": "קטלנית",
+        "type": "פגיעה בהולך רגל",
+        "date": "12/02/21",
+        "hour": "09:15",
+        "killed_count": 1,
+        "severe_injured_count": 2,
+        "light_injured_count": 0,
+        "injured_count": 2
+      },
+      {
+        "accident_year": 2020,
+        "accident_severity": "קטלנית",
+        "type": "התנגשות חזית בחזית",
+        "date": "16/12/20",
+        "hour": "11:30",
+        "killed_count": 2,
+        "severe_injured_count": 0,
+        "light_injured_count": 0,
+        "injured_count": 0
+      },
+      {
+        "accident_year": 2020,
+        "accident_severity": "קשה",
+        "type": "ירידה מהכביש או עלייה למדרכה",
+        "date": "11/09/20",
+        "hour": "03:45",
+        "killed_count": 0,
+        "severe_injured_count": 1,
+        "light_injured_count": 0,
+        "injured_count": 1
+      },
+      {
+        "accident_year": 2020,
+        "accident_severity": "קטלנית",
+        "type": "התנגשות חזית בחזית",
+        "date": "05/08/20",
+        "hour": "23:30",
+        "killed_count": 1,
+        "severe_injured_count": 0,
+        "light_injured_count": 5,
+        "injured_count": 5
+      },
+      {
+        "accident_year": 2020,
+        "accident_severity": "קטלנית",
+        "type": "התנגשות חזית בחזית",
+        "date": "29/01/20",
+        "hour": "09:00",
+        "killed_count": 1,
+        "severe_injured_count": 0,
+        "light_injured_count": 1,
+        "injured_count": 1
+      },
+      {
+        "accident_year": 2020,
+        "accident_severity": "קטלנית",
+        "type": "התנגשות חזית בחזית",
+        "date": "19/01/20",
+        "hour": "01:30",
+        "killed_count": 1,
+        "severe_injured_count": 0,
+        "light_injured_count": 1,
+        "injured_count": 1
+      },
+      {
+        "accident_year": 2019,
+        "accident_severity": "קשה",
+        "type": "התנגשות צד בצד",
+        "date": "24/09/19",
+        "hour": "14:15",
+        "killed_count": 0,
+        "severe_injured_count": 1,
+        "light_injured_count": 9,
+        "injured_count": 10
+      },
+      {
+        "accident_year": 2019,
+        "accident_severity": "קשה",
+        "type": "התנגשות עם עצם דומם",
+        "date": "16/08/19",
+        "hour": "16:00",
+        "killed_count": 0,
+        "severe_injured_count": 1,
+        "light_injured_count": 0,
+        "injured_count": 1
+      },
+      {
+        "accident_year": 2019,
+        "accident_severity": "קשה",
+        "type": "פגיעה בהולך רגל",
+        "date": "11/08/19",
+        "hour": "21:00",
+        "killed_count": 0,
+        "severe_injured_count": 2,
+        "light_injured_count": 1,
+        "injured_count": 3
+      },
+      {
+        "accident_year": 2019,
+        "accident_severity": "קשה",
+        "type": "התנגשות חזית בחזית",
+        "date": "03/04/19",
+        "hour": "19:45",
+        "killed_count": 0,
+        "severe_injured_count": 1,
+        "light_injured_count": 0,
+        "injured_count": 1
+      }
+    ],
+    "text": {
+      "title": "תאונות חמורות במקטע כניסה למצפה שלם - צומת שדי תרומות"
+    }
+  },
+  "meta": {
+    "rank": 2,
+    "information": ""
+  }
+}

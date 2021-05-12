@@ -1,0 +1,17 @@
+{
+  "name": "accident_count_by_severity",
+  "data": {
+    "items": {
+      "severity_fatal_count": 12,
+      "severity_light_count": 156,
+      "severity_severe_count": 20,
+      "start_year": 2017,
+      "end_year": 2021,
+      "total_accidents_count": 188
+    }
+  },
+  "meta": {
+    "rank": 1,
+    "information": ""
+  }
+}

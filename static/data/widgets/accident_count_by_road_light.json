@@ -1,0 +1,42 @@
+{
+  "name": "accident_count_by_road_light",
+  "data": {
+    "items": [
+      {
+        "road_light": "אור יום רגיל",
+        "count": 54
+      },
+      {
+        "road_light": "דמדומים",
+        "count": 3
+      },
+      {
+        "road_light": "יום לא ידוע",
+        "count": 67
+      },
+      {
+        "road_light": "לילה לא ידוע",
+        "count": 42
+      },
+      {
+        "road_light": "לילה לא קיימת תאורה",
+        "count": 12
+      },
+      {
+        "road_light": "לילה פעלה תאורה",
+        "count": 7
+      },
+      {
+        "road_light": "קיימת תאורה בלתי תקינה / לא פועלת",
+        "count": 3
+      }
+    ],
+    "text": {
+      "title": "כמות תאונות לפי תאורה"
+    }
+  },
+  "meta": {
+    "rank": 12,
+    "information": ""
+  }
+}

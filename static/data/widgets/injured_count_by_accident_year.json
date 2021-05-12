@@ -1,0 +1,34 @@
+{
+  "name": "injured_count_by_accident_year",
+  "data": {
+    "items": [
+      {
+        "accident_year": 2017,
+        "count": 119
+      },
+      {
+        "accident_year": 2018,
+        "count": 115
+      },
+      {
+        "accident_year": 2019,
+        "count": 139
+      },
+      {
+        "accident_year": 2020,
+        "count": 68
+      },
+      {
+        "accident_year": 2021,
+        "count": 5
+      }
+    ],
+    "text": {
+      "title": "נפגעים בתאונות במקטע כניסה למצפה שלם - צומת שדי תרומות"
+    }
+  },
+  "meta": {
+    "rank": 9,
+    "information": ""
+  }
+}

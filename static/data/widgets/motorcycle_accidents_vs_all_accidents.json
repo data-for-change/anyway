@@ -1,0 +1,34 @@
+{
+  "name": "motorcycle_accidents_vs_all_accidents",
+  "data": {
+    "items": [
+      {
+        "location": "כביש 90",
+        "vehicle": "אופנוע",
+        "percentage": 0.15333333333333332
+      },
+      {
+        "location": "כביש 90",
+        "vehicle": "אחר",
+        "percentage": 0.8466666666666667
+      },
+      {
+        "location": "כל הארץ",
+        "vehicle": "אופנוע",
+        "percentage": 0.22530594405594406
+      },
+      {
+        "location": "כל הארץ",
+        "vehicle": "אחר",
+        "percentage": 0.7746940559440559
+      }
+    ],
+    "text": {
+      "title": "תאונות אופנועים קשות וקטלניות בכביש 90 בהשוואה לכל הארץ"
+    }
+  },
+  "meta": {
+    "rank": 20,
+    "information": ""
+  }
+}

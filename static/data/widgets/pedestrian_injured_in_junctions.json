@@ -1,0 +1,26 @@
+{
+  "name": "pedestrian_injured_in_junctions",
+  "data": {
+    "items": [
+      {
+        "street name": "גורדון י ל",
+        "count": 18
+      },
+      {
+        "street name": "אידלסון אברהם",
+        "count": 10
+      },
+      {
+        "street name": "פרישמן",
+        "count": 7
+      }
+    ],
+    "text": {
+      "title": "מספר נפגעים הולכי רגל בצמתים - רחוב בן יהודה, תל אביב"
+    }
+  },
+  "meta": {
+    "rank": 23,
+    "information": ""
+  }
+}

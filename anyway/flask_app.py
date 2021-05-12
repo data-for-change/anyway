@@ -74,7 +74,7 @@ from anyway.models import (
     users_to_roles,
 )
 from anyway.oauth import OAuthSignIn
-from anyway.infographics_utils import get_infographics_data
+from anyway.infographics_utils import get_infographics_data, get_infographics_mock_data
 from anyway.app_and_db import app, db, get_cors_config
 from anyway.anyway_dataclasses.user_data import UserData
 from anyway.utilities import is_valid_number, is_a_safe_redirect_url, is_a_valid_email
@@ -1240,26 +1240,34 @@ def oauth_callback(provider: str) -> Response:
 
 @app.route("/api/infographics-data", methods=["GET"])
 def infographics_data():
-    news_flash_id = request.values.get("news_flash_id")
+    mock_data = request.values.get("mock", "false")
+    if mock_data == "true":
+        output = get_infographics_mock_data()
+    elif mock_data == "false":
+        news_flash_id = request.values.get("news_flash_id")
+        if news_flash_id == None:
+            log_bad_request(request)
+            return abort(http_client.BAD_REQUEST)
 
-    if news_flash_id == None:
+        number_of_years_ago = request.values.get("years_ago", BE_CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
+        lang: str = request.values.get("lang", "he")
+        logging.debug(
+            (
+                "getting infographics data for news_flash_id: {news_flash_id}, "
+                + "in time period:{number_of_years_ago}, lang:{lang}"
+            ).format(
+                news_flash_id=news_flash_id, number_of_years_ago=number_of_years_ago, lang=lang
+            )
+        )
+        output = get_infographics_data(
+            news_flash_id=news_flash_id, years_ago=number_of_years_ago, lang=lang
+        )
+        if not output:
+            log_bad_request(request)
+            return abort(http_client.NOT_FOUND)
+    else:
         log_bad_request(request)
         return abort(http_client.BAD_REQUEST)
-
-    number_of_years_ago = request.values.get("years_ago", BE_CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
-    lang: str = request.values.get("lang", "he")
-    logging.debug(
-        ("getting infographics data for news_flash_id: {news_flash_id}, " +
-                  "in time period:{number_of_years_ago}, lang:{lang}").format(
-            news_flash_id=news_flash_id, number_of_years_ago=number_of_years_ago,
-            lang=lang
-        )
-    )
-    output = get_infographics_data(news_flash_id=news_flash_id, years_ago=number_of_years_ago, lang=lang)
-    if not output:
-        log_bad_request(request)
-        return abort(http_client.NOT_FOUND)
-
     json_data = json.dumps(output, default=str)
     return Response(json_data, mimetype="application/json")
 

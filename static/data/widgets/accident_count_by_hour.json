@@ -1,0 +1,110 @@
+{
+  "name": "accident_count_by_hour",
+  "data": {
+    "items": [
+      {
+        "accident_hour": 0,
+        "count": 2
+      },
+      {
+        "accident_hour": 1,
+        "count": 2
+      },
+      {
+        "accident_hour": 2,
+        "count": 2
+      },
+      {
+        "accident_hour": 3,
+        "count": 1
+      },
+      {
+        "accident_hour": 4,
+        "count": 4
+      },
+      {
+        "accident_hour": 5,
+        "count": 7
+      },
+      {
+        "accident_hour": 6,
+        "count": 6
+      },
+      {
+        "accident_hour": 7,
+        "count": 7
+      },
+      {
+        "accident_hour": 8,
+        "count": 7
+      },
+      {
+        "accident_hour": 9,
+        "count": 10
+      },
+      {
+        "accident_hour": 10,
+        "count": 13
+      },
+      {
+        "accident_hour": 11,
+        "count": 8
+      },
+      {
+        "accident_hour": 12,
+        "count": 11
+      },
+      {
+        "accident_hour": 13,
+        "count": 11
+      },
+      {
+        "accident_hour": 14,
+        "count": 12
+      },
+      {
+        "accident_hour": 15,
+        "count": 18
+      },
+      {
+        "accident_hour": 16,
+        "count": 13
+      },
+      {
+        "accident_hour": 17,
+        "count": 6
+      },
+      {
+        "accident_hour": 18,
+        "count": 11
+      },
+      {
+        "accident_hour": 19,
+        "count": 9
+      },
+      {
+        "accident_hour": 20,
+        "count": 7
+      },
+      {
+        "accident_hour": 21,
+        "count": 6
+      },
+      {
+        "accident_hour": 22,
+        "count": 6
+      },
+      {
+        "accident_hour": 23,
+        "count": 9
+      }
+    ],
+    "text": {
+      "title": "כמות תאונות לפי שעה"
+    }
+  },
+  "meta": {
+    "rank": 11,
+    "information": ""
+  }
+}

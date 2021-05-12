@@ -1,0 +1,34 @@
+{
+  "name": "head_on_collisions_comparison",
+  "data": {
+    "items": {
+      "specific_road_segment_fatal_accidents": [
+        {
+          "desc": "חזיתיות",
+          "count": 8
+        },
+        {
+          "desc": "אחרות",
+          "count": 4
+        }
+      ],
+      "all_roads_fatal_accidents": [
+        {
+          "desc": "חזיתיות",
+          "count": 148
+        },
+        {
+          "desc": "אחרות",
+          "count": 447
+        }
+      ]
+    },
+    "text": {
+      "title": "תאונות קטלניות לפי סוג"
+    }
+  },
+  "meta": {
+    "rank": 5,
+    "information": ""
+  }
+}

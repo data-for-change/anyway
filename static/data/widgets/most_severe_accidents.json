@@ -1,0 +1,81 @@
+{
+  "name": "most_severe_accidents",
+  "data": {
+    "items": [
+      {
+        "longitude": 35.503680442138,
+        "latitude": 32.3735418944463,
+        "accident_severity": "קטלנית",
+        "accident_timestamp": "2021-02-12 09:15:00",
+        "accident_type": "פגיעה בהולך רגל"
+      },
+      {
+        "longitude": 35.4692068660984,
+        "latitude": 31.9507633827888,
+        "accident_severity": "קטלנית",
+        "accident_timestamp": "2020-12-16 11:30:00",
+        "accident_type": "התנגשות חזית בחזית"
+      },
+      {
+        "longitude": 35.5053748935707,
+        "latitude": 31.7734741247309,
+        "accident_severity": "קשה",
+        "accident_timestamp": "2020-09-11 03:45:00",
+        "accident_type": "ירידה מהכביש או עלייה למדרכה"
+      },
+      {
+        "longitude": 35.5126219830894,
+        "latitude": 31.8418518140218,
+        "accident_severity": "קטלנית",
+        "accident_timestamp": "2020-08-05 23:30:00",
+        "accident_type": "התנגשות חזית בחזית"
+      },
+      {
+        "longitude": 35.5490687049037,
+        "latitude": 32.2289458270214,
+        "accident_severity": "קטלנית",
+        "accident_timestamp": "2020-01-29 09:00:00",
+        "accident_type": "התנגשות חזית בחזית"
+      },
+      {
+        "longitude": 35.4517558001046,
+        "latitude": 32.0300134719802,
+        "accident_severity": "קטלנית",
+        "accident_timestamp": "2020-01-19 01:30:00",
+        "accident_type": "התנגשות חזית בחזית"
+      },
+      {
+        "longitude": 35.4931850808076,
+        "latitude": 32.4112505107304,
+        "accident_severity": "קשה",
+        "accident_timestamp": "2019-09-24 14:15:00",
+        "accident_type": "התנגשות צד בצד"
+      },
+      {
+        "longitude": 35.5051739830015,
+        "latitude": 31.8711519347246,
+        "accident_severity": "קשה",
+        "accident_timestamp": "2019-08-16 16:00:00",
+        "accident_type": "התנגשות עם עצם דומם"
+      },
+      {
+        "longitude": 35.4780039390812,
+        "latitude": 32.0602690979797,
+        "accident_severity": "קשה",
+        "accident_timestamp": "2019-08-11 21:00:00",
+        "accident_type": "פגיעה בהולך רגל"
+      },
+      {
+        "longitude": 35.4517558001046,
+        "latitude": 32.0300134719802,
+        "accident_severity": "קשה",
+        "accident_timestamp": "2019-04-03 19:45:00",
+        "accident_type": "התנגשות חזית בחזית"
+      }
+    ]
+  },
+  "meta": {
+    "rank": 3,
+    "information": ""
+  }
+}

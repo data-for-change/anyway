@@ -89,7 +89,7 @@ class S3Handler:
 
     @staticmethod
     def is_a_directory(s3_object):
-        return s3_object.key[-1] == '/'
+        return s3_object.key[-1] == "/"
 
     def __download_accidents_type_files(self, accidents_type, start_year):
         current_year, s3_bucket, local_directory = (

@@ -64,6 +64,10 @@ def main(detach_dir, username=None, password=None, email_search_start_date=""):
                 raise Exception("Error fetching mail")
 
             email_body = message_parts[0][1]
+
+            if type(email_body) is bytes:
+                email_body = email_body.decode('utf-8')
+
             mail = email.message_from_string(email_body)
             try:
                 mtime = datetime.strptime(mail["Date"][:-6], "%a, %d %b %Y %H:%M:%S")

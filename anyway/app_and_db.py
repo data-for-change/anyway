@@ -1,11 +1,30 @@
 from anyway import utilities
 from flask_sqlalchemy import SQLAlchemy
+import flask_restx
+from http import HTTPStatus
 
 from anyway.backend_constants import BE_CONST
 from anyway.config import SERVER_ENV
 
+
+class FlexRootApi(flask_restx.Api):
+    def __init__(self, inner_app, **kwargs):
+        self.render_root_method = None
+        super().__init__(inner_app, **kwargs)
+
+    def render_root(self):
+        if self.render_root_method is not None:
+            return self.render_root_method()
+        else:
+            self.abort(HTTPStatus.NOT_FOUND)
+
+    def set_render_root_function(self, func):
+        self.render_root_method = func
+
+
 app = utilities.init_flask()
 db = SQLAlchemy(app)
+api = FlexRootApi(app, doc="/swagger")
 
 
 def get_cors_config() -> dict:

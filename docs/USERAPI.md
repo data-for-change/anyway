@@ -190,6 +190,183 @@ There are no params to pass.
 
 You will get HTTP 200 response.
 
+### Enable/Disable user
+
+#### Description
+
+Enable or disable a user, this API doesn't delete the user from the DB,
+user with admin rights must be logged in to use this api.  
+An inactive user (disabled user) can't log in to the site.
+
+#### URL struct
+
+> POST https://www.anyway.co.il/user/change_user_active_mode
+
+#### Example
+
+> https://www.anyway.co.il/user/change_user_active_mode
+
+#### Parameters
+JSON with the fields:  
+**email** - _string_ ,Required , email.  
+**mode** - _bool_ ,Required , true for active, false for inactive/disabled user.  
+
+#### Returns
+
+If no error has occurred then you will get an empty HTTP 200 response. Otherwise, you will get one of the errors
+described in the [errors](#Errors) section of this document.
+
+### Add a role to DB
+
+#### Description
+
+Add a role to DB, user with admin rights must be logged in to use this api.
+
+#### URL struct
+
+> POST https://www.anyway.co.il/user/add_role
+
+#### Example
+
+> https://www.anyway.co.il/user/add_role
+
+#### Parameters
+JSON with the fields:  
+**name** - _string_ ,Required, at lest 2 chars and less than 127 chars, can contain only chars from regex "a-zA-Z0-9_-".  
+**description** - _string_ ,Required, up to 255 chars.
+
+#### Returns
+
+If no error has occurred then you will get an empty HTTP 200 response. Otherwise, you will get one of the errors
+described in the [errors](#Errors) section of this document.
+
+### Add user to role
+
+#### Description
+
+Add user to role, user with admin rights must be logged in to use this api.
+
+#### URL struct
+
+> POST https://www.anyway.co.il/user/add_to_role
+
+#### Example
+
+> https://www.anyway.co.il/user/add_to_role
+
+#### Parameters
+JSON with the fields:  
+**role** - _string_ ,Required, a role from the DB.  
+**email** - _string_ , Required, email of the user that will be added to the role.
+
+#### Returns
+
+If no error has occurred then you will get an empty HTTP 200 response. Otherwise, you will get one of the errors
+described in the [errors](#Errors) section of this document.
+
+### Remove user from role
+
+#### Description
+
+Remove user from role, user with admin rights must be logged in to use this api.
+
+#### URL struct
+
+> POST https://www.anyway.co.il/user/remove_from_role
+
+#### Example
+
+> https://www.anyway.co.il/user/remove_from_role
+
+#### Parameters
+JSON with the fields:  
+**role** - _string_ ,Required, a role from the DB.  
+**email** - _string_ , Required, email of the user that will be removed from the role.
+
+#### Returns
+
+If no error has occurred then you will get an empty HTTP 200 response. Otherwise, you will get one of the errors
+described in the [errors](#Errors) section of this document.
+
+### Get roles list from DB
+
+#### Description
+
+Return a JSON with a list of roles in the DB, user with admin rights must be logged in to use this api.
+
+#### URL struct
+
+> GET https://www.anyway.co.il/get_roles_list
+
+#### Example
+
+> https://www.anyway.co.il/get_roles_list
+
+#### Parameters
+
+There are no params to pass.
+
+#### Returns
+
+If no error has occurred then you will get a JSON with an HTTP 200 response. Example of expected result:
+
+```json
+[
+    {
+        "id": 1,
+        "name": "admins",
+        "description": "This is the default admin role."
+    },
+    {
+        "id": 2,
+        "name": "or_yarok",
+        "description": "This is the role for or yarok members."
+    }
+]
+```
+
+struct:
+
+[  
+{  
+**id** - _int_ ,Id of the role, int.  
+**name** - _string_ , Name of the role.  
+**description** - _string_ , Name of the role.  
+}  
+]  
+
+Otherwise, you will get one of the errors described in the [errors](#Errors) section of this document.
+
+
+### Get infographic data
+
+#### Description
+
+This is a partial documentation of this API (only what is user specific).  
+This API allows user specific and user unspecific data retrieval of infographic data.
+
+#### URL struct
+
+> GET https://www.anyway.co.il/api/infographics-data
+
+#### Example
+
+> https://www.anyway.co.il/api/infographics-data?lang=he&news_flash_id=38203&years_ago=5&personalized=true
+> 
+> https://www.anyway.co.il/api/infographics-data?lang=he&news_flash_id=38203&years_ago=5
+
+#### Parameters
+
+**personalized** - _bool_ ,Optional, Get user specific infographic data.  
+
+And other params that are not documented here. . . 
+
+#### Returns
+
+If no error has occurred then you will get a JSON with HTTP 200 response.   
+In some cases of error (like user not logged in and personalized=true) you will receive user unspecific data.
+
+
 ### Errors
 
 There are 2 types of error - Application errors(created by our code and described in this document) and framework
@@ -206,13 +383,27 @@ errors(e.g. Flask error, those can be in difference format then what describe he
 
 | Error name                          | Error code | Error msg                                                                                    | HTTP return Code |
 |-------------------------------------|------------|----------------------------------------------------------------------------------------------|------------------|
-| Bad phone number                    | 1          | Bad Request (Bad phone number).                                                              | 400              |
-| Bad email                           | 2          | Bad Request (Bad email address).                                                             | 400              |
+| Invalid phone number                | 1          | Bad Request (Bad phone number).                                                              | 400              |
+| Invalid email                       | 2          | Bad Request (Bad email address).                                                             | 400              |
 | No email address was given          | 3          | Bad Request (There is no email in our DB and there is no email in the json of this request). | 400              |
 | Missing last name or first name     | 4          | Bad Request (first name or last name is missing).                                            | 400              |
-| Bad JSON or no indication of a JSON | 5          | Bad Request (not a JSON or mimetype does not indicate JSON).                                 | 400              |
+| Invalid JSON or no JSON mimetype    | 5          | Bad Request (not a JSON or mimetype does not indicate JSON).                                 | 400              |
 | User not logged in                  | 6          | User not logged in.                                                                          | 401              |
 | User is already logged in           | 7          | User is already logged in.                                                                   | 400              |
 | No user id                          | 8          | Couldn't get user id from the OAuth provider.                                                | 500              |
 | Bad OAuth provider                  | 9          | Google is the only supported OAuth 2.0 provider.                                             | 400              |
 | JSON with unknown field             | 10         | Bad Request (Unknown field {}).                                                              | 400              |
+| JSON without role name              | 11         | Bad Request (Role name is missing from request json).                                        | 400              |
+| Role name is not in DB              | 12         | Bad Request (Role {} doesn't exist in DB).                                                   | 400              |
+| User not found                      | 13         | Bad Request (User(email:{}) not found).                                                      | 400              |
+| User is already member in role      | 14         | Bad Request (User(email:{}) is already in role {}).                                          | 400              |
+| User is missing permission          | 15         | Bad Request (User is missing permission {}).                                                 | 401              |
+| User is not in role                 | 16         | Bad Request (User(email:{}) is not in role {}).                                              | 400              |
+| User is not active                  | 17         | Bad Request (User is not active).                                                            | 401              |
+| Invalid role name                   | 18         | Bad Request (Bad role name, need to be more then 2 char, less then 127 and only those chars - a-zA-Z0-9_-). | 400              |
+| Role name already exists            | 19         | Bad Request (Role name already exists).                                                      | 400              |
+| Invalid role description            | 20         | Bad Request (Bad role description, need to be less then 255 chars).                          | 400              |
+| Role description is missing         | 21         | Bad Request (Role description is missing from request json).                                 | 400              |
+| Missing mode in json                | 22         | Bad Request (Mode is missing from request json).                                             | 400              |
+| Invalid mode value                  | 23         | Bad Request (Bad mode value).                                                                | 400              |
+

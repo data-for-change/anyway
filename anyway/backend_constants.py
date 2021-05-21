@@ -59,6 +59,7 @@ class BackEndConstants(object):
     # This class should be correlated with the Roles table
     class Roles2Names(Enum):
         Admins = "admins"
+        Or_yarok = "or_yarok"
 
     # This is a type for the 'road_type' table field name
     ROAD_TYPE_NOT_IN_CITY_IN_INTERSECTION = 3
@@ -105,6 +106,16 @@ class BackEndConstants(object):
     SUPPORTED_RESOLUTIONS: List[ResolutionCategories] = [
         ResolutionCategories.STREET,
         ResolutionCategories.SUBURBAN_ROAD,
+    ]
+
+    # If in the future there will be a number of organizations or a need for a dynamic setting change, move this
+    # data to a table in the DB.
+    OR_YAROK_WIDGETS = [
+        "accident_count_by_severity",
+        "most_severe_accidents_table",
+        "most_severe_accidents",
+        "vision_zero",
+        "head_on_collisions_comparison",
     ]
 
 

@@ -89,7 +89,13 @@ from anyway.views.schools.api import (
     injured_around_schools_months_graphs_data_api,
     injured_around_schools_api,
 )
-from anyway.views.news_flash.api import news_flash, single_news_flash
+from anyway.views.news_flash.api import (
+    news_flash,
+    news_flash_new,
+    single_news_flash,
+    DEFAULT_LIMIT_REQ_PARAMETER,
+    DEFAULT_OFFSET_REQ_PARAMETER,
+)
 
 
 app.config.from_object(__name__)
@@ -1061,7 +1067,7 @@ def acc_in_area_query():
             "polygon parameter is mandatory and must be sent as part of the request - http://{host:port}/markers/polygon?polygon=POLYGON(({lon} {"
             "lat},{lon} {lat},........,{lonN},{latN}))"
         )
-        raise abort(Response(msg))
+        raise abort(Response(msg))  # pylint disable=all
 
     query_obj = (
         db.session.query(AccidentMarker)
@@ -1139,31 +1145,35 @@ app.add_url_rule(
     view_func=injured_around_schools_api,
     methods=["GET"],
 )
-# app.add_url_rule(
-#     "/api/news-flash/<int:news_flash_id>",
-#     endpoint=None,
-#     view_func=single_news_flash,
-#     methods=["GET"],
-# )
 app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
 
 
-parser = reqparse.RequestParser()
-parser.add_argument('id', type=int, help='News flash id')
-parser.add_argument('source', type=str, help='news flash source')
-parser.add_argument('start_date', type=int, help='limit news flashes to a time period starting at the given timestamp')
-parser.add_argument('end_date', type=int, help='limit news flashes to a time period ending at the given timestamp')
-parser.add_argument('interurban_only', type=bool, help='limit news flashes to inter-urban')
-parser.add_argument('road_number', type=int, help='limit news flashes to given road')
-parser.add_argument('road_segment_only', type=bool, help='limit news flashes to items where a road_segment is specified')
-parser.add_argument('offset', type=int, help='skip items from start to given offset')
-parser.add_argument('limit', type=int, help='limit number of retrieved items to given limit')
+nf_parser = reqparse.RequestParser()
+nf_parser.add_argument('id', type=int, help='News flash id')
+nf_parser.add_argument('source', type=str, help='news flash source')
+nf_parser.add_argument('start_date', type=int,
+                       help='limit news flashes to a time period starting at the given timestamp')
+nf_parser.add_argument('end_date', type=int,
+                       help='limit news flashes to a time period ending at the given timestamp')
+nf_parser.add_argument('interurban_only', type=str, help='limit news flashes to inter-urban')
+nf_parser.add_argument('road_number', type=int, help='limit news flashes to given road')
+nf_parser.add_argument('road_segment_only', type=bool,
+                       help='limit news flashes to items where a road_segment is specified')
+nf_parser.add_argument('offset', type=int, default=DEFAULT_OFFSET_REQ_PARAMETER,
+                       help='skip items from start to given offset')
+nf_parser.add_argument('limit', type=int, default=DEFAULT_LIMIT_REQ_PARAMETER,
+                       help='limit number of retrieved items to given limit')
+
+
+def datetime_to_str(val: datetime.datetime) -> str:
+    return val.strftime("%Y-%m-%d %H:%M:%S") if isinstance(val, datetime.datetime) else 'None'
+
 
 news_flash_fields_model = api.model('news_flash', {
     'id': fields.Integer(),
     'accident': fields.Boolean(description='This news-flash reports an accident'),
     'author': fields.String(),
-    'date': fields.Integer(description='format: timestamp'),
+    'date': fields.String(description='format: "%Y-%m-%d %H:%M:%S"'),
     'description': fields.String(),
     'lat': fields.Float(),
     'link': fields.String(),
@@ -1193,7 +1203,6 @@ news_flash_list_model = api.model('news_flash_list', {
 class RetrieveSingleNewsFlash(Resource):
 
     @api.doc('get single news flash')
-    # @api.expect(parser)
     @api.response(404, 'News flash not found')
     @api.response(200, 'Retrieve single news-flash item', news_flash_fields_model)
     def get(self, news_flash_id):
@@ -1204,11 +1213,15 @@ class RetrieveSingleNewsFlash(Resource):
 class RetrieveNewsFlash(Resource):
 
     @api.doc('get news flash records')
-    @api.expect(parser)
+    @api.expect(nf_parser)
     @api.response(404, 'Parameter value not supported or missing')
     @api.response(200, 'Retrieve news-flash items filtered by given parameters', news_flash_list_model)
     def get(self):
-        return news_flash()
+        args = nf_parser.parse_args()
+        res = news_flash_new(args)
+        for d in res:
+            d['date'] = datetime_to_str(d['date']) if 'date' in d else 'None'
+        return res
 
 
 def return_json_error(error_code: int, *argv) -> Response:
@@ -1307,19 +1320,12 @@ parser = reqparse.RequestParser()
 parser.add_argument('id', type=int, help='News flash id')
 parser.add_argument('years_ago', type=int, default=5, help='Number of years back to consider accidents')
 
-resp_mod = api.model('infographics_data', {
-    'rank': fields.Raw(readonly=True, description='The task unique identifier'),
-    'task': fields.Raw(required=True, description='The task details')
-})
-
 
 @api.route("/api/infographics-data", methods=["GET"])
 class InfographicsData(Resource):
 
     @api.doc('get infographics data')
     @api.expect(parser)
-    @api.response(400, 'Validation Error')
-    @api.response(200, 'meta data and actual widgets data', resp_mod)
     def get(self):
         return infographics_data()
 

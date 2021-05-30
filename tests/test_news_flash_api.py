@@ -1,6 +1,5 @@
 import unittest
 from unittest.mock import patch
-import mock
 from sqlalchemy.orm import sessionmaker
 from anyway.app_and_db import db
 from anyway.views.news_flash.api import (
@@ -68,35 +67,31 @@ class NewsFlashApiTestCase(unittest.TestCase):
 
     def test_gen_news_flash_query(self):
 
-        m = mock.MagicMock()
-        values = {"id": None, "limit": 1, "road_number": 12345678}
-        m.values = values
         orig_supported_resolutions = BE_CONST.SUPPORTED_RESOLUTIONS
-        with mock.patch("anyway.views.news_flash.api.request", m):
-            BE_CONST.SUPPORTED_RESOLUTIONS = [
-                BE_CONST.ResolutionCategories.DISTRICT
-            ]
-            actual = gen_news_flash_query(self.session)
-            news_flashes = actual.all()
-            self.assertEqual(len(news_flashes), 1, "single news flash")
-            self.assertEqual(news_flashes[0].description, self.district_description,
-                             "district description")
+        BE_CONST.SUPPORTED_RESOLUTIONS = [
+          BE_CONST.ResolutionCategories.DISTRICT
+        ]
+        actual = gen_news_flash_query(self.session, road_number=12345678)
+        news_flashes = actual.all()
+        self.assertEqual(len(news_flashes), 1, "single news flash")
+        self.assertEqual(news_flashes[0].description, self.district_description,
+                         "district description")
 
-            BE_CONST.SUPPORTED_RESOLUTIONS = [
-                BE_CONST.ResolutionCategories.REGION
-            ]
-            actual = gen_news_flash_query(self.session)
-            news_flashes = actual.all()
-            self.assertEqual(len(news_flashes), 1, "single news flash")
-            self.assertEqual(news_flashes[0].description, self.region_description,
-                             "region description")
+        BE_CONST.SUPPORTED_RESOLUTIONS = [
+          BE_CONST.ResolutionCategories.REGION
+        ]
+        actual = gen_news_flash_query(self.session, road_number=12345678)
+        news_flashes = actual.all()
+        self.assertEqual(len(news_flashes), 1, "single news flash")
+        self.assertEqual(news_flashes[0].description, self.region_description,
+                         "region description")
 
-            BE_CONST.SUPPORTED_RESOLUTIONS = [
-                BE_CONST.ResolutionCategories.CITY
-            ]
-            actual = gen_news_flash_query(self.session)
-            news_flashes = actual.all()
-            self.assertEqual(len(news_flashes), 0, "zero news flash")
+        BE_CONST.SUPPORTED_RESOLUTIONS = [
+          BE_CONST.ResolutionCategories.CITY
+        ]
+        actual = gen_news_flash_query(self.session, road_number=12345678)
+        news_flashes = actual.all()
+        self.assertEqual(len(news_flashes), 0, "zero news flash")
 
         BE_CONST.SUPPORTED_RESOLUTIONS = orig_supported_resolutions
 

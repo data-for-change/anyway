@@ -1067,7 +1067,7 @@ def acc_in_area_query():
             "polygon parameter is mandatory and must be sent as part of the request - http://{host:port}/markers/polygon?polygon=POLYGON(({lon} {"
             "lat},{lon} {lat},........,{lonN},{latN}))"
         )
-        raise abort(Response(msg))  # pylint: disable=all
+        raise abort(Response(msg))  # pylint
 
     query_obj = (
         db.session.query(AccidentMarker)
@@ -1221,7 +1221,7 @@ class RetrieveNewsFlash(Resource):
         res = news_flash_new(args)
         for d in res:
             d['date'] = datetime_to_str(d['date']) if 'date' in d else 'None'
-        return res
+        return {'news_flashes': res}
 
 
 def return_json_error(error_code: int, *argv) -> Response:

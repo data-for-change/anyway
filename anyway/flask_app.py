@@ -1067,7 +1067,7 @@ def acc_in_area_query():
             "polygon parameter is mandatory and must be sent as part of the request - http://{host:port}/markers/polygon?polygon=POLYGON(({lon} {"
             "lat},{lon} {lat},........,{lonN},{latN}))"
         )
-        raise abort(Response(msg))  # pylint
+        raise abort(Response(msg))  # pylint: disable=all
 
     query_obj = (
         db.session.query(AccidentMarker)

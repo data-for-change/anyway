@@ -1,6 +1,7 @@
 import datetime
 import json
 import logging
+from typing import List
 
 from flask import request, Response
 from sqlalchemy import and_, not_
@@ -29,7 +30,17 @@ def news_flash():
                 return Response("News flash location not supported", 406)
         return Response(status=404)
 
-    query = gen_news_flash_query(db.session)
+    query = gen_news_flash_query(
+        db.session,
+        source=request.values.get("source"),
+        start_date=request.values.get("start_date"),
+        end_date=request.values.get("end_date"),
+        interurban_only=request.values.get("interurban_only"),
+        road_number=request.values.get("road_number"),
+        road_segment=request.values.get("road_segment_only"),
+        offset=request.values.get("offset", DEFAULT_OFFSET_REQ_PARAMETER),
+        limit=request.values.get("limit", DEFAULT_LIMIT_REQ_PARAMETER),
+    )
     news_flashes = query.all()
 
     news_flashes_jsons = [n.serialize() for n in news_flashes]
@@ -38,17 +49,41 @@ def news_flash():
     return Response(json.dumps(news_flashes_jsons, default=str), mimetype="application/json")
 
 
-def gen_news_flash_query(session):
-    source = request.values.get("source")
-    start_date = request.values.get("start_date")
-    end_date = request.values.get("end_date")
-    interurban_only = request.values.get("interurban_only")
-    road_number = request.values.get("road_number")
-    road_segment = request.values.get("road_segment_only")
-    offset = request.values.get("offset", DEFAULT_OFFSET_REQ_PARAMETER)
-    limit = request.values.get("limit", DEFAULT_LIMIT_REQ_PARAMETER)
-    query = session.query(NewsFlash)
+def news_flash_new(args: dict) -> List[dict]:
+    news_flash_id = args["id"]
 
+    if news_flash_id is not None:
+        return single_news_flash(news_flash_id)
+
+    query = gen_news_flash_query(db.session,
+                                 source=args.get("source"),
+                                 start_date=args.get("start_date"),
+                                 end_date=args.get("end_date"),
+                                 interurban_only=args.get("interurban_only"),
+                                 road_number=args.get("road_number"),
+                                 road_segment=args.get("road_segment_only"),
+                                 offset=args.get("offset"),
+                                 limit=args.get("limit"),
+                                 )
+    news_flashes = query.all()
+
+    news_flashes_jsons = [n.serialize() for n in news_flashes]
+    for news_flash in news_flashes_jsons:
+        set_display_source(news_flash, news_flash_id)
+    return news_flashes_jsons
+
+
+def gen_news_flash_query(session,
+                         source=None,
+                         start_date=None,
+                         end_date=None,
+                         interurban_only=None,
+                         road_number=None,
+                         road_segment=None,
+                         offset=None,
+                         limit=None,
+                         ):
+    query = session.query(NewsFlash)
     # get all possible sources
     sources = [
         str(source_name[0]) for source_name in db.session.query(NewsFlash.source).distinct().all()
@@ -74,7 +109,7 @@ def gen_news_flash_query(session):
         )
     supported_resolutions = set([x.value for x in BE_CONST.SUPPORTED_RESOLUTIONS])
     query = query.filter(NewsFlash.resolution.in_(supported_resolutions))
-    if interurban_only == "true":
+    if interurban_only == "true" or interurban_only == "True":
         query = query.filter(NewsFlash.resolution.in_(["כביש בינעירוני"]))
     if road_number:
         query = query.filter(NewsFlash.road1 == road_number)

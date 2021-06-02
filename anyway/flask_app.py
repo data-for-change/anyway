@@ -5,14 +5,17 @@ import csv
 import datetime
 import json
 import logging
+import re
+import typing
 from io import StringIO
 import os
 import time
 
+
 from flask_login import login_user, logout_user, LoginManager, current_user
 import jinja2
 import pandas as pd
-from flask import make_response, render_template, Response, jsonify, abort, current_app, g
+from flask import make_response, render_template, Response, jsonify, abort, current_app, g, Request
 from flask import request, redirect, session
 from flask_assets import Environment
 from flask_babel import Babel, gettext
@@ -28,6 +31,7 @@ from flask_principal import (
     RoleNeed,
     Permission,
 )
+from flask_restx import Resource, fields, reqparse
 
 from anyway.error_code_and_strings import (
     Errors as Es,
@@ -48,7 +52,7 @@ from anyway.clusters_calculator import retrieve_clusters
 from anyway.config import ENTRIES_PER_PAGE
 from anyway.backend_constants import BE_CONST
 from anyway.constants import CONST
-from anyway.current_user_functions import get_current_user_email, get_current_user
+from anyway.user_functions import get_current_user_email, get_current_user, get_user_by_email
 from anyway.models import (
     AccidentMarker,
     DiscussionMarker,
@@ -75,9 +79,13 @@ from anyway.models import (
 )
 from anyway.oauth import OAuthSignIn
 from anyway.infographics_utils import get_infographics_data, get_infographics_mock_data
-from anyway.app_and_db import app, db, get_cors_config
+from anyway.app_and_db import app, db, api, get_cors_config
 from anyway.anyway_dataclasses.user_data import UserData
-from anyway.utilities import is_valid_number, is_a_safe_redirect_url, is_a_valid_email
+from anyway.utilities import (
+    is_valid_number,
+    is_a_safe_redirect_url,
+    is_a_valid_email,
+)
 from anyway.views.schools.api import (
     schools_description_api,
     schools_names_api,
@@ -87,7 +95,13 @@ from anyway.views.schools.api import (
     injured_around_schools_months_graphs_data_api,
     injured_around_schools_api,
 )
-from anyway.views.news_flash.api import news_flash, single_news_flash
+from anyway.views.news_flash.api import (
+    news_flash,
+    news_flash_new,
+    single_news_flash,
+    DEFAULT_LIMIT_REQ_PARAMETER,
+    DEFAULT_OFFSET_REQ_PARAMETER,
+)
 
 
 app.config.from_object(__name__)
@@ -783,7 +797,6 @@ def log_bad_request(request):
         logging.debug("Bad request:{0}".format(str(request)))
 
 
-@app.route("/")
 def index(marker=None, message=None):
     context = {"url": request.base_url, "index_url": request.url_root}
     context["CONST"] = CONST.to_dict()
@@ -908,6 +921,9 @@ def index(marker=None, message=None):
     context["hide_search"] = True if request.values.get("hide_search") == "true" else False
     context["embedded_reports"] = get_embedded_reports()
     return render_template("index.html", **context)
+
+
+api.set_render_root_function(index)
 
 
 def string2timestamp(s):
@@ -1057,7 +1073,7 @@ def acc_in_area_query():
             "polygon parameter is mandatory and must be sent as part of the request - http://{host:port}/markers/polygon?polygon=POLYGON(({lon} {"
             "lat},{lon} {lat},........,{lonN},{latN}))"
         )
-        raise abort(Response(msg))
+        raise abort(Response(msg))  # pylint: disable=all
 
     query_obj = (
         db.session.query(AccidentMarker)
@@ -1106,6 +1122,11 @@ def on_identity_loaded(sender, identity):
 @principals.identity_loader
 def load_identity_when_session_expires():
     if hasattr(current_user, "id"):
+        if hasattr(current_user, "is_active"):
+            if not current_user.is_active:
+                logout_user()
+                return AnonymousIdentity()
+
         return Identity(current_user.id)
 
 
@@ -1135,13 +1156,83 @@ app.add_url_rule(
     view_func=injured_around_schools_api,
     methods=["GET"],
 )
-app.add_url_rule(
-    "/api/news-flash/<int:news_flash_id>",
-    endpoint=None,
-    view_func=single_news_flash,
-    methods=["GET"],
-)
 app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
+
+
+nf_parser = reqparse.RequestParser()
+nf_parser.add_argument('id', type=int, help='News flash id')
+nf_parser.add_argument('source', type=str, help='news flash source')
+nf_parser.add_argument('start_date', type=int,
+                       help='limit news flashes to a time period starting at the given timestamp')
+nf_parser.add_argument('end_date', type=int,
+                       help='limit news flashes to a time period ending at the given timestamp')
+nf_parser.add_argument('interurban_only', type=str, help='limit news flashes to inter-urban')
+nf_parser.add_argument('road_number', type=int, help='limit news flashes to given road')
+nf_parser.add_argument('road_segment_only', type=bool,
+                       help='limit news flashes to items where a road_segment is specified')
+nf_parser.add_argument('offset', type=int, default=DEFAULT_OFFSET_REQ_PARAMETER,
+                       help='skip items from start to given offset')
+nf_parser.add_argument('limit', type=int, default=DEFAULT_LIMIT_REQ_PARAMETER,
+                       help='limit number of retrieved items to given limit')
+
+
+def datetime_to_str(val: datetime.datetime) -> str:
+    return val.strftime("%Y-%m-%d %H:%M:%S") if isinstance(val, datetime.datetime) else 'None'
+
+
+news_flash_fields_model = api.model('news_flash', {
+    'id': fields.Integer(),
+    'accident': fields.Boolean(description='This news-flash reports an accident'),
+    'author': fields.String(),
+    'date': fields.String(description='format: "%Y-%m-%d %H:%M:%S"'),
+    'description': fields.String(),
+    'lat': fields.Float(),
+    'link': fields.String(),
+    'lon': fields.Float(),
+    'road1': fields.Float(),
+    'road2': fields.Float(),
+    'resolution': fields.String(description='Type of location of this news-flash'),
+    'title': fields.String(),
+    'source': fields.String(),
+    'organization': fields.String(),
+    'location': fields.String(),
+    'tweet_id': fields.Integer(),
+    'region_hebrew': fields.String(),
+    'district_hebrew': fields.String(),
+    'yishuv_name': fields.String(),
+    'street1_hebrew': fields.String(),
+    'street2_hebrew': fields.String(),
+    'non_urban_intersection_hebrew': fields.String(),
+    'road_segment_name': fields.String()
+})
+news_flash_list_model = api.model('news_flash_list', {
+    'news_flashes': fields.List(fields.Nested(news_flash_fields_model))
+})
+
+
+@api.route("/api/news-flash/<int:news_flash_id>")
+class RetrieveSingleNewsFlash(Resource):
+
+    @api.doc('get single news flash')
+    @api.response(404, 'News flash not found')
+    @api.response(200, 'Retrieve single news-flash item', news_flash_fields_model)
+    def get(self, news_flash_id):
+        return single_news_flash(news_flash_id)
+
+
+@api.route("/api/news-flash-new", methods=["GET"])
+class RetrieveNewsFlash(Resource):
+
+    @api.doc('get news flash records')
+    @api.expect(nf_parser)
+    @api.response(404, 'Parameter value not supported or missing')
+    @api.response(200, 'Retrieve news-flash items filtered by given parameters', news_flash_list_model)
+    def get(self):
+        args = nf_parser.parse_args()
+        res = news_flash_new(args)
+        for d in res:
+            d['date'] = datetime_to_str(d['date']) if 'date' in d else 'None'
+        return {'news_flashes': res}
 
 
 def return_json_error(error_code: int, *argv) -> Response:
@@ -1188,9 +1279,12 @@ def oauth_callback(provider: str) -> Response:
     if not user:
         user = (
             db.session.query(Users)
-                .filter_by(oauth_provider=provider, email=user_data.email)
-                .first()
+            .filter_by(oauth_provider=provider, email=user_data.email)
+            .first()
         )
+
+    if not user.is_active:
+        return return_json_error(Es.BR_USER_NOT_ACTIVE)
 
     if not user:
         user = Users(
@@ -1209,13 +1303,15 @@ def oauth_callback(provider: str) -> Response:
         db.session.add(user)
     else:
         user.user_last_login_date = datetime.datetime.now()
-        if user.oauth_provider_user_id == "unknown-manual-insert":  # Only for anyway@anyway.co.il first login
+        if (
+            user.oauth_provider_user_id == "unknown-manual-insert"
+        ):  # Only for anyway@anyway.co.il first login
             user.oauth_provider_user_id = user_data.service_user_id
             user.oauth_provider_user_name = user_data.name
-            user.oauth_provider_user_domain=user_data.service_user_domain
-            user.oauth_provider_user_picture_url=user_data.picture_url
-            user.oauth_provider_user_locale=user_data.service_user_locale
-            user.oauth_provider_user_profile_url=user_data.user_profile_url
+            user.oauth_provider_user_domain = user_data.service_user_domain
+            user.oauth_provider_user_picture_url = user_data.picture_url
+            user.oauth_provider_user_locale = user_data.service_user_locale
+            user.oauth_provider_user_profile_url = user_data.user_profile_url
 
     db.session.commit()
 
@@ -1236,11 +1332,23 @@ def oauth_callback(provider: str) -> Response:
 """
     Returns infographics-data API
 """
+parser = reqparse.RequestParser()
+parser.add_argument('id', type=int, help='News flash id')
+parser.add_argument('years_ago', type=int, default=5, help='Number of years back to consider accidents')
 
 
-@app.route("/api/infographics-data", methods=["GET"])
+@api.route("/api/infographics-data", methods=["GET"])
+class InfographicsData(Resource):
+
+    @api.doc('get infographics data')
+    @api.expect(parser)
+    def get(self):
+        return infographics_data()
+
+
 def infographics_data():
     mock_data = request.values.get("mock", "false")
+    personalized_data = request.values.get("personalized", "false")
     if mock_data == "true":
         output = get_infographics_mock_data()
     elif mock_data == "false":
@@ -1268,8 +1376,36 @@ def infographics_data():
     else:
         log_bad_request(request)
         return abort(http_client.BAD_REQUEST)
+
+    if personalized_data == "true":
+        output = widgets_personalisation_for_user(output)
+
     json_data = json.dumps(output, default=str)
     return Response(json_data, mimetype="application/json")
+
+
+def widgets_personalisation_for_user(raw_info: typing.Dict) -> typing.Dict:
+    if current_user.is_anonymous:
+        return raw_info
+
+    roles_names = [role.name for role in current_user.roles]
+
+    if BE_CONST.Roles2Names.Or_yarok.value in roles_names:
+        widgets_list = raw_info.get("widgets")
+        if not widgets_list:
+            return raw_info
+
+        new_list = []
+        for wig in widgets_list:
+            wig_name = wig.get("name")
+            if wig_name is None:
+                new_list.append(wig)
+                continue
+
+            if wig_name in BE_CONST.OR_YAROK_WIDGETS:
+                new_list.append(wig)
+        raw_info["widgets"] = new_list
+    return raw_info
 
 
 def get_embedded_reports():
@@ -1339,12 +1475,9 @@ def add_to_role() -> Response:
     return change_user_roles("add")
 
 
-def change_user_roles(action: str) -> Response:
-    allowed_fields = [
-        "role",
-        "email",
-    ]
-
+def check_admin_api_with_input(
+    request: Request, allowed_fields: typing.List[str]
+) -> typing.Optional[Response]:
     if current_user.is_anonymous:
         return return_json_error(Es.BR_USER_NOT_LOGGED_IN)
 
@@ -1359,6 +1492,19 @@ def change_user_roles(action: str) -> Response:
     for key in reg_dict:
         if key not in allowed_fields:
             return return_json_error(Es.BR_UNKNOWN_FIELD, key)
+    return None
+
+
+def change_user_roles(action: str) -> Response:
+    allowed_fields = [
+        "role",
+        "email",
+    ]
+
+    res = check_admin_api_with_input(request, allowed_fields)
+    if res:
+        return res
+    reg_dict = request.json
 
     role_name = reg_dict.get("role")
     if not role_name:
@@ -1372,7 +1518,7 @@ def change_user_roles(action: str) -> Response:
         return return_json_error(Es.BR_NO_EMAIL)
     if not is_a_valid_email(email):
         return return_json_error(Es.BR_BAD_EMAIL)
-    user = db.session.query(Users).filter(Users.email == email).first()
+    user = get_user_by_email(db, email)
     if user is None:
         return return_json_error(Es.BR_USER_NOT_FOUND, email)
 
@@ -1392,8 +1538,7 @@ def change_user_roles(action: str) -> Response:
         for user_role in user.roles:
             if role.name == user_role.name:
                 d = users_to_roles.delete().where(  # noqa pylint: disable=no-value-for-parameter
-                    (users_to_roles.c.user_id == user.id)
-                    & (users_to_roles.c.role_id == role.id)
+                    (users_to_roles.c.user_id == user.id) & (users_to_roles.c.role_id == role.id)
                 )
                 db.session.execute(d)
                 removed = True
@@ -1405,11 +1550,7 @@ def change_user_roles(action: str) -> Response:
 
 
 def get_role_object(role_name):
-    role = (
-        db.session.query(Roles)
-        .filter(Roles.name == role_name)
-        .first()
-    )
+    role = db.session.query(Roles).filter(Roles.name == role_name).first()
     return role
 
 
@@ -1491,3 +1632,111 @@ def update_user_in_db(
     current_user.user_desc = user_desc
     current_user.is_user_completed_registration = True
     db.session.commit()
+
+
+@app.route("/user/change_user_active_mode", methods=["POST"])
+def user_disable() -> Response:
+    allowed_fields = [
+        "email",
+        "mode",
+    ]
+
+    result = check_admin_api_with_input(request, allowed_fields)
+    if result:
+        return result
+    reg_dict = request.json
+
+    email = reg_dict.get("email")
+    if not email:
+        return return_json_error(Es.BR_NO_EMAIL)
+    if not is_a_valid_email(email):
+        return return_json_error(Es.BR_BAD_EMAIL)
+    user = get_user_by_email(db, email)
+    if user is None:
+        return return_json_error(Es.BR_USER_NOT_FOUND, email)
+
+    mode = reg_dict.get("mode")
+    if mode is None:
+        return return_json_error(Es.BR_NO_MODE)
+
+    if type(mode) != bool:
+        return return_json_error(Es.BR_BAD_MODE)
+
+    user.is_active = mode
+    db.session.commit()
+    return Response(status=HTTPStatus.OK)
+
+
+@app.route("/user/add_role", methods=["POST"])
+def add_role() -> Response:
+    allowed_fields = [
+        "name",
+        "description",
+    ]
+
+    res = check_admin_api_with_input(request, allowed_fields)
+    if res:
+        return res
+    reg_dict = request.json
+
+    name = reg_dict.get("name")
+    if not name:
+        return return_json_error(Es.BR_ROLE_NAME_MISSING)
+
+    if not is_a_valid_role_name(name):
+        return return_json_error(Es.BR_BAD_ROLE_NAME)
+
+    role = db.session.query(Roles).filter(Roles.name == name).first()
+    if role:
+        return return_json_error(Es.BR_ROLE_EXIST)
+
+    description = reg_dict.get("description")
+    if not description:
+        return return_json_error(Es.BR_ROLE_DESCRIPTION_MISSING)
+
+    if not is_a_valid_role_description(description):
+        return return_json_error(Es.BR_BAD_ROLE_DESCRIPTION)
+
+    role = Roles(name=name, description=description, create_date=datetime.datetime.now())
+    db.session.add(role)
+    db.session.commit()
+    return Response(status=HTTPStatus.OK)
+
+
+def is_a_valid_role_name(name: str) -> bool:
+    if len(name) < 2 or len(name) >= Roles.name.type.length:
+        return False
+
+    match = re.match("^[a-zA-Z0-9_-]+$", name)
+    if not match:
+        return False
+
+    return True
+
+
+def is_a_valid_role_description(name: str) -> bool:
+    if len(name) >= Roles.description.type.length:
+        return False
+
+    return True
+
+
+@app.route("/user/get_roles_list", methods=["GET"])
+def get_roles_list() -> Response:
+    if current_user.is_anonymous:
+        return return_json_error(Es.BR_USER_NOT_LOGGED_IN)
+
+    admin_permission = Permission(RoleNeed(BE_CONST.Roles2Names.Admins.value))
+    if not admin_permission.can():
+        return return_json_error(Es.BR_MISSING_PERMISSION, BE_CONST.Roles2Names.Admins.value)
+
+    roles_list = db.session.query(Roles).all()
+    send_list = []
+    for role in roles_list:
+        send_list.append({"id": role.id, "name": role.name, "description": role.description})
+
+    return app.response_class(
+        response=json.dumps(send_list),
+        status=HTTPStatus.OK,
+        mimetype="application/json",
+    )

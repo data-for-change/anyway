@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-05-01 21:27+0000\n"
+"POT-Creation-Date: 2021-05-12 13:10+0000\n"
 "PO-Revision-Date: 2020-11-26 16:45+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -126,98 +126,92 @@ msgstr ""
 msgid "other_driver"
 msgstr ""
 
-#: anyway/infographics_utils.py:243 anyway/infographics_utils.py:321
-#: anyway/infographics_utils.py:379 anyway/infographics_utils.py:485
-#: anyway/infographics_utils.py:907
-msgid "metainformation"
-msgstr ""
-
-#: anyway/infographics_utils.py:252
+#: anyway/infographics_utils.py:241
 msgid "Fatal, severe and light accidents count in the specified location."
 msgstr ""
 
-#: anyway/infographics_utils.py:328
+#: anyway/infographics_utils.py:311
 msgid "accident_severity"
 msgstr ""
 
-#: anyway/infographics_utils.py:329
+#: anyway/infographics_utils.py:312
 msgid "type"
 msgstr ""
 
-#: anyway/infographics_utils.py:340
+#: anyway/infographics_utils.py:323
 msgid ""
 "Most recent fatal and severe accidents in location, ordered by date. Up "
 "to 10 accidents are presented."
 msgstr ""
 
-#: anyway/infographics_utils.py:386 anyway/infographics_utils.py:1463
+#: anyway/infographics_utils.py:363 anyway/infographics_utils.py:1449
 msgid "accident_type"
 msgstr ""
 
-#: anyway/infographics_utils.py:395
+#: anyway/infographics_utils.py:372
 msgid ""
 "Most recent fatal and severe accidents displayed on a map. Up to 10 "
 "accidents are presented."
 msgstr ""
 
-#: anyway/infographics_utils.py:487
+#: anyway/infographics_utils.py:463
 msgid "fatal accidents by type"
 msgstr ""
 
-#: anyway/infographics_utils.py:490
+#: anyway/infographics_utils.py:466
 msgid "desc"
 msgstr ""
 
-#: anyway/infographics_utils.py:517
+#: anyway/infographics_utils.py:493
 msgid "others"
 msgstr ""
 
-#: anyway/infographics_utils.py:518
+#: anyway/infographics_utils.py:494
 msgid "frontal"
 msgstr ""
 
-#: anyway/infographics_utils.py:519
+#: anyway/infographics_utils.py:495
 msgid ""
-"Fatal accidents distribution in percentages by accident type - head on "
-"collisions vs other accidents."
+"Fatal accidents distribution by accident type - head on collisions vs "
+"other accidents."
 msgstr ""
 
-#: anyway/infographics_utils.py:591
+#: anyway/infographics_utils.py:567
 msgid "Fatal and severe accidents heat map"
 msgstr ""
 
-#: anyway/infographics_utils.py:840
+#: anyway/infographics_utils.py:816
 msgid "Injury severity per age group in "
 msgstr ""
 
-#: anyway/infographics_utils.py:910
+#: anyway/infographics_utils.py:896
 msgid "driver_type"
 msgstr ""
 
-#: anyway/infographics_utils.py:916
+#: anyway/infographics_utils.py:902
 msgid "accident count by driver type "
 msgstr ""
 
-#: anyway/infographics_utils.py:922
+#: anyway/infographics_utils.py:908
 msgid ""
 "Driver involvement in accident by driver type: professional - trucks, "
 "taxi, bus, work, minibus, tractor, private - private car, motorcycle, "
 "light electric - electric scooter, mobility scooter, electric bike."
 msgstr ""
 
-#: anyway/infographics_utils.py:1028
+#: anyway/infographics_utils.py:1014
 msgid ""
 "comparing vehicle type percentage in accidents in {} relative to national"
 " average"
 msgstr ""
 
-#: anyway/infographics_utils.py:1297
+#: anyway/infographics_utils.py:1283
 msgid ""
 "Pedestrian Injuries on Ben Yehuda Street in Tel Aviv by Type of hitting "
 "Vehicle, Compared to Urban Accidents Across the country"
 msgstr ""
 
-#: anyway/infographics_utils.py:1566
+#: anyway/infographics_utils.py:1552
 msgid "Most severe accidents in segment"
 msgstr ""
 
@@ -382,76 +376,3 @@ msgstr ""
 #: templates/index.html:490
 msgid "Login with Google"
 msgstr ""
-
-#~ msgid "Pedestrian injury"
-#~ msgstr ""
-
-#~ msgid "Collision of front to side"
-#~ msgstr ""
-
-#~ msgid "Collision of front to rear-end"
-#~ msgstr ""
-
-#~ msgid "Collision of side to side (lateral)"
-#~ msgstr ""
-
-#~ msgid "Head-on frontal collision"
-#~ msgstr ""
-
-#~ msgid "Collision with a stopped non-parked vehicle"
-#~ msgstr ""
-
-#~ msgid "Collision with a parked vehicle"
-#~ msgstr ""
-
-#~ msgid "Collision with an inanimate object"
-#~ msgstr ""
-
-#~ msgid "Swerving off the road or onto the pavement"
-#~ msgstr ""
-
-#~ msgid "Overturned vehicle"
-#~ msgstr ""
-
-#~ msgid "Skid"
-#~ msgstr ""
-
-#~ msgid "Injury of a passenger in a vehicle"
-#~ msgstr ""
-
-#~ msgid "A fall from a moving vehicle"
-#~ msgstr ""
-
-#~ msgid "Fire"
-#~ msgstr ""
-
-#~ msgid "Other"
-#~ msgstr ""
-
-#~ msgid "Collision of rear-end to front"
-#~ msgstr ""
-
-#~ msgid "Collision of rear-end to side"
-#~ msgstr ""
-
-#~ msgid "Collision with an animal"
-#~ msgstr ""
-
-#~ msgid "Damage caused by a falling load off a vehicle"
-#~ msgstr ""
-
-#~ msgid "Accidents in descending order by severity for segment"
-#~ msgstr ""
-
-#~ msgid "unknown"
-#~ msgstr ""
-
-#~ msgid "all_roads_fatal_accidents"
-#~ msgstr ""
-
-#~ msgid "specific_road_segment_fatal_accidents"
-#~ msgstr ""
-
-#~ msgid "car_type"
-#~ msgstr ""
-

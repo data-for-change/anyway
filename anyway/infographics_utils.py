@@ -187,6 +187,8 @@ def get_widget_class_by_name(name: str) -> Type[Widget]:
 
 
 def register(widget_class: Type[Widget]) -> Type[Widget]:
+    if widgets_dict.get(widget_class.name) is not None:
+        logging.error(f"Double register:{widget_class.name}:{widget_class}\n")
     widgets_dict[widget_class.name] = widget_class
     logging.debug(f"register:{widget_class.name}:{widget_class}\n")
     return widget_class

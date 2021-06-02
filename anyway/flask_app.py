@@ -1283,9 +1283,6 @@ def oauth_callback(provider: str) -> Response:
             .first()
         )
 
-    if not user.is_active:
-        return return_json_error(Es.BR_USER_NOT_ACTIVE)
-
     if not user:
         user = Users(
             user_register_date=datetime.datetime.now(),
@@ -1302,6 +1299,9 @@ def oauth_callback(provider: str) -> Response:
         )
         db.session.add(user)
     else:
+        if not user.is_active:
+            return return_json_error(Es.BR_USER_NOT_ACTIVE)
+
         user.user_last_login_date = datetime.datetime.now()
         if (
             user.oauth_provider_user_id == "unknown-manual-insert"

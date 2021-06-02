@@ -114,7 +114,7 @@ class BackEndConstants(object):
         "accident_count_by_severity",
         "most_severe_accidents_table",
         "most_severe_accidents",
-        "vision_zero",
+        "vision_zero_2_plus_1",
         "head_on_collisions_comparison",
     ]
 

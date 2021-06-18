@@ -409,6 +409,11 @@ def update_casualties_costs(filename):
 
     return parse(filename)
 
+@scripts.command()
+def importemail():
+    from anyway.parsers.cbs.importmail_cbs import main
+
+    return main()
 
 if __name__ == "__main__":
     cli(sys.argv[1:])  # pylint: disable=too-many-function-args

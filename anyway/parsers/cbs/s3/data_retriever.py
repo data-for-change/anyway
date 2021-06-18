@@ -1,10 +1,8 @@
-from os import environ, makedirs, mkdir
+from os import makedirs, mkdir
 from os.path import basename, dirname, abspath, join as join_path, exists as does_path_exist
 from datetime import datetime
 from tempfile import mkdtemp
 import logging
-
-get_environment_variable = environ.get
 
 from .config import ACCIDENTS_TYPE_1, ACCIDENTS_TYPE_3, \
     ANYWAY_BUCKET, LOCAL_CBS_DIRECTORY, ACCIDENTS_TYPE_PREFIX

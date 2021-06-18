@@ -10,6 +10,7 @@ class S3DataClass:
         self._aws_secret_key = secrets.get("AWS_SECRET_KEY")
         self._s3_resource = None
         self._s3_bucket = None
+        self._client = None
 
     @property
     def s3_resource(self):
@@ -19,13 +20,10 @@ class S3DataClass:
                 aws_access_key_id=self._aws_access_key,
                 aws_secret_access_key=self._aws_secret_key,
             )
-
         return self._s3_resource
 
     @property
     def s3_bucket(self):
         if self._s3_bucket is None:
             self._s3_bucket = self.s3_resource.Bucket(ANYWAY_BUCKET)
-
         return self._s3_bucket
-

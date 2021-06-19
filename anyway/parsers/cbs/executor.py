@@ -14,7 +14,7 @@ import math
 import pandas as pd
 from sqlalchemy import or_, and_
 
-from anyway.parsers.cbs import preprocessing_cbs_files, importmail_cbs
+from anyway.parsers.cbs import preprocessing_cbs_files
 from anyway import field_names, localization
 from anyway.backend_constants import BE_CONST
 from anyway.models import (
@@ -778,13 +778,12 @@ def delete_invalid_entries(batch_size):
             db.session.commit()
 
 
-def delete_cbs_entries(start_date, batch_size):
+def delete_cbs_entries(start_year, batch_size):
     """
     deletes all CBS markers (provider_code=1 or provider_code=3) in the database created in year and with provider code provider_code
     first deletes from tables Involved and Vehicle, then from table AccidentMarker
-    first deletes from tables InvolvedNoLocation and VehicleNoLocation, then from table AccidentsNoLocation
     """
-
+    start_date = f"{start_year}-01-01"
     marker_ids_to_delete = (
         db.session.query(AccidentMarker.id)
         .filter(AccidentMarker.created >= datetime.strptime(start_date, "%Y-%m-%d"))
@@ -823,54 +822,6 @@ def delete_cbs_entries(start_date, batch_size):
             db.session.commit()
 
         q = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_(ids_chunk))
-        if q.all():
-            logging.info("deleting entries from AccidentMarker")
-            q.delete(synchronize_session=False)
-            db.session.commit()
-
-
-def delete_cbs_entries_from_email(provider_code, year, batch_size):
-    """
-    deletes all CBS markers (provider_code=1 or provider_code=3) in the database created in year and with provider code provider_code
-    first deletes from tables Involved and Vehicle, then from table AccidentMarker
-    first deletes from tables InvolvedNoLocation and VehicleNoLocation, then from table AccidentsNoLocation
-    """
-
-    marker_ids_to_delete = (
-        db.session.query(AccidentMarker.provider_and_id)
-        .filter(
-            and_(AccidentMarker.accident_year == year),
-            AccidentMarker.provider_code == provider_code,
-        )
-        .all()
-    )
-
-    marker_ids_to_delete = [acc_id[0] for acc_id in marker_ids_to_delete]
-
-    logging.info(
-        "There are "
-        + str(len(marker_ids_to_delete))
-        + " accident ids to delete for year "
-        + str(year)
-    )
-
-    for ids_chunk in chunks(marker_ids_to_delete, batch_size):
-
-        logging.info("Deleting a chunk of " + str(len(ids_chunk)))
-
-        q = db.session.query(Involved).filter(Involved.provider_and_id.in_(ids_chunk))
-        if q.all():
-            logging.info("deleting entries from Involved")
-            q.delete(synchronize_session=False)
-            db.session.commit()
-
-        q = db.session.query(Vehicle).filter(Vehicle.provider_and_id.in_(ids_chunk))
-        if q.all():
-            logging.info("deleting entries from Vehicle")
-            q.delete(synchronize_session=False)
-            db.session.commit()
-
-        q = db.session.query(AccidentMarker).filter(AccidentMarker.provider_and_id.in_(ids_chunk))
         if q.all():
             logging.info("deleting entries from AccidentMarker")
             q.delete(synchronize_session=False)
@@ -1031,126 +982,39 @@ def update_dictionary_tables(path):
 def get_file_type_and_year(file_path):
     df = pd.read_csv(file_path, encoding=CONTENT_ENCODING)
     provider_code = df.iloc[0][field_names.file_type.lower()]
-    year = df.iloc[0][field_names.accident_year]
+    year = df[field_names.accident_year].mode().values[0]
     return int(provider_code), int(year)
 
 
 def main(
-    specific_folder,
-    delete_all,
-    path,
     batch_size,
-    delete_start_date,
-    load_start_year,
-    from_email,
-    username="",
-    password="",
-    email_search_start_date="",
-    from_s3=False,
+    load_start_year=None,
 ):
+    if load_start_year is None:
+        now = datetime.now()
+        load_start_year = now.year - 1
     try:
-        if not from_email and not from_s3:
-            import_ui = ImporterUI(path, specific_folder, delete_all)
-            dir_name = import_ui.source_path()
-
-            if specific_folder:
-                dir_list = [dir_name]
-            else:
-                dir_list = glob.glob("{0}/*/*".format(dir_name))
-
-            # wipe all the AccidentMarker and Vehicle and Involved data first
-            if import_ui.is_delete_all():
-                truncate_tables(db, (Vehicle, Involved, AccidentMarker))
-            elif delete_start_date is not None:
-                delete_cbs_entries(delete_start_date, batch_size)
-            started = datetime.now()
-            total = 0
-            for directory in sorted(dir_list, reverse=False):
-                directory_name = os.path.basename(os.path.normpath(directory))
-                year = directory_name[1:5] if directory_name[0] == "H" else directory_name[0:4]
-                if int(year) >= int(load_start_year):
-                    parent_directory = os.path.basename(
-                        os.path.dirname(os.path.join(os.pardir, directory))
-                    )
-                    provider_code = get_provider_code(parent_directory)
-                    logging.info("Importing Directory " + directory)
-                    total += import_to_datastore(directory, provider_code, int(year), batch_size)
-                else:
-                    logging.info(
-                        "Importing only starting year {0}. Directory {1} has year {2}".format(
-                            load_start_year, directory_name, year
-                        )
-                    )
-        elif from_s3:
-            logging.info("Importing data from s3...")
-            s3_data_retriever = S3DataRetriever()
-            s3_data_retriever.get_files_from_s3(start_year=load_start_year)
-            """
-            Should be soon implemented as "delete_entries_from_S3"
-            """
-            # delete_cbs_entries_from_email(provider_code, year, batch_size)
-            if delete_start_date is not None:
-                delete_cbs_entries(delete_start_date, batch_size)
-            started = datetime.now()
-            total = 0
-            for provider_code in [
-                BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
-                BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
-            ]:
-                for year in range(int(load_start_year), s3_data_retriever.current_year + 1):
-                    cbs_files_dir = os.path.join(
-                        s3_data_retriever.local_files_directory,
-                        ACCIDENTS_TYPE_PREFIX + "_" + str(provider_code),
-                        str(year),
-                    )
-                    logging.info("Importing Directory " + cbs_files_dir)
-                    preprocessing_cbs_files.update_cbs_files_names(cbs_files_dir)
-                    acc_data_file_path = preprocessing_cbs_files.get_accidents_file_data(
-                        cbs_files_dir
-                    )
-                    total += import_to_datastore(cbs_files_dir, provider_code, year, batch_size)
-            shutil.rmtree(s3_data_retriever.local_temp_directory)
-        else:
-            logging.info("Importing data from mail...")
-            temp_dir = tempfile.mkdtemp()
-            zip_path = importmail_cbs.main(temp_dir, username, password, email_search_start_date)
-            if zip_path is None:
-                logging.info("No new cbs files found")
-                return
-            zip_ref = zipfile.ZipFile(zip_path, "r")
-            cbs_files_dir = os.path.join(temp_dir, "cbsfiles")
-            if not os.path.exists(cbs_files_dir):
-                os.makedirs(cbs_files_dir)
-            zip_ref.extractall(cbs_files_dir)
-            zip_ref.close()
-            preprocessing_cbs_files.update_cbs_files_names(cbs_files_dir)
-            acc_data_file_path = preprocessing_cbs_files.get_accidents_file_data(cbs_files_dir)
-            provider_code, year = get_file_type_and_year(acc_data_file_path)
-
-            logging.info("Uploading data to S3...")
-
-            try:
-                s3_uploader = S3Uploader()
-                s3_uploader.upload_to_S3(
-                    local_file_path=acc_data_file_path,
-                    provider_code=provider_code,
-                    year=year
+        logging.info("Importing data from s3...")
+        s3_data_retriever = S3DataRetriever()
+        s3_data_retriever.get_files_from_s3(start_year=load_start_year)
+        delete_cbs_entries(load_start_year, batch_size)
+        started = datetime.now()
+        total = 0
+        for provider_code in [
+            BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
+            BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+        ]:
+            # TODO: make sure that code does not break if end year does not exist in s3
+            for year in range(int(load_start_year), s3_data_retriever.current_year + 1):
+                cbs_files_dir = os.path.join(
+                    s3_data_retriever.local_files_directory,
+                    ACCIDENTS_TYPE_PREFIX + "_" + str(provider_code),
+                    str(year),
                 )
-
-                delete_cbs_entries_from_email(provider_code, year, batch_size)
-
-            except botocore.exceptions.ClientError as err:
-                if err.response['Error']['Code'] == 'InternalError':
-                    print('S3 Error Message: {}'.format(err.response['Error']['Message']))
-                    print('S3 Request ID: {}'.format(err.response['ResponseMetadata']['RequestId']))
-                    print('S3 Response Http code: {}'.format(err.response['ResponseMetadata']['HTTPStatusCode']))
-                else:
-                    raise err
-
-            started = datetime.now()
-            total = 0
-
-            shutil.rmtree(temp_dir)
+                logging.info("Importing Directory " + cbs_files_dir)
+                preprocessing_cbs_files.update_cbs_files_names(cbs_files_dir)
+                total += import_to_datastore(cbs_files_dir, provider_code, year, batch_size)
+        shutil.rmtree(s3_data_retriever.local_temp_directory)
 
         fill_db_geo_data()
 

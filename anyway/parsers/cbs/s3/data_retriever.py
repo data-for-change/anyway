@@ -96,15 +96,11 @@ class S3DataRetriever(S3DataClass):
                 )
 
     def get_files_from_s3(self, start_year, accidents_types=None):
-        desired_accidents_types = None
-
         if accidents_types is None:
             desired_accidents_types = self.__accidents_types
         else:
             desired_accidents_types = accidents_types
-
         start_year = int(start_year)
-
         for accidents_type in desired_accidents_types:
             self.__download_accidents_type_files(
                 accidents_type=accidents_type, start_year=start_year

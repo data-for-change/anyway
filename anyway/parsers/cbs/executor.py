@@ -4,15 +4,13 @@ import logging
 import os
 import re
 import shutil
-import tempfile
 import traceback
-import zipfile
 from collections import OrderedDict, defaultdict
 from datetime import datetime
 
 import math
 import pandas as pd
-from sqlalchemy import or_, and_
+from sqlalchemy import or_
 
 from anyway.parsers.cbs import preprocessing_cbs_files
 from anyway import field_names, localization
@@ -78,12 +76,10 @@ from anyway.models import (
     ProviderCode,
     VehicleDamage,
 )
-from anyway.utilities import ItmToWGS84, time_delta, ImporterUI, truncate_tables, chunks
+from anyway.utilities import ItmToWGS84, time_delta, ImporterUI, chunks
 from anyway.db_views import VIEWS
 from anyway.app_and_db import db
-from anyway.parsers.cbs.s3 import S3DataRetriever, S3Uploader
-
-import botocore
+from anyway.parsers.cbs.s3 import S3DataRetriever
 
 failed_dirs = OrderedDict()
 

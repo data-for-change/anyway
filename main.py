@@ -86,15 +86,18 @@ def process():
 @process.command()
 @click.option("--batch_size", type=int, default=5000)
 @click.option("--load_start_year", type=str, default=None)
+@click.option("--source", type=str, default="s3")
 def cbs(
     batch_size,
     load_start_year,
+    source
 ):
     from anyway.parsers.cbs.executor import main
 
     return main(
         batch_size=batch_size,
         load_start_year=load_start_year,
+        source=source
     )
 
 

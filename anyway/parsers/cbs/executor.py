@@ -76,7 +76,7 @@ from anyway.models import (
     ProviderCode,
     VehicleDamage,
 )
-from anyway.utilities import ItmToWGS84, time_delta, ImporterUI, chunks
+from anyway.utilities import ItmToWGS84, time_delta, ImporterUI, truncate_tables, chunks
 from anyway.db_views import VIEWS
 from anyway.app_and_db import db
 from anyway.parsers.cbs.s3 import S3DataRetriever
@@ -984,33 +984,54 @@ def get_file_type_and_year(file_path):
 
 def main(
     batch_size,
+    source,
     load_start_year=None,
 ):
-    if load_start_year is None:
-        now = datetime.now()
-        load_start_year = now.year - 1
     try:
-        logging.info("Importing data from s3...")
-        s3_data_retriever = S3DataRetriever()
-        s3_data_retriever.get_files_from_s3(start_year=load_start_year)
-        delete_cbs_entries(load_start_year, batch_size)
-        started = datetime.now()
         total = 0
-        for provider_code in [
-            BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
-            BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
-        ]:
-            # TODO: make sure that code does not break if end year does not exist in s3
-            for year in range(int(load_start_year), s3_data_retriever.current_year + 1):
-                cbs_files_dir = os.path.join(
-                    s3_data_retriever.local_files_directory,
-                    ACCIDENTS_TYPE_PREFIX + "_" + str(provider_code),
-                    str(year),
+        started = datetime.now()
+        if source == "s3":
+            if load_start_year is None:
+                now = datetime.now()
+                load_start_year = now.year - 1
+            logging.info("Importing data from s3...")
+            s3_data_retriever = S3DataRetriever()
+            s3_data_retriever.get_files_from_s3(start_year=load_start_year)
+            delete_cbs_entries(load_start_year, batch_size)
+            for provider_code in [
+                BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
+                BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+            ]:
+                # TODO: make sure that code does not break if end year does not exist in s3
+                for year in range(int(load_start_year), s3_data_retriever.current_year + 1):
+                    cbs_files_dir = os.path.join(
+                        s3_data_retriever.local_files_directory,
+                        ACCIDENTS_TYPE_PREFIX + "_" + str(provider_code),
+                        str(year),
+                    )
+                    logging.info("Importing Directory " + cbs_files_dir)
+                    preprocessing_cbs_files.update_cbs_files_names(cbs_files_dir)
+                    total += import_to_datastore(cbs_files_dir, provider_code, year, batch_size)
+            shutil.rmtree(s3_data_retriever.local_temp_directory)
+
+        elif source == "local_dir_for_tests_only":
+            path="static/data/cbs"
+            import_ui = ImporterUI(path)
+            dir_name = import_ui.source_path()
+            dir_list = glob.glob("{0}/*/*".format(dir_name))
+
+            # wipe all the AccidentMarker and Vehicle and Involved data first
+            if import_ui.is_delete_all():
+                truncate_tables(db, (Vehicle, Involved, AccidentMarker))
+            for directory in sorted(dir_list, reverse=False):
+                directory_name = os.path.basename(os.path.normpath(directory))
+                year = directory_name[1:5] if directory_name[0] == "H" else directory_name[0:4]
+                parent_directory = os.path.basename(
+                    os.path.dirname(os.path.join(os.pardir, directory))
                 )
-                logging.info("Importing Directory " + cbs_files_dir)
-                preprocessing_cbs_files.update_cbs_files_names(cbs_files_dir)
-                total += import_to_datastore(cbs_files_dir, provider_code, year, batch_size)
-        shutil.rmtree(s3_data_retriever.local_temp_directory)
+                provider_code = get_provider_code(parent_directory)
+                logging.info("Importing Directory " + directory)
+                total += import_to_datastore(directory, provider_code, int(year), batch_size)
 
         fill_db_geo_data()
 
@@ -1024,7 +1045,6 @@ def main(
             )
         )
         logging.info("Total: {0} items in {1}".format(total, time_delta(started)))
-
         create_tables()
     except Exception as ex:
         print("Exception occured while loading the cbs data: {0}".format(str(ex)))

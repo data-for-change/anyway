@@ -268,6 +268,14 @@ def infographics_data_cache(info, update):
     return main(update=update, info=info)
 
 
+@process.command()
+@click.argument("filename", type=str, default="static/data/casualties/casualties_costs.csv")
+def update_casualties_costs(filename):
+    from anyway.parsers.casualties_costs import parse
+
+    return parse(filename)
+
+
 @cli.group()
 def preprocess():
     pass
@@ -374,13 +382,6 @@ def accidents_around_schools(start_date, end_date, distance, output_path):
         start_date=start_date, end_date=end_date, distance=distance, output_path=output_path
     )
 
-
-@process.command()
-@click.argument("filename", type=str, default="static/data/casualties/casualties_costs.csv")
-def update_casualties_costs(filename):
-    from anyway.parsers.casualties_costs import parse
-
-    return parse(filename)
 
 @scripts.command()
 def importemail():

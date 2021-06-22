@@ -826,18 +826,6 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
 
 
 @register
-class VisionZeroWidget(SubUrbanWidget):
-    name: str = "vision_zero"
-
-    def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, type(self).name)
-        self.rank = 15
-
-    def generate_items(self) -> None:
-        self.items = ["vision_zero_2_plus_1"]
-
-
-@register
 class Road2Plus1Widget(SubUrbanWidget):
     name: str = "vision_zero_2_plus_1"
 

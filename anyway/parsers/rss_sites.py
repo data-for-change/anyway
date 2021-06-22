@@ -28,9 +28,14 @@ def parse_ynet(rss_soup, html_soup):
 sites_config = {
     "ynet": {
         "rss": "https://www.ynet.co.il:443/Integration/StoryRss1854.xml",
-        "parser": parse_ynet,
+        "parser_function": parse_ynet,
+        "parser": "html.parser",
     },
-    "walla": {"rss": "https://rss.walla.co.il:443/feed/22", "parser": parse_walla},
+    "walla": {
+        "rss": "https://rss.walla.co.il:443/feed/22",
+        "parser_function": parse_walla,
+        "parser": "lxml",
+    },
 }
 
 
@@ -45,7 +50,7 @@ def scrape(site_name, *, fetch_rss=_fetch, fetch_html=_fetch):
     # Patch RSS issue in walla. This might create duplicate `guid` field
     rss_text = rss_text.replace("link", "guid")
 
-    rss_soup = BeautifulSoup(rss_text, features="lxml")
+    rss_soup = BeautifulSoup(rss_text, features=config["parser"])
     rss_soup_items = rss_soup.find_all("item")
 
     assert rss_soup_items
@@ -55,9 +60,9 @@ def scrape(site_name, *, fetch_rss=_fetch, fetch_html=_fetch):
         date = timezones.parse_creation_datetime(item_rss_soup.pubdate.get_text())
 
         html_text = fetch_html(link)
-        item_html_soup = BeautifulSoup(html_text, "lxml")
+        item_html_soup = BeautifulSoup(html_text, config["parser"])
 
-        author, title, description = config["parser"](item_rss_soup, item_html_soup)
+        author, title, description = config["parser_function"](item_rss_soup, item_html_soup)
         yield NewsFlash(
             link=link,
             date=date,

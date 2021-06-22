@@ -84,44 +84,20 @@ def process():
 
 
 @process.command()
-@click.option("--specific_folder", is_flag=True, default=False)
-@click.option("--delete_all", is_flag=True)
-@click.option("--path", type=str, default="static/data/cbs")
 @click.option("--batch_size", type=int, default=5000)
-@click.option("--delete_start_date", type=str, default=None)
-@click.option("--load_start_year", type=str, default="2005")
-@click.option("--from_email", is_flag=True, default=False)
-@click.option("--username", default="")
-@click.option("--password", default="")
-@click.option("--email_search_start_date", type=str, default="")  # format - DD.MM.YYYY
-@click.option("--from_s3", is_flag=True, default=False)
+@click.option("--load_start_year", type=str, default=None)
+@click.option("--source", type=str, default="s3")
 def cbs(
-    specific_folder,
-    delete_all,
-    path,
     batch_size,
-    delete_start_date,
     load_start_year,
-    from_email,
-    username,
-    password,
-    email_search_start_date,
-    from_s3,
+    source
 ):
     from anyway.parsers.cbs.executor import main
 
     return main(
-        specific_folder=specific_folder,
-        delete_all=delete_all,
-        path=path,
         batch_size=batch_size,
-        delete_start_date=delete_start_date,
         load_start_year=load_start_year,
-        from_email=from_email,
-        username=username,
-        password=password,
-        email_search_start_date=email_search_start_date,
-        from_s3=from_s3,
+        source=source
     )
 
 
@@ -295,6 +271,14 @@ def infographics_data_cache(info, update):
     return main(update=update, info=info)
 
 
+@process.command()
+@click.argument("filename", type=str, default="static/data/casualties/casualties_costs.csv")
+def update_casualties_costs(filename):
+    from anyway.parsers.casualties_costs import parse
+
+    return parse(filename)
+
+
 @cli.group()
 def preprocess():
     pass
@@ -402,13 +386,11 @@ def accidents_around_schools(start_date, end_date, distance, output_path):
     )
 
 
-@process.command()
-@click.argument("filename", type=str, default="static/data/casualties/casualties_costs.csv")
-def update_casualties_costs(filename):
-    from anyway.parsers.casualties_costs import parse
+@scripts.command()
+def importemail():
+    from anyway.parsers.cbs.importmail_cbs import main
 
-    return parse(filename)
-
+    return main()
 
 if __name__ == "__main__":
     cli(sys.argv[1:])  # pylint: disable=too-many-function-args

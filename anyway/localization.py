@@ -219,5 +219,4 @@ def get_city_name(symbol_id, lang: str = "he") -> Optional[str]:
     try:
         return _cities.loc[symbol_id, column_to_fetch]
     except Exception:
-        logger.warning(f"symbol_id={ symbol_id } could not be found.")
         return None

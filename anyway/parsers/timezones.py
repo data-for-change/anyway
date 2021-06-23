@@ -1,4 +1,5 @@
 from datetime import datetime, timezone, timedelta
+import time
 
 ISREAL_SUMMER_TIMEZONE = timezone(offset=timedelta(hours=3))
 
@@ -34,3 +35,7 @@ def parse_creation_datetime(raw_date: str):
 def from_db(date):
     # DB holds timezone as UTC; to get local-timezone pretty-printing, we change it on load time
     return date.astimezone(tz=ISREAL_SUMMER_TIMEZONE)
+
+
+def from_rss(date: time.struct_time):
+    return datetime(*date[:6]).replace(tzinfo=timezone.utc).astimezone(tz=ISREAL_SUMMER_TIMEZONE)

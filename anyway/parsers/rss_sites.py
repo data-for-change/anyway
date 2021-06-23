@@ -1,36 +1,32 @@
 import requests
 from bs4 import BeautifulSoup
-
-from anyway.models import NewsFlash
+import feedparser
 from anyway.parsers import timezones
 
 
-def parse_walla(rss_soup, html_soup):
-    description = rss_soup.description.get_text()
+def parse_html_walla(item_rss, html_soup):
+    # For some reason there's html here
+    description = BeautifulSoup(item_rss["summary"], features="lxml").text
 
-    author = html_soup.find("div", class_="author").get_text()
-    # we still need html here since lxml strips CDATA
-    title = html_soup.find("h1", class_="title").get_text()
-
-    return author, title, description
+    author = html_soup.find("div", class_="author").find("a").get_text()
+    return author, description
 
 
-def parse_ynet(rss_soup, html_soup):
-    title = rss_soup.title.get_text()
-
-    description_text = html_soup.find("script", type="application/ld+json").get_text()
-    author = description_text.split("(")[-1].split(")")[0]
-    description = description_text.split('"description"')[1].split("(")[0]
-
-    return author, title, description
+def parse_html_ynet(item_rss, html_soup):
+    # This is rather fragile
+    # description_text: "[description] ([author]) [unrelated stuff]"
+    description_text = html_soup.find(id="ArticleBodyComponent").get_text()
+    author = description_text.split("(")[-1].split(")")[0].strip()
+    description = description_text.rsplit("(")[0].strip()
+    return author, description
 
 
 sites_config = {
     "ynet": {
         "rss": "https://www.ynet.co.il:443/Integration/StoryRss1854.xml",
-        "parser": parse_ynet,
+        "parser": parse_html_ynet,
     },
-    "walla": {"rss": "https://rss.walla.co.il:443/feed/22", "parser": parse_walla},
+    "walla": {"rss": "https://rss.walla.co.il:443/feed/22", "parser": parse_html_walla},
 }
 
 
@@ -38,32 +34,31 @@ def _fetch(url: str) -> str:
     return requests.get(url).text
 
 
-def scrape(site_name, *, fetch_rss=_fetch, fetch_html=_fetch):
+def scrape_raw(site_name: str, *, rss_source=None, fetch_html=_fetch):
     config = sites_config[site_name]
-    rss_text = fetch_rss(config["rss"])
+    if rss_source is None:
+        rss_source = config["rss"]
+    rss_dict = feedparser.parse(rss_source)
+    if rss_dict.get("bozo_exception"):
+        raise rss_dict["bozo_exception"]
 
-    # Patch RSS issue in walla. This might create duplicate `guid` field
-    rss_text = rss_text.replace("link", "guid")
+    for item_rss in rss_dict["items"]:
+        html_text = fetch_html(item_rss["link"])
+        author, description = config["parser"](item_rss, BeautifulSoup(html_text, "lxml"))
+        yield {
+            "link": item_rss["link"],
+            "date": timezones.from_rss(item_rss["published_parsed"]),
+            "source": site_name,
+            "author": author,
+            "title": item_rss["title"],
+            "description": description,
+            "accident": False,
+        }
 
-    rss_soup = BeautifulSoup(rss_text, features="lxml")
-    rss_soup_items = rss_soup.find_all("item")
 
-    assert rss_soup_items
+def scrape(*args, **kwargs):
+    # lazily load dependencies, so this module will behave like an independent library
+    from anyway.models import NewsFlash
 
-    for item_rss_soup in rss_soup_items:
-        link = item_rss_soup.guid.get_text()
-        date = timezones.parse_creation_datetime(item_rss_soup.pubdate.get_text())
-
-        html_text = fetch_html(link)
-        item_html_soup = BeautifulSoup(html_text, "lxml")
-
-        author, title, description = config["parser"](item_rss_soup, item_html_soup)
-        yield NewsFlash(
-            link=link,
-            date=date,
-            source=site_name,
-            author=author,
-            title=title,
-            description=description,
-            accident=False,
-        )
+    for dict_item in scrape_raw(*args, **kwargs):
+        yield NewsFlash(**dict_item)

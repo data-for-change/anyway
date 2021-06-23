@@ -26,17 +26,7 @@ def fetch_html_walla(link):
 
 
 def fetch_html_ynet(link):
-    with open("tests/" + link[-len("0,7340,L-5735229,00.html"):], encoding="utf-8") as f:
-        return f.read()
-
-
-def fetch_rss_walla(link):
-    with open("tests/walla.xml", encoding="utf-8") as f:
-        return f.read()
-
-
-def fetch_rss_ynet(link):
-    with open("tests/ynet.xml", encoding="utf-8") as f:
+    with open(f'tests/{link[-len("HkhoCYxnO"):]}.html', encoding="utf-8") as f:
         return f.read()
 
 
@@ -56,25 +46,17 @@ def assert_all_equal(items_actual, items_expected):
 def test_scrape_walla():
     items_expected = [
         NewsFlash(
-            date=datetime.datetime(2020, 5, 23, 19, 55, tzinfo=timezones.ISREAL_SUMMER_TIMEZONE),
-            title='פרקליטי רה"מ יתלוננו נגד רביב דרוקר על שיבוש הליכי משפט',
-            link="https://news.walla.co.il/break/3362504",
+            date=datetime.datetime(2021, 6, 23, 16, 49, tzinfo=timezones.ISREAL_SUMMER_TIMEZONE),
+            title='חובת המסכות תוחזר אם יהיה ממוצע שבועי של 100 חולים ביום',
+            link="https://news.walla.co.il/break/3443829",
             source="walla",
-            author="דניאל דולב",
-            description='פרקליטיו של ראש הממשלה בנימין נתניהו מתכוונים להגיש הערב (שבת) תלונה ליועץ המשפטי לממשלה, אביחי מנדלבליט, נגד העיתונאי רביב דרוקר בטענה ששיבש הליכי משפט והדיח עד בתוכניתו "המקור". התלונה מתייחסת לראיונות שנתנו לתוכנית עדי תביעה במשפטו של נתניהו, בהם שאול אלוביץ\' ומומו פילבר.]]>',
-        ),
-        NewsFlash(
-            date=datetime.datetime(2020, 5, 22, 16, 14, tzinfo=timezones.ISREAL_SUMMER_TIMEZONE),
-            title="פקיסטן: לפחות נוסע אחד שרד את התרסקות המטוס",
-            link="https://news.walla.co.il/break/3362389",
-            source="walla",
-            author="רויטרס",
-            description="לפחות נוסע אחד שרד מהתרסקות המטוס הפקיסטני היום (שישי) באזור מגורים בקראצ'י - כך אמר גורם בממשל המקומי. בהודעתו אמר דובר ממשלת המחוז כי בנקאי שהיה על המטוס אותר לאחר ששרד את ההתרסקות. מרשות התעופה האזרחית של פקיסטן נמסר כי היו 91 נוסעים ושמונה אנשי צוות על מטוס איירבוס A320.]]>",
+            author="מירב כהן",
+            description='חובת המסכות תוחזר בחללים סגורים אם יהיה ממוצע שבועי של 100 חולים ביום - כך הוחלט היום (רביעי) בדיון השרים.',
         ),
     ]
 
     items_actual = list(
-        rss_sites.scrape("walla", fetch_rss=fetch_rss_walla, fetch_html=fetch_html_walla)
+        rss_sites.scrape("walla", rss_source="tests/walla.xml", fetch_html=fetch_html_walla)
     )
     assert_all_equal(items_actual, items_expected)
     verify_cache(items_actual)
@@ -85,26 +67,18 @@ def test_scrape_ynet():
         # note: the file holds date in winter timezone, so here it is described as summer timezone - +1 hour
         NewsFlash(
             date=datetime.datetime(
-                2020, 5, 22, 19, 27, 32, tzinfo=timezones.ISREAL_SUMMER_TIMEZONE
+                2021, 6, 23, 13, 58, 51, tzinfo=timezones.ISREAL_SUMMER_TIMEZONE
             ),
-            title="קפריסין הודיעה: ישראלים יוכלו להיכנס למדינה החל מה-9 ביוני",
-            link="http://www.ynet.co.il/articles/0,7340,L-5735229,00.html",
+            title='עבודות לתועלת הציבור לסייעת "גן מתוק" בגבעתיים שבו הותקפו ילדים',
+            link='https://www.ynet.co.il/news/article/HkhoCYxnO',
             source="ynet",
-            author="איתמר אייכנר",
-            description=": \"שר התחבורה של קפריסין הודיע על תוכנית לפתיחת שדות התעופה וחידוש הטיסות החל מה-9 ביוני. התוכנית שאושרה בידי הממשלה חולקה לשני שלבים לפי תאריכים ומדינות שיורשו להיכנס בשעריה. עד ה-19 ביוני נוסעים מכל המקומות יצטרכו להיבדק לקורונה 72 שעות לפני מועד הטיסה. מה-20 ביוני יידרשו לכך רק נוסעים משוויץ, פולין רומניה, קרואטיה, אסטוניה וצ'כיה. בתי המלון ייפתחו ב-1 ביוני, וחובת הבידוד תבוטל ב-20 ביוני.   ",
-        ),
-        NewsFlash(
-            date=datetime.datetime(2020, 5, 22, 16, 8, 48, tzinfo=timezones.ISREAL_SUMMER_TIMEZONE),
-            link="http://www.ynet.co.il/articles/0,7340,L-5735178,00.html",
-            source="ynet",
-            author="אלישע בן קימון",
-            title="צוותי כיבוי פועלים בשריפת קוצים שמתפשטת סמוך ליצהר שבשומרון",
-            description=': "צוותי כיבוי פועלים בשריפת קוצים שמתפשטת לעבר ההתנחלות יצהר שבשומרון. לוחמי האש פועלים למניעת התקדמות השריפה ליצהר על ידי חתירה למגע עם האש ובסיוע מטוסי כיבוי. נמסר כי קיימת סכנה למוצב צבאי במקום.   ',
+            author="גלעד מורג",
+            description='בית משפט השלום בתל אביב קבע שלא להרשיע את סייעת "גן מתוק" בגבעתיים, אורנה אקבלי. הוא קבע שביצעה עבירת סיוע לתקיפה אך בגלל נסיבות החריגות של המקרה ובגלל שהייתה מעורבת בדיווח על האלימות בגן לא תורשע. עם זאת על אקבלי הוטלו 180 שעות עבודות לתועלת הציבור, צו מבחן, ו-3,000 שקל פיצויים.',
         ),
     ]
 
     items_actual = list(
-        rss_sites.scrape("ynet", fetch_rss=fetch_rss_ynet, fetch_html=fetch_html_ynet)
+        rss_sites.scrape("ynet", rss_source="tests/ynet.xml", fetch_html=fetch_html_ynet)
     )
     assert_all_equal(items_actual, items_expected)
     verify_cache(items_actual)

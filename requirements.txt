@@ -13,7 +13,7 @@ attrs==19.3.0
 beautifulsoup4==4.9.0
 chardet==3.0.4
 click==7.1.2
-feedparser==5.2.1
+feedparser==6.0.8
 flask_cors==3.0.10
 fuzzywuzzy==0.18.0
 geoalchemy2==0.8.2

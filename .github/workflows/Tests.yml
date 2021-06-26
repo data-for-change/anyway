@@ -34,7 +34,7 @@ jobs:
         pip install -r test_requirements.txt -r requirements.txt
     - name: Pylint
       run: |
-        pylint anyway tests main.py
+        bin/pylint.sh
   Black:
     runs-on: ubuntu-latest
     steps:
@@ -48,7 +48,7 @@ jobs:
         python -m pip install --upgrade black
     - name: black formatting
       run: |
-        black anyway/**/*.py -l 100 --verbose --check
+        bin/black.sh
   Tests:
     runs-on: ubuntu-latest
     steps:

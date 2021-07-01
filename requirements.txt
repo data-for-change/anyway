@@ -40,7 +40,7 @@ rauth==0.7.3
 rcssmin==1.0.6
 requests==2.25.1
 tweepy==3.8.0
-urllib3==1.26.5
+urllib3==1.26.6
 webassets==2.0
 xlrd==2.0.1
 lxml==4.6.3

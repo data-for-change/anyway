@@ -1,7 +1,7 @@
 ## Current Processes
 
 ## Data created in News Flash process
-- **Relevant output DB Tables**: infographics_data_cache
+- **Relevant output DB Tables**: infographics_data_cache, news_flash
 - **command**: `python3 main.py process news-flash`
 - **Scheduling**: Nowadays runs in Jenkins every 30 minutes
 See NEWS_FLASH.md for more details

@@ -53,10 +53,12 @@ Environment Variables: AWS_ACCESS_KEY, AWS_SECRET_KEY
 6. API + Documentation (Swagger) - 
    - CBS Raw DATA AND/OR CBS Processed Data
 7. CBS Localization
-   - Do we want to enhance Localization Infrastructure at this stage? 
-   - Relevant work: Ziv’s work in code, Dvir’s code for adding translations, Yaron’s experience with localization
+   - Do we want to enhance Localization Infrastructure at this stage?
+   - We're using Flask Babel these days for localization - I think we can definitely continue using it.
+   - Relevant work: Ziv’s is the expert - see his localization work in code, Dvir’s code for adding translations, Yaron’s experience with localization.
 8. Infographics Data Related Tasks (might be done at a later stage):
-   - Data enrichment using additional aggregation tables AND/OR columns for Infographics tasks
+   - Data enrichment using additional aggregation tables AND/OR columns for Infographics tasks.
+   - Ziv and Bar are the infographics data experts - one can consult them regarding aggregation tables and architecture.
 
 #### Important Notes
 - Make sure we use our PostGIS’s abilities for current/future geographic queries

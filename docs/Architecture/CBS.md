@@ -62,6 +62,7 @@ Environment Variables: AWS_ACCESS_KEY, AWS_SECRET_KEY
 
 #### Relevant Work:
 - [Dvir's value_mapping branch](https://github.com/dvirein/anyway-backend/tree/value_mapping)
+- [Current CBS Data Processing Code](https://github.com/hasadna/anyway/blob/dev/anyway/parsers/cbs/executor.py)
 
 ### Data Team
 1. Data Exploration

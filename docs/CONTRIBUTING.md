@@ -102,23 +102,9 @@ Universally formatted code is crucial in open source projects and promotes ease 
 Do not use `print` for messages in Python code! Instead, use the `logging` module.
 Remember that log messages are very helpful for debugging server issues, so add as much information as you can.
 
-**Unit Tests**
+**Tests**
 
-All unit tests can be found in the "tests" folder. When adding a new test, make sure you follow this pattern: `test_*.py` (e.g.: `test_bounding_box_query.py`).
-To run the tests, use the following command:
-
-    python -m unittest discover tests
-
-Note that you can add a pattern so the discover command will find only your file as such:
-
-    python -m unittest discover tests "*bounding*.py"
-
-
-Also, if you add an empty file, named `__init__.py` at tests folder, you'll be able to run more commands as:
-
-    python -m unittest test_module.TestClass.test_method
-
-(e.g.: `python -m unittest tests.test_bounding_box_query`)
+See our [Tests documentation](TESTS.md)
 
 **Pull Requests**
 

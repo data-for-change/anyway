@@ -5,7 +5,7 @@ Extracts data from source, processes it and pushes it to NewsFlash table
 In Addition - the InfographicsDataCache is filled with relevant data of the newsflash
 
 - **Environment Variables**: GOOGLE_MAPS_KEY (for google's location API)
-- **Additional environment variables for the each source**:
+- **Additional environment variables for each source**:
    * Ynet Newsflashes. Additional Environment Variables: None
    * Walla Newsflashes. Additional Environment Variables: None
    * Twitter - Adds tweets to NewsFlash table. Additional Environment Variables: TWITTER_ACCESS_KEY, TWITTER_ACCESS_SECRET, TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET

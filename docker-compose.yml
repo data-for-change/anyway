@@ -15,6 +15,7 @@ services:
       - TWITTER_ACCESS_KEY
       - TWITTER_ACCESS_SECRET
       - GOOGLE_APPLICATION_CREDENTIALS=GOOGLE_APPLICATION_CREDENTIALS_KEY.json
+      - MAPS_API_KEY
     volumes:
       - .:/anyway
     restart: always

@@ -8,7 +8,7 @@ def parse_html_walla(item_rss, html_soup):
     # For some reason there's html here
     description = BeautifulSoup(item_rss["summary"], features="lxml").text
 
-    author = html_soup.find("div", class_="author").find("a").get_text()
+    author = html_soup.find("div", class_="author").get_text().strip()
     return author, description
 
 

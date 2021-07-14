@@ -73,13 +73,39 @@ def classify_rss(text):
     :param text: news flash text
     :return: boolean, true if news flash is about car accident, false for others
     """
-    accident_words = ["תאונ"]
+    accident_words = ["תאונ", " דרסה ", " דרס ", " נדרס ", " נדרסה "]
     working_accidents_words = ["תאונת עבודה", "תאונות עבודה"]
+    followup_accidents_words = [
+        "התאונ",
+        "תאונת ה",
+        "פורסם",
+        "הותר לפרסום",
+        "ההרוג",
+        "הפצוע",
+        "מאסר",
+        "נקבע מותו של ה",
+        "נקבע מותו של נהג ה",
+        "נקבע מותה של ה",
+        "נקבע מותה של נהגת ה",
+        "החשד",
+        "חשוד",
+        "רוכב ה",
+        "הורשע",
+        "אשם",
+        "אישום",
+        "מנוחות",
+        "נעצרו",
+        ': "',
+        "התאונה",
+    ]
     involved_words = [
         "רכב",
+        "מכונית",
+        "מכוניות",
         "אוטובוס",
         "ג'יפ",
         "משאית",
+        "משאיות",
         "קטנוע",
         "טרקטור",
         "אופנוע",
@@ -93,9 +119,9 @@ def classify_rss(text):
         "פגע",
         "פגיע",
         "פגוע",
-        "הרג",
         "הריג",
         "הרוג",
+        "נהרג",
         "פצע",
         "פציע",
         "פצוע",
@@ -105,15 +131,47 @@ def classify_rss(text):
         "החליק",
         "החלק",
     ]
-    shooting_words = [" ירי ", " ירייה ", " יריות "]
+    shooting_words = [
+        " ירי ",
+        " ירייה ",
+        " יריות ",
+        'בקת"ב',
+        " מירי ",
+        "תופת",
+        "פיצוץ",
+        "נדקר",
+        "הושלך",
+        "הושלכו",
+        "נרגם",
+        "רצח",
+        "יידוי",
+        "תבערה",
+        "רקטות",
+        "רקטה",
+        " טיל ",
+        " נורתה ",
+        "פיגוע",
+        "נעצר",
+        "מטען חבלה",
+        "פגיעה ישירה",
+    ]
     shooting_startswith = [" ירי", " ירייה", " יריות"]
 
+    abroad = text.split()[0].endswith(":") or "ישראלי" in text
     explicit_accident = any([val in text for val in accident_words])
     not_work_accident = all([val not in text for val in working_accidents_words])
+    not_followup_accident = all([val not in text for val in followup_accidents_words])
     involved = any([val in text for val in involved_words])
     hurt = any([val in text for val in hurt_words])
     no_shooting = all([val not in text for val in shooting_words]) and all(
         [not text.startswith(val) for val in shooting_startswith]
     )
+    airplane = any(val in text for val in ["מטוס", "מסוק"])
 
-    return ((explicit_accident and not_work_accident) or (involved and hurt)) and no_shooting
+    return (
+        not abroad
+        and not airplane
+        and ((explicit_accident and not_work_accident) or (involved and hurt))
+        and no_shooting
+        and not_followup_accident
+    )

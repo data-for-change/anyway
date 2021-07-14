@@ -237,9 +237,9 @@ def test_timeparse():
     assert twitter == ynet == walla
 
 
-BEST_PRECISION_YNET = 0.68
-BEST_RECALL_YNET = 0.92
-BEST_F1_YNET = 0.78
+BEST_PRECISION_YNET = 0.90
+BEST_RECALL_YNET = 0.94
+BEST_F1_YNET = 0.92
 
 
 def test_classification_statistics_ynet():

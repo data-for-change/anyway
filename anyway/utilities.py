@@ -12,10 +12,23 @@ from urllib.parse import urlparse
 
 import phonenumbers
 from dateutil.relativedelta import relativedelta
-from flask import Flask
+
+try:
+    from flask import Flask
+except ModuleNotFoundError:
+    pass
+
 from phonenumbers import NumberParseException
-from pyproj import Transformer
-from validate_email import validate_email
+
+try:
+    from pyproj import Transformer
+except ModuleNotFoundError:
+    pass
+
+try:
+    from validate_email import validate_email
+except ModuleNotFoundError:
+    pass
 
 from anyway import config
 

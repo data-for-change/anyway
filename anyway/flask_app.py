@@ -922,7 +922,7 @@ def index(marker=None, message=None):
     context["iteritems"] = dict.items
     context["hide_search"] = True if request.values.get("hide_search") == "true" else False
     context["embedded_reports"] = get_embedded_reports()
-    context['maps_api_key'] = secrets.get('MAPS_API_KEY', DEFAULT_MAPS_API_KEY);
+    context['maps_api_key'] = os.environ.get('MAPS_API_KEY', DEFAULT_MAPS_API_KEY);
     return render_template("index.html", **context)
 
 

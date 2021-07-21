@@ -44,6 +44,7 @@ def assert_all_equal(items_actual, items_expected):
 
 
 def test_scrape_walla():
+    # Reuters is marked differently than Walla's authors
     items_expected = [
         NewsFlash(
             date=datetime.datetime(2021, 6, 23, 16, 49, tzinfo=timezones.ISREAL_SUMMER_TIMEZONE),
@@ -52,6 +53,14 @@ def test_scrape_walla():
             source="walla",
             author="מירב כהן",
             description='חובת המסכות תוחזר בחללים סגורים אם יהיה ממוצע שבועי של 100 חולים ביום - כך הוחלט היום (רביעי) בדיון השרים.',
+        ),
+        NewsFlash(
+            date=datetime.datetime(2021, 7, 14, 9, 10, tzinfo=timezones.ISREAL_SUMMER_TIMEZONE),
+            title="פקיסטן: שמונה הרוגים בפיצוץ באוטובוס",
+            link="https://news.walla.co.il/break/3448092",
+            source="walla",
+            author="רויטרס",
+            description="שמונה בני אדם נהרגו הבוקר (רביעי) בפיצוץ אוטובוס בצפון פקיסטן. בין ההרוגים, שישה מהנדסים תושבי סין. טרם ידוע מקור הפיצוץ.",
         ),
     ]
 

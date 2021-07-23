@@ -21,6 +21,8 @@ Instructions
 
 * Please complete ANYWAY’s [“getting the code” section](https://github.com/hasadna/anyway#getting-the-code) before starting
 
+**NOTE:** If you're using windows, complete the "getting the code" section after installing WSL, inside the new ubuntu environment.
+
 **1.** [Get the code](https://github.com/hasadna/anyway#getting-the-code)
 
 **2.** [Install Docker](https://docs.docker.com/install/) and [Install Docker Compose](https://docs.docker.com/compose/install/)

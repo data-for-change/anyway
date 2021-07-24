@@ -782,6 +782,10 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
             .with_entities("age_group", "injury_severity", func.count().label("count"))
         )
 
+        # if there's no data - return empty dict
+        if query.count() == 0:
+            return {}
+
         range_dict = {0: 4, 5: 9, 10: 14, 15: 19, 20: 24, 25: 34, 35: 44, 45: 54, 55: 64, 65: 200}
 
         def defaultdict_int_factory() -> Callable:

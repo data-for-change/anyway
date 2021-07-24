@@ -837,10 +837,59 @@ class Road2Plus1Widget(SubUrbanWidget):
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
+        self.information = "Road 2 plus 1 solution to prevent fatal accidents."
         self.rank = 24
 
     def generate_items(self) -> None:
         self.items = ["vision_zero_2_plus_1"]
+
+    def get_frontal_severe_fatal_accidents_in_past_year(self) -> int:
+        news_flash = self.request_params.news_flash_obj
+        road_data = {}
+        filter_dict = {
+            "road_type": BE_CONST.ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION,
+        }
+
+        if news_flash.road1 and news_flash.road_segment_name:
+            filter_dict.update(
+                {
+                    "road1": news_flash.road1,
+                    "road_segment_name": news_flash.road_segment_name,
+                    "accident_severity": [
+                        BE_CONST.AccidentSeverity.FATAL,
+                        BE_CONST.AccidentSeverity.SEVERE,
+                    ],
+                }
+            )
+            road_data = get_accidents_stats(
+                table_obj=AccidentMarkerView,
+                filters=filter_dict,
+                group_by="accident_type",
+                count="accident_type",
+                start_time=self.request_params.end_time - datetime.timedelta(days=730),
+                end_time=self.request_params.end_time,
+            )
+
+            road_sums = self.sum_count_of_accident_type(
+                road_data, BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION
+            )
+
+            frontal_accidents_severe_fatal_past_year = road_sums
+            return frontal_accidents_severe_fatal_past_year
+
+    @staticmethod
+    def sum_count_of_accident_type(data: Dict, acc_type: int) -> Dict:
+        given = sum([d["count"] for d in data if d["accident_type"] == acc_type])
+        return given
+
+    # noinspection PyUnboundLocalVariable
+    def is_included(self) -> bool:
+        frontal_accidents_severe_fatal_past_year = (
+            self.get_frontal_severe_fatal_accidents_in_past_year()
+        )
+        if frontal_accidents_severe_fatal_past_year is not None:
+            return frontal_accidents_severe_fatal_past_year >= 1
+        return False
 
 
 @register

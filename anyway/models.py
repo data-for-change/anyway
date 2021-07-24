@@ -23,7 +23,9 @@ from sqlalchemy import (
     Table,
     ForeignKeyConstraint,
     func,
-    TIMESTAMP, PrimaryKeyConstraint, FetchedValue,
+    TIMESTAMP,
+    PrimaryKeyConstraint,
+    FetchedValue,
 )
 import sqlalchemy
 from sqlalchemy.orm import relationship, load_only, backref
@@ -52,9 +54,16 @@ users_to_roles = Table(
     "users_to_roles",
     Base.metadata,
     Column("user_id", BigInteger(), ForeignKey("users.id"), index=True, nullable=False),
-    Column("role_id", Integer(), ForeignKey("roles.id"), index=True, nullable=False, server_default=FetchedValue()),
+    Column(
+        "role_id",
+        Integer(),
+        ForeignKey("roles.id"),
+        index=True,
+        nullable=False,
+        server_default=FetchedValue(),
+    ),
     Column("create_date", DateTime(), nullable=False),
-    PrimaryKeyConstraint('user_id', 'role_id'),
+    PrimaryKeyConstraint("user_id", "role_id"),
 )
 
 

@@ -1015,7 +1015,7 @@ def main(
             shutil.rmtree(s3_data_retriever.local_temp_directory)
 
         elif source == "local_dir_for_tests_only":
-            path="static/data/cbs"
+            path = "static/data/cbs"
             import_ui = ImporterUI(path)
             dir_name = import_ui.source_path()
             dir_list = glob.glob("{0}/*/*".format(dir_name))

@@ -30,7 +30,6 @@ class Mail:
             self.imap_session = imaplib.IMAP4_SSL("imap.gmail.com")
             self.imap_session.login(self._username, self._password)
 
-
     def select_dir(self, mail_dir):
         self.imap_session.select(mail_dir)
 
@@ -39,7 +38,7 @@ class MailImporter:
     def __init__(self, mail_dir="cbs/data"):
         self.mail_dir = mail_dir
         self.mail = Mail()
-        self.temp_files_dir_path = 'cbs_importmail_temp'
+        self.temp_files_dir_path = "cbs_importmail_temp"
 
     def get_temp_files_dir(self):
         return self.temp_files_dir_path
@@ -50,16 +49,16 @@ class MailImporter:
         else:
             self.delete_temp_files_dir()
             os.mkdir(self.temp_files_dir_path)
-            #raise ValueError('temp files dir already exists')
+            # raise ValueError('temp files dir already exists')
 
     def delete_temp_files_dir(self) -> None:
         if os.path.exists(self.temp_files_dir_path):
             shutil.rmtree(self.temp_files_dir_path)
         else:
-            raise ValueError('temp files dir does not exist')
+            raise ValueError("temp files dir does not exist")
 
     def get_recent_cbs_emails(self, emails_num=2, email_search_start_date=""):
-        logging.info(f'Trying to import email from label {self.mail_dir}')
+        logging.info(f"Trying to import email from label {self.mail_dir}")
         if email_search_start_date == "":
             _, data = self.mail.imap_session.search(None, "ALL")
         else:
@@ -76,7 +75,7 @@ class MailImporter:
             email_body = message_parts[0][1]
 
             if type(email_body) is bytes:
-                email_body = email_body.decode('utf-8')
+                email_body = email_body.decode("utf-8")
 
             mail = email.message_from_string(email_body)
             try:
@@ -97,14 +96,16 @@ class MailImporter:
 
         # get recent emails
         recent_cbs_emails = []
-        for i in reversed(range(1,emails_num+1)):
+        for i in reversed(range(1, emails_num + 1)):
             recent_cbs_emails.append(emails_with_zip_sorted_by_time[-i])
         return recent_cbs_emails
 
     def import_cbs_data_to_s3(self, emails_num=2, email_search_start_date=""):
         self.mail.login()
         self.mail.select_dir(self.mail_dir)
-        recent_cbs_emails = self.get_recent_cbs_emails(emails_num=emails_num, email_search_start_date=email_search_start_date)
+        recent_cbs_emails = self.get_recent_cbs_emails(
+            emails_num=emails_num, email_search_start_date=email_search_start_date
+        )
         for msgId, mtime in recent_cbs_emails:
             typ, message_parts = self.mail.imap_session.fetch(msgId, "(RFC822)")
             if typ != "OK":
@@ -113,12 +114,12 @@ class MailImporter:
 
             email_body = message_parts[0][1]
             if type(email_body) is bytes:
-                email_body = email_body.decode('utf-8')
+                email_body = email_body.decode("utf-8")
             mail = email.message_from_string(email_body)
             for part in mail.walk():
                 if (
-                        part.get_content_maintype() == "multipart"
-                        or part.get("Content-Disposition") is None
+                    part.get_content_maintype() == "multipart"
+                    or part.get("Content-Disposition") is None
                 ):
                     continue
                 filename = part.get_filename()
@@ -138,7 +139,9 @@ class MailImporter:
                     with zipfile.ZipFile(filepath, "r") as zf:
                         zf.extractall(non_zip_path)
                     preprocessing_cbs_files.update_cbs_files_names(non_zip_path)
-                    acc_data_file_path = preprocessing_cbs_files.get_accidents_file_data(non_zip_path)
+                    acc_data_file_path = preprocessing_cbs_files.get_accidents_file_data(
+                        non_zip_path
+                    )
                     provider_code, year = get_file_type_and_year(acc_data_file_path)
 
                     s3_uploader = S3Uploader()
@@ -149,14 +152,13 @@ class MailImporter:
                     # upload new cbs data to s3
                     for file in os.scandir(non_zip_path):
                         s3_uploader.upload_to_S3(
-                            local_file_path=file.path,
-                            provider_code=provider_code,
-                            year=year
+                            local_file_path=file.path, provider_code=provider_code, year=year
                         )
                     self.delete_temp_files_dir()
 
         self.mail.imap_session.close()
         self.mail.imap_session.logout()
+
 
 def main():
     importer = MailImporter()

@@ -845,7 +845,7 @@ class Road2Plus1Widget(SubUrbanWidget):
     def generate_items(self) -> None:
         self.items = ["vision_zero_2_plus_1"]
 
-    def get_frontal_severe_fatal_accidents_in_past_year(self) -> int:
+    def get_frontal_accidents_in_past_year(self) -> int:
         news_flash = self.request_params.news_flash_obj
         road_data = {}
         filter_dict = {
@@ -856,11 +856,7 @@ class Road2Plus1Widget(SubUrbanWidget):
             filter_dict.update(
                 {
                     "road1": news_flash.road1,
-                    "road_segment_name": news_flash.road_segment_name,
-                    "accident_severity": [
-                        BE_CONST.AccidentSeverity.FATAL,
-                        BE_CONST.AccidentSeverity.SEVERE,
-                    ],
+                    "road_segment_name": news_flash.road_segment_name
                 }
             )
             road_data = get_accidents_stats(
@@ -868,7 +864,7 @@ class Road2Plus1Widget(SubUrbanWidget):
                 filters=filter_dict,
                 group_by="accident_type",
                 count="accident_type",
-                start_time=self.request_params.end_time - datetime.timedelta(days=730),
+                start_time=self.request_params.end_time - datetime.timedelta(days=365),
                 end_time=self.request_params.end_time,
             )
 
@@ -886,11 +882,11 @@ class Road2Plus1Widget(SubUrbanWidget):
 
     # noinspection PyUnboundLocalVariable
     def is_included(self) -> bool:
-        frontal_accidents_severe_fatal_past_year = (
-            self.get_frontal_severe_fatal_accidents_in_past_year()
+        frontal_accidents_past_year = (
+            self.get_frontal_accidents_in_past_year()
         )
-        if frontal_accidents_severe_fatal_past_year is not None:
-            return frontal_accidents_severe_fatal_past_year >= 1
+        if frontal_accidents_past_year is not None:
+            return frontal_accidents_past_year >= 2
         return False
 
 

@@ -112,7 +112,7 @@ class Widget:
     # noinspection PyMethodMayBeStatic
     def is_included(self) -> bool:
         """Whether this widget is included in the response"""
-        return True
+        return bool(self.items)
 
     def generate_items(self) -> None:
         """ Generates the data of the widget and set it to self.items"""

@@ -4,7 +4,6 @@ from .config import ANYWAY_BUCKET
 
 
 class S3DataClass:
-
     def __init__(self):
         self._aws_access_key = secrets.get("AWS_ACCESS_KEY")
         self._aws_secret_key = secrets.get("AWS_SECRET_KEY")

@@ -112,7 +112,7 @@ class Widget:
     # noinspection PyMethodMayBeStatic
     def is_included(self) -> bool:
         """Whether this widget is included in the response"""
-        return True
+        return bool(self.items)
 
     def generate_items(self) -> None:
         """ Generates the data of the widget and set it to self.items"""
@@ -231,6 +231,8 @@ class AccidentCountBySeverityWidget(SubUrbanWidget):
             severity_count_text = "severity_{}_count".format(severity_english)
             items[severity_count_text] = severity_and_count["count"]
             total_accidents_count += severity_and_count["count"]
+        if total_accidents_count == 0:
+            return {}
         items["start_year"] = start_year
         items["end_year"] = end_year
         items["total_accidents_count"] = total_accidents_count
@@ -401,7 +403,9 @@ class HeadOnCollisionsComparisonWidget(SubUrbanWidget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 5
-        self.information = "Fatal accidents distribution by accident type - head on collisions vs other accidents."
+        self.information = (
+            "Fatal accidents distribution by accident type - head on collisions vs other accidents."
+        )
 
     def generate_items(self) -> None:
         self.items = self.get_head_to_head_stat()
@@ -780,6 +784,10 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
             .with_entities("age_group", "injury_severity", func.count().label("count"))
         )
 
+        # if there's no data - return empty dict
+        if query.count() == 0:
+            return {}
+
         range_dict = {0: 4, 5: 9, 10: 14, 15: 19, 20: 24, 25: 34, 35: 44, 45: 54, 55: 64, 65: 200}
 
         def defaultdict_int_factory() -> Callable:
@@ -831,10 +839,55 @@ class Road2Plus1Widget(SubUrbanWidget):
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
+        self.information = "Road 2 plus 1 solution to prevent fatal accidents."
         self.rank = 24
 
     def generate_items(self) -> None:
         self.items = ["vision_zero_2_plus_1"]
+
+    def get_frontal_accidents_in_past_year(self) -> int:
+        news_flash = self.request_params.news_flash_obj
+        road_data = {}
+        filter_dict = {
+            "road_type": BE_CONST.ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION,
+        }
+
+        if news_flash.road1 and news_flash.road_segment_name:
+            filter_dict.update(
+                {
+                    "road1": news_flash.road1,
+                    "road_segment_name": news_flash.road_segment_name
+                }
+            )
+            road_data = get_accidents_stats(
+                table_obj=AccidentMarkerView,
+                filters=filter_dict,
+                group_by="accident_type",
+                count="accident_type",
+                start_time=self.request_params.end_time - datetime.timedelta(days=365),
+                end_time=self.request_params.end_time,
+            )
+
+            road_sums = self.sum_count_of_accident_type(
+                road_data, BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION
+            )
+
+            frontal_accidents_severe_fatal_past_year = road_sums
+            return frontal_accidents_severe_fatal_past_year
+
+    @staticmethod
+    def sum_count_of_accident_type(data: Dict, acc_type: int) -> Dict:
+        given = sum([d["count"] for d in data if d["accident_type"] == acc_type])
+        return given
+
+    # noinspection PyUnboundLocalVariable
+    def is_included(self) -> bool:
+        frontal_accidents_past_year = (
+            self.get_frontal_accidents_in_past_year()
+        )
+        if frontal_accidents_past_year is not None:
+            return frontal_accidents_past_year >= 2
+        return False
 
 
 @register

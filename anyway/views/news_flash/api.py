@@ -55,16 +55,17 @@ def news_flash_new(args: dict) -> List[dict]:
     if news_flash_id is not None:
         return single_news_flash(news_flash_id)
 
-    query = gen_news_flash_query(db.session,
-                                 source=args.get("source"),
-                                 start_date=args.get("start_date"),
-                                 end_date=args.get("end_date"),
-                                 interurban_only=args.get("interurban_only"),
-                                 road_number=args.get("road_number"),
-                                 road_segment=args.get("road_segment_only"),
-                                 offset=args.get("offset"),
-                                 limit=args.get("limit"),
-                                 )
+    query = gen_news_flash_query(
+        db.session,
+        source=args.get("source"),
+        start_date=args.get("start_date"),
+        end_date=args.get("end_date"),
+        interurban_only=args.get("interurban_only"),
+        road_number=args.get("road_number"),
+        road_segment=args.get("road_segment_only"),
+        offset=args.get("offset"),
+        limit=args.get("limit"),
+    )
     news_flashes = query.all()
 
     news_flashes_jsons = [n.serialize() for n in news_flashes]
@@ -73,16 +74,17 @@ def news_flash_new(args: dict) -> List[dict]:
     return news_flashes_jsons
 
 
-def gen_news_flash_query(session,
-                         source=None,
-                         start_date=None,
-                         end_date=None,
-                         interurban_only=None,
-                         road_number=None,
-                         road_segment=None,
-                         offset=None,
-                         limit=None,
-                         ):
+def gen_news_flash_query(
+    session,
+    source=None,
+    start_date=None,
+    end_date=None,
+    interurban_only=None,
+    road_number=None,
+    road_segment=None,
+    offset=None,
+    limit=None,
+):
     query = session.query(NewsFlash)
     # get all possible sources
     sources = [

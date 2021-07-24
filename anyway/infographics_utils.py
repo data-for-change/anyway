@@ -231,6 +231,8 @@ class AccidentCountBySeverityWidget(SubUrbanWidget):
             severity_count_text = "severity_{}_count".format(severity_english)
             items[severity_count_text] = severity_and_count["count"]
             total_accidents_count += severity_and_count["count"]
+        if total_accidents_count == 0:
+            return {}
         items["start_year"] = start_year
         items["end_year"] = end_year
         items["total_accidents_count"] = total_accidents_count

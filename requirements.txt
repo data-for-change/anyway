@@ -27,7 +27,7 @@ google-cloud-storage==1.28.1
 google-cloud-translate==2.0.1
 googlemaps==4.4.0
 graphene-sqlalchemy==2.2.2
-gunicorn==20.0.4
+gunicorn==20.1.0
 newrelic==5.12.1.141
 numpy==1.18.4
 openpyxl==3.0.3

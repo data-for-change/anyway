@@ -1,7 +1,7 @@
 import datetime
 import json
 import logging
-from typing import List
+from typing import List, Literal
 
 from flask import request, Response
 from sqlalchemy import and_, not_
@@ -11,9 +11,26 @@ from anyway.backend_constants import BE_CONST
 from anyway.models import NewsFlash
 from anyway.infographics_utils import is_news_flash_resolution_supported
 
+from pydantic import BaseModel, ValidationError, validator
+
 DEFAULT_OFFSET_REQ_PARAMETER = 0
 DEFAULT_LIMIT_REQ_PARAMETER = 100
 
+class QueryParams(BaseModel):
+    road_number: int
+    offset: int
+    limit: int
+    interurban_only: bool
+    road_segment_only: bool
+    source: Literal['ynet', 'walla', 'twitter']
+    start_date: datetime.datetime
+    end_date: datetime.datetime
+
+    @validator('end_date')
+    def check_missing_date(cls, end_date, start_date):
+        if end_date ^ start_date:
+            raise ValidationError('Missing start or end date')
+        return end_date
 
 def news_flash():
     news_flash_id = request.values.get("id")

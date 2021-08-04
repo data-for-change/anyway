@@ -93,7 +93,7 @@ First, to login to github go to [this link](https://github.com/settings/tokens) 
 
 Second, copy the token that you just generate and run docker login command like this when `USERNAME` is your github username, and paste the token when prompt will ask the password.
 ```bash
-$ docker login docker.pkg.github.com -u USERNAME 
+$ sudo docker login docker.pkg.github.com -u USERNAME 
 ```
 
 **6.** Go to the project's root directory and run:

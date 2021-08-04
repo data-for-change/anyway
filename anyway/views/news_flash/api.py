@@ -16,21 +16,34 @@ from pydantic import BaseModel, ValidationError, validator
 DEFAULT_OFFSET_REQ_PARAMETER = 0
 DEFAULT_LIMIT_REQ_PARAMETER = 100
 
-class QueryParams(BaseModel):
-    road_number: int
-    offset: int
-    limit: int
-    interurban_only: bool
-    road_segment_only: bool
-    source: Literal['ynet', 'walla', 'twitter']
-    start_date: datetime.datetime
-    end_date: datetime.datetime
+class NewsFlashQuery(BaseModel):
 
-    @validator('end_date')
-    def check_missing_date(cls, end_date, start_date):
-        if end_date ^ start_date:
-            raise ValidationError('Missing start or end date')
-        return end_date
+    road_number: Optional[int]
+    offset: Optional[int]
+    limit: Optional[int]
+    interurban_only: Optional[bool]
+    road_segment_only: Optional[bool]
+    source: Optional[str]
+    # Must set default value in order to be accessed from "check_missing_date" validator when no value provided
+    # from the request
+    start_date: Optional[datetime.datetime] = None
+    end_date: Optional[datetime.datetime] = None
+
+    @validator('end_date', always=True)
+    def check_missing_date(cls, v, values):
+        if bool(v) != bool(values['start_date']):
+            raise ValueError('Missing start or end date')
+        return v
+    
+    @validator('source')
+    def check_source_exist(cls, v):
+        valid_sources =  [
+        str(source_name[0]) for source_name in db.session.query(NewsFlash.source).distinct().all()
+        ]
+        if not v in valid_sources:
+            raise ValueError('Source must be one of: {}'.format(valid_sources))
+        return v
+
 
 def news_flash():
     news_flash_id = request.values.get("id")

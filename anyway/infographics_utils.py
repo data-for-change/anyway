@@ -5,6 +5,7 @@ import json
 import os
 import copy
 from functools import lru_cache
+from collections import defaultdict
 from typing import Optional, Dict, List, Union, Any, Type, Callable
 
 # noinspection PyUnresolvedReferences
@@ -20,18 +21,15 @@ from sqlalchemy import desc
 
 # noinspection PyProtectedMember
 from flask_babel import _
-from anyway.backend_constants import BE_CONST
+from anyway.backend_constants import (
+    BE_CONST, LabeledCode, InjurySeverity, AccidentSeverity, DriverType, AccidentType
+)
 from anyway.models import NewsFlash, AccidentMarkerView, InvolvedMarkerView, VehicleMarkerView
 from anyway.parsers import resolution_dict
 from anyway.app_and_db import db
 from anyway.infographics_dictionaries import (
-    english_driver_type_dict,
     head_on_collisions_comparison_dict,
-    english_accident_severity_dict,
-    english_accident_type_dict,
     segment_dictionary,
-    english_injury_severity_dict,
-    hebrew_accident_severity_dict,
 )
 from anyway.parsers import infographics_data_cache_updater
 from anyway.utilities import parse_age_from_range
@@ -241,6 +239,8 @@ class AccidentCountBySeverityWidget(SubUrbanWidget):
 
 # adding calls to _() for pybabel extraction
 _("Fatal, severe and light accidents count in the specified location.")
+_("Fatal, severe and light injured count in the specified years, split by injury severity")
+_("Fatal, severe and light accidents count in the specified years, split by accident severity")
 
 
 @register
@@ -278,7 +278,7 @@ class MostSevereAccidentsTableWidget(SubUrbanWidget):
         )
         # Add casualties
         for accident in accidents:
-            accident["type"] = english_accident_type_dict[accident["accident_type"]]
+            accident["type"] = AccidentType(accident["accident_type"]).get_label()
             dt = accident["accident_timestamp"].to_pydatetime()
             accident["date"] = dt.strftime("%d/%m/%y")
             accident["hour"] = dt.strftime("%H:%M")
@@ -301,9 +301,7 @@ class MostSevereAccidentsTableWidget(SubUrbanWidget):
                 accident["id"],
                 accident["provider_code"],
             )
-            accident["accident_severity"] = english_accident_severity_dict[
-                accident["accident_severity"]
-            ]
+            accident["accident_severity"] = AccidentSeverity(accident["accident_severity"]).get_label()
         return accidents
 
     @staticmethod
@@ -360,14 +358,14 @@ class MostSevereAccidentsWidget(SubUrbanWidget):
             table_obj, filters, entities, start_time, end_time, limit
         )
         for item in items:
-            item["accident_severity"] = hebrew_accident_severity_dict[item["accident_severity"]]
+            item["accident_severity"] = _(AccidentSeverity(item["accident_severity"]).get_label())
         return items
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         for item in items["data"]["items"]:
             try:
-                item["accident_type"] = _(english_accident_type_dict[item["accident_type"]])
+                item["accident_type"] = _(AccidentType(item["accident_type"]).get_label())
             except KeyError:
                 logging.exception(
                     f"MostSevereAccidentsWidget.localize_items: Exception while translating {item}."
@@ -413,9 +411,10 @@ class HeadOnCollisionsComparisonWidget(SubUrbanWidget):
     def get_head_to_head_stat(self) -> Dict:
         news_flash = self.request_params.news_flash_obj
         road_data = {}
+
         filter_dict = {
             "road_type": BE_CONST.ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION,
-            "accident_severity": BE_CONST.AccidentSeverity.FATAL,
+            "accident_severity": AccidentSeverity.FATAL.value,  # pylint: disable=no-member
         }
         all_roads_data = get_accidents_stats(
             table_obj=AccidentMarkerView,
@@ -443,10 +442,12 @@ class HeadOnCollisionsComparisonWidget(SubUrbanWidget):
             )
 
         road_sums = self.sum_count_of_accident_type(
-            road_data, BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION
+            # pylint: disable=no-member
+            road_data, AccidentType.HEAD_ON_FRONTAL_COLLISION.value
         )
         all_roads_sums = self.sum_count_of_accident_type(
-            all_roads_data, BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION
+            # pylint: disable=no-member
+            all_roads_data, AccidentType.HEAD_ON_FRONTAL_COLLISION.value
         )
 
         res = {
@@ -550,8 +551,10 @@ class AccidentsHeatMapWidget(SubUrbanWidget):
     def generate_items(self) -> None:
         accidents_heat_map_filters = self.request_params.location_info.copy()
         accidents_heat_map_filters["accident_severity"] = [
-            BE_CONST.AccidentSeverity.FATAL,
-            BE_CONST.AccidentSeverity.SEVERE,
+            # pylint: disable=no-member
+            AccidentSeverity.FATAL.value,
+            # pylint: disable=no-member
+            AccidentSeverity.SEVERE.value,
         ]
         self.items = AccidentsHeatMapWidget.get_accidents_heat_map(
             filters=accidents_heat_map_filters,
@@ -589,19 +592,38 @@ class AccidentCountByAccidentYearWidget(SubUrbanWidget):
         super().__init__(request_params, type(self).name)
         self.rank = 8
         self.text = {
-            "title": "כמות התאונות לפי שנה במקטע "
-            + self.request_params.location_info["road_segment_name"]
+            # "title" will be set in localize_items()
+            "labels": gen_entity_labels(AccidentSeverity)
         }
+        self.information = "Fatal, severe and light accidents count in the specified years, split by accident severity"
 
     def generate_items(self) -> None:
-        self.items = get_accidents_stats(
+
+        res = get_accidents_stats(
             table_obj=AccidentMarkerView,
             filters=self.request_params.location_info,
-            group_by="accident_year",
+            group_by=("accident_severity", "accident_year"),
             count="accident_year",
             start_time=self.request_params.start_time,
-            end_time=self.request_params.end_time,
+            end_time=self.request_params.end_time
         )
+        try:
+            self.items = add_empty_keys_to_gen_two_level_dict(
+                res,
+                AccidentSeverity.codes(),
+                list(range(self.request_params.start_time.year,
+                           self.request_params.end_time.year + 1))
+            )
+        except Exception as e:
+            logging.exception(f'failed to add empty keys to {res}', e)
+
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        items["data"]["text"]["title"] =\
+            _("Number of accidents, by year, splitted by accident severity, in segment")\
+            + " "\
+            + segment_dictionary[request_params.location_info["road_segment_name"]]
+        return items
 
 
 @register
@@ -612,19 +634,37 @@ class InjuredCountByAccidentYearWidget(SubUrbanWidget):
         super().__init__(request_params, type(self).name)
         self.rank = 9
         self.text = {
-            "title": "נפגעים בתאונות במקטע "
-            + self.request_params.location_info["road_segment_name"]
+            # "title" will be set in localize_items()
+            "labels": gen_entity_labels(InjurySeverity)
         }
+        self.information = "Fatal, severe and light injured count in the specified years, split by injury severity"
 
     def generate_items(self) -> None:
-        self.items = get_accidents_stats(
+        res = get_accidents_stats(
             table_obj=InvolvedMarkerView,
             filters=get_injured_filters(self.request_params.location_info),
-            group_by="accident_year",
+            group_by=("injury_severity", "accident_year"),
             count="accident_year",
             start_time=self.request_params.start_time,
             end_time=self.request_params.end_time,
         )
+        try:
+            self.items = add_empty_keys_to_gen_two_level_dict(
+                res,
+                InjurySeverity.codes(),
+                list(range(self.request_params.start_time.year,
+                           self.request_params.end_time.year + 1))
+            )
+        except Exception as e:
+            logging.exception(f'failed to add empty keys to {res}', e)
+
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        items["data"]["text"]["title"] =\
+            _("Number of injured in accidents, per year, splitted by severity, in segment")\
+            + " "\
+            + segment_dictionary[request_params.location_info["road_segment_name"]]
+        return items
 
 
 @register
@@ -771,8 +811,8 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
             .filter(
                 InvolvedMarkerView.injury_severity.in_(
                     [
-                        BE_CONST.InjurySeverity.DEAD,
-                        BE_CONST.InjurySeverity.SEVERE,
+                        InjurySeverity.FATAL.value,  # pylint: disable=no-member
+                        InjurySeverity.SEVERE.value,  # pylint: disable=no-member
                     ]
                 )
             )
@@ -797,7 +837,7 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
 
         for row in query:
             age_range = row.age_group
-            injury_name = english_injury_severity_dict[row.injury_severity]
+            injury_name = InjurySeverity(row.injury_severity).get_label()
             count = row.count
 
             # The age groups in the DB are not the same age groups in the Widget - so we need to merge some of the groups
@@ -869,14 +909,16 @@ class Road2Plus1Widget(SubUrbanWidget):
             )
 
             road_sums = self.sum_count_of_accident_type(
-                road_data, BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION
+                # pylint: disable=no-member
+                road_data, AccidentType.HEAD_ON_FRONTAL_COLLISION.value
             )
 
-            frontal_accidents_severe_fatal_past_year = road_sums
-            return frontal_accidents_severe_fatal_past_year
+            return road_sums
+        else:
+            return 0
 
     @staticmethod
-    def sum_count_of_accident_type(data: Dict, acc_type: int) -> Dict:
+    def sum_count_of_accident_type(data: Dict, acc_type: int) -> int:
         given = sum([d["count"] for d in data if d["accident_type"] == acc_type])
         return given
 
@@ -919,17 +961,20 @@ class AccidentCountByDriverTypeWidget(SubUrbanWidget):
             vehicle_type, count = item["involve_vehicle_type"], int(item["count"])
             if vehicle_type in VehicleCategory.PROFESSIONAL_DRIVER.get_codes():
                 driver_types[
-                    english_driver_type_dict[BE_CONST.DriverType.PROFESSIONAL_DRIVER]
+                    # pylint: disable=no-member
+                    DriverType.PROFESSIONAL_DRIVER.get_label()
                 ] += count
             elif vehicle_type in VehicleCategory.PRIVATE_DRIVER.get_codes():
                 driver_types[
-                    english_driver_type_dict[BE_CONST.DriverType.PRIVATE_VEHICLE_DRIVER]
+                    # pylint: disable=no-member
+                    DriverType.PRIVATE_VEHICLE_DRIVER.get_label()
                 ] += count
             elif (
                 vehicle_type in VehicleCategory.LIGHT_ELECTRIC.get_codes()
                 or vehicle_type in VehicleCategory.OTHER.get_codes()
             ):
-                driver_types[english_driver_type_dict[BE_CONST.DriverType.OTHER_DRIVER]] += count
+                # pylint: disable=no-member
+                driver_types[DriverType.OTHER_DRIVER.get_label()] += count
         output = [
             {"driver_type": driver_type, "count": count}
             for driver_type, count in driver_types.items()
@@ -1266,7 +1311,8 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
             .filter(InvolvedMarkerView.road_type.in_(BE_CONST.NON_CITY_ROAD_TYPES))
             .filter(
                 InvolvedMarkerView.accident_severity.in_(
-                    [BE_CONST.AccidentSeverity.FATAL, BE_CONST.AccidentSeverity.SEVERE]
+                    # pylint: disable=no-member
+                    [AccidentSeverity.FATAL.value, AccidentSeverity.SEVERE.value]
                 )
             )
             .group_by(location_label, vehicle_label)
@@ -1497,7 +1543,7 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(SubUrbanWidget):
         for item in items["data"]["items"]:
             try:
                 item[VehicleMarkerView.accident_type.name] = _(
-                    english_accident_type_dict[item["accident_type"]]
+                    AccidentType(item["accident_type"]).get_label()
                 )
             except KeyError:
                 logging.exception(
@@ -1554,14 +1600,50 @@ def get_accidents_stats(
     # get stats
     query = get_query(table_obj, filters, start_time, end_time)
     if group_by:
-        query = query.group_by(group_by)
-        query = query.with_entities(group_by, func.count(count))
+        if isinstance(group_by, tuple):
+            if len(group_by) == 2:
+                query = query.group_by(*group_by)
+                query = query.with_entities(*group_by, func.count(count))
+                dd = query.all()
+                res = retro_dictify(dd)
+                return res
+            else:
+                err_msg = f'get_accidents_stats: {group_by}: Only a string or a tuple of two are valid for group_by'
+                logging.error(err_msg)
+                raise Exception(err_msg)
+        else:
+            query = query.group_by(group_by)
+            query = query.with_entities(group_by, func.count(count))
     df = pd.read_sql_query(query.statement, query.session.bind)
     df.rename(columns={"count_1": "count"}, inplace=True)  # pylint: disable=no-member
     df.columns = [c.replace("_hebrew", "") for c in df.columns]
     return (  # pylint: disable=no-member
         df.to_dict(orient="records") if group_by or count else df.to_dict()
     )
+
+
+def add_empty_keys_to_gen_two_level_dict(d, level_1_values: List[Any], level_2_values: List[Any],
+                                         default_level_3_value: int = 0) -> Dict[Any, Dict[Any, int]]:
+    for v1 in level_1_values:
+        if v1 not in d:
+            d[v1] = {}
+        for v2 in level_2_values:
+            if v2 not in d[v1]:
+                d[v1][v2] = default_level_3_value
+    return d
+
+
+# noinspection Mypy
+def retro_dictify(indexable) -> Dict[Any, Dict[Any, Any]]:
+    d = defaultdict(dict)
+    for row in indexable:
+        here = d
+        for elem in row[:-2]:
+            if elem not in here:
+                here[elem] = defaultdict(lambda : 0)
+            here = here[elem]
+        here[row[-2]] = row[-1]
+    return d
 
 
 def get_injured_filters(location_info):
@@ -1584,9 +1666,10 @@ def get_most_severe_accidents_with_entities(
         BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
         BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
     ]
+    # pylint: disable=no-member
     filters["accident_severity"] = [
-        BE_CONST.AccidentSeverity.FATAL,
-        BE_CONST.AccidentSeverity.SEVERE,
+        AccidentSeverity.FATAL.value,
+        AccidentSeverity.SEVERE.value,
     ]
     query = get_query(table_obj, filters, start_time, end_time)
     query = query.with_entities(*entities)
@@ -1683,7 +1766,8 @@ def sum_road_accidents_by_specific_type(road_data, field_name):
 def convert_roads_fatal_accidents_to_frontend_view(data_dict):
     data_list = []
     for key, value in data_dict.items():
-        if key == BE_CONST.AccidentType.HEAD_ON_FRONTAL_COLLISION:
+        # pylint: disable=no-member
+        if key == AccidentType.HEAD_ON_FRONTAL_COLLISION.value:
             data_list.append(
                 {"desc": head_on_collisions_comparison_dict["head_to_head"], "count": value}
             )
@@ -1703,6 +1787,15 @@ def get_latest_accident_date(table_obj, filters):
     query = db.session.query(func.max(table_obj.accident_timestamp))
     df = pd.read_sql_query(query.statement, query.session.bind)
     return (df.to_dict(orient="records"))[0].get("max_1")  # pylint: disable=no-member
+
+
+def gen_entity_labels(entity: Type[LabeledCode]) -> dict:
+    res = {}
+    for e in entity:
+        label = e.get_label()
+        res[e.value] = {"name": label,
+                        "localized_name": _(label)}
+    return res
 
 
 # noinspection PyArgumentList

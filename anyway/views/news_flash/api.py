@@ -1,9 +1,9 @@
 import datetime
 import json
 import logging
-from typing import List, Literal
+from typing import List, Literal, Optional
 
-from flask import request, Response
+from flask import request, Response, make_response, jsonify
 from sqlalchemy import and_, not_
 
 from anyway.app_and_db import db
@@ -16,11 +16,13 @@ from pydantic import BaseModel, ValidationError, validator
 DEFAULT_OFFSET_REQ_PARAMETER = 0
 DEFAULT_LIMIT_REQ_PARAMETER = 100
 
+
 class NewsFlashQuery(BaseModel):
 
+    id: Optional[int]
     road_number: Optional[int]
-    offset: Optional[int]
-    limit: Optional[int]
+    offset: Optional[int] = DEFAULT_OFFSET_REQ_PARAMETER
+    limit: Optional[int] = DEFAULT_LIMIT_REQ_PARAMETER
     interurban_only: Optional[bool]
     road_segment_only: Optional[bool]
     source: Optional[str]
@@ -29,48 +31,37 @@ class NewsFlashQuery(BaseModel):
     start_date: Optional[datetime.datetime] = None
     end_date: Optional[datetime.datetime] = None
 
-    @validator('end_date', always=True)
+    @validator("end_date", always=True)
     def check_missing_date(cls, v, values):
-        if bool(v) != bool(values['start_date']):
-            raise ValueError('Missing start or end date')
+        if bool(v) != bool(values["start_date"]):
+            raise ValueError("Must provide both start and end date")
         return v
-    
-    @validator('source')
+
+    @validator("source")
     def check_source_exist(cls, v):
-        valid_sources =  [
-        str(source_name[0]) for source_name in db.session.query(NewsFlash.source).distinct().all()
+        valid_sources = [
+            str(source_name[0])
+            for source_name in db.session.query(NewsFlash.source).distinct().all()
         ]
         if not v in valid_sources:
-            raise ValueError('Source must be one of: {}'.format(valid_sources))
+            raise ValueError(f"Source must be one of: {valid_sources}")
         return v
 
 
 def news_flash():
     news_flash_id = request.values.get("id")
+    requested_query_params = request.args
 
-    if news_flash_id is not None:
-        query = db.session.query(NewsFlash)
-        news_flash_obj = query.filter(NewsFlash.id == news_flash_id).first()
-        if news_flash_obj is not None:
-            if is_news_flash_resolution_supported(news_flash_obj):
-                return Response(
-                    json.dumps(news_flash_obj.serialize(), default=str), mimetype="application/json"
-                )
-            else:
-                return Response("News flash location not supported", 406)
-        return Response(status=404)
+    try:
+        validated_query_params = NewsFlashQuery(**requested_query_params).dict(exclude_none=True)
+    except ValidationError as e:
+        return make_response(jsonify(e.errors()[0]["msg"]), 404)
 
-    query = gen_news_flash_query(
-        db.session,
-        source=request.values.get("source"),
-        start_date=request.values.get("start_date"),
-        end_date=request.values.get("end_date"),
-        interurban_only=request.values.get("interurban_only"),
-        road_number=request.values.get("road_number"),
-        road_segment=request.values.get("road_segment_only"),
-        offset=request.values.get("offset", DEFAULT_OFFSET_REQ_PARAMETER),
-        limit=request.values.get("limit", DEFAULT_LIMIT_REQ_PARAMETER),
-    )
+    query = db.session.query(NewsFlash)
+    if "id" in validated_query_params:
+        return get_news_flash_by_id(validated_query_params["id"], query)
+
+    query = gen_news_flash_query_new(query, validated_query_params)
     news_flashes = query.all()
 
     news_flashes_jsons = [n.serialize() for n in news_flashes]
@@ -102,7 +93,6 @@ def news_flash_new(args: dict) -> List[dict]:
     for news_flash in news_flashes_jsons:
         set_display_source(news_flash, news_flash_id)
     return news_flashes_jsons
-
 
 def gen_news_flash_query(
     session,
@@ -160,6 +150,32 @@ def gen_news_flash_query(
 
     return query
 
+def gen_news_flash_query_new(query, valid_params: dict):
+    filters = {
+        "source": filter_news_flash_by_source,
+        "start_date": filter_news_flash_by_start_date,
+        "end_date": filter_news_flash_by_end_date,
+        "interurban_only": filter_news_flash_by_interurban_only,
+        "road_segment_only": filter_news_flash_by_road_segment,
+        "road_number": filter_news_flash_by_road_number,
+    }
+
+    for param in valid_params:
+        if param is not "offset" and param is not "limit":
+            query = filters[param](query, valid_params[param])
+
+    query = query.filter(
+        and_(
+            NewsFlash.accident == True,
+            not_(and_(NewsFlash.lat == 0, NewsFlash.lon == 0)),
+            not_(and_(NewsFlash.lat == None, NewsFlash.lon == None)),
+        )
+    ).order_by(NewsFlash.date.desc())
+
+    query = filter_news_flash_by_offset(query, valid_params["offset"])
+    query = filter_news_flash_by_limit(query, valid_params["limit"])
+    return query
+
 
 def set_display_source(news_flash, news_flash_id):
     news_flash["display_source"] = BE_CONST.SOURCE_MAPPING.get(
@@ -183,3 +199,53 @@ def single_news_flash(news_flash_id: int):
             json.dumps(news_flash_obj.serialize(), default=str), mimetype="application/json"
         )
     return Response(status=404)
+
+
+def get_supported_resolutions() -> set:
+    return set([x.value for x in BE_CONST.SUPPORTED_RESOLUTIONS])
+
+
+def get_news_flash_by_id(id: int, query):
+    news_flash_with_id = query.filter(NewsFlash.id == id).first()
+    if news_flash_with_id is None:
+        return Response(status=404)
+    if not is_news_flash_resolution_supported(news_flash_with_id):
+        return Response("News flash location not supported", 406)
+    return Response(
+    json.dumps(news_flash_with_id.serialize(), default=str), mimetype="application/json")
+
+
+def filter_news_flash_by_interurban_only(query, interurban_only: bool):
+    return query.filter(NewsFlash.resolution.in_(["כביש בינעירוני"]))
+
+
+def filter_news_flash_by_road_number(query, road_number):
+    return query.filter(NewsFlash.road1 == road_number)
+
+
+def filter_news_flash_by_road_segment(query, road_segment_required: bool):
+    return query.filter(not_(NewsFlash.road_segment_name == None))
+
+
+def filter_news_flash_by_start_date(query, start_date: datetime.datetime):
+    return query.filter(NewsFlash.date >= start_date)
+
+
+def filter_news_flash_by_end_date(query, end_date: datetime.datetime):
+    return query.filter(NewsFlash.date <= end_date)
+
+
+def filter_news_flash_by_supported_resolutions(query, supported_resolutions):
+    return query.filter(NewsFlash.resolution.in_(supported_resolutions))
+
+
+def filter_news_flash_by_source(query, source):
+    return query.filter(NewsFlash.source == source)
+
+
+def filter_news_flash_by_offset(query, offset):
+    return query.offset(offset)
+
+
+def filter_news_flash_by_limit(query, limit):
+    return query.limit(limit)

@@ -1,3 +1,6 @@
+# pylint: disable=no-name-in-module
+# pylint: disable=no-self-argument
+
 import datetime
 import json
 import logging
@@ -94,6 +97,7 @@ def news_flash_new(args: dict) -> List[dict]:
         set_display_source(news_flash, news_flash_id)
     return news_flashes_jsons
 
+
 def gen_news_flash_query(
     session,
     source=None,
@@ -149,6 +153,7 @@ def gen_news_flash_query(
     query = query.limit(limit)
 
     return query
+
 
 def gen_news_flash_query_new(query, valid_params: dict):
     filters = {
@@ -212,7 +217,8 @@ def get_news_flash_by_id(id: int, query):
     if not is_news_flash_resolution_supported(news_flash_with_id):
         return Response("News flash location not supported", 406)
     return Response(
-    json.dumps(news_flash_with_id.serialize(), default=str), mimetype="application/json")
+        json.dumps(news_flash_with_id.serialize(), default=str), mimetype="application/json"
+    )
 
 
 def filter_news_flash_by_interurban_only(query, interurban_only: bool):

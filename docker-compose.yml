@@ -34,5 +34,14 @@ services:
       - "9876:5432"
     restart: always
 
+  anyway-etl:
+    image: docker.pkg.github.com/hasadna/anyway-etl/anyway-etl:latest
+    volumes:
+      - anyway_etl_data:/var/anyway-etl-data
+    depends_on:
+      - db
+    restart: "no"
+
 volumes:
   db_data:
+  anyway_etl_data:

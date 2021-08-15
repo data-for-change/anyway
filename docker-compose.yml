@@ -3,7 +3,7 @@ version: '3'
 services:
   anyway:
     build: .
-    image: docker.pkg.github.com/hasadna/anyway/anyway:latest
+    image: ghcr.io/hasadna/anyway/anyway:latest
     container_name: anyway
     ports:
       - "8080:5000"
@@ -23,7 +23,7 @@ services:
 
   db:
     build: db_docker
-    image: docker.pkg.github.com/hasadna/anyway/db:latest
+    image: ghcr.io/hasadna/anyway/db:latest
     container_name: db
     environment:
       - DBRESTORE_AWS_ACCESS_KEY_ID
@@ -35,7 +35,7 @@ services:
     restart: always
 
   anyway-etl:
-    image: docker.pkg.github.com/hasadna/anyway-etl/anyway-etl:latest
+    image: ghcr.io/hasadna/anyway-etl/anyway-etl:latest
     volumes:
       - anyway_etl_data:/var/anyway-etl-data
     depends_on:
@@ -43,7 +43,7 @@ services:
     restart: "no"
 
   anyway-etl-nginx:
-    image: docker.pkg.github.com/hasadna/anyway-etl/anyway-etl-nginx:latest
+    image: ghcr.io/hasadna/anyway-etl/anyway-etl-nginx:latest
     volumes:
       - anyway_etl_data:/var/anyway-etl-data
     restart: unless-stopped
@@ -59,7 +59,7 @@ services:
       - "airflow-db:/var/lib/postgresql/data"
 
   airflow-webserver:
-    image: docker.pkg.github.com/hasadna/anyway-etl/anyway-etl-airflow:latest
+    image: ghcr.io/hasadna/anyway-etl/anyway-etl-airflow:latest
     restart: unless-stopped
     environment:
       ANYWAY_ETL_AIRFLOW_INITIALIZE: "yes"
@@ -73,7 +73,7 @@ services:
       - airflow-db
 
   airflow-scheduler:
-    image: docker.pkg.github.com/hasadna/anyway-etl/anyway-etl-airflow:latest
+    image: ghcr.io/hasadna/anyway-etl/anyway-etl-airflow:latest
     restart: unless-stopped
     environment:
       ANYWAY_ETL_AIRFLOW_ROLE: "scheduler"

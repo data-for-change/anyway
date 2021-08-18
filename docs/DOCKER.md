@@ -48,7 +48,7 @@ $ docker login docker.pkg.github.com -u USERNAME
 ```
 
 **6.** Go to the project's root directory and run:
-    `sudo docker-compose up`
+    `sudo docker-compose up anyway`
 This will start the containers. It will take a few minutes until it's done.
 
 **7.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
@@ -97,7 +97,7 @@ $ sudo docker login docker.pkg.github.com -u USERNAME
 ```
 
 **6.** Go to the project's root directory and run:
-    `sudo docker-compose up`
+    `sudo docker-compose up anyway`
 This will start the containers. It will take a few minutes until it's done.
 
 **7.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
@@ -114,6 +114,47 @@ Using VSCODE
 -----------------------
 In order to use VSCODE in debugging mode with DOCKER, check out [VSCODE_CONFIGURATION](VSCODE_CONFIGURATION.md)
 
+## Working on anyway-etl and Airflow
+
+Anyway ETL processes and Airflow server are developed in a different repository: [hasadna/anyway-etl](https://github.com/hasadna/anyway-etl)
+but we use the same Docker Compose environment.
+
+For some tasks you will also need to set secret values in the `.env` file, ask a team member for these values.
+
+**Running anyway-etl tasks**
+
+* Pull the latest anyway-etl Docker image: `docker-compose pull anyway-etl`
+* See the available anyway-etl commands: `docker-compose run anyway-etl --help`
+* Run a command: `docker-compose run anyway-etl cbs parse-all`
+
+**Developing anyway-etl tasks**
+
+To develop anyway-etl using the Docker Compose environment you first need to clone [hasadna/anyway-etl](https://github.com/hasadna/anyway-etl).
+The clone should be a sibling directory to anyway, so it will be at `../anyway-etl` relative to anyway repository.
+
+* Build the anyway-etl Docker image: `docker-compose -f docker-compose.yml -f ../anyway-etl/docker-compose-override.yaml build anyway-etl`
+* Run anyway-etl commands: `docker-compose -f docker-compose.yml -f ../anyway-etl/docker-compose-override.yaml run anyway-etl --help`
+    * When running this command, any changes you make to anyway or anyway-etl code will take effect immediately without requireing to rebuild the image. 
+
+**Running the Airflow server**
+
+* Pull the airflow server image: `docker-compose pull airflow-webserver airflow-scheduler`
+* Start the server: `docker-compose up -d airflow-scheduler`
+* Access the server at http://localhost:8082 with username `admin` and password `123456`
+
+**Developing the Airflow server**
+
+* Build and start the server: `docker-compose -f docker-compose.yml -f ../anyway-etl/docker-compose-override.yaml up -d --build airflow-webserver airflow-scheduler`
+    * On first run it may take a while for the server to be available
+
+**Running the ETL Nginx server**
+
+The ETL Nginx servers allows to browse the data used by the ETL tasks
+
+* Pull the image: `docker-compose pull anyway-etl-nginx`
+* Run the server: `docker-compose up -d anyway-etl-nginx`
+* Browse the files at http://localhost:8083
+
 ## Additional Docker commands
 Use `sudo` before each docker commands if you are using ubuntu.
 
@@ -124,7 +165,7 @@ simply rebuild the image - Run in anyway directory:
 
 Run docker-compose in detached mode - containers are running in background:
 
-    docker-compose up -d
+    docker-compose up -d anyway
 
 List your local docker images:
 

@@ -2,7 +2,11 @@ from enum import Enum
 from typing import List, Union
 import logging
 import math
-from flask_babel import _
+
+try:
+    from flask_babel import _
+except ModuleNotFoundError:
+    pass
 
 
 class VehicleType(Enum):

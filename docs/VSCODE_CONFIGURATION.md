@@ -32,6 +32,6 @@ CMD FLASK_APP=anyway python -m debugpy --listen 0.0.0.0:5678 -m flask run --host
     ]
 ```
 6. Run `docker-compose build`
-7. Run `docker-compose up`
+7. Run `docker-compose up anyway`
 8. Go to the `RUN` section in VSCODE and choose `ANYWAY Docker: Python - Flask`
 9. Happy Debugging!

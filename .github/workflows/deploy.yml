@@ -133,6 +133,6 @@ jobs:
             echo "${GITHUB_SHA}" > $ANYWAY_ETL_COMMIT_FILENAME &&\
             git add ./$ANYWAY_ETL_COMMIT_FILENAME &&\
             git commit -m "automatic update of $ANYWAY_ETL_COMMIT_FILENAME" &&\
-            git push origin master
+            git push origin main
           fi
         fi

@@ -5,7 +5,12 @@ import json
 import logging
 from collections import namedtuple
 
-from flask_login import UserMixin
+try:
+    from flask_login import UserMixin
+except ModuleNotFoundError:
+    class UserMixin():
+        pass
+
 from geoalchemy2 import Geometry
 from sqlalchemy import (
     Column,
@@ -35,7 +40,12 @@ from anyway import localization
 from anyway.backend_constants import BE_CONST
 from anyway.database import Base
 from anyway.utilities import decode_hebrew
-from anyway.app_and_db import db
+
+try:
+    from anyway.app_and_db import db
+except ModuleNotFoundError:
+    pass
+
 from anyway.vehicle_type import VehicleType as BE_VehicleType
 
 MarkerResult = namedtuple("MarkerResult", ["accident_markers", "rsa_markers", "total_records"])

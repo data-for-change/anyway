@@ -86,6 +86,7 @@ jobs:
         DOCKER_REPOSITORY_DB_BACKUP: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
         DOCKER_REPOSITORY_NGINX: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_NGINX }}
         HASADNA_K8S_DEPLOY_KEY: ${{ secrets.HASADNA_K8S_DEPLOY_KEY }}
+        ANYWAY_ETL_DEPLOY_KEY: ${{ secrets.ANYWAY_ETL_DEPLOY_KEY }}
       run: |
         if [ "${GITHUB_REF}" == "refs/heads/master" ] || [ "${GITHUB_REF}" == "refs/heads/dev" ]; then
           SHA_TAG=sha-`git rev-parse --short $GITHUB_SHA` &&\
@@ -117,6 +118,21 @@ jobs:
             else
               git add ./values.auto-updated.yaml && git commit -m "automatic update of anyway"
             fi &&\
-            git push origin master
+            git push origin master &&\
+            cd `mktemp -d` &&\
+            echo "${ANYWAY_ETL_DEPLOY_KEY}" > anyway_etl_deploy_key &&\
+            chmod 400 anyway_etl_deploy_key &&\
+            export GIT_SSH_COMMAND="ssh -i `pwd`/anyway_etl_deploy_key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" &&\
+            git clone git@github.com:hasadna/anyway-etl.git &&\
+            cd anyway-etl &&\
+            if [ "${GITHUB_REF}" == "refs/heads/dev" ]; then
+              ANYWAY_ETL_COMMIT_FILENAME=anyway-dev-commit.txt
+            else
+              ANYWAY_ETL_COMMIT_FILENAME=anyway-master-commit.txt
+            fi &&\
+            echo "${GITHUB_SHA}" > $ANYWAY_ETL_COMMIT_FILENAME &&\
+            git add ./$ANYWAY_ETL_COMMIT_FILENAME &&\
+            git commit -m "automatic update of $ANYWAY_ETL_COMMIT_FILENAME" &&\
+            git push origin main
           fi
         fi

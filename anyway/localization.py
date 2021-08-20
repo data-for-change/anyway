@@ -199,7 +199,10 @@ _fields = {
     "RSA_LICENSE_PLATE": "סוג לוחית רישוי",
 }
 
-_cities = pd.read_csv("static/data/cities.csv", encoding="utf-8", index_col=field_names.sign)
+try:
+    _cities = pd.read_csv("static/data/cities.csv", encoding="utf-8", index_col=field_names.sign)
+except FileNotFoundError:
+    pass
 
 
 def get_field(field, value=None):

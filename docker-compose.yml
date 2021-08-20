@@ -3,7 +3,7 @@ version: '3'
 services:
   anyway:
     build: .
-    image: docker.pkg.github.com/hasadna/anyway/anyway:latest
+    image: ghcr.io/hasadna/anyway/anyway:latest
     container_name: anyway
     ports:
       - "8080:5000"
@@ -24,7 +24,7 @@ services:
 
   db:
     build: db_docker
-    image: docker.pkg.github.com/hasadna/anyway/db:latest
+    image: ghcr.io/hasadna/anyway/db:latest
     container_name: db
     environment:
       - DBRESTORE_AWS_ACCESS_KEY_ID
@@ -35,5 +35,61 @@ services:
       - "9876:5432"
     restart: always
 
+  anyway-etl:
+    image: ghcr.io/hasadna/anyway-etl/anyway-etl:latest
+    volumes:
+      - anyway_etl_data:/var/anyway-etl-data
+    depends_on:
+      - db
+    restart: "no"
+
+  anyway-etl-nginx:
+    image: ghcr.io/hasadna/anyway-etl/anyway-etl-nginx:latest
+    volumes:
+      - anyway_etl_data:/var/anyway-etl-data
+    restart: unless-stopped
+    ports:
+      - "8083:80"
+
+  airflow-db:
+    image: postgres:13
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: "123456"
+    volumes:
+      - "airflow-db:/var/lib/postgresql/data"
+
+  airflow-webserver:
+    image: ghcr.io/hasadna/anyway-etl/anyway-etl-airflow:latest
+    restart: unless-stopped
+    environment:
+      ANYWAY_ETL_AIRFLOW_INITIALIZE: "yes"
+      ANYWAY_ETL_AIRFLOW_ROLE: "webserver"
+      ANYWAY_ETL_AIRFLOW_ADMIN_PASSWORD: "123456"
+    ports:
+      - "8082:8080"
+    volumes:
+      - "airflow-home:/var/airflow"
+    depends_on:
+      - airflow-db
+
+  airflow-scheduler:
+    image: ghcr.io/hasadna/anyway-etl/anyway-etl-airflow:latest
+    restart: unless-stopped
+    environment:
+      ANYWAY_ETL_AIRFLOW_ROLE: "scheduler"
+      ANYWAY_ETL_AIRFLOW_PIP_INSTALL_DEPS: "yes"
+      IMAP_MAIL_USER: "${IMAP_MAIL_USER}"
+      IMAP_MAIL_PASSWORD: "${IMAP_MAIL_PASSWORD}"
+    volumes:
+      - "airflow-home:/var/airflow"
+      - anyway_etl_data:/var/anyway-etl-data
+    depends_on:
+      - airflow-webserver
+      - db
+
 volumes:
   db_data:
+  anyway_etl_data:
+  airflow-db:
+  airflow-home:

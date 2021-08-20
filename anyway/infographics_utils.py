@@ -843,7 +843,7 @@ class Road2Plus1Widget(SubUrbanWidget):
         self.rank = 24
 
     def generate_items(self) -> None:
-        self.items = ["vision_zero_2_plus_1"]
+        self.items = {"image_src": "vision_zero_2_plus_1"}
 
     def get_frontal_accidents_in_past_year(self) -> int:
         news_flash = self.request_params.news_flash_obj

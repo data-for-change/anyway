@@ -2374,3 +2374,18 @@ class SchoolWithDescription2020(Base):
     y = Column(Float(), nullable=True)
     longitude = Column(Float(), nullable=True)
     latitude = Column(Float(), nullable=True)
+
+class CBSLocations(Base):
+    __tablename__ = "cbs_locations"
+    id = Column(Integer(), primary_key=True)
+    road1 = Column(Integer(), nullable=True)
+    road2 = Column(Integer(), nullable=True)
+    non_urban_intersection_hebrew = Column(Text(), nullable=True)
+    yishuv_name = Column(Text(), nullable=True)
+    street1_hebrew = Column(Text(), nullable=True)
+    street2_hebrew = Column(Text(), nullable=True)
+    district_hebrew = Column(Text(), nullable=True)
+    region_hebrew = Column(Text(), nullable=True)
+    road_segment_name = Column(Text(), nullable=True)
+    longitude = Column(Float(), nullable=True)
+    latitude = Column(Float(), nullable=True)

@@ -1406,6 +1406,29 @@ def infographics_data():
     return Response(json_data, mimetype="application/json")
 
 
+@api.route("/api/gps-to-location", methods=["GET"])
+class GPSToLocation(Resource):
+    @api.doc("from gps to location")
+    @api.expect(parser)
+    def get(self):
+        return gps_to_cbs_location()
+
+def gps_to_cbs_location():
+    longitude = request.values.get("longitude")
+    latitude = request.values.get("latitude")
+    if not longitude or not latitude:
+        log_bad_request(request)
+        return abort(http_client.BAD_REQUEST)
+    from anyway.parsers.news_flash_db_adapter import init_db
+    from anyway.parsers.location_extraction import extract_geo_features_from_geo_location
+    db = init_db()
+    location = extract_geo_features_from_geo_location(db, latitude, longitude)
+    if not location:
+        logging.info("location not exist")
+    logging.info(location)
+    return abort(http_client.NOT_FOUND)
+
+
 def widgets_personalisation_for_user(raw_info: typing.Dict) -> typing.Dict:
     if current_user.is_anonymous:
         return raw_info

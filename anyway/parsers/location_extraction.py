@@ -117,6 +117,61 @@ def set_accident_resolution(accident_row):
             logging.info("bug in accident resolution")
 
 
+def reverse_geocode_extract(latitude, longitude):
+    """
+    this method takes a latitude, longitude and returns a dict of the corresponding
+    location found on google maps (by that string), describing details of the location found and the geometry
+    :param latitude: latitude
+    :param longitude: longitude
+    :return: a dict containing data about the found location on google maps, with the keys: street,
+    road_no [road number], intersection, city, address, district and the geometry of the location.
+    """
+    street = None
+    road_no = None
+    intersection = None
+    subdistrict = None
+    city = None
+    district = None
+    try:
+        gmaps = googlemaps.Client(key=secrets.get("GOOGLE_MAPS_KEY"))
+        geocode_result = gmaps.reverse_geocode((latitude, longitude))
+
+        # if we got no results, move to next iteration of location string
+        if not geocode_result:
+            return None
+    except Exception as _:
+        logging.info('exception in gmaps')
+        return None
+    logging.info(geocode_result)
+    response = geocode_result[0]
+    geom = response["geometry"]["location"]
+    for item in response["address_components"]:
+        if "route" in item["types"]:
+            if item["short_name"].isdigit():
+                road_no = int(item["short_name"])
+            else:
+                street = item["long_name"]
+        elif "point_of_interest" in item["types"] or "intersection" in item["types"]:
+            intersection = item["long_name"]
+        elif "locality" in item["types"]:
+            city = item["long_name"]
+        elif "administrative_area_level_2" in item["types"]:
+            subdistrict = item["long_name"]
+        elif "administrative_area_level_1" in item["types"]:
+            district = item["long_name"]
+    address = response["formatted_address"]
+    return {
+        "street": street,
+        "road_no": road_no,
+        "intersection": intersection,
+        "city": city,
+        "address": address,
+        "subdistrict": subdistrict,
+        "district": district,
+        "geom": geom,
+    }
+
+
 def geocode_extract(location):
     """
     this method takes a string representing location and a google maps key and returns a dict of the corresponding
@@ -325,6 +380,16 @@ def extract_geo_features(db, newsflash: NewsFlash) -> None:
         for k, v in location_from_db.items():
             setattr(newsflash, k, v)
 
+def extract_geo_features_from_geo_location(db, latitude, longitude) -> dict:
+    geo_location = reverse_geocode_extract(latitude, longitude)
+    if geo_location is not None:
+        lat = geo_location["geom"]["lat"]
+        lon = geo_location["geom"]["lng"]
+        resolution = set_accident_resolution(geo_location)
+        location_from_db = get_db_matching_location(
+            db, lat, lon, resolution, geo_location["road_no"]
+        )
+        return location_from_db
 
 def get_candidate_location_strings(location_string):
     """

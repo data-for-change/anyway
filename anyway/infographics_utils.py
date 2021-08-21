@@ -811,7 +811,7 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
             .filter(
                 InvolvedMarkerView.injury_severity.in_(
                     [
-                        InjurySeverity.FATAL.value,  # pylint: disable=no-member
+                        InjurySeverity.KILLED.value,  # pylint: disable=no-member
                         InjurySeverity.SEVERE.value,  # pylint: disable=no-member
                     ]
                 )
@@ -885,7 +885,7 @@ class Road2Plus1Widget(SubUrbanWidget):
     def generate_items(self) -> None:
         self.items = {"image_src": "vision_zero_2_plus_1"}
 
-    def get_frontal_accidents_in_past_year(self) -> int:
+    def get_frontal_accidents_in_past_year(self) -> Optional[int]:
         news_flash = self.request_params.news_flash_obj
         road_data = {}
         filter_dict = {
@@ -914,8 +914,6 @@ class Road2Plus1Widget(SubUrbanWidget):
             )
 
             return road_sums
-        else:
-            return 0
 
     @staticmethod
     def sum_count_of_accident_type(data: Dict, acc_type: int) -> int:

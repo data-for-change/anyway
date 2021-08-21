@@ -1,5 +1,6 @@
 from enum import Enum
 from typing import List, Iterable
+from flask_babel import _
 # noinspection PyProtectedMember
 
 
@@ -103,17 +104,19 @@ class LabeledCode(Enum):
 
 # This is a type for the field 'injury_severity' in the table 'involved_markers_hebrew'
 class InjurySeverity(LabeledCode):
-    FATAL = 1
+    KILLED = 1
     SEVERE = 2
     LIGHT = 3
 
     def labels(self):
         return {
-            InjurySeverity.FATAL: "fatal",
+            InjurySeverity.KILLED: "killed",
             InjurySeverity.SEVERE: "severe",
             InjurySeverity.LIGHT: "light",
         }
 
+
+_("killed")
 
 # This is a type for the 'accident_severity' table field name
 class AccidentSeverity(LabeledCode):
@@ -185,81 +188,3 @@ class DriverType(LabeledCode):
             DriverType.PRIVATE_VEHICLE_DRIVER: "private_vehicle_driver",
             DriverType.OTHER_DRIVER: "other_driver",
         }
-
-
-# class LC(Enum):
-#
-#     @staticmethod
-#     def get_label_impl(cls, val: int, labels: List[str]) -> str:
-#         if 0 <= val - 1 < len(labels):
-#             return labels[val - 1]
-#         else:
-#             err = f'{val}: not found in class {cls}'
-#             logging.error(err)
-#             raise ValueError(err)
-#
-#     @classmethod
-#     def codes(cls: Iterable) -> List[int]:
-#         if isinstance(cls, Iterable):
-#             return [a.value for a in cls]
-#         else:
-#             raise ValueError(f'{cls}: needs to be derived from Enum')
-#
-#     def get_label(self) -> str:
-#         return self.labels()[self]
-#
-#     # @staticmethod
-#     def labels(self):
-#         return {}
-#
-# class T(LC):
-#     A = 1
-#     B = 2
-#
-#     # @staticmethod
-#     def labels(self):
-#         return {
-#             T.A: "professional_driver",
-#             T.B: "private_vehicle_driver",
-#         }
-#
-#
-# class U(LC):
-#     C = 1
-#     D = 2
-#
-#     @staticmethod
-#     def labels():
-#         return {
-#             U.C: "c",
-#             U.D: "d",
-#         }
-#
-#
-# class EE(LC):
-#     A = 1
-#     B = 2
-#
-#     def add_10(self) -> int:
-#         return self.value + 10
-#
-#
-# if __name__ == "__main__":
-#     res = {}
-#     for e in U:
-#         res[e.value] = {"name": e.get_label()}
-#     print('res', res)
-#     print('codes t', T.codes())
-#     print('codes u', U.codes())
-#     print('get label T', T(1).get_label())
-#     print('get label U', U(1).get_label())
-#     print(type(T.A in T))
-#     print(type(T(1)))
-#     print(T.A.value)
-#     print([e.add_10() for e in EE])
-#     print('labels', [e.get_label() for e in T])
-#     try:
-#         print('get label', T(0).get_label())
-#     except Exception:
-#         logging.exception("")
-#     print('Done')

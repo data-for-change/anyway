@@ -108,6 +108,17 @@ class BackEndConstants(object):
         ResolutionCategories.SUBURBAN_ROAD,
     ]
 
+    class Source(Enum):
+        YNET = "ynet"
+        WALLA = "walla"
+        TWITTER = "twitter"
+
+    SUPPORTED_SOURCES: List[Source] = [
+        Source.YNET,
+        Source.WALLA,
+        Source.TWITTER,
+    ]
+
     # If in the future there will be a number of organizations or a need for a dynamic setting change, move this
     # data to a table in the DB.
     OR_YAROK_WIDGETS = [

@@ -89,16 +89,17 @@ BE_CONST = BackEndConstants()
 class LabeledCode(Enum):
 
     def get_label(self) -> str:
-        return self.labels()[self]
+        return type(self).labels()[self]
 
     @classmethod
     def codes(cls: Iterable) -> List[int]:
         if isinstance(cls, Iterable):
             return [a.value for a in cls]
         else:
-            raise ValueError(f'{cls}: needs to be derived from Enum')
+            raise NotImplementedError(f'{cls}: needs to be derived from Enum')
 
-    def labels(self):
+    @classmethod
+    def labels(cls):
         return {}
 
 
@@ -108,7 +109,8 @@ class InjurySeverity(LabeledCode):
     SEVERE_INJURED = 2
     LIGHT_INJURED = 3
 
-    def labels(self):
+    @classmethod
+    def labels(cls):
         return {
             InjurySeverity.KILLED: "killed",
             InjurySeverity.SEVERE_INJURED: "severe injured",
@@ -126,7 +128,8 @@ class AccidentSeverity(LabeledCode):
     SEVERE = 2
     LIGHT = 3
 
-    def labels(self):
+    @classmethod
+    def labels(cls):
         return {
             AccidentSeverity.FATAL: "fatal",
             AccidentSeverity.SEVERE: "severe",
@@ -155,7 +158,8 @@ class AccidentType(LabeledCode):
     COLLISION_WITH_AN_ANIMAL = 19
     DAMAGE_CAUSED_BY_A_FALLING_LOAD_OFF_A_VEHICLE = 20
 
-    def labels(self):
+    @classmethod
+    def labels(cls):
         return {
             AccidentType.PEDESTRIAN_INJURY: "Pedestrian injury",
             AccidentType.COLLISION_OF_FRONT_TO_SIDE: "Collision of front to side",
@@ -184,7 +188,8 @@ class DriverType(LabeledCode):
     PRIVATE_VEHICLE_DRIVER = 2
     OTHER_DRIVER = 3
 
-    def labels(self):
+    @classmethod
+    def labels(cls):
         return {
             DriverType.PROFESSIONAL_DRIVER: "professional_driver",
             DriverType.PRIVATE_VEHICLE_DRIVER: "private_vehicle_driver",

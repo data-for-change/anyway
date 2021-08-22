@@ -105,18 +105,20 @@ class LabeledCode(Enum):
 # This is a type for the field 'injury_severity' in the table 'involved_markers_hebrew'
 class InjurySeverity(LabeledCode):
     KILLED = 1
-    SEVERE = 2
-    LIGHT = 3
+    SEVERE_INJURED = 2
+    LIGHT_INJURED = 3
 
     def labels(self):
         return {
             InjurySeverity.KILLED: "killed",
-            InjurySeverity.SEVERE: "severe",
-            InjurySeverity.LIGHT: "light",
+            InjurySeverity.SEVERE_INJURED: "severe injured",
+            InjurySeverity.LIGHT_INJURED: "light injured",
         }
 
 
 _("killed")
+_("severe injured")
+_("light injured")
 
 # This is a type for the 'accident_severity' table field name
 class AccidentSeverity(LabeledCode):

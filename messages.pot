@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-08-21 20:29+0300\n"
+"POT-Creation-Date: 2021-08-22 18:54+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,6 +19,14 @@ msgstr ""
 
 #: anyway/backend_constants.py:119
 msgid "killed"
+msgstr ""
+
+#: anyway/backend_constants.py:120
+msgid "severe injured"
+msgstr ""
+
+#: anyway/backend_constants.py:121
+msgid "light injured"
 msgstr ""
 
 #: anyway/flask_app.py:715 anyway/flask_app.py:820

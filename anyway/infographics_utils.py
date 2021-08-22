@@ -812,7 +812,7 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
                 InvolvedMarkerView.injury_severity.in_(
                     [
                         InjurySeverity.KILLED.value,  # pylint: disable=no-member
-                        InjurySeverity.SEVERE.value,  # pylint: disable=no-member
+                        InjurySeverity.SEVERE_INJURED.value,  # pylint: disable=no-member
                     ]
                 )
             )

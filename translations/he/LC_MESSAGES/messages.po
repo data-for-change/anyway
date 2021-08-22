@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-08-21 20:29+0300\n"
+"POT-Creation-Date: 2021-08-22 18:54+0300\n"
 "PO-Revision-Date: 2020-10-16 15:42+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: he\n"
@@ -20,7 +20,15 @@ msgstr ""
 
 #: anyway/backend_constants.py:119
 msgid "killed"
-msgstr "הרוג"
+msgstr "הרוג/ה"
+
+#: anyway/backend_constants.py:120
+msgid "severe injured"
+msgstr "פצוע/ה קשה"
+
+#: anyway/backend_constants.py:121
+msgid "light injured"
+msgstr "פצוע/ה קל"
 
 #: anyway/flask_app.py:715 anyway/flask_app.py:820
 msgid "Discussion not found:"
@@ -347,7 +355,6 @@ msgid "professional driver"
 msgstr "נהג מקצועי"
 
 #: anyway/vehicle_type.py:183
-#, fuzzy
 msgid "private driver"
 msgstr "נהג רכב פרטי"
 

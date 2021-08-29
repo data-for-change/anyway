@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-05-12 13:10+0000\n"
+"POT-Creation-Date: 2021-08-22 18:54+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,111 +17,123 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.0\n"
 
-#: anyway/flask_app.py:705 anyway/flask_app.py:812
+#: anyway/backend_constants.py:119
+msgid "killed"
+msgstr ""
+
+#: anyway/backend_constants.py:120
+msgid "severe injured"
+msgstr ""
+
+#: anyway/backend_constants.py:121
+msgid "light injured"
+msgstr ""
+
+#: anyway/flask_app.py:715 anyway/flask_app.py:820
 msgid "Discussion not found:"
 msgstr ""
 
-#: anyway/flask_app.py:708
+#: anyway/flask_app.py:718
 msgid "Illegal Discussion"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:64
+#: anyway/infographics_dictionaries.py:18
 msgid "fatal"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:65
+#: anyway/infographics_dictionaries.py:19
 msgid "severe"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:66
+#: anyway/infographics_dictionaries.py:20
 msgid "light"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:68
+#: anyway/infographics_dictionaries.py:22
 msgid "Pedestrian injury"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:69
+#: anyway/infographics_dictionaries.py:23
 msgid "Collision of front to side"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:70
+#: anyway/infographics_dictionaries.py:24
 msgid "Collision of front to rear-end"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:71
+#: anyway/infographics_dictionaries.py:25
 msgid "Collision of side to side (lateral)"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:72
+#: anyway/infographics_dictionaries.py:26
 msgid "Head-on frontal collision"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:73
+#: anyway/infographics_dictionaries.py:27
 msgid "Collision with a stopped non-parked vehicle"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:74
+#: anyway/infographics_dictionaries.py:28
 msgid "Collision with a parked vehicle"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:75
+#: anyway/infographics_dictionaries.py:29
 msgid "Collision with an inanimate object"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:76
+#: anyway/infographics_dictionaries.py:30
 msgid "Swerving off the road or onto the pavement"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:77
+#: anyway/infographics_dictionaries.py:31
 msgid "Overturned vehicle"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:78
+#: anyway/infographics_dictionaries.py:32
 msgid "Skid"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:79
+#: anyway/infographics_dictionaries.py:33
 msgid "Injury of a passenger in a vehicle"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:80
+#: anyway/infographics_dictionaries.py:34
 msgid "A fall from a moving vehicle"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:81
+#: anyway/infographics_dictionaries.py:35
 msgid "Fire"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:82
+#: anyway/infographics_dictionaries.py:36
 msgid "Other"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:83
+#: anyway/infographics_dictionaries.py:37
 msgid "Collision of rear-end to front"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:84
+#: anyway/infographics_dictionaries.py:38
 msgid "Collision of rear-end to side"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:85
+#: anyway/infographics_dictionaries.py:39
 msgid "Collision with an animal"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:86
+#: anyway/infographics_dictionaries.py:40
 msgid "Damage caused by a falling load off a vehicle"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:88
+#: anyway/infographics_dictionaries.py:42
 msgid "professional_driver"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:89
+#: anyway/infographics_dictionaries.py:43
 msgid "private_vehicle_driver"
 msgstr ""
 
-#: anyway/infographics_dictionaries.py:90
+#: anyway/infographics_dictionaries.py:44
 msgid "other_driver"
 msgstr ""
 
@@ -129,212 +141,228 @@ msgstr ""
 msgid "Fatal, severe and light accidents count in the specified location."
 msgstr ""
 
-#: anyway/infographics_utils.py:311
-msgid "accident_severity"
+#: anyway/infographics_utils.py:242
+msgid ""
+"Fatal, severe and light injured count in the specified years, split by "
+"injury severity"
+msgstr ""
+
+#: anyway/infographics_utils.py:243
+msgid ""
+"Fatal, severe and light accidents count in the specified years, split by "
+"accident severity"
 msgstr ""
 
 #: anyway/infographics_utils.py:312
+msgid "accident_severity"
+msgstr ""
+
+#: anyway/infographics_utils.py:313
 msgid "type"
 msgstr ""
 
-#: anyway/infographics_utils.py:323
+#: anyway/infographics_utils.py:325
 msgid ""
 "Most recent fatal and severe accidents in location, ordered by date. Up "
 "to 10 accidents are presented."
 msgstr ""
 
-#: anyway/infographics_utils.py:363 anyway/infographics_utils.py:1449
-msgid "accident_type"
-msgstr ""
-
-#: anyway/infographics_utils.py:372
+#: anyway/infographics_utils.py:377
 msgid ""
 "Most recent fatal and severe accidents displayed on a map. Up to 10 "
 "accidents are presented."
 msgstr ""
 
-#: anyway/infographics_utils.py:463
+#: anyway/infographics_utils.py:474
 msgid "fatal accidents by type"
 msgstr ""
 
-#: anyway/infographics_utils.py:466
+#: anyway/infographics_utils.py:477
 msgid "desc"
 msgstr ""
 
-#: anyway/infographics_utils.py:493
+#: anyway/infographics_utils.py:504
 msgid "others"
 msgstr ""
 
-#: anyway/infographics_utils.py:494
+#: anyway/infographics_utils.py:505
 msgid "frontal"
 msgstr ""
 
-#: anyway/infographics_utils.py:495
+#: anyway/infographics_utils.py:506
 msgid ""
 "Fatal accidents distribution by accident type - head on collisions vs "
 "other accidents."
 msgstr ""
 
-#: anyway/infographics_utils.py:567
+#: anyway/infographics_utils.py:580
 msgid "Fatal and severe accidents heat map"
 msgstr ""
 
-#: anyway/infographics_utils.py:816
+#: anyway/infographics_utils.py:623
+msgid "Number of accidents, by year, splitted by accident severity, in segment"
+msgstr ""
+
+#: anyway/infographics_utils.py:664
+msgid "Number of injured in accidents, per year, splitted by severity, in segment"
+msgstr ""
+
+#: anyway/infographics_utils.py:870
 msgid "Injury severity per age group in "
 msgstr ""
 
-#: anyway/infographics_utils.py:896
+#: anyway/infographics_utils.py:986
 msgid "driver_type"
 msgstr ""
 
-#: anyway/infographics_utils.py:902
+#: anyway/infographics_utils.py:992
 msgid "accident count by driver type "
 msgstr ""
 
-#: anyway/infographics_utils.py:908
+#: anyway/infographics_utils.py:999
 msgid ""
 "Driver involvement in accident by driver type: professional - trucks, "
 "taxi, bus, work, minibus, tractor, private - private car, motorcycle, "
 "light electric - electric scooter, mobility scooter, electric bike."
 msgstr ""
 
-#: anyway/infographics_utils.py:1014
+#: anyway/infographics_utils.py:1107
 msgid ""
 "comparing vehicle type percentage in accidents in {} relative to national"
 " average"
 msgstr ""
 
-#: anyway/infographics_utils.py:1283
+#: anyway/infographics_utils.py:1377
 msgid ""
 "Pedestrian Injuries on Ben Yehuda Street in Tel Aviv by Type of hitting "
 "Vehicle, Compared to Urban Accidents Across the country"
 msgstr ""
 
-#: anyway/infographics_utils.py:1552
+#: anyway/infographics_utils.py:1683
 msgid "Most severe accidents in segment"
 msgstr ""
 
-#: anyway/vehicle_type.py:43 anyway/vehicle_type.py:171
+#: anyway/vehicle_type.py:47 anyway/vehicle_type.py:185
 msgid "private car"
 msgstr ""
 
-#: anyway/vehicle_type.py:44
+#: anyway/vehicle_type.py:48
 msgid "truck upto 4 tons"
 msgstr ""
 
-#: anyway/vehicle_type.py:45
+#: anyway/vehicle_type.py:49
 msgid "pickup upto 4 tons"
 msgstr ""
 
-#: anyway/vehicle_type.py:46
+#: anyway/vehicle_type.py:50
 msgid "truck 4 to 10 tons"
 msgstr ""
 
-#: anyway/vehicle_type.py:47
+#: anyway/vehicle_type.py:51
 msgid "truck 12 to 16 tons"
 msgstr ""
 
-#: anyway/vehicle_type.py:48
+#: anyway/vehicle_type.py:52
 msgid "truck 16 to 34 tons"
 msgstr ""
 
-#: anyway/vehicle_type.py:49
+#: anyway/vehicle_type.py:53
 msgid "truck above 34 tons"
 msgstr ""
 
-#: anyway/vehicle_type.py:50
+#: anyway/vehicle_type.py:54
 msgid "motorcycle upto 50 cc"
 msgstr ""
 
-#: anyway/vehicle_type.py:51
+#: anyway/vehicle_type.py:55
 msgid "motorcycle 50 to 250 cc"
 msgstr ""
 
-#: anyway/vehicle_type.py:52
+#: anyway/vehicle_type.py:56
 msgid "motorcycle 250 to 500 cc"
 msgstr ""
 
-#: anyway/vehicle_type.py:53
+#: anyway/vehicle_type.py:57
 msgid "bus"
 msgstr ""
 
-#: anyway/vehicle_type.py:54
+#: anyway/vehicle_type.py:58
 msgid "taxi"
 msgstr ""
 
-#: anyway/vehicle_type.py:55
+#: anyway/vehicle_type.py:59
 msgid "work vehicle"
 msgstr ""
 
-#: anyway/vehicle_type.py:56
+#: anyway/vehicle_type.py:60
 msgid "tractor"
 msgstr ""
 
-#: anyway/vehicle_type.py:57
+#: anyway/vehicle_type.py:61
 msgid "bike"
 msgstr ""
 
-#: anyway/vehicle_type.py:58
+#: anyway/vehicle_type.py:62
 msgid "train"
 msgstr ""
 
-#: anyway/vehicle_type.py:59
+#: anyway/vehicle_type.py:63
 msgid "other and unknown"
 msgstr ""
 
-#: anyway/vehicle_type.py:60
+#: anyway/vehicle_type.py:64
 msgid "minibus"
 msgstr ""
 
-#: anyway/vehicle_type.py:61
+#: anyway/vehicle_type.py:65
 msgid "motorcycle above 500 cc"
 msgstr ""
 
-#: anyway/vehicle_type.py:62
+#: anyway/vehicle_type.py:66
 msgid "electric scooter"
 msgstr ""
 
-#: anyway/vehicle_type.py:63
+#: anyway/vehicle_type.py:67
 msgid "mobility scooter"
 msgstr ""
 
-#: anyway/vehicle_type.py:64
+#: anyway/vehicle_type.py:68
 msgid "electric bike"
 msgstr ""
 
-#: anyway/vehicle_type.py:65
+#: anyway/vehicle_type.py:69
 msgid "truck 3.5 to 10 tons"
 msgstr ""
 
-#: anyway/vehicle_type.py:66
+#: anyway/vehicle_type.py:70
 msgid "truck 10 to 12 tons"
 msgstr ""
 
-#: anyway/vehicle_type.py:168
+#: anyway/vehicle_type.py:182
 msgid "professional driver"
 msgstr ""
 
-#: anyway/vehicle_type.py:169
+#: anyway/vehicle_type.py:183
 msgid "private driver"
 msgstr ""
 
-#: anyway/vehicle_type.py:170
+#: anyway/vehicle_type.py:184
 msgid "light electric vehicles"
 msgstr ""
 
-#: anyway/vehicle_type.py:172
+#: anyway/vehicle_type.py:186
 msgid "large vehicle"
 msgstr ""
 
-#: anyway/vehicle_type.py:173
+#: anyway/vehicle_type.py:187
 msgid "motorcycle"
 msgstr ""
 
-#: anyway/vehicle_type.py:174
+#: anyway/vehicle_type.py:188
 msgid "bicycle and small motor vehicles"
 msgstr ""
 
-#: anyway/vehicle_type.py:175
+#: anyway/vehicle_type.py:189
 msgid "other"
 msgstr ""
 
@@ -375,3 +403,4 @@ msgstr ""
 #: templates/index.html:490
 msgid "Login with Google"
 msgstr ""
+

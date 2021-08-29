@@ -69,6 +69,10 @@ Contributing
 * Get updates whenever you start working: `git pull upstream dev`
 * Push to your fork when you've committed your changes and tested them: `git push`. Now make sure CI tests are passing (see Actions tab) and make a pull request from your fork on GitHub
 
+## WSL2
+
+In order to use WSL2, please follow [these official Docker instructions](https://docs.docker.com/desktop/windows/wsl/). Note that although you run Docker from a Linux distribution, you are instructed to install the Docker Desktop app, and specify usage of WSL2
+
 ## Docker
 We are using DOCKER. See [DOCKER](docs/DOCKER.md)
 

@@ -5,7 +5,7 @@ import datetime
 import json
 import logging
 
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from flask import request, Response, make_response, jsonify
 from sqlalchemy import and_, not_, or_
@@ -271,10 +271,14 @@ def filter_by_resolutions(query, resolutions: List[str]):
     return query.filter(ands.pop())
 
 
-def normalize_query_param(key, value):
-    return value if key == "source" or key == "resolution" else value[0]
+# Params that can take more than 1 value are kept as lists regardless of number of values supplied
+# in order to simplify dependent code.
+# Single valued params are converted to their value.
+def normalize_query_param(key, value: list):
+    multi_value_params = ["source", "resolution"]
+    return value if key in  multi_value_params else value.pop()
 
 
-def normalize_query(params):
+def normalize_query(params: dict):
     params_non_flat = params.to_dict(flat=False)
     return {k: normalize_query_param(k, v) for k, v in params_non_flat.items()}

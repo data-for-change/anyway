@@ -44,9 +44,10 @@ class NewsFlashQuery(BaseModel):
     @validator("resolution")
     def check_supported_resolutions(cls, v):
         supported_resolutions = get_supported_resolutions()
-        if not set(v) <= supported_resolutions:
+        requested_resolutions = set([resolution.lower() for resolution in v])
+        if not requested_resolutions <= supported_resolutions:
             raise ValueError(f"Resolution must be one of: {supported_resolutions}")
-        return v
+        return requested_resolutions
 
 def news_flash():
     news_flash_id = request.values.get("id")

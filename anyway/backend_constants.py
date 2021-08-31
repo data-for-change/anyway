@@ -109,6 +109,11 @@ class BackEndConstants(object):
     ]
 
     class Source(Enum):
+        @classmethod
+        def _missing_(cls, value):
+            for member in cls:
+                if member.value == value.lower():
+                    return member
         YNET = "ynet"
         WALLA = "walla"
         TWITTER = "twitter"

@@ -160,7 +160,7 @@ If no error has occurred then you will get a JSON with an HTTP 200 response. Exa
 **oauth_provider_user_name** - _string_ ,Sometimes we are given a username by the OAuth provider.  
 **oauth_provider_user_picture_url** - _string_ ,A URL for a picture of the user(only available if the OAuth provider
 have given us, Sometimes the OAuth provider is given us a blank picture).  
-**phone** - _string_ , Phone number - e.g. 03-1234567, 0541234567, 054-123-1234, +972-054-123-1234 
+**phone** - _string_ , Phone number - e.g. 03-1234567, 0541234567, 054-123-1234, +972-054-123-1234  
 **roles** - _[string]_ ,The roles assigned to the user - e.g. admins . . .   
 Other fields are self-explanatory, so they are not described here.  
 Otherwise, you will get one of the errors described in the [errors](#Errors) section of this document.
@@ -429,7 +429,7 @@ each dict object in the list has the following struct:
 **oauth_provider_user_name** - _string_ ,Sometimes we are given a username by the OAuth provider.  
 **oauth_provider_user_picture_url** - _string_ ,A URL for a picture of the user(only available if the OAuth provider
 have given us, Sometimes the OAuth provider is given us a blank picture).  
-**phone** - _string_ , Phone number - e.g. 03-1234567, 0541234567, 054-123-1234, +972-054-123-1234 
+**phone** - _string_ , Phone number - e.g. 03-1234567, 0541234567, 054-123-1234, +972-054-123-1234  
 **roles** - _[string]_ ,The roles assigned to the user - e.g. admins . . .   
 Other fields are self-explanatory, so they are not described here.  
 Otherwise, you will get one of the errors described in the [errors](#Errors) section of this document.

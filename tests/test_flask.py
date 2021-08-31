@@ -217,7 +217,7 @@ def test_user_update_success(app):
         with patch("anyway.flask_app.get_current_user_email") as get_current_user_email:
             get_current_user_email.side_effect = lambda: None
 
-            with patch("anyway.flask_app.update_current_user_in_db"):
+            with patch("anyway.flask_app.update_user_in_db"):
                 rv = user_update_post_json(
                     app, json_data={"first_name": "a", "last_name": "a", "email": "aa@gmail.com"}
                 )
@@ -239,7 +239,6 @@ def test_user_update_success(app):
                     "email": "aa@gmail.com",
                     "phone": "0541234567",
                     "user_type": "journalist",
-                    "user_work_place": "ynet",
                     "user_url": "http:\\www.a.com",
                     "user_desc": "a",
                 }

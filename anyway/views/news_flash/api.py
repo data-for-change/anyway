@@ -5,7 +5,7 @@ import datetime
 import json
 import logging
 
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from flask import request, Response, make_response, jsonify
 from sqlalchemy import and_, not_, or_

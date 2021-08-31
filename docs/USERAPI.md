@@ -470,7 +470,7 @@ the following fields must be present in the JSON:
 
 **user_url** - _string_ ,Required, a URL to the user site  
 
-Please note that all fields are Required, if no change was made in one of the field then send the same values you got 
+Please note that all fields are Required, if no change was made in one of the field then send the same value as you got 
 from the [Get users list with info](# Get users list with info) API.
 
 Examples for good JSON:

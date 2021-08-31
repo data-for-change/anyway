@@ -12,8 +12,6 @@ import datetime
 from sqlalchemy import orm, text
 from sqlalchemy.engine.reflection import Inspector
 
-from anyway.backend_constants import BackEndConstants
-
 revision = "bd67c88713b8"
 down_revision = "10023013f155"
 branch_labels = None
@@ -73,7 +71,7 @@ def upgrade():
     session = orm.Session(bind=bind)
 
     role_admins = Roles(
-        name=BackEndConstants.Roles2Names.Admins.value,
+        name="admins",
         description="This is the default admin role.",
         create_date=datetime.datetime.now(),
     )

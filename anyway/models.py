@@ -8,8 +8,10 @@ from collections import namedtuple
 try:
     from flask_login import UserMixin
 except ModuleNotFoundError:
-    class UserMixin():
+
+    class UserMixin:
         pass
+
 
 from geoalchemy2 import Geometry
 from sqlalchemy import (
@@ -91,7 +93,6 @@ class Users(Base, UserMixin):
     oauth_provider_user_picture_url = Column(String, nullable=True)
     oauth_provider_user_locale = Column(String(64), nullable=True)
     oauth_provider_user_profile_url = Column(String, nullable=True)
-    work_on_behalf_of_organization = Column(String(128), nullable=True)
     first_name = Column(String(255))
     last_name = Column(String(255))
     phone = Column(String(17))

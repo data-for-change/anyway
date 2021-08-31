@@ -1458,6 +1458,41 @@ def load_user(id: str) -> Users:
     return db.session.query(Users).get(id)
 
 
+# TODO: in the future add pagination if needed
+@app.route("/admin/get_all_users_info")
+def get_all_users_info() -> Response:
+    if current_user.is_anonymous:
+        return return_json_error(Es.BR_USER_NOT_LOGGED_IN)
+
+    admin_permission = Permission(RoleNeed(BE_CONST.Roles2Names.Admins.value))
+    if not admin_permission.can():
+        return return_json_error(Es.BR_MISSING_PERMISSION, BE_CONST.Roles2Names.Admins.value)
+
+    dict_ret = []
+    for user_obj in db.session.query(Users).all():
+        roles = user_obj.roles
+        dict_ret.append(
+            {
+                "id": user_obj.id,
+                "user_register_date": user_obj.user_register_date,
+                "email": user_obj.email,
+                "is_active": user_obj.is_active,
+                "oauth_provider": user_obj.oauth_provider,
+                "oauth_provider_user_name": user_obj.oauth_provider_user_name,
+                "oauth_provider_user_picture_url": user_obj.oauth_provider_user_picture_url,
+                "first_name": user_obj.first_name,
+                "last_name": user_obj.last_name,
+                "phone": user_obj.phone,
+                "user_type": user_obj.user_type,
+                "user_url": user_obj.user_url,
+                "user_desc": user_obj.user_desc,
+                "is_user_completed_registration": user_obj.is_user_completed_registration,
+                "roles": [r.name for r in roles],
+            }
+        )
+    return jsonify(dict_ret)
+
+
 @app.route("/user/info")
 def user_have_email() -> Response:
     if current_user.is_anonymous:
@@ -1474,7 +1509,6 @@ def user_have_email() -> Response:
             "oauth_provider": user_obj.oauth_provider,
             "oauth_provider_user_name": user_obj.oauth_provider_user_name,
             "oauth_provider_user_picture_url": user_obj.oauth_provider_user_picture_url,
-            "work_on_behalf_of_organization": user_obj.work_on_behalf_of_organization,
             "first_name": user_obj.first_name,
             "last_name": user_obj.last_name,
             "phone": user_obj.phone,
@@ -1576,6 +1610,67 @@ def get_role_object(role_name):
     return role
 
 
+@app.route("/admin/update_user", methods=["POST"])
+def admin_update_user() -> Response:
+    allowed_fields = [
+        "user_current_email",
+        "first_name",
+        "last_name",
+        "email",
+        "phone",
+        "user_type",
+        "user_url",
+        "user_desc",
+        "is_user_completed_registration",
+    ]
+
+    res = check_admin_api_with_input(request, allowed_fields)
+    if res:
+        return res
+    reg_dict = request.json
+
+    for field in allowed_fields:
+        if field not in reg_dict:
+            return return_json_error(Es.BR_FIELD_MISSING, field)
+
+    user_current_email = reg_dict.get("user_current_email")
+    if not user_current_email:
+        return return_json_error(Es.BR_NO_EMAIL)
+    if not is_a_valid_email(user_current_email):
+        return return_json_error(Es.BR_BAD_EMAIL)
+    user = get_user_by_email(db, user_current_email)
+    if user is None:
+        return return_json_error(Es.BR_USER_NOT_FOUND, user_current_email)
+
+    user_db_new_email = reg_dict.get("email")
+    if not is_a_valid_email(user_db_new_email):
+        return return_json_error(Es.BR_BAD_EMAIL)
+
+    phone = reg_dict.get("phone")
+    if phone and not is_valid_number(phone):
+        return return_json_error(Es.BR_BAD_PHONE)
+
+    first_name = reg_dict.get("first_name")
+    last_name = reg_dict.get("last_name")
+    user_desc = reg_dict.get("user_desc")
+    user_type = reg_dict.get("user_type")
+    user_url = reg_dict.get("user_url")
+    is_user_completed_registration = reg_dict.get("is_user_completed_registration")
+    update_user_in_db(
+        user,
+        first_name,
+        last_name,
+        phone,
+        user_db_new_email,
+        user_desc,
+        user_type,
+        user_url,
+        is_user_completed_registration,
+    )
+
+    return Response(status=HTTPStatus.OK)
+
+
 # This code is also used as part of the user first registration
 @app.route("/user/update", methods=["POST"])
 def user_update() -> Response:
@@ -1585,7 +1680,6 @@ def user_update() -> Response:
         "email",
         "phone",
         "user_type",
-        "user_work_place",
         "user_url",
         "user_desc",
     ]
@@ -1623,18 +1717,19 @@ def user_update() -> Response:
         return return_json_error(Es.BR_BAD_PHONE)
 
     user_type = reg_dict.get("user_type")
-    user_work_place = reg_dict.get("user_work_place")
     user_url = reg_dict.get("user_url")
     user_desc = reg_dict.get("user_desc")
 
     update_user_in_db(
-        first_name, last_name, phone, user_db_email, user_desc, user_type, user_url, user_work_place
+        first_name, last_name, phone, user_db_email, user_desc, user_type, user_url, True
     )
 
     return Response(status=HTTPStatus.OK)
 
 
+
 def update_user_in_db(
+    user: Users,
     first_name: str,
     last_name: str,
     phone: str,
@@ -1642,17 +1737,16 @@ def update_user_in_db(
     user_desc: str,
     user_type: str,
     user_url: str,
-    user_work_place: str,
+    is_user_completed_registration: bool,
 ) -> None:
-    current_user.first_name = first_name
-    current_user.last_name = last_name
-    current_user.email = user_db_email
-    current_user.phone = phone
-    current_user.user_type = user_type
-    current_user.work_on_behalf_of_organization = user_work_place
-    current_user.user_url = user_url
-    current_user.user_desc = user_desc
-    current_user.is_user_completed_registration = True
+    user.first_name = first_name
+    user.last_name = last_name
+    user.email = user_db_email
+    user.phone = phone
+    user.user_type = user_type
+    user.user_url = user_url
+    user.user_desc = user_desc
+    user.is_user_completed_registration = is_user_completed_registration
     db.session.commit()
 
 

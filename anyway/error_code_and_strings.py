@@ -25,6 +25,7 @@ class Errors:
     BR_ROLE_DESCRIPTION_MISSING = 21
     BR_NO_MODE = 22
     BR_BAD_MODE = 23
+    BR_FIELD_MISSING = 24
 
 
 ERROR_TO_STRING_DICT = {
@@ -51,6 +52,7 @@ ERROR_TO_STRING_DICT = {
     Errors.BR_ROLE_DESCRIPTION_MISSING: "Bad Request (Role description is missing from request json).",
     Errors.BR_NO_MODE: "Bad Request (Mode is missing from request json).",
     Errors.BR_BAD_MODE: "Bad Request (Bad mode value).",
+    Errors.BR_FIELD_MISSING: "Bad Request (Field {} is missing from json).",
 }
 
 ERROR_TO_HTTP_CODE_DICT = {
@@ -77,6 +79,7 @@ ERROR_TO_HTTP_CODE_DICT = {
     Errors.BR_ROLE_DESCRIPTION_MISSING: HTTPStatus.BAD_REQUEST,
     Errors.BR_NO_MODE: HTTPStatus.BAD_REQUEST,
     Errors.BR_BAD_MODE: HTTPStatus.BAD_REQUEST,
+    Errors.BR_FIELD_MISSING: HTTPStatus.BAD_REQUEST,
 }
 
 

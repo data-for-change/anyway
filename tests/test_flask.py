@@ -217,7 +217,7 @@ def test_user_update_success(app):
         with patch("anyway.flask_app.get_current_user_email") as get_current_user_email:
             get_current_user_email.side_effect = lambda: None
 
-            with patch("anyway.flask_app.update_user_in_db"):
+            with patch("anyway.flask_app.update_current_user_in_db"):
                 rv = user_update_post_json(
                     app, json_data={"first_name": "a", "last_name": "a", "email": "aa@gmail.com"}
                 )
@@ -281,7 +281,6 @@ def test_get_current_user(app):
                 "user_register_date": None,
                 "user_type": None,
                 "user_url": None,
-                "work_on_behalf_of_organization": None,
                 "roles": [],
             }
 
@@ -295,7 +294,6 @@ def get_mock_current_user(get_current_user: mock.MagicMock) -> mock.MagicMock:
     ret_obj.oauth_provider = OAUTH_PROVIDER
     ret_obj.oauth_provider_user_name = None
     ret_obj.oauth_provider_user_picture_url = None
-    ret_obj.work_on_behalf_of_organization = None
     ret_obj.phone = None
     ret_obj.user_type = None
     ret_obj.user_url = None

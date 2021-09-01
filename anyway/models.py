@@ -817,7 +817,6 @@ class NewsFlash(Base):
     street2_hebrew = Column(Text(), nullable=True)
     non_urban_intersection_hebrew = Column(Text(), nullable=True)
     road_segment_name = Column(Text(), nullable=True)
-    waze_alert = Column(Integer(), ForeignKey("waze_alerts.id"), nullable=True)
 
     def serialize(self):
         return {

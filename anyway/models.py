@@ -817,7 +817,6 @@ class NewsFlash(Base):
     street2_hebrew = Column(Text(), nullable=True)
     non_urban_intersection_hebrew = Column(Text(), nullable=True)
     road_segment_name = Column(Text(), nullable=True)
-    waze_alert = Column(Integer(), ForeignKey("waze_alerts.id"), nullable=True)
 
     def serialize(self):
         return {
@@ -2263,7 +2262,7 @@ class WazeAlert(Base):
     reliability = Column(Integer())
     alert_type = Column(Text())
     alert_subtype = Column(Text())
-    uuid = Column(Text(), unique=True, index=True)
+    uuid = Column(Text(), index=True)
     report_by_municipality_user = Column(Boolean(), default=False)
     street = Column(Text())
     road_type = Column(Integer())
@@ -2282,7 +2281,7 @@ class WazeTrafficJams(Base):
     turn_type = Column(Integer())
     length = Column(Float())
     type = Column(Text())
-    uuid = Column(Text(), unique=True, index=True)
+    uuid = Column(Text(), index=True)
     speed = Column(Integer())
     segments = Column(Text())
     road_type = Column(Integer())

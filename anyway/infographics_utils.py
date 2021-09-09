@@ -18,6 +18,8 @@ from collections import defaultdict
 from sqlalchemy import func, distinct, literal_column, case
 from sqlalchemy import cast, Numeric
 from sqlalchemy import desc
+from sqlalchemy import or_
+
 
 # noinspection PyProtectedMember
 from flask_babel import _
@@ -1118,22 +1120,53 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
 
 
 @register
+# TODO: As it currently stands, for SubUrbanWidgets such as this, the is_relevant() method is simply is_sub_urban() which checks for 
+# the presence of "road1" and "road_segment_name", which do not match the condition of "street1/2_hebrew" having value, which is required
+#  for matching with the "involved_markers_hebrew" table (see SQLAlchemy below). Maybe we should make InjuredAccidentsWithPedestriansWidget 
+# inherit Widget instead of SubUrbanWidget?
 class InjuredAccidentsWithPedestriansWidget(SubUrbanWidget):
     name: str = "injured_accidents_with_pedestrians"
 
+    def validate_parameters(self):
+        # TODO: validate each parameter and display message accordingly
+        return self.request_params.location_info.get('yishuv_name') is not None and \
+            (self.request_params.news_flash_obj.street1_hebrew is not None or   \
+            self.request_params.news_flash_obj.street2_hebrew is not None) and  \
+            self.request_params.years_ago is None
+            
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
+        
+        if not self.validate_parameters():                
+            logging.exception(f"Could not validate parameters for {NewsFlash} : {request_params.news_flash_obj.id}")
+            return None
+
         self.rank = 18
-        self.text = {"title": "נפגעים הולכי רגל ברחוב ז׳בוטינסקי, פתח תקווה"}
+        self.text = {"title": f"נפגעים הולכי רגל ברחוב(ות) {str.join(', ', [request_params.news_flash_obj.street1_hebrew, request_params.news_flash_obj.street2_hebrew])}, {request_params.news_flash_obj.yishuv_name}"}
 
     @staticmethod
+    # TODO: change?
     def is_in_cache() -> bool:
         return False
 
     def generate_items(self) -> None:
-        self.items = (
-            InjuredAccidentsWithPedestriansWidget.injured_accidents_with_pedestrians_mock_data()
-        )
+        try:            
+            query = db.session.query(InvolvedMarkerView)\
+                .with_entities(InvolvedMarkerView.accident_year,    \
+                    InvolvedMarkerView.injury_severity, \
+                    InvolvedMarkerView.injury_severity_hebrew,\
+                    func.count(distinct(f"{InvolvedMarkerView.provider_and_id}_{InvolvedMarkerView.involve_id}")))  \
+                .filter(InvolvedMarkerView.accident_yishuv_name == self.request_params.location_info['yishuv_name'])\
+                .filter(InvolvedMarkerView.injured_type == 1)   \
+                .filter(or_(InvolvedMarkerView.street1_hebrew == self.request_params.news_flash_obj.street1_hebrew, 
+                    InvolvedMarkerView.street2_hebrew == self.request_params.news_flash_obj.street2_hebrew))    \
+                .filter(InvolvedMarkerView.accident_year >= datetime.date.today().year - self.request_params.years_ago)   \
+                .group_by(InvolvedMarkerView.accident_year, InvolvedMarkerView.injury_severity, InvolvedMarkerView.injury_severity_hebrew)
+                
+            self.items = (query.all())
+        except Exception as e:
+            logging.exception(f"InjuredAccidentsWithPedestriansWidget.generate_items(): {e}")
+            return None       
 
     @staticmethod
     def injured_accidents_with_pedestrians_mock_data():  # Temporary for Frontend
@@ -1843,6 +1876,7 @@ def get_request_params(
 
     last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
     # converting to datetime object to get the date
+    # TODO: handle last_accident_date is None
     end_time = last_accident_date.to_pydatetime().date()
 
     start_time = datetime.date(end_time.year + 1 - number_of_years_ago, 1, 1)

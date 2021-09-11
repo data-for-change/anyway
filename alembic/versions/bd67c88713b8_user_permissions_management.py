@@ -12,6 +12,7 @@ import datetime
 from sqlalchemy import orm, text
 from sqlalchemy.engine.reflection import Inspector
 
+
 revision = "bd67c88713b8"
 down_revision = "10023013f155"
 branch_labels = None

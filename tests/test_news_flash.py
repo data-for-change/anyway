@@ -218,7 +218,7 @@ def test_location_extraction_extract_location_text():
 
 
 def test_location_extraction_geocode_extract():
-
+    pytest.skip("Skip until issue fixed")
     if not secrets.exists("GOOGLE_MAPS_KEY"):
         pytest.skip("Could not find GOOGLE_MAPS_KEY")
 

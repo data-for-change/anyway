@@ -99,6 +99,7 @@ from anyway.views.news_flash.api import (
     news_flash,
     news_flash_new,
     single_news_flash,
+    news_flash_v2,
     DEFAULT_LIMIT_REQ_PARAMETER,
     DEFAULT_OFFSET_REQ_PARAMETER,
 )
@@ -1160,6 +1161,8 @@ app.add_url_rule(
     methods=["GET"],
 )
 app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
+
+app.add_url_rule("/api/news-flash_v2", endpoint=None, view_func=news_flash_v2, methods=["GET"])
 
 
 nf_parser = reqparse.RequestParser()

@@ -978,7 +978,7 @@ def update_dictionary_tables(path):
 def get_file_type_and_year(file_path):
     df = pd.read_csv(file_path, encoding=CONTENT_ENCODING)
     provider_code = df.iloc[0][field_names.file_type.lower()]
-    year = df[field_names.accident_year].mode().values[0]
+    year = df.loc[field_names.accident_year].mode().values[0]
     return int(provider_code), int(year)
 
 

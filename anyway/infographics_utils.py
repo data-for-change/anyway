@@ -1120,29 +1120,20 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
 
 
 @register
-# TODO: As it currently stands, for SubUrbanWidgets such as this, the is_relevant() method is simply is_sub_urban() which checks for
-# the presence of "road1" and "road_segment_name", which do not match the condition of "street1/2_hebrew" having value, which is required
-#  for matching with the "involved_markers_hebrew" table (see SQLAlchemy below). Maybe we should make InjuredAccidentsWithPedestriansWidget
-# inherit Widget instead of SubUrbanWidget?
-class InjuredAccidentsWithPedestriansWidget(SubUrbanWidget):
+class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
     name: str = "injured_accidents_with_pedestrians"
 
     def validate_parameters(self):
         # TODO: validate each parameter and display message accordingly
         return self.request_params.location_info.get('yishuv_name') is not None and \
-            (self.request_params.news_flash_obj.street1_hebrew is not None or   \
-            self.request_params.news_flash_obj.street2_hebrew is not None) and  \
-            self.request_params.years_ago is None
+            self.request_params.news_flash_obj.street1_hebrew is not None and  \
+            self.request_params.years_ago is not None
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
 
-        if not self.validate_parameters():
-            logging.exception(f"Could not validate parameters for {NewsFlash} : {request_params.news_flash_obj.id}")
-            return None
-
         self.rank = 18
-        self.text = {"title": f"נפגעים הולכי רגל ברחוב(ות) {str.join(', ', [request_params.news_flash_obj.street1_hebrew, request_params.news_flash_obj.street2_hebrew])}, {request_params.news_flash_obj.yishuv_name}"}
+        self.text = {"title": f"נפגעים הולכי רגל ב- {get_news_flash_location_text(request_params.news_flash_obj)}"}
 
     @staticmethod
     # TODO: change?
@@ -1151,7 +1142,11 @@ class InjuredAccidentsWithPedestriansWidget(SubUrbanWidget):
 
     def generate_items(self) -> None:
         try:
-            query = db.session.query(InvolvedMarkerView)\
+            if not self.validate_parameters():
+                logging.exception(f"Could not validate parameters for {NewsFlash} : {self.request_params.news_flash_obj.id}")
+                return None
+
+            query = db.session.query(InvolvedMarkerView)    \
                 .with_entities(InvolvedMarkerView.accident_year,    \
                     InvolvedMarkerView.injury_severity, \
                     InvolvedMarkerView.injury_severity_hebrew,\
@@ -1874,9 +1869,10 @@ def get_request_params(
     if all(value is None for value in location_info.values()):
         return None
 
+    # TODO: this does not return the latest accident date for tables which are not AccidentMarkerView. For example, in the 
+    # InjuredAccidentsWithPedestriansWidget, where we query against InvolvedMarkerView
     last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
     # converting to datetime object to get the date
-    # TODO: handle last_accident_date is None
     end_time = last_accident_date.to_pydatetime().date()
 
     start_time = datetime.date(end_time.year + 1 - number_of_years_ago, 1, 1)

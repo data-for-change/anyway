@@ -1869,7 +1869,7 @@ def get_request_params(
     if all(value is None for value in location_info.values()):
         return None
 
-    # TODO: this does not return the latest accident date for tables which are not AccidentMarkerView. For example, in the 
+    # TODO: this does not return the latest accident date for tables which are not AccidentMarkerView. For example, in the
     # InjuredAccidentsWithPedestriansWidget, where we query against InvolvedMarkerView
     last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
     # converting to datetime object to get the date

@@ -648,8 +648,9 @@ def import_vehicles(vehicles, **kwargs):
                 "vehicle_damage": get_data_value(vehicle.get(field_names.vehicle_damage)),
             }
         )
-    logging.info("Finished Importing vehicles")
     db.session.bulk_insert_mappings(Vehicle, vehicles_result)
+    db.session.commit()
+    logging.info("Finished Importing vehicles")
     return len(vehicles_result)
 
 

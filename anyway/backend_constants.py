@@ -1,6 +1,9 @@
 from enum import Enum
 from typing import List, Iterable
-from flask_babel import _
+try:
+    from flask_babel import _
+except ImportError:
+    pass
 # noinspection PyProtectedMember
 
 
@@ -134,9 +137,13 @@ class InjurySeverity(LabeledCode):
         }
 
 
-_("killed")
-_("severe injured")
-_("light injured")
+try:
+    _("killed")
+    _("severe injured")
+    _("light injured")
+except NameError:
+    pass
+
 
 # This is a type for the 'accident_severity' table field name
 class AccidentSeverity(LabeledCode):

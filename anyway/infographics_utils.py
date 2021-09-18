@@ -1145,12 +1145,7 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
-
         self.rank = 18
-        self.text = {
-            "title": f"נפגעים הולכי רגל ב- {get_news_flash_location_text(request_params.news_flash_obj)}",
-            "labels": gen_entity_labels(InjurySeverity)
-        }
 
     def generate_items(self) -> None:
         try:
@@ -1180,6 +1175,13 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
             logging.error(f"InjuredAccidentsWithPedestriansWidget.generate_items(): {e}")
             raise Exception(e)
 
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        items["data"]["text"] = {
+            "title": f"נפגעים הולכי רגל ב- {get_news_flash_location_text(request_params.news_flash_obj)}",
+            "labels": gen_entity_labels(InjurySeverity)
+        }
+        return items
 
 @register
 class AccidentSeverityByCrossLocationWidget(SubUrbanWidget):
@@ -1818,8 +1820,6 @@ def get_request_params(
     if all(value is None for value in location_info.values()):
         return None
 
-    # TODO: this does not return the latest accident date for tables which are not AccidentMarkerView. For example, in the
-    # InjuredAccidentsWithPedestriansWidget, where we query against InvolvedMarkerView
     last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
     # converting to datetime object to get the date
     end_time = last_accident_date.to_pydatetime().date()

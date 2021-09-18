@@ -19,12 +19,13 @@ from sqlalchemy import func, distinct, literal_column, case
 from sqlalchemy import cast, Numeric
 from sqlalchemy import desc
 from sqlalchemy import or_
+from sqlalchemy.sql.elements import and_
 
 
 # noinspection PyProtectedMember
 from flask_babel import _
 from anyway.backend_constants import (
-    BE_CONST, LabeledCode, InjurySeverity, AccidentSeverity, DriverType, AccidentType
+    BE_CONST, InjuredType, LabeledCode, InjurySeverity, AccidentSeverity, DriverType, AccidentType
 )
 from anyway.models import NewsFlash, AccidentMarkerView, InvolvedMarkerView, VehicleMarkerView
 from anyway.parsers import resolution_dict
@@ -1129,16 +1130,27 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
             self.request_params.news_flash_obj.street1_hebrew is not None and  \
             self.request_params.years_ago is not None
 
+    def convert_to_dict(self, query_results):
+        res = {}
+
+        for query_result in query_results:
+            if query_result.injury_severity not in res:
+                res[query_result.injury_severity] = {}
+            if query_result.accident_year not in res[query_result.injury_severity]:
+                res[query_result.injury_severity][query_result.accident_year] = 0
+
+            res[query_result.injury_severity][query_result.accident_year] += query_result.count
+
+        return res
+
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
 
         self.rank = 18
-        self.text = {"title": f"נפגעים הולכי רגל ב- {get_news_flash_location_text(request_params.news_flash_obj)}"}
-
-    @staticmethod
-    # TODO: change?
-    def is_in_cache() -> bool:
-        return False
+        self.text = {
+            "title": f"נפגעים הולכי רגל ב- {get_news_flash_location_text(request_params.news_flash_obj)}",
+            "labels": gen_entity_labels(InjurySeverity)
+        }
 
     def generate_items(self) -> None:
         try:
@@ -1149,87 +1161,24 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
             query = db.session.query(InvolvedMarkerView)    \
                 .with_entities(InvolvedMarkerView.accident_year,    \
                     InvolvedMarkerView.injury_severity, \
-                    InvolvedMarkerView.injury_severity_hebrew,\
-                    func.count(distinct(f"{InvolvedMarkerView.provider_and_id}_{InvolvedMarkerView.involve_id}")))  \
+                    func.count().label('count'))  \
                 .filter(InvolvedMarkerView.accident_yishuv_name == self.request_params.location_info['yishuv_name'])\
-                .filter(InvolvedMarkerView.injured_type == 1)   \
-                .filter(or_(InvolvedMarkerView.street1_hebrew == self.request_params.news_flash_obj.street1_hebrew,
-                    InvolvedMarkerView.street2_hebrew == self.request_params.news_flash_obj.street2_hebrew))    \
-                .filter(InvolvedMarkerView.accident_year >= datetime.date.today().year - self.request_params.years_ago)   \
-                .group_by(InvolvedMarkerView.accident_year, InvolvedMarkerView.injury_severity, InvolvedMarkerView.injury_severity_hebrew)
+                .filter(InvolvedMarkerView.injury_severity.in_([InjurySeverity.KILLED.value, InjurySeverity.SEVERE_INJURED.value, InjurySeverity.LIGHT_INJURED.value]))   \
+                .filter(InvolvedMarkerView.injured_type == InjuredType.PEDESTRIAN.value)   \
+                .filter(or_(InvolvedMarkerView.street1_hebrew == self.request_params.news_flash_obj.street1_hebrew, InvolvedMarkerView.street2_hebrew == self.request_params.news_flash_obj.street1_hebrew))    \
+                .filter(and_(InvolvedMarkerView.accident_timestamp >= self.request_params.start_time, InvolvedMarkerView.accident_timestamp <= self.request_params.end_time)) \
+                .group_by(InvolvedMarkerView.accident_year, InvolvedMarkerView.injury_severity)
 
-            self.items = (query.all())
+            self.items = add_empty_keys_to_gen_two_level_dict(
+                self.convert_to_dict(query.all()),
+                InjurySeverity.codes(),
+                list(range(self.request_params.start_time.year,
+                           self.request_params.end_time.year + 1))
+            )
+
         except Exception as e:
-            logging.exception(f"InjuredAccidentsWithPedestriansWidget.generate_items(): {e}")
-            return None
-
-    @staticmethod
-    def injured_accidents_with_pedestrians_mock_data():  # Temporary for Frontend
-        return [
-            {
-                "year": 2009,
-                "light_injury_severity_text": "פצוע קל",
-                "light_injury_severity_count": 12,
-                "severe_injury_severity_text": "פצוע קשה",
-                "severe_injury_severity_count": 3,
-                "killed_injury_severity_text": "הרוג",
-                "killed_injury_severity_count": 0,
-            },
-            {
-                "year": 2010,
-                "light_injury_severity_text": "פצוע קל",
-                "light_injury_severity_count": 24,
-                "severe_injury_severity_text": "פצוע קשה",
-                "severe_injury_severity_count": 0,
-                "killed_injury_severity_text": "הרוג",
-                "killed_injury_severity_count": 1,
-            },
-            {
-                "year": 2011,
-                "light_injury_severity_text": "פצוע קל",
-                "light_injury_severity_count": 9,
-                "severe_injury_severity_text": "פצוע קשה",
-                "severe_injury_severity_count": 2,
-                "killed_injury_severity_text": "הרוג",
-                "killed_injury_severity_count": 1,
-            },
-            {
-                "year": 2012,
-                "light_injury_severity_text": "פצוע קל",
-                "light_injury_severity_count": 21,
-                "severe_injury_severity_text": "פצוע קשה",
-                "severe_injury_severity_count": 2,
-                "killed_injury_severity_text": "הרוג",
-                "killed_injury_severity_count": 4,
-            },
-            {
-                "year": 2013,
-                "light_injury_severity_text": "פצוע קל",
-                "light_injury_severity_count": 21,
-                "severe_injury_severity_text": "פצוע קשה",
-                "severe_injury_severity_count": 2,
-                "killed_injury_severity_text": "הרוג",
-                "killed_injury_severity_count": 4,
-            },
-            {
-                "year": 2014,
-                "light_injury_severity_text": "פצוע קל",
-                "light_injury_severity_count": 10,
-                "severe_injury_severity_text": "פצוע קשה",
-                "severe_injury_severity_count": 0,
-                "killed_injury_severity_text": "הרוג",
-                "killed_injury_severity_count": 1,
-            },
-            {
-                "year": 2015,
-                "light_injury_severity_text": "פצוע קל",
-                "light_injury_severity_count": 13,
-                "severe_injury_severity_text": "פצוע קשה",
-                "severe_injury_severity_count": 2,
-                "killed_injury_severity_text": "הרוג",
-                "killed_injury_severity_count": 0,
-            },
-        ]
+            logging.error(f"InjuredAccidentsWithPedestriansWidget.generate_items(): {e}")
+            raise Exception(e)
 
 
 @register

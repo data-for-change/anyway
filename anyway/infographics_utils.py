@@ -1124,10 +1124,10 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
 class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
     name: str = "injured_accidents_with_pedestrians"
 
-    def validate_parameters(self):
+    def validate_parameters(self, yishuv_name, street1_hebrew):
         # TODO: validate each parameter and display message accordingly
-        return self.request_params.location_info.get('yishuv_name') is not None and \
-            self.request_params.news_flash_obj.street1_hebrew is not None and  \
+        return yishuv_name is not None and \
+            street1_hebrew is not None and  \
             self.request_params.years_ago is not None
 
     def convert_to_dict(self, query_results):
@@ -1149,7 +1149,10 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
 
     def generate_items(self) -> None:
         try:
-            if not self.validate_parameters():
+            yishuv_name = self.request_params.location_info.get('yishuv_name')
+            street1_hebrew = self.request_params.location_info.get('street1_hebrew')
+
+            if not self.validate_parameters(yishuv_name, street1_hebrew):
                 logging.exception(f"Could not validate parameters for {NewsFlash} : {self.request_params.news_flash_obj.id}")
                 return None
 
@@ -1157,10 +1160,10 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
                 .with_entities(InvolvedMarkerView.accident_year,    \
                     InvolvedMarkerView.injury_severity, \
                     func.count().label('count'))  \
-                .filter(InvolvedMarkerView.accident_yishuv_name == self.request_params.location_info['yishuv_name'])\
+                .filter(InvolvedMarkerView.accident_yishuv_name == yishuv_name)\
                 .filter(InvolvedMarkerView.injury_severity.in_([InjurySeverity.KILLED.value, InjurySeverity.SEVERE_INJURED.value, InjurySeverity.LIGHT_INJURED.value]))   \
                 .filter(InvolvedMarkerView.injured_type == InjuredType.PEDESTRIAN.value)   \
-                .filter(or_(InvolvedMarkerView.street1_hebrew == self.request_params.news_flash_obj.street1_hebrew, InvolvedMarkerView.street2_hebrew == self.request_params.news_flash_obj.street1_hebrew))    \
+                .filter(or_(InvolvedMarkerView.street1_hebrew == street1_hebrew, InvolvedMarkerView.street2_hebrew == street1_hebrew))    \
                 .filter(and_(InvolvedMarkerView.accident_timestamp >= self.request_params.start_time, InvolvedMarkerView.accident_timestamp <= self.request_params.end_time)) \
                 .group_by(InvolvedMarkerView.accident_year, InvolvedMarkerView.injury_severity)
 

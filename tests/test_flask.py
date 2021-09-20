@@ -286,6 +286,23 @@ def test_get_current_user(app):
 
 def get_mock_current_user(get_current_user: mock.MagicMock) -> mock.MagicMock:
     ret_obj = mock.MagicMock()
+    ret_obj.serialize.side_effect = lambda: {
+        "id": USER_ID,
+        "user_register_date": None,
+        "email": USER_EMAIL,
+        "is_active": USER_ACTIVE,
+        "oauth_provider": OAUTH_PROVIDER,
+        "oauth_provider_user_name": None,
+        "oauth_provider_user_picture_url": None,
+        "first_name": FIRST_NAME,
+        "last_name": LAST_NAME,
+        "phone": None,
+        "user_type": None,
+        "user_url": None,
+        "user_desc": None,
+        "is_user_completed_registration": USER_COMPLETED,
+        "roles": [],
+    }
     ret_obj.id = USER_ID
     ret_obj.user_register_date = None
     ret_obj.email = USER_EMAIL
@@ -341,9 +358,7 @@ def user_add_or_remove_role(app: FlaskClient, path: str) -> None:
 def set_mock_and_test_perm(app, current_user, path):
     set_current_user_mock(current_user)
     rv = app.post(path, follow_redirects=True)
-    assert_return_code_for_user_update(
-        Errors.BR_MISSING_PERMISSION, rv
-    )
+    assert_return_code_for_user_update(Errors.BR_MISSING_PERMISSION, rv)
     role = mock.MagicMock()
     role.name = BE_CONST.Roles2Names.Admins.value
     current_user.return_value.roles = [role]

@@ -52,7 +52,12 @@ from anyway.clusters_calculator import retrieve_clusters
 from anyway.config import ENTRIES_PER_PAGE
 from anyway.backend_constants import BE_CONST
 from anyway.constants import CONST
-from anyway.user_functions import get_current_user_email, get_current_user, get_user_by_email
+from anyway.user_functions import (
+    get_current_user_email,
+    get_current_user,
+    get_user_by_email,
+    is_current_user_have_permission, role_id_to_role_obj,
+)
 from anyway.models import (
     AccidentMarker,
     DiscussionMarker,
@@ -76,6 +81,7 @@ from anyway.models import (
     Users,
     Roles,
     users_to_roles,
+    RolesToAPI,
 )
 from anyway.oauth import OAuthSignIn
 from anyway.infographics_utils import get_infographics_data, get_infographics_mock_data
@@ -1466,33 +1472,12 @@ def load_user(id: str) -> Users:
 def get_all_users_info() -> Response:
     if current_user.is_anonymous:
         return return_json_error(Es.BR_USER_NOT_LOGGED_IN)
-
-    admin_permission = Permission(RoleNeed(BE_CONST.Roles2Names.Admins.value))
-    if not admin_permission.can():
-        return return_json_error(Es.BR_MISSING_PERMISSION, BE_CONST.Roles2Names.Admins.value)
+    if not is_current_user_have_permission(db, request):
+        return return_json_error(Es.BR_MISSING_PERMISSION)
 
     dict_ret = []
-    for user_obj in db.session.query(Users).all():
-        roles = user_obj.roles
-        dict_ret.append(
-            {
-                "id": user_obj.id,
-                "user_register_date": user_obj.user_register_date,
-                "email": user_obj.email,
-                "is_active": user_obj.is_active,
-                "oauth_provider": user_obj.oauth_provider,
-                "oauth_provider_user_name": user_obj.oauth_provider_user_name,
-                "oauth_provider_user_picture_url": user_obj.oauth_provider_user_picture_url,
-                "first_name": user_obj.first_name,
-                "last_name": user_obj.last_name,
-                "phone": user_obj.phone,
-                "user_type": user_obj.user_type,
-                "user_url": user_obj.user_url,
-                "user_desc": user_obj.user_desc,
-                "is_user_completed_registration": user_obj.is_user_completed_registration,
-                "roles": [r.name for r in roles],
-            }
-        )
+    for user_obj in db.session.query(Users).order_by(Users.user_register_date).all():
+        dict_ret.append(user_obj.serialize())
     return jsonify(dict_ret)
 
 
@@ -1502,26 +1487,7 @@ def user_have_email() -> Response:
         return return_json_error(Es.BR_USER_NOT_LOGGED_IN)
 
     user_obj = get_current_user()
-    roles = user_obj.roles
-    return jsonify(
-        {
-            "id": user_obj.id,
-            "user_register_date": user_obj.user_register_date,
-            "email": user_obj.email,
-            "is_active": user_obj.is_active,
-            "oauth_provider": user_obj.oauth_provider,
-            "oauth_provider_user_name": user_obj.oauth_provider_user_name,
-            "oauth_provider_user_picture_url": user_obj.oauth_provider_user_picture_url,
-            "first_name": user_obj.first_name,
-            "last_name": user_obj.last_name,
-            "phone": user_obj.phone,
-            "user_type": user_obj.user_type,
-            "user_url": user_obj.user_url,
-            "user_desc": user_obj.user_desc,
-            "is_user_completed_registration": user_obj.is_user_completed_registration,
-            "roles": [r.name for r in roles],
-        }
-    )
+    return jsonify(user_obj.serialize())
 
 
 @app.route("/user/remove_from_role", methods=["POST"])
@@ -1534,15 +1500,14 @@ def add_to_role() -> Response:
     return change_user_roles("add")
 
 
-def check_admin_api_with_input(
+def look_for_errors_in_request_admin(
     request: Request, allowed_fields: typing.List[str]
 ) -> typing.Optional[Response]:
     if current_user.is_anonymous:
         return return_json_error(Es.BR_USER_NOT_LOGGED_IN)
 
-    admin_permission = Permission(RoleNeed(BE_CONST.Roles2Names.Admins.value))
-    if not admin_permission.can():
-        return return_json_error(Es.BR_MISSING_PERMISSION, BE_CONST.Roles2Names.Admins.value)
+    if not is_current_user_have_permission(db, request):
+        return return_json_error(Es.BR_MISSING_PERMISSION)
 
     # Validate input
     reg_dict = request.json
@@ -1560,7 +1525,7 @@ def change_user_roles(action: str) -> Response:
         "email",
     ]
 
-    res = check_admin_api_with_input(request, allowed_fields)
+    res = look_for_errors_in_request_admin(request, allowed_fields)
     if res:
         return res
     reg_dict = request.json
@@ -1627,7 +1592,7 @@ def admin_update_user() -> Response:
         "is_user_completed_registration",
     ]
 
-    res = check_admin_api_with_input(request, allowed_fields)
+    res = look_for_errors_in_request_admin(request, allowed_fields)
     if res:
         return res
     reg_dict = request.json
@@ -1730,7 +1695,6 @@ def user_update() -> Response:
     return Response(status=HTTPStatus.OK)
 
 
-
 def update_user_in_db(
     user: Users,
     first_name: str,
@@ -1760,7 +1724,7 @@ def user_disable() -> Response:
         "mode",
     ]
 
-    result = check_admin_api_with_input(request, allowed_fields)
+    result = look_for_errors_in_request_admin(request, allowed_fields)
     if result:
         return result
     reg_dict = request.json
@@ -1793,7 +1757,7 @@ def add_role() -> Response:
         "description",
     ]
 
-    res = check_admin_api_with_input(request, allowed_fields)
+    res = look_for_errors_in_request_admin(request, allowed_fields)
     if res:
         return res
     reg_dict = request.json
@@ -1845,14 +1809,38 @@ def get_roles_list() -> Response:
     if current_user.is_anonymous:
         return return_json_error(Es.BR_USER_NOT_LOGGED_IN)
 
-    admin_permission = Permission(RoleNeed(BE_CONST.Roles2Names.Admins.value))
-    if not admin_permission.can():
-        return return_json_error(Es.BR_MISSING_PERMISSION, BE_CONST.Roles2Names.Admins.value)
+    if not is_current_user_have_permission(db, request):
+        return return_json_error(Es.BR_MISSING_PERMISSION)
 
     roles_list = db.session.query(Roles).all()
     send_list = []
     for role in roles_list:
         send_list.append({"id": role.id, "name": role.name, "description": role.description})
+
+    return app.response_class(
+        response=json.dumps(send_list),
+        status=HTTPStatus.OK,
+        mimetype="application/json",
+    )
+
+
+@app.route("/admin/get_roles_to_api", methods=["GET"])
+def get_roles_to_api() -> Response:
+    if current_user.is_anonymous:
+        return return_json_error(Es.BR_USER_NOT_LOGGED_IN)
+
+    if not is_current_user_have_permission(db, request):
+        return return_json_error(Es.BR_MISSING_PERMISSION)
+
+    data_list = db.session.query(RolesToAPI).order_by(RolesToAPI.create_date).all()
+    send_list = []
+    for rta in data_list:
+        send_list.append(
+            {
+                "role_name": role_id_to_role_obj(db, rta.role_id).name,
+                "api_name": rta.api_name
+            }
+        )
 
     return app.response_class(
         response=json.dumps(send_list),

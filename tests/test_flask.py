@@ -342,7 +342,7 @@ def set_mock_and_test_perm(app, current_user, path):
     set_current_user_mock(current_user)
     rv = app.post(path, follow_redirects=True)
     assert_return_code_for_user_update(
-        Errors.BR_MISSING_PERMISSION, rv, BE_CONST.Roles2Names.Admins.value
+        Errors.BR_MISSING_PERMISSION, rv
     )
     role = mock.MagicMock()
     role.name = BE_CONST.Roles2Names.Admins.value

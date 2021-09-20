@@ -43,7 +43,7 @@ ERROR_TO_STRING_DICT = {
     Errors.BR_ROLE_NOT_EXIST: "Bad Request (Role {} doesn't exist in DB).",
     Errors.BR_USER_NOT_FOUND: "Bad Request (User(email:{}) not found).",
     Errors.BR_USER_ALREADY_IN_ROLE: "Bad Request (User(email:{}) is already in role {}).",
-    Errors.BR_MISSING_PERMISSION: "Bad Request (User is missing permission {}).",
+    Errors.BR_MISSING_PERMISSION: "Bad Request (User is missing permission to access this resource).",
     Errors.BR_USER_NOT_IN_ROLE: "Bad Request (User(email:{}) is not in role {}).",
     Errors.BR_USER_NOT_ACTIVE: "Bad Request (User is not active).",
     Errors.BR_BAD_ROLE_NAME: "Bad Request (Bad role name, need to be more then 2 char, less then 127 and only those chars - a-zA-Z0-9_-).",

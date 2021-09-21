@@ -38,7 +38,7 @@ ANYWAY’s next challenge is to form an automatic generator of infographics to e
 Relevant github repositories:
 - [Infographics FrontEnd](https://github.com/hasadna/anyway-newsflash-infographics)
 - [ANYWAY ETL Flows](https://github.com/hasadna/anyway-etl)
-Note: ANYWAY ETL Flows uses current repository code - however to update ANYWAY ETL with most updated anyway code, the change does need to be introduced in a release of anyway-etl.
+Note: ANYWAY ETL Flows uses current repository code - to update ANYWAY ETL with most updated anyway code, the change needs to be introduced in a release of anyway-etl.
 
 
 ### HASADNA

@@ -9,7 +9,7 @@ Create Date: 2021-09-22 13:51:15.237803
 # revision identifiers, used by Alembic.
 import datetime
 
-from sqlalchemy import orm
+from sqlalchemy import orm, text
 
 revision = '34b8f4307555'
 down_revision = '0b877ab8221c'

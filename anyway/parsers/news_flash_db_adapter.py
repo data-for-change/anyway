@@ -24,24 +24,33 @@ class DBAdapter:
     def commit(self, *args, **kwargs):
         return self.db.session.commit(*args, **kwargs)
 
+    def recreate_table_for_location_extraction(self):
+        with self.db.session.begin():
+            self.db.session.execute("""TRUNCATE cbs_locations""")
+            self.db.session.execute("""INSERT INTO cbs_locations
+                    (SELECT ROW_NUMBER() OVER (ORDER BY road1) as id, LOCATIONS.*
+                    FROM 
+                    (SELECT DISTINCT road1,
+                        road2,
+                        non_urban_intersection_hebrew,
+                        yishuv_name,
+                        street1_hebrew,
+                        street2_hebrew,
+                        district_hebrew,
+                        region_hebrew,
+                        road_segment_name,
+                        longitude,
+                        latitude
+                    FROM markers_hebrew
+                    WHERE (provider_code=1
+                           OR provider_code=3)
+                      AND (longitude is not null
+                           AND latitude is not null)) LOCATIONS)"""
+            )
+
     def get_markers_for_location_extraction(self):
         query_res = self.execute(
-            """SELECT DISTINCT road1,
-                    road2,
-                    non_urban_intersection_hebrew,
-                    yishuv_name,
-                    street1_hebrew,
-                    street2_hebrew,
-                    district_hebrew,
-                    region_hebrew,
-                    road_segment_name,
-                    longitude,
-                    latitude
-                FROM markers_hebrew
-                WHERE (provider_code=1
-                       OR provider_code=3)
-                  AND (longitude is not null
-                       AND latitude is not null)"""
+            """SELECT * FROM cbs_locations"""
         )
         df = pd.DataFrame(query_res.fetchall())
         df.columns = query_res.keys()

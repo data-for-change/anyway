@@ -8,8 +8,10 @@ from collections import namedtuple
 try:
     from flask_login import UserMixin
 except ModuleNotFoundError:
-    class UserMixin():
+
+    class UserMixin:
         pass
+
 
 from geoalchemy2 import Geometry
 from sqlalchemy import (
@@ -2375,5 +2377,21 @@ class SchoolWithDescription2020(Base):
     geom = Column(Geometry("POINT", srid=4326), index=True)
     x = Column(Float(), nullable=True)
     y = Column(Float(), nullable=True)
+    longitude = Column(Float(), nullable=True)
+    latitude = Column(Float(), nullable=True)
+
+
+class CBSLocations(Base):
+    __tablename__ = "cbs_locations"
+    id = Column(Integer(), primary_key=True)
+    road1 = Column(Integer(), nullable=True)
+    road2 = Column(Integer(), nullable=True)
+    non_urban_intersection_hebrew = Column(Text(), nullable=True)
+    yishuv_name = Column(Text(), nullable=True)
+    street1_hebrew = Column(Text(), nullable=True)
+    street2_hebrew = Column(Text(), nullable=True)
+    district_hebrew = Column(Text(), nullable=True)
+    region_hebrew = Column(Text(), nullable=True)
+    road_segment_name = Column(Text(), nullable=True)
     longitude = Column(Float(), nullable=True)
     latitude = Column(Float(), nullable=True)

@@ -1,14 +1,14 @@
 """add cbs_locations table
 
 Revision ID: 312c9eb92e40
-Revises: bd67c88713b8
+Revises: d2dfd0ce5a7e
 Create Date: 2021-08-20 15:46:37.063756
 
 """
 
 # revision identifiers, used by Alembic.
 revision = '312c9eb92e40'
-down_revision = 'bd67c88713b8'
+down_revision = 'd2dfd0ce5a7e'
 branch_labels = None
 depends_on = None
 

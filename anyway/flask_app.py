@@ -1428,9 +1428,28 @@ def gps_to_cbs_location():
     location = extract_geo_features_from_geo_location(db, latitude, longitude)
     if not location:
         logging.info("location not exist")
-    logging.info(location)
+    #logging.info(location)
+    if "road1" in location and "road_segment_name" in location:
+        location["resolution"] = "interurban_road_segment"
+        json_data = json.dumps(location, default=str)
+        return Response(json_data, mimetype="application/json")
+    if "yishuv_name" in location and "street1_hebrew" in location:
+        location["resolution"] = "street"
+        json_data = json.dumps(location, default=str)
+        return Response(json_data, mimetype="application/json")
     return abort(http_client.NOT_FOUND)
 
+@api.route("/api/infographics-data-by-location", methods=["GET"])
+class InfographicsDataByLocation(Resource):
+    @api.doc("get infographics data")
+    @api.expect(parser)
+    def get(self):
+        return infographics_data_by_location()
+
+def infographics_data_by_location():
+    output = get_infographics_mock_data()
+    json_data = json.dumps(output, default=str)
+    return Response(json_data, mimetype="application/json")
 
 def widgets_personalisation_for_user(raw_info: typing.Dict) -> typing.Dict:
     if current_user.is_anonymous:

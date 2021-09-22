@@ -142,7 +142,7 @@ def reverse_geocode_extract(latitude, longitude):
     except Exception as _:
         logging.info('exception in gmaps')
         return None
-    logging.info(geocode_result)
+    #logging.info(geocode_result)
     response = geocode_result[0]
     geom = response["geometry"]["location"]
     for item in response["address_components"]:

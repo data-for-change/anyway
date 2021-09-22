@@ -1,18 +1,18 @@
 """create roles_to_api table
 
-Revision ID: 592fab210488
-Revises: bc10fd684e42
-Create Date: 2021-09-18 15:45:56.555520
+Revision ID: 34b8f4307555
+Revises: 0b877ab8221c
+Create Date: 2021-09-22 13:51:15.237803
 
 """
 
 # revision identifiers, used by Alembic.
 import datetime
 
-from sqlalchemy import text, orm
+from sqlalchemy import orm, text
 
-revision = "592fab210488"
-down_revision = "bc10fd684e42"
+revision = '34b8f4307555'
+down_revision = '0b877ab8221c'
 branch_labels = None
 depends_on = None
 

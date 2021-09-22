@@ -1,14 +1,14 @@
 """remove work_on_behalf_of_organization from Users table
 
-Revision ID: bc10fd684e42
-Revises: ef627578319a
-Create Date: 2021-08-31 19:24:43.751675
+Revision ID: 0b877ab8221c
+Revises: d2dfd0ce5a7e
+Create Date: 2021-09-22 13:50:55.411517
 
 """
 
 # revision identifiers, used by Alembic.
-revision = "bc10fd684e42"
-down_revision = "ef627578319a"
+revision = '0b877ab8221c'
+down_revision = 'd2dfd0ce5a7e'
 branch_labels = None
 depends_on = None
 

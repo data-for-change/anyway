@@ -18,6 +18,13 @@ When working on all processes - Pay attention to
 - Documentation: Add/Improve Documentation
 - Tests: Add/improve existing tests
 
+
+Additional Repositories
+------------------------------------------------
+ANYWAY ETL Flows](https://github.com/hasadna/anyway-etl)
+Note: ANYWAY ETL Flows uses current repository code - to update ANYWAY ETL with most updated anyway code, the change needs to be introduced in a release of anyway-etl.
+
+
 Previous Work Done
 ------------------
 [ANYWAY Architecture 2.0](https://www.dropbox.com/scl/fi/437sduau2rxifuowxvpa4/_-Anyway-2.0-Architecture.paper?dl=0&rlkey=nhi13ne9nhf9r56eexorse6i2)

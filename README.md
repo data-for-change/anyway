@@ -35,6 +35,10 @@ At the beginning of one of the school years we created a report of pedestrian [a
 ### ANYWAY’s Infographics Generator - Our Next Challenge
 
 ANYWAY’s next challenge is to form an automatic generator of infographics to empower and serve journalists, bloggers, public opinion leaders, community leaders etc. in the era of **data journalism**. The generated infographics will enhance reporting and news writing with the use of **statistics**. Each infographic will be created for a real-time road accident related **news flash** and will provide a deeper insight into the story based on historical data. This, we believe, will increase both the quantity and quality of articles dealing with road accidents, and will result in raising public awareness and creating pressure on decision makers to initiate infrastructure improvements in light of **Vision Zero**.
+Relevant github repositories:
+- [Infographics FrontEnd](https://github.com/hasadna/anyway-newsflash-infographics)
+- [ANYWAY ETL Flows](https://github.com/hasadna/anyway-etl)
+Note: ANYWAY ETL Flows uses current repository code - to update ANYWAY ETL with most updated anyway code, the change needs to be introduced in a release of anyway-etl.
 
 
 ### HASADNA
@@ -79,6 +83,7 @@ We are using DOCKER. See [DOCKER](docs/DOCKER.md)
 ## Testing
 ### Pylint
 To run pylint tests: `pylint -j $(nproc) anyway tests && pytest -m "not browser" ./tests`
+
 ### Black
 To format the code using black: `black anyway/**/*.py -l 100 anyway` should be executed from the root directory.
 Alternatively, one can execute `docker run -v $(pwd):/code jbbarth/black anyway -l 100` to run the command with docker.

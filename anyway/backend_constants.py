@@ -1,6 +1,9 @@
 from enum import Enum
 from typing import List, Iterable
-from flask_babel import _
+try:
+    from flask_babel import _
+except ImportError:
+    pass
 # noinspection PyProtectedMember
 
 
@@ -72,6 +75,22 @@ class BackEndConstants(object):
         ResolutionCategories.SUBURBAN_ROAD,
     ]
 
+    class Source(Enum):
+        @classmethod
+        def _missing_(cls, value):
+            for member in cls:
+                if member.value == value.lower():
+                    return member
+        YNET = "ynet"
+        WALLA = "walla"
+        TWITTER = "twitter"
+
+    SUPPORTED_SOURCES: List[Source] = [
+        Source.YNET,
+        Source.WALLA,
+        Source.TWITTER,
+    ]
+
     # If in the future there will be a number of organizations or a need for a dynamic setting change, move this
     # data to a table in the DB.
     OR_YAROK_WIDGETS = [
@@ -118,9 +137,13 @@ class InjurySeverity(LabeledCode):
         }
 
 
-_("killed")
-_("severe injured")
-_("light injured")
+try:
+    _("killed")
+    _("severe injured")
+    _("light injured")
+except NameError:
+    pass
+
 
 # This is a type for the 'accident_severity' table field name
 class AccidentSeverity(LabeledCode):
@@ -194,4 +217,29 @@ class DriverType(LabeledCode):
             DriverType.PROFESSIONAL_DRIVER: "professional_driver",
             DriverType.PRIVATE_VEHICLE_DRIVER: "private_vehicle_driver",
             DriverType.OTHER_DRIVER: "other_driver",
+        }
+
+class InjuredType(LabeledCode):
+    PEDESTRIAN = 1
+    DRIVER_FOUR_WHEELS_AND_ABOVE = 2
+    PASSENGER_FOUR_WHEELS_AND_ABOVE = 3
+    DRIVER_MOTORCYCLE = 4
+    PASSENGER_MOTORCYCLE = 5
+    DRIVER_BICYCLE = 6
+    PASSENGER_BICYCLE = 7
+    DRIVER_UNKNOWN_VEHICLE = 8
+    PASSENGER_UNKNOWN_VEHICLE = 9
+
+    @classmethod
+    def labels(cls):
+        return {
+            InjuredType.PEDESTRIAN:"Pedestrian",
+            InjuredType.DRIVER_FOUR_WHEELS_AND_ABOVE: "Driver of a vehicle with 4 wheel or more",
+            InjuredType.PASSENGER_FOUR_WHEELS_AND_ABOVE: "Passenger of a vehicle with 4 wheel or more",
+            InjuredType.DRIVER_MOTORCYCLE: "Motorcycle driver",
+            InjuredType.PASSENGER_MOTORCYCLE: "Motorcycle passenger",
+            InjuredType.DRIVER_BICYCLE: "Bicycle driver",
+            InjuredType.PASSENGER_BICYCLE: "Bicycle passenger",
+            InjuredType.DRIVER_UNKNOWN_VEHICLE: "Driver of an unknown vehicle",
+            InjuredType.PASSENGER_UNKNOWN_VEHICLE: "Passenger of an unknown vehicle"
         }

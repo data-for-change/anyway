@@ -1416,6 +1416,7 @@ class GPSToLocation(Resource):
     def get(self):
         return gps_to_cbs_location()
 
+
 def gps_to_cbs_location():
     longitude = request.values.get("longitude")
     latitude = request.values.get("latitude")
@@ -1424,11 +1425,12 @@ def gps_to_cbs_location():
         return abort(http_client.BAD_REQUEST)
     from anyway.parsers.news_flash_db_adapter import init_db
     from anyway.parsers.location_extraction import extract_geo_features_from_geo_location
+
     db = init_db()
     location = extract_geo_features_from_geo_location(db, latitude, longitude)
     if not location:
         logging.info("location not exist")
-    #logging.info(location)
+    # logging.info(location)
     if "road1" in location and "road_segment_name" in location:
         location["resolution"] = "interurban_road_segment"
         json_data = json.dumps(location, default=str)
@@ -1439,6 +1441,7 @@ def gps_to_cbs_location():
         return Response(json_data, mimetype="application/json")
     return abort(http_client.NOT_FOUND)
 
+
 @api.route("/api/infographics-data-by-location", methods=["GET"])
 class InfographicsDataByLocation(Resource):
     @api.doc("get infographics data")
@@ -1446,10 +1449,12 @@ class InfographicsDataByLocation(Resource):
     def get(self):
         return infographics_data_by_location()
 
+
 def infographics_data_by_location():
     output = get_infographics_mock_data()
     json_data = json.dumps(output, default=str)
     return Response(json_data, mimetype="application/json")
+
 
 def widgets_personalisation_for_user(raw_info: typing.Dict) -> typing.Dict:
     if current_user.is_anonymous:

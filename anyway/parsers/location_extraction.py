@@ -140,9 +140,9 @@ def reverse_geocode_extract(latitude, longitude):
         if not geocode_result:
             return None
     except Exception as _:
-        logging.info('exception in gmaps')
+        logging.info("exception in gmaps")
         return None
-    #logging.info(geocode_result)
+    # logging.info(geocode_result)
     response = geocode_result[0]
     geom = response["geometry"]["location"]
     for item in response["address_components"]:
@@ -380,6 +380,7 @@ def extract_geo_features(db, newsflash: NewsFlash) -> None:
         for k, v in location_from_db.items():
             setattr(newsflash, k, v)
 
+
 def extract_geo_features_from_geo_location(db, latitude, longitude) -> dict:
     geo_location = reverse_geocode_extract(latitude, longitude)
     if geo_location is not None:
@@ -390,6 +391,7 @@ def extract_geo_features_from_geo_location(db, latitude, longitude) -> dict:
             db, lat, lon, resolution, geo_location["road_no"]
         )
         return location_from_db
+
 
 def get_candidate_location_strings(location_string):
     """

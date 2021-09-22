@@ -27,7 +27,7 @@ class DBAdapter:
     def recreate_table_for_location_extraction(self):
         with self.db.session.begin():
             self.db.session.execute("""TRUNCATE cbs_locations""")
-            self.db.session.execute("""INSERT INTO cbs_locations 
+            self.db.session.execute("""INSERT INTO cbs_locations
                     (SELECT ROW_NUMBER() OVER (ORDER BY road1) as id, LOCATIONS.*
                     FROM 
                     (SELECT DISTINCT road1,

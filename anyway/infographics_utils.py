@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import time
 import logging
 import datetime
 import json
@@ -1852,12 +1853,13 @@ def create_infographics_data(news_flash_id, number_of_years_ago, lang: str) -> s
     return json.dumps(output, default=str)
 
 
-# def create_infographics_data_1(request_params: RequestParams) -> str:
-#     output = create_infographics_items(request_params)
-#     return json.dumps(output, default=str)
-
-
 def create_infographics_items(request_params: RequestParams) -> Dict:
+    def get_dates_comment():
+        return {
+            "dates": [request_params.start_time.year, request_params.end_time.year],
+            "last_update": time.mktime(request_params.end_time.timetuple())
+        }
+
     try:
         if request_params is None:
             return {}
@@ -1876,13 +1878,7 @@ def create_infographics_items(request_params: RequestParams) -> Dict:
             "location_text": request_params.location_text,
         }
         output["widgets"] = []
-        output["meta"]["dates_comment"] = (
-            str(request_params.start_time.year)
-            + "-"
-            + str(request_params.end_time.year)
-            + ", עדכון אחרון: "
-            + str(request_params.end_time)
-        )
+        output["meta"]["dates_comment"] = get_dates_comment()
         widgets: List[Widget] = generate_widgets(request_params=request_params, to_cache=True)
         widgets.extend(generate_widgets(request_params=request_params, to_cache=False))
         output["widgets"].extend(list(map(lambda w: w.serialize(), widgets)))

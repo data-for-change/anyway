@@ -1856,7 +1856,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago, lang: str) -> s
 def create_infographics_items(request_params: RequestParams) -> Dict:
     def get_dates_comment():
         return {
-            "dates": [request_params.start_time.year, request_params.end_time.year],
+            "date_range": [request_params.start_time.year, request_params.end_time.year],
             "last_update": time.mktime(request_params.end_time.timetuple())
         }
 

@@ -1876,9 +1876,9 @@ def create_infographics_items(request_params: RequestParams) -> Dict:
         output["meta"] = {
             "location_info": request_params.location_info.copy(),
             "location_text": request_params.location_text,
+            "dates_comment": get_dates_comment()
         }
         output["widgets"] = []
-        output["meta"]["dates_comment"] = get_dates_comment()
         widgets: List[Widget] = generate_widgets(request_params=request_params, to_cache=True)
         widgets.extend(generate_widgets(request_params=request_params, to_cache=False))
         output["widgets"].extend(list(map(lambda w: w.serialize(), widgets)))

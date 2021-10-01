@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
-from typing import Dict
+from typing import Dict, List
 from sqlalchemy import not_
 from anyway.models import InfographicsDataCache, InfographicsDataCacheTemp, NewsFlash
 from anyway.constants import CONST
@@ -146,6 +146,23 @@ def get_cache_info():
     return f"num items in cache: {cache_items}, temp table: {tmp_items}, accident flashes:{num_acc_flash_items}, flashes processed:{num_acc_suburban_flash_items}"
 
 
+def get_flash_ids(count: int) -> List[int]:
+    for nfid in db.session.query(NewsFlash). \
+        filter(NewsFlash.accident). \
+        filter(NewsFlash.resolution.in_(["כביש בינעירוני"])). \
+        filter(not_(NewsFlash.road_segment_name == None)). \
+        with_entities(NewsFlash.id). \
+        limit(count):
+        yield nfid[0]
+
+
+def widget_performance(count: int):
+    for nfid in get_flash_ids(2):
+        logging.debug(f'nfid:{nfid}')
+
+
+
+
 def main(update, info):
     if update:
         logging.info("Refreshing infographics cache...")
@@ -156,3 +173,23 @@ def main(update, info):
         logging.info(get_cache_info())
     else:
         logging.debug(f"{info}")
+        from anyway.infographics_utils import Widget, widgets_dict, RequestParams, get_request_params, create_infographics_data, widget_calc_times
+        widget_names = ['top_road_segments_accidents_per_km',
+                        'motorcycle_accidents_vs_all_accidents',
+                        'accident_count_pedestrians_per_vehicle_street_vs_all',
+                        'injured_accidents_with_pedestrians',
+                        'vehicle_accident_vs_all_accidents']
+        for nfid in get_flash_ids(2):
+            logging.debug(f'news flash:{nfid}\t\t----------------------')
+            res = create_infographics_data(nfid, 8, 'en')
+            logging.debug(f'{type(res)}\n')
+        with open('widget-times', 'w') as file:
+            for k, v in widget_calc_times.items():
+                file.write(f'{k}:{str(v)}\n')
+            # request_params: RequestParams = get_request_params(nfid, 8, 'en')
+            # logging.getLogger('sqlalchemy').setLevel(logging.DEBUG)
+            # logging.getLogger('flask_sqlalchemy').setLevel(logging.DEBUG)
+            # for n in widget_names:
+            #     w: Widget = widgets_dict[n]
+            #     widget = w(request_params)
+            #     logging.debug(f'{widget.name}:{widget.serialize()["meta"]}')

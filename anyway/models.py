@@ -1841,6 +1841,212 @@ class AccidentMarkerView(Base):
         }
 
 
+class AccidentMarkerViewSmall(Base):
+    __tablename__ = "markers_hebrew_small"
+    id = Column(BigInteger(), primary_key=True)
+    # provider_and_id = Column(BigInteger())
+    provider_code = Column(Integer(), primary_key=True)
+    # provider_code_hebrew = Column(Text())
+    # file_type_police = Column(Integer())
+    accident_type = Column(Integer(), index=True)
+    # accident_type_hebrew = Column(Text(), index=True)
+    accident_severity = Column(Integer(), index=True)
+    # accident_severity_hebrew = Column(Text(), index=True)
+    accident_timestamp = Column(DateTime, default=None, index=True)
+    location_accuracy = Column(Integer())
+    # location_accuracy_hebrew = Column(Text())
+    road_type = Column(Integer())
+    # road_type_hebrew = Column(Text())
+    # road_shape = Column(Integer())
+    # road_shape_hebrew = Column(Text())
+    # day_type = Column(Integer())
+    # day_type_hebrew = Column(Text())
+    # police_unit = Column(Integer())
+    # police_unit_hebrew = Column(Text())
+    # one_lane = Column(Integer())
+    # one_lane_hebrew = Column(Text())
+    # multi_lane = Column(Integer())
+    # multi_lane_hebrew = Column(Text())
+    # speed_limit = Column(Integer())
+    # speed_limit_hebrew = Column(Text())
+    # road_intactness = Column(Integer())
+    # road_intactness_hebrew = Column(Text())
+    # road_width = Column(Integer())
+    # road_width_hebrew = Column(Text())
+    # road_sign = Column(Integer())
+    # road_sign_hebrew = Column(Text())
+    road_light = Column(Integer())
+    # road_light_hebrew = Column(Text())
+    # road_control = Column(Integer())
+    # road_control_hebrew = Column(Text())
+    # weather = Column(Integer())
+    # weather_hebrew = Column(Text())
+    # road_surface = Column(Integer())
+    # road_surface_hebrew = Column(Text())
+    # road_object = Column(Integer())
+    # road_object_hebrew = Column(Text())
+    # object_distance = Column(Integer())
+    # object_distance_hebrew = Column(Text())
+    # didnt_cross = Column(Integer())
+    # didnt_cross_hebrew = Column(Text())
+    # cross_mode = Column(Integer())
+    # cross_mode_hebrew = Column(Text())
+    # cross_location = Column(Integer())
+    # cross_location_hebrew = Column(Text())
+    # cross_direction = Column(Integer())
+    # cross_direction_hebrew = Column(Text())
+    road1 = Column(Integer(), index=True)
+    road2 = Column(Integer(), index=True)
+    # km = Column(Float())
+    # km_raw = Column(Text())
+    # km_accurate = Column(Boolean())
+    road_segment_id = Column(Integer(), index=True)
+    road_segment_number = Column(Integer(), index=True)
+    # road_segment_name = Column(Text(), index=True)
+    # road_segment_from_km = Column(Float())
+    # road_segment_to_km = Column(Float())
+    # road_segment_length_km = Column(Float())
+    yishuv_symbol = Column(Integer())
+    # yishuv_name = Column(Text(), index=True)
+    geo_area = Column(Integer())
+    # geo_area_hebrew = Column(Text())
+    day_night = Column(Integer())
+    # day_night_hebrew = Column(Text())
+    # day_in_week = Column(Integer())
+    # day_in_week_hebrew = Column(Text())
+    # traffic_light = Column(Integer())
+    # traffic_light_hebrew = Column(Text())
+    region = Column(Integer())
+    # region_hebrew = Column(Text())
+    district = Column(Integer())
+    # district_hebrew = Column(Text())
+    # natural_area = Column(Integer())
+    # natural_area_hebrew = Column(Text())
+    # municipal_status = Column(Integer())
+    # municipal_status_hebrew = Column(Text())
+    # yishuv_shape = Column(Integer())
+    # yishuv_shape_hebrew = Column(Text())
+    street1 = Column(Integer())
+    # street1_hebrew = Column(Text(), index=True)
+    street2 = Column(Integer())
+    # street2_hebrew = Column(Text(), index=True)
+    # house_number = Column(Integer())
+    non_urban_intersection = Column(Integer())
+    # non_urban_intersection_hebrew = Column(Text())
+    non_urban_intersection_by_junction_number = Column(Text())
+    urban_intersection = Column(Integer())
+    accident_year = Column(Integer(), primary_key=True, index=True)
+    # accident_month = Column(Integer())
+    # accident_day = Column(Integer())
+    # accident_hour_raw = Column(Integer())
+    # accident_hour_raw_hebrew = Column(Text())
+    # accident_hour = Column(Integer())
+    # accident_minute = Column(Integer())
+    # geom = Column(Geometry("POINT"), index=True)
+    # latitude = Column(Float())
+    # longitude = Column(Float())
+    # x = Column(Float())
+    # y = Column(Float())
+
+    def serialize(self):
+        return {
+            "id": self.id,
+
+            "provider_code": self.provider_code,
+            # "provider_code_hebrew": self.provider_code_hebrew,
+
+            "accident_type": self.accident_type,
+            # "accident_type_hebrew": self.accident_type_hebrew,
+            "accident_severity": self.accident_severity,
+            # "accident_severity_hebrew": self.accident_severity_hebrew,
+
+            "location_accuracy": self.location_accuracy,
+            # "location_accuracy_hebrew": self.location_accuracy_hebrew,
+            "road_type": self.road_type,
+            # "road_type_hebrew": self.road_type_hebrew,
+            # "road_shape": self.road_shape,
+            # "road_shape_hebrew": self.road_shape_hebrew,
+            # "day_type": self.day_type,
+            # "day_type_hebrew": self.day_type_hebrew,
+            # "police_unit": self.police_unit,
+            # "police_unit_hebrew": self.police_unit_hebrew,
+            # "one_lane": self.one_lane,
+            # "one_lane_hebrew": self.one_lane_hebrew,
+            # "multi_lane": self.multi_lane,
+            # "multi_lane_hebrew": self.multi_lane_hebrew,
+            # "speed_limit": self.speed_limit,
+            # "speed_limit_hebrew": self.speed_limit_hebrew,
+            # "road_intactness": self.road_intactness,
+            # "road_intactness_hebrew": self.road_intactness_hebrew,
+            # "road_width": self.road_width,
+            # "road_width_hebrew": self.road_width_hebrew,
+            # "road_sign": self.road_sign,
+            # "road_sign_hebrew": self.road_sign_hebrew,
+            "road_light": self.road_light,
+            # "road_light_hebrew": self.road_light_hebrew,
+            # "road_control": self.road_control,
+            # "road_control_hebrew": self.road_control_hebrew,
+            # "weather": self.weather,
+            # "weather_hebrew": self.weather_hebrew,
+            # "road_surface": self.road_surface,
+            # "road_surface_hebrew": self.road_surface_hebrew,
+            # "road_object": self.road_object,
+            # "road_object_hebrew": self.road_object_hebrew,
+            # "object_distance": self.object_distance,
+            # "object_distance_hebrew": self.object_distance_hebrew,
+            # "didnt_cross": self.didnt_cross,
+            # "didnt_cross_hebrew": self.didnt_cross_hebrew,
+            # "cross_mode": self.cross_mode,
+            # "cross_mode_hebrew": self.cross_mode_hebrew,
+            # "cross_location": self.cross_location,
+            # "cross_location_hebrew": self.cross_location_hebrew,
+            # "cross_direction": self.cross_direction,
+            # "cross_direction_hebrew": self.cross_direction_hebrew,
+            "road1": self.road1,
+            "road2": self.road2,
+            # "km": self.km,
+            # "km_raw": self.km_raw,
+            # "km_accurate": self.km_accurate,
+            "yishuv_symbol": self.km_accurate,
+            # "yishuv_name": self.yishuv_name,
+            # "geo_area": self.geo_area,
+            # "geo_area_hebrew": self.geo_area_hebrew,
+            # "day_night": self.day_night,
+            # "day_night_hebrew": self.day_night_hebrew,
+            # "day_in_week": self.day_in_week,
+            # "day_in_week_hebrew": self.day_in_week_hebrew,
+            # "traffic_light": self.traffic_light,
+            # "traffic_light_hebrew": self.traffic_light_hebrew,
+            "region": self.region,
+            # "region_hebrew": self.region_hebrew,
+            "district": self.district,
+            # "district_hebrew": self.district_hebrew,
+            # "natural_area": self.natural_area,
+            # "natural_area_hebrew": self.natural_area_hebrew,
+            # "municipal_status": self.municipal_status,
+            # "municipal_status_hebrew": self.municipal_status_hebrew,
+            # "yishuv_shape": self.yishuv_shape,
+            # "yishuv_shape_hebrew": self.yishuv_shape_hebrew,
+            "street1": self.street1,
+            # "street1_hebrew": self.street1_hebrew,
+            "street2": self.street2,
+            # "street2_hebrew": self.street2_hebrew,
+            # "non_urban_intersection_hebrew": self.non_urban_intersection_hebrew,
+            "accident_year": self.accident_year,
+            # "accident_month": self.accident_month,
+            # "accident_day": self.accident_day,
+            # "accident_hour_raw": self.accident_hour_raw,
+            # "accident_hour_raw_hebrew": self.accident_hour_raw_hebrew,
+            # "accident_hour": self.accident_hour,
+            # "accident_minute": self.accident_minute,
+            # "geom": self.geom,
+            # "latitude": self.latitude,
+            # "longitude": self.longitude,
+            # "x": self.x,
+            # "y": self.y,
+        }
+
+
 class RoadSegments(Base):
     __tablename__ = "road_segments"
     id = Column(Integer(), primary_key=True)
@@ -2040,6 +2246,171 @@ class InvolvedMarkerView(Base):
     vehicle_vehicle_type_hebrew = Column(Text())
     vehicle_damage = Column(Integer())
     vehicle_damage_hebrew = Column(Text())
+
+
+class InvolvedMarkerViewSmall(Base):
+    __tablename__ = "involved_markers_hebrew_small"
+    accident_id = Column(BigInteger(), primary_key=True)
+    provider_and_id = Column(BigInteger())
+    provider_code = Column(Integer(), primary_key=True)
+    # file_type_police = Column(Integer())
+    involved_type = Column(Integer(), index=True)
+    # involved_type_hebrew = Column(Text(), index=True)
+    # license_acquiring_date = Column(Integer())
+    # age_group = Column(Integer())
+    # age_group_hebrew = Column(Text())
+    # sex = Column(Integer())
+    # sex_hebrew = Column(Text())
+    involve_vehicle_type = Column(Integer(), index=True)
+    # involve_vehicle_type_hebrew = Column(Text(), index=True)
+    # safety_measures = Column(Integer())
+    # safety_measures_hebrew = Column(Text())
+    involve_yishuv_symbol = Column(Integer())
+    # involve_yishuv_name = Column(Text())
+    injury_severity = Column(Integer())
+    # injury_severity_hebrew = Column(Text())
+    injured_type = Column(Integer())
+    # injured_type_hebrew = Column(Text())
+    # injured_position = Column(Integer())
+    # injured_position_hebrew = Column(Text())
+    # population_type = Column(Integer())
+    # population_type_hebrew = Column(Text())
+    # involve_home_region = Column(Integer())
+    # involve_home_region_hebrew = Column(Text())
+    # involve_home_district = Column(Integer())
+    # involve_home_district_hebrew = Column(Text())
+    # involve_home_natural_area = Column(Integer())
+    # involve_home_natural_area_hebrew = Column(Text())
+    # involve_home_municipal_status = Column(Integer())
+    # involve_home_municipal_status_hebrew = Column(Text())
+    # involve_home_yishuv_shape = Column(Integer())
+    # involve_home_yishuv_shape_hebrew = Column(Text())
+    # hospital_time = Column(Integer())
+    # hospital_time_hebrew = Column(Text())
+    # medical_type = Column(Integer())
+    # medical_type_hebrew = Column(Text())
+    # release_dest = Column(Integer())
+    # release_dest_hebrew = Column(Text())
+    # safety_measures_use = Column(Integer())
+    # safety_measures_use_hebrew = Column(Text())
+    # late_deceased = Column(Integer())
+    # late_deceased_hebrew = Column(Text())
+    # car_id = Column(Integer())
+    involve_id = Column(Integer(), primary_key=True)
+    accident_year = Column(Integer(), index=True, primary_key=True)
+    # accident_month = Column(Integer())
+    # provider_code_hebrew = Column(Text())
+    accident_timestamp = Column(DateTime, default=None, index=True)
+    accident_type = Column(Integer())
+    # accident_type_hebrew = Column(Text())
+    accident_severity = Column(Integer(), index=True)
+    # accident_severity_hebrew = Column(Text(), index=True)
+    location_accuracy = Column(Integer())
+    # location_accuracy_hebrew = Column(Text())
+    road_type = Column(Integer(), index=True)
+    # road_type_hebrew = Column(Text(), index=True)
+    # road_shape = Column(Integer())
+    # road_shape_hebrew = Column(Text())
+    # day_type = Column(Integer())
+    # day_type_hebrew = Column(Text())
+    # police_unit = Column(Integer())
+    # police_unit_hebrew = Column(Text())
+    # one_lane = Column(Integer())
+    # one_lane_hebrew = Column(Text())
+    # multi_lane = Column(Integer())
+    # multi_lane_hebrew = Column(Text())
+    # speed_limit = Column(Integer())
+    # speed_limit_hebrew = Column(Text())
+    # road_intactness = Column(Integer())
+    # road_intactness_hebrew = Column(Text())
+    # road_width = Column(Integer())
+    # road_width_hebrew = Column(Text())
+    # road_sign = Column(Integer())
+    # road_sign_hebrew = Column(Text())
+    road_light = Column(Integer())
+    # road_light_hebrew = Column(Text())
+    # road_control = Column(Integer())
+    # road_control_hebrew = Column(Text())
+    # weather = Column(Integer())
+    # weather_hebrew = Column(Text())
+    # road_surface = Column(Integer())
+    # road_surface_hebrew = Column(Text())
+    # road_object = Column(Integer())
+    # road_object_hebrew = Column(Text())
+    # object_distance = Column(Integer())
+    # object_distance_hebrew = Column(Text())
+    # didnt_cross = Column(Integer())
+    # didnt_cross_hebrew = Column(Text())
+    # cross_mode = Column(Integer())
+    # cross_mode_hebrew = Column(Text())
+    # cross_location = Column(Integer())
+    # cross_location_hebrew = Column(Text())
+    # cross_direction = Column(Integer())
+    # cross_direction_hebrew = Column(Text())
+    road1 = Column(Integer(), index=True)
+    road2 = Column(Integer(), index=True)
+    # km = Column(Float())
+    # km_raw = Column(Text())
+    # km_accurate = Column(Boolean())
+    road_segment_id = Column(Integer(), index=True)
+    # road_segment_number = Column(Integer(), index=True)
+    # road_segment_name = Column(Text(), index=True)
+    # road_segment_from_km = Column(Float())
+    # road_segment_to_km = Column(Float())
+    # road_segment_length_km = Column(Float())
+    accident_yishuv_symbol = Column(Integer())
+    # accident_yishuv_name = Column(Text(), index=True)
+    # geo_area = Column(Integer())
+    # geo_area_hebrew = Column(Text())
+    day_night = Column(Integer())
+    # day_night_hebrew = Column(Text())
+    # day_in_week = Column(Integer())
+    # day_in_week_hebrew = Column(Text())
+    # traffic_light = Column(Integer())
+    # traffic_light_hebrew = Column(Text())
+    # accident_region = Column(Integer())
+    # accident_region_hebrew = Column(Text())
+    # accident_district = Column(Integer())
+    # accident_district_hebrew = Column(Text())
+    # accident_natural_area = Column(Integer())
+    # accident_natural_area_hebrew = Column(Text())
+    # accident_municipal_status = Column(Integer())
+    # accident_municipal_status_hebrew = Column(Text())
+    # accident_yishuv_shape = Column(Integer())
+    # accident_yishuv_shape_hebrew = Column(Text())
+    street1 = Column(Integer())
+    # street1_hebrew = Column(Text(), index=True)
+    street2 = Column(Integer())
+    # street2_hebrew = Column(Text(), index=True)
+    non_urban_intersection = Column(Integer())
+    # non_urban_intersection_hebrew = Column(Text())
+    non_urban_intersection_by_junction_number = Column(Text())
+    # accident_day = Column(Integer())
+    # accident_hour_raw = Column(Integer())
+    # accident_hour_raw_hebrew = Column(Text())
+    # accident_hour = Column(Integer())
+    # accident_minute = Column(Integer())
+    # geom = Column(Geometry("POINT"), index=True)
+    # latitude = Column(Float())
+    # longitude = Column(Float())
+    # x = Column(Float())
+    # y = Column(Float())
+    # engine_volume = Column(Integer())
+    # engine_volume_hebrew = Column(Text())
+    # manufacturing_year = Column(Integer())
+    # driving_directions = Column(Integer())
+    # driving_directions_hebrew = Column(Text())
+    vehicle_status = Column(Integer())
+    # vehicle_status_hebrew = Column(Text())
+    # vehicle_attribution = Column(Integer())
+    # vehicle_attribution_hebrew = Column(Text())
+    # seats = Column(Integer())
+    # total_weight = Column(Integer())
+    # total_weight_hebrew = Column(Text())
+    vehicle_vehicle_type = Column(Integer())
+    # vehicle_vehicle_type_hebrew = Column(Text())
+    # vehicle_damage = Column(Integer())
+    # vehicle_damage_hebrew = Column(Text())
 
 
 class InvolvedView(Base):
@@ -2244,6 +2615,129 @@ class VehicleMarkerView(Base):
     vehicle_type_hebrew = Column(Text(), index=True)
     vehicle_damage = Column(Integer())
     vehicle_damage_hebrew = Column(Text())
+    car_id = Column(Integer())
+
+
+class VehicleMarkerViewSmall(Base):
+    __tablename__ = "vehicles_markers_hebrew_small"
+    accident_timestamp = Column(DateTime, default=None)
+    accident_type = Column(Integer(), index=True)
+    # accident_type_hebrew = Column(Text(), index=True)
+    accident_severity = Column(Integer(), index=True)
+    # accident_severity_hebrew = Column(Text(), index=True)
+    location_accuracy = Column(Integer())
+    # location_accuracy_hebrew = Column(Text())
+    road_type = Column(Integer())
+    # road_type_hebrew = Column(Text())
+    road_shape = Column(Integer())
+    # road_shape_hebrew = Column(Text())
+    day_type = Column(Integer())
+    # day_type_hebrew = Column(Text())
+    # police_unit = Column(Integer())
+    # police_unit_hebrew = Column(Text())
+    one_lane = Column(Integer())
+    # one_lane_hebrew = Column(Text())
+    multi_lane = Column(Integer())
+    # multi_lane_hebrew = Column(Text())
+    speed_limit = Column(Integer())
+    # speed_limit_hebrew = Column(Text())
+    # road_intactness = Column(Integer())
+    # road_intactness_hebrew = Column(Text())
+    road_width = Column(Integer())
+    # road_width_hebrew = Column(Text())
+    road_sign = Column(Integer())
+    # road_sign_hebrew = Column(Text())
+    road_light = Column(Integer())
+    # road_light_hebrew = Column(Text())
+    # road_control = Column(Integer())
+    # road_control_hebrew = Column(Text())
+    weather = Column(Integer())
+    # weather_hebrew = Column(Text())
+    road_surface = Column(Integer())
+    # road_surface_hebrew = Column(Text())
+    # road_object = Column(Integer())
+    # road_object_hebrew = Column(Text())
+    object_distance = Column(Integer())
+    # object_distance_hebrew = Column(Text())
+    # didnt_cross = Column(Integer())
+    # didnt_cross_hebrew = Column(Text())
+    # cross_mode = Column(Integer())
+    # cross_mode_hebrew = Column(Text())
+    # cross_location = Column(Integer())
+    # cross_location_hebrew = Column(Text())
+    # cross_direction = Column(Integer())
+    # cross_direction_hebrew = Column(Text())
+    road1 = Column(Integer(), index=True)
+    road2 = Column(Integer(), index=True)
+    km = Column(Float())
+    # km_raw = Column(Text())
+    km_accurate = Column(Boolean())
+    road_segment_id = Column(Integer(), index=True)
+    road_segment_number = Column(Integer(), index=True)
+    # road_segment_name = Column(Text(), index=True)
+    # road_segment_from_km = Column(Float())
+    # road_segment_to_km = Column(Float())
+    road_segment_length_km = Column(Float())
+    accident_yishuv_symbol = Column(Integer())
+    # accident_yishuv_name = Column(Text(), index=True)
+    geo_area = Column(Integer())
+    # geo_area_hebrew = Column(Text())
+    day_night = Column(Integer())
+    # day_night_hebrew = Column(Text())
+    # day_in_week = Column(Integer())
+    # day_in_week_hebrew = Column(Text())
+    traffic_light = Column(Integer())
+    # traffic_light_hebrew = Column(Text())
+    accident_region = Column(Integer())
+    # accident_region_hebrew = Column(Text())
+    accident_district = Column(Integer())
+    # accident_district_hebrew = Column(Text())
+    accident_natural_area = Column(Integer())
+    # accident_natural_area_hebrew = Column(Text())
+    accident_municipal_status = Column(Integer())
+    # accident_municipal_status_hebrew = Column(Text())
+    # accident_yishuv_shape = Column(Integer())
+    # accident_yishuv_shape_hebrew = Column(Text())
+    street1 = Column(Integer())
+    # street1_hebrew = Column(Text(), index=True)
+    street2 = Column(Integer())
+    # street2_hebrew = Column(Text(), index=True)
+    non_urban_intersection = Column(Integer())
+    # non_urban_intersection_hebrew = Column(Text())
+    # non_urban_intersection_by_junction_number = Column(Text())
+    accident_day = Column(Integer())
+    accident_hour_raw = Column(Integer())
+    # accident_hour_raw_hebrew = Column(Text())
+    accident_hour = Column(Integer())
+    # accident_minute = Column(Integer())
+    accident_year = Column(Integer(), primary_key=True, index=True)
+    # accident_month = Column(Integer())
+    # geom = Column(Geometry("POINT"), index=True)
+    # latitude = Column(Float())
+    # longitude = Column(Float())
+    # x = Column(Float())
+    # y = Column(Float())
+    id = Column(BigInteger(), primary_key=True)
+    accident_id = Column(BigInteger(), primary_key=True)
+    provider_and_id = Column(BigInteger())
+    provider_code = Column(Integer(), primary_key=True)
+    # file_type_police = Column(Integer())
+    # engine_volume = Column(Integer())
+    # engine_volume_hebrew = Column(Text())
+    # manufacturing_year = Column(Integer())
+    # driving_directions = Column(Integer())
+    # driving_directions_hebrew = Column(Text())
+    vehicle_status = Column(Integer())
+    # vehicle_status_hebrew = Column(Text())
+    vehicle_attribution = Column(Integer())
+    # vehicle_attribution_hebrew = Column(Text())
+    seats = Column(Integer())
+    total_weight = Column(Integer())
+    # total_weight_hebrew = Column(Text())
+    vehicle_type = Column(Integer(), index=True)
+    # vehicle_type_hebrew = Column(Text(), index=True)
+    vehicle_damage = Column(Integer())
+    # vehicle_damage_hebrew = Column(Text())
     car_id = Column(Integer())
 
 

@@ -66,6 +66,21 @@ def get_small_vehicles_markers_hebrew() -> db.Model:
     return VehicleMarkerViewSmall if USE_SMALL_TABLES else VehicleMarkerView
 
 
+USE_SMALL_TABLES = True
+
+
+def get_small_accident_marker_view() -> db.Model:
+    return AccidentMarkerViewSmall if USE_SMALL_TABLES else AccidentMarkerView
+
+
+def get_small_involved_marker() -> db.Model:
+    return InvolvedMarkerViewSmall if USE_SMALL_TABLES else InvolvedMarkerView
+
+
+def get_small_vehicles_markers_hebrew() -> db.Model:
+    return VehicleMarkerViewSmall if USE_SMALL_TABLES else VehicleMarkerView
+
+
 @dataclass
 class RequestParams:
     """
@@ -2307,9 +2322,7 @@ def get_request_params_for_road_segment(
     last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
     # converting to datetime object to get the date
     end_time = last_accident_date.to_pydatetime().date()
-
     start_time = datetime.date(end_time.year + 1 - number_of_years_ago, 1, 1)
-
     request_params = RequestParams(
         news_flash_obj=None,
         years_ago=number_of_years_ago,

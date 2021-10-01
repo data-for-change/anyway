@@ -35,7 +35,10 @@ from anyway.backend_constants import (
     AccidentType,
     CrossCategory,
 )
-from anyway.models import NewsFlash, AccidentMarkerView, InvolvedMarkerView, VehicleMarkerView
+from anyway.models import (NewsFlash, AccidentMarkerView, InvolvedMarkerView,
+                           VehicleMarkerView, VehicleMarkerViewSmall,
+                           AccidentMarkerViewSmall, InvolvedMarkerViewSmall
+                           )
 from anyway.parsers import resolution_dict
 from anyway.app_and_db import db
 from anyway.infographics_dictionaries import (
@@ -47,6 +50,20 @@ from anyway.utilities import parse_age_from_range
 from anyway.vehicle_type import VehicleCategory, VehicleType
 from anyway.parsers.location_extraction import get_road_segment_name_and_number
 
+
+USE_SMALL_TABLES = True
+
+
+def get_small_accident_marker_view() -> db.Model:
+    return AccidentMarkerViewSmall if USE_SMALL_TABLES else AccidentMarkerView
+
+
+def get_small_involved_marker() -> db.Model:
+    return InvolvedMarkerViewSmall if USE_SMALL_TABLES else InvolvedMarkerView
+
+
+def get_small_vehicles_markers_hebrew() -> db.Model:
+    return VehicleMarkerViewSmall if USE_SMALL_TABLES else VehicleMarkerView
 
 
 @dataclass
@@ -63,6 +80,8 @@ class RequestParams:
     gps: Dict
     start_time: datetime.date
     end_time: datetime.date
+    start_year: int
+    end_year: int
     lang: str
 
     def __str__(self):
@@ -1138,7 +1157,7 @@ class TopRoadSegmentsAccidentsPerKmWidget(SubUrbanWidget):
 
 _('Severe and fatal accidents per Km by section in road')
 
-
+@register
 class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
     name: str = "injured_count_per_age_group"
 
@@ -1155,13 +1174,15 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
     def filter_and_group_injured_count_per_age_group(request_params: RequestParams):
         road_number = request_params.location_info["road1"]
         road_segment = request_params.location_info["road_segment_name"]
-
+        involved_table = get_small_involved_marker()
         query = (
-            db.session.query(InvolvedMarkerView)
-            .filter(InvolvedMarkerView.accident_timestamp >= request_params.start_time)
-            .filter(InvolvedMarkerView.accident_timestamp <= request_params.end_time)
+            db.session.query(involved_table)
+            .filter(involved_table.accident_year.in_(range(request_params.start_year,
+                                                           request_params.end_year + 1)))
+            # .filter(involved_table.accident_timestamp >= request_params.start_time)
+            # .filter(involved_table.accident_timestamp <= request_params.end_time)
             .filter(
-                InvolvedMarkerView.provider_code.in_(
+                involved_table.provider_code.in_(
                     [
                         BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
                         BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
@@ -1169,7 +1190,7 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
                 )
             )
             .filter(
-                InvolvedMarkerView.injury_severity.in_(
+                involved_table.injury_severity.in_(
                     [
                         InjurySeverity.KILLED.value,  # pylint: disable=no-member
                         InjurySeverity.SEVERE_INJURED.value,  # pylint: disable=no-member
@@ -1177,9 +1198,10 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
                 )
             )
             .filter(
-                (InvolvedMarkerView.road1 == road_number)
-                | (InvolvedMarkerView.road2 == road_number)
+                (involved_table.road1 == road_number)
+                | (involved_table.road2 == road_number)
             )
+            # todo handle road_segment_name field
             .filter(InvolvedMarkerView.road_segment_name == road_segment)
             .group_by("age_group", "injury_severity")
             .with_entities("age_group", "injury_severity", func.count().label("count"))
@@ -1441,7 +1463,7 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
     @lru_cache(maxsize=64)
     def percentage_accidents_by_car_type_national_data_cache(start_time, end_time):
         involved_by_vehicle_type_data = get_accidents_stats(
-            table_obj=InvolvedMarkerView,
+            table_obj=get_small_involved_marker(),
             filters={
                 "road_type": [
                     BE_CONST.ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION,
@@ -1517,17 +1539,17 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
                     f"Could not validate parameters for {NewsFlash} : {self.request_params.news_flash_obj.id}"
                 )
                 return None
-
+            involved_table = get_small_involved_marker()
             query = (
-                db.session.query(InvolvedMarkerView)
+                db.session.query(involved_table)
                 .with_entities(
-                    InvolvedMarkerView.accident_year,
-                    InvolvedMarkerView.injury_severity,
+                    involved_table.accident_year,
+                    involved_table.injury_severity,
                     func.count().label("count"),
                 )
-                .filter(InvolvedMarkerView.accident_yishuv_name == yishuv_name)
+                .filter(involved_table.accident_yishuv_name == yishuv_name)
                 .filter(
-                    InvolvedMarkerView.injury_severity.in_(
+                    involved_table.injury_severity.in_(
                         [
                             InjurySeverity.KILLED.value,
                             InjurySeverity.SEVERE_INJURED.value,
@@ -1535,20 +1557,20 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
                         ]
                     )
                 )
-                .filter(InvolvedMarkerView.injured_type == InjuredType.PEDESTRIAN.value)
+                .filter(involved_table.injured_type == InjuredType.PEDESTRIAN.value)
                 .filter(
                     or_(
-                        InvolvedMarkerView.street1_hebrew == street1_hebrew,
-                        InvolvedMarkerView.street2_hebrew == street1_hebrew,
+                        involved_table.street1_hebrew == street1_hebrew,
+                        involved_table.street2_hebrew == street1_hebrew,
                     )
                 )
                 .filter(
                     and_(
-                        InvolvedMarkerView.accident_timestamp >= self.request_params.start_time,
-                        InvolvedMarkerView.accident_timestamp <= self.request_params.end_time,
+                        involved_table.accident_timestamp >= self.request_params.start_time,
+                        involved_table.accident_timestamp <= self.request_params.end_time,
                     )
                 )
-                .group_by(InvolvedMarkerView.accident_year, InvolvedMarkerView.injury_severity)
+                .group_by(involved_table.accident_year, involved_table.injury_severity)
             )
 
             self.items = add_empty_keys_to_gen_two_level_dict(
@@ -1619,7 +1641,7 @@ class AccidentSeverityByCrossLocationWidget(SubUrbanWidget):
             },
         ]
 
-
+@register
 class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
     name: str = "motorcycle_accidents_vs_all_accidents"
 
@@ -1640,14 +1662,15 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
     def motorcycle_accidents_vs_all_accidents(
         start_time: datetime.date, end_time: datetime.date, road_number: str
     ) -> List:
+        my_involved = get_small_involved_marker()
         location_label = "location"
         location_other = "שאר הארץ"
         location_road = f"כביש {int(road_number)}"
         case_location = case(
             [
                 (
-                    (InvolvedMarkerView.road1 == road_number)
-                    | (InvolvedMarkerView.road2 == road_number),
+                    (my_involved.road1 == road_number)
+                    | (my_involved.road2 == road_number),
                     location_road,
                 )
             ],
@@ -1660,7 +1683,7 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
         case_vehicle = case(
             [
                 (
-                    InvolvedMarkerView.involve_vehicle_type.in_(
+                    my_involved.involve_vehicle_type.in_(
                         VehicleCategory.MOTORCYCLE.get_codes()
                     ),
                     literal_column(f"'{vehicle_motorcycle}'"),
@@ -1670,7 +1693,7 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
         ).label(vehicle_label)
 
         query = get_query(
-            table_obj=InvolvedMarkerView, filters={}, start_time=start_time, end_time=end_time
+            table_obj=my_involved, filters={}, start_time=start_time, end_time=end_time
         )
 
         num_accidents_label = "num_of_accidents"
@@ -1678,11 +1701,11 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
             query.with_entities(
                 case_location,
                 case_vehicle,
-                func.count(distinct(InvolvedMarkerView.provider_and_id)).label(num_accidents_label),
+                func.count(distinct(my_involved.provider_and_id)).label(num_accidents_label),
             )
-            .filter(InvolvedMarkerView.road_type.in_(BE_CONST.NON_CITY_ROAD_TYPES))
+            .filter(my_involved.road_type.in_(BE_CONST.NON_CITY_ROAD_TYPES))
             .filter(
-                InvolvedMarkerView.accident_severity.in_(
+                my_involved.accident_severity.in_(
                     # pylint: disable=no-member
                     [AccidentSeverity.FATAL.value, AccidentSeverity.SEVERE.value]
                 )
@@ -1857,14 +1880,15 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(SubUrbanWidget):
         all_roads_query_result = run_query(all_roads_query)
         all_roads_sum_accidents = 0
         all_roads_map = {}
+        vehicle_table = get_small_vehicles_markers_hebrew()
         for record in all_roads_query_result:
             all_roads_sum_accidents += record[num_accidents_label]
-            all_roads_map[record[VehicleMarkerView.accident_type.name]] = record[
+            all_roads_map[record[vehicle_table.accident_type.name]] = record[
                 num_accidents_label
             ]
 
         road_query = all_roads_query.filter(
-            (VehicleMarkerView.road1 == road_number) | (VehicleMarkerView.road2 == road_number)
+            (vehicle_table.road1 == road_number) | (vehicle_table.road2 == road_number)
         )
         road_query_result = run_query(road_query)
         road_sum_accidents = 0
@@ -1878,10 +1902,10 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(SubUrbanWidget):
                 == AccidentTypeVehicleTypeRoadComparisonWidget.MAX_ACCIDENT_TYPES_TO_RETURN
             ):
                 break
-            accident_type = record[VehicleMarkerView.accident_type.name]
+            accident_type = record[vehicle_table.accident_type.name]
             types_to_report.append(
                 {
-                    VehicleMarkerView.accident_type.name: accident_type,
+                    vehicle_table.accident_type.name: accident_type,
                     location_road: record[num_accidents_label] / road_sum_accidents,
                     location_all: all_roads_map[accident_type] / all_roads_sum_accidents,
                 }
@@ -1895,18 +1919,19 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(SubUrbanWidget):
         num_accidents_label: str,
         vehicle_types: List[int],
     ) -> db.session.query:
+        table = get_small_vehicles_markers_hebrew()
         return (
             get_query(
-                table_obj=VehicleMarkerView,
+                table_obj=table,
                 start_time=start_time,
                 end_time=end_time,
-                filters={VehicleMarkerView.vehicle_type.name: vehicle_types},
+                filters={table.vehicle_type.name: vehicle_types},
             )
             .with_entities(
-                VehicleMarkerView.accident_type,
-                func.count(distinct(VehicleMarkerView.provider_and_id)).label(num_accidents_label),
+                table.accident_type,
+                func.count(distinct(table.provider_and_id)).label(num_accidents_label),
             )
-            .group_by(VehicleMarkerView.accident_type)
+            .group_by(table.accident_type)
             .order_by(desc(num_accidents_label))
         )
 
@@ -1914,7 +1939,7 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(SubUrbanWidget):
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         for item in items["data"]["items"]:
             try:
-                item[VehicleMarkerView.accident_type.name] = _(
+                item[get_small_vehicles_markers_hebrew().accident_type.name] = _(
                     AccidentType(item["accident_type"]).get_label()
                 )
             except KeyError:
@@ -2082,7 +2107,7 @@ def get_casualties_count_in_accident(accident_id, provider_code, injury_severity
         "accident_year": accident_year,
     }
     casualties = get_accidents_stats(
-        table_obj=InvolvedMarkerView,
+        table_obj=get_small_involved_marker(),
         filters=filters,
         group_by="injury_severity",
         count="injury_severity",
@@ -2234,12 +2259,14 @@ def get_request_params(
     if all(value is None for value in location_info.values()):
         return None
 
-    last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
+    last_accident_date = get_latest_accident_date(
+        table_obj=get_small_accident_marker_view(),
+        filters=None)
     # converting to datetime object to get the date
     end_time = last_accident_date.to_pydatetime().date()
-
+    end_year = end_time.year
     start_time = datetime.date(end_time.year + 1 - number_of_years_ago, 1, 1)
-
+    start_year = start_time.year
     request_params = RequestParams(
         news_flash_obj=news_flash_obj,
         years_ago=number_of_years_ago,
@@ -2249,6 +2276,8 @@ def get_request_params(
         gps=gps,
         start_time=start_time,
         end_time=end_time,
+        start_year=start_year,
+        end_year=end_year,
         lang=lang,
     )
     logging.debug(f"Ending get_request_params. params: {request_params}")
@@ -2344,12 +2373,25 @@ def create_infographics_items(request_params: RequestParams) -> Dict:
         output["widgets"] = []
         widgets: List[Widget] = generate_widgets(request_params=request_params, to_cache=True)
         widgets.extend(generate_widgets(request_params=request_params, to_cache=False))
-        output["widgets"].extend(list(map(lambda w: w.serialize(), widgets)))
+        output["widgets"].extend(list(map(measure_and_serialize, widgets)))
+        # output["widgets"].extend(list(map(lambda w: w.serialize(), widgets)))
 
     except Exception as e:
         logging.error(f"exception in create_infographics_data:{e}:{traceback.format_exc()}")
         output = {}
     return output
+
+
+widget_calc_times = {}
+
+
+def measure_and_serialize(w: Widget):
+    start = datetime.datetime.now()
+    res = w.serialize()
+    delta = datetime.datetime.now() - start
+    cur = widget_calc_times[w.name] if w.name in widget_calc_times else datetime.timedelta(seconds=0)
+    widget_calc_times[w.name] = cur + delta
+    return res
 
 
 def get_infographics_data(news_flash_id, years_ago, lang: str) -> Dict:

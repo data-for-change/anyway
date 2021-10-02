@@ -1165,6 +1165,7 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 18
+        self.information = "Injured and killed pedestrians by severity and year"
 
     def generate_items(self) -> None:
         try:

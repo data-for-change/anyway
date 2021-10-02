@@ -78,8 +78,6 @@ class RequestParams:
     gps: Dict
     start_time: datetime.date
     end_time: datetime.date
-    start_year: int
-    end_year: int
     lang: str
 
     def __str__(self):
@@ -843,8 +841,8 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
         involved_table = get_small_involved_marker()
         query = (
             db.session.query(involved_table)
-            .filter(involved_table.accident_year.in_(range(request_params.start_year,
-                                                           request_params.end_year + 1)))
+            .filter(involved_table.accident_year.in_(range(request_params.start_time.year,
+                                                           request_params.end_time.year + 1)))
             # .filter(involved_table.accident_timestamp >= request_params.start_time)
             # .filter(involved_table.accident_timestamp <= request_params.end_time)
             .filter(
@@ -1211,13 +1209,13 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
                 .filter(
                     involved_table.injury_severity.in_(
                         [
-                            InjurySeverity.KILLED.value,
-                            InjurySeverity.SEVERE_INJURED.value,
-                            InjurySeverity.LIGHT_INJURED.value,
+                            InjurySeverity.KILLED.value,  # pylint: disable=no-member
+                            InjurySeverity.SEVERE_INJURED.value,  # pylint: disable=no-member
+                            InjurySeverity.LIGHT_INJURED.value,  # pylint: disable=no-member
                         ]
                     )
                 )
-                .filter(involved_table.injured_type == InjuredType.PEDESTRIAN.value)
+                .filter(involved_table.injured_type == InjuredType.PEDESTRIAN.value)  # pylint: disable=no-member
                 .filter(
                     or_(
                         involved_table.street1_hebrew == street1_hebrew,
@@ -1901,9 +1899,7 @@ def get_request_params(
         filters=None)
     # converting to datetime object to get the date
     end_time = last_accident_date.to_pydatetime().date()
-    end_year = end_time.year
     start_time = datetime.date(end_time.year + 1 - number_of_years_ago, 1, 1)
-    start_year = start_time.year
     request_params = RequestParams(
         news_flash_obj=news_flash_obj,
         years_ago=number_of_years_ago,
@@ -1913,8 +1909,6 @@ def get_request_params(
         gps=gps,
         start_time=start_time,
         end_time=end_time,
-        start_year=start_year,
-        end_year=end_year,
         lang=lang,
     )
     logging.debug(f"Ending get_request_params. params: {request_params}")

@@ -1,77 +1,64 @@
 {
   "name": "injured_accidents_with_pedestrians",
   "data": {
-    "items": [
-      {
-        "year": 2009,
-        "light_injury_severity_text": "פצוע קל",
-        "light_injury_severity_count": 12,
-        "severe_injury_severity_text": "פצוע קשה",
-        "severe_injury_severity_count": 3,
-        "killed_injury_severity_text": "הרוג",
-        "killed_injury_severity_count": 0
+    "items": {
+      "2": {
+        "2012": 1,
+        "2013": 1,
+        "2018": 1,
+        "2014": 0,
+        "2015": 0,
+        "2016": 0,
+        "2017": 0,
+        "2019": 0,
+        "2020": 0,
+        "2021": 0
       },
-      {
-        "year": 2010,
-        "light_injury_severity_text": "פצוע קל",
-        "light_injury_severity_count": 24,
-        "severe_injury_severity_text": "פצוע קשה",
-        "severe_injury_severity_count": 0,
-        "killed_injury_severity_text": "הרוג",
-        "killed_injury_severity_count": 1
+      "3": {
+        "2012": 2,
+        "2017": 1,
+        "2018": 1,
+        "2019": 4,
+        "2021": 1,
+        "2013": 0,
+        "2014": 0,
+        "2015": 0,
+        "2016": 0,
+        "2020": 0
       },
-      {
-        "year": 2011,
-        "light_injury_severity_text": "פצוע קל",
-        "light_injury_severity_count": 9,
-        "severe_injury_severity_text": "פצוע קשה",
-        "severe_injury_severity_count": 2,
-        "killed_injury_severity_text": "הרוג",
-        "killed_injury_severity_count": 1
-      },
-      {
-        "year": 2012,
-        "light_injury_severity_text": "פצוע קל",
-        "light_injury_severity_count": 21,
-        "severe_injury_severity_text": "פצוע קשה",
-        "severe_injury_severity_count": 2,
-        "killed_injury_severity_text": "הרוג",
-        "killed_injury_severity_count": 4
-      },
-      {
-        "year": 2013,
-        "light_injury_severity_text": "פצוע קל",
-        "light_injury_severity_count": 21,
-        "severe_injury_severity_text": "פצוע קשה",
-        "severe_injury_severity_count": 2,
-        "killed_injury_severity_text": "הרוג",
-        "killed_injury_severity_count": 4
-      },
-      {
-        "year": 2014,
-        "light_injury_severity_text": "פצוע קל",
-        "light_injury_severity_count": 10,
-        "severe_injury_severity_text": "פצוע קשה",
-        "severe_injury_severity_count": 0,
-        "killed_injury_severity_text": "הרוג",
-        "killed_injury_severity_count": 1
-      },
-      {
-        "year": 2015,
-        "light_injury_severity_text": "פצוע קל",
-        "light_injury_severity_count": 13,
-        "severe_injury_severity_text": "פצוע קשה",
-        "severe_injury_severity_count": 2,
-        "killed_injury_severity_text": "הרוג",
-        "killed_injury_severity_count": 0
+      "1": {
+        "2016": 1,
+        "2012": 0,
+        "2013": 0,
+        "2014": 0,
+        "2015": 0,
+        "2017": 0,
+        "2018": 0,
+        "2019": 0,
+        "2020": 0,
+        "2021": 0
       }
-    ],
+    },
     "text": {
-      "title": "נפגעים הולכי רגל ברחוב ז׳בוטינסקי, פתח תקווה"
+      "title": "נפגעים הולכי רגל ב- צומת רמות בירושלים",
+      "labels": {
+        "1": {
+          "name": "killed",
+          "localized_name": "killed"
+        },
+        "2": {
+          "name": "severe injured",
+          "localized_name": "severe injured"
+        },
+        "3": {
+          "name": "light injured",
+          "localized_name": "light injured"
+        }
+      }
     }
   },
   "meta": {
     "rank": 18,
-    "information": ""
+    "information": "כמות נפגעים הולכי רגל לפי חומרה ושנה"
   }
 }

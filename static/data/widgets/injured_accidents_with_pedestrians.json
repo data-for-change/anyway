@@ -40,7 +40,7 @@
       }
     },
     "text": {
-      "title": "\u05e0\u05e4\u05d2\u05e2\u05d9\u05dd \u05d4\u05d5\u05dc\u05db\u05d9 \u05e8\u05d2\u05dc \u05d1- \u05e6\u05d5\u05de\u05ea \u05e8\u05de\u05d5\u05ea \u05d1\u05d9\u05e8\u05d5\u05e9\u05dc\u05d9\u05dd",
+      "title": "נפגעים הולכי רגל ב- צומת רמות בירושלים",
       "labels": {
         "1": {
           "name": "killed",
@@ -59,6 +59,6 @@
   },
   "meta": {
     "rank": 18,
-    "information": "Project-Id-Version: PROJECT VERSION\nReport-Msgid-Bugs-To: EMAIL@ADDRESS\nPOT-Creation-Date: 2021-08-22 18:54+0300\nPO-Revision-Date: 2020-11-26 16:45+0200\nLast-Translator: FULL NAME <EMAIL@ADDRESS>\nLanguage: en\nLanguage-Team: en <LL@li.org>\nPlural-Forms: nplurals=2; plural=(n != 1)\nMIME-Version: 1.0\nContent-Type: text/plain; charset=utf-8\nContent-Transfer-Encoding: 8bit\nGenerated-By: Babel 2.9.0\n"
+    "information": "כמות נפגעים הולכי רגל לפי חומרה ושנה"
   }
 }

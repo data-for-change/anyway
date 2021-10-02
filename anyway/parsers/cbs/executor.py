@@ -942,16 +942,24 @@ def create_provider_code_table():
 def create_tables():
     with db.get_engine().begin() as conn:
         conn.execute("TRUNCATE involved_markers_hebrew")
+        conn.execute("TRUNCATE involved_markers_hebrew_small")
         conn.execute("TRUNCATE vehicles_markers_hebrew")
+        conn.execute("TRUNCATE vehicles_markers_hebrew_small")
         conn.execute("TRUNCATE vehicles_hebrew")
         conn.execute("TRUNCATE involved_hebrew")
         conn.execute("TRUNCATE markers_hebrew")
+        conn.execute("TRUNCATE markers_hebrew_small")
         conn.execute("INSERT INTO markers_hebrew " + VIEWS.MARKERS_HEBREW_VIEW)
+        conn.execute("INSERT INTO markers_hebrew_small " + VIEWS.MARKERS_HEBREW_SMALL)
         conn.execute("INSERT INTO involved_hebrew " + VIEWS.INVOLVED_HEBREW_VIEW)
         conn.execute("INSERT INTO vehicles_hebrew " + VIEWS.VEHICLES_HEBREW_VIEW)
         conn.execute("INSERT INTO vehicles_markers_hebrew " + VIEWS.VEHICLES_MARKERS_HEBREW_VIEW)
+        conn.execute("INSERT INTO vehicles_markers_hebrew_small " + VIEWS.VEHICLES_MARKERS_HEBREW_SMALL)
         conn.execute(
             "INSERT INTO involved_markers_hebrew " + VIEWS.INVOLVED_HEBREW_MARKERS_HEBREW_VIEW
+        )
+        conn.execute(
+            "INSERT INTO involved_markers_hebrew_small " + VIEWS.INVOLVED_HEBREW_MARKERS_SMALL
         )
         logging.info("Created DB Hebrew Tables")
 

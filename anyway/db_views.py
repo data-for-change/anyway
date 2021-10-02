@@ -140,7 +140,7 @@ class Views(object):
                                      LEFT JOIN accident_hour_raw ON markers.accident_hour_raw = accident_hour_raw.id AND markers.accident_year = accident_hour_raw.year AND markers.provider_code = accident_hour_raw.provider_code
                                      LEFT JOIN provider_code ON markers.provider_code = provider_code.id;"""
 
-    MARKERS_HEBREW_VIEW_SMALL = """
+    MARKERS_HEBREW_SMALL = """
 (
     id,
     provider_code,

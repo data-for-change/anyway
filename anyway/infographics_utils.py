@@ -263,7 +263,7 @@ class SevereFatalCountByAccidentYearAndVehicleWidget(UrbanWidget):
             "title": "Severe or fatal accidents on bikes, e-bikes, or scooters in "
             + self.request_params.location_info["yishuv_name"]
         }
-    
+
     def generate_items(self) -> None:
         self.items = {"e_bikes": get_accidents_stats(
             table_obj=InvolvedMarkerView,
@@ -327,15 +327,15 @@ class SevereFatalCountByAccidentYearAndVehicleWidget(UrbanWidget):
                 start_time=self.request_params.end_time - datetime.timedelta(days=15),
                 end_time=self.request_params.end_time,
         )}
-        
+
 
     def is_included(self) -> bool:
         self.relevance_check()        
         if self.relevance["rel"]:
             return self.items
         return False
-    
-    
+
+
 @register
 class MostSevereAccidentsTableWidget(SubUrbanWidget):
     name: str = "most_severe_accidents_table"

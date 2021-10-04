@@ -379,6 +379,12 @@ def extract_geo_features(db, newsflash: NewsFlash) -> None:
         )
         for k, v in location_from_db.items():
             setattr(newsflash, k, v)
+        all_resolutions = []
+        for _, v in resolution_dict.items():
+            all_resolutions += v
+        for resolution in all_resolutions:
+            if resolution not in location_from_db:
+                setattr(newsflash, resolution, None)
 
 
 def extract_geo_features_from_geo_location(db, latitude, longitude) -> dict:

@@ -1414,7 +1414,17 @@ class GPSToLocation(Resource):
     @api.doc("from gps to location")
     @api.expect(parser)
     def get(self):
-        return gps_to_cbs_location()
+        def get_gps_to_location_mock_data():
+            mock_data = {}
+            path = os.path.join("static", "data", "gps_to_location")
+            file = "gps_to_location.json"
+            with open(os.path.join(path, file)) as f:
+                mock_data = json.loads(f.read())
+            return mock_data
+        output = get_gps_to_location_mock_data()
+        json_data = json.dumps(output, default=str)
+        return Response(json_data, mimetype="application/json")
+        #return gps_to_cbs_location()
 
 
 def gps_to_cbs_location():

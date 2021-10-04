@@ -1433,6 +1433,7 @@ def gps_to_cbs_location():
     # logging.info(location)
     if "road1" in location and "road_segment_name" in location:
         location["resolution"] = "interurban_road_segment"
+        location["road_segment_id"] = 1341
         json_data = json.dumps(location, default=str)
         return Response(json_data, mimetype="application/json")
     if "yishuv_name" in location and "street1_hebrew" in location:

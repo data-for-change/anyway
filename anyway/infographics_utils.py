@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import time
 import logging
 import datetime
 import json
@@ -25,7 +26,13 @@ from sqlalchemy.sql.elements import and_
 # noinspection PyProtectedMember
 from flask_babel import _
 from anyway.backend_constants import (
-    BE_CONST, InjuredType, LabeledCode, InjurySeverity, AccidentSeverity, DriverType, AccidentType
+    BE_CONST,
+    InjuredType,
+    LabeledCode,
+    InjurySeverity,
+    AccidentSeverity,
+    DriverType,
+    AccidentType,
 )
 from anyway.models import NewsFlash, AccidentMarkerView, InvolvedMarkerView, VehicleMarkerView
 from anyway.parsers import resolution_dict
@@ -304,7 +311,9 @@ class MostSevereAccidentsTableWidget(SubUrbanWidget):
                 accident["id"],
                 accident["provider_code"],
             )
-            accident["accident_severity"] = AccidentSeverity(accident["accident_severity"]).get_label()
+            accident["accident_severity"] = AccidentSeverity(
+                accident["accident_severity"]
+            ).get_label()
         return accidents
 
     @staticmethod
@@ -446,11 +455,13 @@ class HeadOnCollisionsComparisonWidget(SubUrbanWidget):
 
         road_sums = self.sum_count_of_accident_type(
             # pylint: disable=no-member
-            road_data, AccidentType.HEAD_ON_FRONTAL_COLLISION.value
+            road_data,
+            AccidentType.HEAD_ON_FRONTAL_COLLISION.value,
         )
         all_roads_sums = self.sum_count_of_accident_type(
             # pylint: disable=no-member
-            all_roads_data, AccidentType.HEAD_ON_FRONTAL_COLLISION.value
+            all_roads_data,
+            AccidentType.HEAD_ON_FRONTAL_COLLISION.value,
         )
 
         res = {
@@ -607,25 +618,28 @@ class AccidentCountByAccidentYearWidget(SubUrbanWidget):
             group_by=("accident_severity", "accident_year"),
             count="accident_year",
             start_time=self.request_params.start_time,
-            end_time=self.request_params.end_time
+            end_time=self.request_params.end_time,
         )
         try:
             self.items = add_empty_keys_to_gen_two_level_dict(
                 res,
                 AccidentSeverity.codes(),
-                list(range(self.request_params.start_time.year,
-                           self.request_params.end_time.year + 1))
+                list(
+                    range(
+                        self.request_params.start_time.year, self.request_params.end_time.year + 1
+                    )
+                ),
             )
         except Exception as e:
-            logging.exception(f'failed to add empty keys to {res}', e)
+            logging.exception(f"failed to add empty keys to {res}", e)
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
             "title": _("Number of accidents, by year, splitted by accident severity, in segment")
-                     + " "
-                     + segment_dictionary[request_params.location_info["road_segment_name"]],
-            "labels": gen_entity_labels(AccidentSeverity)
+            + " "
+            + segment_dictionary[request_params.location_info["road_segment_name"]],
+            "labels": gen_entity_labels(AccidentSeverity),
         }
         return items
 
@@ -640,7 +654,9 @@ class InjuredCountByAccidentYearWidget(SubUrbanWidget):
         self.text = {
             # "title" and "labels" will be set in localize_items()
         }
-        self.information = "Fatal, severe and light injured count in the specified years, split by injury severity"
+        self.information = (
+            "Fatal, severe and light injured count in the specified years, split by injury severity"
+        )
 
     def generate_items(self) -> None:
         res = get_accidents_stats(
@@ -655,19 +671,22 @@ class InjuredCountByAccidentYearWidget(SubUrbanWidget):
             self.items = add_empty_keys_to_gen_two_level_dict(
                 res,
                 InjurySeverity.codes(),
-                list(range(self.request_params.start_time.year,
-                           self.request_params.end_time.year + 1))
+                list(
+                    range(
+                        self.request_params.start_time.year, self.request_params.end_time.year + 1
+                    )
+                ),
             )
         except Exception as e:
-            logging.exception(f'failed to add empty keys to {res}', e)
+            logging.exception(f"failed to add empty keys to {res}", e)
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
             "title": _("Number of injured in accidents, per year, splitted by severity, in segment")
-                     + " "
-                     + segment_dictionary[request_params.location_info["road_segment_name"]],
-            "labels": gen_entity_labels(InjurySeverity)
+            + " "
+            + segment_dictionary[request_params.location_info["road_segment_name"]],
+            "labels": gen_entity_labels(InjurySeverity),
         }
         return items
 
@@ -899,10 +918,7 @@ class Road2Plus1Widget(SubUrbanWidget):
 
         if news_flash.road1 and news_flash.road_segment_name:
             filter_dict.update(
-                {
-                    "road1": news_flash.road1,
-                    "road_segment_name": news_flash.road_segment_name
-                }
+                {"road1": news_flash.road1, "road_segment_name": news_flash.road_segment_name}
             )
             road_data = get_accidents_stats(
                 table_obj=AccidentMarkerView,
@@ -915,7 +931,8 @@ class Road2Plus1Widget(SubUrbanWidget):
 
             road_sums = self.sum_count_of_accident_type(
                 # pylint: disable=no-member
-                road_data, AccidentType.HEAD_ON_FRONTAL_COLLISION.value
+                road_data,
+                AccidentType.HEAD_ON_FRONTAL_COLLISION.value,
             )
 
             return road_sums
@@ -927,9 +944,7 @@ class Road2Plus1Widget(SubUrbanWidget):
 
     # noinspection PyUnboundLocalVariable
     def is_included(self) -> bool:
-        frontal_accidents_past_year = (
-            self.get_frontal_accidents_in_past_year()
-        )
+        frontal_accidents_past_year = self.get_frontal_accidents_in_past_year()
         if frontal_accidents_past_year is not None:
             return frontal_accidents_past_year >= 2
         return False
@@ -1128,9 +1143,11 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
 
     def validate_parameters(self, yishuv_name, street1_hebrew):
         # TODO: validate each parameter and display message accordingly
-        return yishuv_name is not None and \
-            street1_hebrew is not None and  \
-            self.request_params.years_ago is not None
+        return (
+            yishuv_name is not None
+            and street1_hebrew is not None
+            and self.request_params.years_ago is not None
+        )
 
     def convert_to_dict(self, query_results):
         res = {}
@@ -1148,32 +1165,60 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 18
+        self.information = "Injured and killed pedestrians by severity and year"
 
     def generate_items(self) -> None:
         try:
-            yishuv_name = self.request_params.location_info.get('yishuv_name')
-            street1_hebrew = self.request_params.location_info.get('street1_hebrew')
+            yishuv_name = self.request_params.location_info.get("yishuv_name")
+            street1_hebrew = self.request_params.location_info.get("street1_hebrew")
 
             if not self.validate_parameters(yishuv_name, street1_hebrew):
-                logging.exception(f"Could not validate parameters for {NewsFlash} : {self.request_params.news_flash_obj.id}")
+                logging.exception(
+                    f"Could not validate parameters for {NewsFlash} : {self.request_params.news_flash_obj.id}"
+                )
                 return None
 
-            query = db.session.query(InvolvedMarkerView)    \
-                .with_entities(InvolvedMarkerView.accident_year,    \
-                    InvolvedMarkerView.injury_severity, \
-                    func.count().label('count'))  \
-                .filter(InvolvedMarkerView.accident_yishuv_name == yishuv_name)\
-                .filter(InvolvedMarkerView.injury_severity.in_([InjurySeverity.KILLED.value, InjurySeverity.SEVERE_INJURED.value, InjurySeverity.LIGHT_INJURED.value]))   \
-                .filter(InvolvedMarkerView.injured_type == InjuredType.PEDESTRIAN.value)   \
-                .filter(or_(InvolvedMarkerView.street1_hebrew == street1_hebrew, InvolvedMarkerView.street2_hebrew == street1_hebrew))    \
-                .filter(and_(InvolvedMarkerView.accident_timestamp >= self.request_params.start_time, InvolvedMarkerView.accident_timestamp <= self.request_params.end_time)) \
+            query = (
+                db.session.query(InvolvedMarkerView)
+                .with_entities(
+                    InvolvedMarkerView.accident_year,
+                    InvolvedMarkerView.injury_severity,
+                    func.count().label("count"),
+                )
+                .filter(InvolvedMarkerView.accident_yishuv_name == yishuv_name)
+                .filter(
+                    InvolvedMarkerView.injury_severity.in_(
+                        [
+                            InjurySeverity.KILLED.value,
+                            InjurySeverity.SEVERE_INJURED.value,
+                            InjurySeverity.LIGHT_INJURED.value,
+                        ]
+                    )
+                )
+                .filter(InvolvedMarkerView.injured_type == InjuredType.PEDESTRIAN.value)
+                .filter(
+                    or_(
+                        InvolvedMarkerView.street1_hebrew == street1_hebrew,
+                        InvolvedMarkerView.street2_hebrew == street1_hebrew,
+                    )
+                )
+                .filter(
+                    and_(
+                        InvolvedMarkerView.accident_timestamp >= self.request_params.start_time,
+                        InvolvedMarkerView.accident_timestamp <= self.request_params.end_time,
+                    )
+                )
                 .group_by(InvolvedMarkerView.accident_year, InvolvedMarkerView.injury_severity)
+            )
 
             self.items = add_empty_keys_to_gen_two_level_dict(
                 self.convert_to_dict(query.all()),
                 InjurySeverity.codes(),
-                list(range(self.request_params.start_time.year,
-                           self.request_params.end_time.year + 1))
+                list(
+                    range(
+                        self.request_params.start_time.year, self.request_params.end_time.year + 1
+                    )
+                ),
             )
 
         except Exception as e:
@@ -1184,9 +1229,10 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
             "title": f"נפגעים הולכי רגל ב- {get_news_flash_location_text(request_params.news_flash_obj)}",
-            "labels": gen_entity_labels(InjurySeverity)
+            "labels": gen_entity_labels(InjurySeverity),
         }
         return items
+
 
 @register
 class AccidentSeverityByCrossLocationWidget(SubUrbanWidget):
@@ -1590,7 +1636,7 @@ def get_accidents_stats(
                 res = retro_dictify(dd)
                 return res
             else:
-                err_msg = f'get_accidents_stats: {group_by}: Only a string or a tuple of two are valid for group_by'
+                err_msg = f"get_accidents_stats: {group_by}: Only a string or a tuple of two are valid for group_by"
                 logging.error(err_msg)
                 raise Exception(err_msg)
         else:
@@ -1604,8 +1650,9 @@ def get_accidents_stats(
     )
 
 
-def add_empty_keys_to_gen_two_level_dict(d, level_1_values: List[Any], level_2_values: List[Any],
-                                         default_level_3_value: int = 0) -> Dict[Any, Dict[Any, int]]:
+def add_empty_keys_to_gen_two_level_dict(
+    d, level_1_values: List[Any], level_2_values: List[Any], default_level_3_value: int = 0
+) -> Dict[Any, Dict[Any, int]]:
     for v1 in level_1_values:
         if v1 not in d:
             d[v1] = {}
@@ -1622,7 +1669,7 @@ def retro_dictify(indexable) -> Dict[Any, Dict[Any, Any]]:
         here = d
         for elem in row[:-2]:
             if elem not in here:
-                here[elem] = defaultdict(lambda : 0)
+                here[elem] = defaultdict(lambda: 0)
             here = here[elem]
         here[row[-2]] = row[-1]
     return d
@@ -1775,8 +1822,7 @@ def gen_entity_labels(entity: Type[LabeledCode]) -> dict:
     res = {}
     for e in entity:
         label = e.get_label()
-        res[e.value] = {"name": label,
-                        "localized_name": _(label)}
+        res[e.value] = {"name": label, "localized_name": _(label)}
     return res
 
 
@@ -1852,12 +1898,13 @@ def create_infographics_data(news_flash_id, number_of_years_ago, lang: str) -> s
     return json.dumps(output, default=str)
 
 
-# def create_infographics_data_1(request_params: RequestParams) -> str:
-#     output = create_infographics_items(request_params)
-#     return json.dumps(output, default=str)
-
-
 def create_infographics_items(request_params: RequestParams) -> Dict:
+    def get_dates_comment():
+        return {
+            "date_range": [request_params.start_time.year, request_params.end_time.year],
+            "last_update": time.mktime(request_params.end_time.timetuple())
+        }
+
     try:
         if request_params is None:
             return {}
@@ -1874,15 +1921,9 @@ def create_infographics_items(request_params: RequestParams) -> Dict:
         output["meta"] = {
             "location_info": request_params.location_info.copy(),
             "location_text": request_params.location_text,
+            "dates_comment": get_dates_comment()
         }
         output["widgets"] = []
-        output["meta"]["dates_comment"] = (
-            str(request_params.start_time.year)
-            + "-"
-            + str(request_params.end_time.year)
-            + ", עדכון אחרון: "
-            + str(request_params.end_time)
-        )
         widgets: List[Widget] = generate_widgets(request_params=request_params, to_cache=True)
         widgets.extend(generate_widgets(request_params=request_params, to_cache=False))
         output["widgets"].extend(list(map(lambda w: w.serialize(), widgets)))

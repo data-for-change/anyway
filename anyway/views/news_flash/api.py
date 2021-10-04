@@ -49,6 +49,7 @@ class NewsFlashQuery(BaseModel):
             raise ValueError(f"Resolution must be one of: {supported_resolutions}")
         return requested_resolutions
 
+
 def news_flash():
     news_flash_id = request.values.get("id")
 
@@ -276,7 +277,7 @@ def filter_by_resolutions(query, resolutions: List[str]):
 # Single valued params are converted to their value.
 def normalize_query_param(key, value: list):
     multi_value_params = ["source", "resolution"]
-    return value if key in  multi_value_params else value.pop()
+    return value if key in multi_value_params else value.pop()
 
 
 def normalize_query(params: dict):

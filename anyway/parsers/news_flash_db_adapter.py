@@ -36,11 +36,13 @@ class DBAdapter:
                         road2,
                         non_urban_intersection_hebrew,
                         yishuv_name,
+                        yishuv_symbol,
                         street1_hebrew,
                         street2_hebrew,
                         district_hebrew,
                         region_hebrew,
                         road_segment_name,
+                        road_segment_id,
                         longitude,
                         latitude
                     FROM markers_hebrew

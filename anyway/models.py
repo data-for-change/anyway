@@ -835,10 +835,12 @@ class NewsFlash(Base):
     region_hebrew = Column(Text(), nullable=True)
     district_hebrew = Column(Text(), nullable=True)
     yishuv_name = Column(Text(), nullable=True)
+    yishuv_symbol = Column(Integer(), nullable=True)
     street1_hebrew = Column(Text(), nullable=True)
     street2_hebrew = Column(Text(), nullable=True)
     non_urban_intersection_hebrew = Column(Text(), nullable=True)
     road_segment_name = Column(Text(), nullable=True)
+    road_segment_id = Column(Integer(), nullable=True)
 
     def serialize(self):
         return {
@@ -2933,10 +2935,12 @@ class CBSLocations(Base):
     road2 = Column(Integer(), nullable=True)
     non_urban_intersection_hebrew = Column(Text(), nullable=True)
     yishuv_name = Column(Text(), nullable=True)
+    yishuv_symbol = Column(Integer(), nullable=True)
     street1_hebrew = Column(Text(), nullable=True)
     street2_hebrew = Column(Text(), nullable=True)
     district_hebrew = Column(Text(), nullable=True)
     region_hebrew = Column(Text(), nullable=True)
     road_segment_name = Column(Text(), nullable=True)
+    road_segment_id = Column(Integer(), nullable=True)
     longitude = Column(Float(), nullable=True)
     latitude = Column(Float(), nullable=True)

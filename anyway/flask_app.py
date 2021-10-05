@@ -1361,9 +1361,8 @@ parser.add_argument("id", type=int, help="News flash id")
 parser.add_argument(
     "years_ago", type=int, default=5, help="Number of years back to consider accidents"
 )
-parser.add_argument(
-    "lang", type=str, default="he", help="Language"
-)
+parser.add_argument("lang", type=str, default="he", help="Language")
+
 
 @api.route("/api/infographics-data", methods=["GET"])
 class InfographicsData(Resource):
@@ -1423,10 +1422,11 @@ class GPSToLocation(Resource):
             with open(os.path.join(path, file)) as f:
                 mock_data = json.loads(f.read())
             return mock_data
+
         output = get_gps_to_location_mock_data()
         json_data = json.dumps(output, default=str)
         return Response(json_data, mimetype="application/json")
-        #return gps_to_cbs_location()
+        # return gps_to_cbs_location()
 
 
 def gps_to_cbs_location():
@@ -1463,9 +1463,8 @@ idbl_parser.add_argument("road_segment_id", type=int, help="Road Segment id")
 idbl_parser.add_argument(
     "years_ago", type=int, default=5, help="Number of years back to consider accidents"
 )
-idbl_parser.add_argument(
-    "lang", type=str, default="he", help="Language"
-)
+idbl_parser.add_argument("lang", type=str, default="he", help="Language")
+
 
 @api.route("/api/infographics-data-by-location", methods=["GET"])
 class InfographicsDataByLocation(Resource):
@@ -1473,6 +1472,8 @@ class InfographicsDataByLocation(Resource):
     @api.expect(idbl_parser)
     def get(self):
         return infographics_data_by_location()
+
+
 def infographics_data_by_location():
     output = get_infographics_mock_data()
     json_data = json.dumps(output, default=str)

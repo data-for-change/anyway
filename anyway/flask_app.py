@@ -1162,7 +1162,7 @@ app.add_url_rule(
 )
 app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
 
-app.add_url_rule("/api/news-flash_v2", endpoint=None, view_func=news_flash_v2, methods=["GET"])
+app.add_url_rule("/api/news-flash-v2", endpoint=None, view_func=news_flash_v2, methods=["GET"])
 
 
 nf_parser = reqparse.RequestParser()

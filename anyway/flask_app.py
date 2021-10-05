@@ -1162,7 +1162,7 @@ app.add_url_rule(
 )
 app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
 
-app.add_url_rule("/api/news-flash_v2", endpoint=None, view_func=news_flash_v2, methods=["GET"])
+app.add_url_rule("/api/news-flash-v2", endpoint=None, view_func=news_flash_v2, methods=["GET"])
 
 
 nf_parser = reqparse.RequestParser()
@@ -1361,7 +1361,9 @@ parser.add_argument("id", type=int, help="News flash id")
 parser.add_argument(
     "years_ago", type=int, default=5, help="Number of years back to consider accidents"
 )
-
+parser.add_argument(
+    "lang", type=str, default="he", help="Language"
+)
 
 @api.route("/api/infographics-data", methods=["GET"])
 class InfographicsData(Resource):
@@ -1453,14 +1455,24 @@ def gps_to_cbs_location():
     return abort(http_client.NOT_FOUND)
 
 
+"""
+    Returns infographics-data-by0location API
+"""
+idbl_parser = reqparse.RequestParser()
+idbl_parser.add_argument("road_segment_id", type=int, help="Road Segment id")
+idbl_parser.add_argument(
+    "years_ago", type=int, default=5, help="Number of years back to consider accidents"
+)
+idbl_parser.add_argument(
+    "lang", type=str, default="he", help="Language"
+)
+
 @api.route("/api/infographics-data-by-location", methods=["GET"])
 class InfographicsDataByLocation(Resource):
     @api.doc("get infographics data")
-    @api.expect(parser)
+    @api.expect(idbl_parser)
     def get(self):
         return infographics_data_by_location()
-
-
 def infographics_data_by_location():
     output = get_infographics_mock_data()
     json_data = json.dumps(output, default=str)

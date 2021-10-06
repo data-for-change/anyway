@@ -1410,23 +1410,20 @@ def infographics_data():
     return Response(json_data, mimetype="application/json")
 
 
+"""
+    Returns GPS to CBS location
+"""
+gps_parser = reqparse.RequestParser()
+gps_parser.add_argument("longitude", type=float, help="longitude")
+gps_parser.add_argument("latitude", type=float, help="latitude")
+
+
 @api.route("/api/gps-to-location", methods=["GET"])
 class GPSToLocation(Resource):
     @api.doc("from gps to location")
-    @api.expect(parser)
+    @api.expect(gps_parser)
     def get(self):
-        def get_gps_to_location_mock_data():
-            mock_data = {}
-            path = os.path.join("static", "data", "gps_to_location")
-            file = "gps_to_location.json"
-            with open(os.path.join(path, file)) as f:
-                mock_data = json.loads(f.read())
-            return mock_data
-
-        output = get_gps_to_location_mock_data()
-        json_data = json.dumps(output, default=str)
-        return Response(json_data, mimetype="application/json")
-        # return gps_to_cbs_location()
+        return gps_to_cbs_location()
 
 
 def gps_to_cbs_location():
@@ -1436,24 +1433,14 @@ def gps_to_cbs_location():
         log_bad_request(request)
         return abort(http_client.BAD_REQUEST)
     from anyway.parsers.news_flash_db_adapter import init_db
-    from anyway.parsers.location_extraction import extract_geo_features_from_geo_location
-
-    db = init_db()
-    location = extract_geo_features_from_geo_location(db, latitude, longitude)
+    from anyway.parsers.location_extraction import get_db_matching_location_interurban, get_road_segment_id
+    location = get_db_matching_location_interurban(float(latitude), float(longitude))
     if not location:
         logging.info("location not exist")
-    # logging.info(location)
-    if "road1" in location and "road_segment_name" in location:
-        location["resolution"] = "interurban_road_segment"
-        location["road_segment_id"] = 1341
-        json_data = json.dumps(location, default=str)
-        return Response(json_data, mimetype="application/json")
-    if "yishuv_name" in location and "street1_hebrew" in location:
-        location["resolution"] = "street"
-        json_data = json.dumps(location, default=str)
-        return Response(json_data, mimetype="application/json")
-    return abort(http_client.NOT_FOUND)
-
+    location["resolution"] = "interurban_road_segment"
+    location["road_segment_id"] = get_road_segment_id(road_segment_name=location["road_segment_name"])
+    json_data = json.dumps(location, default=str)
+    return Response(json_data, mimetype="application/json")
 
 """
     Returns infographics-data-by0location API

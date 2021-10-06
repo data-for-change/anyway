@@ -3,7 +3,13 @@
 from datetime import datetime
 from typing import Dict
 from sqlalchemy import not_
-from anyway.models import InfographicsDataCache, InfographicsDataCacheTemp, NewsFlash, RoadSegments, InfographicsRoadSegmentsDataCache
+from anyway.models import (
+    InfographicsDataCache,
+    InfographicsDataCacheTemp,
+    NewsFlash,
+    RoadSegments,
+    InfographicsRoadSegmentsDataCache,
+)
 from anyway.constants import CONST
 from anyway.backend_constants import BE_CONST
 from anyway.app_and_db import db
@@ -76,6 +82,7 @@ def get_infographics_data_from_cache(news_flash_id, years_ago) -> Dict:
         )
         return {}
 
+
 def get_infographics_data_from_cache_by_road_segment(road_segment_id, years_ago) -> Dict:
     db_item = (
         db.session.query(InfographicsRoadSegmentsDataCache)
@@ -97,6 +104,7 @@ def get_infographics_data_from_cache_by_road_segment(road_segment_id, years_ago)
             f":cause:{e.__cause__}, class:{e.__class__}"
         )
         return {}
+
 
 def copy_temp_into_cache():
     num_items_cache = db.session.query(InfographicsDataCache).count()
@@ -169,13 +177,10 @@ def build_cache_for_road_segments():
                         road_segment.get_id(), y, "he"
                     ),
                 }
-                for road_segment in db.session.query(RoadSegments)
-                .all()
+                for road_segment in db.session.query(RoadSegments).all()
             ],
         )
     logging.info(f"cache rebuild took:{str(datetime.now() - start)}")
-
-
 
 
 def get_cache_info():
@@ -192,6 +197,7 @@ def get_cache_info():
     db.session.commit()
     return f"num items in cache: {cache_items}, temp table: {tmp_items}, accident flashes:{num_acc_flash_items}, flashes processed:{num_acc_suburban_flash_items}"
 
+
 def main_for_road_segments(update, info):
     if update:
         logging.info("Refreshing road segments infographics cache...")
@@ -201,6 +207,7 @@ def main_for_road_segments(update, info):
         logging.info(get_cache_info())
     else:
         logging.debug(f"{info}")
+
 
 def main(update, info):
     if update:

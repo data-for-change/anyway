@@ -78,7 +78,11 @@ from anyway.models import (
     users_to_roles,
 )
 from anyway.oauth import OAuthSignIn
-from anyway.infographics_utils import get_infographics_data, get_infographics_mock_data, get_infographics_data_for_road_segment
+from anyway.infographics_utils import (
+    get_infographics_data,
+    get_infographics_mock_data,
+    get_infographics_data_for_road_segment,
+)
 from anyway.app_and_db import app, db, api, get_cors_config
 from anyway.anyway_dataclasses.user_data import UserData
 from anyway.utilities import (
@@ -1433,14 +1437,21 @@ def gps_to_cbs_location():
         log_bad_request(request)
         return abort(http_client.BAD_REQUEST)
     from anyway.parsers.news_flash_db_adapter import init_db
-    from anyway.parsers.location_extraction import get_db_matching_location_interurban, get_road_segment_id
+    from anyway.parsers.location_extraction import (
+        get_db_matching_location_interurban,
+        get_road_segment_id,
+    )
+
     location = get_db_matching_location_interurban(float(latitude), float(longitude))
     if not location:
         logging.info("location not exist")
     location["resolution"] = "interurban_road_segment"
-    location["road_segment_id"] = get_road_segment_id(road_segment_name=location["road_segment_name"])
+    location["road_segment_id"] = get_road_segment_id(
+        road_segment_name=location["road_segment_name"]
+    )
     json_data = json.dumps(location, default=str)
     return Response(json_data, mimetype="application/json")
+
 
 """
     Returns infographics-data-by-location API

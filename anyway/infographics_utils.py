@@ -918,7 +918,10 @@ class Road2Plus1Widget(SubUrbanWidget):
 
         if location_info["road1"] and location_info["road_segment_name"]:
             filter_dict.update(
-                {"road1": location_info["road1"], "road_segment_name": location_info["road_segment_name"]}
+                {
+                    "road1": location_info["road1"],
+                    "road_segment_name": location_info["road_segment_name"],
+                }
             )
             road_data = get_accidents_stats(
                 table_obj=AccidentMarkerView,
@@ -1137,7 +1140,7 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
         return items
 
 
-#@register
+# @register
 class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
     name: str = "injured_accidents_with_pedestrians"
 
@@ -1610,7 +1613,6 @@ def extract_road_segment_location(road_segment_id):
     return {"name": "location", "data": data, "gps": gps}
 
 
-
 def get_query(table_obj, filters, start_time, end_time):
     query = db.session.query(table_obj)
     if start_time:
@@ -1779,7 +1781,6 @@ def get_news_flash_location_text(news_flash_obj: NewsFlash):
     return res
 
 
-
 # generate text describing location or road segment of news flash
 # to be used by most severe accidents additional info widget
 def get_road_segment_location_text(road1, road_segment_name):
@@ -1910,7 +1911,6 @@ def get_request_params(
     return request_params
 
 
-
 def get_request_params_for_road_segment(
     road_segment_id: int, number_of_years_ago: int, lang: str
 ) -> Optional[RequestParams]:
@@ -1924,7 +1924,9 @@ def get_request_params_for_road_segment(
     if location_info is None:
         return None
     logging.debug("location_info:{}".format(location_info))
-    location_text = get_road_segment_location_text(location_info["data"]["road1"], location_info["data"]["road_segment_name"])
+    location_text = get_road_segment_location_text(
+        location_info["data"]["road1"], location_info["data"]["road_segment_name"]
+    )
     logging.debug("location_text:{}".format(location_text))
     gps = location_info["gps"]
     location_info = location_info["data"]
@@ -1955,15 +1957,20 @@ def get_request_params_for_road_segment(
     logging.debug(f"Ending get_request_params. params: {request_params}")
     return request_params
 
+
 def create_infographics_data(news_flash_id, number_of_years_ago, lang: str) -> str:
     request_params = get_request_params(news_flash_id, number_of_years_ago, lang)
     output = create_infographics_items(request_params)
     return json.dumps(output, default=str)
 
-def create_infographics_data_for_road_segment(road_segment_id, number_of_years_ago, lang: str) -> str:
+
+def create_infographics_data_for_road_segment(
+    road_segment_id, number_of_years_ago, lang: str
+) -> str:
     request_params = get_request_params_for_road_segment(road_segment_id, number_of_years_ago, lang)
     output = create_infographics_items(request_params)
     return json.dumps(output, default=str)
+
 
 # def create_infographics_data_1(request_params: RequestParams) -> str:
 #     output = create_infographics_items(request_params)
@@ -2036,8 +2043,10 @@ def get_infographics_data_for_road_segment(road_segment_id, years_ago, lang: str
         output = create_infographics_items(request_params)
     else:
         try:
-            output = infographics_data_cache_updater.get_infographics_data_from_cache_by_road_segment(
-                road_segment_id, years_ago
+            output = (
+                infographics_data_cache_updater.get_infographics_data_from_cache_by_road_segment(
+                    road_segment_id, years_ago
+                )
             )
         except Exception as e:
             logging.error(

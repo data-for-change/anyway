@@ -43,22 +43,20 @@ def get_road_segment_id(road_segment_name) -> int:
     from_name = road_segment_name.split("-")[0].strip()
     to_name = road_segment_name.split("-")[1].strip()
     query_obj = (
-            db.session.query(RoadSegments)
-                .filter(RoadSegments.from_name == from_name)
-                .filter(RoadSegments.to_name == to_name)
-        )
+        db.session.query(RoadSegments)
+        .filter(RoadSegments.from_name == from_name)
+        .filter(RoadSegments.to_name == to_name)
+    )
     segment = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
     return segment.iloc[0]["id"]
+
 
 def get_road_segment_name_and_number(road_segment_id) -> (int, str):
     try:
         from anyway.app_and_db import db
     except ModuleNotFoundError:
         pass
-    query_obj = (
-            db.session.query(RoadSegments)
-                .filter(RoadSegments.id == road_segment_id)
-        )
+    query_obj = db.session.query(RoadSegments).filter(RoadSegments.id == road_segment_id)
     segment = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
     from_name = segment.iloc[0]["from_name"]
     to_name = segment.iloc[0]["to_name"]
@@ -106,12 +104,12 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
     )
 
     query_obj = (
-            db.session.query(AccidentMarkerView)
-                .filter(AccidentMarkerView.geom.intersects(polygon_str))
-                .filter(AccidentMarkerView.accident_year >= 2014)
-                .filter(AccidentMarkerView.provider_code != BE_CONST.RSA_PROVIDER_CODE)
-                .filter(not_(AccidentMarkerView.road_segment_name == None))
-        )
+        db.session.query(AccidentMarkerView)
+        .filter(AccidentMarkerView.geom.intersects(polygon_str))
+        .filter(AccidentMarkerView.accident_year >= 2014)
+        .filter(AccidentMarkerView.provider_code != BE_CONST.RSA_PROVIDER_CODE)
+        .filter(not_(AccidentMarkerView.road_segment_name == None))
+    )
     markers = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
 
     geod = Geodesic.WGS84

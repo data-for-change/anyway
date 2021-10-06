@@ -165,7 +165,7 @@ def build_cache_for_road_segments():
     start = datetime.now()
     db.session.query(InfographicsRoadSegmentsDataCache).delete()
     db.session.commit()
-    for y in CONST.INFOGRAPHICS_CACHE_YEARS_AGO:
+    for y in [5, 8]:
         logging.debug(f"processing years_ago:{y}")
         db.get_engine().execute(
             InfographicsRoadSegmentsDataCache.__table__.insert(),  # pylint: disable=no-member

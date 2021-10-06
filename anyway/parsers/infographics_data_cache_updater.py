@@ -180,6 +180,7 @@ def build_cache_for_road_segments():
                 for road_segment in db.session.query(RoadSegments).all()
             ],
         )
+        db.session.commit()
     logging.info(f"cache rebuild took:{str(datetime.now() - start)}")
 
 

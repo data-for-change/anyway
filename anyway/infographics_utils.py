@@ -1140,7 +1140,7 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
         return items
 
 
-# @register
+@register
 class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
     name: str = "injured_accidents_with_pedestrians"
 

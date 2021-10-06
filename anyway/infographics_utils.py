@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import time
 import logging
 import datetime
 import json
@@ -1168,6 +1169,7 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 18
+        self.information = "Injured and killed pedestrians by severity and year"
 
     def generate_items(self) -> None:
         try:
@@ -1971,13 +1973,13 @@ def create_infographics_data_for_road_segment(
     output = create_infographics_items(request_params)
     return json.dumps(output, default=str)
 
-
-# def create_infographics_data_1(request_params: RequestParams) -> str:
-#     output = create_infographics_items(request_params)
-#     return json.dumps(output, default=str)
-
-
 def create_infographics_items(request_params: RequestParams) -> Dict:
+    def get_dates_comment():
+        return {
+            "date_range": [request_params.start_time.year, request_params.end_time.year],
+            "last_update": time.mktime(request_params.end_time.timetuple())
+        }
+
     try:
         if request_params is None:
             return {}
@@ -1994,15 +1996,9 @@ def create_infographics_items(request_params: RequestParams) -> Dict:
         output["meta"] = {
             "location_info": request_params.location_info.copy(),
             "location_text": request_params.location_text,
+            "dates_comment": get_dates_comment()
         }
         output["widgets"] = []
-        output["meta"]["dates_comment"] = (
-            str(request_params.start_time.year)
-            + "-"
-            + str(request_params.end_time.year)
-            + ", עדכון אחרון: "
-            + str(request_params.end_time)
-        )
         widgets: List[Widget] = generate_widgets(request_params=request_params, to_cache=True)
         widgets.extend(generate_widgets(request_params=request_params, to_cache=False))
         output["widgets"].extend(list(map(lambda w: w.serialize(), widgets)))

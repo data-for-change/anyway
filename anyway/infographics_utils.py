@@ -44,6 +44,7 @@ from anyway.infographics_dictionaries import (
 from anyway.parsers import infographics_data_cache_updater
 from anyway.utilities import parse_age_from_range
 from anyway.vehicle_type import VehicleCategory
+from anyway.parsers.location_extraction import get_road_segment_name_and_number
 
 
 @dataclass
@@ -421,7 +422,7 @@ class HeadOnCollisionsComparisonWidget(SubUrbanWidget):
         self.items = self.get_head_to_head_stat()
 
     def get_head_to_head_stat(self) -> Dict:
-        news_flash = self.request_params.news_flash_obj
+        location_info = self.request_params.location_info
         road_data = {}
 
         filter_dict = {
@@ -437,11 +438,11 @@ class HeadOnCollisionsComparisonWidget(SubUrbanWidget):
             end_time=self.request_params.end_time,
         )
 
-        if news_flash.road1 and news_flash.road_segment_name:
+        if location_info["road1"] and location_info["road_segment_name"]:
             filter_dict.update(
                 {
-                    "road1": news_flash.road1,
-                    "road_segment_name": news_flash.road_segment_name,
+                    "road1": location_info["road1"],
+                    "road_segment_name": location_info["road_segment_name"],
                 }
             )
             road_data = get_accidents_stats(
@@ -910,15 +911,18 @@ class Road2Plus1Widget(SubUrbanWidget):
         self.items = {"image_src": "vision_zero_2_plus_1"}
 
     def get_frontal_accidents_in_past_year(self) -> Optional[int]:
-        news_flash = self.request_params.news_flash_obj
+        location_info = self.request_params.location_info
         road_data = {}
         filter_dict = {
             "road_type": BE_CONST.ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION,
         }
 
-        if news_flash.road1 and news_flash.road_segment_name:
+        if location_info["road1"] and location_info["road_segment_name"]:
             filter_dict.update(
-                {"road1": news_flash.road1, "road_segment_name": news_flash.road_segment_name}
+                {
+                    "road1": location_info["road1"],
+                    "road_segment_name": location_info["road_segment_name"],
+                }
             )
             road_data = get_accidents_stats(
                 table_obj=AccidentMarkerView,
@@ -1228,7 +1232,7 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
-            "title": f"נפגעים הולכי רגל ב- {get_news_flash_location_text(request_params.news_flash_obj)}",
+            "title": f"נפגעים הולכי רגל ב- {request_params.location_text}",
             "labels": gen_entity_labels(InjurySeverity),
         }
         return items
@@ -1601,6 +1605,16 @@ def extract_news_flash_location(news_flash_obj):
     return {"name": "location", "data": data, "gps": gps}
 
 
+def extract_road_segment_location(road_segment_id):
+    data = {"resolution": "interurban_road_segment"}
+    road1, road_segment_name = get_road_segment_name_and_number(road_segment_id)
+    data["road1"] = road1
+    data["road_segment_name"] = road_segment_name
+    # fake gps - todo: fix
+    gps = {"lat": 32.825610, "lon": 35.165395}
+    return {"name": "location", "data": data, "gps": gps}
+
+
 def get_query(table_obj, filters, start_time, end_time):
     query = db.session.query(table_obj)
     if start_time:
@@ -1769,6 +1783,13 @@ def get_news_flash_location_text(news_flash_obj: NewsFlash):
     return res
 
 
+# generate text describing location or road segment of news flash
+# to be used by most severe accidents additional info widget
+def get_road_segment_location_text(road1, road_segment_name):
+    res = "כביש " + str(road1) + " במקטע " + road_segment_name
+    return res
+
+
 def extract_news_flash_obj(news_flash_id):
     news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == news_flash_id).first()
 
@@ -1892,11 +1913,65 @@ def get_request_params(
     return request_params
 
 
+def get_request_params_for_road_segment(
+    road_segment_id: int, number_of_years_ago: int, lang: str
+) -> Optional[RequestParams]:
+    try:
+        number_of_years_ago = int(number_of_years_ago)
+    except ValueError:
+        return None
+    if number_of_years_ago < 0 or number_of_years_ago > 100:
+        return None
+    location_info = extract_road_segment_location(road_segment_id)
+    if location_info is None:
+        return None
+    logging.debug("location_info:{}".format(location_info))
+    location_text = get_road_segment_location_text(
+        location_info["data"]["road1"], location_info["data"]["road_segment_name"]
+    )
+    logging.debug("location_text:{}".format(location_text))
+    gps = location_info["gps"]
+    location_info = location_info["data"]
+    resolution = location_info.pop("resolution")
+    if resolution is None:
+        return None
+
+    if all(value is None for value in location_info.values()):
+        return None
+
+    last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
+    # converting to datetime object to get the date
+    end_time = last_accident_date.to_pydatetime().date()
+
+    start_time = datetime.date(end_time.year + 1 - number_of_years_ago, 1, 1)
+
+    request_params = RequestParams(
+        news_flash_obj=None,
+        years_ago=number_of_years_ago,
+        location_text=location_text,
+        location_info=location_info,
+        resolution=resolution,
+        gps=gps,
+        start_time=start_time,
+        end_time=end_time,
+        lang=lang,
+    )
+    logging.debug(f"Ending get_request_params. params: {request_params}")
+    return request_params
+
+
 def create_infographics_data(news_flash_id, number_of_years_ago, lang: str) -> str:
     request_params = get_request_params(news_flash_id, number_of_years_ago, lang)
     output = create_infographics_items(request_params)
     return json.dumps(output, default=str)
 
+
+def create_infographics_data_for_road_segment(
+    road_segment_id, number_of_years_ago, lang: str
+) -> str:
+    request_params = get_request_params_for_road_segment(road_segment_id, number_of_years_ago, lang)
+    output = create_infographics_items(request_params)
+    return json.dumps(output, default=str)
 
 def create_infographics_items(request_params: RequestParams) -> Dict:
     def get_dates_comment():
@@ -1951,6 +2026,32 @@ def get_infographics_data(news_flash_id, years_ago, lang: str) -> Dict:
             output = {}
     if not output:
         logging.error(f"infographics_data({news_flash_id}, {years_ago}) not found in cache")
+    elif "widgets" not in output:
+        logging.error(f"get_infographics_data: 'widgets' key missing from output:{output}")
+    else:
+        output["widgets"] = localize_after_cache(request_params, output["widgets"])
+    return output
+
+
+def get_infographics_data_for_road_segment(road_segment_id, years_ago, lang: str) -> Dict:
+    request_params = get_request_params_for_road_segment(road_segment_id, years_ago, lang)
+    if os.environ.get("FLASK_ENV") == "development":
+        output = create_infographics_items(request_params)
+    else:
+        try:
+            output = (
+                infographics_data_cache_updater.get_infographics_data_from_cache_by_road_segment(
+                    road_segment_id, years_ago
+                )
+            )
+        except Exception as e:
+            logging.error(
+                f"Exception while retrieving from infographics cache({road_segment_id},{years_ago})"
+                f":cause:{e.__cause__}, class:{e.__class__}"
+            )
+            output = {}
+    if not output:
+        logging.error(f"infographics_data({road_segment_id}, {years_ago}) not found in cache")
     elif "widgets" not in output:
         logging.error(f"get_infographics_data: 'widgets' key missing from output:{output}")
     else:

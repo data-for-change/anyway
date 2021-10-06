@@ -115,7 +115,7 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
     geod = Geodesic.WGS84
     # relevant_fields = resolution_dict[resolution]
     # markers = db.get_markers_for_location_extraction()
-    markers["geohash"] = markers.apply(
+    markers["geohash"] = markers.apply(  # pylint: disable=maybe-no-member
         lambda x: geohash.encode(x["latitude"], x["longitude"], precision=4), axis=1
     )  # pylint: disable=maybe-no-member
     markers_orig = markers.copy()  # pylint: disable=maybe-no-member

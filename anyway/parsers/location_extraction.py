@@ -48,7 +48,7 @@ def get_road_segment_id(road_segment_name) -> int:
         .filter(RoadSegments.to_name == to_name)
     )
     segment = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-    return segment.iloc[0]["id"] # pylint: disable=maybe-no-member
+    return segment.iloc[0]["id"]  # pylint: disable=maybe-no-member
 
 
 def get_road_segment_name_and_number(road_segment_id) -> (int, str):
@@ -58,10 +58,10 @@ def get_road_segment_name_and_number(road_segment_id) -> (int, str):
         pass
     query_obj = db.session.query(RoadSegments).filter(RoadSegments.id == road_segment_id)
     segment = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-    from_name = segment.iloc[0]["from_name"] # pylint: disable=maybe-no-member
-    to_name = segment.iloc[0]["to_name"] # pylint: disable=maybe-no-member
+    from_name = segment.iloc[0]["from_name"]  # pylint: disable=maybe-no-member
+    to_name = segment.iloc[0]["to_name"]  # pylint: disable=maybe-no-member
     road_segment_name = " - ".join([from_name, to_name])
-    road = segment.iloc[0]["road"] # pylint: disable=maybe-no-member
+    road = segment.iloc[0]["road"]  # pylint: disable=maybe-no-member
     return float(road), road_segment_name
 
 
@@ -117,9 +117,9 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
     # markers = db.get_markers_for_location_extraction()
     markers["geohash"] = markers.apply(
         lambda x: geohash.encode(x["latitude"], x["longitude"], precision=4), axis=1
-    ) # pylint: disable=maybe-no-member
-    markers_orig = markers.copy() # pylint: disable=maybe-no-member
-    markers = markers.loc[(markers["road1"] != None)] # pylint: disable=maybe-no-member
+    )  # pylint: disable=maybe-no-member
+    markers_orig = markers.copy()  # pylint: disable=maybe-no-member
+    markers = markers.loc[(markers["road1"] != None)]  # pylint: disable=maybe-no-member
     if markers.count()[0] == 0:
         markers = markers_orig
 

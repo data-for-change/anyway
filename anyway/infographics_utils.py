@@ -1973,11 +1973,12 @@ def create_infographics_data_for_road_segment(
     output = create_infographics_items(request_params)
     return json.dumps(output, default=str)
 
+
 def create_infographics_items(request_params: RequestParams) -> Dict:
     def get_dates_comment():
         return {
             "date_range": [request_params.start_time.year, request_params.end_time.year],
-            "last_update": time.mktime(request_params.end_time.timetuple())
+            "last_update": time.mktime(request_params.end_time.timetuple()),
         }
 
     try:
@@ -1996,7 +1997,7 @@ def create_infographics_items(request_params: RequestParams) -> Dict:
         output["meta"] = {
             "location_info": request_params.location_info.copy(),
             "location_text": request_params.location_text,
-            "dates_comment": get_dates_comment()
+            "dates_comment": get_dates_comment(),
         }
         output["widgets"] = []
         widgets: List[Widget] = generate_widgets(request_params=request_params, to_cache=True)

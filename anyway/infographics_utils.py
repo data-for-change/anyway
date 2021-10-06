@@ -123,7 +123,7 @@ class Widget:
         return bool(self.items)
 
     def generate_items(self) -> None:
-        """ Generates the data of the widget and set it to self.items"""
+        """Generates the data of the widget and set it to self.items"""
         pass
 
     @staticmethod
@@ -804,6 +804,7 @@ class TopRoadSegmentsAccidentsPerKmWidget(SubUrbanWidget):
         return result.to_dict(orient="records")  # pylint: disable=no-member
 
 
+@register
 class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
     name: str = "injured_count_per_age_group"
 
@@ -819,6 +820,7 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
     @staticmethod
     def filter_and_group_injured_count_per_age_group(request_params: RequestParams):
         road_number = request_params.location_info["road1"]
+        road_segment = request_params.location_info["road_segment_name"]
 
         query = (
             db.session.query(InvolvedMarkerView)
@@ -844,6 +846,7 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
                 (InvolvedMarkerView.road1 == road_number)
                 | (InvolvedMarkerView.road2 == road_number)
             )
+            .filter(InvolvedMarkerView.road_segment_name == road_segment)
             .group_by("age_group", "injury_severity")
             .with_entities("age_group", "injury_severity", func.count().label("count"))
         )
@@ -1902,7 +1905,7 @@ def create_infographics_items(request_params: RequestParams) -> Dict:
     def get_dates_comment():
         return {
             "date_range": [request_params.start_time.year, request_params.end_time.year],
-            "last_update": time.mktime(request_params.end_time.timetuple())
+            "last_update": time.mktime(request_params.end_time.timetuple()),
         }
 
     try:
@@ -1921,7 +1924,7 @@ def create_infographics_items(request_params: RequestParams) -> Dict:
         output["meta"] = {
             "location_info": request_params.location_info.copy(),
             "location_text": request_params.location_text,
-            "dates_comment": get_dates_comment()
+            "dates_comment": get_dates_comment(),
         }
         output["widgets"] = []
         widgets: List[Widget] = generate_widgets(request_params=request_params, to_cache=True)

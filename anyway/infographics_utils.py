@@ -1237,6 +1237,8 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
         }
         return items
 
+# adding calls to _() for pybabel extraction
+_("Injured and killed pedestrians by severity and year")
 
 @register
 class AccidentSeverityByCrossLocationWidget(SubUrbanWidget):

@@ -1,14 +1,19 @@
 import logging
 import re
-
+import math
 import geohash  # python-geohash package
 import googlemaps
 import numpy as np
 from geographiclib.geodesic import Geodesic
-
+from anyway.backend_constants import BE_CONST
 from anyway.models import NewsFlash
 from anyway.parsers import resolution_dict
 from anyway import secrets
+from anyway.models import AccidentMarkerView, RoadSegments
+from sqlalchemy import (
+    not_,
+)
+import pandas as pd
 
 
 def extract_road_number(location):
@@ -28,6 +33,117 @@ def extract_road_number(location):
         else:
             logging.info("bug in extract road number")
     return None
+
+
+def get_road_segment_id(road_segment_name) -> int:
+    try:
+        from anyway.app_and_db import db
+    except ModuleNotFoundError:
+        pass
+    from_name = road_segment_name.split("-")[0].strip()
+    to_name = road_segment_name.split("-")[1].strip()
+    query_obj = (
+        db.session.query(RoadSegments)
+        .filter(RoadSegments.from_name == from_name)
+        .filter(RoadSegments.to_name == to_name)
+    )
+    segment = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+    return segment.iloc[0]["id"]
+
+
+def get_road_segment_name_and_number(road_segment_id) -> (int, str):
+    try:
+        from anyway.app_and_db import db
+    except ModuleNotFoundError:
+        pass
+    query_obj = db.session.query(RoadSegments).filter(RoadSegments.id == road_segment_id)
+    segment = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+    from_name = segment.iloc[0]["from_name"]
+    to_name = segment.iloc[0]["to_name"]
+    road_segment_name = " - ".join([from_name, to_name])
+    road = segment.iloc[0]["road"]
+    return float(road), road_segment_name
+
+
+def get_db_matching_location_interurban(latitude, longitude) -> dict:
+    """
+    extracts location from db by closest geo point to location found, using road number if provided and limits to
+    requested resolution
+    :param latitude: location latitude
+    :param longitude: location longitude
+    """
+
+    def get_bounding_box(latitude, longitude, distance_in_km):
+        latitude = math.radians(latitude)
+        longitude = math.radians(longitude)
+
+        radius = 6371
+        # Radius of the parallel at given latitude
+        parallel_radius = radius * math.cos(latitude)
+
+        lat_min = latitude - distance_in_km / radius
+        lat_max = latitude + distance_in_km / radius
+        lon_min = longitude - distance_in_km / parallel_radius
+        lon_max = longitude + distance_in_km / parallel_radius
+        rad2deg = math.degrees
+
+        return rad2deg(lat_min), rad2deg(lon_min), rad2deg(lat_max), rad2deg(lon_max)
+
+    try:
+        from anyway.app_and_db import db
+    except ModuleNotFoundError:
+        pass
+    distance_in_km = 5
+    lat_min, lon_min, lat_max, lon_max = get_bounding_box(latitude, longitude, distance_in_km)
+    baseX = lon_min
+    baseY = lat_min
+    distanceX = lon_max
+    distanceY = lat_max
+    polygon_str = "POLYGON(({0} {1},{0} {3},{2} {3},{2} {1},{0} {1}))".format(
+        baseX, baseY, distanceX, distanceY
+    )
+
+    query_obj = (
+        db.session.query(AccidentMarkerView)
+        .filter(AccidentMarkerView.geom.intersects(polygon_str))
+        .filter(AccidentMarkerView.accident_year >= 2014)
+        .filter(AccidentMarkerView.provider_code != BE_CONST.RSA_PROVIDER_CODE)
+        .filter(not_(AccidentMarkerView.road_segment_name == None))
+    )
+    markers = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+
+    geod = Geodesic.WGS84
+    # relevant_fields = resolution_dict[resolution]
+    # markers = db.get_markers_for_location_extraction()
+    markers["geohash"] = markers.apply(
+        lambda x: geohash.encode(x["latitude"], x["longitude"], precision=4), axis=1
+    )
+    markers_orig = markers.copy()
+    markers = markers.loc[(markers["road1"] != None)]
+    if markers.count()[0] == 0:
+        markers = markers_orig
+
+    # FILTER BY GEOHASH
+    curr_geohash = geohash.encode(latitude, longitude, precision=4)
+    if markers.loc[markers["geohash"] == curr_geohash].count()[0] > 0:
+        markers = markers.loc[markers["geohash"] == curr_geohash].copy()
+
+    # CREATE DISTANCE FIELD
+    markers["dist_point"] = markers.apply(
+        lambda x: geod.Inverse(latitude, longitude, x["latitude"], x["longitude"])["s12"], axis=1
+    ).replace({np.nan: None})
+
+    most_fit_loc = (
+        markers.loc[markers["dist_point"] == markers["dist_point"].min()].iloc[0].to_dict()
+    )
+
+    final_loc = {}
+    for field in ["road1", "road_segment_name"]:
+        loc = most_fit_loc[field]
+        if loc not in [None, "", "nan"]:
+            if not (isinstance(loc, np.float64) and np.isnan(loc)):
+                final_loc[field] = loc
+    return final_loc
 
 
 def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):
@@ -385,18 +501,6 @@ def extract_geo_features(db, newsflash: NewsFlash) -> None:
         for resolution in all_resolutions:
             if resolution not in location_from_db:
                 setattr(newsflash, resolution, None)
-
-
-def extract_geo_features_from_geo_location(db, latitude, longitude) -> dict:
-    geo_location = reverse_geocode_extract(latitude, longitude)
-    if geo_location is not None:
-        lat = geo_location["geom"]["lat"]
-        lon = geo_location["geom"]["lng"]
-        resolution = set_accident_resolution(geo_location)
-        location_from_db = get_db_matching_location(
-            db, lat, lon, resolution, geo_location["road_no"]
-        )
-        return location_from_db
 
 
 def get_candidate_location_strings(location_string):

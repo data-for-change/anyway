@@ -86,8 +86,8 @@ def get_infographics_data_from_cache(news_flash_id, years_ago) -> Dict:
 def get_infographics_data_from_cache_by_road_segment(road_segment_id, years_ago) -> Dict:
     db_item = (
         db.session.query(InfographicsRoadSegmentsDataCache)
-        .filter(InfographicsDataCache.road_segment_id == road_segment_id)
-        .filter(InfographicsDataCache.years_ago == years_ago)
+        .filter(InfographicsRoadSegmentsDataCache.road_segment_id == int(road_segment_id))
+        .filter(InfographicsRoadSegmentsDataCache.years_ago == int(years_ago))
         .first()
     )
     logging.debug(f"retrieved from cache {type(db_item)}:{db_item}"[:70])

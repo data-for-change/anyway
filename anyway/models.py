@@ -1852,6 +1852,9 @@ class RoadSegments(Base):
     to_km = Column(Float())
     to_name = Column(Text())
 
+    def get_id(self):
+        return self.id
+
 
 class ReportProblem(Base):
     __tablename__ = "report_problem"
@@ -2316,6 +2319,10 @@ class InfographicsDataCacheFields(object):
     years_ago = Column(Integer(), primary_key=True)
     data = Column(sqlalchemy.types.JSON())
 
+class InfographicsRoadSegmentsDataCacheFields(object):
+    road_segment_id = Column(BigInteger(), primary_key=True)
+    years_ago = Column(Integer(), primary_key=True)
+    data = Column(sqlalchemy.types.JSON())
 
 class InfographicsDataCache(InfographicsDataCacheFields, Base):
     __tablename__ = "infographics_data_cache"
@@ -2328,6 +2335,19 @@ class InfographicsDataCache(InfographicsDataCacheFields, Base):
 
     def serialize(self):
         return {"news_flash_id": self.news_flash_id, "years_ago": self.years_ago, "data": self.data}
+
+
+class InfographicsRoadSegmentsDataCache(InfographicsRoadSegmentsDataCacheFields, Base):
+    __tablename__ = "infographics_road_segments_data_cache"
+    __table_args__ = (
+        Index("infographics_data_road_segments_cache_road_segment_id_years_idx", "road_segment_id", "years_ago", unique=True),
+    )
+
+    def get_data(self):
+        return self.data
+
+    def serialize(self):
+        return {"road_segment_id": self.road_segment_id, "years_ago": self.years_ago, "data": self.data}
 
 
 class InfographicsDataCacheTemp(InfographicsDataCacheFields, Base):

@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Dict
 from sqlalchemy import not_
-from anyway.models import InfographicsDataCache, InfographicsDataCacheTemp, NewsFlash
+from anyway.models import InfographicsDataCache, InfographicsDataCacheTemp, NewsFlash, RoadSegments, InfographicsRoadSegmentsDataCache
 from anyway.constants import CONST
 from anyway.backend_constants import BE_CONST
 from anyway.app_and_db import db
@@ -76,6 +76,27 @@ def get_infographics_data_from_cache(news_flash_id, years_ago) -> Dict:
         )
         return {}
 
+def get_infographics_data_from_cache_by_road_segment(road_segment_id, years_ago) -> Dict:
+    db_item = (
+        db.session.query(InfographicsRoadSegmentsDataCache)
+        .filter(InfographicsDataCache.road_segment_id == road_segment_id)
+        .filter(InfographicsDataCache.years_ago == years_ago)
+        .first()
+    )
+    logging.debug(f"retrieved from cache {type(db_item)}:{db_item}"[:70])
+    db.session.commit()
+    try:
+        if db_item:
+            return json.loads(db_item.get_data())
+        else:
+            return {}
+    except Exception as e:
+        logging.error(
+            f"Exception while extracting data from returned cache item flash_id:{road_segment_id},years:{years_ago})"
+            f"returned value {type(db_item)}"
+            f":cause:{e.__cause__}, class:{e.__class__}"
+        )
+        return {}
 
 def copy_temp_into_cache():
     num_items_cache = db.session.query(InfographicsDataCache).count()
@@ -131,6 +152,32 @@ def build_cache_into_temp():
     logging.info(f"cache rebuild took:{str(datetime.now() - start)}")
 
 
+# noinspection PyUnresolvedReferences
+def build_cache_for_road_segments():
+    start = datetime.now()
+    db.session.query(InfographicsRoadSegmentsDataCache).delete()
+    db.session.commit()
+    for y in CONST.INFOGRAPHICS_CACHE_YEARS_AGO:
+        logging.debug(f"processing years_ago:{y}")
+        db.get_engine().execute(
+            InfographicsRoadSegmentsDataCache.__table__.insert(),  # pylint: disable=no-member
+            [
+                {
+                    "road_segment_id": road_segment.get_id(),
+                    "years_ago": y,
+                    "data": anyway.infographics_utils.create_infographics_data_for_road_segment(
+                        road_segment.get_id(), y, "he"
+                    ),
+                }
+                for road_segment in db.session.query(RoadSegments)
+                .all()
+            ],
+        )
+    logging.info(f"cache rebuild took:{str(datetime.now() - start)}")
+
+
+
+
 def get_cache_info():
     cache_items = db.session.query(InfographicsDataCache).count()
     tmp_items = db.session.query(InfographicsDataCacheTemp).count()
@@ -145,6 +192,15 @@ def get_cache_info():
     db.session.commit()
     return f"num items in cache: {cache_items}, temp table: {tmp_items}, accident flashes:{num_acc_flash_items}, flashes processed:{num_acc_suburban_flash_items}"
 
+def main_for_road_segments(update, info):
+    if update:
+        logging.info("Refreshing road segments infographics cache...")
+        build_cache_for_road_segments()
+        logging.info("Refreshing road segments infographics cache cache Done")
+    if info:
+        logging.info(get_cache_info())
+    else:
+        logging.debug(f"{info}")
 
 def main(update, info):
     if update:

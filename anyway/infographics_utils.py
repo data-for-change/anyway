@@ -805,7 +805,6 @@ class TopRoadSegmentsAccidentsPerKmWidget(SubUrbanWidget):
         return result.to_dict(orient="records")  # pylint: disable=no-member
 
 
-@register
 class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
     name: str = "injured_count_per_age_group"
 

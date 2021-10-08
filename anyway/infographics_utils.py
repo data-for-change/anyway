@@ -124,7 +124,7 @@ class Widget:
         return bool(self.items)
 
     def generate_items(self) -> None:
-        """ Generates the data of the widget and set it to self.items"""
+        """Generates the data of the widget and set it to self.items"""
         pass
 
     @staticmethod
@@ -224,19 +224,23 @@ class AccidentCountBySeverityWidget(SubUrbanWidget):
         count_by_severity = get_accidents_stats(
             table_obj=AccidentMarkerView,
             filters=location_info,
-            group_by="accident_severity_hebrew",
-            count="accident_severity_hebrew",
+            group_by="accident_severity",
+            count="accident_severity",
             start_time=start_time,
             end_time=end_time,
         )
-        severity_dict = {"קטלנית": "fatal", "קשה": "severe", "קלה": "light"}
+        found_severities = [d["accident_severity"] for d in count_by_severity]
         items = {}
         total_accidents_count = 0
         start_year = start_time.year
         end_year = end_time.year
+        for sev in AccidentSeverity:
+            if sev.value not in found_severities:
+                count_by_severity.append({"accident_severity": sev.value, "count": 0})
         for severity_and_count in count_by_severity:
-            accident_severity_hebrew = severity_and_count["accident_severity"]
-            severity_english = severity_dict[accident_severity_hebrew]
+            severity_english = AccidentSeverity.labels()[
+                AccidentSeverity(severity_and_count["accident_severity"])
+            ]
             severity_count_text = "severity_{}_count".format(severity_english)
             items[severity_count_text] = severity_and_count["count"]
             total_accidents_count += severity_and_count["count"]
@@ -820,6 +824,7 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
     @staticmethod
     def filter_and_group_injured_count_per_age_group(request_params: RequestParams):
         road_number = request_params.location_info["road1"]
+        road_segment = request_params.location_info["road_segment_name"]
 
         query = (
             db.session.query(InvolvedMarkerView)
@@ -845,6 +850,7 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
                 (InvolvedMarkerView.road1 == road_number)
                 | (InvolvedMarkerView.road2 == road_number)
             )
+            .filter(InvolvedMarkerView.road_segment_name == road_segment)
             .group_by("age_group", "injury_severity")
             .with_entities("age_group", "injury_severity", func.count().label("count"))
         )
@@ -1236,6 +1242,10 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
             "labels": gen_entity_labels(InjurySeverity),
         }
         return items
+
+
+# adding calls to _() for pybabel extraction
+_("Injured and killed pedestrians by severity and year")
 
 
 @register

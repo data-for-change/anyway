@@ -124,7 +124,7 @@ class Widget:
         return bool(self.items)
 
     def generate_items(self) -> None:
-        """ Generates the data of the widget and set it to self.items"""
+        """Generates the data of the widget and set it to self.items"""
         pass
 
     @staticmethod
@@ -820,6 +820,7 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
     @staticmethod
     def filter_and_group_injured_count_per_age_group(request_params: RequestParams):
         road_number = request_params.location_info["road1"]
+        road_segment = request_params.location_info["road_segment_name"]
 
         query = (
             db.session.query(InvolvedMarkerView)
@@ -845,6 +846,7 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
                 (InvolvedMarkerView.road1 == road_number)
                 | (InvolvedMarkerView.road2 == road_number)
             )
+            .filter(InvolvedMarkerView.road_segment_name == road_segment)
             .group_by("age_group", "injury_severity")
             .with_entities("age_group", "injury_severity", func.count().label("count"))
         )

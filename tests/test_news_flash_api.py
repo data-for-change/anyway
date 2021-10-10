@@ -47,6 +47,7 @@ class NewsFlashApiTestCase(unittest.TestCase):
             {'name': 'location',
              'data': {'resolution': 'רחוב',
                       'yishuv_name': 'נצרת',
+                      'yishuv_symbol': 77,
                       'street1_hebrew': 'רח 6021',
                       'road1': 17
                       },

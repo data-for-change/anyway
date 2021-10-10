@@ -10,6 +10,15 @@ import anyway.parsers.infographics_data_cache_updater
 
 
 class Test_infographics_data_from_cache(TestCase):
+
+    ok_newsflash = NewsFlash(id=17,
+                             accident=True,
+                             resolution="כביש בינעירוני",
+                             road_segment_name="name",
+                             road1=1,
+                             road_segment_id=37,
+                             )
+
     def test_get_not_existing_from_cache(self):
         cache_data = anyway.parsers.infographics_data_cache_updater.get_infographics_data_from_cache(
             17, 1
@@ -54,9 +63,8 @@ class Test_infographics_data_from_cache(TestCase):
     @patch("anyway.parsers.infographics_data_cache_updater.db.get_engine")
     @patch("anyway.infographics_utils.create_infographics_data")
     def test_add_qualified_news_flash(self, utils, get_engine):
-        nf = NewsFlash(id=17, accident=True, resolution="כביש בינעירוני", road_segment_name="name", road1=1)
         get_engine.execute.return_value = {}
-        res = add_news_flash_to_cache(nf)
+        res = add_news_flash_to_cache(self.ok_newsflash)
         invocations = utils.call_args_list
         utils.assert_has_calls(
             [unittest.mock.call(17, y, "he") for y in CONST.INFOGRAPHICS_CACHE_YEARS_AGO]
@@ -69,9 +77,8 @@ class Test_infographics_data_from_cache(TestCase):
     @patch("anyway.parsers.infographics_data_cache_updater.db.get_engine")
     @patch("anyway.infographics_utils.create_infographics_data")
     def test_add_news_flash_throws_exception(self, utils, get_engine):
-        nf = NewsFlash(id=17, accident=True, resolution="כביש בינעירוני", road_segment_name="name", road1=1)
         get_engine.side_effect = RuntimeError
-        res = add_news_flash_to_cache(nf)
+        res = add_news_flash_to_cache(self.ok_newsflash)
         assert not res, "Should return False when error occurred"
 
 

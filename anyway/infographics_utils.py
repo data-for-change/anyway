@@ -66,21 +66,6 @@ def get_small_vehicles_markers_hebrew() -> db.Model:
     return VehicleMarkerViewSmall if USE_SMALL_TABLES else VehicleMarkerView
 
 
-USE_SMALL_TABLES = True
-
-
-def get_small_accident_marker_view() -> db.Model:
-    return AccidentMarkerViewSmall if USE_SMALL_TABLES else AccidentMarkerView
-
-
-def get_small_involved_marker() -> db.Model:
-    return InvolvedMarkerViewSmall if USE_SMALL_TABLES else InvolvedMarkerView
-
-
-def get_small_vehicles_markers_hebrew() -> db.Model:
-    return VehicleMarkerViewSmall if USE_SMALL_TABLES else VehicleMarkerView
-
-
 @dataclass
 class RequestParams:
     """

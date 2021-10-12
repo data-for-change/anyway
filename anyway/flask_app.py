@@ -83,7 +83,11 @@ from anyway.models import (
     users_to_roles,
 )
 from anyway.oauth import OAuthSignIn
-from anyway.infographics_utils import get_infographics_data, get_infographics_mock_data
+from anyway.infographics_utils import (
+    get_infographics_data,
+    get_infographics_mock_data,
+    get_infographics_data_for_road_segment,
+)
 from anyway.app_and_db import app, db, api, get_cors_config
 from anyway.anyway_dataclasses.user_data import UserData
 from anyway.utilities import (
@@ -1167,7 +1171,7 @@ app.add_url_rule(
 )
 app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
 
-app.add_url_rule("/api/news-flash_v2", endpoint=None, view_func=news_flash_v2, methods=["GET"])
+app.add_url_rule("/api/news-flash-v2", endpoint=None, view_func=news_flash_v2, methods=["GET"])
 
 
 nf_parser = reqparse.RequestParser()
@@ -1395,6 +1399,7 @@ parser.add_argument("id", type=int, help="News flash id")
 parser.add_argument(
     "years_ago", type=int, default=5, help="Number of years back to consider accidents"
 )
+parser.add_argument("lang", type=str, default="he", help="Language")
 
 
 @api.route("/api/infographics-data", methods=["GET"])
@@ -1428,6 +1433,102 @@ def infographics_data():
         )
         output = get_infographics_data(
             news_flash_id=news_flash_id, years_ago=number_of_years_ago, lang=lang
+        )
+        if not output:
+            log_bad_request(request)
+            return abort(http_client.NOT_FOUND)
+    else:
+        log_bad_request(request)
+        return abort(http_client.BAD_REQUEST)
+
+    if personalized_data == "true":
+        output = widgets_personalisation_for_user(output)
+
+    json_data = json.dumps(output, default=str)
+    return Response(json_data, mimetype="application/json")
+
+
+"""
+    Returns GPS to CBS location
+"""
+gps_parser = reqparse.RequestParser()
+gps_parser.add_argument("longitude", type=float, help="longitude")
+gps_parser.add_argument("latitude", type=float, help="latitude")
+
+
+@api.route("/api/gps-to-location", methods=["GET"])
+class GPSToLocation(Resource):
+    @api.doc("from gps to location")
+    @api.expect(gps_parser)
+    def get(self):
+        return gps_to_cbs_location()
+
+
+def gps_to_cbs_location():
+    longitude = request.values.get("longitude")
+    latitude = request.values.get("latitude")
+    if not longitude or not latitude:
+        log_bad_request(request)
+        return abort(http_client.BAD_REQUEST)
+    from anyway.parsers.news_flash_db_adapter import init_db
+    from anyway.parsers.location_extraction import (
+        get_db_matching_location_interurban,
+        get_road_segment_id,
+    )
+
+    location = get_db_matching_location_interurban(float(latitude), float(longitude))
+    if not location:
+        logging.info("location not exist")
+    location["resolution"] = "interurban_road_segment"
+    location["road_segment_id"] = get_road_segment_id(
+        road_segment_name=location["road_segment_name"]
+    )
+    json_data = json.dumps(location, default=str)
+    return Response(json_data, mimetype="application/json")
+
+
+"""
+    Returns infographics-data-by-location API
+"""
+idbl_parser = reqparse.RequestParser()
+idbl_parser.add_argument("road_segment_id", type=int, help="Road Segment id")
+idbl_parser.add_argument(
+    "years_ago", type=int, default=5, help="Number of years back to consider accidents"
+)
+idbl_parser.add_argument("lang", type=str, default="he", help="Language")
+
+
+@api.route("/api/infographics-data-by-location", methods=["GET"])
+class InfographicsDataByLocation(Resource):
+    @api.doc("get infographics data")
+    @api.expect(idbl_parser)
+    def get(self):
+        return infographics_data_by_location()
+
+
+def infographics_data_by_location():
+    mock_data = request.values.get("mock", "false")
+    personalized_data = request.values.get("personalized", "false")
+    if mock_data == "true":
+        output = get_infographics_mock_data()
+    elif mock_data == "false":
+        road_segment_id = request.values.get("road_segment_id")
+        if road_segment_id == None:
+            log_bad_request(request)
+            return abort(http_client.BAD_REQUEST)
+
+        number_of_years_ago = request.values.get("years_ago", BE_CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
+        lang: str = request.values.get("lang", "he")
+        logging.debug(
+            (
+                "getting infographics data for news_flash_id: {news_flash_id}, "
+                + "in time period:{number_of_years_ago}, lang:{lang}"
+            ).format(
+                news_flash_id=road_segment_id, number_of_years_ago=number_of_years_ago, lang=lang
+            )
+        )
+        output = get_infographics_data_for_road_segment(
+            road_segment_id=road_segment_id, years_ago=number_of_years_ago, lang=lang
         )
         if not output:
             log_bad_request(request)

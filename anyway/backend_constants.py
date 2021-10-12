@@ -1,5 +1,6 @@
 from enum import Enum
 from typing import List, Iterable
+
 try:
     from flask_babel import _
 except ImportError:
@@ -46,18 +47,20 @@ class BackEndConstants(object):
     UNKNOWN = "UNKNOWN"
     DEFAULT_REDIRECT_URL = "https://anyway-infographics.web.app/"
     ANYWAY_CORS_SITE_LIST_PROD = [
-        "https://anyway-infographics-staging.web.app/*",
-        "https://anyway-infographics.web.app/*",
-        "https://www.anyway.co.il/*",
-        "https://anyway-infographics-demo.web.app/*",
+        "https://anyway-infographics-staging.web.app",
+        "https://anyway-infographics.web.app",
+        "https://www.anyway.co.il",
+        "https://anyway-infographics-demo.web.app",
+        "https://media.anyway.co.il",
+        "https://dev.anyway.co.il",
     ]
 
     ANYWAY_CORS_SITE_LIST_DEV = ANYWAY_CORS_SITE_LIST_PROD + [
-        "https://dev.anyway.co.il/*",
-        "http://localhost:3000/*",
-        "https://localhost:3000/*",
-        "http://127.0.0.1:3000/*",
-        "https://127.0.0.1:3000/*",
+        "https://dev.anyway.co.il",
+        "http://localhost:3000",
+        "https://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://127.0.0.1:3000",
     ]
 
     class ResolutionCategories(Enum):
@@ -81,6 +84,7 @@ class BackEndConstants(object):
             for member in cls:
                 if member.value == value.lower():
                     return member
+
         YNET = "ynet"
         WALLA = "walla"
         TWITTER = "twitter"
@@ -115,7 +119,6 @@ BE_CONST = BackEndConstants()
 
 
 class LabeledCode(Enum):
-
     def get_label(self) -> str:
         return type(self).labels()[self]
 
@@ -124,7 +127,7 @@ class LabeledCode(Enum):
         if isinstance(cls, Iterable):
             return [a.value for a in cls]
         else:
-            raise NotImplementedError(f'{cls}: needs to be derived from Enum')
+            raise NotImplementedError(f"{cls}: needs to be derived from Enum")
 
     @classmethod
     def labels(cls):
@@ -228,6 +231,7 @@ class DriverType(LabeledCode):
             DriverType.OTHER_DRIVER: "other_driver",
         }
 
+
 class InjuredType(LabeledCode):
     PEDESTRIAN = 1
     DRIVER_FOUR_WHEELS_AND_ABOVE = 2
@@ -242,7 +246,7 @@ class InjuredType(LabeledCode):
     @classmethod
     def labels(cls):
         return {
-            InjuredType.PEDESTRIAN:"Pedestrian",
+            InjuredType.PEDESTRIAN: "Pedestrian",
             InjuredType.DRIVER_FOUR_WHEELS_AND_ABOVE: "Driver of a vehicle with 4 wheel or more",
             InjuredType.PASSENGER_FOUR_WHEELS_AND_ABOVE: "Passenger of a vehicle with 4 wheel or more",
             InjuredType.DRIVER_MOTORCYCLE: "Motorcycle driver",
@@ -250,5 +254,5 @@ class InjuredType(LabeledCode):
             InjuredType.DRIVER_BICYCLE: "Bicycle driver",
             InjuredType.PASSENGER_BICYCLE: "Bicycle passenger",
             InjuredType.DRIVER_UNKNOWN_VEHICLE: "Driver of an unknown vehicle",
-            InjuredType.PASSENGER_UNKNOWN_VEHICLE: "Passenger of an unknown vehicle"
+            InjuredType.PASSENGER_UNKNOWN_VEHICLE: "Passenger of an unknown vehicle",
         }

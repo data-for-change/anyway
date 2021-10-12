@@ -7,6 +7,7 @@ import json
 import logging
 import re
 import typing
+from functools import wraps
 from io import StringIO
 import os
 import time
@@ -35,8 +36,8 @@ from flask_restx import Resource, fields, reqparse
 
 from anyway.error_code_and_strings import (
     Errors as Es,
-    ERROR_TO_HTTP_CODE_DICT,
     build_json_for_user_api_error,
+    ERROR_TO_HTTP_CODE_DICT,
 )
 
 from http import client as http_client, HTTPStatus
@@ -56,7 +57,6 @@ from anyway.user_functions import (
     get_current_user_email,
     get_current_user,
     get_user_by_email,
-    is_current_user_have_permission, role_id_to_role_obj,
 )
 from anyway.models import (
     AccidentMarker,
@@ -81,7 +81,6 @@ from anyway.models import (
     Users,
     Roles,
     users_to_roles,
-    RolesToAPI,
 )
 from anyway.oauth import OAuthSignIn
 from anyway.infographics_utils import get_infographics_data, get_infographics_mock_data
@@ -1265,6 +1264,35 @@ class RetrieveNewsFlash(Resource):
         return {"news_flashes": res}
 
 
+# Copied and modified from flask-security
+def roles_accepted(*roles):
+    """Decorator which specifies that a user must have at least one of the
+    specified roles. Example::
+
+        @app.route('/create_post')
+        @roles_accepted('editor', 'author')
+        def create_post():
+            return 'Create Post'
+
+    The current user must have either the `editor` role or `author` role in
+    order to view the page.
+
+    :param roles: The possible roles.
+    """
+
+    def wrapper(fn):
+        @wraps(fn)
+        def decorated_view(*args, **kwargs):
+            perm = Permission(*[RoleNeed(role) for role in roles])
+            if perm.can():
+                return fn(*args, **kwargs)
+            return return_json_error(Es.BR_BAD_AUTH)
+
+        return decorated_view
+
+    return wrapper
+
+
 def return_json_error(error_code: int, *argv) -> Response:
     return app.response_class(
         response=json.dumps(build_json_for_user_api_error(error_code, argv)),
@@ -1468,13 +1496,9 @@ def load_user(id: str) -> Users:
 
 
 # TODO: in the future add pagination if needed
-@app.route("/admin/get_all_users_info")
+@app.route("/user/get_all_users_info")
+@roles_accepted(*BE_CONST.ROLES_TO_API["/user/get_all_users_info"])
 def get_all_users_info() -> Response:
-    if current_user.is_anonymous:
-        return return_json_error(Es.BR_USER_NOT_LOGGED_IN)
-    if not is_current_user_have_permission(db, request):
-        return return_json_error(Es.BR_MISSING_PERMISSION)
-
     dict_ret = []
     for user_obj in db.session.query(Users).order_by(Users.user_register_date).all():
         dict_ret.append(user_obj.serialize())
@@ -1484,39 +1508,33 @@ def get_all_users_info() -> Response:
 @app.route("/user/info")
 def user_have_email() -> Response:
     if current_user.is_anonymous:
-        return return_json_error(Es.BR_USER_NOT_LOGGED_IN)
+        return return_json_error(Es.BR_BAD_AUTH)
 
     user_obj = get_current_user()
-    return jsonify(user_obj.serialize())
+    return jsonify(user_obj.serialize_exposed_to_user())
 
 
 @app.route("/user/remove_from_role", methods=["POST"])
+@roles_accepted(*BE_CONST.ROLES_TO_API["/user/remove_from_role"])
 def remove_from_role() -> Response:
     return change_user_roles("remove")
 
 
 @app.route("/user/add_to_role", methods=["POST"])
+@roles_accepted(*BE_CONST.ROLES_TO_API["/user/add_to_role"])
 def add_to_role() -> Response:
     return change_user_roles("add")
 
 
-def look_for_errors_in_request_admin(
-    request: Request, allowed_fields: typing.List[str]
-) -> typing.Optional[Response]:
-    if current_user.is_anonymous:
-        return return_json_error(Es.BR_USER_NOT_LOGGED_IN)
-
-    if not is_current_user_have_permission(db, request):
-        return return_json_error(Es.BR_MISSING_PERMISSION)
-
+def validate_fields_exist(request: Request, allowed_fields: typing.List[str]) -> bool:
     # Validate input
     reg_dict = request.json
     if not reg_dict:
-        return return_json_error(Es.BR_BAD_JSON)
+        return True
     for key in reg_dict:
         if key not in allowed_fields:
-            return return_json_error(Es.BR_UNKNOWN_FIELD, key)
-    return None
+            return True
+    return False
 
 
 def change_user_roles(action: str) -> Response:
@@ -1525,9 +1543,9 @@ def change_user_roles(action: str) -> Response:
         "email",
     ]
 
-    res = look_for_errors_in_request_admin(request, allowed_fields)
+    res = validate_fields_exist(request, allowed_fields)
     if res:
-        return res
+        return return_json_error(Es.BR_FIELD_MISSING)
     reg_dict = request.json
 
     role_name = reg_dict.get("role")
@@ -1578,7 +1596,8 @@ def get_role_object(role_name):
     return role
 
 
-@app.route("/admin/update_user", methods=["POST"])
+@app.route("/user/update_user", methods=["POST"])
+@roles_accepted(*BE_CONST.ROLES_TO_API["/user/update_user"])
 def admin_update_user() -> Response:
     allowed_fields = [
         "user_current_email",
@@ -1592,14 +1611,10 @@ def admin_update_user() -> Response:
         "is_user_completed_registration",
     ]
 
-    res = look_for_errors_in_request_admin(request, allowed_fields)
+    res = validate_fields_exist(request, allowed_fields)
     if res:
-        return res
+        return return_json_error(Es.BR_FIELD_MISSING)
     reg_dict = request.json
-
-    for field in allowed_fields:
-        if field not in reg_dict:
-            return return_json_error(Es.BR_FIELD_MISSING, field)
 
     user_current_email = reg_dict.get("user_current_email")
     if not user_current_email:
@@ -1653,15 +1668,12 @@ def user_update() -> Response:
     ]
 
     if current_user.is_anonymous:
-        return return_json_error(Es.BR_USER_NOT_LOGGED_IN)
+        return return_json_error(Es.BR_BAD_AUTH)
 
+    res = validate_fields_exist(request, allowed_fields)
+    if not res:
+        return return_json_error(Es.BR_FIELD_MISSING)
     reg_dict = request.json
-    if not reg_dict:
-        return return_json_error(Es.BR_BAD_JSON)
-
-    for key in reg_dict:
-        if key not in allowed_fields:
-            return return_json_error(Es.BR_UNKNOWN_FIELD, key)
 
     first_name = reg_dict.get("first_name")
     last_name = reg_dict.get("last_name")
@@ -1718,15 +1730,16 @@ def update_user_in_db(
 
 
 @app.route("/user/change_user_active_mode", methods=["POST"])
+@roles_accepted(*BE_CONST.ROLES_TO_API["/user/change_user_active_mode"])
 def user_disable() -> Response:
     allowed_fields = [
         "email",
         "mode",
     ]
 
-    result = look_for_errors_in_request_admin(request, allowed_fields)
+    result = validate_fields_exist(request, allowed_fields)
     if result:
-        return result
+        return return_json_error(Es.BR_FIELD_MISSING)
     reg_dict = request.json
 
     email = reg_dict.get("email")
@@ -1751,15 +1764,16 @@ def user_disable() -> Response:
 
 
 @app.route("/user/add_role", methods=["POST"])
+@roles_accepted(*BE_CONST.ROLES_TO_API["/user/add_role"])
 def add_role() -> Response:
     allowed_fields = [
         "name",
         "description",
     ]
 
-    res = look_for_errors_in_request_admin(request, allowed_fields)
+    res = validate_fields_exist(request, allowed_fields)
     if res:
-        return res
+        return return_json_error(Es.BR_FIELD_MISSING)
     reg_dict = request.json
 
     name = reg_dict.get("name")
@@ -1805,42 +1819,12 @@ def is_a_valid_role_description(name: str) -> bool:
 
 
 @app.route("/user/get_roles_list", methods=["GET"])
+@roles_accepted(*BE_CONST.ROLES_TO_API["/user/get_roles_list"])
 def get_roles_list() -> Response:
-    if current_user.is_anonymous:
-        return return_json_error(Es.BR_USER_NOT_LOGGED_IN)
-
-    if not is_current_user_have_permission(db, request):
-        return return_json_error(Es.BR_MISSING_PERMISSION)
-
     roles_list = db.session.query(Roles).all()
     send_list = []
     for role in roles_list:
         send_list.append({"id": role.id, "name": role.name, "description": role.description})
-
-    return app.response_class(
-        response=json.dumps(send_list),
-        status=HTTPStatus.OK,
-        mimetype="application/json",
-    )
-
-
-@app.route("/admin/get_roles_to_api", methods=["GET"])
-def get_roles_to_api() -> Response:
-    if current_user.is_anonymous:
-        return return_json_error(Es.BR_USER_NOT_LOGGED_IN)
-
-    if not is_current_user_have_permission(db, request):
-        return return_json_error(Es.BR_MISSING_PERMISSION)
-
-    data_list = db.session.query(RolesToAPI).order_by(RolesToAPI.create_date).all()
-    send_list = []
-    for rta in data_list:
-        send_list.append(
-            {
-                "role_name": role_id_to_role_obj(db, rta.role_id).name,
-                "api_name": rta.api_name
-            }
-        )
 
     return app.response_class(
         response=json.dumps(send_list),

@@ -107,7 +107,7 @@ class Users(Base, UserMixin):
         backref=backref("users", lazy="dynamic"),
     )
 
-    def serialize(self):
+    def serialize_exposed_to_user(self):
         roles = self.roles
         return {
             "id": self.id,
@@ -126,16 +126,6 @@ class Users(Base, UserMixin):
             "is_user_completed_registration": self.is_user_completed_registration,
             "roles": [r.name for r in roles],
         }
-
-
-class RolesToAPI(Base):
-    __tablename__ = "roles_to_api"
-    __table_args__ = (
-        PrimaryKeyConstraint("role_id", "api_name"),
-    )
-    role_id = Column("role_id", Integer(), ForeignKey("roles.id"), index=True, nullable=False)
-    api_name = Column("api_name", String(511), index=True, nullable=False)
-    create_date = Column("create_date", DateTime(), index=True, nullable=False, server_default=text("now()"))
 
 
 class LocationSubscribers(Base, UserMixin):

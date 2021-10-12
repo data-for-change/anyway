@@ -146,7 +146,7 @@ def user_update_post(app: FlaskClient) -> Response:
 
 def test_user_update_not_logged_in(app):
     rv = user_update_post(app)
-    assert_return_code_for_user_update(Errors.BR_USER_NOT_LOGGED_IN, rv)
+    assert_return_code_for_user_update(Errors.BR_BAD_AUTH, rv)
 
     rv = app.get("/user/update", follow_redirects=True)
     assert rv.status_code == HTTPStatus.METHOD_NOT_ALLOWED
@@ -258,7 +258,7 @@ USER_COMPLETED = True
 
 def test_get_current_user(app):
     rv = app.get("/user/info", follow_redirects=True)
-    assert_return_code_for_user_update(Errors.BR_USER_NOT_LOGGED_IN, rv)
+    assert_return_code_for_user_update(Errors.BR_BAD_AUTH, rv)
     with patch("flask_login.utils._get_user") as current_user:
         set_current_user_mock(current_user)
         with patch("anyway.flask_app.get_current_user") as get_current_user:
@@ -358,7 +358,7 @@ def user_add_or_remove_role(app: FlaskClient, path: str) -> None:
 def set_mock_and_test_perm(app, current_user, path):
     set_current_user_mock(current_user)
     rv = app.post(path, follow_redirects=True)
-    assert_return_code_for_user_update(Errors.BR_MISSING_PERMISSION, rv)
+    assert_return_code_for_user_update(Errors.BR_BAD_AUTH, rv)
     role = mock.MagicMock()
     role.name = BE_CONST.Roles2Names.Admins.value
     current_user.return_value.roles = [role]

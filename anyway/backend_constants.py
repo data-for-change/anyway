@@ -101,6 +101,15 @@ class BackEndConstants(object):
         "head_on_collisions_comparison",
     ]
 
+    ROLES_TO_API = {"/user/get_all_users_info": [Roles2Names.Admins.value],
+                    "/user/add_role": [Roles2Names.Admins.value],
+                    "/user/update_user": [Roles2Names.Admins.value],
+                    "/user/add_to_role": [Roles2Names.Admins.value],
+                    "/user/remove_from_role": [Roles2Names.Admins.value],
+                    "/user/change_user_active_mode": [Roles2Names.Admins.value],
+                    "/user/get_roles_to_api": [Roles2Names.Admins.value],
+                    "/user/get_roles_list": [Roles2Names.Admins.value],
+                    }
 
 BE_CONST = BackEndConstants()
 

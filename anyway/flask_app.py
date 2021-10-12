@@ -1772,7 +1772,7 @@ def user_update() -> Response:
         return return_json_error(Es.BR_BAD_AUTH)
 
     res = validate_fields_exist(request, allowed_fields)
-    if not res:
+    if res:
         return return_json_error(Es.BR_FIELD_MISSING)
     reg_dict = request.json
 

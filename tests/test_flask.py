@@ -157,17 +157,17 @@ def test_user_update_bad_json(app):
         set_current_user_mock(current_user)
 
         rv = user_update_post(app)
-        assert_return_code_for_user_update(Errors.BR_BAD_JSON, rv)
+        assert_return_code_for_user_update(Errors.BR_FIELD_MISSING, rv)
 
         rv = user_update_post_json(app)
         assert rv.status_code == HTTPStatus.BAD_REQUEST
         assert b"Failed to decode JSON object" in rv.data
 
         rv = user_update_post_json(app, json_data={})
-        assert_return_code_for_user_update(Errors.BR_BAD_JSON, rv)
+        assert_return_code_for_user_update(Errors.BR_FIELD_MISSING, rv)
 
         rv = user_update_post_json(app, json_data={"a": "a"})
-        assert_return_code_for_user_update(Errors.BR_UNKNOWN_FIELD, rv, "a")
+        assert_return_code_for_user_update(Errors.BR_FIELD_MISSING, rv)
 
 
 def test_user_update_names(app):
@@ -286,7 +286,7 @@ def test_get_current_user(app):
 
 def get_mock_current_user(get_current_user: mock.MagicMock) -> mock.MagicMock:
     ret_obj = mock.MagicMock()
-    ret_obj.serialize.side_effect = lambda: {
+    ret_obj.serialize_exposed_to_user.side_effect = lambda: {
         "id": USER_ID,
         "user_register_date": None,
         "email": USER_EMAIL,
@@ -417,7 +417,7 @@ def test_add_role(app):
         set_mock_and_test_perm(app, current_user, path)
 
         rv = post_json(app, path, json_data={"email": "a"})
-        assert_return_code_for_user_update(Errors.BR_UNKNOWN_FIELD, rv, "email")
+        assert_return_code_for_user_update(Errors.BR_FIELD_MISSING, rv)
 
         rv = post_json(app, path, json_data={"description": ""})
         assert_return_code_for_user_update(Errors.BR_ROLE_NAME_MISSING, rv)

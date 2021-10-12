@@ -1607,7 +1607,7 @@ def get_all_users_info() -> Response:
 
 
 @app.route("/user/info")
-def user_have_email() -> Response:
+def get_user_info() -> Response:
     if current_user.is_anonymous:
         return return_json_error(Es.BR_BAD_AUTH)
 
@@ -1627,7 +1627,7 @@ def add_to_role() -> Response:
     return change_user_roles("add")
 
 
-def validate_fields_exist(request: Request, allowed_fields: typing.List[str]) -> bool:
+def is_input_fields_malformed(request: Request, allowed_fields: typing.List[str]) -> bool:
     # Validate input
     reg_dict = request.json
     if not reg_dict:
@@ -1644,7 +1644,7 @@ def change_user_roles(action: str) -> Response:
         "email",
     ]
 
-    res = validate_fields_exist(request, allowed_fields)
+    res = is_input_fields_malformed(request, allowed_fields)
     if res:
         return return_json_error(Es.BR_FIELD_MISSING)
     reg_dict = request.json
@@ -1712,7 +1712,7 @@ def admin_update_user() -> Response:
         "is_user_completed_registration",
     ]
 
-    res = validate_fields_exist(request, allowed_fields)
+    res = is_input_fields_malformed(request, allowed_fields)
     if res:
         return return_json_error(Es.BR_FIELD_MISSING)
     reg_dict = request.json
@@ -1771,7 +1771,7 @@ def user_update() -> Response:
     if current_user.is_anonymous:
         return return_json_error(Es.BR_BAD_AUTH)
 
-    res = validate_fields_exist(request, allowed_fields)
+    res = is_input_fields_malformed(request, allowed_fields)
     if res:
         return return_json_error(Es.BR_FIELD_MISSING)
     reg_dict = request.json
@@ -1838,7 +1838,7 @@ def user_disable() -> Response:
         "mode",
     ]
 
-    result = validate_fields_exist(request, allowed_fields)
+    result = is_input_fields_malformed(request, allowed_fields)
     if result:
         return return_json_error(Es.BR_FIELD_MISSING)
     reg_dict = request.json
@@ -1872,7 +1872,7 @@ def add_role() -> Response:
         "description",
     ]
 
-    res = validate_fields_exist(request, allowed_fields)
+    res = is_input_fields_malformed(request, allowed_fields)
     if res:
         return return_json_error(Es.BR_FIELD_MISSING)
     reg_dict = request.json

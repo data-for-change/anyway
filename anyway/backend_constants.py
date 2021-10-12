@@ -111,7 +111,6 @@ class BackEndConstants(object):
                     "/user/add_to_role": [Roles2Names.Admins.value],
                     "/user/remove_from_role": [Roles2Names.Admins.value],
                     "/user/change_user_active_mode": [Roles2Names.Admins.value],
-                    "/user/get_roles_to_api": [Roles2Names.Admins.value],
                     "/user/get_roles_list": [Roles2Names.Admins.value],
                     }
 

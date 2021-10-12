@@ -1602,7 +1602,7 @@ def load_user(id: str) -> Users:
 def get_all_users_info() -> Response:
     dict_ret = []
     for user_obj in db.session.query(Users).order_by(Users.user_register_date).all():
-        dict_ret.append(user_obj.serialize())
+        dict_ret.append(user_obj.serialize_exposed_to_user())
     return jsonify(dict_ret)
 
 

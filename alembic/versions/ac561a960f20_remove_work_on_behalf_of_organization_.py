@@ -1,14 +1,14 @@
-"""remove work_on_behalf_of_organization from Users table
+"""Remove work_on_behalf_of_organization from Users table
 
-Revision ID: 0b877ab8221c
-Revises: d2dfd0ce5a7e
-Create Date: 2021-09-22 13:50:55.411517
+Revision ID: ac561a960f20
+Revises: 2dcc57ee1757
+Create Date: 2021-10-13 00:07:12.033996
 
 """
 
 # revision identifiers, used by Alembic.
-revision = '0b877ab8221c'
-down_revision = 'd2dfd0ce5a7e'
+revision = 'ac561a960f20'
+down_revision = '2dcc57ee1757'
 branch_labels = None
 depends_on = None
 
@@ -24,3 +24,4 @@ def downgrade():
     op.add_column(
         "users", sa.Column("work_on_behalf_of_organization", sa.String(128), nullable=True)
     )
+

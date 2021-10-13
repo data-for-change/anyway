@@ -1610,6 +1610,8 @@ def extract_news_flash_location(news_flash_obj):
     for field in resolution_dict[resolution]:
         curr_field = getattr(news_flash_obj, field)
         if curr_field is not None:
+            if isinstance(curr_field, float):
+                curr_field = int(curr_field)
             data[field] = curr_field
     gps = {"lat": news_flash_obj.lat, "lon": news_flash_obj.lon}
     return {"name": "location", "data": data, "gps": gps}
@@ -1618,7 +1620,7 @@ def extract_news_flash_location(news_flash_obj):
 def extract_road_segment_location(road_segment_id):
     data = {"resolution": "interurban_road_segment"}
     road1, road_segment_name = get_road_segment_name_and_number(road_segment_id)
-    data["road1"] = road1
+    data["road1"] = int(road1)
     data["road_segment_name"] = road_segment_name
     # fake gps - todo: fix
     gps = {"lat": 32.825610, "lon": 35.165395}

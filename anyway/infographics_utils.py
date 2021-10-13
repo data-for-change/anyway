@@ -258,59 +258,24 @@ _("Fatal, severe and light injured count in the specified years, split by injury
 _("Fatal, severe and light accidents count in the specified years, split by accident severity")
 
 @register
-class SevereFatalCountByAccidentYearAndVehicleWidget(UrbanWidget):
-    name: str = "severe_fatal_count_by_vehicle_by_accident_year"
+class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
+    name: str = "severe_fatal_count_on_small_motor_by_accident_year"
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 15
-        self.text = {
-            "title": "Severe or fatal accidents on bikes, e-bikes, or scooters in "
-            + self.request_params.location_info["yishuv_name"]
-        }
+        # self.text = {
+        #     "title": "Severe or fatal accidents on bikes, e-bikes, or scooters in "
+        #     + self.request_params.location_info["yishuv_name"]
+        # }
 
     def generate_items(self) -> None:
-        self.items = {"e_bikes": get_accidents_stats(
+        self.items = {"bike&smallmotor": get_accidents_stats(
             table_obj=InvolvedMarkerView,
             filters = {
-                "injury_severity": [1, 2],
-                "involve_vehicle_type": 23,
-                "involve_yishuv_name": self.request_params.location_info["yishuv_name"],
-                },
-            group_by="accident_year",
-            count="accident_year",
-            start_time=self.request_params.start_time,
-            end_time=self.request_params.end_time,
-        ),
-        "bikes": get_accidents_stats(
-            table_obj=InvolvedMarkerView,
-            filters = {
-                "injury_severity": [1, 2],
-                "involve_vehicle_type": 15,
-                "involve_yishuv_name": self.request_params.location_info["yishuv_name"],
-                },
-            group_by="accident_year",
-            count="accident_year",
-            start_time=self.request_params.start_time,
-            end_time=self.request_params.end_time,
-        ),
-        "e_scooters": get_accidents_stats(
-            table_obj=InvolvedMarkerView,
-            filters = {
-                "injury_severity": [1, 2],
-                "involve_vehicle_type": 21,
-                "involve_yishuv_name": self.request_params.location_info["yishuv_name"],
-                },
-            group_by="accident_year",
-            count="accident_year",
-            start_time=self.request_params.start_time,
-            end_time=self.request_params.end_time,
-        ),
-        "all_three_together": get_accidents_stats(
-            table_obj=InvolvedMarkerView,
-            filters = {
-                "injury_severity": [1, 2],
-                "involve_vehicle_type": [15, 23, 21],
+                "injury_severity": [InjurySeverity.KILLED.value,
+                        InjurySeverity.SEVERE_INJURED.value],
+                "involve_vehicle_type": VehicleCategory.BICYCLE_AND_SMALL_MOTOR.get_codes(),
                 "involve_yishuv_name": self.request_params.location_info["yishuv_name"],
                 },
             group_by="accident_year",
@@ -318,28 +283,20 @@ class SevereFatalCountByAccidentYearAndVehicleWidget(UrbanWidget):
             start_time=self.request_params.start_time,
             end_time=self.request_params.end_time,
         )}
-
-    def relevance_check(self):
-        self.relevance = {"rel": get_accidents_stats(
-            table_obj=InvolvedMarkerView,
-                filters={
-                "injury_severity": [1, 2],
-                "involve_vehicle_type": [15, 23, 21],
-                "involve_yishuv_name": self.request_params.location_info["yishuv_name"],
-                },
-                group_by="accident_year",
-                count="accident_year",
-                start_time=self.request_params.end_time - datetime.timedelta(days=15),
-                end_time=self.request_params.end_time,
-        )}
-
 
     def is_included(self) -> bool:
-        self.relevance_check()        
-        if self.relevance["rel"]:
+        cutoff_year = (self.request_params.end_time - datetime.timedelta(days=365)).year
+        if self.items["bike&smallmotor"][-1]["accident_year"] >= cutoff_year:
             return self.items
         return False
 
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        items["data"]["text"] = {
+            "title": _("Severe or fatal accidents on bikes, e-bikes, or scooters in ")
+            + request_params.location_info["yishuv_name"]
+        }
+        return items
 
 @register
 class MostSevereAccidentsTableWidget(SubUrbanWidget):

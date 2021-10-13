@@ -264,10 +264,7 @@ class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 15
-        # self.text = {
-        #     "title": "Severe or fatal accidents on bikes, e-bikes, or scooters in "
-        #     + self.request_params.location_info["yishuv_name"]
-        # }
+
 
     def generate_items(self) -> None:
         self.items = {"bike&smallmotor": get_accidents_stats(

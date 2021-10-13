@@ -1172,7 +1172,8 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
     def filter_and_group_injured_count_per_age_group(request_params: RequestParams):
         road_number = request_params.location_info["road1"]
         road_segment = request_params.location_info["road_segment_name"]
-        involved_table = get_small_involved_marker()
+        # involved_table = get_small_involved_marker()
+        involved_table = InvolvedMarkerView
         query = (
             db.session.query(involved_table)
             .filter(involved_table.accident_year.in_(range(request_params.start_time.year,
@@ -1201,8 +1202,8 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
             )
             # todo handle road_segment_name field
             .filter(InvolvedMarkerView.road_segment_name == road_segment)
-            .group_by("age_group", "injury_severity")
-            .with_entities("age_group", "injury_severity", func.count().label("count"))
+            .group_by(involved_table.age_group, "injury_severity")
+            .with_entities(involved_table.age_group, "injury_severity", func.count().label("count"))
         )
 
         # if there's no data - return empty dict

@@ -1131,6 +1131,9 @@ def on_identity_loaded(sender, identity):
         for role in current_user.roles:
             identity.provides.add(RoleNeed(role.name))
 
+    if not current_user.is_anonymous:
+        identity.provides.add(RoleNeed("authenticated"))
+
 
 @principals.identity_loader
 def load_identity_when_session_expires():
@@ -1290,6 +1293,14 @@ def roles_accepted(*roles):
             perm = Permission(*[RoleNeed(role) for role in roles])
             if perm.can():
                 return fn(*args, **kwargs)
+            user_email = "not logged in"
+            user_roles = ""
+            if not current_user.is_anonymous:
+                user_email = current_user.email
+                user_roles = str([role.name for role in current_user.roles])
+            logging.info(
+                f"roles_accepted: User {user_email} doesn't have the needed roles: {str(roles)} for Path {request.url_rule}, but the user have {user_roles}"
+            )
             return return_json_error(Es.BR_BAD_AUTH)
 
         return decorated_view
@@ -1598,7 +1609,7 @@ def load_user(id: str) -> Users:
 
 # TODO: in the future add pagination if needed
 @app.route("/user/get_all_users_info")
-@roles_accepted(*BE_CONST.ROLES_TO_API["/user/get_all_users_info"])
+@roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def get_all_users_info() -> Response:
     dict_ret = []
     for user_obj in db.session.query(Users).order_by(Users.user_register_date).all():
@@ -1607,22 +1618,20 @@ def get_all_users_info() -> Response:
 
 
 @app.route("/user/info")
+@roles_accepted(BE_CONST.Roles2Names.Authenticated.value)
 def get_user_info() -> Response:
-    if current_user.is_anonymous:
-        return return_json_error(Es.BR_BAD_AUTH)
-
     user_obj = get_current_user()
     return jsonify(user_obj.serialize_exposed_to_user())
 
 
 @app.route("/user/remove_from_role", methods=["POST"])
-@roles_accepted(*BE_CONST.ROLES_TO_API["/user/remove_from_role"])
+@roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def remove_from_role() -> Response:
     return change_user_roles("remove")
 
 
 @app.route("/user/add_to_role", methods=["POST"])
-@roles_accepted(*BE_CONST.ROLES_TO_API["/user/add_to_role"])
+@roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def add_to_role() -> Response:
     return change_user_roles("add")
 
@@ -1698,7 +1707,7 @@ def get_role_object(role_name):
 
 
 @app.route("/user/update_user", methods=["POST"])
-@roles_accepted(*BE_CONST.ROLES_TO_API["/user/update_user"])
+@roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def admin_update_user() -> Response:
     allowed_fields = [
         "user_current_email",
@@ -1757,6 +1766,7 @@ def admin_update_user() -> Response:
 
 # This code is also used as part of the user first registration
 @app.route("/user/update", methods=["POST"])
+@roles_accepted(BE_CONST.Roles2Names.Authenticated.value)
 def user_update() -> Response:
     allowed_fields = [
         "first_name",
@@ -1767,9 +1777,6 @@ def user_update() -> Response:
         "user_url",
         "user_desc",
     ]
-
-    if current_user.is_anonymous:
-        return return_json_error(Es.BR_BAD_AUTH)
 
     res = is_input_fields_malformed(request, allowed_fields)
     if res:
@@ -1831,7 +1838,7 @@ def update_user_in_db(
 
 
 @app.route("/user/change_user_active_mode", methods=["POST"])
-@roles_accepted(*BE_CONST.ROLES_TO_API["/user/change_user_active_mode"])
+@roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def user_disable() -> Response:
     allowed_fields = [
         "email",
@@ -1865,7 +1872,7 @@ def user_disable() -> Response:
 
 
 @app.route("/user/add_role", methods=["POST"])
-@roles_accepted(*BE_CONST.ROLES_TO_API["/user/add_role"])
+@roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def add_role() -> Response:
     allowed_fields = [
         "name",
@@ -1920,7 +1927,7 @@ def is_a_valid_role_description(name: str) -> bool:
 
 
 @app.route("/user/get_roles_list", methods=["GET"])
-@roles_accepted(*BE_CONST.ROLES_TO_API["/user/get_roles_list"])
+@roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def get_roles_list() -> Response:
     roles_list = db.session.query(Roles).all()
     send_list = []

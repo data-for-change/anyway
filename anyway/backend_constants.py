@@ -28,6 +28,7 @@ class BackEndConstants(object):
     class Roles2Names(Enum):
         Admins = "admins"
         Or_yarok = "or_yarok"
+        Authenticated = "authenticated"
 
     # This is a type for the 'road_type' table field name
     ROAD_TYPE_NOT_IN_CITY_IN_INTERSECTION = 3
@@ -105,14 +106,6 @@ class BackEndConstants(object):
         "head_on_collisions_comparison",
     ]
 
-    ROLES_TO_API = {"/user/get_all_users_info": [Roles2Names.Admins.value],
-                    "/user/add_role": [Roles2Names.Admins.value],
-                    "/user/update_user": [Roles2Names.Admins.value],
-                    "/user/add_to_role": [Roles2Names.Admins.value],
-                    "/user/remove_from_role": [Roles2Names.Admins.value],
-                    "/user/change_user_active_mode": [Roles2Names.Admins.value],
-                    "/user/get_roles_list": [Roles2Names.Admins.value],
-                    }
 
 BE_CONST = BackEndConstants()
 

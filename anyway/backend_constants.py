@@ -28,6 +28,7 @@ class BackEndConstants(object):
     class Roles2Names(Enum):
         Admins = "admins"
         Or_yarok = "or_yarok"
+        Authenticated = "authenticated"
 
     # This is a type for the 'road_type' table field name
     ROAD_TYPE_NOT_IN_CITY_IN_INTERSECTION = 3

@@ -33,6 +33,7 @@ from sqlalchemy import (
     TIMESTAMP,
     PrimaryKeyConstraint,
     FetchedValue,
+    text,
 )
 import sqlalchemy
 from sqlalchemy.orm import relationship, load_only, backref
@@ -74,7 +75,7 @@ users_to_roles = Table(
         nullable=False,
         server_default=FetchedValue(),
     ),
-    Column("create_date", DateTime(), nullable=False),
+    Column("create_date", DateTime(), nullable=False, server_default=text("now()")),
     PrimaryKeyConstraint("user_id", "role_id"),
 )
 
@@ -93,7 +94,6 @@ class Users(Base, UserMixin):
     oauth_provider_user_picture_url = Column(String, nullable=True)
     oauth_provider_user_locale = Column(String(64), nullable=True)
     oauth_provider_user_profile_url = Column(String, nullable=True)
-    work_on_behalf_of_organization = Column(String(128), nullable=True)
     first_name = Column(String(255))
     last_name = Column(String(255))
     phone = Column(String(17))
@@ -106,6 +106,26 @@ class Users(Base, UserMixin):
         secondary=users_to_roles,
         backref=backref("users", lazy="dynamic"),
     )
+
+    def serialize_exposed_to_user(self):
+        roles = self.roles
+        return {
+            "id": self.id,
+            "user_register_date": self.user_register_date,
+            "email": self.email,
+            "is_active": self.is_active,
+            "oauth_provider": self.oauth_provider,
+            "oauth_provider_user_name": self.oauth_provider_user_name,
+            "oauth_provider_user_picture_url": self.oauth_provider_user_picture_url,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "phone": self.phone,
+            "user_type": self.user_type,
+            "user_url": self.user_url,
+            "user_desc": self.user_desc,
+            "is_user_completed_registration": self.is_user_completed_registration,
+            "roles": [r.name for r in roles],
+        }
 
 
 class LocationSubscribers(Base, UserMixin):

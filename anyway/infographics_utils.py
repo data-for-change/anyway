@@ -241,7 +241,7 @@ class AccidentCountBySeverityWidget(SubUrbanWidget):
     @staticmethod
     def get_accident_count_by_severity(location_info, start_time, end_time):
         count_by_severity = get_accidents_stats(
-            table_obj=AccidentMarkerView,
+            table_obj=get_small_accident_marker_view(),
             filters=location_info,
             group_by="accident_severity",
             count="accident_severity",
@@ -1178,8 +1178,6 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
             db.session.query(involved_table)
             .filter(involved_table.accident_year.in_(range(request_params.start_time.year,
                                                            request_params.end_time.year + 1)))
-            # .filter(involved_table.accident_timestamp >= request_params.start_time)
-            # .filter(involved_table.accident_timestamp <= request_params.end_time)
             .filter(
                 involved_table.provider_code.in_(
                     [

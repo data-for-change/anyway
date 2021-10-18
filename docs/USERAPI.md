@@ -76,7 +76,6 @@ Required else this Optional, this the email of the user
 5. non-relevant professional
 6. other
 
-**user_work_place** - _string_ ,Optional, the place the user work - Ynet, Police, Tel aviv university . . .  
 **user_url** - _string_ ,Optional, a URL to the user site  
 **user_desc** - _string_ ,Optional, a self-description of the user  
 
@@ -97,7 +96,6 @@ Examples for good JSON:
   "email": "aa@gmail.com",
   "phone": "0541234567",
   "user_type": "journalist",
-  "user_work_place": "ynet",
   "user_url": "http:\\www.a.com",
   "user_desc": "Some text here."
 }
@@ -151,7 +149,6 @@ If no error has occurred then you will get a JSON with an HTTP 200 response. Exa
   "user_register_date": "Thu, 24 Dec 2020 13:59:11 GMT",
   "user_type": "journalist",
   "user_url": "http:\\www.ynet.com",
-  "work_on_behalf_of_organization": "ynet",
   "roles": ["admins"]
 }
 ```
@@ -163,7 +160,7 @@ If no error has occurred then you will get a JSON with an HTTP 200 response. Exa
 **oauth_provider_user_name** - _string_ ,Sometimes we are given a username by the OAuth provider.  
 **oauth_provider_user_picture_url** - _string_ ,A URL for a picture of the user(only available if the OAuth provider
 have given us, Sometimes the OAuth provider is given us a blank picture).  
-**phone** - _string_ , Phone number - e.g. 03-1234567, 0541234567, 054-123-1234, +972-054-123-1234 
+**phone** - _string_ , Phone number - e.g. 03-1234567, 0541234567, 054-123-1234, +972-054-123-1234  
 **roles** - _[string]_ ,The roles assigned to the user - e.g. admins . . .   
 Other fields are self-explanatory, so they are not described here.  
 Otherwise, you will get one of the errors described in the [errors](#Errors) section of this document.
@@ -379,6 +376,123 @@ errors(e.g. Flask error, those can be in difference format then what describe he
 }
 ```
 
+### Get users list with info
+
+#### Description
+
+Return a JSON with the users list info from the DB, user with admin rights must be logged in to use this api.
+
+#### URL struct
+
+> GET https://www.anyway.co.il/admin/get_all_users_info
+
+#### Example
+
+> https://www.anyway.co.il/admin/get_all_users_info
+
+#### Parameters
+
+There are no params to pass.
+
+#### Returns
+
+If no error has occurred then you will get a JSON with an HTTP 200 response. Example of expected result:
+
+```json
+[
+  {
+    "email": "vvvvv@gmail.com",
+    "first_name": "Ron",
+    "id": 14,
+    "is_active": true,
+    "is_user_completed_registration": true,
+    "last_name": "Cohen",
+    "oauth_provider": "google",
+    "oauth_provider_user_name": null,
+    "oauth_provider_user_picture_url": "https://lh3.googleusercontent.com/a/default-user=s96-c",
+    "phone": "0541234567",
+    "roles": [
+      
+    ],
+    "user_desc": "A student in the Open university, and a part time journalist.",
+    "user_register_date": "Wed, 02 Jun 2021 21:00:08 GMT",
+    "user_type": "journalist",
+    "user_url": "http:\\www.ynet.com"
+  }
+]
+```
+each dict object in the list has the following struct:  
+**email** - _string_ ,What was given by the OAuth provider or by the user.  
+**id** - _int_ ,Our id for this user.  
+**is_active** - _bool_ ,Is the user active.  
+**is_user_completed_registration** - _bool_ ,Have the user completed the registration process.  
+**oauth_provider_user_name** - _string_ ,Sometimes we are given a username by the OAuth provider.  
+**oauth_provider_user_picture_url** - _string_ ,A URL for a picture of the user(only available if the OAuth provider
+have given us, Sometimes the OAuth provider is given us a blank picture).  
+**phone** - _string_ , Phone number - e.g. 03-1234567, 0541234567, 054-123-1234, +972-054-123-1234  
+**roles** - _[string]_ ,The roles assigned to the user - e.g. admins . . .   
+Other fields are self-explanatory, so they are not described here.  
+Otherwise, you will get one of the errors described in the [errors](#Errors) section of this document.
+
+### User info update by admin
+
+#### Description
+
+Update the user's info in the DB, user with admin rights must be logged in to use this api.
+
+#### URL struct
+
+> POST https://www.anyway.co.il/admin/update_user
+
+#### Example
+
+> https://www.anyway.co.il/admin/update_user
+
+#### Parameters
+
+There are no params that are passed in the URL query. All params should be passed as JSON in body of the POST request -
+the following fields must be present in the JSON:  
+**user_current_email** - _string_ ,Required, the "id" of the relevant user.  
+**email** - _string_ ,Required, new email.  
+**first_name** - _string_ ,Required, the user first name.  
+**is_user_completed_registration** - _bool_, Required, self-explanatory.  
+**last_name** - _string_ ,Required, the user last name.  
+**phone** - _string_ ,Required, phone number, can be given with or without israeli calling code `+972`, can contain `-`, e.g. 03-1234567, 0541234567, 054-123-1234, +972-054-123-1234  
+**user_desc** - _string_ ,Required, a self-description of the user  
+**user_type** - _string_ ,Required, this param describe if the user is journalist / academic researcher or something else, valid values are:  
+
+1. journalist
+2. academic researcher
+3. student
+4. police
+5. non-relevant professional
+6. other
+
+**user_url** - _string_ ,Required, a URL to the user site  
+
+Please note that all fields are Required, if no change was made in one of the field then send the same value as you got 
+from the [Get users list with info](# Get users list with info) API.
+
+Examples for good JSON:
+```json
+{
+  "user_current_email": "aaaa@gmail.com",
+  "email": "vvvvv@gmail.com",
+  "first_name": "Ron",
+  "is_user_completed_registration": true,
+  "last_name": "Cohen",
+  "phone": "0541234567",
+  "user_desc": "A student in the Open university, and a part time journalist.",
+  "user_type": "journalist",
+  "user_url": "http:\\www.ynet.com"
+}
+```
+
+#### Returns
+
+If no error has occurred then you will get an empty HTTP 200 response. Otherwise, you will get one of the errors
+described in the [errors](#Errors) section of this document.
+
 #### Error table:
 
 | Error name                          | Error code | Error msg                                                                                    | HTTP return Code |
@@ -406,4 +520,6 @@ errors(e.g. Flask error, those can be in difference format then what describe he
 | Role description is missing         | 21         | Bad Request (Role description is missing from request json).                                 | 400              |
 | Missing mode in json                | 22         | Bad Request (Mode is missing from request json).                                             | 400              |
 | Invalid mode value                  | 23         | Bad Request (Bad mode value).                                                                | 400              |
+| Field missing                       | 24         | Bad Request (Field {} is missing from json).                                                 | 400              |
+
 

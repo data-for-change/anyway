@@ -146,7 +146,7 @@ def user_update_post(app: FlaskClient) -> Response:
 
 def test_user_update_not_logged_in(app):
     rv = user_update_post(app)
-    assert_return_code_for_user_update(Errors.BR_USER_NOT_LOGGED_IN, rv)
+    assert_return_code_for_user_update(Errors.BR_BAD_AUTH, rv)
 
     rv = app.get("/user/update", follow_redirects=True)
     assert rv.status_code == HTTPStatus.METHOD_NOT_ALLOWED
@@ -157,17 +157,17 @@ def test_user_update_bad_json(app):
         set_current_user_mock(current_user)
 
         rv = user_update_post(app)
-        assert_return_code_for_user_update(Errors.BR_BAD_JSON, rv)
+        assert_return_code_for_user_update(Errors.BR_FIELD_MISSING, rv)
 
         rv = user_update_post_json(app)
         assert rv.status_code == HTTPStatus.BAD_REQUEST
         assert b"Failed to decode JSON object" in rv.data
 
         rv = user_update_post_json(app, json_data={})
-        assert_return_code_for_user_update(Errors.BR_BAD_JSON, rv)
+        assert_return_code_for_user_update(Errors.BR_FIELD_MISSING, rv)
 
         rv = user_update_post_json(app, json_data={"a": "a"})
-        assert_return_code_for_user_update(Errors.BR_UNKNOWN_FIELD, rv, "a")
+        assert_return_code_for_user_update(Errors.BR_FIELD_MISSING, rv)
 
 
 def test_user_update_names(app):
@@ -239,7 +239,6 @@ def test_user_update_success(app):
                     "email": "aa@gmail.com",
                     "phone": "0541234567",
                     "user_type": "journalist",
-                    "user_work_place": "ynet",
                     "user_url": "http:\\www.a.com",
                     "user_desc": "a",
                 }
@@ -259,7 +258,7 @@ USER_COMPLETED = True
 
 def test_get_current_user(app):
     rv = app.get("/user/info", follow_redirects=True)
-    assert_return_code_for_user_update(Errors.BR_USER_NOT_LOGGED_IN, rv)
+    assert_return_code_for_user_update(Errors.BR_BAD_AUTH, rv)
     with patch("flask_login.utils._get_user") as current_user:
         set_current_user_mock(current_user)
         with patch("anyway.flask_app.get_current_user") as get_current_user:
@@ -281,13 +280,29 @@ def test_get_current_user(app):
                 "user_register_date": None,
                 "user_type": None,
                 "user_url": None,
-                "work_on_behalf_of_organization": None,
                 "roles": [],
             }
 
 
 def get_mock_current_user(get_current_user: mock.MagicMock) -> mock.MagicMock:
     ret_obj = mock.MagicMock()
+    ret_obj.serialize_exposed_to_user.side_effect = lambda: {
+        "id": USER_ID,
+        "user_register_date": None,
+        "email": USER_EMAIL,
+        "is_active": USER_ACTIVE,
+        "oauth_provider": OAUTH_PROVIDER,
+        "oauth_provider_user_name": None,
+        "oauth_provider_user_picture_url": None,
+        "first_name": FIRST_NAME,
+        "last_name": LAST_NAME,
+        "phone": None,
+        "user_type": None,
+        "user_url": None,
+        "user_desc": None,
+        "is_user_completed_registration": USER_COMPLETED,
+        "roles": [],
+    }
     ret_obj.id = USER_ID
     ret_obj.user_register_date = None
     ret_obj.email = USER_EMAIL
@@ -295,7 +310,6 @@ def get_mock_current_user(get_current_user: mock.MagicMock) -> mock.MagicMock:
     ret_obj.oauth_provider = OAUTH_PROVIDER
     ret_obj.oauth_provider_user_name = None
     ret_obj.oauth_provider_user_picture_url = None
-    ret_obj.work_on_behalf_of_organization = None
     ret_obj.phone = None
     ret_obj.user_type = None
     ret_obj.user_url = None
@@ -344,9 +358,7 @@ def user_add_or_remove_role(app: FlaskClient, path: str) -> None:
 def set_mock_and_test_perm(app, current_user, path):
     set_current_user_mock(current_user)
     rv = app.post(path, follow_redirects=True)
-    assert_return_code_for_user_update(
-        Errors.BR_MISSING_PERMISSION, rv, BE_CONST.Roles2Names.Admins.value
-    )
+    assert_return_code_for_user_update(Errors.BR_BAD_AUTH, rv)
     role = mock.MagicMock()
     role.name = BE_CONST.Roles2Names.Admins.value
     current_user.return_value.roles = [role]
@@ -405,7 +417,7 @@ def test_add_role(app):
         set_mock_and_test_perm(app, current_user, path)
 
         rv = post_json(app, path, json_data={"email": "a"})
-        assert_return_code_for_user_update(Errors.BR_UNKNOWN_FIELD, rv, "email")
+        assert_return_code_for_user_update(Errors.BR_FIELD_MISSING, rv)
 
         rv = post_json(app, path, json_data={"description": ""})
         assert_return_code_for_user_update(Errors.BR_ROLE_NAME_MISSING, rv)

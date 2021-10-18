@@ -7,6 +7,7 @@ import json
 import logging
 import re
 import typing
+from functools import wraps
 from io import StringIO
 import os
 import time
@@ -35,8 +36,8 @@ from flask_restx import Resource, fields, reqparse
 
 from anyway.error_code_and_strings import (
     Errors as Es,
-    ERROR_TO_HTTP_CODE_DICT,
     build_json_for_user_api_error,
+    ERROR_TO_HTTP_CODE_DICT,
 )
 
 from http import client as http_client, HTTPStatus
@@ -52,7 +53,11 @@ from anyway.clusters_calculator import retrieve_clusters
 from anyway.config import ENTRIES_PER_PAGE
 from anyway.backend_constants import BE_CONST
 from anyway.constants import CONST
-from anyway.user_functions import get_current_user_email, get_current_user, get_user_by_email
+from anyway.user_functions import (
+    get_current_user_email,
+    get_current_user,
+    get_user_by_email,
+)
 from anyway.models import (
     AccidentMarker,
     DiscussionMarker,
@@ -1126,6 +1131,9 @@ def on_identity_loaded(sender, identity):
         for role in current_user.roles:
             identity.provides.add(RoleNeed(role.name))
 
+    if not current_user.is_anonymous:
+        identity.provides.add(RoleNeed("authenticated"))
+
 
 @principals.identity_loader
 def load_identity_when_session_expires():
@@ -1261,6 +1269,43 @@ class RetrieveNewsFlash(Resource):
         for d in res:
             d["date"] = datetime_to_str(d["date"]) if "date" in d else "None"
         return {"news_flashes": res}
+
+
+# Copied and modified from flask-security
+def roles_accepted(*roles):
+    """Decorator which specifies that a user must have at least one of the
+    specified roles. Example::
+
+        @app.route('/create_post')
+        @roles_accepted('editor', 'author')
+        def create_post():
+            return 'Create Post'
+
+    The current user must have either the `editor` role or `author` role in
+    order to view the page.
+
+    :param roles: The possible roles.
+    """
+
+    def wrapper(fn):
+        @wraps(fn)
+        def decorated_view(*args, **kwargs):
+            perm = Permission(*[RoleNeed(role) for role in roles])
+            if perm.can():
+                return fn(*args, **kwargs)
+            user_email = "not logged in"
+            user_roles = ""
+            if not current_user.is_anonymous:
+                user_email = current_user.email
+                user_roles = str([role.name for role in current_user.roles])
+            logging.info(
+                f"roles_accepted: User {user_email} doesn't have the needed roles: {str(roles)} for Path {request.url_rule}, but the user have {user_roles}"
+            )
+            return return_json_error(Es.BR_BAD_AUTH)
+
+        return decorated_view
+
+    return wrapper
 
 
 def return_json_error(error_code: int, *argv) -> Response:
@@ -1562,63 +1607,44 @@ def load_user(id: str) -> Users:
     return db.session.query(Users).get(id)
 
 
-@app.route("/user/info")
-def user_have_email() -> Response:
-    if current_user.is_anonymous:
-        return return_json_error(Es.BR_USER_NOT_LOGGED_IN)
+# TODO: in the future add pagination if needed
+@app.route("/user/get_all_users_info")
+@roles_accepted(BE_CONST.Roles2Names.Admins.value)
+def get_all_users_info() -> Response:
+    dict_ret = []
+    for user_obj in db.session.query(Users).order_by(Users.user_register_date).all():
+        dict_ret.append(user_obj.serialize_exposed_to_user())
+    return jsonify(dict_ret)
 
+
+@app.route("/user/info")
+@roles_accepted(BE_CONST.Roles2Names.Authenticated.value)
+def get_user_info() -> Response:
     user_obj = get_current_user()
-    roles = user_obj.roles
-    return jsonify(
-        {
-            "id": user_obj.id,
-            "user_register_date": user_obj.user_register_date,
-            "email": user_obj.email,
-            "is_active": user_obj.is_active,
-            "oauth_provider": user_obj.oauth_provider,
-            "oauth_provider_user_name": user_obj.oauth_provider_user_name,
-            "oauth_provider_user_picture_url": user_obj.oauth_provider_user_picture_url,
-            "work_on_behalf_of_organization": user_obj.work_on_behalf_of_organization,
-            "first_name": user_obj.first_name,
-            "last_name": user_obj.last_name,
-            "phone": user_obj.phone,
-            "user_type": user_obj.user_type,
-            "user_url": user_obj.user_url,
-            "user_desc": user_obj.user_desc,
-            "is_user_completed_registration": user_obj.is_user_completed_registration,
-            "roles": [r.name for r in roles],
-        }
-    )
+    return jsonify(user_obj.serialize_exposed_to_user())
 
 
 @app.route("/user/remove_from_role", methods=["POST"])
+@roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def remove_from_role() -> Response:
     return change_user_roles("remove")
 
 
 @app.route("/user/add_to_role", methods=["POST"])
+@roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def add_to_role() -> Response:
     return change_user_roles("add")
 
 
-def check_admin_api_with_input(
-    request: Request, allowed_fields: typing.List[str]
-) -> typing.Optional[Response]:
-    if current_user.is_anonymous:
-        return return_json_error(Es.BR_USER_NOT_LOGGED_IN)
-
-    admin_permission = Permission(RoleNeed(BE_CONST.Roles2Names.Admins.value))
-    if not admin_permission.can():
-        return return_json_error(Es.BR_MISSING_PERMISSION, BE_CONST.Roles2Names.Admins.value)
-
+def is_input_fields_malformed(request: Request, allowed_fields: typing.List[str]) -> bool:
     # Validate input
     reg_dict = request.json
     if not reg_dict:
-        return return_json_error(Es.BR_BAD_JSON)
+        return True
     for key in reg_dict:
         if key not in allowed_fields:
-            return return_json_error(Es.BR_UNKNOWN_FIELD, key)
-    return None
+            return True
+    return False
 
 
 def change_user_roles(action: str) -> Response:
@@ -1627,9 +1653,9 @@ def change_user_roles(action: str) -> Response:
         "email",
     ]
 
-    res = check_admin_api_with_input(request, allowed_fields)
+    res = is_input_fields_malformed(request, allowed_fields)
     if res:
-        return res
+        return return_json_error(Es.BR_FIELD_MISSING)
     reg_dict = request.json
 
     role_name = reg_dict.get("role")
@@ -1680,8 +1706,67 @@ def get_role_object(role_name):
     return role
 
 
+@app.route("/user/update_user", methods=["POST"])
+@roles_accepted(BE_CONST.Roles2Names.Admins.value)
+def admin_update_user() -> Response:
+    allowed_fields = [
+        "user_current_email",
+        "first_name",
+        "last_name",
+        "email",
+        "phone",
+        "user_type",
+        "user_url",
+        "user_desc",
+        "is_user_completed_registration",
+    ]
+
+    res = is_input_fields_malformed(request, allowed_fields)
+    if res:
+        return return_json_error(Es.BR_FIELD_MISSING)
+    reg_dict = request.json
+
+    user_current_email = reg_dict.get("user_current_email")
+    if not user_current_email:
+        return return_json_error(Es.BR_NO_EMAIL)
+    if not is_a_valid_email(user_current_email):
+        return return_json_error(Es.BR_BAD_EMAIL)
+    user = get_user_by_email(db, user_current_email)
+    if user is None:
+        return return_json_error(Es.BR_USER_NOT_FOUND, user_current_email)
+
+    user_db_new_email = reg_dict.get("email")
+    if not is_a_valid_email(user_db_new_email):
+        return return_json_error(Es.BR_BAD_EMAIL)
+
+    phone = reg_dict.get("phone")
+    if phone and not is_valid_number(phone):
+        return return_json_error(Es.BR_BAD_PHONE)
+
+    first_name = reg_dict.get("first_name")
+    last_name = reg_dict.get("last_name")
+    user_desc = reg_dict.get("user_desc")
+    user_type = reg_dict.get("user_type")
+    user_url = reg_dict.get("user_url")
+    is_user_completed_registration = reg_dict.get("is_user_completed_registration")
+    update_user_in_db(
+        user,
+        first_name,
+        last_name,
+        phone,
+        user_db_new_email,
+        user_desc,
+        user_type,
+        user_url,
+        is_user_completed_registration,
+    )
+
+    return Response(status=HTTPStatus.OK)
+
+
 # This code is also used as part of the user first registration
 @app.route("/user/update", methods=["POST"])
+@roles_accepted(BE_CONST.Roles2Names.Authenticated.value)
 def user_update() -> Response:
     allowed_fields = [
         "first_name",
@@ -1689,21 +1774,14 @@ def user_update() -> Response:
         "email",
         "phone",
         "user_type",
-        "user_work_place",
         "user_url",
         "user_desc",
     ]
 
-    if current_user.is_anonymous:
-        return return_json_error(Es.BR_USER_NOT_LOGGED_IN)
-
+    res = is_input_fields_malformed(request, allowed_fields)
+    if res:
+        return return_json_error(Es.BR_FIELD_MISSING)
     reg_dict = request.json
-    if not reg_dict:
-        return return_json_error(Es.BR_BAD_JSON)
-
-    for key in reg_dict:
-        if key not in allowed_fields:
-            return return_json_error(Es.BR_UNKNOWN_FIELD, key)
 
     first_name = reg_dict.get("first_name")
     last_name = reg_dict.get("last_name")
@@ -1727,18 +1805,18 @@ def user_update() -> Response:
         return return_json_error(Es.BR_BAD_PHONE)
 
     user_type = reg_dict.get("user_type")
-    user_work_place = reg_dict.get("user_work_place")
     user_url = reg_dict.get("user_url")
     user_desc = reg_dict.get("user_desc")
 
     update_user_in_db(
-        first_name, last_name, phone, user_db_email, user_desc, user_type, user_url, user_work_place
+        first_name, last_name, phone, user_db_email, user_desc, user_type, user_url, True
     )
 
     return Response(status=HTTPStatus.OK)
 
 
 def update_user_in_db(
+    user: Users,
     first_name: str,
     last_name: str,
     phone: str,
@@ -1746,30 +1824,30 @@ def update_user_in_db(
     user_desc: str,
     user_type: str,
     user_url: str,
-    user_work_place: str,
+    is_user_completed_registration: bool,
 ) -> None:
-    current_user.first_name = first_name
-    current_user.last_name = last_name
-    current_user.email = user_db_email
-    current_user.phone = phone
-    current_user.user_type = user_type
-    current_user.work_on_behalf_of_organization = user_work_place
-    current_user.user_url = user_url
-    current_user.user_desc = user_desc
-    current_user.is_user_completed_registration = True
+    user.first_name = first_name
+    user.last_name = last_name
+    user.email = user_db_email
+    user.phone = phone
+    user.user_type = user_type
+    user.user_url = user_url
+    user.user_desc = user_desc
+    user.is_user_completed_registration = is_user_completed_registration
     db.session.commit()
 
 
 @app.route("/user/change_user_active_mode", methods=["POST"])
+@roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def user_disable() -> Response:
     allowed_fields = [
         "email",
         "mode",
     ]
 
-    result = check_admin_api_with_input(request, allowed_fields)
+    result = is_input_fields_malformed(request, allowed_fields)
     if result:
-        return result
+        return return_json_error(Es.BR_FIELD_MISSING)
     reg_dict = request.json
 
     email = reg_dict.get("email")
@@ -1794,15 +1872,16 @@ def user_disable() -> Response:
 
 
 @app.route("/user/add_role", methods=["POST"])
+@roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def add_role() -> Response:
     allowed_fields = [
         "name",
         "description",
     ]
 
-    res = check_admin_api_with_input(request, allowed_fields)
+    res = is_input_fields_malformed(request, allowed_fields)
     if res:
-        return res
+        return return_json_error(Es.BR_FIELD_MISSING)
     reg_dict = request.json
 
     name = reg_dict.get("name")
@@ -1848,14 +1927,8 @@ def is_a_valid_role_description(name: str) -> bool:
 
 
 @app.route("/user/get_roles_list", methods=["GET"])
+@roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def get_roles_list() -> Response:
-    if current_user.is_anonymous:
-        return return_json_error(Es.BR_USER_NOT_LOGGED_IN)
-
-    admin_permission = Permission(RoleNeed(BE_CONST.Roles2Names.Admins.value))
-    if not admin_permission.can():
-        return return_json_error(Es.BR_MISSING_PERMISSION, BE_CONST.Roles2Names.Admins.value)
-
     roles_list = db.session.query(Roles).all()
     send_list = []
     for role in roles_list:

@@ -648,11 +648,11 @@ class HeadOnCollisionsComparisonWidget(SubUrbanWidget):
             end_time=self.request_params.end_time,
         )
 
-        if location_info["road1"] and location_info["road_segment_name"]:
+        if location_info["road1"] and location_info["road_segment_id"]:
             filter_dict.update(
                 {
                     "road1": location_info["road1"],
-                    "road_segment_name": location_info["road_segment_name"],
+                    "road_segment_id": location_info["road_segment_id"],
                 }
             )
             road_data = get_accidents_stats(
@@ -801,10 +801,13 @@ class AccidentsHeatMapWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        road_segment_name, x = get_road_segment_name_and_number(
+            request_params.location_info["road_segment_id"]
+        )
         items["data"]["text"] = {
             "title": _("Fatal and severe accidents heat map")
             + " "
-            + segment_dictionary[request_params.location_info["road_segment_name"]]
+            + segment_dictionary[road_segment_name]
         }
         return items
 
@@ -846,10 +849,13 @@ class AccidentCountByAccidentYearWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        road_segment_name, x = get_road_segment_name_and_number(
+            request_params.location_info["road_segment_id"]
+        )
         items["data"]["text"] = {
             "title": _("Number of accidents, by year, splitted by accident severity, in segment")
             + " "
-            + segment_dictionary[request_params.location_info["road_segment_name"]],
+            + segment_dictionary[road_segment_name],
             "labels": gen_entity_labels(AccidentSeverity),
         }
         return items
@@ -893,10 +899,13 @@ class InjuredCountByAccidentYearWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        road_segment_name, x = get_road_segment_name_and_number(
+            request_params.location_info["road_segment_id"]
+        )
         items["data"]["text"] = {
             "title": _("Number of injured in accidents, per year, splitted by severity, in segment")
             + " "
-            + segment_dictionary[request_params.location_info["road_segment_name"]],
+            + segment_dictionary[road_segment_name],
             "labels": gen_entity_labels(InjurySeverity),
         }
         return items
@@ -1171,9 +1180,9 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
     @staticmethod
     def filter_and_group_injured_count_per_age_group(request_params: RequestParams):
         road_number = request_params.location_info["road1"]
-        road_segment = request_params.location_info["road_segment_name"]
+        segment_id = request_params.location_info["road_segment_id"]
         # involved_table = get_small_involved_marker()
-        involved_table = InvolvedMarkerView
+        involved_table = get_small_involved_marker()
         query = (
             db.session.query(involved_table)
             .filter(involved_table.accident_year.in_(range(request_params.start_time.year,
@@ -1198,8 +1207,8 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
                 (involved_table.road1 == road_number)
                 | (involved_table.road2 == road_number)
             )
-            # todo handle road_segment_name field
-            .filter(InvolvedMarkerView.road_segment_name == road_segment)
+            # todo handle age_group field
+            .filter(involved_table.road_segment_id == segment_id)
             .group_by(involved_table.age_group, "injury_severity")
             .with_entities(involved_table.age_group, "injury_severity", func.count().label("count"))
         )
@@ -1246,9 +1255,12 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        road_segment_name, x = get_road_segment_name_and_number(
+            request_params.location_info["road_segment_id"]
+        )
         items["data"]["text"] = {
             "title": _("Injury severity per age group in ")
-            + request_params.location_info["road_segment_name"]
+            + road_segment_name
         }
         return items
 
@@ -1272,11 +1284,11 @@ class Road2Plus1Widget(SubUrbanWidget):
             "road_type": BE_CONST.ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION,
         }
 
-        if location_info["road1"] and location_info["road_segment_name"]:
+        if location_info["road1"] and location_info["road_segment_id"]:
             filter_dict.update(
                 {
                     "road1": location_info["road1"],
-                    "road_segment_name": location_info["road_segment_name"],
+                    "road_segment_id": location_info["road_segment_id"],
                 }
             )
             road_data = get_accidents_stats(
@@ -1360,6 +1372,9 @@ class AccidentCountByDriverTypeWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        road_segment_name, x = get_road_segment_name_and_number(
+            request_params.location_info["road_segment_id"]
+        )
         for item in items["data"]["items"]:
             try:
                 item["driver_type"] = _(item["driver_type"])
@@ -1369,7 +1384,7 @@ class AccidentCountByDriverTypeWidget(SubUrbanWidget):
                 )
         items["data"]["text"] = {
             "title": _("accident count by driver type ")
-            + request_params.location_info["road_segment_name"]
+            + road_segment_name
         }
         return items
 
@@ -1478,6 +1493,9 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        road_segment_name, x = get_road_segment_name_and_number(
+            request_params.location_info["road_segment_id"]
+        )
         for item in items["data"]["items"]:
             try:
                 item["car_type"] = _(VehicleCategory(item["car_type"]).get_english_display_name())
@@ -1489,9 +1507,7 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
             "relative to national average"
         )
         items["data"]["text"] = {
-            "title": base_title.format(
-                segment_dictionary[request_params.location_info["road_segment_name"]]
-            )
+            "title": base_title.format(segment_dictionary[road_segment_name])
         }
         return items
 
@@ -2088,10 +2104,13 @@ def get_most_severe_accidents_with_entities(
 
 
 def get_most_severe_accidents_table_title(location_info):
+    road_segment_name, x = get_road_segment_name_and_number(
+        location_info["road_segment_id"]
+    )
     return (
         _("Most severe accidents in segment")
         + " "
-        + segment_dictionary[location_info["road_segment_name"]]
+        + segment_dictionary[road_segment_name]
     )
 
 
@@ -2460,7 +2479,7 @@ def is_sub_urban(request_params: RequestParams) -> bool:
     return (
         request_params is not None
         and "road1" in request_params.location_info
-        and "road_segment_name" in request_params.location_info
+        and "road_segment_id" in request_params.location_info
     )
 
 

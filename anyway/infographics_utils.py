@@ -267,23 +267,35 @@ class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
 
 
     def generate_items(self) -> None:
-        self.items = {"bike&smallmotor": get_accidents_stats(
+        self.items = SmallMotorSevereFatalCountByYearWidget.get_motor_stats(self.request_params.location_info["yishuv_name"],
+            self.request_params.start_time,
+            self.request_params.end_time,)
+
+    @staticmethod
+    def get_motor_stats(location_info, start_time, end_time) -> None:
+        count_by_year = get_accidents_stats(
             table_obj=InvolvedMarkerView,
             filters = {
                 "injury_severity": [InjurySeverity.KILLED.value,
                         InjurySeverity.SEVERE_INJURED.value],
                 "involve_vehicle_type": VehicleCategory.BICYCLE_AND_SMALL_MOTOR.get_codes(),
-                "involve_yishuv_name": self.request_params.location_info["yishuv_name"],
+                "involve_yishuv_name": location_info,
                 },
             group_by="accident_year",
             count="accident_year",
-            start_time=self.request_params.start_time,
-            end_time=self.request_params.end_time,
-        )}
+            start_time=start_time,
+            end_time=end_time,
+        )
+        found_accidents = [d['accident_year'] for d in count_by_year if 'accident_year' in d]
+        start_year = start_time.year
+        end_year = end_time.year
+        for year in list(range(start_year, end_year+1)):
+            if year not in found_accidents:
+                count_by_year.append({"accident_year": year, "count": 0})
+        return count_by_year
 
     def is_included(self) -> bool:
-        cutoff_year = (self.request_params.end_time - datetime.timedelta(days=365)).year
-        if self.items["bike&smallmotor"][-1]["accident_year"] >= cutoff_year:
+        if self.items[-1]["count"] > 0 and self.items[-2]["count"] > 0:
             return self.items
         return False
 

@@ -1,10 +1,12 @@
 import datetime
+import os
 import logging
 import pandas as pd
 from flask_sqlalchemy import SQLAlchemy
 from anyway.parsers import infographics_data_cache_updater
 from anyway.parsers import timezones
 from anyway.models import NewsFlash
+from anyway.slack_accident_notifications import publish_notification
 
 # fmt: off
 
@@ -76,6 +78,8 @@ class DBAdapter:
         self.db.session.add(newsflash)
         self.db.session.commit()
         infographics_data_cache_updater.add_news_flash_to_cache(newsflash)
+        if os.environ.get("FLASK_ENV") == "production":
+            publish_notification(newsflash)
 
     def get_newsflash_by_id(self, id):
         return self.db.session.query(NewsFlash).filter(NewsFlash.id == id)

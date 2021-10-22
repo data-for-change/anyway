@@ -260,26 +260,33 @@ _("Fatal, severe and light accidents count in the specified years, split by acci
 
 @register
 class UrbanCrosswalkWidget(UrbanWidget):
-    name: str = "accidents_by_cross_location"
+    name: str = "urban_accidents_by_cross_location"
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 27
 
     def generate_items(self) -> None:
-        self.items = {"with_crosswalk": get_accidents_stats(
+        self.items = UrbanCrosswalkWidget.get_crosswalk(self.request_params.location_info["yishuv_name"],
+            self.request_params.location_info["street1_hebrew"],
+            self.request_params.start_time,
+            self.request_params.end_time,)
+
+    @staticmethod
+    def get_crosswalk(yishuv, street, start_time, end_time) -> None:
+        cross_output = {"with_crosswalk": get_accidents_stats(
             table_obj=InvolvedMarkerView,
             filters = {
                 "injury_severity": [InjurySeverity.KILLED.value,  # pylint: disable=no-member
                         InjurySeverity.SEVERE_INJURED.value],
                 "cross_location": CrossCategory.CROSSWALK.get_codes(),
-                "involve_yishuv_name": self.request_params.location_info["yishuv_name"],
-                "street1_hebrew": self.request_params.location_info["street1_hebrew"],
+                "involve_yishuv_name": yishuv,
+                "street1_hebrew": street,
                 },
             group_by="street1_hebrew",
             count="street1_hebrew",
-            start_time=self.request_params.start_time,
-            end_time=self.request_params.end_time,
+            start_time=start_time,
+            end_time=end_time,
         ),
         "without_crosswalk": get_accidents_stats(
             table_obj=InvolvedMarkerView,
@@ -287,14 +294,20 @@ class UrbanCrosswalkWidget(UrbanWidget):
                 "injury_severity": [InjurySeverity.KILLED.value,  # pylint: disable=no-member
                         InjurySeverity.SEVERE_INJURED.value],
                 "cross_location": CrossCategory.NONE.get_codes(),
-                "involve_yishuv_name": self.request_params.location_info["yishuv_name"],
-                "street1_hebrew": self.request_params.location_info["street1_hebrew"],
+                "involve_yishuv_name": yishuv,
+                "street1_hebrew": street,
                 },
             group_by="street1_hebrew",
             count="street1_hebrew",
-            start_time=self.request_params.start_time,
-            end_time=self.request_params.end_time,
+            start_time=start_time,
+            end_time=end_time,
         )}
+        if not cross_output["with_crosswalk"]:
+            cross_output["with_crosswalk"] = {"street1_hebrew": street, "count": 0}
+        if not cross_output["without_crosswalk"]:
+            cross_output["without_crosswalk"] = {"street1_hebrew": street, "count": 0}
+        return cross_output
+
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
@@ -305,42 +318,38 @@ class UrbanCrosswalkWidget(UrbanWidget):
         return items
 
     def is_included(self) -> bool:
-        if self.items["with_crosswalk"]:
-            if len(self.items["with_crosswalk"]) > 1:
-                with_cross = self.items["with_crosswalk"][1]["count"] + self.items["with_crosswalk"][0]["count"]
-            else: with_cross = self.items["with_crosswalk"][0]["count"]
-        else: with_cross = 0
-        if self.items["without_crosswalk"]:
-            if len(self.items["without_crosswalk"]) > 1:
-                without_cross = self.items["without_crosswalk"][1]["count"] + self.items["without_crosswalk"][0]["count"]
-            else: without_cross = self.items["without_crosswalk"][0]["count"]
-        else: without_cross = 0
-        if without_cross + with_cross > 10:
+        if self.items["with_crosswalk"][0]["count"] + self.items["without_crosswalk"][0]["count"] > 10:
             return self.items
         return False
 
 
 @register
 class SuburbanCrosswalkWidget(SubUrbanWidget):
-    name: str = "accidents_by_cross_location"
+    name: str = "suburban_accidents_by_cross_location"
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 26
 
     def generate_items(self) -> None:
-        self.items = {"with_crosswalk": get_accidents_stats(
+        self.items = SuburbanCrosswalkWidget.get_crosswalk(self.request_params.location_info["road_segment_name"],
+            self.request_params.start_time,
+            self.request_params.end_time,)
+    
+    @staticmethod
+    def get_crosswalk(road, start_time, end_time) -> None:
+        cross_output ={"with_crosswalk": get_accidents_stats(
             table_obj=InvolvedMarkerView,
             filters = {
                 "injury_severity": [InjurySeverity.KILLED.value,  # pylint: disable=no-member
                         InjurySeverity.SEVERE_INJURED.value],
                 "cross_location": CrossCategory.CROSSWALK.get_codes(),
-                "road_segment_name": self.request_params.location_info["road_segment_name"],
+                "road_segment_name": road,
                 },
-            group_by="street1_hebrew",
-            count="street1_hebrew",
-            start_time=self.request_params.start_time,
-            end_time=self.request_params.end_time,
+            group_by="road_segment_name",
+            count="road_segment_name",
+            start_time=start_time,
+            end_time=end_time,
         ),
         "without_crosswalk": get_accidents_stats(
             table_obj=InvolvedMarkerView,
@@ -348,13 +357,18 @@ class SuburbanCrosswalkWidget(SubUrbanWidget):
                 "injury_severity": [InjurySeverity.KILLED.value,  # pylint: disable=no-member
                         InjurySeverity.SEVERE_INJURED.value],
                 "cross_location": CrossCategory.NONE.get_codes(),
-                "road_segment_name": self.request_params.location_info["road_segment_name"],
+                "road_segment_name": road,
                 },
             group_by="road_segment_name",
             count="road_segment_name",
-            start_time=self.request_params.start_time,
-            end_time=self.request_params.end_time,
+            start_time=start_time,
+            end_time=end_time,
         )}
+        if not cross_output["with_crosswalk"]:
+            cross_output["with_crosswalk"] = [{"road_segment": road, "count": 0}]
+        if not cross_output["without_crosswalk"]:
+            cross_output["without_crosswalk"] = [{"road_segment": road, "count": 0}]
+        return cross_output
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
@@ -365,17 +379,7 @@ class SuburbanCrosswalkWidget(SubUrbanWidget):
         return items
 
     def is_included(self) -> bool:
-        if self.items["with_crosswalk"]:
-            if len(self.items["with_crosswalk"]) > 1:
-                with_cross = self.items["with_crosswalk"][1]["count"] + self.items["with_crosswalk"][0]["count"]
-            else: with_cross = self.items["with_crosswalk"][0]["count"]
-        else: with_cross = 0
-        if self.items["without_crosswalk"]:
-            if len(self.items["without_crosswalk"]) > 1:
-                without_cross = self.items["without_crosswalk"][1]["count"] + self.items["without_crosswalk"][0]["count"]
-            else: without_cross = self.items["without_crosswalk"][0]["count"]
-        else: without_cross = 0
-        if without_cross + with_cross > 10:
+        if self.items["with_crosswalk"][0]["count"] + self.items["without_crosswalk"][0]["count"] > 10:
             return self.items
         return False
 

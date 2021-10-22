@@ -43,7 +43,7 @@ from anyway.infographics_dictionaries import (
 )
 from anyway.parsers import infographics_data_cache_updater
 from anyway.utilities import parse_age_from_range
-from anyway.vehicle_type import VehicleCategory
+from anyway.vehicle_type import VehicleCategory, VehicleType
 from anyway.parsers.location_extraction import get_road_segment_name_and_number
 
 
@@ -257,6 +257,43 @@ _("Fatal, severe and light accidents count in the specified location.")
 _("Fatal, severe and light injured count in the specified years, split by injury severity")
 _("Fatal, severe and light accidents count in the specified years, split by accident severity")
 
+@register
+class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
+    name: str = "severe_fatal_count_on_small_motor_by_accident_year"
+
+    def __init__(self, request_params: RequestParams):
+        super().__init__(request_params, type(self).name)
+        self.rank = 15
+
+
+    def generate_items(self) -> None:
+        self.items = {"bike&smallmotor": get_accidents_stats(
+            table_obj=InvolvedMarkerView,
+            filters = {
+                "injury_severity": [InjurySeverity.KILLED.value,
+                        InjurySeverity.SEVERE_INJURED.value],
+                "involve_vehicle_type": VehicleCategory.BICYCLE_AND_SMALL_MOTOR.get_codes(),
+                "involve_yishuv_name": self.request_params.location_info["yishuv_name"],
+                },
+            group_by="accident_year",
+            count="accident_year",
+            start_time=self.request_params.start_time,
+            end_time=self.request_params.end_time,
+        )}
+
+    def is_included(self) -> bool:
+        cutoff_year = (self.request_params.end_time - datetime.timedelta(days=365)).year
+        if self.items["bike&smallmotor"][-1]["accident_year"] >= cutoff_year:
+            return self.items
+        return False
+
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        items["data"]["text"] = {
+            "title": _("Severe or fatal accidents on bikes, e-bikes, or scooters in ")
+            + request_params.location_info["yishuv_name"]
+        }
+        return items
 
 @register
 class MostSevereAccidentsTableWidget(SubUrbanWidget):

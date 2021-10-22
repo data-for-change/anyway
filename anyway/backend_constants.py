@@ -28,6 +28,7 @@ class BackEndConstants(object):
     class Roles2Names(Enum):
         Admins = "admins"
         Or_yarok = "or_yarok"
+        Authenticated = "authenticated"
 
     # This is a type for the 'road_type' table field name
     ROAD_TYPE_NOT_IN_CITY_IN_INTERSECTION = 3
@@ -47,18 +48,20 @@ class BackEndConstants(object):
     UNKNOWN = "UNKNOWN"
     DEFAULT_REDIRECT_URL = "https://anyway-infographics.web.app/"
     ANYWAY_CORS_SITE_LIST_PROD = [
-        "https://anyway-infographics-staging.web.app/*",
-        "https://anyway-infographics.web.app/*",
-        "https://www.anyway.co.il/*",
-        "https://anyway-infographics-demo.web.app/*",
+        "https://anyway-infographics-staging.web.app",
+        "https://anyway-infographics.web.app",
+        "https://www.anyway.co.il",
+        "https://anyway-infographics-demo.web.app",
+        "https://media.anyway.co.il",
+        "https://dev.anyway.co.il",
     ]
 
     ANYWAY_CORS_SITE_LIST_DEV = ANYWAY_CORS_SITE_LIST_PROD + [
-        "https://dev.anyway.co.il/*",
-        "http://localhost:3000/*",
-        "https://localhost:3000/*",
-        "http://127.0.0.1:3000/*",
-        "https://127.0.0.1:3000/*",
+        "https://dev.anyway.co.il",
+        "http://localhost:3000",
+        "https://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://127.0.0.1:3000",
     ]
 
     class ResolutionCategories(Enum):

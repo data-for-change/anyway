@@ -299,3 +299,4 @@ def is_a_valid_email(tmp_given_user_email: str) -> bool:
         use_blacklist=False,
     )
     return is_valid
+

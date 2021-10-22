@@ -33,6 +33,7 @@ from anyway.backend_constants import (
     AccidentSeverity,
     DriverType,
     AccidentType,
+    CrossCategory,
 )
 from anyway.models import NewsFlash, AccidentMarkerView, InvolvedMarkerView, VehicleMarkerView
 from anyway.parsers import resolution_dict
@@ -43,7 +44,7 @@ from anyway.infographics_dictionaries import (
 )
 from anyway.parsers import infographics_data_cache_updater
 from anyway.utilities import parse_age_from_range
-from anyway.vehicle_type import VehicleCategory, VehicleType
+from anyway.vehicle_type import VehicleCategory
 from anyway.parsers.location_extraction import get_road_segment_name_and_number
 
 
@@ -258,42 +259,125 @@ _("Fatal, severe and light injured count in the specified years, split by injury
 _("Fatal, severe and light accidents count in the specified years, split by accident severity")
 
 @register
-class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
-    name: str = "severe_fatal_count_on_small_motor_by_accident_year"
+class UrbanCrosswalkWidget(UrbanWidget):
+    name: str = "accidents_by_cross_location"
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
-        self.rank = 15
-
+        self.rank = 27
 
     def generate_items(self) -> None:
-        self.items = {"bike&smallmotor": get_accidents_stats(
+        self.items = {"with_crosswalk": get_accidents_stats(
             table_obj=InvolvedMarkerView,
             filters = {
-                "injury_severity": [InjurySeverity.KILLED.value,
+                "injury_severity": [InjurySeverity.KILLED.value,  # pylint: disable=no-member
                         InjurySeverity.SEVERE_INJURED.value],
-                "involve_vehicle_type": VehicleCategory.BICYCLE_AND_SMALL_MOTOR.get_codes(),
+                "cross_location": CrossCategory.CROSSWALK.get_codes(),
                 "involve_yishuv_name": self.request_params.location_info["yishuv_name"],
+                "street1_hebrew": self.request_params.location_info["street1_hebrew"],
                 },
-            group_by="accident_year",
-            count="accident_year",
+            group_by="street1_hebrew",
+            count="street1_hebrew",
+            start_time=self.request_params.start_time,
+            end_time=self.request_params.end_time,
+        ),
+        "without_crosswalk": get_accidents_stats(
+            table_obj=InvolvedMarkerView,
+            filters = {
+                "injury_severity": [InjurySeverity.KILLED.value,  # pylint: disable=no-member
+                        InjurySeverity.SEVERE_INJURED.value],
+                "cross_location": CrossCategory.NONE.get_codes(),
+                "involve_yishuv_name": self.request_params.location_info["yishuv_name"],
+                "street1_hebrew": self.request_params.location_info["street1_hebrew"],
+                },
+            group_by="street1_hebrew",
+            count="street1_hebrew",
             start_time=self.request_params.start_time,
             end_time=self.request_params.end_time,
         )}
 
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        items["data"]["text"] = {
+            "title": "Pedestrian injury comparison on "
+            + request_params.location_info["street1_hebrew"]
+        }
+        return items
+
     def is_included(self) -> bool:
-        cutoff_year = (self.request_params.end_time - datetime.timedelta(days=365)).year
-        if self.items["bike&smallmotor"][-1]["accident_year"] >= cutoff_year:
+        if self.items["with_crosswalk"]:
+            if len(self.items["with_crosswalk"]) > 1:
+                with_cross = self.items["with_crosswalk"][1]["count"] + self.items["with_crosswalk"][0]["count"]
+            else: with_cross = self.items["with_crosswalk"][0]["count"]
+        else: with_cross = 0
+        if self.items["without_crosswalk"]:
+            if len(self.items["without_crosswalk"]) > 1:
+                without_cross = self.items["without_crosswalk"][1]["count"] + self.items["without_crosswalk"][0]["count"]
+            else: without_cross = self.items["without_crosswalk"][0]["count"]
+        else: without_cross = 0
+        if without_cross + with_cross > 10:
             return self.items
         return False
+
+
+@register
+class SuburbanCrosswalkWidget(SubUrbanWidget):
+    name: str = "accidents_by_cross_location"
+
+    def __init__(self, request_params: RequestParams):
+        super().__init__(request_params, type(self).name)
+        self.rank = 26
+
+    def generate_items(self) -> None:
+        self.items = {"with_crosswalk": get_accidents_stats(
+            table_obj=InvolvedMarkerView,
+            filters = {
+                "injury_severity": [InjurySeverity.KILLED.value,  # pylint: disable=no-member
+                        InjurySeverity.SEVERE_INJURED.value],
+                "cross_location": CrossCategory.CROSSWALK.get_codes(),
+                "road_segment_name": self.request_params.location_info["road_segment_name"],
+                },
+            group_by="street1_hebrew",
+            count="street1_hebrew",
+            start_time=self.request_params.start_time,
+            end_time=self.request_params.end_time,
+        ),
+        "without_crosswalk": get_accidents_stats(
+            table_obj=InvolvedMarkerView,
+            filters = {
+                "injury_severity": [InjurySeverity.KILLED.value,  # pylint: disable=no-member
+                        InjurySeverity.SEVERE_INJURED.value],
+                "cross_location": CrossCategory.NONE.get_codes(),
+                "road_segment_name": self.request_params.location_info["road_segment_name"],
+                },
+            group_by="road_segment_name",
+            count="road_segment_name",
+            start_time=self.request_params.start_time,
+            end_time=self.request_params.end_time,
+        )}
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
-            "title": _("Severe or fatal accidents on bikes, e-bikes, or scooters in ")
-            + request_params.location_info["yishuv_name"]
+            "title": "Pedestrian injury comparison on "
+            + request_params.location_info["road_segment_name"]
         }
         return items
+
+    def is_included(self) -> bool:
+        if self.items["with_crosswalk"]:
+            if len(self.items["with_crosswalk"]) > 1:
+                with_cross = self.items["with_crosswalk"][1]["count"] + self.items["with_crosswalk"][0]["count"]
+            else: with_cross = self.items["with_crosswalk"][0]["count"]
+        else: with_cross = 0
+        if self.items["without_crosswalk"]:
+            if len(self.items["without_crosswalk"]) > 1:
+                without_cross = self.items["without_crosswalk"][1]["count"] + self.items["without_crosswalk"][0]["count"]
+            else: without_cross = self.items["without_crosswalk"][0]["count"]
+        else: without_cross = 0
+        if without_cross + with_cross > 10:
+            return self.items
+        return False
 
 @register
 class MostSevereAccidentsTableWidget(SubUrbanWidget):

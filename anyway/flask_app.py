@@ -81,6 +81,7 @@ from anyway.models import (
     Users,
     Roles,
     users_to_roles,
+    Organization, users_to_organizations,
 )
 from anyway.oauth import OAuthSignIn
 from anyway.infographics_utils import (
@@ -1809,7 +1810,15 @@ def user_update() -> Response:
     user_desc = reg_dict.get("user_desc")
 
     update_user_in_db(
-        first_name, last_name, phone, user_db_email, user_desc, user_type, user_url, True
+        current_user,
+        first_name,
+        last_name,
+        phone,
+        user_db_email,
+        user_desc,
+        user_type,
+        user_url,
+        True,
     )
 
     return Response(status=HTTPStatus.OK)
@@ -1939,3 +1948,100 @@ def get_roles_list() -> Response:
         status=HTTPStatus.OK,
         mimetype="application/json",
     )
+
+
+@app.route("/user/get_organization_list", methods=["GET"])
+@roles_accepted(BE_CONST.Roles2Names.Admins.value)
+def get_organization_list() -> Response:
+    orgs_list = db.session.query(Organization).all()
+    send_list = []
+    for org in orgs_list:
+        send_list.append(org.name)
+
+    return app.response_class(
+        response=json.dumps(send_list),
+        status=HTTPStatus.OK,
+        mimetype="application/json",
+    )
+
+
+@app.route("/user/add_organization", methods=["POST"])
+@roles_accepted(BE_CONST.Roles2Names.Admins.value)
+def add_organization() -> Response:
+    reg_dict = request.json
+
+    if reg_dict is None:
+        return return_json_error(Es.BR_BAD_JSON)
+
+    name = reg_dict.get("name")
+    if not name:
+        return return_json_error(Es.BR_FIELD_MISSING)
+
+    org = db.session.query(Organization).filter(Organization.name == name).first()
+    if not org:
+        org = Organization(name=name, create_date=datetime.datetime.now())
+        db.session.add(org)
+        db.session.commit()
+    return Response(status=HTTPStatus.OK)
+
+
+@app.route("/user/remove_user_from_org", methods=["POST"])
+@roles_accepted(BE_CONST.Roles2Names.Admins.value)
+def remove_user_from_org() -> Response:
+    reg_dict = request.json
+    if reg_dict is None:
+        return return_json_error(Es.BR_BAD_JSON)
+
+    email = reg_dict.get("email")
+    if not email:
+        return return_json_error(Es.BR_NO_EMAIL)
+    user = get_user_by_email(db, email)
+    if user is None:
+        return return_json_error(Es.BR_USER_NOT_FOUND, email)
+
+    org = reg_dict.get("org")
+    if not org:
+        return return_json_error(Es.BR_FIELD_MISSING)
+    org_obj = db.session.query(Organization).filter(Organization.name == org).first()
+    if org_obj is None:
+        return return_json_error(Es.BR_ORG_NOT_FOUND)
+
+    removed = False
+    for user_org in user.organizations:
+        if user_org.name == org:
+            d = users_to_organizations.delete().where(  # noqa pylint: disable=no-value-for-parameter
+                (users_to_organizations.c.user_id == user.id) & (users_to_organizations.c.organization_name == org)
+            )
+            db.session.execute(d)
+            db.session.commit()
+            removed = True
+    if not removed:
+        return return_json_error(Es.BR_USER_NOT_IN_ORG, email, org)
+
+    return Response(status=HTTPStatus.OK)
+
+
+@app.route("/user/add_user_to_org", methods=["POST"])
+@roles_accepted(BE_CONST.Roles2Names.Admins.value)
+def add_user_to_org() -> Response:
+    reg_dict = request.json
+    if reg_dict is None:
+        return return_json_error(Es.BR_BAD_JSON)
+
+    email = reg_dict.get("email")
+    if not email:
+        return return_json_error(Es.BR_NO_EMAIL)
+    user = get_user_by_email(db, email)
+    if user is None:
+        return return_json_error(Es.BR_USER_NOT_FOUND, email)
+
+    org = reg_dict.get("org")
+    if not org:
+        return return_json_error(Es.BR_FIELD_MISSING)
+    org_obj = db.session.query(Organization).filter(Organization.name == org).first()
+    if org_obj is None:
+        return return_json_error(Es.BR_ORG_NOT_FOUND)
+
+    user.organizations.append(org_obj)
+    db.session.commit()
+    return Response(status=HTTPStatus.OK)

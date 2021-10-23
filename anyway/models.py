@@ -79,6 +79,22 @@ users_to_roles = Table(
     PrimaryKeyConstraint("user_id", "role_id"),
 )
 
+users_to_organizations = Table(
+    "users_to_organizations",
+    Base.metadata,
+    Column("user_id", BigInteger(), ForeignKey("users.id"), index=True, nullable=False),
+    Column(
+        "organization_name",
+        String(255),
+        ForeignKey("organization.name"),
+        index=True,
+        nullable=False,
+        server_default=FetchedValue(),
+    ),
+    Column("create_date", DateTime(), nullable=False, server_default=text("now()")),
+    PrimaryKeyConstraint("user_id", "organization_name"),
+)
+
 
 class Users(Base, UserMixin):
     __tablename__ = "users"
@@ -106,9 +122,15 @@ class Users(Base, UserMixin):
         secondary=users_to_roles,
         backref=backref("users", lazy="dynamic"),
     )
+    organizations = relationship(
+        "Organization",
+        secondary=users_to_organizations,
+        backref=backref("users", lazy="dynamic"),
+    )
 
     def serialize_exposed_to_user(self):
         roles = self.roles
+        organizations = self.organizations
         return {
             "id": self.id,
             "user_register_date": self.user_register_date,
@@ -125,7 +147,14 @@ class Users(Base, UserMixin):
             "user_desc": self.user_desc,
             "is_user_completed_registration": self.is_user_completed_registration,
             "roles": [r.name for r in roles],
+            "organizations": [r.name for r in organizations],
         }
+
+
+class Organization(Base):
+    __tablename__ = "organization"
+    name = Column(String(255), primary_key=True, unique=True, index=True, nullable=False)
+    create_date = Column(DateTime(), nullable=False, server_default=text("now()"))
 
 
 class LocationSubscribers(Base, UserMixin):

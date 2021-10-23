@@ -27,6 +27,8 @@ class Errors:
     BR_BAD_MODE = 23
     BR_FIELD_MISSING = 24
     BR_BAD_AUTH = 25
+    BR_ORG_NOT_FOUND = 26
+    BR_USER_NOT_IN_ORG = 27
 
 
 ERROR_TO_STRING_DICT = {
@@ -55,6 +57,8 @@ ERROR_TO_STRING_DICT = {
     Errors.BR_BAD_MODE: "Bad Request (Bad mode value).",
     Errors.BR_FIELD_MISSING: "Bad Request (Field is missing from json).",
     Errors.BR_BAD_AUTH: "Bad Request (Bad Auth).",
+    Errors.BR_ORG_NOT_FOUND: "Bad Request (Organization(name:{}) not found).",
+    Errors.BR_USER_NOT_IN_ORG: "Bad Request (User(email:{}) is not in org {}).",
 }
 
 ERROR_TO_HTTP_CODE_DICT = {
@@ -83,6 +87,8 @@ ERROR_TO_HTTP_CODE_DICT = {
     Errors.BR_BAD_MODE: HTTPStatus.BAD_REQUEST,
     Errors.BR_FIELD_MISSING: HTTPStatus.BAD_REQUEST,
     Errors.BR_BAD_AUTH: HTTPStatus.UNAUTHORIZED,
+    Errors.BR_ORG_NOT_FOUND: HTTPStatus.BAD_REQUEST,
+    Errors.BR_USER_NOT_IN_ORG: HTTPStatus.BAD_REQUEST,
 }
 
 

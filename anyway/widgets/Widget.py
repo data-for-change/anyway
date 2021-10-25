@@ -2,7 +2,7 @@ import copy
 import logging
 from typing import Union, Dict, List, Optional
 
-from anyway.infographics_utils import RequestParams
+from anyway.RequestParams import RequestParams
 
 
 class Widget:

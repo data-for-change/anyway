@@ -1,10 +1,8 @@
-from enum import __call__
-
 from anyway.backend_constants import AccidentSeverity
 from anyway.infographics_utils import register, get_accidents_stats
 from anyway.RequestParams import RequestParams
 from anyway.models import AccidentMarkerView
-from anyway.widgets.SubUrbanWidget import SubUrbanWidget
+from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
 
 
 @register

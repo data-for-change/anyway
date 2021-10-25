@@ -3,10 +3,12 @@ import datetime
 import pytest
 from numpy import nan
 from six.moves import http_client
+
+import anyway.RequestParams
 from anyway import app as flask_app
 from jsonschema import validate
 from anyway.app_and_db import db
-from anyway.infographics_utils import AccidentCountByCarTypeWidget
+from anyway.widgets.suburban_widgets.AccidentCountByAccidentYearWidget import AccidentCountByCarTypeWidget
 from anyway.vehicle_type import VehicleCategory
 
 
@@ -116,7 +118,7 @@ class Test_Infographic_Api:
         involved_by_vehicle_type_data_test = [{'involve_vehicle_type': 1, 'count': 11}]
         end_time = datetime.date(2020, 6, 30)
         start_time = datetime.date(2020, 1, 1)
-        request_params = infographics_utils.RequestParams(
+        request_params = anyway.RequestParams.RequestParams(
             news_flash_obj=None,
             years_ago=1,
             location_text='',

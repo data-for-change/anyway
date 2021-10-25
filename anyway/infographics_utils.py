@@ -911,7 +911,7 @@ class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
             self.request_params.start_time,
             self.request_params.end_time,)
 
-    @staticmethod  
+    @staticmethod
     def separate_data(yishuv, start_time, end_time) -> None:
         output = {"e_bikes": get_accidents_stats(
             table_obj=InvolvedMarkerView,

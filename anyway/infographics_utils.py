@@ -48,6 +48,7 @@ from anyway.vehicle_type import VehicleCategory
 from anyway.parsers.location_extraction import get_road_segment_name_and_number
 
 
+
 @dataclass
 class RequestParams:
     """
@@ -312,7 +313,7 @@ class UrbanCrosswalkWidget(UrbanWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
-            "title": "Pedestrian injury comparison on "
+            "title": _("Pedestrian injury comparison on ")
             + request_params.location_info["street1_hebrew"]
         }
         return items
@@ -373,7 +374,7 @@ class SuburbanCrosswalkWidget(SubUrbanWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
-            "title": "Pedestrian injury comparison on "
+            "title": _("Pedestrian injury comparison on ")
             + request_params.location_info["road_segment_name"]
         }
         return items
@@ -839,6 +840,58 @@ class AccidentCountByDayNightWidget(SubUrbanWidget):
             start_time=self.request_params.start_time,
             end_time=self.request_params.end_time,
         )
+
+
+@register
+class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
+    name: str = "severe_fatal_count_on_small_motor_by_accident_year"
+
+    def __init__(self, request_params: RequestParams):
+        super().__init__(request_params, type(self).name)
+        self.rank = 15
+
+
+    def generate_items(self) -> None:
+        self.items = SmallMotorSevereFatalCountByYearWidget.get_motor_stats(self.request_params.location_info["yishuv_name"],
+            self.request_params.start_time,
+            self.request_params.end_time,)
+        
+    @staticmethod
+    def get_motor_stats(location_info, start_time, end_time) -> None:
+        count_by_year = get_accidents_stats(
+            table_obj=InvolvedMarkerView,
+            filters = {
+                "injury_severity": [InjurySeverity.KILLED.value,
+                        InjurySeverity.SEVERE_INJURED.value],
+                "involve_vehicle_type": VehicleCategory.BICYCLE_AND_SMALL_MOTOR.get_codes(),
+                "involve_yishuv_name": location_info,
+                },
+            group_by="accident_year",
+            count="accident_year",
+            start_time=start_time,
+            end_time=end_time,
+        )
+        found_accidents = [d['accident_year'] for d in count_by_year if 'accident_year' in d]
+        start_year = start_time.year
+        end_year = end_time.year
+        for year in list(range(start_year, end_year+1)):
+            if year not in found_accidents:
+                count_by_year.append({"accident_year": year, "count": 0})
+        return count_by_year
+
+    def is_included(self) -> bool:
+        if self.items[-1]["count"] > 0 and self.items[-2]["count"] > 0:
+            return self.items
+        return False
+
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        items["data"]["text"] = {
+            "title": _("Severe or fatal accidents on bikes, e-bikes, or scooters in ")
+            + request_params.location_info["yishuv_name"]
+        }
+        return items
+
 
 
 @register

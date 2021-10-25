@@ -44,7 +44,7 @@ from anyway.infographics_dictionaries import (
 )
 from anyway.parsers import infographics_data_cache_updater
 from anyway.utilities import parse_age_from_range
-from anyway.vehicle_type import VehicleCategory
+from anyway.vehicle_type import VehicleCategory, VehicleType
 from anyway.parsers.location_extraction import get_road_segment_name_and_number
 
 
@@ -336,7 +336,7 @@ class SuburbanCrosswalkWidget(SubUrbanWidget):
         self.items = SuburbanCrosswalkWidget.get_crosswalk(self.request_params.location_info["road_segment_name"],
             self.request_params.start_time,
             self.request_params.end_time,)
-    
+   
     @staticmethod
     def get_crosswalk(road, start_time, end_time) -> None:
         cross_output ={"with_crosswalk": get_accidents_stats(
@@ -893,6 +893,63 @@ class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
         return items
 
 
+@register
+class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
+    name: str = "accidents_on_small_motor_by_vehicle_by_accident_year"
+
+    def __init__(self, request_params: RequestParams):
+        super().__init__(request_params, type(self).name)
+        self.rank = 28
+
+
+    def generate_items(self) -> None:
+        self.items = {"e_bikes": get_accidents_stats(
+            table_obj=InvolvedMarkerView,
+            filters = {
+                "injury_severity": [InjurySeverity.KILLED.value,
+                        InjurySeverity.SEVERE_INJURED.value],
+                "involve_vehicle_type": VehicleType.ELECTRIC_BIKE.value,
+                "involve_yishuv_name": self.request_params.location_info["yishuv_name"],
+                },
+            group_by="accident_year",
+            count="accident_year",
+            start_time=self.request_params.start_time,
+            end_time=self.request_params.end_time,
+        ),
+        "bikes": get_accidents_stats(
+            table_obj=InvolvedMarkerView,
+            filters = {
+                "injury_severity": [InjurySeverity.KILLED.value,
+                        InjurySeverity.SEVERE_INJURED.value],
+                "involve_vehicle_type": VehicleType.BIKE.value,
+                "involve_yishuv_name": self.request_params.location_info["yishuv_name"],
+                },
+            group_by="accident_year",
+            count="accident_year",
+            start_time=self.request_params.start_time,
+            end_time=self.request_params.end_time,
+        ),
+        "e_scooters": get_accidents_stats(
+            table_obj=InvolvedMarkerView,
+            filters = {
+                "injury_severity": [InjurySeverity.KILLED.value,
+                        InjurySeverity.SEVERE_INJURED.value],
+                "involve_vehicle_type": VehicleType.ELECTRIC_SCOOTER.value,
+                "involve_yishuv_name": self.request_params.location_info["yishuv_name"],
+                },
+            group_by="accident_year",
+            count="accident_year",
+            start_time=self.request_params.start_time,
+            end_time=self.request_params.end_time,
+        )}
+		
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        items["data"]["text"] = {
+            "title": _("Severe or fatal accidents on bikes, e-bikes, or scooters in ")
+            + request_params.location_info["yishuv_name"]
+        }
+        return items
 
 @register
 class AccidentCountByHourWidget(SubUrbanWidget):

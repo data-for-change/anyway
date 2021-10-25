@@ -286,4 +286,4 @@ class CrossCategory(Enum):
                 CrossLocation.YESNONE,
             ],
         }
-        return list(map(lambda x: x.value, category_cross_locations[self]))   
+        return list(map(lambda x: x.value, category_cross_locations[self]))

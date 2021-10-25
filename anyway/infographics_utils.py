@@ -774,9 +774,6 @@ class TopRoadSegmentsAccidentsPerKmWidget(SubUrbanWidget):
 
     @staticmethod
     def get_top_road_segments_accidents_per_km(resolution, location_info, start_time=None, end_time=None, limit=3):
-        if resolution != "כביש בינעירוני":  # relevent for non urban roads only
-            return {}
-
         query = get_query(table_obj=AccidentMarkerView, filters={"road1" : location_info["road1"]}, start_time=start_time, end_time=end_time)
 
         try:
@@ -802,9 +799,9 @@ class TopRoadSegmentsAccidentsPerKmWidget(SubUrbanWidget):
             result = pd.read_sql_query(query.statement, query.session.bind)
             return result.to_dict(orient="records")  # pylint: disable=no-member
 
-        except Exception as e:
-            logging.exception(f"{TopRoadSegmentsAccidentsPerKmWidget.name}: {e}")
-            return {}
+        except Exception as exception:
+            logging.exception(f"{TopRoadSegmentsAccidentsPerKmWidget.name}: {exception}")
+            raise exception
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:

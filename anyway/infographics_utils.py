@@ -304,9 +304,9 @@ class UrbanCrosswalkWidget(UrbanWidget):
             end_time=end_time,
         )}
         if not cross_output["with_crosswalk"]:
-            cross_output["with_crosswalk"] = {"street1_hebrew": street, "count": 0}
+            cross_output["with_crosswalk"] = [{"street1_hebrew": street, "count": 0}]
         if not cross_output["without_crosswalk"]:
-            cross_output["without_crosswalk"] = {"street1_hebrew": street, "count": 0}
+            cross_output["without_crosswalk"] = [{"street1_hebrew": street, "count": 0}]
         return cross_output
 
 
@@ -336,7 +336,7 @@ class SuburbanCrosswalkWidget(SubUrbanWidget):
         self.items = SuburbanCrosswalkWidget.get_crosswalk(self.request_params.location_info["road_segment_name"],
             self.request_params.start_time,
             self.request_params.end_time,)
-   
+
     @staticmethod
     def get_crosswalk(road, start_time, end_time) -> None:
         cross_output ={"with_crosswalk": get_accidents_stats(
@@ -845,6 +845,8 @@ class AccidentCountByDayNightWidget(SubUrbanWidget):
 @register
 class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
     name: str = "severe_fatal_count_on_small_motor_by_accident_year"
+    #TODO: when accident vehicle becomes available in request params, 
+    # make it so widget is only included on newsflashes that have a relevant vehicle
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
@@ -855,7 +857,7 @@ class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
         self.items = SmallMotorSevereFatalCountByYearWidget.get_motor_stats(self.request_params.location_info["yishuv_name"],
             self.request_params.start_time,
             self.request_params.end_time,)
-        
+
     @staticmethod
     def get_motor_stats(location_info, start_time, end_time) -> None:
         count_by_year = get_accidents_stats(
@@ -895,7 +897,9 @@ class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
 
 @register
 class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
-    name: str = "accidents_on_small_motor_by_vehicle_by_accident_year"
+    name: str = "accidents_on_small_motor_by_vehicle_by_year"
+    #TODO: when accident vehicle becomes available in request params, 
+    # make it so widget is only included on newsflashes that have a relevant vehicle
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
@@ -903,18 +907,24 @@ class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
 
 
     def generate_items(self) -> None:
-        self.items = {"e_bikes": get_accidents_stats(
+        self.items = SevereFatalCountByVehicleByYearWidget.separate_data(self.request_params.location_info["yishuv_name"],
+            self.request_params.start_time,
+            self.request_params.end_time,)
+   
+    @staticmethod    
+    def separate_data(yishuv, start_time, end_time) -> None:
+        output = {"e_bikes": get_accidents_stats(
             table_obj=InvolvedMarkerView,
             filters = {
                 "injury_severity": [InjurySeverity.KILLED.value,
                         InjurySeverity.SEVERE_INJURED.value],
                 "involve_vehicle_type": VehicleType.ELECTRIC_BIKE.value,
-                "involve_yishuv_name": self.request_params.location_info["yishuv_name"],
+                "involve_yishuv_name": yishuv,
                 },
             group_by="accident_year",
             count="accident_year",
-            start_time=self.request_params.start_time,
-            end_time=self.request_params.end_time,
+            start_time=start_time,
+            end_time=end_time,
         ),
         "bikes": get_accidents_stats(
             table_obj=InvolvedMarkerView,
@@ -922,12 +932,12 @@ class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
                 "injury_severity": [InjurySeverity.KILLED.value,
                         InjurySeverity.SEVERE_INJURED.value],
                 "involve_vehicle_type": VehicleType.BIKE.value,
-                "involve_yishuv_name": self.request_params.location_info["yishuv_name"],
+                "involve_yishuv_name": yishuv,
                 },
             group_by="accident_year",
             count="accident_year",
-            start_time=self.request_params.start_time,
-            end_time=self.request_params.end_time,
+            start_time=start_time,
+            end_time=end_time,
         ),
         "e_scooters": get_accidents_stats(
             table_obj=InvolvedMarkerView,
@@ -935,14 +945,27 @@ class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
                 "injury_severity": [InjurySeverity.KILLED.value,
                         InjurySeverity.SEVERE_INJURED.value],
                 "involve_vehicle_type": VehicleType.ELECTRIC_SCOOTER.value,
-                "involve_yishuv_name": self.request_params.location_info["yishuv_name"],
+                "involve_yishuv_name": yishuv,
                 },
             group_by="accident_year",
             count="accident_year",
-            start_time=self.request_params.start_time,
-            end_time=self.request_params.end_time,
+            start_time=start_time,
+            end_time=end_time,
         )}
-	
+        bike_accidents = [d['accident_year'] for d in output["bikes"] if 'accident_year' in d]
+        ebike_accidents = [d['accident_year'] for d in output["e_bikes"] if 'accident_year' in d]
+        scooter_accidents = [d['accident_year'] for d in output["e_scooters"] if 'accident_year' in d]
+        start_year = start_time.year
+        end_year = end_time.year
+        for year in list(range(start_year, end_year+1)):
+            if year not in bike_accidents:
+                output["bikes"].append({"accident_year": year, "count": 0})
+            if year not in ebike_accidents:
+                output["e_bikes"].append({"accident_year": year, "count": 0})
+            if year not in scooter_accidents:
+                output["e_scooters"].append({"accident_year": year, "count": 0})
+        return output
+
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
@@ -950,6 +973,11 @@ class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
             + request_params.location_info["yishuv_name"]
         }
         return items
+    
+    def is_included(self) -> bool:
+        if self.items["bikes"][-1]["count"] + self.items["e_bikes"][-1]["count"] + self.items["e_scooters"][-1]["count"] > 1:
+            return self.items
+        return False
 
 @register
 class AccidentCountByHourWidget(SubUrbanWidget):

@@ -845,8 +845,8 @@ class AccidentCountByDayNightWidget(SubUrbanWidget):
 @register
 class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
     name: str = "severe_fatal_count_on_small_motor_by_accident_year"
-    #TODO: when accident vehicle becomes available in request params, 
-    # make it so widget is only included on newsflashes that have a relevant vehicle
+    #TODO: when accident vehicle becomes available in request params,
+    # make it so widget shows only the vehicle in the newsflash (eg only e_bikes)
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
@@ -898,7 +898,7 @@ class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
 @register
 class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
     name: str = "accidents_on_small_motor_by_vehicle_by_year"
-    #TODO: when accident vehicle becomes available in request params, 
+    #TODO: when accident vehicle becomes available in request params,
     # make it so widget is only included on newsflashes that have a relevant vehicle
 
     def __init__(self, request_params: RequestParams):
@@ -910,8 +910,8 @@ class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
         self.items = SevereFatalCountByVehicleByYearWidget.separate_data(self.request_params.location_info["yishuv_name"],
             self.request_params.start_time,
             self.request_params.end_time,)
-   
-    @staticmethod    
+
+    @staticmethod  
     def separate_data(yishuv, start_time, end_time) -> None:
         output = {"e_bikes": get_accidents_stats(
             table_obj=InvolvedMarkerView,
@@ -973,7 +973,7 @@ class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
             + request_params.location_info["yishuv_name"]
         }
         return items
-    
+
     def is_included(self) -> bool:
         if self.items["bikes"][-1]["count"] + self.items["e_bikes"][-1]["count"] + self.items["e_scooters"][-1]["count"] > 1:
             return self.items

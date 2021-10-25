@@ -942,7 +942,7 @@ class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
             start_time=self.request_params.start_time,
             end_time=self.request_params.end_time,
         )}
-		
+	
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {

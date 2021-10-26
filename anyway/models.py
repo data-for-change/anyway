@@ -2283,7 +2283,7 @@ class InvolvedMarkerViewSmall(Base):
     # involved_type_hebrew = Column(Text(), index=True)
     # license_acquiring_date = Column(Integer())
     # todo: add age_group
-    # age_group = Column(Integer())
+    age_group = Column(Integer())
     # age_group_hebrew = Column(Text())
     # sex = Column(Integer())
     # sex_hebrew = Column(Text())

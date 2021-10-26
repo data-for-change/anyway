@@ -1,7 +1,7 @@
 """Adding tables involved_markers_hebrew_small, markers_hebrew_small and vehicles_markers_hebrew_small
 
 Revision ID: 4f98b6b083b7
-Revises: 312c9eb92e40
+Revises: 2dcc57ee1757
 Create Date: 2021-10-02 06:09:03.808108
 
 """

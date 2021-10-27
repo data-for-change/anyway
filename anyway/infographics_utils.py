@@ -6,7 +6,6 @@ import json
 import os
 import copy
 from functools import lru_cache
-from collections import defaultdict
 from typing import Optional, Dict, List, Union, Any, Type, Callable
 
 # noinspection PyUnresolvedReferences
@@ -292,9 +291,10 @@ class InjuredCountBySeverityWidget(SubUrbanWidget):
     def get_injured_count_by_severity(road, segment, start_time, end_time):
         count_by_severity = get_accidents_stats(
             table_obj=InvolvedMarkerView,
-            filters = {
-                "injury_severity": [InjurySeverity.KILLED.value,
-                        InjurySeverity.SEVERE_INJURED.value, InjurySeverity.LIGHT_INJURED.value],
+            filters={
+                "injury_severity": [InjurySeverity.KILLED.value,  # pylint: disable=no-member
+                                    InjurySeverity.SEVERE_INJURED.value,  # pylint: disable=no-member
+                                    InjurySeverity.LIGHT_INJURED.value],  # pylint: disable=no-member
                 "road1": road,
                 "road_segment_name": segment,
                 },
@@ -359,7 +359,7 @@ class UrbanCrosswalkWidget(UrbanWidget):
             table_obj=InvolvedMarkerView,
             filters = {
                 "injury_severity": [InjurySeverity.KILLED.value,  # pylint: disable=no-member
-                        InjurySeverity.SEVERE_INJURED.value],
+                        InjurySeverity.SEVERE_INJURED.value],  # pylint: disable=no-member
                 "cross_location": CrossCategory.CROSSWALK.get_codes(),
                 "involve_yishuv_name": yishuv,
                 "street1_hebrew": street,
@@ -373,7 +373,7 @@ class UrbanCrosswalkWidget(UrbanWidget):
             table_obj=InvolvedMarkerView,
             filters = {
                 "injury_severity": [InjurySeverity.KILLED.value,  # pylint: disable=no-member
-                        InjurySeverity.SEVERE_INJURED.value],
+                                    InjurySeverity.SEVERE_INJURED.value],  # pylint: disable=no-member
                 "cross_location": CrossCategory.NONE.get_codes(),
                 "involve_yishuv_name": yishuv,
                 "street1_hebrew": street,
@@ -423,7 +423,7 @@ class SuburbanCrosswalkWidget(SubUrbanWidget):
             table_obj=InvolvedMarkerView,
             filters = {
                 "injury_severity": [InjurySeverity.KILLED.value,  # pylint: disable=no-member
-                        InjurySeverity.SEVERE_INJURED.value],
+                        InjurySeverity.SEVERE_INJURED.value],  # pylint: disable=no-member
                 "cross_location": CrossCategory.CROSSWALK.get_codes(),
                 "road_segment_name": road,
                 },
@@ -436,7 +436,7 @@ class SuburbanCrosswalkWidget(SubUrbanWidget):
             table_obj=InvolvedMarkerView,
             filters = {
                 "injury_severity": [InjurySeverity.KILLED.value,  # pylint: disable=no-member
-                        InjurySeverity.SEVERE_INJURED.value],
+                                    InjurySeverity.SEVERE_INJURED.value],  # pylint: disable=no-member
                 "cross_location": CrossCategory.NONE.get_codes(),
                 "road_segment_name": road,
                 },
@@ -801,7 +801,7 @@ class AccidentsHeatMapWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        road_segment_name, x = get_road_segment_name_and_number(
+        road_segment_name, x = get_road_segment_name_and_number(  # pylint: disable=unused-variable
             request_params.location_info["road_segment_id"]
         )
         items["data"]["text"] = {
@@ -849,7 +849,7 @@ class AccidentCountByAccidentYearWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        road_segment_name, x = get_road_segment_name_and_number(
+        road_segment_name, x = get_road_segment_name_and_number(  # pylint: disable=unused-variable
             request_params.location_info["road_segment_id"]
         )
         items["data"]["text"] = {
@@ -899,7 +899,7 @@ class InjuredCountByAccidentYearWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        road_segment_name, x = get_road_segment_name_and_number(
+        road_segment_name, x = get_road_segment_name_and_number(  # pylint: disable=unused-variable
             request_params.location_info["road_segment_id"]
         )
         items["data"]["text"] = {
@@ -951,12 +951,12 @@ class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
     def get_motor_stats(location_info, start_time, end_time) -> None:
         count_by_year = get_accidents_stats(
             table_obj=InvolvedMarkerView,
-            filters = {
-                "injury_severity": [InjurySeverity.KILLED.value,
-                        InjurySeverity.SEVERE_INJURED.value],
+            filters={
+                "injury_severity": [InjurySeverity.KILLED.value,  # pylint: disable=no-member
+                                    InjurySeverity.SEVERE_INJURED.value],  # pylint: disable=no-member
                 "involve_vehicle_type": VehicleCategory.BICYCLE_AND_SMALL_MOTOR.get_codes(),
                 "involve_yishuv_name": location_info,
-                },
+            },
             group_by="accident_year",
             count="accident_year",
             start_time=start_time,
@@ -1005,9 +1005,9 @@ class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
         output = {"e_bikes": get_accidents_stats(
             table_obj=InvolvedMarkerView,
             filters = {
-                "injury_severity": [InjurySeverity.KILLED.value,
-                        InjurySeverity.SEVERE_INJURED.value],
-                "involve_vehicle_type": VehicleType.ELECTRIC_BIKE.value,
+                "injury_severity": [InjurySeverity.KILLED.value,  # pylint: disable=no-member
+                                    InjurySeverity.SEVERE_INJURED.value],  # pylint: disable=no-member
+                "involve_vehicle_type": VehicleType.ELECTRIC_BIKE.value,  # pylint: disable=no-member
                 "involve_yishuv_name": yishuv,
                 },
             group_by="accident_year",
@@ -1018,9 +1018,9 @@ class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
         "bikes": get_accidents_stats(
             table_obj=InvolvedMarkerView,
             filters = {
-                "injury_severity": [InjurySeverity.KILLED.value,
-                        InjurySeverity.SEVERE_INJURED.value],
-                "involve_vehicle_type": VehicleType.BIKE.value,
+                "injury_severity": [InjurySeverity.KILLED.value,  # pylint: disable=no-member
+                                    InjurySeverity.SEVERE_INJURED.value],  # pylint: disable=no-member
+                "involve_vehicle_type": VehicleType.BIKE.value,  # pylint: disable=no-member
                 "involve_yishuv_name": yishuv,
                 },
             group_by="accident_year",
@@ -1031,9 +1031,9 @@ class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
         "e_scooters": get_accidents_stats(
             table_obj=InvolvedMarkerView,
             filters = {
-                "injury_severity": [InjurySeverity.KILLED.value,
-                        InjurySeverity.SEVERE_INJURED.value],
-                "involve_vehicle_type": VehicleType.ELECTRIC_SCOOTER.value,
+                "injury_severity": [InjurySeverity.KILLED.value,  # pylint: disable=no-member
+                                    InjurySeverity.SEVERE_INJURED.value],  # pylint: disable=no-member
+                "involve_vehicle_type": VehicleType.ELECTRIC_SCOOTER.value,  # pylint: disable=no-member
                 "involve_yishuv_name": yishuv,
                 },
             group_by="accident_year",
@@ -1140,7 +1140,10 @@ class TopRoadSegmentsAccidentsPerKmWidget(SubUrbanWidget):
                     func.count(AccidentMarkerView.id).label("total_accidents"),
                 )
                 .filter(AccidentMarkerView.road_segment_name.isnot(None))
-                .filter(AccidentMarkerView.accident_severity.in_([AccidentSeverity.FATAL.value, AccidentSeverity.SEVERE.value]))
+                .filter(AccidentMarkerView.accident_severity.in_([
+                    AccidentSeverity.FATAL.value,  # pylint: disable=no-member
+                    AccidentSeverity.SEVERE.value  # pylint: disable=no-member
+                ]))
                 .group_by(
                     AccidentMarkerView.road_segment_name, AccidentMarkerView.road_segment_length_km
                 )
@@ -1255,7 +1258,7 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        road_segment_name, x = get_road_segment_name_and_number(
+        road_segment_name, x = get_road_segment_name_and_number(  # pylint: disable=unused-variable
             request_params.location_info["road_segment_id"]
         )
         items["data"]["text"] = {
@@ -1372,7 +1375,7 @@ class AccidentCountByDriverTypeWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        road_segment_name, x = get_road_segment_name_and_number(
+        road_segment_name, x = get_road_segment_name_and_number(  # pylint: disable=unused-variable
             request_params.location_info["road_segment_id"]
         )
         for item in items["data"]["items"]:
@@ -1493,7 +1496,7 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        road_segment_name, x = get_road_segment_name_and_number(
+        road_segment_name, x = get_road_segment_name_and_number(  # pylint: disable=unused-variable
             request_params.location_info["road_segment_id"]
         )
         for item in items["data"]["items"]:
@@ -2104,7 +2107,7 @@ def get_most_severe_accidents_with_entities(
 
 
 def get_most_severe_accidents_table_title(location_info):
-    road_segment_name, x = get_road_segment_name_and_number(
+    road_segment_name, x = get_road_segment_name_and_number(  # pylint: disable=unused-variable
         location_info["road_segment_id"]
     )
     return (

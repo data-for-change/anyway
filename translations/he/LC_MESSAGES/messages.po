@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-10-30 14:21+0300\n"
+"POT-Creation-Date: 2021-10-30 14:31+0300\n"
 "PO-Revision-Date: 2020-10-16 15:42+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: he\n"
@@ -278,7 +278,7 @@ msgstr ""
 msgid ""
 "comparing vehicle type percentage in accidents in {} relative to national"
 " average"
-msgstr ""
+msgstr "השוואת אחוז הרכבים בתאונות במקטע {} לעומת ממוצע ארצי"
 
 #: anyway/widgets/suburban_widgets/AccidentCountByDriverTypeWidget.py:69
 msgid "driver_type"
@@ -348,7 +348,7 @@ msgstr ""
 
 #: anyway/widgets/suburban_widgets/InjuredCountBySeverityWidget.py:69
 msgid "Number of Injuries in Accidents on "
-msgstr ""
+msgstr "כמות נפעגים בתעונות ב"
 
 #: anyway/widgets/suburban_widgets/InjuredCountPerAgeGroupWidget.py:104
 msgid "Injury severity per age group in "
@@ -385,8 +385,9 @@ msgstr ""
 
 #: anyway/widgets/suburban_widgets/SuburbanCrosswalkWidget.py:65
 #: anyway/widgets/urban_widgets/UrbanCrosswalkWidget.py:68
+#, fuzzy
 msgid "Pedestrian injury comparison on "
-msgstr ""
+msgstr "פגיעות בהולכי רגל על"
 
 #: anyway/widgets/suburban_widgets/TopRoadSegmentsAccidentsPerKmWidget.py:74
 msgid "Severe and fatal accidents per Km by section in road"
@@ -399,7 +400,7 @@ msgstr "כמות נפגעים הולכי רגל לפי חומרה ושנה"
 #: anyway/widgets/urban_widgets/SevereFatalCountByVehicleByYearWidget.py:88
 #: anyway/widgets/urban_widgets/SmallMotorSevereFatalCountByYearWidget.py:60
 msgid "Severe or fatal accidents on bikes, e-bikes, or scooters in "
-msgstr ""
+msgstr "רוכבי אופנים, אופנים חשמליים, וקורקינט חשמלי שנפצעו קשה או נהרגו ב"
 
 #: templates/index.html:4 templates/index.html:10
 msgid "ANYWAY - Making a difference in any way"

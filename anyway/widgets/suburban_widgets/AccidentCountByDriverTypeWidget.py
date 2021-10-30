@@ -6,9 +6,10 @@ from flask_babel import _
 
 from anyway.RequestParams import RequestParams
 from anyway.backend_constants import DriverType
-from anyway.infographics_utils import register, get_accidents_stats, get_injured_filters
+from anyway.widgets.widget_utils import get_accidents_stats, get_injured_filters
 from anyway.models import InvolvedMarkerView
 from anyway.vehicle_type import VehicleCategory
+from anyway.widgets.Widget import register
 from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
 
 
@@ -75,3 +76,7 @@ class AccidentCountByDriverTypeWidget(SubUrbanWidget):
                      + request_params.location_info["road_segment_name"]
         }
         return items
+
+
+# adding calls to _() for pybabel extraction
+_("Driver involvement in accident by driver type: professional - trucks, taxi, bus, work, minibus, tractor, private - private car, motorcycle, light electric - electric scooter, mobility scooter, electric bike.")

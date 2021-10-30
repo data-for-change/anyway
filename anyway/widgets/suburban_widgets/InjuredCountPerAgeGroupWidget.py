@@ -1,5 +1,4 @@
 from collections import defaultdict
-from enum import __call__
 from typing import Callable, Dict
 
 from flask_babel import _

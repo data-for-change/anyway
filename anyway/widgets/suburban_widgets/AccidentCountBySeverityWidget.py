@@ -1,9 +1,10 @@
 from anyway.backend_constants import AccidentSeverity
-from anyway.infographics_utils import register, get_accidents_stats
+from anyway.widgets.widget_utils import get_accidents_stats
 from anyway.RequestParams import RequestParams
 from anyway.models import AccidentMarkerView
+from anyway.widgets.Widget import register
 from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
-
+from flask_babel import _
 
 @register
 class AccidentCountBySeverityWidget(SubUrbanWidget):
@@ -52,3 +53,6 @@ class AccidentCountBySeverityWidget(SubUrbanWidget):
         items["end_year"] = end_year
         items["total_accidents_count"] = total_accidents_count
         return items
+
+
+_("Fatal, severe and light accidents count in the specified location.")

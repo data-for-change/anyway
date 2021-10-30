@@ -1,5 +1,5 @@
 from anyway.RequestParams import RequestParams
-from anyway.infographics_utils import register
+from anyway.widgets.Widget import register
 from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
 
 

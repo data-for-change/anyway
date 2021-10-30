@@ -6,8 +6,9 @@ from flask_babel import _
 from anyway.RequestParams import RequestParams
 from anyway.backend_constants import AccidentSeverity, BE_CONST
 from anyway.infographics_dictionaries import segment_dictionary
-from anyway.infographics_utils import register, get_query
+from anyway.widgets.widget_utils import get_query
 from anyway.models import AccidentMarkerView
+from anyway.widgets.Widget import register
 from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
 
 

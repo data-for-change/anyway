@@ -1,6 +1,5 @@
 import datetime
 import logging
-from enum import __call__
 from typing import List, Dict
 
 from flask_babel import _
@@ -8,8 +7,8 @@ from sqlalchemy import func, distinct, desc
 
 from anyway.RequestParams import RequestParams
 from anyway.app_and_db import db
-from anyway.infographics_utils import run_query, get_query
-from anyway.models import VehicleMarkerView
+from anyway.widgets.widget_utils import get_query, run_query
+from anyway.models import VehicleMarkerView, AccidentType
 from anyway.vehicle_type import VehicleCategory
 from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
 

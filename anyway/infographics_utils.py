@@ -4,7 +4,7 @@ import logging
 import datetime
 import json
 import os
-from typing import Optional, Dict, List, Any, Type, Callable
+from typing import Optional, Dict, List, Type, Callable
 
 # noinspection PyUnresolvedReferences
 from dataclasses import dataclass
@@ -14,8 +14,6 @@ import pandas as pd
 from collections import defaultdict
 
 from sqlalchemy import func
-from sqlalchemy import cast, Numeric
-from sqlalchemy import desc
 
 # noinspection PyProtectedMember
 from flask_babel import _
@@ -23,59 +21,37 @@ from flask_babel import _
 from anyway.RequestParams import RequestParams
 from anyway.backend_constants import (
     BE_CONST,
-    LabeledCode,
-    AccidentSeverity,
     AccidentType,
 )
-from anyway.models import NewsFlash, AccidentMarkerView, InvolvedMarkerView
+from anyway.models import NewsFlash, AccidentMarkerView
 from anyway.parsers import resolution_dict
 from anyway.app_and_db import db
 from anyway.infographics_dictionaries import (
     head_on_collisions_comparison_dict,
-    segment_dictionary,
 )
 from anyway.parsers import infographics_data_cache_updater
 from anyway.parsers.location_extraction import get_road_segment_name_and_number
-from anyway.widgets.Widget import Widget
-from anyway.widgets.suburban_widgets import SubUrbanWidget, PedestrianInjuredInJunctionsWidget
-from anyway.widgets.urban_widgets import UrbanWidget, InjuredAccidentsWithPedestriansWidget
+from anyway.widgets import Widget
+import anyway.widgets.urban_widgets
+#import UrbanWidget, InjuredAccidentsWithPedestriansWidget
+import anyway.widgets.suburban_widgets
+# import AccidentCountByAccidentTypeWidget, AccidentCountByAccidentYearWidget, \
+#     AccidentTypeVehicleTypeRoadComparisonWidget, MostSevereAccidentsTableWidget, AccidentCountByDayNightWidget, \
+#     AccidentCountByDriverTypeWidget, AccidentCountByHourWidget, AccidentCountByRoadLightWidget, \
+#     AccidentCountBySeverityWidget, AccidentCountPedestriansPerVehicleStreetVsAllWidget, \
+#     AccidentSeverityByCrossLocationWidget, AccidentsHeatMapWidget, HeadOnCollisionsComparisonWidget, \
+#     InjuredCountByAccidentYearWidget, InjuredCountPerAgeGroupWidget, MostSevereAccidentsWidget, \
+#     MotorcycleAccidentsVsAllAccidentsWidget, PedestrianInjuredInJunctionsWidget, Road2Plus1Widget, StreetViewWidget, \
+#     SubUrbanWidget, TopRoadSegmentsAccidentsPerKmWidget, TopRoadSegmentsAccidentsWidget
 
-widgets_dict: Dict[str, Type[Widget]] = {}
 
-
-def get_widget_factories() -> List[Callable[[RequestParams], Widget]]:
+def get_widget_factories() -> List[Callable[[RequestParams], type(Widget)]]:
     """Returns list of callables that generate all widget instances"""
-    return list(widgets_dict.values())
+    return list(Widget.widgets_dict.values())
 
 
-def get_widget_class_by_name(name: str) -> Type[Widget]:
-    return widgets_dict[name]
-
-
-def register(widget_class: Type[Widget]) -> Type[Widget]:
-    if widgets_dict.get(widget_class.name) is not None:
-        logging.error(f"Double register:{widget_class.name}:{widget_class}\n")
-    widgets_dict[widget_class.name] = widget_class
-    logging.debug(f"register:{widget_class.name}:{widget_class}\n")
-    return widget_class
-
-
-# adding calls to _() for pybabel extraction
-_("Fatal, severe and light accidents count in the specified location.")
-_("Fatal, severe and light injured count in the specified years, split by injury severity")
-_("Fatal, severe and light accidents count in the specified years, split by accident severity")
-_("Most recent fatal and severe accidents in location, ordered by date. Up to 10 accidents are presented.")
-_("Most recent fatal and severe accidents displayed on a map. Up to 10 accidents are presented.")
-_("others")
-_("frontal")
-_("Fatal accidents distribution by accident type - head on collisions vs other accidents.")
-_("Driver involvement in accident by driver type: professional - trucks, taxi, bus, work, minibus, tractor, private - private car, motorcycle, light electric - electric scooter, mobility scooter, electric bike.")
-_("Injured and killed pedestrians by severity and year")
-
-
-def run_query(query: db.session.query) -> Dict:
-    # pylint: disable=no-member
-    return pd.read_sql_query(query.statement, query.session.bind).to_dict(orient="records")
+def get_widget_class_by_name(name: str) -> type(Widget):
+    return Widget.widgets_dict[name]
 
 
 def extract_news_flash_location(news_flash_obj):
@@ -106,140 +82,7 @@ def extract_road_segment_location(road_segment_id):
     return {"name": "location", "data": data, "gps": gps}
 
 
-def get_query(table_obj, filters, start_time, end_time):
-    query = db.session.query(table_obj)
-    if start_time:
-        query = query.filter(getattr(table_obj, "accident_timestamp") >= start_time)
-    if end_time:
-        query = query.filter(getattr(table_obj, "accident_timestamp") <= end_time)
-    if filters:
-        for field_name, value in filters.items():
-            if isinstance(value, list):
-                values = value
-            else:
-                values = [value]
-            query = query.filter((getattr(table_obj, field_name)).in_(values))
-    return query
-
-
-def get_accidents_stats(
-        table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None
-):
-    filters = filters or {}
-    filters["provider_code"] = [
-        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
-        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
-    ]
-    # get stats
-    query = get_query(table_obj, filters, start_time, end_time)
-    if group_by:
-        if isinstance(group_by, tuple):
-            if len(group_by) == 2:
-                query = query.group_by(*group_by)
-                query = query.with_entities(*group_by, func.count(count))
-                dd = query.all()
-                res = retro_dictify(dd)
-                return res
-            else:
-                err_msg = f"get_accidents_stats: {group_by}: Only a string or a tuple of two are valid for group_by"
-                logging.error(err_msg)
-                raise Exception(err_msg)
-        else:
-            query = query.group_by(group_by)
-            query = query.with_entities(group_by, func.count(count))
-    df = pd.read_sql_query(query.statement, query.session.bind)
-    df.rename(columns={"count_1": "count"}, inplace=True)  # pylint: disable=no-member
-    df.columns = [c.replace("_hebrew", "") for c in df.columns]
-    return (  # pylint: disable=no-member
-        df.to_dict(orient="records") if group_by or count else df.to_dict()
-    )
-
-
-def add_empty_keys_to_gen_two_level_dict(
-        d, level_1_values: List[Any], level_2_values: List[Any], default_level_3_value: int = 0
-) -> Dict[Any, Dict[Any, int]]:
-    for v1 in level_1_values:
-        if v1 not in d:
-            d[v1] = {}
-        for v2 in level_2_values:
-            if v2 not in d[v1]:
-                d[v1][v2] = default_level_3_value
-    return d
-
-
-# noinspection Mypy
-def retro_dictify(indexable) -> Dict[Any, Dict[Any, Any]]:
-    d = defaultdict(dict)
-    for row in indexable:
-        here = d
-        for elem in row[:-2]:
-            if elem not in here:
-                here[elem] = defaultdict(lambda: 0)
-            here = here[elem]
-        here[row[-2]] = row[-1]
-    return d
-
-
-def get_injured_filters(location_info):
-    new_filters = {}
-    for curr_filter, curr_values in location_info.items():
-        if curr_filter in ["region_hebrew", "district_hebrew", "yishuv_name"]:
-            new_filter_name = "accident_" + curr_filter
-            new_filters[new_filter_name] = curr_values
-        else:
-            new_filters[curr_filter] = curr_values
-    new_filters["injury_severity"] = [1, 2, 3, 4, 5]
-    return new_filters
-
-
-def get_most_severe_accidents_with_entities(
-        table_obj, filters, entities, start_time, end_time, limit=10
-):
-    filters = filters or {}
-    filters["provider_code"] = [
-        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
-        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
-    ]
-    # pylint: disable=no-member
-    filters["accident_severity"] = [
-        AccidentSeverity.FATAL.value,
-        AccidentSeverity.SEVERE.value,
-    ]
-    query = get_query(table_obj, filters, start_time, end_time)
-    query = query.with_entities(*entities)
-    query = query.order_by(getattr(table_obj, "accident_timestamp").desc())
-    query = query.limit(limit)
-    df = pd.read_sql_query(query.statement, query.session.bind)
-    df.columns = [c.replace("_hebrew", "") for c in df.columns]
-    return df.to_dict(orient="records")  # pylint: disable=no-member
-
-
-def get_most_severe_accidents_table_title(location_info):
-    return (
-            _("Most severe accidents in segment")
-            + " "
-            + segment_dictionary[location_info["road_segment_name"]]
-    )
-
-
 # count of dead and severely injured
-def get_casualties_count_in_accident(accident_id, provider_code, injury_severity, accident_year):
-    filters = {
-        "accident_id": accident_id,
-        "provider_code": provider_code,
-        "injury_severity": injury_severity,
-        "accident_year": accident_year,
-    }
-    casualties = get_accidents_stats(
-        table_obj=InvolvedMarkerView,
-        filters=filters,
-        group_by="injury_severity",
-        count="injury_severity",
-    )
-    res = 0
-    for ca in casualties:
-        res += ca["count"]
-    return res
 
 
 # generate text describing location or road segment of news flash
@@ -330,25 +173,21 @@ def get_latest_accident_date(table_obj, filters):
     return (df.to_dict(orient="records"))[0].get("max_1")  # pylint: disable=no-member
 
 
-def gen_entity_labels(entity: Type[LabeledCode]) -> dict:
-    res = {}
-    for e in entity:
-        label = e.get_label()
-        res[e.value] = {"name": label, "localized_name": _(label)}
-    return res
-
-
 # noinspection PyArgumentList
-def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> List[Widget]:
+def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> List[type(Widget)]:
     widgets = []
     # noinspection PyArgumentList
-    for w in widgets_dict.values():
+    for w in Widget.widgets_dict.values():
         if w.is_relevant(request_params) and w.is_in_cache() == to_cache:
             widget: Widget = w(request_params)
             widgets.append(widget)
             logging.debug(f"name:{widget.name}, class:{get_widget_class_by_name(widget.name)}")
     for w in widgets:
-        w.generate_items()
+        print(w.name)
+        try:
+            w.generate_items()
+        except Exception  as e:
+            print(e)
     filtered_widgets = []
     for w in widgets:
         if w.is_included():
@@ -491,7 +330,7 @@ def create_infographics_items(request_params: RequestParams) -> Dict:
             "dates_comment": get_dates_comment(),
         }
         output["widgets"] = []
-        widgets: List[Widget] = generate_widgets(request_params=request_params, to_cache=True)
+        widgets: List[type(Widget)] = generate_widgets(request_params=request_params, to_cache=True)
         widgets.extend(generate_widgets(request_params=request_params, to_cache=False))
         output["widgets"].extend(list(map(lambda w: w.serialize(), widgets)))
 

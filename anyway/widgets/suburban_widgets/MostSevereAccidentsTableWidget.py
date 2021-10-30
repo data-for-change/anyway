@@ -1,14 +1,65 @@
 import logging
-from enum import __call__
 from typing import Dict
 
+import pandas as pd
 from flask_babel import _
-
 from anyway.RequestParams import RequestParams
-from anyway.infographics_utils import register, get_most_severe_accidents_with_entities, \
-    get_casualties_count_in_accident, get_most_severe_accidents_table_title
-from anyway.models import AccidentMarkerView
+from anyway.backend_constants import BE_CONST, AccidentSeverity, AccidentType
+from anyway.infographics_dictionaries import segment_dictionary
+from anyway.widgets.widget_utils import get_query, get_accidents_stats
+from anyway.models import AccidentMarkerView, InvolvedMarkerView
 from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
+from anyway.widgets.Widget import register
+
+
+def get_most_severe_accidents_with_entities(
+        table_obj, filters, entities, start_time, end_time, limit=10
+):
+    filters = filters or {}
+    filters["provider_code"] = [
+        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
+        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+    ]
+    # pylint: disable=no-member
+    filters["accident_severity"] = [
+        AccidentSeverity.FATAL.value,
+        AccidentSeverity.SEVERE.value,
+    ]
+    query = get_query(table_obj, filters, start_time, end_time)
+    query = query.with_entities(*entities)
+    query = query.order_by(getattr(table_obj, "accident_timestamp").desc())
+    query = query.limit(limit)
+    df = pd.read_sql_query(query.statement, query.session.bind)
+    df.columns = [c.replace("_hebrew", "") for c in df.columns]
+    return df.to_dict(orient="records")  # pylint: disable=no-member
+
+
+def get_most_severe_accidents_table_title(location_info):
+    return (
+            _("Most severe accidents in segment")
+            + " "
+            + segment_dictionary[location_info["road_segment_name"]]
+    )
+
+
+# count of dead and severely injured
+def get_casualties_count_in_accident(accident_id, provider_code, injury_severity, accident_year):
+    filters = {
+        "accident_id": accident_id,
+        "provider_code": provider_code,
+        "injury_severity": injury_severity,
+        "accident_year": accident_year,
+    }
+    casualties = get_accidents_stats(
+        table_obj=InvolvedMarkerView,
+        filters=filters,
+        group_by="injury_severity",
+        count="injury_severity",
+    )
+    res = 0
+    for ca in casualties:
+        res += ca["count"]
+    return res
 
 
 @register
@@ -89,3 +140,8 @@ class MostSevereAccidentsTableWidget(SubUrbanWidget):
             "title": get_most_severe_accidents_table_title(request_params.location_info)
         }
         return items
+
+
+# adding calls to _() for pybabel extraction
+_("Most recent fatal and severe accidents in location, ordered by date. Up to 10 accidents are presented.")
+_("Most recent fatal and severe accidents in location, ordered by date. Up to 10 accidents are presented.")

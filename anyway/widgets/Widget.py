@@ -1,6 +1,6 @@
 import copy
 import logging
-from typing import Union, Dict, List, Optional
+from typing import Union, Dict, List, Optional, Type
 
 from anyway.RequestParams import RequestParams
 
@@ -72,9 +72,7 @@ class Widget:
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         if "name" in items:
-            logging.debug(
-                f"Widget.localize_items: widget {items['name']} should implement localize_items method"
-            )
+            logging.debug(f"Widget.localize_items: widget {items['name']} should implement localize_items method")
         else:
             logging.error(f"Widget.localize_items: bad input (missing 'name' key):{items}")
         return items
@@ -93,3 +91,14 @@ class Widget:
         output["meta"]["rank"] = self.rank
         output["meta"]["information"] = self.information
         return output
+
+
+def register(widget_class: Type[Widget]) -> Type[Widget]:
+    if widgets_dict.get(widget_class.name) is not None:
+        logging.error(f"Double register:{widget_class.name}:{widget_class}\n")
+    widgets_dict[widget_class.name] = widget_class
+    logging.debug(f"register:{widget_class.name}:{widget_class}\n")
+    return widget_class
+
+
+widgets_dict: Dict[str, Type[Widget]] = {}

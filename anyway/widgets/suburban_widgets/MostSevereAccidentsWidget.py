@@ -1,12 +1,13 @@
 import logging
-from enum import __call__
 from typing import Dict
 
 from flask_babel import _
 
 from anyway.RequestParams import RequestParams
-from anyway.infographics_utils import register, get_most_severe_accidents_with_entities
+from anyway.backend_constants import AccidentSeverity, AccidentType
+from anyway.widgets.suburban_widgets.MostSevereAccidentsTableWidget import get_most_severe_accidents_with_entities
 from anyway.models import AccidentMarkerView
+from anyway.widgets.Widget import register
 from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
 
 
@@ -54,3 +55,7 @@ class MostSevereAccidentsWidget(SubUrbanWidget):
                     f"MostSevereAccidentsWidget.localize_items: Exception while translating {item}."
                 )
         return items
+
+
+# adding calls to _() for pybabel extraction
+_("Most recent fatal and severe accidents displayed on a map. Up to 10 accidents are presented.")

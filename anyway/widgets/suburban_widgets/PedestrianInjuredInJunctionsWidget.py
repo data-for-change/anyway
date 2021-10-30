@@ -1,6 +1,17 @@
+import logging
+from datetime import datetime
+from typing import List, Dict
+
+from sqlalchemy import func, distinct, desc
+from flask_babel import _
 from anyway.RequestParams import RequestParams
-from anyway.infographics_utils import register
+from anyway.backend_constants import AccidentType
+from anyway.models import VehicleMarkerView
+from anyway.vehicle_type import VehicleCategory
+from anyway.widgets.Widget import register
 from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
+from anyway.widgets.widget_utils import run_query, get_query
+from anyway.app_and_db import db
 
 
 @register

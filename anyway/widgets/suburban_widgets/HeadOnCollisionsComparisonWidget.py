@@ -4,8 +4,9 @@ from flask_babel import _
 
 from anyway.RequestParams import RequestParams
 from anyway.backend_constants import BE_CONST, AccidentSeverity, AccidentType
-from anyway.infographics_utils import register, get_accidents_stats
+from anyway.widgets.widget_utils import get_accidents_stats
 from anyway.models import AccidentMarkerView
+from anyway.widgets.Widget import register
 from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
 
 
@@ -117,3 +118,9 @@ class HeadOnCollisionsComparisonWidget(SubUrbanWidget):
                 raise ValueError
         all_total = all_h2h + all_others
         return segment_h2h > 0 and (segment_h2h / segment_total) > all_h2h / all_total
+
+
+# adding calls to _() for pybabel extraction
+_("others")
+_("frontal")
+_("Fatal accidents distribution by accident type - head on collisions vs other accidents.")

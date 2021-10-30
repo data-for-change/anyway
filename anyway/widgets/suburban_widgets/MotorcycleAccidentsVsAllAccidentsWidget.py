@@ -6,7 +6,7 @@ from sqlalchemy import case, literal_column, func, distinct, desc
 
 from anyway.RequestParams import RequestParams
 from anyway.backend_constants import BE_CONST, AccidentSeverity
-from anyway.infographics_utils import get_query
+from anyway.widgets.widget_utils import get_query
 from anyway.models import InvolvedMarkerView
 from anyway.vehicle_type import VehicleCategory
 from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget

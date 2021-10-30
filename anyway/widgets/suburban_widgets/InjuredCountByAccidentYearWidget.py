@@ -6,9 +6,10 @@ from flask_babel import _
 from anyway.RequestParams import RequestParams
 from anyway.backend_constants import InjurySeverity
 from anyway.infographics_dictionaries import segment_dictionary
-from anyway.infographics_utils import register, get_accidents_stats, get_injured_filters, \
-    add_empty_keys_to_gen_two_level_dict, gen_entity_labels
+from anyway.widgets.widget_utils import get_accidents_stats, add_empty_keys_to_gen_two_level_dict, gen_entity_labels, \
+    get_injured_filters
 from anyway.models import InvolvedMarkerView
+from anyway.widgets.Widget import register
 from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
 
 
@@ -57,3 +58,6 @@ class InjuredCountByAccidentYearWidget(SubUrbanWidget):
             "labels": gen_entity_labels(InjurySeverity),
         }
         return items
+
+
+_("Fatal, severe and light injured count in the specified years, split by injury severity")

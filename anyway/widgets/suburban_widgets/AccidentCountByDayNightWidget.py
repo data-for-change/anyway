@@ -1,6 +1,7 @@
 from anyway.RequestParams import RequestParams
-from anyway.infographics_utils import register, get_accidents_stats
+from anyway.widgets.widget_utils import get_accidents_stats
 from anyway.models import AccidentMarkerView
+from anyway.widgets.Widget import register
 from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
 
 

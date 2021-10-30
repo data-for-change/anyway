@@ -1,2 +1,7 @@
-from . import InjuredAccidentsWithPedestriansWidget, UrbanWidget, SevereFatalCountByVehicleByYearWidget, \
-    SmallMotorSevereFatalCountByYearWidget, UrbanCrosswalkWidget
+from . import (
+    InjuredAccidentsWithPedestriansWidget,
+    UrbanWidget,
+    SevereFatalCountByVehicleByYearWidget,
+    SmallMotorSevereFatalCountByYearWidget,
+    UrbanCrosswalkWidget,
+)

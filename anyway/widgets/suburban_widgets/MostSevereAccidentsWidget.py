@@ -5,7 +5,9 @@ from flask_babel import _
 
 from anyway.RequestParams import RequestParams
 from anyway.backend_constants import AccidentSeverity, AccidentType
-from anyway.widgets.suburban_widgets.MostSevereAccidentsTableWidget import get_most_severe_accidents_with_entities
+from anyway.widgets.suburban_widgets.MostSevereAccidentsTableWidget import (
+    get_most_severe_accidents_with_entities,
+)
 from anyway.models import AccidentMarkerView
 from anyway.widgets.Widget import register
 from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget

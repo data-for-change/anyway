@@ -31,17 +31,14 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
 
         query = (
             db.session.query(InvolvedMarkerView)
-                .filter(InvolvedMarkerView.accident_timestamp >= request_params.start_time)
-                .filter(InvolvedMarkerView.accident_timestamp <= request_params.end_time)
-                .filter(
+            .filter(InvolvedMarkerView.accident_timestamp >= request_params.start_time)
+            .filter(InvolvedMarkerView.accident_timestamp <= request_params.end_time)
+            .filter(
                 InvolvedMarkerView.provider_code.in_(
-                    [
-                        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
-                        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
-                    ]
+                    [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
                 )
             )
-                .filter(
+            .filter(
                 InvolvedMarkerView.injury_severity.in_(
                     [
                         InjurySeverity.KILLED.value,  # pylint: disable=no-member
@@ -49,13 +46,13 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
                     ]
                 )
             )
-                .filter(
+            .filter(
                 (InvolvedMarkerView.road1 == road_number)
                 | (InvolvedMarkerView.road2 == road_number)
             )
-                .filter(InvolvedMarkerView.road_segment_name == road_segment)
-                .group_by("age_group", "injury_severity")
-                .with_entities("age_group", "injury_severity", func.count().label("count"))
+            .filter(InvolvedMarkerView.road_segment_name == road_segment)
+            .group_by("age_group", "injury_severity")
+            .with_entities("age_group", "injury_severity", func.count().label("count"))
         )
 
         # if there's no data - return empty dict
@@ -102,6 +99,6 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
             "title": _("Injury severity per age group in ")
-                     + request_params.location_info["road_segment_name"]
+            + request_params.location_info["road_segment_name"]
         }
         return items

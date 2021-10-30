@@ -20,9 +20,9 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
     def validate_parameters(self, yishuv_name, street1_hebrew):
         # TODO: validate each parameter and display message accordingly
         return (
-                yishuv_name is not None
-                and street1_hebrew is not None
-                and self.request_params.years_ago is not None
+            yishuv_name is not None
+            and street1_hebrew is not None
+            and self.request_params.years_ago is not None
         )
 
     def convert_to_dict(self, query_results):
@@ -56,13 +56,13 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
 
             query = (
                 db.session.query(InvolvedMarkerView)
-                    .with_entities(
+                .with_entities(
                     InvolvedMarkerView.accident_year,
                     InvolvedMarkerView.injury_severity,
                     func.count().label("count"),
                 )
-                    .filter(InvolvedMarkerView.accident_yishuv_name == yishuv_name)
-                    .filter(
+                .filter(InvolvedMarkerView.accident_yishuv_name == yishuv_name)
+                .filter(
                     InvolvedMarkerView.injury_severity.in_(
                         [
                             InjurySeverity.KILLED.value,
@@ -71,20 +71,20 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
                         ]
                     )
                 )
-                    .filter(InvolvedMarkerView.injured_type == InjuredType.PEDESTRIAN.value)
-                    .filter(
+                .filter(InvolvedMarkerView.injured_type == InjuredType.PEDESTRIAN.value)
+                .filter(
                     or_(
                         InvolvedMarkerView.street1_hebrew == street1_hebrew,
                         InvolvedMarkerView.street2_hebrew == street1_hebrew,
                     )
                 )
-                    .filter(
+                .filter(
                     and_(
                         InvolvedMarkerView.accident_timestamp >= self.request_params.start_time,
                         InvolvedMarkerView.accident_timestamp <= self.request_params.end_time,
                     )
                 )
-                    .group_by(InvolvedMarkerView.accident_year, InvolvedMarkerView.injury_severity)
+                .group_by(InvolvedMarkerView.accident_year, InvolvedMarkerView.injury_severity)
             )
 
             self.items = add_empty_keys_to_gen_two_level_dict(

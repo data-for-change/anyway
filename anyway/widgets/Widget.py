@@ -72,7 +72,9 @@ class Widget:
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         if "name" in items:
-            logging.debug(f"Widget.localize_items: widget {items['name']} should implement localize_items method")
+            logging.debug(
+                f"Widget.localize_items: widget {items['name']} should implement localize_items method"
+            )
         else:
             logging.error(f"Widget.localize_items: bad input (missing 'name' key):{items}")
         return items

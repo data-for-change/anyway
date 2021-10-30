@@ -983,11 +983,7 @@ def get_file_type_and_year(file_path):
     return int(provider_code), int(year)
 
 
-def main(
-    batch_size,
-    source,
-    load_start_year=None,
-):
+def main(batch_size, source, load_start_year=None):
     try:
         total = 0
         started = datetime.now()

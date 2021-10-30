@@ -33,7 +33,7 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(SubUrbanWidget):
 
     @staticmethod
     def accident_type_road_vs_all_count(
-            start_time: datetime.date, end_time: datetime.date, road_number: str
+        start_time: datetime.date, end_time: datetime.date, road_number: str
     ) -> List:
         num_accidents_label = "num_of_accidents"
         location_all = "כל הארץ"
@@ -41,10 +41,8 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(SubUrbanWidget):
 
         vehicle_types = VehicleCategory.MOTORCYCLE.get_codes()  # WIP: change by vehicle type
 
-        all_roads_query = (
-            AccidentTypeVehicleTypeRoadComparisonWidget.get_accident_count_by_vehicle_type_query(
-                start_time, end_time, num_accidents_label, vehicle_types
-            )
+        all_roads_query = AccidentTypeVehicleTypeRoadComparisonWidget.get_accident_count_by_vehicle_type_query(
+            start_time, end_time, num_accidents_label, vehicle_types
         )
         all_roads_query_result = run_query(all_roads_query)
         all_roads_sum_accidents = 0
@@ -66,8 +64,8 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(SubUrbanWidget):
 
         for record in road_query_result:
             if (
-                    len(types_to_report)
-                    == AccidentTypeVehicleTypeRoadComparisonWidget.MAX_ACCIDENT_TYPES_TO_RETURN
+                len(types_to_report)
+                == AccidentTypeVehicleTypeRoadComparisonWidget.MAX_ACCIDENT_TYPES_TO_RETURN
             ):
                 break
             accident_type = record[VehicleMarkerView.accident_type.name]
@@ -82,10 +80,10 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(SubUrbanWidget):
 
     @staticmethod
     def get_accident_count_by_vehicle_type_query(
-            start_time: datetime.date,
-            end_time: datetime.date,
-            num_accidents_label: str,
-            vehicle_types: List[int],
+        start_time: datetime.date,
+        end_time: datetime.date,
+        num_accidents_label: str,
+        vehicle_types: List[int],
     ) -> db.session.query:
         return (
             get_query(
@@ -94,12 +92,12 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(SubUrbanWidget):
                 end_time=end_time,
                 filters={VehicleMarkerView.vehicle_type.name: vehicle_types},
             )
-                .with_entities(
+            .with_entities(
                 VehicleMarkerView.accident_type,
                 func.count(distinct(VehicleMarkerView.provider_and_id)).label(num_accidents_label),
             )
-                .group_by(VehicleMarkerView.accident_type)
-                .order_by(desc(num_accidents_label))
+            .group_by(VehicleMarkerView.accident_type)
+            .order_by(desc(num_accidents_label))
         )
 
     @staticmethod

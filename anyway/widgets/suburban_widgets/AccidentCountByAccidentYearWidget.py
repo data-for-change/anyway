@@ -9,7 +9,11 @@ from anyway.infographics_dictionaries import segment_dictionary
 from anyway.models import AccidentMarkerView
 from anyway.widgets.Widget import register
 from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
-from anyway.widgets.widget_utils import get_accidents_stats, add_empty_keys_to_gen_two_level_dict, gen_entity_labels
+from anyway.widgets.widget_utils import (
+    get_accidents_stats,
+    add_empty_keys_to_gen_two_level_dict,
+    gen_entity_labels,
+)
 
 
 @register
@@ -51,8 +55,8 @@ class AccidentCountByAccidentYearWidget(SubUrbanWidget):
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
             "title": _("Number of accidents, by year, splitted by accident severity, in segment")
-                     + " "
-                     + segment_dictionary[request_params.location_info["road_segment_name"]],
+            + " "
+            + segment_dictionary[request_params.location_info["road_segment_name"]],
             "labels": gen_entity_labels(AccidentSeverity),
         }
         return items

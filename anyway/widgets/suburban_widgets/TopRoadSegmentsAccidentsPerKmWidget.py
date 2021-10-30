@@ -31,9 +31,15 @@ class TopRoadSegmentsAccidentsPerKmWidget(SubUrbanWidget):
         )
 
     @staticmethod
-    def get_top_road_segments_accidents_per_km(resolution, location_info, start_time=None, end_time=None, limit=3):
-        query = get_query(table_obj=AccidentMarkerView, filters={"road1": location_info["road1"]},
-                          start_time=start_time, end_time=end_time)
+    def get_top_road_segments_accidents_per_km(
+        resolution, location_info, start_time=None, end_time=None, limit=3
+    ):
+        query = get_query(
+            table_obj=AccidentMarkerView,
+            filters={"road1": location_info["road1"]},
+            start_time=start_time,
+            end_time=end_time,
+        )
 
         try:
             query = (
@@ -41,19 +47,25 @@ class TopRoadSegmentsAccidentsPerKmWidget(SubUrbanWidget):
                     AccidentMarkerView.road_segment_name,
                     AccidentMarkerView.road_segment_length_km.label("segment_length"),
                     cast(
-                        (func.count(AccidentMarkerView.id) / AccidentMarkerView.road_segment_length_km),
+                        (
+                            func.count(AccidentMarkerView.id)
+                            / AccidentMarkerView.road_segment_length_km
+                        ),
                         Numeric(10, 4),
                     ).label("accidents_per_km"),
                     func.count(AccidentMarkerView.id).label("total_accidents"),
                 )
-                    .filter(AccidentMarkerView.road_segment_name.isnot(None))
-                    .filter(AccidentMarkerView.accident_severity.in_(
-                    [AccidentSeverity.FATAL.value, AccidentSeverity.SEVERE.value]))
-                    .group_by(
+                .filter(AccidentMarkerView.road_segment_name.isnot(None))
+                .filter(
+                    AccidentMarkerView.accident_severity.in_(
+                        [AccidentSeverity.FATAL.value, AccidentSeverity.SEVERE.value]
+                    )
+                )
+                .group_by(
                     AccidentMarkerView.road_segment_name, AccidentMarkerView.road_segment_length_km
                 )
-                    .order_by(desc("accidents_per_km"))
-                    .limit(limit)
+                .order_by(desc("accidents_per_km"))
+                .limit(limit)
             )
 
             result = pd.read_sql_query(query.statement, query.session.bind)
@@ -71,4 +83,4 @@ class TopRoadSegmentsAccidentsPerKmWidget(SubUrbanWidget):
         return items
 
 
-_('Severe and fatal accidents per Km by section in road')
+_("Severe and fatal accidents per Km by section in road")

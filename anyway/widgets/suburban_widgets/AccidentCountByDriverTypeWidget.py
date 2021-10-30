@@ -51,8 +51,8 @@ class AccidentCountByDriverTypeWidget(SubUrbanWidget):
                     DriverType.PRIVATE_VEHICLE_DRIVER.get_label()
                 ] += count
             elif (
-                    vehicle_type in VehicleCategory.LIGHT_ELECTRIC.get_codes()
-                    or vehicle_type in VehicleCategory.OTHER.get_codes()
+                vehicle_type in VehicleCategory.LIGHT_ELECTRIC.get_codes()
+                or vehicle_type in VehicleCategory.OTHER.get_codes()
             ):
                 # pylint: disable=no-member
                 driver_types[DriverType.OTHER_DRIVER.get_label()] += count
@@ -73,10 +73,12 @@ class AccidentCountByDriverTypeWidget(SubUrbanWidget):
                 )
         items["data"]["text"] = {
             "title": _("accident count by driver type ")
-                     + request_params.location_info["road_segment_name"]
+            + request_params.location_info["road_segment_name"]
         }
         return items
 
 
 # adding calls to _() for pybabel extraction
-_("Driver involvement in accident by driver type: professional - trucks, taxi, bus, work, minibus, tractor, private - private car, motorcycle, light electric - electric scooter, mobility scooter, electric bike.")
+_(
+    "Driver involvement in accident by driver type: professional - trucks, taxi, bus, work, minibus, tractor, private - private car, motorcycle, light electric - electric scooter, mobility scooter, electric bike."
+)

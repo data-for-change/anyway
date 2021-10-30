@@ -6,6 +6,7 @@ from anyway.widgets.Widget import register
 from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
 from flask_babel import _
 
+
 @register
 class AccidentCountBySeverityWidget(SubUrbanWidget):
     name: str = "accident_count_by_severity"

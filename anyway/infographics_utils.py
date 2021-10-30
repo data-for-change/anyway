@@ -4,10 +4,7 @@ import logging
 import datetime
 import json
 import os
-from typing import Optional, Dict, List, Type, Callable
-
-# noinspection PyUnresolvedReferences
-from dataclasses import dataclass
+from typing import Optional, Dict, List, Callable
 import traceback
 
 import pandas as pd
@@ -19,23 +16,20 @@ from sqlalchemy import func
 from flask_babel import _
 
 from anyway.RequestParams import RequestParams
-from anyway.backend_constants import (
-    BE_CONST,
-    AccidentType,
-    CrossCategory,
-)
+from anyway.backend_constants import BE_CONST, AccidentType
 from anyway.models import NewsFlash, AccidentMarkerView
 from anyway.parsers import resolution_dict
 from anyway.app_and_db import db
-from anyway.infographics_dictionaries import (
-    head_on_collisions_comparison_dict,
-)
+from anyway.infographics_dictionaries import head_on_collisions_comparison_dict
 from anyway.parsers import infographics_data_cache_updater
 from anyway.parsers.location_extraction import get_road_segment_name_and_number
 from anyway.widgets import Widget
+
+# We need to import the modules, which in turn imports all the widgets, and registers them, even if they are not explicitly used here
+# pylint: disable=unused-import
 import anyway.widgets.urban_widgets
 import anyway.widgets.suburban_widgets
-
+# pylint: enable=unused-import
 
 def get_widget_factories() -> List[Callable[[RequestParams], type(Widget)]]:
     """Returns list of callables that generate all widget instances"""
@@ -178,7 +172,7 @@ def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> Li
         print(w.name)
         try:
             w.generate_items()
-        except Exception  as e:
+        except Exception as e:
             print(e)
     filtered_widgets = []
     for w in widgets:
@@ -188,7 +182,7 @@ def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> Li
 
 
 def get_request_params(
-        news_flash_id: int, number_of_years_ago: int, lang: str
+    news_flash_id: int, number_of_years_ago: int, lang: str
 ) -> Optional[RequestParams]:
     try:
         number_of_years_ago = int(number_of_years_ago)
@@ -236,7 +230,7 @@ def get_request_params(
 
 
 def get_request_params_for_road_segment(
-        road_segment_id: int, number_of_years_ago: int, lang: str
+    road_segment_id: int, number_of_years_ago: int, lang: str
 ) -> Optional[RequestParams]:
     try:
         number_of_years_ago = int(number_of_years_ago)
@@ -289,7 +283,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago, lang: str) -> s
 
 
 def create_infographics_data_for_road_segment(
-        road_segment_id, number_of_years_ago, lang: str
+    road_segment_id, number_of_years_ago, lang: str
 ) -> str:
     request_params = get_request_params_for_road_segment(road_segment_id, number_of_years_ago, lang)
     output = create_infographics_items(request_params)
@@ -362,10 +356,8 @@ def get_infographics_data_for_road_segment(road_segment_id, years_ago, lang: str
         output = create_infographics_items(request_params)
     else:
         try:
-            output = (
-                infographics_data_cache_updater.get_infographics_data_from_cache_by_road_segment(
-                    road_segment_id, years_ago
-                )
+            output = infographics_data_cache_updater.get_infographics_data_from_cache_by_road_segment(
+                road_segment_id, years_ago
             )
         except Exception as e:
             logging.error(

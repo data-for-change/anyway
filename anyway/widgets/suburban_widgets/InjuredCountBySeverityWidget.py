@@ -31,8 +31,11 @@ class InjuredCountBySeverityWidget(SubUrbanWidget):
         count_by_severity = get_accidents_stats(
             table_obj=InvolvedMarkerView,
             filters={
-                "injury_severity": [InjurySeverity.KILLED.value,
-                                    InjurySeverity.SEVERE_INJURED.value, InjurySeverity.LIGHT_INJURED.value],
+                "injury_severity": [
+                    InjurySeverity.KILLED.value,
+                    InjurySeverity.SEVERE_INJURED.value,
+                    InjurySeverity.LIGHT_INJURED.value,
+                ],
                 "road1": road,
                 "road_segment_name": segment,
             },
@@ -67,6 +70,6 @@ class InjuredCountBySeverityWidget(SubUrbanWidget):
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
             "title": _("Number of Injuries in Accidents on ")
-                     + request_params.location_info["road_segment_name"]
+            + request_params.location_info["road_segment_name"]
         }
         return items

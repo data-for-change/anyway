@@ -50,7 +50,7 @@ class AccidentsHeatMapWidget(SubUrbanWidget):
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
             "title": _("Fatal and severe accidents heat map")
-                     + " "
-                     + segment_dictionary[request_params.location_info["road_segment_name"]]
+            + " "
+            + segment_dictionary[request_params.location_info["road_segment_name"]]
         }
         return items

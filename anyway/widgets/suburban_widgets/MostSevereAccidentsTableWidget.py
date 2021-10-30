@@ -13,7 +13,7 @@ from anyway.widgets.Widget import register
 
 
 def get_most_severe_accidents_with_entities(
-        table_obj, filters, entities, start_time, end_time, limit=10
+    table_obj, filters, entities, start_time, end_time, limit=10
 ):
     filters = filters or {}
     filters["provider_code"] = [
@@ -21,10 +21,7 @@ def get_most_severe_accidents_with_entities(
         BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
     ]
     # pylint: disable=no-member
-    filters["accident_severity"] = [
-        AccidentSeverity.FATAL.value,
-        AccidentSeverity.SEVERE.value,
-    ]
+    filters["accident_severity"] = [AccidentSeverity.FATAL.value, AccidentSeverity.SEVERE.value]
     query = get_query(table_obj, filters, start_time, end_time)
     query = query.with_entities(*entities)
     query = query.order_by(getattr(table_obj, "accident_timestamp").desc())
@@ -36,9 +33,9 @@ def get_most_severe_accidents_with_entities(
 
 def get_most_severe_accidents_table_title(location_info):
     return (
-            _("Most severe accidents in segment")
-            + " "
-            + segment_dictionary[location_info["road_segment_name"]]
+        _("Most severe accidents in segment")
+        + " "
+        + segment_dictionary[location_info["road_segment_name"]]
     )
 
 
@@ -112,7 +109,7 @@ class MostSevereAccidentsTableWidget(SubUrbanWidget):
             )
             # TODO: remove injured_count after FE adaptation to light and severe counts
             accident["injured_count"] = (
-                    accident["severe_injured_count"] + accident["light_injured_count"]
+                accident["severe_injured_count"] + accident["light_injured_count"]
             )
             del (
                 accident["accident_timestamp"],
@@ -143,5 +140,9 @@ class MostSevereAccidentsTableWidget(SubUrbanWidget):
 
 
 # adding calls to _() for pybabel extraction
-_("Most recent fatal and severe accidents in location, ordered by date. Up to 10 accidents are presented.")
-_("Most recent fatal and severe accidents in location, ordered by date. Up to 10 accidents are presented.")
+_(
+    "Most recent fatal and severe accidents in location, ordered by date. Up to 10 accidents are presented."
+)
+_(
+    "Most recent fatal and severe accidents in location, ordered by date. Up to 10 accidents are presented."
+)

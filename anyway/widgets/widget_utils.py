@@ -26,7 +26,9 @@ def get_query(table_obj, filters, start_time, end_time):
     return query
 
 
-def get_accidents_stats(table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None):
+def get_accidents_stats(
+    table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None
+):
     filters = filters or {}
     filters["provider_code"] = [
         BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
@@ -71,7 +73,7 @@ def retro_dictify(indexable) -> Dict[Any, Dict[Any, Any]]:
 
 
 def add_empty_keys_to_gen_two_level_dict(
-        d, level_1_values: List[Any], level_2_values: List[Any], default_level_3_value: int = 0
+    d, level_1_values: List[Any], level_2_values: List[Any], default_level_3_value: int = 0
 ) -> Dict[Any, Dict[Any, int]]:
     for v1 in level_1_values:
         if v1 not in d:

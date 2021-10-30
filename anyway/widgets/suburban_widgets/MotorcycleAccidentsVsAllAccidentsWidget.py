@@ -30,7 +30,7 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
 
     @staticmethod
     def motorcycle_accidents_vs_all_accidents(
-            start_time: datetime.date, end_time: datetime.date, road_number: str
+        start_time: datetime.date, end_time: datetime.date, road_number: str
     ) -> List:
         location_label = "location"
         location_other = "שאר הארץ"
@@ -72,15 +72,15 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
                 case_vehicle,
                 func.count(distinct(InvolvedMarkerView.provider_and_id)).label(num_accidents_label),
             )
-                .filter(InvolvedMarkerView.road_type.in_(BE_CONST.NON_CITY_ROAD_TYPES))
-                .filter(
+            .filter(InvolvedMarkerView.road_type.in_(BE_CONST.NON_CITY_ROAD_TYPES))
+            .filter(
                 InvolvedMarkerView.accident_severity.in_(
                     # pylint: disable=no-member
                     [AccidentSeverity.FATAL.value, AccidentSeverity.SEVERE.value]
                 )
             )
-                .group_by(location_label, vehicle_label)
-                .order_by(desc(num_accidents_label))
+            .group_by(location_label, vehicle_label)
+            .order_by(desc(num_accidents_label))
         )
         # pylint: disable=no-member
         results = pd.read_sql_query(query.statement, query.session.bind).to_dict(

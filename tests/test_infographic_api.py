@@ -117,8 +117,6 @@ class Test_Infographic_Api:
         assert output_tmp[VehicleCategory.LARGE.value] == pytest.approx(33.333333333333336)
         assert output_tmp[VehicleCategory.BICYCLE_AND_SMALL_MOTOR.value] == pytest.approx(16.666666666666668)
 
-        
-
         involved_by_vehicle_type_data_test = [{'involve_vehicle_type': 1, 'count': 11}]
         end_time = datetime.date(2020, 6, 30)
         start_time = datetime.date(2020, 1, 1)

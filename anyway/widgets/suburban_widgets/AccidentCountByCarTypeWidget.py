@@ -1,4 +1,3 @@
-import json
 import logging
 from collections import defaultdict
 from functools import lru_cache
@@ -16,7 +15,6 @@ from anyway.widgets.widget_utils import get_accidents_stats, get_injured_filters
 
 @register
 class AccidentCountByCarTypeWidget(SubUrbanWidget):
-    
     name: str = "accident_count_by_car_type"
 
     def __init__(self, request_params: RequestParams):
@@ -24,10 +22,14 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
         self.rank = 17
 
     def generate_items(self) -> None:
-        self.items = (AccidentCountByCarTypeWidget.get_stats_accidents_by_car_type_with_national_data(self.request_params))
+        self.items = AccidentCountByCarTypeWidget.get_stats_accidents_by_car_type_with_national_data(
+            self.request_params
+        )
 
     @staticmethod
-    def get_stats_accidents_by_car_type_with_national_data(request_params: RequestParams, involved_by_vehicle_type_data=None):
+    def get_stats_accidents_by_car_type_with_national_data(
+        request_params: RequestParams, involved_by_vehicle_type_data=None
+    ):
         out = []
         if involved_by_vehicle_type_data is None:
             involved_by_vehicle_type_data = get_accidents_stats(
@@ -44,10 +46,8 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
         data_by_segment = AccidentCountByCarTypeWidget.percentage_accidents_by_car_type(
             involved_by_vehicle_type_data
         )
-        national_data = (
-            AccidentCountByCarTypeWidget.percentage_accidents_by_car_type_national_data_cache(
-                start_time, end_time
-            )
+        national_data = AccidentCountByCarTypeWidget.percentage_accidents_by_car_type_national_data_cache(
+            start_time, end_time
         )
 
         for k, v in national_data.items():  # pylint: disable=W0612
@@ -111,7 +111,9 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
                 item["car_type"] = _(VehicleCategory(item["car_type"]).get_english_display_name())
             except ValueError:
                 logging.exception(f"AccidentCountByCarType.localize_items: item:{item}")
-        base_title = _("comparing vehicle type percentage in accidents in {} relative to national average")
+        base_title = _(
+            "comparing vehicle type percentage in accidents in {} relative to national average"
+        )
         items["data"]["text"] = {
             "title": base_title.format(
                 segment_dictionary[request_params.location_info["road_segment_name"]]

@@ -6,8 +6,12 @@ from flask_babel import _
 from anyway.RequestParams import RequestParams
 from anyway.backend_constants import InjurySeverity
 from anyway.infographics_dictionaries import segment_dictionary
-from anyway.widgets.widget_utils import get_accidents_stats, add_empty_keys_to_gen_two_level_dict, gen_entity_labels, \
-    get_injured_filters
+from anyway.widgets.widget_utils import (
+    get_accidents_stats,
+    add_empty_keys_to_gen_two_level_dict,
+    gen_entity_labels,
+    get_injured_filters,
+)
 from anyway.models import InvolvedMarkerView
 from anyway.widgets.Widget import register
 from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
@@ -53,8 +57,8 @@ class InjuredCountByAccidentYearWidget(SubUrbanWidget):
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
             "title": _("Number of injured in accidents, per year, splitted by severity, in segment")
-                     + " "
-                     + segment_dictionary[request_params.location_info["road_segment_name"]],
+            + " "
+            + segment_dictionary[request_params.location_info["road_segment_name"]],
             "labels": gen_entity_labels(InjurySeverity),
         }
         return items

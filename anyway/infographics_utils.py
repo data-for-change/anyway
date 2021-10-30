@@ -22,6 +22,7 @@ from anyway.RequestParams import RequestParams
 from anyway.backend_constants import (
     BE_CONST,
     AccidentType,
+    CrossCategory,
 )
 from anyway.models import NewsFlash, AccidentMarkerView
 from anyway.parsers import resolution_dict
@@ -33,16 +34,7 @@ from anyway.parsers import infographics_data_cache_updater
 from anyway.parsers.location_extraction import get_road_segment_name_and_number
 from anyway.widgets import Widget
 import anyway.widgets.urban_widgets
-#import UrbanWidget, InjuredAccidentsWithPedestriansWidget
 import anyway.widgets.suburban_widgets
-# import AccidentCountByAccidentTypeWidget, AccidentCountByAccidentYearWidget, \
-#     AccidentTypeVehicleTypeRoadComparisonWidget, MostSevereAccidentsTableWidget, AccidentCountByDayNightWidget, \
-#     AccidentCountByDriverTypeWidget, AccidentCountByHourWidget, AccidentCountByRoadLightWidget, \
-#     AccidentCountBySeverityWidget, AccidentCountPedestriansPerVehicleStreetVsAllWidget, \
-#     AccidentSeverityByCrossLocationWidget, AccidentsHeatMapWidget, HeadOnCollisionsComparisonWidget, \
-#     InjuredCountByAccidentYearWidget, InjuredCountPerAgeGroupWidget, MostSevereAccidentsWidget, \
-#     MotorcycleAccidentsVsAllAccidentsWidget, PedestrianInjuredInJunctionsWidget, Road2Plus1Widget, StreetViewWidget, \
-#     SubUrbanWidget, TopRoadSegmentsAccidentsPerKmWidget, TopRoadSegmentsAccidentsWidget
 
 
 def get_widget_factories() -> List[Callable[[RequestParams], type(Widget)]]:

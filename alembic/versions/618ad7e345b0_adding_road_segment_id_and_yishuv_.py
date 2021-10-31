@@ -19,12 +19,20 @@ import sqlalchemy as sa
 def upgrade():
     op.add_column('news_flash', sa.Column('yishuv_symbol', sa.Integer(), nullable=True))
     op.add_column('news_flash', sa.Column('road_segment_id', sa.Integer(), nullable=True))
+    op.add_column('news_flash', sa.Column('street1', sa.Integer(), nullable=True))
+    op.add_column('news_flash', sa.Column('street2', sa.Integer(), nullable=True))
     op.add_column('cbs_locations', sa.Column('yishuv_symbol', sa.Integer(), nullable=True))
     op.add_column('cbs_locations', sa.Column('road_segment_id', sa.Integer(), nullable=True))
+    op.add_column('cbs_locations', sa.Column('street1', sa.Integer(), nullable=True))
+    op.add_column('cbs_locations', sa.Column('street2', sa.Integer(), nullable=True))
 
 
 def downgrade():
     op.drop_column('news_flash', 'yishuv_symbol')
     op.drop_column('news_flash', 'road_segment_id')
+    op.drop_column('news_flash', 'street1')
+    op.drop_column('news_flash', 'street2')
     op.drop_column('cbs_locations', 'yishuv_symbol')
     op.drop_column('cbs_locations', 'road_segment_id')
+    op.drop_column('cbs_locations', 'street1')
+    op.drop_column('cbs_locations', 'street2')

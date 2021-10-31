@@ -47,7 +47,7 @@ from anyway.infographics_dictionaries import (
 from anyway.parsers import infographics_data_cache_updater
 from anyway.utilities import parse_age_from_range
 from anyway.vehicle_type import VehicleCategory, VehicleType
-from anyway.parsers.location_extraction import get_road_segment_name_and_number
+from anyway.parsers.location_extraction import get_road_segment_name_and_number, get_road_segment_name
 
 
 USE_SMALL_TABLES = True
@@ -282,7 +282,7 @@ class InjuredCountBySeverityWidget(SubUrbanWidget):
     def generate_items(self) -> None:
         self.items = InjuredCountBySeverityWidget.get_injured_count_by_severity(
             self.request_params.location_info["road1"],
-            self.request_params.location_info["road_segment_name"],
+            self.request_params.location_info["road_segment_id"],
             self.request_params.start_time,
             self.request_params.end_time,
         )
@@ -296,7 +296,7 @@ class InjuredCountBySeverityWidget(SubUrbanWidget):
                                     InjurySeverity.SEVERE_INJURED.value,  # pylint: disable=no-member
                                     InjurySeverity.LIGHT_INJURED.value],  # pylint: disable=no-member
                 "road1": road,
-                "road_segment_name": segment,
+                "road_segment_id": segment,
                 },
             group_by="injury_severity",
             count="injury_severity",
@@ -327,9 +327,12 @@ class InjuredCountBySeverityWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        road_segment_name = get_road_segment_name(
+            request_params.location_info["road_segment_id"]
+        )
         items["data"]["text"] = {
             "title": _("Number of Injuries in Accidents on ")
-            + request_params.location_info["road_segment_name"]
+            + segment_dictionary[road_segment_name]
         }
         return items
 
@@ -413,7 +416,7 @@ class SuburbanCrosswalkWidget(SubUrbanWidget):
         self.rank = 26
 
     def generate_items(self) -> None:
-        self.items = SuburbanCrosswalkWidget.get_crosswalk(self.request_params.location_info["road_segment_name"],
+        self.items = SuburbanCrosswalkWidget.get_crosswalk(self.request_params.location_info["road_segment_id"],
             self.request_params.start_time,
             self.request_params.end_time,)
 
@@ -425,10 +428,10 @@ class SuburbanCrosswalkWidget(SubUrbanWidget):
                 "injury_severity": [InjurySeverity.KILLED.value,  # pylint: disable=no-member
                         InjurySeverity.SEVERE_INJURED.value],  # pylint: disable=no-member
                 "cross_location": CrossCategory.CROSSWALK.get_codes(),
-                "road_segment_name": road,
+                "road_segment_id": road,
                 },
-            group_by="road_segment_name",
-            count="road_segment_name",
+            group_by="road_segment_id",
+            count="road_segment_id",
             start_time=start_time,
             end_time=end_time,
         ),
@@ -438,10 +441,10 @@ class SuburbanCrosswalkWidget(SubUrbanWidget):
                 "injury_severity": [InjurySeverity.KILLED.value,  # pylint: disable=no-member
                                     InjurySeverity.SEVERE_INJURED.value],  # pylint: disable=no-member
                 "cross_location": CrossCategory.NONE.get_codes(),
-                "road_segment_name": road,
+                "road_segment_id": road,
                 },
-            group_by="road_segment_name",
-            count="road_segment_name",
+            group_by="road_segment_id",
+            count="road_segment_id",
             start_time=start_time,
             end_time=end_time,
         )}
@@ -453,9 +456,12 @@ class SuburbanCrosswalkWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        road_segment_name = get_road_segment_name(
+            request_params.location_info["road_segment_id"]
+        )
         items["data"]["text"] = {
             "title": _("Pedestrian injury comparison on ")
-            + request_params.location_info["road_segment_name"]
+            + segment_dictionary[road_segment_name]
         }
         return items
 
@@ -801,7 +807,7 @@ class AccidentsHeatMapWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        road_segment_name, x = get_road_segment_name_and_number(  # pylint: disable=unused-variable
+        road_segment_name = get_road_segment_name(
             request_params.location_info["road_segment_id"]
         )
         items["data"]["text"] = {
@@ -849,7 +855,7 @@ class AccidentCountByAccidentYearWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        road_segment_name, x = get_road_segment_name_and_number(  # pylint: disable=unused-variable
+        road_segment_name = get_road_segment_name(
             request_params.location_info["road_segment_id"]
         )
         items["data"]["text"] = {
@@ -899,7 +905,7 @@ class InjuredCountByAccidentYearWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        road_segment_name, x = get_road_segment_name_and_number(  # pylint: disable=unused-variable
+        road_segment_name = get_road_segment_name(
             request_params.location_info["road_segment_id"]
         )
         items["data"]["text"] = {
@@ -1258,7 +1264,7 @@ class InjuredCountPerAgeGroupWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        road_segment_name, x = get_road_segment_name_and_number(  # pylint: disable=unused-variable
+        road_segment_name = get_road_segment_name(
             request_params.location_info["road_segment_id"]
         )
         items["data"]["text"] = {
@@ -1375,7 +1381,7 @@ class AccidentCountByDriverTypeWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        road_segment_name, x = get_road_segment_name_and_number(  # pylint: disable=unused-variable
+        road_segment_name = get_road_segment_name(
             request_params.location_info["road_segment_id"]
         )
         for item in items["data"]["items"]:
@@ -1496,7 +1502,7 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        road_segment_name, x = get_road_segment_name_and_number(  # pylint: disable=unused-variable
+        road_segment_name = get_road_segment_name(
             request_params.location_info["road_segment_id"]
         )
         for item in items["data"]["items"]:
@@ -1555,7 +1561,7 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
                     f"Could not validate parameters for {NewsFlash} : {self.request_params.news_flash_obj.id}"
                 )
                 return None
-            involved_table = get_small_involved_marker()
+            involved_table = InvolvedMarkerView
             query = (
                 db.session.query(involved_table)
                 .with_entities(
@@ -2107,7 +2113,7 @@ def get_most_severe_accidents_with_entities(
 
 
 def get_most_severe_accidents_table_title(location_info):
-    road_segment_name, x = get_road_segment_name_and_number(  # pylint: disable=unused-variable
+    road_segment_name = get_road_segment_name(
         location_info["road_segment_id"]
     )
     return (
@@ -2390,7 +2396,7 @@ def create_infographics_items(request_params: RequestParams) -> Dict:
         # output["widgets"].extend(list(map(lambda w: w.serialize(), widgets)))
 
     except Exception as e:
-        logging.error(f"exception in create_infographics_data:{e}:{traceback.format_exc()}")
+        logging.exception(f"exception in create_infographics_data:{e}:{traceback.format_exc()}")
         output = {}
     return output
 

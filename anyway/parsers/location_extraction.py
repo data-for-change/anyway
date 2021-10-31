@@ -1,6 +1,7 @@
 import logging
 import re
 import math
+from typing import Optional
 import geohash  # python-geohash package
 import googlemaps
 import numpy as np
@@ -35,20 +36,18 @@ def extract_road_number(location):
     return None
 
 
-def get_road_segment_id(road_segment_name) -> int:
+def get_road_segment_id(road_segment_name) -> Optional[int]:
     try:
         from anyway.app_and_db import db
     except ModuleNotFoundError:
         pass
     from_name = road_segment_name.split("-")[0].strip()
     to_name = road_segment_name.split("-")[1].strip()
-    query_obj = (
-        db.session.query(RoadSegments)
-        .filter(RoadSegments.from_name == from_name)
-        .filter(RoadSegments.to_name == to_name)
-    )
-    segment = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-    return segment.iloc[0]["id"]  # pylint: disable=maybe-no-member
+    segment = db.session.query(RoadSegments)\
+        .filter(RoadSegments.from_name == from_name)\
+        .filter(RoadSegments.to_name == to_name)\
+        .first()
+    return segment.segment_id if segment else None
 
 
 def get_road_segment_name_and_number(road_segment_id) -> (int, str):
@@ -56,13 +55,18 @@ def get_road_segment_name_and_number(road_segment_id) -> (int, str):
         from anyway.app_and_db import db
     except ModuleNotFoundError:
         pass
-    query_obj = db.session.query(RoadSegments).filter(RoadSegments.id == road_segment_id)
+    query_obj = db.session.query(RoadSegments).filter(RoadSegments.segment_id == road_segment_id)
     segment = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
     from_name = segment.iloc[0]["from_name"]  # pylint: disable=maybe-no-member
     to_name = segment.iloc[0]["to_name"]  # pylint: disable=maybe-no-member
     road_segment_name = " - ".join([from_name, to_name])
     road = segment.iloc[0]["road"]  # pylint: disable=maybe-no-member
     return float(road), road_segment_name
+
+
+def get_road_segment_name(road_segment_id) -> int:
+    number, name = get_road_segment_name_and_number(road_segment_id)
+    return name
 
 
 def get_db_matching_location_interurban(latitude, longitude) -> dict:
@@ -136,13 +140,17 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
     most_fit_loc = (
         markers.loc[markers["dist_point"] == markers["dist_point"].min()].iloc[0].to_dict()
     )
+    logging.debug(f"interurban get_db_matching_location most_fit:{most_fit_loc}")
 
     final_loc = {}
-    for field in ["road1", "road_segment_name"]:
+    for field in resolution_dict["כביש בינעירוני"]:  # ["road1", "road_segment_name"]:
         loc = most_fit_loc[field]
         if loc not in [None, "", "nan"]:
             if not (isinstance(loc, np.float64) and np.isnan(loc)):
                 final_loc[field] = loc
+            else:
+                logging.debug(f"interurban Excluding due to float: {field}:{loc}")
+    logging.debug(f"interurban get_db_matching_location res:{final_loc}")
     return final_loc
 
 
@@ -183,6 +191,9 @@ def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):
         markers = markers_orig
 
     # FILTER BY GEOHASH
+    if not (latitude and longitude):
+        logging.error(f"lat:{latitude},lon:{longitude}. Returning empty result")
+        return {}
     curr_geohash = geohash.encode(latitude, longitude, precision=4)
     if markers.loc[markers["geohash"] == curr_geohash].count()[0] > 0:
         markers = markers.loc[markers["geohash"] == curr_geohash].copy()
@@ -195,6 +206,11 @@ def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):
     most_fit_loc = (
         markers.loc[markers["dist_point"] == markers["dist_point"].min()].iloc[0].to_dict()
     )
+    if most_fit_loc["road_segment_name"] is not None and \
+       most_fit_loc["road_segment_id"] is None:
+        most_fit_loc["road_segment_id"] = \
+            get_road_segment_id(most_fit_loc["road_segment_name"])
+    logging.debug(f"get_db_matching_location most_fit:{most_fit_loc}")
 
     final_loc = {}
     for field in relevant_fields:
@@ -202,6 +218,9 @@ def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):
         if loc not in [None, "", "nan"]:
             if not (isinstance(loc, np.float64) and np.isnan(loc)):
                 final_loc[field] = loc
+            else:
+                logging.debug(f"Excluding due to float: {field}:{loc}")
+    logging.debug(f"get_db_matching_location res:{final_loc}")
     return final_loc
 
 

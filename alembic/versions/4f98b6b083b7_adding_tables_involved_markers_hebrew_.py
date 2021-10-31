@@ -1,14 +1,15 @@
 """Adding tables involved_markers_hebrew_small, markers_hebrew_small and vehicles_markers_hebrew_small
 
 Revision ID: 4f98b6b083b7
-Revises: 2dcc57ee1757
+Revises: ac561a960f20
 Create Date: 2021-10-02 06:09:03.808108
 
 """
 
 # revision identifiers, used by Alembic.
 revision = '4f98b6b083b7'
-down_revision = '2dcc57ee1757'
+down_revision = 'ac561a960f20'
+#down_revision = '2dcc57ee1757'
 # down_revision = '312c9eb92e40'
 branch_labels = None
 depends_on = None

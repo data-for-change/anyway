@@ -84,15 +84,15 @@ users_to_organizations = Table(
     Base.metadata,
     Column("user_id", BigInteger(), ForeignKey("users.id"), index=True, nullable=False),
     Column(
-        "organization_name",
-        String(255),
-        ForeignKey("organization.name"),
+        "organization_id",
+        BigInteger(),
+        ForeignKey("organization.id"),
         index=True,
         nullable=False,
         server_default=FetchedValue(),
     ),
     Column("create_date", DateTime(), nullable=False, server_default=text("now()")),
-    PrimaryKeyConstraint("user_id", "organization_name"),
+    PrimaryKeyConstraint("user_id", "organization_id"),
 )
 
 
@@ -146,14 +146,15 @@ class Users(Base, UserMixin):
             "user_url": self.user_url,
             "user_desc": self.user_desc,
             "is_user_completed_registration": self.is_user_completed_registration,
-            "roles": [r.name for r in roles],
-            "organizations": [r.name for r in organizations],
+            "roles": [role.name for role in roles],
+            "organizations": [org.name for org in organizations],
         }
 
 
 class Organization(Base):
     __tablename__ = "organization"
-    name = Column(String(255), primary_key=True, unique=True, index=True, nullable=False)
+    id = Column(BigInteger, autoincrement=True, nullable=False, primary_key=True, index=True)
+    name = Column(String(255), unique=True, index=True, nullable=False)
     create_date = Column(DateTime(), nullable=False, server_default=text("now()"))
 
 

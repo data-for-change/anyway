@@ -35,9 +35,7 @@ from flask_principal import (
 from flask_restx import Resource, fields, reqparse
 
 from anyway.error_code_and_strings import (
-    Errors as Es,
-    build_json_for_user_api_error,
-    ERROR_TO_HTTP_CODE_DICT,
+    Errors as Es, build_json_for_user_api_error, ERROR_TO_HTTP_CODE_DICT,
 )
 
 from http import client as http_client, HTTPStatus
@@ -81,7 +79,8 @@ from anyway.models import (
     Users,
     Roles,
     users_to_roles,
-    Organization, users_to_organizations,
+    Organization,
+    users_to_organizations,
 )
 from anyway.oauth import OAuthSignIn
 from anyway.infographics_utils import (
@@ -1347,14 +1346,12 @@ def oauth_callback(provider: str) -> Response:
     user = (
         db.session.query(Users)
         .filter_by(oauth_provider=provider, oauth_provider_user_id=user_data.service_user_id)
-        .first()
+        .one()
     )
 
     if not user:
         user = (
-            db.session.query(Users)
-            .filter_by(oauth_provider=provider, email=user_data.email)
-            .first()
+            db.session.query(Users).filter_by(oauth_provider=provider, email=user_data.email).one()
         )
 
     if not user:
@@ -1639,38 +1636,28 @@ def add_to_role() -> Response:
 
 def is_input_fields_malformed(request: Request, allowed_fields: typing.List[str]) -> bool:
     # Validate input
-    reg_dict = request.json
-    if not reg_dict:
+    req_dict = request.json
+    if not req_dict:
         return True
-    for key in reg_dict:
+    for key in req_dict:
         if key not in allowed_fields:
             return True
     return False
 
 
 def change_user_roles(action: str) -> Response:
-    allowed_fields = [
-        "role",
-        "email",
-    ]
-
-    res = is_input_fields_malformed(request, allowed_fields)
-    if res:
+    req_dict = request.json
+    if not req_dict:
         return return_json_error(Es.BR_FIELD_MISSING)
-    reg_dict = request.json
 
-    role_name = reg_dict.get("role")
+    role_name = req_dict.get("role")
     if not role_name:
         return return_json_error(Es.BR_ROLE_NAME_MISSING)
     role = get_role_object(role_name)
     if role is None:
         return return_json_error(Es.BR_ROLE_NOT_EXIST, role_name)
 
-    email = reg_dict.get("email")
-    if not email:
-        return return_json_error(Es.BR_NO_EMAIL)
-    if not is_a_valid_email(email):
-        return return_json_error(Es.BR_BAD_EMAIL)
+    email = req_dict.get("email")
     user = get_user_by_email(db, email)
     if user is None:
         return return_json_error(Es.BR_USER_NOT_FOUND, email)
@@ -1679,7 +1666,7 @@ def change_user_roles(action: str) -> Response:
         # Add user to role
         for user_role in user.roles:
             if role.name == user_role.name:
-                return return_json_error(Es.BR_USER_ALREADY_IN_ROLE, email, role_name)
+                return return_json_error(Es.BR_USER_ALREADY_IN_ROLE, role_name)
         user.roles.append(role)
         # Add user to role in the current instance
         if current_user.email == user.email:
@@ -1703,7 +1690,7 @@ def change_user_roles(action: str) -> Response:
 
 
 def get_role_object(role_name):
-    role = db.session.query(Roles).filter(Roles.name == role_name).first()
+    role = db.session.query(Roles).filter(Roles.name == role_name).one()
     return role
 
 
@@ -1725,31 +1712,27 @@ def admin_update_user() -> Response:
     res = is_input_fields_malformed(request, allowed_fields)
     if res:
         return return_json_error(Es.BR_FIELD_MISSING)
-    reg_dict = request.json
+    req_dict = request.json
 
-    user_current_email = reg_dict.get("user_current_email")
-    if not user_current_email:
-        return return_json_error(Es.BR_NO_EMAIL)
-    if not is_a_valid_email(user_current_email):
-        return return_json_error(Es.BR_BAD_EMAIL)
+    user_current_email = req_dict.get("user_current_email")
     user = get_user_by_email(db, user_current_email)
     if user is None:
         return return_json_error(Es.BR_USER_NOT_FOUND, user_current_email)
 
-    user_db_new_email = reg_dict.get("email")
+    user_db_new_email = req_dict.get("email")
     if not is_a_valid_email(user_db_new_email):
         return return_json_error(Es.BR_BAD_EMAIL)
 
-    phone = reg_dict.get("phone")
+    phone = req_dict.get("phone")
     if phone and not is_valid_number(phone):
         return return_json_error(Es.BR_BAD_PHONE)
 
-    first_name = reg_dict.get("first_name")
-    last_name = reg_dict.get("last_name")
-    user_desc = reg_dict.get("user_desc")
-    user_type = reg_dict.get("user_type")
-    user_url = reg_dict.get("user_url")
-    is_user_completed_registration = reg_dict.get("is_user_completed_registration")
+    first_name = req_dict.get("first_name")
+    last_name = req_dict.get("last_name")
+    user_desc = req_dict.get("user_desc")
+    user_type = req_dict.get("user_type")
+    user_url = req_dict.get("user_url")
+    is_user_completed_registration = req_dict.get("is_user_completed_registration")
     update_user_in_db(
         user,
         first_name,
@@ -1782,15 +1765,15 @@ def user_update() -> Response:
     res = is_input_fields_malformed(request, allowed_fields)
     if res:
         return return_json_error(Es.BR_FIELD_MISSING)
-    reg_dict = request.json
+    req_dict = request.json
 
-    first_name = reg_dict.get("first_name")
-    last_name = reg_dict.get("last_name")
+    first_name = req_dict.get("first_name")
+    last_name = req_dict.get("last_name")
     if not first_name or not last_name:
         return return_json_error(Es.BR_FIRST_NAME_OR_LAST_NAME_MISSING)
 
     # If we don't have the user email then we have to get it else only update if the user want.
-    tmp_given_user_email = reg_dict.get("email")
+    tmp_given_user_email = req_dict.get("email")
     user_db_email = get_current_user_email()
     if not user_db_email or tmp_given_user_email:
         if not tmp_given_user_email:
@@ -1801,13 +1784,13 @@ def user_update() -> Response:
 
         user_db_email = tmp_given_user_email
 
-    phone = reg_dict.get("phone")
+    phone = req_dict.get("phone")
     if phone and not is_valid_number(phone):
         return return_json_error(Es.BR_BAD_PHONE)
 
-    user_type = reg_dict.get("user_type")
-    user_url = reg_dict.get("user_url")
-    user_desc = reg_dict.get("user_desc")
+    user_type = req_dict.get("user_type")
+    user_url = req_dict.get("user_url")
+    user_desc = req_dict.get("user_desc")
 
     update_user_in_db(
         current_user,
@@ -1849,26 +1832,16 @@ def update_user_in_db(
 @app.route("/user/change_user_active_mode", methods=["POST"])
 @roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def user_disable() -> Response:
-    allowed_fields = [
-        "email",
-        "mode",
-    ]
-
-    result = is_input_fields_malformed(request, allowed_fields)
-    if result:
+    req_dict = request.json
+    if not req_dict:
         return return_json_error(Es.BR_FIELD_MISSING)
-    reg_dict = request.json
 
-    email = reg_dict.get("email")
-    if not email:
-        return return_json_error(Es.BR_NO_EMAIL)
-    if not is_a_valid_email(email):
-        return return_json_error(Es.BR_BAD_EMAIL)
+    email = req_dict.get("email")
     user = get_user_by_email(db, email)
     if user is None:
         return return_json_error(Es.BR_USER_NOT_FOUND, email)
 
-    mode = reg_dict.get("mode")
+    mode = req_dict.get("mode")
     if mode is None:
         return return_json_error(Es.BR_NO_MODE)
 
@@ -1883,17 +1856,11 @@ def user_disable() -> Response:
 @app.route("/user/add_role", methods=["POST"])
 @roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def add_role() -> Response:
-    allowed_fields = [
-        "name",
-        "description",
-    ]
-
-    res = is_input_fields_malformed(request, allowed_fields)
-    if res:
+    req_dict = request.json
+    if not req_dict:
         return return_json_error(Es.BR_FIELD_MISSING)
-    reg_dict = request.json
 
-    name = reg_dict.get("name")
+    name = req_dict.get("name")
     if not name:
         return return_json_error(Es.BR_ROLE_NAME_MISSING)
 
@@ -1904,7 +1871,7 @@ def add_role() -> Response:
     if role:
         return return_json_error(Es.BR_ROLE_EXIST)
 
-    description = reg_dict.get("description")
+    description = req_dict.get("description")
     if not description:
         return return_json_error(Es.BR_ROLE_DESCRIPTION_MISSING)
 
@@ -1939,9 +1906,9 @@ def is_a_valid_role_description(name: str) -> bool:
 @roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def get_roles_list() -> Response:
     roles_list = db.session.query(Roles).all()
-    send_list = []
-    for role in roles_list:
-        send_list.append({"id": role.id, "name": role.name, "description": role.description})
+    send_list = [
+        {"id": role.id, "name": role.name, "description": role.description} for role in roles_list
+    ]
 
     return app.response_class(
         response=json.dumps(send_list),
@@ -1954,9 +1921,7 @@ def get_roles_list() -> Response:
 @roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def get_organization_list() -> Response:
     orgs_list = db.session.query(Organization).all()
-    send_list = []
-    for org in orgs_list:
-        send_list.append(org.name)
+    send_list = [org.name for org in orgs_list]
 
     return app.response_class(
         response=json.dumps(send_list),
@@ -1968,12 +1933,12 @@ def get_organization_list() -> Response:
 @app.route("/user/add_organization", methods=["POST"])
 @roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def add_organization() -> Response:
-    reg_dict = request.json
+    req_dict = request.json
 
-    if reg_dict is None:
+    if req_dict is None:
         return return_json_error(Es.BR_BAD_JSON)
 
-    name = reg_dict.get("name")
+    name = req_dict.get("name")
     if not name:
         return return_json_error(Es.BR_FIELD_MISSING)
 
@@ -1982,41 +1947,42 @@ def add_organization() -> Response:
         org = Organization(name=name, create_date=datetime.datetime.now())
         db.session.add(org)
         db.session.commit()
+
     return Response(status=HTTPStatus.OK)
 
 
 @app.route("/user/remove_user_from_org", methods=["POST"])
 @roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def remove_user_from_org() -> Response:
-    reg_dict = request.json
-    if reg_dict is None:
+    req_dict = request.json
+    if req_dict is None:
         return return_json_error(Es.BR_BAD_JSON)
 
-    email = reg_dict.get("email")
-    if not email:
-        return return_json_error(Es.BR_NO_EMAIL)
+    email = req_dict.get("email")
     user = get_user_by_email(db, email)
     if user is None:
         return return_json_error(Es.BR_USER_NOT_FOUND, email)
 
-    org = reg_dict.get("org")
+    org = req_dict.get("org")
     if not org:
         return return_json_error(Es.BR_FIELD_MISSING)
-    org_obj = db.session.query(Organization).filter(Organization.name == org).first()
-    if org_obj is None:
+    try:
+        org_obj = db.session.query(Organization).filter(Organization.name == org).one()
+    except NoResultFound:
         return return_json_error(Es.BR_ORG_NOT_FOUND)
 
     removed = False
     for user_org in user.organizations:
-        if user_org.name == org:
-            d = users_to_organizations.delete().where(  # noqa pylint: disable=no-value-for-parameter
-                (users_to_organizations.c.user_id == user.id) & (users_to_organizations.c.organization_name == org)
+        if user_org.id == org_obj.id:
+            delete_user_from_org = users_to_organizations.delete().where(  # noqa pylint: disable=no-value-for-parameter
+                (users_to_organizations.c.user_id == user.id)
+                & (users_to_organizations.c.organization_id == org_obj.id)
             )
-            db.session.execute(d)
+            db.session.execute(delete_user_from_org)
             db.session.commit()
             removed = True
     if not removed:
-        return return_json_error(Es.BR_USER_NOT_IN_ORG, email, org)
+        return return_json_error(Es.BR_USER_NOT_IN_ORG, org)
 
     return Response(status=HTTPStatus.OK)
 
@@ -2024,23 +1990,25 @@ def remove_user_from_org() -> Response:
 @app.route("/user/add_user_to_org", methods=["POST"])
 @roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def add_user_to_org() -> Response:
-    reg_dict = request.json
-    if reg_dict is None:
+    req_dict = request.json
+    if req_dict is None:
         return return_json_error(Es.BR_BAD_JSON)
 
-    email = reg_dict.get("email")
-    if not email:
-        return return_json_error(Es.BR_NO_EMAIL)
+    email = req_dict.get("email")
     user = get_user_by_email(db, email)
     if user is None:
         return return_json_error(Es.BR_USER_NOT_FOUND, email)
 
-    org = reg_dict.get("org")
+    org = req_dict.get("org")
     if not org:
         return return_json_error(Es.BR_FIELD_MISSING)
-    org_obj = db.session.query(Organization).filter(Organization.name == org).first()
-    if org_obj is None:
+    try:
+        org_obj = db.session.query(Organization).filter(Organization.name == org).one()
+    except NoResultFound:
         return return_json_error(Es.BR_ORG_NOT_FOUND)
+
+    if org_obj in user.organizations:
+        return return_json_error(Es.BR_USER_ALREADY_IN_ORG)
 
     user.organizations.append(org_obj)
     db.session.commit()

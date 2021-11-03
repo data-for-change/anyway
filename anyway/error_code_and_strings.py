@@ -29,6 +29,7 @@ class Errors:
     BR_BAD_AUTH = 25
     BR_ORG_NOT_FOUND = 26
     BR_USER_NOT_IN_ORG = 27
+    BR_USER_ALREADY_IN_ORG = 28
 
 
 ERROR_TO_STRING_DICT = {
@@ -45,7 +46,7 @@ ERROR_TO_STRING_DICT = {
     Errors.BR_ROLE_NAME_MISSING: "Bad Request (Role name is missing from request json).",
     Errors.BR_ROLE_NOT_EXIST: "Bad Request (Role {} doesn't exist in DB).",
     Errors.BR_USER_NOT_FOUND: "Bad Request (User(email:{}) not found).",
-    Errors.BR_USER_ALREADY_IN_ROLE: "Bad Request (User(email:{}) is already in role {}).",
+    Errors.BR_USER_ALREADY_IN_ROLE: "Bad Request (User is already in role {}).",
     Errors.BR_MISSING_PERMISSION: "Bad Request (User is missing permission to access this resource).",
     Errors.BR_USER_NOT_IN_ROLE: "Bad Request (User(email:{}) is not in role {}).",
     Errors.BR_USER_NOT_ACTIVE: "Bad Request (User is not active).",
@@ -57,8 +58,9 @@ ERROR_TO_STRING_DICT = {
     Errors.BR_BAD_MODE: "Bad Request (Bad mode value).",
     Errors.BR_FIELD_MISSING: "Bad Request (Field is missing from json).",
     Errors.BR_BAD_AUTH: "Bad Request (Bad Auth).",
-    Errors.BR_ORG_NOT_FOUND: "Bad Request (Organization(name:{}) not found).",
-    Errors.BR_USER_NOT_IN_ORG: "Bad Request (User(email:{}) is not in org {}).",
+    Errors.BR_ORG_NOT_FOUND: "Bad Request (Organization not found).",
+    Errors.BR_USER_NOT_IN_ORG: "Bad Request (User is not in org {}).",
+    Errors.BR_USER_ALREADY_IN_ORG: "Bad Request (User is already in org).",
 }
 
 ERROR_TO_HTTP_CODE_DICT = {
@@ -89,6 +91,7 @@ ERROR_TO_HTTP_CODE_DICT = {
     Errors.BR_BAD_AUTH: HTTPStatus.UNAUTHORIZED,
     Errors.BR_ORG_NOT_FOUND: HTTPStatus.BAD_REQUEST,
     Errors.BR_USER_NOT_IN_ORG: HTTPStatus.BAD_REQUEST,
+    Errors.BR_USER_ALREADY_IN_ORG: HTTPStatus.BAD_REQUEST,
 }
 
 

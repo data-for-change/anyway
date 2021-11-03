@@ -33,6 +33,7 @@ from flask_principal import (
     Permission,
 )
 from flask_restx import Resource, fields, reqparse
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from anyway.error_code_and_strings import (
     Errors as Es, build_json_for_user_api_error, ERROR_TO_HTTP_CODE_DICT,
@@ -1343,16 +1344,23 @@ def oauth_callback(provider: str) -> Response:
     if not user_data or not user_data.service_user_id:
         return return_json_error(Es.BR_NO_USER_ID)
 
-    user = (
-        db.session.query(Users)
-        .filter_by(oauth_provider=provider, oauth_provider_user_id=user_data.service_user_id)
-        .one()
-    )
-
-    if not user:
+    user = None
+    try:
         user = (
-            db.session.query(Users).filter_by(oauth_provider=provider, email=user_data.email).one()
+            db.session.query(Users)
+            .filter_by(oauth_provider=provider, oauth_provider_user_id=user_data.service_user_id)
+            .one()
         )
+    except (NoResultFound, MultipleResultsFound):
+        try:
+            user = (
+                db.session.query(Users).filter_by(oauth_provider=provider, email=user_data.email).one()
+            )
+        except MultipleResultsFound as e:
+            # Internal server error - this case should not exists
+            raise e
+        except NoResultFound:
+            pass
 
     if not user:
         user = Users(

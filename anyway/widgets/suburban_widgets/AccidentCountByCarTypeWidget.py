@@ -10,7 +10,7 @@ from anyway.vehicle_type import VehicleCategory
 from anyway.widgets.Widget import register
 from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
 from anyway.RequestParams import RequestParams
-from anyway.widgets.widget_utils import get_accidents_stats, get_injured_filters
+import anyway.widgets.widget_utils as widget_utils
 
 
 @register
@@ -32,9 +32,9 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
     ):
         out = []
         if involved_by_vehicle_type_data is None:
-            involved_by_vehicle_type_data = get_accidents_stats(
+            involved_by_vehicle_type_data = widget_utils.get_accidents_stats(
                 table_obj=InvolvedMarkerView,
-                filters=get_injured_filters(request_params.location_info),
+                filters=widget_utils.get_injured_filters(request_params.location_info),
                 group_by="involve_vehicle_type",
                 count="involve_vehicle_type",
                 start_time=request_params.start_time,
@@ -87,7 +87,7 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
     @staticmethod
     @lru_cache(maxsize=64)
     def percentage_accidents_by_car_type_national_data_cache(start_time, end_time):
-        involved_by_vehicle_type_data = get_accidents_stats(
+        involved_by_vehicle_type_data = widget_utils.get_accidents_stats(
             table_obj=InvolvedMarkerView,
             filters={
                 "road_type": [

@@ -4,12 +4,11 @@ import logging
 import datetime
 import json
 import os
-from typing import Optional, Dict, List, Callable
 import traceback
-
 import pandas as pd
-from collections import defaultdict
 
+from typing import Optional, Dict, List, Callable
+from collections import defaultdict
 from sqlalchemy import func
 
 # noinspection PyProtectedMember
@@ -25,11 +24,17 @@ from anyway.parsers import infographics_data_cache_updater
 from anyway.parsers.location_extraction import get_road_segment_name_and_number
 from anyway.widgets import Widget
 
-# We need to import the modules, which in turn imports all the widgets, and registers them, even if they are not explicitly used here
+logger = logging.getLogger("infographics_utils")
+
+# We need to import the modules, which in turn imports all the widgets, and registers them, even if they are not
+# explicitly used here
 # pylint: disable=unused-import
 import anyway.widgets.urban_widgets
 import anyway.widgets.suburban_widgets
+
+
 # pylint: enable=unused-import
+
 
 def get_widget_factories() -> List[Callable[[RequestParams], type(Widget)]]:
     """Returns list of callables that generate all widget instances"""
@@ -66,9 +71,6 @@ def extract_road_segment_location(road_segment_id):
     # fake gps - todo: fix
     gps = {"lat": 32.825610, "lon": 35.165395}
     return {"name": "location", "data": data, "gps": gps}
-
-
-# count of dead and severely injured
 
 
 # generate text describing location or road segment of news flash
@@ -147,7 +149,7 @@ def convert_roads_fatal_accidents_to_frontend_view(data_dict):
     return data_list
 
 
-# gets the latest date an accident has occured
+# gets the latest date an accident has occurred
 def get_latest_accident_date(table_obj, filters):
     filters = filters or {}
     filters["provider_code"] = [
@@ -169,11 +171,11 @@ def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> Li
             widgets.append(widget)
             logging.debug(f"name:{widget.name}, class:{get_widget_class_by_name(widget.name)}")
     for w in widgets:
-        print(w.name)
         try:
+            logger.info(f"Generating items for : {w.name}")
             w.generate_items()
         except Exception as e:
-            print(e)
+            logger.error(f"Encountered error when generating items for {w.name} : {e}")
     filtered_widgets = []
     for w in widgets:
         if w.is_included():
@@ -219,6 +221,7 @@ def get_request_params(
         years_ago=number_of_years_ago,
         location_text=location_text,
         location_info=location_info,
+        # TODO: getting a warning on resolution=resolution: "Expected type 'dict', got 'int' instead"
         resolution=resolution,
         gps=gps,
         start_time=start_time,
@@ -266,6 +269,7 @@ def get_request_params_for_road_segment(
         years_ago=number_of_years_ago,
         location_text=location_text,
         location_info=location_info,
+        # TODO: getting a warning on resolution=resolution: "Expected type 'dict', got 'int' instead"
         resolution=resolution,
         gps=gps,
         start_time=start_time,

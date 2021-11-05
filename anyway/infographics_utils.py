@@ -299,6 +299,7 @@ class InjuredCountBySeverityWidget(SubUrbanWidget):
                 InjurySeverity(severity_and_count["injury_severity"])
             ]
             severity_count_text = "{}_count".format(severity_english)
+            severity_count_text = severity_count_text.replace(" ", "_")
             items[severity_count_text] = severity_and_count["count"]
             total_injured_count += severity_and_count["count"]
         if total_injured_count == 0:
@@ -322,7 +323,7 @@ _("Fatal, severe and light accidents count in the specified location.")
 _("Fatal, severe and light injured count in the specified years, split by injury severity")
 _("Fatal, severe and light accidents count in the specified years, split by accident severity")
 
-@register
+#@register
 class UrbanCrosswalkWidget(UrbanWidget):
     name: str = "urban_accidents_by_cross_location"
 
@@ -387,7 +388,7 @@ class UrbanCrosswalkWidget(UrbanWidget):
         return False
 
 
-@register
+#@register
 class SuburbanCrosswalkWidget(SubUrbanWidget):
     name: str = "suburban_accidents_by_cross_location"
 
@@ -905,7 +906,7 @@ class AccidentCountByDayNightWidget(SubUrbanWidget):
         )
 
 
-@register
+#@register
 class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
     name: str = "severe_fatal_count_on_small_motor_by_accident_year"
     #TODO: when accident vehicle becomes available in request params,
@@ -958,7 +959,7 @@ class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
         return items
 
 
-@register
+#@register
 class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
     name: str = "accidents_on_small_motor_by_vehicle_by_year"
     #TODO: when accident vehicle becomes available in request params,

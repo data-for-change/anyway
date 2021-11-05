@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-10-25 11:11+0000\n"
+"POT-Creation-Date: 2021-10-26 19:46+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.1\n"
+"Generated-By: Babel 2.6.0\n"
 
 #: anyway/backend_constants.py:145
 msgid "killed"
@@ -219,42 +219,46 @@ msgstr ""
 msgid "Severe or fatal accidents on bikes, e-bikes, or scooters in "
 msgstr ""
 
-#: anyway/infographics_utils.py:1227
+#: anyway/infographics_utils.py:1139
+msgid "Severe and fatal accidents per Km by section in road"
+msgstr ""
+
+#: anyway/infographics_utils.py:1231
 msgid "Injury severity per age group in "
 msgstr ""
 
-#: anyway/infographics_utils.py:1342
+#: anyway/infographics_utils.py:1346
 msgid "driver_type"
 msgstr ""
 
-#: anyway/infographics_utils.py:1348
+#: anyway/infographics_utils.py:1352
 msgid "accident count by driver type "
 msgstr ""
 
-#: anyway/infographics_utils.py:1355
+#: anyway/infographics_utils.py:1359
 msgid ""
 "Driver involvement in accident by driver type: professional - trucks, "
 "taxi, bus, work, minibus, tractor, private - private car, motorcycle, "
 "light electric - electric scooter, mobility scooter, electric bike."
 msgstr ""
 
-#: anyway/infographics_utils.py:1463
+#: anyway/infographics_utils.py:1467
 msgid ""
 "comparing vehicle type percentage in accidents in {} relative to national"
 " average"
 msgstr ""
 
-#: anyway/infographics_utils.py:1574
+#: anyway/infographics_utils.py:1578
 msgid "Injured and killed pedestrians by severity and year"
 msgstr ""
 
-#: anyway/infographics_utils.py:1747
+#: anyway/infographics_utils.py:1751
 msgid ""
 "Pedestrian Injuries on Ben Yehuda Street in Tel Aviv by Type of hitting "
 "Vehicle, Compared to Urban Accidents Across the country"
 msgstr ""
 
-#: anyway/infographics_utils.py:2066
+#: anyway/infographics_utils.py:2070
 msgid "Most severe accidents in segment"
 msgstr ""
 

@@ -299,6 +299,7 @@ class InjuredCountBySeverityWidget(SubUrbanWidget):
                 InjurySeverity(severity_and_count["injury_severity"])
             ]
             severity_count_text = "{}_count".format(severity_english)
+            severity_count_text = severity_count_text.replace(" ", "_")
             items[severity_count_text] = severity_and_count["count"]
             total_injured_count += severity_and_count["count"]
         if total_injured_count == 0:
@@ -322,7 +323,7 @@ _("Fatal, severe and light accidents count in the specified location.")
 _("Fatal, severe and light injured count in the specified years, split by injury severity")
 _("Fatal, severe and light accidents count in the specified years, split by accident severity")
 
-#@register
+@register
 class UrbanCrosswalkWidget(UrbanWidget):
     name: str = "urban_accidents_by_cross_location"
 
@@ -387,7 +388,7 @@ class UrbanCrosswalkWidget(UrbanWidget):
         return False
 
 
-#@register
+@register
 class SuburbanCrosswalkWidget(SubUrbanWidget):
     name: str = "suburban_accidents_by_cross_location"
 
@@ -905,7 +906,7 @@ class AccidentCountByDayNightWidget(SubUrbanWidget):
         )
 
 
-#@register
+@register
 class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
     name: str = "severe_fatal_count_on_small_motor_by_accident_year"
     #TODO: when accident vehicle becomes available in request params,
@@ -958,7 +959,7 @@ class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
         return items
 
 
-#@register
+@register
 class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
     name: str = "accidents_on_small_motor_by_vehicle_by_year"
     #TODO: when accident vehicle becomes available in request params,
@@ -1082,16 +1083,13 @@ class AccidentCountByRoadLightWidget(SubUrbanWidget):
         )
 
 
+@register
 class TopRoadSegmentsAccidentsPerKmWidget(SubUrbanWidget):
     name: str = "top_road_segments_accidents_per_km"
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 13
-        self.text = {
-            "title": "תאונות לכל ק״מ כביש על פי מקטע בכביש "
-            + str(int(self.request_params.location_info["road1"]))
-        }
 
     def generate_items(self) -> None:
         self.items = TopRoadSegmentsAccidentsPerKmWidget.get_top_road_segments_accidents_per_km(
@@ -1102,37 +1100,44 @@ class TopRoadSegmentsAccidentsPerKmWidget(SubUrbanWidget):
         )
 
     @staticmethod
-    def get_top_road_segments_accidents_per_km(
-        resolution, location_info, start_time=None, end_time=None, limit=3
-    ):
-        if resolution != "כביש בינעירוני":  # relevent for non urban roads only
-            return {}
-        filters = {}
-        filters["road1"] = location_info["road1"]
-        query = get_query(
-            table_obj=AccidentMarkerView, filters=filters, start_time=start_time, end_time=end_time
-        )
+    def get_top_road_segments_accidents_per_km(resolution, location_info, start_time=None, end_time=None, limit=3):
+        query = get_query(table_obj=AccidentMarkerView, filters={"road1" : location_info["road1"]}, start_time=start_time, end_time=end_time)
 
-        query = (
-            query.with_entities(
-                AccidentMarkerView.road_segment_name,
-                AccidentMarkerView.road_segment_length_km.label("segment_length"),
-                cast(
-                    (func.count(AccidentMarkerView.id) / AccidentMarkerView.road_segment_length_km),
-                    Numeric(10, 4),
-                ).label("accidents_per_km"),
-                func.count(AccidentMarkerView.id).label("total_accidents"),
+        try:
+            query = (
+                query.with_entities(
+                    AccidentMarkerView.road_segment_name,
+                    AccidentMarkerView.road_segment_length_km.label("segment_length"),
+                    cast(
+                        (func.count(AccidentMarkerView.id) / AccidentMarkerView.road_segment_length_km),
+                        Numeric(10, 4),
+                    ).label("accidents_per_km"),
+                    func.count(AccidentMarkerView.id).label("total_accidents"),
+                )
+                .filter(AccidentMarkerView.road_segment_name.isnot(None))
+                .filter(AccidentMarkerView.accident_severity.in_([AccidentSeverity.FATAL.value, AccidentSeverity.SEVERE.value]))
+                .group_by(
+                    AccidentMarkerView.road_segment_name, AccidentMarkerView.road_segment_length_km
+                )
+                .order_by(desc("accidents_per_km"))
+                .limit(limit)
             )
-            .filter(AccidentMarkerView.road_segment_name.isnot(None))
-            .group_by(
-                AccidentMarkerView.road_segment_name, AccidentMarkerView.road_segment_length_km
-            )
-            .order_by(desc("accidents_per_km"))
-            .limit(limit)
-        )
 
-        result = pd.read_sql_query(query.statement, query.session.bind)
-        return result.to_dict(orient="records")  # pylint: disable=no-member
+            result = pd.read_sql_query(query.statement, query.session.bind)
+            return result.to_dict(orient="records")  # pylint: disable=no-member
+
+        except Exception as exception:
+            logging.exception(f"{TopRoadSegmentsAccidentsPerKmWidget.name}: {exception}")
+            raise exception
+
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        items["data"]["text"] = {
+            "title": f"{_('Severe and fatal accidents per Km by section in road')} {int(request_params.location_info['road1'])}"
+        }
+        return items
+
+_('Severe and fatal accidents per Km by section in road')
 
 
 class InjuredCountPerAgeGroupWidget(SubUrbanWidget):

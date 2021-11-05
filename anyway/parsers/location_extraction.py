@@ -14,6 +14,7 @@ from sqlalchemy import (
     not_,
 )
 import pandas as pd
+from typing import Tuple
 
 
 def extract_road_number(location):
@@ -51,7 +52,7 @@ def get_road_segment_id(road_segment_name) -> int:
     return segment.iloc[0]["id"]  # pylint: disable=maybe-no-member
 
 
-def get_road_segment_name_and_number(road_segment_id) -> (int, str):
+def get_road_segment_name_and_number(road_segment_id) -> Tuple[int, str]:
     try:
         from anyway.app_and_db import db
     except ModuleNotFoundError:

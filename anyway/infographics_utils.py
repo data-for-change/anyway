@@ -254,6 +254,69 @@ class AccidentCountBySeverityWidget(SubUrbanWidget):
         return items
 
 
+@register
+class InjuredCountBySeverityWidget(SubUrbanWidget):
+    name: str = "injured_count_by_severity"
+
+    def __init__(self, request_params: RequestParams):
+        super().__init__(request_params, type(self).name)
+        self.rank = 29
+        self.information = "Fatal, severe and light injuries count in the specified location."
+
+    def generate_items(self) -> None:
+        self.items = InjuredCountBySeverityWidget.get_injured_count_by_severity(
+            self.request_params.location_info["road1"],
+            self.request_params.location_info["road_segment_name"],
+            self.request_params.start_time,
+            self.request_params.end_time,
+        )
+
+    @staticmethod
+    def get_injured_count_by_severity(road, segment, start_time, end_time):
+        count_by_severity = get_accidents_stats(
+            table_obj=InvolvedMarkerView,
+            filters = {
+                "injury_severity": [InjurySeverity.KILLED.value,
+                        InjurySeverity.SEVERE_INJURED.value, InjurySeverity.LIGHT_INJURED.value],
+                "road1": road,
+                "road_segment_name": segment,
+                },
+            group_by="injury_severity",
+            count="injury_severity",
+            start_time=start_time,
+            end_time=end_time,
+        )
+        found_severities = [d["injury_severity"] for d in count_by_severity]
+        items = {}
+        total_injured_count = 0
+        start_year = start_time.year
+        end_year = end_time.year
+        for sev in InjurySeverity:
+            if sev.value not in found_severities:
+                count_by_severity.append({"injury_severity": sev.value, "count": 0})
+        for severity_and_count in count_by_severity:
+            severity_english = InjurySeverity.labels()[
+                InjurySeverity(severity_and_count["injury_severity"])
+            ]
+            severity_count_text = "{}_count".format(severity_english)
+            items[severity_count_text] = severity_and_count["count"]
+            total_injured_count += severity_and_count["count"]
+        if total_injured_count == 0:
+            return {}
+        items["start_year"] = start_year
+        items["end_year"] = end_year
+        items["total_injured_count"] = total_injured_count
+        return items
+
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        items["data"]["text"] = {
+            "title": _("Number of Injuries in Accidents on ")
+            + request_params.location_info["road_segment_name"]
+        }
+        return items
+
+
 # adding calls to _() for pybabel extraction
 _("Fatal, severe and light accidents count in the specified location.")
 _("Fatal, severe and light injured count in the specified years, split by injury severity")
@@ -304,9 +367,9 @@ class UrbanCrosswalkWidget(UrbanWidget):
             end_time=end_time,
         )}
         if not cross_output["with_crosswalk"]:
-            cross_output["with_crosswalk"] = {"street1_hebrew": street, "count": 0}
+            cross_output["with_crosswalk"] = [{"street1_hebrew": street, "count": 0}]
         if not cross_output["without_crosswalk"]:
-            cross_output["without_crosswalk"] = {"street1_hebrew": street, "count": 0}
+            cross_output["without_crosswalk"] = [{"street1_hebrew": street, "count": 0}]
         return cross_output
 
 
@@ -336,7 +399,7 @@ class SuburbanCrosswalkWidget(SubUrbanWidget):
         self.items = SuburbanCrosswalkWidget.get_crosswalk(self.request_params.location_info["road_segment_name"],
             self.request_params.start_time,
             self.request_params.end_time,)
-   
+
     @staticmethod
     def get_crosswalk(road, start_time, end_time) -> None:
         cross_output ={"with_crosswalk": get_accidents_stats(
@@ -845,6 +908,8 @@ class AccidentCountByDayNightWidget(SubUrbanWidget):
 @register
 class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
     name: str = "severe_fatal_count_on_small_motor_by_accident_year"
+    #TODO: when accident vehicle becomes available in request params,
+    # make it so widget shows only the vehicle in the newsflash (eg only e_bikes)
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
@@ -855,7 +920,7 @@ class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
         self.items = SmallMotorSevereFatalCountByYearWidget.get_motor_stats(self.request_params.location_info["yishuv_name"],
             self.request_params.start_time,
             self.request_params.end_time,)
-        
+
     @staticmethod
     def get_motor_stats(location_info, start_time, end_time) -> None:
         count_by_year = get_accidents_stats(
@@ -895,7 +960,9 @@ class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
 
 @register
 class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
-    name: str = "accidents_on_small_motor_by_vehicle_by_accident_year"
+    name: str = "accidents_on_small_motor_by_vehicle_by_year"
+    #TODO: when accident vehicle becomes available in request params,
+    # make it so widget is only included on newsflashes that have a relevant vehicle
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
@@ -903,18 +970,24 @@ class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
 
 
     def generate_items(self) -> None:
-        self.items = {"e_bikes": get_accidents_stats(
+        self.items = SevereFatalCountByVehicleByYearWidget.separate_data(self.request_params.location_info["yishuv_name"],
+            self.request_params.start_time,
+            self.request_params.end_time,)
+
+    @staticmethod
+    def separate_data(yishuv, start_time, end_time) -> None:
+        output = {"e_bikes": get_accidents_stats(
             table_obj=InvolvedMarkerView,
             filters = {
                 "injury_severity": [InjurySeverity.KILLED.value,
                         InjurySeverity.SEVERE_INJURED.value],
                 "involve_vehicle_type": VehicleType.ELECTRIC_BIKE.value,
-                "involve_yishuv_name": self.request_params.location_info["yishuv_name"],
+                "involve_yishuv_name": yishuv,
                 },
             group_by="accident_year",
             count="accident_year",
-            start_time=self.request_params.start_time,
-            end_time=self.request_params.end_time,
+            start_time=start_time,
+            end_time=end_time,
         ),
         "bikes": get_accidents_stats(
             table_obj=InvolvedMarkerView,
@@ -922,12 +995,12 @@ class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
                 "injury_severity": [InjurySeverity.KILLED.value,
                         InjurySeverity.SEVERE_INJURED.value],
                 "involve_vehicle_type": VehicleType.BIKE.value,
-                "involve_yishuv_name": self.request_params.location_info["yishuv_name"],
+                "involve_yishuv_name": yishuv,
                 },
             group_by="accident_year",
             count="accident_year",
-            start_time=self.request_params.start_time,
-            end_time=self.request_params.end_time,
+            start_time=start_time,
+            end_time=end_time,
         ),
         "e_scooters": get_accidents_stats(
             table_obj=InvolvedMarkerView,
@@ -935,14 +1008,27 @@ class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
                 "injury_severity": [InjurySeverity.KILLED.value,
                         InjurySeverity.SEVERE_INJURED.value],
                 "involve_vehicle_type": VehicleType.ELECTRIC_SCOOTER.value,
-                "involve_yishuv_name": self.request_params.location_info["yishuv_name"],
+                "involve_yishuv_name": yishuv,
                 },
             group_by="accident_year",
             count="accident_year",
-            start_time=self.request_params.start_time,
-            end_time=self.request_params.end_time,
+            start_time=start_time,
+            end_time=end_time,
         )}
-	
+        bike_accidents = [d['accident_year'] for d in output["bikes"] if 'accident_year' in d]
+        ebike_accidents = [d['accident_year'] for d in output["e_bikes"] if 'accident_year' in d]
+        scooter_accidents = [d['accident_year'] for d in output["e_scooters"] if 'accident_year' in d]
+        start_year = start_time.year
+        end_year = end_time.year
+        for year in list(range(start_year, end_year+1)):
+            if year not in bike_accidents:
+                output["bikes"].append({"accident_year": year, "count": 0})
+            if year not in ebike_accidents:
+                output["e_bikes"].append({"accident_year": year, "count": 0})
+            if year not in scooter_accidents:
+                output["e_scooters"].append({"accident_year": year, "count": 0})
+        return output
+
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
@@ -950,6 +1036,11 @@ class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
             + request_params.location_info["yishuv_name"]
         }
         return items
+
+    def is_included(self) -> bool:
+        if self.items["bikes"][-1]["count"] + self.items["e_bikes"][-1]["count"] + self.items["e_scooters"][-1]["count"] > 1:
+            return self.items
+        return False
 
 @register
 class AccidentCountByHourWidget(SubUrbanWidget):
@@ -991,16 +1082,13 @@ class AccidentCountByRoadLightWidget(SubUrbanWidget):
         )
 
 
+@register
 class TopRoadSegmentsAccidentsPerKmWidget(SubUrbanWidget):
     name: str = "top_road_segments_accidents_per_km"
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 13
-        self.text = {
-            "title": "תאונות לכל ק״מ כביש על פי מקטע בכביש "
-            + str(int(self.request_params.location_info["road1"]))
-        }
 
     def generate_items(self) -> None:
         self.items = TopRoadSegmentsAccidentsPerKmWidget.get_top_road_segments_accidents_per_km(
@@ -1011,37 +1099,44 @@ class TopRoadSegmentsAccidentsPerKmWidget(SubUrbanWidget):
         )
 
     @staticmethod
-    def get_top_road_segments_accidents_per_km(
-        resolution, location_info, start_time=None, end_time=None, limit=3
-    ):
-        if resolution != "כביש בינעירוני":  # relevent for non urban roads only
-            return {}
-        filters = {}
-        filters["road1"] = location_info["road1"]
-        query = get_query(
-            table_obj=AccidentMarkerView, filters=filters, start_time=start_time, end_time=end_time
-        )
+    def get_top_road_segments_accidents_per_km(resolution, location_info, start_time=None, end_time=None, limit=3):
+        query = get_query(table_obj=AccidentMarkerView, filters={"road1" : location_info["road1"]}, start_time=start_time, end_time=end_time)
 
-        query = (
-            query.with_entities(
-                AccidentMarkerView.road_segment_name,
-                AccidentMarkerView.road_segment_length_km.label("segment_length"),
-                cast(
-                    (func.count(AccidentMarkerView.id) / AccidentMarkerView.road_segment_length_km),
-                    Numeric(10, 4),
-                ).label("accidents_per_km"),
-                func.count(AccidentMarkerView.id).label("total_accidents"),
+        try:
+            query = (
+                query.with_entities(
+                    AccidentMarkerView.road_segment_name,
+                    AccidentMarkerView.road_segment_length_km.label("segment_length"),
+                    cast(
+                        (func.count(AccidentMarkerView.id) / AccidentMarkerView.road_segment_length_km),
+                        Numeric(10, 4),
+                    ).label("accidents_per_km"),
+                    func.count(AccidentMarkerView.id).label("total_accidents"),
+                )
+                .filter(AccidentMarkerView.road_segment_name.isnot(None))
+                .filter(AccidentMarkerView.accident_severity.in_([AccidentSeverity.FATAL.value, AccidentSeverity.SEVERE.value]))
+                .group_by(
+                    AccidentMarkerView.road_segment_name, AccidentMarkerView.road_segment_length_km
+                )
+                .order_by(desc("accidents_per_km"))
+                .limit(limit)
             )
-            .filter(AccidentMarkerView.road_segment_name.isnot(None))
-            .group_by(
-                AccidentMarkerView.road_segment_name, AccidentMarkerView.road_segment_length_km
-            )
-            .order_by(desc("accidents_per_km"))
-            .limit(limit)
-        )
 
-        result = pd.read_sql_query(query.statement, query.session.bind)
-        return result.to_dict(orient="records")  # pylint: disable=no-member
+            result = pd.read_sql_query(query.statement, query.session.bind)
+            return result.to_dict(orient="records")  # pylint: disable=no-member
+
+        except Exception as exception:
+            logging.exception(f"{TopRoadSegmentsAccidentsPerKmWidget.name}: {exception}")
+            raise exception
+
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        items["data"]["text"] = {
+            "title": f"{_('Severe and fatal accidents per Km by section in road')} {int(request_params.location_info['road1'])}"
+        }
+        return items
+
+_('Severe and fatal accidents per Km by section in road')
 
 
 class InjuredCountPerAgeGroupWidget(SubUrbanWidget):

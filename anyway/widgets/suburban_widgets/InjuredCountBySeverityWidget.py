@@ -56,7 +56,7 @@ class InjuredCountBySeverityWidget(SubUrbanWidget):
             severity_english = InjurySeverity.labels()[
                 InjurySeverity(severity_and_count["injury_severity"])
             ]
-            severity_count_text = "{}_count".format(severity_english)
+            severity_count_text = "{}_count".format(severity_english).replace(" ", "_")
             items[severity_count_text] = severity_and_count["count"]
             total_injured_count += severity_and_count["count"]
         if total_injured_count == 0:

@@ -10,7 +10,6 @@ from anyway.widgets.widget_utils import get_accidents_stats
 from flask_babel import _
 
 
-@register
 class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
     name: str = "severe_fatal_count_on_small_motor_by_accident_year"
     # TODO: when accident vehicle becomes available in request params,

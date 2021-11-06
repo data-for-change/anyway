@@ -352,7 +352,7 @@ def user_add_or_remove_role(app: FlaskClient, path: str) -> None:
             rv = post_json(
                 app, path, json_data={"role": BE_CONST.Roles2Names.Admins.value, "email": "a"}
             )
-            assert_return_code_for_user_update(Errors.BR_BAD_EMAIL, rv)
+            assert_return_code_for_user_update(Errors.BR_USER_NOT_FOUND, rv, extra="a")
 
 
 def set_mock_and_test_perm(app, current_user, path):
@@ -392,7 +392,7 @@ def test_user_change_user_active_mode(app: FlaskClient) -> None:
         set_mock_and_test_perm(app, current_user, path)
 
         rv = post_json(app, path, json_data={"email": "a"})
-        assert_return_code_for_user_update(Errors.BR_BAD_EMAIL, rv)
+        assert_return_code_for_user_update(Errors.BR_USER_NOT_FOUND, rv, extra="a")
         with patch("anyway.flask_app.get_user_by_email") as get_user_by_email:
             get_user_by_email.side_effect = lambda db, email: mock.MagicMock()
 
@@ -417,7 +417,7 @@ def test_add_role(app):
         set_mock_and_test_perm(app, current_user, path)
 
         rv = post_json(app, path, json_data={"email": "a"})
-        assert_return_code_for_user_update(Errors.BR_FIELD_MISSING, rv)
+        assert_return_code_for_user_update(Errors.BR_ROLE_NAME_MISSING, rv)
 
         rv = post_json(app, path, json_data={"description": ""})
         assert_return_code_for_user_update(Errors.BR_ROLE_NAME_MISSING, rv)

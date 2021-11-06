@@ -12,7 +12,6 @@ from anyway.backend_constants import CrossCategory
 
 
 # TODO: pretty sure there are errors in this widget, for example, is_included returns self.items
-@register
 class UrbanCrosswalkWidget(UrbanWidget):
     name: str = "urban_accidents_by_cross_location"
 

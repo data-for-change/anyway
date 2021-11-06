@@ -6,7 +6,9 @@ from flask_sqlalchemy import SQLAlchemy
 from anyway.models import Users
 
 
-def get_user_by_email(db: SQLAlchemy, email: str) -> Users:
+def get_user_by_email(db: SQLAlchemy, email: str) -> Optional[Users]:
+    if not email:
+        return None
     user = db.session.query(Users).filter(Users.email == email).first()
     return user
 

@@ -3,7 +3,6 @@ from typing import Dict
 from anyway.RequestParams import RequestParams
 from anyway.backend_constants import InjurySeverity
 from anyway.models import InvolvedMarkerView
-from anyway.widgets.Widget import register
 from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
 from anyway.widgets.widget_utils import get_accidents_stats
 from flask_babel import _

@@ -7,7 +7,7 @@ import os
 import traceback
 import pandas as pd
 
-from typing import Optional, Dict, List, Callable
+from typing import Optional, Dict, List, Callable, Type
 from collections import defaultdict
 from sqlalchemy import func
 
@@ -22,7 +22,7 @@ from anyway.app_and_db import db
 from anyway.infographics_dictionaries import head_on_collisions_comparison_dict
 from anyway.parsers import infographics_data_cache_updater
 from anyway.parsers.location_extraction import get_road_segment_name_and_number
-from anyway.widgets import Widget
+from anyway.widgets.Widget import Widget, widgets_dict
 
 logger = logging.getLogger("infographics_utils")
 
@@ -36,13 +36,13 @@ import anyway.widgets.suburban_widgets
 # pylint: enable=unused-import
 
 
-def get_widget_factories() -> List[Callable[[RequestParams], type(Widget)]]:
+def get_widget_factories() -> List[Callable[[RequestParams], Type[Widget]]]:
     """Returns list of callables that generate all widget instances"""
-    return list(Widget.widgets_dict.values())
+    return list(widgets_dict.values())
 
 
-def get_widget_class_by_name(name: str) -> type(Widget):
-    return Widget.widgets_dict[name]
+def get_widget_class_by_name(name: str) -> Type[Widget]:
+    return widgets_dict[name]
 
 
 def extract_news_flash_location(news_flash_obj):
@@ -162,10 +162,10 @@ def get_latest_accident_date(table_obj, filters):
 
 
 # noinspection PyArgumentList
-def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> List[type(Widget)]:
+def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> List[Type[Widget]]:
     widgets = []
     # noinspection PyArgumentList
-    for w in Widget.widgets_dict.values():
+    for w in widgets_dict.values():
         if w.is_relevant(request_params) and w.is_in_cache() == to_cache:
             widget: Widget = w(request_params)
             widgets.append(widget)
@@ -320,7 +320,7 @@ def create_infographics_items(request_params: RequestParams) -> Dict:
             "dates_comment": get_dates_comment(),
         }
         output["widgets"] = []
-        widgets: List[type(Widget)] = generate_widgets(request_params=request_params, to_cache=True)
+        widgets: List[Type[Widget]] = generate_widgets(request_params=request_params, to_cache=True)
         widgets.extend(generate_widgets(request_params=request_params, to_cache=False))
         output["widgets"].extend(list(map(lambda w: w.serialize(), widgets)))
 

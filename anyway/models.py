@@ -118,7 +118,9 @@ class Users(Base, UserMixin):
     user_desc = Column(String(2048))
     is_user_completed_registration = Column(Boolean)
     roles = relationship(
-        "Roles", secondary=users_to_roles, backref=backref("users", lazy="dynamic")
+        "Roles",
+        secondary=users_to_roles,
+        backref=backref("users", lazy="dynamic"),
     )
     organizations = relationship(
         "Organization",

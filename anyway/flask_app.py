@@ -52,7 +52,11 @@ from anyway.clusters_calculator import retrieve_clusters
 from anyway.config import ENTRIES_PER_PAGE
 from anyway.backend_constants import BE_CONST
 from anyway.constants import CONST
-from anyway.user_functions import get_current_user_email, get_current_user, get_user_by_email
+from anyway.user_functions import (
+    get_current_user_email,
+    get_current_user,
+    get_user_by_email,
+)
 from anyway.models import (
     AccidentMarker,
     DiscussionMarker,
@@ -87,7 +91,11 @@ from anyway.infographics_utils import (
 )
 from anyway.app_and_db import app, db, api, get_cors_config
 from anyway.anyway_dataclasses.user_data import UserData
-from anyway.utilities import is_valid_number, is_a_safe_redirect_url, is_a_valid_email
+from anyway.utilities import (
+    is_valid_number,
+    is_a_safe_redirect_url,
+    is_a_valid_email,
+)
 from anyway.views.schools.api import (
     schools_description_api,
     schools_names_api,
@@ -191,7 +199,10 @@ assets.register(
     ),
 )
 
-CORS(app, resources=get_cors_config())
+CORS(
+    app,
+    resources=get_cors_config(),
+)
 
 jinja_environment = jinja2.Environment(
     autoescape=True,
@@ -1921,7 +1932,9 @@ def get_organization_list() -> Response:
     send_list = [org.name for org in orgs_list]
 
     return app.response_class(
-        response=json.dumps(send_list), status=HTTPStatus.OK, mimetype="application/json"
+        response=json.dumps(send_list),
+        status=HTTPStatus.OK,
+        mimetype="application/json",
     )
 
 

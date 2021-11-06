@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-11-06 16:10+0200\n"
+"POT-Creation-Date: 2021-11-06 16:36+0200\n"
 "PO-Revision-Date: 2020-11-26 16:45+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -30,11 +30,11 @@ msgstr "severe injured"
 msgid "light injured"
 msgstr "light injured"
 
-#: anyway/flask_app.py:715 anyway/flask_app.py:820
+#: anyway/flask_app.py:726 anyway/flask_app.py:831
 msgid "Discussion not found:"
 msgstr ""
 
-#: anyway/flask_app.py:718
+#: anyway/flask_app.py:729
 msgid "Illegal Discussion"
 msgstr ""
 
@@ -372,8 +372,8 @@ msgid ""
 "accidents are presented."
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/SuburbanCrosswalkWidget.py:72
-#: anyway/widgets/urban_widgets/UrbanCrosswalkWidget.py:75
+#: anyway/widgets/suburban_widgets/SuburbanCrosswalkWidget.py:71
+#: anyway/widgets/urban_widgets/UrbanCrosswalkWidget.py:74
 msgid "Pedestrian injury comparison on "
 msgstr ""
 
@@ -385,8 +385,8 @@ msgstr ""
 msgid "Injured and killed pedestrians by severity and year"
 msgstr ""
 
-#: anyway/widgets/urban_widgets/SevereFatalCountByVehicleByYearWidget.py:98
-#: anyway/widgets/urban_widgets/SmallMotorSevereFatalCountByYearWidget.py:62
+#: anyway/widgets/urban_widgets/SevereFatalCountByVehicleByYearWidget.py:97
+#: anyway/widgets/urban_widgets/SmallMotorSevereFatalCountByYearWidget.py:61
 msgid "Severe or fatal accidents on bikes, e-bikes, or scooters in "
 msgstr ""
 

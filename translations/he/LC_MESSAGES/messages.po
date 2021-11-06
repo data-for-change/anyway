@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-11-06 16:10+0200\n"
+"POT-Creation-Date: 2021-11-06 16:36+0200\n"
 "PO-Revision-Date: 2020-10-16 15:42+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: he\n"
@@ -30,11 +30,11 @@ msgstr "פצוע/ה קשה"
 msgid "light injured"
 msgstr "פצוע/ה קל"
 
-#: anyway/flask_app.py:715 anyway/flask_app.py:820
+#: anyway/flask_app.py:726 anyway/flask_app.py:831
 msgid "Discussion not found:"
 msgstr ""
 
-#: anyway/flask_app.py:718
+#: anyway/flask_app.py:729
 msgid "Illegal Discussion"
 msgstr ""
 
@@ -383,8 +383,8 @@ msgstr ""
 "התאונות החמורות (קשות וקטלניות) האחרונות מוצגות על גבי מפה. מוצגות עד 10 "
 "תאונות."
 
-#: anyway/widgets/suburban_widgets/SuburbanCrosswalkWidget.py:72
-#: anyway/widgets/urban_widgets/UrbanCrosswalkWidget.py:75
+#: anyway/widgets/suburban_widgets/SuburbanCrosswalkWidget.py:71
+#: anyway/widgets/urban_widgets/UrbanCrosswalkWidget.py:74
 #, fuzzy
 msgid "Pedestrian injury comparison on "
 msgstr "פגיעות בהולכי רגל על"
@@ -397,8 +397,8 @@ msgstr "תאונות קטלניות וקשות לכל קילומטר לפי מק
 msgid "Injured and killed pedestrians by severity and year"
 msgstr "כמות נפגעים הולכי רגל לפי חומרה ושנה"
 
-#: anyway/widgets/urban_widgets/SevereFatalCountByVehicleByYearWidget.py:98
-#: anyway/widgets/urban_widgets/SmallMotorSevereFatalCountByYearWidget.py:62
+#: anyway/widgets/urban_widgets/SevereFatalCountByVehicleByYearWidget.py:97
+#: anyway/widgets/urban_widgets/SmallMotorSevereFatalCountByYearWidget.py:61
 msgid "Severe or fatal accidents on bikes, e-bikes, or scooters in "
 msgstr "רוכבי אופנים, אופנים חשמליים, וקורקינט חשמלי שנפצעו קשה או נהרגו ב"
 

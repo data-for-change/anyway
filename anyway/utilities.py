@@ -259,7 +259,10 @@ def is_a_safe_redirect_url(url: str) -> bool:
         return False
 
     # Note that we don't support ipv6 localhost address or ipv4 localhost full range of address
-    if netloc in ["localhost", "127.0.0.1"]:
+    if netloc in [
+        "localhost",
+        "127.0.0.1",
+    ]:
         return True
     else:  # Check localhost with port
         localhost_regex = re.compile(r"^127\.0\.0\.1:[0-9]{1,7}$|^localhost:[0-9]{1,7}$")
@@ -277,7 +280,11 @@ def is_a_safe_redirect_url(url: str) -> bool:
     if (
         config.SERVER_ENV == "dev"
         and url_obj.scheme == "https"
-        and netloc in ["dev.anyway.co.il", "www.dev.anyway.co.il"]
+        and netloc
+        in [
+            "dev.anyway.co.il",
+            "www.dev.anyway.co.il",
+        ]
     ):
         return True
 
@@ -286,6 +293,10 @@ def is_a_safe_redirect_url(url: str) -> bool:
 
 def is_a_valid_email(tmp_given_user_email: str) -> bool:
     is_valid = validate_email(
-        email_address=tmp_given_user_email, check_regex=True, check_mx=False, use_blacklist=False
+        email_address=tmp_given_user_email,
+        check_regex=True,
+        check_mx=False,
+        use_blacklist=False,
     )
     return is_valid
+

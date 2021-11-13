@@ -79,6 +79,22 @@ users_to_roles = Table(
     PrimaryKeyConstraint("user_id", "role_id"),
 )
 
+users_to_organizations = Table(
+    "users_to_organizations",
+    Base.metadata,
+    Column("user_id", BigInteger(), ForeignKey("users.id"), index=True, nullable=False),
+    Column(
+        "organization_id",
+        BigInteger(),
+        ForeignKey("organization.id"),
+        index=True,
+        nullable=False,
+        server_default=FetchedValue(),
+    ),
+    Column("create_date", DateTime(), nullable=False, server_default=text("now()")),
+    PrimaryKeyConstraint("user_id", "organization_id"),
+)
+
 
 class Users(Base, UserMixin):
     __tablename__ = "users"
@@ -106,9 +122,15 @@ class Users(Base, UserMixin):
         secondary=users_to_roles,
         backref=backref("users", lazy="dynamic"),
     )
+    organizations = relationship(
+        "Organization",
+        secondary=users_to_organizations,
+        backref=backref("users", lazy="dynamic"),
+    )
 
     def serialize_exposed_to_user(self):
         roles = self.roles
+        organizations = self.organizations
         return {
             "id": self.id,
             "user_register_date": self.user_register_date,
@@ -124,8 +146,16 @@ class Users(Base, UserMixin):
             "user_url": self.user_url,
             "user_desc": self.user_desc,
             "is_user_completed_registration": self.is_user_completed_registration,
-            "roles": [r.name for r in roles],
+            "roles": [role.name for role in roles],
+            "organizations": [org.name for org in organizations],
         }
+
+
+class Organization(Base):
+    __tablename__ = "organization"
+    id = Column(BigInteger, autoincrement=True, nullable=False, primary_key=True, index=True)
+    name = Column(String(255), unique=True, index=True, nullable=False)
+    create_date = Column(DateTime(), nullable=False, server_default=text("now()"))
 
 
 class LocationSubscribers(Base, UserMixin):
@@ -2339,11 +2369,8 @@ class InfographicsDataCacheFields(object):
     years_ago = Column(Integer(), primary_key=True)
     data = Column(sqlalchemy.types.JSON())
 
-
-class InfographicsRoadSegmentsDataCacheFields(object):
-    road_segment_id = Column(BigInteger(), primary_key=True)
-    years_ago = Column(Integer(), primary_key=True)
-    data = Column(sqlalchemy.types.JSON())
+    def serialize(self):
+        return {"news_flash_id": self.news_flash_id, "years_ago": self.years_ago, "data": self.data}
 
 
 class InfographicsDataCache(InfographicsDataCacheFields, Base):
@@ -2355,8 +2382,28 @@ class InfographicsDataCache(InfographicsDataCacheFields, Base):
     def get_data(self):
         return self.data
 
-    def serialize(self):
-        return {"news_flash_id": self.news_flash_id, "years_ago": self.years_ago, "data": self.data}
+
+class InfographicsDataCacheTemp(InfographicsDataCacheFields, Base):
+    __tablename__ = "infographics_data_cache_temp"
+
+    # Flask-Login integration
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.news_flash_id
+
+
+class InfographicsRoadSegmentsDataCacheFields(object):
+    road_segment_id = Column(BigInteger(), primary_key=True)
+    years_ago = Column(Integer(), primary_key=True)
+    data = Column(sqlalchemy.types.JSON())
 
 
 class InfographicsRoadSegmentsDataCache(InfographicsRoadSegmentsDataCacheFields, Base):
@@ -2381,24 +2428,85 @@ class InfographicsRoadSegmentsDataCache(InfographicsRoadSegmentsDataCacheFields,
         }
 
 
-class InfographicsDataCacheTemp(InfographicsDataCacheFields, Base):
-    __tablename__ = "infographics_data_cache_temp"
+class InfographicsTwoRoadsDataCacheFields(object):
+    road1 = Column(Integer(), primary_key=True)
+    road2 = Column(Integer(), primary_key=True)
+    years_ago = Column(Integer(), primary_key=True)
+    data = Column(sqlalchemy.types.JSON())
+
+
+class InfographicsTwoRoadsDataCache(InfographicsTwoRoadsDataCacheFields, Base):
+    __tablename__ = "infographics_two_roads_data_cache"
+    __table_args__ = (
+        Index("infographics_two_roads_data_cache_id_years_idx", "road1", "road2",
+              "years_ago", unique=True),
+    )
+
+    def get_data(self):
+        return self.data
 
     def serialize(self):
-        return {"news_flash_id": self.news_flash_id, "years_ago": self.years_ago, "data": self.data}
+        return {"road1": self.road1, "road2": self.road2, "years_ago": self.years_ago,
+                "data": self.data}
 
-    # Flask-Login integration
-    def is_authenticated(self):
-        return True
 
-    def is_active(self):
-        return True
+class InfographicsTwoRoadsDataCacheTemp(InfographicsTwoRoadsDataCacheFields, Base):
+    __tablename__ = "infographics_two_roads_data_cache_temp"
 
-    def is_anonymous(self):
-        return False
+    def serialize(self):
+        return {"road1": self.road1, "road2": self.road2, "years_ago": self.years_ago,
+                "data": self.data}
 
-    def get_id(self):
-        return self.news_flash_id
+    # # Flask-Login integration
+    # def is_authenticated(self):
+    #     return True
+    #
+    # def is_active(self):
+    #     return True
+    #
+    # def is_anonymous(self):
+    #     return False
+    #
+
+
+class InfographicsTwoStreetsDataCacheFields(object):
+    street1 = Column(Integer(), primary_key=True)
+    street2 = Column(Integer(), primary_key=True)
+    yishuv_symbol = Column(Integer(), primary_key=True)
+    years_ago = Column(Integer(), primary_key=True)
+    data = Column(sqlalchemy.types.JSON())
+
+    def serialize(self):
+        return {"street1": self.street1, "street2": self.street2,
+                "yishuv_symbol": self.yishuv_symbol,
+                "years_ago": self.years_ago,
+                "data": self.data}
+
+
+class InfographicsTwoStreetsDataCache(InfographicsTwoStreetsDataCacheFields, Base):
+    __tablename__ = "infographics_two_streets_data_cache"
+    __table_args__ = (
+        Index("infographics_two_streets_data_cache_id_years_idx", "street1", "street2",
+              "yishuv_symbol", "years_ago", unique=True),
+    )
+
+    def get_data(self):
+        return self.data
+
+
+class InfographicsTwoStreetsDataCacheTemp(InfographicsTwoStreetsDataCacheFields, Base):
+    __tablename__ = "infographics_two_streets_data_cache_temp"
+
+    # # Flask-Login integration
+    # def is_authenticated(self):
+    #     return True
+    #
+    # def is_active(self):
+    #     return True
+    #
+    # def is_anonymous(self):
+    #     return False
+    #
 
 
 class CasualtiesCosts(Base):

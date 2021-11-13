@@ -13,6 +13,7 @@ To use the script you need:
 SERVER_ENV=dev
 DATABASE_URL=postgresql://{username}:{password}@{ip}:{port}/anyway
 FLASK_ENV=development
+export PYTHONPATH=<project root>/anyway/
 3.Run this script
 """
 ADMIN_EMAIL = "anyway@anyway.co.il"

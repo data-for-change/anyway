@@ -2369,6 +2369,9 @@ class InfographicsDataCacheFields(object):
     years_ago = Column(Integer(), primary_key=True)
     data = Column(sqlalchemy.types.JSON())
 
+    def serialize(self):
+        return {"news_flash_id": self.news_flash_id, "years_ago": self.years_ago, "data": self.data}
+
 
 class InfographicsDataCache(InfographicsDataCacheFields, Base):
     __tablename__ = "infographics_data_cache"
@@ -2379,15 +2382,9 @@ class InfographicsDataCache(InfographicsDataCacheFields, Base):
     def get_data(self):
         return self.data
 
-    def serialize(self):
-        return {"news_flash_id": self.news_flash_id, "years_ago": self.years_ago, "data": self.data}
-
 
 class InfographicsDataCacheTemp(InfographicsDataCacheFields, Base):
     __tablename__ = "infographics_data_cache_temp"
-
-    def serialize(self):
-        return {"news_flash_id": self.news_flash_id, "years_ago": self.years_ago, "data": self.data}
 
     # Flask-Login integration
     def is_authenticated(self):
@@ -2459,6 +2456,46 @@ class InfographicsTwoRoadsDataCacheTemp(InfographicsTwoRoadsDataCacheFields, Bas
     def serialize(self):
         return {"road1": self.road1, "road2": self.road2, "years_ago": self.years_ago,
                 "data": self.data}
+
+    # # Flask-Login integration
+    # def is_authenticated(self):
+    #     return True
+    #
+    # def is_active(self):
+    #     return True
+    #
+    # def is_anonymous(self):
+    #     return False
+    #
+
+
+class InfographicsTwoStreetsDataCacheFields(object):
+    street1 = Column(Integer(), primary_key=True)
+    street2 = Column(Integer(), primary_key=True)
+    yishuv_symbol = Column(Integer(), primary_key=True)
+    years_ago = Column(Integer(), primary_key=True)
+    data = Column(sqlalchemy.types.JSON())
+
+    def serialize(self):
+        return {"street1": self.street1, "street2": self.street2,
+                "yishuv_symbol": self.yishuv_symbol,
+                "years_ago": self.years_ago,
+                "data": self.data}
+
+
+class InfographicsTwoStreetsDataCache(InfographicsTwoStreetsDataCacheFields, Base):
+    __tablename__ = "infographics_two_streets_data_cache"
+    __table_args__ = (
+        Index("infographics_two_streets_data_cache_id_years_idx", "street1", "street2",
+              "yishuv_symbol", "years_ago", unique=True),
+    )
+
+    def get_data(self):
+        return self.data
+
+
+class InfographicsTwoStreetsDataCacheTemp(InfographicsTwoStreetsDataCacheFields, Base):
+    __tablename__ = "infographics_two_streets_data_cache_temp"
 
     # # Flask-Login integration
     # def is_authenticated(self):

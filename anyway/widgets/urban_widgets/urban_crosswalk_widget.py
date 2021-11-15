@@ -1,6 +1,6 @@
 from typing import Dict
 
-from anyway.RequestParams import RequestParams
+from anyway.request_params import RequestParams
 from anyway.backend_constants import InjurySeverity
 from anyway.models import InvolvedMarkerView
 from anyway.widgets.urban_widgets.urban_widget import UrbanWidget

@@ -1,4 +1,4 @@
-from anyway.RequestParams import RequestParams
+from anyway.request_params import RequestParams
 from anyway.widgets.widget_utils import get_accidents_stats
 from anyway.models import AccidentMarkerView
 from anyway.widgets.widget import register

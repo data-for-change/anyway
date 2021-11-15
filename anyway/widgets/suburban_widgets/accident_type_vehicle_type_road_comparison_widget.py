@@ -5,7 +5,7 @@ from typing import List, Dict
 from flask_babel import _
 from sqlalchemy import func, distinct, desc
 
-from anyway.RequestParams import RequestParams
+from anyway.request_params import RequestParams
 from anyway.app_and_db import db
 from anyway.widgets.widget_utils import get_query, run_query
 from anyway.models import VehicleMarkerView, AccidentType

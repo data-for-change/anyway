@@ -4,7 +4,7 @@ from typing import List
 import pandas as pd
 from sqlalchemy import case, literal_column, func, distinct, desc
 
-from anyway.RequestParams import RequestParams
+from anyway.request_params import RequestParams
 from anyway.backend_constants import BE_CONST, AccidentSeverity
 from anyway.widgets.widget_utils import get_query
 from anyway.models import InvolvedMarkerView

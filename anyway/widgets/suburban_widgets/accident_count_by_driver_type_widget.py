@@ -4,7 +4,7 @@ from typing import Dict
 
 from flask_babel import _
 
-from anyway.RequestParams import RequestParams
+from anyway.request_params import RequestParams
 from anyway.backend_constants import DriverType
 from anyway.widgets.widget_utils import get_accidents_stats, get_injured_filters
 from anyway.models import InvolvedMarkerView

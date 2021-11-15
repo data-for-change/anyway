@@ -2,7 +2,7 @@ import copy
 import logging
 from typing import Union, Dict, List, Optional, Type
 
-from anyway.RequestParams import RequestParams
+from anyway.request_params import RequestParams
 
 
 class Widget:

@@ -4,7 +4,7 @@ from typing import Callable, Dict
 from flask_babel import _
 from sqlalchemy import func
 
-from anyway.RequestParams import RequestParams
+from anyway.request_params import RequestParams
 from anyway.app_and_db import db
 from anyway.backend_constants import BE_CONST, InjurySeverity
 from anyway.models import InvolvedMarkerView

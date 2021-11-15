@@ -9,7 +9,7 @@ from anyway.models import InvolvedMarkerView
 from anyway.vehicle_type import VehicleCategory
 from anyway.widgets.widget import register
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
-from anyway.RequestParams import RequestParams
+from anyway.request_params import RequestParams
 import anyway.widgets.widget_utils as widget_utils
 
 

@@ -1,6 +1,6 @@
 import datetime
 import pytest
-import anyway.RequestParams
+import anyway.request_params
 import anyway.widgets.widget_utils as widget_utils
 
 from numpy import nan
@@ -117,7 +117,7 @@ class Test_Infographic_Api:
         involved_by_vehicle_type_data_test = [{'involve_vehicle_type': 1, 'count': 11}]
         end_time = datetime.date(2020, 6, 30)
         start_time = datetime.date(2020, 1, 1)
-        request_params = anyway.RequestParams.RequestParams(
+        request_params = anyway.request_params.RequestParams(
             news_flash_obj=None,
             years_ago=1,
             location_text='',

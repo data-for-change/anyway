@@ -1,7 +1,7 @@
 import datetime
 from typing import Optional, Dict
 
-from anyway.RequestParams import RequestParams
+from anyway.request_params import RequestParams
 from anyway.backend_constants import BE_CONST, AccidentType
 from anyway.widgets.widget_utils import get_accidents_stats
 from anyway.models import AccidentMarkerView

@@ -4,7 +4,7 @@ from typing import Dict
 from sqlalchemy import func, or_
 from sqlalchemy.sql.elements import and_
 from flask_babel import _
-from anyway.RequestParams import RequestParams
+from anyway.request_params import RequestParams
 from anyway.app_and_db import db
 from anyway.backend_constants import InjurySeverity, InjuredType
 from anyway.widgets.widget_utils import add_empty_keys_to_gen_two_level_dict, gen_entity_labels

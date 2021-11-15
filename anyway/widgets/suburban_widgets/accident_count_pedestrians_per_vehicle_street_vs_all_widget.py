@@ -1,6 +1,6 @@
 from flask_babel import _
 
-from anyway.RequestParams import RequestParams
+from anyway.request_params import RequestParams
 from anyway.widgets.widget import Widget
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 

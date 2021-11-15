@@ -1,6 +1,6 @@
 from anyway.backend_constants import AccidentSeverity
 from anyway.widgets.widget_utils import get_accidents_stats
-from anyway.RequestParams import RequestParams
+from anyway.request_params import RequestParams
 from anyway.models import AccidentMarkerView
 from anyway.widgets.widget import register
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget

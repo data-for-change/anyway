@@ -1,5 +1,5 @@
 import logging
-from anyway.RequestParams import RequestParams
+from anyway.request_params import RequestParams
 from anyway.widgets.widget import Widget
 
 

@@ -3,7 +3,7 @@ from typing import Dict
 import pandas as pd
 from flask_babel import _
 
-from anyway.RequestParams import RequestParams
+from anyway.request_params import RequestParams
 from anyway.backend_constants import AccidentSeverity, BE_CONST
 from anyway.infographics_dictionaries import segment_dictionary
 from anyway.widgets.widget_utils import get_query

@@ -14,7 +14,7 @@ from sqlalchemy import func
 # noinspection PyProtectedMember
 from flask_babel import _
 
-from anyway.RequestParams import RequestParams
+from anyway.request_params import RequestParams
 from anyway.backend_constants import BE_CONST, AccidentType
 from anyway.models import NewsFlash, AccidentMarkerView
 from anyway.parsers import resolution_dict

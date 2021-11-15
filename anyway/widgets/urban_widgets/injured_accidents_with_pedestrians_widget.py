@@ -9,8 +9,8 @@ from anyway.app_and_db import db
 from anyway.backend_constants import InjurySeverity, InjuredType
 from anyway.widgets.widget_utils import add_empty_keys_to_gen_two_level_dict, gen_entity_labels
 from anyway.models import NewsFlash, InvolvedMarkerView
-from anyway.widgets.Widget import register
-from anyway.widgets.urban_widgets.UrbanWidget import UrbanWidget
+from anyway.widgets.widget import register
+from anyway.widgets.urban_widgets.urban_widget import UrbanWidget
 
 
 @register

@@ -10,7 +10,7 @@ from anyway.app_and_db import db
 from anyway.widgets.widget_utils import get_query, run_query
 from anyway.models import VehicleMarkerView, AccidentType
 from anyway.vehicle_type import VehicleCategory
-from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
+from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 
 
 class AccidentTypeVehicleTypeRoadComparisonWidget(SubUrbanWidget):

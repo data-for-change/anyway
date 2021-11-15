@@ -22,7 +22,7 @@ from anyway.app_and_db import db
 from anyway.infographics_dictionaries import head_on_collisions_comparison_dict
 from anyway.parsers import infographics_data_cache_updater
 from anyway.parsers.location_extraction import get_road_segment_name_and_number
-from anyway.widgets.Widget import Widget, widgets_dict
+from anyway.widgets.widget import Widget, widgets_dict
 
 logger = logging.getLogger("infographics_utils")
 

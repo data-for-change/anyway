@@ -9,7 +9,7 @@ from anyway import app as flask_app
 from jsonschema import validate
 from anyway.app_and_db import db
 from anyway.vehicle_type import VehicleCategory
-from anyway.widgets.suburban_widgets.AccidentCountByCarTypeWidget import AccidentCountByCarTypeWidget
+from anyway.widgets.suburban_widgets.accident_count_by_car_type_widget import  AccidentCountByCarTypeWidget
 
 
 def insert_infographic_mock_data(app):

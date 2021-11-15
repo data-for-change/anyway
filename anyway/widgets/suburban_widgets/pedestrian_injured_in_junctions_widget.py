@@ -1,6 +1,6 @@
 from anyway.RequestParams import RequestParams
-from anyway.widgets.Widget import register
-from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
+from anyway.widgets.widget import register
+from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 
 
 @register

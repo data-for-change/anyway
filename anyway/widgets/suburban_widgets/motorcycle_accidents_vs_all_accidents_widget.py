@@ -9,7 +9,7 @@ from anyway.backend_constants import BE_CONST, AccidentSeverity
 from anyway.widgets.widget_utils import get_query
 from anyway.models import InvolvedMarkerView
 from anyway.vehicle_type import VehicleCategory
-from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
+from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 
 
 class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):

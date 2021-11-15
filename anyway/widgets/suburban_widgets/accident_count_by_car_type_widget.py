@@ -7,8 +7,8 @@ from anyway.backend_constants import BE_CONST
 from anyway.infographics_dictionaries import segment_dictionary
 from anyway.models import InvolvedMarkerView
 from anyway.vehicle_type import VehicleCategory
-from anyway.widgets.Widget import register
-from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
+from anyway.widgets.widget import register
+from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 from anyway.RequestParams import RequestParams
 import anyway.widgets.widget_utils as widget_utils
 

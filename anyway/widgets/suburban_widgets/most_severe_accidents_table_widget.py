@@ -8,8 +8,8 @@ from anyway.backend_constants import BE_CONST, AccidentSeverity, AccidentType
 from anyway.infographics_dictionaries import segment_dictionary
 from anyway.widgets.widget_utils import get_query, get_accidents_stats
 from anyway.models import AccidentMarkerView, InvolvedMarkerView
-from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
-from anyway.widgets.Widget import register
+from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
+from anyway.widgets.widget import register
 
 
 def get_most_severe_accidents_with_entities(

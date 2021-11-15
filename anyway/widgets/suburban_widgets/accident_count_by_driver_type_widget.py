@@ -9,8 +9,8 @@ from anyway.backend_constants import DriverType
 from anyway.widgets.widget_utils import get_accidents_stats, get_injured_filters
 from anyway.models import InvolvedMarkerView
 from anyway.vehicle_type import VehicleCategory
-from anyway.widgets.Widget import register
-from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
+from anyway.widgets.widget import register
+from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 
 
 @register

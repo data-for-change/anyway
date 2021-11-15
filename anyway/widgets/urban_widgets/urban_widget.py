@@ -1,6 +1,6 @@
 import logging
 from anyway.RequestParams import RequestParams
-from anyway.widgets.Widget import Widget
+from anyway.widgets.widget import Widget
 
 
 class UrbanWidget(Widget):

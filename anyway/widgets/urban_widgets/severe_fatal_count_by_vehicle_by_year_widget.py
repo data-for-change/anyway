@@ -4,7 +4,7 @@ from anyway.RequestParams import RequestParams
 from anyway.backend_constants import InjurySeverity
 from anyway.models import InvolvedMarkerView
 from anyway.vehicle_type import VehicleType
-from anyway.widgets.urban_widgets.UrbanWidget import UrbanWidget
+from anyway.widgets.urban_widgets.urban_widget import UrbanWidget
 from anyway.widgets.widget_utils import get_accidents_stats
 from flask_babel import _
 

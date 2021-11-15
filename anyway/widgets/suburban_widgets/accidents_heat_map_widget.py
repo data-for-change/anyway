@@ -8,8 +8,8 @@ from anyway.backend_constants import AccidentSeverity, BE_CONST
 from anyway.infographics_dictionaries import segment_dictionary
 from anyway.widgets.widget_utils import get_query
 from anyway.models import AccidentMarkerView
-from anyway.widgets.Widget import register
-from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
+from anyway.widgets.widget import register
+from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 
 
 @register

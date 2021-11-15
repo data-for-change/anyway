@@ -1,8 +1,8 @@
 from flask_babel import _
 
 from anyway.RequestParams import RequestParams
-from anyway.widgets.Widget import Widget
-from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
+from anyway.widgets.widget import Widget
+from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 
 
 class AccidentCountPedestriansPerVehicleStreetVsAllWidget(SubUrbanWidget):

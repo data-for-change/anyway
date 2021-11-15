@@ -9,7 +9,7 @@ from anyway.app_and_db import db
 from anyway.backend_constants import BE_CONST, InjurySeverity
 from anyway.models import InvolvedMarkerView
 from anyway.utilities import parse_age_from_range
-from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
+from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 
 
 class InjuredCountPerAgeGroupWidget(SubUrbanWidget):

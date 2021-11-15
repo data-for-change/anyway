@@ -4,38 +4,36 @@ from typing import Dict
 from flask_babel import _
 
 from anyway.RequestParams import RequestParams
-from anyway.backend_constants import InjurySeverity
+from anyway.backend_constants import AccidentSeverity
 from anyway.infographics_dictionaries import segment_dictionary
+from anyway.models import AccidentMarkerView
+from anyway.widgets.widget import register
+from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 from anyway.widgets.widget_utils import (
     get_accidents_stats,
     add_empty_keys_to_gen_two_level_dict,
     gen_entity_labels,
-    get_injured_filters,
 )
-from anyway.models import InvolvedMarkerView
-from anyway.widgets.Widget import register
-from anyway.widgets.suburban_widgets.SubUrbanWidget import SubUrbanWidget
 
 
 @register
-class InjuredCountByAccidentYearWidget(SubUrbanWidget):
-    name: str = "injured_count_by_accident_year"
+class AccidentCountByAccidentYearWidget(SubUrbanWidget):
+    name: str = "accident_count_by_accident_year"
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
-        self.rank = 9
+        self.rank = 8
         self.text = {
             # "title" and "labels" will be set in localize_items()
         }
-        self.information = (
-            "Fatal, severe and light injured count in the specified years, split by injury severity"
-        )
+        self.information = "Fatal, severe and light accidents count in the specified years, split by accident severity"
 
     def generate_items(self) -> None:
+
         res = get_accidents_stats(
-            table_obj=InvolvedMarkerView,
-            filters=get_injured_filters(self.request_params.location_info),
-            group_by=("injury_severity", "accident_year"),
+            table_obj=AccidentMarkerView,
+            filters=self.request_params.location_info,
+            group_by=("accident_severity", "accident_year"),
             count="accident_year",
             start_time=self.request_params.start_time,
             end_time=self.request_params.end_time,
@@ -43,7 +41,7 @@ class InjuredCountByAccidentYearWidget(SubUrbanWidget):
         try:
             self.items = add_empty_keys_to_gen_two_level_dict(
                 res,
-                InjurySeverity.codes(),
+                AccidentSeverity.codes(),
                 list(
                     range(
                         self.request_params.start_time.year, self.request_params.end_time.year + 1
@@ -56,12 +54,12 @@ class InjuredCountByAccidentYearWidget(SubUrbanWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
-            "title": _("Number of injured in accidents, per year, splitted by severity, in segment")
+            "title": _("Number of accidents, by year, splitted by accident severity, in segment")
             + " "
             + segment_dictionary[request_params.location_info["road_segment_name"]],
-            "labels": gen_entity_labels(InjurySeverity),
+            "labels": gen_entity_labels(AccidentSeverity),
         }
         return items
 
 
-_("Fatal, severe and light injured count in the specified years, split by injury severity")
+_("Fatal, severe and light accidents count in the specified years, split by accident severity")

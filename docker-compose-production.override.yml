@@ -3,7 +3,7 @@ version: '3'
 services:
   nginx:
     build: nginx_docker
-    image: docker.pkg.github.com/hasadna/anyway/nginx:latest
+    image: ghcr.io/hasadna/anyway/nginx:latest
     depends_on:
       - anyway
     ports:

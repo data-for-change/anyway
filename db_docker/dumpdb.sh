@@ -1,5 +1,14 @@
 #!/bin/bash
 
+TRUNCATE_TABLES="users roles locationsubscribers users_to_roles users_to_organizations organization"
+
+TRUNCATE_TABLES_EXCLUDE_ARGUMENTS=""
+TRUNCATE_TABLES_INCLUDE_ARGUMENTS=""
+for TABLE in $TRUNCATE_TABLES; do
+  TRUNCATE_TABLES_EXCLUDE_ARGUMENTS="${TRUNCATE_TABLES_EXCLUDE_ARGUMENTS} -T ${TABLE}"
+  TRUNCATE_TABLES_INCLUDE_ARGUMENTS="${TRUNCATE_TABLES_INCLUDE_ARGUMENTS} -t ${TABLE}"
+done
+
 export TZ=Asia/Jerusalem
 
 ( [ "${DBDUMP_AWS_ACCESS_KEY_ID}" == "" ] || [ "${DBDUMP_AWS_SECRET_ACCESS_KEY}" == "" ] ) && echo missing AWS env vars && exit 1
@@ -28,9 +37,13 @@ echo dumping full db &&\
 dumpdb "pg_dumpall" \
        "`date +%Y-%m-%d`_${DBDUMP_S3_FILE_PREFIX}anyway.pgdump" \
        "anyway-full-db-dumps" &&\
- echo dumping partial db &&\
-dumpdb "pg_dump -d anyway --no-privileges -N topology -T users -T roles -T locationsubscribers -T users_to_roles" \
+echo dumping partial db without truncated tables &&\
+dumpdb "pg_dump -d anyway --no-privileges -N topology ${TRUNCATE_TABLES_EXCLUDE_ARGUMENTS}" \
        "`date +%Y-%m-%d`_${DBDUMP_S3_FILE_PREFIX}anyway_partial.pgdump" \
+        "anyway-partial-db-dumps" &&\
+echo dumping partial db with truncated tables schema only &&\
+dumpdb "pg_dump -d anyway --no-privileges -N topology -s ${TRUNCATE_TABLES_INCLUDE_ARGUMENTS}" \
+       "`date +%Y-%m-%d`_${DBDUMP_S3_FILE_PREFIX}anyway_partial_schema.pgdump" \
         "anyway-partial-db-dumps" &&\
 echo Great Success && exit 0
 echo Failed && exit 1

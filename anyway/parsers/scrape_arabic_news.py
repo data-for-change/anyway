@@ -3,86 +3,54 @@
 #panet-abstract: /<div class=\"panet-abstract\"> (.*?)<\/div>/gm
 #panet-time: /<div class=\"panet-time-cont\".<time class=\"panet-time\">(.*?)<\/div>/gm
 
+from dataclasses import dataclass
+import json
 import requests
 import re
 
+
+@dataclass
+class PanetArticle:
+    title: str
+    abstract: str
+    time: str
+
+
+def is_panet_accident(title, abstract):
+    keywords = ["حادث طرق", "حوادث طرق", "اصطدام", " دهس", "سائق", "سيارة", "انقلاب", "شاحنة", "مشاة"]
+
+    return any(keyword in title+" "+abstract for keyword in keywords)
+
+
 def scrape():
-    Website_Content = requests.get("http://www.panet.co.il/category/home/2")
-    #print(Website_Content.text)
+    panet_dict = dict()
+
+    website_content = requests.get("http://www.panet.co.il/category/home/2")
 
     #panet-titles:
-    regex1 = r"<div class=\"panet-title\">(.*?)<\/div>"
-    matches1 = re.finditer(regex1, Website_Content.text, re.MULTILINE)
-
-    f1 = open("/Users/rabea/titles.txt", "w")
+    regex = r"<div class=\"panet-title\"><a href=\"(.*?)\">(.*?)</a><\/div><div class=\"panet-abstract\">(.*?)</div></div></div><div class=\"panet-time-cont\".<time class=\"panet-time\">(.*?)<\/div>"
+    matches1 = re.finditer(regex, website_content.text, re.MULTILINE)
 
     for matchNum, match in enumerate(matches1, start=1):
+        url = match.group(1)
+        title = match.group(2)
+        abstract = match.group(3)
+        time = match.group(4)
+        if is_panet_accident(title, abstract):
+            article = PanetArticle(title=title, abstract=abstract, time=time)
+            panet_dict[url] = article
 
-        # print("Match {matchNum} was found at {start}-{end}: {match}".format(matchNum=matchNum, start=match.start(),
-        #                                                                    end=match.end(), match=match.group()))
-
-        for groupNum in range(0, len(match.groups())):
-            groupNum = groupNum + 1
-
-            # print("Group {groupNum} found at {start}-{end}: {group}".format(groupNum=groupNum, start=match.start(groupNum),
-            #                                                                end=match.end(groupNum),
-            #                                                                group=match.group(groupNum)))
-            #print(match.group(groupNum))
-            f1.write(match.group(groupNum))
-            f1.write('\n')
-
-
-    f1.close()
-
-
-    #panet-abstracts ***http://www.panet.co.il/category/home/2***:
-
-
-    regex2 = r"<div class=\"panet-abstract\">(.*?)</div>"
-    matches2 = re.finditer(regex2, Website_Content.text, re.MULTILINE)
-
-    f2 = open("/Users/rabea/abstracts.txt", "w")
-    for matchNum, match in enumerate(matches2, start=1):
-
-        #print("Match {matchNum} was found at {start}-{end}: {match}".format(matchNum=matchNum, start=match.start(),
-                                                                         #   end=match.end(), match=match.group()))
-
-        for groupNum in range(0, len(match.groups())):
-            groupNum = groupNum + 1
-
-            # print("Group {groupNum} found at {start}-{end}: {group}".format(groupNum=groupNum, start=match.start(groupNum),
-            #                                                                 end=match.end(groupNum),
-            #                                                                 group=match.group(groupNum)))
-            f2.write(match.group(groupNum))
-            f2.write('\n')
-
-    f2.close()
-    #panet-time:
-
-    regex3 = r"<div class=\"panet-time-cont\".<time class=\"panet-time\">(.*?)<\/div>"
-    matches3 = re.finditer(regex3, Website_Content.text, re.MULTILINE)
-
-    f3 = open("/Users/rabea/articles-pub-time.txt", 'w')
-    for matchNum, match in enumerate(matches3, start=1):
-
-        # print("Match {matchNum} was found at {start}-{end}: {match}".format(matchNum=matchNum, start=match.start(),
-        #                                                                     end=match.end(), match=match.group()))
-
-        for groupNum in range(0, len(match.groups())):
-            groupNum = groupNum + 1
-
-            # print("Group {groupNum} found at {start}-{end}: {group}".format(groupNum=groupNum, start=match.start(groupNum),
-            #                                                                 end=match.end(groupNum),
-            #                                                                 group=match.group(groupNum)))
-
-            f3.write(match.group(groupNum))
-            f3.write('\n')
-    f3.close()
+    f = open("panet/panet_accidents.tsv", "w")
+    for url in panet_dict.keys():
+        article = panet_dict[url]
+        f.write(f"{url}\t{article.title}\t{article.time}\t{article.abstract},\n")
+    f.close()
 
 
 if __name__ == '__main__':
-    # scrape()
+    scrape()
 
+    """
     for page in range(1, 10):
         content = requests.get(f"http://www.panet.co.il/category/home/2/{page}/")
         contenttxt = content.text
@@ -93,5 +61,4 @@ if __name__ == '__main__':
         # file_yaml = open(f"/Users/rabea/PycharmProjects/Efraim/PanetPage{page}.yaml", "w")
         # file_yaml.write(contenttxt)
         # file_yaml.close()
-
-
+    """

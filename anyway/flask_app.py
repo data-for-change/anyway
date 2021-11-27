@@ -1534,24 +1534,6 @@ def infographics_data_by_location():
     elif mock_data == "false":
         request_params = request_params_from_request_values(request.values)
         output = get_infographics_data_for_location(request_params)
-        # road_segment_id = request.values.get("road_segment_id")
-        # if road_segment_id == None:
-        #     log_bad_request(request)
-        #     return abort(http_client.BAD_REQUEST)
-        #
-        # number_of_years_ago = request.values.get("years_ago", BE_CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
-        # lang: str = request.values.get("lang", "he")
-        # logging.debug(
-        #     (
-        #         "getting infographics data for news_flash_id: {news_flash_id}, "
-        #         + "in time period:{number_of_years_ago}, lang:{lang}"
-        #     ).format(
-        #         news_flash_id=road_segment_id, number_of_years_ago=number_of_years_ago, lang=lang
-        #     )
-        # )
-        # output = get_infographics_data_for_road_segment(
-        #     road_segment_id=road_segment_id, years_ago=number_of_years_ago, lang=lang
-        # )
         if not output:
             log_bad_request(request)
             return abort(http_client.NOT_FOUND)

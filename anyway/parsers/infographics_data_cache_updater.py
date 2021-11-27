@@ -125,7 +125,6 @@ def get_cache_retrieval_query(params: RequestParams):
 
 
 def get_infographics_data_from_cache_by_location(request_params: RequestParams) -> Dict:
-    logging.error("get_infographics_data_from_cache_by_location: not yet implemented")
     query = get_cache_retrieval_query(request_params)
     db_item = query.first()
     logging.debug(f"retrieved from cache {type(db_item)}:{db_item}"[:70])

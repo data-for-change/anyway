@@ -58,7 +58,6 @@ def get_road_segment_name_and_number(road_segment_id) -> (float, str):
         pass
     query_obj = db.session.query(RoadSegments).filter(RoadSegments.segment_id == road_segment_id)
     segment = query_obj.first()
-    # segment = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
     from_name = segment.from_name  # pylint: disable=maybe-no-member
     to_name = segment.to_name  # pylint: disable=maybe-no-member
     road_segment_name = " - ".join([from_name, to_name])

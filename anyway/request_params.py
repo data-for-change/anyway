@@ -153,13 +153,6 @@ def extract_road_segment_location(road_segment_id):
     return {"name": "location", "data": data, "gps": gps, "text": text}
 
 
-# def get_location_from_road_segment_id(road_segment_id: str) -> dict:
-#     loc = extract_road_segment_location(road_segment_id)
-#     loc["text"] = get_road_segment_location_text(loc["data"]["road1"],
-#                                                  loc["data"]["road_segment_id"])
-#     return loc
-#
-#
 def extract_news_flash_obj(news_flash_id) -> Optional[NewsFlash]:
     news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == news_flash_id).first()
 

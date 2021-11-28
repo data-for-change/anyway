@@ -914,9 +914,9 @@ class NewsFlash(Base):
 class City(Base):
     __tablename__ = "cities"
     id = Column(Integer(), primary_key=True)
-    symbol_code = Column(Integer())
+    symbol_code = Column(Integer())  # yishuv_symbol
     name = Column(String())
-    search_heb = Column(String())
+    search_heb = Column(String())  # yishuv_name
     search_eng = Column(String())
     search_priority = Column(Integer())
 
@@ -942,6 +942,34 @@ class City(Base):
 
     def get_id(self):
         return self.id
+
+
+class Streets(Base):
+    __tablename__ = "streets"
+    MAX_NAME_LEN = 50
+    yishuv_symbol = Column(Integer(), primary_key=True)
+    street = Column(Integer(), primary_key=True)
+    street_hebrew = Column(String(length=MAX_NAME_LEN))
+
+    def serialize(self):
+        return {
+            "yishuv_symbol": self.yishuv_symbol,
+            "street": self.street,
+            "street_hebrew": self.street_hebrew,
+        }
+
+    # Flask-Login integration
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.yishuv_symbol, self.street
 
 
 class RegisteredVehicle(Base):

@@ -211,7 +211,7 @@ def create_infographics_items(request_params: RequestParams) -> Dict:
     def get_dates_comment():
         return {
             "date_range": [request_params.start_time.year, request_params.end_time.year],
-            "last_update": time.mktime(request_params.end_time.timetuple()),
+            "last_update": datetime.datetime.fromordinal(request_params.end_time.toordinal()).isoformat(),
         }
 
     try:

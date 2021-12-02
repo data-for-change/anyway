@@ -13,6 +13,7 @@ from anyway.models import (
 from anyway.constants import CONST
 from anyway.backend_constants import BE_CONST
 from anyway.app_and_db import db
+from anyway.request_params import RequestParams
 import anyway.infographics_utils
 import logging
 import json
@@ -106,6 +107,42 @@ def get_infographics_data_from_cache_by_road_segment(road_segment_id, years_ago)
         return {}
 
 
+def get_cache_retrieval_query(params: RequestParams):
+    res = params.resolution
+    if res == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
+        return (
+            db.session.query(InfographicsRoadSegmentsDataCache)
+            .filter(
+                InfographicsRoadSegmentsDataCache.road_segment_id
+                == int(params.location_info["road_segment_id"])
+            )
+            .filter(InfographicsRoadSegmentsDataCache.years_ago == int(params.years_ago))
+        )
+    else:
+        msg = f"Cache unsupported resolution: {res}, params:{params}"
+        logging.error(msg)
+        raise ValueError(msg)
+
+
+def get_infographics_data_from_cache_by_location(request_params: RequestParams) -> Dict:
+    query = get_cache_retrieval_query(request_params)
+    db_item = query.first()
+    logging.debug(f"retrieved from cache {type(db_item)}:{db_item}"[:70])
+    db.session.commit()
+    try:
+        if db_item:
+            return json.loads(db_item.get_data())
+        else:
+            return {}
+    except Exception as e:
+        logging.error(
+            f"Exception while extracting data from returned cache item:{request_params}"
+            f"returned value {type(db_item)}"
+            f":cause:{e.__cause__}, class:{e.__class__}"
+        )
+        return {}
+
+
 def copy_temp_into_cache():
     num_items_cache = db.session.query(InfographicsDataCache).count()
     num_items_temp = db.session.query(InfographicsDataCacheTemp).count()
@@ -171,13 +208,13 @@ def build_cache_for_road_segments():
             InfographicsRoadSegmentsDataCache.__table__.insert(),  # pylint: disable=no-member
             [
                 {
-                    "road_segment_id": road_segment.get_id(),
+                    "road_segment_id": road_segment.get_segment_id(),
                     "years_ago": y,
                     "data": anyway.infographics_utils.create_infographics_data_for_road_segment(
-                        road_segment.get_id(), y, "he"
+                        road_segment.get_segment_id(), y, "he"
                     ),
                 }
-                for road_segment in db.session.query(RoadSegments).all()
+                for road_segment in db.session.query(RoadSegments).limit(10)
             ],
         )
         db.session.commit()

@@ -1905,6 +1905,9 @@ class RoadSegments(Base):
     def get_id(self):
         return self.id
 
+    def get_segment_id(self):
+        return self.segment_id
+
 
 class ReportProblem(Base):
     __tablename__ = "report_problem"

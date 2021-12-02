@@ -1,4 +1,4 @@
-FROM docker.pkg.github.com/hasadna/anyway/anyway:latest AS builder
+FROM ghcr.io/hasadna/anyway/anyway:latest AS builder
 RUN flask assets build
 
 FROM nginx:stable

@@ -54,7 +54,6 @@ def roles_accepted(*roles):
             if perm.can():
                 return fn(*args, **kwargs)
             user_email = "not logged in"
-            user_roles = ""
             if not current_user.is_anonymous:
                 user_email = current_user.email
             logging.info(

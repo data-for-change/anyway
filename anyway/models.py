@@ -947,9 +947,9 @@ class City(Base):
 class Streets(Base):
     __tablename__ = "streets"
     MAX_NAME_LEN = 50
-    yishuv_symbol = Column(Integer(), primary_key=True)
-    street = Column(Integer(), primary_key=True)
-    street_hebrew = Column(String(length=MAX_NAME_LEN))
+    yishuv_symbol = Column(Integer(), primary_key=True, nullable=False)
+    street = Column(Integer(), primary_key=True, nullable=False)
+    street_hebrew = Column(String(length=MAX_NAME_LEN), nullable=True)
 
     def serialize(self):
         return {

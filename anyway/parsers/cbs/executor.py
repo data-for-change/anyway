@@ -714,7 +714,7 @@ def import_to_datastore(
 ) -> Tuple[int, Dict[int, List[dict]]]:
     """
     goes through all the files in a given directory, parses and commits them
-    Returns No of new items, and new streets dict.
+    Returns number of new items, and new streets dict.
     """
     try:
         assert batch_size > 0
@@ -746,8 +746,6 @@ def import_to_datastore(
 
 
 def import_streets_into_db():
-    db.session.query(Streets).delete()
-    db.session.commit()
     items = []
     max_name_len = 0
     for k, street_hebrew in yishuv_street_dict.items():
@@ -761,6 +759,7 @@ def import_streets_into_db():
             "street_hebrew": street_hebrew[: min(name_len, Streets.MAX_NAME_LEN)],
         }
         items.append(street_entry)
+    db.session.query(Streets).delete()
     db.session.bulk_insert_mappings(Streets, items)
     db.session.commit()
     if max_name_len > Streets.MAX_NAME_LEN:

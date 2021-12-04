@@ -57,8 +57,9 @@ def request_params_from_request_values(vals: dict) -> Optional[RequestParams]:
 
     try:
         years_ago = int(years_ago)
-    except ValueError:
-        return None
+    except (ValueError, TypeError):
+        # TODO: revert this change back to return None - meant to fix current API not working
+        years_ago = 5
     if years_ago < 0 or years_ago > 100:
         return None
     last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)

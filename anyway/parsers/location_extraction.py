@@ -48,7 +48,7 @@ def get_road_segment_id(road_segment_name) -> int:
         .filter(RoadSegments.to_name == to_name)
     )
     segment = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-    return segment.iloc[0]["id"]  # pylint: disable=maybe-no-member
+    return segment.iloc[0]["segment_id"]  # pylint: disable=maybe-no-member
 
 
 def get_road_segment_name_and_number(road_segment_id) -> (float, str):

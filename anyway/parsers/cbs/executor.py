@@ -11,6 +11,7 @@ from datetime import datetime
 import math
 import pandas as pd
 from sqlalchemy import or_
+from typing import Tuple, Dict, List, Any
 
 from anyway.parsers.cbs import preprocessing_cbs_files
 from anyway import field_names, localization
@@ -75,11 +76,16 @@ from anyway.models import (
     LocationAccuracy,
     ProviderCode,
     VehicleDamage,
+    Streets,
 )
 from anyway.utilities import ItmToWGS84, time_delta, ImporterUI, truncate_tables, chunks
 from anyway.db_views import VIEWS
 from anyway.app_and_db import db
 from anyway.parsers.cbs.s3 import S3DataRetriever
+
+
+street_map_type: Dict[int, List[dict]]
+
 
 failed_dirs = OrderedDict()
 
@@ -703,16 +709,19 @@ def get_files(directory):
     return output_files_dict
 
 
-def import_to_datastore(directory, provider_code, year, batch_size):
+def import_to_datastore(
+    directory, provider_code, year, batch_size
+) -> Tuple[int, Dict[int, List[dict]]]:
     """
     goes through all the files in a given directory, parses and commits them
+    Returns number of new items, and new streets dict.
     """
     try:
         assert batch_size > 0
 
         files_from_cbs = get_files(directory)
         if len(files_from_cbs) == 0:
-            return 0
+            return 0, {}
         logging.info("Importing '{}'".format(directory))
         started = datetime.now()
 
@@ -728,12 +737,74 @@ def import_to_datastore(directory, provider_code, year, batch_size):
         new_items += vehicles_count
 
         logging.info("\t{0} items in {1}".format(new_items, time_delta(started)))
-        return new_items
+        return new_items, files_from_cbs[STREETS]
     except ValueError as e:
         failed_dirs[directory] = str(e)
         if "Not found" in str(e):
-            return 0
-        raise (e)
+            return 0, {}
+        raise e
+
+
+def import_streets_into_db():
+    items = []
+    max_name_len = 0
+    for k, street_hebrew in yishuv_street_dict.items():
+        yishuv_symbol, street = k
+        name_len = len(street_hebrew)
+        if name_len > max_name_len:
+            max_name_len = name_len
+        street_entry = {
+            "yishuv_symbol": yishuv_symbol,
+            "street": street,
+            "street_hebrew": street_hebrew[: min(name_len, Streets.MAX_NAME_LEN)],
+        }
+        items.append(street_entry)
+    db.session.query(Streets).delete()
+    db.session.bulk_insert_mappings(Streets, items)
+    db.session.commit()
+    if max_name_len > Streets.MAX_NAME_LEN:
+        logging.error(
+            f"Importing streets table: Street hebrew name length exceeded: max name: {max_name_len}"
+        )
+    else:
+        logging.info(f"Max street name len:{max_name_len}")
+    logging.info(f"Done. {len(yishuv_street_dict)}:{len(yishuv_name_dict)}")
+
+
+yishuv_street_dict: Dict[Tuple[int, int], str] = {}
+yishuv_name_dict: Dict[Tuple[int, str], int] = {}
+
+
+def add_to_streets(streets_map: Dict[int, List[dict]]):
+    for yishuv_symbol, streets_list in streets_map.items():
+        for street in streets_list:
+            my_street = {
+                "yishuv_symbol": yishuv_symbol,
+                "street": street[field_names.street_sign],
+                "street_hebrew": street[field_names.street_name],
+            }
+            add_street_remove_name_duplicates(my_street)
+            add_street_remove_num_duplicates(my_street)
+
+
+def add_street_remove_num_duplicates(street: Dict[str, Any]):
+    k = (street["yishuv_symbol"], street["street"])
+    v = yishuv_street_dict.get(k, None)
+    if v is not None and v != street["street_hebrew"]:
+        logging.error(f"Duplicate street code: {k}-> {v} and {street['street_hebrew']}")
+        yishuv_street_dict[k] = street["street_hebrew"]
+    if v is None:
+        yishuv_street_dict[k] = street["street_hebrew"]
+
+
+def add_street_remove_name_duplicates(street: Dict[str, Any]):
+    k = (street["yishuv_symbol"], street["street_hebrew"])
+    v = yishuv_name_dict.get(k, None)
+    if v is not None and v != street["street"]:
+        logging.error(f"Duplicate street name: {k}-> {v} and {street['street']}")
+        yishuv_name_dict[k] = street["street"]
+    if v is None:
+        yishuv_name_dict[k] = street["street"]
 
 
 def delete_invalid_entries(batch_size):
@@ -1012,7 +1083,12 @@ def main(
                     )
                     logging.info("Importing Directory " + cbs_files_dir)
                     preprocessing_cbs_files.update_cbs_files_names(cbs_files_dir)
-                    total += import_to_datastore(cbs_files_dir, provider_code, year, batch_size)
+                    num_new, streets = import_to_datastore(
+                        cbs_files_dir, provider_code, year, batch_size
+                    )
+                    total += num_new
+                    add_to_streets(streets)
+            import_streets_into_db()
             shutil.rmtree(s3_data_retriever.local_temp_directory)
 
         elif source == "local_dir_for_tests_only":
@@ -1032,8 +1108,12 @@ def main(
                 )
                 provider_code = get_provider_code(parent_directory)
                 logging.info("Importing Directory " + directory)
-                total += import_to_datastore(directory, provider_code, int(year), batch_size)
-
+                num_new, streets = import_to_datastore(
+                    directory, provider_code, int(year), batch_size
+                )
+                total += num_new
+                add_to_streets(streets)
+        import_streets_into_db()
         fill_db_geo_data()
 
         failed = [

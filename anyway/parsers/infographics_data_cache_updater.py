@@ -214,7 +214,7 @@ def build_cache_for_road_segments():
                         road_segment.get_segment_id(), y, "he"
                     ),
                 }
-                for road_segment in db.session.query(RoadSegments).limit(10)
+                for road_segment in db.session.query(RoadSegments).all()
             ],
         )
         db.session.commit()

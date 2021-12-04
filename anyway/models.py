@@ -958,19 +958,6 @@ class Streets(Base):
             "street_hebrew": self.street_hebrew,
         }
 
-    # Flask-Login integration
-    def is_authenticated(self):
-        return True
-
-    def is_active(self):
-        return True
-
-    def is_anonymous(self):
-        return False
-
-    def get_id(self):
-        return self.yishuv_symbol, self.street
-
 
 class RegisteredVehicle(Base):
     __tablename__ = "cities_vehicles_registered"

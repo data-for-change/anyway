@@ -4,6 +4,7 @@ import datetime
 import json
 import logging
 from collections import namedtuple
+from typing import Optional
 
 try:
     from flask_login import UserMixin
@@ -930,6 +931,21 @@ class City(Base):
             "search_priority": self.search_priority,
         }
 
+    @staticmethod
+    def get_name_from_symbol(symbol: int) -> str:
+        res = db.session.query(City.search_heb).filter(City.symbol_code == symbol).first()
+        if res is None:
+            raise ValueError(f"{symbol}: could not find city with that symbol")
+        return res.search_heb
+
+    @staticmethod
+    def get_symbol_from_name(name: str) -> int:
+        res = db.session.query(City.symbol_code).filter(City.search_heb == name).first()
+        if res is None:
+            logging.error(f"City: no city with name:{name}.")
+            raise ValueError(f"City: no city with name:{name}.")
+        return res.symbol_code
+
     # Flask-Login integration
     def is_authenticated(self):
         return True
@@ -957,6 +973,21 @@ class Streets(Base):
             "street": self.street,
             "street_hebrew": self.street_hebrew,
         }
+
+    @staticmethod
+    def get_street_name_by_street(yishuv_symbol: int, street: int) -> str:
+        res = db.session.query(Streets.street_hebrew) \
+            .filter(Streets.yishuv_symbol == yishuv_symbol) \
+            .filter(Streets.street == street)\
+            .first()
+        if res is None:
+            raise ValueError(f"{street}: could not find street in yishuv:{yishuv_symbol}")
+        return res.street_hebrew
+
+    @staticmethod
+    def get_street_by_street_name(name: str) -> Optional[int]:
+        res = db.session.query(Streets.street).filter(Streets.street_hebrew == name).first()
+        return res
 
 
 class RegisteredVehicle(Base):
@@ -2456,24 +2487,37 @@ class InfographicsTwoRoadsDataCacheFields(object):
 class InfographicsTwoRoadsDataCache(InfographicsTwoRoadsDataCacheFields, Base):
     __tablename__ = "infographics_two_roads_data_cache"
     __table_args__ = (
-        Index("infographics_two_roads_data_cache_id_years_idx", "road1", "road2",
-              "years_ago", unique=True),
+        Index(
+            "infographics_two_roads_data_cache_id_years_idx",
+            "road1",
+            "road2",
+            "years_ago",
+            unique=True,
+        ),
     )
 
     def get_data(self):
         return self.data
 
     def serialize(self):
-        return {"road1": self.road1, "road2": self.road2, "years_ago": self.years_ago,
-                "data": self.data}
+        return {
+            "road1": self.road1,
+            "road2": self.road2,
+            "years_ago": self.years_ago,
+            "data": self.data,
+        }
 
 
 class InfographicsTwoRoadsDataCacheTemp(InfographicsTwoRoadsDataCacheFields, Base):
     __tablename__ = "infographics_two_roads_data_cache_temp"
 
     def serialize(self):
-        return {"road1": self.road1, "road2": self.road2, "years_ago": self.years_ago,
-                "data": self.data}
+        return {
+            "road1": self.road1,
+            "road2": self.road2,
+            "years_ago": self.years_ago,
+            "data": self.data,
+        }
 
     # # Flask-Login integration
     # def is_authenticated(self):
@@ -2487,44 +2531,39 @@ class InfographicsTwoRoadsDataCacheTemp(InfographicsTwoRoadsDataCacheFields, Bas
     #
 
 
-class InfographicsTwoStreetsDataCacheFields(object):
-    street1 = Column(Integer(), primary_key=True)
-    street2 = Column(Integer(), primary_key=True)
+class InfographicsStreetDataCacheFields(object):
     yishuv_symbol = Column(Integer(), primary_key=True)
+    street = Column(Integer(), primary_key=True)
     years_ago = Column(Integer(), primary_key=True)
     data = Column(sqlalchemy.types.JSON())
 
     def serialize(self):
-        return {"street1": self.street1, "street2": self.street2,
-                "yishuv_symbol": self.yishuv_symbol,
-                "years_ago": self.years_ago,
-                "data": self.data}
+        return {
+            "street": self.street,
+            "yishuv_symbol": self.yishuv_symbol,
+            "years_ago": self.years_ago,
+            "data": self.data,
+        }
 
 
-class InfographicsTwoStreetsDataCache(InfographicsTwoStreetsDataCacheFields, Base):
-    __tablename__ = "infographics_two_streets_data_cache"
+class InfographicsStreetDataCache(InfographicsStreetDataCacheFields, Base):
+    __tablename__ = "infographics_street_data_cache"
     __table_args__ = (
-        Index("infographics_two_streets_data_cache_id_years_idx", "street1", "street2",
-              "yishuv_symbol", "years_ago", unique=True),
+        Index(
+            "infographics_street_data_cache_id_years_idx",
+            "yishuv_symbol",
+            "street",
+            "years_ago",
+            unique=True,
+        ),
     )
 
     def get_data(self):
         return self.data
 
 
-class InfographicsTwoStreetsDataCacheTemp(InfographicsTwoStreetsDataCacheFields, Base):
-    __tablename__ = "infographics_two_streets_data_cache_temp"
-
-    # # Flask-Login integration
-    # def is_authenticated(self):
-    #     return True
-    #
-    # def is_active(self):
-    #     return True
-    #
-    # def is_anonymous(self):
-    #     return False
-    #
+class InfographicsStreetDataCacheTemp(InfographicsStreetDataCacheFields, Base):
+    __tablename__ = "infographics_street_data_cache_temp"
 
 
 class CasualtiesCosts(Base):

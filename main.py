@@ -278,6 +278,18 @@ def infographics_data_cache_for_road_segments():
     return main_for_road_segments(update=True, info=True)
 
 
+@process.group()
+def cache():
+    pass
+
+
+@cache.command()
+def update_street():
+    """Update street cache"""
+    from anyway.parsers.infographics_data_cache_updater import main_for_street
+    main_for_street()
+
+
 @process.command()
 @click.argument("filename", type=str, default="static/data/casualties/casualties_costs.csv")
 def update_casualties_costs(filename):

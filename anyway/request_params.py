@@ -2,10 +2,11 @@ import datetime
 from dataclasses import dataclass
 from typing import Dict, Any, Optional
 import logging
+import copy
 from sqlalchemy import func
 import pandas as pd
 
-from anyway.models import NewsFlash, AccidentMarkerView
+from anyway.models import NewsFlash, AccidentMarkerView, City, Streets
 from anyway.parsers.location_extraction import get_road_segment_name_and_number
 from anyway.backend_constants import BE_CONST
 from anyway.app_and_db import db
@@ -36,7 +37,8 @@ class RequestParams:
         )
 
 
-def request_params_from_request_values(vals: dict) -> Optional[RequestParams]:
+# todo: merge with get_request_params()
+def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams]:
     location = get_location_from_request_values(vals)
     years_ago = vals.get("years_ago")
     lang = vals.get("lang", "he")
@@ -90,6 +92,10 @@ def get_location_from_request_values(vals: dict) -> dict:
     road_segment_id = vals.get("road_segment_id")
     if road_segment_id is not None:
         return extract_road_segment_location(road_segment_id)
+    if ("yishuv_name" in vals or "yishuv_symbol" in vals) and (
+        "street1" in vals or "street1_hebrew" in vals
+    ):
+        return extract_street_location(vals)
     logging.error(f"Unsupported location:{vals}")
     return {}
 
@@ -142,6 +148,10 @@ def get_road_segment_location_text(road1: int, road_segment_name: str):
     return res
 
 
+def get_street_location_text(yishuv_name, street1_hebrew):
+    return " רחוב " + street1_hebrew + " ב" + yishuv_name
+
+
 def extract_road_segment_location(road_segment_id):
     data = {"resolution": BE_CONST.ResolutionCategories.SUBURBAN_ROAD}
     road1, road_segment_name = get_road_segment_name_and_number(road_segment_id)
@@ -152,6 +162,32 @@ def extract_road_segment_location(road_segment_id):
     # fake gps - todo: fix
     gps = {"lat": 32.825610, "lon": 35.165395}
     return {"name": "location", "data": data, "gps": gps, "text": text}
+
+
+# todo: fill both codes and names into location
+def extract_street_location(input_vals: dict):
+    vals = fill_missing_street_values(input_vals)
+    # noinspection PyDictCreation
+    data = {"resolution": BE_CONST.ResolutionCategories.STREET}
+    for k in ["yishuv_name", "yishuv_symbol", "street1", "street1_hebrew"]:
+        data[k] = vals[k]
+    text = get_street_location_text(vals["yishuv_name"], vals["street1_hebrew"])
+    # fake gps - todo: fix
+    gps = {"lat": 32.825610, "lon": 35.165395}
+    return {"name": "location", "data": data, "gps": gps, "text": text}
+
+
+def fill_missing_street_values(vals: dict) -> dict:
+    res = copy.copy(vals)
+    if "yishuv_symbol" in res and "yishuv_name" not in res:
+        res["yishuv_name"] = City.get_name_from_symbol(res["yishuv_symbol"])
+    else:
+        res["yishuv_symbol"] = City.get_symbol_from_name(res["yishuv_name"])
+    if "street1" in res and "street1_hebrew" not in res:
+        res["street1_hebrew"] = Streets.get_street_name_by_street(res["yishuv_symbol"], res["street1"])
+    else:
+        res["street1"] = Streets.get_street_by_street_name(res["street1_hebrew"])
+    return res
 
 
 def extract_news_flash_obj(news_flash_id) -> Optional[NewsFlash]:

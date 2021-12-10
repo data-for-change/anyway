@@ -14,12 +14,6 @@ from flask_assets import Environment
 from flask_babel import Babel, gettext
 from flask_compress import Compress
 from flask_cors import CORS
-from flask_login import LoginManager
-from flask_principal import (
-    Principal,
-    identity_loaded,
-    UserNeed,
-)
 from flask_restx import Resource, fields, reqparse
 from sqlalchemy import and_, not_, or_
 from sqlalchemy import func
@@ -28,8 +22,7 @@ from webassets.ext.jinja2 import AssetsExtension
 from werkzeug.exceptions import BadRequestKeyError
 
 from anyway import utilities, secrets
-from anyway.app_and_db import app, api, get_cors_config
-from anyway.base import _set_cookie_hijack, _clear_cookie_hijack
+from anyway.app_and_db import api, get_cors_config
 from anyway.clusters_calculator import retrieve_clusters
 from anyway.config import ENTRIES_PER_PAGE
 from anyway.constants import CONST
@@ -188,14 +181,6 @@ cbs_dict_files = {DICTIONARY: "Dictionary.csv"}
 content_encoding = "cp1255"
 
 Compress(app)
-# Setup Flask-login
-login_manager = LoginManager()
-# Those 2 function hijack are a temporary fix - more info in base.py
-login_manager._set_cookie = _set_cookie_hijack
-login_manager._clear_cookie = _clear_cookie_hijack
-login_manager.init_app(app)
-# Setup Flask-Principal
-principals = Principal(app)
 
 
 @app.teardown_appcontext
@@ -1420,42 +1405,6 @@ def embedded_reports_api():
 #
 
 # User system API
-@login_manager.user_loader
-def load_user(id: str) -> Users:
-    return db.session.query(Users).get(id)
-
-
-# noinspection PyUnusedLocal
-@identity_loaded.connect_via(app)
-def on_identity_loaded(sender, identity):
-    # Set the identity user object
-    identity.user = current_user
-
-    # Add the UserNeed to the identity
-    if hasattr(current_user, "id"):
-        identity.provides.add(UserNeed(current_user.id))
-
-    # Assuming the User model has a list of roles, update the
-    # identity with the roles that the user provides
-    if hasattr(current_user, "roles"):
-        for role in current_user.roles:
-            identity.provides.add(RoleNeed(role.name))
-
-    if not current_user.is_anonymous:
-        identity.provides.add(RoleNeed("authenticated"))
-
-
-@principals.identity_loader
-def load_identity_when_session_expires():
-    if hasattr(current_user, "id"):
-        if hasattr(current_user, "is_active"):
-            if not current_user.is_active:
-                logout_user()
-                return AnonymousIdentity()
-
-        return Identity(current_user.id)
-
-
 app.add_url_rule("/user/add_user_to_org", view_func=add_user_to_org, methods=["POST"])
 app.add_url_rule("/user/remove_user_from_org", view_func=remove_user_from_org, methods=["POST"])
 app.add_url_rule("/user/add_role", view_func=add_role, methods=["POST"])
@@ -1471,6 +1420,9 @@ app.add_url_rule("/user/get_all_users_info", view_func=get_all_users_info, metho
 app.add_url_rule("/user/get_roles_list", view_func=get_roles_list, methods=["GET"])
 app.add_url_rule("/callback/<provider>", view_func=oauth_callback, methods=["GET"])
 app.add_url_rule("/authorize/<provider>", view_func=oauth_authorize, methods=["GET"])
+
+# A hack for Jinja template that is looking for /logout
+app.add_url_rule("/logout", view_func=logout, methods=["GET"])
 
 
 @api.route("/logout")

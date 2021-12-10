@@ -8,13 +8,23 @@ from functools import wraps
 from http import HTTPStatus
 
 from flask import Response, request, Request, jsonify, current_app, redirect, g
-from flask_login import current_user, login_user, logout_user
-from flask_principal import Permission, RoleNeed, identity_changed, Identity, AnonymousIdentity
+from flask_login import current_user, login_user, logout_user, LoginManager
+from flask_principal import (
+    Permission,
+    RoleNeed,
+    identity_changed,
+    Identity,
+    AnonymousIdentity,
+    Principal,
+    identity_loaded,
+    UserNeed,
+)
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from anyway.anyway_dataclasses.user_data import UserData
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 from anyway.backend_constants import BE_CONST
+from anyway.base import _set_cookie_hijack, _clear_cookie_hijack
 from anyway.error_code_and_strings import (
     Errors as Es,
     ERROR_TO_HTTP_CODE_DICT,
@@ -30,6 +40,14 @@ from anyway.views.user_system.user_functions import (
     get_current_user,
 )
 
+# Setup Flask-login
+login_manager = LoginManager()
+# Those 2 function hijack are a temporary fix - more info in base.py
+login_manager._set_cookie = _set_cookie_hijack
+login_manager._clear_cookie = _clear_cookie_hijack
+login_manager.init_app(app)
+# Setup Flask-Principal
+principals = Principal(app)
 
 # Copied and modified from flask-security
 def roles_accepted(*roles):
@@ -57,13 +75,49 @@ def roles_accepted(*roles):
             if not current_user.is_anonymous:
                 user_email = current_user.email
             logging.info(
-                f"roles_accepted: User \"{user_email}\" doesn't have the needed roles: {str(roles)} for Path {request.url_rule}"
+                f'roles_accepted: User "{user_email}" doesn\'t have the needed roles: {str(roles)} for Path {request.url_rule}'
             )
             return return_json_error(Es.BR_BAD_AUTH)
 
         return decorated_view
 
     return wrapper
+
+
+@login_manager.user_loader
+def load_user(id: str) -> Users:
+    return db.session.query(Users).get(id)
+
+
+# noinspection PyUnusedLocal
+@identity_loaded.connect_via(app)
+def on_identity_loaded(sender, identity):
+    # Set the identity user object
+    identity.user = current_user
+
+    # Add the UserNeed to the identity
+    if hasattr(current_user, "id"):
+        identity.provides.add(UserNeed(current_user.id))
+
+    # Assuming the User model has a list of roles, update the
+    # identity with the roles that the user provides
+    if hasattr(current_user, "roles"):
+        for role in current_user.roles:
+            identity.provides.add(RoleNeed(role.name))
+
+    if not current_user.is_anonymous:
+        identity.provides.add(RoleNeed("authenticated"))
+
+
+@principals.identity_loader
+def load_identity_when_session_expires():
+    if hasattr(current_user, "id"):
+        if hasattr(current_user, "is_active"):
+            if not current_user.is_active:
+                logout_user()
+                return AnonymousIdentity()
+
+        return Identity(current_user.id)
 
 
 def return_json_error(error_code: int, *argv) -> Response:

@@ -20,8 +20,7 @@ def _iter_rows(filename):
         "סוג עבירה",
         "סוג רכב",
         "סוג לוחית רישוי",
-        "רמת חומרה",
-        "נ״צ סופי",
+        "נ״צ ערוך",
     ]
     assert [cell.value for cell in first_row] == headers
     for row in rows:
@@ -30,9 +29,11 @@ def _iter_rows(filename):
 
         violation = row[3].value
         vehicle_type = row[4].value
-        coordinates = row[7].value
-        severity = row[6].value
+        coordinates = row[6].value
+        if coordinates == ',' or coordinates == '0.0,0.0':
+            continue
         rsa_license_plate = row[5].value
+        rsa_severity = None
         video_link = None
         timestamp = parser.parse(row[1].value, dayfirst=True)
         if not violation:
@@ -44,7 +45,6 @@ def _iter_rows(filename):
         description = {
             "VIOLATION_TYPE": violation,
             "VEHICLE_TYPE": vehicle_type,
-            "RSA_SEVERITY": severity,
             "RSA_LICENSE_PLATE": rsa_license_plate,
         }
 
@@ -56,7 +56,6 @@ def _iter_rows(filename):
             "created": timestamp,
             "provider_code": BE_CONST.RSA_PROVIDER_CODE,
             "accident_severity": 0,
-            "rsa_severity": severity,
             "title": "שומרי הדרך",
             "description": json.dumps(description),
             "location_accuracy": 1,
@@ -70,7 +69,8 @@ def _iter_rows(filename):
 
 
 def parse(filename):
-    for batch in batch_iterator(_iter_rows(filename), batch_size=5000):
+    db.session.execute(f"DELETE from markers where provider_code = {BE_CONST.RSA_PROVIDER_CODE}")
+    for batch in batch_iterator(_iter_rows(filename), batch_size=50000):
         db.session.bulk_insert_mappings(AccidentMarker, batch)
         db.session.commit()
 

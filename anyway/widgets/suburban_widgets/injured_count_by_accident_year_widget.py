@@ -1,4 +1,3 @@
-import logging
 from typing import Dict
 
 from flask_babel import _
@@ -11,6 +10,7 @@ from anyway.widgets.widget_utils import (
     add_empty_keys_to_gen_two_level_dict,
     gen_entity_labels,
     get_injured_filters,
+    format_2_level_items,
 )
 from anyway.models import InvolvedMarkerView
 from anyway.widgets.widget import register
@@ -32,26 +32,20 @@ class InjuredCountByAccidentYearWidget(SubUrbanWidget):
         )
 
     def generate_items(self) -> None:
-        res = get_accidents_stats(
+        res1 = get_accidents_stats(
             table_obj=InvolvedMarkerView,
             filters=get_injured_filters(self.request_params.location_info),
-            group_by=("injury_severity", "accident_year"),
-            count="accident_year",
+            group_by=("accident_year", "injury_severity"),
+            count="injury_severity",
             start_time=self.request_params.start_time,
             end_time=self.request_params.end_time,
         )
-        try:
-            self.items = add_empty_keys_to_gen_two_level_dict(
-                res,
-                InjurySeverity.codes(),
-                list(
-                    range(
-                        self.request_params.start_time.year, self.request_params.end_time.year + 1
-                    )
-                ),
-            )
-        except Exception as e:
-            logging.exception(f"failed to add empty keys to {res}", e)
+        res2 = add_empty_keys_to_gen_two_level_dict(
+            res1,
+            list(range(self.request_params.start_time.year, self.request_params.end_time.year + 1)),
+            InjurySeverity.codes(),
+        )
+        self.items = format_2_level_items(res2, None, InjurySeverity)
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
@@ -59,7 +53,7 @@ class InjuredCountByAccidentYearWidget(SubUrbanWidget):
             "title": _("Number of injured in accidents, per year, splitted by severity, in segment")
             + " "
             + segment_dictionary[request_params.location_info["road_segment_name"]],
-            "labels": gen_entity_labels(InjurySeverity),
+            "labels_map": gen_entity_labels(InjurySeverity),
         }
         return items
 

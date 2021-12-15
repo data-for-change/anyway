@@ -1,6 +1,6 @@
 import logging
 from collections import defaultdict
-from typing import Dict, Any, List, Type
+from typing import Dict, Any, List, Type, Optional
 
 import pandas as pd
 from flask_babel import _
@@ -86,9 +86,9 @@ def add_empty_keys_to_gen_two_level_dict(
 
 def gen_entity_labels(entity: Type[LabeledCode]) -> dict:
     res = {}
-    for e in entity:
-        label = e.get_label()
-        res[e.value] = {"name": label, "localized_name": _(label)}
+    for code in entity:
+        label = code.get_label()
+        res[label] = _(label)
     return res
 
 
@@ -107,3 +107,24 @@ def get_injured_filters(location_info):
 def run_query(query: db.session.query) -> Dict:
     # pylint: disable=no-member
     return pd.read_sql_query(query.statement, query.session.bind).to_dict(orient="records")
+
+
+LKEY = "label_key"
+VAL = "value"
+SERIES = "series"
+
+
+def format_2_level_items(
+    items: Dict[str, dict],
+    level1_vals: Optional[Type[LabeledCode]],
+    level2_vals: Optional[Type[LabeledCode]],
+):
+    res: List[Dict[str, Any]] = []
+    for l1_code, year_res in items.items():
+        l1 = level1_vals.labels()[level1_vals(l1_code)] if level1_vals else l1_code
+        series_data = []
+        for l2_code, num in year_res.items():
+            l2 = level2_vals.labels()[level2_vals(l2_code)] if level2_vals else l2_code
+            series_data.append({LKEY: l2, VAL: num})
+        res.append({LKEY: l1, SERIES: series_data})
+    return res

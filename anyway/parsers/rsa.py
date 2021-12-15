@@ -30,10 +30,9 @@ def _iter_rows(filename):
         violation = row[3].value
         vehicle_type = row[4].value
         coordinates = row[6].value
-        if coordinates == ',' or coordinates == '0.0,0.0':
+        if coordinates == "," or coordinates == "0.0,0.0":
             continue
         rsa_license_plate = row[5].value
-        rsa_severity = None
         video_link = None
         timestamp = parser.parse(row[1].value, dayfirst=True)
         if not violation:

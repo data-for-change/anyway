@@ -1,8 +1,10 @@
 from anyway.request_params import RequestParams
 from anyway.widgets.widget import register
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
+from typing import Dict
+from flask_babel import _
 
-
+# TODO: unregister? this widget produces only mock data
 @register
 class TopRoadSegmentsAccidentsWidget(SubUrbanWidget):
     name: str = "top_road_segments_accidents"
@@ -10,7 +12,6 @@ class TopRoadSegmentsAccidentsWidget(SubUrbanWidget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 22
-        self.text = {"title": "5 המקטעים עם כמות התאונות הגדולה ביותר"}
 
     def generate_items(self) -> None:
         self.items = TopRoadSegmentsAccidentsWidget.top_road_segments_accidents_mock_data()
@@ -24,3 +25,10 @@ class TopRoadSegmentsAccidentsWidget(SubUrbanWidget):
             {"segment name": "מחלף קוממיות - מחלף יוספטל", "count": 34},
             {"segment name": "מחלף ההלכה - מחלף רוקח ", "count": 31},
         ]
+
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        items["data"]["text"] = {
+            "title": _("Segments with most accidents"),
+        }
+        return items

@@ -5,7 +5,7 @@ from anyway.models import AccidentMarkerView
 from anyway.widgets.widget import register
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 from flask_babel import _
-
+from typing import Dict
 
 @register
 class AccidentCountBySeverityWidget(SubUrbanWidget):
@@ -55,5 +55,11 @@ class AccidentCountBySeverityWidget(SubUrbanWidget):
         items["total_accidents_count"] = total_accidents_count
         return items
 
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        items["data"]["text"] = {
+            "title": _('Number of accidents by severity') +f" - {request_params.location_info['road_segment_name']}"
+        }
+        return items
 
 _("Fatal, severe and light accidents count in the specified location.")

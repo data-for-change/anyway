@@ -10,8 +10,10 @@ from anyway.widgets.widget_utils import get_query
 from anyway.models import InvolvedMarkerView
 from anyway.vehicle_type import VehicleCategory
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
+from typing import Dict
+from flask_babel import _
 
-
+# TODO: register?
 class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
     name: str = "motorcycle_accidents_vs_all_accidents"
 
@@ -19,9 +21,6 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
         super().__init__(request_params, type(self).name)
         self.rank = 20
         self.road_number: str = request_params.location_info["road1"]
-        self.text = {
-            "title": f"תאונות אופנועים קשות וקטלניות בכביש {int(self.road_number)} בהשוואה לכל הארץ"
-        }
 
     def generate_items(self) -> None:
         self.items = MotorcycleAccidentsVsAllAccidentsWidget.motorcycle_accidents_vs_all_accidents(
@@ -131,3 +130,10 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
                 percentage_label: (counter_other_other + counter_road_other) / sum_all,
             },
         ]
+
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        items["data"]["text"] = {
+            "title": _('Number of fatal and severe motorcycle accidents') +f" - {request_params.location_info['road1']} " +_('compared to rest of country')
+        }
+        return items

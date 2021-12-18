@@ -750,6 +750,14 @@ def import_streets_into_db():
     max_name_len = 0
     for k, street_hebrew in yishuv_street_dict.items():
         yishuv_symbol, street = k
+        yishuv_name_street_num = yishuv_name_dict.get((yishuv_symbol, street_hebrew), None)
+        if yishuv_name_street_num is None or yishuv_name_street_num != street:
+            logging.error(
+                f"streets data mismatch:"
+                f"yishuv_street_dict entry: {k}->{street_hebrew}"
+                f",yishuv_name_dict entry: {(yishuv_symbol, street_hebrew)}->{yishuv_name_street_num}"
+            )
+            continue
         name_len = len(street_hebrew)
         if name_len > max_name_len:
             max_name_len = name_len

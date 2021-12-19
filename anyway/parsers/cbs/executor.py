@@ -767,6 +767,9 @@ def import_streets_into_db():
             "street_hebrew": street_hebrew[: min(name_len, Streets.MAX_NAME_LEN)],
         }
         items.append(street_entry)
+    logging.info(
+        f"Writing to db: {len(yishuv_street_dict)}:{len(yishuv_name_dict)} -> {len(items)} rows"
+    )
     db.session.query(Streets).delete()
     db.session.bulk_insert_mappings(Streets, items)
     db.session.commit()
@@ -781,6 +784,19 @@ def import_streets_into_db():
 
 yishuv_street_dict: Dict[Tuple[int, int], str] = {}
 yishuv_name_dict: Dict[Tuple[int, str], int] = {}
+
+
+def load_existing_streets():
+    streets = db.session.query(Streets).all()
+    for s in streets:
+        s_dict = {
+            "yishuv_symbol": s.yishuv_symbol,
+            "street": s.street,
+            "street_hebrew": s.street_hebrew,
+        }
+        add_street_remove_name_duplicates(s_dict)
+        add_street_remove_num_duplicates(s_dict)
+    logging.info(f"Loaded streets: {len(yishuv_street_dict)}:{len(yishuv_name_dict)}")
 
 
 def add_to_streets(streets_map: Dict[int, List[dict]]):
@@ -1068,6 +1084,7 @@ def main(
     load_start_year=None,
 ):
     try:
+        load_existing_streets()
         total = 0
         started = datetime.now()
         if source == "s3":

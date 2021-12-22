@@ -1082,9 +1082,9 @@ app.add_url_rule(
     view_func=injured_around_schools_api,
     methods=["GET"],
 )
-app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
+app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash_v2, methods=["GET"])
 
-app.add_url_rule("/api/news-flash-v2", endpoint=None, view_func=news_flash_v2, methods=["GET"])
+app.add_url_rule("/api/v1/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
 
 
 nf_parser = reqparse.RequestParser()

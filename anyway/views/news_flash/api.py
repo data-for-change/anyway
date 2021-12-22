@@ -94,7 +94,7 @@ def news_flash_v2():
     if "id" in validated_query_params:
         return get_news_flash_by_id(validated_query_params["id"])
 
-    query = gen_news_flash_query_v2(validated_query_params)
+    query = gen_news_flash_query_v2(db.session, validated_query_params)
     news_flashes = query.all()
 
     news_flashes_jsons = [n.serialize() for n in news_flashes]
@@ -185,8 +185,8 @@ def gen_news_flash_query(
     return query
 
 
-def gen_news_flash_query_v2(valid_params: dict):
-    query = db.session.query(NewsFlash)
+def gen_news_flash_query_v2(session, valid_params: dict):
+    query = session.query(NewsFlash)
     for param, value in valid_params.items():
         if param == "road_number":
             query = query.filter(NewsFlash.road1 == value)

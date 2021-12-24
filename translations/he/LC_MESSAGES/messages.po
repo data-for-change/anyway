@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-12-18 11:12+0200\n"
+"POT-Creation-Date: 2021-12-28 17:05+0200\n"
 "PO-Revision-Date: 2020-10-16 15:42+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: he\n"
@@ -16,7 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.6.0\n"
+"Generated-By: Babel 2.9.1\n"
 
 #: anyway/backend_constants.py:145
 msgid "killed"
@@ -30,11 +30,11 @@ msgstr "פצוע/ה קשה"
 msgid "light injured"
 msgstr "פצוע/ה קל"
 
-#: anyway/flask_app.py:729 anyway/flask_app.py:834
+#: anyway/flask_app.py:676 anyway/flask_app.py:781
 msgid "Discussion not found:"
 msgstr ""
 
-#: anyway/flask_app.py:732
+#: anyway/flask_app.py:679
 msgid "Illegal Discussion"
 msgstr ""
 
@@ -266,11 +266,11 @@ msgstr "אחרות"
 msgid "Number of accidents by accident type"
 msgstr "מספר תאונות לפי סוג"
 
-#: anyway/widgets/suburban_widgets/accident_count_by_accident_year_widget.py:57
+#: anyway/widgets/suburban_widgets/accident_count_by_accident_year_widget.py:51
 msgid "Number of accidents, by year, splitted by accident severity, in segment"
 msgstr "מספר תאונות לפי שנה, מחולקות לפי חומרה, במקטע"
 
-#: anyway/widgets/suburban_widgets/accident_count_by_accident_year_widget.py:65
+#: anyway/widgets/suburban_widgets/accident_count_by_accident_year_widget.py:59
 msgid ""
 "Fatal, severe and light accidents count in the specified years, split by "
 "accident severity"
@@ -348,11 +348,11 @@ msgid ""
 "other accidents."
 msgstr "התפלגות התאונות הקטלניות לפי סוג, תאונות חזיתיות מול סך התאונות האחרות."
 
-#: anyway/widgets/suburban_widgets/injured_count_by_accident_year_widget.py:56
+#: anyway/widgets/suburban_widgets/injured_count_by_accident_year_widget.py:50
 msgid "Number of injured in accidents, per year, split by severity"
 msgstr "מספר נפגעים לפי שנה, לפי חומרה"
 
-#: anyway/widgets/suburban_widgets/injured_count_by_accident_year_widget.py:62
+#: anyway/widgets/suburban_widgets/injured_count_by_accident_year_widget.py:56
 msgid ""
 "Fatal, severe and light injured count in the specified years, split by "
 "injury severity"
@@ -364,8 +364,12 @@ msgstr ""
 msgid "Number of Injuries in accidents by severity"
 msgstr "מספר תאונות לפי חומרה"
 
-#: anyway/widgets/suburban_widgets/injured_count_per_age_group_widget.py:101
-msgid "Injury severity per age group in "
+#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_widget.py:44
+msgid "Killed and injury stacked per age group in "
+msgstr "חומרת פגיעה פר גיל בכביש "
+
+#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_widget.py:73
+msgid "Killed and injury per age group in "
 msgstr "חומרת פגיעה פר גיל בכביש "
 
 #: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:36
@@ -477,7 +481,3 @@ msgstr ""
 #: templates/index.html:490
 msgid "Login with Google"
 msgstr ""
-
-#~ msgid "Injured and killed pedestrians by severity and year"
-#~ msgstr "כמות נפגעים הולכי רגל לפי חומרה ושנה"
-

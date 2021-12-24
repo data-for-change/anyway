@@ -750,6 +750,14 @@ def import_streets_into_db():
     max_name_len = 0
     for k, street_hebrew in yishuv_street_dict.items():
         yishuv_symbol, street = k
+        yishuv_name_street_num = yishuv_name_dict.get((yishuv_symbol, street_hebrew), None)
+        if yishuv_name_street_num is None or yishuv_name_street_num != street:
+            logging.error(
+                f"streets data mismatch:"
+                f"yishuv_street_dict entry: {k}->{street_hebrew}"
+                f",yishuv_name_dict entry: {(yishuv_symbol, street_hebrew)}->{yishuv_name_street_num}"
+            )
+            continue
         name_len = len(street_hebrew)
         if name_len > max_name_len:
             max_name_len = name_len
@@ -759,6 +767,9 @@ def import_streets_into_db():
             "street_hebrew": street_hebrew[: min(name_len, Streets.MAX_NAME_LEN)],
         }
         items.append(street_entry)
+    logging.info(
+        f"Writing to db: {len(yishuv_street_dict)}:{len(yishuv_name_dict)} -> {len(items)} rows"
+    )
     db.session.query(Streets).delete()
     db.session.bulk_insert_mappings(Streets, items)
     db.session.commit()
@@ -773,6 +784,19 @@ def import_streets_into_db():
 
 yishuv_street_dict: Dict[Tuple[int, int], str] = {}
 yishuv_name_dict: Dict[Tuple[int, str], int] = {}
+
+
+def load_existing_streets():
+    streets = db.session.query(Streets).all()
+    for s in streets:
+        s_dict = {
+            "yishuv_symbol": s.yishuv_symbol,
+            "street": s.street,
+            "street_hebrew": s.street_hebrew,
+        }
+        add_street_remove_name_duplicates(s_dict)
+        add_street_remove_num_duplicates(s_dict)
+    logging.info(f"Loaded streets: {len(yishuv_street_dict)}:{len(yishuv_name_dict)}")
 
 
 def add_to_streets(streets_map: Dict[int, List[dict]]):
@@ -1060,6 +1084,7 @@ def main(
     load_start_year=None,
 ):
     try:
+        load_existing_streets()
         total = 0
         started = datetime.now()
         if source == "s3":

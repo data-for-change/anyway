@@ -1,6 +1,6 @@
 import logging
 from collections import defaultdict
-from typing import Dict, Any, List, Type, Optional
+from typing import Dict, Any, List, Type, Optional, Union
 
 import pandas as pd
 from flask_babel import _
@@ -128,3 +128,29 @@ def format_2_level_items(
             series_data.append({LKEY: l2, VAL: num})
         res.append({LKEY: l1, SERIES: series_data})
     return res
+
+
+def order_severity_in_stack_bar_widget(
+    structured_data_list: List[Dict[str, Union[str, List]]], severity_order: List[str]
+) -> List[Dict[str, Union[str, List]]]:
+    severity_dict = {}
+    for struct in structured_data_list:
+        series_data = struct["series"]
+        for injury in series_data:
+            for key, value in injury.items():
+                if key != "label_key":
+                    continue
+
+                severity_dict[value] = injury
+
+        series_data_new = []
+        for severity in severity_order:
+            if severity in severity_dict:
+                series_data_new.append(severity_dict.pop(severity))
+
+        for key, value in severity_dict.items():
+            series_data_new.append(value)
+
+        struct["series"] = series_data_new
+
+    return structured_data_list

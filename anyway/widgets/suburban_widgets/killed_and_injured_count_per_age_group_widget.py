@@ -1,21 +1,27 @@
 from collections import defaultdict
 from datetime import datetime
-from typing import Callable, Dict, Tuple
+from typing import Callable, Dict, Tuple, List
 
 from flask_babel import _
 from flask_sqlalchemy import BaseQuery
 from sqlalchemy import func
 
 from anyway.app_and_db import db
-from anyway.backend_constants import BE_CONST, InjurySeverity
+from anyway.backend_constants import BE_CONST, InjurySeverity as IS
 from anyway.models import InvolvedMarkerView
 from anyway.request_params import RequestParams
 from anyway.utilities import parse_age_from_range
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 from anyway.widgets.widget import register
+from anyway.widgets.widget_utils import (
+    order_severity_in_stack_bar_widget,
+    gen_entity_labels,
+    add_empty_keys_to_gen_two_level_dict,
+)
 
-# RequestParams is not hashable so we can't use functools.lru_cache
+# RequestParams is not hashable, so we can't use functools.lru_cache
 cache_dict = {}
+AGE_RANGE_DICT = {0: 4, 5: 9, 10: 14, 15: 19, 20: 24, 25: 34, 35: 44, 45: 54, 55: 64, 65: 200}
 
 
 @register
@@ -28,21 +34,36 @@ class KilledInjuredCountPerAgeGroupStackedWidget(SubUrbanWidget):
 
     def generate_items(self) -> None:
         raw_data = filter_and_group_injured_count_per_age_group(self.request_params)
+
+        partial_processed = add_empty_keys_to_gen_two_level_dict(
+            raw_data,
+            get_age_range_list(),
+            IS.codes(),
+        )
+
         structured_data_list = []
-        for age_group, severity_dict in raw_data.items():
+        for age_group, severity_dict in partial_processed.items():
             series_severity = [
-                {"label_key": _(InjurySeverity(severity_value).get_label()), "value": count}
+                {"label_key": IS(severity_value).get_label(), "value": count}
                 for severity_value, count in severity_dict.items()
             ]
             structured_data_list.append({"label_key": age_group, "series": series_severity})
 
-        self.items = structured_data_list
+        self.items = order_severity_in_stack_bar_widget(
+            structured_data_list,
+            [
+                IS.LIGHT_INJURED.get_label(),
+                IS.SEVERE_INJURED.get_label(),
+                IS.KILLED.get_label(),
+            ],
+        )
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
             "title": _("Killed and injury stacked per age group in ")
-            + request_params.location_info["road_segment_name"]
+            + request_params.location_info["road_segment_name"],
+            "labels_map": gen_entity_labels(IS),
         }
         return items
 
@@ -101,9 +122,18 @@ def filter_and_group_injured_count_per_age_group(request_params: RequestParams) 
     return dict_grouped
 
 
-def parse_query_data(query: BaseQuery) -> Tuple[Dict, bool]:
-    range_dict = {0: 4, 5: 9, 10: 14, 15: 19, 20: 24, 25: 34, 35: 44, 45: 54, 55: 64, 65: 200}
+def get_age_range_list() -> List[str]:
+    age_list = []
+    for item_min_range, item_max_range in AGE_RANGE_DICT.items():
+        if 200 == item_max_range:
+            age_list.append("65+")
+        else:
+            age_list.append(f"{item_min_range:02}-{item_max_range:02}")
 
+    return age_list
+
+
+def parse_query_data(query: BaseQuery) -> Tuple[Dict, bool]:
     def defaultdict_int_factory() -> Callable:
         return lambda: defaultdict(int)
 
@@ -115,7 +145,7 @@ def parse_query_data(query: BaseQuery) -> Tuple[Dict, bool]:
         injury_id = row.injury_severity
         count = row.count
 
-        # The age groups in the DB are not the same age groups in the Widget - so we need to merge some of the groups
+        # The age groups in the DB are not the same age groups in the Widget - so we need to merge some groups
         age_parse = parse_age_from_range(age_range)
         if not age_parse:
             dict_grouped["unknown"][injury_id] += count
@@ -123,7 +153,7 @@ def parse_query_data(query: BaseQuery) -> Tuple[Dict, bool]:
             min_age, max_age = age_parse
             found_age_range = False
             # Find to what "bucket" to aggregate the data
-            for item_min_range, item_max_range in range_dict.items():
+            for item_min_range, item_max_range in AGE_RANGE_DICT.items():
                 if item_min_range <= min_age <= max_age <= item_max_range:
                     string_age_range = f"{item_min_range:02}-{item_max_range:02}"
                     dict_grouped[string_age_range][injury_id] += count
@@ -154,9 +184,9 @@ def create_query_for_killed_and_injured_count_per_age_group(
         .filter(
             InvolvedMarkerView.injury_severity.in_(
                 [
-                    InjurySeverity.KILLED.value,  # pylint: disable=no-member
-                    InjurySeverity.SEVERE_INJURED.value,  # pylint: disable=no-member
-                    InjurySeverity.LIGHT_INJURED.value,  # pylint: disable=no-member
+                    IS.KILLED.value,  # pylint: disable=no-member
+                    IS.SEVERE_INJURED.value,  # pylint: disable=no-member
+                    IS.LIGHT_INJURED.value,  # pylint: disable=no-member
                 ]
             )
         )

@@ -3,6 +3,8 @@ from anyway.widgets.widget_utils import get_accidents_stats
 from anyway.models import AccidentMarkerView
 from anyway.widgets.widget import register
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
+from typing import Dict
+from flask_babel import _
 
 
 @register
@@ -37,3 +39,10 @@ class AccidentCountByAccidentTypeWidget(SubUrbanWidget):
             else:
                 merged_accident_type_count.append(item)
         return merged_accident_type_count
+
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        items["data"]["text"] = {
+            "title": _("Number of accidents by accident type"),
+        }
+        return items

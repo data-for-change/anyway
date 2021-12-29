@@ -78,9 +78,8 @@ class TopRoadSegmentsAccidentsPerKmWidget(SubUrbanWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
-            "title": f"{_('Severe and fatal accidents per Km by section in road')} {int(request_params.location_info['road1'])}"
+            "title": _('Segments with most accidents per Km') +f" - {request_params.location_info['road1']}"
         }
         return items
-
 
 _("Severe and fatal accidents per Km by section in road")

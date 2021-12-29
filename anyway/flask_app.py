@@ -76,6 +76,7 @@ DEFAULT_MAPS_API_KEY = "AIzaSyDUIWsBLkvIUwzLHMHos9qFebyJ63hEG2M"
 
 
 app.config.from_object(__name__)
+app.config["SWAGGER_UI_DOC_EXPANSION"] = 'list'
 app.config["SESSION_COOKIE_SAMESITE"] = "none"
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["REMEMBER_COOKIE_SECURE"] = True

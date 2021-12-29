@@ -6,6 +6,7 @@
 pyvenv.cfg.
 # compiled code
 *.py[cod]
+*.log
 
 # C extensions
 *.so

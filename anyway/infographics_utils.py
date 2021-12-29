@@ -19,7 +19,6 @@ from anyway.request_params import (
     extract_news_flash_obj,
     get_latest_accident_date,
     extract_news_flash_location,
-    get_request_params_from_request_values,
 )
 from anyway.backend_constants import BE_CONST, AccidentType
 from anyway.models import NewsFlash, AccidentMarkerView
@@ -207,27 +206,11 @@ def create_infographics_data_for_road_segment(
     return json.dumps(output, default=str)
 
 
-def create_infographics_data_for_location(vals: dict) -> str:
-    logger.debug(f"create_infographics_data_for_location({vals})")
-    try:
-        request_params = get_request_params_from_request_values(vals)
-        output = create_infographics_items(request_params)
-    except Exception as e:
-        logger.exception(
-            f"Exception while creating infographics items({vals})"
-            f":cause:{e.__cause__}, class:{e.__class__}"
-        )
-        output = {}
-    return json.dumps(output, default=str)
-
-
 def create_infographics_items(request_params: RequestParams) -> Dict:
     def get_dates_comment():
         return {
             "date_range": [request_params.start_time.year, request_params.end_time.year],
-            "last_update": datetime.datetime.fromordinal(
-                request_params.end_time.toordinal()
-            ).isoformat(),
+            "last_update": datetime.datetime.fromordinal(request_params.end_time.toordinal()).isoformat(),
         }
 
     try:

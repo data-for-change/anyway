@@ -20,21 +20,21 @@ import sqlalchemy as sa
 two_roads_table_name = 'infographics_two_roads_data_cache'
 two_roads_table_name_temp = 'infographics_two_roads_data_cache_temp'
 two_roads_index = 'infographics_two_roads_data_cache_id_years_idx'
-street_table_name = 'infographics_street_data_cache'
-street_table_name_temp = 'infographics_street_data_cache_temp'
-street_index = 'infographics_street_data_cache_id_years_idx'
+two_streets_table_name = 'infographics_two_streets_data_cache'
+two_streets_table_name_temp = 'infographics_two_streets_data_cache_temp'
+two_streets_index = 'infographics_two_streets_data_cache_id_years_idx'
 
 
 def upgrade():
     create_new_fields()
     create_two_roads_cache()
-    create_street_cache()
+    create_two_streets_cache()
 
 
 def downgrade():
     drop_new_fields()
     drop_two_roads_cache()
-    drop_street_cache()
+    drop_two_streets_cache()
 
 
 def create_new_fields():
@@ -88,27 +88,28 @@ def drop_two_roads_cache():
     op.drop_table(two_roads_table_name_temp)
 
 
-def create_street_table(table: str, index: Optional[str]):
+def create_two_streets_table(table: str, index: Optional[str]):
     op.create_table(table,
+                    sa.Column('street1', sa.Integer(), nullable=False),
+                    sa.Column('street2', sa.Integer(), nullable=True),
                     sa.Column('yishuv_symbol', sa.Integer(), nullable=False),
-                    sa.Column('street', sa.Integer(), nullable=False),
                     sa.Column('years_ago', sa.Integer(), nullable=False),
                     sa.Column('data', sa.types.JSON(), nullable=False),
-                    sa.PrimaryKeyConstraint('yishuv_symbol', 'street', 'years_ago')
+                    sa.PrimaryKeyConstraint('street1', 'street2', 'years_ago')
                     )
     if index:
         op.create_index(index, table,
-                        ['yishuv_symbol', 'street', 'years_ago'],
+                        ['street1', 'street2', 'yishuv_symbol', 'years_ago'],
                         unique=True)
 
 
-def create_street_cache():
-    create_street_table(street_table_name, street_index)
-    create_street_table(street_table_name_temp, None)
+def create_two_streets_cache():
+    create_two_streets_table(two_streets_table_name, two_streets_index)
+    create_two_streets_table(two_streets_table_name_temp, None)
 
 
-def drop_street_cache():
-    op.drop_index(op.f(street_index), table_name=street_table_name)
-    op.drop_table(street_table_name)
+def drop_two_streets_cache():
+    op.drop_index(op.f(two_streets_index), table_name=two_streets_table_name)
+    op.drop_table(two_streets_table_name)
 
-    op.drop_table(street_table_name_temp)
+    op.drop_table(two_streets_table_name_temp)

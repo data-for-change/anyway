@@ -52,7 +52,7 @@ from anyway.models import (
     AccidentMarkerView,
     EmbeddedReports,
 )
-from anyway.request_params import request_params_from_request_values
+from anyway.request_params import get_request_params_from_request_values
 from anyway.views.news_flash.api import (
     news_flash,
     news_flash_new,
@@ -1303,7 +1303,7 @@ def infographics_data_by_location():
     if mock_data == "true":
         output = get_infographics_mock_data()
     elif mock_data == "false":
-        request_params = request_params_from_request_values(request.values)
+        request_params = get_request_params_from_request_values(request.values)
         output = get_infographics_data_for_location(request_params)
         if not output:
             log_bad_request(request)

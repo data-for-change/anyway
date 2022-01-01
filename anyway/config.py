@@ -12,7 +12,7 @@ SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "postgresql://postgres@local
 SQLALCHEMY_TRACK_MODIFICATIONS = True
 ENTRIES_PER_PAGE = os.environ.get("ENTRIES_PER_PAGE", 1000)
 SQLALCHEMY_ENGINE_OPTIONS = {}
-SQLALCHEMY_ECHO = True
+# SQLALCHEMY_ECHO = True
 # available languages
 LANGUAGES = {"en": "English", "he": "עברית"}
 

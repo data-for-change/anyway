@@ -130,7 +130,7 @@ def format_2_level_items(
     return res
 
 
-def order_severity_in_stack_bar_widget(
+def order_by_list_stack_bar_widget(
     structured_data_list: List[Dict[str, Union[str, List]]], severity_order: List[str]
 ) -> List[Dict[str, Union[str, List]]]:
     severity_dict = {}

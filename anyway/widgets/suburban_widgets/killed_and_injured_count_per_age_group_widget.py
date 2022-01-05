@@ -14,7 +14,7 @@ from anyway.utilities import parse_age_from_range
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 from anyway.widgets.widget import register
 from anyway.widgets.widget_utils import (
-    order_severity_in_stack_bar_widget,
+    order_by_list_stack_bar_widget,
     gen_entity_labels,
     add_empty_keys_to_gen_two_level_dict,
 )
@@ -49,7 +49,7 @@ class KilledInjuredCountPerAgeGroupStackedWidget(SubUrbanWidget):
             ]
             structured_data_list.append({"label_key": age_group, "series": series_severity})
 
-        self.items = order_severity_in_stack_bar_widget(
+        self.items = order_by_list_stack_bar_widget(
             structured_data_list,
             [
                 IS.KILLED.get_label(),

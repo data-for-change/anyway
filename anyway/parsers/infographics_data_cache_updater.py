@@ -1,15 +1,19 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
-from typing import Dict
 from sqlalchemy import not_
 from anyway.models import (
+    Base,
     InfographicsDataCache,
     InfographicsDataCacheTemp,
     NewsFlash,
     RoadSegments,
     InfographicsRoadSegmentsDataCache,
+    InfographicsStreetDataCacheTemp,
+    InfographicsStreetDataCache,
+    Streets,
 )
+from typing import Dict, Iterable
 from anyway.constants import CONST
 from anyway.backend_constants import BE_CONST
 from anyway.app_and_db import db
@@ -17,6 +21,12 @@ from anyway.request_params import RequestParams
 import anyway.infographics_utils
 import logging
 import json
+
+
+CACHE = "cache"
+TEMP = "temp"
+REGULAR_CACHE_TABLES = {CACHE: InfographicsDataCache, TEMP: InfographicsDataCacheTemp}
+STREET_CACHE_TABLES = {CACHE: InfographicsStreetDataCache, TEMP: InfographicsStreetDataCacheTemp}
 
 
 def is_in_cache(nf):
@@ -109,6 +119,7 @@ def get_infographics_data_from_cache_by_road_segment(road_segment_id, years_ago)
 
 def get_cache_retrieval_query(params: RequestParams):
     res = params.resolution
+    loc = params.location_info
     if res == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
         return (
             db.session.query(InfographicsRoadSegmentsDataCache)
@@ -117,6 +128,14 @@ def get_cache_retrieval_query(params: RequestParams):
                 == int(params.location_info["road_segment_id"])
             )
             .filter(InfographicsRoadSegmentsDataCache.years_ago == int(params.years_ago))
+        )
+    elif res == BE_CONST.ResolutionCategories.STREET:
+        t = InfographicsStreetDataCache
+        return (
+            db.session.query(t)
+            .filter(t.yishuv_symbol == loc["yishuv_symbol"])
+            .filter(t.street == loc["street1"])
+            .filter(t.years_ago == int(params.years_ago))
         )
     else:
         msg = f"Cache unsupported resolution: {res}, params:{params}"
@@ -143,29 +162,33 @@ def get_infographics_data_from_cache_by_location(request_params: RequestParams) 
         return {}
 
 
-def copy_temp_into_cache():
-    num_items_cache = db.session.query(InfographicsDataCache).count()
-    num_items_temp = db.session.query(InfographicsDataCacheTemp).count()
-    logging.debug(f"num items in cache: {num_items_cache}, temp:{num_items_temp}")
+def copy_temp_into_cache(table: Dict[str, Base]):
+    num_items_cache = db.session.query(table[CACHE]).count()
+    num_items_temp = db.session.query(table[TEMP]).count()
+    logging.debug(
+        f"temp into cache for {table[CACHE].__tablename__}, "
+        f"num items in cache: {num_items_cache}, temp:{num_items_temp}"
+    )
     db.session.commit()
     start = datetime.now()
     with db.get_engine().begin() as conn:
         conn.execute("lock table infographics_data_cache in exclusive mode")
         logging.debug(f"in transaction, after lock")
-        conn.execute("delete from infographics_data_cache")
+        conn.execute(f"delete from {table[CACHE].__tablename__}")
         logging.debug(f"in transaction, after delete")
         conn.execute(
-            "insert into infographics_data_cache SELECT * from infographics_data_cache_temp"
+            f"insert into {table[CACHE].__tablename__} "
+            f"SELECT * from {table[TEMP].__tablename__}"
         )
         logging.debug(f"in transaction, after insert into")
     logging.info(f"cache unavailable time: {str(datetime.now() - start)}")
-    num_items_cache = db.session.query(InfographicsDataCache).count()
-    num_items_temp = db.session.query(InfographicsDataCacheTemp).count()
+    num_items_cache = db.session.query(table[CACHE]).count()
+    num_items_temp = db.session.query(table[TEMP]).count()
     logging.debug(f"num items in cache: {num_items_cache}, temp:{num_items_temp}")
-    db.session.execute("truncate table infographics_data_cache_temp")
+    db.session.execute(f"truncate table {table[TEMP].__tablename__}")
     db.session.commit()
-    num_items_cache = db.session.query(InfographicsDataCache).count()
-    num_items_temp = db.session.query(InfographicsDataCacheTemp).count()
+    num_items_cache = db.session.query(table[CACHE]).count()
+    num_items_temp = db.session.query(table[TEMP]).count()
     logging.debug(f"num items in cache: {num_items_cache}, temp:{num_items_temp}")
     db.session.commit()
 
@@ -194,6 +217,47 @@ def build_cache_into_temp():
                 .all()
             ],
         )
+    logging.info(f"cache rebuild took:{str(datetime.now() - start)}")
+
+
+def get_streets() -> Iterable[Streets]:
+    t = Streets
+    street_iter = iter(db.session.query(t.yishuv_symbol, t.street).all())
+    try:
+        while True:
+            yield next(street_iter)
+    except StopIteration:
+        logging.debug("Read from streets table completed")
+
+
+def get_street_infographic_keys() -> Iterable[Dict[str, int]]:
+    for street in get_streets():
+        for y in CONST.INFOGRAPHICS_CACHE_YEARS_AGO:
+            yield {
+                "yishuv_symbol": street.yishuv_symbol,
+                "street1": street.street,
+                "years_ago": y,
+                "lang": "en",
+            }
+
+
+def build_street_cache_into_temp():
+    start = datetime.now()
+    db.session.query(InfographicsStreetDataCacheTemp).delete()
+    db.session.commit()
+    db.get_engine().execute(
+        InfographicsStreetDataCacheTemp.__table__.insert(),  # pylint: disable=no-member
+        [
+            {
+                "yishuv_symbol": d["yishuv_symbol"],
+                "street": d["street1"],
+                "years_ago": d["years_ago"],
+                "data": anyway.infographics_utils.create_infographics_data_for_location(d),
+            }
+            for d in get_street_infographic_keys()
+        ],
+    )
+    db.session.commit()
     logging.info(f"cache rebuild took:{str(datetime.now() - start)}")
 
 
@@ -247,11 +311,16 @@ def main_for_road_segments(update, info):
         logging.debug(f"{info}")
 
 
+def main_for_street():
+    build_street_cache_into_temp()
+    copy_temp_into_cache(STREET_CACHE_TABLES)
+
+
 def main(update, info):
     if update:
         logging.info("Refreshing infographics cache...")
         build_cache_into_temp()
-        copy_temp_into_cache()
+        copy_temp_into_cache(REGULAR_CACHE_TABLES)
         logging.info("Refreshing infographics cache Done")
     if info:
         logging.info(get_cache_info())

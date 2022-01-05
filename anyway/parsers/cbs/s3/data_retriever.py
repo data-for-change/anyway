@@ -22,7 +22,17 @@ class S3DataRetriever(S3DataClass):
         self.__temp_directory = None
         self.__local_files_directory = None
         self.__current_year = None
+        self.__max_year = None
+        self.__min_year = None
         self.__download_from_s3_callback = None
+
+    @property
+    def max_year(self):
+        return self.__max_year
+
+    @property
+    def min_year(self):
+        return self.__min_year
 
     @property
     def current_year(self):
@@ -99,6 +109,9 @@ class S3DataRetriever(S3DataClass):
                 download_from_s3_callback(
                     Bucket=ANYWAY_BUCKET, Key=object_key, Filename=local_file_path
                 )
+                self.__max_year = year if self.__max_year is None else max(year, self.__max_year)
+                self.__min_year = year if self.__min_year is None else min(year, self.__min_year)
+
 
     def get_files_from_s3(self, start_year, accidents_types=None):
         if accidents_types is None:

@@ -4,7 +4,7 @@ from typing import Callable, Dict, Tuple, List
 
 from flask_babel import _
 from flask_sqlalchemy import BaseQuery
-from sqlalchemy import func
+from sqlalchemy import func, asc
 
 from anyway.app_and_db import db
 from anyway.backend_constants import BE_CONST, InjurySeverity as IS
@@ -21,7 +21,7 @@ from anyway.widgets.widget_utils import (
 
 # RequestParams is not hashable, so we can't use functools.lru_cache
 cache_dict = {}
-AGE_RANGE_DICT = {0: 4, 5: 9, 10: 14, 15: 19, 20: 24, 25: 34, 35: 44, 45: 54, 55: 64, 65: 200}
+AGE_RANGE_DICT = {0: 4, 5: 14, 15: 19, 20: 24, 25: 44, 45: 64, 65: 200}
 
 
 @register
@@ -52,9 +52,9 @@ class KilledInjuredCountPerAgeGroupStackedWidget(SubUrbanWidget):
         self.items = order_severity_in_stack_bar_widget(
             structured_data_list,
             [
-                IS.LIGHT_INJURED.get_label(),
-                IS.SEVERE_INJURED.get_label(),
                 IS.KILLED.get_label(),
+                IS.SEVERE_INJURED.get_label(),
+                IS.LIGHT_INJURED.get_label(),
             ],
         )
 
@@ -194,7 +194,8 @@ def create_query_for_killed_and_injured_count_per_age_group(
             (InvolvedMarkerView.road1 == road_number) | (InvolvedMarkerView.road2 == road_number)
         )
         .filter(InvolvedMarkerView.road_segment_name == road_segment)
-        .group_by("age_group", "injury_severity")
-        .with_entities("age_group", "injury_severity", func.count().label("count"))
+        .group_by(InvolvedMarkerView.age_group, InvolvedMarkerView.injury_severity)
+        .with_entities(InvolvedMarkerView.age_group, InvolvedMarkerView.injury_severity, func.count().label("count"))
+        .order_by(asc(InvolvedMarkerView.age_group))
     )
     return query

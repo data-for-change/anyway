@@ -35,20 +35,20 @@ def extract_road_number(location):
     return None
 
 
-def get_road_segment_id(road_segment_name) -> int:
+def get_road_segment_by_name(road_segment_name: str) -> RoadSegments:
     try:
         from anyway.app_and_db import db
     except ModuleNotFoundError:
         pass
-    from_name = road_segment_name.split("-")[0].strip()
-    to_name = road_segment_name.split("-")[1].strip()
+    from_name = road_segment_name.split(" - ")[0].strip()
+    to_name = road_segment_name.split(" - ")[1].strip()
     query_obj = (
         db.session.query(RoadSegments)
         .filter(RoadSegments.from_name == from_name)
         .filter(RoadSegments.to_name == to_name)
     )
-    segment = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-    return segment.iloc[0]["segment_id"]  # pylint: disable=maybe-no-member
+    segment = query_obj.first()
+    return segment
 
 
 def get_road_segment_name_and_number(road_segment_id) -> (float, str):

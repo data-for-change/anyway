@@ -1264,16 +1264,16 @@ def gps_to_cbs_location():
     from anyway.parsers.news_flash_db_adapter import init_db
     from anyway.parsers.location_extraction import (
         get_db_matching_location_interurban,
-        get_road_segment_id,
+        get_road_segment_by_name,
     )
 
     location = get_db_matching_location_interurban(float(latitude), float(longitude))
     if not location:
         logging.info("location not exist")
     location["resolution"] = "interurban_road_segment"
-    location["road_segment_id"] = get_road_segment_id(
+    location["road_segment_id"] = get_road_segment_by_name(
         road_segment_name=location["road_segment_name"]
-    )
+    ).segment_id
     json_data = json.dumps(location, default=str)
     return Response(json_data, mimetype="application/json")
 

@@ -4,7 +4,6 @@ import datetime
 import json
 import logging
 from collections import namedtuple
-from typing import Optional
 
 try:
     from flask_login import UserMixin
@@ -985,8 +984,13 @@ class Streets(Base):
         return res.street_hebrew
 
     @staticmethod
-    def get_street_by_street_name(name: str) -> Optional[int]:
-        res = db.session.query(Streets.street).filter(Streets.street_hebrew == name).first()
+    def get_street_by_street_name(yishuv_symbol: int, name: str) -> int:
+        res = db.session.query(Streets.street) \
+            .filter(Streets.yishuv_symbol == yishuv_symbol) \
+            .filter(Streets.street_hebrew == name)\
+            .first()
+        if res is None:
+            raise ValueError(f"{name}: could not find street in yishuv:{yishuv_symbol}")
         return res
 
 

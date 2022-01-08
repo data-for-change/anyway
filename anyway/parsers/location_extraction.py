@@ -94,7 +94,8 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
         from anyway.app_and_db import db
     except ModuleNotFoundError:
         pass
-    distance_in_km = 5
+
+    distance_in_km = 1.5
     lat_min, lon_min, lat_max, lon_max = get_bounding_box(latitude, longitude, distance_in_km)
     baseX = lon_min
     baseY = lat_min
@@ -107,15 +108,13 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
     query_obj = (
         db.session.query(AccidentMarkerView)
         .filter(AccidentMarkerView.geom.intersects(polygon_str))
-        .filter(AccidentMarkerView.accident_year >= 2014)
+        .filter(AccidentMarkerView.accident_year >= 2015)
         .filter(AccidentMarkerView.provider_code != BE_CONST.RSA_PROVIDER_CODE)
         .filter(not_(AccidentMarkerView.road_segment_name == None))
     )
     markers = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
 
     geod = Geodesic.WGS84
-    # relevant_fields = resolution_dict[resolution]
-    # markers = db.get_markers_for_location_extraction()
     markers["geohash"] = markers.apply(  # pylint: disable=maybe-no-member
         lambda x: geohash.encode(x["latitude"], x["longitude"], precision=4), axis=1
     )  # pylint: disable=maybe-no-member
@@ -145,6 +144,53 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
             if not (isinstance(loc, np.float64) and np.isnan(loc)):
                 final_loc[field] = loc
     return final_loc
+
+    # query_obj = (
+    #     db.session.query(AccidentMarkerView)
+    #     .with_entities(AccidentMarkerView.road1, 
+    #         AccidentMarkerView.road_segment_name, 
+    #         func.avg(AccidentMarkerView.latitude).label("avg_lat"),
+    #         func.avg(AccidentMarkerView.longitude).label("avg_lon"),
+    #         func.min(AccidentMarkerView.latitude).label("min_lat"),
+    #         func.min(AccidentMarkerView.longitude).label("min_lon"),
+    #         func.max(AccidentMarkerView.latitude).label("max_lat"),
+    #         func.max(AccidentMarkerView.longitude).label("max_lon"))
+    #     .filter(not_(AccidentMarkerView.road_segment_name == None))
+    #     .group_by(AccidentMarkerView.road_segment_name, AccidentMarkerView.road1)
+    # )
+
+    # segment_list = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+
+    # def find_dist(o_lat, o_lon, lat, lon):
+    #     #Haversine formula for great circle distance between two points
+    #     o_lat = np.radians(o_lat)
+    #     o_lon = np.radians(o_lon)
+    #     lat = np.radians(lat)
+    #     lon = np.radians(lon)
+
+    #     a = np.sin(abs(o_lat - lat)/2)**2 + np.cos(o_lat)*np.cos(lat)*(np.sin(abs(o_lon-lon)/2)**2)
+    #     c = 2*np.arctan2(np.sqrt(a), np.sqrt(1-a))
+    #     R = 6371
+    #     d = R*c
+    #     return d
+
+
+  
+    # segment_list["avg_dist"] = find_dist(latitude, longitude, segment_list['avg_lat'], segment_list['avg_lon'])
+    # segment_list["min_dist"] = find_dist(latitude, longitude, segment_list['min_lat'], segment_list['min_lon'])
+    # segment_list["max_dist"] = find_dist(latitude, longitude, segment_list['max_lat'], segment_list['max_lon'])
+    # segment_list["distance"] = segment_list["avg_dist"] + segment_list["min_dist"] + segment_list["max_dist"]
+    # most_fit_loc = segment_list.loc[segment_list["distance"] == segment_list["distance"].min()].iloc[0].to_dict()
+    
+
+    # final_loc = {}
+    # for field in ["road1", "road_segment_name"]:
+    #     loc = most_fit_loc[field]
+    #     if loc not in [None, "", "nan"]:
+    #         if not (isinstance(loc, np.float64) and np.isnan(loc)):
+    #             final_loc[field] = loc
+                
+    # return final_loc
 
 
 def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):

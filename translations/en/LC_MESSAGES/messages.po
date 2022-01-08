@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-10-26 19:46+0300\n"
+"POT-Creation-Date: 2021-12-18 11:12+0200\n"
 "PO-Revision-Date: 2020-11-26 16:45+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -30,11 +30,11 @@ msgstr "severe injured"
 msgid "light injured"
 msgstr "light injured"
 
-#: anyway/flask_app.py:725 anyway/flask_app.py:830
+#: anyway/flask_app.py:729 anyway/flask_app.py:834
 msgid "Discussion not found:"
 msgstr ""
 
-#: anyway/flask_app.py:728
+#: anyway/flask_app.py:732
 msgid "Illegal Discussion"
 msgstr ""
 
@@ -136,131 +136,6 @@ msgstr ""
 
 #: anyway/infographics_dictionaries.py:44
 msgid "other_driver"
-msgstr ""
-
-#: anyway/infographics_utils.py:314
-msgid "Number of Injuries in Accidents on "
-msgstr ""
-
-#: anyway/infographics_utils.py:321
-msgid "Fatal, severe and light accidents count in the specified location."
-msgstr ""
-
-#: anyway/infographics_utils.py:322
-msgid ""
-"Fatal, severe and light injured count in the specified years, split by "
-"injury severity"
-msgstr ""
-
-#: anyway/infographics_utils.py:323
-msgid ""
-"Fatal, severe and light accidents count in the specified years, split by "
-"accident severity"
-msgstr ""
-
-#: anyway/infographics_utils.py:379 anyway/infographics_utils.py:440
-msgid "Pedestrian injury comparison on "
-msgstr ""
-
-#: anyway/infographics_utils.py:518
-msgid "accident_severity"
-msgstr ""
-
-#: anyway/infographics_utils.py:519
-msgid "type"
-msgstr ""
-
-#: anyway/infographics_utils.py:531
-msgid ""
-"Most recent fatal and severe accidents in location, ordered by date. Up "
-"to 10 accidents are presented."
-msgstr ""
-
-#: anyway/infographics_utils.py:583
-msgid ""
-"Most recent fatal and severe accidents displayed on a map. Up to 10 "
-"accidents are presented."
-msgstr ""
-
-#: anyway/infographics_utils.py:682
-msgid "fatal accidents by type"
-msgstr ""
-
-#: anyway/infographics_utils.py:685
-msgid "desc"
-msgstr ""
-
-#: anyway/infographics_utils.py:712
-msgid "others"
-msgstr ""
-
-#: anyway/infographics_utils.py:713
-msgid "frontal"
-msgstr ""
-
-#: anyway/infographics_utils.py:714
-msgid ""
-"Fatal accidents distribution by accident type - head on collisions vs "
-"other accidents."
-msgstr ""
-
-#: anyway/infographics_utils.py:788
-msgid "Fatal and severe accidents heat map"
-msgstr ""
-
-#: anyway/infographics_utils.py:833
-msgid "Number of accidents, by year, splitted by accident severity, in segment"
-msgstr ""
-
-#: anyway/infographics_utils.py:880
-msgid "Number of injured in accidents, per year, splitted by severity, in segment"
-msgstr ""
-
-#: anyway/infographics_utils.py:955 anyway/infographics_utils.py:1035
-msgid "Severe or fatal accidents on bikes, e-bikes, or scooters in "
-msgstr ""
-
-#: anyway/infographics_utils.py:1139
-msgid "Severe and fatal accidents per Km by section in road"
-msgstr ""
-
-#: anyway/infographics_utils.py:1231
-msgid "Injury severity per age group in "
-msgstr ""
-
-#: anyway/infographics_utils.py:1346
-msgid "driver_type"
-msgstr ""
-
-#: anyway/infographics_utils.py:1352
-msgid "accident count by driver type "
-msgstr ""
-
-#: anyway/infographics_utils.py:1359
-msgid ""
-"Driver involvement in accident by driver type: professional - trucks, "
-"taxi, bus, work, minibus, tractor, private - private car, motorcycle, "
-"light electric - electric scooter, mobility scooter, electric bike."
-msgstr ""
-
-#: anyway/infographics_utils.py:1467
-msgid ""
-"comparing vehicle type percentage in accidents in {} relative to national"
-" average"
-msgstr ""
-
-#: anyway/infographics_utils.py:1578
-msgid "Injured and killed pedestrians by severity and year"
-msgstr ""
-
-#: anyway/infographics_utils.py:1751
-msgid ""
-"Pedestrian Injuries on Ben Yehuda Street in Tel Aviv by Type of hitting "
-"Vehicle, Compared to Urban Accidents Across the country"
-msgstr ""
-
-#: anyway/infographics_utils.py:2070
-msgid "Most severe accidents in segment"
 msgstr ""
 
 #: anyway/vehicle_type.py:47 anyway/vehicle_type.py:185
@@ -387,6 +262,172 @@ msgstr ""
 msgid "other"
 msgstr ""
 
+#: anyway/widgets/suburban_widgets/accident_count_by_accident_type_widget.py:46
+msgid "Number of accidents by accident type"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/accident_count_by_accident_year_widget.py:57
+msgid "Number of accidents, by year, splitted by accident severity, in segment"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/accident_count_by_accident_year_widget.py:65
+msgid ""
+"Fatal, severe and light accidents count in the specified years, split by "
+"accident severity"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/accident_count_by_car_type_widget.py:114
+msgid ""
+"comparing vehicle type percentage in accidents in {} relative to national"
+" average"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/accident_count_by_day_night_widget.py:30
+msgid "Number of accidents by day/night"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/accident_count_by_driver_type_widget.py:69
+msgid "driver_type"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/accident_count_by_driver_type_widget.py:75
+msgid "Number of accidents by driver type"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/accident_count_by_driver_type_widget.py:81
+msgid ""
+"Driver involvement in accident by driver type: professional - trucks, "
+"taxi, bus, work, minibus, tractor, private - private car, motorcycle, "
+"light electric - electric scooter, mobility scooter, electric bike."
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/accident_count_by_hour_widget.py:30
+msgid "Number of accidents by hour"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/accident_count_by_road_light_widget.py:30
+msgid "Number of accidents by road light"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/accident_count_by_severity_widget.py:61
+msgid "Number of accidents by severity"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/accident_count_by_severity_widget.py:65
+msgid "Fatal, severe and light accidents count in the specified location."
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/accidents_heat_map_widget.py:52
+msgid "Fatal and severe accidents heat map"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:95
+msgid "Fatal head on collisions vs other accidents"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:99
+msgid "desc"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:126
+msgid "others"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:127
+msgid "frontal"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:128
+msgid ""
+"Fatal accidents distribution by accident type - head on collisions vs "
+"other accidents."
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/injured_count_by_accident_year_widget.py:56
+msgid "Number of injured in accidents, per year, split by severity"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/injured_count_by_accident_year_widget.py:62
+msgid ""
+"Fatal, severe and light injured count in the specified years, split by "
+"injury severity"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/injured_count_by_severity_widget.py:72
+msgid "Number of Injuries in accidents by severity"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/injured_count_per_age_group_widget.py:101
+msgid "Injury severity per age group in "
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:36
+msgid "Most severe accidents in segment"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:130
+msgid "accident_severity"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:131
+msgid "type"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:143
+#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:146
+msgid ""
+"Most recent fatal and severe accidents in location, ordered by date. Up "
+"to 10 accidents are presented."
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/most_severe_accidents_widget.py:63
+msgid ""
+"Most recent fatal and severe accidents displayed on a map. Up to 10 "
+"accidents are presented."
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/motorcycle_accidents_vs_all_accidents_widget.py:137
+msgid "Number of fatal and severe motorcycle accidents"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/motorcycle_accidents_vs_all_accidents_widget.py:137
+msgid "compared to rest of country"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/road2_plus1_widget.py:69
+msgid "Road 2 plus 1 solution to prevent fatal accidents"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/street_view_widget.py:24
+msgid "Street view widget"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/suburban_crosswalk_widget.py:71
+#: anyway/widgets/urban_widgets/urban_crosswalk_widget.py:74
+msgid "Pedestrian injury comparison on "
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/top_road_segments_accidents_per_km_widget.py:81
+msgid "Segments with most accidents per Km"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/top_road_segments_accidents_per_km_widget.py:85
+msgid "Severe and fatal accidents per Km by section in road"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/top_road_segments_accidents_widget.py:32
+msgid "Segments with most accidents"
+msgstr ""
+
+#: anyway/widgets/urban_widgets/injured_accidents_with_pedestrians_widget.py:107
+msgid "Pedestrian accidents by severity and year"
+msgstr ""
+
+#: anyway/widgets/urban_widgets/severe_fatal_count_by_vehicle_by_year_widget.py:97
+#: anyway/widgets/urban_widgets/small_motor_severe_fatal_count_by_year_widget.py:61
+msgid "Severe or fatal accidents on bikes, e-bikes, or scooters in "
+msgstr ""
+
 #: templates/index.html:4 templates/index.html:10
 msgid "ANYWAY - Making a difference in any way"
 msgstr ""
@@ -424,4 +465,7 @@ msgstr ""
 #: templates/index.html:490
 msgid "Login with Google"
 msgstr ""
+
+#~ msgid "Injured and killed pedestrians by severity and year"
+#~ msgstr ""
 

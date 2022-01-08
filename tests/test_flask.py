@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 # from anyway.utilities import open_utf8
 import json
+import typing
 from collections import Counter
 from functools import partial
+from http import HTTPStatus
+from http import client as http_client
 from unittest import mock
 from unittest.mock import patch
 
 import pytest
-from http import client as http_client, HTTPStatus
-
-import typing
-
 from flask import Response
 from flask.testing import FlaskClient
 from urlobject import URLObject
@@ -22,7 +21,7 @@ from anyway.error_code_and_strings import (
     build_json_for_user_api_error,
     Errors,
 )
-from anyway.flask_app import is_a_valid_role_name
+from anyway.views.user_system.api import is_a_valid_role_name
 
 
 @pytest.fixture
@@ -185,7 +184,7 @@ def test_user_fail_on_email(app):
     with patch("flask_login.utils._get_user") as current_user:
         set_current_user_mock(current_user)
 
-        with patch("anyway.flask_app.get_current_user_email") as get_current_user_email:
+        with patch("anyway.views.user_system.api.get_current_user_email") as get_current_user_email:
             get_current_user_email.side_effect = lambda: None
 
             rv = user_update_post_json(app, json_data={"first_name": "a", "last_name": "a"})
@@ -201,7 +200,7 @@ def test_user_fail_on_phone(app):
     with patch("flask_login.utils._get_user") as current_user:
         set_current_user_mock(current_user)
 
-        with patch("anyway.flask_app.get_current_user_email") as get_current_user_email:
+        with patch("anyway.views.user_system.api.get_current_user_email") as get_current_user_email:
             get_current_user_email.side_effect = lambda: "aa@bb.com"
 
             rv = user_update_post_json(
@@ -214,10 +213,10 @@ def test_user_update_success(app):
     with patch("flask_login.utils._get_user") as current_user:
         set_current_user_mock(current_user)
 
-        with patch("anyway.flask_app.get_current_user_email") as get_current_user_email:
+        with patch("anyway.views.user_system.api.get_current_user_email") as get_current_user_email:
             get_current_user_email.side_effect = lambda: None
 
-            with patch("anyway.flask_app.update_user_in_db"):
+            with patch("anyway.views.user_system.api.update_user_in_db"):
                 rv = user_update_post_json(
                     app, json_data={"first_name": "a", "last_name": "a", "email": "aa@gmail.com"}
                 )
@@ -261,7 +260,7 @@ def test_get_current_user(app):
     assert_return_code_for_user_update(Errors.BR_BAD_AUTH, rv)
     with patch("flask_login.utils._get_user") as current_user:
         set_current_user_mock(current_user)
-        with patch("anyway.flask_app.get_current_user") as get_current_user:
+        with patch("anyway.views.user_system.api.get_current_user") as get_current_user:
             get_mock_current_user(get_current_user)
             rv = app.get("/user/info", follow_redirects=True)
             assert rv.status_code == HTTPStatus.OK
@@ -345,14 +344,14 @@ def user_add_or_remove_role(app: FlaskClient, path: str) -> None:
         rv = post_json(app, path, json_data={"email": "a"})
         assert_return_code_for_user_update(Errors.BR_ROLE_NAME_MISSING, rv)
 
-        with patch("anyway.flask_app.get_role_object") as get_role_object:
+        with patch("anyway.views.user_system.api.get_role_object") as get_role_object:
             get_role_object.return_value = mock.MagicMock()
             get_role_object.return_value.name = BE_CONST.Roles2Names.Admins.value
 
             rv = post_json(
                 app, path, json_data={"role": BE_CONST.Roles2Names.Admins.value, "email": "a"}
             )
-            assert_return_code_for_user_update(Errors.BR_BAD_EMAIL, rv)
+            assert_return_code_for_user_update(Errors.BR_USER_NOT_FOUND, rv, extra="a")
 
 
 def set_mock_and_test_perm(app, current_user, path):
@@ -392,8 +391,8 @@ def test_user_change_user_active_mode(app: FlaskClient) -> None:
         set_mock_and_test_perm(app, current_user, path)
 
         rv = post_json(app, path, json_data={"email": "a"})
-        assert_return_code_for_user_update(Errors.BR_BAD_EMAIL, rv)
-        with patch("anyway.flask_app.get_user_by_email") as get_user_by_email:
+        assert_return_code_for_user_update(Errors.BR_USER_NOT_FOUND, rv, extra="a")
+        with patch("anyway.views.user_system.api.get_user_by_email") as get_user_by_email:
             get_user_by_email.side_effect = lambda db, email: mock.MagicMock()
 
             rv = post_json(app, path, json_data={"email": "a@b.com"})
@@ -417,7 +416,7 @@ def test_add_role(app):
         set_mock_and_test_perm(app, current_user, path)
 
         rv = post_json(app, path, json_data={"email": "a"})
-        assert_return_code_for_user_update(Errors.BR_FIELD_MISSING, rv)
+        assert_return_code_for_user_update(Errors.BR_ROLE_NAME_MISSING, rv)
 
         rv = post_json(app, path, json_data={"description": ""})
         assert_return_code_for_user_update(Errors.BR_ROLE_NAME_MISSING, rv)

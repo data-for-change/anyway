@@ -1,13 +1,15 @@
 import datetime
-
 import pytest
+import anyway.request_params
+import anyway.widgets.widget_utils as widget_utils
+
 from numpy import nan
 from six.moves import http_client
 from anyway import app as flask_app
 from jsonschema import validate
 from anyway.app_and_db import db
-from anyway.infographics_utils import AccidentCountByCarTypeWidget
 from anyway.vehicle_type import VehicleCategory
+from anyway.widgets.suburban_widgets.accident_count_by_car_type_widget import  AccidentCountByCarTypeWidget
 
 
 def insert_infographic_mock_data(app):
@@ -110,14 +112,12 @@ class Test_Infographic_Api:
                      {'involve_vehicle_type': 22.0, 'count': 39}, {'involve_vehicle_type': 9.0, 'count': 1073},
                      {'involve_vehicle_type': 24.0, 'count': 582}, {'involve_vehicle_type': 7.0, 'count': 115}]
 
-        from anyway import infographics_utils
-        tmp_func = infographics_utils.get_accidents_stats  # Backup function ref
-        infographics_utils.get_accidents_stats = mock_get_accidents_stats
+        tmp_func = widget_utils.get_accidents_stats  # Backup function ref
+        widget_utils.get_accidents_stats = mock_get_accidents_stats
         involved_by_vehicle_type_data_test = [{'involve_vehicle_type': 1, 'count': 11}]
         end_time = datetime.date(2020, 6, 30)
         start_time = datetime.date(2020, 1, 1)
-        request_params = infographics_utils.RequestParams(
-            news_flash_obj=None,
+        request_params = anyway.request_params.RequestParams(
             years_ago=1,
             location_text='',
             location_info=None,
@@ -146,34 +146,9 @@ class Test_Infographic_Api:
                   'percentage_country': 2.794865247568421,
                   'percentage_segment': 0.0}]
 
-        infographics_utils.get_accidents_stats = tmp_func  # Restore function ref - So we don't affect other tests
+        widget_utils.get_accidents_stats = tmp_func  # Restore function ref - So we don't affect other tests
         assert len(actual) == len(expected)
         assert actual == expected
-
-
-    # def test_location_info(self):
-    #     assert self.infographic_data["meta"]["location_info"] == {
-    #         "resolution": "כביש בינעירוני",
-    #         "road1": 90.0,
-    #         "road_segment_name": "כניסה למצפה שלם - צומת שדי תרומות",
-    #     }
-
-    # def test_infographic_with_existing_news_flash(self):
-    #     self._accident_count_by_severity_test()
-    #     self._most_severe_accidents_table_test()
-    #     self._most_severe_accidents_test()
-    #     self._street_view_test()
-    #     self._head_on_collisions_comparison_test()
-    #     self._accident_count_by_accident_type_test()
-    #     self._accidents_heat_map_test()
-    #     self._accident_count_by_accident_year_test()
-    #     self._injured_count_by_accident_year_test()
-    #     self._accident_count_by_day_night_test()
-    #     self._accidents_count_by_hour_test()
-    #     self._accident_count_by_road_light_test()
-    #     self._top_road_segments_accidents_per_km_test()
-    #     self._injured_count_per_age_group_test()
-    #     self._injured_vision_zero_test()
 
     def _get_widget_by_name(self, name):
         widget = next(

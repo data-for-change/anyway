@@ -4,6 +4,7 @@ import datetime
 import json
 import logging
 from collections import namedtuple
+from typing import Optional
 
 try:
     from flask_login import UserMixin
@@ -79,6 +80,22 @@ users_to_roles = Table(
     PrimaryKeyConstraint("user_id", "role_id"),
 )
 
+users_to_organizations = Table(
+    "users_to_organizations",
+    Base.metadata,
+    Column("user_id", BigInteger(), ForeignKey("users.id"), index=True, nullable=False),
+    Column(
+        "organization_id",
+        BigInteger(),
+        ForeignKey("organization.id"),
+        index=True,
+        nullable=False,
+        server_default=FetchedValue(),
+    ),
+    Column("create_date", DateTime(), nullable=False, server_default=text("now()")),
+    PrimaryKeyConstraint("user_id", "organization_id"),
+)
+
 
 class Users(Base, UserMixin):
     __tablename__ = "users"
@@ -106,9 +123,15 @@ class Users(Base, UserMixin):
         secondary=users_to_roles,
         backref=backref("users", lazy="dynamic"),
     )
+    organizations = relationship(
+        "Organization",
+        secondary=users_to_organizations,
+        backref=backref("users", lazy="dynamic"),
+    )
 
     def serialize_exposed_to_user(self):
         roles = self.roles
+        organizations = self.organizations
         return {
             "id": self.id,
             "user_register_date": self.user_register_date,
@@ -124,8 +147,16 @@ class Users(Base, UserMixin):
             "user_url": self.user_url,
             "user_desc": self.user_desc,
             "is_user_completed_registration": self.is_user_completed_registration,
-            "roles": [r.name for r in roles],
+            "roles": [role.name for role in roles],
+            "organizations": [org.name for org in organizations],
         }
+
+
+class Organization(Base):
+    __tablename__ = "organization"
+    id = Column(BigInteger, autoincrement=True, nullable=False, primary_key=True, index=True)
+    name = Column(String(255), unique=True, index=True, nullable=False)
+    create_date = Column(DateTime(), nullable=False, server_default=text("now()"))
 
 
 class LocationSubscribers(Base, UserMixin):
@@ -884,9 +915,9 @@ class NewsFlash(Base):
 class City(Base):
     __tablename__ = "cities"
     id = Column(Integer(), primary_key=True)
-    symbol_code = Column(Integer())
+    symbol_code = Column(Integer())  # yishuv_symbol
     name = Column(String())
-    search_heb = Column(String())
+    search_heb = Column(String())  # yishuv_name
     search_eng = Column(String())
     search_priority = Column(Integer())
 
@@ -900,6 +931,21 @@ class City(Base):
             "search_priority": self.search_priority,
         }
 
+    @staticmethod
+    def get_name_from_symbol(symbol: int) -> str:
+        res = db.session.query(City.search_heb).filter(City.symbol_code == symbol).first()
+        if res is None:
+            raise ValueError(f"{symbol}: could not find city with that symbol")
+        return res.search_heb
+
+    @staticmethod
+    def get_symbol_from_name(name: str) -> int:
+        res = db.session.query(City.symbol_code).filter(City.search_heb == name).first()
+        if res is None:
+            logging.error(f"City: no city with name:{name}.")
+            raise ValueError(f"City: no city with name:{name}.")
+        return res.symbol_code
+
     # Flask-Login integration
     def is_authenticated(self):
         return True
@@ -912,6 +958,36 @@ class City(Base):
 
     def get_id(self):
         return self.id
+
+
+class Streets(Base):
+    __tablename__ = "streets"
+    MAX_NAME_LEN = 50
+    yishuv_symbol = Column(Integer(), primary_key=True, nullable=False)
+    street = Column(Integer(), primary_key=True, nullable=False)
+    street_hebrew = Column(String(length=MAX_NAME_LEN), nullable=True)
+
+    def serialize(self):
+        return {
+            "yishuv_symbol": self.yishuv_symbol,
+            "street": self.street,
+            "street_hebrew": self.street_hebrew,
+        }
+
+    @staticmethod
+    def get_street_name_by_street(yishuv_symbol: int, street: int) -> str:
+        res = db.session.query(Streets.street_hebrew) \
+            .filter(Streets.yishuv_symbol == yishuv_symbol) \
+            .filter(Streets.street == street)\
+            .first()
+        if res is None:
+            raise ValueError(f"{street}: could not find street in yishuv:{yishuv_symbol}")
+        return res.street_hebrew
+
+    @staticmethod
+    def get_street_by_street_name(name: str) -> Optional[int]:
+        res = db.session.query(Streets.street).filter(Streets.street_hebrew == name).first()
+        return res
 
 
 class RegisteredVehicle(Base):
@@ -1875,6 +1951,9 @@ class RoadSegments(Base):
     def get_id(self):
         return self.id
 
+    def get_segment_id(self):
+        return self.segment_id
+
 
 class ReportProblem(Base):
     __tablename__ = "report_problem"
@@ -2339,11 +2418,8 @@ class InfographicsDataCacheFields(object):
     years_ago = Column(Integer(), primary_key=True)
     data = Column(sqlalchemy.types.JSON())
 
-
-class InfographicsRoadSegmentsDataCacheFields(object):
-    road_segment_id = Column(BigInteger(), primary_key=True)
-    years_ago = Column(Integer(), primary_key=True)
-    data = Column(sqlalchemy.types.JSON())
+    def serialize(self):
+        return {"news_flash_id": self.news_flash_id, "years_ago": self.years_ago, "data": self.data}
 
 
 class InfographicsDataCache(InfographicsDataCacheFields, Base):
@@ -2355,8 +2431,28 @@ class InfographicsDataCache(InfographicsDataCacheFields, Base):
     def get_data(self):
         return self.data
 
-    def serialize(self):
-        return {"news_flash_id": self.news_flash_id, "years_ago": self.years_ago, "data": self.data}
+
+class InfographicsDataCacheTemp(InfographicsDataCacheFields, Base):
+    __tablename__ = "infographics_data_cache_temp"
+
+    # Flask-Login integration
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.news_flash_id
+
+
+class InfographicsRoadSegmentsDataCacheFields(object):
+    road_segment_id = Column(BigInteger(), primary_key=True)
+    years_ago = Column(Integer(), primary_key=True)
+    data = Column(sqlalchemy.types.JSON())
 
 
 class InfographicsRoadSegmentsDataCache(InfographicsRoadSegmentsDataCacheFields, Base):
@@ -2381,24 +2477,80 @@ class InfographicsRoadSegmentsDataCache(InfographicsRoadSegmentsDataCacheFields,
         }
 
 
-class InfographicsDataCacheTemp(InfographicsDataCacheFields, Base):
-    __tablename__ = "infographics_data_cache_temp"
+class InfographicsTwoRoadsDataCacheFields(object):
+    road1 = Column(Integer(), primary_key=True)
+    road2 = Column(Integer(), primary_key=True)
+    years_ago = Column(Integer(), primary_key=True)
+    data = Column(sqlalchemy.types.JSON())
+
+
+class InfographicsTwoRoadsDataCache(InfographicsTwoRoadsDataCacheFields, Base):
+    __tablename__ = "infographics_two_roads_data_cache"
+    __table_args__ = (
+        Index("infographics_two_roads_data_cache_id_years_idx", "road1", "road2",
+              "years_ago", unique=True),
+    )
+
+    def get_data(self):
+        return self.data
 
     def serialize(self):
-        return {"news_flash_id": self.news_flash_id, "years_ago": self.years_ago, "data": self.data}
+        return {"road1": self.road1, "road2": self.road2, "years_ago": self.years_ago,
+                "data": self.data}
 
-    # Flask-Login integration
-    def is_authenticated(self):
-        return True
 
-    def is_active(self):
-        return True
+class InfographicsTwoRoadsDataCacheTemp(InfographicsTwoRoadsDataCacheFields, Base):
+    __tablename__ = "infographics_two_roads_data_cache_temp"
 
-    def is_anonymous(self):
-        return False
+    def serialize(self):
+        return {"road1": self.road1, "road2": self.road2, "years_ago": self.years_ago,
+                "data": self.data}
 
-    def get_id(self):
-        return self.news_flash_id
+    # # Flask-Login integration
+    # def is_authenticated(self):
+    #     return True
+    #
+    # def is_active(self):
+    #     return True
+    #
+    # def is_anonymous(self):
+    #     return False
+    #
+
+
+class InfographicsStreetDataCacheFields(object):
+    yishuv_symbol = Column(Integer(), primary_key=True)
+    street = Column(Integer(), primary_key=True)
+    years_ago = Column(Integer(), primary_key=True)
+    data = Column(sqlalchemy.types.JSON())
+
+    def serialize(self):
+        return {
+            "street": self.street,
+            "yishuv_symbol": self.yishuv_symbol,
+            "years_ago": self.years_ago,
+            "data": self.data,
+        }
+
+
+class InfographicsStreetDataCache(InfographicsStreetDataCacheFields, Base):
+    __tablename__ = "infographics_street_data_cache"
+    __table_args__ = (
+        Index(
+            "infographics_street_data_cache_id_years_idx",
+            "yishuv_symbol",
+            "street",
+            "years_ago",
+            unique=True,
+        ),
+    )
+
+    def get_data(self):
+        return self.data
+
+
+class InfographicsStreetDataCacheTemp(InfographicsStreetDataCacheFields, Base):
+    __tablename__ = "infographics_street_data_cache_temp"
 
 
 class CasualtiesCosts(Base):

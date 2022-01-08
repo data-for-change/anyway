@@ -1099,8 +1099,8 @@ def main(
                 BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
                 BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
             ]:
-                # TODO: make sure that code does not break if end year does not exist in s3
-                for year in range(int(load_start_year), s3_data_retriever.current_year + 1):
+                logging.info(f"Loading min year {s3_data_retriever.min_year} Loading max year {s3_data_retriever.max_year}")
+                for year in range(s3_data_retriever.min_year, s3_data_retriever.max_year + 1):
                     cbs_files_dir = os.path.join(
                         s3_data_retriever.local_files_directory,
                         ACCIDENTS_TYPE_PREFIX + "_" + str(provider_code),

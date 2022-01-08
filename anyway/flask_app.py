@@ -52,7 +52,7 @@ from anyway.models import (
     AccidentMarkerView,
     EmbeddedReports,
 )
-from anyway.request_params import request_params_from_request_values
+from anyway.request_params import get_request_params_from_request_values
 from anyway.views.news_flash.api import (
     news_flash,
     news_flash_new,
@@ -76,6 +76,7 @@ DEFAULT_MAPS_API_KEY = "AIzaSyDUIWsBLkvIUwzLHMHos9qFebyJ63hEG2M"
 
 
 app.config.from_object(__name__)
+app.config["SWAGGER_UI_DOC_EXPANSION"] = 'list'
 app.config["SESSION_COOKIE_SAMESITE"] = "none"
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["REMEMBER_COOKIE_SECURE"] = True
@@ -1082,9 +1083,9 @@ app.add_url_rule(
     view_func=injured_around_schools_api,
     methods=["GET"],
 )
-app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
+app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash_v2, methods=["GET"])
 
-app.add_url_rule("/api/news-flash-v2", endpoint=None, view_func=news_flash_v2, methods=["GET"])
+app.add_url_rule("/api/v1/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
 
 
 nf_parser = reqparse.RequestParser()
@@ -1302,7 +1303,7 @@ def infographics_data_by_location():
     if mock_data == "true":
         output = get_infographics_mock_data()
     elif mock_data == "false":
-        request_params = request_params_from_request_values(request.values)
+        request_params = get_request_params_from_request_values(request.values)
         output = get_infographics_data_for_location(request_params)
         if not output:
             log_bad_request(request)

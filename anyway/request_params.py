@@ -7,7 +7,7 @@ from sqlalchemy import func
 import pandas as pd
 
 from anyway.models import NewsFlash, AccidentMarkerView, City, Streets
-from anyway.parsers.location_extraction import get_road_segment_name_and_number
+from anyway.parsers.location_extraction import get_road_segment_name_and_number, get_road_segment_by_name
 from anyway.backend_constants import BE_CONST
 from anyway.app_and_db import db
 from anyway.parsers import resolution_dict
@@ -106,7 +106,21 @@ def get_location_from_news_flash(news_flash_id: str) -> dict:
     res = loc["data"]["resolution"]
     loc["data"]["resolution"] = BE_CONST.ResolutionCategories(res)
     loc["text"] = get_news_flash_location_text(news_flash)
+    add_numeric_field_values(loc, news_flash)
     return loc
+
+
+def add_numeric_field_values(loc: dict, news_flash: NewsFlash) -> None:
+    if loc["data"]["resolution"] == BE_CONST.ResolutionCategories.STREET:
+        if "yishuv_symbol" not in loc["data"]:
+            loc["data"]["yishuv_symbol"] = City.get_symbol_from_name(loc["data"]["yishuv_name"])
+        if "street1" not in loc["data"]:
+            loc["data"]["street1"] = Streets.get_street_by_street_name(loc["data"]["yishuv_symbol"],
+                                                                       loc["data"]["street1_hebrew"])
+    elif loc["data"]["resolution"] == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
+        if "road_segment_id" not in loc["data"]:
+            segment = get_road_segment_by_name(loc["data"]["road_segment_name"])
+            loc["data"]["road_segment_id"] = segment.segment_id
 
 
 # generate text describing location or road segment of news flash
@@ -186,7 +200,7 @@ def fill_missing_street_values(vals: dict) -> dict:
     if "street1" in res and "street1_hebrew" not in res:
         res["street1_hebrew"] = Streets.get_street_name_by_street(res["yishuv_symbol"], res["street1"])
     else:
-        res["street1"] = Streets.get_street_by_street_name(res["street1_hebrew"])
+        res["street1"] = Streets.get_street_by_street_name(res["yishuv_symbol"], res["street1_hebrew"])
     return res
 
 

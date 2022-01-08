@@ -10,7 +10,9 @@ from anyway.models import NewsFlash
 from anyway.parsers import resolution_dict
 from anyway import secrets
 from anyway.models import AccidentMarkerView, RoadSegments
-from sqlalchemy import (not_,)
+from sqlalchemy import (
+    not_,
+)
 from sqlalchemy.orm import load_only
 import pandas as pd
 from typing import Tuple
@@ -110,7 +112,8 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
         .filter(AccidentMarkerView.accident_year >= 2015)
         .filter(AccidentMarkerView.provider_code != BE_CONST.RSA_PROVIDER_CODE)
         .filter(not_(AccidentMarkerView.road_segment_name == None))
-        .options(load_only(
+        .options(
+            load_only(
                 "road1",
                 "road_segment_id",
                 "road_segment_name",

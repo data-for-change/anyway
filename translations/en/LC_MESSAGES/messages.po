@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-12-28 17:05+0200\n"
+"POT-Creation-Date: 2022-01-08 14:56+0200\n"
 "PO-Revision-Date: 2020-11-26 16:45+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -18,23 +18,23 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.1\n"
 
-#: anyway/backend_constants.py:145
+#: anyway/backend_constants.py:149
 msgid "killed"
 msgstr "killed"
 
-#: anyway/backend_constants.py:146
+#: anyway/backend_constants.py:150
 msgid "severe injured"
 msgstr "severe injured"
 
-#: anyway/backend_constants.py:147
+#: anyway/backend_constants.py:151
 msgid "light injured"
 msgstr "light injured"
 
-#: anyway/flask_app.py:676 anyway/flask_app.py:781
+#: anyway/flask_app.py:677 anyway/flask_app.py:782
 msgid "Discussion not found:"
 msgstr ""
 
-#: anyway/flask_app.py:679
+#: anyway/flask_app.py:680
 msgid "Illegal Discussion"
 msgstr ""
 
@@ -357,12 +357,17 @@ msgstr ""
 msgid "Number of Injuries in accidents by severity"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_widget.py:44
-msgid "Killed and injury stacked per age group in "
+#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_stacked_widget.py:52
+msgid "Killed and injury stacked per age group"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_widget.py:73
-msgid "Killed and injury per age group in "
+#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_stacked_widget.py:53
+#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_widget.py:38
+msgid "In"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_widget.py:37
+msgid "Injury per age group"
 msgstr ""
 
 #: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:36
@@ -469,3 +474,10 @@ msgstr ""
 #: templates/index.html:490
 msgid "Login with Google"
 msgstr ""
+
+#~ msgid "Killed and injury stacked per age group in "
+#~ msgstr ""
+
+#~ msgid "Killed and injury per age group in "
+#~ msgstr ""
+

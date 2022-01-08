@@ -25,4 +25,5 @@ from . import (
     injured_count_by_severity_widget,
     motorcycle_accidents_vs_all_accidents_widget,
     suburban_crosswalk_widget,
+    killed_and_injured_count_per_age_group_stacked_widget,
 )

@@ -106,6 +106,10 @@ class BackEndConstants(object):
         "head_on_collisions_comparison",
     ]
 
+    LKEY = "label_key"
+    VAL = "value"
+    SERIES = "series"
+
 
 BE_CONST = BackEndConstants()
 
@@ -249,6 +253,7 @@ class InjuredType(LabeledCode):
             InjuredType.PASSENGER_UNKNOWN_VEHICLE: "Passenger of an unknown vehicle",
         }
 
+
 class CrossLocation(Enum):
     UNKNOWN = 9
     OUTNEAR = 1
@@ -265,6 +270,7 @@ class CrossLocation(Enum):
             CrossLocation.YESNONE: "In the crosswalk, without a crossing light",
             CrossLocation.YESLIGHT: "In the crosswalk, with a crossing light",
         }
+
 
 class CrossCategory(Enum):
     UNKNOWN = 0

@@ -1,6 +1,6 @@
 import logging
 from collections import defaultdict
-from typing import Dict, Any, List, Type, Optional, Union
+from typing import Dict, Any, List, Type, Optional
 
 import pandas as pd
 from flask_babel import _
@@ -109,11 +109,6 @@ def run_query(query: db.session.query) -> Dict:
     return pd.read_sql_query(query.statement, query.session.bind).to_dict(orient="records")
 
 
-LKEY = "label_key"
-VAL = "value"
-SERIES = "series"
-
-
 def format_2_level_items(
     items: Dict[str, dict],
     level1_vals: Optional[Type[LabeledCode]],
@@ -125,32 +120,6 @@ def format_2_level_items(
         series_data = []
         for l2_code, num in year_res.items():
             l2 = level2_vals.labels()[level2_vals(l2_code)] if level2_vals else l2_code
-            series_data.append({LKEY: l2, VAL: num})
-        res.append({LKEY: l1, SERIES: series_data})
+            series_data.append({BE_CONST.LKEY: l2, BE_CONST.VAL: num})
+        res.append({BE_CONST.LKEY: l1, BE_CONST.SERIES: series_data})
     return res
-
-
-def order_by_list_stack_bar_widget(
-    structured_data_list: List[Dict[str, Union[str, List]]], severity_order: List[str]
-) -> List[Dict[str, Union[str, List]]]:
-    severity_dict = {}
-    for struct in structured_data_list:
-        series_data = struct["series"]
-        for injury in series_data:
-            for key, value in injury.items():
-                if key != "label_key":
-                    continue
-
-                severity_dict[value] = injury
-
-        series_data_new = []
-        for severity in severity_order:
-            if severity in severity_dict:
-                series_data_new.append(severity_dict.pop(severity))
-
-        for key, value in severity_dict.items():
-            series_data_new.append(value)
-
-        struct["series"] = series_data_new
-
-    return structured_data_list

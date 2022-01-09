@@ -1,4 +1,5 @@
 import logging
+from collections import defaultdict
 from typing import Dict
 
 from sqlalchemy import func, or_
@@ -32,18 +33,11 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
     
     @staticmethod
     def convert_to_dict(query_results):
-        res = {}
-
+        res = defaultdict(lambda: {InjurySeverity.KILLED.value:0, InjurySeverity.SEVERE_INJURED.value:0, InjurySeverity.LIGHT_INJURED.value:0})
         for query_result in query_results:
-            if query_result.accident_year not in res:
-                res[query_result.accident_year] = {}
-            if query_result.injury_severity not in res[query_result.accident_year]:
-                res[query_result.accident_year][query_result.injury_severity] = 0
-
             res[query_result.accident_year][query_result.injury_severity] += query_result.count
-
         return res
-    
+
     def generate_items(self) -> None:
         try:
             yishuv_name = self.request_params.location_info.get("yishuv_name")

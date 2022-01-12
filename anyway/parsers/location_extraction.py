@@ -65,6 +65,7 @@ def get_road_segment_name_and_number(road_segment_id) -> (float, str):
     road = segment.road  # pylint: disable=maybe-no-member
     return float(road), road_segment_name
 
+
 def get_db_matching_location_interurban(latitude, longitude) -> dict:
     """
     extracts location from db by closest geo point to location found, using road number if provided and limits to
@@ -155,6 +156,7 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
             if not (isinstance(loc, np.float64) and np.isnan(loc)):
                 final_loc[field] = loc
     return final_loc
+
 
 def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):
     """

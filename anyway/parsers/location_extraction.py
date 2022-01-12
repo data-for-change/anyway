@@ -14,6 +14,7 @@ from sqlalchemy import (
     not_,
 )
 import pandas as pd
+from sqlalchemy.orm import load_only
 
 
 def extract_road_number(location):
@@ -64,7 +65,6 @@ def get_road_segment_name_and_number(road_segment_id) -> (float, str):
     road = segment.road  # pylint: disable=maybe-no-member
     return float(road), road_segment_name
 
-
 def get_db_matching_location_interurban(latitude, longitude) -> dict:
     """
     extracts location from db by closest geo point to location found, using road number if provided and limits to
@@ -93,7 +93,8 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
         from anyway.app_and_db import db
     except ModuleNotFoundError:
         pass
-    distance_in_km = 5
+
+    distance_in_km = 1.5
     lat_min, lon_min, lat_max, lon_max = get_bounding_box(latitude, longitude, distance_in_km)
     baseX = lon_min
     baseY = lat_min
@@ -106,15 +107,25 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
     query_obj = (
         db.session.query(AccidentMarkerView)
         .filter(AccidentMarkerView.geom.intersects(polygon_str))
-        .filter(AccidentMarkerView.accident_year >= 2014)
+        .filter(AccidentMarkerView.accident_year >= 2015)
         .filter(AccidentMarkerView.provider_code != BE_CONST.RSA_PROVIDER_CODE)
         .filter(not_(AccidentMarkerView.road_segment_name == None))
+        .options(
+            load_only(
+                "road1",
+                "road_segment_id",
+                "road_segment_name",
+                "latitude",
+                "longitude",
+                "geom",
+                "accident_year",
+                "provider_code",
+            )
+        )
     )
     markers = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
 
     geod = Geodesic.WGS84
-    # relevant_fields = resolution_dict[resolution]
-    # markers = db.get_markers_for_location_extraction()
     markers["geohash"] = markers.apply(  # pylint: disable=maybe-no-member
         lambda x: geohash.encode(x["latitude"], x["longitude"], precision=4), axis=1
     )  # pylint: disable=maybe-no-member
@@ -144,7 +155,6 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
             if not (isinstance(loc, np.float64) and np.isnan(loc)):
                 final_loc[field] = loc
     return final_loc
-
 
 def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):
     """

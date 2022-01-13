@@ -35,7 +35,7 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
     def convert_to_dict(query_results):
         res = defaultdict(lambda: {InjurySeverity.KILLED.value:0, InjurySeverity.SEVERE_INJURED.value:0, InjurySeverity.LIGHT_INJURED.value:0})
         for query_result in query_results:
-            res[query_result.accident_year][query_result.injury_severity] += query_result.count
+            res[str(query_result.accident_year)][query_result.injury_severity] += query_result.count
         return res
 
     def generate_items(self) -> None:
@@ -84,11 +84,7 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
 
             res = add_empty_keys_to_gen_two_level_dict(
                 self.convert_to_dict(query.all()),
-                list(
-                    range(
-                        self.request_params.start_time.year, self.request_params.end_time.year + 1
-                    )
-                ),
+                [str(year) for year in range(self.request_params.start_time.year, self.request_params.end_time.year + 1)],
                 InjurySeverity.codes(),
             )
             self.items = format_2_level_items(res, None, InjurySeverity)

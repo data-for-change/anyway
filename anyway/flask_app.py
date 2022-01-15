@@ -76,7 +76,7 @@ DEFAULT_MAPS_API_KEY = "AIzaSyDUIWsBLkvIUwzLHMHos9qFebyJ63hEG2M"
 
 
 app.config.from_object(__name__)
-app.config["SWAGGER_UI_DOC_EXPANSION"] = 'list'
+app.config["SWAGGER_UI_DOC_EXPANSION"] = "list"
 app.config["SESSION_COOKIE_SAMESITE"] = "none"
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["REMEMBER_COOKIE_SECURE"] = True
@@ -1406,8 +1406,6 @@ def embedded_reports_api():
 #
 
 # User system API
-app.add_url_rule("/user/add_user_to_org", view_func=add_user_to_org, methods=["POST"])
-app.add_url_rule("/user/remove_user_from_org", view_func=remove_user_from_org, methods=["POST"])
 app.add_url_rule("/user/add_role", view_func=add_role, methods=["POST"])
 app.add_url_rule(
     "/user/change_user_active_mode", view_func=change_user_active_mode, methods=["POST"]
@@ -1458,3 +1456,29 @@ class AddOrganization(Resource):
         args = add_org_parser.parse_args()
         org_name = args["name"]
         return add_organization(org_name)
+
+
+update_user_org_parser = api.parser()
+update_user_org_parser.add_argument("email", type=str, required=True)
+update_user_org_parser.add_argument(
+    "org",
+    type=str,
+    required=False,
+    help="If 'org' argument is missing then the user will not be a member of any organization.",
+)
+
+
+@api.route("/user/update_user_org")
+@api.expect(update_user_org_parser)
+class UpdateUserOrg(Resource):
+    @api.doc(
+        "Add user as a member in organization, if 'org' argument is missing then the user will not be a "
+        "member of any organization"
+    )
+    @api.response(200, "")
+    @api.response(400, "Organization or User is not in the DB")
+    def post(self):
+        args = update_user_org_parser.parse_args()
+        user_email = args["email"]
+        org_name = args["org"]
+        return update_user_org(user_email, org_name)

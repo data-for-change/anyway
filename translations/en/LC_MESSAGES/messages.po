@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-01-08 14:56+0200\n"
+"POT-Creation-Date: 2022-01-15 12:35+0200\n"
 "PO-Revision-Date: 2020-11-26 16:45+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -16,19 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.1\n"
-
-#: anyway/backend_constants.py:149
-msgid "killed"
-msgstr "killed"
-
-#: anyway/backend_constants.py:150
-msgid "severe injured"
-msgstr "severe injured"
-
-#: anyway/backend_constants.py:151
-msgid "light injured"
-msgstr "light injured"
+"Generated-By: Babel 2.6.0\n"
 
 #: anyway/flask_app.py:677 anyway/flask_app.py:782
 msgid "Discussion not found:"
@@ -262,6 +250,18 @@ msgstr ""
 msgid "other"
 msgstr ""
 
+#: anyway/constants/backend_constants.py:109
+msgid "killed"
+msgstr "killed"
+
+#: anyway/constants/backend_constants.py:110
+msgid "severe injured"
+msgstr "severe injured"
+
+#: anyway/constants/backend_constants.py:111
+msgid "light injured"
+msgstr "light injured"
+
 #: anyway/widgets/suburban_widgets/accident_count_by_accident_type_widget.py:46
 msgid "Number of accidents by accident type"
 msgstr ""
@@ -276,7 +276,7 @@ msgid ""
 "accident severity"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/accident_count_by_car_type_widget.py:114
+#: anyway/widgets/suburban_widgets/accident_count_by_car_type_widget.py:115
 msgid ""
 "comparing vehicle type percentage in accidents in {} relative to national"
 " average"
@@ -317,27 +317,27 @@ msgstr ""
 msgid "Fatal, severe and light accidents count in the specified location."
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/accidents_heat_map_widget.py:52
+#: anyway/widgets/suburban_widgets/accidents_heat_map_widget.py:53
 msgid "Fatal and severe accidents heat map"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:95
+#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:98
 msgid "Fatal head on collisions vs other accidents"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:99
+#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:102
 msgid "desc"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:126
+#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:129
 msgid "others"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:127
+#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:130
 msgid "frontal"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:128
+#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:131
 msgid ""
 "Fatal accidents distribution by accident type - head on collisions vs "
 "other accidents."
@@ -357,53 +357,53 @@ msgstr ""
 msgid "Number of Injuries in accidents by severity"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_stacked_widget.py:52
+#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_stacked_widget.py:59
 msgid "Killed and injury stacked per age group"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_stacked_widget.py:53
-#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_widget.py:38
+#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_stacked_widget.py:60
+#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_widget.py:40
 msgid "In"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_widget.py:37
+#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_widget.py:39
 msgid "Injury per age group"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:36
+#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:38
 msgid "Most severe accidents in segment"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:130
+#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:132
 msgid "accident_severity"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:131
+#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:133
 msgid "type"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:143
-#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:146
+#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:145
+#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:148
 msgid ""
 "Most recent fatal and severe accidents in location, ordered by date. Up "
 "to 10 accidents are presented."
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/most_severe_accidents_widget.py:63
+#: anyway/widgets/suburban_widgets/most_severe_accidents_widget.py:64
 msgid ""
 "Most recent fatal and severe accidents displayed on a map. Up to 10 "
 "accidents are presented."
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/motorcycle_accidents_vs_all_accidents_widget.py:137
+#: anyway/widgets/suburban_widgets/motorcycle_accidents_vs_all_accidents_widget.py:138
 msgid "Number of fatal and severe motorcycle accidents"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/motorcycle_accidents_vs_all_accidents_widget.py:137
+#: anyway/widgets/suburban_widgets/motorcycle_accidents_vs_all_accidents_widget.py:138
 msgid "compared to rest of country"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/road2_plus1_widget.py:69
+#: anyway/widgets/suburban_widgets/road2_plus1_widget.py:70
 msgid "Road 2 plus 1 solution to prevent fatal accidents"
 msgstr ""
 
@@ -428,7 +428,7 @@ msgstr ""
 msgid "Segments with most accidents"
 msgstr ""
 
-#: anyway/widgets/urban_widgets/injured_accidents_with_pedestrians_widget.py:107
+#: anyway/widgets/urban_widgets/injured_accidents_with_pedestrians_widget.py:108
 msgid "Pedestrian accidents by severity and year"
 msgstr ""
 

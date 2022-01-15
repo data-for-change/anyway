@@ -23,7 +23,7 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from anyway.anyway_dataclasses.user_data import UserData
 from anyway.app_and_db import db, app
-from anyway.backend_constants import BE_CONST
+from anyway.constants.backend_constants import BackEndConstants
 from anyway.base import _set_cookie_hijack, _clear_cookie_hijack
 from anyway.error_code_and_strings import (
     Errors as Es,
@@ -136,7 +136,7 @@ def oauth_authorize(provider: str) -> Response:
         return return_json_error(Es.BR_USER_ALREADY_LOGGED_IN)
 
     redirect_url_from_url = request.args.get("redirect_url", type=str)
-    redirect_url = BE_CONST.DEFAULT_REDIRECT_URL
+    redirect_url = BackEndConstants.DEFAULT_REDIRECT_URL
     if redirect_url_from_url and is_a_safe_redirect_url(redirect_url_from_url):
         redirect_url = redirect_url_from_url
 
@@ -211,7 +211,7 @@ def oauth_callback(provider: str) -> Response:
 
     db.session.commit()
 
-    redirect_url = BE_CONST.DEFAULT_REDIRECT_URL
+    redirect_url = BackEndConstants.DEFAULT_REDIRECT_URL
     redirect_url_json_base64 = request.args.get("state", type=str)
     if redirect_url_json_base64:
         redirect_url_json = json.loads(base64.b64decode(redirect_url_json_base64.encode("UTF8")))
@@ -226,7 +226,7 @@ def oauth_callback(provider: str) -> Response:
 
 
 # TODO: in the future add pagination if needed
-@roles_accepted(BE_CONST.Roles2Names.Admins.value)
+@roles_accepted(BackEndConstants.Roles2Names.Admins.value)
 def get_all_users_info() -> Response:
     dict_ret = []
     for user_obj in db.session.query(Users).order_by(Users.user_register_date).all():
@@ -234,18 +234,18 @@ def get_all_users_info() -> Response:
     return jsonify(dict_ret)
 
 
-@roles_accepted(BE_CONST.Roles2Names.Authenticated.value)
+@roles_accepted(BackEndConstants.Roles2Names.Authenticated.value)
 def get_user_info() -> Response:
     user_obj = get_current_user()
     return jsonify(user_obj.serialize_exposed_to_user())
 
 
-@roles_accepted(BE_CONST.Roles2Names.Admins.value)
+@roles_accepted(BackEndConstants.Roles2Names.Admins.value)
 def remove_from_role() -> Response:
     return change_user_roles("remove")
 
 
-@roles_accepted(BE_CONST.Roles2Names.Admins.value)
+@roles_accepted(BackEndConstants.Roles2Names.Admins.value)
 def add_to_role() -> Response:
     return change_user_roles("add")
 
@@ -310,7 +310,7 @@ def get_role_object(role_name):
     return role
 
 
-@roles_accepted(BE_CONST.Roles2Names.Admins.value)
+@roles_accepted(BackEndConstants.Roles2Names.Admins.value)
 def admin_update_user() -> Response:
     allowed_fields = [
         "user_current_email",
@@ -366,7 +366,7 @@ def admin_update_user() -> Response:
 # This code is also used as part of the user first registration
 
 
-@roles_accepted(BE_CONST.Roles2Names.Authenticated.value)
+@roles_accepted(BackEndConstants.Roles2Names.Authenticated.value)
 def user_update() -> Response:
     allowed_fields = [
         "first_name",
@@ -445,7 +445,7 @@ def update_user_in_db(
     db.session.commit()
 
 
-@roles_accepted(BE_CONST.Roles2Names.Admins.value)
+@roles_accepted(BackEndConstants.Roles2Names.Admins.value)
 def change_user_active_mode() -> Response:
     req_dict = request.json
     if not req_dict:
@@ -468,7 +468,7 @@ def change_user_active_mode() -> Response:
     return Response(status=HTTPStatus.OK)
 
 
-@roles_accepted(BE_CONST.Roles2Names.Admins.value)
+@roles_accepted(BackEndConstants.Roles2Names.Admins.value)
 def add_role() -> Response:
     req_dict = request.json
     if not req_dict:
@@ -516,7 +516,7 @@ def is_a_valid_role_description(name: str) -> bool:
     return True
 
 
-@roles_accepted(BE_CONST.Roles2Names.Admins.value)
+@roles_accepted(BackEndConstants.Roles2Names.Admins.value)
 def get_roles_list() -> Response:
     roles_list = db.session.query(Roles).all()
     send_list = [
@@ -524,25 +524,21 @@ def get_roles_list() -> Response:
     ]
 
     return Response(
-        response=json.dumps(send_list),
-        status=HTTPStatus.OK,
-        mimetype="application/json",
+        response=json.dumps(send_list), status=HTTPStatus.OK, mimetype="application/json"
     )
 
 
-@roles_accepted(BE_CONST.Roles2Names.Admins.value)
+@roles_accepted(BackEndConstants.Roles2Names.Admins.value)
 def get_organization_list() -> Response:
     orgs_list = db.session.query(Organization).all()
     send_list = [org.name for org in orgs_list]
 
     return Response(
-        response=json.dumps(send_list),
-        status=HTTPStatus.OK,
-        mimetype="application/json",
+        response=json.dumps(send_list), status=HTTPStatus.OK, mimetype="application/json"
     )
 
 
-@roles_accepted(BE_CONST.Roles2Names.Admins.value)
+@roles_accepted(BackEndConstants.Roles2Names.Admins.value)
 def add_organization(name: str) -> Response:
     if not name:
         return return_json_error(Es.BR_FIELD_MISSING)
@@ -556,7 +552,7 @@ def add_organization(name: str) -> Response:
     return Response(status=HTTPStatus.OK)
 
 
-@roles_accepted(BE_CONST.Roles2Names.Admins.value)
+@roles_accepted(BackEndConstants.Roles2Names.Admins.value)
 def remove_user_from_org() -> Response:
     req_dict = request.json
     if req_dict is None:
@@ -591,7 +587,7 @@ def remove_user_from_org() -> Response:
     return Response(status=HTTPStatus.OK)
 
 
-@roles_accepted(BE_CONST.Roles2Names.Admins.value)
+@roles_accepted(BackEndConstants.Roles2Names.Admins.value)
 def add_user_to_org() -> Response:
     req_dict = request.json
     if req_dict is None:

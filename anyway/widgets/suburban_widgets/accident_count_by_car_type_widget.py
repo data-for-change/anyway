@@ -3,7 +3,7 @@ from collections import defaultdict
 from functools import lru_cache
 from typing import Dict
 from flask_babel import _
-from anyway.backend_constants import BE_CONST
+from anyway.constants.backend_constants import BackEndConstants
 from anyway.infographics_dictionaries import segment_dictionary
 from anyway.models import InvolvedMarkerView
 from anyway.vehicle_type import VehicleCategory
@@ -91,8 +91,8 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
             table_obj=InvolvedMarkerView,
             filters={
                 "road_type": [
-                    BE_CONST.ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION,
-                    BE_CONST.ROAD_TYPE_NOT_IN_CITY_IN_INTERSECTION,
+                    BackEndConstants.ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION,
+                    BackEndConstants.ROAD_TYPE_NOT_IN_CITY_IN_INTERSECTION,
                 ]
             },
             group_by="involve_vehicle_type",

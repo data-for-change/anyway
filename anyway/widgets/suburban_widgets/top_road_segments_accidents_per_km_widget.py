@@ -7,7 +7,7 @@ from sqlalchemy import cast, func, Numeric, desc
 # noinspection PyProtectedMember
 from flask_babel import _
 from anyway.request_params import RequestParams
-from anyway.backend_constants import AccidentSeverity
+from anyway.constants.accident_severity import AccidentSeverity
 from anyway.widgets.widget import register
 from anyway.widgets.widget_utils import get_query
 from anyway.models import AccidentMarkerView
@@ -78,8 +78,10 @@ class TopRoadSegmentsAccidentsPerKmWidget(SubUrbanWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
-            "title": _('Segments with most accidents per Km') +f" - {request_params.location_info['road1']}"
+            "title": _("Segments with most accidents per Km")
+            + f" - {request_params.location_info['road1']}"
         }
         return items
+
 
 _("Severe and fatal accidents per Km by section in road")

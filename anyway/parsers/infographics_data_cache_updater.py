@@ -14,8 +14,8 @@ from anyway.models import (
     Streets,
 )
 from typing import Dict, Iterable
-from anyway.constants import CONST
-from anyway.backend_constants import BE_CONST
+from anyway.constants.constants import Constants
+from anyway.constants.backend_constants import BackEndConstants
 from anyway.app_and_db import db
 from anyway.request_params import RequestParams
 import anyway.infographics_utils
@@ -31,7 +31,7 @@ STREET_CACHE_TABLES = {CACHE: InfographicsStreetDataCache, TEMP: InfographicsStr
 
 def is_in_cache(nf):
     return (
-        len(CONST.INFOGRAPHICS_CACHE_YEARS_AGO)
+        len(Constants.INFOGRAPHICS_CACHE_YEARS_AGO)
         == db.session.query(InfographicsDataCache)
         .filter(InfographicsDataCache.news_flash_id == nf.get_id())
         .count()
@@ -59,7 +59,7 @@ def add_news_flash_to_cache(news_flash: NewsFlash):
                         news_flash.get_id(), y, "he"
                     ),
                 }
-                for y in CONST.INFOGRAPHICS_CACHE_YEARS_AGO
+                for y in Constants.INFOGRAPHICS_CACHE_YEARS_AGO
             ],
         )
         logging.info(f"{news_flash.get_id()} added to cache")
@@ -120,7 +120,7 @@ def get_infographics_data_from_cache_by_road_segment(road_segment_id, years_ago)
 def get_cache_retrieval_query(params: RequestParams):
     res = params.resolution
     loc = params.location_info
-    if res == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
+    if res == BackEndConstants.ResolutionCategories.SUBURBAN_ROAD:
         return (
             db.session.query(InfographicsRoadSegmentsDataCache)
             .filter(
@@ -129,7 +129,7 @@ def get_cache_retrieval_query(params: RequestParams):
             )
             .filter(InfographicsRoadSegmentsDataCache.years_ago == int(params.years_ago))
         )
-    elif res == BE_CONST.ResolutionCategories.STREET:
+    elif res == BackEndConstants.ResolutionCategories.STREET:
         t = InfographicsStreetDataCache
         return (
             db.session.query(t)
@@ -198,8 +198,8 @@ def build_cache_into_temp():
     start = datetime.now()
     db.session.query(InfographicsDataCacheTemp).delete()
     db.session.commit()
-    supported_resolutions = set([x.value for x in BE_CONST.SUPPORTED_RESOLUTIONS])
-    for y in CONST.INFOGRAPHICS_CACHE_YEARS_AGO:
+    supported_resolutions = set([x.value for x in BackEndConstants.SUPPORTED_RESOLUTIONS])
+    for y in Constants.INFOGRAPHICS_CACHE_YEARS_AGO:
         logging.debug(f"processing years_ago:{y}")
         db.get_engine().execute(
             InfographicsDataCacheTemp.__table__.insert(),  # pylint: disable=no-member
@@ -232,7 +232,7 @@ def get_streets() -> Iterable[Streets]:
 
 def get_street_infographic_keys() -> Iterable[Dict[str, int]]:
     for street in get_streets():
-        for y in CONST.INFOGRAPHICS_CACHE_YEARS_AGO:
+        for y in Constants.INFOGRAPHICS_CACHE_YEARS_AGO:
             yield {
                 "yishuv_symbol": street.yishuv_symbol,
                 "street1": street.street,
@@ -266,7 +266,7 @@ def build_cache_for_road_segments():
     start = datetime.now()
     db.session.query(InfographicsRoadSegmentsDataCache).delete()
     db.session.commit()
-    for y in CONST.INFOGRAPHICS_CACHE_YEARS_AGO:
+    for y in Constants.INFOGRAPHICS_CACHE_YEARS_AGO:
         logging.debug(f"processing years_ago:{y}")
         db.get_engine().execute(
             InfographicsRoadSegmentsDataCache.__table__.insert(),  # pylint: disable=no-member

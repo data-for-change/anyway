@@ -4,7 +4,7 @@ from unittest import TestCase
 from unittest.mock import Mock, patch
 from anyway.infographics_utils import get_infographics_data
 from anyway.models import NewsFlash
-from anyway.constants import CONST
+from anyway.constants.constants import Constants
 from anyway.parsers.infographics_data_cache_updater import add_news_flash_to_cache
 import anyway.parsers.infographics_data_cache_updater
 
@@ -59,11 +59,11 @@ class Test_infographics_data_from_cache(TestCase):
         res = add_news_flash_to_cache(nf)
         invocations = utils.call_args_list
         utils.assert_has_calls(
-            [unittest.mock.call(17, y, "he") for y in CONST.INFOGRAPHICS_CACHE_YEARS_AGO]
+            [unittest.mock.call(17, y, "he") for y in Constants.INFOGRAPHICS_CACHE_YEARS_AGO]
         )
         for i in range(len(invocations)):
             self.assertEqual(invocations[i][0][0], 17, "incorrect news flash id")
-            self.assertEqual(invocations[i][0][1], CONST.INFOGRAPHICS_CACHE_YEARS_AGO[i])
+            self.assertEqual(invocations[i][0][1], Constants.INFOGRAPHICS_CACHE_YEARS_AGO[i])
         assert res, "Should return True when no error occurred"
 
     @patch("anyway.parsers.infographics_data_cache_updater.db.get_engine")

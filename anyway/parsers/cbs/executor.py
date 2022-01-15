@@ -15,7 +15,7 @@ from typing import Tuple, Dict, List, Any
 
 from anyway.parsers.cbs import preprocessing_cbs_files
 from anyway import field_names, localization
-from anyway.backend_constants import BE_CONST
+from anyway.constants.backend_constants import BackEndConstants
 from anyway.models import (
     AccidentMarker,
     Involved,
@@ -881,8 +881,8 @@ def delete_cbs_entries(start_year, batch_size):
         .filter(AccidentMarker.created >= datetime.strptime(start_date, "%Y-%m-%d"))
         .filter(
             or_(
-                (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_1_CODE),
-                (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_3_CODE),
+                (AccidentMarker.provider_code == BackEndConstants.CBS_ACCIDENT_TYPE_1_CODE),
+                (AccidentMarker.provider_code == BackEndConstants.CBS_ACCIDENT_TYPE_3_CODE),
             )
         )
         .all()
@@ -1078,11 +1078,7 @@ def get_file_type_and_year(file_path):
     return int(provider_code), int(year)
 
 
-def main(
-    batch_size,
-    source,
-    load_start_year=None,
-):
+def main(batch_size, source, load_start_year=None):
     try:
         load_existing_streets()
         total = 0
@@ -1096,10 +1092,12 @@ def main(
             s3_data_retriever.get_files_from_s3(start_year=load_start_year)
             delete_cbs_entries(load_start_year, batch_size)
             for provider_code in [
-                BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
-                BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+                BackEndConstants.CBS_ACCIDENT_TYPE_1_CODE,
+                BackEndConstants.CBS_ACCIDENT_TYPE_3_CODE,
             ]:
-                logging.info(f"Loading min year {s3_data_retriever.min_year} Loading max year {s3_data_retriever.max_year}")
+                logging.info(
+                    f"Loading min year {s3_data_retriever.min_year} Loading max year {s3_data_retriever.max_year}"
+                )
                 for year in range(s3_data_retriever.min_year, s3_data_retriever.max_year + 1):
                     cbs_files_dir = os.path.join(
                         s3_data_retriever.local_files_directory,

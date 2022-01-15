@@ -7,8 +7,11 @@ from sqlalchemy import func
 import pandas as pd
 
 from anyway.models import NewsFlash, AccidentMarkerView, City, Streets
-from anyway.parsers.location_extraction import get_road_segment_name_and_number, get_road_segment_by_name
-from anyway.backend_constants import BE_CONST
+from anyway.parsers.location_extraction import (
+    get_road_segment_name_and_number,
+    get_road_segment_by_name,
+)
+from anyway.constants.backend_constants import BackEndConstants
 from anyway.app_and_db import db
 from anyway.parsers import resolution_dict
 
@@ -22,7 +25,7 @@ class RequestParams:
     years_ago: int
     location_text: str
     location_info: Dict[str, Any]
-    resolution: BE_CONST.ResolutionCategories
+    resolution: BackEndConstants.ResolutionCategories
     gps: Dict
     start_time: datetime.date
     end_time: datetime.date
@@ -50,7 +53,7 @@ def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams
     logging.debug("location_info:{}".format(location_info))
     logging.debug("location_text:{}".format(location_text))
     resolution = location_info.pop("resolution")
-    if resolution is None or resolution not in BE_CONST.SUPPORTED_RESOLUTIONS:
+    if resolution is None or resolution not in BackEndConstants.SUPPORTED_RESOLUTIONS:
         logging.error(f"Resolution empty or not supported: {resolution}.")
         return None
 
@@ -104,20 +107,21 @@ def get_location_from_news_flash(news_flash_id: str) -> dict:
     news_flash = extract_news_flash_obj(news_flash_id)
     loc = extract_news_flash_location(news_flash)
     res = loc["data"]["resolution"]
-    loc["data"]["resolution"] = BE_CONST.ResolutionCategories(res)
+    loc["data"]["resolution"] = BackEndConstants.ResolutionCategories(res)
     loc["text"] = get_news_flash_location_text(news_flash)
     add_numeric_field_values(loc, news_flash)
     return loc
 
 
 def add_numeric_field_values(loc: dict, news_flash: NewsFlash) -> None:
-    if loc["data"]["resolution"] == BE_CONST.ResolutionCategories.STREET:
+    if loc["data"]["resolution"] == BackEndConstants.ResolutionCategories.STREET:
         if "yishuv_symbol" not in loc["data"]:
             loc["data"]["yishuv_symbol"] = City.get_symbol_from_name(loc["data"]["yishuv_name"])
         if "street1" not in loc["data"]:
-            loc["data"]["street1"] = Streets.get_street_by_street_name(loc["data"]["yishuv_symbol"],
-                                                                       loc["data"]["street1_hebrew"])
-    elif loc["data"]["resolution"] == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
+            loc["data"]["street1"] = Streets.get_street_by_street_name(
+                loc["data"]["yishuv_symbol"], loc["data"]["street1_hebrew"]
+            )
+    elif loc["data"]["resolution"] == BackEndConstants.ResolutionCategories.SUBURBAN_ROAD:
         if "road_segment_id" not in loc["data"]:
             segment = get_road_segment_by_name(loc["data"]["road_segment_name"])
             loc["data"]["road_segment_id"] = segment.segment_id
@@ -167,7 +171,7 @@ def get_street_location_text(yishuv_name, street1_hebrew):
 
 
 def extract_road_segment_location(road_segment_id):
-    data = {"resolution": BE_CONST.ResolutionCategories.SUBURBAN_ROAD}
+    data = {"resolution": BackEndConstants.ResolutionCategories.SUBURBAN_ROAD}
     road1, road_segment_name = get_road_segment_name_and_number(road_segment_id)
     data["road1"] = int(road1)
     data["road_segment_name"] = road_segment_name
@@ -182,7 +186,7 @@ def extract_road_segment_location(road_segment_id):
 def extract_street_location(input_vals: dict):
     vals = fill_missing_street_values(input_vals)
     # noinspection PyDictCreation
-    data = {"resolution": BE_CONST.ResolutionCategories.STREET}
+    data = {"resolution": BackEndConstants.ResolutionCategories.STREET}
     for k in ["yishuv_name", "yishuv_symbol", "street1", "street1_hebrew"]:
         data[k] = vals[k]
     text = get_street_location_text(vals["yishuv_name"], vals["street1_hebrew"])
@@ -198,9 +202,13 @@ def fill_missing_street_values(vals: dict) -> dict:
     else:
         res["yishuv_symbol"] = City.get_symbol_from_name(res["yishuv_name"])
     if "street1" in res and "street1_hebrew" not in res:
-        res["street1_hebrew"] = Streets.get_street_name_by_street(res["yishuv_symbol"], res["street1"])
+        res["street1_hebrew"] = Streets.get_street_name_by_street(
+            res["yishuv_symbol"], res["street1"]
+        )
     else:
-        res["street1"] = Streets.get_street_by_street_name(res["yishuv_symbol"], res["street1_hebrew"])
+        res["street1"] = Streets.get_street_by_street_name(
+            res["yishuv_symbol"], res["street1_hebrew"]
+        )
     return res
 
 
@@ -218,8 +226,8 @@ def extract_news_flash_obj(news_flash_id) -> Optional[NewsFlash]:
 def get_latest_accident_date(table_obj, filters):
     filters = filters or {}
     filters["provider_code"] = [
-        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
-        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+        BackEndConstants.CBS_ACCIDENT_TYPE_1_CODE,
+        BackEndConstants.CBS_ACCIDENT_TYPE_3_CODE,
     ]
     query = db.session.query(func.max(table_obj.accident_timestamp))
     df = pd.read_sql_query(query.statement, query.session.bind)

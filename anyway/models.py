@@ -40,7 +40,7 @@ from sqlalchemy.orm import relationship, load_only, backref
 from sqlalchemy import or_, and_
 
 from anyway import localization
-from anyway.backend_constants import BE_CONST
+from anyway.constants.backend_constants import BackEndConstants
 from anyway.database import Base
 from anyway.utilities import decode_hebrew
 
@@ -118,14 +118,10 @@ class Users(Base, UserMixin):
     user_desc = Column(String(2048))
     is_user_completed_registration = Column(Boolean)
     roles = relationship(
-        "Roles",
-        secondary=users_to_roles,
-        backref=backref("users", lazy="dynamic"),
+        "Roles", secondary=users_to_roles, backref=backref("users", lazy="dynamic")
     )
     organizations = relationship(
-        "Organization",
-        secondary=users_to_organizations,
-        backref=backref("users", lazy="dynamic"),
+        "Organization", secondary=users_to_organizations, backref=backref("users", lazy="dynamic")
     )
 
     def serialize_exposed_to_user(self):
@@ -256,7 +252,7 @@ class AccidentMarker(MarkerMixin, Base):
         Index("idx_markers_created", "created", unique=False),
     )
 
-    __mapper_args__ = {"polymorphic_identity": BE_CONST.MARKER_TYPE_ACCIDENT}
+    __mapper_args__ = {"polymorphic_identity": BackEndConstants.MARKER_TYPE_ACCIDENT}
     id = Column(BigInteger(), primary_key=True)
     provider_and_id = Column(BigInteger())
     provider_code = Column(Integer(), primary_key=True)
@@ -337,7 +333,10 @@ class AccidentMarker(MarkerMixin, Base):
             db.session.query(func.max(AccidentMarker.created))
             .filter(
                 AccidentMarker.provider_code.in_(
-                    [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
+                    [
+                        BackEndConstants.CBS_ACCIDENT_TYPE_1_CODE,
+                        BackEndConstants.CBS_ACCIDENT_TYPE_3_CODE,
+                    ]
                 )
             )
             .first()
@@ -386,7 +385,7 @@ class AccidentMarker(MarkerMixin, Base):
                 }
             )
             # United Hatzala accidents description are not json:
-            if self.provider_code == BE_CONST.UNITED_HATZALA_CODE:
+            if self.provider_code == BackEndConstants.UNITED_HATZALA_CODE:
                 fields.update({"description": self.description})
             else:
                 fields.update({"description": AccidentMarker.json_to_description(self.description)})
@@ -449,7 +448,7 @@ class AccidentMarker(MarkerMixin, Base):
                 .filter(AccidentMarker.geom.intersects(polygon_str))
                 .filter(AccidentMarker.created >= kwargs["start_date"])
                 .filter(AccidentMarker.created < kwargs["end_date"])
-                .filter(AccidentMarker.provider_code != BE_CONST.RSA_PROVIDER_CODE)
+                .filter(AccidentMarker.provider_code != BackEndConstants.RSA_PROVIDER_CODE)
                 .order_by(desc(AccidentMarker.created))
             )
 
@@ -459,7 +458,7 @@ class AccidentMarker(MarkerMixin, Base):
                 .filter(AccidentMarker.geom.intersects(polygon_str))
                 .filter(AccidentMarker.created >= kwargs["start_date"])
                 .filter(AccidentMarker.created < kwargs["end_date"])
-                .filter(AccidentMarker.provider_code == BE_CONST.RSA_PROVIDER_CODE)
+                .filter(AccidentMarker.provider_code == BackEndConstants.RSA_PROVIDER_CODE)
                 .order_by(desc(AccidentMarker.created))
             )
         else:
@@ -468,7 +467,7 @@ class AccidentMarker(MarkerMixin, Base):
                 .filter(AccidentMarker.geom.intersects(polygon_str))
                 .filter(AccidentMarker.created >= kwargs["start_date"])
                 .filter(AccidentMarker.created < kwargs["end_date"])
-                .filter(AccidentMarker.provider_code != BE_CONST.RSA_PROVIDER_CODE)
+                .filter(AccidentMarker.provider_code != BackEndConstants.RSA_PROVIDER_CODE)
                 .order_by(desc(AccidentMarker.created))
             )
 
@@ -477,7 +476,7 @@ class AccidentMarker(MarkerMixin, Base):
                 .filter(AccidentMarker.geom.intersects(polygon_str))
                 .filter(AccidentMarker.created >= kwargs["start_date"])
                 .filter(AccidentMarker.created < kwargs["end_date"])
-                .filter(AccidentMarker.provider_code == BE_CONST.RSA_PROVIDER_CODE)
+                .filter(AccidentMarker.provider_code == BackEndConstants.RSA_PROVIDER_CODE)
                 .order_by(desc(AccidentMarker.created))
             )
 
@@ -486,9 +485,9 @@ class AccidentMarker(MarkerMixin, Base):
         if not kwargs["show_accidents"]:
             markers = markers.filter(
                 and_(
-                    AccidentMarker.provider_code != BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
-                    AccidentMarker.provider_code != BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
-                    AccidentMarker.provider_code != BE_CONST.UNITED_HATZALA_CODE,
+                    AccidentMarker.provider_code != BackEndConstants.CBS_ACCIDENT_TYPE_1_CODE,
+                    AccidentMarker.provider_code != BackEndConstants.CBS_ACCIDENT_TYPE_3_CODE,
+                    AccidentMarker.provider_code != BackEndConstants.UNITED_HATZALA_CODE,
                 )
             )
         if yield_per:
@@ -589,7 +588,7 @@ class AccidentMarker(MarkerMixin, Base):
         if kwargs.get("acctype", 0) != 0:
             if kwargs["acctype"] <= 20:
                 markers = markers.filter(AccidentMarker.accident_type == kwargs["acctype"])
-            elif kwargs["acctype"] == BE_CONST.BIKE_ACCIDENTS:
+            elif kwargs["acctype"] == BackEndConstants.BIKE_ACCIDENTS:
                 markers = markers.filter(
                     AccidentMarker.vehicles.any(Vehicle.vehicle_type == BE_VehicleType.BIKE.value)
                 )
@@ -606,7 +605,7 @@ class AccidentMarker(MarkerMixin, Base):
 
         if kwargs.get("age_groups"):
             age_groups_list = kwargs.get("age_groups").split(",")
-            if len(age_groups_list) < (BE_CONST.AGE_GROUPS_NUMBER + 1):
+            if len(age_groups_list) < (BackEndConstants.AGE_GROUPS_NUMBER + 1):
                 markers = markers.filter(
                     AccidentMarker.involved.any(Involved.age_group.in_(age_groups_list))
                 )
@@ -693,7 +692,7 @@ class AccidentMarker(MarkerMixin, Base):
     @classmethod
     def parse(cls, data):
         return AccidentMarker(
-            type=BE_CONST.MARKER_TYPE_ACCIDENT,
+            type=BackEndConstants.MARKER_TYPE_ACCIDENT,
             title=data["title"],
             description=data["description"],
             latitude=data["latitude"],
@@ -708,7 +707,7 @@ class DiscussionMarker(MarkerMixin, Base):
         Index("idx_discussions_geom", "geom", unique=False),
     )
 
-    __mapper_args__ = {"polymorphic_identity": BE_CONST.MARKER_TYPE_DISCUSSION}
+    __mapper_args__ = {"polymorphic_identity": BackEndConstants.MARKER_TYPE_DISCUSSION}
 
     identifier = Column(String(50), unique=True)
     geom = Column(Geometry("POINT"))
@@ -739,7 +738,7 @@ class DiscussionMarker(MarkerMixin, Base):
             created=datetime.datetime.now(),
             title=data["title"],
             identifier=data["identifier"],
-            type=BE_CONST.MARKER_TYPE_DISCUSSION,
+            type=BackEndConstants.MARKER_TYPE_DISCUSSION,
         )
 
     @staticmethod
@@ -975,20 +974,24 @@ class Streets(Base):
 
     @staticmethod
     def get_street_name_by_street(yishuv_symbol: int, street: int) -> str:
-        res = db.session.query(Streets.street_hebrew) \
-            .filter(Streets.yishuv_symbol == yishuv_symbol) \
-            .filter(Streets.street == street)\
+        res = (
+            db.session.query(Streets.street_hebrew)
+            .filter(Streets.yishuv_symbol == yishuv_symbol)
+            .filter(Streets.street == street)
             .first()
+        )
         if res is None:
             raise ValueError(f"{street}: could not find street in yishuv:{yishuv_symbol}")
         return res.street_hebrew
 
     @staticmethod
     def get_street_by_street_name(yishuv_symbol: int, name: str) -> int:
-        res = db.session.query(Streets.street) \
-            .filter(Streets.yishuv_symbol == yishuv_symbol) \
-            .filter(Streets.street_hebrew == name)\
+        res = (
+            db.session.query(Streets.street)
+            .filter(Streets.yishuv_symbol == yishuv_symbol)
+            .filter(Streets.street_hebrew == name)
             .first()
+        )
         if res is None:
             raise ValueError(f"{name}: could not find street in yishuv:{yishuv_symbol}")
         return res
@@ -2491,24 +2494,37 @@ class InfographicsTwoRoadsDataCacheFields(object):
 class InfographicsTwoRoadsDataCache(InfographicsTwoRoadsDataCacheFields, Base):
     __tablename__ = "infographics_two_roads_data_cache"
     __table_args__ = (
-        Index("infographics_two_roads_data_cache_id_years_idx", "road1", "road2",
-              "years_ago", unique=True),
+        Index(
+            "infographics_two_roads_data_cache_id_years_idx",
+            "road1",
+            "road2",
+            "years_ago",
+            unique=True,
+        ),
     )
 
     def get_data(self):
         return self.data
 
     def serialize(self):
-        return {"road1": self.road1, "road2": self.road2, "years_ago": self.years_ago,
-                "data": self.data}
+        return {
+            "road1": self.road1,
+            "road2": self.road2,
+            "years_ago": self.years_ago,
+            "data": self.data,
+        }
 
 
 class InfographicsTwoRoadsDataCacheTemp(InfographicsTwoRoadsDataCacheFields, Base):
     __tablename__ = "infographics_two_roads_data_cache_temp"
 
     def serialize(self):
-        return {"road1": self.road1, "road2": self.road2, "years_ago": self.years_ago,
-                "data": self.data}
+        return {
+            "road1": self.road1,
+            "road2": self.road2,
+            "years_ago": self.years_ago,
+            "data": self.data,
+        }
 
     # # Flask-Login integration
     # def is_authenticated(self):

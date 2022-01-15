@@ -15,7 +15,7 @@ from flask.testing import FlaskClient
 from urlobject import URLObject
 
 from anyway.app_and_db import app as flask_app
-from anyway.backend_constants import BE_CONST
+from anyway.constants.backend_constants import BackEndConstants
 from anyway.error_code_and_strings import (
     ERROR_TO_HTTP_CODE_DICT,
     build_json_for_user_api_error,
@@ -346,10 +346,10 @@ def user_add_or_remove_role(app: FlaskClient, path: str) -> None:
 
         with patch("anyway.views.user_system.api.get_role_object") as get_role_object:
             get_role_object.return_value = mock.MagicMock()
-            get_role_object.return_value.name = BE_CONST.Roles2Names.Admins.value
+            get_role_object.return_value.name = BackEndConstants.Roles2Names.Admins.value
 
             rv = post_json(
-                app, path, json_data={"role": BE_CONST.Roles2Names.Admins.value, "email": "a"}
+                app, path, json_data={"role": BackEndConstants.Roles2Names.Admins.value, "email": "a"}
             )
             assert_return_code_for_user_update(Errors.BR_USER_NOT_FOUND, rv, extra="a")
 
@@ -359,7 +359,7 @@ def set_mock_and_test_perm(app, current_user, path):
     rv = app.post(path, follow_redirects=True)
     assert_return_code_for_user_update(Errors.BR_BAD_AUTH, rv)
     role = mock.MagicMock()
-    role.name = BE_CONST.Roles2Names.Admins.value
+    role.name = BackEndConstants.Roles2Names.Admins.value
     current_user.return_value.roles = [role]
 
 

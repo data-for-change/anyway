@@ -25,7 +25,7 @@ from anyway import utilities, secrets
 from anyway.app_and_db import api, get_cors_config
 from anyway.clusters_calculator import retrieve_clusters
 from anyway.config import ENTRIES_PER_PAGE
-from anyway.constants import CONST
+from anyway.constants.constants import Constants
 from anyway.infographics_utils import (
     get_infographics_data,
     get_infographics_mock_data,
@@ -76,7 +76,7 @@ DEFAULT_MAPS_API_KEY = "AIzaSyDUIWsBLkvIUwzLHMHos9qFebyJ63hEG2M"
 
 
 app.config.from_object(__name__)
-app.config["SWAGGER_UI_DOC_EXPANSION"] = 'list'
+app.config["SWAGGER_UI_DOC_EXPANSION"] = "list"
 app.config["SESSION_COOKIE_SAMESITE"] = "none"
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["REMEMBER_COOKIE_SECURE"] = True
@@ -158,10 +158,7 @@ assets.register(
     ),
 )
 
-CORS(
-    app,
-    resources=get_cors_config(),
-)
+CORS(app, resources=get_cors_config())
 
 jinja_environment = jinja2.Environment(
     autoescape=True,
@@ -267,7 +264,7 @@ ARG_TYPES = {
     "fetch_markers": (bool, True),
     "fetch_vehicles": (bool, True),
     "fetch_involved": (bool, True),
-    "age_groups": (str, str(CONST.ALL_AGE_GROUPS_LIST).strip("[]").replace(" ", "")),
+    "age_groups": (str, str(Constants.ALL_AGE_GROUPS_LIST).strip("[]").replace(" ", "")),
     "page": (int, 0),
     "per_page": (int, 0),
 }
@@ -320,7 +317,7 @@ def markers():
     logging.debug("getting markers")
     kwargs = get_kwargs()
     logging.debug("querying markers in bounding box: %s" % kwargs)
-    is_thin = kwargs["zoom"] < CONST.MINIMAL_ZOOM
+    is_thin = kwargs["zoom"] < Constants.MINIMAL_ZOOM
     result = AccidentMarker.bounding_box_query(
         is_thin, yield_per=50, involved_and_vehicles=False, **kwargs
     )
@@ -706,7 +703,7 @@ def highlightpoint():
         return make_response("")
 
     # if it's a user gps type (user location), only handle a single post request per session
-    if int(highlight.type) == CONST.HIGHLIGHT_TYPE_USER_GPS:
+    if int(highlight.type) == Constants.HIGHLIGHT_TYPE_USER_GPS:
         if SESSION_HIGHLIGHTPOINT_KEY not in session:
             session[SESSION_HIGHLIGHTPOINT_KEY] = "saved"
         else:
@@ -763,7 +760,7 @@ def log_bad_request(request):
 
 def index(marker=None, message=None):
     context = {"url": request.base_url, "index_url": request.url_root}
-    context["CONST"] = CONST.to_dict()
+    context["CONST"] = Constants().to_dict()
     if "marker" in request.values:
         markers = AccidentMarker.get_marker(request.values["marker"])
         if markers.count() == 1:
@@ -1045,8 +1042,8 @@ def acc_in_area_query():
         .filter(AccidentMarker.geom.intersects(pol_str))
         .filter(
             or_(
-                (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_1_CODE),
-                (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_3_CODE),
+                (AccidentMarker.provider_code == BackEndConstants.CBS_ACCIDENT_TYPE_1_CODE),
+                (AccidentMarker.provider_code == BackEndConstants.CBS_ACCIDENT_TYPE_3_CODE),
             )
         )
     )
@@ -1212,7 +1209,9 @@ def infographics_data():
             log_bad_request(request)
             return abort(http_client.BAD_REQUEST)
 
-        number_of_years_ago = request.values.get("years_ago", BE_CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
+        number_of_years_ago = request.values.get(
+            "years_ago", BackEndConstants.DEFAULT_NUMBER_OF_YEARS_AGO
+        )
         lang: str = request.values.get("lang", "he")
         logging.debug(
             (
@@ -1325,7 +1324,7 @@ def widgets_personalisation_for_user(raw_info: typing.Dict) -> typing.Dict:
 
     roles_names = [role.name for role in current_user.roles]
 
-    if BE_CONST.Roles2Names.Or_yarok.value in roles_names:
+    if BackEndConstants.Roles2Names.Or_yarok.value in roles_names:
         widgets_list = raw_info.get("widgets")
         if not widgets_list:
             return raw_info
@@ -1337,7 +1336,7 @@ def widgets_personalisation_for_user(raw_info: typing.Dict) -> typing.Dict:
                 new_list.append(wig)
                 continue
 
-            if wig_name in BE_CONST.OR_YAROK_WIDGETS:
+            if wig_name in BackEndConstants.OR_YAROK_WIDGETS:
                 new_list.append(wig)
         raw_info["widgets"] = new_list
     return raw_info
@@ -1377,7 +1376,7 @@ def embedded_reports_api():
 #             log_bad_request(request)
 #             return abort(http_client.BAD_REQUEST)
 #
-#         number_of_years_ago = request.values.get("years_ago", BE_CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
+#         number_of_years_ago = request.values.get("years_ago", BackEndConstants.DEFAULT_NUMBER_OF_YEARS_AGO)
 #         lang: str = request.values.get("lang", "he")
 #         logging.debug(
 #             (

@@ -57,6 +57,3 @@ class Constants(object):
             for a in dir(self)
             if not a.startswith("__") and not callable(getattr(self, a))
         }
-
-
-CONST = Constants()

@@ -6,7 +6,8 @@ from flask_sqlalchemy import BaseQuery
 from sqlalchemy import func, asc
 
 from anyway.app_and_db import db
-from anyway.backend_constants import BE_CONST, InjurySeverity as IS
+from anyway.constants.backend_constants import BackEndConstants
+from anyway.constants.injury_severity import InjurySeverity
 from anyway.models import InvolvedMarkerView
 from anyway.request_params import RequestParams
 from anyway.utilities import parse_age_from_range
@@ -96,15 +97,18 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
             .filter(InvolvedMarkerView.accident_timestamp <= end_time)
             .filter(
                 InvolvedMarkerView.provider_code.in_(
-                    [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
+                    [
+                        BackEndConstants.CBS_ACCIDENT_TYPE_1_CODE,
+                        BackEndConstants.CBS_ACCIDENT_TYPE_3_CODE,
+                    ]
                 )
             )
             .filter(
                 InvolvedMarkerView.injury_severity.in_(
                     [
-                        IS.KILLED.value,  # pylint: disable=no-member
-                        IS.SEVERE_INJURED.value,  # pylint: disable=no-member
-                        IS.LIGHT_INJURED.value,  # pylint: disable=no-member
+                        InjurySeverity.KILLED.value,  # pylint: disable=no-member
+                        InjurySeverity.SEVERE_INJURED.value,  # pylint: disable=no-member
+                        InjurySeverity.LIGHT_INJURED.value,  # pylint: disable=no-member
                     ]
                 )
             )

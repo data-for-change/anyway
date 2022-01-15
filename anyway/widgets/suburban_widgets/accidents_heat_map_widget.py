@@ -4,12 +4,13 @@ import pandas as pd
 from flask_babel import _
 
 from anyway.request_params import RequestParams
-from anyway.backend_constants import AccidentSeverity, BE_CONST
+from anyway.constants.accident_severity import AccidentSeverity
 from anyway.infographics_dictionaries import segment_dictionary
 from anyway.widgets.widget_utils import get_query
 from anyway.models import AccidentMarkerView
 from anyway.widgets.widget import register
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
+from anyway.constants.backend_constants import BackEndConstants
 
 
 @register
@@ -38,8 +39,8 @@ class AccidentsHeatMapWidget(SubUrbanWidget):
     def get_accidents_heat_map(filters, start_time, end_time):
         filters = filters or {}
         filters["provider_code"] = [
-            BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
-            BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+            BackEndConstants.CBS_ACCIDENT_TYPE_1_CODE,
+            BackEndConstants.CBS_ACCIDENT_TYPE_3_CODE,
         ]
         query = get_query(AccidentMarkerView, filters, start_time, end_time)
         query = query.with_entities("longitude", "latitude")

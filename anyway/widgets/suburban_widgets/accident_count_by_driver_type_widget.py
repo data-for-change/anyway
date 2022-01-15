@@ -5,7 +5,7 @@ from typing import Dict
 from flask_babel import _
 
 from anyway.request_params import RequestParams
-from anyway.backend_constants import DriverType
+from anyway.constants.driver_type import DriverType
 from anyway.widgets.widget_utils import get_accidents_stats, get_injured_filters
 from anyway.models import InvolvedMarkerView
 from anyway.vehicle_type import VehicleCategory
@@ -72,7 +72,8 @@ class AccidentCountByDriverTypeWidget(SubUrbanWidget):
                     f"AccidentCountByDriverTypeWidget.localize_items: Exception while translating {item}."
                 )
         items["data"]["text"] = {
-            "title": _('Number of accidents by driver type') +f" - {request_params.location_info['road_segment_name']}"
+            "title": _("Number of accidents by driver type")
+            + f" - {request_params.location_info['road_segment_name']}"
         }
         return items
 

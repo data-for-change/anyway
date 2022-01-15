@@ -3,7 +3,10 @@ from typing import Dict
 from flask_babel import _
 
 from anyway.request_params import RequestParams
-from anyway.backend_constants import BE_CONST, AccidentSeverity, AccidentType
+from anyway.constants.backend_constants import BackEndConstants
+from anyway.constants.accident_severity import AccidentSeverity
+from anyway.constants.accident_type import AccidentType
+
 from anyway.widgets.widget_utils import get_accidents_stats
 from anyway.models import AccidentMarkerView
 from anyway.widgets.widget import register
@@ -31,7 +34,7 @@ class HeadOnCollisionsComparisonWidget(SubUrbanWidget):
         road_data = {}
 
         filter_dict = {
-            "road_type": BE_CONST.ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION,
+            "road_type": BackEndConstants.ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION,
             "accident_severity": AccidentSeverity.FATAL.value,  # pylint: disable=no-member
         }
         all_roads_data = get_accidents_stats(
@@ -91,9 +94,7 @@ class HeadOnCollisionsComparisonWidget(SubUrbanWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         i = items["data"]["items"]
-        items["data"]["text"] = {
-            "title": _("Fatal head on collisions vs other accidents")
-        }
+        items["data"]["text"] = {"title": _("Fatal head on collisions vs other accidents")}
         for val in i.values():
             for e in val:
                 e["desc"] = _(e["desc"])

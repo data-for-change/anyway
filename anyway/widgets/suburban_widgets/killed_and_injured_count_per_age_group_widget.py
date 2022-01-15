@@ -2,7 +2,7 @@ from typing import Dict
 
 from flask_babel import _
 
-from anyway.backend_constants import BE_CONST as BE
+from anyway.constants.backend_constants import BackEndConstants as BE
 from anyway.request_params import RequestParams
 from anyway.widgets.suburban_widgets.killed_and_injured_count_per_age_group_widget_utils import (
     KilledAndInjuredCountPerAgeGroupWidgetUtils,

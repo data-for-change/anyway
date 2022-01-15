@@ -12,7 +12,7 @@ from sqlalchemy import and_, not_, or_
 
 
 from anyway.app_and_db import db
-from anyway.backend_constants import BE_CONST
+from anyway.constants.backend_constants import BackEndConstants
 from anyway.models import NewsFlash
 from anyway.infographics_utils import is_news_flash_resolution_supported
 
@@ -29,7 +29,7 @@ class NewsFlashQuery(BaseModel):
     offset: Optional[int] = DEFAULT_OFFSET_REQ_PARAMETER
     limit: Optional[int] = DEFAULT_LIMIT_REQ_PARAMETER
     resolution: Optional[List[str]]
-    source: Optional[List[BE_CONST.Source]]
+    source: Optional[List[BackEndConstants.Source]]
     # Must set default value in order to allow access from "check_missing_date" validator when no value provided
     # from the request
     start_date: Optional[datetime.datetime] = None
@@ -163,7 +163,7 @@ def gen_news_flash_query(
             status=404,
             mimetype="application/json",
         )
-    supported_resolutions = set([x.value for x in BE_CONST.SUPPORTED_RESOLUTIONS])
+    supported_resolutions = set([x.value for x in BackEndConstants.SUPPORTED_RESOLUTIONS])
     query = query.filter(NewsFlash.resolution.in_(supported_resolutions))
     if interurban_only == "true" or interurban_only == "True":
         query = query.filter(NewsFlash.resolution.in_(["כביש בינעירוני"]))
@@ -212,10 +212,10 @@ def gen_news_flash_query_v2(session, valid_params: dict):
 
 
 def set_display_source(news_flash):
-    news_flash["display_source"] = BE_CONST.SOURCE_MAPPING.get(
-        news_flash["source"], BE_CONST.UNKNOWN
+    news_flash["display_source"] = BackEndConstants.SOURCE_MAPPING.get(
+        news_flash["source"], BackEndConstants.UNKNOWN
     )
-    if news_flash["display_source"] == BE_CONST.UNKNOWN:
+    if news_flash["display_source"] == BackEndConstants.UNKNOWN:
         logging.warning(f"Unknown source of news-flash with id")
 
 
@@ -236,7 +236,7 @@ def single_news_flash(news_flash_id: int):
 
 
 def get_supported_resolutions() -> set:
-    return set([x.name.lower() for x in BE_CONST.SUPPORTED_RESOLUTIONS])
+    return set([x.name.lower() for x in BackEndConstants.SUPPORTED_RESOLUTIONS])
 
 
 def get_news_flash_by_id(id: int):
@@ -256,14 +256,14 @@ def filter_by_resolutions(query, resolutions: List[str]):
     if "suburban_road" in resolutions:
         ands.append(
             and_(
-                NewsFlash.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD.value,
+                NewsFlash.resolution == BackEndConstants.ResolutionCategories.SUBURBAN_ROAD.value,
                 NewsFlash.road_segment_name != None,
             )
         )
     if "street" in resolutions:
         ands.append(
             and_(
-                NewsFlash.resolution == BE_CONST.ResolutionCategories.STREET.value,
+                NewsFlash.resolution == BackEndConstants.ResolutionCategories.STREET.value,
                 NewsFlash.street1_hebrew != None,
             )
         )

@@ -21,7 +21,8 @@ from anyway.request_params import (
     extract_news_flash_location,
     get_request_params_from_request_values,
 )
-from anyway.backend_constants import BE_CONST, AccidentType
+from anyway.constants.backend_constants import BackEndConstants
+from anyway.constants.accident_type import AccidentType
 from anyway.models import NewsFlash, AccidentMarkerView
 from anyway.parsers import resolution_dict
 from anyway.infographics_dictionaries import head_on_collisions_comparison_dict
@@ -289,10 +290,8 @@ def get_infographics_data_for_road_segment(road_segment_id, years_ago, lang: str
         output = create_infographics_items(request_params)
     else:
         try:
-            output = (
-                infographics_data_cache_updater.get_infographics_data_from_cache_by_road_segment(
-                    road_segment_id, years_ago
-                )
+            output = infographics_data_cache_updater.get_infographics_data_from_cache_by_road_segment(
+                road_segment_id, years_ago
             )
         except Exception as e:
             logging.error(
@@ -350,7 +349,7 @@ def is_news_flash_resolution_supported(news_flash_obj: NewsFlash) -> bool:
     if location_data is None or location_data["data"]["resolution"] is None:
         return False
     location = location_data["data"]
-    for cat in BE_CONST.SUPPORTED_RESOLUTIONS:
+    for cat in BackEndConstants.SUPPORTED_RESOLUTIONS:
         if cat.value in resolution_dict and set(resolution_dict[cat.value]) <= location.keys():
             return True
     return False

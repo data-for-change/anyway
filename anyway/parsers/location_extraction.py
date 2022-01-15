@@ -5,14 +5,12 @@ import geohash  # python-geohash package
 import googlemaps
 import numpy as np
 from geographiclib.geodesic import Geodesic
-from anyway.backend_constants import BE_CONST
+from anyway.constants.backend_constants import BackEndConstants
 from anyway.models import NewsFlash
 from anyway.parsers import resolution_dict
 from anyway import secrets
 from anyway.models import AccidentMarkerView, RoadSegments
-from sqlalchemy import (
-    not_,
-)
+from sqlalchemy import not_
 import pandas as pd
 
 
@@ -107,7 +105,7 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
         db.session.query(AccidentMarkerView)
         .filter(AccidentMarkerView.geom.intersects(polygon_str))
         .filter(AccidentMarkerView.accident_year >= 2014)
-        .filter(AccidentMarkerView.provider_code != BE_CONST.RSA_PROVIDER_CODE)
+        .filter(AccidentMarkerView.provider_code != BackEndConstants.RSA_PROVIDER_CODE)
         .filter(not_(AccidentMarkerView.road_segment_name == None))
     )
     markers = pd.read_sql_query(query_obj.statement, query_obj.session.bind)

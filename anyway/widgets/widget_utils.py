@@ -7,7 +7,8 @@ from flask_babel import _
 from sqlalchemy import func
 
 from anyway.app_and_db import db
-from anyway.backend_constants import BE_CONST, LabeledCode
+from anyway.constants.backend_constants import BackEndConstants
+from anyway.constants.label_code import LabeledCode
 
 
 def get_query(table_obj, filters, start_time, end_time):
@@ -31,8 +32,8 @@ def get_accidents_stats(
 ):
     filters = filters or {}
     filters["provider_code"] = [
-        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
-        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+        BackEndConstants.CBS_ACCIDENT_TYPE_1_CODE,
+        BackEndConstants.CBS_ACCIDENT_TYPE_3_CODE,
     ]
     # get stats
     query = get_query(table_obj, filters, start_time, end_time)
@@ -120,6 +121,6 @@ def format_2_level_items(
         series_data = []
         for l2_code, num in year_res.items():
             l2 = level2_vals.labels()[level2_vals(l2_code)] if level2_vals else l2_code
-            series_data.append({BE_CONST.LKEY: l2, BE_CONST.VAL: num})
-        res.append({BE_CONST.LKEY: l1, BE_CONST.SERIES: series_data})
+            series_data.append({BackEndConstants.LKEY: l2, BackEndConstants.VAL: num})
+        res.append({BackEndConstants.LKEY: l1, BackEndConstants.SERIES: series_data})
     return res

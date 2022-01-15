@@ -97,7 +97,10 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
             .filter(InvolvedMarkerView.accident_timestamp <= end_time)
             .filter(
                 InvolvedMarkerView.provider_code.in_(
-                    [BackEndConstants.CBS_ACCIDENT_TYPE_1_CODE, BackEndConstants.CBS_ACCIDENT_TYPE_3_CODE]
+                    [
+                        BackEndConstants.CBS_ACCIDENT_TYPE_1_CODE,
+                        BackEndConstants.CBS_ACCIDENT_TYPE_3_CODE,
+                    ]
                 )
             )
             .filter(

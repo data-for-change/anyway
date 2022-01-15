@@ -524,9 +524,7 @@ def get_roles_list() -> Response:
     ]
 
     return Response(
-        response=json.dumps(send_list),
-        status=HTTPStatus.OK,
-        mimetype="application/json",
+        response=json.dumps(send_list), status=HTTPStatus.OK, mimetype="application/json"
     )
 
 
@@ -536,9 +534,7 @@ def get_organization_list() -> Response:
     send_list = [org.name for org in orgs_list]
 
     return Response(
-        response=json.dumps(send_list),
-        status=HTTPStatus.OK,
-        mimetype="application/json",
+        response=json.dumps(send_list), status=HTTPStatus.OK, mimetype="application/json"
     )
 
 

@@ -10,9 +10,7 @@ from anyway.models import NewsFlash
 from anyway.parsers import resolution_dict
 from anyway import secrets
 from anyway.models import AccidentMarkerView, RoadSegments
-from sqlalchemy import (
-    not_,
-)
+from sqlalchemy import not_
 import pandas as pd
 
 

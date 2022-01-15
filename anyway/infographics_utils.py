@@ -290,10 +290,8 @@ def get_infographics_data_for_road_segment(road_segment_id, years_ago, lang: str
         output = create_infographics_items(request_params)
     else:
         try:
-            output = (
-                infographics_data_cache_updater.get_infographics_data_from_cache_by_road_segment(
-                    road_segment_id, years_ago
-                )
+            output = infographics_data_cache_updater.get_infographics_data_from_cache_by_road_segment(
+                road_segment_id, years_ago
             )
         except Exception as e:
             logging.error(

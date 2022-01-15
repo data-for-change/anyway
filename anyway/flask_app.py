@@ -76,7 +76,7 @@ DEFAULT_MAPS_API_KEY = "AIzaSyDUIWsBLkvIUwzLHMHos9qFebyJ63hEG2M"
 
 
 app.config.from_object(__name__)
-app.config["SWAGGER_UI_DOC_EXPANSION"] = 'list'
+app.config["SWAGGER_UI_DOC_EXPANSION"] = "list"
 app.config["SESSION_COOKIE_SAMESITE"] = "none"
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["REMEMBER_COOKIE_SECURE"] = True
@@ -158,10 +158,7 @@ assets.register(
     ),
 )
 
-CORS(
-    app,
-    resources=get_cors_config(),
-)
+CORS(app, resources=get_cors_config())
 
 jinja_environment = jinja2.Environment(
     autoescape=True,
@@ -1212,7 +1209,9 @@ def infographics_data():
             log_bad_request(request)
             return abort(http_client.BAD_REQUEST)
 
-        number_of_years_ago = request.values.get("years_ago", BackEndConstants.DEFAULT_NUMBER_OF_YEARS_AGO)
+        number_of_years_ago = request.values.get(
+            "years_ago", BackEndConstants.DEFAULT_NUMBER_OF_YEARS_AGO
+        )
         lang: str = request.values.get("lang", "he")
         logging.debug(
             (

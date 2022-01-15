@@ -105,7 +105,8 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
-            "title": _('Pedestrian accidents by severity and year') +f" - {request_params.location_text}",
+            "title": _("Pedestrian accidents by severity and year")
+            + f" - {request_params.location_text}",
             "labels": gen_entity_labels(InjurySeverity),
         }
         return items

@@ -12,16 +12,8 @@ class CrossCategory(Enum):
     def get_codes(self) -> List[int]:
         """returns CrossLocation codes of category"""
         category_cross_locations = {
-            CrossCategory.UNKNOWN: [
-                CrossLocation.UNKNOWN,
-            ],
-            CrossCategory.NONE: [
-                CrossLocation.OUTFAR,
-                CrossLocation.OUTNEAR,
-            ],
-            CrossCategory.CROSSWALK: [
-                CrossLocation.YESLIGHT,
-                CrossLocation.YESNONE,
-            ],
+            CrossCategory.UNKNOWN: [CrossLocation.UNKNOWN],
+            CrossCategory.NONE: [CrossLocation.OUTFAR, CrossLocation.OUTNEAR],
+            CrossCategory.CROSSWALK: [CrossLocation.YESLIGHT, CrossLocation.YESNONE],
         }
         return list(map(lambda x: x.value, category_cross_locations[self]))

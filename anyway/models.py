@@ -118,14 +118,10 @@ class Users(Base, UserMixin):
     user_desc = Column(String(2048))
     is_user_completed_registration = Column(Boolean)
     roles = relationship(
-        "Roles",
-        secondary=users_to_roles,
-        backref=backref("users", lazy="dynamic"),
+        "Roles", secondary=users_to_roles, backref=backref("users", lazy="dynamic")
     )
     organizations = relationship(
-        "Organization",
-        secondary=users_to_organizations,
-        backref=backref("users", lazy="dynamic"),
+        "Organization", secondary=users_to_organizations, backref=backref("users", lazy="dynamic")
     )
 
     def serialize_exposed_to_user(self):
@@ -337,7 +333,10 @@ class AccidentMarker(MarkerMixin, Base):
             db.session.query(func.max(AccidentMarker.created))
             .filter(
                 AccidentMarker.provider_code.in_(
-                    [BackEndConstants.CBS_ACCIDENT_TYPE_1_CODE, BackEndConstants.CBS_ACCIDENT_TYPE_3_CODE]
+                    [
+                        BackEndConstants.CBS_ACCIDENT_TYPE_1_CODE,
+                        BackEndConstants.CBS_ACCIDENT_TYPE_3_CODE,
+                    ]
                 )
             )
             .first()
@@ -975,20 +974,24 @@ class Streets(Base):
 
     @staticmethod
     def get_street_name_by_street(yishuv_symbol: int, street: int) -> str:
-        res = db.session.query(Streets.street_hebrew) \
-            .filter(Streets.yishuv_symbol == yishuv_symbol) \
-            .filter(Streets.street == street)\
+        res = (
+            db.session.query(Streets.street_hebrew)
+            .filter(Streets.yishuv_symbol == yishuv_symbol)
+            .filter(Streets.street == street)
             .first()
+        )
         if res is None:
             raise ValueError(f"{street}: could not find street in yishuv:{yishuv_symbol}")
         return res.street_hebrew
 
     @staticmethod
     def get_street_by_street_name(yishuv_symbol: int, name: str) -> int:
-        res = db.session.query(Streets.street) \
-            .filter(Streets.yishuv_symbol == yishuv_symbol) \
-            .filter(Streets.street_hebrew == name)\
+        res = (
+            db.session.query(Streets.street)
+            .filter(Streets.yishuv_symbol == yishuv_symbol)
+            .filter(Streets.street_hebrew == name)
             .first()
+        )
         if res is None:
             raise ValueError(f"{name}: could not find street in yishuv:{yishuv_symbol}")
         return res
@@ -2491,24 +2494,37 @@ class InfographicsTwoRoadsDataCacheFields(object):
 class InfographicsTwoRoadsDataCache(InfographicsTwoRoadsDataCacheFields, Base):
     __tablename__ = "infographics_two_roads_data_cache"
     __table_args__ = (
-        Index("infographics_two_roads_data_cache_id_years_idx", "road1", "road2",
-              "years_ago", unique=True),
+        Index(
+            "infographics_two_roads_data_cache_id_years_idx",
+            "road1",
+            "road2",
+            "years_ago",
+            unique=True,
+        ),
     )
 
     def get_data(self):
         return self.data
 
     def serialize(self):
-        return {"road1": self.road1, "road2": self.road2, "years_ago": self.years_ago,
-                "data": self.data}
+        return {
+            "road1": self.road1,
+            "road2": self.road2,
+            "years_ago": self.years_ago,
+            "data": self.data,
+        }
 
 
 class InfographicsTwoRoadsDataCacheTemp(InfographicsTwoRoadsDataCacheFields, Base):
     __tablename__ = "infographics_two_roads_data_cache_temp"
 
     def serialize(self):
-        return {"road1": self.road1, "road2": self.road2, "years_ago": self.years_ago,
-                "data": self.data}
+        return {
+            "road1": self.road1,
+            "road2": self.road2,
+            "years_ago": self.years_ago,
+            "data": self.data,
+        }
 
     # # Flask-Login integration
     # def is_authenticated(self):

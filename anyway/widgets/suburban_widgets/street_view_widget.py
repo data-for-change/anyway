@@ -4,6 +4,7 @@ from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 from typing import Dict
 from flask_babel import _
 
+
 @register
 class StreetViewWidget(SubUrbanWidget):
     name: str = "street_view"
@@ -20,8 +21,5 @@ class StreetViewWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        items["data"]["text"] = {
-            "title": _("Street view widget"),
-        }
+        items["data"]["text"] = {"title": _("Street view widget")}
         return items
-

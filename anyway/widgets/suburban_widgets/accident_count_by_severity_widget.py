@@ -7,6 +7,7 @@ from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 from flask_babel import _
 from typing import Dict
 
+
 @register
 class AccidentCountBySeverityWidget(SubUrbanWidget):
     name: str = "accident_count_by_severity"
@@ -58,8 +59,10 @@ class AccidentCountBySeverityWidget(SubUrbanWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
-            "title": _('Number of accidents by severity') +f" - {request_params.location_info['road_segment_name']}"
+            "title": _("Number of accidents by severity")
+            + f" - {request_params.location_info['road_segment_name']}"
         }
         return items
+
 
 _("Fatal, severe and light accidents count in the specified location.")

@@ -135,6 +135,8 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
-            "title": _('Number of fatal and severe motorcycle accidents') +f" - {request_params.location_info['road1']} " +_('compared to rest of country')
+            "title": _("Number of fatal and severe motorcycle accidents")
+            + f" - {request_params.location_info['road1']} "
+            + _("compared to rest of country")
         }
         return items

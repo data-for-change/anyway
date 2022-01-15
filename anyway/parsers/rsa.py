@@ -68,7 +68,9 @@ def _iter_rows(filename):
 
 
 def parse(filename):
-    db.session.execute(f"DELETE from markers where provider_code = {BackEndConstants.RSA_PROVIDER_CODE}")
+    db.session.execute(
+        f"DELETE from markers where provider_code = {BackEndConstants.RSA_PROVIDER_CODE}"
+    )
     for batch in batch_iterator(_iter_rows(filename), batch_size=50000):
         db.session.bulk_insert_mappings(AccidentMarker, batch)
         db.session.commit()

@@ -13,7 +13,6 @@ from anyway.request_params import RequestParams
 import anyway.widgets.widget_utils as widget_utils
 
 
-
 @register
 class AccidentCountByCarTypeWidget(SubUrbanWidget):
     name: str = "accident_count_by_car_type"

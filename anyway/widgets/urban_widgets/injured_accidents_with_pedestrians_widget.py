@@ -6,7 +6,8 @@ from sqlalchemy.sql.elements import and_
 from flask_babel import _
 from anyway.request_params import RequestParams
 from anyway.app_and_db import db
-from anyway.backend_constants import InjurySeverity, InjuredType
+from anyway.constants.injured_type import InjuredType
+from anyway.constants.injury_severity import InjurySeverity
 from anyway.widgets.widget_utils import add_empty_keys_to_gen_two_level_dict, gen_entity_labels
 from anyway.models import NewsFlash, InvolvedMarkerView
 from anyway.widgets.widget import register

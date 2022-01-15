@@ -6,7 +6,7 @@ from anyway.views.news_flash.api import (
     is_news_flash_resolution_supported,
     gen_news_flash_query
 )
-from anyway.backend_constants import BE_CONST
+from anyway.constants.backend_constants import BackEndConstants
 from anyway.models import NewsFlash
 
 
@@ -67,9 +67,9 @@ class NewsFlashApiTestCase(unittest.TestCase):
 
     def test_gen_news_flash_query(self):
 
-        orig_supported_resolutions = BE_CONST.SUPPORTED_RESOLUTIONS
-        BE_CONST.SUPPORTED_RESOLUTIONS = [
-          BE_CONST.ResolutionCategories.DISTRICT
+        orig_supported_resolutions = BackEndConstants.SUPPORTED_RESOLUTIONS
+        BackEndConstants.SUPPORTED_RESOLUTIONS = [
+          BackEndConstants.ResolutionCategories.DISTRICT
         ]
         actual = gen_news_flash_query(self.session, road_number=12345678)
         news_flashes = actual.all()
@@ -77,8 +77,8 @@ class NewsFlashApiTestCase(unittest.TestCase):
         self.assertEqual(news_flashes[0].description, self.district_description,
                          "district description")
 
-        BE_CONST.SUPPORTED_RESOLUTIONS = [
-          BE_CONST.ResolutionCategories.REGION
+        BackEndConstants.SUPPORTED_RESOLUTIONS = [
+          BackEndConstants.ResolutionCategories.REGION
         ]
         actual = gen_news_flash_query(self.session, road_number=12345678)
         news_flashes = actual.all()
@@ -86,14 +86,14 @@ class NewsFlashApiTestCase(unittest.TestCase):
         self.assertEqual(news_flashes[0].description, self.region_description,
                          "region description")
 
-        BE_CONST.SUPPORTED_RESOLUTIONS = [
-          BE_CONST.ResolutionCategories.CITY
+        BackEndConstants.SUPPORTED_RESOLUTIONS = [
+          BackEndConstants.ResolutionCategories.CITY
         ]
         actual = gen_news_flash_query(self.session, road_number=12345678)
         news_flashes = actual.all()
         self.assertEqual(len(news_flashes), 0, "zero news flash")
 
-        BE_CONST.SUPPORTED_RESOLUTIONS = orig_supported_resolutions
+        BackEndConstants.SUPPORTED_RESOLUTIONS = orig_supported_resolutions
 
     def tearDown(self):
         self.session.close()

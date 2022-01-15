@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 import flask_restx
 from http import HTTPStatus
 
-from anyway.backend_constants import BE_CONST
+from anyway.constants.backend_constants import BackEndConstants
 from anyway.config import SERVER_ENV
 
 
@@ -28,9 +28,9 @@ api = FlexRootApi(app, doc="/swagger")
 
 
 def get_cors_config() -> dict:
-    cors_site_list = BE_CONST.ANYWAY_CORS_SITE_LIST_PROD
+    cors_site_list = BackEndConstants.ANYWAY_CORS_SITE_LIST_PROD
     if SERVER_ENV == "dev":
-        cors_site_list = BE_CONST.ANYWAY_CORS_SITE_LIST_DEV
+        cors_site_list = BackEndConstants.ANYWAY_CORS_SITE_LIST_DEV
 
     return {
         r"/location-subscription": {"origins": "*"},

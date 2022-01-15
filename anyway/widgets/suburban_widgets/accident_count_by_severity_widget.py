@@ -1,4 +1,4 @@
-from anyway.backend_constants import AccidentSeverity
+from anyway.constants.accident_severity import AccidentSeverity
 from anyway.widgets.widget_utils import get_accidents_stats
 from anyway.request_params import RequestParams
 from anyway.models import AccidentMarkerView

@@ -2,7 +2,8 @@ import datetime
 from typing import Optional, Dict
 
 from anyway.request_params import RequestParams
-from anyway.backend_constants import BE_CONST, AccidentType
+from anyway.constants.backend_constants import BackEndConstants
+from anyway.constants.accident_type import AccidentType
 from anyway.widgets.widget_utils import get_accidents_stats
 from anyway.models import AccidentMarkerView
 from anyway.widgets.widget import register
@@ -25,7 +26,7 @@ class Road2Plus1Widget(SubUrbanWidget):
     def get_frontal_accidents_in_past_year(self) -> Optional[int]:
         location_info = self.request_params.location_info
         road_data = {}
-        filter_dict = {"road_type": BE_CONST.ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION}
+        filter_dict = {"road_type": BackEndConstants.ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION}
 
         if location_info["road1"] and location_info["road_segment_name"]:
             filter_dict.update(

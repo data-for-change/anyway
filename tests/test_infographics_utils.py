@@ -1,6 +1,6 @@
 import unittest
 from anyway.widgets.widget_utils import format_2_level_items
-from anyway.backend_constants import AccidentSeverity
+from anyway.constants.accident_severity import AccidentSeverity
 
 
 class TestInfographicsUtilsCase(unittest.TestCase):

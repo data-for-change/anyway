@@ -4,7 +4,8 @@ from typing import Dict
 from flask_babel import _
 
 from anyway.request_params import RequestParams
-from anyway.backend_constants import AccidentSeverity, AccidentType
+from anyway.constants.accident_type import AccidentType
+from anyway.constants.accident_severity import AccidentSeverity
 from anyway.widgets.suburban_widgets.most_severe_accidents_table_widget import (
     get_most_severe_accidents_with_entities,
 )

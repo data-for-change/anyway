@@ -1,7 +1,7 @@
 from typing import Dict
 
 from anyway.request_params import RequestParams
-from anyway.backend_constants import InjurySeverity
+from anyway.constants.injury_severity import InjurySeverity
 from anyway.models import InvolvedMarkerView
 from anyway.widgets.widget import register
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget

@@ -2,7 +2,8 @@ from typing import Dict, List
 
 from flask_babel import _
 
-from anyway.backend_constants import InjurySeverity as IS, BE_CONST as BE
+from anyway.constants.backend_constants import BackEndConstants
+from anyway.constants.injury_severity import InjurySeverity as IS
 from anyway.request_params import RequestParams
 from anyway.widgets.suburban_widgets.killed_and_injured_count_per_age_group_widget_utils import (
     KilledAndInjuredCountPerAgeGroupWidgetUtils,
@@ -45,10 +46,10 @@ class KilledInjuredCountPerAgeGroupStackedWidget(SubUrbanWidget):
         structured_data_list = []
         for age_group, severity_dict in partial_processed.items():
             ordered_list = [
-                {BE.LKEY: inj.get_label(), BE.VAL: severity_dict.get(inj.value, 0)}
+                {BackEndConstants.LKEY: inj.get_label(), BackEndConstants.VAL: severity_dict.get(inj.value, 0)}
                 for inj in INJURY_ORDER
             ]
-            structured_data_list.append({BE.LKEY: age_group, BE.SERIES: ordered_list})
+            structured_data_list.append({BackEndConstants.LKEY: age_group, BackEndConstants.SERIES: ordered_list})
 
         self.items = structured_data_list
 

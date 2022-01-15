@@ -4,7 +4,9 @@ from typing import Dict
 import pandas as pd
 from flask_babel import _
 from anyway.request_params import RequestParams
-from anyway.backend_constants import BE_CONST, AccidentSeverity, AccidentType
+from anyway.constants.backend_constants import BackEndConstants
+from anyway.constants.accident_severity import AccidentSeverity
+from anyway.constants.accident_type import AccidentType
 from anyway.infographics_dictionaries import segment_dictionary
 from anyway.widgets.widget_utils import get_query, get_accidents_stats
 from anyway.models import AccidentMarkerView, InvolvedMarkerView
@@ -17,8 +19,8 @@ def get_most_severe_accidents_with_entities(
 ):
     filters = filters or {}
     filters["provider_code"] = [
-        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
-        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+        BackEndConstants.CBS_ACCIDENT_TYPE_1_CODE,
+        BackEndConstants.CBS_ACCIDENT_TYPE_3_CODE,
     ]
     # pylint: disable=no-member
     filters["accident_severity"] = [AccidentSeverity.FATAL.value, AccidentSeverity.SEVERE.value]

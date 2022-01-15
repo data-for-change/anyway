@@ -1,13 +1,13 @@
 from typing import Dict
 
 from anyway.request_params import RequestParams
-from anyway.backend_constants import InjurySeverity
+from anyway.constants.injury_severity import InjurySeverity
 from anyway.models import InvolvedMarkerView
 from anyway.widgets.urban_widgets.urban_widget import UrbanWidget
 from anyway.widgets.widget_utils import get_accidents_stats
 from flask_babel import _
 
-from anyway.backend_constants import CrossCategory
+from anyway.constants.cross_category import CrossCategory
 
 
 # TODO: pretty sure there are errors in this widget, for example, is_included returns self.items

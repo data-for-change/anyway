@@ -5,7 +5,8 @@ import pandas as pd
 from sqlalchemy import case, literal_column, func, distinct, desc
 
 from anyway.request_params import RequestParams
-from anyway.backend_constants import BE_CONST, AccidentSeverity
+from anyway.constants.backend_constants import BackEndConstants
+from anyway.constants.accident_severity import AccidentSeverity
 from anyway.widgets.widget_utils import get_query
 from anyway.models import InvolvedMarkerView
 from anyway.vehicle_type import VehicleCategory
@@ -71,7 +72,7 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
                 case_vehicle,
                 func.count(distinct(InvolvedMarkerView.provider_and_id)).label(num_accidents_label),
             )
-            .filter(InvolvedMarkerView.road_type.in_(BE_CONST.NON_CITY_ROAD_TYPES))
+            .filter(InvolvedMarkerView.road_type.in_(BackEndConstants.NON_CITY_ROAD_TYPES))
             .filter(
                 InvolvedMarkerView.accident_severity.in_(
                     # pylint: disable=no-member

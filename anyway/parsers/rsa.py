@@ -3,7 +3,7 @@ import json
 from dateutil import parser
 from openpyxl import load_workbook
 from anyway.parsers.utils import batch_iterator
-from anyway.backend_constants import BE_CONST
+from anyway.constants.backend_constants import BackEndConstants
 from anyway.models import AccidentMarker
 from anyway.app_and_db import db
 
@@ -25,7 +25,7 @@ def _iter_rows(filename):
     assert [cell.value for cell in first_row] == headers
     for row in rows:
         id_ = int(row[0].value)
-        provider_and_id_ = int(str(BE_CONST.RSA_PROVIDER_CODE) + str(id_))
+        provider_and_id_ = int(str(BackEndConstants.RSA_PROVIDER_CODE) + str(id_))
 
         violation = row[3].value
         vehicle_type = row[4].value
@@ -53,12 +53,12 @@ def _iter_rows(filename):
             "latitude": latitude,
             "longitude": longitude,
             "created": timestamp,
-            "provider_code": BE_CONST.RSA_PROVIDER_CODE,
+            "provider_code": BackEndConstants.RSA_PROVIDER_CODE,
             "accident_severity": 0,
             "title": "שומרי הדרך",
             "description": json.dumps(description),
             "location_accuracy": 1,
-            "type": BE_CONST.MARKER_TYPE_ACCIDENT,
+            "type": BackEndConstants.MARKER_TYPE_ACCIDENT,
             "video_link": video_link,
             "vehicle_type_rsa": vehicle_type,
             "violation_type_rsa": violation,
@@ -68,7 +68,7 @@ def _iter_rows(filename):
 
 
 def parse(filename):
-    db.session.execute(f"DELETE from markers where provider_code = {BE_CONST.RSA_PROVIDER_CODE}")
+    db.session.execute(f"DELETE from markers where provider_code = {BackEndConstants.RSA_PROVIDER_CODE}")
     for batch in batch_iterator(_iter_rows(filename), batch_size=50000):
         db.session.bulk_insert_mappings(AccidentMarker, batch)
         db.session.commit()

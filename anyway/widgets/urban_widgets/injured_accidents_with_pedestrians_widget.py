@@ -17,7 +17,7 @@ from anyway.widgets.urban_widgets.urban_widget import UrbanWidget
 @register
 class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
     name: str = "injured_accidents_with_pedestrians"
- 
+
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 18
@@ -30,7 +30,7 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
             and street1_hebrew is not None
             and self.request_params.years_ago is not None
         )
- 
+
     @staticmethod
     def convert_to_dict(query_results):
         res = defaultdict(lambda: {InjurySeverity.KILLED.value:0, InjurySeverity.SEVERE_INJURED.value:0, InjurySeverity.LIGHT_INJURED.value:0})

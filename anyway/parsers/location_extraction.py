@@ -106,7 +106,7 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
         baseX, baseY, distanceX, distanceY
     )
     
-cutoff_year = (date.today()).year - 6
+    cutoff_year = (date.today()).year - 6
     query_obj = (
         db.session.query(AccidentMarkerView)
         .filter(AccidentMarkerView.geom.intersects(polygon_str))

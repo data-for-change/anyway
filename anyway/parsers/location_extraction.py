@@ -15,6 +15,7 @@ from sqlalchemy import (
 )
 import pandas as pd
 from sqlalchemy.orm import load_only
+from datetime import date
 
 
 def extract_road_number(location):
@@ -104,11 +105,12 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
     polygon_str = "POLYGON(({0} {1},{0} {3},{2} {3},{2} {1},{0} {1}))".format(
         baseX, baseY, distanceX, distanceY
     )
-
+    
+cutoff_year = (date.today()).year - 6
     query_obj = (
         db.session.query(AccidentMarkerView)
         .filter(AccidentMarkerView.geom.intersects(polygon_str))
-        .filter(AccidentMarkerView.accident_year >= 2015)
+        .filter(AccidentMarkerView.accident_year >= cutoff_year)
         .filter(AccidentMarkerView.provider_code != BE_CONST.RSA_PROVIDER_CODE)
         .filter(not_(AccidentMarkerView.road_segment_name == None))
         .options(

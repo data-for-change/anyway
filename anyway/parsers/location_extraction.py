@@ -66,7 +66,6 @@ def get_road_segment_name_and_number(road_segment_id) -> (float, str):
     road = segment.road  # pylint: disable=maybe-no-member
     return float(road), road_segment_name
 
-
 def get_db_matching_location_interurban(latitude, longitude) -> dict:
     """
     extracts location from db by closest geo point to location found, using road number if provided and limits to
@@ -105,7 +104,7 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
     polygon_str = "POLYGON(({0} {1},{0} {3},{2} {3},{2} {1},{0} {1}))".format(
         baseX, baseY, distanceX, distanceY
     )
-    
+
     cutoff_year = (date.today()).year - 6
     query_obj = (
         db.session.query(AccidentMarkerView)

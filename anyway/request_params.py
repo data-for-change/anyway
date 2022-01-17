@@ -7,7 +7,7 @@ from sqlalchemy import func
 import pandas as pd
 
 from anyway.models import NewsFlash, AccidentMarkerView, City, Streets
-from anyway.parsers.location_extraction import get_road_segment_name_and_number, get_road_segment_by_name
+from anyway.parsers.location_extraction import get_road_segment_name_and_number, get_road_segment_by_name_and_road
 from anyway.backend_constants import BE_CONST
 from anyway.app_and_db import db
 from anyway.parsers import resolution_dict
@@ -119,7 +119,8 @@ def add_numeric_field_values(loc: dict, news_flash: NewsFlash) -> None:
                                                                        loc["data"]["street1_hebrew"])
     elif loc["data"]["resolution"] == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
         if "road_segment_id" not in loc["data"]:
-            segment = get_road_segment_by_name(loc["data"]["road_segment_name"])
+            segment = get_road_segment_by_name_and_road(loc["data"]["road_segment_name"],
+                                                        loc["data"]["road1"])
             loc["data"]["road_segment_id"] = segment.segment_id
 
 

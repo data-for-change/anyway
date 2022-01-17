@@ -51,6 +51,22 @@ def get_road_segment_by_name(road_segment_name: str) -> RoadSegments:
     return segment
 
 
+def get_road_segment_by_name_and_road(road_segment_name: str, road: int) -> RoadSegments:
+    try:
+        from anyway.app_and_db import db
+    except ModuleNotFoundError:
+        pass
+    segments = db.session.query(RoadSegments).filter(RoadSegments.road == road).all()
+    for segment in segments:
+        if road_segment_name.startswith(segment.from_name) and road_segment_name.endswith(
+            segment.to_name
+        ):
+            return segment
+    err_msg = f"get_road_segment_by_name_and_road:{road_segment_name},{road}: not found"
+    logging.error(err_msg)
+    raise ValueError(err_msg)
+
+
 def get_road_segment_name_and_number(road_segment_id) -> (float, str):
     try:
         from anyway.app_and_db import db

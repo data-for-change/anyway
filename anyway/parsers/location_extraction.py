@@ -14,6 +14,8 @@ from sqlalchemy import (
     not_,
 )
 import pandas as pd
+from sqlalchemy.orm import load_only
+from datetime import date
 
 
 def extract_road_number(location):
@@ -35,20 +37,36 @@ def extract_road_number(location):
     return None
 
 
-def get_road_segment_id(road_segment_name) -> int:
+def get_road_segment_by_name(road_segment_name: str) -> RoadSegments:
     try:
         from anyway.app_and_db import db
     except ModuleNotFoundError:
         pass
-    from_name = road_segment_name.split("-")[0].strip()
-    to_name = road_segment_name.split("-")[1].strip()
+    from_name = road_segment_name.split(" - ")[0].strip()
+    to_name = road_segment_name.split(" - ")[1].strip()
     query_obj = (
         db.session.query(RoadSegments)
         .filter(RoadSegments.from_name == from_name)
         .filter(RoadSegments.to_name == to_name)
     )
-    segment = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
-    return segment.iloc[0]["segment_id"]  # pylint: disable=maybe-no-member
+    segment = query_obj.first()
+    return segment
+
+
+def get_road_segment_by_name_and_road(road_segment_name: str, road: int) -> RoadSegments:
+    try:
+        from anyway.app_and_db import db
+    except ModuleNotFoundError:
+        pass
+    segments = db.session.query(RoadSegments).filter(RoadSegments.road == road).all()
+    for segment in segments:
+        if road_segment_name.startswith(segment.from_name) and road_segment_name.endswith(
+            segment.to_name
+        ):
+            return segment
+    err_msg = f"get_road_segment_by_name_and_road:{road_segment_name},{road}: not found"
+    logging.error(err_msg)
+    raise ValueError(err_msg)
 
 
 def get_road_segment_name_and_number(road_segment_id) -> (float, str):
@@ -93,7 +111,8 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
         from anyway.app_and_db import db
     except ModuleNotFoundError:
         pass
-    distance_in_km = 5
+
+    distance_in_km = 1.5
     lat_min, lon_min, lat_max, lon_max = get_bounding_box(latitude, longitude, distance_in_km)
     baseX = lon_min
     baseY = lat_min
@@ -103,18 +122,29 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
         baseX, baseY, distanceX, distanceY
     )
 
+    cutoff_year = (date.today()).year - 6
     query_obj = (
         db.session.query(AccidentMarkerView)
         .filter(AccidentMarkerView.geom.intersects(polygon_str))
-        .filter(AccidentMarkerView.accident_year >= 2014)
+        .filter(AccidentMarkerView.accident_year >= cutoff_year)
         .filter(AccidentMarkerView.provider_code != BE_CONST.RSA_PROVIDER_CODE)
         .filter(not_(AccidentMarkerView.road_segment_name == None))
+        .options(
+            load_only(
+                "road1",
+                "road_segment_id",
+                "road_segment_name",
+                "latitude",
+                "longitude",
+                "geom",
+                "accident_year",
+                "provider_code",
+            )
+        )
     )
     markers = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
 
     geod = Geodesic.WGS84
-    # relevant_fields = resolution_dict[resolution]
-    # markers = db.get_markers_for_location_extraction()
     markers["geohash"] = markers.apply(  # pylint: disable=maybe-no-member
         lambda x: geohash.encode(x["latitude"], x["longitude"], precision=4), axis=1
     )  # pylint: disable=maybe-no-member

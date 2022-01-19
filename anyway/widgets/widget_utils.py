@@ -109,11 +109,6 @@ def run_query(query: db.session.query) -> Dict:
     return pd.read_sql_query(query.statement, query.session.bind).to_dict(orient="records")
 
 
-LKEY = "label_key"
-VAL = "value"
-SERIES = "series"
-
-
 def format_2_level_items(
     items: Dict[str, dict],
     level1_vals: Optional[Type[LabeledCode]],
@@ -125,6 +120,6 @@ def format_2_level_items(
         series_data = []
         for l2_code, num in year_res.items():
             l2 = level2_vals.labels()[level2_vals(l2_code)] if level2_vals else l2_code
-            series_data.append({LKEY: l2, VAL: num})
-        res.append({LKEY: l1, SERIES: series_data})
+            series_data.append({BE_CONST.LKEY: l2, BE_CONST.VAL: num})
+        res.append({BE_CONST.LKEY: l1, BE_CONST.SERIES: series_data})
     return res

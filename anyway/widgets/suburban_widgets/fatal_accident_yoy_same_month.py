@@ -10,6 +10,7 @@ from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 from anyway.widgets.widget_utils import (
     get_accidents_stats,
 )
+from anyway.models import AccidentMarker
 
 
 @register
@@ -21,9 +22,10 @@ class FatalAccidentYoYSameMonth(SubUrbanWidget):
         self.rank = 8
 
     def generate_items(self) -> None:
+        latest_created_date = AccidentMarker.get_latest_marker_created_date()
         self.items = get_accidents_stats(
             table_obj=AccidentMarkerView,
-            filters={"accident_month": 9, "accident_severity": AccidentSeverity.FATAL},
+            filters={"accident_month": latest_created_date.month, "accident_severity": AccidentSeverity.FATAL},
             group_by=("accident_year"),
             count="accident_severity",
             start_time=self.request_params.start_time,
@@ -33,9 +35,9 @@ class FatalAccidentYoYSameMonth(SubUrbanWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
-            "title": _("Killed in accidents on September compared to September in previous years"),
+            "title": _("Monthly killed in accidents on year over compared for current month in previous years"),
         }
         return items
 
 
-_("Killed in accidents on September compared to September in previous years")
+_("Monthly killed in accidents on year over compared for current month in previous years")

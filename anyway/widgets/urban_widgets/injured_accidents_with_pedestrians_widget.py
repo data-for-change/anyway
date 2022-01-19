@@ -1,4 +1,5 @@
 import logging
+from collections import defaultdict
 from typing import Dict
 
 from sqlalchemy import func, or_
@@ -7,7 +8,7 @@ from flask_babel import _
 from anyway.request_params import RequestParams
 from anyway.app_and_db import db
 from anyway.backend_constants import InjurySeverity, InjuredType
-from anyway.widgets.widget_utils import add_empty_keys_to_gen_two_level_dict, gen_entity_labels
+from anyway.widgets.widget_utils import add_empty_keys_to_gen_two_level_dict, gen_entity_labels, format_2_level_items
 from anyway.models import NewsFlash, InvolvedMarkerView
 from anyway.widgets.widget import register
 from anyway.widgets.urban_widgets.urban_widget import UrbanWidget
@@ -17,6 +18,11 @@ from anyway.widgets.urban_widgets.urban_widget import UrbanWidget
 class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
     name: str = "injured_accidents_with_pedestrians"
 
+    def __init__(self, request_params: RequestParams):
+        super().__init__(request_params, type(self).name)
+        self.rank = 18
+        self.information = "Injured and killed pedestrians by severity and year"
+
     def validate_parameters(self, yishuv_name, street1_hebrew):
         # TODO: validate each parameter and display message accordingly
         return (
@@ -25,23 +31,12 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
             and self.request_params.years_ago is not None
         )
 
-    def convert_to_dict(self, query_results):
-        res = {}
-
+    @staticmethod
+    def convert_to_dict(query_results):
+        res = defaultdict(lambda: {InjurySeverity.KILLED.value:0, InjurySeverity.SEVERE_INJURED.value:0, InjurySeverity.LIGHT_INJURED.value:0})
         for query_result in query_results:
-            if query_result.injury_severity not in res:
-                res[query_result.injury_severity] = {}
-            if query_result.accident_year not in res[query_result.injury_severity]:
-                res[query_result.injury_severity][query_result.accident_year] = 0
-
-            res[query_result.injury_severity][query_result.accident_year] += query_result.count
-
+            res[str(query_result.accident_year)][query_result.injury_severity] += query_result.count
         return res
-
-    def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, type(self).name)
-        self.rank = 18
-        self.information = "Injured and killed pedestrians by severity and year"
 
     def generate_items(self) -> None:
         try:
@@ -87,15 +82,12 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
                 .group_by(InvolvedMarkerView.accident_year, InvolvedMarkerView.injury_severity)
             )
 
-            self.items = add_empty_keys_to_gen_two_level_dict(
+            res = add_empty_keys_to_gen_two_level_dict(
                 self.convert_to_dict(query.all()),
+                [str(year) for year in range(self.request_params.start_time.year, self.request_params.end_time.year + 1)],
                 InjurySeverity.codes(),
-                list(
-                    range(
-                        self.request_params.start_time.year, self.request_params.end_time.year + 1
-                    )
-                ),
             )
+            self.items = format_2_level_items(res, None, InjurySeverity)
 
         except Exception as e:
             logging.error(f"InjuredAccidentsWithPedestriansWidget.generate_items(): {e}")

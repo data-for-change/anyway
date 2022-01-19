@@ -25,7 +25,7 @@ class FatalAccidentYoYSameMonth(SubUrbanWidget):
         latest_created_date = AccidentMarker.get_latest_marker_created_date()
         self.items = get_accidents_stats(
             table_obj=AccidentMarkerView,
-            filters={"accident_month": latest_created_date.month, "accident_severity": AccidentSeverity.FATAL},
+            filters={"accident_month": latest_created_date.month, "accident_severity": AccidentSeverity.FATAL.value},
             group_by=("accident_year"),
             count="accident_severity",
             start_time=self.request_params.start_time,

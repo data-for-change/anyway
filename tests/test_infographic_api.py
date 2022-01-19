@@ -262,6 +262,19 @@ class Test_Infographic_Api:
         validate(widget["data"]["items"][0], schema)
         assert widget["data"]["text"]["title"] == "כמות פצועים"
 
+    def test_fatal_yoy_monthly(self):
+        widget = self._get_widget_by_name(name="fatal_accident_yoy_same_month")
+        assert len(widget["data"]["items"]) == 1
+
+        schema = {
+            "type": "object",
+            "properties": {"accident_year": {"type": "number"}, "count": {"type": "number"},},
+        }
+
+        validate(widget["data"]["items"][0], schema)
+        assert widget["data"]["text"]["title"] == "Monthly killed in accidents on year over compared for current month in previous years"
+
+
     def _accident_count_by_day_night_test(self):
         widget = self._get_widget_by_name(name="accident_count_by_day_night")
         assert len(widget["data"]["items"]) > 1

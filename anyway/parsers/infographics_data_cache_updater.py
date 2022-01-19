@@ -14,7 +14,7 @@ from anyway.models import (
     Streets,
 )
 from typing import Dict, Iterable
-from anyway.constants import CONST
+from anyway.constants import Constants as CONST
 from anyway.backend_constants import BE_CONST
 from anyway.app_and_db import db
 from anyway.request_params import RequestParams

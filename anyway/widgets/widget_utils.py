@@ -1,6 +1,6 @@
 import logging
 from collections import defaultdict
-from typing import Dict, Any, List, Type, Optional
+from typing import Dict, Any, List, Type, Optional, Union
 
 import pandas as pd
 from flask_babel import _
@@ -110,7 +110,7 @@ def run_query(query: db.session.query) -> Dict:
 
 
 def format_2_level_items(
-    items: Dict[str, dict],
+    items: Dict[Union[str, int], dict],
     level1_vals: Optional[Type[LabeledCode]],
     level2_vals: Optional[Type[LabeledCode]],
 ):

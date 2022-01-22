@@ -146,7 +146,7 @@ def fill_and_sort_by_numeric_range(
     return dict(sorted(data.items()))
 
 
-def sort_for_stacked_bar(
+def sort_and_fill_gaps_for_stacked_bar(
     data: defaultdict, numeric_range: typing.Iterable, default_order: dict
 ) -> Dict[int, dict]:
     res = fill_and_sort_by_numeric_range(data, numeric_range, default_order)

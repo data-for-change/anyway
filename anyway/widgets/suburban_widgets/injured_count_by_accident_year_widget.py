@@ -13,7 +13,7 @@ from anyway.widgets.widget_utils import (
     gen_entity_labels,
     get_injured_filters,
     format_2_level_items,
-    sort_for_stacked_bar,
+    sort_and_fill_gaps_for_stacked_bar,
 )
 
 
@@ -37,7 +37,7 @@ class InjuredCountByAccidentYearWidget(SubUrbanWidget):
             start_time=self.request_params.start_time,
             end_time=self.request_params.end_time,
         )
-        res2 = sort_for_stacked_bar(
+        res2 = sort_and_fill_gaps_for_stacked_bar(
             res1,
             range(self.request_params.start_time.year, self.request_params.end_time.year + 1),
             {

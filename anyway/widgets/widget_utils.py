@@ -1,4 +1,6 @@
+import copy
 import logging
+import typing
 from collections import defaultdict
 from typing import Dict, Any, List, Type, Optional
 
@@ -110,7 +112,7 @@ def run_query(query: db.session.query) -> Dict:
 
 
 def format_2_level_items(
-    items: Dict[str, dict],
+    items: Dict[typing.Union[int, str], dict],
     level1_vals: Optional[Type[LabeledCode]],
     level2_vals: Optional[Type[LabeledCode]],
 ):
@@ -123,3 +125,30 @@ def format_2_level_items(
             series_data.append({BE_CONST.LKEY: l2, BE_CONST.VAL: num})
         res.append({BE_CONST.LKEY: l1, BE_CONST.SERIES: series_data})
     return res
+
+
+def second_level_fill_and_sort(data: dict, default_order: dict) -> dict:
+    for num, value in data.items():
+        new_value = copy.deepcopy(default_order)
+        for key, value_in in value.items():
+            new_value[key] += value_in
+        data[num] = new_value
+
+    return data
+
+
+def fill_and_sort_by_numeric_range(
+    data: defaultdict, numeric_range: typing.Iterable, default_order: dict
+) -> Dict[int, dict]:
+    for item in numeric_range:
+        if item not in data:
+            data[item] = default_order
+    return dict(sorted(data.items()))
+
+
+def sort_for_stacked_bar(
+    data: defaultdict, numeric_range: typing.Iterable, default_order: dict
+) -> Dict[int, dict]:
+    res = fill_and_sort_by_numeric_range(data, numeric_range, default_order)
+    res2 = second_level_fill_and_sort(res, default_order)
+    return res2

@@ -160,43 +160,6 @@ def test_twitter_parse():
         assert actual.accident == expected.accident
 
 
-def test_location_extraction_extract_geo_features():
-    if not secrets.exists("GOOGLE_MAPS_KEY"):
-        pytest.skip("Could not find GOOGLE_MAPS_KEY")
-
-    parsed = dict(
-        link="https://twitter.com/mda_israel/status/1253010741080326148",
-        title='בשעה 19:39 התקבל דיווח במוקד 101 של מד"א במרחב דן על הולכת רגל שככל הנראה נפגעה מאופנוע ברחוב ביאליק ברמת גן. צוותי מד"א מעניקים טיפול ומפנים לבי"ח איכילוב 2 פצועים: אישה כבת 30 במצב קשה, עם חבלה רב מערכתית ורוכב האופנוע, צעיר בן 18 במצב בינוני, עם חבלות בראש ובגפיים.',
-        description='בשעה 19:39 התקבל דיווח במוקד 101 של מד"א במרחב דן על הולכת רגל שככל הנראה נפגעה מאופנוע ברחוב ביאליק ברמת גן. צוותי מד"א מעניקים טיפול ומפנים לבי"ח איכילוב 2 פצועים: אישה כבת 30 במצב קשה, עם חבלה רב מערכתית ורוכב האופנוע, צעיר בן 18 במצב בינוני, עם חבלות בראש ובגפיים.',
-        source="twitter",
-        tweet_id=1253010741080326144,
-        author="מגן דוד אדום",
-        date=datetime.datetime(2020, 4, 22, 19, 39, 51),
-        accident=True,
-    )
-    expected = NewsFlash(
-        **parsed,
-        lat=32.0861791,
-        lon=34.8098462,
-        resolution="רחוב",
-        location="רחוב ביאליק ברמת גן",
-        road_segment_name=None,
-        district_hebrew=None,
-        non_urban_intersection_hebrew=None,
-        region_hebrew=None,
-        road1=None,
-        road2=None,
-        street1_hebrew="ביאליק",
-        street2_hebrew=None,
-        yishuv_name="רמת גן",
-    )
-
-    actual = NewsFlash(**parsed)
-    location_extraction.extract_geo_features(init_db(), actual)
-    for k in to_dict(expected):
-        assert getattr(actual, k) == getattr(expected, k)
-
-
 def test_location_extraction_extract_location_text():
     for description, expected_location_text in [
         (

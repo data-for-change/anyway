@@ -328,7 +328,7 @@ msgstr "מוקדי תאונות קטלניות וקשות במקטע"
 
 #: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:95
 msgid "Fatal head on collisions vs other accidents"
-msgstr "תאונות קטלניות בהתנגשות חזיתית כנגד שאר התאונות"
+msgstr "תאונות קטלניות לפי סוג"
 
 #: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:99
 msgid "desc"

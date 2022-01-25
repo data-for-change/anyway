@@ -19,7 +19,7 @@ class FatalAccidentYoYSameMonth(SubUrbanWidget):
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
-        self.rank = 8
+        self.rank = 31
 
     def generate_items(self) -> None:
         latest_created_date = AccidentMarker.get_latest_marker_created_date()
@@ -39,5 +39,3 @@ class FatalAccidentYoYSameMonth(SubUrbanWidget):
         }
         return items
 
-
-_("Monthly killed in accidents on year over compared for current month in previous years")

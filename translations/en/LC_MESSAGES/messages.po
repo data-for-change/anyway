@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-01-08 14:56+0200\n"
+"POT-Creation-Date: 2022-01-25 12:56+0200\n"
 "PO-Revision-Date: 2020-11-26 16:45+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -321,6 +321,12 @@ msgstr ""
 msgid "Fatal and severe accidents heat map"
 msgstr ""
 
+#: anyway/widgets/suburban_widgets/fatal_accident_yoy_same_month.py:38
+msgid ""
+"Monthly killed in accidents on year over compared for current month in "
+"previous years"
+msgstr ""
+
 #: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:95
 msgid "Fatal head on collisions vs other accidents"
 msgstr ""
@@ -357,16 +363,16 @@ msgstr ""
 msgid "Number of Injuries in accidents by severity"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_stacked_widget.py:52
+#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_stacked_widget.py:58
 msgid "Killed and injury stacked per age group"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_stacked_widget.py:53
-#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_widget.py:38
+#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_stacked_widget.py:59
+#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_widget.py:40
 msgid "In"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_widget.py:37
+#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_widget.py:39
 msgid "Injury per age group"
 msgstr ""
 
@@ -428,7 +434,7 @@ msgstr ""
 msgid "Segments with most accidents"
 msgstr ""
 
-#: anyway/widgets/urban_widgets/injured_accidents_with_pedestrians_widget.py:107
+#: anyway/widgets/urban_widgets/injured_accidents_with_pedestrians_widget.py:99
 msgid "Pedestrian accidents by severity and year"
 msgstr ""
 

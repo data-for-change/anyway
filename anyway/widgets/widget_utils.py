@@ -111,6 +111,7 @@ def run_query(query: db.session.query) -> Dict:
     return pd.read_sql_query(query.statement, query.session.bind).to_dict(orient="records")
 
 
+# TODO: Find a better way to deal with typing.Union[int, str]
 def format_2_level_items(
     items: Dict[typing.Union[int, str], dict],
     level1_vals: Optional[Type[LabeledCode]],

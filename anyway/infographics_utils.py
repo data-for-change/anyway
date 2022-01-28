@@ -35,6 +35,7 @@ logger = logging.getLogger("infographics_utils")
 # pylint: disable=unused-import
 import anyway.widgets.urban_widgets
 import anyway.widgets.suburban_widgets
+import anyway.widgets.all_locations_widgets
 
 
 # pylint: enable=unused-import

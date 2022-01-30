@@ -3,7 +3,7 @@ from typing import Dict
 from flask_babel import _
 
 from anyway.request_params import RequestParams
-from anyway.backend_constants import InjurySeverity as IS
+from anyway.backend_constants import InjurySeverity as IS, BackEndConstants
 from anyway.models import InvolvedMarkerView, AccidentMarker
 from anyway.widgets.widget import register
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
@@ -22,15 +22,21 @@ class FatalAccidentYoYSameMonth(SubUrbanWidget):
 
     def generate_items(self) -> None:
         latest_created_date = AccidentMarker.get_latest_marker_created_date()
-
-        self.items = get_accidents_stats(
+        structured_data_list = []
+        for year_stats in get_accidents_stats(
             table_obj=InvolvedMarkerView,
             filters={InvolvedMarkerView.accident_month.name: latest_created_date.month, InvolvedMarkerView.injury_severity.name: IS.KILLED.value},
             group_by=(InvolvedMarkerView.accident_year.name),
             count=InvolvedMarkerView.injury_severity.name,
             start_time=self.request_params.start_time,
             end_time=self.request_params.end_time,
-        )
+        ):
+            structured_data_list.append({
+                BackEndConstants.LKEY: year_stats[InvolvedMarkerView.accident_year.name],
+                BackEndConstants.VAL: year_stats['count']
+            })
+        self.items = structured_data_list
+
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:

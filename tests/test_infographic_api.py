@@ -269,9 +269,9 @@ class Test_Infographic_Api:
 
         schema = {
             "type": "object",
-            "properties": {"accident_year": {"type": "number"}, "count": {"type": "number"},},
+            "properties": {"label_key": {"type": "number"}, "value": {"type": "number"},},
         }
-
+        assert widget["data"]["items"][0] == {'label_key': 2014, 'value': 32}
         validate(widget["data"]["items"][0], schema)
         assert widget["data"]["text"]["title"] == "כמות ההרוגים בתאונות דרכים בחודש הנוכחי בהשוואה לשנים קודמות"
 

@@ -5,7 +5,6 @@ from . import (
     street_view_widget,
     top_road_segments_accidents_per_km_widget,
     accident_count_by_road_light_widget,
-    accident_count_by_severity_widget,
     accident_count_pedestrians_per_vehicle_street_vs_all_widget,
     accident_severity_by_cross_location_widget,
     accidents_heat_map_widget,

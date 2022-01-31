@@ -3,6 +3,7 @@ from anyway.widgets.widget import register
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 from typing import Dict
 
+
 @register
 class AccidentSeverityByCrossLocationWidget(SubUrbanWidget):
     name: str = "accident_severity_by_cross_location"

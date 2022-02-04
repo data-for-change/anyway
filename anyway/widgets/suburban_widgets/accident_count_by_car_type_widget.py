@@ -58,7 +58,7 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
             )
         )
 
-        for car_type in national_data:
+        for car_type in data_by_segment:
             out.append(
                 {
                     "label_key": car_type,

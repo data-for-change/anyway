@@ -160,21 +160,7 @@ class Test_Infographic_Api:
                     {"label_key": "percentage_segment", "value": 100.0},
                     {"label_key": "percentage_country", "value": 68.45562803221988},
                 ],
-            },
-            {
-                "label_key": 5,
-                "series": [
-                    {"label_key": "percentage_segment", "value": 0.0},
-                    {"label_key": "percentage_country", "value": 12.641890480280415},
-                ],
-            },
-            {
-                "label_key": 8,
-                "series": [
-                    {"label_key": "percentage_segment", "value": 0.0},
-                    {"label_key": "percentage_country", "value": 9.84470391606119},
-                ],
-            },
+            }
         ]
 
         widget_utils.get_accidents_stats = (

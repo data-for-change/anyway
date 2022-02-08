@@ -29,7 +29,5 @@ class TopRoadSegmentsAccidentsWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        items["data"]["text"] = {
-            "title": _("Segments with most accidents"),
-        }
+        items["data"]["text"] = {"title": _("Segments with most accidents")}
         return items

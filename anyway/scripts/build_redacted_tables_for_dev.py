@@ -24,9 +24,7 @@ def create_db():
     Users.metadata.create_all(engine)
 
     role_admins = Roles(
-        name="admins",
-        description="This is the default admin role.",
-        create_date=datetime.now(),
+        name="admins", description="This is the default admin role.", create_date=datetime.now()
     )
 
     session = sessionmaker(bind=engine).Session()
@@ -62,9 +60,7 @@ def create_db():
     )
     if admin_role is None:
         insert_users_to_roles = users_to_roles.insert().values(
-            user_id=user_id.id,
-            role_id=role_id.id,
-            create_date=datetime.now(),
+            user_id=user_id.id, role_id=role_id.id, create_date=datetime.now()
         )
         session.execute(insert_users_to_roles)
     session.commit()

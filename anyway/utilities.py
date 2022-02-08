@@ -286,9 +286,6 @@ def is_a_safe_redirect_url(url: str) -> bool:
 
 def is_a_valid_email(tmp_given_user_email: str) -> bool:
     is_valid = validate_email(
-        email_address=tmp_given_user_email,
-        check_regex=True,
-        check_mx=False,
-        use_blacklist=False,
+        email_address=tmp_given_user_email, check_regex=True, check_mx=False, use_blacklist=False
     )
     return is_valid

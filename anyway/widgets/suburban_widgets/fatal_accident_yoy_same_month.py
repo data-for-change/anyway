@@ -43,6 +43,8 @@ class FatalAccidentYoYSameMonth(SubUrbanWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
-            "title": _("Monthly killed in accidents on year over compared for current month in previous years"),
+            "title": _(
+                "Monthly killed in accidents on year over compared for current month in previous years"
+            )
         }
         return items

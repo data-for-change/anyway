@@ -28,6 +28,7 @@ class AccidentCountByRoadLightWidget(SubUrbanWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
-            "title": _('Number of accidents by road light') +f" - {request_params.location_info['road_segment_name']}"
+            "title": _("Number of accidents by road light")
+            + f" - {request_params.location_info['road_segment_name']}"
         }
         return items

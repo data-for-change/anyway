@@ -293,7 +293,7 @@ def get_cache_info():
         db.session.query(NewsFlash)
         .filter(NewsFlash.accident)
         .filter(NewsFlash.resolution.in_(["כביש בינעירוני"]))
-        .filter(not_(NewsFlash.road_segment_name == None))
+        .filter(not_(NewsFlash.road_segment_name is None))
         .count()
     )
     db.session.commit()

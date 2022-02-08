@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Union
 
 from anyway.request_params import RequestParams
 from anyway.backend_constants import InjurySeverity
@@ -26,7 +26,7 @@ class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
         )
 
     @staticmethod
-    def get_motor_stats(location_info, start_time, end_time) -> None:
+    def get_motor_stats(location_info, start_time, end_time):
         count_by_year = get_accidents_stats(
             table_obj=InvolvedMarkerView,
             filters={
@@ -50,7 +50,7 @@ class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
                 count_by_year.append({"accident_year": year, "count": 0})
         return count_by_year
 
-    def is_included(self) -> bool:
+    def is_included(self) -> Union[dict, list, bool]:
         if self.items[-1]["count"] > 0 and self.items[-2]["count"] > 0:
             return self.items
         return False

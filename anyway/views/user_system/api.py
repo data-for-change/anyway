@@ -49,6 +49,7 @@ login_manager.init_app(app)
 # Setup Flask-Principal
 principals = Principal(app)
 
+
 # Copied and modified from flask-security
 def roles_accepted(*roles):
     """Decorator which specifies that a user must have at least one of the

@@ -6,6 +6,7 @@ from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 from typing import Dict
 from flask_babel import _
 
+
 @register
 class AccidentCountByRoadLightWidget(SubUrbanWidget):
     name: str = "accident_count_by_road_light"

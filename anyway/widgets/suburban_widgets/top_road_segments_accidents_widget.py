@@ -4,6 +4,7 @@ from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 from typing import Dict
 from flask_babel import _
 
+
 # TODO: unregister? this widget produces only mock data
 @register
 class TopRoadSegmentsAccidentsWidget(SubUrbanWidget):

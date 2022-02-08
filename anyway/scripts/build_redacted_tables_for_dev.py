@@ -28,8 +28,8 @@ def create_db():
         description="This is the default admin role.",
         create_date=datetime.now(),
     )
-    Session = sessionmaker(bind=engine)
-    session = Session()
+
+    session = sessionmaker(bind=engine).Session()
     admin_role = (
         session.query(Roles).with_entities(Roles.name).filter(Roles.name == "admins").first()
     )

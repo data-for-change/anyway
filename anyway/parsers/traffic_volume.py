@@ -11,7 +11,6 @@ from anyway.utilities import chunks
 from anyway.utilities import time_delta
 from anyway.app_and_db import db
 
-
 dictionary = {
     "shana": "year",
     "kvish": "road",
@@ -83,13 +82,16 @@ def get_traffic_volume_rows(path):
 
 def import_to_datastore(path, batch_size):
     try:
+        new_items = 0
         assert batch_size > 0
         dir_list = glob.glob("{0}/*".format(path))
         for directory in sorted(dir_list, reverse=False):
             started = datetime.now()
             delete_traffic_volume_of_directory(directory)
             traffic_volume_rows = get_traffic_volume_rows(directory)
-            new_items = 0
+            new_items = (
+                0
+            )  # TODO: not sure this should be here. As it stands, we are just returning new_items for the last iteration
             logging.info("inserting " + str(len(traffic_volume_rows)) + " new traffic data rows")
             for traffic_volume_chunk in chunks(traffic_volume_rows, batch_size):
                 db.session.bulk_insert_mappings(TrafficVolume, traffic_volume_chunk)
@@ -98,12 +100,8 @@ def import_to_datastore(path, batch_size):
             logging.info("\t{0} items in {1}".format(new_items, time_delta(started)))
         db.session.commit()
         return new_items
-    except:
-        error = (
-            "Traffic Volume import succeeded partially with "
-            + str(new_items)
-            + " traffic data rows"
-        )
+    except Exception as exception:
+        error = f"Traffic Volume import succeeded partially with {new_items} traffic data rows. Got exception : {exception}"
         raise Exception(error)
 
 

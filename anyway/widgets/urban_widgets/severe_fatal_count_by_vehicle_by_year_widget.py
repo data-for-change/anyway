@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Any, Union
 
 from anyway.request_params import RequestParams
 from anyway.backend_constants import InjurySeverity
@@ -27,7 +27,7 @@ class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
         )
 
     @staticmethod
-    def separate_data(yishuv, start_time, end_time) -> None:
+    def separate_data(yishuv, start_time, end_time) -> Dict[str, Any]:
         output = {
             "e_bikes": get_accidents_stats(
                 table_obj=InvolvedMarkerView,
@@ -99,7 +99,7 @@ class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
         }
         return items
 
-    def is_included(self) -> bool:
+    def is_included(self) -> Union[dict, list, bool]:
         if (
             self.items["bikes"][-1]["count"]
             + self.items["e_bikes"][-1]["count"]

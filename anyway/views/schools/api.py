@@ -17,7 +17,7 @@ def schools_api():
         db.session.query(School)
         .filter(
             not_(and_(School.latitude == 0, School.longitude == 0)),
-            not_(and_(School.latitude == None, School.longitude == None)),
+            not_(and_(School.latitude is not None, School.longitude is not None)),
         )
         .with_entities(
             School.yishuv_symbol,
@@ -58,8 +58,8 @@ def schools_description_api():
             ),
             not_(
                 and_(
-                    SchoolWithDescription2020.latitude == None,
-                    SchoolWithDescription2020.longitude == None,
+                    SchoolWithDescription2020.latitude is not None,
+                    SchoolWithDescription2020.longitude is not None,
                 )
             ),
         )
@@ -94,8 +94,8 @@ def schools_yishuvs_api():
             ),
             not_(
                 and_(
-                    SchoolWithDescription2020.latitude == None,
-                    SchoolWithDescription2020.longitude == None,
+                    SchoolWithDescription2020.latitude is None,
+                    SchoolWithDescription2020.longitude is None,
                 )
             ),
         )

@@ -175,7 +175,7 @@ def gen_news_flash_query(
         and_(
             NewsFlash.accident == True,
             not_(and_(NewsFlash.lat == 0, NewsFlash.lon == 0)),
-            not_(and_(NewsFlash.lat == None, NewsFlash.lon == None)),
+            not_(and_(NewsFlash.lat is None, NewsFlash.lon is None)),
         )
     ).order_by(NewsFlash.date.desc())
 
@@ -195,7 +195,7 @@ def gen_news_flash_query_v2(session, valid_params: dict):
             query = query.filter(NewsFlash.source.in_(sources))
         if param == "start_date":
             query = query.filter(
-                NewsFlash.date >= value and NewsFlash.date <= valid_params["end_date"]
+                value <= NewsFlash.date <= valid_params["end_date"]
             )
         if param == "resolution":
             query = filter_by_resolutions(query, value)
@@ -203,7 +203,7 @@ def gen_news_flash_query_v2(session, valid_params: dict):
         and_(
             NewsFlash.accident == True,
             not_(and_(NewsFlash.lat == 0, NewsFlash.lon == 0)),
-            not_(and_(NewsFlash.lat == None, NewsFlash.lon == None)),
+            not_(and_(NewsFlash.lat is None, NewsFlash.lon is None)),
         )
     ).order_by(NewsFlash.date.desc())
     query = query.offset(valid_params["offset"])
@@ -257,14 +257,14 @@ def filter_by_resolutions(query, resolutions: List[str]):
         ands.append(
             and_(
                 NewsFlash.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD.value,
-                NewsFlash.road_segment_name != None,
+                NewsFlash.road_segment_name is not None,
             )
         )
     if "street" in resolutions:
         ands.append(
             and_(
                 NewsFlash.resolution == BE_CONST.ResolutionCategories.STREET.value,
-                NewsFlash.street1_hebrew != None,
+                NewsFlash.street1_hebrew is not None,
             )
         )
     if len(ands) > 1:

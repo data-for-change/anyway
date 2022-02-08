@@ -64,18 +64,18 @@ def parse_csv_line(str_row):
 
 
 def calc_markers(markers):
-    DEADLY_WEIGHT = 7
-    HARD_WEIGHT = 5
-    LIGHT_WEIGHT = 1
+    deadly_weight = 7
+    hard_weight = 5
+    light_weight = 1
     severities = [x.get("accident_severity", 1) for x in markers]
     light_count = severities.count(3)
     hard_count = severities.count(2)
     deadly_count = severities.count(1)
 
     return {
-        "grade": deadly_count * DEADLY_WEIGHT
-        + hard_count * HARD_WEIGHT
-        + light_count * LIGHT_WEIGHT,
+        "grade": deadly_count * deadly_weight
+        + hard_count * hard_weight
+        + light_count * light_weight,
         "light": light_count,
         "hard": hard_count,
         "deadly": deadly_count,

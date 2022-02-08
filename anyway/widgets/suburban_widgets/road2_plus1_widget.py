@@ -10,6 +10,7 @@ from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 from typing import Dict
 from flask_babel import _
 
+
 @register
 class Road2Plus1Widget(SubUrbanWidget):
     name: str = "vision_zero_2_plus_1"

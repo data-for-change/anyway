@@ -82,4 +82,5 @@ class TopRoadSegmentsAccidentsPerKmWidget(SubUrbanWidget):
         }
         return items
 
+
 _("Severe and fatal accidents per Km by section in road")

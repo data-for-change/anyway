@@ -839,7 +839,7 @@ def delete_invalid_entries(batch_size):
 
     marker_ids_to_delete = (
         db.session.query(AccidentMarker.id)
-        .filter(or_((AccidentMarker.longitude == None), (AccidentMarker.latitude == None)))
+        .filter(or_((AccidentMarker.longitude is None), (AccidentMarker.latitude is None)))
         .all()
     )
 
@@ -1078,11 +1078,7 @@ def get_file_type_and_year(file_path):
     return int(provider_code), int(year)
 
 
-def main(
-    batch_size,
-    source,
-    load_start_year=None,
-):
+def main(batch_size, source, load_start_year=None):
     try:
         load_existing_streets()
         total = 0

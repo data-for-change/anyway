@@ -1,4 +1,4 @@
-from typing import Dict, Union, List, Any
+from typing import Dict, Union, Any
 
 from anyway.request_params import RequestParams
 from anyway.backend_constants import InjurySeverity

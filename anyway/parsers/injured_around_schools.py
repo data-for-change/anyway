@@ -227,7 +227,7 @@ def get_injured_around_schools(start_date, end_date, distance):
             not_(and_(SchoolWithDescription.latitude == 0, SchoolWithDescription.longitude == 0)),
             not_(
                 and_(
-                    SchoolWithDescription.latitude is None, SchoolWithDescription.longitude is None
+                    SchoolWithDescription.latitude == None, SchoolWithDescription.longitude == None
                 )
             ),
             or_(

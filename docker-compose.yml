@@ -7,7 +7,6 @@ services:
     container_name: anyway
     ports:
       - "8080:5000"
-      - "5678:5678"
     environment:
       - DATABASE_URL=postgresql://anyway:anyway@db/anyway
       - FLASK_ENV=development

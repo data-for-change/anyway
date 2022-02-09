@@ -126,7 +126,7 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
         .filter(AccidentMarkerView.geom.intersects(polygon_str))
         .filter(AccidentMarkerView.accident_year >= cutoff_year)
         .filter(AccidentMarkerView.provider_code != BE_CONST.RSA_PROVIDER_CODE)
-        .filter(not_(AccidentMarkerView.road_segment_name is None))
+        .filter(not_(AccidentMarkerView.road_segment_name == None))
         .options(
             load_only(
                 "road1",

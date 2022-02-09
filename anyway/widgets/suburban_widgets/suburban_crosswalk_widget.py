@@ -28,7 +28,7 @@ class SuburbanCrosswalkWidget(SubUrbanWidget):
     @staticmethod
     def get_crosswalk(
         road, start_time, end_time
-    ) -> Dict[str, Union[List[Dict[str, Union[int, Any]]], Any]]:
+    ) -> Dict[str, Any]:
         cross_output = {
             "with_crosswalk": get_accidents_stats(
                 table_obj=InvolvedMarkerView,

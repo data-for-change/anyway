@@ -395,7 +395,7 @@ def yishuv_symbol_to_name():
     logging.debug("getting yishuv symbol and yishuv name pairs")
     markers = (
         db.session.query(AccidentMarkerView.yishuv_name, AccidentMarkerView.yishuv_symbol)
-        .filter(not_(AccidentMarkerView.yishuv_name is None))
+        .filter(not_(AccidentMarkerView.yishuv_name == None))
         .group_by(AccidentMarkerView.yishuv_name, AccidentMarkerView.yishuv_symbol)
         .all()
     )

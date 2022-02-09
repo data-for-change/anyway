@@ -50,6 +50,4 @@ EXPOSE 5000
 RUN flask assets clean
 
 ENTRYPOINT ["/anyway/docker-entrypoint.sh"]
-
-RUN pip install debugpy
-CMD FLASK_APP=anyway python -m debugpy --listen 0.0.0.0:5678 -m flask run --host 0.0.0.0 -p 5000
+CMD FLASK_APP=anyway flask run --host 0.0.0.0

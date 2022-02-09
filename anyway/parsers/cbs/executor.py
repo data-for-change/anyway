@@ -839,7 +839,7 @@ def delete_invalid_entries(batch_size):
 
     marker_ids_to_delete = (
         db.session.query(AccidentMarker.id)
-        .filter(or_((AccidentMarker.longitude is None), (AccidentMarker.latitude is None)))
+        .filter(or_((AccidentMarker.longitude == None), (AccidentMarker.latitude == None)))
         .all()
     )
 

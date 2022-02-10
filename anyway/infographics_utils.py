@@ -246,6 +246,7 @@ def create_infographics_items(request_params: RequestParams) -> Dict:
         output["meta"] = {
             "location_info": request_params.location_info.copy(),
             "location_text": request_params.location_text,
+            "resolution": request_params.resolution.name,
             "dates_comment": get_dates_comment(),
         }
         output["widgets"] = []

@@ -25,6 +25,7 @@ def valid_date(date_string):
 
 @click.group()
 def cli():
+    print("testing")
     pass
 
 

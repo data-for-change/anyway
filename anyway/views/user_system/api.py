@@ -49,6 +49,7 @@ login_manager.init_app(app)
 # Setup Flask-Principal
 principals = Principal(app)
 
+
 # Copied and modified from flask-security
 def roles_accepted(*roles):
     """Decorator which specifies that a user must have at least one of the
@@ -524,9 +525,7 @@ def get_roles_list() -> Response:
     ]
 
     return Response(
-        response=json.dumps(send_list),
-        status=HTTPStatus.OK,
-        mimetype="application/json",
+        response=json.dumps(send_list), status=HTTPStatus.OK, mimetype="application/json"
     )
 
 
@@ -536,9 +535,7 @@ def get_organization_list() -> Response:
     send_list = [org.name for org in orgs_list]
 
     return Response(
-        response=json.dumps(send_list),
-        status=HTTPStatus.OK,
-        mimetype="application/json",
+        response=json.dumps(send_list), status=HTTPStatus.OK, mimetype="application/json"
     )
 
 

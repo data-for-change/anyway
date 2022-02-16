@@ -5,7 +5,6 @@ from . import (
     street_view_widget,
     top_road_segments_accidents_per_km_widget,
     accident_count_by_road_light_widget,
-    accident_count_by_severity_widget,
     accident_count_pedestrians_per_vehicle_street_vs_all_widget,
     accident_severity_by_cross_location_widget,
     accidents_heat_map_widget,
@@ -26,4 +25,5 @@ from . import (
     motorcycle_accidents_vs_all_accidents_widget,
     suburban_crosswalk_widget,
     killed_and_injured_count_per_age_group_stacked_widget,
+    fatal_accident_yoy_same_month,
 )

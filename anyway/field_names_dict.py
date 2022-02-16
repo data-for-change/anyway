@@ -48,8 +48,6 @@ field_names_dict = {
     "cross_mode": "OFEN_HAZIYA",
     "cross_location": "MEKOM_HAZIYA",
     "cross_direction": "KIVUN_HAZIYA",
-    "road1": "KVISH1",
-    "road2": "KVISH2",
     "km": "KM",
     "yishuv_symbol": "SEMEL_YISHUV",
     "geo_area": "THUM_GEOGRAFI",

@@ -9,7 +9,7 @@ from anyway.parsers.infographics_data_cache_updater import add_news_flash_to_cac
 import anyway.parsers.infographics_data_cache_updater
 
 
-class Test_infographics_data_from_cache(TestCase):
+class TestInfographicsDataFromCache(TestCase):
     def test_get_not_existing_from_cache(self):
         cache_data = anyway.parsers.infographics_data_cache_updater.get_infographics_data_from_cache(
             17, 1

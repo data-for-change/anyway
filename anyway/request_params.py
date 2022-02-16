@@ -43,6 +43,8 @@ class RequestParams:
 # todo: merge with get_request_params()
 def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams]:
     location = get_location_from_request_values(vals)
+    if location is None:
+        return None
     years_ago = vals.get("years_ago")
     lang = vals.get("lang", "he")
     location_text = location["text"]
@@ -103,9 +105,13 @@ def get_location_from_request_values(vals: dict) -> dict:
     return {}
 
 
-def get_location_from_news_flash(news_flash_id: str) -> dict:
+def get_location_from_news_flash(news_flash_id: str) -> Optional[dict]:
     news_flash = extract_news_flash_obj(news_flash_id)
+    if news_flash is None:
+        return None
     loc = extract_news_flash_location(news_flash)
+    if loc is None:
+        return None
     res = loc["data"]["resolution"]
     loc["data"]["resolution"] = BE_CONST.ResolutionCategories(res)
     loc["text"] = get_news_flash_location_text(news_flash)

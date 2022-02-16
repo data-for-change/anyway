@@ -1,12 +1,14 @@
 import logging
 from typing import Dict
 
+# noinspection PyProtectedMember
 from flask_babel import _
 
 from anyway.request_params import RequestParams
 from anyway.backend_constants import AccidentSeverity, AccidentType
 from anyway.widgets.suburban_widgets.most_severe_accidents_table_widget import (
     get_most_severe_accidents_with_entities,
+    get_most_severe_accidents_table_title,
 )
 from anyway.models import AccidentMarkerView
 from anyway.widgets.widget import register
@@ -23,6 +25,7 @@ class MostSevereAccidentsWidget(SubUrbanWidget):
         self.information = "Most recent fatal and severe accidents displayed on a map. Up to 10 accidents are presented."
 
     def generate_items(self) -> None:
+        # noinspection PyUnresolvedReferences
         self.items = MostSevereAccidentsWidget.get_most_severe_accidents(
             AccidentMarkerView,
             self.request_params.location_info,
@@ -56,6 +59,9 @@ class MostSevereAccidentsWidget(SubUrbanWidget):
                 logging.exception(
                     f"MostSevereAccidentsWidget.localize_items: Exception while translating {item}."
                 )
+        items["data"]["text"] = {
+            "title": get_most_severe_accidents_table_title(request_params.location_info)
+        }
         return items
 
 

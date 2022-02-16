@@ -141,10 +141,10 @@ def import_to_datastore(schools_description_filepath, schools_coordinates_filepa
             db.session.bulk_insert_mappings(SchoolWithDescription2020, schools_chunk)
             db.session.commit()
         new_items += len(schools)
-        logging.info("\t{0} items in {1}".format(new_items, time_delta(started)))
+        logging.info(f"\t{new_items} items in {time_delta(started)}")
         return new_items
-    except:
-        error = "Schools import succeded partially with " + new_items + " schools"
+    except Exception as exception:
+        error = f"Schools import succeeded partially with {new_items} schools. Got exception : {exception}"
         raise Exception(error)
 
 

@@ -3,6 +3,7 @@ from anyway.widgets.widget import register
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 from typing import Dict
 
+
 # TODO: unregister? this widget produces only mock data
 @register
 class PedestrianInjuredInJunctionsWidget(SubUrbanWidget):

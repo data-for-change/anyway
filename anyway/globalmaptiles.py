@@ -409,12 +409,12 @@ if __name__ == "__main__":
     if profile != "mercator":
         Usage("ERROR: Sorry, given profile is not implemented yet.")
 
-    if zoomlevel == None or lat == None or lon == None:
+    if zoomlevel is None or lat is None or lon is None:
         Usage("ERROR: Specify at least 'zoomlevel', 'lat' and 'lon'.")
     if latmax is not None and lonmax is None:
         Usage("ERROR: Both 'latmax' and 'lonmax' must be given.")
 
-    if latmax != None and lonmax != None:
+    if latmax is not None and lonmax is not None:
         if latmax < lat:
             Usage("ERROR: 'latmax' must be bigger then 'lat'")
         if lonmax < lon:

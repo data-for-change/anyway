@@ -12,6 +12,7 @@ from anyway.models import VehicleMarkerView, AccidentType
 from anyway.vehicle_type import VehicleCategory
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 
+
 # TODO: register?
 class AccidentTypeVehicleTypeRoadComparisonWidget(SubUrbanWidget):
     name: str = "vehicle_accident_vs_all_accidents"  # WIP: change by vehicle type

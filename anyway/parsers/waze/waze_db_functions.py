@@ -5,7 +5,7 @@ from anyway.app_and_db import app, db
 def insert_waze_alerts(waze_alerts):
     """
     insert new waze alerts to db
-    :param waze_alerts_df: DataFrame contains waze alerts
+    :param waze_alerts: waze alerts
     """
 
     return _upsert_waze_objects_by_uuid(WazeAlert, waze_alerts)
@@ -14,7 +14,7 @@ def insert_waze_alerts(waze_alerts):
 def insert_waze_traffic_jams(waze_traffic_jams):
     """
     insert new waze traffic jams to db
-    :param waze_traffic_jams_df: DataFrame contains waze traffic jams
+    :param waze_traffic_jams: waze traffic jams
     """
 
     return _upsert_waze_objects_by_uuid(WazeTrafficJams, waze_traffic_jams)

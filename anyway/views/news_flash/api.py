@@ -256,7 +256,12 @@ def filter_by_resolutions(query, resolutions: List[str]):
     if "suburban_road" in resolutions:
         ands.append(
             and_(
-                NewsFlash.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD.value,
+                NewsFlash.resolution.in_(
+                    [
+                        BE_CONST.ResolutionCategories.SUBURBAN_ROAD.value,
+                        BE_CONST.ResolutionCategories.SUBURBAN_JUNCTION.value,
+                    ]
+                ),
                 NewsFlash.road_segment_name != None,
             )
         )

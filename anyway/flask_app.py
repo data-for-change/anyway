@@ -158,10 +158,7 @@ assets.register(
     ),
 )
 
-CORS(
-    app,
-    resources=get_cors_config(),
-)
+CORS(app, resources=get_cors_config())
 
 jinja_environment = jinja2.Environment(
     autoescape=True,
@@ -762,8 +759,7 @@ def log_bad_request(request):
 
 
 def index(marker=None, message=None):
-    context = {"url": request.base_url, "index_url": request.url_root}
-    context["CONST"] = CONST.to_dict()
+    context = {"url": request.base_url, "index_url": request.url_root, "CONST": CONST.to_dict()}
     if "marker" in request.values:
         markers = AccidentMarker.get_marker(request.values["marker"])
         if markers.count() == 1:
@@ -901,11 +897,11 @@ def year2timestamp(y):
 
 @app.route("/location-subscription", methods=["POST", "OPTIONS"])
 def updatebyemail():
-    jsonData = request.get_json(force=True)
-    logging.debug(jsonData)
-    emailaddress = str(jsonData["address"])
-    fname = (jsonData["fname"]).encode("utf8")
-    lname = (jsonData["lname"]).encode("utf8")
+    json_data = request.get_json(force=True)
+    logging.debug(json_data)
+    emailaddress = str(json_data["address"])
+    fname = (json_data["fname"]).encode("utf8")
+    lname = (json_data["lname"]).encode("utf8")
     if len(fname) > 40:
         response = Response(
             json.dumps({"respo": "First name too long"}, default=str), mimetype="application/json"
@@ -935,8 +931,8 @@ def updatebyemail():
     if curr_max_id is None:
         curr_max_id = 0
     user_id = curr_max_id + 1
-    if "school_id" in jsonData.keys():
-        school_id = int(jsonData["school_id"])
+    if "school_id" in json_data.keys():
+        school_id = int(json_data["school_id"])
         user_subscription = LocationSubscribers(
             id=user_id,
             email=emailaddress,
@@ -954,10 +950,10 @@ def updatebyemail():
             email=emailaddress,
             first_name=fname.decode("utf8"),
             last_name=lname.decode("utf8"),
-            ne_lng=jsonData["ne_lng"],
-            ne_lat=jsonData["ne_lat"],
-            sw_lng=jsonData["sw_lng"],
-            sw_lat=jsonData["sw_lat"],
+            ne_lng=json_data["ne_lng"],
+            ne_lat=json_data["ne_lat"],
+            sw_lng=json_data["sw_lng"],
+            sw_lat=json_data["sw_lat"],
             school_id=None,
         )
     db.session.add(user_subscription)
@@ -973,30 +969,30 @@ def updatebyemail():
 
 @app.route("/report-problem", methods=["POST"])
 def report_problem():
-    jsonData = request.get_json(force=True)
-    logging.debug(jsonData)
-    first_name = (jsonData["first_name"]).encode("utf8")
-    last_name = (jsonData["last_name"]).encode("utf8")
+    json_data = request.get_json(force=True)
+    logging.debug(json_data)
+    first_name = (json_data["first_name"]).encode("utf8")
+    last_name = (json_data["last_name"]).encode("utf8")
     report_problem = ReportProblem(
-        latitude=jsonData["latitude"],
-        longitude=jsonData["longitude"],
-        problem_description=jsonData["problem_description"],
-        signs_on_the_road_not_clear=jsonData["signs_on_the_road_not_clear"],
-        signs_problem=jsonData["signs_problem"],
-        pothole=jsonData["pothole"],
-        no_light=jsonData["no_light"],
-        no_sign=jsonData["no_sign"],
-        crossing_missing=jsonData["crossing_missing"],
-        sidewalk_is_blocked=jsonData["sidewalk_is_blocked"],
-        street_light_issue=jsonData["street_light_issue"],
-        road_hazard=jsonData["road_hazard"],
+        latitude=json_data["latitude"],
+        longitude=json_data["longitude"],
+        problem_description=json_data["problem_description"],
+        signs_on_the_road_not_clear=json_data["signs_on_the_road_not_clear"],
+        signs_problem=json_data["signs_problem"],
+        pothole=json_data["pothole"],
+        no_light=json_data["no_light"],
+        no_sign=json_data["no_sign"],
+        crossing_missing=json_data["crossing_missing"],
+        sidewalk_is_blocked=json_data["sidewalk_is_blocked"],
+        street_light_issue=json_data["street_light_issue"],
+        road_hazard=json_data["road_hazard"],
         first_name=first_name.decode("utf8"),
         last_name=last_name.decode("utf8"),
-        phone_number=jsonData["phone_number"],
-        email=str(jsonData["email"]),
-        send_to_municipality=jsonData["send_to_municipality"],
-        personal_id=jsonData["personal_id"],
-        image_data=jsonData["image_data"],
+        phone_number=json_data["phone_number"],
+        email=str(json_data["email"]),
+        send_to_municipality=json_data["send_to_municipality"],
+        personal_id=json_data["personal_id"],
+        image_data=json_data["image_data"],
     )
     db.session.add(report_problem)
     db.session.commit()
@@ -1208,7 +1204,7 @@ def infographics_data():
         output = get_infographics_mock_data()
     elif mock_data == "false":
         news_flash_id = request.values.get("news_flash_id")
-        if news_flash_id == None:
+        if news_flash_id is None:
             log_bad_request(request)
             return abort(http_client.BAD_REQUEST)
 

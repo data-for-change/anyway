@@ -16,8 +16,6 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-
-
 MARKERS_HEBREW_VIEW = """SELECT markers.id,
                                     markers.provider_and_id,
                                     markers.provider_code,

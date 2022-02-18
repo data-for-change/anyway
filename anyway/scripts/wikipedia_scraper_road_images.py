@@ -29,7 +29,7 @@ def main(dest_folder):
     # updates all_road_page_links with links to specific road page from the main page WIKIPEDIA_ISRAELI_ROADS_LINK
     try:
         main_page = urllib.request.urlopen(WIKIPEDIA_ISRAELI_ROADS_LINK)
-    except urllib.error.HTTPError as e:
+    except urllib.error.HTTPError as e:  # TODO: maybe throw exception?
         logger.debug(f"could not get main page for all roads - {WIKIPEDIA_ISRAELI_ROADS_LINK}")
     soup = BeautifulSoup(main_page, "lxml")
     update_all_road_page_links(all_road_page_links, soup)

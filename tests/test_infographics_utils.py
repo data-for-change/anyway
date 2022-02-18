@@ -34,6 +34,7 @@ class TestInfographicsUtilsCase(unittest.TestCase):
             ]
         }
     ]
+
     def test_format_two_level_items(self):
         actual = format_2_level_items(
             self.item1,

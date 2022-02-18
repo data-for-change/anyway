@@ -90,11 +90,7 @@ class BackEndConstants(object):
         WALLA = "walla"
         TWITTER = "twitter"
 
-    SUPPORTED_SOURCES: List[Source] = [
-        Source.YNET,
-        Source.WALLA,
-        Source.TWITTER,
-    ]
+    SUPPORTED_SOURCES: List[Source] = [Source.YNET, Source.WALLA, Source.TWITTER]
 
     # If in the future there will be a number of organizations or a need for a dynamic setting change, move this
     # data to a table in the DB.
@@ -280,16 +276,8 @@ class CrossCategory(Enum):
     def get_codes(self) -> List[int]:
         """returns CrossLocation codes of category"""
         category_cross_locations = {
-            CrossCategory.UNKNOWN: [
-                CrossLocation.UNKNOWN,
-            ],
-            CrossCategory.NONE: [
-                CrossLocation.OUTFAR,
-                CrossLocation.OUTNEAR,
-            ],
-            CrossCategory.CROSSWALK: [
-                CrossLocation.YESLIGHT,
-                CrossLocation.YESNONE,
-            ],
+            CrossCategory.UNKNOWN: [CrossLocation.UNKNOWN],
+            CrossCategory.NONE: [CrossLocation.OUTFAR, CrossLocation.OUTNEAR],
+            CrossCategory.CROSSWALK: [CrossLocation.YESLIGHT, CrossLocation.YESNONE],
         }
         return list(map(lambda x: x.value, category_cross_locations[self]))

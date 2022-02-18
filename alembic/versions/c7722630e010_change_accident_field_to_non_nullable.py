@@ -17,7 +17,7 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.execute('UPDATE news_flash SET accident = false WHERE accident is null');
+    op.execute('UPDATE news_flash SET accident = false WHERE accident is null')
     op.alter_column('news_flash', 'accident',
                existing_type=sa.BOOLEAN(),
                nullable=False)

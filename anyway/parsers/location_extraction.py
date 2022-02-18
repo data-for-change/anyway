@@ -10,9 +10,7 @@ from anyway.models import NewsFlash
 from anyway.parsers import resolution_dict
 from anyway import secrets
 from anyway.models import AccidentMarkerView, RoadSegments
-from sqlalchemy import (
-    not_,
-)
+from sqlalchemy import not_
 import pandas as pd
 from sqlalchemy.orm import load_only
 from datetime import date
@@ -41,7 +39,7 @@ def get_road_segment_by_name(road_segment_name: str) -> RoadSegments:
     try:
         from anyway.app_and_db import db
     except ModuleNotFoundError:
-        pass
+        pass  # TODO: maybe throw exception?
     from_name = road_segment_name.split(" - ")[0].strip()
     to_name = road_segment_name.split(" - ")[1].strip()
     query_obj = (
@@ -57,7 +55,7 @@ def get_road_segment_by_name_and_road(road_segment_name: str, road: int) -> Road
     try:
         from anyway.app_and_db import db
     except ModuleNotFoundError:
-        pass
+        pass  # TODO: maybe throw exception?
     segments = db.session.query(RoadSegments).filter(RoadSegments.road == road).all()
     for segment in segments:
         if road_segment_name.startswith(segment.from_name) and road_segment_name.endswith(
@@ -73,7 +71,7 @@ def get_road_segment_name_and_number(road_segment_id) -> (float, str):
     try:
         from anyway.app_and_db import db
     except ModuleNotFoundError:
-        pass
+        pass  # TODO: maybe throw exception?
     query_obj = db.session.query(RoadSegments).filter(RoadSegments.segment_id == road_segment_id)
     segment = query_obj.first()
     from_name = segment.from_name  # pylint: disable=maybe-no-member
@@ -110,16 +108,16 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
     try:
         from anyway.app_and_db import db
     except ModuleNotFoundError:
-        pass
+        pass  # TODO: maybe throw exception?
 
     distance_in_km = 1.5
     lat_min, lon_min, lat_max, lon_max = get_bounding_box(latitude, longitude, distance_in_km)
-    baseX = lon_min
-    baseY = lat_min
-    distanceX = lon_max
-    distanceY = lat_max
+    base_x = lon_min
+    base_y = lat_min
+    distance_x = lon_max
+    distance_y = lat_max
     polygon_str = "POLYGON(({0} {1},{0} {3},{2} {3},{2} {1},{0} {1}))".format(
-        baseX, baseY, distanceX, distanceY
+        base_x, base_y, distance_x, distance_y
     )
 
     cutoff_year = (date.today()).year - 6
@@ -149,7 +147,7 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
         lambda x: geohash.encode(x["latitude"], x["longitude"], precision=4), axis=1
     )  # pylint: disable=maybe-no-member
     markers_orig = markers.copy()  # pylint: disable=maybe-no-member
-    markers = markers.loc[(markers["road1"] != None)]  # pylint: disable=maybe-no-member
+    markers = markers.loc[(markers["road1"] is not None)]  # pylint: disable=maybe-no-member
     if markers.count()[0] == 0:
         markers = markers_orig
 
@@ -180,6 +178,7 @@ def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):
     """
     extracts location from db by closest geo point to location found, using road number if provided and limits to
     requested resolution
+    :param db: the DB
     :param latitude: location latitude
     :param longitude: location longitude
     :param resolution: wanted resolution

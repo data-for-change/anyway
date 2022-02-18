@@ -8,7 +8,11 @@ from flask_babel import _
 from anyway.request_params import RequestParams
 from anyway.app_and_db import db
 from anyway.backend_constants import InjurySeverity, InjuredType
-from anyway.widgets.widget_utils import add_empty_keys_to_gen_two_level_dict, gen_entity_labels, format_2_level_items
+from anyway.widgets.widget_utils import (
+    add_empty_keys_to_gen_two_level_dict,
+    gen_entity_labels,
+    format_2_level_items,
+)
 from anyway.models import NewsFlash, InvolvedMarkerView
 from anyway.widgets.widget import register
 from anyway.widgets.urban_widgets.urban_widget import UrbanWidget
@@ -33,7 +37,13 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
 
     @staticmethod
     def convert_to_dict(query_results):
-        res = defaultdict(lambda: {InjurySeverity.KILLED.value:0, InjurySeverity.SEVERE_INJURED.value:0, InjurySeverity.LIGHT_INJURED.value:0})
+        res = defaultdict(
+            lambda: {
+                InjurySeverity.KILLED.value: 0,
+                InjurySeverity.SEVERE_INJURED.value: 0,
+                InjurySeverity.LIGHT_INJURED.value: 0,
+            }
+        )
         for query_result in query_results:
             res[str(query_result.accident_year)][query_result.injury_severity] += query_result.count
         return res
@@ -84,7 +94,12 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
 
             res = add_empty_keys_to_gen_two_level_dict(
                 self.convert_to_dict(query.all()),
-                [str(year) for year in range(self.request_params.start_time.year, self.request_params.end_time.year + 1)],
+                [
+                    str(year)
+                    for year in range(
+                        self.request_params.start_time.year, self.request_params.end_time.year + 1
+                    )
+                ],
                 InjurySeverity.codes(),
             )
             self.items = format_2_level_items(res, None, InjurySeverity)
@@ -96,7 +111,8 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
-            "title": _('Pedestrian accidents by severity and year') +f" - {request_params.location_text}",
+            "title": _("Pedestrian accidents by severity and year")
+            + f" - {request_params.location_text}",
             "labels": gen_entity_labels(InjurySeverity),
         }
         return items

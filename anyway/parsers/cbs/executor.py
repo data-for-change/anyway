@@ -1078,11 +1078,7 @@ def get_file_type_and_year(file_path):
     return int(provider_code), int(year)
 
 
-def main(
-    batch_size,
-    source,
-    load_start_year=None,
-):
+def main(batch_size, source, load_start_year=None):
     try:
         load_existing_streets()
         total = 0
@@ -1099,7 +1095,9 @@ def main(
                 BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
                 BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
             ]:
-                logging.info(f"Loading min year {s3_data_retriever.min_year} Loading max year {s3_data_retriever.max_year}")
+                logging.info(
+                    f"Loading min year {s3_data_retriever.min_year} Loading max year {s3_data_retriever.max_year}"
+                )
                 for year in range(s3_data_retriever.min_year, s3_data_retriever.max_year + 1):
                     cbs_files_dir = os.path.join(
                         s3_data_retriever.local_files_directory,

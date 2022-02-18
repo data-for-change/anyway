@@ -39,6 +39,6 @@ _("Collision of rear-end to side")
 _("Collision with an animal")
 _("Damage caused by a falling load off a vehicle")
 
-_("professional_driver")  # "נהג מקצועי")
-_("private_vehicle_driver")  #  "נהג פרטי")
-_("other_driver")  # "לא ידוע")
+_("professional_driver")  # "נהג מקצועי"
+_("private_vehicle_driver")  # "נהג פרטי"
+_("other_driver")  # "לא ידוע"

@@ -4,6 +4,7 @@ from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 from typing import Dict
 from flask_babel import _
 
+
 # TODO: unregister? this widget produces only mock data
 @register
 class TopRoadSegmentsAccidentsWidget(SubUrbanWidget):
@@ -28,7 +29,5 @@ class TopRoadSegmentsAccidentsWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        items["data"]["text"] = {
-            "title": _("Segments with most accidents"),
-        }
+        items["data"]["text"] = {"title": _("Segments with most accidents")}
         return items

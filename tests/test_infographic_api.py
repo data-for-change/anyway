@@ -90,33 +90,33 @@ class TestInfographicApi:
         assert rv.status_code == http_client.NOT_FOUND
 
     def test_accident_count_by_car_type(self, app):
-        test_involved_by_vehicle_type_data = [{"involve_vehicle_type": 1, "count": 3},
-                                              {"involve_vehicle_type": 25, "count": 2},
-                                              {"involve_vehicle_type": 15, "count": 1}]
+        test_involved_by_vehicle_type_data = [{"vehicle_type": 1, "count": 3},
+                                              {"vehicle_type": 25, "count": 2},
+                                              {"vehicle_type": 15, "count": 1}]
         output_tmp = AccidentCountByCarTypeWidget.percentage_accidents_by_car_type(test_involved_by_vehicle_type_data)
         assert len(output_tmp) == 3
-        assert output_tmp[VehicleCategory.CAR.value] == 50
-        assert output_tmp[VehicleCategory.LARGE.value] == pytest.approx(33.333333333333336)
-        assert output_tmp[VehicleCategory.BICYCLE_AND_SMALL_MOTOR.value] == pytest.approx(16.666666666666668)
+        assert output_tmp[VehicleCategory.CAR.value] == 51
+        assert output_tmp[VehicleCategory.LARGE.value] == 33
+        assert output_tmp[VehicleCategory.BICYCLE_AND_SMALL_MOTOR.value] == 16
 
         def mock_get_accidents_stats(table_obj, filters=None, group_by=None, count=None, start_time=None,
                                      end_time=None):
-            return [{'involve_vehicle_type': nan, 'count': 2329}, {'involve_vehicle_type': 14.0, 'count': 112},
-                    {'involve_vehicle_type': 25.0, 'count': 86}, {'involve_vehicle_type': 17.0, 'count': 1852},
-                    {'involve_vehicle_type': 12.0, 'count': 797}, {'involve_vehicle_type': 8.0, 'count': 186},
-                    {'involve_vehicle_type': 1.0, 'count': 28693}, {'involve_vehicle_type': 15.0, 'count': 429},
-                    {'involve_vehicle_type': 10.0, 'count': 930}, {'involve_vehicle_type': 11.0, 'count': 1936},
-                    {'involve_vehicle_type': 18.0, 'count': 319}, {'involve_vehicle_type': 16.0, 'count': 21},
-                    {'involve_vehicle_type': 6.0, 'count': 383}, {'involve_vehicle_type': 19.0, 'count': 509},
-                    {'involve_vehicle_type': 2.0, 'count': 1092}, {'involve_vehicle_type': 21.0, 'count': 259},
-                    {'involve_vehicle_type': 3.0, 'count': 696}, {'involve_vehicle_type': 23.0, 'count': 516},
-                    {'involve_vehicle_type': 5.0, 'count': 103}, {'involve_vehicle_type': 13.0, 'count': 22},
-                    {'involve_vehicle_type': 22.0, 'count': 39}, {'involve_vehicle_type': 9.0, 'count': 1073},
-                    {'involve_vehicle_type': 24.0, 'count': 582}, {'involve_vehicle_type': 7.0, 'count': 115}]
+            return [{'vehicle_type': nan, 'count': 2329}, {'vehicle_type': 14.0, 'count': 112},
+                    {'vehicle_type': 25.0, 'count': 86}, {'vehicle_type': 17.0, 'count': 1852},
+                    {'vehicle_type': 12.0, 'count': 797}, {'vehicle_type': 8.0, 'count': 186},
+                    {'vehicle_type': 1.0, 'count': 28693}, {'vehicle_type': 15.0, 'count': 429},
+                    {'vehicle_type': 10.0, 'count': 930}, {'vehicle_type': 11.0, 'count': 1936},
+                    {'vehicle_type': 18.0, 'count': 319}, {'vehicle_type': 16.0, 'count': 21},
+                    {'vehicle_type': 6.0, 'count': 383}, {'vehicle_type': 19.0, 'count': 509},
+                    {'vehicle_type': 2.0, 'count': 1092}, {'vehicle_type': 21.0, 'count': 259},
+                    {'vehicle_type': 3.0, 'count': 696}, {'vehicle_type': 23.0, 'count': 516},
+                    {'vehicle_type': 5.0, 'count': 103}, {'vehicle_type': 13.0, 'count': 22},
+                    {'vehicle_type': 22.0, 'count': 39}, {'vehicle_type': 9.0, 'count': 1073},
+                    {'vehicle_type': 24.0, 'count': 582}, {'vehicle_type': 7.0, 'count': 115}]
 
         tmp_func = widget_utils.get_accidents_stats  # Backup function ref
         widget_utils.get_accidents_stats = mock_get_accidents_stats
-        involved_by_vehicle_type_data_test = [{'involve_vehicle_type': 1, 'count': 11}]
+        involved_by_vehicle_type_data_test = [{'vehicle_type': 1, 'count': 11}]
         end_time = datetime.date(2020, 6, 30)
         start_time = datetime.date(2020, 1, 1)
         request_params = anyway.request_params.RequestParams(
@@ -132,15 +132,9 @@ class TestInfographicApi:
         actual = AccidentCountByCarTypeWidget.get_stats_accidents_by_car_type_with_national_data(
             request_params, involved_by_vehicle_type_data=involved_by_vehicle_type_data_test
         )
-        expected = [
-            {
-                "label_key": 4,
-                "series": [
-                    {"label_key": "percentage_segment", "value": 100.0},
-                    {"label_key": "percentage_country", "value": 68.45562803221988},
-                ],
-            }
-        ]
+        expected = [{'label_key': 4,
+                     'series': [{'label_key': 'percentage_segment', 'value': 100},
+                                {'label_key': 'percentage_country', 'value': 68}]}]
 
         widget_utils.get_accidents_stats = tmp_func  # Restore function ref - So we don't affect other tests
         assert len(actual) == len(expected)
@@ -301,7 +295,7 @@ class TestInfographicApi:
 
         schema = {
             "type": "object",
-            "properties": {"road_light": {"type": "string"}, "count": {"type": "number"},},
+            "properties": {"road_light": {"type": "string"}, "count": {"type": "number"}, },
         }
 
         validate(widget["data"]["items"][0], schema)

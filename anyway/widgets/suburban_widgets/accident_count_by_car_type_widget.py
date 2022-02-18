@@ -1,6 +1,7 @@
 import logging
 from collections import defaultdict
 from functools import lru_cache
+from math import floor
 from typing import Dict
 
 from flask_babel import _
@@ -26,10 +27,8 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
         self.rank = 17
 
     def generate_items(self) -> None:
-        self.items = (
-            AccidentCountByCarTypeWidget.get_stats_accidents_by_car_type_with_national_data(
-                self.request_params
-            )
+        self.items = AccidentCountByCarTypeWidget.get_stats_accidents_by_car_type_with_national_data(
+            self.request_params
         )
 
     @staticmethod
@@ -52,10 +51,8 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
         data_by_segment = AccidentCountByCarTypeWidget.percentage_accidents_by_car_type(
             involved_by_vehicle_type_data
         )
-        national_data = (
-            AccidentCountByCarTypeWidget.percentage_accidents_by_car_type_national_data_cache(
-                start_time, end_time
-            )
+        national_data = AccidentCountByCarTypeWidget.percentage_accidents_by_car_type_national_data_cache(
+            start_time, end_time
         )
 
         for car_type in data_by_segment:
@@ -71,8 +68,8 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
         return out
 
     @staticmethod
-    def percentage_accidents_by_car_type(involved_by_vehicle_type_data):
-        vehicle_type_dict = defaultdict(float)
+    def percentage_accidents_by_car_type(involved_by_vehicle_type_data) -> Dict[str, int]:
+        vehicle_type_dict = defaultdict(int)
         total_count = 0
         for item in involved_by_vehicle_type_data:
             vehicle_type, count = item["vehicle_type"], int(item["count"])
@@ -88,25 +85,34 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
             else:
                 vehicle_type_dict[VehicleCategory.OTHER.value] += count
 
-        output = {}
         # Order the vehicle_type_dict dict by value which is the count of the vehicle_type
-        vehicle_type_dict_ordered = dict(
+        vehicle_type_dict = dict(
             sorted(vehicle_type_dict.items(), key=lambda item: item[1], reverse=True)
         )
 
+        output = {}
+        sum_all_three = 0
         # Calculate percentage of the top 3
-        for i, (key, value) in enumerate(vehicle_type_dict_ordered.items()):
-            output[key] = 100 * value / total_count
+        for i, (key, value) in enumerate(vehicle_type_dict.items()):
+            output[key] = floor(100 * value / total_count)
+            sum_all_three += output[key]
             if i >= TOP_3:
+                break
+
+        # Round up to 100
+        if len(vehicle_type_dict) <= 3 and sum_all_three < 100:
+            # Add 1 to the first element
+            for key, value in output.items():
+                output[key] += 1
                 break
 
         # Use defaultdict to return 0 where there is no key, so when there is no data for this type of vehicle the
         # result will be zero
-        return defaultdict(float, output)
+        return defaultdict(int, output)
 
     @staticmethod
     @lru_cache(maxsize=64)
-    def percentage_accidents_by_car_type_national_data_cache(start_time, end_time):
+    def percentage_accidents_by_car_type_national_data_cache(start_time, end_time) -> Dict[str, int]:
         involved_by_vehicle_type_data = widget_utils.get_accidents_stats(
             table_obj=VehicleMarkerView,
             filters={

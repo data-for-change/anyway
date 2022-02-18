@@ -25,7 +25,10 @@ When this infographic should be displayed
 **SQL query**
 Sql clause and usage guidance. In addition to query, detail which parameters should be modified when executing it
  and which output fields are language specific
-When creating the query and filtering CBS data - it's better to use the numeric values of the categorical fields (accident_severity = 1 is better than accident_severity_hebrew = 'תאונה קטלנית'). For code redeablity - one can create constants and dictionaries. 
+When creating the query and filtering CBS data - it's better to use the numeric values of the categorical fields (accident_severity = 1 is better than accident_severity_hebrew = 'תאונה קטלנית'). For code redeablity - one can create constants and dictionaries.
+
+**Information Tag**
+Add short description that explains visualization content to the end user.
 
 **Additional context**
 - Definition will be used by BE team to generate a Json response to FE

@@ -108,7 +108,7 @@ def test_url_redirect_checker():
 
 def test_url_redirect_checker_dev():
     config.SERVER_ENV = "dev"
-    bad_urls =[
+    bad_urls = [
         "dev.anyway.co.il",
         "www.dev.anyway.co.il",
     ]

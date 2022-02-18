@@ -41,12 +41,12 @@ def get_bounding_box(latitude, longitude, distance_in_km):
 
 def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
     lat_min, lon_min, lat_max, lon_max = get_bounding_box(latitude, longitude, distance)
-    baseX = lon_min
-    baseY = lat_min
-    distanceX = lon_max
-    distanceY = lat_max
+    base_x = lon_min
+    base_y = lat_min
+    distance_x = lon_max
+    distance_y = lat_max
     pol_str = "POLYGON(({0} {1},{0} {3},{2} {3},{2} {1},{0} {1}))".format(
-        baseX, baseY, distanceX, distanceY
+        base_x, base_y, distance_x, distance_y
     )
 
     query_obj = (

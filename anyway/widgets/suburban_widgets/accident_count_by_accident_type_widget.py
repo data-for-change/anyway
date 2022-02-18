@@ -42,7 +42,5 @@ class AccidentCountByAccidentTypeWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        items["data"]["text"] = {
-            "title": _("Number of accidents by accident type"),
-        }
+        items["data"]["text"] = {"title": _("Number of accidents by accident type")}
         return items

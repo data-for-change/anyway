@@ -1,13 +1,13 @@
-from typing import Dict
+from typing import Dict, Union, Any
 
-from anyway.request_params import RequestParams
-from anyway.backend_constants import InjurySeverity
-from anyway.models import InvolvedMarkerView
-from anyway.widgets.urban_widgets.urban_widget import UrbanWidget
-from anyway.widgets.widget_utils import get_accidents_stats
 from flask_babel import _
 
 from anyway.backend_constants import CrossCategory
+from anyway.backend_constants import InjurySeverity
+from anyway.models import InvolvedMarkerView
+from anyway.request_params import RequestParams
+from anyway.widgets.urban_widgets.urban_widget import UrbanWidget
+from anyway.widgets.widget_utils import get_accidents_stats
 
 
 # TODO: pretty sure there are errors in this widget, for example, is_included returns self.items
@@ -27,7 +27,9 @@ class UrbanCrosswalkWidget(UrbanWidget):
         )
 
     @staticmethod
-    def get_crosswalk(yishuv, street, start_time, end_time) -> None:
+    def get_crosswalk(
+        yishuv, street, start_time, end_time
+    ) -> Dict[str, Any]:
         cross_output = {
             "with_crosswalk": get_accidents_stats(
                 table_obj=InvolvedMarkerView,
@@ -76,7 +78,7 @@ class UrbanCrosswalkWidget(UrbanWidget):
         }
         return items
 
-    def is_included(self) -> bool:
+    def is_included(self) -> Union[dict, list, bool]:
         if (
             self.items["with_crosswalk"][0]["count"] + self.items["without_crosswalk"][0]["count"]
             > 10

@@ -32,10 +32,9 @@ def get_accidents_stats(
     table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None
 ):
     filters = filters or {}
-    filters["provider_code"] = [
-        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
-        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
-    ]
+    provider_code_filters = [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    filters["provider_code"] = filters.get("provider_code", provider_code_filters)
+
     # get stats
     query = get_query(table_obj, filters, start_time, end_time)
     if group_by:

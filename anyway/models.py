@@ -118,14 +118,10 @@ class Users(Base, UserMixin):
     user_desc = Column(String(2048))
     is_user_completed_registration = Column(Boolean)
     roles = relationship(
-        "Roles",
-        secondary=users_to_roles,
-        backref=backref("users", lazy="dynamic"),
+        "Roles", secondary=users_to_roles, backref=backref("users", lazy="dynamic")
     )
     organizations = relationship(
-        "Organization",
-        secondary=users_to_organizations,
-        backref=backref("users", lazy="dynamic"),
+        "Organization", secondary=users_to_organizations, backref=backref("users", lazy="dynamic")
     )
 
     def serialize_exposed_to_user(self):
@@ -613,7 +609,7 @@ class AccidentMarker(MarkerMixin, Base):
         else:
             markers = db.session.query(AccidentMarker).filter(sql.false())
 
-        if kwargs.get("light_transportation", False) == True:
+        if kwargs.get("light_transportation", False):
             age_groups_list = kwargs.get("age_groups").split(",")
             markers = markers.filter(
                 or_(
@@ -914,9 +910,9 @@ class NewsFlash(Base):
 class City(Base):
     __tablename__ = "cities"
     id = Column(Integer(), primary_key=True)
-    symbol_code = Column(Integer())
+    symbol_code = Column(Integer())  # yishuv_symbol
     name = Column(String())
-    search_heb = Column(String())
+    search_heb = Column(String())  # yishuv_name
     search_eng = Column(String())
     search_priority = Column(Integer())
 
@@ -930,6 +926,21 @@ class City(Base):
             "search_priority": self.search_priority,
         }
 
+    @staticmethod
+    def get_name_from_symbol(symbol: int) -> str:
+        res = db.session.query(City.search_heb).filter(City.symbol_code == symbol).first()
+        if res is None:
+            raise ValueError(f"{symbol}: could not find city with that symbol")
+        return res.search_heb
+
+    @staticmethod
+    def get_symbol_from_name(name: str) -> int:
+        res = db.session.query(City.symbol_code).filter(City.search_heb == name).first()
+        if res is None:
+            logging.error(f"City: no city with name:{name}.")
+            raise ValueError(f"City: no city with name:{name}.")
+        return res.symbol_code
+
     # Flask-Login integration
     def is_authenticated(self):
         return True
@@ -942,6 +953,45 @@ class City(Base):
 
     def get_id(self):
         return self.id
+
+
+class Streets(Base):
+    __tablename__ = "streets"
+    MAX_NAME_LEN = 50
+    yishuv_symbol = Column(Integer(), primary_key=True, nullable=False)
+    street = Column(Integer(), primary_key=True, nullable=False)
+    street_hebrew = Column(String(length=MAX_NAME_LEN), nullable=True)
+
+    def serialize(self):
+        return {
+            "yishuv_symbol": self.yishuv_symbol,
+            "street": self.street,
+            "street_hebrew": self.street_hebrew,
+        }
+
+    @staticmethod
+    def get_street_name_by_street(yishuv_symbol: int, street: int) -> str:
+        res = (
+            db.session.query(Streets.street_hebrew)
+            .filter(Streets.yishuv_symbol == yishuv_symbol)
+            .filter(Streets.street == street)
+            .first()
+        )
+        if res is None:
+            raise ValueError(f"{street}: could not find street in yishuv:{yishuv_symbol}")
+        return res.street_hebrew
+
+    @staticmethod
+    def get_street_by_street_name(yishuv_symbol: int, name: str) -> int:
+        res = (
+            db.session.query(Streets.street)
+            .filter(Streets.yishuv_symbol == yishuv_symbol)
+            .filter(Streets.street_hebrew == name)
+            .first()
+        )
+        if res is None:
+            raise ValueError(f"{name}: could not find street in yishuv:{yishuv_symbol}")
+        return res
 
 
 class RegisteredVehicle(Base):
@@ -1905,6 +1955,9 @@ class RoadSegments(Base):
     def get_id(self):
         return self.id
 
+    def get_segment_id(self):
+        return self.segment_id
+
 
 class ReportProblem(Base):
     __tablename__ = "report_problem"
@@ -2270,7 +2323,6 @@ class VehicleMarkerView(Base):
     accident_hour = Column(Integer())
     accident_minute = Column(Integer())
     accident_year = Column(Integer(), primary_key=True, index=True)
-    accident_month = Column(Integer())
     geom = Column(Geometry("POINT"), index=True)
     latitude = Column(Float())
     longitude = Column(Float())
@@ -2438,24 +2490,37 @@ class InfographicsTwoRoadsDataCacheFields(object):
 class InfographicsTwoRoadsDataCache(InfographicsTwoRoadsDataCacheFields, Base):
     __tablename__ = "infographics_two_roads_data_cache"
     __table_args__ = (
-        Index("infographics_two_roads_data_cache_id_years_idx", "road1", "road2",
-              "years_ago", unique=True),
+        Index(
+            "infographics_two_roads_data_cache_id_years_idx",
+            "road1",
+            "road2",
+            "years_ago",
+            unique=True,
+        ),
     )
 
     def get_data(self):
         return self.data
 
     def serialize(self):
-        return {"road1": self.road1, "road2": self.road2, "years_ago": self.years_ago,
-                "data": self.data}
+        return {
+            "road1": self.road1,
+            "road2": self.road2,
+            "years_ago": self.years_ago,
+            "data": self.data,
+        }
 
 
 class InfographicsTwoRoadsDataCacheTemp(InfographicsTwoRoadsDataCacheFields, Base):
     __tablename__ = "infographics_two_roads_data_cache_temp"
 
     def serialize(self):
-        return {"road1": self.road1, "road2": self.road2, "years_ago": self.years_ago,
-                "data": self.data}
+        return {
+            "road1": self.road1,
+            "road2": self.road2,
+            "years_ago": self.years_ago,
+            "data": self.data,
+        }
 
     # # Flask-Login integration
     # def is_authenticated(self):
@@ -2469,44 +2534,39 @@ class InfographicsTwoRoadsDataCacheTemp(InfographicsTwoRoadsDataCacheFields, Bas
     #
 
 
-class InfographicsTwoStreetsDataCacheFields(object):
-    street1 = Column(Integer(), primary_key=True)
-    street2 = Column(Integer(), primary_key=True)
+class InfographicsStreetDataCacheFields(object):
     yishuv_symbol = Column(Integer(), primary_key=True)
+    street = Column(Integer(), primary_key=True)
     years_ago = Column(Integer(), primary_key=True)
     data = Column(sqlalchemy.types.JSON())
 
     def serialize(self):
-        return {"street1": self.street1, "street2": self.street2,
-                "yishuv_symbol": self.yishuv_symbol,
-                "years_ago": self.years_ago,
-                "data": self.data}
+        return {
+            "street": self.street,
+            "yishuv_symbol": self.yishuv_symbol,
+            "years_ago": self.years_ago,
+            "data": self.data,
+        }
 
 
-class InfographicsTwoStreetsDataCache(InfographicsTwoStreetsDataCacheFields, Base):
-    __tablename__ = "infographics_two_streets_data_cache"
+class InfographicsStreetDataCache(InfographicsStreetDataCacheFields, Base):
+    __tablename__ = "infographics_street_data_cache"
     __table_args__ = (
-        Index("infographics_two_streets_data_cache_id_years_idx", "street1", "street2",
-              "yishuv_symbol", "years_ago", unique=True),
+        Index(
+            "infographics_street_data_cache_id_years_idx",
+            "yishuv_symbol",
+            "street",
+            "years_ago",
+            unique=True,
+        ),
     )
 
     def get_data(self):
         return self.data
 
 
-class InfographicsTwoStreetsDataCacheTemp(InfographicsTwoStreetsDataCacheFields, Base):
-    __tablename__ = "infographics_two_streets_data_cache_temp"
-
-    # # Flask-Login integration
-    # def is_authenticated(self):
-    #     return True
-    #
-    # def is_active(self):
-    #     return True
-    #
-    # def is_anonymous(self):
-    #     return False
-    #
+class InfographicsStreetDataCacheTemp(InfographicsStreetDataCacheFields, Base):
+    __tablename__ = "infographics_street_data_cache_temp"
 
 
 class CasualtiesCosts(Base):
@@ -2518,7 +2578,7 @@ class CasualtiesCosts(Base):
     year = Column(Integer())
     data_source_hebrew = Column(String())
 
-    def toStr(self):
+    def to_str(self):
         return f"{self.id}:{self.injured_type}:{self.injuries_cost_k}"
 
 

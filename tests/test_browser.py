@@ -6,7 +6,7 @@ from selenium.common.exceptions import (
     WebDriverException,
 )
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
 
 _WAIT_TIME = 30
@@ -24,7 +24,7 @@ def _ajax_finished(selenium):
 
 def _check_accidents(selenium):
     accidents_element = WebDriverWait(selenium, 30).until(
-        EC.visibility_of_element_located((By.XPATH, "//a[@onclick = 'showFilter(FILTER_MARKERS)']"))
+        expected_conditions.visibility_of_element_located((By.XPATH, "//a[@onclick = 'showFilter(FILTER_MARKERS)']"))
     )
     try:
         accidents = int(accidents_element.text)
@@ -58,7 +58,7 @@ def _click_a_cluster(selenium):
 
         try:
             WebDriverWait(selenium, 3).until(
-                EC.visibility_of_element_located(
+                expected_conditions.visibility_of_element_located(
                     (By.XPATH, "//a[@onclick = 'showFilter(FILTER_MARKERS)']")
                 )
             )
@@ -79,7 +79,7 @@ def test_sanity(selenium, anyway_server):
 
     first_accidents = WebDriverWait(selenium, _WAIT_TIME).until(_check_accidents)
     zoom_out_button = WebDriverWait(selenium, _WAIT_TIME).until(
-        EC.element_to_be_clickable((By.XPATH, "//button[@title='הקטנת התצוגה']"))
+        expected_conditions.element_to_be_clickable((By.XPATH, "//button[@title='הקטנת התצוגה']"))
     )
 
     zoom_out_button.click()

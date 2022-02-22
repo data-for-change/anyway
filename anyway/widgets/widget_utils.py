@@ -1,6 +1,8 @@
+import copy
 import logging
+import typing
 from collections import defaultdict
-from typing import Dict, Any, List, Type
+from typing import Dict, Any, List, Type, Optional
 
 import pandas as pd
 from flask_babel import _
@@ -86,9 +88,9 @@ def add_empty_keys_to_gen_two_level_dict(
 
 def gen_entity_labels(entity: Type[LabeledCode]) -> dict:
     res = {}
-    for e in entity:
-        label = e.get_label()
-        res[e.value] = {"name": label, "localized_name": _(label)}
+    for code in entity:
+        label = code.get_label()
+        res[label] = _(label)
     return res
 
 
@@ -107,3 +109,47 @@ def get_injured_filters(location_info):
 def run_query(query: db.session.query) -> Dict:
     # pylint: disable=no-member
     return pd.read_sql_query(query.statement, query.session.bind).to_dict(orient="records")
+
+
+# TODO: Find a better way to deal with typing.Union[int, str]
+def format_2_level_items(
+    items: Dict[typing.Union[int, str], dict],
+    level1_vals: Optional[Type[LabeledCode]],
+    level2_vals: Optional[Type[LabeledCode]],
+):
+    res: List[Dict[str, Any]] = []
+    for l1_code, year_res in items.items():
+        l1 = level1_vals.labels()[level1_vals(l1_code)] if level1_vals else l1_code
+        series_data = []
+        for l2_code, num in year_res.items():
+            l2 = level2_vals.labels()[level2_vals(l2_code)] if level2_vals else l2_code
+            series_data.append({BE_CONST.LKEY: l2, BE_CONST.VAL: num})
+        res.append({BE_CONST.LKEY: l1, BE_CONST.SERIES: series_data})
+    return res
+
+
+def second_level_fill_and_sort(data: dict, default_order: dict) -> dict:
+    for num, value in data.items():
+        new_value = copy.deepcopy(default_order)
+        for key, value_in in value.items():
+            new_value[key] += value_in
+        data[num] = new_value
+
+    return data
+
+
+def fill_and_sort_by_numeric_range(
+    data: defaultdict, numeric_range: typing.Iterable, default_order: dict
+) -> Dict[int, dict]:
+    for item in numeric_range:
+        if item not in data:
+            data[item] = default_order
+    return dict(sorted(data.items()))
+
+
+def sort_and_fill_gaps_for_stacked_bar(
+    data: defaultdict, numeric_range: typing.Iterable, default_order: dict
+) -> Dict[int, dict]:
+    res = fill_and_sort_by_numeric_range(data, numeric_range, default_order)
+    res2 = second_level_fill_and_sort(res, default_order)
+    return res2

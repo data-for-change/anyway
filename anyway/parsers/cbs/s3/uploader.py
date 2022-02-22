@@ -8,7 +8,7 @@ class S3Uploader(S3DataClass):
     def __init__(self):
         super().__init__()
 
-    def upload_to_S3(self, local_file_path, provider_code, year):
+    def upload_to_s3(self, local_file_path, provider_code, year):
         local_filename = os.path.basename(local_file_path)
         accidents_type_directory = f"{ACCIDENTS_TYPE_PREFIX}_{provider_code}"
         s3_filename = f"{accidents_type_directory}/{year}/{local_filename}"

@@ -8,6 +8,7 @@ from anyway.parsers import timezones
 from anyway.models import NewsFlash
 from anyway.slack_accident_notifications import publish_notification
 
+
 # fmt: off
 
 
@@ -48,7 +49,7 @@ class DBAdapter:
                            OR provider_code=3)
                       AND (longitude is not null
                            AND latitude is not null)) LOCATIONS)"""
-            )
+                                    )
 
     def get_markers_for_location_extraction(self):
         query_res = self.execute(

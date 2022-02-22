@@ -7,6 +7,8 @@ from anyway.widgets.widget_utils import get_accidents_stats
 from anyway.models import AccidentMarkerView
 from anyway.widgets.widget import register
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
+from typing import Dict
+from flask_babel import _
 
 
 @register
@@ -61,3 +63,8 @@ class Road2Plus1Widget(SubUrbanWidget):
         if frontal_accidents_past_year is not None:
             return frontal_accidents_past_year >= 2
         return False
+
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        items["data"]["text"] = {"title": _("Road 2 plus 1 solution to prevent fatal accidents")}
+        return items

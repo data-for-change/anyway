@@ -1,125 +1,52 @@
 # -*- coding: utf-8 -*-
-import time
 import logging
 import datetime
 import json
 import os
 import traceback
-import pandas as pd
 
-from typing import Optional, Dict, List, Callable, Type
+from typing import Optional, Dict, List, Type
 from collections import defaultdict
-from sqlalchemy import func
 
 # noinspection PyProtectedMember
 from flask_babel import _
 
-from anyway.request_params import RequestParams
+from anyway.request_params import (
+    RequestParams,
+    get_news_flash_location_text,
+    get_road_segment_location_text,
+    extract_road_segment_location,
+    extract_news_flash_obj,
+    get_latest_accident_date,
+    extract_news_flash_location,
+    get_request_params_from_request_values,
+)
 from anyway.backend_constants import BE_CONST, AccidentType
 from anyway.models import NewsFlash, AccidentMarkerView
 from anyway.parsers import resolution_dict
-from anyway.app_and_db import db
 from anyway.infographics_dictionaries import head_on_collisions_comparison_dict
 from anyway.parsers import infographics_data_cache_updater
-from anyway.parsers.location_extraction import get_road_segment_name_and_number
 from anyway.widgets.widget import Widget, widgets_dict
-
-logger = logging.getLogger("infographics_utils")
 
 # We need to import the modules, which in turn imports all the widgets, and registers them, even if they are not
 # explicitly used here
 # pylint: disable=unused-import
 import anyway.widgets.urban_widgets
 import anyway.widgets.suburban_widgets
-
+import anyway.widgets.all_locations_widgets
 
 # pylint: enable=unused-import
 
+logger = logging.getLogger("infographics_utils")
 
-def get_widget_factories() -> List[Callable[[RequestParams], Type[Widget]]]:
+
+def get_widget_factories() -> List[Type[Widget]]:
     """Returns list of callables that generate all widget instances"""
     return list(widgets_dict.values())
 
 
 def get_widget_class_by_name(name: str) -> Type[Widget]:
     return widgets_dict[name]
-
-
-def extract_news_flash_location(news_flash_obj):
-    resolution = news_flash_obj.resolution or None
-    if not news_flash_obj or not resolution or resolution not in resolution_dict:
-        logging.warning(
-            f"could not find valid resolution for news flash id {str(news_flash_obj.id)}"
-        )
-        return None
-    data = {"resolution": resolution}
-    for field in resolution_dict[resolution]:
-        curr_field = getattr(news_flash_obj, field)
-        if curr_field is not None:
-            if isinstance(curr_field, float):
-                curr_field = int(curr_field)
-            data[field] = curr_field
-    gps = {"lat": news_flash_obj.lat, "lon": news_flash_obj.lon}
-    return {"name": "location", "data": data, "gps": gps}
-
-
-def extract_road_segment_location(road_segment_id):
-    data = {"resolution": "interurban_road_segment"}
-    road1, road_segment_name = get_road_segment_name_and_number(road_segment_id)
-    data["road1"] = int(road1)
-    data["road_segment_name"] = road_segment_name
-    # fake gps - todo: fix
-    gps = {"lat": 32.825610, "lon": 35.165395}
-    return {"name": "location", "data": data, "gps": gps}
-
-
-# generate text describing location or road segment of news flash
-# to be used by most severe accidents additional info widget
-def get_news_flash_location_text(news_flash_obj: NewsFlash):
-    nf = news_flash_obj.serialize()
-    resolution = nf["resolution"] if nf["resolution"] else ""
-    yishuv_name = nf["yishuv_name"] if nf["yishuv_name"] else ""
-    road1 = str(int(nf["road1"])) if nf["road1"] else ""
-    road2 = str(int(nf["road2"])) if nf["road2"] else ""
-    street1_hebrew = nf["street1_hebrew"] if nf["street1_hebrew"] else ""
-    road_segment_name = nf["road_segment_name"] if nf["road_segment_name"] else ""
-    if resolution == "כביש בינעירוני" and road1 and road_segment_name:
-        res = "כביש " + road1 + " במקטע " + road_segment_name
-    elif resolution == "עיר" and not yishuv_name:
-        res = nf["location"]
-    elif resolution == "עיר" and yishuv_name:
-        res = nf["yishuv_name"]
-    elif resolution == "צומת בינעירוני" and road1 and road2:
-        res = "צומת כביש " + road1 + " עם כביש " + road2
-    elif resolution == "צומת בינעירוני" and road1 and road_segment_name:
-        res = "כביש " + road1 + " במקטע " + road_segment_name
-    elif resolution == "רחוב" and yishuv_name and street1_hebrew:
-        res = " רחוב " + street1_hebrew + " ב" + yishuv_name
-    else:
-        logging.warning(
-            "Did not found quality resolution. Using location field. News Flash id:{}".format(
-                nf["id"]
-            )
-        )
-        res = nf["location"]
-    return res
-
-
-# generate text describing location or road segment of news flash
-# to be used by most severe accidents additional info widget
-def get_road_segment_location_text(road1, road_segment_name):
-    res = "כביש " + str(road1) + " במקטע " + road_segment_name
-    return res
-
-
-def extract_news_flash_obj(news_flash_id):
-    news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == news_flash_id).first()
-
-    if not news_flash_obj:
-        logging.warning("Could not find news flash id {}".format(news_flash_id))
-        return None
-
-    return news_flash_obj
 
 
 def sum_road_accidents_by_specific_type(road_data, field_name):
@@ -149,20 +76,8 @@ def convert_roads_fatal_accidents_to_frontend_view(data_dict):
     return data_list
 
 
-# gets the latest date an accident has occurred
-def get_latest_accident_date(table_obj, filters):
-    filters = filters or {}
-    filters["provider_code"] = [
-        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
-        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
-    ]
-    query = db.session.query(func.max(table_obj.accident_timestamp))
-    df = pd.read_sql_query(query.statement, query.session.bind)
-    return (df.to_dict(orient="records"))[0].get("max_1")  # pylint: disable=no-member
-
-
 # noinspection PyArgumentList
-def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> List[Type[Widget]]:
+def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> List[Widget]:
     widgets = []
     # noinspection PyArgumentList
     for w in widgets_dict.values():
@@ -217,7 +132,6 @@ def get_request_params(
     start_time = datetime.date(end_time.year + 1 - number_of_years_ago, 1, 1)
 
     request_params = RequestParams(
-        news_flash_obj=news_flash_obj,
         years_ago=number_of_years_ago,
         location_text=location_text,
         location_info=location_info,
@@ -265,7 +179,6 @@ def get_request_params_for_road_segment(
     start_time = datetime.date(end_time.year + 1 - number_of_years_ago, 1, 1)
 
     request_params = RequestParams(
-        news_flash_obj=None,
         years_ago=number_of_years_ago,
         location_text=location_text,
         location_info=location_info,
@@ -294,11 +207,27 @@ def create_infographics_data_for_road_segment(
     return json.dumps(output, default=str)
 
 
+def create_infographics_data_for_location(vals: dict) -> str:
+    logger.debug(f"create_infographics_data_for_location({vals})")
+    try:
+        request_params = get_request_params_from_request_values(vals)
+        output = create_infographics_items(request_params)
+    except Exception as e:
+        logger.exception(
+            f"Exception while creating infographics items({vals})"
+            f":cause:{e.__cause__}, class:{e.__class__}"
+        )
+        output = {}
+    return json.dumps(output, default=str)
+
+
 def create_infographics_items(request_params: RequestParams) -> Dict:
     def get_dates_comment():
         return {
             "date_range": [request_params.start_time.year, request_params.end_time.year],
-            "last_update": time.mktime(request_params.end_time.timetuple()),
+            "last_update": datetime.datetime.fromordinal(
+                request_params.end_time.toordinal()
+            ).isoformat(),
         }
 
     try:
@@ -371,6 +300,29 @@ def get_infographics_data_for_road_segment(road_segment_id, years_ago, lang: str
             output = {}
     if not output:
         logging.error(f"infographics_data({road_segment_id}, {years_ago}) not found in cache")
+    elif "widgets" not in output:
+        logging.error(f"get_infographics_data: 'widgets' key missing from output:{output}")
+    else:
+        output["widgets"] = localize_after_cache(request_params, output["widgets"])
+    return output
+
+
+def get_infographics_data_for_location(request_params: RequestParams) -> Dict:
+    if os.environ.get("FLASK_ENV") == "development":
+        output = create_infographics_items(request_params)
+    else:
+        try:
+            output = infographics_data_cache_updater.get_infographics_data_from_cache_by_location(
+                request_params
+            )
+        except Exception as e:
+            logging.error(
+                f"Exception while retrieving from infographics cache({request_params})"
+                f":cause:{e.__cause__}, class:{e.__class__}"
+            )
+            output = {}
+    if not output:
+        logging.error(f"infographics_data({request_params}) not found in cache")
     elif "widgets" not in output:
         logging.error(f"get_infographics_data: 'widgets' key missing from output:{output}")
     else:

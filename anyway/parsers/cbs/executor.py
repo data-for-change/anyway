@@ -11,6 +11,7 @@ from datetime import datetime
 import math
 import pandas as pd
 from sqlalchemy import or_
+from typing import Tuple, Dict, List, Any
 
 from anyway.parsers.cbs import preprocessing_cbs_files
 from anyway import field_names, localization
@@ -75,11 +76,16 @@ from anyway.models import (
     LocationAccuracy,
     ProviderCode,
     VehicleDamage,
+    Streets,
 )
 from anyway.utilities import ItmToWGS84, time_delta, ImporterUI, truncate_tables, chunks
 from anyway.db_views import VIEWS
 from anyway.app_and_db import db
 from anyway.parsers.cbs.s3 import S3DataRetriever
+
+
+street_map_type: Dict[int, List[dict]]
+
 
 failed_dirs = OrderedDict()
 
@@ -443,7 +449,7 @@ def get_data_value(value):
     return None if value is None or math.isnan(value) else int(value)
 
 
-def create_marker(accident, streets, roads, non_urban_intersection):
+def create_marker(provider_code, accident, streets, roads, non_urban_intersection):
     if field_names.x not in accident or field_names.y not in accident:
         raise ValueError("Missing x and y coordinates")
     if (
@@ -465,13 +471,14 @@ def create_marker(accident, streets, roads, non_urban_intersection):
         km_accurate = False if "-" in km else True
         km = float(km.strip("-"))
     accident_datetime = parse_date(accident)
+    file_type_police = accident.get(field_names.file_type_police)
+    if file_type_police is None:
+        file_type_police = provider_code
     marker = {
         "id": int(accident.get(field_names.id)),
-        "provider_and_id": int(
-            str(int(accident.get(field_names.file_type))) + str(int(accident.get(field_names.id)))
-        ),
-        "provider_code": int(accident.get(field_names.file_type)),
-        "file_type_police": get_data_value(accident.get(field_names.file_type_police)),
+        "provider_and_id": int(str(provider_code) + str(int(accident.get(field_names.id)))),
+        "provider_code": provider_code,
+        "file_type_police": file_type_police,
         "title": "Accident",
         "description": json.dumps(load_extra_data(accident, streets, roads)),
         "address": get_address(accident, streets),
@@ -550,37 +557,37 @@ def create_marker(accident, streets, roads, non_urban_intersection):
     return marker
 
 
-def import_accidents(accidents, streets, roads, non_urban_intersection, **kwargs):
-    logging.info("Importing markers")
+def import_accidents(provider_code, accidents, streets, roads, non_urban_intersection, **kwargs):
+    logging.debug("Importing markers")
     accidents_result = []
     for _, accident in accidents.iterrows():
-        marker = create_marker(accident, streets, roads, non_urban_intersection)
+        marker = create_marker(provider_code, accident, streets, roads, non_urban_intersection)
         accidents_result.append(marker)
     db.session.bulk_insert_mappings(AccidentMarker, accidents_result)
     db.session.commit()
-    logging.info("Finished Importing markers")
-    logging.info("Inserted " + str(len(accidents_result)) + " new accident markers")
+    logging.debug("Finished Importing markers")
+    logging.debug("Inserted " + str(len(accidents_result)) + " new accident markers")
     fill_db_geo_data()
     return len(accidents_result)
 
 
-def import_involved(involved, **kwargs):
-    logging.info("Importing involved")
+def import_involved(provider_code, involved, **kwargs):
+    logging.debug("Importing involved")
     involved_result = []
     for _, involve in involved.iterrows():
         if not involve.get(field_names.id) or pd.isnull(
             involve.get(field_names.id)
         ):  # skip lines with no accident id
             continue
+        file_type_police = involve.get(field_names.file_type_police)
+        if file_type_police is None:
+            file_type_police = provider_code
         involved_result.append(
             {
                 "accident_id": int(involve.get(field_names.id)),
-                "provider_and_id": int(
-                    str(int(involve.get(field_names.file_type)))
-                    + str(int(involve.get(field_names.id)))
-                ),
-                "provider_code": int(involve.get(field_names.file_type)),
-                "file_type_police": get_data_value(involve.get(field_names.file_type_police)),
+                "provider_and_id": int(str(provider_code) + str(int(involve.get(field_names.id)))),
+                "provider_code": provider_code,
+                "file_type_police": file_type_police,
                 "involved_type": int(involve.get(field_names.involved_type)),
                 "license_acquiring_date": int(involve.get(field_names.license_acquiring_date)),
                 "age_group": int(involve.get(field_names.age_group)),
@@ -617,23 +624,23 @@ def import_involved(involved, **kwargs):
         )
     db.session.bulk_insert_mappings(Involved, involved_result)
     db.session.commit()
-    logging.info("Finished Importing involved")
+    logging.debug("Finished Importing involved")
     return len(involved_result)
 
 
-def import_vehicles(vehicles, **kwargs):
-    logging.info("Importing vehicles")
+def import_vehicles(provider_code, vehicles, **kwargs):
+    logging.debug("Importing vehicles")
     vehicles_result = []
     for _, vehicle in vehicles.iterrows():
+        file_type_police = vehicle.get(field_names.file_type_police)
+        if file_type_police is None:
+            file_type_police = provider_code
         vehicles_result.append(
             {
                 "accident_id": int(vehicle.get(field_names.id)),
-                "provider_and_id": int(
-                    str(int(vehicle.get(field_names.file_type)))
-                    + str(int(vehicle.get(field_names.id)))
-                ),
-                "provider_code": int(vehicle.get(field_names.file_type)),
-                "file_type_police": get_data_value(vehicle.get(field_names.file_type_police)),
+                "provider_and_id": int(str(provider_code) + str(int(vehicle.get(field_names.id)))),
+                "provider_code": provider_code,
+                "file_type_police": file_type_police,
                 "engine_volume": int(vehicle.get(field_names.engine_volume)),
                 "manufacturing_year": get_data_value(vehicle.get(field_names.manufacturing_year)),
                 "driving_directions": get_data_value(vehicle.get(field_names.driving_directions)),
@@ -650,7 +657,7 @@ def import_vehicles(vehicles, **kwargs):
         )
     db.session.bulk_insert_mappings(Vehicle, vehicles_result)
     db.session.commit()
-    logging.info("Finished Importing vehicles")
+    logging.debug("Finished Importing vehicles")
     return len(vehicles_result)
 
 
@@ -703,37 +710,126 @@ def get_files(directory):
     return output_files_dict
 
 
-def import_to_datastore(directory, provider_code, year, batch_size):
+def import_to_datastore(
+    directory, provider_code, year, batch_size
+) -> Tuple[int, Dict[int, List[dict]]]:
     """
     goes through all the files in a given directory, parses and commits them
+    Returns number of new items, and new streets dict.
     """
     try:
         assert batch_size > 0
 
         files_from_cbs = get_files(directory)
         if len(files_from_cbs) == 0:
-            return 0
-        logging.info("Importing '{}'".format(directory))
+            return 0, {}
+        logging.debug("Importing '{}'".format(directory))
         started = datetime.now()
 
         # import dictionary
         fill_dictionary_tables(files_from_cbs[DICTIONARY], provider_code, year)
 
         new_items = 0
-        accidents_count = import_accidents(**files_from_cbs)
+        accidents_count = import_accidents(provider_code=provider_code, **files_from_cbs)
         new_items += accidents_count
-        involved_count = import_involved(**files_from_cbs)
+        involved_count = import_involved(provider_code=provider_code, **files_from_cbs)
         new_items += involved_count
-        vehicles_count = import_vehicles(**files_from_cbs)
+        vehicles_count = import_vehicles(provider_code=provider_code, **files_from_cbs)
         new_items += vehicles_count
 
-        logging.info("\t{0} items in {1}".format(new_items, time_delta(started)))
-        return new_items
+        logging.debug("\t{0} items in {1}".format(new_items, time_delta(started)))
+        return new_items, files_from_cbs[STREETS]
     except ValueError as e:
         failed_dirs[directory] = str(e)
         if "Not found" in str(e):
-            return 0
-        raise (e)
+            return 0, {}
+        raise e
+
+
+def import_streets_into_db():
+    items = []
+    max_name_len = 0
+    for k, street_hebrew in yishuv_street_dict.items():
+        yishuv_symbol, street = k
+        yishuv_name_street_num = yishuv_name_dict.get((yishuv_symbol, street_hebrew), None)
+        if yishuv_name_street_num is None or yishuv_name_street_num != street:
+            logging.error(
+                f"streets data mismatch:"
+                f"yishuv_street_dict entry: {k}->{street_hebrew}"
+                f",yishuv_name_dict entry: {(yishuv_symbol, street_hebrew)}->{yishuv_name_street_num}"
+            )
+            continue
+        name_len = len(street_hebrew)
+        if name_len > max_name_len:
+            max_name_len = name_len
+        street_entry = {
+            "yishuv_symbol": yishuv_symbol,
+            "street": street,
+            "street_hebrew": street_hebrew[: min(name_len, Streets.MAX_NAME_LEN)],
+        }
+        items.append(street_entry)
+    logging.debug(
+        f"Writing to db: {len(yishuv_street_dict)}:{len(yishuv_name_dict)} -> {len(items)} rows"
+    )
+    db.session.query(Streets).delete()
+    db.session.bulk_insert_mappings(Streets, items)
+    db.session.commit()
+    if max_name_len > Streets.MAX_NAME_LEN:
+        logging.error(
+            f"Importing streets table: Street hebrew name length exceeded: max name: {max_name_len}"
+        )
+    else:
+        logging.debug(f"Max street name len:{max_name_len}")
+    logging.debug(f"Done. {len(yishuv_street_dict)}:{len(yishuv_name_dict)}")
+
+
+yishuv_street_dict: Dict[Tuple[int, int], str] = {}
+yishuv_name_dict: Dict[Tuple[int, str], int] = {}
+
+
+def load_existing_streets():
+    streets = db.session.query(Streets).all()
+    for s in streets:
+        s_dict = {
+            "yishuv_symbol": s.yishuv_symbol,
+            "street": s.street,
+            "street_hebrew": s.street_hebrew,
+        }
+        add_street_remove_name_duplicates(s_dict)
+        add_street_remove_num_duplicates(s_dict)
+    logging.debug(f"Loaded streets: {len(yishuv_street_dict)}:{len(yishuv_name_dict)}")
+
+
+def add_to_streets(streets_map: Dict[int, List[dict]]):
+    for yishuv_symbol, streets_list in streets_map.items():
+        for street in streets_list:
+            my_street = {
+                "yishuv_symbol": yishuv_symbol,
+                "street": street[field_names.street_sign],
+                "street_hebrew": street[field_names.street_name],
+            }
+            add_street_remove_name_duplicates(my_street)
+            add_street_remove_num_duplicates(my_street)
+
+
+def add_street_remove_num_duplicates(street: Dict[str, Any]):
+    k = (street["yishuv_symbol"], street["street"])
+    v = yishuv_street_dict.get(k, None)
+    if v is not None and v != street["street_hebrew"]:
+        logging.error(f"Duplicate street code: {k}-> {v} and {street['street_hebrew']}")
+        yishuv_street_dict[k] = street["street_hebrew"]
+    if v is None:
+        yishuv_street_dict[k] = street["street_hebrew"]
+
+
+def add_street_remove_name_duplicates(street: Dict[str, Any]):
+    k = (street["yishuv_symbol"], street["street_hebrew"])
+    v = yishuv_name_dict.get(k, None)
+    if v is not None and v != street["street"]:
+        logging.error(f"Duplicate street name: {k}-> {v} and {street['street']}")
+        yishuv_name_dict[k] = street["street"]
+    if v is None:
+        yishuv_name_dict[k] = street["street"]
 
 
 def delete_invalid_entries(batch_size):
@@ -750,27 +846,27 @@ def delete_invalid_entries(batch_size):
 
     marker_ids_to_delete = [acc_id[0] for acc_id in marker_ids_to_delete]
 
-    logging.info("There are " + str(len(marker_ids_to_delete)) + " invalid accident_ids to delete")
+    logging.debug("There are " + str(len(marker_ids_to_delete)) + " invalid accident_ids to delete")
 
     for ids_chunk in chunks(marker_ids_to_delete, batch_size):
 
-        logging.info("Deleting a chunk of " + str(len(ids_chunk)))
+        logging.debug("Deleting a chunk of " + str(len(ids_chunk)))
 
         q = db.session.query(Involved).filter(Involved.accident_id.in_(ids_chunk))
         if q.all():
-            logging.info("deleting invalid entries from Involved")
+            logging.debug("deleting invalid entries from Involved")
             q.delete(synchronize_session="fetch")
             db.session.commit()
 
         q = db.session.query(Vehicle).filter(Vehicle.accident_id.in_(ids_chunk))
         if q.all():
-            logging.info("deleting invalid entries from Vehicle")
+            logging.debug("deleting invalid entries from Vehicle")
             q.delete(synchronize_session="fetch")
             db.session.commit()
 
         q = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_(ids_chunk))
         if q.all():
-            logging.info("deleting invalid entries from AccidentMarker")
+            logging.debug("deleting invalid entries from AccidentMarker")
             q.delete(synchronize_session="fetch")
             db.session.commit()
 
@@ -795,7 +891,7 @@ def delete_cbs_entries(start_year, batch_size):
 
     marker_ids_to_delete = [acc_id[0] for acc_id in marker_ids_to_delete]
 
-    logging.info(
+    logging.debug(
         "There are "
         + str(len(marker_ids_to_delete))
         + " accident ids to delete starting "
@@ -804,23 +900,23 @@ def delete_cbs_entries(start_year, batch_size):
 
     for ids_chunk in chunks(marker_ids_to_delete, batch_size):
 
-        logging.info("Deleting a chunk of " + str(len(ids_chunk)))
+        logging.debug("Deleting a chunk of " + str(len(ids_chunk)))
 
         q = db.session.query(Involved).filter(Involved.accident_id.in_(ids_chunk))
         if q.all():
-            logging.info("deleting entries from Involved")
+            logging.debug("deleting entries from Involved")
             q.delete(synchronize_session=False)
             db.session.commit()
 
         q = db.session.query(Vehicle).filter(Vehicle.accident_id.in_(ids_chunk))
         if q.all():
-            logging.info("deleting entries from Vehicle")
+            logging.debug("deleting entries from Vehicle")
             q.delete(synchronize_session=False)
             db.session.commit()
 
         q = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_(ids_chunk))
         if q.all():
-            logging.info("deleting entries from AccidentMarker")
+            logging.debug("deleting entries from AccidentMarker")
             q.delete(synchronize_session=False)
             db.session.commit()
 
@@ -867,7 +963,7 @@ def fill_dictionary_tables(cbs_dictionary, provider_code, year):
         try:
             curr_table = TABLES_DICT[k]
         except Exception as _:
-            logging.info(
+            logging.debug(
                 "A key " + str(k) + " was added to dictionary - update models, tables and classes"
             )
             continue
@@ -904,7 +1000,7 @@ def fill_dictionary_tables(cbs_dictionary, provider_code, year):
             )
             db.session.execute(sql_insert)
             db.session.commit()
-        logging.info("Inserted/Updated dictionary values into table " + curr_table)
+        logging.debug("Inserted/Updated dictionary values into table " + curr_table)
     create_provider_code_table()
 
 
@@ -917,7 +1013,7 @@ def truncate_dictionary_tables(dictionary_file):
         sql_truncate = "TRUNCATE TABLE " + curr_table
         db.session.execute(sql_truncate)
         db.session.commit()
-        logging.info("Truncated table " + curr_table)
+        logging.debug("Truncated table " + curr_table)
 
 
 def create_provider_code_table():
@@ -953,7 +1049,7 @@ def create_tables():
         conn.execute(
             "INSERT INTO involved_markers_hebrew " + VIEWS.INVOLVED_HEBREW_MARKERS_HEBREW_VIEW
         )
-        logging.info("Created DB Hebrew Tables")
+        logging.debug("Created DB Hebrew Tables")
 
 
 def update_dictionary_tables(path):
@@ -968,11 +1064,11 @@ def update_dictionary_tables(path):
             continue
         parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
         provider_code = get_provider_code(parent_directory)
-        logging.info("Importing Directory " + directory)
+        logging.debug("Importing Directory " + directory)
         files_from_cbs = dict(get_files(directory))
         if len(files_from_cbs) == 0:
             return 0
-        logging.info("Filling dictionary for directory '{}'".format(directory))
+        logging.debug("Filling dictionary for directory '{}'".format(directory))
         fill_dictionary_tables(files_from_cbs[DICTIONARY], provider_code, int(year))
 
 
@@ -983,19 +1079,16 @@ def get_file_type_and_year(file_path):
     return int(provider_code), int(year)
 
 
-def main(
-    batch_size,
-    source,
-    load_start_year=None,
-):
+def main(batch_size, source, load_start_year=None):
     try:
+        load_existing_streets()
         total = 0
         started = datetime.now()
         if source == "s3":
             if load_start_year is None:
                 now = datetime.now()
                 load_start_year = now.year - 1
-            logging.info("Importing data from s3...")
+            logging.debug("Importing data from s3...")
             s3_data_retriever = S3DataRetriever()
             s3_data_retriever.get_files_from_s3(start_year=load_start_year)
             delete_cbs_entries(load_start_year, batch_size)
@@ -1003,16 +1096,23 @@ def main(
                 BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
                 BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
             ]:
-                # TODO: make sure that code does not break if end year does not exist in s3
-                for year in range(int(load_start_year), s3_data_retriever.current_year + 1):
+                logging.info(
+                    f"Loading min year {s3_data_retriever.min_year} Loading max year {s3_data_retriever.max_year}"
+                )
+                for year in range(s3_data_retriever.min_year, s3_data_retriever.max_year + 1):
                     cbs_files_dir = os.path.join(
                         s3_data_retriever.local_files_directory,
                         ACCIDENTS_TYPE_PREFIX + "_" + str(provider_code),
                         str(year),
                     )
-                    logging.info("Importing Directory " + cbs_files_dir)
+                    logging.debug("Importing Directory " + cbs_files_dir)
                     preprocessing_cbs_files.update_cbs_files_names(cbs_files_dir)
-                    total += import_to_datastore(cbs_files_dir, provider_code, year, batch_size)
+                    num_new, streets = import_to_datastore(
+                        cbs_files_dir, provider_code, year, batch_size
+                    )
+                    total += num_new
+                    add_to_streets(streets)
+            import_streets_into_db()
             shutil.rmtree(s3_data_retriever.local_temp_directory)
 
         elif source == "local_dir_for_tests_only":
@@ -1031,21 +1131,25 @@ def main(
                     os.path.dirname(os.path.join(os.pardir, directory))
                 )
                 provider_code = get_provider_code(parent_directory)
-                logging.info("Importing Directory " + directory)
-                total += import_to_datastore(directory, provider_code, int(year), batch_size)
-
+                logging.debug("Importing Directory " + directory)
+                num_new, streets = import_to_datastore(
+                    directory, provider_code, int(year), batch_size
+                )
+                total += num_new
+                add_to_streets(streets)
+        import_streets_into_db()
         fill_db_geo_data()
 
         failed = [
             "\t'{0}' ({1})".format(directory, fail_reason)
             for directory, fail_reason in failed_dirs.items()
         ]
-        logging.info(
+        logging.debug(
             "Finished processing all directories{0}{1}".format(
                 ", except:\n" if failed else "", "\n".join(failed)
             )
         )
-        logging.info("Total: {0} items in {1}".format(total, time_delta(started)))
+        logging.debug("Total: {0} items in {1}".format(total, time_delta(started)))
         create_tables()
     except Exception as ex:
         print("Exception occured while loading the cbs data: {0}".format(str(ex)))

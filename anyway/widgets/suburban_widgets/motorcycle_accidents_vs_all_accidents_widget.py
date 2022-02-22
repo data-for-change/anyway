@@ -4,14 +4,24 @@ from typing import List
 import pandas as pd
 from sqlalchemy import case, literal_column, func, distinct, desc
 
+from anyway.widgets.widget import register
 from anyway.request_params import RequestParams
 from anyway.backend_constants import BE_CONST, AccidentSeverity
 from anyway.widgets.widget_utils import get_query
 from anyway.models import InvolvedMarkerView
 from anyway.vehicle_type import VehicleCategory
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
+from typing import Dict
+from flask_babel import _
 
 
+location_other = "location other"
+location_road = "location road"
+location_all_label = "all roads"
+_("all roads")
+
+
+@register
 class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
     name: str = "motorcycle_accidents_vs_all_accidents"
 
@@ -19,11 +29,9 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
         super().__init__(request_params, type(self).name)
         self.rank = 20
         self.road_number: str = request_params.location_info["road1"]
-        self.text = {
-            "title": f"תאונות אופנועים קשות וקטלניות בכביש {int(self.road_number)} בהשוואה לכל הארץ"
-        }
 
     def generate_items(self) -> None:
+        # noinspection PyUnresolvedReferences
         self.items = MotorcycleAccidentsVsAllAccidentsWidget.motorcycle_accidents_vs_all_accidents(
             self.request_params.start_time, self.request_params.end_time, self.road_number
         )
@@ -33,8 +41,6 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
         start_time: datetime.date, end_time: datetime.date, road_number: str
     ) -> List:
         location_label = "location"
-        location_other = "שאר הארץ"
-        location_road = f"כביש {int(road_number)}"
         case_location = case(
             [
                 (
@@ -47,8 +53,8 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
         ).label(location_label)
 
         vehicle_label = "vehicle"
-        vehicle_other = "אחר"
-        vehicle_motorcycle = "אופנוע"
+        vehicle_other = VehicleCategory.OTHER.get_english_display_name()
+        vehicle_motorcycle = VehicleCategory.MOTORCYCLE.get_english_display_name()
         case_vehicle = case(
             [
                 (
@@ -106,28 +112,56 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
         if sum_road == 0:
             sum_road = 1  # prevent division by zero
         sum_all = counter_other_other + counter_other_motorcycle + sum_road
-        percentage_label = "percentage"
-        location_all_label = "כל הארץ"
 
         return [
             {
-                location_label: location_road,
-                vehicle_label: vehicle_motorcycle,
-                percentage_label: counter_road_motorcycle / sum_road,
+                "label_key": location_road,
+                "series": [
+                    {"label_key": vehicle_motorcycle, "value": counter_road_motorcycle / sum_road},
+                    {"label_key": vehicle_other, "value": counter_road_other / sum_road},
+                ],
             },
             {
-                location_label: location_road,
-                vehicle_label: vehicle_other,
-                percentage_label: counter_road_other / sum_road,
-            },
-            {
-                location_label: location_all_label,
-                vehicle_label: vehicle_motorcycle,
-                percentage_label: (counter_other_motorcycle + counter_road_motorcycle) / sum_all,
-            },
-            {
-                location_label: location_all_label,
-                vehicle_label: vehicle_other,
-                percentage_label: (counter_other_other + counter_road_other) / sum_all,
+                "label_key": location_all_label,
+                "series": [
+                    {
+                        "label_key": vehicle_motorcycle,
+                        "value": (counter_other_motorcycle + counter_road_motorcycle) / sum_all,
+                    },
+                    {
+                        "label_key": vehicle_other,
+                        "value": (counter_other_other + counter_road_other) / sum_all,
+                    },
+                ],
             },
         ]
+
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        road_num = request_params.location_info["road1"]
+        moto = VehicleCategory.MOTORCYCLE.get_english_display_name()
+        other = VehicleCategory.OTHER.get_english_display_name()
+        road_label = f"road {road_num}"
+        road_label_display_name = f"{_('road')} {road_num}"
+        for item in items["data"]["items"]:
+            if item["label_key"] == location_road:
+                item["label_key"] = road_label_display_name
+            else:
+                item["label_key"] = _(item["label_key"])
+            for e in item["series"]:
+                e["label_key"] = _(e["label_key"])
+        items["data"]["text"] = {
+            "title": _("Fatal and severe motorcycle accidents on road")
+            + f" {road_num} "
+            + _("compared to rest of country"),
+            "labels_map": {
+                moto: _(moto),
+                other: _(other),
+                location_all_label: _(location_all_label),
+                road_label: road_label_display_name,
+            },
+        }
+        return items
+
+
+_("road")

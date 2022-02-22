@@ -1,27 +1,23 @@
-from flask_babel import _
-
 from anyway.request_params import RequestParams
 from anyway.widgets.widget import Widget
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
+from typing import Dict
 
 
+# TODO: register?
 class AccidentCountPedestriansPerVehicleStreetVsAllWidget(SubUrbanWidget):
     name: str = "accident_count_pedestrians_per_vehicle_street_vs_all"
 
     def __init__(self, request_params: RequestParams):
         Widget.__init__(self, request_params, type(self).name)
         self.rank = 21
-        self.text = {
-            "title": _(
-                "Pedestrian Injuries on Ben Yehuda Street in Tel Aviv by Type of hitting Vehicle, Compared to Urban Accidents Across the country"
-            )
-        }
 
     @staticmethod
     def is_in_cache() -> bool:
         return False
 
     def generate_items(self) -> None:
+        # TODO: add real data
         self.items = (
             AccidentCountPedestriansPerVehicleStreetVsAllWidget.accidents_count_pedestrians_per_vehicle_street_vs_all_mock_data()
         )
@@ -39,3 +35,10 @@ class AccidentCountPedestriansPerVehicleStreetVsAllWidget(SubUrbanWidget):
             {"location": "בן יהודה", "vehicle": "רכב כבד", "num_of_accidents": 22},
             {"location": "בן יהודה", "vehicle": "אופניים וקורקינט ממונע", "num_of_accidents": 9},
         ]
+
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        items["data"]["text"] = {
+            "title": "Number of pedestrian accidents on Ben Yehuda street in Tel Aviv by type of hitting vehicle compared to urban accidents across the country"
+        }
+        return items

@@ -90,11 +90,7 @@ class BackEndConstants(object):
         WALLA = "walla"
         TWITTER = "twitter"
 
-    SUPPORTED_SOURCES: List[Source] = [
-        Source.YNET,
-        Source.WALLA,
-        Source.TWITTER,
-    ]
+    SUPPORTED_SOURCES: List[Source] = [Source.YNET, Source.WALLA, Source.TWITTER]
 
     # If in the future there will be a number of organizations or a need for a dynamic setting change, move this
     # data to a table in the DB.
@@ -105,6 +101,10 @@ class BackEndConstants(object):
         "vision_zero_2_plus_1",
         "head_on_collisions_comparison",
     ]
+
+    LKEY = "label_key"
+    VAL = "value"
+    SERIES = "series"
 
 
 BE_CONST = BackEndConstants()
@@ -249,6 +249,7 @@ class InjuredType(LabeledCode):
             InjuredType.PASSENGER_UNKNOWN_VEHICLE: "Passenger of an unknown vehicle",
         }
 
+
 class CrossLocation(Enum):
     UNKNOWN = 9
     OUTNEAR = 1
@@ -266,6 +267,7 @@ class CrossLocation(Enum):
             CrossLocation.YESLIGHT: "In the crosswalk, with a crossing light",
         }
 
+
 class CrossCategory(Enum):
     UNKNOWN = 0
     NONE = 1
@@ -274,16 +276,8 @@ class CrossCategory(Enum):
     def get_codes(self) -> List[int]:
         """returns CrossLocation codes of category"""
         category_cross_locations = {
-            CrossCategory.UNKNOWN: [
-                CrossLocation.UNKNOWN,
-            ],
-            CrossCategory.NONE: [
-                CrossLocation.OUTFAR,
-                CrossLocation.OUTNEAR,
-            ],
-            CrossCategory.CROSSWALK: [
-                CrossLocation.YESLIGHT,
-                CrossLocation.YESNONE,
-            ],
+            CrossCategory.UNKNOWN: [CrossLocation.UNKNOWN],
+            CrossCategory.NONE: [CrossLocation.OUTFAR, CrossLocation.OUTNEAR],
+            CrossCategory.CROSSWALK: [CrossLocation.YESLIGHT, CrossLocation.YESNONE],
         }
         return list(map(lambda x: x.value, category_cross_locations[self]))

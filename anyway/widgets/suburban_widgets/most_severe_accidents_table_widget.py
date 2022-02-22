@@ -31,12 +31,25 @@ def get_most_severe_accidents_with_entities(
     return df.to_dict(orient="records")  # pylint: disable=no-member
 
 
-def get_most_severe_accidents_table_title(location_info):
-    return (
-        _("Most severe accidents in segment")
-        + " "
-        + segment_dictionary[location_info["road_segment_name"]]
-    )
+def get_most_severe_accidents_table_title(
+    location_info: dict, resolution: BE_CONST.ResolutionCategories
+):
+    # todo: hack - will be fixed in next PR
+    if isinstance(resolution, BE_CONST.ResolutionCategories):
+        resolution = resolution.value
+    if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD.value:
+        return (
+            _("Most severe accidents in segment")
+            + " "
+            + segment_dictionary[location_info["road_segment_name"]]
+        )
+    elif resolution == BE_CONST.ResolutionCategories.STREET.value:
+        return (
+            _("Most severe accidents in street")
+            + f" {location_info['street1_hebrew']} "
+            + _("in ")
+            + f"{location_info['yishuv_name']}"
+        )
 
 
 # count of dead and severely injured
@@ -134,7 +147,9 @@ class MostSevereAccidentsTableWidget(SubUrbanWidget):
                         f"MostSevereAccidentsTableWidget.localize_items: Exception while translating {item}."
                     )
         items["data"]["text"] = {
-            "title": get_most_severe_accidents_table_title(request_params.location_info)
+            "title": get_most_severe_accidents_table_title(
+                request_params.location_info, request_params.resolution
+            )
         }
         return items
 

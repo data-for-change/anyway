@@ -9,15 +9,15 @@ import click
 
 
 def valid_date(date_string):
-    DATE_INPUT_FORMAT = "%d-%m-%Y"
-    DATE_INPUT_FORMAT_ALT = "%Y-%m-%dT%H:%M"
+    date_input_format = "%d-%m-%Y"
+    date_input_format_alt = "%Y-%m-%dT%H:%M"
     from datetime import datetime
 
     try:
-        return datetime.strptime(date_string, DATE_INPUT_FORMAT)
+        return datetime.strptime(date_string, date_input_format)
     except ValueError:
         try:
-            return datetime.strptime(date_string, DATE_INPUT_FORMAT_ALT)
+            return datetime.strptime(date_string, date_input_format_alt)
         except ValueError:
             msg = "Not a valid date: '{0}'.".format(date_string)
             raise argparse.ArgumentTypeError(msg)
@@ -278,6 +278,18 @@ def infographics_data_cache_for_road_segments():
     return main_for_road_segments(update=True, info=True)
 
 
+@process.group()
+def cache():
+    pass
+
+
+@cache.command()
+def update_street():
+    """Update street cache"""
+    from anyway.parsers.infographics_data_cache_updater import main_for_street
+    main_for_street()
+
+
 @process.command()
 @click.argument("filename", type=str, default="static/data/casualties/casualties_costs.csv")
 def update_casualties_costs(filename):
@@ -363,10 +375,10 @@ def load_discussions(identifiers):
         try:
             db.session.add(marker)
             db.session.commit()
-            logging.info("Added:  " + identifier)
+            logging.info(f"Added: {identifier}")
         except Exception as e:
             db.session.rollback()
-            logging.warn("Failed: " + identifier + ": " + e)
+            logging.warning(f"Failed: {identifier} {e}")
 
 
 @cli.group()
@@ -398,6 +410,7 @@ def importemail():
     from anyway.parsers.cbs.importmail_cbs import main
 
     return main()
+
 
 if __name__ == "__main__":
     cli(sys.argv[1:])  # pylint: disable=too-many-function-args

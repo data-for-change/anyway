@@ -195,7 +195,6 @@ _fields = {
     "ZURAT_ISHUV": "צורת יישוב",
     "VEHICLE_TYPE": "סוג רכב",
     "VIOLATION_TYPE": "סוג עבירה",
-    "RSA_SEVERITY": "רמת חומרה",
     "RSA_LICENSE_PLATE": "סוג לוחית רישוי",
 }
 

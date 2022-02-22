@@ -13,6 +13,7 @@ from anyway.vehicle_type import VehicleCategory
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 
 
+# TODO: register?
 class AccidentTypeVehicleTypeRoadComparisonWidget(SubUrbanWidget):
     name: str = "vehicle_accident_vs_all_accidents"  # WIP: change by vehicle type
     MAX_ACCIDENT_TYPES_TO_RETURN: int = 5
@@ -22,9 +23,6 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(SubUrbanWidget):
         self.road_number: str = request_params.location_info["road1"]
         # WIP: change rank, text by vehicle type
         self.rank = 25
-        self.text = {
-            "title": f"סוגי תאונות אופנועים בכביש {int(self.road_number)} בהשוואה לכל הארץ"
-        }
 
     def generate_items(self) -> None:
         self.items = AccidentTypeVehicleTypeRoadComparisonWidget.accident_type_road_vs_all_count(
@@ -111,4 +109,8 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(SubUrbanWidget):
                 logging.exception(
                     f"AccidentTypeVehicleTypeRoadComparisonWidget.localize_items: Exception while translating {item}."
                 )
+        items["data"]["text"] = {
+            # TODO: after registering decide on title
+            "title": "Number of accidents by vehicle type by severity"
+        }
         return items

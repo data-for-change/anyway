@@ -384,11 +384,11 @@ Return a JSON with the users list info from the DB, user with admin rights must 
 
 #### URL struct
 
-> GET https://www.anyway.co.il/admin/get_all_users_info
+> GET https://www.anyway.co.il/user/get_all_users_info
 
 #### Example
 
-> https://www.anyway.co.il/admin/get_all_users_info
+> https://www.anyway.co.il/user/get_all_users_info
 
 #### Parameters
 
@@ -442,11 +442,11 @@ Update the user's info in the DB, user with admin rights must be logged in to us
 
 #### URL struct
 
-> POST https://www.anyway.co.il/admin/update_user
+> POST https://www.anyway.co.il/user/update_user
 
 #### Example
 
-> https://www.anyway.co.il/admin/update_user
+> https://www.anyway.co.il/user/update_user
 
 #### Parameters
 

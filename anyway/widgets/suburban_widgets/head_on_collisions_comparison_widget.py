@@ -91,7 +91,7 @@ class HeadOnCollisionsComparisonWidget(SubUrbanWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         i = items["data"]["items"]
-        items["data"]["text"] = {"title": _("fatal accidents by type")}
+        items["data"]["text"] = {"title": _("Fatal head on collisions vs other accidents")}
         for val in i.values():
             for e in val:
                 e["desc"] = _(e["desc"])

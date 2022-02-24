@@ -34,16 +34,13 @@ def get_most_severe_accidents_with_entities(
 def get_most_severe_accidents_table_title(
     location_info: dict, resolution: BE_CONST.ResolutionCategories
 ):
-    # todo: hack - will be fixed in next PR
-    if isinstance(resolution, BE_CONST.ResolutionCategories):
-        resolution = resolution.value
-    if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD.value:
+    if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
         return (
             _("Most severe accidents in segment")
             + " "
             + segment_dictionary[location_info["road_segment_name"]]
         )
-    elif resolution == BE_CONST.ResolutionCategories.STREET.value:
+    elif resolution == BE_CONST.ResolutionCategories.STREET:
         return (
             _("Most severe accidents in street")
             + f" {location_info['street1_hebrew']} "

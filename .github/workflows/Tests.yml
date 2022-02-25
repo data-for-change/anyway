@@ -64,6 +64,7 @@ jobs:
         docker exec anyway alembic upgrade head
         docker exec anyway ./main.py process registered-vehicles
         docker exec anyway ./main.py process cbs --source local_dir_for_tests_only
+        docker exec anyway ./main.py process road-segments
     - name: Tests
       env:
         TWITTER_CONSUMER_KEY: ${{ secrets.TWITTER_CONSUMER_KEY }}

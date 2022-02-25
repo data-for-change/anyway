@@ -74,7 +74,7 @@ class TestInfographicApi:
         """Should success and be empty when no flash id is sent"""
         rv = app.get("/api/infographics-data")
 
-        assert rv.status_code == http_client.BAD_REQUEST
+        assert rv.status_code == http_client.NOT_FOUND
 
     def test_limit(self, app):
         """Should process the limit parameter successfully"""

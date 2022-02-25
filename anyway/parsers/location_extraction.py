@@ -147,7 +147,7 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
         lambda x: geohash.encode(x["latitude"], x["longitude"], precision=4), axis=1
     )  # pylint: disable=maybe-no-member
     markers_orig = markers.copy()  # pylint: disable=maybe-no-member
-    markers = markers.loc[(markers["road1"] is not None)]  # pylint: disable=maybe-no-member
+    markers = markers.loc[markers["road1"].notnull()]  # pylint: disable=maybe-no-member
     if markers.count()[0] == 0:
         markers = markers_orig
 

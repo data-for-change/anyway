@@ -1194,7 +1194,7 @@ class InfographicsData(Resource):
     @api.doc("get infographics data")
     @api.expect(parser)
     def get(self):
-        return infographics_data()
+        return infographics_data_by_location()
 
 
 def infographics_data():

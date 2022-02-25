@@ -138,11 +138,12 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
             except ValueError:
                 logging.exception(f"AccidentCountByCarType.localize_items: item:{item}")
         base_title = _(
-            "Comparing top 3 vehicle type percentage in accidents in {} relative to national average"
+            "Comparing vehicle type in accidents in {} relative to national average"
         )
         items["data"]["text"] = {
             "title": base_title.format(
                 segment_dictionary[request_params.location_info["road_segment_name"]]
             )
         }
+        items["meta"]["information"] = _("Vehicle accidents by type in specific segment, sorted by segment, compared to the national average")
         return items

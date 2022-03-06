@@ -43,7 +43,9 @@ class RequestParams:
 # todo: merge with get_request_params()
 def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams]:
     location = get_location_from_request_values(vals)
-    years_ago = vals.get("years_ago")
+    if location is None:
+        return None
+    years_ago = vals.get("years_ago", BE_CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
     lang = vals.get("lang", "he")
     location_text = location["text"]
     gps = location["gps"]
@@ -88,7 +90,7 @@ def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams
     return request_params
 
 
-def get_location_from_request_values(vals: dict) -> dict:
+def get_location_from_request_values(vals: dict) -> Optional[dict]:
     news_flash_id = vals.get("news_flash_id")
     if news_flash_id is not None:
         return get_location_from_news_flash(news_flash_id)
@@ -99,13 +101,17 @@ def get_location_from_request_values(vals: dict) -> dict:
         "street1" in vals or "street1_hebrew" in vals
     ):
         return extract_street_location(vals)
-    logging.error(f"Unsupported location:{vals}")
-    return {}
+    logging.error(f"Unsupported location:{vals.values()}")
+    return None
 
 
-def get_location_from_news_flash(news_flash_id: str) -> dict:
+def get_location_from_news_flash(news_flash_id: str) -> Optional[dict]:
     news_flash = extract_news_flash_obj(news_flash_id)
+    if news_flash is None:
+        return None
     loc = extract_news_flash_location(news_flash)
+    if loc is None:
+        return None
     res = loc["data"]["resolution"]
     loc["data"]["resolution"] = BE_CONST.ResolutionCategories(res)
     loc["text"] = get_news_flash_location_text(news_flash)

@@ -9,6 +9,7 @@ from anyway.models import (
     NewsFlash,
     RoadSegments,
     InfographicsRoadSegmentsDataCache,
+    InfographicsRoadSegmentsDataCacheTemp,
     InfographicsStreetDataCacheTemp,
     InfographicsStreetDataCache,
     Streets,
@@ -27,6 +28,10 @@ CACHE = "cache"
 TEMP = "temp"
 REGULAR_CACHE_TABLES = {CACHE: InfographicsDataCache, TEMP: InfographicsDataCacheTemp}
 STREET_CACHE_TABLES = {CACHE: InfographicsStreetDataCache, TEMP: InfographicsStreetDataCacheTemp}
+ROAD_SEGMENT_CACHE_TABLES = {
+    CACHE: InfographicsRoadSegmentsDataCache,
+    TEMP: InfographicsRoadSegmentsDataCacheTemp,
+}
 
 
 def is_in_cache(nf):
@@ -261,27 +266,42 @@ def build_street_cache_into_temp():
     logging.info(f"cache rebuild took:{str(datetime.now() - start)}")
 
 
-# noinspection PyUnresolvedReferences
-def build_cache_for_road_segments():
+def get_road_segments() -> Iterable[RoadSegments]:
+    t = RoadSegments
+    segment_iter = iter(db.session.query(t.segment_id).all())
+    try:
+        while True:
+            yield next(segment_iter)
+    except StopIteration:
+        logging.debug("Read from road_segments table completed")
+
+
+def get_road_segment_infographic_keys() -> Iterable[Dict[str, int]]:
+    for road_segment in get_road_segments():
+        for y in CONST.INFOGRAPHICS_CACHE_YEARS_AGO:
+            yield {
+                "road_segment_id": road_segment.segment_id,
+                "years_ago": y,
+                "lang": "en",
+            }
+
+
+def build_road_segments_cache_into_temp():
     start = datetime.now()
-    db.session.query(InfographicsRoadSegmentsDataCache).delete()
+    db.session.query(InfographicsRoadSegmentsDataCacheTemp).delete()
     db.session.commit()
-    for y in CONST.INFOGRAPHICS_CACHE_YEARS_AGO:
-        logging.debug(f"processing years_ago:{y}")
-        db.get_engine().execute(
-            InfographicsRoadSegmentsDataCache.__table__.insert(),  # pylint: disable=no-member
-            [
-                {
-                    "road_segment_id": road_segment.get_segment_id(),
-                    "years_ago": y,
-                    "data": anyway.infographics_utils.create_infographics_data_for_road_segment(
-                        road_segment.get_segment_id(), y, "he"
-                    ),
-                }
-                for road_segment in db.session.query(RoadSegments).all()
-            ],
-        )
-        db.session.commit()
+    db.get_engine().execute(
+        InfographicsRoadSegmentsDataCacheTemp.__table__.insert(),  # pylint: disable=no-member
+        [
+            {
+                "road_segment_id": d["road_segment_id"],
+                "years_ago": d["years_ago"],
+                "data": anyway.infographics_utils.create_infographics_data_for_location(d),
+            }
+            for d in get_road_segment_infographic_keys()
+        ],
+    )
+    db.session.commit()
     logging.info(f"cache rebuild took:{str(datetime.now() - start)}")
 
 
@@ -300,15 +320,11 @@ def get_cache_info():
     return f"num items in cache: {cache_items}, temp table: {tmp_items}, accident flashes:{num_acc_flash_items}, flashes processed:{num_acc_suburban_flash_items}"
 
 
-def main_for_road_segments(update, info):
-    if update:
-        logging.info("Refreshing road segments infographics cache...")
-        build_cache_for_road_segments()
-        logging.info("Refreshing road segments infographics cache cache Done")
-    if info:
-        logging.info(get_cache_info())
-    else:
-        logging.debug(f"{info}")
+def main_for_road_segments():
+    logging.info("Refreshing road segments infographics cache...")
+    build_road_segments_cache_into_temp()
+    copy_temp_into_cache(ROAD_SEGMENT_CACHE_TABLES)
+    logging.info("Refreshing road segments infographics cache cache Done")
 
 
 def main_for_street():

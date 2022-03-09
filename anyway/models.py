@@ -2480,6 +2480,10 @@ class InfographicsRoadSegmentsDataCache(InfographicsRoadSegmentsDataCacheFields,
         }
 
 
+class InfographicsRoadSegmentsDataCacheTemp(InfographicsRoadSegmentsDataCacheFields, Base):
+    __tablename__ = "infographics_road_segments_data_cache_temp"
+
+
 class InfographicsTwoRoadsDataCacheFields(object):
     road1 = Column(Integer(), primary_key=True)
     road2 = Column(Integer(), primary_key=True)

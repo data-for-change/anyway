@@ -33,15 +33,15 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
 
     @staticmethod
     def get_stats_accidents_by_car_type_with_national_data(
-        request_params: RequestParams, involved_by_vehicle_type_data=None
+        request_params: RequestParams, vehicle_grouped_by_type_count_unique=None
     ):
         out = []
-        if involved_by_vehicle_type_data is None:
-            involved_by_vehicle_type_data = widget_utils.get_accidents_stats(
+        if vehicle_grouped_by_type_count_unique is None:
+            vehicle_grouped_by_type_count_unique = widget_utils.get_accidents_stats(
                 table_obj=VehicleMarkerView,
                 filters=request_params.location_info,
                 group_by="vehicle_type",
-                count="vehicle_type",
+                count="provider_and_id",
                 start_time=request_params.start_time,
                 end_time=request_params.end_time,
             )
@@ -49,7 +49,7 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
         start_time = request_params.start_time
         end_time = request_params.end_time
         data_by_segment = AccidentCountByCarTypeWidget.percentage_accidents_by_car_type(
-            involved_by_vehicle_type_data
+            vehicle_grouped_by_type_count_unique
         )
         national_data = AccidentCountByCarTypeWidget.percentage_accidents_by_car_type_national_data_cache(
             start_time, end_time
@@ -68,10 +68,10 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
         return out
 
     @staticmethod
-    def percentage_accidents_by_car_type(involved_by_vehicle_type_data) -> Dict[str, int]:
+    def percentage_accidents_by_car_type(vehicle_grouped_by_type_count_unique) -> Dict[str, int]:
         vehicle_type_dict = defaultdict(int)
         total_count = 0
-        for item in involved_by_vehicle_type_data:
+        for item in vehicle_grouped_by_type_count_unique:
             vehicle_type, count = item["vehicle_type"], int(item["count"])
             total_count += count
             if vehicle_type in VehicleCategory.CAR.get_codes():
@@ -113,7 +113,7 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
     @staticmethod
     @lru_cache(maxsize=64)
     def percentage_accidents_by_car_type_national_data_cache(start_time, end_time) -> Dict[str, int]:
-        involved_by_vehicle_type_data = widget_utils.get_accidents_stats(
+        vehicle_grouped_by_type_count_unique = widget_utils.get_accidents_stats(
             table_obj=VehicleMarkerView,
             filters={
                 "road_type": [
@@ -122,12 +122,12 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
                 ]
             },
             group_by="vehicle_type",
-            count="vehicle_type",
+            count="provider_and_id",
             start_time=start_time,
             end_time=end_time,
         )
         return AccidentCountByCarTypeWidget.percentage_accidents_by_car_type(
-            involved_by_vehicle_type_data
+            vehicle_grouped_by_type_count_unique
         )
 
     @staticmethod

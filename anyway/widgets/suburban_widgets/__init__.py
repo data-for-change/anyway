@@ -25,4 +25,6 @@ from . import (
     suburban_crosswalk_widget,
     killed_and_injured_count_per_age_group_stacked_widget,
     fatal_accident_yoy_same_month,
+    total_accident_count_by_accident_year_stacked_bar_widget,
+    total_injured_count_by_accident_year_stacked_bar_widget
 )

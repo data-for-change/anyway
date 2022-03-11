@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-03-04 12:08+0200\n"
+"POT-Creation-Date: 2022-03-11 22:38+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.0\n"
+"Generated-By: Babel 2.9.1\n"
 
 #: anyway/backend_constants.py:145
 msgid "killed"
@@ -386,6 +386,22 @@ msgstr ""
 
 #: anyway/widgets/suburban_widgets/top_road_segments_accidents_widget.py:32
 msgid "Segments with most accidents"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/total_accident_count_by_accident_year_stacked_bar_widget.py:27
+msgid "Accidents count in the specified years"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/total_accident_count_by_accident_year_stacked_bar_widget.py:47
+msgid "Number of accidents, by year in segment"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/total_injured_count_by_accident_year_stacked_bar_widget.py:25
+msgid "Injured count in the specified years"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/total_injured_count_by_accident_year_stacked_bar_widget.py:45
+msgid "Number of injured in accidents, per year"
 msgstr ""
 
 #: anyway/widgets/urban_widgets/injured_accidents_with_pedestrians_widget.py:114

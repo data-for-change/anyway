@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-03-04 12:08+0200\n"
+"POT-Creation-Date: 2022-03-11 22:38+0200\n"
 "PO-Revision-Date: 2020-10-16 15:42+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: he\n"
@@ -16,7 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.0\n"
+"Generated-By: Babel 2.9.1\n"
 
 #: anyway/backend_constants.py:145
 msgid "killed"
@@ -214,7 +214,9 @@ msgstr "התנגשות"
 msgid ""
 "Distribution of accidents by type in the selected location and time "
 "period. Three most common accident types are displayed"
-msgstr "התפלגות תאונות לפי סוג התאונה במקום ובפרק הזמן הנבחר. מוצגים 3 סוגי התאונות הנפוצים ביותר במקום זה"
+msgstr ""
+"התפלגות תאונות לפי סוג התאונה במקום ובפרק הזמן הנבחר. מוצגים 3 סוגי "
+"התאונות הנפוצים ביותר במקום זה"
 
 #: anyway/widgets/suburban_widgets/accident_count_by_accident_year_widget.py:55
 msgid "Number of accidents, by year, splitted by accident severity, in segment"
@@ -400,6 +402,22 @@ msgstr "תאונות קטלניות וקשות לכל קילומטר לפי מק
 #: anyway/widgets/suburban_widgets/top_road_segments_accidents_widget.py:32
 msgid "Segments with most accidents"
 msgstr "מקטעים עם הכי הרבה תאונות"
+
+#: anyway/widgets/suburban_widgets/total_accident_count_by_accident_year_stacked_bar_widget.py:27
+msgid "Accidents count in the specified years"
+msgstr "כמות התאונות פר שנה."
+
+#: anyway/widgets/suburban_widgets/total_accident_count_by_accident_year_stacked_bar_widget.py:47
+msgid "Number of accidents, by year in segment"
+msgstr "מספר תאונות לפי שנה במקטע"
+
+#: anyway/widgets/suburban_widgets/total_injured_count_by_accident_year_stacked_bar_widget.py:25
+msgid "Injured count in the specified years"
+msgstr "כמות הפציעות לפי שנה"
+
+#: anyway/widgets/suburban_widgets/total_injured_count_by_accident_year_stacked_bar_widget.py:45
+msgid "Number of injured in accidents, per year"
+msgstr "מספר נפגעים לפי שנה"
 
 #: anyway/widgets/urban_widgets/injured_accidents_with_pedestrians_widget.py:114
 msgid "Pedestrian accidents by severity and year"

@@ -116,7 +116,7 @@ class TestInfographicApi:
 
         tmp_func = widget_utils.get_accidents_stats  # Backup function ref
         widget_utils.get_accidents_stats = mock_get_accidents_stats
-        involved_by_vehicle_type_data_test = [{'vehicle_type': 1, 'count': 11}]
+        vehicle_grouped_by_type_count_unique_test = [{'vehicle_type': 1, 'count': 11}]
         end_time = datetime.date(2020, 6, 30)
         start_time = datetime.date(2020, 1, 1)
         request_params = anyway.request_params.RequestParams(
@@ -130,7 +130,7 @@ class TestInfographicApi:
             lang="he"
         )
         actual = AccidentCountByCarTypeWidget.get_stats_accidents_by_car_type_with_national_data(
-            request_params, involved_by_vehicle_type_data=involved_by_vehicle_type_data_test
+            request_params, vehicle_grouped_by_type_count_unique=vehicle_grouped_by_type_count_unique_test
         )
         expected = [{'label_key': 4,
                      'series': [{'label_key': 'percentage_segment', 'value': 100},

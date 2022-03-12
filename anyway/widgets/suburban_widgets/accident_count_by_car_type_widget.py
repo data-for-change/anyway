@@ -15,7 +15,7 @@ from anyway.vehicle_type import VehicleCategory
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 from anyway.widgets.widget import register
 
-TOP_3 = 2
+MAX_NUMBER_OF_ITEMS = 2
 
 
 @register
@@ -91,16 +91,16 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
         )
 
         output = {}
-        sum_all_three = 0
-        # Calculate percentage of the top 3
+        sum_all = 0
+        # Calculate percentage of MAX_NUMBER_OF_ITEMS
         for i, (key, value) in enumerate(vehicle_type_dict.items()):
             output[key] = floor(100 * value / total_count)
-            sum_all_three += output[key]
-            if i >= TOP_3:
+            sum_all += output[key]
+            if i >= MAX_NUMBER_OF_ITEMS:
                 break
 
         # Round up to 100
-        if len(vehicle_type_dict) <= 3 and sum_all_three < 100:
+        if len(vehicle_type_dict) <= 3 and sum_all < 100:
             # Add 1 to the first element
             for key, value in output.items():
                 output[key] += 1

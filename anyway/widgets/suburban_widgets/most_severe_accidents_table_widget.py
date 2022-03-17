@@ -13,7 +13,13 @@ from anyway.widgets.widget import register
 
 
 def get_most_severe_accidents_with_entities(
-    table_obj, filters, entities, start_time, end_time, limit=10
+    table_obj,
+    filters,
+    entities,
+    start_time,
+    end_time,
+    resolution: BE_CONST.ResolutionCategories,
+    limit=10,
 ):
     filters = filters or {}
     filters["provider_code"] = [
@@ -24,7 +30,10 @@ def get_most_severe_accidents_with_entities(
     filters["accident_severity"] = [AccidentSeverity.FATAL.value, AccidentSeverity.SEVERE.value]
     query = get_query(table_obj, filters, start_time, end_time)
     query = query.with_entities(*entities)
-    query = query.order_by(getattr(table_obj, "accident_timestamp").desc())
+    query = query.order_by(
+        getattr(table_obj, "accident_timestamp").desc(),
+        getattr(table_obj, "accident_severity").asc(),
+    )
     query = query.limit(limit)
     df = pd.read_sql_query(query.statement, query.session.bind)
     df.columns = [c.replace("_hebrew", "") for c in df.columns]
@@ -42,7 +51,7 @@ def get_most_severe_accidents_table_title(
         )
     elif resolution == BE_CONST.ResolutionCategories.STREET:
         return (
-            _("Most severe accidents in street")
+            _("Severe accidents in street")
             + f" {location_info['street1_hebrew']} "
             + _("in ")
             + f"{location_info['yishuv_name']}"
@@ -79,14 +88,18 @@ class MostSevereAccidentsTableWidget(SubUrbanWidget):
         self.information = "Most recent fatal and severe accidents in location, ordered by date. Up to 10 accidents are presented."
 
     def generate_items(self) -> None:
+        # noinspection PyUnresolvedReferences
         self.items = MostSevereAccidentsTableWidget.prepare_table(
             self.request_params.location_info,
             self.request_params.start_time,
             self.request_params.end_time,
+            self.request_params.resolution,
         )
 
     @staticmethod
-    def prepare_table(location_info, start_time, end_time):
+    def prepare_table(
+        location_info, start_time, end_time, resolution: BE_CONST.ResolutionCategories
+    ):
         entities = (
             "id",
             "provider_code",
@@ -101,6 +114,7 @@ class MostSevereAccidentsTableWidget(SubUrbanWidget):
             entities=entities,
             start_time=start_time,
             end_time=end_time,
+            resolution=resolution,
         )
         # Add casualties
         for accident in accidents:

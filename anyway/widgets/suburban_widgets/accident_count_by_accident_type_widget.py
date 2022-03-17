@@ -18,7 +18,7 @@ class AccidentCountByAccidentTypeWidget(SubUrbanWidget):
         super().__init__(request_params, type(self).name)
         self.rank = 6
         self.information = (
-            "Distribution of accidents by type in the selected location and time period. "
+            "Distribution of accidents by type in the selected segment and time period. "
             "Three most common accident types are displayed"
         )
 
@@ -62,5 +62,5 @@ class AccidentCountByAccidentTypeWidget(SubUrbanWidget):
 
 _("Collision")
 _(
-    "Distribution of accidents by type in the selected location and time period. Three most common accident types are displayed"
+    "Distribution of accidents by type in the selected segment and time period. Three most common accident types are displayed"
 )

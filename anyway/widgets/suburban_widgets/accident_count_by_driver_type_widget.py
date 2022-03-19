@@ -7,7 +7,7 @@ from flask_babel import _
 from anyway.request_params import RequestParams
 from anyway.backend_constants import DriverType
 from anyway.widgets.widget_utils import get_accidents_stats, get_injured_filters
-from anyway.models import InvolvedMarkerView, InvolvedType
+from anyway.models import InvolvedMarkerView
 from anyway.vehicle_type import VehicleCategory
 from anyway.widgets.widget import register
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget

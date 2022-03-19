@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-02-17 19:22+0200\n"
+"POT-Creation-Date: 2022-03-19 11:03+0200\n"
 "PO-Revision-Date: 2020-11-26 16:45+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -16,7 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.0\n"
+"Generated-By: Babel 2.6.0\n"
 
 #: anyway/backend_constants.py:145
 msgid "killed"
@@ -174,27 +174,27 @@ msgstr ""
 msgid "Number of accidents by severity"
 msgstr ""
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:70
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:72
 msgid "in years"
 msgstr ""
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:73
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:75
 msgid "on street"
 msgstr ""
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:76
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:78
 msgid "took place"
 msgstr ""
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:78
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:80
 msgid "accidents"
 msgstr ""
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:84
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:86
 msgid "Fatal, severe and light accidents count in the specified location."
 msgstr ""
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_widget.py:70
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_widget.py:71
 msgid ""
 "Most recent fatal and severe accidents displayed on a map. Up to 10 "
 "accidents are presented."
@@ -232,7 +232,7 @@ msgstr ""
 msgid "Number of accidents by driver type"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/accident_count_by_driver_type_widget.py:82
+#: anyway/widgets/suburban_widgets/accident_count_by_driver_type_widget.py:81
 msgid ""
 "Driver involvement in accident by driver type: professional - trucks, "
 "taxi, bus, work, minibus, tractor, private - private car, motorcycle, "
@@ -306,28 +306,28 @@ msgstr ""
 msgid "Injury per age group"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:38
+#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:39
 msgid "Most severe accidents in segment"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:44
+#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:45
 msgid "Most severe accidents in street"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:46
+#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:47
 msgid "in "
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:139
+#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:140
 msgid "accident_severity"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:140
+#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:141
 msgid "type"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:153
-#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:156
+#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:155
+#: anyway/widgets/suburban_widgets/most_severe_accidents_table_widget.py:158
 msgid ""
 "Most recent fatal and severe accidents in location, ordered by date. Up "
 "to 10 accidents are presented."

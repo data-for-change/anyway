@@ -1,6 +1,7 @@
 import logging
 from anyway.request_params import RequestParams
 from anyway.widgets.widget import Widget
+from anyway.backend_constants import BE_CONST
 
 
 class AllLocationsWidget(Widget):
@@ -14,9 +15,10 @@ class AllLocationsWidget(Widget):
 
     @staticmethod
     def is_all_locations(request_params: RequestParams) -> bool:
-        return request_params is not None
-        # todo: quick fix. Will be properly fixed in next PR
-        # and request_params.resolution in BE_CONST.SUPPORTED_RESOLUTIONS
+        return (
+            request_params is not None
+            and request_params.resolution in BE_CONST.SUPPORTED_RESOLUTIONS
+        )
 
     @staticmethod
     def is_relevant(request_params: RequestParams) -> bool:

@@ -14,7 +14,6 @@ from . import (
     accident_count_by_hour_widget,
     accident_count_by_driver_type_widget,
     accident_count_by_day_night_widget,
-    most_severe_accidents_table_widget,
     accident_type_vehicle_type_road_comparison_widget,
     accident_count_by_accident_year_widget,
     accident_count_by_accident_type_widget,

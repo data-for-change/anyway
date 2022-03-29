@@ -7,7 +7,6 @@ from typing import Dict
 from flask_babel import _
 
 
-@register
 class AccidentCountByHourWidget(SubUrbanWidget):
     name: str = "accident_count_by_hour"
 

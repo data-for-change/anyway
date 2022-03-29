@@ -5,8 +5,7 @@ from typing import Dict
 from flask_babel import _
 
 
-# TODO: unregister? this widget produces only mock data
-@register
+
 class TopRoadSegmentsAccidentsWidget(SubUrbanWidget):
     name: str = "top_road_segments_accidents"
 

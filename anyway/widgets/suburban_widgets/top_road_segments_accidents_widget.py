@@ -1,5 +1,4 @@
 from anyway.request_params import RequestParams
-from anyway.widgets.widget import register
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 from typing import Dict
 from flask_babel import _

@@ -1,12 +1,11 @@
 from anyway.request_params import RequestParams
 from anyway.widgets.widget_utils import get_accidents_stats
 from anyway.models import AccidentMarkerView
-from anyway.widgets.widget import register
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 from typing import Dict
 from flask_babel import _
 
-@register
+
 class AccidentCountByHourWidget(SubUrbanWidget):
     name: str = "accident_count_by_hour"
 
@@ -27,6 +26,7 @@ class AccidentCountByHourWidget(SubUrbanWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
-            "title": _('Number of accidents by hour') +f" - {request_params.location_info['road_segment_name']}"
+            "title": _("Number of accidents by hour")
+            + f" - {request_params.location_info['road_segment_name']}"
         }
         return items

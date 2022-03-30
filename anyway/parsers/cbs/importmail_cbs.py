@@ -151,7 +151,7 @@ class MailImporter:
 
                     # upload new cbs data to s3
                     for file in os.scandir(non_zip_path):
-                        s3_uploader.upload_to_S3(
+                        s3_uploader.upload_to_s3(
                             local_file_path=file.path, provider_code=provider_code, year=year
                         )
                     self.delete_temp_files_dir()

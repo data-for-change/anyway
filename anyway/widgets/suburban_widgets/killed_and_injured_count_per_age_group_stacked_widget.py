@@ -2,7 +2,7 @@ from typing import Dict, List
 
 from flask_babel import _
 
-from anyway.backend_constants import InjurySeverity as IS, BE_CONST as BE
+from anyway.backend_constants import InjurySeverity, BE_CONST as BE
 from anyway.request_params import RequestParams
 from anyway.widgets.suburban_widgets.killed_and_injured_count_per_age_group_widget_utils import (
     KilledAndInjuredCountPerAgeGroupWidgetUtils,
@@ -11,17 +11,11 @@ from anyway.widgets.suburban_widgets.killed_and_injured_count_per_age_group_widg
 
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 from anyway.widgets.widget import register
-from anyway.widgets.widget_utils import (
-    add_empty_keys_to_gen_two_level_dict,
-    gen_entity_labels,
-)
+from anyway.widgets.widget_utils import add_empty_keys_to_gen_two_level_dict, gen_entity_labels
 
-INJURY_ORDER = [
-    IS.KILLED,
-    IS.SEVERE_INJURED,
-    IS.LIGHT_INJURED,
-]
+INJURY_ORDER = [InjurySeverity.KILLED, InjurySeverity.SEVERE_INJURED, InjurySeverity.LIGHT_INJURED]
 MAX_AGE = 200
+
 
 @register
 class KilledInjuredCountPerAgeGroupStackedWidget(SubUrbanWidget):
@@ -37,9 +31,7 @@ class KilledInjuredCountPerAgeGroupStackedWidget(SubUrbanWidget):
         )
 
         partial_processed = add_empty_keys_to_gen_two_level_dict(
-            raw_data,
-            self.get_age_range_list(),
-            IS.codes(),
+            raw_data, self.get_age_range_list(), InjurySeverity.codes()
         )
 
         structured_data_list = []
@@ -57,7 +49,7 @@ class KilledInjuredCountPerAgeGroupStackedWidget(SubUrbanWidget):
         items["data"]["text"] = {
             "title": _("Killed and injury stacked per age group"),
             "subtitle": _("In") + " " + request_params.location_info["road_segment_name"],
-            "labels_map": gen_entity_labels(IS),
+            "labels_map": gen_entity_labels(InjurySeverity),
         }
         return items
 

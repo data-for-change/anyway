@@ -90,11 +90,7 @@ class BackEndConstants(object):
         WALLA = "walla"
         TWITTER = "twitter"
 
-    SUPPORTED_SOURCES: List[Source] = [
-        Source.YNET,
-        Source.WALLA,
-        Source.TWITTER,
-    ]
+    SUPPORTED_SOURCES: List[Source] = [Source.YNET, Source.WALLA, Source.TWITTER]
 
     # If in the future there will be a number of organizations or a need for a dynamic setting change, move this
     # data to a table in the DB.
@@ -213,6 +209,20 @@ class AccidentType(LabeledCode):
             AccidentType.DAMAGE_CAUSED_BY_A_FALLING_LOAD_OFF_A_VEHICLE: "Damage caused by a falling load off a vehicle",
         }
 
+    def is_collision(self) -> bool:
+        return self in [
+            self.COLLISION_OF_FRONT_TO_SIDE,
+            self.COLLISION_OF_FRONT_TO_REAR_END,
+            self.COLLISION_OF_SIDE_TO_SIDE_LATERAL,
+            self.HEAD_ON_FRONTAL_COLLISION,
+            self.COLLISION_WITH_A_STOPPED_NON_PARKED_VEHICLE,
+            self.COLLISION_WITH_A_PARKED_VEHICLE,
+            self.COLLISION_WITH_AN_INANIMATE_OBJECT,
+            self.COLLISION_OF_REAR_END_TO_FRONT,
+            self.COLLISION_OF_REAR_END_TO_SIDE,
+            self.COLLISION_WITH_AN_ANIMAL,
+        ]
+
 
 class DriverType(LabeledCode):
     PROFESSIONAL_DRIVER = 1
@@ -280,16 +290,8 @@ class CrossCategory(Enum):
     def get_codes(self) -> List[int]:
         """returns CrossLocation codes of category"""
         category_cross_locations = {
-            CrossCategory.UNKNOWN: [
-                CrossLocation.UNKNOWN,
-            ],
-            CrossCategory.NONE: [
-                CrossLocation.OUTFAR,
-                CrossLocation.OUTNEAR,
-            ],
-            CrossCategory.CROSSWALK: [
-                CrossLocation.YESLIGHT,
-                CrossLocation.YESNONE,
-            ],
+            CrossCategory.UNKNOWN: [CrossLocation.UNKNOWN],
+            CrossCategory.NONE: [CrossLocation.OUTFAR, CrossLocation.OUTNEAR],
+            CrossCategory.CROSSWALK: [CrossLocation.YESLIGHT, CrossLocation.YESNONE],
         }
         return list(map(lambda x: x.value, category_cross_locations[self]))

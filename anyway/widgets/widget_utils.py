@@ -1,4 +1,6 @@
+import copy
 import logging
+import typing
 from collections import defaultdict
 from typing import Dict, Any, List, Type, Optional
 
@@ -30,10 +32,9 @@ def get_accidents_stats(
     table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None
 ):
     filters = filters or {}
-    filters["provider_code"] = [
-        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
-        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
-    ]
+    provider_code_filters = [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    filters["provider_code"] = filters.get("provider_code", provider_code_filters)
+
     # get stats
     query = get_query(table_obj, filters, start_time, end_time)
     if group_by:
@@ -109,8 +110,9 @@ def run_query(query: db.session.query) -> Dict:
     return pd.read_sql_query(query.statement, query.session.bind).to_dict(orient="records")
 
 
+# TODO: Find a better way to deal with typing.Union[int, str]
 def format_2_level_items(
-    items: Dict[str, dict],
+    items: Dict[typing.Union[int, str], dict],
     level1_vals: Optional[Type[LabeledCode]],
     level2_vals: Optional[Type[LabeledCode]],
 ):
@@ -123,3 +125,30 @@ def format_2_level_items(
             series_data.append({BE_CONST.LKEY: l2, BE_CONST.VAL: num})
         res.append({BE_CONST.LKEY: l1, BE_CONST.SERIES: series_data})
     return res
+
+
+def second_level_fill_and_sort(data: dict, default_order: dict) -> dict:
+    for num, value in data.items():
+        new_value = copy.deepcopy(default_order)
+        for key, value_in in value.items():
+            new_value[key] += value_in
+        data[num] = new_value
+
+    return data
+
+
+def fill_and_sort_by_numeric_range(
+    data: defaultdict, numeric_range: typing.Iterable, default_order: dict
+) -> Dict[int, dict]:
+    for item in numeric_range:
+        if item not in data:
+            data[item] = default_order
+    return dict(sorted(data.items()))
+
+
+def sort_and_fill_gaps_for_stacked_bar(
+    data: defaultdict, numeric_range: typing.Iterable, default_order: dict
+) -> Dict[int, dict]:
+    res = fill_and_sort_by_numeric_range(data, numeric_range, default_order)
+    res2 = second_level_fill_and_sort(res, default_order)
+    return res2

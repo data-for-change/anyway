@@ -51,12 +51,12 @@ def get_bounding_box(latitude, longitude, distance_in_km):
 
 def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
     lat_min, lon_min, lat_max, lon_max = get_bounding_box(latitude, longitude, distance)
-    baseX = lon_min
-    baseY = lat_min
-    distanceX = lon_max
-    distanceY = lat_max
+    base_x = lon_min
+    base_y = lat_min
+    distance_x = lon_max
+    distance_y = lat_max
     pol_str = "POLYGON(({0} {1},{0} {3},{2} {3},{2} {1},{0} {1}))".format(
-        baseX, baseY, distanceX, distanceY
+        base_x, base_y, distance_x, distance_y
     )
 
     query_obj = (
@@ -454,29 +454,29 @@ def import_to_datastore(start_date, end_date, distance, batch_size):
         truncate_injured_around_schools()
         new_items = 0
         logging.info(
-            "inserting "
-            + str(len(injured_around_schools))
-            + " new rows about to injured_around_school"
+            f"inserting {len(injured_around_schools)} new rows about to injured_around_school"
         )
         for chunk_idx, schools_chunk in enumerate(chunks(injured_around_schools, batch_size)):
             if chunk_idx % 10 == 0:
-                logging_chunk = "Chunk idx in injured_around_schools: " + str(chunk_idx)
+                logging_chunk = f"Chunk idx in injured_around_schools: {chunk_idx}"
                 logging.info(logging_chunk)
             db.session.bulk_insert_mappings(InjuredAroundSchool, schools_chunk)
             db.session.commit()
-        logging.info("inserting " + str(len(df_total)) + " new rows injured_around_school_all_data")
+        logging.info(f"inserting {len(df_total)} new rows injured_around_school_all_data")
         for chunk_idx, schools_chunk in enumerate(chunks(df_total, batch_size)):
             if chunk_idx % 10 == 0:
-                logging_chunk = "Chunk idx in injured_around_school_all_data: " + str(chunk_idx)
+                logging_chunk = f"Chunk idx in injured_around_school_all_data: {chunk_idx}"
                 logging.info(logging_chunk)
             db.session.bulk_insert_mappings(InjuredAroundSchoolAllData, schools_chunk)
             db.session.commit()
         new_items += len(injured_around_schools) + len(df_total)
-        logging.info("\t{0} items in {1}".format(new_items, time_delta(started)))
+        logging.info(f"\t{new_items} items in {time_delta(started)}")
         return new_items
-    except:
-        logging.info("\tExecution took {0}".format(time_delta(started)))
-        error = "Schools import succeded partially with " + new_items + " schools"
+    except Exception as exception:
+        logging.info(f"\tExecution took {time_delta(started)}")
+        error = (
+            f"Schools import succeeded partially with {new_items} schools. Got error : {exception}"
+        )
         raise Exception(error)
 
 

@@ -76,7 +76,7 @@ DEFAULT_MAPS_API_KEY = "AIzaSyDUIWsBLkvIUwzLHMHos9qFebyJ63hEG2M"
 
 
 app.config.from_object(__name__)
-app.config["SWAGGER_UI_DOC_EXPANSION"] = 'list'
+app.config["SWAGGER_UI_DOC_EXPANSION"] = "list"
 app.config["SESSION_COOKIE_SAMESITE"] = "none"
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["REMEMBER_COOKIE_SECURE"] = True
@@ -158,10 +158,7 @@ assets.register(
     ),
 )
 
-CORS(
-    app,
-    resources=get_cors_config(),
-)
+CORS(app, resources=get_cors_config())
 
 jinja_environment = jinja2.Environment(
     autoescape=True,
@@ -762,8 +759,7 @@ def log_bad_request(request):
 
 
 def index(marker=None, message=None):
-    context = {"url": request.base_url, "index_url": request.url_root}
-    context["CONST"] = CONST.to_dict()
+    context = {"url": request.base_url, "index_url": request.url_root, "CONST": CONST.to_dict()}
     if "marker" in request.values:
         markers = AccidentMarker.get_marker(request.values["marker"])
         if markers.count() == 1:
@@ -901,11 +897,11 @@ def year2timestamp(y):
 
 @app.route("/location-subscription", methods=["POST", "OPTIONS"])
 def updatebyemail():
-    jsonData = request.get_json(force=True)
-    logging.debug(jsonData)
-    emailaddress = str(jsonData["address"])
-    fname = (jsonData["fname"]).encode("utf8")
-    lname = (jsonData["lname"]).encode("utf8")
+    json_data = request.get_json(force=True)
+    logging.debug(json_data)
+    emailaddress = str(json_data["address"])
+    fname = (json_data["fname"]).encode("utf8")
+    lname = (json_data["lname"]).encode("utf8")
     if len(fname) > 40:
         response = Response(
             json.dumps({"respo": "First name too long"}, default=str), mimetype="application/json"
@@ -935,8 +931,8 @@ def updatebyemail():
     if curr_max_id is None:
         curr_max_id = 0
     user_id = curr_max_id + 1
-    if "school_id" in jsonData.keys():
-        school_id = int(jsonData["school_id"])
+    if "school_id" in json_data.keys():
+        school_id = int(json_data["school_id"])
         user_subscription = LocationSubscribers(
             id=user_id,
             email=emailaddress,
@@ -954,10 +950,10 @@ def updatebyemail():
             email=emailaddress,
             first_name=fname.decode("utf8"),
             last_name=lname.decode("utf8"),
-            ne_lng=jsonData["ne_lng"],
-            ne_lat=jsonData["ne_lat"],
-            sw_lng=jsonData["sw_lng"],
-            sw_lat=jsonData["sw_lat"],
+            ne_lng=json_data["ne_lng"],
+            ne_lat=json_data["ne_lat"],
+            sw_lng=json_data["sw_lng"],
+            sw_lat=json_data["sw_lat"],
             school_id=None,
         )
     db.session.add(user_subscription)
@@ -973,30 +969,30 @@ def updatebyemail():
 
 @app.route("/report-problem", methods=["POST"])
 def report_problem():
-    jsonData = request.get_json(force=True)
-    logging.debug(jsonData)
-    first_name = (jsonData["first_name"]).encode("utf8")
-    last_name = (jsonData["last_name"]).encode("utf8")
+    json_data = request.get_json(force=True)
+    logging.debug(json_data)
+    first_name = (json_data["first_name"]).encode("utf8")
+    last_name = (json_data["last_name"]).encode("utf8")
     report_problem = ReportProblem(
-        latitude=jsonData["latitude"],
-        longitude=jsonData["longitude"],
-        problem_description=jsonData["problem_description"],
-        signs_on_the_road_not_clear=jsonData["signs_on_the_road_not_clear"],
-        signs_problem=jsonData["signs_problem"],
-        pothole=jsonData["pothole"],
-        no_light=jsonData["no_light"],
-        no_sign=jsonData["no_sign"],
-        crossing_missing=jsonData["crossing_missing"],
-        sidewalk_is_blocked=jsonData["sidewalk_is_blocked"],
-        street_light_issue=jsonData["street_light_issue"],
-        road_hazard=jsonData["road_hazard"],
+        latitude=json_data["latitude"],
+        longitude=json_data["longitude"],
+        problem_description=json_data["problem_description"],
+        signs_on_the_road_not_clear=json_data["signs_on_the_road_not_clear"],
+        signs_problem=json_data["signs_problem"],
+        pothole=json_data["pothole"],
+        no_light=json_data["no_light"],
+        no_sign=json_data["no_sign"],
+        crossing_missing=json_data["crossing_missing"],
+        sidewalk_is_blocked=json_data["sidewalk_is_blocked"],
+        street_light_issue=json_data["street_light_issue"],
+        road_hazard=json_data["road_hazard"],
         first_name=first_name.decode("utf8"),
         last_name=last_name.decode("utf8"),
-        phone_number=jsonData["phone_number"],
-        email=str(jsonData["email"]),
-        send_to_municipality=jsonData["send_to_municipality"],
-        personal_id=jsonData["personal_id"],
-        image_data=jsonData["image_data"],
+        phone_number=json_data["phone_number"],
+        email=str(json_data["email"]),
+        send_to_municipality=json_data["send_to_municipality"],
+        personal_id=json_data["personal_id"],
+        image_data=json_data["image_data"],
     )
     db.session.add(report_problem)
     db.session.commit()
@@ -1198,7 +1194,7 @@ class InfographicsData(Resource):
     @api.doc("get infographics data")
     @api.expect(parser)
     def get(self):
-        return infographics_data()
+        return infographics_data_by_location()
 
 
 def infographics_data():
@@ -1208,7 +1204,7 @@ def infographics_data():
         output = get_infographics_mock_data()
     elif mock_data == "false":
         news_flash_id = request.values.get("news_flash_id")
-        if news_flash_id == None:
+        if news_flash_id is None:
             log_bad_request(request)
             return abort(http_client.BAD_REQUEST)
 
@@ -1366,48 +1362,7 @@ def embedded_reports_api():
     return response
 
 
-# def infographics_data_by_location():
-#     mock_data = request.values.get("mock", "false")
-#     personalized_data = request.values.get("personalized", "false")
-#     if mock_data == "true":
-#         output = get_infographics_mock_data()
-#     elif mock_data == "false":
-#         road_segment_id = request.values.get("road_segment_id")
-#         if road_segment_id == None:
-#             log_bad_request(request)
-#             return abort(http_client.BAD_REQUEST)
-#
-#         number_of_years_ago = request.values.get("years_ago", BE_CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
-#         lang: str = request.values.get("lang", "he")
-#         logging.debug(
-#             (
-#                 "getting infographics data for news_flash_id: {news_flash_id}, "
-#                 + "in time period:{number_of_years_ago}, lang:{lang}"
-#             ).format(
-#                 news_flash_id=road_segment_id, number_of_years_ago=number_of_years_ago, lang=lang
-#             )
-#         )
-#         output = get_infographics_data_for_road_segment(
-#             road_segment_id=road_segment_id, years_ago=number_of_years_ago, lang=lang
-#         )
-#         if not output:
-#             log_bad_request(request)
-#             return abort(http_client.NOT_FOUND)
-#     else:
-#         log_bad_request(request)
-#         return abort(http_client.BAD_REQUEST)
-#
-#     if personalized_data == "true":
-#         output = widgets_personalisation_for_user(output)
-#
-#     json_data = json.dumps(output, default=str)
-#     return Response(json_data, mimetype="application/json")
-#
-#
-
 # User system API
-app.add_url_rule("/user/add_user_to_org", view_func=add_user_to_org, methods=["POST"])
-app.add_url_rule("/user/remove_user_from_org", view_func=remove_user_from_org, methods=["POST"])
 app.add_url_rule("/user/add_role", view_func=add_role, methods=["POST"])
 app.add_url_rule(
     "/user/change_user_active_mode", view_func=change_user_active_mode, methods=["POST"]
@@ -1458,3 +1413,29 @@ class AddOrganization(Resource):
         args = add_org_parser.parse_args()
         org_name = args["name"]
         return add_organization(org_name)
+
+
+update_user_org_parser = api.parser()
+update_user_org_parser.add_argument("email", type=str, required=True)
+update_user_org_parser.add_argument(
+    "org",
+    type=str,
+    required=False,
+    help="If 'org' argument is missing then the user will not be a member of any organization.",
+)
+
+
+@api.route("/user/update_user_org")
+@api.expect(update_user_org_parser)
+class UpdateUserOrg(Resource):
+    @api.doc(
+        "Add user as a member in organization, if 'org' argument is missing then the user will not be a "
+        "member of any organization"
+    )
+    @api.response(200, "")
+    @api.response(400, "Organization or User is not in the DB")
+    def post(self):
+        args = update_user_org_parser.parse_args()
+        user_email = args["email"]
+        org_name = args["org"]
+        return update_user_org(user_email, org_name)

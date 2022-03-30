@@ -30,7 +30,7 @@ from anyway.error_code_and_strings import (
     ERROR_TO_HTTP_CODE_DICT,
     build_json_for_user_api_error,
 )
-from anyway.models import Organization, users_to_organizations, Roles, Users, users_to_roles
+from anyway.models import Organization, Roles, Users, users_to_roles
 from anyway.oauth import OAuthSignIn
 
 from anyway.utilities import is_valid_number, is_a_valid_email, is_a_safe_redirect_url
@@ -48,6 +48,7 @@ login_manager._clear_cookie = _clear_cookie_hijack
 login_manager.init_app(app)
 # Setup Flask-Principal
 principals = Principal(app)
+
 
 # Copied and modified from flask-security
 def roles_accepted(*roles):
@@ -524,9 +525,7 @@ def get_roles_list() -> Response:
     ]
 
     return Response(
-        response=json.dumps(send_list),
-        status=HTTPStatus.OK,
-        mimetype="application/json",
+        response=json.dumps(send_list), status=HTTPStatus.OK, mimetype="application/json"
     )
 
 
@@ -536,9 +535,7 @@ def get_organization_list() -> Response:
     send_list = [org.name for org in orgs_list]
 
     return Response(
-        response=json.dumps(send_list),
-        status=HTTPStatus.OK,
-        mimetype="application/json",
+        response=json.dumps(send_list), status=HTTPStatus.OK, mimetype="application/json"
     )
 
 
@@ -557,62 +554,19 @@ def add_organization(name: str) -> Response:
 
 
 @roles_accepted(BE_CONST.Roles2Names.Admins.value)
-def remove_user_from_org() -> Response:
-    req_dict = request.json
-    if req_dict is None:
-        return return_json_error(Es.BR_BAD_JSON)
-
-    email = req_dict.get("email")
-    user = get_user_by_email(db, email)
+def update_user_org(user_email: str, org_name: str) -> Response:
+    user = get_user_by_email(db, user_email)
     if user is None:
-        return return_json_error(Es.BR_USER_NOT_FOUND, email)
+        return return_json_error(Es.BR_USER_NOT_FOUND, user_email)
 
-    org = req_dict.get("org")
-    if not org:
-        return return_json_error(Es.BR_FIELD_MISSING)
-    try:
-        org_obj = db.session.query(Organization).filter(Organization.name == org).one()
-    except NoResultFound:
-        return return_json_error(Es.BR_ORG_NOT_FOUND)
+    if org_name is not None:
+        try:
+            org_obj = db.session.query(Organization).filter(Organization.name == org_name).one()
+        except NoResultFound:
+            return return_json_error(Es.BR_ORG_NOT_FOUND)
+        user.organizations = [org_obj]
+    else:
+        user.organizations = []
 
-    removed = False
-    for user_org in user.organizations:
-        if user_org.id == org_obj.id:
-            delete_user_from_org = users_to_organizations.delete().where(  # noqa pylint: disable=no-value-for-parameter
-                (users_to_organizations.c.user_id == user.id)
-                & (users_to_organizations.c.organization_id == org_obj.id)
-            )
-            db.session.execute(delete_user_from_org)
-            db.session.commit()
-            removed = True
-    if not removed:
-        return return_json_error(Es.BR_USER_NOT_IN_ORG, org)
-
-    return Response(status=HTTPStatus.OK)
-
-
-@roles_accepted(BE_CONST.Roles2Names.Admins.value)
-def add_user_to_org() -> Response:
-    req_dict = request.json
-    if req_dict is None:
-        return return_json_error(Es.BR_BAD_JSON)
-
-    email = req_dict.get("email")
-    user = get_user_by_email(db, email)
-    if user is None:
-        return return_json_error(Es.BR_USER_NOT_FOUND, email)
-
-    org = req_dict.get("org")
-    if not org:
-        return return_json_error(Es.BR_FIELD_MISSING)
-    try:
-        org_obj = db.session.query(Organization).filter(Organization.name == org).one()
-    except NoResultFound:
-        return return_json_error(Es.BR_ORG_NOT_FOUND)
-
-    if org_obj in user.organizations:
-        return return_json_error(Es.BR_USER_ALREADY_IN_ORG)
-
-    user.organizations.append(org_obj)
     db.session.commit()
     return Response(status=HTTPStatus.OK)

@@ -3,6 +3,7 @@ from anyway.widgets.widget import Widget
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 from typing import Dict
 
+
 # TODO: register?
 class AccidentCountPedestriansPerVehicleStreetVsAllWidget(SubUrbanWidget):
     name: str = "accident_count_pedestrians_per_vehicle_street_vs_all"

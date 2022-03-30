@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Union, Any
 
 from anyway.request_params import RequestParams
 from anyway.backend_constants import InjurySeverity
@@ -26,7 +26,9 @@ class SuburbanCrosswalkWidget(SubUrbanWidget):
         )
 
     @staticmethod
-    def get_crosswalk(road, start_time, end_time) -> None:
+    def get_crosswalk(
+        road, start_time, end_time
+    ) -> Dict[str, Any]:
         cross_output = {
             "with_crosswalk": get_accidents_stats(
                 table_obj=InvolvedMarkerView,
@@ -73,7 +75,7 @@ class SuburbanCrosswalkWidget(SubUrbanWidget):
         }
         return items
 
-    def is_included(self) -> bool:
+    def is_included(self) -> Union[dict, list, bool]:
         if (
             self.items["with_crosswalk"][0]["count"] + self.items["without_crosswalk"][0]["count"]
             > 10

@@ -7,7 +7,10 @@ from sqlalchemy import func
 import pandas as pd
 
 from anyway.models import NewsFlash, AccidentMarkerView, City, Streets
-from anyway.parsers.location_extraction import get_road_segment_name_and_number, get_road_segment_by_name
+from anyway.parsers.location_extraction import (
+    get_road_segment_name_and_number,
+    get_road_segment_by_name_and_road,
+)
 from anyway.backend_constants import BE_CONST
 from anyway.app_and_db import db
 from anyway.parsers import resolution_dict
@@ -40,7 +43,9 @@ class RequestParams:
 # todo: merge with get_request_params()
 def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams]:
     location = get_location_from_request_values(vals)
-    years_ago = vals.get("years_ago")
+    if location is None:
+        return None
+    years_ago = vals.get("years_ago", BE_CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
     lang = vals.get("lang", "he")
     location_text = location["text"]
     gps = location["gps"]
@@ -85,7 +90,7 @@ def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams
     return request_params
 
 
-def get_location_from_request_values(vals: dict) -> dict:
+def get_location_from_request_values(vals: dict) -> Optional[dict]:
     news_flash_id = vals.get("news_flash_id")
     if news_flash_id is not None:
         return get_location_from_news_flash(news_flash_id)
@@ -96,13 +101,17 @@ def get_location_from_request_values(vals: dict) -> dict:
         "street1" in vals or "street1_hebrew" in vals
     ):
         return extract_street_location(vals)
-    logging.error(f"Unsupported location:{vals}")
-    return {}
+    logging.error(f"Unsupported location:{vals.values()}")
+    return None
 
 
-def get_location_from_news_flash(news_flash_id: str) -> dict:
+def get_location_from_news_flash(news_flash_id: str) -> Optional[dict]:
     news_flash = extract_news_flash_obj(news_flash_id)
+    if news_flash is None:
+        return None
     loc = extract_news_flash_location(news_flash)
+    if loc is None:
+        return None
     res = loc["data"]["resolution"]
     loc["data"]["resolution"] = BE_CONST.ResolutionCategories(res)
     loc["text"] = get_news_flash_location_text(news_flash)
@@ -115,11 +124,14 @@ def add_numeric_field_values(loc: dict, news_flash: NewsFlash) -> None:
         if "yishuv_symbol" not in loc["data"]:
             loc["data"]["yishuv_symbol"] = City.get_symbol_from_name(loc["data"]["yishuv_name"])
         if "street1" not in loc["data"]:
-            loc["data"]["street1"] = Streets.get_street_by_street_name(loc["data"]["yishuv_symbol"],
-                                                                       loc["data"]["street1_hebrew"])
+            loc["data"]["street1"] = Streets.get_street_by_street_name(
+                loc["data"]["yishuv_symbol"], loc["data"]["street1_hebrew"]
+            )
     elif loc["data"]["resolution"] == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
         if "road_segment_id" not in loc["data"]:
-            segment = get_road_segment_by_name(loc["data"]["road_segment_name"])
+            segment = get_road_segment_by_name_and_road(
+                loc["data"]["road_segment_name"], loc["data"]["road1"]
+            )
             loc["data"]["road_segment_id"] = segment.segment_id
 
 
@@ -198,9 +210,13 @@ def fill_missing_street_values(vals: dict) -> dict:
     else:
         res["yishuv_symbol"] = City.get_symbol_from_name(res["yishuv_name"])
     if "street1" in res and "street1_hebrew" not in res:
-        res["street1_hebrew"] = Streets.get_street_name_by_street(res["yishuv_symbol"], res["street1"])
+        res["street1_hebrew"] = Streets.get_street_name_by_street(
+            res["yishuv_symbol"], res["street1"]
+        )
     else:
-        res["street1"] = Streets.get_street_by_street_name(res["yishuv_symbol"], res["street1_hebrew"])
+        res["street1"] = Streets.get_street_by_street_name(
+            res["yishuv_symbol"], res["street1_hebrew"]
+        )
     return res
 
 

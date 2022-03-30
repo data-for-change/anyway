@@ -17,7 +17,10 @@ class SubUrbanWidget(Widget):
         return (
             request_params is not None
             and "road1" in request_params.location_info
-            and "road_segment_name" in request_params.location_info
+            and (
+                "road_segment_name" in request_params.location_info
+                or "road_segment_id" in request_params.location_info
+            )
         )
 
     @staticmethod

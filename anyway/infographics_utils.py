@@ -5,7 +5,7 @@ import json
 import os
 import traceback
 
-from typing import Optional, Dict, List, Callable, Type
+from typing import Optional, Dict, List, Type
 from collections import defaultdict
 
 # noinspection PyProtectedMember
@@ -27,20 +27,23 @@ from anyway.parsers import resolution_dict
 from anyway.infographics_dictionaries import head_on_collisions_comparison_dict
 from anyway.parsers import infographics_data_cache_updater
 from anyway.widgets.widget import Widget, widgets_dict
-
-logger = logging.getLogger("infographics_utils")
+from anyway.parsers.infographics_data_cache_updater import (
+    get_infographics_data_from_cache_by_road_segment,
+)
 
 # We need to import the modules, which in turn imports all the widgets, and registers them, even if they are not
 # explicitly used here
 # pylint: disable=unused-import
 import anyway.widgets.urban_widgets
 import anyway.widgets.suburban_widgets
-
+import anyway.widgets.all_locations_widgets
 
 # pylint: enable=unused-import
 
+logger = logging.getLogger("infographics_utils")
 
-def get_widget_factories() -> List[Callable[[RequestParams], Type[Widget]]]:
+
+def get_widget_factories() -> List[Type[Widget]]:
     """Returns list of callables that generate all widget instances"""
     return list(widgets_dict.values())
 
@@ -77,7 +80,7 @@ def convert_roads_fatal_accidents_to_frontend_view(data_dict):
 
 
 # noinspection PyArgumentList
-def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> List[Type[Widget]]:
+def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> List[Widget]:
     widgets = []
     # noinspection PyArgumentList
     for w in widgets_dict.values():
@@ -246,6 +249,7 @@ def create_infographics_items(request_params: RequestParams) -> Dict:
         output["meta"] = {
             "location_info": request_params.location_info.copy(),
             "location_text": request_params.location_text,
+            "resolution": request_params.resolution.name,
             "dates_comment": get_dates_comment(),
         }
         output["widgets"] = []
@@ -260,7 +264,8 @@ def create_infographics_items(request_params: RequestParams) -> Dict:
 
 
 def get_infographics_data(news_flash_id, years_ago, lang: str) -> Dict:
-    request_params = get_request_params(news_flash_id, years_ago, lang)
+    vals = {"news_flash_id": news_flash_id, "years_ago": years_ago, "lang": lang}
+    request_params = get_request_params_from_request_values(vals)
     if os.environ.get("FLASK_ENV") == "development":
         output = create_infographics_items(request_params)
     else:
@@ -284,16 +289,13 @@ def get_infographics_data(news_flash_id, years_ago, lang: str) -> Dict:
 
 
 def get_infographics_data_for_road_segment(road_segment_id, years_ago, lang: str) -> Dict:
-    request_params = get_request_params_for_road_segment(road_segment_id, years_ago, lang)
+    vals = {"road_segment_id": road_segment_id, "years_ago": years_ago, "lang": lang}
+    request_params = get_request_params_from_request_values(vals)
     if os.environ.get("FLASK_ENV") == "development":
         output = create_infographics_items(request_params)
     else:
         try:
-            output = (
-                infographics_data_cache_updater.get_infographics_data_from_cache_by_road_segment(
-                    road_segment_id, years_ago
-                )
-            )
+            output = get_infographics_data_from_cache_by_road_segment(road_segment_id, years_ago)
         except Exception as e:
             logging.error(
                 f"Exception while retrieving from infographics cache({road_segment_id},{years_ago})"

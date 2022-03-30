@@ -44,30 +44,30 @@ class VehicleType(Enum):
 
     def get_english_display_name(self):
         english_vehicle_type_display_names = {
-            VehicleType.CAR: _("private car"),
-            VehicleType.TRUCK_UPTO_4: _("truck upto 4 tons"),
-            VehicleType.PICKUP_UPTO_4: _("pickup upto 4 tons"),
-            VehicleType.TRUCK_4_TO_10: _("truck 4 to 10 tons"),
-            VehicleType.TRUCK_12_TO_16: _("truck 12 to 16 tons"),
-            VehicleType.TRUCK_16_TO_34: _("truck 16 to 34 tons"),
-            VehicleType.TRUCK_ABOVE_34: _("truck above 34 tons"),
-            VehicleType.MOTORCYCLE_UPTO_50: _("motorcycle upto 50 cc"),
-            VehicleType.MOTORCYCLE_50_TO_250: _("motorcycle 50 to 250 cc"),
-            VehicleType.MOTORCYCLE_250_TO_500: _("motorcycle 250 to 500 cc"),
-            VehicleType.BUS: _("bus"),
-            VehicleType.TAXI: _("taxi"),
-            VehicleType.WORK: _("work vehicle"),
-            VehicleType.TRACTOR: _("tractor"),
-            VehicleType.BIKE: _("bike"),
-            VehicleType.TRAIN: _("train"),
-            VehicleType.OTHER_AND_UNKNOWN: _("other and unknown"),
-            VehicleType.MINIBUS: _("minibus"),
-            VehicleType.MOTORCYCLE_ABOVE_500: _("motorcycle above 500 cc"),
-            VehicleType.ELECTRIC_SCOOTER: _("electric scooter"),
-            VehicleType.MOBILITY_SCOOTER: _("mobility scooter"),
-            VehicleType.ELECTRIC_BIKE: _("electric bike"),
-            VehicleType.TRUCK_3_5_TO_10: _("truck 3.5 to 10 tons"),
-            VehicleType.TRUCK_10_TO_12: _("truck 10 to 12 tons"),
+            VehicleType.CAR: "private car",
+            VehicleType.TRUCK_UPTO_4: "truck upto 4 tons",
+            VehicleType.PICKUP_UPTO_4: "pickup upto 4 tons",
+            VehicleType.TRUCK_4_TO_10: "truck 4 to 10 tons",
+            VehicleType.TRUCK_12_TO_16: "truck 12 to 16 tons",
+            VehicleType.TRUCK_16_TO_34: "truck 16 to 34 tons",
+            VehicleType.TRUCK_ABOVE_34: "truck above 34 tons",
+            VehicleType.MOTORCYCLE_UPTO_50: "motorcycle upto 50 cc",
+            VehicleType.MOTORCYCLE_50_TO_250: "motorcycle 50 to 250 cc",
+            VehicleType.MOTORCYCLE_250_TO_500: "motorcycle 250 to 500 cc",
+            VehicleType.BUS: "bus",
+            VehicleType.TAXI: "taxi",
+            VehicleType.WORK: "work vehicle",
+            VehicleType.TRACTOR: "tractor",
+            VehicleType.BIKE: "bike",
+            VehicleType.TRAIN: "train",
+            VehicleType.OTHER_AND_UNKNOWN: "other and unknown",
+            VehicleType.MINIBUS: "minibus",
+            VehicleType.MOTORCYCLE_ABOVE_500: "motorcycle above 500 cc",
+            VehicleType.ELECTRIC_SCOOTER: "electric scooter",
+            VehicleType.MOBILITY_SCOOTER: "mobility scooter",
+            VehicleType.ELECTRIC_BIKE: "electric bike",
+            VehicleType.TRUCK_3_5_TO_10: "truck 3.5 to 10 tons",
+            VehicleType.TRUCK_10_TO_12: "truck 10 to 12 tons",
         }
         try:
             return english_vehicle_type_display_names[self]
@@ -179,17 +179,27 @@ class VehicleCategory(Enum):
 
     def get_english_display_name(self):
         english_vehicle_type_display_names = {
-            VehicleCategory.PROFESSIONAL_DRIVER: _("professional driver"),
-            VehicleCategory.PRIVATE_DRIVER: _("private driver"),
-            VehicleCategory.LIGHT_ELECTRIC: _("light electric vehicles"),
-            VehicleCategory.CAR: _("private car"),
-            VehicleCategory.LARGE: _("large vehicle"),
-            VehicleCategory.MOTORCYCLE: _("motorcycle"),
-            VehicleCategory.BICYCLE_AND_SMALL_MOTOR: _("bicycle and small motor vehicles"),
-            VehicleCategory.OTHER: _("other"),
+            VehicleCategory.PROFESSIONAL_DRIVER: "professional driver",
+            VehicleCategory.PRIVATE_DRIVER: "private driver",
+            VehicleCategory.LIGHT_ELECTRIC: "light electric vehicles",
+            VehicleCategory.CAR: "private car",
+            VehicleCategory.LARGE: "large vehicle",
+            VehicleCategory.MOTORCYCLE: "motorcycle",
+            VehicleCategory.BICYCLE_AND_SMALL_MOTOR: "bicycle and small motor vehicles",
+            VehicleCategory.OTHER: "other vehicle",
         }
         try:
             return english_vehicle_type_display_names[self]
         except (KeyError, TypeError):
             logging.exception(f"VehicleType.get_display_name: {self}: no display string defined")
             return "no display name defined"
+
+
+_("professional driver")
+_("private driver")
+_("light electric vehicles")
+_("private car")
+_("large vehicle")
+_("motorcycle")
+_("bicycle and small motor vehicles")
+_("other vehicle")

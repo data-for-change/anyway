@@ -194,9 +194,7 @@ def gen_news_flash_query_v2(session, valid_params: dict):
             sources = [source.value for source in value]
             query = query.filter(NewsFlash.source.in_(sources))
         if param == "start_date":
-            query = query.filter(
-                NewsFlash.date >= value and NewsFlash.date <= valid_params["end_date"]
-            )
+            query = query.filter(value <= NewsFlash.date <= valid_params["end_date"])
         if param == "resolution":
             query = filter_by_resolutions(query, value)
     query = query.filter(

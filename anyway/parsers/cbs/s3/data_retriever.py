@@ -112,7 +112,6 @@ class S3DataRetriever(S3DataClass):
                 self.__max_year = year if self.__max_year is None else max(year, self.__max_year)
                 self.__min_year = year if self.__min_year is None else min(year, self.__min_year)
 
-
     def get_files_from_s3(self, start_year, accidents_types=None):
         if accidents_types is None:
             desired_accidents_types = self.__accidents_types

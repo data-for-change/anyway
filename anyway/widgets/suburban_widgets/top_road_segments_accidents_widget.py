@@ -1,12 +1,10 @@
 from anyway.request_params import RequestParams
-from anyway.widgets.widget import register
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 from typing import Dict
 from flask_babel import _
 
 
-# TODO: unregister? this widget produces only mock data
-@register
+
 class TopRoadSegmentsAccidentsWidget(SubUrbanWidget):
     name: str = "top_road_segments_accidents"
 

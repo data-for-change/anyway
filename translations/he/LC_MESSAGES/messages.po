@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-03-31 09:23+0300\n"
+"POT-Creation-Date: 2022-03-31 10:41+0300\n"
 "PO-Revision-Date: 2020-10-16 15:42+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: he\n"
@@ -170,27 +170,45 @@ msgstr "אופניים/קורקינט"
 msgid "other vehicle"
 msgstr "רכב אחר"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:64
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:63
 msgid "Number of accidents by severity"
 msgstr "מספר תאונות לפי חומרה"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:72
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:67
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:87
+msgid "Fatal, severe and light accidents count in "
+msgstr "כמות התאונות הקטלניות, הקשות והקלות ב"
+
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:67
+msgid "segment"
+msgstr "מקטע"
+
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:68
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:89
+msgid "in the selected time"
+msgstr "בפרק הזמן הנבחר"
+
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:75
 msgid "in years"
 msgstr "בשנים"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:75
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:78
 msgid "on street"
 msgstr "ברחוב"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:78
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:81
 msgid "took place"
 msgstr "התרחשו"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:80
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:83
 msgid "accidents"
 msgstr "תאונות"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:86
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:88
+msgid "street"
+msgstr "רחוב"
+
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:94
 msgid "Fatal, severe and light accidents count in the specified location."
 msgstr "כמות התאונות הקטלניות, הקשות והקלות במקטע בפרק הזמן הנבחר."
 
@@ -272,7 +290,9 @@ msgstr "תאונות על פי זמן"
 msgid ""
 "Distribution of accidents by day/night. Day/night are determined by "
 "sunrise and sunset at each day of the year."
-msgstr "התפלגות התאונות ביום ובלילה. היום והלילה נקבעים לפי זריחת השמש ושקיעתה בכל יום בשנה"
+msgstr ""
+"התפלגות התאונות ביום ובלילה. היום והלילה נקבעים לפי זריחת השמש ושקיעתה "
+"בכל יום בשנה"
 
 #: anyway/widgets/suburban_widgets/accident_count_by_driver_type_widget.py:69
 msgid "driver_type"

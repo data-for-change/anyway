@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-03-19 09:25+0200\n"
+"POT-Creation-Date: 2022-03-31 09:23+0300\n"
 "PO-Revision-Date: 2020-11-26 16:45+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -206,15 +206,15 @@ msgstr ""
 msgid "in "
 msgstr ""
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:154
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:163
 msgid "accident_severity"
 msgstr ""
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:155
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:164
 msgid "type"
 msgstr ""
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:169
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:178
 msgid ""
 "Most recent fatal and severe accidents, ordered by date. Up to 10 "
 "accidents are presented."
@@ -256,8 +256,14 @@ msgid ""
 " average"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/accident_count_by_day_night_widget.py:30
-msgid "Number of accidents by day/night"
+#: anyway/widgets/suburban_widgets/accident_count_by_day_night_widget.py:34
+msgid "Accidents by time"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/accident_count_by_day_night_widget.py:38
+msgid ""
+"Distribution of accidents by day/night. Day/night are determined by "
+"sunrise and sunset at each day of the year."
 msgstr ""
 
 #: anyway/widgets/suburban_widgets/accident_count_by_driver_type_widget.py:69
@@ -275,7 +281,7 @@ msgid ""
 "light electric - electric scooter, mobility scooter, electric bike."
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/accident_count_by_hour_widget.py:31
+#: anyway/widgets/suburban_widgets/accident_count_by_hour_widget.py:29
 msgid "Number of accidents by hour"
 msgstr ""
 
@@ -293,23 +299,23 @@ msgid ""
 "previous years"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:94
+#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:91
 msgid "Fatal head on collisions vs other accidents"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:97
+#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:94
 msgid "desc"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:124
+#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:121
 msgid "others"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:125
+#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:122
 msgid "frontal"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:126
+#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:123
 msgid ""
 "Fatal accidents distribution by accident type - head on collisions vs "
 "other accidents."
@@ -384,7 +390,7 @@ msgstr ""
 msgid "Severe and fatal accidents per Km by section in road"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/top_road_segments_accidents_widget.py:32
+#: anyway/widgets/suburban_widgets/top_road_segments_accidents_widget.py:30
 msgid "Segments with most accidents"
 msgstr ""
 
@@ -542,5 +548,8 @@ msgstr ""
 #~ "Most recent fatal and severe accidents"
 #~ " in location, ordered by date. Up "
 #~ "to 10 accidents are presented."
+#~ msgstr ""
+
+#~ msgid "Number of accidents by day/night"
 #~ msgstr ""
 

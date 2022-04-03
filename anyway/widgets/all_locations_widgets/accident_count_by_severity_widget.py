@@ -69,7 +69,6 @@ class AccidentCountBySeverityWidget(AllLocationsWidget):
             )
         elif request_params.resolution == BE_CONST.ResolutionCategories.STREET:
             # To have FE to treat it as a different widget
-            items["name"] = "accident_count_by_severity_urban"
             num_accidents = items["data"]["items"]["total_accidents_count"]
             s = "{} {} - {} {} {}, {}, {} {} {}".format(
                 _("in years"),

@@ -14,6 +14,10 @@ class AccidentCountByDayNightWidget(SubUrbanWidget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 10
+        self.information = (
+            "Distribution of accidents by day/night. "
+            "Day/night are determined by sunrise and sunset at each day of the year."
+        )
 
     def generate_items(self) -> None:
         self.items = get_accidents_stats(
@@ -27,5 +31,11 @@ class AccidentCountByDayNightWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        items["data"]["text"] = {"title": _("Number of accidents by day/night")}
+        items["data"]["text"] = {"title": _("Accidents by time")}
         return items
+
+
+_(
+    "Distribution of accidents by day/night. "
+    "Day/night are determined by sunrise and sunset at each day of the year."
+)

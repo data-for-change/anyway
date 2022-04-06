@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-03-19 09:25+0200\n"
+"POT-Creation-Date: 2022-03-31 10:41+0300\n"
 "PO-Revision-Date: 2020-10-16 15:42+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: he\n"
@@ -170,27 +170,45 @@ msgstr "אופניים/קורקינט"
 msgid "other vehicle"
 msgstr "רכב אחר"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:64
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:63
 msgid "Number of accidents by severity"
 msgstr "מספר תאונות לפי חומרה"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:72
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:67
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:87
+msgid "Fatal, severe and light accidents count in "
+msgstr "כמות התאונות הקטלניות, הקשות והקלות ב"
+
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:67
+msgid "segment"
+msgstr "מקטע"
+
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:68
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:89
+msgid "in the selected time"
+msgstr "בפרק הזמן הנבחר"
+
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:75
 msgid "in years"
 msgstr "בשנים"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:75
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:78
 msgid "on street"
 msgstr "ברחוב"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:78
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:81
 msgid "took place"
 msgstr "התרחשו"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:80
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:83
 msgid "accidents"
 msgstr "תאונות"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:86
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:88
+msgid "street"
+msgstr "רחוב"
+
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:94
 msgid "Fatal, severe and light accidents count in the specified location."
 msgstr "כמות התאונות הקטלניות, הקשות והקלות במקטע בפרק הזמן הנבחר."
 
@@ -206,15 +224,15 @@ msgstr "תאונות חמורות ברחוב"
 msgid "in "
 msgstr "ב"
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:154
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:163
 msgid "accident_severity"
 msgstr "חומרת תאונה"
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:155
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:164
 msgid "type"
 msgstr "סוג"
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:169
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:178
 msgid ""
 "Most recent fatal and severe accidents, ordered by date. Up to 10 "
 "accidents are presented."
@@ -264,9 +282,17 @@ msgid ""
 " average"
 msgstr "השוואת אחוז הרכבים בתאונות במקטע {} לעומת ממוצע ארצי"
 
-#: anyway/widgets/suburban_widgets/accident_count_by_day_night_widget.py:30
-msgid "Number of accidents by day/night"
-msgstr "מספר תאונות ביום ובלילה"
+#: anyway/widgets/suburban_widgets/accident_count_by_day_night_widget.py:34
+msgid "Accidents by time"
+msgstr "תאונות על פי זמן"
+
+#: anyway/widgets/suburban_widgets/accident_count_by_day_night_widget.py:38
+msgid ""
+"Distribution of accidents by day/night. Day/night are determined by "
+"sunrise and sunset at each day of the year."
+msgstr ""
+"התפלגות התאונות ביום ובלילה. היום והלילה נקבעים לפי זריחת השמש ושקיעתה "
+"בכל יום בשנה"
 
 #: anyway/widgets/suburban_widgets/accident_count_by_driver_type_widget.py:69
 msgid "driver_type"
@@ -286,7 +312,7 @@ msgstr ""
 "עבודה, מיניבוס, טרקטור, נהג פרטי - רכב פרטי, אופנוע, חשמלי קל - קלנועית, "
 "קורקינט ואופניים חשמליים."
 
-#: anyway/widgets/suburban_widgets/accident_count_by_hour_widget.py:31
+#: anyway/widgets/suburban_widgets/accident_count_by_hour_widget.py:29
 msgid "Number of accidents by hour"
 msgstr "מספר תאונות לפי שעה"
 
@@ -304,23 +330,23 @@ msgid ""
 "previous years"
 msgstr "כמות ההרוגים בתאונות דרכים בחודש הנוכחי בהשוואה לשנים קודמות"
 
-#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:94
+#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:91
 msgid "Fatal head on collisions vs other accidents"
 msgstr "תאונות קטלניות לפי סוג"
 
-#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:97
+#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:94
 msgid "desc"
 msgstr "תאור"
 
-#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:124
+#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:121
 msgid "others"
 msgstr "אחרות"
 
-#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:125
+#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:122
 msgid "frontal"
 msgstr "חזיתיות"
 
-#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:126
+#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:123
 msgid ""
 "Fatal accidents distribution by accident type - head on collisions vs "
 "other accidents."
@@ -397,7 +423,7 @@ msgstr "מקטעים עם הכי הרבה תאונות לק\"מ "
 msgid "Severe and fatal accidents per Km by section in road"
 msgstr "תאונות קטלניות וקשות לכל קילומטר לפי מקטע בכביש"
 
-#: anyway/widgets/suburban_widgets/top_road_segments_accidents_widget.py:32
+#: anyway/widgets/suburban_widgets/top_road_segments_accidents_widget.py:30
 msgid "Segments with most accidents"
 msgstr "מקטעים עם הכי הרבה תאונות"
 
@@ -519,4 +545,7 @@ msgstr ""
 
 #~ msgid "accident_type"
 #~ msgstr "חומרת תאונה"
+
+#~ msgid "Number of accidents by day/night"
+#~ msgstr "מספר תאונות ביום ובלילה"
 

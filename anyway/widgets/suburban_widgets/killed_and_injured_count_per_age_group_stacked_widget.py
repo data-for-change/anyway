@@ -13,7 +13,7 @@ from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 from anyway.widgets.widget import register
 from anyway.widgets.widget_utils import add_empty_keys_to_gen_two_level_dict, gen_entity_labels
 
-INJURY_ORDER = [InjurySeverity.KILLED, InjurySeverity.SEVERE_INJURED, InjurySeverity.LIGHT_INJURED]
+INJURY_ORDER = [InjurySeverity.LIGHT_INJURED, InjurySeverity.SEVERE_INJURED, InjurySeverity.KILLED]
 MAX_AGE = 200
 
 

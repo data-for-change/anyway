@@ -39,9 +39,9 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
     def convert_to_dict(query_results):
         res = defaultdict(
             lambda: {
-                InjurySeverity.KILLED.value: 0,
-                InjurySeverity.SEVERE_INJURED.value: 0,
                 InjurySeverity.LIGHT_INJURED.value: 0,
+                InjurySeverity.SEVERE_INJURED.value: 0,
+                InjurySeverity.KILLED.value: 0,
             }
         )
         for query_result in query_results:

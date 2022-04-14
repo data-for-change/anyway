@@ -4,6 +4,7 @@ import datetime
 import json
 import logging
 from collections import namedtuple
+from typing import List
 
 try:
     from flask_login import UserMixin
@@ -941,6 +942,15 @@ class City(Base):
             raise ValueError(f"City: no city with name:{name}.")
         return res.symbol_code
 
+    @staticmethod
+    def get_all_cities() -> List[dict]:
+        res = db.session.query(City.symbol_code, City.search_heb).all()
+        if res is None:
+            logging.error(f"Failed to get cities.")
+            raise RuntimeError(f"When retrieving all cities")
+        res1 = [{"yishuv_symbol": c.symbol_code, "yishuv_name": c.search_heb} for c in res]
+        return res1
+
     # Flask-Login integration
     def is_authenticated(self):
         return True
@@ -992,6 +1002,18 @@ class Streets(Base):
         if res is None:
             raise ValueError(f"{name}: could not find street in yishuv:{yishuv_symbol}")
         return res
+
+    @staticmethod
+    def get_streets_by_yishuv(yishuv_symbol: int) -> List[dict]:
+        res = (
+            db.session.query(Streets.street, Streets.street_hebrew)
+            .filter(Streets.yishuv_symbol == yishuv_symbol)
+            .all()
+        )
+        res1 = [{"street": s.street, "street_hebrew": s.street_hebrew} for s in res]
+        if res is None:
+            raise RuntimeError(f"When retrieving streets of {yishuv_symbol}")
+        return res1
 
 
 class RegisteredVehicle(Base):

@@ -107,16 +107,16 @@ jobs:
             git clone git@github.com:hasadna/hasadna-k8s.git &&\
             cd hasadna-k8s &&\
             if [ "${GITHUB_REF}" == "refs/heads/dev" ]; then
-              python update_yaml.py '{"anyway":{"imageDev":"'${ANYWAY_IMAGE}'","nginxImageDev":"'${NGINX_IMAGE}'"}}' ./values.auto-updated.yaml
+              python update_yaml.py '{"imageDev":"'${ANYWAY_IMAGE}'","nginxImageDev":"'${NGINX_IMAGE}'"}' apps/anyway/values-anyway-auto-updated.yaml
             else
-              python update_yaml.py '{"anyway":{"image":"'${ANYWAY_IMAGE}'","dbImage":"'${DB_IMAGE}'","dbBackupImage":"'${DB_BACKUP_IMAGE}'","nginxImage":"'${NGINX_IMAGE}'"}}' ./values.auto-updated.yaml
+              python update_yaml.py '{"image":"'${ANYWAY_IMAGE}'","dbImage":"'${DB_IMAGE}'","dbBackupImage":"'${DB_BACKUP_IMAGE}'","nginxImage":"'${NGINX_IMAGE}'"}' apps/anyway/values-anyway-auto-updated.yaml
             fi &&\
             git config --global user.name "Anyway CI" &&\
             git config --global user.email "anyway-ci@localhost" &&\
             if [ "${GITHUB_REF}" == "refs/heads/dev" ]; then
-              git add ./values.auto-updated.yaml && git commit -m "automatic update of dev anyway"
+              git add apps/anyway/values-anyway-auto-updated.yaml && git commit -m "automatic update of dev anyway"
             else
-              git add ./values.auto-updated.yaml && git commit -m "automatic update of anyway"
+              git add apps/anyway/values-anyway-auto-updated.yaml && git commit -m "automatic update of anyway"
             fi &&\
             git push origin master &&\
             cd `mktemp -d` &&\

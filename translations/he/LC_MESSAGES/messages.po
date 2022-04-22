@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-03-31 10:41+0300\n"
+"POT-Creation-Date: 2022-04-22 21:37+0300\n"
 "PO-Revision-Date: 2020-10-16 15:42+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: he\n"
@@ -16,7 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.0\n"
+"Generated-By: Babel 2.9.1\n"
 
 #: anyway/backend_constants.py:145
 msgid "killed"
@@ -30,11 +30,11 @@ msgstr "פצוע/ה קשה"
 msgid "light injured"
 msgstr "פצוע/ה קל"
 
-#: anyway/flask_app.py:674 anyway/flask_app.py:778
+#: anyway/flask_app.py:676 anyway/flask_app.py:780
 msgid "Discussion not found:"
 msgstr ""
 
-#: anyway/flask_app.py:677
+#: anyway/flask_app.py:679
 msgid "Illegal Discussion"
 msgstr ""
 
@@ -175,7 +175,7 @@ msgid "Number of accidents by severity"
 msgstr "מספר תאונות לפי חומרה"
 
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:67
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:87
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:86
 msgid "Fatal, severe and light accidents count in "
 msgstr "כמות התאונות הקטלניות, הקשות והקלות ב"
 
@@ -184,31 +184,31 @@ msgid "segment"
 msgstr "מקטע"
 
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:68
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:89
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:88
 msgid "in the selected time"
 msgstr "בפרק הזמן הנבחר"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:75
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:74
 msgid "in years"
 msgstr "בשנים"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:78
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:77
 msgid "on street"
 msgstr "ברחוב"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:81
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:80
 msgid "took place"
 msgstr "התרחשו"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:83
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:82
 msgid "accidents"
 msgstr "תאונות"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:88
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:87
 msgid "street"
 msgstr "רחוב"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:94
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:93
 msgid "Fatal, severe and light accidents count in the specified location."
 msgstr "כמות התאונות הקטלניות, הקשות והקלות במקטע בפרק הזמן הנבחר."
 
@@ -276,11 +276,15 @@ msgstr ""
 "כמות התאונות הקטלניות, הקשות והקלות במקטע, לפי שנת התאונה, מחולק לפי "
 "חומרת התאונה, בפרק הזמן הנבחר."
 
-#: anyway/widgets/suburban_widgets/accident_count_by_car_type_widget.py:114
-msgid ""
-"comparing vehicle type percentage in accidents in {} relative to national"
-" average"
+#: anyway/widgets/suburban_widgets/accident_count_by_car_type_widget.py:140
+msgid "Comparing vehicle type in accidents in {} relative to national average"
 msgstr "השוואת אחוז הרכבים בתאונות במקטע {} לעומת ממוצע ארצי"
+
+#: anyway/widgets/suburban_widgets/accident_count_by_car_type_widget.py:148
+msgid ""
+"Vehicle accidents by type in specific segment, sorted by segment, "
+"compared to the national average"
+msgstr "תאונות רכבים לפי סוג במקטע, מסודרים לפי מקטע, בהשוואה לממוצע הארצי"
 
 #: anyway/widgets/suburban_widgets/accident_count_by_day_night_widget.py:34
 msgid "Accidents by time"
@@ -302,7 +306,7 @@ msgstr "סוג נהג"
 msgid "Number of accidents by driver type"
 msgstr "מספר תאונות לפי סוג הנהג"
 
-#: anyway/widgets/suburban_widgets/accident_count_by_driver_type_widget.py:82
+#: anyway/widgets/suburban_widgets/accident_count_by_driver_type_widget.py:81
 msgid ""
 "Driver involvement in accident by driver type: professional - trucks, "
 "taxi, bus, work, minibus, tractor, private - private car, motorcycle, "

@@ -241,11 +241,7 @@ def set_accident_resolution(accident_row):
     :return: resolution option
     """
     try:
-        if accident_row["intersection"] is not None and "/" in str(accident_row["intersection"]):
-            return "צומת עירוני"
-        elif accident_row["intersection"] is not None:
-            return "צומת בינעירוני"
-        elif accident_row["road_no"] is not None:
+        if accident_row["road_no"] is not None:
             return "כביש בינעירוני"
         elif accident_row["street"] is not None:
             return "רחוב"

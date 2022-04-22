@@ -87,18 +87,10 @@ def process():
 @click.option("--batch_size", type=int, default=5000)
 @click.option("--load_start_year", type=str, default=None)
 @click.option("--source", type=str, default="s3")
-def cbs(
-    batch_size,
-    load_start_year,
-    source
-):
+def cbs(batch_size, load_start_year, source):
     from anyway.parsers.cbs.executor import main
 
-    return main(
-        batch_size=batch_size,
-        load_start_year=load_start_year,
-        source=source
-    )
+    return main(batch_size=batch_size, load_start_year=load_start_year, source=source)
 
 
 @process.command()
@@ -275,7 +267,8 @@ def infographics_data_cache(info, update):
 def infographics_data_cache_for_road_segments():
     """Will refresh the infographics data cache"""
     from anyway.parsers.infographics_data_cache_updater import main_for_road_segments
-    return main_for_road_segments(update=True, info=True)
+
+    return main_for_road_segments()
 
 
 @process.group()
@@ -287,7 +280,14 @@ def cache():
 def update_street():
     """Update street cache"""
     from anyway.parsers.infographics_data_cache_updater import main_for_street
+
     main_for_street()
+
+
+@cache.command()
+def update_road_segments():
+    """Update road segments cache"""
+    infographics_data_cache_for_road_segments()
 
 
 @process.command()

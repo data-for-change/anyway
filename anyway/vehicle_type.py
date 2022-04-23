@@ -6,8 +6,8 @@ import math
 try:
     from flask_babel import _
 except ModuleNotFoundError:
-    pass
-
+    def _(str):
+        return str
 
 class VehicleType(Enum):
     CAR = 1
@@ -194,14 +194,12 @@ class VehicleCategory(Enum):
             logging.exception(f"VehicleType.get_display_name: {self}: no display string defined")
             return "no display name defined"
 
-try:
-    _("professional driver")
-    _("private driver")
-    _("light electric vehicles")
-    _("private car")
-    _("large vehicle")
-    _("motorcycle")
-    _("bicycle and small motor vehicles")
-    _("other vehicle")
-except: # pylint: disable=bare-except
-    pass
+
+_("professional driver")
+_("private driver")
+_("light electric vehicles")
+_("private car")
+_("large vehicle")
+_("motorcycle")
+_("bicycle and small motor vehicles")
+_("other vehicle")

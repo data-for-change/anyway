@@ -13,7 +13,6 @@ from anyway.models import VehicleMarkerView
 from anyway.request_params import RequestParams
 from anyway.vehicle_type import VehicleCategory
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
-from anyway.widgets.widget import register
 
 MAX_NUMBER_OF_ITEMS = 2
 

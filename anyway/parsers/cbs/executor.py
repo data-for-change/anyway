@@ -1151,6 +1151,7 @@ def main(batch_size, source, load_start_year=None):
         )
         logging.debug("Total: {0} items in {1}".format(total, time_delta(started)))
         create_tables()
+        logging.debug("Finished Creating Hebrew DB Tables")
     except Exception as ex:
         print("Exception occured while loading the cbs data: {0}".format(str(ex)))
         print("Traceback: {0}".format(traceback.format_exc()))

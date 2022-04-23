@@ -18,7 +18,6 @@ from anyway.widgets.widget import register
 MAX_NUMBER_OF_ITEMS = 2
 
 
-@register
 class AccidentCountByCarTypeWidget(SubUrbanWidget):
     name: str = "accident_count_by_car_type"
 

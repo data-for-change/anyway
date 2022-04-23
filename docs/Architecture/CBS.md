@@ -48,7 +48,7 @@ Environment Variables: AWS_ACCESS_KEY, AWS_SECRET_KEY
    - Current Flow: email -> s3 -> updated tables
      email -> s3: can be scheduled once a week / even a day
      s3 -> Data Tables: Needs to be scheduled when both accident type 1 and accident type 3 of that months are in s3
-     Explanation: Nowadays we pull the last data from last 2 emails and insert data to s3 (after deleting previous data), we need to pull only emails we didn't save to s3 - hence track on the emails we already read and not re-insert them.
+     Explanation: Nowadays we pull the last data from last 4 emails and insert data to s3 (after deleting previous data), we need to pull only emails we didn't save to s3 - hence track on the emails we already read and not re-insert them.
      Optional: We can add CBS data versioning in s3 - right now we delete old data and insert new one.
 6. API + Documentation (Swagger) - 
    - CBS Raw DATA AND/OR CBS Processed Data

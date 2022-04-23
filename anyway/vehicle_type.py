@@ -194,12 +194,14 @@ class VehicleCategory(Enum):
             logging.exception(f"VehicleType.get_display_name: {self}: no display string defined")
             return "no display name defined"
 
-
-_("professional driver")
-_("private driver")
-_("light electric vehicles")
-_("private car")
-_("large vehicle")
-_("motorcycle")
-_("bicycle and small motor vehicles")
-_("other vehicle")
+try:
+    _("professional driver")
+    _("private driver")
+    _("light electric vehicles")
+    _("private car")
+    _("large vehicle")
+    _("motorcycle")
+    _("bicycle and small motor vehicles")
+    _("other vehicle")
+except: # pylint: disable=bare-except
+    pass

@@ -29,6 +29,9 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
         super().__init__(request_params, type(self).name)
         self.rank = 20
         self.road_number: str = request_params.location_info["road1"]
+        self.information = (
+            "Percentage of serious and fatal motorcycle accidents in the selected section compared to the average percentage of accidents in other road sections throughout the country"
+        )
 
     def generate_items(self) -> None:
         # noinspection PyUnresolvedReferences
@@ -163,5 +166,12 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
         }
         return items
 
+    # noinspection PyUnboundLocalVariable
+    def is_included(self) -> bool:
+        motor_accidents_in_road = self.items[0]["series"][0]["value"]
+        motor_accidents_in_all_roads = self.items[1]["series"][0]["value"]
+        # At least 3 severe motorcycle accidents in road and more than twice as much of motor accidents in other roads
+        return motor_accidents_in_road >= 3 and motor_accidents_in_road >= 2*motor_accidents_in_all_roads
 
 _("road")
+_("Percentage of serious and fatal motorcycle accidents in the selected section compared to the average percentage of accidents in other road sections throughout the country")

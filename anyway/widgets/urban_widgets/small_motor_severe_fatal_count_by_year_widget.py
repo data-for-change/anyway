@@ -51,9 +51,7 @@ class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
         return count_by_year
 
     def is_included(self) -> Union[dict, list, bool]:
-        if self.items[-1]["count"] > 0 and self.items[-2]["count"] > 0:
-            return self.items
-        return False
+        return self.items[-1]["count"] > 0 and self.items[-2]["count"] > 0
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:

@@ -29,11 +29,14 @@ class AccidentCountByDriverTypeWidget(SubUrbanWidget):
 
     @staticmethod
     def count_accidents_by_driver_type(request_params):
+        filters = get_injured_filters(request_params.location_info)
+        filters["involved_type"] = [1,2]
         involved_by_vehicle_type_data = get_accidents_stats(
             table_obj=InvolvedMarkerView,
-            filters=get_injured_filters(request_params.location_info),
+            filters=filters,
             group_by="involve_vehicle_type",
-            count="involve_vehicle_type",
+            count="provider_and_id",
+            cnt_distinct=True,
             start_time=request_params.start_time,
             end_time=request_params.end_time,
         )

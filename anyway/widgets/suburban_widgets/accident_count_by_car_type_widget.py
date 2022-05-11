@@ -3,7 +3,7 @@ from collections import defaultdict
 from functools import lru_cache
 from math import floor
 from typing import Dict
-
+from anyway.widgets.widget import register
 from flask_babel import _
 
 import anyway.widgets.widget_utils as widget_utils

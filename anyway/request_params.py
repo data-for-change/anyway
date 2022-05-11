@@ -169,7 +169,7 @@ def get_news_flash_location_text(news_flash_obj: NewsFlash):
 # generate text describing location or road segment of news flash
 # to be used by most severe accidents additional info widget
 def get_road_segment_location_text(road1: int, road_segment_name: str):
-    res = "כביש " + str(road1) + " במקטע " + road_segment_name
+    res = "כביש " + str(int(road1)) + " במקטע " + road_segment_name
     return res
 
 

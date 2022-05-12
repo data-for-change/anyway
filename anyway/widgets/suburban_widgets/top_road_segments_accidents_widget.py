@@ -4,7 +4,6 @@ from typing import Dict
 from flask_babel import _
 
 
-
 class TopRoadSegmentsAccidentsWidget(SubUrbanWidget):
     name: str = "top_road_segments_accidents"
 

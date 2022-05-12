@@ -5,7 +5,7 @@ from typing import Dict
 from flask_babel import _
 
 from anyway.request_params import RequestParams
-from anyway.backend_constants import DriverType
+from anyway.backend_constants import DriverType, InvolvedType
 from anyway.widgets.widget_utils import get_accidents_stats, get_injured_filters
 from anyway.models import InvolvedMarkerView
 from anyway.vehicle_type import VehicleCategory
@@ -30,7 +30,7 @@ class AccidentCountByDriverTypeWidget(SubUrbanWidget):
     @staticmethod
     def count_accidents_by_driver_type(request_params):
         filters = get_injured_filters(request_params.location_info)
-        filters["involved_type"] = [1,2]
+        filters["involved_type"] = InvolvedType.ANY_DRIVERS
         involved_by_vehicle_type_data = get_accidents_stats(
             table_obj=InvolvedMarkerView,
             filters=filters,
@@ -74,9 +74,7 @@ class AccidentCountByDriverTypeWidget(SubUrbanWidget):
                 logging.exception(
                     f"AccidentCountByDriverTypeWidget.localize_items: Exception while translating {item}."
                 )
-        items["data"]["text"] = {
-            "title": _("Number of accidents by driver type")
-        }
+        items["data"]["text"] = {"title": _("Number of accidents by driver type")}
         return items
 
 

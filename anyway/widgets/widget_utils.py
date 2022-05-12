@@ -29,7 +29,13 @@ def get_query(table_obj, filters, start_time, end_time):
 
 
 def get_accidents_stats(
-    table_obj, filters=None, group_by=None, count=None, cnt_distinct=False, start_time=None, end_time=None
+    table_obj,
+    filters=None,
+    group_by=None,
+    count=None,
+    cnt_distinct=False,
+    start_time=None,
+    end_time=None,
 ):
     filters = filters or {}
     provider_code_filters = [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
@@ -51,7 +57,9 @@ def get_accidents_stats(
                 raise Exception(err_msg)
         else:
             query = query.group_by(group_by)
-            query = query.with_entities(group_by, func.count(count) if not cnt_distinct else func.count(distinct(count)))
+            query = query.with_entities(
+                group_by, func.count(count) if not cnt_distinct else func.count(distinct(count))
+            )
     df = pd.read_sql_query(query.statement, query.session.bind)
     df.rename(columns={"count_1": "count"}, inplace=True)  # pylint: disable=no-member
     df.columns = [c.replace("_hebrew", "") for c in df.columns]

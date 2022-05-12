@@ -25,8 +25,10 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
         self.rank = 17
 
     def generate_items(self) -> None:
-        self.items = AccidentCountByCarTypeWidget.get_stats_accidents_by_car_type_with_national_data(
-            self.request_params
+        self.items = (
+            AccidentCountByCarTypeWidget.get_stats_accidents_by_car_type_with_national_data(
+                self.request_params
+            )
         )
 
     @staticmethod
@@ -49,8 +51,10 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
         data_by_segment = AccidentCountByCarTypeWidget.percentage_accidents_by_car_type(
             vehicle_grouped_by_type_count_unique
         )
-        national_data = AccidentCountByCarTypeWidget.percentage_accidents_by_car_type_national_data_cache(
-            start_time, end_time
+        national_data = (
+            AccidentCountByCarTypeWidget.percentage_accidents_by_car_type_national_data_cache(
+                start_time, end_time
+            )
         )
 
         for car_type in data_by_segment:
@@ -110,7 +114,9 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
 
     @staticmethod
     @lru_cache(maxsize=64)
-    def percentage_accidents_by_car_type_national_data_cache(start_time, end_time) -> Dict[str, int]:
+    def percentage_accidents_by_car_type_national_data_cache(
+        start_time, end_time
+    ) -> Dict[str, int]:
         vehicle_grouped_by_type_count_unique = widget_utils.get_accidents_stats(
             table_obj=VehicleMarkerView,
             filters={
@@ -135,13 +141,13 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
                 item["label_key"] = _(VehicleCategory(item["label_key"]).get_english_display_name())
             except ValueError:
                 logging.exception(f"AccidentCountByCarType.localize_items: item:{item}")
-        base_title = _(
-            "Comparing vehicle type in accidents in {} relative to national average"
-        )
+        base_title = _("Comparing vehicle type in accidents in {} relative to national average")
         items["data"]["text"] = {
             "title": base_title.format(
                 segment_dictionary[request_params.location_info["road_segment_name"]]
             )
         }
-        items["meta"]["information"] = _("Vehicle accidents by type in specific segment, sorted by segment, compared to the national average")
+        items["meta"]["information"] = _(
+            "Vehicle accidents by type in specific segment, sorted by segment, compared to the national average"
+        )
         return items

@@ -64,8 +64,9 @@ class AccidentCountBySeverityWidget(AllLocationsWidget):
                 + f" - {request_params.location_info['road_segment_name']}"
             }
             items["meta"]["information"] = "{}{} {}.".format(
-                _("Fatal, severe and light accidents count in "), _("segment"),
-                _("in the selected time")
+                _("Fatal, severe and light accidents count in "),
+                _("segment"),
+                _("in the selected time"),
             )
         elif request_params.resolution == BE_CONST.ResolutionCategories.STREET:
             # To have FE to treat it as a different widget
@@ -85,7 +86,7 @@ class AccidentCountBySeverityWidget(AllLocationsWidget):
             items["meta"]["information"] = "{}{} {}.".format(
                 _("Fatal, severe and light accidents count in "),
                 _("street"),
-                _("in the selected time")
+                _("in the selected time"),
             )
         return items
 

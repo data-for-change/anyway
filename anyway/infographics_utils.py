@@ -340,9 +340,7 @@ def localize_after_cache(request_params: RequestParams, items_list: List[Dict]) 
         if "name" in items:
             widget_class = get_widget_class_by_name(items["name"])
             if widget_class:
-                res.append(
-                    widget_class.localize_items(request_params, items)
-                )
+                res.append(widget_class.localize_items(request_params, items))
         else:
             logging.error(f"localize_after_cache: bad input (missing 'name' key):{items}")
         items["meta"]["information"] = _(items.get("meta", {}).get("information", ""))

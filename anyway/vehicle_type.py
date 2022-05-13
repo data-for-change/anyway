@@ -6,8 +6,10 @@ import math
 try:
     from flask_babel import _
 except ModuleNotFoundError:
+
     def _(str):
         return str
+
 
 class VehicleType(Enum):
     CAR = 1

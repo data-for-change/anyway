@@ -295,3 +295,11 @@ class CrossCategory(Enum):
             CrossCategory.CROSSWALK: [CrossLocation.YESLIGHT, CrossLocation.YESNONE],
         }
         return list(map(lambda x: x.value, category_cross_locations[self]))
+
+
+class InvolvedType(Enum):
+    # this is defined based on https://docs.google.com/spreadsheets/d/1qaVV7NKXVYNmnxKZ4he2MKZDAjWPHiHfq-U5dcNZM5k/edit#gid=266079360
+    DRIVER = 1
+    INJURED_DRIVER = 2
+    INJURED = 3
+    ANY_DRIVER = (DRIVER, INJURED_DRIVER)

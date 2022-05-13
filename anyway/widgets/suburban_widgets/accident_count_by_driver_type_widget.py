@@ -3,9 +3,8 @@ from collections import defaultdict
 from typing import Dict
 
 from flask_babel import _
-
+import anyway.backend_constants as consts
 from anyway.request_params import RequestParams
-from anyway.backend_constants import DriverType
 from anyway.widgets.widget_utils import get_accidents_stats, get_injured_filters
 from anyway.models import InvolvedMarkerView
 from anyway.vehicle_type import VehicleCategory
@@ -29,11 +28,14 @@ class AccidentCountByDriverTypeWidget(SubUrbanWidget):
 
     @staticmethod
     def count_accidents_by_driver_type(request_params):
+        filters = get_injured_filters(request_params.location_info)
+        filters["involved_type"] = consts.InvolvedType.ANY_DRIVER
         involved_by_vehicle_type_data = get_accidents_stats(
             table_obj=InvolvedMarkerView,
-            filters=get_injured_filters(request_params.location_info),
+            filters=filters,
             group_by="involve_vehicle_type",
-            count="involve_vehicle_type",
+            count="provider_and_id",
+            cnt_distinct=True,
             start_time=request_params.start_time,
             end_time=request_params.end_time,
         )
@@ -43,19 +45,19 @@ class AccidentCountByDriverTypeWidget(SubUrbanWidget):
             if vehicle_type in VehicleCategory.PROFESSIONAL_DRIVER.get_codes():
                 driver_types[
                     # pylint: disable=no-member
-                    DriverType.PROFESSIONAL_DRIVER.get_label()
+                    consts.DriverType.PROFESSIONAL_DRIVER.get_label()
                 ] += count
             elif vehicle_type in VehicleCategory.PRIVATE_DRIVER.get_codes():
                 driver_types[
                     # pylint: disable=no-member
-                    DriverType.PRIVATE_VEHICLE_DRIVER.get_label()
+                    consts.DriverType.PRIVATE_VEHICLE_DRIVER.get_label()
                 ] += count
             elif (
                 vehicle_type in VehicleCategory.LIGHT_ELECTRIC.get_codes()
                 or vehicle_type in VehicleCategory.OTHER.get_codes()
             ):
                 # pylint: disable=no-member
-                driver_types[DriverType.OTHER_DRIVER.get_label()] += count
+                driver_types[consts.DriverType.OTHER_DRIVER.get_label()] += count
         output = [
             {"driver_type": driver_type, "count": count}
             for driver_type, count in driver_types.items()
@@ -71,9 +73,7 @@ class AccidentCountByDriverTypeWidget(SubUrbanWidget):
                 logging.exception(
                     f"AccidentCountByDriverTypeWidget.localize_items: Exception while translating {item}."
                 )
-        items["data"]["text"] = {
-            "title": _("Number of accidents by driver type")
-        }
+        items["data"]["text"] = {"title": _("Number of accidents by driver type")}
         return items
 
 

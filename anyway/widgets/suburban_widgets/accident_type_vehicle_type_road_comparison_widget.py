@@ -39,8 +39,10 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(SubUrbanWidget):
 
         vehicle_types = VehicleCategory.MOTORCYCLE.get_codes()  # WIP: change by vehicle type
 
-        all_roads_query = AccidentTypeVehicleTypeRoadComparisonWidget.get_accident_count_by_vehicle_type_query(
-            start_time, end_time, num_accidents_label, vehicle_types
+        all_roads_query = (
+            AccidentTypeVehicleTypeRoadComparisonWidget.get_accident_count_by_vehicle_type_query(
+                start_time, end_time, num_accidents_label, vehicle_types
+            )
         )
         all_roads_query_result = run_query(all_roads_query)
         all_roads_sum_accidents = 0

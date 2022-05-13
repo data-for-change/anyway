@@ -241,6 +241,10 @@ def get_user_info() -> Response:
     return jsonify(user_obj.serialize_exposed_to_user())
 
 
+def is_user_logged_in() -> Response:
+    return jsonify({"is_user_logged_in":  not current_user.is_anonymous})
+
+
 @roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def remove_from_role() -> Response:
     return change_user_roles("remove")

@@ -1374,6 +1374,7 @@ app.add_url_rule("/user/update_user", view_func=admin_update_user, methods=["POS
 app.add_url_rule("/user/add_to_role", view_func=add_to_role, methods=["POST"])
 app.add_url_rule("/user/remove_from_role", view_func=remove_from_role, methods=["POST"])
 app.add_url_rule("/user/info", view_func=get_user_info, methods=["GET"])
+app.add_url_rule("/user/is_user_logged_in", view_func=is_user_logged_in, methods=["GET"])
 app.add_url_rule("/user/get_all_users_info", view_func=get_all_users_info, methods=["GET"])
 app.add_url_rule("/user/get_roles_list", view_func=get_roles_list, methods=["GET"])
 app.add_url_rule("/callback/<provider>", view_func=oauth_callback, methods=["GET"])

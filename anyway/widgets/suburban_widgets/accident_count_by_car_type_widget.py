@@ -3,7 +3,7 @@ from collections import defaultdict
 from functools import lru_cache
 from math import floor
 from typing import Dict
-
+from anyway.widgets.widget import register
 from flask_babel import _
 
 import anyway.widgets.widget_utils as widget_utils
@@ -16,7 +16,7 @@ from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 
 MAX_NUMBER_OF_ITEMS = 2
 
-
+@register
 class AccidentCountByCarTypeWidget(SubUrbanWidget):
     name: str = "accident_count_by_car_type"
 

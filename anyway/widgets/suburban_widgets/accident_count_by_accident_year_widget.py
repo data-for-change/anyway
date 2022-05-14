@@ -42,9 +42,9 @@ class AccidentCountByAccidentYearWidget(SubUrbanWidget):
             res1,
             range(self.request_params.start_time.year, self.request_params.end_time.year + 1),
             {
-                AccidentSeverity.LIGHT.value: 0,
-                AccidentSeverity.SEVERE.value: 0,
                 AccidentSeverity.FATAL.value: 0,
+                AccidentSeverity.SEVERE.value: 0,
+                AccidentSeverity.LIGHT.value: 0,
             },
         )
         self.items = format_2_level_items(res2, None, AccidentSeverity)

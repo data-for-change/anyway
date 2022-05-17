@@ -6,7 +6,7 @@ import copy
 from sqlalchemy import func
 import pandas as pd
 
-from anyway.models import NewsFlash, AccidentMarkerView, DeprecatedCity, Streets
+from anyway.models import NewsFlash, AccidentMarkerView, City, Streets
 from anyway.parsers.location_extraction import (
     get_road_segment_name_and_number,
     get_road_segment_by_name_and_road,
@@ -121,7 +121,7 @@ def get_location_from_news_flash(news_flash_id: str) -> Optional[dict]:
 def add_numeric_field_values(loc: dict, news_flash: NewsFlash) -> None:
     if loc["data"]["resolution"] == BE_CONST.ResolutionCategories.STREET:
         if "yishuv_symbol" not in loc["data"]:
-            loc["data"]["yishuv_symbol"] = DeprecatedCity.get_symbol_from_name(
+            loc["data"]["yishuv_symbol"] = City.get_symbol_from_name(
                 loc["data"]["yishuv_name"]
             )
         if "street1" not in loc["data"]:
@@ -207,9 +207,9 @@ def extract_street_location(input_vals: dict):
 def fill_missing_street_values(vals: dict) -> dict:
     res = copy.copy(vals)
     if "yishuv_symbol" in res and "yishuv_name" not in res:
-        res["yishuv_name"] = DeprecatedCity.get_name_from_symbol(res["yishuv_symbol"])
+        res["yishuv_name"] = City.get_name_from_symbol(res["yishuv_symbol"])
     else:
-        res["yishuv_symbol"] = DeprecatedCity.get_symbol_from_name(res["yishuv_name"])
+        res["yishuv_symbol"] = City.get_symbol_from_name(res["yishuv_name"])
     if "street1" in res and "street1_hebrew" not in res:
         res["street1_hebrew"] = Streets.get_street_name_by_street(
             res["yishuv_symbol"], res["street1"]

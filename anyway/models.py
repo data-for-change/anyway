@@ -908,7 +908,67 @@ class NewsFlash(Base):
         return self.id
 
 
-class City(Base):
+class CityFields(object):
+    __tablename__ = "cbs_cities"
+    heb_name = Column(String())
+    yishuv_symbol = Column(Integer(), primary_key=True)
+    eng_name = Column(String())
+    district = Column(Integer())
+    napa = Column(Integer())
+    # natural_zone = Column(Integer(), nullable=True)
+    municipal_stance = Column(Integer(), nullable=True)
+    metropolitan = Column(Integer(), nullable=True)
+    # religion = Column(Integer(), nullable=True)
+    # population = Column(Integer(), nullable=True)
+    # other = Column(Float(), nullable=True)
+    # jews = Column(Float(), nullable=True)
+    # arab = Column(Float(), nullable=True)
+    # founded = Column(Integer(), nullable=True)
+    # tzura = Column(Integer(), nullable=True)
+    # irgun = Column(Integer(), nullable=True)
+    center = Column(BigInteger(), nullable=True)
+    # altitude = Column(Integer(), nullable=True)
+    # planning = Column(Integer(), nullable=True)
+    # police = Column(Integer(), nullable=True)
+    # year = Column(Integer(), nullable=True)
+    # taatik = Column(String(), nullable=True)
+
+    def serialize(self):
+        return {
+            "heb_name": self.heb_name,
+            "yishuv_symbol": self.yishuv_symbol,
+            "eng_name": self.eng_name,
+            "district": self.district,
+            "napa": self.napa,
+            # "natural_zone": self.natural_zone,
+            "municipal_stance": self.municipal_stance,
+            "metropolitan": self.metropolitan,
+            # "religion": self.religion,
+            # "population": self.population,
+            # "other": self.other,
+            # "jews": self.jews,
+            # "arab": self.arab,
+            # "founded": self.founded,
+            # "tzura": self.tzura,
+            # "irgun": self.irgun,
+            "center": self.center,
+            # "altitude": self.altitude,
+            # "planning": self.planning,
+            # "police": self.police,
+            # "year": self.year,
+            # "taatik": self.taatik,
+        }
+
+
+class City(CityFields, Base):
+    __tablename__ = "cbs_cities"
+
+
+class CityTemp(CityFields, Base):
+    __tablename__ = "cbs_cities_temp"
+
+
+class DeprecatedCity(Base):
     __tablename__ = "cities"
     id = Column(Integer(), primary_key=True)
     symbol_code = Column(Integer())  # yishuv_symbol
@@ -929,22 +989,30 @@ class City(Base):
 
     @staticmethod
     def get_name_from_symbol(symbol: int) -> str:
-        res = db.session.query(City.search_heb).filter(City.symbol_code == symbol).first()
+        res = (
+            db.session.query(DeprecatedCity.search_heb)
+            .filter(DeprecatedCity.symbol_code == symbol)
+            .first()
+        )
         if res is None:
             raise ValueError(f"{symbol}: could not find city with that symbol")
         return res.search_heb
 
     @staticmethod
     def get_symbol_from_name(name: str) -> int:
-        res = db.session.query(City.symbol_code).filter(City.search_heb == name).first()
+        res = (
+            db.session.query(DeprecatedCity.symbol_code)
+            .filter(DeprecatedCity.search_heb == name)
+            .first()
+        )
         if res is None:
-            logging.error(f"City: no city with name:{name}.")
-            raise ValueError(f"City: no city with name:{name}.")
+            logging.error(f"DeprecatedCity: no city with name:{name}.")
+            raise ValueError(f"DeprecatedCity: no city with name:{name}.")
         return res.symbol_code
 
     @staticmethod
     def get_all_cities() -> List[dict]:
-        res = db.session.query(City.symbol_code, City.search_heb).all()
+        res = db.session.query(DeprecatedCity.symbol_code, DeprecatedCity.search_heb).all()
         if res is None:
             logging.error(f"Failed to get cities.")
             raise RuntimeError(f"When retrieving all cities")

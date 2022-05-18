@@ -323,6 +323,19 @@ def create_cbs_tables():
     return create_tables()
 
 
+@create_tables.command()
+@click.option(
+    "--file-name",
+    type=str,
+    help="csv file to load from. Default is static/data/cities.csv",
+    default="%s/static/data/cities.csv" % os.path.abspath(os.path.dirname(__file__)),
+)
+def update_cities_table(file_name):
+    from anyway.parsers.cbs.preprocessing_cbs_files import load_cities_data
+
+    return load_cities_data(file_name=file_name)
+
+
 @cli.group()
 def update_dictionary_tables():
     pass

@@ -1,4 +1,4 @@
-from typing import Dict, Union, Any
+from typing import Dict, Any
 
 from anyway.request_params import RequestParams
 from anyway.backend_constants import InjurySeverity
@@ -73,10 +73,5 @@ class SuburbanCrosswalkWidget(SubUrbanWidget):
         }
         return items
 
-    def is_included(self) -> Union[dict, list, bool]:
-        if (
-            self.items["with_crosswalk"][0]["count"] + self.items["without_crosswalk"][0]["count"]
-            > 10
-        ):
-            return self.items
-        return False
+    def is_included(self) -> bool:
+        return (self.items["with_crosswalk"][0]["count"] + self.items["without_crosswalk"][0]["count"]) > 10

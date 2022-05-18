@@ -1,4 +1,4 @@
-from typing import Dict, Union
+from typing import Dict
 
 from anyway.request_params import RequestParams
 from anyway.backend_constants import InjurySeverity
@@ -50,10 +50,8 @@ class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
                 count_by_year.append({"accident_year": year, "count": 0})
         return count_by_year
 
-    def is_included(self) -> Union[dict, list, bool]:
-        if self.items[-1]["count"] > 0 and self.items[-2]["count"] > 0:
-            return self.items
-        return False
+    def is_included(self) -> bool:
+        return self.items[-1]["count"] > 0 and self.items[-2]["count"] > 0
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:

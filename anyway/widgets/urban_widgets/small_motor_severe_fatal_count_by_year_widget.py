@@ -50,7 +50,7 @@ class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
                 count_by_year.append({"accident_year": year, "count": 0})
         return count_by_year
 
-    def is_included(self) -> Union[dict, list, bool]:
+    def is_included(self) -> bool:
         return self.items[-1]["count"] > 0 and self.items[-2]["count"] > 0
 
     @staticmethod

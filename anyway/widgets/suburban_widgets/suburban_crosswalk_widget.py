@@ -75,5 +75,5 @@ class SuburbanCrosswalkWidget(SubUrbanWidget):
         }
         return items
 
-    def is_included(self) -> Union[dict, list, bool]:
+    def is_included(self) -> bool:
         return self.items["with_crosswalk"][0]["count"] + self.items["without_crosswalk"][0]["count"] > 10

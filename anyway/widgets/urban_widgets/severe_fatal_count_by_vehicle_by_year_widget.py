@@ -1,4 +1,4 @@
-from typing import Dict, Any, Union
+from typing import Dict, Any
 
 from anyway.request_params import RequestParams
 from anyway.backend_constants import InjurySeverity
@@ -99,12 +99,6 @@ class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
         }
         return items
 
-    def is_included(self) -> Union[dict, list, bool]:
-        if (
-            self.items["bikes"][-1]["count"]
-            + self.items["e_bikes"][-1]["count"]
-            + self.items["e_scooters"][-1]["count"]
-            > 1
-        ):
-            return self.items
-        return False
+    def is_included(self) -> bool:
+        count = self.items["bikes"][-1]["count"] + self.items["e_bikes"][-1]["count"] + self.items["e_scooters"][-1]["count"]
+        return count > 1

@@ -65,8 +65,7 @@ def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams
     try:
         years_ago = int(years_ago)
     except (ValueError, TypeError):
-        # TODO: revert this change back to return None - meant to fix current API not working
-        years_ago = 5
+        return None
     if years_ago < 0 or years_ago > 100:
         return None
     last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
@@ -170,7 +169,7 @@ def get_news_flash_location_text(news_flash_obj: NewsFlash):
 # generate text describing location or road segment of news flash
 # to be used by most severe accidents additional info widget
 def get_road_segment_location_text(road1: int, road_segment_name: str):
-    res = "כביש " + str(road1) + " במקטע " + road_segment_name
+    res = "כביש " + str(int(road1)) + " במקטע " + road_segment_name
     return res
 
 

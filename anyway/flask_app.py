@@ -51,6 +51,8 @@ from anyway.models import (
     AgeGroup,
     AccidentMarkerView,
     EmbeddedReports,
+    City,
+    Streets,
 )
 from anyway.request_params import get_request_params_from_request_values
 from anyway.views.news_flash.api import (
@@ -1372,6 +1374,7 @@ app.add_url_rule("/user/update_user", view_func=admin_update_user, methods=["POS
 app.add_url_rule("/user/add_to_role", view_func=add_to_role, methods=["POST"])
 app.add_url_rule("/user/remove_from_role", view_func=remove_from_role, methods=["POST"])
 app.add_url_rule("/user/info", view_func=get_user_info, methods=["GET"])
+app.add_url_rule("/user/is_user_logged_in", view_func=is_user_logged_in, methods=["GET"])
 app.add_url_rule("/user/get_all_users_info", view_func=get_all_users_info, methods=["GET"])
 app.add_url_rule("/user/get_roles_list", view_func=get_roles_list, methods=["GET"])
 app.add_url_rule("/callback/<provider>", view_func=oauth_callback, methods=["GET"])
@@ -1439,3 +1442,29 @@ class UpdateUserOrg(Resource):
         user_email = args["email"]
         org_name = args["org"]
         return update_user_org(user_email, org_name)
+
+
+get_streets_parser = api.parser()
+get_streets_parser.add_argument(
+    "yishuv_symbol",
+    type=int,
+    required=True,
+    help="Symbol of yishuv to get streets of.",
+)
+
+
+@api.route("/api/streets")
+@api.expect(get_streets_parser)
+class UpdateUserOrg(Resource):
+    @api.doc("Get all streets of yishuv")
+    def get(self):
+        args = get_streets_parser.parse_args()
+        yishuv_symbol = args["yishuv_symbol"]
+        return Streets.get_streets_by_yishuv(yishuv_symbol)
+
+
+@api.route("/api/city", methods=["GET"])
+class Cities(Resource):
+    @api.doc("get get all cities")
+    def get(self):
+        return City.get_all_cities()

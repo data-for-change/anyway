@@ -16,7 +16,6 @@ class AccidentCountBySeverityWidget(AllLocationsWidget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 1
-        self.information = "Fatal, severe and light accidents count in the specified location."
 
     def generate_items(self) -> None:
         self.items = AccidentCountBySeverityWidget.get_accident_count_by_severity(
@@ -64,9 +63,13 @@ class AccidentCountBySeverityWidget(AllLocationsWidget):
                 "title": _("Number of accidents by severity")
                 + f" - {request_params.location_info['road_segment_name']}"
             }
+            items["meta"]["information"] = "{}{} {}.".format(
+                _("Fatal, severe and light accidents count in "),
+                _("segment"),
+                _("in the selected time"),
+            )
         elif request_params.resolution == BE_CONST.ResolutionCategories.STREET:
             # To have FE to treat it as a different widget
-            items["name"] = "accident_count_by_severity_urban"
             num_accidents = items["data"]["items"]["total_accidents_count"]
             s = "{} {} - {} {} {}, {}, {} {} {}".format(
                 _("in years"),
@@ -80,6 +83,11 @@ class AccidentCountBySeverityWidget(AllLocationsWidget):
                 _("accidents"),
             )
             items["data"]["text"] = {"title": s}
+            items["meta"]["information"] = "{}{} {}.".format(
+                _("Fatal, severe and light accidents count in "),
+                _("street"),
+                _("in the selected time"),
+            )
         return items
 
 

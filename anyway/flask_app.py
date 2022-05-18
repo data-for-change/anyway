@@ -51,7 +51,7 @@ from anyway.models import (
     AgeGroup,
     AccidentMarkerView,
     EmbeddedReports,
-    City,
+    DeprecatedCity,
     Streets,
 )
 from anyway.request_params import get_request_params_from_request_values
@@ -1467,4 +1467,4 @@ class UpdateUserOrg(Resource):
 class Cities(Resource):
     @api.doc("get get all cities")
     def get(self):
-        return City.get_all_cities()
+        return DeprecatedCity.get_all_cities()

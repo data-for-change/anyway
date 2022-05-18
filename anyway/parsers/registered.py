@@ -5,7 +5,7 @@ import logging
 import os
 import re
 from datetime import datetime
-from anyway.models import RegisteredVehicle, City
+from anyway.models import RegisteredVehicle, DeprecatedCity
 from anyway.utilities import time_delta, CsvReader, ImporterUI, truncate_tables, decode_hebrew
 from anyway.app_and_db import db
 
@@ -135,7 +135,7 @@ def main(specific_folder, delete_all, path):
     db.session.commit()
     db.engine.execute(
         "UPDATE {0} SET city_id = (SELECT id FROM {1} WHERE {0}.search_name = {1}.search_heb) WHERE city_id IS NULL".format(
-            RegisteredVehicle.__tablename__, City.__tablename__
+            RegisteredVehicle.__tablename__, DeprecatedCity.__tablename__
         )
     )
     logging.info("Total: {0} items in {1}".format(total, time_delta(started)))

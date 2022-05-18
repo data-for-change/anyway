@@ -1,4 +1,4 @@
-from typing import Dict, Union, Any
+from typing import Dict, Any
 
 from flask_babel import _
 

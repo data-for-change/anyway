@@ -29,7 +29,7 @@ class AccidentCountByDriverTypeWidget(SubUrbanWidget):
     @staticmethod
     def count_accidents_by_driver_type(request_params):
         filters = get_injured_filters(request_params.location_info)
-        filters["involved_type"] = consts.InvolvedType.ANY_DRIVER
+        filters["involved_type"] = [consts.InvolvedType.DRIVER.value, consts.InvolvedType.INJURED_DRIVER.value]
         involved_by_vehicle_type_data = get_accidents_stats(
             table_obj=InvolvedMarkerView,
             filters=filters,

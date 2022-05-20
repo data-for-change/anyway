@@ -963,6 +963,30 @@ class CityFields(object):
 class City(CityFields, Base):
     __tablename__ = "cbs_cities"
 
+    @staticmethod
+    def get_name_from_symbol(symbol: int) -> str:
+        res = db.session.query(City.heb_name).filter(City.yishuv_symbol == symbol).first()
+        if res is None:
+            raise ValueError(f"{symbol}: could not find city with that symbol")
+        return res.heb_name
+
+    @staticmethod
+    def get_symbol_from_name(name: str) -> int:
+        res: City = db.session.query(City.yishuv_symbol).filter(City.heb_name == name).first()
+        if res is None:
+            logging.error(f"City: no city with name:{name}.")
+            raise ValueError(f"City: no city with name:{name}.")
+        return res.yishuv_symbol
+
+    @staticmethod
+    def get_all_cities() -> List[dict]:
+        res: City = db.session.query(City.yishuv_symbol, City.heb_name).all()
+        if res is None:
+            logging.error(f"Failed to get cities.")
+            raise RuntimeError(f"When retrieving all cities")
+        res1 = [{"yishuv_symbol": c.yishuv_symbol, "yishuv_name": c.heb_name} for c in res]
+        return res1
+
 
 class CityTemp(CityFields, Base):
     __tablename__ = "cbs_cities_temp"

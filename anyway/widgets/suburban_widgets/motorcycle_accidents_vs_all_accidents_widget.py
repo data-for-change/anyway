@@ -168,10 +168,24 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
 
     # noinspection PyUnboundLocalVariable
     def is_included(self) -> bool:
-        motor_accidents_in_road = self.items[0]["series"][0]["value"]
-        motor_accidents_in_all_roads = self.items[1]["series"][0]["value"]
+        vehicle_motorcycle = VehicleCategory.MOTORCYCLE.get_english_display_name()
+        motor_accidents_in_road, motor_accidents_in_all_roads = None, None
+        for item in self.items:
+            if item["label_key"] == location_road:
+                for serie in item["series"]:
+                    if serie["label_key"] == vehicle_motorcycle:
+                        motor_accidents_in_road = serie["value"]
+            elif item["label_key"] == location_all_label:
+                 for serie in item["series"]:
+                    if serie["label_key"] == vehicle_motorcycle:
+                        motor_accidents_in_all_roads = serie["value"]
+            else:
+                raise ValueError
+        if not motor_accidents_in_road or not motor_accidents_in_all_roads:
+            raise ValueError
         # At least 3 severe motorcycle accidents in road and more than twice as much of motor accidents in other roads
-        return motor_accidents_in_road >= 3 and motor_accidents_in_road >= 2*motor_accidents_in_all_roads
+        total = motor_accidents_in_road + motor_accidents_in_all_roads
+        return motor_accidents_in_road >= 3 and (motor_accidents_in_road / total) >= 2*(motor_accidents_in_all_roads / total)
 
 _("road")
 _("Percentage of serious and fatal motorcycle accidents in the selected section compared to the average percentage of accidents in other road sections throughout the country")

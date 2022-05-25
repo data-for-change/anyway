@@ -176,7 +176,7 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
                     if serie["label_key"] == vehicle_motorcycle:
                         motor_accidents_in_road = serie["value"]
             elif item["label_key"] == location_all_label:
-                 for serie in item["series"]:
+                for serie in item["series"]:
                     if serie["label_key"] == vehicle_motorcycle:
                         motor_accidents_in_all_roads = serie["value"]
             else:

@@ -7,6 +7,11 @@ import sys
 
 import click
 
+logging.basicConfig(
+    format="%(asctime)s %(levelname)-8s %(message)s",
+    level=logging.DEBUG,
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 def valid_date(date_string):
     date_input_format = "%d-%m-%Y"
@@ -416,6 +421,14 @@ def accidents_around_schools(start_date, end_date, distance, output_path):
     return main(
         start_date=start_date, end_date=end_date, distance=distance, output_path=output_path
     )
+
+
+@scripts.command()
+def test_airflow():
+    print('my print')
+    logging.info('info log')
+    logging.warning('warning log')
+    logging.debug('debug log')
 
 
 @scripts.command()

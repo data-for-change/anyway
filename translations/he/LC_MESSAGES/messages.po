@@ -266,7 +266,7 @@ msgstr ""
 
 #: anyway/widgets/suburban_widgets/accident_count_by_accident_year_widget.py:55
 msgid "Number of accidents, by year, splitted by accident severity, in segment"
-msgstr "מספר תאונות לפי שנה, מחולקות לפי חומרה, במקטע"
+msgstr "תאונות במקטע"
 
 #: anyway/widgets/suburban_widgets/accident_count_by_accident_year_widget.py:63
 msgid ""

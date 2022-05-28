@@ -285,6 +285,30 @@ JSON with the fields:
 If no error has occurred then you will get an empty HTTP 200 response. Otherwise, you will get one of the errors
 described in the [errors](#Errors) section of this document.
 
+### Delete user
+
+#### Description
+
+Delete a user and all of it's association (roles, organization . . ), user with admin rights must be logged in to use this api.
+A user can delete itself. 
+
+#### URL struct
+
+> POST https://www.anyway.co.il/user/delete_user
+
+#### Example
+
+> https://www.anyway.co.il/user/delete_user
+
+#### Parameters
+JSON with the fields:    
+**email** - _string_ , Required, email of the user that will be deleted.
+
+#### Returns
+
+If no error has occurred then you will get an empty HTTP 200 response. Otherwise, you will get one of the errors
+described in the [errors](#Errors) section of this document.
+
 ### Get roles list from DB
 
 #### Description

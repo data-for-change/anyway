@@ -78,6 +78,7 @@ from anyway.models import (
     VehicleDamage,
     Streets,
 )
+from anyway.parsers.cbs.exceptions import CBSParsingFailed
 from anyway.utilities import ItmToWGS84, time_delta, ImporterUI, truncate_tables, chunks
 from anyway.db_views import VIEWS
 from anyway.app_and_db import db
@@ -1153,6 +1154,6 @@ def main(batch_size, source, load_start_year=None):
         create_tables()
         logging.debug("Finished Creating Hebrew DB Tables")
     except Exception as ex:
-        print("Exception occured while loading the cbs data: {0}".format(str(ex)))
         print("Traceback: {0}".format(traceback.format_exc()))
+        raise CBSParsingFailed(message=str(ex))
         # Todo - send an email that an exception occured

@@ -1,6 +1,6 @@
-from anyway.exceptions import AnywayException
+from anyway.exceptions import AnywayError
 
 
-class CBSParsingFailed(AnywayException):
+class CBSParsingFailed(AnywayError):
     def __init__(self, message: str):
         super().__init__(message=f"Exception occurred while loading the cbs data: {message}")

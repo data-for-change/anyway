@@ -1138,7 +1138,12 @@ def main(batch_size, source, load_start_year=None):
                 )
                 total += num_new
                 add_to_streets(streets)
-        import_streets_into_db()
+
+        # [Carmel:] not best solution,
+        # need to understand what are all possible values for the 'source' argument
+        if source != 's3':
+            import_streets_into_db()
+
         fill_db_geo_data()
 
         failed = [

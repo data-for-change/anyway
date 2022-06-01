@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-04-22 21:37+0300\n"
+"POT-Creation-Date: 2022-05-27 14:02+0300\n"
 "PO-Revision-Date: 2020-10-16 15:42+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: he\n"
@@ -16,7 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.1\n"
+"Generated-By: Babel 2.6.0\n"
 
 #: anyway/backend_constants.py:145
 msgid "killed"
@@ -138,35 +138,35 @@ msgstr "נהג רכב פרטי"
 msgid "other_driver"
 msgstr "אחר"
 
-#: anyway/vehicle_type.py:198
+#: anyway/vehicle_type.py:200
 msgid "professional driver"
 msgstr "נהג מקצועי"
 
-#: anyway/vehicle_type.py:199
+#: anyway/vehicle_type.py:201
 msgid "private driver"
 msgstr "נהג רכב פרטי"
 
-#: anyway/vehicle_type.py:200
+#: anyway/vehicle_type.py:202
 msgid "light electric vehicles"
 msgstr "רכבים חשמליים קלים"
 
-#: anyway/vehicle_type.py:201
+#: anyway/vehicle_type.py:203
 msgid "private car"
 msgstr "רכב נוסעים פרטי"
 
-#: anyway/vehicle_type.py:202
+#: anyway/vehicle_type.py:204
 msgid "large vehicle"
 msgstr "מסחרי/משאית"
 
-#: anyway/vehicle_type.py:203
+#: anyway/vehicle_type.py:205
 msgid "motorcycle"
 msgstr "אופנוע"
 
-#: anyway/vehicle_type.py:204
+#: anyway/vehicle_type.py:206
 msgid "bicycle and small motor vehicles"
 msgstr "אופניים/קורקינט"
 
-#: anyway/vehicle_type.py:205
+#: anyway/vehicle_type.py:207
 msgid "other vehicle"
 msgstr "רכב אחר"
 
@@ -175,40 +175,40 @@ msgid "Number of accidents by severity"
 msgstr "מספר תאונות לפי חומרה"
 
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:67
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:86
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:87
 msgid "Fatal, severe and light accidents count in "
 msgstr "כמות התאונות הקטלניות, הקשות והקלות ב"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:67
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:68
 msgid "segment"
 msgstr "מקטע"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:68
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:88
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:69
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:89
 msgid "in the selected time"
 msgstr "בפרק הזמן הנבחר"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:74
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:75
 msgid "in years"
 msgstr "בשנים"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:77
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:78
 msgid "on street"
 msgstr "ברחוב"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:80
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:81
 msgid "took place"
 msgstr "התרחשו"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:82
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:83
 msgid "accidents"
 msgstr "תאונות"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:87
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:88
 msgid "street"
 msgstr "רחוב"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:93
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:94
 msgid "Fatal, severe and light accidents count in the specified location."
 msgstr "כמות התאונות הקטלניות, הקשות והקלות במקטע בפרק הזמן הנבחר."
 
@@ -265,8 +265,8 @@ msgstr ""
 "התאונות הנפוצים ביותר במקום זה"
 
 #: anyway/widgets/suburban_widgets/accident_count_by_accident_year_widget.py:55
-msgid "Number of accidents, by year, splitted by accident severity, in segment"
-msgstr "מספר תאונות לפי שנה, מחולקות לפי חומרה, במקטע"
+msgid "Accidents in segment"
+msgstr "תאונות במקטע"
 
 #: anyway/widgets/suburban_widgets/accident_count_by_accident_year_widget.py:63
 msgid ""
@@ -276,11 +276,11 @@ msgstr ""
 "כמות התאונות הקטלניות, הקשות והקלות במקטע, לפי שנת התאונה, מחולק לפי "
 "חומרת התאונה, בפרק הזמן הנבחר."
 
-#: anyway/widgets/suburban_widgets/accident_count_by_car_type_widget.py:140
+#: anyway/widgets/suburban_widgets/accident_count_by_car_type_widget.py:144
 msgid "Comparing vehicle type in accidents in {} relative to national average"
 msgstr "השוואת אחוז הרכבים בתאונות במקטע {} לעומת ממוצע ארצי"
 
-#: anyway/widgets/suburban_widgets/accident_count_by_car_type_widget.py:148
+#: anyway/widgets/suburban_widgets/accident_count_by_car_type_widget.py:150
 msgid ""
 "Vehicle accidents by type in specific segment, sorted by segment, "
 "compared to the national average"
@@ -298,11 +298,11 @@ msgstr ""
 "התפלגות התאונות ביום ובלילה. היום והלילה נקבעים לפי זריחת השמש ושקיעתה "
 "בכל יום בשנה"
 
-#: anyway/widgets/suburban_widgets/accident_count_by_driver_type_widget.py:69
+#: anyway/widgets/suburban_widgets/accident_count_by_driver_type_widget.py:71
 msgid "driver_type"
 msgstr "סוג נהג"
 
-#: anyway/widgets/suburban_widgets/accident_count_by_driver_type_widget.py:75
+#: anyway/widgets/suburban_widgets/accident_count_by_driver_type_widget.py:76
 msgid "Number of accidents by driver type"
 msgstr "מספר תאונות לפי סוג הנהג"
 
@@ -414,8 +414,8 @@ msgstr "פתרון כביש 2 פלוס 1 למניעת תאונות קטלניו�
 msgid "Street view widget"
 msgstr "Street view widget"
 
-#: anyway/widgets/suburban_widgets/suburban_crosswalk_widget.py:73
-#: anyway/widgets/urban_widgets/urban_crosswalk_widget.py:76
+#: anyway/widgets/suburban_widgets/suburban_crosswalk_widget.py:71
+#: anyway/widgets/urban_widgets/urban_crosswalk_widget.py:74
 msgid "Pedestrian injury comparison on "
 msgstr "פגיעות בהולכי רגל על"
 
@@ -427,7 +427,7 @@ msgstr "מקטעים עם הכי הרבה תאונות לק\"מ "
 msgid "Severe and fatal accidents per Km by section in road"
 msgstr "תאונות קטלניות וקשות לכל קילומטר לפי מקטע בכביש"
 
-#: anyway/widgets/suburban_widgets/top_road_segments_accidents_widget.py:30
+#: anyway/widgets/suburban_widgets/top_road_segments_accidents_widget.py:29
 msgid "Segments with most accidents"
 msgstr "מקטעים עם הכי הרבה תאונות"
 
@@ -436,7 +436,7 @@ msgid "Pedestrian accidents by severity and year"
 msgstr "תאונות הולכי רגל לפי חומרה ולפי שנה"
 
 #: anyway/widgets/urban_widgets/severe_fatal_count_by_vehicle_by_year_widget.py:97
-#: anyway/widgets/urban_widgets/small_motor_severe_fatal_count_by_year_widget.py:61
+#: anyway/widgets/urban_widgets/small_motor_severe_fatal_count_by_year_widget.py:59
 msgid "Severe or fatal accidents on bikes, e-bikes, or scooters in "
 msgstr "רוכבי אופנים, אופנים חשמליים, וקורקינט חשמלי שנפצעו קשה או נהרגו ב"
 
@@ -552,4 +552,7 @@ msgstr ""
 
 #~ msgid "Number of accidents by day/night"
 #~ msgstr "מספר תאונות ביום ובלילה"
+
+#~ msgid "Number of accidents, by year, splitted by accident severity, in segment"
+#~ msgstr "מספר תאונות לפי שנה, מחולקות לפי חומרה, במקטע"
 

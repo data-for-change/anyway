@@ -242,7 +242,7 @@ def get_user_info() -> Response:
 
 
 def is_user_logged_in() -> Response:
-    return jsonify({"is_user_logged_in":  not current_user.is_anonymous})
+    return jsonify({"is_user_logged_in": not current_user.is_anonymous})
 
 
 @roles_accepted(BE_CONST.Roles2Names.Admins.value)
@@ -574,3 +574,21 @@ def update_user_org(user_email: str, org_name: str) -> Response:
 
     db.session.commit()
     return Response(status=HTTPStatus.OK)
+
+
+@roles_accepted(BE_CONST.Roles2Names.Admins.value)
+def delete_user(email: str) -> Response:
+    user = get_user_by_email(db, email)
+    if user is None:
+        return return_json_error(Es.BR_USER_NOT_FOUND, email)
+
+    # Delete user roles
+    user.roles = []
+
+    # Delete user organizations membership
+    user.organizations = []
+
+    db.session.delete(user)
+    db.session.commit()
+    return Response(status=HTTPStatus.OK)
+

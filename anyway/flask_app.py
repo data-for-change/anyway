@@ -1444,6 +1444,24 @@ class UpdateUserOrg(Resource):
         return update_user_org(user_email, org_name)
 
 
+delete_user_parser = api.parser()
+delete_user_parser.add_argument("email", type=str, required=True)
+
+
+@api.route("/user/delete_user")
+@api.expect(delete_user_parser)
+class DeleteUser(Resource):
+    @api.doc(
+        "Delete a user and all of its connections (roles, Orgs . . .)"
+    )
+    @api.response(200, "")
+    @api.response(400, "User is not in the DB")
+    def post(self):
+        args = delete_user_parser.parse_args()
+        user_email = args["email"]
+        return delete_user(email=user_email)
+
+
 get_streets_parser = api.parser()
 get_streets_parser.add_argument(
     "yishuv_symbol",
@@ -1455,7 +1473,7 @@ get_streets_parser.add_argument(
 
 @api.route("/api/streets")
 @api.expect(get_streets_parser)
-class UpdateUserOrg(Resource):
+class GetAllStreetsOfYishuv(Resource):
     @api.doc("Get all streets of yishuv")
     def get(self):
         args = get_streets_parser.parse_args()

@@ -51,6 +51,8 @@ from anyway.models import (
     AgeGroup,
     AccidentMarkerView,
     EmbeddedReports,
+    City,
+    Streets,
 )
 from anyway.request_params import get_request_params_from_request_values
 from anyway.views.news_flash.api import (
@@ -1194,7 +1196,7 @@ class InfographicsData(Resource):
     @api.doc("get infographics data")
     @api.expect(parser)
     def get(self):
-        return infographics_data()
+        return infographics_data_by_location()
 
 
 def infographics_data():
@@ -1362,45 +1364,6 @@ def embedded_reports_api():
     return response
 
 
-# def infographics_data_by_location():
-#     mock_data = request.values.get("mock", "false")
-#     personalized_data = request.values.get("personalized", "false")
-#     if mock_data == "true":
-#         output = get_infographics_mock_data()
-#     elif mock_data == "false":
-#         road_segment_id = request.values.get("road_segment_id")
-#         if road_segment_id == None:
-#             log_bad_request(request)
-#             return abort(http_client.BAD_REQUEST)
-#
-#         number_of_years_ago = request.values.get("years_ago", BE_CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
-#         lang: str = request.values.get("lang", "he")
-#         logging.debug(
-#             (
-#                 "getting infographics data for news_flash_id: {news_flash_id}, "
-#                 + "in time period:{number_of_years_ago}, lang:{lang}"
-#             ).format(
-#                 news_flash_id=road_segment_id, number_of_years_ago=number_of_years_ago, lang=lang
-#             )
-#         )
-#         output = get_infographics_data_for_road_segment(
-#             road_segment_id=road_segment_id, years_ago=number_of_years_ago, lang=lang
-#         )
-#         if not output:
-#             log_bad_request(request)
-#             return abort(http_client.NOT_FOUND)
-#     else:
-#         log_bad_request(request)
-#         return abort(http_client.BAD_REQUEST)
-#
-#     if personalized_data == "true":
-#         output = widgets_personalisation_for_user(output)
-#
-#     json_data = json.dumps(output, default=str)
-#     return Response(json_data, mimetype="application/json")
-#
-#
-
 # User system API
 app.add_url_rule("/user/add_role", view_func=add_role, methods=["POST"])
 app.add_url_rule(
@@ -1411,6 +1374,7 @@ app.add_url_rule("/user/update_user", view_func=admin_update_user, methods=["POS
 app.add_url_rule("/user/add_to_role", view_func=add_to_role, methods=["POST"])
 app.add_url_rule("/user/remove_from_role", view_func=remove_from_role, methods=["POST"])
 app.add_url_rule("/user/info", view_func=get_user_info, methods=["GET"])
+app.add_url_rule("/user/is_user_logged_in", view_func=is_user_logged_in, methods=["GET"])
 app.add_url_rule("/user/get_all_users_info", view_func=get_all_users_info, methods=["GET"])
 app.add_url_rule("/user/get_roles_list", view_func=get_roles_list, methods=["GET"])
 app.add_url_rule("/callback/<provider>", view_func=oauth_callback, methods=["GET"])
@@ -1478,3 +1442,47 @@ class UpdateUserOrg(Resource):
         user_email = args["email"]
         org_name = args["org"]
         return update_user_org(user_email, org_name)
+
+
+delete_user_parser = api.parser()
+delete_user_parser.add_argument("email", type=str, required=True)
+
+
+@api.route("/user/delete_user")
+@api.expect(delete_user_parser)
+class DeleteUser(Resource):
+    @api.doc(
+        "Delete a user and all of its connections (roles, Orgs . . .)"
+    )
+    @api.response(200, "")
+    @api.response(400, "User is not in the DB")
+    def post(self):
+        args = delete_user_parser.parse_args()
+        user_email = args["email"]
+        return delete_user(email=user_email)
+
+
+get_streets_parser = api.parser()
+get_streets_parser.add_argument(
+    "yishuv_symbol",
+    type=int,
+    required=True,
+    help="Symbol of yishuv to get streets of.",
+)
+
+
+@api.route("/api/streets")
+@api.expect(get_streets_parser)
+class GetAllStreetsOfYishuv(Resource):
+    @api.doc("Get all streets of yishuv")
+    def get(self):
+        args = get_streets_parser.parse_args()
+        yishuv_symbol = args["yishuv_symbol"]
+        return Streets.get_streets_by_yishuv(yishuv_symbol)
+
+
+@api.route("/api/city", methods=["GET"])
+class Cities(Resource):
+    @api.doc("get get all cities")
+    def get(self):
+        return City.get_all_cities()

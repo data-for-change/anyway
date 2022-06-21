@@ -43,7 +43,9 @@ class RequestParams:
 # todo: merge with get_request_params()
 def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams]:
     location = get_location_from_request_values(vals)
-    years_ago = vals.get("years_ago")
+    if location is None:
+        return None
+    years_ago = vals.get("years_ago", BE_CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
     lang = vals.get("lang", "he")
     location_text = location["text"]
     gps = location["gps"]
@@ -63,8 +65,7 @@ def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams
     try:
         years_ago = int(years_ago)
     except (ValueError, TypeError):
-        # TODO: revert this change back to return None - meant to fix current API not working
-        years_ago = 5
+        return None
     if years_ago < 0 or years_ago > 100:
         return None
     last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
@@ -88,7 +89,7 @@ def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams
     return request_params
 
 
-def get_location_from_request_values(vals: dict) -> dict:
+def get_location_from_request_values(vals: dict) -> Optional[dict]:
     news_flash_id = vals.get("news_flash_id")
     if news_flash_id is not None:
         return get_location_from_news_flash(news_flash_id)
@@ -99,13 +100,17 @@ def get_location_from_request_values(vals: dict) -> dict:
         "street1" in vals or "street1_hebrew" in vals
     ):
         return extract_street_location(vals)
-    logging.error(f"Unsupported location:{vals}")
-    return {}
+    logging.error(f"Unsupported location:{vals.values()}")
+    return None
 
 
-def get_location_from_news_flash(news_flash_id: str) -> dict:
+def get_location_from_news_flash(news_flash_id: str) -> Optional[dict]:
     news_flash = extract_news_flash_obj(news_flash_id)
+    if news_flash is None:
+        return None
     loc = extract_news_flash_location(news_flash)
+    if loc is None:
+        return None
     res = loc["data"]["resolution"]
     loc["data"]["resolution"] = BE_CONST.ResolutionCategories(res)
     loc["text"] = get_news_flash_location_text(news_flash)
@@ -116,7 +121,9 @@ def get_location_from_news_flash(news_flash_id: str) -> dict:
 def add_numeric_field_values(loc: dict, news_flash: NewsFlash) -> None:
     if loc["data"]["resolution"] == BE_CONST.ResolutionCategories.STREET:
         if "yishuv_symbol" not in loc["data"]:
-            loc["data"]["yishuv_symbol"] = City.get_symbol_from_name(loc["data"]["yishuv_name"])
+            loc["data"]["yishuv_symbol"] = City.get_symbol_from_name(
+                loc["data"]["yishuv_name"]
+            )
         if "street1" not in loc["data"]:
             loc["data"]["street1"] = Streets.get_street_by_street_name(
                 loc["data"]["yishuv_symbol"], loc["data"]["street1_hebrew"]
@@ -164,7 +171,7 @@ def get_news_flash_location_text(news_flash_obj: NewsFlash):
 # generate text describing location or road segment of news flash
 # to be used by most severe accidents additional info widget
 def get_road_segment_location_text(road1: int, road_segment_name: str):
-    res = "כביש " + str(road1) + " במקטע " + road_segment_name
+    res = "כביש " + str(int(road1)) + " במקטע " + road_segment_name
     return res
 
 

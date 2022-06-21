@@ -10,7 +10,7 @@ from datetime import datetime
 
 import math
 import pandas as pd
-from sqlalchemy import or_
+from sqlalchemy import or_, event
 from typing import Tuple, Dict, List, Any
 
 from anyway.parsers.cbs import preprocessing_cbs_files
@@ -78,6 +78,7 @@ from anyway.models import (
     VehicleDamage,
     Streets,
 )
+from anyway.parsers.cbs.exceptions import CBSParsingFailed
 from anyway.utilities import ItmToWGS84, time_delta, ImporterUI, truncate_tables, chunks
 from anyway.db_views import VIEWS
 from anyway.app_and_db import db
@@ -1035,21 +1036,42 @@ def create_provider_code_table():
         db.session.commit()
 
 
+def receive_rollback(conn, **kwargs):
+    """listen for the 'rollback' event"""
+    logging.debug(f"rollback in create_tables(). conn:{conn},kw:{kwargs}")
+    print("---------------------------------------------")
+
+
 def create_tables():
-    with db.get_engine().begin() as conn:
-        conn.execute("TRUNCATE involved_markers_hebrew")
-        conn.execute("TRUNCATE vehicles_markers_hebrew")
-        conn.execute("TRUNCATE vehicles_hebrew")
-        conn.execute("TRUNCATE involved_hebrew")
-        conn.execute("TRUNCATE markers_hebrew")
-        conn.execute("INSERT INTO markers_hebrew " + VIEWS.MARKERS_HEBREW_VIEW)
-        conn.execute("INSERT INTO involved_hebrew " + VIEWS.INVOLVED_HEBREW_VIEW)
-        conn.execute("INSERT INTO vehicles_hebrew " + VIEWS.VEHICLES_HEBREW_VIEW)
-        conn.execute("INSERT INTO vehicles_markers_hebrew " + VIEWS.VEHICLES_MARKERS_HEBREW_VIEW)
-        conn.execute(
-            "INSERT INTO involved_markers_hebrew " + VIEWS.INVOLVED_HEBREW_MARKERS_HEBREW_VIEW
-        )
-        logging.debug("Created DB Hebrew Tables")
+    try:
+        with db.get_engine().begin() as conn:
+            event.listen(conn, "rollback", receive_rollback)
+            logging.debug("begin create tables")
+            conn.execute("TRUNCATE involved_markers_hebrew")
+            logging.debug("after TRUNCATE involved_markers_hebrew")
+            conn.execute("TRUNCATE vehicles_markers_hebrew")
+            logging.debug("after TRUNCATE vehicles_markers_hebrew")
+            conn.execute("TRUNCATE vehicles_hebrew")
+            logging.debug("after TRUNCATE vehicles_hebrew")
+            conn.execute("TRUNCATE involved_hebrew")
+            logging.debug("after TRUNCATE involved_hebrew")
+            conn.execute("TRUNCATE markers_hebrew")
+            logging.debug("after TRUNCATE markers_hebrew")
+            conn.execute("INSERT INTO markers_hebrew " + VIEWS.MARKERS_HEBREW_VIEW)
+            logging.debug("after INSERT INTO markers_hebrew")
+            conn.execute("INSERT INTO involved_hebrew " + VIEWS.INVOLVED_HEBREW_VIEW)
+            logging.debug("after INSERT INTO involved_hebrew")
+            conn.execute("INSERT INTO vehicles_hebrew " + VIEWS.VEHICLES_HEBREW_VIEW)
+            logging.debug("after INSERT INTO vehicles_hebrew ")
+            conn.execute("INSERT INTO vehicles_markers_hebrew " + VIEWS.VEHICLES_MARKERS_HEBREW_VIEW)
+            logging.debug("after INSERT INTO vehicles_markers_hebrew")
+            conn.execute(
+                "INSERT INTO involved_markers_hebrew " + VIEWS.INVOLVED_HEBREW_MARKERS_HEBREW_VIEW
+            )
+            logging.debug("Created DB Hebrew Tables")
+    except Exception as e:
+        logging.exception(f"Exception while creating hebrew tables, {e}", e)
+        raise e
 
 
 def update_dictionary_tables(path):
@@ -1137,7 +1159,12 @@ def main(batch_size, source, load_start_year=None):
                 )
                 total += num_new
                 add_to_streets(streets)
-        import_streets_into_db()
+
+        # [Carmel:] not best solution,
+        # need to understand what are all possible values for the 'source' argument
+        if source != 's3':
+            import_streets_into_db()
+
         fill_db_geo_data()
 
         failed = [
@@ -1151,7 +1178,8 @@ def main(batch_size, source, load_start_year=None):
         )
         logging.debug("Total: {0} items in {1}".format(total, time_delta(started)))
         create_tables()
+        logging.debug("Finished Creating Hebrew DB Tables")
     except Exception as ex:
-        print("Exception occured while loading the cbs data: {0}".format(str(ex)))
         print("Traceback: {0}".format(traceback.format_exc()))
+        raise CBSParsingFailed(message=str(ex))
         # Todo - send an email that an exception occured

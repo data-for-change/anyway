@@ -4,6 +4,7 @@ import datetime
 import json
 import logging
 from collections import namedtuple
+from typing import List
 
 try:
     from flask_login import UserMixin
@@ -907,7 +908,91 @@ class NewsFlash(Base):
         return self.id
 
 
-class City(Base):
+class CityFields(object):
+    __tablename__ = "cbs_cities"
+    heb_name = Column(String())
+    yishuv_symbol = Column(Integer(), primary_key=True)
+    eng_name = Column(String())
+    district = Column(Integer())
+    napa = Column(Integer())
+    # natural_zone = Column(Integer(), nullable=True)
+    municipal_stance = Column(Integer(), nullable=True)
+    metropolitan = Column(Integer(), nullable=True)
+    # religion = Column(Integer(), nullable=True)
+    # population = Column(Integer(), nullable=True)
+    # other = Column(Float(), nullable=True)
+    # jews = Column(Float(), nullable=True)
+    # arab = Column(Float(), nullable=True)
+    # founded = Column(Integer(), nullable=True)
+    # tzura = Column(Integer(), nullable=True)
+    # irgun = Column(Integer(), nullable=True)
+    center = Column(BigInteger(), nullable=True)
+    # altitude = Column(Integer(), nullable=True)
+    # planning = Column(Integer(), nullable=True)
+    # police = Column(Integer(), nullable=True)
+    # year = Column(Integer(), nullable=True)
+    # taatik = Column(String(), nullable=True)
+
+    def serialize(self):
+        return {
+            "heb_name": self.heb_name,
+            "yishuv_symbol": self.yishuv_symbol,
+            "eng_name": self.eng_name,
+            "district": self.district,
+            "napa": self.napa,
+            # "natural_zone": self.natural_zone,
+            "municipal_stance": self.municipal_stance,
+            "metropolitan": self.metropolitan,
+            # "religion": self.religion,
+            # "population": self.population,
+            # "other": self.other,
+            # "jews": self.jews,
+            # "arab": self.arab,
+            # "founded": self.founded,
+            # "tzura": self.tzura,
+            # "irgun": self.irgun,
+            "center": self.center,
+            # "altitude": self.altitude,
+            # "planning": self.planning,
+            # "police": self.police,
+            # "year": self.year,
+            # "taatik": self.taatik,
+        }
+
+
+class City(CityFields, Base):
+    __tablename__ = "cbs_cities"
+
+    @staticmethod
+    def get_name_from_symbol(symbol: int) -> str:
+        res = db.session.query(City.heb_name).filter(City.yishuv_symbol == symbol).first()
+        if res is None:
+            raise ValueError(f"{symbol}: could not find city with that symbol")
+        return res.heb_name
+
+    @staticmethod
+    def get_symbol_from_name(name: str) -> int:
+        res: City = db.session.query(City.yishuv_symbol).filter(City.heb_name == name).first()
+        if res is None:
+            logging.error(f"City: no city with name:{name}.")
+            raise ValueError(f"City: no city with name:{name}.")
+        return res.yishuv_symbol
+
+    @staticmethod
+    def get_all_cities() -> List[dict]:
+        res: City = db.session.query(City.yishuv_symbol, City.heb_name).all()
+        if res is None:
+            logging.error(f"Failed to get cities.")
+            raise RuntimeError(f"When retrieving all cities")
+        res1 = [{"yishuv_symbol": c.yishuv_symbol, "yishuv_name": c.heb_name} for c in res]
+        return res1
+
+
+class CityTemp(CityFields, Base):
+    __tablename__ = "cbs_cities_temp"
+
+
+class DeprecatedCity(Base):
     __tablename__ = "cities"
     id = Column(Integer(), primary_key=True)
     symbol_code = Column(Integer())  # yishuv_symbol
@@ -928,18 +1013,35 @@ class City(Base):
 
     @staticmethod
     def get_name_from_symbol(symbol: int) -> str:
-        res = db.session.query(City.search_heb).filter(City.symbol_code == symbol).first()
+        res = (
+            db.session.query(DeprecatedCity.search_heb)
+            .filter(DeprecatedCity.symbol_code == symbol)
+            .first()
+        )
         if res is None:
             raise ValueError(f"{symbol}: could not find city with that symbol")
         return res.search_heb
 
     @staticmethod
     def get_symbol_from_name(name: str) -> int:
-        res = db.session.query(City.symbol_code).filter(City.search_heb == name).first()
+        res = (
+            db.session.query(DeprecatedCity.symbol_code)
+            .filter(DeprecatedCity.search_heb == name)
+            .first()
+        )
         if res is None:
-            logging.error(f"City: no city with name:{name}.")
-            raise ValueError(f"City: no city with name:{name}.")
+            logging.error(f"DeprecatedCity: no city with name:{name}.")
+            raise ValueError(f"DeprecatedCity: no city with name:{name}.")
         return res.symbol_code
+
+    @staticmethod
+    def get_all_cities() -> List[dict]:
+        res = db.session.query(DeprecatedCity.symbol_code, DeprecatedCity.search_heb).all()
+        if res is None:
+            logging.error(f"Failed to get cities.")
+            raise RuntimeError(f"When retrieving all cities")
+        res1 = [{"yishuv_symbol": c.symbol_code, "yishuv_name": c.search_heb} for c in res]
+        return res1
 
     # Flask-Login integration
     def is_authenticated(self):
@@ -992,6 +1094,18 @@ class Streets(Base):
         if res is None:
             raise ValueError(f"{name}: could not find street in yishuv:{yishuv_symbol}")
         return res
+
+    @staticmethod
+    def get_streets_by_yishuv(yishuv_symbol: int) -> List[dict]:
+        res = (
+            db.session.query(Streets.street, Streets.street_hebrew)
+            .filter(Streets.yishuv_symbol == yishuv_symbol)
+            .all()
+        )
+        res1 = [{"street": s.street, "street_hebrew": s.street_hebrew} for s in res]
+        if res is None:
+            raise RuntimeError(f"When retrieving streets of {yishuv_symbol}")
+        return res1
 
 
 class RegisteredVehicle(Base):
@@ -2478,6 +2592,10 @@ class InfographicsRoadSegmentsDataCache(InfographicsRoadSegmentsDataCacheFields,
             "years_ago": self.years_ago,
             "data": self.data,
         }
+
+
+class InfographicsRoadSegmentsDataCacheTemp(InfographicsRoadSegmentsDataCacheFields, Base):
+    __tablename__ = "infographics_road_segments_data_cache_temp"
 
 
 class InfographicsTwoRoadsDataCacheFields(object):

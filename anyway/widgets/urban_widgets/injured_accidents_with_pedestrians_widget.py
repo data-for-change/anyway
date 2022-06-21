@@ -106,7 +106,7 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
 
         except Exception as e:
             logging.error(f"InjuredAccidentsWithPedestriansWidget.generate_items(): {e}")
-            raise Exception(e)
+            raise
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:

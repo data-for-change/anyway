@@ -209,6 +209,20 @@ class AccidentType(LabeledCode):
             AccidentType.DAMAGE_CAUSED_BY_A_FALLING_LOAD_OFF_A_VEHICLE: "Damage caused by a falling load off a vehicle",
         }
 
+    def is_collision(self) -> bool:
+        return self in [
+            self.COLLISION_OF_FRONT_TO_SIDE,
+            self.COLLISION_OF_FRONT_TO_REAR_END,
+            self.COLLISION_OF_SIDE_TO_SIDE_LATERAL,
+            self.HEAD_ON_FRONTAL_COLLISION,
+            self.COLLISION_WITH_A_STOPPED_NON_PARKED_VEHICLE,
+            self.COLLISION_WITH_A_PARKED_VEHICLE,
+            self.COLLISION_WITH_AN_INANIMATE_OBJECT,
+            self.COLLISION_OF_REAR_END_TO_FRONT,
+            self.COLLISION_OF_REAR_END_TO_SIDE,
+            self.COLLISION_WITH_AN_ANIMAL,
+        ]
+
 
 class DriverType(LabeledCode):
     PROFESSIONAL_DRIVER = 1
@@ -281,3 +295,10 @@ class CrossCategory(Enum):
             CrossCategory.CROSSWALK: [CrossLocation.YESLIGHT, CrossLocation.YESNONE],
         }
         return list(map(lambda x: x.value, category_cross_locations[self]))
+
+
+class InvolvedType(Enum):
+    # this is defined based on https://docs.google.com/spreadsheets/d/1qaVV7NKXVYNmnxKZ4he2MKZDAjWPHiHfq-U5dcNZM5k/edit#gid=266079360
+    DRIVER = 1
+    INJURED_DRIVER = 2
+    INJURED = 3

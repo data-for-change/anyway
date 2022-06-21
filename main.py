@@ -7,6 +7,11 @@ import sys
 
 import click
 
+logging.basicConfig(
+    format="%(asctime)s %(levelname)-8s %(message)s",
+    level=logging.DEBUG,
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 def valid_date(date_string):
     date_input_format = "%d-%m-%Y"
@@ -87,18 +92,10 @@ def process():
 @click.option("--batch_size", type=int, default=5000)
 @click.option("--load_start_year", type=str, default=None)
 @click.option("--source", type=str, default="s3")
-def cbs(
-    batch_size,
-    load_start_year,
-    source
-):
+def cbs(batch_size, load_start_year, source):
     from anyway.parsers.cbs.executor import main
 
-    return main(
-        batch_size=batch_size,
-        load_start_year=load_start_year,
-        source=source
-    )
+    return main(batch_size=batch_size, load_start_year=load_start_year, source=source)
 
 
 @process.command()
@@ -275,7 +272,8 @@ def infographics_data_cache(info, update):
 def infographics_data_cache_for_road_segments():
     """Will refresh the infographics data cache"""
     from anyway.parsers.infographics_data_cache_updater import main_for_road_segments
-    return main_for_road_segments(update=True, info=True)
+
+    return main_for_road_segments()
 
 
 @process.group()
@@ -287,7 +285,14 @@ def cache():
 def update_street():
     """Update street cache"""
     from anyway.parsers.infographics_data_cache_updater import main_for_street
+
     main_for_street()
+
+
+@cache.command()
+def update_road_segments():
+    """Update road segments cache"""
+    infographics_data_cache_for_road_segments()
 
 
 @process.command()
@@ -321,6 +326,19 @@ def create_cbs_tables():
     from anyway.parsers.cbs.executor import create_tables
 
     return create_tables()
+
+
+@create_tables.command()
+@click.option(
+    "--file-name",
+    type=str,
+    help="csv file to load from. Default is static/data/cities.csv",
+    default="%s/static/data/cities.csv" % os.path.abspath(os.path.dirname(__file__)),
+)
+def update_cities_table(file_name):
+    from anyway.parsers.cbs.preprocessing_cbs_files import load_cities_data
+
+    return load_cities_data(file_name=file_name)
 
 
 @cli.group()
@@ -403,6 +421,14 @@ def accidents_around_schools(start_date, end_date, distance, output_path):
     return main(
         start_date=start_date, end_date=end_date, distance=distance, output_path=output_path
     )
+
+
+@scripts.command()
+def test_airflow():
+    print('my print')
+    logging.info('info log')
+    logging.warning('warning log')
+    logging.debug('debug log')
 
 
 @scripts.command()

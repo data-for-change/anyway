@@ -7,7 +7,7 @@ from sqlalchemy.sql.elements import and_
 from flask_babel import _
 from anyway.request_params import RequestParams
 from anyway.app_and_db import db
-from anyway.backend_constants import InjurySeverity, InjuredType
+from anyway.backend_constants import InjurySeverity, InjuredType, BE_CONST
 from anyway.widgets.widget_utils import (
     add_empty_keys_to_gen_two_level_dict,
     gen_entity_labels,
@@ -102,7 +102,7 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
                 ],
                 InjurySeverity.codes(),
             )
-            self.items = format_2_level_items(res, None, InjurySeverity)
+            self.items = format_2_level_items(res, None, InjurySeverity, total=True)
 
         except Exception as e:
             logging.error(f"InjuredAccidentsWithPedestriansWidget.generate_items(): {e}")
@@ -113,6 +113,7 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
         items["data"]["text"] = {
             "title": _("Pedestrian accidents by severity and year")
             + f" - {request_params.location_text}",
-            "labels": gen_entity_labels(InjurySeverity),
+            "labels": {**gen_entity_labels(InjurySeverity),
+            **{BE_CONST.TOTAL : _("total_injured")}}
         }
         return items

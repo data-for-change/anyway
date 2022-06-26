@@ -40,8 +40,9 @@ class KilledInjuredCountPerAgeGroupStackedWidget(SubUrbanWidget):
                 {BE.LKEY: inj.get_label(), BE.VAL: severity_dict.get(inj.value, 0)}
                 for inj in INJURY_ORDER
             ]
-            structured_data_list.append({BE.LKEY: age_group, BE.SERIES: ordered_list})
-
+            structured_data_list.append({BE.LKEY: age_group,
+            BE.TOTAL: sum([item[BE.VAL] for item in ordered_list]),
+            BE.SERIES: ordered_list})
         self.items = structured_data_list
 
     @staticmethod
@@ -49,7 +50,8 @@ class KilledInjuredCountPerAgeGroupStackedWidget(SubUrbanWidget):
         items["data"]["text"] = {
             "title": _("Killed and injury stacked per age group"),
             "subtitle": _("In") + " " + request_params.location_info["road_segment_name"],
-            "labels_map": gen_entity_labels(InjurySeverity),
+            "labels_map": {**gen_entity_labels(InjurySeverity),
+            **{BE.TOTAL : _("total_injured")}}
         }
         return items
 

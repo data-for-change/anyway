@@ -123,6 +123,7 @@ def format_2_level_items(
     items: Dict[typing.Union[int, str], dict],
     level1_vals: Optional[Type[LabeledCode]],
     level2_vals: Optional[Type[LabeledCode]],
+    total: bool = False,
 ):
     res: List[Dict[str, Any]] = []
     for l1_code, year_res in items.items():
@@ -131,7 +132,16 @@ def format_2_level_items(
         for l2_code, num in year_res.items():
             l2 = level2_vals.labels()[level2_vals(l2_code)] if level2_vals else l2_code
             series_data.append({BE_CONST.LKEY: l2, BE_CONST.VAL: num})
-        res.append({BE_CONST.LKEY: l1, BE_CONST.SERIES: series_data})
+        if total:
+            res.append(
+                {
+                    BE_CONST.LKEY: l1,
+                    BE_CONST.TOTAL: sum([item[BE_CONST.VAL] for item in series_data]),
+                    BE_CONST.SERIES: series_data,
+                }
+            )
+        else:
+            res.append({BE_CONST.LKEY: l1, BE_CONST.SERIES: series_data})
     return res
 
 

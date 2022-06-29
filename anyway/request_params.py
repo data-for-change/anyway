@@ -121,7 +121,9 @@ def get_location_from_news_flash(news_flash_id: str) -> Optional[dict]:
 def add_numeric_field_values(loc: dict, news_flash: NewsFlash) -> None:
     if loc["data"]["resolution"] == BE_CONST.ResolutionCategories.STREET:
         if "yishuv_symbol" not in loc["data"]:
-            loc["data"]["yishuv_symbol"] = City.get_symbol_from_name(loc["data"]["yishuv_name"])
+            loc["data"]["yishuv_symbol"] = City.get_symbol_from_name(
+                loc["data"]["yishuv_name"]
+            )
         if "street1" not in loc["data"]:
             loc["data"]["street1"] = Streets.get_street_by_street_name(
                 loc["data"]["yishuv_symbol"], loc["data"]["street1_hebrew"]

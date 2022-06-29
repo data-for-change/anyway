@@ -302,4 +302,3 @@ class InvolvedType(Enum):
     DRIVER = 1
     INJURED_DRIVER = 2
     INJURED = 3
-    ANY_DRIVER = (DRIVER, INJURED_DRIVER)

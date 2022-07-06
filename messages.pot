@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-05-27 14:02+0300\n"
+"POT-Creation-Date: 2022-06-27 01:14+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,15 +17,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.6.0\n"
 
-#: anyway/backend_constants.py:145
+#: anyway/backend_constants.py:146
 msgid "killed"
 msgstr ""
 
-#: anyway/backend_constants.py:146
+#: anyway/backend_constants.py:147
 msgid "severe injured"
 msgstr ""
 
-#: anyway/backend_constants.py:147
+#: anyway/backend_constants.py:148
 msgid "light injured"
 msgstr ""
 
@@ -257,8 +257,12 @@ msgid ""
 "period. Three most common accident types are displayed"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/accident_count_by_accident_year_widget.py:55
+#: anyway/widgets/suburban_widgets/accident_count_by_accident_year_widget.py:54
 msgid "Accidents in segment"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/accident_count_by_accident_year_widget.py:58
+msgid "total_accidents"
 msgstr ""
 
 #: anyway/widgets/suburban_widgets/accident_count_by_accident_year_widget.py:63
@@ -346,7 +350,13 @@ msgstr ""
 msgid "Number of injured in accidents, per year, split by severity"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/injured_count_by_accident_year_widget.py:61
+#: anyway/widgets/suburban_widgets/injured_count_by_accident_year_widget.py:57
+#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_stacked_widget.py:54
+#: anyway/widgets/urban_widgets/injured_accidents_with_pedestrians_widget.py:117
+msgid "total_injured"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/injured_count_by_accident_year_widget.py:62
 msgid ""
 "Fatal, severe and light injured count in the specified years, split by "
 "injury severity"
@@ -356,11 +366,11 @@ msgstr ""
 msgid "Number of Injuries in accidents by severity"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_stacked_widget.py:50
+#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_stacked_widget.py:51
 msgid "Killed and injury stacked per age group"
 msgstr ""
 
-#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_stacked_widget.py:51
+#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_stacked_widget.py:52
 #: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_widget.py:40
 msgid "In"
 msgstr ""

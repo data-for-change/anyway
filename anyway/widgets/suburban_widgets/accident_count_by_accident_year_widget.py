@@ -2,7 +2,7 @@ from typing import Dict
 
 from flask_babel import _
 
-from anyway.backend_constants import AccidentSeverity
+from anyway.backend_constants import AccidentSeverity, BE_CONST
 from anyway.infographics_dictionaries import segment_dictionary
 from anyway.models import AccidentMarkerView
 from anyway.request_params import RequestParams
@@ -29,7 +29,6 @@ class AccidentCountByAccidentYearWidget(SubUrbanWidget):
         self.information = "Fatal, severe and light accidents count in the specified years, split by accident severity"
 
     def generate_items(self) -> None:
-
         res1 = get_accidents_stats(
             table_obj=AccidentMarkerView,
             filters=self.request_params.location_info,
@@ -47,7 +46,7 @@ class AccidentCountByAccidentYearWidget(SubUrbanWidget):
                 AccidentSeverity.LIGHT.value: 0,
             },
         )
-        self.items = format_2_level_items(res2, None, AccidentSeverity)
+        self.items = format_2_level_items(res2, None, AccidentSeverity, total=True)
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
@@ -55,7 +54,8 @@ class AccidentCountByAccidentYearWidget(SubUrbanWidget):
             "title": _("Accidents in segment")
             + " "
             + segment_dictionary[request_params.location_info["road_segment_name"]],
-            "labels_map": gen_entity_labels(AccidentSeverity),
+            "labels_map": {**gen_entity_labels(AccidentSeverity),
+             **{BE_CONST.TOTAL : _("total_accidents")}}
         }
         return items
 

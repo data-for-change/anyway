@@ -157,7 +157,7 @@ def get_news_flash_location_text(news_flash_obj: NewsFlash):
     elif resolution == "צומת בינעירוני" and road1 and road_segment_name:
         res = "כביש " + road1 + " במקטע " + road_segment_name
     elif resolution == "רחוב" and yishuv_name and street1_hebrew:
-        res = " רחוב " + street1_hebrew + " ב" + yishuv_name
+        res = get_street_location_text(yishuv_name, street1_hebrew)
     else:
         logging.warning(
             "Did not found quality resolution. Using location field. News Flash id:{}".format(
@@ -176,7 +176,7 @@ def get_road_segment_location_text(road1: int, road_segment_name: str):
 
 
 def get_street_location_text(yishuv_name, street1_hebrew):
-    return " רחוב " + street1_hebrew + " ב" + yishuv_name
+    return "רחוב " + street1_hebrew + " ב" + yishuv_name
 
 
 def extract_road_segment_location(road_segment_id):

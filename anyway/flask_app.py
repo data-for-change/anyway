@@ -60,6 +60,7 @@ from anyway.views.news_flash.api import (
     news_flash_new,
     single_news_flash,
     news_flash_v2,
+    update_new_flash_qualifying,
     DEFAULT_LIMIT_REQ_PARAMETER,
     DEFAULT_OFFSET_REQ_PARAMETER,
 )
@@ -1148,6 +1149,8 @@ news_flash_fields_model = api.model(
         "street2_hebrew": fields.String(),
         "non_urban_intersection_hebrew": fields.String(),
         "road_segment_name": fields.String(),
+        "newsflash_location_qualification": fields.Integer(),
+        "location_qualifying_user": fields.Integer(),
     },
 )
 news_flash_list_model = api.model(
@@ -1451,9 +1454,7 @@ delete_user_parser.add_argument("email", type=str, required=True)
 @api.route("/user/delete_user")
 @api.expect(delete_user_parser)
 class DeleteUser(Resource):
-    @api.doc(
-        "Delete a user and all of its connections (roles, Orgs . . .)"
-    )
+    @api.doc("Delete a user and all of its connections (roles, Orgs . . .)")
     @api.response(200, "")
     @api.response(400, "User is not in the DB")
     def post(self):
@@ -1486,3 +1487,9 @@ class Cities(Resource):
     @api.doc("get get all cities")
     def get(self):
         return City.get_all_cities()
+
+
+@api.route("/api/news-flash/<int:id>", methods=["PUT"])
+class SetNewsflashLocationQualification(Resource):
+    def put(self, id):
+        return update_new_flash_qualifying(id)

@@ -10,13 +10,14 @@ from jsonschema import validate
 from anyway.app_and_db import db
 from anyway.vehicle_type import VehicleCategory
 from anyway.widgets.suburban_widgets.accident_count_by_car_type_widget import AccidentCountByCarTypeWidget
+from anyway.backend_constants import NewsflashLocationQualification
 
 
 def insert_infographic_mock_data(app):
-    sql_insert = """
+    sql_insert = f"""
         insert into news_flash
         (accident, author, date, description, lat, link, lon, title, source, location, road1, road2, resolution,
-        tweet_id, district_hebrew, non_urban_intersection_hebrew, region_hebrew, road_segment_name, street1_hebrew, street2_hebrew, yishuv_name)
+        tweet_id, district_hebrew, non_urban_intersection_hebrew, region_hebrew, road_segment_name, street1_hebrew, street2_hebrew, yishuv_name, newsflash_location_qualification, location_qualifying_user)
         values (
         true,
         'ynet',
@@ -38,6 +39,8 @@ def insert_infographic_mock_data(app):
         'כניסה למצפה שלם - צומת שדי תרומות',
         null,
         null,
+        null,
+        {NewsflashLocationQualification.NOT_VERIFIED.value},
         null) returning id;
     """
     insert_id = db.session.execute(sql_insert).fetchone()[0]

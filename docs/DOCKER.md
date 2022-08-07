@@ -27,7 +27,7 @@ Instructions
 
 **2.** [Install Docker](https://docs.docker.com/install/) and [Install Docker Compose](https://docs.docker.com/compose/install/)
 
-**3.** Get the `.env` file with the required secret values and place in the project **root directory** - can be downloaded [from here](https://drive.google.com/file/d/1WA_B3Qo5xgf2Zt_tVNjnSK2VONqQ1ZYD/view?usp=sharing). Note that this file **needs to be saved as `.env`** - with the `.` at the beginning of the name of the file.
+**3.** Get the `.env` file with the required secret values and place in the project **root directory** - can be downloaded [from here](https://drive.google.com/file/d/1ZdM9MdvSuhsNkJXy93Nj05c9GE-hyHOj/view?usp=sharing). Note that this file **needs to be saved as `.env`** - with the `.` at the beginning of the name of the file.
 **Continue with your OS, See below**
 
 **For Mac:**

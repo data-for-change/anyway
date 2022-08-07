@@ -2,7 +2,7 @@ from typing import Dict
 
 from flask_babel import _
 
-from anyway.backend_constants import InjurySeverity, BE_CONST
+from anyway.backend_constants import InjurySeverity
 from anyway.infographics_dictionaries import segment_dictionary
 from anyway.models import InvolvedMarkerView
 from anyway.request_params import RequestParams
@@ -46,15 +46,14 @@ class InjuredCountByAccidentYearWidget(SubUrbanWidget):
                 InjurySeverity.LIGHT_INJURED.value: 0,
             },
         )
-        self.items = format_2_level_items(res2, None, InjurySeverity, total=True)
+        self.items = format_2_level_items(res2, None, InjurySeverity)
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
             "title": _("Number of injured in accidents, per year, split by severity")
             + f" - {segment_dictionary[request_params.location_info['road_segment_name']]}",
-            "labels_map": {**gen_entity_labels(InjurySeverity),
-            **{BE_CONST.TOTAL : _("total_injured")}}
+            "labels_map": gen_entity_labels(InjurySeverity),
         }
         return items
 

@@ -35,14 +35,15 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
 
     def generate_items(self) -> None:
         # noinspection PyUnresolvedReferences
-        self.items = MotorcycleAccidentsVsAllAccidentsWidget.motorcycle_accidents_vs_all_accidents(
+        res = MotorcycleAccidentsVsAllAccidentsWidget.motorcycle_accidents_vs_all_accidents(
             self.request_params.start_time, self.request_params.end_time, self.road_number
         )
+        self.items, self.counter_road_motorcycle, self.motorcycle_road_percentage, self.motorcycle_all_roads_percentage = res
 
     @staticmethod
     def motorcycle_accidents_vs_all_accidents(
         start_time: datetime.date, end_time: datetime.date, road_number: str
-    ) -> List:
+        ) -> List:
         location_label = "location"
         case_location = case(
             [
@@ -115,12 +116,15 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
         if sum_road == 0:
             sum_road = 1  # prevent division by zero
         sum_all = counter_other_other + counter_other_motorcycle + sum_road
+        
+        motorcycle_road_percentage = counter_road_motorcycle / sum_road
+        motorcycle_all_roads_percentage = (counter_other_motorcycle + counter_road_motorcycle) / sum_all
 
-        return [
+        items = [
             {
                 "label_key": location_road,
                 "series": [
-                    {"label_key": vehicle_motorcycle, "value": counter_road_motorcycle / sum_road},
+                    {"label_key": vehicle_motorcycle, "value": motorcycle_road_percentage},
                     {"label_key": vehicle_other, "value": counter_road_other / sum_road},
                 ],
             },
@@ -129,7 +133,7 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
                 "series": [
                     {
                         "label_key": vehicle_motorcycle,
-                        "value": (counter_other_motorcycle + counter_road_motorcycle) / sum_all,
+                        "value": motorcycle_all_roads_percentage,
                     },
                     {
                         "label_key": vehicle_other,
@@ -138,6 +142,8 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
                 ],
             },
         ]
+
+        return items, counter_road_motorcycle, motorcycle_road_percentage, motorcycle_all_roads_percentage
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
@@ -166,26 +172,14 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
         }
         return items
 
+    """
+    Show widget if:
+    1. At least 3 severe motorcycle accidents in road
+    2. Percentage of motor accidents in road is at least twice as much as percentage of motor accidents in other roads
+    """
     # noinspection PyUnboundLocalVariable
     def is_included(self) -> bool:
-        vehicle_motorcycle = VehicleCategory.MOTORCYCLE.get_english_display_name()
-        motor_accidents_in_road, motor_accidents_in_all_roads = None, None
-        for item in self.items:
-            if item["label_key"] == location_road:
-                for serie in item["series"]:
-                    if serie["label_key"] == vehicle_motorcycle:
-                        motor_accidents_in_road = serie["value"]
-            elif item["label_key"] == location_all_label:
-                for serie in item["series"]:
-                    if serie["label_key"] == vehicle_motorcycle:
-                        motor_accidents_in_all_roads = serie["value"]
-            else:
-                raise ValueError
-        if not motor_accidents_in_road or not motor_accidents_in_all_roads:
-            raise ValueError
-        # At least 3 severe motorcycle accidents in road and more than twice as much of motor accidents in other roads
-        total = motor_accidents_in_road + motor_accidents_in_all_roads
-        return motor_accidents_in_road >= 3 and (motor_accidents_in_road / total) >= 2*(motor_accidents_in_all_roads / total)
+        return self.counter_road_motorcycle >= 3 and self.motorcycle_road_percentage >= 2*self.motorcycle_all_roads_percentage
 
 _("road")
 _("Percentage of serious and fatal motorcycle accidents in the selected section compared to the average percentage of accidents in other road sections throughout the country")

@@ -65,8 +65,7 @@ def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams
     try:
         years_ago = int(years_ago)
     except (ValueError, TypeError):
-        # TODO: revert this change back to return None - meant to fix current API not working
-        years_ago = 5
+        return None
     if years_ago < 0 or years_ago > 100:
         return None
     last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
@@ -122,7 +121,9 @@ def get_location_from_news_flash(news_flash_id: str) -> Optional[dict]:
 def add_numeric_field_values(loc: dict, news_flash: NewsFlash) -> None:
     if loc["data"]["resolution"] == BE_CONST.ResolutionCategories.STREET:
         if "yishuv_symbol" not in loc["data"]:
-            loc["data"]["yishuv_symbol"] = City.get_symbol_from_name(loc["data"]["yishuv_name"])
+            loc["data"]["yishuv_symbol"] = City.get_symbol_from_name(
+                loc["data"]["yishuv_name"]
+            )
         if "street1" not in loc["data"]:
             loc["data"]["street1"] = Streets.get_street_by_street_name(
                 loc["data"]["yishuv_symbol"], loc["data"]["street1_hebrew"]
@@ -156,7 +157,7 @@ def get_news_flash_location_text(news_flash_obj: NewsFlash):
     elif resolution == "צומת בינעירוני" and road1 and road_segment_name:
         res = "כביש " + road1 + " במקטע " + road_segment_name
     elif resolution == "רחוב" and yishuv_name and street1_hebrew:
-        res = " רחוב " + street1_hebrew + " ב" + yishuv_name
+        res = get_street_location_text(yishuv_name, street1_hebrew)
     else:
         logging.warning(
             "Did not found quality resolution. Using location field. News Flash id:{}".format(
@@ -170,12 +171,12 @@ def get_news_flash_location_text(news_flash_obj: NewsFlash):
 # generate text describing location or road segment of news flash
 # to be used by most severe accidents additional info widget
 def get_road_segment_location_text(road1: int, road_segment_name: str):
-    res = "כביש " + str(road1) + " במקטע " + road_segment_name
+    res = "כביש " + str(int(road1)) + " במקטע " + road_segment_name
     return res
 
 
 def get_street_location_text(yishuv_name, street1_hebrew):
-    return " רחוב " + street1_hebrew + " ב" + yishuv_name
+    return "רחוב " + street1_hebrew + " ב" + yishuv_name
 
 
 def extract_road_segment_location(road_segment_id):

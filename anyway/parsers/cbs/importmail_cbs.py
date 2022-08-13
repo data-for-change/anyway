@@ -100,7 +100,7 @@ class MailImporter:
             recent_cbs_emails.append(emails_with_zip_sorted_by_time[-i])
         return recent_cbs_emails
 
-    def import_cbs_data_to_s3(self, emails_num=2, email_search_start_date=""):
+    def import_cbs_data_to_s3(self, emails_num=4, email_search_start_date=""):
         self.mail.login()
         self.mail.select_dir(self.mail_dir)
         recent_cbs_emails = self.get_recent_cbs_emails(

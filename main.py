@@ -7,6 +7,11 @@ import sys
 
 import click
 
+logging.basicConfig(
+    format="%(asctime)s %(levelname)-8s %(message)s",
+    level=logging.DEBUG,
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 def valid_date(date_string):
     date_input_format = "%d-%m-%Y"
@@ -323,6 +328,19 @@ def create_cbs_tables():
     return create_tables()
 
 
+@create_tables.command()
+@click.option(
+    "--file-name",
+    type=str,
+    help="csv file to load from. Default is static/data/cities.csv",
+    default="%s/static/data/cities.csv" % os.path.abspath(os.path.dirname(__file__)),
+)
+def update_cities_table(file_name):
+    from anyway.parsers.cbs.preprocessing_cbs_files import load_cities_data
+
+    return load_cities_data(file_name=file_name)
+
+
 @cli.group()
 def update_dictionary_tables():
     pass
@@ -403,6 +421,14 @@ def accidents_around_schools(start_date, end_date, distance, output_path):
     return main(
         start_date=start_date, end_date=end_date, distance=distance, output_path=output_path
     )
+
+
+@scripts.command()
+def test_airflow():
+    print('my print')
+    logging.info('info log')
+    logging.warning('warning log')
+    logging.debug('debug log')
 
 
 @scripts.command()

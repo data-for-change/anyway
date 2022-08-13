@@ -49,7 +49,7 @@ def get_widget_factories() -> List[Type[Widget]]:
 
 
 def get_widget_class_by_name(name: str) -> Type[Widget]:
-    return widgets_dict[name]
+    return widgets_dict.get(name)
 
 
 def sum_road_accidents_by_specific_type(road_data, field_name):
@@ -338,9 +338,9 @@ def localize_after_cache(request_params: RequestParams, items_list: List[Dict]) 
     res = []
     for items in items_list:
         if "name" in items:
-            res.append(
-                get_widget_class_by_name(items["name"]).localize_items(request_params, items)
-            )
+            widget_class = get_widget_class_by_name(items["name"])
+            if widget_class:
+                res.append(widget_class.localize_items(request_params, items))
         else:
             logging.error(f"localize_after_cache: bad input (missing 'name' key):{items}")
         items["meta"]["information"] = _(items.get("meta", {}).get("information", ""))

@@ -116,10 +116,8 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
         if sum_road == 0:
             sum_road = 1  # prevent division by zero
         sum_all = counter_other_other + counter_other_motorcycle + sum_road
- 
         motorcycle_road_percentage = counter_road_motorcycle / sum_road
         motorcycle_all_roads_percentage = (counter_other_motorcycle + counter_road_motorcycle) / sum_all
-
         items = [
             {
                 "label_key": location_road,
@@ -142,7 +140,6 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
                 ],
             },
         ]
-
         return items, counter_road_motorcycle, motorcycle_road_percentage, motorcycle_all_roads_percentage
 
     @staticmethod

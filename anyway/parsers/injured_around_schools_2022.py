@@ -31,6 +31,7 @@ class SchoolsJsonFile(Enum):
 SUBTYPE_ACCIDENT_WITH_PEDESTRIAN = 1
 LOCATION_ACCURACY_PRECISE = True
 LOCATION_ACCURACY_PRECISE_INT = 1
+LOCATION_ACCURACY_PRECISE_LIST = [1, 3, 4]
 AGE_GROUPS = [2, 3, 4]
 INJURED_TYPE_PEDESTRIAN = 1
 INJURED_TYPES = [1, 6, 7]
@@ -41,6 +42,8 @@ ANYWAY_UI_FORMAT_MAP_ONLY = "https://www.anyway.co.il/?zoom=17&start_date={start
 ANYWAY_UI_FORMAT_WITH_FILTERS = "https://www.anyway.co.il/?zoom=17&start_date={start_date}&end_date={end_date}&lat={latitude}&lon={longitude}&show_fatal=1&show_severe=1&show_light=1&approx={location_approx}&accurate={location_accurate}&show_markers=1&show_discussions=0&show_urban=3&show_intersection=3&show_lane=3&show_day=7&show_holiday=0&show_time=24&start_time=25&end_time=25&weather=0&road=0&separation=0&surface=0&acctype={acc_type}&controlmeasure=0&district=0&case_type=0&show_rsa=0&age_groups=1234"
 DATE_INPUT_FORMAT = "%d-%m-%Y"
 DATE_URL_FORMAT = "%Y-%m-%d"
+SEVEN_AM_RAW = 29
+SEVEN_PM_RAW = 76
 
 SCHOOLS_DATA_DIR = pathlib.Path(__file__).parent.parent.parent / 'static' / 'data' / 'schools'
 
@@ -82,7 +85,7 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
         )
         .filter(InvolvedMarkerView.accident_timestamp >= start_date)
         .filter(InvolvedMarkerView.accident_timestamp < end_date)
-        .filter(InvolvedMarkerView.location_accuracy == LOCATION_ACCURACY_PRECISE_INT)
+        .filter(InvolvedMarkerView.location_accuracy.in_(LOCATION_ACCURACY_PRECISE_LIST))
         .filter(InvolvedMarkerView.age_group.in_(AGE_GROUPS))
         .filter(InvolvedMarkerView.injury_severity.in_([1, 2, 3]))
         .filter(
@@ -90,6 +93,9 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
                 (InvolvedMarkerView.injured_type.in_(INJURED_TYPES)),
                 (InvolvedMarkerView.involve_vehicle_type.in_(VEHICLE_TYPES))
             )
+        )
+        .filter(
+            InvolvedMarkerView.accident_hour_raw.between(SEVEN_AM_RAW, SEVEN_PM_RAW)
         )
         # .with_entities(InvolvedMarkerView.geom,
         #                InvolvedMarkerView.injured_type,

@@ -253,10 +253,7 @@ def get_injured_around_schools(start_date, end_date, distance):
                     SchoolWithDescription.latitude == None, SchoolWithDescription.longitude == None
                 )
             ),
-            or_(
-                SchoolWithDescription.school_type == "גן ילדים",
-                SchoolWithDescription.school_type == "בית ספר",
-            ),
+            SchoolWithDescription.school_type == "בית ספר"
         )
         .all()
     )
@@ -284,6 +281,8 @@ def get_injured_around_schools(start_date, end_date, distance):
         if idx % 100 == 0:
             logging.info(idx)
     shutil.rmtree(data_dir)
+
+    df_total.drop_duplicates(['accident_year', 'provider_and_id'], keep='first', inplace=True)
 
     # df_total_injured
     logging.info("create df_total_injured")

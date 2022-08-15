@@ -451,7 +451,7 @@ def get_injured_around_schools(start_date, end_date, distance):
     joined_df = joined_df.to_dict(orient="records")
 
     logging.info("select_columns_df_total")
-    df_total = select_columns_df_total(df_total)
+    #df_total = select_columns_df_total(df_total)
     df_total = df_total.to_dict(orient="records")
     logging.info("return joined_df, df_total")
     return joined_df, df_total
@@ -532,20 +532,27 @@ FILE_TO_GENERATE_METHOD = {
 # TODO: unit testing...
 def generate_json_files(start_date: datetime, end_date: datetime, file_suffix: str, distance: float = 0.5) -> NoReturn:
     logging.info('Generating json files...')
-    injured_around_schools, _ = get_injured_around_schools(
+    injured_around_schools, total = get_injured_around_schools(
             start_date, end_date, distance
         )
-    injured_df = pd.DataFrame(injured_around_schools)
-    schools_ids = injured_df.school_id.unique()
+    #injured_df = pd.Dat`aFrame(injured_around_schools)
+    # TODO: delete once we are satisfied witn the results
+    total_df = pd.DataFrame(total)
+    print('saving csv')
+    total_df.to_csv(SCHOOLS_DATA_DIR / 'total_15_08_22_first_100.csv', index=False, encoding='utf-8-sig')
+    print('csv is saved')
 
-    for idx, (file_enum, generate_method) in enumerate(FILE_TO_GENERATE_METHOD.items()):
-        logging.info(f'Generating file #{idx+1}')
-        data_for_file = generate_method(injured_df, schools_ids)
-        file_name = f'injured_around_schools{file_enum.value}_api_{file_suffix}.json'
-        full_path = SCHOOLS_DATA_DIR / file_name 
-        with open(full_path, 'w') as file:
-            json.dump(data_for_file, file, indent=4)
-        logging.info(f"File '{file_name}' is successfully written!")
+    # TODO: return to use this logic when there is no longer need for CSVs
+    # schools_ids = injured_df.school_id.unique()
+
+    # for idx, (file_enum, generate_method) in enumerate(FILE_TO_GENERATE_METHOD.items()):
+    #     logging.info(f'Generating file #{idx+1}')
+    #     data_for_file = generate_method(injured_df, schools_ids)
+    #     file_name = f'injured_around_schools{file_enum.value}_api_{file_suffix}.json'
+    #     full_path = SCHOOLS_DATA_DIR / file_name 
+    #     with open(full_path, 'w') as file:
+    #         json.dump(data_for_file, file, indent=4)
+    #     logging.info(f"File '{file_name}' is successfully written!")
 
 if __name__ == '__main__':
     generate_json_files(start_date=datetime(year=2015, month=1, day=1),

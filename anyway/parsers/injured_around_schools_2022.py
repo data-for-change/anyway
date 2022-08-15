@@ -44,6 +44,7 @@ DATE_INPUT_FORMAT = "%d-%m-%Y"
 DATE_URL_FORMAT = "%Y-%m-%d"
 SEVEN_AM_RAW = 29
 SEVEN_PM_RAW = 76
+INJURY_SEVERITIES = [1, 2, 3]
 
 SCHOOLS_DATA_DIR = pathlib.Path(__file__).parent.parent.parent / 'static' / 'data' / 'schools'
 
@@ -84,10 +85,10 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
             )
         )
         .filter(InvolvedMarkerView.accident_timestamp >= start_date)
-        .filter(InvolvedMarkerView.accident_timestamp < end_date)
+        .filter(InvolvedMarkerView.accident_timestamp <= end_date)
         .filter(InvolvedMarkerView.location_accuracy.in_(LOCATION_ACCURACY_PRECISE_LIST))
         .filter(InvolvedMarkerView.age_group.in_(AGE_GROUPS))
-        .filter(InvolvedMarkerView.injury_severity.in_([1, 2, 3]))
+        .filter(InvolvedMarkerView.injury_severity.in_(INJURY_SEVERITIES))
         .filter(
             or_(
                 (InvolvedMarkerView.injured_type.in_(INJURED_TYPES)),
@@ -133,6 +134,9 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
         start_date=start_date.strftime(DATE_URL_FORMAT),
         end_date=end_date.strftime(DATE_URL_FORMAT),
         acc_type=SUBTYPE_ACCIDENT_WITH_PEDESTRIAN,
+        # TODO: should be modified because we've added more location
+        # approaches: 
+        # https://github.com/hasadna/anyway/pull/2223#discussion_r945924503
         location_accurate=location_accurate,
         location_approx=location_approx,
     )

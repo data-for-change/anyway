@@ -1,5 +1,5 @@
 import datetime
-from typing import List
+from typing import Tuple
 
 import pandas as pd
 from sqlalchemy import case, literal_column, func, distinct, desc
@@ -43,7 +43,7 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
     @staticmethod
     def motorcycle_accidents_vs_all_accidents(
         start_time: datetime.date, end_time: datetime.date, road_number: str
-        ) -> List:
+        ) -> Tuple:
         location_label = "location"
         case_location = case(
             [

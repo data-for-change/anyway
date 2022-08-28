@@ -5,7 +5,7 @@ import shutil
 from datetime import datetime
 from enum import Enum
 import pathlib
-import swifter # pylint: disable=unused-import
+import swifter  # pylint: disable=unused-import
 
 import math
 import pandas as pd

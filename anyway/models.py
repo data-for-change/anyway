@@ -612,11 +612,12 @@ class AccidentMarker(MarkerMixin, Base):
 
         if kwargs.get("light_transportation", False):
             age_groups_list = kwargs.get("age_groups").split(",")
+            INJURED_TYPES = [1, 6, 7]
             markers = markers.filter(
                 or_(
                     AccidentMarker.involved.any(
                         and_(
-                            Involved.injured_type == 1,
+                            Involved.injured_type.in_(INJURED_TYPES),
                             Involved.injury_severity >= 1,
                             Involved.injury_severity <= 3,
                             Involved.age_group.in_(age_groups_list),

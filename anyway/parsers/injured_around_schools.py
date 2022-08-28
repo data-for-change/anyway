@@ -10,8 +10,7 @@ from sqlalchemy import or_, not_, and_
 
 from anyway.backend_constants import BE_CONST
 from anyway.models import (
-    AccidentMarker,
-    Involved,
+    InvolvedMarkerView,
     SchoolWithDescription,
     InjuredAroundSchool,
     InjuredAroundSchoolAllData,

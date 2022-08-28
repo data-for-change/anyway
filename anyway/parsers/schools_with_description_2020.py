@@ -43,9 +43,9 @@ def get_str_value(value):
 
 def get_schools_with_description(schools_description_filepath, schools_coordinates_filepath):
     logging.info("\tReading schools description data from '%s'..." % schools_description_filepath)
-    df_schools = pd.read_excel(schools_description_filepath, engine='openpyxl')
+    df_schools = pd.read_excel(schools_description_filepath, engine="openpyxl")
     logging.info("\tReading schools coordinates data from '%s'..." % schools_coordinates_filepath)
-    df_coordinates = pd.read_excel(schools_coordinates_filepath, engine='openpyxl')
+    df_coordinates = pd.read_excel(schools_coordinates_filepath, engine="openpyxl")
     schools = []
     # get school_id
     df_schools = df_schools.drop_duplicates(school_fields["school_id"])

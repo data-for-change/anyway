@@ -28,7 +28,7 @@ from anyway.infographics_dictionaries import head_on_collisions_comparison_dict
 from anyway.parsers import infographics_data_cache_updater
 from anyway.widgets.widget import Widget, widgets_dict
 from anyway.parsers.infographics_data_cache_updater import (
-    get_infographics_data_from_cache_by_road_segment,
+    get_infographics_data_from_cache_by_road_segment
 )
 
 # We need to import the modules, which in turn imports all the widgets, and registers them, even if they are not

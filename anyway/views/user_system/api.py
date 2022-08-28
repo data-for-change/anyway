@@ -591,4 +591,3 @@ def delete_user(email: str) -> Response:
     db.session.delete(user)
     db.session.commit()
     return Response(status=HTTPStatus.OK)
-

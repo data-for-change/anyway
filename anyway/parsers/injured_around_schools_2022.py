@@ -15,16 +15,15 @@ import numpy as np
 from sqlalchemy import or_, not_, and_
 
 from anyway.backend_constants import BE_CONST
-from anyway.models import (
-    SchoolWithDescription2020,
-    InvolvedMarkerView
-)
+from anyway.models import SchoolWithDescription2020, InvolvedMarkerView
 
 from anyway.utilities import time_delta, chunks
 from anyway.app_and_db import db
 
+
 class SchoolsJsonFile(Enum):
     MAIN_FILE = ""
+
 
 SUBTYPE_ACCIDENT_WITH_PEDESTRIAN = 1
 LOCATION_ACCURACY_PRECISE = False
@@ -43,7 +42,9 @@ SEVEN_AM_RAW = 29
 SEVEN_PM_RAW = 76
 INJURY_SEVERITIES = [1, 2, 3]
 
-ALL_SCHOOLS_DATA_DIR =  os.path.join(pathlib.Path(__file__).parent.parent.parent, 'static', 'data', 'schools', 'all_schools_data')
+ALL_SCHOOLS_DATA_DIR = os.path.join(
+    pathlib.Path(__file__).parent.parent.parent, "static", "data", "schools", "all_schools_data"
+)
 
 
 def get_bounding_box(latitude, longitude, distance_in_km):
@@ -62,6 +63,7 @@ def get_bounding_box(latitude, longitude, distance_in_km):
 
     return rad2deg(lat_min), rad2deg(lon_min), rad2deg(lat_max), rad2deg(lon_max)
 
+
 def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
     lat_min, lon_min, lat_max, lon_max = get_bounding_box(latitude, longitude, distance)
     baseX = lon_min
@@ -71,7 +73,7 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
     pol_str = "POLYGON(({0} {1},{0} {3},{2} {3},{2} {1},{0} {1}))".format(
         baseX, baseY, distanceX, distanceY
     )
-    pol_str_for_google_csv =  "POLYGON(({0} {1},{0} {3},{2} {3},{2} {1},{0} {1}))".format(
+    pol_str_for_google_csv = "POLYGON(({0} {1},{0} {3},{2} {3},{2} {1},{0} {1}))".format(
         round(baseX, 6), round(baseY, 6), round(distanceX, 6), round(distanceY, 6)
     )
     query_obj = (
@@ -91,12 +93,10 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
         .filter(
             or_(
                 (InvolvedMarkerView.injured_type.in_(INJURED_TYPES)),
-                (InvolvedMarkerView.involve_vehicle_type.in_(VEHICLE_TYPES))
+                (InvolvedMarkerView.involve_vehicle_type.in_(VEHICLE_TYPES)),
             )
         )
-        .filter(
-            InvolvedMarkerView.accident_hour_raw.between(SEVEN_AM_RAW, SEVEN_PM_RAW)
-        )
+        .filter(InvolvedMarkerView.accident_hour_raw.between(SEVEN_AM_RAW, SEVEN_PM_RAW))
     )
 
     df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
@@ -113,10 +113,10 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
         longitude=longitude,
         start_date=start_date.strftime(DATE_URL_FORMAT),
         end_date=end_date.strftime(DATE_URL_FORMAT),
-        # 
+        #
         acc_type=SUBTYPE_ACCIDENT_WITH_PEDESTRIAN,
         # TODO: location_accurate, location_approx: should be modified because we've added more location
-        # approaches: 
+        # approaches:
         # https://github.com/hasadna/anyway/pull/2223#discussion_r945924503
         location_accurate=location_accurate,
         location_approx=location_approx,
@@ -130,8 +130,12 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
     df["school_latitude"] = school.latitude
     df["school_anyway_link"] = ui_url_map_only
     df["WKT Polygon"] = pol_str_for_google_csv
-    df["WKT Point_12"] =  "POINT(({0} {1})".format(round(school.longitude, 12), round(school.latitude, 12))
-    df["WKT Point_6"] =  "POINT(({0} {1})".format(round(school.longitude, 6), round(school.latitude, 6))
+    df["WKT Point_12"] = "POINT(({0} {1})".format(
+        round(school.longitude, 12), round(school.latitude, 12)
+    )
+    df["WKT Point_6"] = "POINT(({0} {1})".format(
+        round(school.longitude, 6), round(school.latitude, 6)
+    )
     return df
 
 
@@ -139,10 +143,16 @@ def calculate_injured_around_schools(start_date, end_date, distance):
     schools = (
         db.session.query(SchoolWithDescription2020)
         .filter(
-            not_(and_(SchoolWithDescription2020.latitude == 0, SchoolWithDescription2020.longitude == 0)),
             not_(
                 and_(
-                    SchoolWithDescription2020.latitude == None, SchoolWithDescription2020.longitude == None
+                    SchoolWithDescription2020.latitude == 0,
+                    SchoolWithDescription2020.longitude == 0,
+                )
+            ),
+            not_(
+                and_(
+                    SchoolWithDescription2020.latitude == None,
+                    SchoolWithDescription2020.longitude == None,
                 )
             ),
         )
@@ -151,11 +161,11 @@ def calculate_injured_around_schools(start_date, end_date, distance):
     if os.path.exists(ALL_SCHOOLS_DATA_DIR):
         shutil.rmtree(ALL_SCHOOLS_DATA_DIR)
     os.mkdir(ALL_SCHOOLS_DATA_DIR)
-    PICKELS_DATA_DIR = os.path.join(ALL_SCHOOLS_DATA_DIR, 'pickels')
-    CSVS_DATA_DIR = os.path.join(ALL_SCHOOLS_DATA_DIR, 'csvs')
+    PICKELS_DATA_DIR = os.path.join(ALL_SCHOOLS_DATA_DIR, "pickels")
+    CSVS_DATA_DIR = os.path.join(ALL_SCHOOLS_DATA_DIR, "csvs")
     os.mkdir(PICKELS_DATA_DIR)
     os.mkdir(CSVS_DATA_DIR)
-    df_schools = pd.DataFrame(schools, columns=['schools'])
+    df_schools = pd.DataFrame(schools, columns=["schools"])
 
     def create_school_data(school):
         df_curr = acc_inv_query(
@@ -164,22 +174,21 @@ def calculate_injured_around_schools(start_date, end_date, distance):
             distance=distance,
             start_date=start_date,
             end_date=end_date,
-            school=school)
-        
-        curr_pkl_path = os.path.join(PICKELS_DATA_DIR, str(school.school_id) + '.pkl')
-        curr_csv_path = os.path.join(CSVS_DATA_DIR, str(school.school_id) + '.csv')
+            school=school,
+        )
+
+        curr_pkl_path = os.path.join(PICKELS_DATA_DIR, str(school.school_id) + ".pkl")
+        curr_csv_path = os.path.join(CSVS_DATA_DIR, str(school.school_id) + ".csv")
         df_curr.to_pickle(curr_pkl_path)
         df_curr.to_csv(curr_csv_path, index=False)
 
-    df_schools['schools'].swifter.apply(lambda school: create_school_data(school))
+    df_schools["schools"].swifter.apply(lambda school: create_school_data(school))
 
 
 def import_to_datastore(start_date, end_date, distance, batch_size):
     assert batch_size > 0
     started = datetime.now()
-    calculate_injured_around_schools(
-        start_date, end_date, distance
-    )
+    calculate_injured_around_schools(start_date, end_date, distance)
     logging.info(f"Finished saving in {time_delta(started)}")
 
 

@@ -10,7 +10,8 @@ from sqlalchemy import or_, not_, and_
 
 from anyway.backend_constants import BE_CONST
 from anyway.models import (
-    InvolvedMarkerView,
+    AccidentMarker,
+    Involved,
     SchoolWithDescription,
     InjuredAroundSchool,
     InjuredAroundSchoolAllData,
@@ -59,27 +60,23 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
     )
 
     query_obj = (
-        db.session.query(InvolvedMarkerView)
-        .filter(InvolvedMarkerView.geom.intersects(pol_str))
+        db.session.query(Involved, AccidentMarker)
+        .join(AccidentMarker, AccidentMarker.provider_and_id == Involved.provider_and_id)
+        .filter(AccidentMarker.geom.intersects(pol_str))
+        .filter(Involved.injured_type == INJURED_TYPE_PEDESTRIAN)
+        .filter(AccidentMarker.provider_and_id == Involved.provider_and_id)
         .filter(
             or_(
-                (InvolvedMarkerView.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_1_CODE),
-                (InvolvedMarkerView.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_3_CODE),
+                (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_1_CODE),
+                (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_3_CODE),
             )
         )
-        .filter(InvolvedMarkerView.accident_timestamp >= start_date)
-        .filter(InvolvedMarkerView.accident_timestamp <= end_date)
-        .filter(InvolvedMarkerView.location_accuracy.in_(LOCATION_ACCURACY_PRECISE_LIST))
-        .filter(InvolvedMarkerView.age_group.in_(AGE_GROUPS))
-        .filter(InvolvedMarkerView.injury_severity.in_(INJURY_SEVERITIES))
-        .filter(
-            or_(
-                (InvolvedMarkerView.injured_type.in_(INJURED_TYPES)),
-                (InvolvedMarkerView.involve_vehicle_type.in_(VEHICLE_TYPES)),
-            )
-        )
-        .filter(InvolvedMarkerView.accident_hour_raw.between(SEVEN_AM_RAW, SEVEN_PM_RAW))
-    )
+        .filter(AccidentMarker.created >= start_date)
+        .filter(AccidentMarker.created < end_date)
+        .filter(AccidentMarker.location_accuracy == LOCATION_ACCURACY_PRECISE_INT)
+        .filter(AccidentMarker.yishuv_symbol != YISHUV_SYMBOL_NOT_EXIST)
+        .filter(Involved.age_group.in_([1, 2, 3, 4]))
+    )  # ages 0-19
 
     df = pd.read_sql_query(query_obj.with_labels().statement, query_obj.session.bind)
     if LOCATION_ACCURACY_PRECISE:

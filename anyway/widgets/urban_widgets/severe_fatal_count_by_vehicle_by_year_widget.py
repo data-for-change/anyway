@@ -100,5 +100,9 @@ class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
         return items
 
     def is_included(self) -> bool:
-        count = self.items["bikes"][-1]["count"] + self.items["e_bikes"][-1]["count"] + self.items["e_scooters"][-1]["count"]
+        count = (
+            self.items["bikes"][-1]["count"]
+            + self.items["e_bikes"][-1]["count"]
+            + self.items["e_scooters"][-1]["count"]
+        )
         return count > 1

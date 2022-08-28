@@ -43,9 +43,9 @@ def get_str_value(value):
 
 def get_schools_with_description(schools_description_filepath, schools_coordinates_filepath):
     logging.info("\tReading schools description data from '%s'..." % schools_description_filepath)
-    df_schools = pd.read_excel(schools_description_filepath)
+    df_schools = pd.read_excel(schools_description_filepath, engine="openpyxl")
     logging.info("\tReading schools coordinates data from '%s'..." % schools_coordinates_filepath)
-    df_coordinates = pd.read_excel(schools_coordinates_filepath)
+    df_coordinates = pd.read_excel(schools_coordinates_filepath, engine="openpyxl")
     schools = []
     # get school_id
     df_schools = df_schools.drop_duplicates(school_fields["school_id"])
@@ -54,6 +54,8 @@ def get_schools_with_description(schools_description_filepath, schools_coordinat
     all_schools_tuples = []
     for _, school in df_schools.iterrows():
         school_id = get_numeric_value(school[school_fields["school_id"]], int)
+        if not school_id:
+            continue
         school_name = get_str_value(school[school_fields["school_name"]]).strip('"')
         if school_id in list(df_coordinates[school_fields["school_id"]].values):
             x_coord = df_coordinates.loc[
@@ -120,7 +122,7 @@ def get_schools_with_description(schools_description_filepath, schools_coordinat
 
 
 def truncate_schools_with_description():
-    curr_table = "schools_with_description"
+    curr_table = "schools_with_description2020"
     sql_truncate = "TRUNCATE TABLE " + curr_table
     db.session.execute(sql_truncate)
     db.session.commit()

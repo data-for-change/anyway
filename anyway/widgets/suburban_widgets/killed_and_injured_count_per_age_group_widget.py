@@ -5,7 +5,7 @@ from flask_babel import _
 from anyway.backend_constants import BE_CONST as BE
 from anyway.request_params import RequestParams
 from anyway.widgets.suburban_widgets.killed_and_injured_count_per_age_group_widget_utils import (
-    KilledAndInjuredCountPerAgeGroupWidgetUtils,
+    KilledAndInjuredCountPerAgeGroupWidgetUtils
 )
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 from anyway.widgets.widget import register

@@ -1451,9 +1451,7 @@ delete_user_parser.add_argument("email", type=str, required=True)
 @api.route("/user/delete_user")
 @api.expect(delete_user_parser)
 class DeleteUser(Resource):
-    @api.doc(
-        "Delete a user and all of its connections (roles, Orgs . . .)"
-    )
+    @api.doc("Delete a user and all of its connections (roles, Orgs . . .)")
     @api.response(200, "")
     @api.response(400, "User is not in the DB")
     def post(self):
@@ -1464,10 +1462,7 @@ class DeleteUser(Resource):
 
 get_streets_parser = api.parser()
 get_streets_parser.add_argument(
-    "yishuv_symbol",
-    type=int,
-    required=True,
-    help="Symbol of yishuv to get streets of.",
+    "yishuv_symbol", type=int, required=True, help="Symbol of yishuv to get streets of."
 )
 
 

@@ -58,14 +58,7 @@ def load_cities_data(file_name: str):
         "year",
         "taatik",
     ]
-    col_types = dict.fromkeys(
-        [
-            "heb_name",
-            "eng_name",
-            "taatik",
-        ],
-        lambda x: str(x) if x else None,
-    )
+    col_types = dict.fromkeys(["heb_name", "eng_name", "taatik"], lambda x: str(x) if x else None)
     col_types.update(
         dict.fromkeys(
             [
@@ -89,16 +82,7 @@ def load_cities_data(file_name: str):
             lambda x: int(x) if x and x.isdigit() else 1,
         )
     )
-    col_types.update(
-        dict.fromkeys(
-            [
-                "other",
-                "jews",
-                "arab",
-            ],
-            lambda x: float(x) if x else 0.0001,
-        )
-    )
+    col_types.update(dict.fromkeys(["other", "jews", "arab"], lambda x: float(x) if x else 0.0001))
     cities = pd.read_csv(
         file_name, header=0, names=column_names, converters=col_types, encoding="utf-8"
     )

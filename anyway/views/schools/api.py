@@ -124,7 +124,7 @@ def injured_around_schools_api():
     # pylint: disable=no-member
     logging.debug("getting injured around schools api")
     school_id = request.values.get("school_id")
-    all_data = json.load(open("static/data/schools/injured_around_schools_api_2020.json"))
+    all_data = json.load(open("static/data/schools/injured_around_schools_api_2022.json"))
     school_data = all_data[school_id]
     response = Response(json.dumps(school_data, default=str), mimetype="application/json")
     response.headers.add("Access-Control-Allow-Origin", "*")
@@ -137,7 +137,7 @@ def injured_around_schools_sex_graphs_data_api():
     logging.debug("getting injured around schools sex graphs data api")
     school_id = request.values.get("school_id")
     all_data = json.load(
-        open("static/data/schools/injured_around_schools_sex_graphs_data_api_2020.json")
+        open("static/data/schools/injured_around_schools_sex_graphs_data_api_2022.json")
     )
     school_data = all_data[school_id]
     response = Response(json.dumps(school_data, default=str), mimetype="application/json")
@@ -149,7 +149,7 @@ def injured_around_schools_months_graphs_data_api():
     logging.debug("getting injured around schools months graphs data api")
     school_id = request.values.get("school_id")
     all_data = json.load(
-        open("static/data/schools/injured_around_schools_months_graphs_data_api_2020.json")
+        open("static/data/schools/injured_around_schools_months_graphs_data_api_2022.json")
     )
     school_data = all_data[school_id]
     response = Response(json.dumps(school_data, default=str), mimetype="application/json")

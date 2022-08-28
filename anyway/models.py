@@ -612,6 +612,8 @@ class AccidentMarker(MarkerMixin, Base):
 
         if kwargs.get("light_transportation", False):
             age_groups_list = kwargs.get("age_groups").split(",")
+            LOCATION_ACCURACY_PRECISE_LIST = [1, 3, 4]
+            markers = markers.filter(AccidentMarker.location_accuracy.in_(LOCATION_ACCURACY_PRECISE_LIST))
             INJURED_TYPES = [1, 6, 7]
             markers = markers.filter(
                 or_(

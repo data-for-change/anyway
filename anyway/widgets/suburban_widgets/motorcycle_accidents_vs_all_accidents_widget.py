@@ -1,5 +1,5 @@
 import datetime
-from typing import List
+from typing import Tuple
 
 import pandas as pd
 from sqlalchemy import case, literal_column, func, distinct, desc
@@ -29,17 +29,21 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
         super().__init__(request_params, type(self).name)
         self.rank = 20
         self.road_number: str = request_params.location_info["road1"]
+        self.information = (
+            "Percentage of serious and fatal motorcycle accidents in the selected section compared to the average percentage of accidents in other road sections throughout the country"
+        )
 
     def generate_items(self) -> None:
         # noinspection PyUnresolvedReferences
-        self.items = MotorcycleAccidentsVsAllAccidentsWidget.motorcycle_accidents_vs_all_accidents(
+        res = MotorcycleAccidentsVsAllAccidentsWidget.motorcycle_accidents_vs_all_accidents(
             self.request_params.start_time, self.request_params.end_time, self.road_number
         )
+        self.items, self.counter_road_motorcycle, self.motorcycle_road_percentage, self.motorcycle_all_roads_percentage = res
 
     @staticmethod
     def motorcycle_accidents_vs_all_accidents(
         start_time: datetime.date, end_time: datetime.date, road_number: str
-    ) -> List:
+        ) -> Tuple:
         location_label = "location"
         case_location = case(
             [
@@ -112,12 +116,13 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
         if sum_road == 0:
             sum_road = 1  # prevent division by zero
         sum_all = counter_other_other + counter_other_motorcycle + sum_road
-
-        return [
+        motorcycle_road_percentage = counter_road_motorcycle / sum_road
+        motorcycle_all_roads_percentage = (counter_other_motorcycle + counter_road_motorcycle) / sum_all
+        items = [
             {
                 "label_key": location_road,
                 "series": [
-                    {"label_key": vehicle_motorcycle, "value": counter_road_motorcycle / sum_road},
+                    {"label_key": vehicle_motorcycle, "value": motorcycle_road_percentage},
                     {"label_key": vehicle_other, "value": counter_road_other / sum_road},
                 ],
             },
@@ -126,7 +131,7 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
                 "series": [
                     {
                         "label_key": vehicle_motorcycle,
-                        "value": (counter_other_motorcycle + counter_road_motorcycle) / sum_all,
+                        "value": motorcycle_all_roads_percentage,
                     },
                     {
                         "label_key": vehicle_other,
@@ -135,6 +140,7 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
                 ],
             },
         ]
+        return items, counter_road_motorcycle, motorcycle_road_percentage, motorcycle_all_roads_percentage
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
@@ -163,5 +169,14 @@ class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
         }
         return items
 
+    """
+    Show widget if:
+    1. At least 3 severe motorcycle accidents in road
+    2. Percentage of motor accidents in road is at least twice as much as percentage of motor accidents in other roads
+    """
+    # noinspection PyUnboundLocalVariable
+    def is_included(self) -> bool:
+        return self.counter_road_motorcycle >= 3 and self.motorcycle_road_percentage >= 2*self.motorcycle_all_roads_percentage
 
 _("road")
+_("Percentage of serious and fatal motorcycle accidents in the selected section compared to the average percentage of accidents in other road sections throughout the country")

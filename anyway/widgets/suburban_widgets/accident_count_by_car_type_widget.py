@@ -16,6 +16,7 @@ from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 
 MAX_NUMBER_OF_ITEMS = 2
 
+
 @register
 class AccidentCountByCarTypeWidget(SubUrbanWidget):
     name: str = "accident_count_by_car_type"
@@ -25,10 +26,8 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
         self.rank = 17
 
     def generate_items(self) -> None:
-        self.items = (
-            AccidentCountByCarTypeWidget.get_stats_accidents_by_car_type_with_national_data(
-                self.request_params
-            )
+        self.items = AccidentCountByCarTypeWidget.get_stats_accidents_by_car_type_with_national_data(
+            self.request_params
         )
 
     @staticmethod
@@ -51,10 +50,8 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
         data_by_segment = AccidentCountByCarTypeWidget.percentage_accidents_by_car_type(
             vehicle_grouped_by_type_count_unique
         )
-        national_data = (
-            AccidentCountByCarTypeWidget.percentage_accidents_by_car_type_national_data_cache(
-                start_time, end_time
-            )
+        national_data = AccidentCountByCarTypeWidget.percentage_accidents_by_car_type_national_data_cache(
+            start_time, end_time
         )
 
         for car_type in data_by_segment:

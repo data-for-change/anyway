@@ -51,9 +51,9 @@ def get_str_value(value):
 
 def get_schools_with_description(schools_description_filepath, schools_coordinates_filepath):
     logging.info("\tReading schools description data from '%s'..." % schools_description_filepath)
-    df_schools = pd.read_excel(schools_description_filepath)
+    df_schools = pd.read_excel(schools_description_filepath, engine="openpyxl")
     logging.info("\tReading schools coordinates data from '%s'..." % schools_coordinates_filepath)
-    df_coordinates = pd.read_excel(schools_coordinates_filepath)
+    df_coordinates = pd.read_excel(schools_coordinates_filepath, engine="openpyxl")
     schools = []
     # get max data year
     max_year = df_schools[school_fields["data_year"]].astype(int).max()

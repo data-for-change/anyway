@@ -1063,7 +1063,9 @@ def create_tables():
             logging.debug("after INSERT INTO involved_hebrew")
             conn.execute("INSERT INTO vehicles_hebrew " + VIEWS.VEHICLES_HEBREW_VIEW)
             logging.debug("after INSERT INTO vehicles_hebrew ")
-            conn.execute("INSERT INTO vehicles_markers_hebrew " + VIEWS.VEHICLES_MARKERS_HEBREW_VIEW)
+            conn.execute(
+                "INSERT INTO vehicles_markers_hebrew " + VIEWS.VEHICLES_MARKERS_HEBREW_VIEW
+            )
             logging.debug("after INSERT INTO vehicles_markers_hebrew")
             conn.execute(
                 "INSERT INTO involved_markers_hebrew " + VIEWS.INVOLVED_HEBREW_MARKERS_HEBREW_VIEW
@@ -1162,7 +1164,7 @@ def main(batch_size, source, load_start_year=None):
 
         # [Carmel:] not best solution,
         # need to understand what are all possible values for the 'source' argument
-        if source != 's3':
+        if source != "s3":
             import_streets_into_db()
 
         fill_db_geo_data()

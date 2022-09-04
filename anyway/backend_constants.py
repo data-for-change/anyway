@@ -105,7 +105,6 @@ class BackEndConstants(object):
 
     LKEY = "label_key"
     VAL = "value"
-    TOTAL = "total"
     SERIES = "series"
 
 

@@ -194,16 +194,15 @@ def schools_with_description_2020(
 
 @process.command()
 @click.option(
-    "--start_date", default="01-01-2014", type=valid_date, help="The Start Date - format DD-MM-YYYY"
+    "--start_date", default="01-07-2017", type=valid_date, help="The Start Date - format DD-MM-YYYY"
 )
 @click.option(
-    "--end_date", default="31-12-2018", type=valid_date, help="The End Date - format DD-MM-YYYY"
+    "--end_date", default="30-06-2022", type=valid_date, help="The End Date - format DD-MM-YYYY"
 )
 @click.option("--distance", default=0.5, help="float In KM. Default is 0.5 (500m)", type=float)
 @click.option("--batch_size", type=int, default=5000)
-def injured_around_schools(start_date, end_date, distance, batch_size):
-    from anyway.parsers.injured_around_schools import parse
-
+def injured_around_schools_2022(start_date, end_date, distance, batch_size):
+    from anyway.parsers.injured_around_schools_2022 import parse
     return parse(start_date=start_date, end_date=end_date, distance=distance, batch_size=batch_size)
 
 

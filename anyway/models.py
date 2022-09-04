@@ -445,7 +445,7 @@ class AccidentMarker(MarkerMixin, Base):
                 .with_entities(*query_entities)
                 .filter(AccidentMarker.geom.intersects(polygon_str))
                 .filter(AccidentMarker.created >= kwargs["start_date"])
-                .filter(AccidentMarker.created < kwargs["end_date"])
+                .filter(AccidentMarker.created <= kwargs["end_date"])
                 .filter(AccidentMarker.provider_code != BE_CONST.RSA_PROVIDER_CODE)
                 .order_by(desc(AccidentMarker.created))
             )
@@ -455,7 +455,7 @@ class AccidentMarker(MarkerMixin, Base):
                 .with_entities(*query_entities)
                 .filter(AccidentMarker.geom.intersects(polygon_str))
                 .filter(AccidentMarker.created >= kwargs["start_date"])
-                .filter(AccidentMarker.created < kwargs["end_date"])
+                .filter(AccidentMarker.created <= kwargs["end_date"])
                 .filter(AccidentMarker.provider_code == BE_CONST.RSA_PROVIDER_CODE)
                 .order_by(desc(AccidentMarker.created))
             )
@@ -464,7 +464,7 @@ class AccidentMarker(MarkerMixin, Base):
                 db.session.query(AccidentMarker)
                 .filter(AccidentMarker.geom.intersects(polygon_str))
                 .filter(AccidentMarker.created >= kwargs["start_date"])
-                .filter(AccidentMarker.created < kwargs["end_date"])
+                .filter(AccidentMarker.created <= kwargs["end_date"])
                 .filter(AccidentMarker.provider_code != BE_CONST.RSA_PROVIDER_CODE)
                 .order_by(desc(AccidentMarker.created))
             )
@@ -473,7 +473,7 @@ class AccidentMarker(MarkerMixin, Base):
                 db.session.query(AccidentMarker)
                 .filter(AccidentMarker.geom.intersects(polygon_str))
                 .filter(AccidentMarker.created >= kwargs["start_date"])
-                .filter(AccidentMarker.created < kwargs["end_date"])
+                .filter(AccidentMarker.created <= kwargs["end_date"])
                 .filter(AccidentMarker.provider_code == BE_CONST.RSA_PROVIDER_CODE)
                 .order_by(desc(AccidentMarker.created))
             )
@@ -612,11 +612,14 @@ class AccidentMarker(MarkerMixin, Base):
 
         if kwargs.get("light_transportation", False):
             age_groups_list = kwargs.get("age_groups").split(",")
+            LOCATION_ACCURACY_PRECISE_LIST = [1, 3, 4]
+            markers = markers.filter(AccidentMarker.location_accuracy.in_(LOCATION_ACCURACY_PRECISE_LIST))
+            INJURED_TYPES = [1, 6, 7]
             markers = markers.filter(
                 or_(
                     AccidentMarker.involved.any(
                         and_(
-                            Involved.injured_type == 1,
+                            Involved.injured_type.in_(INJURED_TYPES),
                             Involved.injury_severity >= 1,
                             Involved.injury_severity <= 3,
                             Involved.age_group.in_(age_groups_list),

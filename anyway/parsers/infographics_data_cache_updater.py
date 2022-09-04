@@ -280,11 +280,7 @@ def get_road_segments() -> Iterable[RoadSegments]:
 def get_road_segment_infographic_keys() -> Iterable[Dict[str, int]]:
     for road_segment in get_road_segments():
         for y in CONST.INFOGRAPHICS_CACHE_YEARS_AGO:
-            yield {
-                "road_segment_id": road_segment.segment_id,
-                "years_ago": y,
-                "lang": "en",
-            }
+            yield {"road_segment_id": road_segment.segment_id, "years_ago": y, "lang": "en"}
 
 
 def build_road_segments_cache_into_temp():

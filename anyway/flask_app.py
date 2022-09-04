@@ -1465,10 +1465,7 @@ class DeleteUser(Resource):
 
 get_streets_parser = api.parser()
 get_streets_parser.add_argument(
-    "yishuv_symbol",
-    type=int,
-    required=True,
-    help="Symbol of yishuv to get streets of.",
+    "yishuv_symbol", type=int, required=True, help="Symbol of yishuv to get streets of."
 )
 
 

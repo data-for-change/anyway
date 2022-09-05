@@ -5,14 +5,15 @@ from unittest.mock import Mock, patch
 from anyway.infographics_utils import get_infographics_data
 from anyway.models import NewsFlash
 from anyway.constants import CONST
+from anyway.backend_constants import NewsflashLocationQualification
 from anyway.parsers.infographics_data_cache_updater import add_news_flash_to_cache
 import anyway.parsers.infographics_data_cache_updater
 
 
 class TestInfographicsDataFromCache(TestCase):
     def test_get_not_existing_from_cache(self):
-        cache_data = anyway.parsers.infographics_data_cache_updater.get_infographics_data_from_cache(
-            17, 1
+        cache_data = (
+            anyway.parsers.infographics_data_cache_updater.get_infographics_data_from_cache(17, 1)
         )
         self.assertEqual(cache_data, {}, "returned value from cache should be None")
 
@@ -46,7 +47,12 @@ class TestInfographicsDataFromCache(TestCase):
 
     @patch("anyway.infographics_utils.create_infographics_data")
     def test_add_unqualified_news_flash(self, utils):
-        nf = NewsFlash(accident=False, resolution=["xxx"], road_segment_name="name")
+        nf = NewsFlash(
+            accident=False,
+            resolution=["xxx"],
+            road_segment_name="name",
+            newsflash_location_qualification=NewsflashLocationQualification.NOT_VERIFIED.value,
+        )
         res = add_news_flash_to_cache(nf)
         utils.assert_not_called()
         assert res, "Should return True when no error occurred"
@@ -54,7 +60,14 @@ class TestInfographicsDataFromCache(TestCase):
     @patch("anyway.parsers.infographics_data_cache_updater.db.get_engine")
     @patch("anyway.infographics_utils.create_infographics_data")
     def test_add_qualified_news_flash(self, utils, get_engine):
-        nf = NewsFlash(id=17, accident=True, resolution="כביש בינעירוני", road_segment_name="name", road1=1)
+        nf = NewsFlash(
+            id=17,
+            accident=True,
+            resolution="כביש בינעירוני",
+            road_segment_name="name",
+            road1=1,
+            newsflash_location_qualification=NewsflashLocationQualification.NOT_VERIFIED.value,
+        )
         get_engine.execute.return_value = {}
         res = add_news_flash_to_cache(nf)
         invocations = utils.call_args_list
@@ -69,7 +82,14 @@ class TestInfographicsDataFromCache(TestCase):
     @patch("anyway.parsers.infographics_data_cache_updater.db.get_engine")
     @patch("anyway.infographics_utils.create_infographics_data")
     def test_add_news_flash_throws_exception(self, utils, get_engine):
-        nf = NewsFlash(id=17, accident=True, resolution="כביש בינעירוני", road_segment_name="name", road1=1)
+        nf = NewsFlash(
+            id=17,
+            accident=True,
+            resolution="כביש בינעירוני",
+            road_segment_name="name",
+            road1=1,
+            newsflash_location_qualification=NewsflashLocationQualification.NOT_VERIFIED.value,
+        )
         get_engine.side_effect = RuntimeError
         res = add_news_flash_to_cache(nf)
         assert not res, "Should return False when error occurred"

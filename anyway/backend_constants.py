@@ -29,6 +29,7 @@ class BackEndConstants(object):
         Admins = "admins"
         Or_yarok = "or_yarok"
         Authenticated = "authenticated"
+        Location_verification = "location_verification"
 
     # This is a type for the 'road_type' table field name
     ROAD_TYPE_NOT_IN_CITY_IN_INTERSECTION = 3
@@ -302,3 +303,27 @@ class InvolvedType(Enum):
     DRIVER = 1
     INJURED_DRIVER = 2
     INJURED = 3
+
+
+class NewsflashLocationQualification(LabeledCode):
+    NOT_VERIFIED = 1
+    VERIFIED = 2
+    REJECTED = 3
+    MANUAL = 4
+
+    @classmethod
+    def labels(cls):
+        return {
+            NewsflashLocationQualification.NOT_VERIFIED: "not verified",
+            NewsflashLocationQualification.VERIFIED: "verified",
+            NewsflashLocationQualification.REJECTED: "rejected",
+            NewsflashLocationQualification.MANUAL: "manual",
+        }
+
+
+QUALIFICATION_TO_ENUM_VALUE = {
+    "not_verified": NewsflashLocationQualification.NOT_VERIFIED.value,
+    "verified": NewsflashLocationQualification.VERIFIED.value,
+    "rejected": NewsflashLocationQualification.REJECTED.value,
+    "manual": NewsflashLocationQualification.MANUAL.value,
+}

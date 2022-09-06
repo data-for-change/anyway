@@ -5,10 +5,13 @@ import re
 import sys
 import threading
 import typing
+from contextlib import contextmanager
 from csv import DictReader
 from datetime import datetime
 from functools import partial
 from urllib.parse import urlparse
+from sqlalchemy import MetaData, Table
+
 
 import phonenumbers
 from dateutil.relativedelta import relativedelta
@@ -173,6 +176,29 @@ def truncate_tables(db, tables):
         db.session.commit()
 
 
+def order_query_by_columns(query, keys):
+    for primary_key in keys:
+        query = query.order_by(primary_key)
+    return query
+
+
+def split_query_to_chunks(base_query, primary_keys, chunk_size):
+    items_read = chunk_size
+    offset = 0
+    query = order_query_by_columns(base_query, primary_keys)
+    while items_read == chunk_size:
+        chunk = query \
+            .slice(offset, offset + chunk_size) \
+            .all()
+        items_read = len(chunk)
+        offset += items_read
+        yield [row._asdict() for row in chunk]
+
+def run_query_and_insert_to_table_in_chunks(query, table_inserted_to, columns_to_order_query_uniqely, chunk_size, session):
+    for chunk in split_query_to_chunks(query, columns_to_order_query_uniqely, chunk_size):
+        session.bulk_insert_mappings(table_inserted_to, chunk)
+        session.commit()
+
 def valid_date(date_string):
     from datetime import datetime
 
@@ -289,3 +315,27 @@ def is_a_valid_email(tmp_given_user_email: str) -> bool:
         email_address=tmp_given_user_email, check_regex=True, check_mx=False, use_blacklist=False
     )
     return is_valid
+
+class TableForTest(object):
+    def __init__(self):
+        self.table = None
+
+    @contextmanager
+    def create_table(self, db, table_name, metadata, *args):
+        try:
+            self.table = Table(table_name, metadata, *args)
+            metadata.create_all(db.engine)
+            yield self.table
+        finally:
+            db.session.close()
+            if self.table is not None:
+                self.table.drop(db.engine)
+
+    @contextmanager
+    def create_table_with_data(self, db, name, columns, data):
+        with self.create_table(db, name, MetaData(), *columns) as table:
+            with db.engine.connect() as conn:
+                conn.execute(
+                    table.insert().values(data)
+                )
+                yield table

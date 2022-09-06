@@ -1,5 +1,12 @@
+import logging
+
 from anyway import config
-from anyway.utilities import is_valid_number, is_a_safe_redirect_url
+from anyway.utilities import is_valid_number, is_a_safe_redirect_url, split_query_to_chunks, TableForTest, \
+    run_query_and_insert_to_table_in_chunks
+from anyway.app_and_db import db
+from sqlalchemy import MetaData, Table, Column, Integer, insert
+from sqlalchemy.inspection import inspect
+from contextlib import contextmanager
 
 
 # The main logic is implemented in external library, the only reason for this test is to make sure that this library
@@ -123,3 +130,39 @@ def test_url_redirect_checker_dev():
 
     for url in good_urls:
         assert is_a_safe_redirect_url(url)
+
+
+def test_split_query_to_chunks():
+    data_for_less_then_chunk_size = [{"id": 1}]
+    with TableForTest().create_table_with_data(db, "table_for_test1",
+                                               [Column('id', Integer, primary_key=True)],
+                                               data_for_less_then_chunk_size) as table:
+        results = [x for x in split_query_to_chunks(db.session.query(table), inspect(table).primary_key, 2)]
+        assert results == [[{'id': 1}]]
+
+    data_for_data_size_divisive_by_chunk_size = [{"id": 1}, {"id": 2}, {"id": 3}, {"id": 4}]
+    with TableForTest().create_table_with_data(db, "table_for_test2",
+                                               [Column('id', Integer, primary_key=True)],
+                                               data_for_data_size_divisive_by_chunk_size) as table:
+        results = [x for x in split_query_to_chunks(db.session.query(table), inspect(table).primary_key, 2)]
+        assert results == [[{'id': 1}, {'id': 2}], [{'id': 3}, {'id': 4}], []]
+
+    data_for_data_size_larger_than_chunk_size = [{"id": 1}, {"id": 2}, {"id": 3}, {"id": 4}, {"id": 5}]
+    with TableForTest().create_table_with_data(db, "table_for_test3",
+                                               [Column('id', Integer, primary_key=True)],
+                                               data_for_data_size_larger_than_chunk_size) as table:
+        results = [x for x in split_query_to_chunks(db.session.query(table), inspect(table).primary_key, 2)]
+        assert results == [[{'id': 1}, {'id': 2}], [{'id': 3}, {'id': 4}], [{'id': 5}]]
+
+    data_for_two_primary_keys = [{"first": 1, "second": 2},
+                                 {"first": 1, "second": 1},
+                                 {"first": 2, "second": 2},
+                                 {"first": 2, "second": 1}]
+    with TableForTest().create_table_with_data(db, "table_for_test4",
+                                               [Column('first', Integer, primary_key=True),
+                                                Column('second', Integer, primary_key=True)],
+                                               data_for_two_primary_keys) as table:
+        results = [x for x in split_query_to_chunks(db.session.query(table), inspect(table).primary_key, 2)]
+        assert results == [[{"first": 1, "second": 1}, {"first": 1, "second": 2}],
+                           [{"first": 2, "second": 1}, {"first": 2, "second": 2}],
+                           []]

@@ -177,27 +177,16 @@ def truncate_tables(db, tables):
         db.session.commit()
 
 
-def create_query_for_next_chunk(base_query, column_to_chunk_by, starting_id, chunk_size):
-    query_with_ids_equal_larger_to_starting_id = \
-        base_query.filter(column_to_chunk_by >= starting_id) if starting_id else base_query
-    return query_with_ids_equal_larger_to_starting_id\
-        .add_column(column_to_chunk_by)\
-        .order_by(column_to_chunk_by) \
-        .limit(chunk_size)
-
-
-def order_query_by_primary_keys(query, keys):
+def order_query_by_columns(query, keys):
     for primary_key in keys:
         query = query.order_by(primary_key)
     return query
 
-def get_primary_key_names(table):
-    return [primary_key.name for primary_key in inspect(table)]
 
 def split_query_to_chunks(base_query, primary_keys, chunk_size):
     items_read = chunk_size
     offset = 0
-    query = order_query_by_primary_keys(base_query, primary_keys)
+    query = order_query_by_columns(base_query, primary_keys)
     while items_read == chunk_size:
         chunk = query \
             .slice(offset, offset + chunk_size) \

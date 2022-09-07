@@ -10,7 +10,6 @@ from csv import DictReader
 from datetime import datetime
 from functools import partial
 from urllib.parse import urlparse
-from sqlalchemy.inspection import inspect
 from sqlalchemy import MetaData, Table
 
 

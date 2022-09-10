@@ -9,6 +9,8 @@ from csv import DictReader
 from datetime import datetime
 from functools import partial
 from urllib.parse import urlparse
+from sqlalchemy import func, or_
+from sqlalchemy.sql import select
 
 import phonenumbers
 from dateutil.relativedelta import relativedelta
@@ -166,12 +168,45 @@ def decode_hebrew(s):
 open_utf8 = partial(open, encoding="utf-8")
 
 
+def row_to_dict(row):
+    return row._asdict()
+
+
+def fetch_ids_for_chunking(conn, column_to_chunk_by, chunk_size):
+    sub_query = select([])\
+        .column(column_to_chunk_by)\
+        .column(func.row_number().over(order_by=column_to_chunk_by).label("row_number"))\
+        .alias()
+    select_query = select([sub_query]) \
+        .where(or_(func.mod(sub_query.c.row_number, chunk_size) == 0,
+                   sub_query.c.row_number == 1))
+    ids_and_row_numbers = conn.execute(select_query).fetchall()
+    ids = [id_and_row_number[0] for id_and_row_number in ids_and_row_numbers]
+    return ids
+
 def truncate_tables(db, tables):
     logging.info("Deleting tables: " + ", ".join(table.__name__ for table in tables))
     for table in tables:
         db.session.query(table).delete()
         db.session.commit()
 
+
+def split_query_to_chunks_using_ids(base_select, column_to_chunk_by, chunk_size, conn):
+    ids = fetch_ids_for_chunking(conn, column_to_chunk_by, chunk_size)
+    print()
+    for index in range(len(ids)):
+        select = base_select.where(column_to_chunk_by >= ids[index])
+        if index + 1 < len(ids):
+            select = select.where(column_to_chunk_by < ids[index + 1])
+        chunk = conn.execute(select).fetchall()
+        print("generated chunk")
+        yield [dict(row.items()) for row in chunk]
+
+
+def run_query_and_insert_to_table_in_chunks(query, table_inserted_to, column_to_chunk_by, chunk_size, conn):
+    for chunk in split_query_to_chunks_using_ids(query, column_to_chunk_by, chunk_size, conn):
+        conn.execute(table_inserted_to.__table__.insert(), chunk)
+        print("inserted")
 
 def valid_date(date_string):
     from datetime import datetime

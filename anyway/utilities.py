@@ -184,6 +184,7 @@ def fetch_first_and_every_nth_value_for_column(conn, column_to_fetch, n):
     ids = [id_and_row_number[0] for id_and_row_number in ids_and_row_numbers]
     return ids
 
+
 def truncate_tables(db, tables):
     logging.info("Deleting tables: " + ", ".join(table.__name__ for table in tables))
     for table in tables:
@@ -191,22 +192,26 @@ def truncate_tables(db, tables):
         db.session.commit()
 
 
-def split_query_to_chunks_using_ids(base_select, column_to_chunk_by, chunk_size, conn):
-    ids = fetch_first_and_every_nth_value_for_column(conn, column_to_chunk_by, chunk_size)
-    print()
-    for index in range(len(ids)):
-        select = base_select.where(column_to_chunk_by >= ids[index])
-        if index + 1 < len(ids):
-            select = select.where(column_to_chunk_by < ids[index + 1])
+def delete_all_rows_from_table(conn, table):
+    table_name = table.__tablename__
+    logging.info("Deleting all rows from table " + table_name)
+    conn.execute("DELETE FROM " + table_name)
+
+
+def split_query_to_chunks_by_column(base_select, column_to_chunk_by, chunk_size, conn):
+    column_values = fetch_first_and_every_nth_value_for_column(conn, column_to_chunk_by, chunk_size)
+    for index in range(len(column_values)):
+        select = base_select.where(column_to_chunk_by >= column_values[index])
+        if index + 1 < len(column_values):
+            select = select.where(column_to_chunk_by < column_values[index + 1])
         chunk = conn.execute(select).fetchall()
-        print("generated chunk")
         yield [dict(row.items()) for row in chunk]
 
 
 def run_query_and_insert_to_table_in_chunks(query, table_inserted_to, column_to_chunk_by, chunk_size, conn):
-    for chunk in split_query_to_chunks_using_ids(query, column_to_chunk_by, chunk_size, conn):
+    for chunk in split_query_to_chunks_by_column(query, column_to_chunk_by, chunk_size, conn):
         conn.execute(table_inserted_to.__table__.insert(), chunk)
-        print("inserted")
+
 
 def valid_date(date_string):
     from datetime import datetime

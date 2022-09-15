@@ -10,7 +10,6 @@ from datetime import datetime
 
 import math
 import pandas as pd
-from select import select
 from sqlalchemy import or_, event
 from typing import Tuple, Dict, List, Any
 
@@ -77,11 +76,16 @@ from anyway.models import (
     LocationAccuracy,
     ProviderCode,
     VehicleDamage,
-    Streets, AccidentMarkerView, InvolvedView, InvolvedMarkerView, VehiclesView, VehicleMarkerView,
+    Streets,
+    AccidentMarkerView,
+    InvolvedView,
+    InvolvedMarkerView,
+    VehiclesView,
+    VehicleMarkerView,
 )
 from anyway.parsers.cbs.exceptions import CBSParsingFailed
-from anyway.utilities import ItmToWGS84, time_delta, ImporterUI, truncate_tables, chunks, fetch_first_and_every_nth_value_for_column, \
-    run_query_and_insert_to_table_in_chunks
+from anyway.utilities import ItmToWGS84, time_delta, ImporterUI, truncate_tables, delete_all_rows_from_table, \
+    chunks, run_query_and_insert_to_table_in_chunks
 from anyway.db_views import VIEWS
 from anyway.app_and_db import db
 from anyway.parsers.cbs.s3 import S3DataRetriever
@@ -1046,27 +1050,28 @@ def create_tables():
     chunk_size = 50000
     try:
         with db.get_engine().begin() as conn:
-            truncate_tables(db, [AccidentMarkerView])
+            event.listen(conn, "rollback", receive_rollback)
+            delete_all_rows_from_table(conn, AccidentMarkerView)
             run_query_and_insert_to_table_in_chunks(VIEWS.create_markers_hebrew_view(), AccidentMarkerView,
                                                     AccidentMarker.id, chunk_size, conn)
             logging.debug("after insertion to markers_hebrew ")
 
-            truncate_tables(db, [InvolvedView])
+            delete_all_rows_from_table(conn, InvolvedView)
             run_query_and_insert_to_table_in_chunks(VIEWS.create_involved_hebrew_view(), InvolvedView,
                                                     Involved.id, chunk_size, conn)
-            logging.debug("after insertion to recreating involved_hebrew ")
+            logging.debug("after insertion to involved_hebrew ")
 
-            truncate_tables(db, [VehiclesView])
+            delete_all_rows_from_table(conn, VehiclesView)
             run_query_and_insert_to_table_in_chunks(VIEWS.create_vehicles_hebrew_view(),
                                                     VehiclesView, Vehicle.id, chunk_size, conn)
             logging.debug("after insertion to vehicles_hebrew ")
 
-            truncate_tables(db, [VehicleMarkerView])
+            delete_all_rows_from_table(conn, VehicleMarkerView)
             run_query_and_insert_to_table_in_chunks(VIEWS.create_vehicles_markers_hebrew_view(),
                                                     VehicleMarkerView, VehiclesView.id, chunk_size, conn)
             logging.debug("after insertion to vehicles_markers_hebrew ")
 
-            truncate_tables(db, [InvolvedMarkerView])
+            delete_all_rows_from_table(conn, InvolvedMarkerView)
             run_query_and_insert_to_table_in_chunks(VIEWS.create_involved_hebrew_markers_hebrew_view(),
                                                     InvolvedMarkerView, InvolvedView.accident_id, chunk_size, conn)
             logging.debug("after insertion to involved_markers_hebrew")

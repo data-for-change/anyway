@@ -100,6 +100,7 @@ class TestInfographicsDataFromCache(TestCase):
         file = f"{root}/anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py"
         modification_date = datetime.datetime.fromtimestamp(
             os.path.getmtime(file))
+        print(modification_date)
         expected = datetime.datetime(2022, 8, 7, 21, 20, 38, 288321)
         self.assertEqual(expected, modification_date,
                          "mod time of most_severe_accidents file")

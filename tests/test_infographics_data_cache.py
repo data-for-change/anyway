@@ -94,6 +94,16 @@ class TestInfographicsDataFromCache(TestCase):
         res = add_news_flash_to_cache(nf)
         assert not res, "Should return False when error occurred"
 
+    def test_modification_date(self):
+        import datetime
+        root = os.path.dirname(os.path.dirname(__file__))
+        file = f"{root}/anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py"
+        modification_date = datetime.datetime.fromtimestamp(
+            os.path.getmtime(file))
+        expected = datetime.datetime(2022, 8, 7, 21, 20, 38, 288321)
+        self.assertEqual(expected, modification_date,
+                         "mod time of most_severe_accidents file")
+
 
 if __name__ == "__main__":
     unittest.main()

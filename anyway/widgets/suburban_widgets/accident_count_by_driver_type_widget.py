@@ -15,9 +15,11 @@ from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 @register
 class AccidentCountByDriverTypeWidget(SubUrbanWidget):
     name: str = "accident_count_by_driver_type"
+    files = [__file__]
+    widget_digest = SubUrbanWidget.calc_widget_digest(files)
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, type(self).name)
+        super().__init__(request_params)
         self.rank = 16
         self.information = "Driver involvement in accident by driver type: professional - trucks, taxi, bus, work, minibus, tractor, private - private car, motorcycle, light electric - electric scooter, mobility scooter, electric bike."
 

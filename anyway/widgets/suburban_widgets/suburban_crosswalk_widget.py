@@ -13,9 +13,11 @@ from anyway.backend_constants import CrossCategory
 # TODO: pretty sure there are errors in this widget, for example, is_included returns self.items
 class SuburbanCrosswalkWidget(SubUrbanWidget):
     name: str = "suburban_accidents_by_cross_location"
+    files = [__file__]
+    widget_digest = SubUrbanWidget.calc_widget_digest(files)
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, type(self).name)
+        super().__init__(request_params)
         self.rank = 26
 
     def generate_items(self) -> None:

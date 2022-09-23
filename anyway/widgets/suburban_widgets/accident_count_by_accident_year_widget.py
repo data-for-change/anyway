@@ -19,9 +19,11 @@ from anyway.widgets.widget_utils import (
 @register
 class AccidentCountByAccidentYearWidget(SubUrbanWidget):
     name: str = "accident_count_by_accident_year"
+    files = [__file__]
+    widget_digest = SubUrbanWidget.calc_widget_digest(files)
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, type(self).name)
+        super().__init__(request_params)
         self.rank = 8
         self.text = {
             # "title" and "labels" will be set in localize_items()

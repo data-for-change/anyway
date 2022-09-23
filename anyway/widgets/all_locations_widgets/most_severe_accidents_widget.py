@@ -10,6 +10,7 @@ from anyway.widgets.all_locations_widgets.most_severe_accidents_table_widget imp
     get_most_severe_accidents_with_entities,
     get_most_severe_accidents_table_title,
 )
+from anyway.widgets.all_locations_widgets import most_severe_accidents_table_widget
 from anyway.models import AccidentMarkerView
 from anyway.widgets.widget import register
 from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget
@@ -18,9 +19,11 @@ from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocatio
 @register
 class MostSevereAccidentsWidget(AllLocationsWidget):
     name: str = "most_severe_accidents"
+    files = [__file__, most_severe_accidents_table_widget.__file__]
+    widget_digest = AllLocationsWidget.calc_widget_digest(files)
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, type(self).name)
+        super().__init__(request_params)
         self.rank = 3
         self.information = "Most recent fatal and severe accidents displayed on a map. Up to 10 accidents are presented."
 

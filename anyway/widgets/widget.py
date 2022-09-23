@@ -1,7 +1,7 @@
 import copy
 import logging
 from typing import Union, Dict, List, Optional, Type
-
+import hashlib
 from anyway.request_params import RequestParams
 
 
@@ -14,35 +14,25 @@ class Widget:
     - Make is subclass of Widget
     - Set attribute rank
     - Implement method generate_items()
-    - Optionally set additional attributes if needed, and alter the returned values of `is_in_cache()` and
-      `is_included()` when needed.
-    Returned Widget structure:
-    `{
-        'name': str,
-        'data': {
-                 'items': list (Array) | dictionary (Object),
-                 'text': dictionary (Object) - can be empty
-                 },
-        'meta': {
-                 'rank': int (Integer)
-                 }
-    }`
+    - Optionally set additional attributes if needed, and alter the returned values of
+      `is_in_cache()` and `is_included()` when needed.
     """
 
     request_params: RequestParams
     name: str
     rank: int
+    widget_digest = ""
+    files: List[str]
     items: Union[Dict, List]
     text: Dict
     meta: Optional[Dict]
 
-    def __init__(self, request_params: RequestParams, name: str):
+    def __init__(self, request_params: RequestParams):
         self.request_params = copy.deepcopy(request_params)
-        self.name = name
         self.rank = -1
         self.items = {}
         self.text = {}
-        self.meta = None
+        self.meta = {"widget_digest": self.widget_digest}
         self.information = ""
 
     def get_name(self) -> str:
@@ -79,11 +69,37 @@ class Widget:
             logging.error(f"Widget.localize_items: bad input (missing 'name' key):{items}")
         return items
 
+    @classmethod
+    def get_widget_files(cls) -> List[str]:
+        return cls.files
+
+    @staticmethod
+    def calc_widget_digest(files: List[str]) -> str:
+        h = hashlib.md5()
+        for fn in files:
+            with open(fn, "rb") as f:
+                file_bytes = f.read()
+                h.update(file_bytes)
+        d = h.digest()
+        return d.hex()
+
+    @classmethod
+    def generate_widget_data(cls, request_params: RequestParams):
+        if cls.is_relevant(request_params):
+            w = cls(request_params)  # pylint: disable=E1120
+            logging.info(f"Generating items for : {w.name}")
+            try:
+                w.generate_items()
+                return w.serialize()
+            except Exception as e:
+                logging.exception(f"Encountered error when generating items for {w.name} : {e}")
+        return {}
+
     def serialize(self):
         if not self.items:
             self.generate_items()
         output = {"name": self.name, "data": {}}
-        output["data"]["items"] = self.items
+        output["data"]["items"] = self.items if self.is_included() else {}
         if self.text:
             output["data"]["text"] = self.text
         if self.meta:

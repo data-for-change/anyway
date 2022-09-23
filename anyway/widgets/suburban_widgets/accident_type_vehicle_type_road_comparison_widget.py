@@ -16,10 +16,12 @@ from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 # TODO: register?
 class AccidentTypeVehicleTypeRoadComparisonWidget(SubUrbanWidget):
     name: str = "vehicle_accident_vs_all_accidents"  # WIP: change by vehicle type
+    files = [__file__]
+    widget_digest = SubUrbanWidget.calc_widget_digest(files)
     MAX_ACCIDENT_TYPES_TO_RETURN: int = 5
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, type(self).name)
+        super().__init__(request_params)
         self.road_number: str = request_params.location_info["road1"]
         # WIP: change rank, text by vehicle type
         self.rank = 25

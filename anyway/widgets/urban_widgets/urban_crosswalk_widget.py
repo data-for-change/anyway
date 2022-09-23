@@ -13,9 +13,11 @@ from anyway.widgets.widget_utils import get_accidents_stats
 # TODO: pretty sure there are errors in this widget, for example, is_included returns self.items
 class UrbanCrosswalkWidget(UrbanWidget):
     name: str = "urban_accidents_by_cross_location"
+    files = [__file__]
+    widget_digest = UrbanWidget.calc_widget_digest(files)
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, type(self).name)
+        super().__init__(request_params)
         self.rank = 27
 
     def generate_items(self) -> None:

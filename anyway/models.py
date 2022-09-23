@@ -2599,6 +2599,16 @@ class InfographicsRoadSegmentsDataCache(InfographicsRoadSegmentsDataCacheFields,
     def get_data(self):
         return self.data
 
+    def set_data(self, data):
+        self.data = data
+
+    def as_dict(self) -> dict:
+        return {
+            "road_segment_id": self.road_segment_id,
+            "years_ago": self.years_ago,
+            "data": self.data,
+        }
+
     def serialize(self):
         return {
             "road_segment_id": self.road_segment_id,
@@ -2632,6 +2642,9 @@ class InfographicsTwoRoadsDataCache(InfographicsTwoRoadsDataCacheFields, Base):
 
     def get_data(self):
         return self.data
+
+    def set_data(self, json_data: str):
+        self.data = json_data
 
     def serialize(self):
         return {
@@ -2694,6 +2707,17 @@ class InfographicsStreetDataCache(InfographicsStreetDataCacheFields, Base):
 
     def get_data(self):
         return self.data
+
+    def set_data(self, json_data: str):
+        self.data = json_data
+
+    def as_dict(self) -> dict:
+        return {
+            "street": self.street,
+            "yishuv_symbol": self.yishuv_symbol,
+            "years_ago": self.years_ago,
+            "data": self.data,
+        }
 
 
 class InfographicsStreetDataCacheTemp(InfographicsStreetDataCacheFields, Base):

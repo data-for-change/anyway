@@ -20,12 +20,19 @@ from anyway.backend_constants import BE_CONST
 from anyway.app_and_db import db
 from anyway.request_params import RequestParams
 import anyway.infographics_utils
+from anyway.widgets.widget import widgets_dict
 import logging
 import json
 
 
 CACHE = "cache"
 TEMP = "temp"
+WIDGETS = "widgets"
+WIDGET_DIGEST = "widget_digest"
+NAME = "name"
+META = "meta"
+DATA = "data"
+ITEMS = "items"
 REGULAR_CACHE_TABLES = {CACHE: InfographicsDataCache, TEMP: InfographicsDataCacheTemp}
 STREET_CACHE_TABLES = {CACHE: InfographicsStreetDataCache, TEMP: InfographicsStreetDataCacheTemp}
 ROAD_SEGMENT_CACHE_TABLES = {
@@ -156,16 +163,45 @@ def get_infographics_data_from_cache_by_location(request_params: RequestParams) 
     db.session.commit()
     try:
         if db_item:
-            return json.loads(db_item.get_data())
+            res = update_cache_data(db_item, request_params, query)
+            non_empty = list(filter(lambda x: x[DATA][ITEMS], res[WIDGETS]))
+            res[WIDGETS] = non_empty
+            return res
         else:
             return {}
     except Exception as e:
-        logging.error(
+        logging.exception(
             f"Exception while extracting data from returned cache item:{request_params}"
             f"returned value {type(db_item)}"
             f":cause:{e.__cause__}, class:{e.__class__}"
         )
         return {}
+
+
+def update_cache_data(db_item, request_params: RequestParams, query) -> dict:
+    cache_data = json.loads(db_item.get_data())
+    res = []
+    dirty: bool = False
+    cache_widgets = {w[NAME]: w for w in cache_data[WIDGETS]}
+    for widget in widgets_dict.values():
+        if widget.is_relevant(request_params):
+            cache_widget = cache_widgets.get(widget.name, None)
+            if (
+                cache_widget is None
+                or cache_widget[META].get(WIDGET_DIGEST, None) != widget.widget_digest
+            ):
+                new_out = widget(request_params).serialize()
+                res.append(new_out)
+                dirty = True
+                logging.debug(f"Widget {widget.name}: generated new. In cache was:{cache_widget}")
+            else:
+                res.append(cache_widget)
+    if dirty:
+        cache_data[WIDGETS] = res
+        j = json.dumps(cache_data, default=str)
+        db_item.set_data(j)
+        db.session.commit()
+    return cache_data
 
 
 def copy_temp_into_cache(table: Dict[str, Base]):

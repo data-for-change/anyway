@@ -106,6 +106,7 @@ class BackEndConstants(object):
     VAL = "value"
     SERIES = "series"
 
+    YISHUV_NAME = "yishuv_name"
 
 BE_CONST = BackEndConstants()
 

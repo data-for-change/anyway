@@ -6,10 +6,11 @@ from typing import Dict, Any, List, Type, Optional
 
 import pandas as pd
 from flask_babel import _
-from sqlalchemy import func, distinct
+from sqlalchemy import func, distinct, between, and_
 
 from anyway.app_and_db import db
 from anyway.backend_constants import BE_CONST, LabeledCode
+from anyway.models import Involved, AccidentMarker, RoadSegments
 
 
 def get_query(table_obj, filters, start_time, end_time):
@@ -29,13 +30,13 @@ def get_query(table_obj, filters, start_time, end_time):
 
 
 def get_accidents_stats(
-    table_obj,
-    filters=None,
-    group_by=None,
-    count=None,
-    cnt_distinct=False,
-    start_time=None,
-    end_time=None,
+        table_obj,
+        filters=None,
+        group_by=None,
+        count=None,
+        cnt_distinct=False,
+        start_time=None,
+        end_time=None,
 ):
     filters = filters or {}
     provider_code_filters = [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
@@ -82,7 +83,7 @@ def retro_dictify(indexable) -> Dict[Any, Dict[Any, Any]]:
 
 
 def add_empty_keys_to_gen_two_level_dict(
-    d, level_1_values: List[Any], level_2_values: List[Any], default_level_3_value: int = 0
+        d, level_1_values: List[Any], level_2_values: List[Any], default_level_3_value: int = 0
 ) -> Dict[Any, Dict[Any, int]]:
     for v1 in level_1_values:
         if v1 not in d:
@@ -120,9 +121,9 @@ def run_query(query: db.session.query) -> Dict:
 
 # TODO: Find a better way to deal with typing.Union[int, str]
 def format_2_level_items(
-    items: Dict[typing.Union[int, str], dict],
-    level1_vals: Optional[Type[LabeledCode]],
-    level2_vals: Optional[Type[LabeledCode]],
+        items: Dict[typing.Union[int, str], dict],
+        level1_vals: Optional[Type[LabeledCode]],
+        level2_vals: Optional[Type[LabeledCode]],
 ):
     res: List[Dict[str, Any]] = []
     for l1_code, year_res in items.items():
@@ -146,7 +147,7 @@ def second_level_fill_and_sort(data: dict, default_order: dict) -> dict:
 
 
 def fill_and_sort_by_numeric_range(
-    data: defaultdict, numeric_range: typing.Iterable, default_order: dict
+        data: defaultdict, numeric_range: typing.Iterable, default_order: dict
 ) -> Dict[int, dict]:
     for item in numeric_range:
         if item not in data:
@@ -155,8 +156,36 @@ def fill_and_sort_by_numeric_range(
 
 
 def sort_and_fill_gaps_for_stacked_bar(
-    data: defaultdict, numeric_range: typing.Iterable, default_order: dict
+        data: defaultdict, numeric_range: typing.Iterable, default_order: dict
 ) -> Dict[int, dict]:
     res = fill_and_sort_by_numeric_range(data, numeric_range, default_order)
     res2 = second_level_fill_and_sort(res, default_order)
     return res2
+
+
+def get_involved_counts(selected_columns, start_year, end_year, severities, vehicle_types, location_info):
+    query = db.session.query(Involved) \
+        .with_entities(*selected_columns) \
+        .join(AccidentMarker,
+              and_(AccidentMarker.id == Involved.accident_id,
+                   AccidentMarker.provider_code == Involved.provider_code,
+                   AccidentMarker.accident_year == Involved.accident_year)) \
+        .filter(between(Involved.accident_year, start_year, end_year)) \
+        .order_by(Involved.accident_year)
+
+    if "yishuv_symbol" in location_info:
+        query = query.filter(AccidentMarker.yishuv_symbol == location_info["yishuv_symbol"]) \
+            .group_by(Involved.accident_year)
+    elif "road_segment_id" in location_info:
+        query = query.join(RoadSegments, AccidentMarker.road1 == RoadSegments.road) \
+            .filter(RoadSegments.segment_id == location_info["road_segment_id"]) \
+            .group_by(Involved.accident_year)
+
+    if severities:
+        query = query.filter(Involved.injury_severity.in_([severity.value for severity in severities]))
+
+    if vehicle_types:
+        query = query.filter(Involved.vehicle_type.in_([v_type.value for v_type in vehicle_types]))
+
+    df = pd.read_sql_query(query.statement, query.session.bind)
+    return df.to_dict(orient="records")

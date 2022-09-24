@@ -95,15 +95,21 @@ class TestInfographicsDataFromCache(TestCase):
         assert not res, "Should return False when error occurred"
 
     def test_modification_date(self):
-        import datetime
+        import hashlib
+        import base64
         root = os.path.dirname(os.path.dirname(__file__))
         file = f"{root}/anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py"
-        modification_date = datetime.datetime.fromtimestamp(
-            os.path.getmtime(file))
-        print(modification_date)
-        expected = datetime.datetime(2022, 8, 7, 21, 20, 38, 288321)
-        self.assertEqual(expected, modification_date,
-                         "mod time of most_severe_accidents file")
+        with open(file, "rb") as f:
+            file_bytes = f.read()
+        h = hashlib.md5()
+        h.update(file_bytes)
+        d = h.digest()
+        b = base64.b64encode(d)
+        s = b.decode()
+        expected = b'uBVQO/2m6B184SrpIXStAg=='
+        print(s)
+        self.assertEqual(expected, b,
+                         "md5 hash")
 
 
 if __name__ == "__main__":

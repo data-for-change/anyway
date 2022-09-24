@@ -106,9 +106,9 @@ class TestInfographicsDataFromCache(TestCase):
         d = h.digest()
         b = base64.b64encode(d)
         s = b.decode()
-        expected = b'uBVQO/2m6B184SrpIXStAg=='
+        expected = 'uBVQO/2m6B184SrpIXStAg=='
         print(s)
-        self.assertEqual(expected, b,
+        self.assertEqual(expected, s,
                          "md5 hash")
 
 

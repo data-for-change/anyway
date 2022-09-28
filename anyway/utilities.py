@@ -9,6 +9,8 @@ from csv import DictReader
 from datetime import datetime
 from functools import partial
 from urllib.parse import urlparse
+from sqlalchemy import func, or_
+from sqlalchemy.sql import select
 
 import phonenumbers
 from dateutil.relativedelta import relativedelta
@@ -166,11 +168,49 @@ def decode_hebrew(s):
 open_utf8 = partial(open, encoding="utf-8")
 
 
+def row_to_dict(row):
+    return row._asdict()
+
+
+def fetch_first_and_every_nth_value_for_column(conn, column_to_fetch, n):
+    sub_query = select([])\
+        .column(column_to_fetch)\
+        .column(func.row_number().over(order_by=column_to_fetch).label("row_number"))\
+        .alias()
+    select_query = select([sub_query]) \
+        .where(or_(func.mod(sub_query.c.row_number, n) == 0,
+                   sub_query.c.row_number == 1))
+    ids_and_row_numbers = conn.execute(select_query).fetchall()
+    ids = [id_and_row_number[0] for id_and_row_number in ids_and_row_numbers]
+    return ids
+
+
 def truncate_tables(db, tables):
     logging.info("Deleting tables: " + ", ".join(table.__name__ for table in tables))
     for table in tables:
         db.session.query(table).delete()
         db.session.commit()
+
+
+def delete_all_rows_from_table(conn, table):
+    table_name = table.__tablename__
+    logging.info("Deleting all rows from table " + table_name)
+    conn.execute("DELETE FROM " + table_name)
+
+
+def split_query_to_chunks_by_column(base_select, column_to_chunk_by, chunk_size, conn):
+    column_values = fetch_first_and_every_nth_value_for_column(conn, column_to_chunk_by, chunk_size)
+    for index in range(len(column_values)):
+        select = base_select.where(column_to_chunk_by >= column_values[index])
+        if index + 1 < len(column_values):
+            select = select.where(column_to_chunk_by < column_values[index + 1])
+        chunk = conn.execute(select).fetchall()
+        yield [dict(row.items()) for row in chunk]
+
+
+def run_query_and_insert_to_table_in_chunks(query, table_inserted_to, column_to_chunk_by, chunk_size, conn):
+    for chunk in split_query_to_chunks_by_column(query, column_to_chunk_by, chunk_size, conn):
+        conn.execute(table_inserted_to.__table__.insert(), chunk)
 
 
 def valid_date(date_string):

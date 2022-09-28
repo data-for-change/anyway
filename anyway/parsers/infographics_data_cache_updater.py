@@ -49,6 +49,7 @@ def add_news_flash_to_cache(news_flash: NewsFlash):
         if not (
             news_flash.accident
             and anyway.infographics_utils.is_news_flash_resolution_supported(news_flash)
+            and news_flash.newsflash_location_qualification is not None
         ):
             logging.debug(
                 f"add_news_flash_to_cache: news flash does not qualify:{news_flash.serialize()}"

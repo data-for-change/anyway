@@ -1,4 +1,4 @@
-ANYWAY_BUCKET = "anyway-cbs"
+ANYWAY_BUCKET = "dfc-anyway-cbs"
 
 ACCIDENTS_TYPE_PREFIX = "accidents_type"
 ACCIDENTS_TYPE_1 = 1

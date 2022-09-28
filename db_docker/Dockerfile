@@ -9,4 +9,4 @@ COPY restore_db.sh /docker-entrypoint-initdb.d/
 ENV POSTGRES_PASSWORD anyway
 ENV POSTGRES_USER anyway
 ENV POSTGRES_DB anyway
-ENV DBRESTORE_AWS_BUCKET=anyway-partial-db-dumps
+ENV DBRESTORE_AWS_BUCKET=dfc-anyway-partial-db-dumps

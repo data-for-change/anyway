@@ -271,7 +271,7 @@ POSTGRES_DB=postgres
 #   aws access/secret with permissions to read from full db dumps bucket
 DBRESTORE_AWS_ACCESS_KEY_ID=
 DBRESTORE_AWS_SECRET_ACCESS_KEY=
-DBRESTORE_AWS_BUCKET=anyway-full-db-dumps
+DBRESTORE_AWS_BUCKET=dfc-anyway-full-db-dumps
 DBRESTORE_FILE_NAME=2020-06-09_anyway.pgdump
 #   should match the password set in app env vars
 DBRESTORE_SET_ANYWAY_PASSWORD=12345678

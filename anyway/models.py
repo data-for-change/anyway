@@ -41,7 +41,7 @@ from sqlalchemy.orm import relationship, load_only, backref
 from sqlalchemy import or_, and_
 
 from anyway import localization
-from anyway.backend_constants import BE_CONST
+from anyway.backend_constants import BE_CONST, NewsflashLocationQualification
 from anyway.database import Base
 from anyway.utilities import decode_hebrew
 
@@ -869,6 +869,12 @@ class NewsFlash(Base):
     street2_hebrew = Column(Text(), nullable=True)
     non_urban_intersection_hebrew = Column(Text(), nullable=True)
     road_segment_name = Column(Text(), nullable=True)
+    newsflash_location_qualification = Column(
+        Integer(),
+        nullable=False,
+        server_default=text(f"{NewsflashLocationQualification.NOT_VERIFIED.value}"),
+    )
+    location_qualifying_user = Column(BigInteger(), nullable=True)
 
     def serialize(self):
         return {
@@ -895,6 +901,10 @@ class NewsFlash(Base):
             "street2_hebrew": self.street2_hebrew,
             "non_urban_intersection_hebrew": self.non_urban_intersection_hebrew,
             "road_segment_name": self.road_segment_name,
+            "newsflash_location_qualification": NewsflashLocationQualification(
+                self.newsflash_location_qualification
+            ).get_label(),
+            "location_qualifying_user": self.location_qualifying_user,
         }
 
     # Flask-Login integration

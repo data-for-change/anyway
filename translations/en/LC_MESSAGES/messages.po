@@ -7,16 +7,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-05-27 14:02+0300\n"
+"POT-Creation-Date: 2022-09-17 17:14+0300\n"
 "PO-Revision-Date: 2020-11-26 16:45+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
 "Language-Team: en <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.6.0\n"
+"Generated-By: Babel 2.10.1\n"
 
 #: anyway/backend_constants.py:145
 msgid "killed"
@@ -321,16 +321,33 @@ msgid ""
 "previous years"
 msgstr ""
 
+#: anyway/widgets/suburban_widgets/front_to_side_accidents_by_severity.py:28
+#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:121
+msgid "others"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/front_to_side_accidents_by_severity.py:29
+msgid "front side"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/front_to_side_accidents_by_severity.py:136
+msgid "Front-side vs other accidents"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/front_to_side_accidents_by_severity.py:138
+msgid "Fatal & severe accidents of type front-to-side in this road segment"
+msgstr ""
+
+#: anyway/widgets/suburban_widgets/front_to_side_accidents_by_severity.py:149
+msgid "fatal accidents"
+msgstr ""
+
 #: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:91
 msgid "Fatal head on collisions vs other accidents"
 msgstr ""
 
 #: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:94
 msgid "desc"
-msgstr ""
-
-#: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:121
-msgid "others"
 msgstr ""
 
 #: anyway/widgets/suburban_widgets/head_on_collisions_comparison_widget.py:122

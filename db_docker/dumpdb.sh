@@ -17,8 +17,8 @@ export TZ=Asia/Jerusalem
 export AWS_ACCESS_KEY_ID="${DBDUMP_AWS_ACCESS_KEY_ID}"
 export AWS_SECRET_ACCESS_KEY="${DBDUMP_AWS_SECRET_ACCESS_KEY}"
 
-DBDUMP_FULL_BUCKET="${DBDUMP_FULL_BUCKET:-anyway-full-db-dumps}"
-DBDUMP_PARTIAL_BUCKET="${DBDUMP_PARTIAL_BUCKET:-anyway-partial-db-dumps}"
+DBDUMP_FULL_BUCKET="${DBDUMP_FULL_BUCKET:-dfc-anyway-full-db-dumps}"
+DBDUMP_PARTIAL_BUCKET="${DBDUMP_PARTIAL_BUCKET:-dfc-anyway-partial-db-dumps}"
 
 dumpdb() {
   PG_DUMP_ARGS="${1}"

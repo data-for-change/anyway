@@ -85,7 +85,7 @@ jobs:
         DOCKER_REPOSITORY_DB: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_DB }}
         DOCKER_REPOSITORY_DB_BACKUP: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
         DOCKER_REPOSITORY_NGINX: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_NGINX }}
-        HASADNA_K8S_DEPLOY_KEY: ${{ secrets.HASADNA_K8S_DEPLOY_KEY }}
+        DFC_K8S_DEPLOY_KEY: ${{ secrets.DFC_K8S_DEPLOY_KEY }}
         ANYWAY_ETL_DEPLOY_KEY: ${{ secrets.ANYWAY_ETL_DEPLOY_KEY }}
       run: |
         if [ "${GITHUB_REF}" == "refs/heads/master" ] || [ "${GITHUB_REF}" == "refs/heads/dev" ]; then
@@ -101,11 +101,11 @@ jobs:
           echo NGINX_IMAGE=$NGINX_IMAGE &&\
           if ! git log -1 --pretty=format:"%s" | grep -- --no-deploy; then
             cd `mktemp -d` &&\
-            echo "${HASADNA_K8S_DEPLOY_KEY}" > hasadna_k8s_deploy_key &&\
-            chmod 400 hasadna_k8s_deploy_key &&\
-            export GIT_SSH_COMMAND="ssh -i `pwd`/hasadna_k8s_deploy_key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" &&\
-            git clone git@github.com:hasadna/hasadna-k8s.git &&\
-            cd hasadna-k8s &&\
+            echo "${DFC_K8S_DEPLOY_KEY}" > dfc_k8s_deploy_key &&\
+            chmod 400 dfc_k8s_deploy_key &&\
+            export GIT_SSH_COMMAND="ssh -i `pwd`/dfc_k8s_deploy_key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" &&\
+            git clone git@github.com:data-for-change/dfc-k8s.git &&\
+            cd dfc-k8s &&\
             if [ "${GITHUB_REF}" == "refs/heads/dev" ]; then
               python update_yaml.py '{"imageDev":"'${ANYWAY_IMAGE}'","nginxImageDev":"'${NGINX_IMAGE}'"}' apps/anyway/values-anyway-auto-updated.yaml
             else

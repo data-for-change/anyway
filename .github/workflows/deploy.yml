@@ -118,7 +118,7 @@ jobs:
             else
               git add apps/anyway/values-anyway-auto-updated.yaml && git commit -m "automatic update of anyway"
             fi &&\
-            git push origin master &&\
+            git push origin main &&\
             cd `mktemp -d` &&\
             echo "${ANYWAY_ETL_DEPLOY_KEY}" > anyway_etl_deploy_key &&\
             chmod 400 anyway_etl_deploy_key &&\

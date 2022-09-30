@@ -1,7 +1,7 @@
 import copy
 import logging
 from typing import Union, Dict, List, Optional, Type
-
+import hashlib
 from anyway.request_params import RequestParams
 
 
@@ -78,6 +78,20 @@ class Widget:
         else:
             logging.error(f"Widget.localize_items: bad input (missing 'name' key):{items}")
         return items
+
+    @classmethod
+    def get_widget_files(cls) -> List[str]:
+        return cls.files
+
+    @staticmethod
+    def calc_widget_digest(files: List[str]) -> bytes:
+        h = hashlib.md5()
+        for fn in files:
+            with open(fn, "rb") as f:
+                file_bytes = f.read()
+                h.update(file_bytes)
+        d = h.digest()
+        return d
 
     def serialize(self):
         if not self.items:

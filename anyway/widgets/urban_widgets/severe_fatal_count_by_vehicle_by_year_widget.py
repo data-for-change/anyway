@@ -12,6 +12,8 @@ from flask_babel import _
 # TODO: pretty sure there are errors in this widget, for example, is_included returns self.items
 class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
     name: str = "accidents_on_small_motor_by_vehicle_by_year"
+    files = [__file__]
+    widget_digest = UrbanWidget.calc_widget_digest(files)
     # TODO: when accident vehicle becomes available in request params,
     # make it so widget is only included on newsflashes that have a relevant vehicle
 

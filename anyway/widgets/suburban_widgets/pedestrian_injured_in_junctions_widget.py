@@ -8,6 +8,8 @@ from typing import Dict
 @register
 class PedestrianInjuredInJunctionsWidget(SubUrbanWidget):
     name: str = "pedestrian_injured_in_junctions"
+    files = [__file__]
+    widget_digest = SubUrbanWidget.calc_widget_digest(files)
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)

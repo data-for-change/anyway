@@ -13,6 +13,8 @@ from anyway.backend_constants import AccidentType
 @register
 class AccidentCountByAccidentTypeWidget(SubUrbanWidget):
     name: str = "accident_count_by_accident_type"
+    files = [__file__]
+    widget_digest = SubUrbanWidget.calc_widget_digest(files)
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)

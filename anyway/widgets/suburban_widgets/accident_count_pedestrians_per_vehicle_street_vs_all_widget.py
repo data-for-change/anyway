@@ -7,6 +7,8 @@ from typing import Dict
 # TODO: register?
 class AccidentCountPedestriansPerVehicleStreetVsAllWidget(SubUrbanWidget):
     name: str = "accident_count_pedestrians_per_vehicle_street_vs_all"
+    files = [__file__]
+    widget_digest = SubUrbanWidget.calc_widget_digest(files)
 
     def __init__(self, request_params: RequestParams):
         Widget.__init__(self, request_params, type(self).name)

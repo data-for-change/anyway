@@ -11,6 +11,8 @@ from flask_babel import _
 
 class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
     name: str = "severe_fatal_count_on_small_motor_by_accident_year"
+    files = [__file__]
+    widget_digest = UrbanWidget.calc_widget_digest(files)
     # TODO: when accident vehicle becomes available in request params,
     # make it so widget shows only the vehicle in the newsflash (eg only e_bikes)
 

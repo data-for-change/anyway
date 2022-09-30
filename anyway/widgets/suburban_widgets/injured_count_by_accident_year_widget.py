@@ -20,6 +20,8 @@ from anyway.widgets.widget_utils import (
 @register
 class InjuredCountByAccidentYearWidget(SubUrbanWidget):
     name: str = "injured_count_by_accident_year"
+    files = [__file__]
+    widget_digest = SubUrbanWidget.calc_widget_digest(files)
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)

@@ -312,7 +312,8 @@ def get_infographics_data_for_road_segment(road_segment_id, years_ago, lang: str
 
 
 def get_infographics_data_for_location(request_params: RequestParams) -> Dict:
-    if os.environ.get("FLASK_ENV") == "development":
+    if os.environ.get("FLASK_ENV") == "development" \
+        and not os.environ.get("USE_CACHE_IN_DEV"):
         output = create_infographics_items(request_params)
     else:
         try:

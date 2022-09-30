@@ -13,6 +13,8 @@ from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 @register
 class HeadOnCollisionsComparisonWidget(SubUrbanWidget):
     name: str = "head_on_collisions_comparison"
+    files = [__file__]
+    widget_digest = SubUrbanWidget.calc_widget_digest(files)
     SPECIFIC_ROAD_SUBTITLE = "specific_road_segment_fatal_accidents"
     ALL_ROADS_SUBTITLE = "all_roads_fatal_accidents"
 

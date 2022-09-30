@@ -6,12 +6,14 @@ from anyway.widgets.widget import register
 from anyway.backend_constants import BE_CONST
 from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget
 from flask_babel import _
-from typing import Dict
+from typing import Dict, List
 
 
 @register
 class AccidentCountBySeverityWidget(AllLocationsWidget):
     name: str = "accident_count_by_severity"
+    files: List[str] = [__file__]
+    widget_digest = AllLocationsWidget.calc_widget_digest(files)
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)

@@ -20,6 +20,7 @@ from anyway.backend_constants import BE_CONST
 from anyway.app_and_db import db
 from anyway.request_params import RequestParams
 import anyway.infographics_utils
+from anyway.widgets.widget import widgets_dict
 import logging
 import json
 
@@ -156,7 +157,9 @@ def get_infographics_data_from_cache_by_location(request_params: RequestParams) 
     db.session.commit()
     try:
         if db_item:
-            return json.loads(db_item.get_data())
+            cache_data = json.loads(db_item.get_data())
+            res = update_cache_data(cache_data, request_params, query)
+            return res
         else:
             return {}
     except Exception as e:
@@ -166,6 +169,31 @@ def get_infographics_data_from_cache_by_location(request_params: RequestParams) 
             f":cause:{e.__cause__}, class:{e.__class__}"
         )
         return {}
+
+
+WIDGETS = "widgets"
+WIDGET_DIGEST = "widget_digest"
+NAME = "name"
+META = "meta"
+
+
+def update_cache_data(cache_data: dict, request_params: RequestParams, query) -> dict:
+    res = []
+    dirty: bool = False
+    for widget_out in cache_data[WIDGETS]:
+        widget_name = widget_out[NAME]
+        widget_class = widgets_dict[widget_name]
+        if widget_class[WIDGET_DIGEST] != widget_out.get(WIDGET_DIGEST, None):
+            new_out = widget_class(request_params).generate_items()
+            res.append(new_out)
+            dirty = True
+            logging.debug(f"Widget {widget_name}: digest changed")
+        else:
+            res.append(widget_out)
+    if dirty:
+        cache_data[WIDGETS] = res
+        query.update(cache_data)
+    return cache_data
 
 
 def copy_temp_into_cache(table: Dict[str, Base]):

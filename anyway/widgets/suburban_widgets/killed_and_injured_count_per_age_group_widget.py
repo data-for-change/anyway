@@ -7,6 +7,7 @@ from anyway.request_params import RequestParams
 from anyway.widgets.suburban_widgets.killed_and_injured_count_per_age_group_widget_utils import (
     KilledAndInjuredCountPerAgeGroupWidgetUtils
 )
+from anyway.widgets.suburban_widgets import killed_and_injured_count_per_age_group_widget_utils
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 from anyway.widgets.widget import register
 
@@ -14,6 +15,8 @@ from anyway.widgets.widget import register
 @register
 class KilledInjuredCountPerAgeGroupWidget(SubUrbanWidget):
     name: str = "killed_and_injured_count_per_age_group"
+    files = [__file__, killed_and_injured_count_per_age_group_widget_utils.__file__]
+    widget_digest = SubUrbanWidget.calc_widget_digest(files)
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)

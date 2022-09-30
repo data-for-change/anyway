@@ -6,17 +6,26 @@ import json
 import logging
 
 from typing import List, Optional
+from http import HTTPStatus
 
 from flask import request, Response, make_response, jsonify
 from sqlalchemy import and_, not_, or_
 
 
 from anyway.app_and_db import db
-from anyway.backend_constants import BE_CONST
+from anyway.backend_constants import (
+    BE_CONST,
+    NewsflashLocationQualification,
+    QUALIFICATION_TO_ENUM_VALUE,
+)
 from anyway.models import NewsFlash
 from anyway.infographics_utils import is_news_flash_resolution_supported
-
 from pydantic import BaseModel, ValidationError, validator
+
+from anyway.views.user_system.api import roles_accepted, return_json_error
+from anyway.views.user_system.user_functions import get_current_user
+from anyway.error_code_and_strings import Errors as Es
+from anyway.parsers import fields_to_resolution
 
 DEFAULT_OFFSET_REQ_PARAMETER = 0
 DEFAULT_LIMIT_REQ_PARAMETER = 100
@@ -281,3 +290,55 @@ def normalize_query_param(key, value: list):
 def normalize_query(params: dict):
     params_non_flat = params.to_dict(flat=False)
     return {k: normalize_query_param(k, v) for k, v in params_non_flat.items()}
+
+
+@roles_accepted(
+    BE_CONST.Roles2Names.Authenticated.value,
+    BE_CONST.Roles2Names.Location_verification.value,
+    need_all_permission=True,
+)
+def update_new_flash_qualifying(id):
+    current_user = get_current_user()
+    manual_update = False
+    use_road_segment = True
+
+    newsflash_location_qualification = request.values.get("newsflash_location_qualification")
+    road_segment_name = request.values.get("road_segment_name")
+    yishuv_name = request.values.get("yishuv_name")
+    street1_hebrew = request.values.get("street1_hebrew")
+    newsflash_location_qualification = QUALIFICATION_TO_ENUM_VALUE[newsflash_location_qualification]
+    if newsflash_location_qualification == NewsflashLocationQualification.MANUAL.value:
+        manual_update = True
+        if road_segment_name is None:
+            if (yishuv_name is None) or (street1_hebrew is None):
+                logging.error("manual update must include location detalis.")
+                return return_json_error(Es.BR_FIELD_MISSING)
+            else:
+                use_road_segment = False
+    else:
+        if road_segment_name is not None or street1_hebrew is not None or yishuv_name is not None:
+            logging.error("only manual update should contain location details.")
+            return return_json_error(Es.BR_BAD_FIELD)
+    news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == id).first()
+    if news_flash_obj is not None:
+        if manual_update:
+            if use_road_segment:
+                news_flash_obj.road_segment_name = road_segment_name
+                news_flash_obj.resolution = fields_to_resolution.get("road_segment_name")
+            else:
+                news_flash_obj.yishuv_name = yishuv_name
+                news_flash_obj.street1_hebrew = street1_hebrew
+                news_flash_obj.resolution = fields_to_resolution.get(
+                    ("yishuv_name", "street1_hebrew")
+                )
+        else:
+            if (news_flash_obj.road_segment_name is None) and (
+                (news_flash_obj.yishuv_name is None) or (news_flash_obj.street1_hebrew is None)
+            ):
+                logging.error("try to set qualification on empty location.")
+                return return_json_error(Es.BR_BAD_FIELD)
+
+        news_flash_obj.newsflash_location_qualification = newsflash_location_qualification
+        news_flash_obj.location_qualifying_user = current_user.id
+        db.session.commit()
+        return Response(status=HTTPStatus.OK)

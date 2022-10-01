@@ -94,22 +94,22 @@ class TestInfographicsDataFromCache(TestCase):
         res = add_news_flash_to_cache(nf)
         assert not res, "Should return False when error occurred"
 
-    def test_modification_date(self):
-        import hashlib
-        import base64
-        root = os.path.dirname(os.path.dirname(__file__))
-        file = f"{root}/anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py"
-        with open(file, "rb") as f:
-            file_bytes = f.read()
-        h = hashlib.md5()
-        h.update(file_bytes)
-        d = h.digest()
-        b = base64.b64encode(d)
-        s = b.decode()
-        expected = 'uBVQO/2m6B184SrpIXStAg=='
-        print(s)
-        self.assertEqual(expected, s,
-                         "md5 hash")
+    # def test_modification_date(self):
+    #     import hashlib
+    #     import base64
+    #     root = os.path.dirname(os.path.dirname(__file__))
+    #     file = f"{root}/anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py"
+    #     with open(file, "rb") as f:
+    #         file_bytes = f.read()
+    #     h = hashlib.md5()
+    #     h.update(file_bytes)
+    #     d = h.digest()
+    #     b = base64.b64encode(d)
+    #     s = b.decode()
+    #     expected = 'uBVQO/2m6B184SrpIXStAg=='
+    #     print(s)
+    #     self.assertEqual(expected, s,
+    #                      "md5 hash")
 
 
 if __name__ == "__main__":

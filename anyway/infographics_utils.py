@@ -80,25 +80,34 @@ def convert_roads_fatal_accidents_to_frontend_view(data_dict):
 
 
 # noinspection PyArgumentList
-def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> List[Widget]:
-    widgets = []
-    # noinspection PyArgumentList
+# def generate_widgets(request_params: RequestParams, to_cache: bool = True) -> List[Widget]:
+#     widgets = []
+#     # noinspection PyArgumentList
+#     for w in widgets_dict.values():
+#         if w.is_relevant(request_params) and w.is_in_cache() == to_cache:
+#             widget: Widget = w(request_params)
+#             widgets.append(widget)
+#             logging.debug(f"name:{widget.name}, class:{get_widget_class_by_name(widget.name)}")
+#     for w in widgets:
+#         try:
+#             logger.info(f"Generating items for : {w.name}")
+#             w.generate_items()
+#         except Exception as e:
+#             logger.error(f"Encountered error when generating items for {w.name} : {e}")
+#     filtered_widgets = []
+#     for w in widgets:
+#         if w.is_included():
+#             filtered_widgets.append(w)
+#     return filtered_widgets
+
+
+def generate_widgets_data(request_params: RequestParams) -> List[dict]:
+    res = []
     for w in widgets_dict.values():
-        if w.is_relevant(request_params) and w.is_in_cache() == to_cache:
-            widget: Widget = w(request_params)
-            widgets.append(widget)
-            logging.debug(f"name:{widget.name}, class:{get_widget_class_by_name(widget.name)}")
-    for w in widgets:
-        try:
-            logger.info(f"Generating items for : {w.name}")
-            w.generate_items()
-        except Exception as e:
-            logger.error(f"Encountered error when generating items for {w.name} : {e}")
-    filtered_widgets = []
-    for w in widgets:
-        if w.is_included():
-            filtered_widgets.append(w)
-    return filtered_widgets
+        d = w.generate_widget_data(request_params)
+        if d:
+            res.append(d)
+    return res
 
 
 def get_request_params(
@@ -252,10 +261,10 @@ def create_infographics_items(request_params: RequestParams) -> Dict:
             "resolution": request_params.resolution.name,
             "dates_comment": get_dates_comment(),
         }
-        output["widgets"] = []
-        widgets: List[Type[Widget]] = generate_widgets(request_params=request_params, to_cache=True)
-        widgets.extend(generate_widgets(request_params=request_params, to_cache=False))
-        output["widgets"].extend(list(map(lambda w: w.serialize(), widgets)))
+        output["widgets"] = generate_widgets_data(request_params)
+        # widgets: List[Type[Widget]] = generate_widgets(request_params=request_params, to_cache=True)
+        # widgets.extend(generate_widgets(request_params=request_params, to_cache=False))
+        # output["widgets"].extend(list(map(lambda w: w.serialize(), widgets)))
 
     except Exception as e:
         logging.error(f"exception in create_infographics_data:{e}:{traceback.format_exc()}")

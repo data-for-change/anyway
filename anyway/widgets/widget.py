@@ -93,6 +93,19 @@ class Widget:
         d = h.digest()
         return d
 
+    @classmethod
+    def generate_widget_data(cls, request_params: RequestParams):
+        if cls.is_relevant(request_params):
+            w = cls(request_params)
+            logging.info(f"Generating items for : {w.name}")
+            try:
+                w.generate_items()
+                if w.is_included():
+                    return w.serialize()
+            except Exception as e:
+                logging.exception(f"Encountered error when generating items for {w.name} : {e}")
+        return {}
+
     def serialize(self):
         if not self.items:
             self.generate_items()

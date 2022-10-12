@@ -95,6 +95,7 @@ msgstr ""
 
 #: anyway/infographics_dictionaries.py:33
 msgid "Injury of a passenger in a vehicle"
+
 msgstr ""
 
 #: anyway/infographics_dictionaries.py:34

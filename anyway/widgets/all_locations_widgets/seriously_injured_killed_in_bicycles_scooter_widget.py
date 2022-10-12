@@ -14,11 +14,7 @@ from anyway.widgets.widget_utils import get_involved_counts
 from flask_babel import _
 
 # noinspection PyProtectedMember
-
-SERIOUSLY_INJURED_KILLED_IN_BICYCLES_SCOOTER_INFORMATION = \
-    "מספר הנפגעים שנפצעו קשה או נהרגו בתאונות אופנים, אופנים חשמליים וקורקינט"
-
-TITLE = _("Severe or fatal accidents on bikes, e-bikes, or scooters")
+TITLE = _("Number of severely injured or killed in bike, e-bike, or scooter accidents")
 
 
 @register
@@ -28,7 +24,7 @@ class SeriouslyInjuredKilledInBicyclesScooterWidget(AllLocationsWidget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params, type(self).name)
         self.rank = 32
-        self.information = SERIOUSLY_INJURED_KILLED_IN_BICYCLES_SCOOTER_INFORMATION
+        self.information = _("Severely injured or killed in bike, e-bike, or scooter accidents")
         logging.debug(request_params.location_info)
 
     def generate_items(self) -> None:
@@ -56,7 +52,7 @@ class SeriouslyInjuredKilledInBicyclesScooterWidget(AllLocationsWidget):
 
     @staticmethod
     def create_location_description(location_info, location_text) -> str:
-        return location_info[Constants.YISHUV_NAME] \
+        return _("in ") + location_info[Constants.YISHUV_NAME] \
             if Constants.YISHUV_NAME in location_info \
             else location_text
 

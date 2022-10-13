@@ -28,6 +28,7 @@ class SeriouslyInjuredKilledInBicyclesScooterWidget(AllLocationsWidget):
         logging.debug(request_params.location_info)
 
     def generate_items(self) -> None:
+        logging.debug("generating items")
         # noinspection PyUnresolvedReferences
         self.items = SeriouslyInjuredKilledInBicyclesScooterWidget.get_seriously_injured_killed_in_bicycles_scooter(
             self.request_params.start_time.year,
@@ -48,7 +49,10 @@ class SeriouslyInjuredKilledInBicyclesScooterWidget(AllLocationsWidget):
 
         severities = (InjurySeverity.KILLED, InjurySeverity.SEVERE_INJURED)
         vehicle_types = (VehicleType.BIKE, VehicleType.ELECTRIC_BIKE, VehicleType.ELECTRIC_SCOOTER)
-        return get_involved_counts(selected_columns, start_year, end_year, severities, vehicle_types, location_info)
+        res = get_involved_counts(selected_columns, start_year, end_year, severities, vehicle_types, location_info)
+        logging.debug("here")
+        logging.debug(res)
+        return res
 
     @staticmethod
     def create_location_description(location_info, location_text) -> str:

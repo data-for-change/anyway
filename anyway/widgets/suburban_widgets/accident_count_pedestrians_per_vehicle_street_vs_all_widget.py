@@ -11,7 +11,7 @@ class AccidentCountPedestriansPerVehicleStreetVsAllWidget(SubUrbanWidget):
     widget_digest = SubUrbanWidget.calc_widget_digest(files)
 
     def __init__(self, request_params: RequestParams):
-        Widget.__init__(self, request_params, type(self).name)
+        Widget.__init__(self, request_params)
         self.rank = 21
 
     @staticmethod

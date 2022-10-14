@@ -187,8 +187,8 @@ def update_cache_data(db_item, request_params: RequestParams, query) -> dict:
     for widget in widgets_dict.values():
         if widget.is_relevant(request_params):
             cache_widget = cache_widgets.get(widget.name, None)
-            if cache_widget is None or cache_widget[META].get(WIDGET_DIGEST, None) != widget.widget_digest:
-                # if widget_class[WIDGET_DIGEST] != widget_out.get(WIDGET_DIGEST, None):
+            if cache_widget is None or \
+                cache_widget[META].get(WIDGET_DIGEST, None) != widget.widget_digest:
                 new_out = widget(request_params).serialize()
                 res.append(new_out)
                 dirty = True
@@ -197,13 +197,8 @@ def update_cache_data(db_item, request_params: RequestParams, query) -> dict:
                 res.append(cache_widget)
     if dirty:
         cache_data[WIDGETS] = res
-        # db_item.set_data(json.dumps(cache_data)
         j = json.dumps(cache_data, default=str)
         db_item.set_data(j)
-        # d = db_item.as_dict()
-        # d['data'] = json.dumps(d['data'], default=str)
-        # with db.session.no_autoflush:
-        #     query.update({DATA: json.dumps(d['data'], default=str)}, synchronize_session="evaluate")
         db.session.commit()
     return cache_data
 

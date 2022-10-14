@@ -2,6 +2,7 @@ import datetime
 import os
 import logging
 import pandas as pd
+import numpy as np
 from flask_sqlalchemy import SQLAlchemy
 from anyway.parsers import infographics_data_cache_updater
 from anyway.parsers import timezones
@@ -20,6 +21,7 @@ def init_db() -> "DBAdapter":
 class DBAdapter:
     def __init__(self, db: SQLAlchemy):
         self.db = db
+        self.__null_types: set = {np.nan}
 
     def execute(self, *args, **kwargs):
         return self.db.session.execute(*args, **kwargs)
@@ -76,6 +78,7 @@ class DBAdapter:
     def insert_new_newsflash(self, newsflash: NewsFlash) -> None:
         logging.info("Adding newsflash, is accident: {}, date: {}"
                      .format(newsflash.accident, newsflash.date))
+        self.__fill_na(newsflash)
         self.db.session.add(newsflash)
         self.db.session.commit()
         infographics_data_cache_updater.add_news_flash_to_cache(newsflash)
@@ -114,3 +117,8 @@ class DBAdapter:
         if latest_id:
             return latest_id[0]
         return None
+
+    def __fill_na(self, newsflash: NewsFlash):
+        for key, value in newsflash.__dict__.items():
+            if value in self.__null_types:
+                setattr(newsflash, key, None)

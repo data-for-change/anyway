@@ -3,6 +3,8 @@ import json
 import mock
 
 import pytest
+import numpy as np
+from unittest.mock import MagicMock
 
 from anyway.parsers import rss_sites, twitter, location_extraction
 from anyway.parsers.news_flash_classifiers import classify_tweets, classify_rss
@@ -12,6 +14,7 @@ from anyway.models import NewsFlash
 from anyway.parsers import timezones
 from anyway.infographics_utils import is_news_flash_resolution_supported
 from anyway.parsers.infographics_data_cache_updater import is_in_cache
+from anyway.parsers.news_flash_db_adapter import DBAdapter
 
 
 def verify_cache(news_flash_list):
@@ -238,3 +241,17 @@ def test_classification_statistics_ynet():
     assert precision > BEST_PRECISION_YNET
     assert recall > BEST_RECALL_YNET
     assert f1 > BEST_F1_YNET
+
+def test_nan_becomes_none_before_insertion(monkeypatch):
+    newsflash = NewsFlash(
+        road1=np.nan,
+    )
+
+    db_mock = MagicMock()
+    monkeypatch.setattr('anyway.parsers.news_flash_db_adapter.infographics_data_cache_updater', MagicMock())
+
+    adapter = DBAdapter(db=db_mock)
+    adapter.insert_new_newsflash(newsflash)
+    
+    assert newsflash.road1 is None
+        

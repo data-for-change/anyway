@@ -246,12 +246,9 @@ def test_nan_becomes_none_before_insertion(monkeypatch):
     newsflash = NewsFlash(
         road1=np.nan,
     )
-
     db_mock = MagicMock()
     monkeypatch.setattr('anyway.parsers.news_flash_db_adapter.infographics_data_cache_updater', MagicMock())
-
     adapter = DBAdapter(db=db_mock)
     adapter.insert_new_newsflash(newsflash)
-    
     assert newsflash.road1 is None
         

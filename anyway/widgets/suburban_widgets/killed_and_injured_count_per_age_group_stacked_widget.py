@@ -24,7 +24,7 @@ class KilledInjuredCountPerAgeGroupStackedWidget(SubUrbanWidget):
     widget_digest = SubUrbanWidget.calc_widget_digest(files)
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, type(self).name)
+        super().__init__(request_params)
         self.rank = 30
 
     def generate_items(self) -> None:

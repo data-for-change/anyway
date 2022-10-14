@@ -28,22 +28,21 @@ class Widget:
                  }
     }`
     """
-
     request_params: RequestParams
     name: str
     rank: int
+    widget_digest = ""
     files: List[str]
     items: Union[Dict, List]
     text: Dict
     meta: Optional[Dict]
 
-    def __init__(self, request_params: RequestParams, name: str):
+    def __init__(self, request_params: RequestParams):
         self.request_params = copy.deepcopy(request_params)
-        self.name = name
         self.rank = -1
         self.items = {}
         self.text = {}
-        self.meta = None
+        self.meta = {"widget_digest": self.widget_digest}
         self.information = ""
 
     def get_name(self) -> str:
@@ -85,14 +84,14 @@ class Widget:
         return cls.files
 
     @staticmethod
-    def calc_widget_digest(files: List[str]) -> bytes:
+    def calc_widget_digest(files: List[str]) -> str:
         h = hashlib.md5()
         for fn in files:
             with open(fn, "rb") as f:
                 file_bytes = f.read()
                 h.update(file_bytes)
         d = h.digest()
-        return d
+        return d.hex()
 
     @classmethod
     def generate_widget_data(cls, request_params: RequestParams):
@@ -101,8 +100,7 @@ class Widget:
             logging.info(f"Generating items for : {w.name}")
             try:
                 w.generate_items()
-                if w.is_included():
-                    return w.serialize()
+                return w.serialize()
             except Exception as e:
                 logging.exception(f"Encountered error when generating items for {w.name} : {e}")
         return {}
@@ -111,7 +109,7 @@ class Widget:
         if not self.items:
             self.generate_items()
         output = {"name": self.name, "data": {}}
-        output["data"]["items"] = self.items
+        output["data"]["items"] = self.items if self.is_included() else {}
         if self.text:
             output["data"]["text"] = self.text
         if self.meta:

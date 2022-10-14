@@ -21,7 +21,7 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(SubUrbanWidget):
     MAX_ACCIDENT_TYPES_TO_RETURN: int = 5
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, type(self).name)
+        super().__init__(request_params)
         self.road_number: str = request_params.location_info["road1"]
         # WIP: change rank, text by vehicle type
         self.rank = 25

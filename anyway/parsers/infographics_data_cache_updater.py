@@ -27,6 +27,12 @@ import json
 
 CACHE = "cache"
 TEMP = "temp"
+WIDGETS = "widgets"
+WIDGET_DIGEST = "widget_digest"
+NAME = "name"
+META = "meta"
+DATA = "data"
+ITEMS = "items"
 REGULAR_CACHE_TABLES = {CACHE: InfographicsDataCache, TEMP: InfographicsDataCacheTemp}
 STREET_CACHE_TABLES = {CACHE: InfographicsStreetDataCache, TEMP: InfographicsStreetDataCacheTemp}
 ROAD_SEGMENT_CACHE_TABLES = {
@@ -157,13 +163,15 @@ def get_infographics_data_from_cache_by_location(request_params: RequestParams) 
     db.session.commit()
     try:
         if db_item:
-            cache_data = json.loads(db_item.get_data())
-            res = update_cache_data(cache_data, request_params, query)
+            # cache_data = json.loads(db_item.get_data())
+            res = update_cache_data(db_item, request_params, query)
+            non_empty = list(filter(lambda x: x[DATA][ITEMS], res[WIDGETS]))
+            res[WIDGETS] = non_empty
             return res
         else:
             return {}
     except Exception as e:
-        logging.error(
+        logging.exception(
             f"Exception while extracting data from returned cache item:{request_params}"
             f"returned value {type(db_item)}"
             f":cause:{e.__cause__}, class:{e.__class__}"
@@ -171,28 +179,32 @@ def get_infographics_data_from_cache_by_location(request_params: RequestParams) 
         return {}
 
 
-WIDGETS = "widgets"
-WIDGET_DIGEST = "widget_digest"
-NAME = "name"
-META = "meta"
-
-
-def update_cache_data(cache_data: dict, request_params: RequestParams, query) -> dict:
+def update_cache_data(db_item, request_params: RequestParams, query) -> dict:
+    cache_data = json.loads(db_item.get_data())
     res = []
     dirty: bool = False
-    for widget_out in cache_data[WIDGETS]:
-        widget_name = widget_out[NAME]
-        widget_class = widgets_dict[widget_name]
-        if widget_class[WIDGET_DIGEST] != widget_out.get(WIDGET_DIGEST, None):
-            new_out = widget_class(request_params).generate_items()
-            res.append(new_out)
-            dirty = True
-            logging.debug(f"Widget {widget_name}: digest changed")
-        else:
-            res.append(widget_out)
+    cache_widgets = {w[NAME]: w for w in cache_data[WIDGETS]}
+    for widget in widgets_dict.values():
+        if widget.is_relevant(request_params):
+            cache_widget = cache_widgets.get(widget.name, None)
+            if cache_widget is None or cache_widget[META].get(WIDGET_DIGEST, None) != widget.widget_digest:
+                # if widget_class[WIDGET_DIGEST] != widget_out.get(WIDGET_DIGEST, None):
+                new_out = widget(request_params).serialize()
+                res.append(new_out)
+                dirty = True
+                logging.debug(f"Widget {widget.name}: generated new. In cache was:{cache_widget}")
+            else:
+                res.append(cache_widget)
     if dirty:
         cache_data[WIDGETS] = res
-        query.update(cache_data)
+        # db_item.set_data(json.dumps(cache_data)
+        j = json.dumps(cache_data, default=str)
+        db_item.set_data(j)
+        # d = db_item.as_dict()
+        # d['data'] = json.dumps(d['data'], default=str)
+        # with db.session.no_autoflush:
+        #     query.update({DATA: json.dumps(d['data'], default=str)}, synchronize_session="evaluate")
+        db.session.commit()
     return cache_data
 
 

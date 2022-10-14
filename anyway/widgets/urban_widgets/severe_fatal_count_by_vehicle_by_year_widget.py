@@ -18,7 +18,7 @@ class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
     # make it so widget is only included on newsflashes that have a relevant vehicle
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, type(self).name)
+        super().__init__(request_params)
         self.rank = 28
 
     def generate_items(self) -> None:

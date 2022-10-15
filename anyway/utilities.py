@@ -216,6 +216,7 @@ def split_query_to_chunks_by_column(base_select, column_to_chunk_by, chunk_size,
     if val is not None:
         # if the column is A and its last value is "N"
         # then there's one query left to be executed:
+        # SELECT ... WHERE A >= "N"
         _yield_select_in_chunks(base_select, column_to_chunk_by, val, next_val=None, conn=conn, chunk_size=chunk_size)
      
     logging.debug("after running query on all chunks")

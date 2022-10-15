@@ -14,20 +14,10 @@ class Widget:
     - Make is subclass of Widget
     - Set attribute rank
     - Implement method generate_items()
-    - Optionally set additional attributes if needed, and alter the returned values of `is_in_cache()` and
-      `is_included()` when needed.
-    Returned Widget structure:
-    `{
-        'name': str,
-        'data': {
-                 'items': list (Array) | dictionary (Object),
-                 'text': dictionary (Object) - can be empty
-                 },
-        'meta': {
-                 'rank': int (Integer)
-                 }
-    }`
+    - Optionally set additional attributes if needed, and alter the returned values of
+      `is_in_cache()` and `is_included()` when needed.
     """
+
     request_params: RequestParams
     name: str
     rank: int

@@ -187,8 +187,10 @@ def update_cache_data(db_item, request_params: RequestParams, query) -> dict:
     for widget in widgets_dict.values():
         if widget.is_relevant(request_params):
             cache_widget = cache_widgets.get(widget.name, None)
-            if cache_widget is None or \
-                cache_widget[META].get(WIDGET_DIGEST, None) != widget.widget_digest:
+            if (
+                cache_widget is None
+                or cache_widget[META].get(WIDGET_DIGEST, None) != widget.widget_digest
+            ):
                 new_out = widget(request_params).serialize()
                 res.append(new_out)
                 dirty = True

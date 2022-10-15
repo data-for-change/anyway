@@ -27,7 +27,6 @@ from anyway.clusters_calculator import retrieve_clusters
 from anyway.config import ENTRIES_PER_PAGE
 from anyway.constants import CONST
 from anyway.infographics_utils import (
-    get_infographics_data,
     get_infographics_mock_data,
     get_infographics_data_for_location,
 )

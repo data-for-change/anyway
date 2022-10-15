@@ -27,9 +27,6 @@ from anyway.parsers import resolution_dict
 from anyway.infographics_dictionaries import head_on_collisions_comparison_dict
 from anyway.parsers import infographics_data_cache_updater
 from anyway.widgets.widget import Widget, widgets_dict
-from anyway.parsers.infographics_data_cache_updater import (
-    get_infographics_data_from_cache_by_road_segment
-)
 
 # We need to import the modules, which in turn imports all the widgets, and registers them, even if they are not
 # explicitly used here
@@ -37,7 +34,6 @@ from anyway.parsers.infographics_data_cache_updater import (
 import anyway.widgets.urban_widgets
 import anyway.widgets.suburban_widgets
 import anyway.widgets.all_locations_widgets
-
 # pylint: enable=unused-import
 
 logger = logging.getLogger("infographics_utils")
@@ -277,32 +273,6 @@ def create_infographics_items(request_params: RequestParams) -> Dict:
     except Exception as e:
         logging.exception(f"exception in create_infographics_data:{e}:{traceback.format_exc()}")
         output = {}
-    return output
-
-
-# todo: remove (unused)
-def get_infographics_data(news_flash_id, years_ago, lang: str) -> Dict:
-    vals = {"news_flash_id": news_flash_id, "years_ago": years_ago, "lang": lang}
-    request_params = get_request_params_from_request_values(vals)
-    if os.environ.get("FLASK_ENV") == "development":
-        output = create_infographics_items(request_params)
-    else:
-        try:
-            output = infographics_data_cache_updater.get_infographics_data_from_cache(
-                news_flash_id, years_ago
-            )
-        except Exception as e:
-            logging.error(
-                f"Exception while retrieving from infographics cache({news_flash_id},{years_ago})"
-                f":cause:{e.__cause__}, class:{e.__class__}"
-            )
-            output = {}
-    if not output:
-        logging.error(f"infographics_data({news_flash_id}, {years_ago}) not found in cache")
-    elif WIDGETS not in output:
-        logging.error(f"get_infographics_data: 'widgets' key missing from output:{output}")
-    else:
-        output[WIDGETS] = localize_after_cache(request_params, output[WIDGETS])
     return output
 
 

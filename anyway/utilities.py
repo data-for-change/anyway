@@ -180,9 +180,6 @@ def fetch_first_and_every_nth_value_for_column(conn, column_to_fetch, n):
     select_query = select([sub_query]) \
         .where(or_(func.mod(sub_query.c.row_number, n) == 0,
                    sub_query.c.row_number == 1))
-    # ids_and_row_numbers = conn.execute(select_query).fetchall()
-    # ids = [id_and_row_number[0] for id_and_row_number in ids_and_row_numbers]
-    # return ids
     cursor = conn.execution_options(stream_results=True).execute(select_query)
     while id_and_row_number := cursor.fetchone():
         yield id_and_row_number[0]  # id
@@ -200,38 +197,26 @@ def delete_all_rows_from_table(conn, table):
     logging.info("Deleting all rows from table " + table_name)
     conn.execute("DELETE FROM " + table_name)
 
+def _yield_select_in_chunks(base_select: str, column_to_chunk_by: str, val: typing.Any, next_val: typing.Any, conn, chunk_size: int):
+    select = base_select.where(column_to_chunk_by >= val)
+    if next_val is not None:
+        select = select.where(column_to_chunk_by < next_val)
+    cursor = conn.execution_options(stream_results=True).execute(select)
+    while chunk := cursor.fetchmany(chunk_size):
+        logging.debug("after running query on chunk")
+        yield [dict(row.items()) for row in chunk]
 
 def split_query_to_chunks_by_column(base_select, column_to_chunk_by, chunk_size, conn):
-    # column_values = fetch_first_and_every_nth_value_for_column(conn, column_to_chunk_by, chunk_size)
     fetch_generator = fetch_first_and_every_nth_value_for_column(conn, column_to_chunk_by, chunk_size)
     val = next(fetch_generator, None)
     while next_val := next(fetch_generator, None):
-        #logging.debug("after fetching every nth column")
-        # for index in range(len(column_values)):
-        #     select = base_select.where(column_to_chunk_by >= column_values[index])
-        #     if index + 1 < len(column_values):
-        #         select = select.where(column_to_chunk_by < column_values[index + 1])
-        #     chunk = conn.execute(select).fetchall()
-        #     logging.debug("after running query on chunk")
-        #     yield [dict(row.items()) for row in chunk]
-        select = base_select.where(column_to_chunk_by >= val)
-        select = select.where(column_to_chunk_by < next_val)
-        cursor = conn.execution_options(stream_results=True).execute(select)
-        while chunk := cursor.fetchmany(chunk_size):
-            logging.debug("after running query on chunk")
-            yield [dict(row.items()) for row in chunk]
+        _yield_select_in_chunks(base_select, column_to_chunk_by, val, next_val, conn, chunk_size)
         val = next_val
 
     if val is not None:
         # if the column is A and its last value is "N"
         # then there's one query left to be executed:
-        # SELECT ... WHERE A >= "N"
-        # (BAD CODE DUPLICATION -> needs to be fixed)
-        select = base_select.where(column_to_chunk_by >= val)
-        cursor = conn.execution_options(stream_results=True).execute(select)
-        while chunk := cursor.fetchmany(chunk_size):
-            logging.debug("after running query on chunk")
-            yield [dict(row.items()) for row in chunk]
+        _yield_select_in_chunks(base_select, column_to_chunk_by, val, next_val=None, conn=conn, chunk_size=chunk_size)
      
     logging.debug("after running query on all chunks")
 

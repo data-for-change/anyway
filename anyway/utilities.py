@@ -204,8 +204,8 @@ def delete_all_rows_from_table(conn, table):
 def split_query_to_chunks_by_column(base_select, column_to_chunk_by, chunk_size, conn):
     # column_values = fetch_first_and_every_nth_value_for_column(conn, column_to_chunk_by, chunk_size)
     fetch_generator = fetch_first_and_every_nth_value_for_column(conn, column_to_chunk_by, chunk_size)
-    previous_id = next(fetch_generator, None)
-    while id_ := next(fetch_generator, None):
+    val = next(fetch_generator, None)
+    while next_val := next(fetch_generator, None):
         #logging.debug("after fetching every nth column")
         # for index in range(len(column_values)):
         #     select = base_select.where(column_to_chunk_by >= column_values[index])
@@ -214,13 +214,25 @@ def split_query_to_chunks_by_column(base_select, column_to_chunk_by, chunk_size,
         #     chunk = conn.execute(select).fetchall()
         #     logging.debug("after running query on chunk")
         #     yield [dict(row.items()) for row in chunk]
-        select = base_select.where(column_to_chunk_by >= previous_id)
-        select = select.where(column_to_chunk_by < id_)
+        select = base_select.where(column_to_chunk_by >= val)
+        select = select.where(column_to_chunk_by < next_val)
         cursor = conn.execution_options(stream_results=True).execute(select)
         while chunk := cursor.fetchmany(chunk_size):
             logging.debug("after running query on chunk")
             yield [dict(row.items()) for row in chunk]
-        previous_id = id_
+        val = next_val
+
+    if val is not None:
+        # if the column is A and its last value is "N"
+        # then there's one query left to be executed:
+        # SELECT ... WHERE A >= "N"
+        # (BAD CODE DUPLICATION -> needs to be fixed)
+        select = base_select.where(column_to_chunk_by >= val)
+        cursor = conn.execution_options(stream_results=True).execute(select)
+        while chunk := cursor.fetchmany(chunk_size):
+            logging.debug("after running query on chunk")
+            yield [dict(row.items()) for row in chunk]
+     
     logging.debug("after running query on all chunks")
 
 

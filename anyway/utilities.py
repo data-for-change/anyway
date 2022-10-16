@@ -11,6 +11,8 @@ from functools import partial
 from urllib.parse import urlparse
 from sqlalchemy import func, or_
 from sqlalchemy.sql import select
+from sqlalchemy.sql.expression import Select
+from sqlalchemy.engine import Connection
 
 import phonenumbers
 from dateutil.relativedelta import relativedelta
@@ -196,29 +198,21 @@ def delete_all_rows_from_table(conn, table):
     table_name = table.__tablename__
     logging.info("Deleting all rows from table " + table_name)
     conn.execute("DELETE FROM " + table_name)
+    
 
-def _yield_select_in_chunks(base_select: str, column_to_chunk_by: str, val: typing.Any, next_val: typing.Any, conn, chunk_size: int):
-    select = base_select.where(column_to_chunk_by >= val)
-    if next_val is not None:
-        select = select.where(column_to_chunk_by < next_val)
-    cursor = conn.execution_options(stream_results=True).execute(select)
-    while chunk := cursor.fetchmany(chunk_size):
-        logging.debug("after running query on chunk")
-        yield [dict(row.items()) for row in chunk]
-
-def split_query_to_chunks_by_column(base_select, column_to_chunk_by, chunk_size, conn):
+def split_query_to_chunks_by_column(base_select: Select, column_to_chunk_by: str, chunk_size: int, conn: Connection):
     fetch_generator = fetch_first_and_every_nth_value_for_column(conn, column_to_chunk_by, chunk_size)
     val = next(fetch_generator, None)
-    while next_val := next(fetch_generator, None):
-        _yield_select_in_chunks(base_select, column_to_chunk_by, val, next_val, conn, chunk_size)
+    while val is not None:
+        next_val = next(fetch_generator, None)
+        select = base_select.where(column_to_chunk_by >= val)
+        if next_val is not None:
+            select = select.where(column_to_chunk_by < next_val)
+        cursor = conn.execution_options(stream_results=True).execute(select)
+        while chunk := cursor.fetchmany(chunk_size):
+            logging.debug("after running query on chunk")
+            yield [dict(row.items()) for row in chunk]
         val = next_val
-
-    if val is not None:
-        # if the column is A and its last value is "N"
-        # then there's one query left to be executed:
-        # SELECT ... WHERE A >= "N"
-        _yield_select_in_chunks(base_select, column_to_chunk_by, val, next_val=None, conn=conn, chunk_size=chunk_size)
-     
     logging.debug("after running query on all chunks")
 
 

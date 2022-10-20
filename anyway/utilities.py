@@ -200,12 +200,15 @@ def delete_all_rows_from_table(conn, table):
 
 def split_query_to_chunks_by_column(base_select, column_to_chunk_by, chunk_size, conn):
     column_values = fetch_first_and_every_nth_value_for_column(conn, column_to_chunk_by, chunk_size)
+    logging.debug("after fetching every nth column")
     for index in range(len(column_values)):
         select = base_select.where(column_to_chunk_by >= column_values[index])
         if index + 1 < len(column_values):
             select = select.where(column_to_chunk_by < column_values[index + 1])
         chunk = conn.execute(select).fetchall()
+        logging.debug("after running query on chunk")
         yield [dict(row.items()) for row in chunk]
+    logging.debug("after running query on all chunks")
 
 
 def run_query_and_insert_to_table_in_chunks(query, table_inserted_to, column_to_chunk_by, chunk_size, conn):

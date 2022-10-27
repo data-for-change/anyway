@@ -211,7 +211,7 @@ def split_query_to_chunks_by_column(base_select: Select, column_to_chunk_by: str
             select = select.where(column_to_chunk_by < next_val)
         cursor = conn.execution_options(stream_results=True).execute(select)
         chunk = cursor.fetchmany(chunk_size)
-        while chunk is not None:
+        while chunk is not None and len(chunk) > 0:
             logging.debug("after running query on chunk")
             yield [dict(row.items()) for row in chunk]
             chunk = cursor.fetchmany(chunk_size)

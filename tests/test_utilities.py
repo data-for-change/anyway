@@ -97,6 +97,7 @@ def test_url_redirect_checker():
         "https://anyway-infographics-staging.web.app/test",
         "https://anyway-infographics.web.app",
         "https://anyway-infographics-demo.web.app",
+        "https://media.anyway.co.il"
     ]
 
     for url in bad_urls:

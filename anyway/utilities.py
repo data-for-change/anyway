@@ -183,8 +183,10 @@ def fetch_first_and_every_nth_value_for_column(conn, column_to_fetch, n):
         .where(or_(func.mod(sub_query.c.row_number, n) == 0,
                    sub_query.c.row_number == 1))
     cursor = conn.execution_options(stream_results=True).execute(select_query)
-    while id_and_row_number := cursor.fetchone():
+    id_and_row_number = cursor.fetchone()
+    while id_and_row_number is not None:
         yield id_and_row_number[0]  # id
+        id_and_row_number = cursor.fetchone()
 
 
 def truncate_tables(db, tables):
@@ -209,9 +211,11 @@ def split_query_to_chunks_by_column(base_select: Select, column_to_chunk_by: str
         if next_val is not None:
             select = select.where(column_to_chunk_by < next_val)
         cursor = conn.execution_options(stream_results=True).execute(select)
-        while chunk := cursor.fetchmany(chunk_size):
+        chunk = cursor.fetchmany(chunk_size)
+        while chunk is not None:
             logging.debug("after running query on chunk")
             yield [dict(row.items()) for row in chunk]
+            chunk = cursor.fetchmany(chunk_size)
         val = next_val
     logging.debug("after running query on all chunks")
 
@@ -319,6 +323,7 @@ def is_a_safe_redirect_url(url: str) -> bool:
         "anyway-infographics-staging.web.app",
         "anyway-infographics.web.app",
         "anyway-infographics-demo.web.app",
+        "media.anyway.co.il"
     ]:
         return True
 

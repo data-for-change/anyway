@@ -200,7 +200,6 @@ def delete_all_rows_from_table(conn, table):
     table_name = table.__tablename__
     logging.info("Deleting all rows from table " + table_name)
     conn.execute("DELETE FROM " + table_name)
-    
 
 def split_query_to_chunks_by_column(base_select: Select, column_to_chunk_by: str, chunk_size: int, conn: Connection):
     fetch_generator = fetch_first_and_every_nth_value_for_column(conn, column_to_chunk_by, chunk_size)

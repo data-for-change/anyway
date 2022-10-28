@@ -11,6 +11,8 @@ from functools import partial
 from urllib.parse import urlparse
 from sqlalchemy import func, or_
 from sqlalchemy.sql import select
+from sqlalchemy.sql.expression import Select
+from sqlalchemy.engine import Connection
 
 import phonenumbers
 from dateutil.relativedelta import relativedelta
@@ -180,9 +182,11 @@ def fetch_first_and_every_nth_value_for_column(conn, column_to_fetch, n):
     select_query = select([sub_query]) \
         .where(or_(func.mod(sub_query.c.row_number, n) == 0,
                    sub_query.c.row_number == 1))
-    ids_and_row_numbers = conn.execute(select_query).fetchall()
-    ids = [id_and_row_number[0] for id_and_row_number in ids_and_row_numbers]
-    return ids
+    cursor = conn.execution_options(stream_results=True).execute(select_query)
+    id_and_row_number = cursor.fetchone()
+    while id_and_row_number is not None:
+        yield id_and_row_number[0]  # id
+        id_and_row_number = cursor.fetchone()
 
 
 def truncate_tables(db, tables):
@@ -197,17 +201,21 @@ def delete_all_rows_from_table(conn, table):
     logging.info("Deleting all rows from table " + table_name)
     conn.execute("DELETE FROM " + table_name)
 
-
-def split_query_to_chunks_by_column(base_select, column_to_chunk_by, chunk_size, conn):
-    column_values = fetch_first_and_every_nth_value_for_column(conn, column_to_chunk_by, chunk_size)
-    logging.debug("after fetching every nth column")
-    for index in range(len(column_values)):
-        select = base_select.where(column_to_chunk_by >= column_values[index])
-        if index + 1 < len(column_values):
-            select = select.where(column_to_chunk_by < column_values[index + 1])
-        chunk = conn.execute(select).fetchall()
-        logging.debug("after running query on chunk")
-        yield [dict(row.items()) for row in chunk]
+def split_query_to_chunks_by_column(base_select: Select, column_to_chunk_by: str, chunk_size: int, conn: Connection):
+    fetch_generator = fetch_first_and_every_nth_value_for_column(conn, column_to_chunk_by, chunk_size)
+    val = next(fetch_generator, None)
+    while val is not None:
+        next_val = next(fetch_generator, None)
+        select = base_select.where(column_to_chunk_by >= val)
+        if next_val is not None:
+            select = select.where(column_to_chunk_by < next_val)
+        cursor = conn.execution_options(stream_results=True).execute(select)
+        chunk = cursor.fetchmany(chunk_size)
+        while chunk is not None and len(chunk) > 0:
+            logging.debug("after running query on chunk")
+            yield [dict(row.items()) for row in chunk]
+            chunk = cursor.fetchmany(chunk_size)
+        val = next_val
     logging.debug("after running query on all chunks")
 
 

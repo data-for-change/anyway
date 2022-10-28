@@ -1047,7 +1047,7 @@ def receive_rollback(conn, **kwargs):
 
 
 def create_tables():
-    chunk_size = 50000
+    chunk_size = 5000
     try:
         with db.get_engine().begin() as conn:
             event.listen(conn, "rollback", receive_rollback)

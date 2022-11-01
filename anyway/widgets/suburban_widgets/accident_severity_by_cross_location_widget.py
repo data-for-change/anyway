@@ -8,7 +8,6 @@ from typing import Dict
 class AccidentSeverityByCrossLocationWidget(SubUrbanWidget):
     name: str = "accident_severity_by_cross_location"
     files = [__file__]
-    widget_digest = SubUrbanWidget.calc_widget_digest(files)
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params)

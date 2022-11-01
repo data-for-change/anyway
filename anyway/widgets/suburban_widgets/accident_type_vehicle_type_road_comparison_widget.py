@@ -17,7 +17,6 @@ from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 class AccidentTypeVehicleTypeRoadComparisonWidget(SubUrbanWidget):
     name: str = "vehicle_accident_vs_all_accidents"  # WIP: change by vehicle type
     files = [__file__]
-    widget_digest = SubUrbanWidget.calc_widget_digest(files)
     MAX_ACCIDENT_TYPES_TO_RETURN: int = 5
 
     def __init__(self, request_params: RequestParams):

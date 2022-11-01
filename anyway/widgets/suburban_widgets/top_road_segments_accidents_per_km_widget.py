@@ -18,7 +18,6 @@ from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 class TopRoadSegmentsAccidentsPerKmWidget(SubUrbanWidget):
     name: str = "top_road_segments_accidents_per_km"
     files = [__file__]
-    widget_digest = SubUrbanWidget.calc_widget_digest(files)
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params)

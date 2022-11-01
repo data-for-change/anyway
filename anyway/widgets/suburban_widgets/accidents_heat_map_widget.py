@@ -16,7 +16,6 @@ from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 class AccidentsHeatMapWidget(SubUrbanWidget):
     name: str = "accidents_heat_map"
     files = [__file__]
-    widget_digest = SubUrbanWidget.calc_widget_digest(files)
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params)

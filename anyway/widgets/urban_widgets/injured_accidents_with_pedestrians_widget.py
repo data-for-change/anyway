@@ -22,7 +22,6 @@ from anyway.widgets.urban_widgets.urban_widget import UrbanWidget
 class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
     name: str = "injured_accidents_with_pedestrians"
     files = [__file__]
-    widget_digest = UrbanWidget.calc_widget_digest(files)
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params)

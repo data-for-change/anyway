@@ -20,7 +20,6 @@ from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocatio
 class MostSevereAccidentsWidget(AllLocationsWidget):
     name: str = "most_severe_accidents"
     files = [__file__, most_severe_accidents_table_widget.__file__]
-    widget_digest = AllLocationsWidget.calc_widget_digest(files)
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params)

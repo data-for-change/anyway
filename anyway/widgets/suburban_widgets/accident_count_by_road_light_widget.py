@@ -11,7 +11,6 @@ from flask_babel import _
 class AccidentCountByRoadLightWidget(SubUrbanWidget):
     name: str = "accident_count_by_road_light"
     files = [__file__]
-    widget_digest = SubUrbanWidget.calc_widget_digest(files)
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params)

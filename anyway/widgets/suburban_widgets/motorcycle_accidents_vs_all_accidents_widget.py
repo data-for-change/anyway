@@ -25,7 +25,6 @@ _("all roads")
 class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
     name: str = "motorcycle_accidents_vs_all_accidents"
     files = [__file__]
-    widget_digest = SubUrbanWidget.calc_widget_digest(files)
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params)

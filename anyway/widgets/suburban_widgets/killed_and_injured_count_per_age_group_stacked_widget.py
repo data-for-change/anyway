@@ -22,7 +22,6 @@ MAX_AGE = 200
 class KilledInjuredCountPerAgeGroupStackedWidget(SubUrbanWidget):
     name: str = "killed_and_injured_count_per_age_group_stacked"
     files = [__file__, killed_and_injured_count_per_age_group_widget_utils.__file__]
-    widget_digest = SubUrbanWidget.calc_widget_digest(files)
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params)

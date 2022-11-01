@@ -112,6 +112,7 @@ class Widget:
 
 
 def register(widget_class: Type[Widget]) -> Type[Widget]:
+    widget_class.widget_digest = widget_class.calc_widget_digest(widget_class.files)
     if widgets_dict.get(widget_class.name) is not None:
         logging.error(f"Double register:{widget_class.name}:{widget_class}\n")
     widgets_dict[widget_class.name] = widget_class

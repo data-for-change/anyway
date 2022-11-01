@@ -82,7 +82,6 @@ def get_casualties_count_in_accident(accident_id, provider_code, injury_severity
 class MostSevereAccidentsTableWidget(AllLocationsWidget):
     name: str = "most_severe_accidents_table"
     files = [__file__]
-    widget_digest = AllLocationsWidget.calc_widget_digest(files)
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params)

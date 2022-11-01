@@ -50,23 +50,23 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
 
     @staticmethod
     def parse_query_data(query: BaseQuery) -> Optional[Dict[str, Counter]]:
-        dict_grouped = {k: Counter() for k in RANGES + [UNKNOWN]}
+        dict_grouped = {k: Counter() for k in AGE_RANGES + [UNKNOWN]}
         has_data = False
-        
+
         for row in query:
             group_name: str = UNKNOWN
-            
+
             age_parsed = parse_age_from_range(row.age_group)
             if age_parsed:
                 min_age, max_age = age_parsed
                 # The age groups in the DB are not the same age groups in the widget, so we need to merge some groups.
                 # Find the right bucket to aggregate the data:
-                for item_min_range, item_max_range in zip(AGE_RANGE, AGE_RANGE[1:]):
+                for item_min_range, item_max_range in zip(AGE_RANGES, AGE_RANGES[1:]):
                     if item_min_range <= min_age <= max_age <= item_max_range:
                         has_data = True
                         group_name = f"{item_min_range}-{item_max_range}" if item_max_range < 120 else f"{item_min_range}+"
                         break
-            
+
             dict_grouped[group_name][row.injury_severity] += row.count
         if not has_data:
             return None

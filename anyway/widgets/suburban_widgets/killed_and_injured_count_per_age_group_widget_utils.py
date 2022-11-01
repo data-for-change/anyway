@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Dict, Optional
 
 from flask_sqlalchemy import BaseQuery
+from flask_babel import _
 from sqlalchemy import func, asc
 
 from anyway.app_and_db import db
@@ -14,7 +15,7 @@ from anyway.utilities import parse_age_from_range
 # RequestParams is not hashable, so we can't use functools.lru_cache
 cache_dict = OrderedDict()
 
-UNKNOWN = "unknown"
+UNKNOWN = _("Unknown")
 CACHE_MAX_SIZE = 10
 
 AGE_RANGES = [0, 5, 15, 20, 25, 45, 65, 200]

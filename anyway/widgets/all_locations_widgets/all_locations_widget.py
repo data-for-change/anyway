@@ -5,13 +5,13 @@ from anyway.backend_constants import BE_CONST
 
 
 class AllLocationsWidget(Widget):
-    def __init__(self, request_params: RequestParams, name: str):
+    def __init__(self, request_params: RequestParams):
         if not AllLocationsWidget.is_all_locations(request_params):
             logging.error(
                 f"AllLocationsWidget initialized with missing location fields:{request_params}"
             )
             raise ValueError("AllLocations fields missing")
-        super().__init__(request_params, name)
+        super().__init__(request_params)
 
     @staticmethod
     def is_all_locations(request_params: RequestParams) -> bool:

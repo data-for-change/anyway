@@ -8,9 +8,10 @@ from flask_babel import _
 @register
 class StreetViewWidget(SubUrbanWidget):
     name: str = "street_view"
+    files = [__file__]
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, type(self).name)
+        super().__init__(request_params)
         self.rank = 4
 
     def generate_items(self) -> None:

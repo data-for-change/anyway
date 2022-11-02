@@ -11,11 +11,12 @@ from flask_babel import _
 
 class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
     name: str = "severe_fatal_count_on_small_motor_by_accident_year"
+    files = [__file__]
     # TODO: when accident vehicle becomes available in request params,
     # make it so widget shows only the vehicle in the newsflash (eg only e_bikes)
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, type(self).name)
+        super().__init__(request_params)
         self.rank = 15
 
     def generate_items(self) -> None:

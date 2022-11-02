@@ -60,12 +60,12 @@ class FrondToSideAccidentsBySeverityWidget(SubUrbanWidget):
                     {
                         SEVERITY: severity_text,
                         DESC: FRONT_SIDE_DESC,
-                        COUNT: f"{round((row[FRONT_SIDE_ACCIDENTS_LABEL] / total) * 100)}%",
+                        COUNT: round((row[FRONT_SIDE_ACCIDENTS_LABEL] / total) * 100),
                     },
                     {
                         SEVERITY: severity_text,
                         DESC: OTHERS_DESC,
-                        COUNT: f"{round((row[OTHER_ACCIDENTS_LABEL] / total) * 100)}%",
+                        COUNT: round((row[OTHER_ACCIDENTS_LABEL] / total) * 100),
                     },
                 ]
             )

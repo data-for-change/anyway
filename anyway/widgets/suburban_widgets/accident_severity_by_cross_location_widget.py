@@ -7,9 +7,10 @@ from typing import Dict
 @register
 class AccidentSeverityByCrossLocationWidget(SubUrbanWidget):
     name: str = "accident_severity_by_cross_location"
+    files = [__file__]
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, type(self).name)
+        super().__init__(request_params)
         self.rank = 19
 
     @staticmethod

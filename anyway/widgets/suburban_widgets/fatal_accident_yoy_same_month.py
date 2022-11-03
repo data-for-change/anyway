@@ -13,9 +13,10 @@ from anyway.widgets.widget_utils import get_accidents_stats
 @register
 class FatalAccidentYoYSameMonth(SubUrbanWidget):
     name: str = "fatal_accident_yoy_same_month"
+    files = [__file__]
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, type(self).name)
+        super().__init__(request_params)
         self.rank = 31
 
     def generate_items(self) -> None:

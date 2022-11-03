@@ -13,11 +13,12 @@ from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 @register
 class HeadOnCollisionsComparisonWidget(SubUrbanWidget):
     name: str = "head_on_collisions_comparison"
+    files = [__file__]
     SPECIFIC_ROAD_SUBTITLE = "specific_road_segment_fatal_accidents"
     ALL_ROADS_SUBTITLE = "all_roads_fatal_accidents"
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, type(self).name)
+        super().__init__(request_params)
         self.rank = 5
         self.information = (
             "Fatal accidents distribution by accident type - head on collisions vs other accidents."

@@ -14,10 +14,9 @@ from flask_babel import _
 @register
 class Road2Plus1Widget(SubUrbanWidget):
     name: str = "vision_zero_2_plus_1"
-    files = [__file__]
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params)
+        super().__init__(request_params, type(self).name)
         self.information = "Road 2 plus 1 solution to prevent fatal accidents."
         self.rank = 24
 

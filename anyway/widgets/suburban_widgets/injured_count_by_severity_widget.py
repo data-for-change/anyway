@@ -12,10 +12,9 @@ from flask_babel import _
 @register
 class InjuredCountBySeverityWidget(SubUrbanWidget):
     name: str = "injured_count_by_severity"
-    files = [__file__]
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params)
+        super().__init__(request_params, type(self).name)
         self.rank = 29
         self.information = "Fatal, severe and light injuries count in the specified location."
 

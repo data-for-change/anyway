@@ -21,10 +21,9 @@ from anyway.widgets.urban_widgets.urban_widget import UrbanWidget
 @register
 class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
     name: str = "injured_accidents_with_pedestrians"
-    files = [__file__]
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params)
+        super().__init__(request_params, type(self).name)
         self.rank = 18
         self.information = "Injured and killed pedestrians by severity and year"
 

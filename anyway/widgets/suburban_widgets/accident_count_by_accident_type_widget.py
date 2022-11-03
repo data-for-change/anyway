@@ -13,10 +13,9 @@ from anyway.backend_constants import AccidentType
 @register
 class AccidentCountByAccidentTypeWidget(SubUrbanWidget):
     name: str = "accident_count_by_accident_type"
-    files = [__file__]
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params)
+        super().__init__(request_params, type(self).name)
         self.rank = 6
         self.information = (
             "Distribution of accidents by type in the selected segment and time period. "

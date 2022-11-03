@@ -4,11 +4,11 @@ from anyway.widgets.widget import Widget
 
 
 class UrbanWidget(Widget):
-    def __init__(self, request_params: RequestParams):
+    def __init__(self, request_params: RequestParams, name: str):
         if not UrbanWidget.is_urban(request_params):
             logging.error(f"UrbanWidget initialized with missing location fields:{request_params}")
             raise ValueError("Urban fields missing")
-        super().__init__(request_params)
+        super().__init__(request_params, name)
 
     @staticmethod
     def is_urban(request_params: RequestParams) -> bool:

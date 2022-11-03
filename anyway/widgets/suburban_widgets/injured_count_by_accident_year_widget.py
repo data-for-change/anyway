@@ -20,10 +20,9 @@ from anyway.widgets.widget_utils import (
 @register
 class InjuredCountByAccidentYearWidget(SubUrbanWidget):
     name: str = "injured_count_by_accident_year"
-    files = [__file__]
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params)
+        super().__init__(request_params, type(self).name)
         self.rank = 9
         self.information = (
             "Fatal, severe and light injured count in the specified years, split by injury severity"

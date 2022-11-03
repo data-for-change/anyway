@@ -81,9 +81,10 @@ def get_casualties_count_in_accident(accident_id, provider_code, injury_severity
 @register
 class MostSevereAccidentsTableWidget(AllLocationsWidget):
     name: str = "most_severe_accidents_table"
+    files = [__file__]
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, type(self).name)
+        super().__init__(request_params)
         self.rank = 2
         self.information = "Most recent fatal and severe accidents, ordered by date. Up to 10 accidents are presented."
 

@@ -6,7 +6,7 @@ from anyway.backend_constants import InjurySeverity, BE_CONST as BE
 from anyway.request_params import RequestParams
 from anyway.widgets.suburban_widgets.killed_and_injured_count_per_age_group_widget_utils import (
     KilledAndInjuredCountPerAgeGroupWidgetUtils,
-    AGE_RANGES,
+    AGE_RANGE_DICT,
 )
 from anyway.widgets.suburban_widgets import killed_and_injured_count_per_age_group_widget_utils
 
@@ -15,6 +15,7 @@ from anyway.widgets.widget import register
 from anyway.widgets.widget_utils import add_empty_keys_to_gen_two_level_dict, gen_entity_labels
 
 INJURY_ORDER = [InjurySeverity.LIGHT_INJURED, InjurySeverity.SEVERE_INJURED, InjurySeverity.KILLED]
+MAX_AGE = 200
 
 
 @register
@@ -56,5 +57,11 @@ class KilledInjuredCountPerAgeGroupStackedWidget(SubUrbanWidget):
 
     @staticmethod
     def get_age_range_list() -> List[str]:
-        return [f"{item_min_range}-{item_max_range}" if item_max_range < 120 else f"{item_min_range}+"
-                for item_min_range, item_max_range in zip(AGE_RANGES, AGE_RANGES[1:])]
+        age_list = []
+        for item_min_range, item_max_range in AGE_RANGE_DICT.items():
+            if MAX_AGE == item_max_range:
+                age_list.append("65+")
+            else:
+                age_list.append(f"{item_min_range:02}-{item_max_range:02}")
+
+        return age_list

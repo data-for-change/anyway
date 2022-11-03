@@ -24,10 +24,9 @@ _("all roads")
 @register
 class MotorcycleAccidentsVsAllAccidentsWidget(SubUrbanWidget):
     name: str = "motorcycle_accidents_vs_all_accidents"
-    files = [__file__]
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params)
+        super().__init__(request_params, type(self).name)
         self.rank = 20
         self.road_number: str = request_params.location_info["road1"]
         self.information = (

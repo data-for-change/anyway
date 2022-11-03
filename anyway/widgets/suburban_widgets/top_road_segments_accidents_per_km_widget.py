@@ -17,10 +17,9 @@ from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 @register
 class TopRoadSegmentsAccidentsPerKmWidget(SubUrbanWidget):
     name: str = "top_road_segments_accidents_per_km"
-    files = [__file__]
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params)
+        super().__init__(request_params, type(self).name)
         self.rank = 13
 
     def generate_items(self) -> None:

@@ -8,7 +8,6 @@ from anyway.widgets.suburban_widgets.killed_and_injured_count_per_age_group_widg
     KilledAndInjuredCountPerAgeGroupWidgetUtils,
     AGE_RANGE_DICT,
 )
-from anyway.widgets.suburban_widgets import killed_and_injured_count_per_age_group_widget_utils
 
 from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 from anyway.widgets.widget import register
@@ -21,10 +20,9 @@ MAX_AGE = 200
 @register
 class KilledInjuredCountPerAgeGroupStackedWidget(SubUrbanWidget):
     name: str = "killed_and_injured_count_per_age_group_stacked"
-    files = [__file__, killed_and_injured_count_per_age_group_widget_utils.__file__]
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params)
+        super().__init__(request_params, type(self).name)
         self.rank = 30
 
     def generate_items(self) -> None:

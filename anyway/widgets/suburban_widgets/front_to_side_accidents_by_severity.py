@@ -31,12 +31,11 @@ SEVERITY_TEXT = "{} accidents"
 
 
 @register
-class FrondToSideAccidentsBySeverityWidget(SubUrbanWidget):
+class FrondToSideAccidentsBySeverity(SubUrbanWidget):
     name: str = "front_to_side_accidents_by_severity"
-    files = [__file__]
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params)
+        super().__init__(request_params, type(self).name)
         self.rank = 32
         self.road_segment_id: str = request_params.location_info["road_segment_id"]
 

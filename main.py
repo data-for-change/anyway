@@ -291,9 +291,7 @@ def update_street():
 @cache.command()
 def update_road_segments():
     """Update road segments cache"""
-    from anyway.parsers.infographics_data_cache_updater import main_for_road_segments
-
-    return main_for_road_segments()
+    infographics_data_cache_for_road_segments()
 
 
 @process.command()

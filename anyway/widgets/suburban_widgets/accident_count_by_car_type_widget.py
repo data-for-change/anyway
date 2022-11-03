@@ -20,10 +20,9 @@ MAX_NUMBER_OF_ITEMS = 2
 @register
 class AccidentCountByCarTypeWidget(SubUrbanWidget):
     name: str = "accident_count_by_car_type"
-    files = [__file__]
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params)
+        super().__init__(request_params, type(self).name)
         self.rank = 17
 
     def generate_items(self) -> None:

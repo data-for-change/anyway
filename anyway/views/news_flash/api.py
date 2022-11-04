@@ -8,6 +8,7 @@ import logging
 from typing import List, Optional
 from http import HTTPStatus
 
+
 from flask import request, Response, make_response, jsonify
 from sqlalchemy import and_, not_, or_
 
@@ -18,14 +19,14 @@ from anyway.backend_constants import (
     NewsflashLocationQualification,
     QUALIFICATION_TO_ENUM_VALUE,
 )
-from anyway.models import NewsFlash
+from anyway.models import NewsFlash, LocationVerificationHistory
 from anyway.infographics_utils import is_news_flash_resolution_supported
 from pydantic import BaseModel, ValidationError, validator
 
 from anyway.views.user_system.api import roles_accepted, return_json_error
 from anyway.views.user_system.user_functions import get_current_user
 from anyway.error_code_and_strings import Errors as Es
-from anyway.parsers import fields_to_resolution
+from anyway.parsers import fields_to_resolution, resolution_dict
 
 DEFAULT_OFFSET_REQ_PARAMETER = 0
 DEFAULT_LIMIT_REQ_PARAMETER = 100
@@ -292,12 +293,42 @@ def normalize_query(params: dict):
     return {k: normalize_query_param(k, v) for k, v in params_non_flat.items()}
 
 
+def update_location_verification_history(
+    user_id: int,
+    news_flash_id: int,
+    prev_location: str,
+    prev_qualification: int,
+    new_location: str,
+    new_qualification: int,
+):
+    new_location_qualifiction_history = LocationVerificationHistory(
+        user_id=user_id,
+        news_flash_id=news_flash_id,
+        location_verification_before_change=prev_qualification,
+        location_before_change=prev_location,
+        location_verification_after_change=new_qualification,
+        location_after_change=new_location,
+    )
+    db.session.add(new_location_qualifiction_history)
+    db.session.commit()
+
+
+def extracted_location_and_qualification(news_flash_obj: NewsFlash):
+    news_flash_resolution = {}
+    resolution = resolution_dict[news_flash_obj.resolution]
+    for field in resolution:
+        value = getattr(news_flash_obj, field)
+        news_flash_resolution[field] = value
+    location = json.dumps(news_flash_resolution)
+    return location, news_flash_obj.newsflash_location_qualification
+
+
 @roles_accepted(
     BE_CONST.Roles2Names.Authenticated.value,
     BE_CONST.Roles2Names.Location_verification.value,
     need_all_permission=True,
 )
-def update_new_flash_qualifying(id):
+def update_news_flash_qualifying(id):
     current_user = get_current_user()
     manual_update = False
     use_road_segment = True
@@ -320,6 +351,7 @@ def update_new_flash_qualifying(id):
             logging.error("only manual update should contain location details.")
             return return_json_error(Es.BR_BAD_FIELD)
     news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == id).first()
+    old_location, old_location_qualifiction = extracted_location_and_qualification(news_flash_obj)
     if news_flash_obj is not None:
         if manual_update:
             if use_road_segment:
@@ -341,4 +373,15 @@ def update_new_flash_qualifying(id):
         news_flash_obj.newsflash_location_qualification = newsflash_location_qualification
         news_flash_obj.location_qualifying_user = current_user.id
         db.session.commit()
+        new_location, new_location_qualifiction = extracted_location_and_qualification(
+            news_flash_obj
+        )
+        update_location_verification_history(
+            user_id=current_user.id,
+            news_flash_id=id,
+            prev_location=old_location,
+            prev_qualification=old_location_qualifiction,
+            new_location=new_location,
+            new_qualification=new_location_qualifiction,
+        )
         return Response(status=HTTPStatus.OK)

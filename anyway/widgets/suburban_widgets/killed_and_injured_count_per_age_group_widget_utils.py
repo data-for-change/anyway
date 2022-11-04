@@ -1,8 +1,9 @@
-from collections import defaultdict, OrderedDict
+from collections import Counter, OrderedDict
 from datetime import datetime
-from typing import Dict, Tuple, Callable
+from typing import Dict, Optional
 
 from flask_sqlalchemy import BaseQuery
+from flask_babel import _
 from sqlalchemy import func, asc
 
 from anyway.app_and_db import db
@@ -14,19 +15,17 @@ from anyway.utilities import parse_age_from_range
 # RequestParams is not hashable, so we can't use functools.lru_cache
 cache_dict = OrderedDict()
 
-SIXTY_FIVE_PLUS = "65+"
-SIXTY_TWOHUNDRED = "65-200"
-UNKNOWN = "unknown"
+UNKNOWN = _("Unknown")
 CACHE_MAX_SIZE = 10
 
-AGE_RANGE_DICT = {0: 4, 5: 14, 15: 19, 20: 24, 25: 44, 45: 64, 65: 200}
+AGE_RANGES = [0, 5, 15, 20, 25, 45, 65, 200]
 
 
 class KilledAndInjuredCountPerAgeGroupWidgetUtils:
     @staticmethod
     def filter_and_group_injured_count_per_age_group(
         request_params: RequestParams,
-    ) -> Dict[str, Dict[int, int]]:
+    ) -> Dict[str, Counter]:
         road_number = request_params.location_info["road1"]
         road_segment = request_params.location_info["road_segment_name"]
         start_time = request_params.start_time
@@ -39,9 +38,9 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
             end_time, road_number, road_segment, start_time
         )
 
-        dict_grouped, has_data = KilledAndInjuredCountPerAgeGroupWidgetUtils.parse_query_data(query)
+        dict_grouped = KilledAndInjuredCountPerAgeGroupWidgetUtils.parse_query_data(query)
 
-        if not has_data:
+        if dict_grouped is None:
             return {}
 
         while len(cache_dict) > CACHE_MAX_SIZE:
@@ -51,40 +50,28 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
         return dict_grouped
 
     @staticmethod
-    def parse_query_data(query: BaseQuery) -> Tuple[Dict[str, Dict[int, int]], bool]:
-        def defaultdict_int_factory() -> Callable:
-            return lambda: defaultdict(int)
-
-        dict_grouped = defaultdict(defaultdict_int_factory())
+    def parse_query_data(query: BaseQuery) -> Optional[Dict[str, Counter]]:
+        dict_grouped = {k: Counter() for k in AGE_RANGES + [UNKNOWN]}
         has_data = False
-        for row in query:
-            has_data = True
-            age_range = row.age_group
-            injury_id = row.injury_severity
-            count = row.count
 
-            # The age groups in the DB are not the same age groups in the Widget - so we need to merge some groups
-            age_parse = parse_age_from_range(age_range)
-            if not age_parse:
-                dict_grouped[UNKNOWN][injury_id] += count
-            else:
-                min_age, max_age = age_parse
-                found_age_range = False
-                # Find to what "bucket" to aggregate the data
-                for item_min_range, item_max_range in AGE_RANGE_DICT.items():
+        for row in query:
+            group_name: str = UNKNOWN
+
+            age_parsed = parse_age_from_range(row.age_group)
+            if age_parsed:
+                min_age, max_age = age_parsed
+                # The age groups in the DB are not the same age groups in the widget, so we need to merge some groups.
+                # Find the right bucket to aggregate the data:
+                for item_min_range, item_max_range in zip(AGE_RANGES, AGE_RANGES[1:]):
                     if item_min_range <= min_age <= max_age <= item_max_range:
-                        string_age_range = f"{item_min_range:02}-{item_max_range:02}"
-                        dict_grouped[string_age_range][injury_id] += count
-                        found_age_range = True
+                        has_data = True
+                        group_name = f"{item_min_range}-{item_max_range}" if item_max_range < 120 else f"{item_min_range}+"
                         break
 
-                if not found_age_range:
-                    dict_grouped[UNKNOWN][injury_id] += count
-
-        # Rename the last key
-        dict_grouped[SIXTY_FIVE_PLUS] = dict_grouped[SIXTY_TWOHUNDRED]
-        del dict_grouped[SIXTY_TWOHUNDRED]
-        return dict_grouped, has_data
+            dict_grouped[group_name][row.injury_severity] += row.count
+        if not has_data:
+            return None
+        return dict_grouped
 
     @staticmethod
     def create_query_for_killed_and_injured_count_per_age_group(

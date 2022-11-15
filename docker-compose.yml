@@ -6,7 +6,7 @@ x-redash-service:
   depends_on:
     - postgres
     - redis
-  env_file: ./redash-env
+  env_file: ./.env
   restart: always
 
 services:
@@ -107,15 +107,15 @@ services:
   postgres:
     container_name: redash-db
     image: postgres:9.6-alpine
-    env_file: ./redash-env
+    env_file: ./.env
     volumes:
       - redash-postgres-data:/var/lib/postgresql/data
     restart: always
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust
-      - PGPORT=5433
+      - PGPORT=5433 # The default port (5432) is reserved for the db of anyway 
     ports:
-      - "5433:5433" # The default port (5432) is reserved for the db of anyway 
+      - "5433:5433"
     expose:
       - "5433"
 

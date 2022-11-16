@@ -1,4 +1,4 @@
-FROM postgis/postgis:10-3.2
+FROM postgis/postgis:9.6-2.5
 
 RUN apt-get update && apt-get install -y curl unzip &&\
     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" &&\

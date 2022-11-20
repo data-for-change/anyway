@@ -12,11 +12,12 @@ from flask_babel import _
 # TODO: pretty sure there are errors in this widget, for example, is_included returns self.items
 class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
     name: str = "accidents_on_small_motor_by_vehicle_by_year"
+    files = [__file__]
     # TODO: when accident vehicle becomes available in request params,
     # make it so widget is only included on newsflashes that have a relevant vehicle
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, type(self).name)
+        super().__init__(request_params)
         self.rank = 28
 
     def generate_items(self) -> None:

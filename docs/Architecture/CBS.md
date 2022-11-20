@@ -4,13 +4,13 @@
 - **Environment Variables**: MAILPASS, MAILUSER
 - **Relevant input**: input emails from CBS containing zip files
 - **Relevant output**: unzipped CBS files saved in S3
-- **Relevant Storage directory**: S3 -> Bucket: anyway-cbs
+- **Relevant Storage directory**: S3 -> Bucket: dfc-anyway-cbs
 - **command**: `python3 main.py scripts importemail`
 - **Scheduling**: Nowadays runs in Jenkins once a week
 
 ### CBS: pulls data from s3, processes cbs data and pushes it to CBS tables
 Environment Variables: AWS_ACCESS_KEY, AWS_SECRET_KEY
-- **Relevant input**: S3 -> Bucket: anyway-cbs
+- **Relevant input**: S3 -> Bucket: dfc-anyway-cbs
 - **Relevant output**: DB Tables: markers, vehicles, involved, vehicles_hebrew, involved_hebrew, vehicles_hebrew, involved_markers_hebrew, vehicles_markers_hebrew, All CBS Dictionary Tables
 - **command**: `python3 main.py process cbs --load_start_year 2021 --source s3`
 - **Scheduling**: to be scheduled

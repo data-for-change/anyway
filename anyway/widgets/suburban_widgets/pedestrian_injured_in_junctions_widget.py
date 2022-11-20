@@ -8,9 +8,10 @@ from typing import Dict
 @register
 class PedestrianInjuredInJunctionsWidget(SubUrbanWidget):
     name: str = "pedestrian_injured_in_junctions"
+    files = [__file__]
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, type(self).name)
+        super().__init__(request_params)
         self.rank = 23
 
     # TODO: add real data

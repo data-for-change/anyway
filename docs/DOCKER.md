@@ -27,7 +27,7 @@ Instructions
 
 **2.** [Install Docker](https://docs.docker.com/install/) and [Install Docker Compose](https://docs.docker.com/compose/install/)
 
-**3.** Get the `.env` file with the required secret values and place in the project **root directory** - can be downloaded [from here](https://drive.google.com/file/d/1ZdM9MdvSuhsNkJXy93Nj05c9GE-hyHOj/view?usp=sharing). Note that this file **needs to be saved as `.env`** - with the `.` at the beginning of the name of the file.
+**3.** Get the `.env` file with the required secret values and place in the project **root directory** - can be downloaded [from here](https://drive.google.com/file/d/1bgMyKlHoAAIixlk8qqmZaXPdmqCxldLu/view?usp=sharing). Note that this file **needs to be saved as `.env`** - with the `.` at the beginning of the name of the file.
 **Continue with your OS, See below**
 
 **For Mac:**
@@ -48,7 +48,7 @@ $ docker login docker.pkg.github.com -u USERNAME
 ```
 
 **6.** Go to the project's root directory and run:
-    `sudo docker-compose up anyway`
+    `sudo docker-compose up --build anyway`
 This will start the containers. It will take a few minutes until it's done.
 
 **7.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
@@ -97,7 +97,7 @@ $ sudo docker login docker.pkg.github.com -u USERNAME
 ```
 
 **6.** Go to the project's root directory and run:
-    `sudo docker-compose up anyway`
+    `sudo docker-compose up --build anyway`
 This will start the containers. It will take a few minutes until it's done.
 
 **7.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
@@ -271,7 +271,7 @@ POSTGRES_DB=postgres
 #   aws access/secret with permissions to read from full db dumps bucket
 DBRESTORE_AWS_ACCESS_KEY_ID=
 DBRESTORE_AWS_SECRET_ACCESS_KEY=
-DBRESTORE_AWS_BUCKET=anyway-full-db-dumps
+DBRESTORE_AWS_BUCKET=dfc-anyway-full-db-dumps
 DBRESTORE_FILE_NAME=2020-06-09_anyway.pgdump
 #   should match the password set in app env vars
 DBRESTORE_SET_ANYWAY_PASSWORD=12345678

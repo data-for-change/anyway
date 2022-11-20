@@ -31,11 +31,12 @@ SEVERITY_TEXT = "{} accidents"
 
 
 @register
-class FrondToSideAccidentsBySeverity(SubUrbanWidget):
+class FrondToSideAccidentsBySeverityWidget(SubUrbanWidget):
     name: str = "front_to_side_accidents_by_severity"
+    files = [__file__]
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, type(self).name)
+        super().__init__(request_params)
         self.rank = 32
         self.road_segment_id: str = request_params.location_info["road_segment_id"]
 
@@ -59,12 +60,12 @@ class FrondToSideAccidentsBySeverity(SubUrbanWidget):
                     {
                         SEVERITY: severity_text,
                         DESC: FRONT_SIDE_DESC,
-                        COUNT: f"{round((row[FRONT_SIDE_ACCIDENTS_LABEL] / total) * 100)}%",
+                        COUNT: round((row[FRONT_SIDE_ACCIDENTS_LABEL] / total) * 100),
                     },
                     {
                         SEVERITY: severity_text,
                         DESC: OTHERS_DESC,
-                        COUNT: f"{round((row[OTHER_ACCIDENTS_LABEL] / total) * 100)}%",
+                        COUNT: round((row[OTHER_ACCIDENTS_LABEL] / total) * 100),
                     },
                 ]
             )

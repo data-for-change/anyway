@@ -16,11 +16,12 @@ TITLE = _("Number of severely injured or killed in bike, e-bike, or scooter acci
 @register
 class SeriouslyInjuredKilledInBicyclesScooterWidget(AllLocationsWidget):
     name: str = "seriously_injured_killed_in_bicycles_scooter"
+    files = [__file__]
     severities = (InjurySeverity.KILLED, InjurySeverity.SEVERE_INJURED)
     vehicle_types = (VehicleType.BIKE, VehicleType.ELECTRIC_BIKE, VehicleType.ELECTRIC_SCOOTER)
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, type(self).name)
+        super().__init__(request_params)
         self.rank = 32
         self.information = _("Severely injured or killed in bike, e-bike, or scooter accidents")
 

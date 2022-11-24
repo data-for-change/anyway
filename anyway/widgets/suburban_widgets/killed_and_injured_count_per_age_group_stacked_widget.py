@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict
 
 from flask_babel import _
 
@@ -6,7 +6,7 @@ from anyway.backend_constants import InjurySeverity, BE_CONST as BE
 from anyway.request_params import RequestParams
 from anyway.widgets.suburban_widgets.killed_and_injured_count_per_age_group_widget_utils import (
     KilledAndInjuredCountPerAgeGroupWidgetUtils,
-    AGE_RANGES,
+    AGE_RANGES, make_group_name,
 )
 from anyway.widgets.suburban_widgets import killed_and_injured_count_per_age_group_widget_utils
 
@@ -32,7 +32,7 @@ class KilledInjuredCountPerAgeGroupStackedWidget(SubUrbanWidget):
         )
 
         partial_processed = add_empty_keys_to_gen_two_level_dict(
-            raw_data, self.get_age_range_list(), InjurySeverity.codes()
+            raw_data, [make_group_name(group) for group in AGE_RANGES], InjurySeverity.codes()
         )
 
         structured_data_list = []
@@ -53,8 +53,3 @@ class KilledInjuredCountPerAgeGroupStackedWidget(SubUrbanWidget):
             "labels_map": gen_entity_labels(InjurySeverity),
         }
         return items
-
-    @staticmethod
-    def get_age_range_list() -> List[str]:
-        return [f"{item_min_range}-{item_max_range}" if item_max_range < 120 else f"{item_min_range}+"
-                for item_min_range, item_max_range in zip(AGE_RANGES, AGE_RANGES[1:])]

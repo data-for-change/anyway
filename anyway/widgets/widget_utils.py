@@ -2,15 +2,17 @@ import copy
 import logging
 import typing
 from collections import defaultdict
-from typing import Dict, Any, List, Type, Optional
+from typing import Dict, Any, List, Type, Optional, Sequence
 
 import pandas as pd
 from flask_babel import _
 from sqlalchemy import func, distinct, between, and_
 
 from anyway.app_and_db import db
-from anyway.backend_constants import BE_CONST, LabeledCode
+from anyway.backend_constants import BE_CONST, LabeledCode, InjurySeverity
 from anyway.models import Involved, AccidentMarker, RoadSegments
+from anyway.request_params import LocationInfo
+from anyway.vehicle_type import VehicleType
 
 
 def get_query(table_obj, filters, start_time, end_time):
@@ -163,7 +165,13 @@ def sort_and_fill_gaps_for_stacked_bar(
     return res2
 
 
-def get_involved_counts(start_year, end_year, severities, vehicle_types, location_info):
+def get_involved_counts(
+    start_year: int,
+    end_year: int,
+    severities: Sequence[InjurySeverity],
+    vehicle_types: Sequence[VehicleType],
+    location_info: LocationInfo,
+) -> Dict[str, int]:
     selected_columns = (
         Involved.accident_year.label("label_key"),
         func.count(distinct(Involved.id)).label("value"),

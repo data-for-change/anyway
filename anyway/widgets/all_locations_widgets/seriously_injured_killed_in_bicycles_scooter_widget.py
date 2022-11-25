@@ -2,7 +2,7 @@ from typing import Dict
 
 from flask_babel import _
 from anyway.backend_constants import InjurySeverity, BackEndConstants as Constants
-from anyway.request_params import RequestParams
+from anyway.request_params import RequestParams, LocationInfo
 from anyway.utilities import half_rounded_up
 from anyway.vehicle_type import VehicleType
 from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget
@@ -35,9 +35,9 @@ class SeriouslyInjuredKilledInBicyclesScooterWidget(AllLocationsWidget):
 
     @staticmethod
     def get_seriously_injured_killed_in_bicycles_scooter(
-            start_year,
-            end_year,
-            location_info
+            start_year: int,
+            end_year: int,
+            location_info: LocationInfo
     ):
 
         res = get_involved_counts(start_year, end_year,
@@ -47,7 +47,7 @@ class SeriouslyInjuredKilledInBicyclesScooterWidget(AllLocationsWidget):
         return res
 
     @staticmethod
-    def create_location_description(location_info, location_text) -> str:
+    def create_location_description(location_info: LocationInfo, location_text: str) -> str:
         return _("in ") + location_info[Constants.YISHUV_NAME] \
             if Constants.YISHUV_NAME in location_info \
             else location_text

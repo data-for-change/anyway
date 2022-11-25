@@ -16,6 +16,9 @@ from anyway.app_and_db import db
 from anyway.parsers import resolution_dict
 
 
+LocationInfo = Dict[str, Any]
+
+
 @dataclass
 class RequestParams:
     """
@@ -24,7 +27,7 @@ class RequestParams:
 
     years_ago: int
     location_text: str
-    location_info: Dict[str, Any]
+    location_info: LocationInfo
     resolution: BE_CONST.ResolutionCategories
     gps: Dict
     start_time: datetime.date

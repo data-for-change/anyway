@@ -4,7 +4,7 @@ from factory import make_factory, Iterator
 from anyway import models
 from anyway.app_and_db import db
 from anyway.backend_constants import InjurySeverity
-from anyway.factories import InvolvedFactory, UrbanAccidentMarkerFactory, \
+from tests.factories import InvolvedFactory, UrbanAccidentMarkerFactory, \
     SuburbanAccidentMarkerFactory, RoadSegmentFactory
 from anyway.vehicle_type import VehicleType
 from anyway.widgets import widget_utils

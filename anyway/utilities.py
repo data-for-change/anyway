@@ -337,5 +337,6 @@ def is_a_valid_email(tmp_given_user_email: str) -> bool:
     )
     return is_valid
 
-def half_rounded_up(num):
+
+def half_rounded_up(num: int):
     return math.ceil(num / 2)

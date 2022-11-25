@@ -1,6 +1,6 @@
 import factory
 
-from . import models
+from anyway import models
 from anyway.app_and_db import db
 
 class DefaultFactory(factory.alchemy.SQLAlchemyModelFactory):

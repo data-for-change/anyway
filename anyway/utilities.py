@@ -212,10 +212,8 @@ def split_query_to_chunks_by_column(base_select, column_to_chunk_by, chunk_size,
 
 
 def run_query_and_insert_to_table_in_chunks(query, table_inserted_to, column_to_chunk_by, chunk_size, conn):
-    for i, chunk in enumerate(split_query_to_chunks_by_column(query, column_to_chunk_by, chunk_size, conn)):
-        logging.debug(f"about to insert chunk #{i+1} into the db")
+    for chunk in split_query_to_chunks_by_column(query, column_to_chunk_by, chunk_size, conn):
         conn.execute(table_inserted_to.__table__.insert(), chunk)
-        logging.debug(f"inserted chunk #{i+1}")
 
 
 def valid_date(date_string):

@@ -2,8 +2,9 @@ name: Deploy
 on:
   push:
     branches:
-      - master
-      - dev
+#      - master
+#      - dev
+      - upgrade-db-to-postgres-15
 env:
   DOCKER_REPOSITORY_ANYWAY: "${{ github.repository }}/anyway"
   DOCKER_REPOSITORY_DB: "${{ github.repository }}/db"
@@ -11,22 +12,22 @@ env:
   DOCKER_REPOSITORY_NGINX: "${{ github.repository }}/nginx"
   SERVER: "docker.pkg.github.com"
 jobs:
-  Build-anyway:
-    if: github.repository == "${{ github.repository_owner }}/anyway"
-    runs-on: ubuntu-18.04
-    steps:
-    - uses: actions/checkout@v2
-    - name: Build and push anyway Docker image
-      uses: docker/build-push-action@v1.1.1
-      with:
-        name: ${{ env.DOCKER_REPOSITORY_ANYWAY }}
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-        registry: docker.pkg.github.com
-        repository: ${{ env.DOCKER_REPOSITORY_ANYWAY }}
-        tag_with_ref: true
-        tag_with_sha: true
-        cache_froms: ${{ env.DOCKER_REPOSITORY_ANYWAY }}:dev
+#  Build-anyway:
+#    if: github.repository == "${{ github.repository_owner }}/anyway"
+#    runs-on: ubuntu-18.04
+#    steps:
+#    - uses: actions/checkout@v2
+#    - name: Build and push anyway Docker image
+#      uses: docker/build-push-action@v1.1.1
+#      with:
+#        name: ${{ env.DOCKER_REPOSITORY_ANYWAY }}
+#        username: ${{ github.repository_owner }}
+#        password: ${{ secrets.GITHUB_TOKEN }}
+#        registry: docker.pkg.github.com
+#        repository: ${{ env.DOCKER_REPOSITORY_ANYWAY }}
+#        tag_with_ref: true
+#        tag_with_sha: true
+#        cache_froms: ${{ env.DOCKER_REPOSITORY_ANYWAY }}:dev
   Build-db:
     if: github.repository == "${{ github.repository_owner }}/anyway"
     runs-on: ubuntu-18.04
@@ -40,7 +41,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
         repository: ${{ env.DOCKER_REPOSITORY_DB }}
         path: 'db_docker'
-        tag_with_ref: true
+        tag_with_ref: false
         tag_with_sha: true
         cache_froms: ${{ env.DOCKER_REPOSITORY_DB }}:dev
   Build-db-backup:
@@ -57,82 +58,82 @@ jobs:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
         path: 'db_docker'
-        tag_with_ref: true
+        tag_with_ref: false
         tag_with_sha: true
         cache_froms: ${{ env.DOCKER_REPOSITORY_DB_BACKUP }}:dev
-  Build-nginx:
-    if: github.repository == "${{ github.repository_owner }}/anyway"
-    needs: Build-anyway
-    runs-on: ubuntu-18.04
-    steps:
-    - uses: actions/checkout@v2
-    - env:
-        DOCKER_USERNAME: ${{ github.repository_owner }}
-        DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        bin/nginx_docker_build_push.sh
-  deploy:
-    needs:
-    - Build-anyway
-    - Build-db
-    - Build-db-backup
-    - Build-nginx
-    runs-on: ubuntu-18.04
-    steps:
-    - uses: actions/checkout@v2
-    - env:
-        DOCKER_REPOSITORY_ANYWAY: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_ANYWAY }}
-        DOCKER_REPOSITORY_DB: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_DB }}
-        DOCKER_REPOSITORY_DB_BACKUP: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
-        DOCKER_REPOSITORY_NGINX: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_NGINX }}
-        DFC_K8S_DEPLOY_KEY: ${{ secrets.DFC_K8S_DEPLOY_KEY }}
-        ANYWAY_ETL_DEPLOY_KEY: ${{ secrets.ANYWAY_ETL_DEPLOY_KEY }}
-      run: |
-        if [ "${GITHUB_REF}" == "refs/heads/master" ] || [ "${GITHUB_REF}" == "refs/heads/dev" ]; then
-          SHA_TAG=sha-`git rev-parse --short $GITHUB_SHA` &&\
-          echo SHA_TAG=$SHA_TAG &&\
-          ANYWAY_IMAGE="${DOCKER_REPOSITORY_ANYWAY}:${SHA_TAG}" &&\
-          echo ANYWAY_IMAGE=$ANYWAY_IMAGE &&\
-          DB_IMAGE="${DOCKER_REPOSITORY_DB}:${SHA_TAG}" &&\
-          echo DB_IMAGE=$DB_IMAGE &&\
-          DB_BACKUP_IMAGE="${DOCKER_REPOSITORY_DB_BACKUP}:${SHA_TAG}" &&\
-          echo DB_BACKUP_IMAGE=$DB_BACKUP_IMAGE &&\
-          NGINX_IMAGE="${DOCKER_REPOSITORY_NGINX}:${SHA_TAG}" &&\
-          echo NGINX_IMAGE=$NGINX_IMAGE &&\
-          if ! git log -1 --pretty=format:"%s" | grep -- --no-deploy; then
-            cd `mktemp -d` &&\
-            echo "${DFC_K8S_DEPLOY_KEY}" > dfc_k8s_deploy_key &&\
-            chmod 400 dfc_k8s_deploy_key &&\
-            export GIT_SSH_COMMAND="ssh -i `pwd`/dfc_k8s_deploy_key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" &&\
-            git clone git@github.com:data-for-change/dfc-k8s.git &&\
-            cd dfc-k8s &&\
-            if [ "${GITHUB_REF}" == "refs/heads/dev" ]; then
-              python update_yaml.py '{"imageDev":"'${ANYWAY_IMAGE}'","nginxImageDev":"'${NGINX_IMAGE}'"}' apps/anyway/values-anyway-auto-updated.yaml
-            else
-              python update_yaml.py '{"image":"'${ANYWAY_IMAGE}'","dbImage":"'${DB_IMAGE}'","dbBackupImage":"'${DB_BACKUP_IMAGE}'","nginxImage":"'${NGINX_IMAGE}'"}' apps/anyway/values-anyway-auto-updated.yaml
-            fi &&\
-            git config --global user.name "Anyway CI" &&\
-            git config --global user.email "anyway-ci@localhost" &&\
-            if [ "${GITHUB_REF}" == "refs/heads/dev" ]; then
-              git add apps/anyway/values-anyway-auto-updated.yaml && git commit -m "automatic update of dev anyway"
-            else
-              git add apps/anyway/values-anyway-auto-updated.yaml && git commit -m "automatic update of anyway"
-            fi &&\
-            git push origin main &&\
-            cd `mktemp -d` &&\
-            echo "${ANYWAY_ETL_DEPLOY_KEY}" > anyway_etl_deploy_key &&\
-            chmod 400 anyway_etl_deploy_key &&\
-            export GIT_SSH_COMMAND="ssh -i `pwd`/anyway_etl_deploy_key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" &&\
-            git clone git@github.com:hasadna/anyway-etl.git &&\
-            cd anyway-etl &&\
-            if [ "${GITHUB_REF}" == "refs/heads/dev" ]; then
-              ANYWAY_ETL_COMMIT_FILENAME=anyway-dev-commit.txt
-            else
-              ANYWAY_ETL_COMMIT_FILENAME=anyway-master-commit.txt
-            fi &&\
-            echo "${GITHUB_SHA}" > $ANYWAY_ETL_COMMIT_FILENAME &&\
-            git add ./$ANYWAY_ETL_COMMIT_FILENAME &&\
-            git commit -m "automatic update of $ANYWAY_ETL_COMMIT_FILENAME" &&\
-            git push origin main
-          fi
-        fi
+#  Build-nginx:
+#    if: github.repository == "${{ github.repository_owner }}/anyway"
+#    needs: Build-anyway
+#    runs-on: ubuntu-18.04
+#    steps:
+#    - uses: actions/checkout@v2
+#    - env:
+#        DOCKER_USERNAME: ${{ github.repository_owner }}
+#        DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+#      run: |
+#        bin/nginx_docker_build_push.sh
+#  deploy:
+#    needs:
+#    - Build-anyway
+#    - Build-db
+#    - Build-db-backup
+#    - Build-nginx
+#    runs-on: ubuntu-18.04
+#    steps:
+#    - uses: actions/checkout@v2
+#    - env:
+#        DOCKER_REPOSITORY_ANYWAY: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_ANYWAY }}
+#        DOCKER_REPOSITORY_DB: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_DB }}
+#        DOCKER_REPOSITORY_DB_BACKUP: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_DB_BACKUP }}
+#        DOCKER_REPOSITORY_NGINX: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_NGINX }}
+#        DFC_K8S_DEPLOY_KEY: ${{ secrets.DFC_K8S_DEPLOY_KEY }}
+#        ANYWAY_ETL_DEPLOY_KEY: ${{ secrets.ANYWAY_ETL_DEPLOY_KEY }}
+#      run: |
+#        if [ "${GITHUB_REF}" == "refs/heads/master" ] || [ "${GITHUB_REF}" == "refs/heads/dev" ]; then
+#          SHA_TAG=sha-`git rev-parse --short $GITHUB_SHA` &&\
+#          echo SHA_TAG=$SHA_TAG &&\
+#          ANYWAY_IMAGE="${DOCKER_REPOSITORY_ANYWAY}:${SHA_TAG}" &&\
+#          echo ANYWAY_IMAGE=$ANYWAY_IMAGE &&\
+#          DB_IMAGE="${DOCKER_REPOSITORY_DB}:${SHA_TAG}" &&\
+#          echo DB_IMAGE=$DB_IMAGE &&\
+#          DB_BACKUP_IMAGE="${DOCKER_REPOSITORY_DB_BACKUP}:${SHA_TAG}" &&\
+#          echo DB_BACKUP_IMAGE=$DB_BACKUP_IMAGE &&\
+#          NGINX_IMAGE="${DOCKER_REPOSITORY_NGINX}:${SHA_TAG}" &&\
+#          echo NGINX_IMAGE=$NGINX_IMAGE &&\
+#          if ! git log -1 --pretty=format:"%s" | grep -- --no-deploy; then
+#            cd `mktemp -d` &&\
+#            echo "${DFC_K8S_DEPLOY_KEY}" > dfc_k8s_deploy_key &&\
+#            chmod 400 dfc_k8s_deploy_key &&\
+#            export GIT_SSH_COMMAND="ssh -i `pwd`/dfc_k8s_deploy_key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" &&\
+#            git clone git@github.com:data-for-change/dfc-k8s.git &&\
+#            cd dfc-k8s &&\
+#            if [ "${GITHUB_REF}" == "refs/heads/dev" ]; then
+#              python update_yaml.py '{"imageDev":"'${ANYWAY_IMAGE}'","nginxImageDev":"'${NGINX_IMAGE}'"}' apps/anyway/values-anyway-auto-updated.yaml
+#            else
+#              python update_yaml.py '{"image":"'${ANYWAY_IMAGE}'","dbImage":"'${DB_IMAGE}'","dbBackupImage":"'${DB_BACKUP_IMAGE}'","nginxImage":"'${NGINX_IMAGE}'"}' apps/anyway/values-anyway-auto-updated.yaml
+#            fi &&\
+#            git config --global user.name "Anyway CI" &&\
+#            git config --global user.email "anyway-ci@localhost" &&\
+#            if [ "${GITHUB_REF}" == "refs/heads/dev" ]; then
+#              git add apps/anyway/values-anyway-auto-updated.yaml && git commit -m "automatic update of dev anyway"
+#            else
+#              git add apps/anyway/values-anyway-auto-updated.yaml && git commit -m "automatic update of anyway"
+#            fi &&\
+#            git push origin main &&\
+#            cd `mktemp -d` &&\
+#            echo "${ANYWAY_ETL_DEPLOY_KEY}" > anyway_etl_deploy_key &&\
+#            chmod 400 anyway_etl_deploy_key &&\
+#            export GIT_SSH_COMMAND="ssh -i `pwd`/anyway_etl_deploy_key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" &&\
+#            git clone git@github.com:hasadna/anyway-etl.git &&\
+#            cd anyway-etl &&\
+#            if [ "${GITHUB_REF}" == "refs/heads/dev" ]; then
+#              ANYWAY_ETL_COMMIT_FILENAME=anyway-dev-commit.txt
+#            else
+#              ANYWAY_ETL_COMMIT_FILENAME=anyway-master-commit.txt
+#            fi &&\
+#            echo "${GITHUB_SHA}" > $ANYWAY_ETL_COMMIT_FILENAME &&\
+#            git add ./$ANYWAY_ETL_COMMIT_FILENAME &&\
+#            git commit -m "automatic update of $ANYWAY_ETL_COMMIT_FILENAME" &&\
+#            git push origin main
+#          fi
+#        fi

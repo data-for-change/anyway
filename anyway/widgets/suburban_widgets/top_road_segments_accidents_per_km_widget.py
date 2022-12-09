@@ -70,7 +70,10 @@ class TopRoadSegmentsAccidentsPerKmWidget(SubUrbanWidget):
             )
 
             result = pd.read_sql_query(query.statement, query.session.bind)
-            return result.to_dict(orient="records")  # pylint: disable=no-member
+            if location_info["road_segment_name"] in result.road_segment_name.values:
+                return result.to_dict(orient="records")  # pylint: disable=no-member
+            else:
+                return None
 
         except Exception as exception:
             logging.exception(f"{TopRoadSegmentsAccidentsPerKmWidget.name}: {exception}")

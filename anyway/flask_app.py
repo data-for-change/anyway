@@ -27,7 +27,6 @@ from anyway.clusters_calculator import retrieve_clusters
 from anyway.config import ENTRIES_PER_PAGE
 from anyway.constants import CONST
 from anyway.infographics_utils import (
-    get_infographics_data,
     get_infographics_mock_data,
     get_infographics_data_for_location,
 )
@@ -60,7 +59,7 @@ from anyway.views.news_flash.api import (
     news_flash_new,
     single_news_flash,
     news_flash_v2,
-    update_new_flash_qualifying,
+    update_news_flash_qualifying,
     DEFAULT_LIMIT_REQ_PARAMETER,
     DEFAULT_OFFSET_REQ_PARAMETER,
 )
@@ -1202,44 +1201,6 @@ class InfographicsData(Resource):
         return infographics_data_by_location()
 
 
-def infographics_data():
-    mock_data = request.values.get("mock", "false")
-    personalized_data = request.values.get("personalized", "false")
-    if mock_data == "true":
-        output = get_infographics_mock_data()
-    elif mock_data == "false":
-        news_flash_id = request.values.get("news_flash_id")
-        if news_flash_id is None:
-            log_bad_request(request)
-            return abort(http_client.BAD_REQUEST)
-
-        number_of_years_ago = request.values.get("years_ago", BE_CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
-        lang: str = request.values.get("lang", "he")
-        logging.debug(
-            (
-                "getting infographics data for news_flash_id: {news_flash_id}, "
-                + "in time period:{number_of_years_ago}, lang:{lang}"
-            ).format(
-                news_flash_id=news_flash_id, number_of_years_ago=number_of_years_ago, lang=lang
-            )
-        )
-        output = get_infographics_data(
-            news_flash_id=news_flash_id, years_ago=number_of_years_ago, lang=lang
-        )
-        if not output:
-            log_bad_request(request)
-            return abort(http_client.NOT_FOUND)
-    else:
-        log_bad_request(request)
-        return abort(http_client.BAD_REQUEST)
-
-    if personalized_data == "true":
-        output = widgets_personalisation_for_user(output)
-
-    json_data = json.dumps(output, default=str)
-    return Response(json_data, mimetype="application/json")
-
-
 """
     Returns GPS to CBS location
 """
@@ -1489,4 +1450,4 @@ class Cities(Resource):
 @api.route("/api/news-flash/<int:id>", methods=["PUT"])
 class SetNewsflashLocationQualification(Resource):
     def put(self, id):
-        return update_new_flash_qualifying(id)
+        return update_news_flash_qualifying(id)

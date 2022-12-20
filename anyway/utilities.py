@@ -1,5 +1,6 @@
 import argparse
 import logging
+import math
 import os
 import re
 import sys
@@ -333,3 +334,7 @@ def is_a_valid_email(tmp_given_user_email: str) -> bool:
         email_address=tmp_given_user_email, check_regex=True, check_mx=False, use_blacklist=False
     )
     return is_valid
+
+
+def half_rounded_up(num: int):
+    return math.ceil(num / 2)

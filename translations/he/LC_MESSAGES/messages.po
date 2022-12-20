@@ -456,6 +456,14 @@ msgstr "מקטעים עם הכי הרבה תאונות"
 msgid "Pedestrian accidents by severity and year"
 msgstr "תאונות הולכי רגל לפי חומרה ולפי שנה"
 
+#: anyway/widgets/all_locations_widgets/seriously_injured_killed_in_bicycles_scooter_widget.py:20
+msgid "Severely injured or killed in bike, e-bike, or scooter accidents"
+msgstr "רוכבי אופניים וקורקינט שנפגעו קשה או נהרגו"
+
+#: anyway/widgets/all_locations_widgets/seriously_injured_killed_in_bicycles_scooter_widget.py
+msgid "Number of severely injured or killed in bike, e-bike, or scooter accidents
+msgstr "מספר נפגעים שנפצעו קשה או נהרגו בתאונות אופנים, אופנים חשמליים וקורקינט"
+
 #: anyway/widgets/urban_widgets/severe_fatal_count_by_vehicle_by_year_widget.py:97
 #: anyway/widgets/urban_widgets/small_motor_severe_fatal_count_by_year_widget.py:59
 msgid "Severe or fatal accidents on bikes, e-bikes, or scooters in "

@@ -17,9 +17,10 @@ from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
 @register
 class TopRoadSegmentsAccidentsPerKmWidget(SubUrbanWidget):
     name: str = "top_road_segments_accidents_per_km"
+    files = [__file__]
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, type(self).name)
+        super().__init__(request_params)
         self.rank = 13
 
     def generate_items(self) -> None:
@@ -74,6 +75,12 @@ class TopRoadSegmentsAccidentsPerKmWidget(SubUrbanWidget):
         except Exception as exception:
             logging.exception(f"{TopRoadSegmentsAccidentsPerKmWidget.name}: {exception}")
             raise exception
+
+    def is_included(self) -> bool:
+        for item in self.items:
+            if item["road_segment_name"] == self.request_params.location_info["road_segment_name"]:
+                return True
+        return False
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:

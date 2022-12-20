@@ -613,7 +613,9 @@ class AccidentMarker(MarkerMixin, Base):
         if kwargs.get("light_transportation", False):
             age_groups_list = kwargs.get("age_groups").split(",")
             LOCATION_ACCURACY_PRECISE_LIST = [1, 3, 4]
-            markers = markers.filter(AccidentMarker.location_accuracy.in_(LOCATION_ACCURACY_PRECISE_LIST))
+            markers = markers.filter(
+                AccidentMarker.location_accuracy.in_(LOCATION_ACCURACY_PRECISE_LIST)
+            )
             INJURED_TYPES = [1, 6, 7]
             markers = markers.filter(
                 or_(
@@ -919,6 +921,34 @@ class NewsFlash(Base):
 
     def get_id(self):
         return self.id
+
+
+class LocationVerificationHistory(Base):
+    __tablename__ = "location_verification_history"
+    id = Column(BigInteger(), primary_key=True)
+    user_id = Column(BigInteger(), ForeignKey("users.id"), nullable=False)
+    news_flash_id = Column(BigInteger(), ForeignKey("news_flash.id"), nullable=False)
+    location_verification_before_change = Column(Integer(), nullable=False)
+    location_before_change = Column(Text(), nullable=False)
+    location_verification_after_change = Column(Integer(), nullable=False)
+    location_after_change = Column(Text(), nullable=False)
+    date = Column(DateTime, default=datetime.datetime.now, nullable=False)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "news_flash": self.news_flash_id,
+            "location_verification_before_change": NewsflashLocationQualification(
+                self.location_verification_before_change
+            ).get_label(),
+            "location_before_change": self.location_before_change,
+            "location_verification_after_change": NewsflashLocationQualification(
+                self.location_verification_after_change
+            ).get_label(),
+            "location_after_change": self.location_after_change,
+            "date": self.date,
+        }
 
 
 class CityFields(object):
@@ -2599,6 +2629,16 @@ class InfographicsRoadSegmentsDataCache(InfographicsRoadSegmentsDataCacheFields,
     def get_data(self):
         return self.data
 
+    def set_data(self, data):
+        self.data = data
+
+    def as_dict(self) -> dict:
+        return {
+            "road_segment_id": self.road_segment_id,
+            "years_ago": self.years_ago,
+            "data": self.data,
+        }
+
     def serialize(self):
         return {
             "road_segment_id": self.road_segment_id,
@@ -2632,6 +2672,9 @@ class InfographicsTwoRoadsDataCache(InfographicsTwoRoadsDataCacheFields, Base):
 
     def get_data(self):
         return self.data
+
+    def set_data(self, json_data: str):
+        self.data = json_data
 
     def serialize(self):
         return {
@@ -2694,6 +2737,17 @@ class InfographicsStreetDataCache(InfographicsStreetDataCacheFields, Base):
 
     def get_data(self):
         return self.data
+
+    def set_data(self, json_data: str):
+        self.data = json_data
+
+    def as_dict(self) -> dict:
+        return {
+            "street": self.street,
+            "yishuv_symbol": self.yishuv_symbol,
+            "years_ago": self.years_ago,
+            "data": self.data,
+        }
 
 
 class InfographicsStreetDataCacheTemp(InfographicsStreetDataCacheFields, Base):

@@ -6,3 +6,4 @@ urlobject
 pytest-selenium
 jsonschema
 mock
+factory_boy

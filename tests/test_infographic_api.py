@@ -71,7 +71,7 @@ class TestInfographicApi:
     def app(self):
         return flask_app.test_client()
 
-    infographic_data = get_infographic_data()
+    infographic_data = None
 
     def test_no_news_flash_id(self, app):
         """Should success and be empty when no flash id is sent"""
@@ -144,6 +144,9 @@ class TestInfographicApi:
         assert actual == expected
 
     def _get_widget_by_name(self, name):
+        if self.infographic_data is None:
+            self.infographic_data = get_infographic_data()
+
         widget = next(
             (widget for widget in self.infographic_data["widgets"] if widget["name"] == name), None,
         )

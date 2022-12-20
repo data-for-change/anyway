@@ -15,10 +15,9 @@ depends_on = None
 from alembic import op
 import sqlalchemy as sa
 
-from anyway.backend_constants import BE_CONST, NewsflashLocationQualification
-
 
 def upgrade():
+    from anyway.backend_constants import NewsflashLocationQualification
     op.add_column(
         "news_flash",
         sa.Column(

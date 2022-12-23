@@ -2,14 +2,17 @@ import copy
 import logging
 import typing
 from collections import defaultdict
-from typing import Dict, Any, List, Type, Optional
+from typing import Dict, Any, List, Type, Optional, Sequence
 
 import pandas as pd
 from flask_babel import _
-from sqlalchemy import func, distinct
+from sqlalchemy import func, distinct, between, and_
 
 from anyway.app_and_db import db
-from anyway.backend_constants import BE_CONST, LabeledCode
+from anyway.backend_constants import BE_CONST, LabeledCode, InjurySeverity
+from anyway.models import Involved, AccidentMarker, RoadSegments
+from anyway.request_params import LocationInfo
+from anyway.vehicle_type import VehicleType
 
 
 def get_query(table_obj, filters, start_time, end_time):
@@ -160,3 +163,54 @@ def sort_and_fill_gaps_for_stacked_bar(
     res = fill_and_sort_by_numeric_range(data, numeric_range, default_order)
     res2 = second_level_fill_and_sort(res, default_order)
     return res2
+
+
+def get_involved_counts(
+    start_year: int,
+    end_year: int,
+    severities: Sequence[InjurySeverity],
+    vehicle_types: Sequence[VehicleType],
+    location_info: LocationInfo,
+) -> Dict[str, int]:
+    selected_columns = (
+        Involved.accident_year.label("label_key"),
+        func.count(distinct(Involved.id)).label("value"),
+    )
+
+    query = (
+        db.session.query()
+        .select_from(Involved)
+        .with_entities(*selected_columns)
+        .join(
+            AccidentMarker,
+            and_(
+                AccidentMarker.id == Involved.accident_id,
+                AccidentMarker.provider_code == Involved.provider_code,
+                AccidentMarker.accident_year == Involved.accident_year,
+            ),
+        )
+        .filter(between(Involved.accident_year, start_year, end_year))
+        .order_by(Involved.accident_year)
+    )
+
+    if "yishuv_symbol" in location_info:
+        query = query.filter(
+            AccidentMarker.yishuv_symbol == location_info["yishuv_symbol"]
+        ).group_by(Involved.accident_year)
+    elif "road_segment_id" in location_info:
+        query = (
+            query.join(RoadSegments, AccidentMarker.road1 == RoadSegments.road)
+            .filter(RoadSegments.segment_id == location_info["road_segment_id"])
+            .group_by(Involved.accident_year)
+        )
+
+    if severities:
+        query = query.filter(
+            Involved.injury_severity.in_([severity.value for severity in severities])
+        )
+
+    if vehicle_types:
+        query = query.filter(Involved.vehicle_type.in_([v_type.value for v_type in vehicle_types]))
+
+    df = pd.read_sql_query(query.statement, query.session.bind)
+    return df.to_dict(orient="records")

@@ -57,7 +57,7 @@ class MostSevereAccidentsWidget(AllLocationsWidget):
             table_obj, filters, entities, start_time, end_time, resolution, limit
         )
         for item in items:
-            item["accident_severity"] = _(AccidentSeverity(item["accident_severity"]).get_label())
+            item["accident_severity"] = AccidentSeverity(item["accident_severity"]).get_label()
         return items
 
     @staticmethod

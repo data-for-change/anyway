@@ -34,6 +34,7 @@ from anyway.widgets.widget import Widget, widgets_dict
 import anyway.widgets.urban_widgets
 import anyway.widgets.suburban_widgets
 import anyway.widgets.all_locations_widgets
+import anyway.widgets.no_location_widgets
 # pylint: enable=unused-import
 
 logger = logging.getLogger("infographics_utils")
@@ -104,6 +105,7 @@ def get_request_params(
     news_flash_obj: Optional[NewsFlash] = extract_news_flash_obj(news_flash_id)
     if news_flash_obj is None:
         return None
+    description = news_flash_obj.description
     location_info = extract_news_flash_location(news_flash_obj)
     if location_info is None:
         return None
@@ -135,6 +137,7 @@ def get_request_params(
         start_time=start_time,
         end_time=end_time,
         lang=lang,
+        description=description
     )
     logging.debug(f"Ending get_request_params. params: {request_params}")
     return request_params
@@ -182,6 +185,8 @@ def get_request_params_for_road_segment(
         start_time=start_time,
         end_time=end_time,
         lang=lang,
+        description=None # Adding placeholder description to avoid failing tests.
+                         # Also, it appears this function is never called, maybe we should consider deleting it
     )
     logging.debug(f"Ending get_request_params. params: {request_params}")
     return request_params
@@ -192,7 +197,7 @@ def create_infographics_data(news_flash_id, number_of_years_ago, lang: str) -> s
     output = create_infographics_items(request_params)
     return json.dumps(output, default=str)
 
-
+# TODO: who is calling this function? can we delete it?
 def create_infographics_data_for_road_segment(
     road_segment_id, number_of_years_ago, lang: str
 ) -> str:

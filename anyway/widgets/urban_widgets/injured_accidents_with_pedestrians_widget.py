@@ -55,6 +55,7 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
             street1_hebrew = self.request_params.location_info.get("street1_hebrew")
 
             if not self.validate_parameters(yishuv_name, street1_hebrew):
+                # TODO: this will fail since there is no news_flash_obj in request_params
                 logging.exception(
                     f"Could not validate parameters for {NewsFlash} : {self.request_params.news_flash_obj.id}"
                 )

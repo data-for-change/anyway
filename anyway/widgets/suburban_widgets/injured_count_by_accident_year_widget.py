@@ -52,8 +52,8 @@ class InjuredCountByAccidentYearWidget(SubUrbanWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
-            "title": _("Number of injured in accidents, per year, split by severity")
-            + f" - {segment_dictionary[request_params.location_info['road_segment_name']]}",
+            "title": _("Number of injured in accidents, per year, split by severity"),
+            "subtitle": segment_dictionary[request_params.location_info['road_segment_name']],
             "labels_map": gen_entity_labels(InjurySeverity),
         }
         return items

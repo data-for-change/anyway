@@ -61,8 +61,8 @@ class AccidentCountBySeverityWidget(AllLocationsWidget):
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         if request_params.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
             items["data"]["text"] = {
-                "title": _("Number of accidents by severity")
-                + f" - {request_params.location_info['road_segment_name']}"
+                "title": _("Number of accidents by severity"),
+                "subtitle": request_params.location_info['road_segment_name']
             }
             items["meta"]["information"] = "{}{} {}.".format(
                 _("Fatal, severe and light accidents count in "),
@@ -72,18 +72,16 @@ class AccidentCountBySeverityWidget(AllLocationsWidget):
         elif request_params.resolution == BE_CONST.ResolutionCategories.STREET:
             # To have FE to treat it as a different widget
             num_accidents = items["data"]["items"]["total_accidents_count"]
-            s = "{} {} - {} {} {}, {}, {} {} {}".format(
+            s = "{} {} - {}, {} {} {}".format(
                 _("in years"),
                 request_params.start_time.year,
                 request_params.end_time.year,
-                _("on street"),
-                request_params.location_info["street1_hebrew"],
-                request_params.location_info["yishuv_name"],
                 _("took place"),
                 num_accidents,
                 _("accidents"),
             )
-            items["data"]["text"] = {"title": s}
+            subtitle = "{}, {}".format(request_params.location_info["street1_hebrew"], request_params.location_info["yishuv_name"])
+            items["data"]["text"] = {"title": s, "subtitle": subtitle}
             items["meta"]["information"] = "{}{} {}.".format(
                 _("Fatal, severe and light accidents count in "),
                 _("street"),

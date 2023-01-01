@@ -131,7 +131,7 @@ class TestInfographicApi:
             start_time=start_time,
             end_time=end_time,
             lang="he",
-            description="Test description"
+            news_flash_description="Test description"
         )
         actual = AccidentCountByCarTypeWidget.get_stats_accidents_by_car_type_with_national_data(
             request_params, vehicle_grouped_by_type_count_unique=vehicle_grouped_by_type_count_unique_test

@@ -33,7 +33,7 @@ class RequestParams:
     start_time: datetime.date
     end_time: datetime.date
     lang: str
-    description: Optional[str]
+    news_flash_description: Optional[str]
 
     def __str__(self):
         return (
@@ -46,7 +46,7 @@ class RequestParams:
 
 # todo: merge with get_request_params()
 def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams]:
-    description = get_description_from_request_values(vals)
+    news_flash_description = get_news_flash_description_from_request_values(vals)
     location = get_location_from_request_values(vals)
     if location is None:
         return None
@@ -90,12 +90,12 @@ def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams
         start_time=start_time,
         end_time=end_time,
         lang=lang,
-        description=description
+        news_flash_description=news_flash_description
     )
     logging.debug(f"Ending get_request_params. params: {request_params}")
     return request_params
 
-def get_description_from_request_values(vals: dict) -> str:
+def get_news_flash_description_from_request_values(vals: dict) -> str:
     news_flash_id = vals.get("news_flash_id")
     if news_flash_id is None:
         return None

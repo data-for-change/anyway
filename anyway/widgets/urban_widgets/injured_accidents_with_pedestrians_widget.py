@@ -13,7 +13,7 @@ from anyway.widgets.widget_utils import (
     gen_entity_labels,
     format_2_level_items,
 )
-from anyway.models import NewsFlash, InvolvedMarkerView
+from anyway.models import InvolvedMarkerView
 from anyway.widgets.widget import register
 from anyway.widgets.urban_widgets.urban_widget import UrbanWidget
 
@@ -56,9 +56,7 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
 
             if not self.validate_parameters(yishuv_name, street1_hebrew):
                 # TODO: this will fail since there is no news_flash_obj in request_params
-                logging.exception(
-                    f"Could not validate parameters for {NewsFlash} : {self.request_params.news_flash_obj.id}"
-                )
+                logging.exception(f"Could not validate parameters yishuv_name + street1_hebrew in widget : {self.name}")
                 return None
 
             query = (

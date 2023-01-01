@@ -13,7 +13,7 @@ class VisionZeroBikeWidget(Widget):
     files = [__file__]
 
     def __init__(self, request_params: RequestParams):
-        if request_params.description is None:
+        if request_params.news_flash_description is None:
             logging.error(f"VisionZeroBikeWidget initialized with missing description field : {request_params}")
         super().__init__(request_params)
         self.information = _("Main principles in zero vision's bike transportation development")
@@ -25,7 +25,7 @@ class VisionZeroBikeWidget(Widget):
 
     # noinspection PyUnboundLocalVariable
     def is_included(self) -> bool:
-        return "אופניים" in self.request_params.description
+        return "אופניים" in self.request_params.news_flash_description
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:

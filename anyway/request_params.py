@@ -46,8 +46,9 @@ class RequestParams:
 
 # todo: merge with get_request_params()
 def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams]:
-    news_flash_description = get_news_flash_description_from_request_values(vals)
-    location = get_location_from_request_values(vals)
+    news_flash_obj = extract_news_flash_obj(vals)
+    news_flash_description =  news_flash_obj.description if news_flash_obj is not None and news_flash_obj.description is not None else None
+    location = get_location_from_news_flash_or_request_values(news_flash_obj, vals)
     if location is None:
         return None
     years_ago = vals.get("years_ago", BE_CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
@@ -95,34 +96,22 @@ def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams
     logging.debug(f"Ending get_request_params. params: {request_params}")
     return request_params
 
-def get_news_flash_description_from_request_values(vals: dict) -> str:
-    news_flash_id = vals.get("news_flash_id")
-    if news_flash_id is None:
-        return None
-    news_flash = extract_news_flash_obj(news_flash_id)
-    if news_flash is None:
-        return None
-    return news_flash.description
 
-def get_location_from_request_values(vals: dict) -> Optional[dict]:
-    news_flash_id = vals.get("news_flash_id")
-    if news_flash_id is not None:
-        return get_location_from_news_flash(news_flash_id)
+def get_location_from_news_flash_or_request_values(news_flash_obj: Optional[NewsFlash], vals: dict) -> Optional[dict]:
+    if news_flash_obj is not None:
+        return get_location_from_news_flash(news_flash_obj)
+
     road_segment_id = vals.get("road_segment_id")
     if road_segment_id is not None:
         return extract_road_segment_location(road_segment_id)
-    if ("yishuv_name" in vals or "yishuv_symbol" in vals) and (
-        "street1" in vals or "street1_hebrew" in vals
-    ):
+    if ("yishuv_name" in vals or "yishuv_symbol" in vals) and ("street1" in vals or "street1_hebrew" in vals):
         return extract_street_location(vals)
+
     logging.error(f"Unsupported location:{vals.values()}")
     return None
 
 
-def get_location_from_news_flash(news_flash_id: str) -> Optional[dict]:
-    news_flash = extract_news_flash_obj(news_flash_id)
-    if news_flash is None:
-        return None
+def get_location_from_news_flash(news_flash: Optional[NewsFlash]) -> Optional[dict]:
     loc = extract_news_flash_location(news_flash)
     if loc is None:
         return None
@@ -234,11 +223,14 @@ def fill_missing_street_values(vals: dict) -> dict:
     return res
 
 
-def extract_news_flash_obj(news_flash_id) -> Optional[NewsFlash]:
+def extract_news_flash_obj(vals) -> Optional[NewsFlash]:
+    news_flash_id = vals.get("news_flash_id")
+    if news_flash_id is None:
+        return None
     news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == news_flash_id).first()
 
     if not news_flash_obj:
-        logging.warning("Could not find news flash id {}".format(news_flash_id))
+        logging.warning(f"Could not find news flash id {news_flash_id}")
         return None
 
     return news_flash_obj

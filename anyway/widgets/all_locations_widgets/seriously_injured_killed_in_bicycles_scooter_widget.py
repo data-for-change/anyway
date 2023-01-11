@@ -1,5 +1,6 @@
 from typing import Dict
 
+# noinspection PyProtectedMember
 from flask_babel import _
 from anyway.backend_constants import InjurySeverity, BackEndConstants as Constants
 from anyway.request_params import RequestParams, LocationInfo
@@ -9,7 +10,6 @@ from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocatio
 from anyway.widgets.widget import register
 from anyway.widgets.widget_utils import get_involved_counts
 
-# noinspection PyProtectedMember
 TITLE = _("Number of severely injured or killed in bike, e-bike, or scooter accidents")
 
 

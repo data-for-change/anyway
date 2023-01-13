@@ -10,8 +10,6 @@ from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocatio
 from anyway.widgets.widget import register
 from anyway.widgets.widget_utils import get_involved_counts
 
-TITLE = _("Number of severely injured or killed in bike, e-bike, or scooter accidents")
-
 
 @register
 class SeriouslyInjuredKilledInBicyclesScooterWidget(AllLocationsWidget):
@@ -47,17 +45,16 @@ class SeriouslyInjuredKilledInBicyclesScooterWidget(AllLocationsWidget):
         return res
 
     @staticmethod
-    def create_location_description(location_info: LocationInfo, location_text: str) -> str:
+    def create_location_description(location_info: LocationInfo) -> str:
         return _("in ") + location_info[Constants.YISHUV_NAME] \
             if Constants.YISHUV_NAME in location_info \
-            else location_text
+            else _("In") + " " + location_info["road_segment_name"]
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         subtitle = SeriouslyInjuredKilledInBicyclesScooterWidget.create_location_description(
-            request_params.location_info,
-            request_params.location_text)
-        items["data"]["text"] = {"title": TITLE,
+            request_params.location_info)
+        items["data"]["text"] = {"title": _("Number of severely injured or killed in bike, e-bike, or scooter accidents"),
                                  "subtitle": subtitle}
         return items
 

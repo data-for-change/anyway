@@ -1,8 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import pandas as pd
-from . import field_names
 
+from anyway import field_names
+from typing import Optional
+
+import logging
+
+logger = logging.getLogger("localizations")
 
 _tables = {
     "SUG_DEREH": {
@@ -15,7 +20,7 @@ _tables = {
         11: "מרחב חוף (חיפה)",
         12: "מרחב גליל",
         14: "מרחב עמקים",
-        20: "מרחב ת\"א",
+        20: 'מרחב ת"א',
         33: "מרחב אילת",
         34: "מרחב הנגב",
         36: "מרחב שמשון (עד 1999)",
@@ -27,17 +32,8 @@ _tables = {
         52: "מרחב השפלה",
         61: "מחוז ירושלים",
     },
-    "SUG_YOM": {
-        1: "חג",
-        2: "ערב חג",
-        3: "חול המועד",
-        4: "יום אחר",
-    },
-    "HUMRAT_TEUNA": {
-        1: "קטלנית",
-        2: "קשה",
-        3: "קלה",
-    },
+    "SUG_YOM": {1: "חג", 2: "ערב חג", 3: "חול המועד", 4: "יום אחר"},
+    "HUMRAT_TEUNA": {1: "קטלנית", 2: "קשה", 3: "קלה"},
     "SUG_TEUNA": {
         1: "פגיעה בהולך רגל",
         2: "התנגשות חזית אל צד",
@@ -84,32 +80,16 @@ _tables = {
         5: "אחר",
     },
     "MEHIRUT_MUTERET": {
-        1: "עד 50 קמ\"ש",
-        2: "60 קמ\"ש",
-        3: "70 קמ\"ש",
-        4: "80 קמ\"ש",
-        5: "90 קמ\"ש",
-        6: "100 קמ\"ש",
+        1: 'עד 50 קמ"ש',
+        2: '60 קמ"ש',
+        3: '70 קמ"ש',
+        4: '80 קמ"ש',
+        5: '90 קמ"ש',
+        6: '100 קמ"ש',
     },
-    "TKINUT": {
-        1: "אין ליקוי",
-        2: "שוליים גרועים",
-        3: "כביש משובש",
-        4: "שוליים גרועים וכביש משובש",
-    },
-    "ROHAV": {
-        1: "עד 5 מטר",
-        2: "5 עד 7",
-        3: "7 עד 10.5",
-        4: "10.5 עד 14",
-        5: "יותר מ-14",
-    },
-    "SIMUN_TIMRUR": {
-        1: "סימון לקוי/חסר",
-        2: "תימרור לקוי/חסר",
-        3: "אין ליקוי",
-        4: "לא נדרש תמרור",
-    },
+    "TKINUT": {1: "אין ליקוי", 2: "שוליים גרועים", 3: "כביש משובש", 4: "שוליים גרועים וכביש משובש"},
+    "ROHAV": {1: "עד 5 מטר", 2: "5 עד 7", 3: "7 עד 10.5", 4: "10.5 עד 14", 5: "יותר מ-14"},
+    "SIMUN_TIMRUR": {1: "סימון לקוי/חסר", 2: "תימרור לקוי/חסר", 3: "אין ליקוי", 4: "לא נדרש תמרור"},
     "TEURA": {
         1: "אור יום רגיל",
         2: "ראות מוגבלת עקב מזג אויר (עשן,ערפל)",
@@ -126,13 +106,7 @@ _tables = {
         6: "תמרור זכות קדימה",
         7: "אחר",
     },
-    "MEZEG_AVIR": {
-        1: "בהיר",
-        2: "גשום",
-        3: "שרבי",
-        4: "ערפילי",
-        5: "אחר",
-    },
+    "MEZEG_AVIR": {1: "בהיר", 2: "גשום", 3: "שרבי", 4: "ערפילי", 5: "אחר"},
     "PNE_KVISH": {
         1: "יבש",
         2: "רטוב ממים",
@@ -151,12 +125,7 @@ _tables = {
         7: "חבית",
         8: "אחר",
     },
-    "MERHAK_EZEM": {
-        1: "עד מטר",
-        2: "1-3 מטר",
-        3: "על הכביש",
-        4: "על שטח הפרדה",
-    },
+    "MERHAK_EZEM": {1: "עד מטר", 2: "1-3 מטר", 3: "על הכביש", 4: "על שטח הפרדה"},
     "LO_HAZA": {
         1: "הלך בכיוון התנועה",
         2: "הלך נגד",
@@ -166,29 +135,21 @@ _tables = {
         6: "היה על שוליים/מדרכה",
         7: "אחר",
     },
-    "OFEN_HAZIYA": {
-        1: "התפרץ אל הכביש",
-        2: "חצה שהוא מוסתר",
-        3: "חצה רגיל",
-        4: "אחר",
-    },
+    "OFEN_HAZIYA": {1: "התפרץ אל הכביש", 2: "חצה שהוא מוסתר", 3: "חצה רגיל", 4: "אחר"},
     "MEKOM_HAZIYA": {
         1: "לא במעבר חציה ליד צומת",
         2: "לא במעבר חציה לא ליד צומת",
         3: "במעבר חציה בלי רמזור",
         4: "במעבר חציה עם רמזור",
     },
-    "KIVUN_HAZIYA": {
-        1: "מימין לשמאל",
-        2: "משמאל לימין",
-    },
+    "KIVUN_HAZIYA": {1: "מימין לשמאל", 2: "משמאל לימין"},
     "STATUS_IGUN": {
         1: "עיגון מדויק",
         2: "מרכז ישוב",
         3: "מרכז דרך",
         4: "מרכז קילומטר",
         9: "לא עוגן",
-    }
+    },
 }
 
 _fields = {
@@ -201,8 +162,8 @@ _fields = {
     "BAYIT": "מספר בית",
     "ZOMET_IRONI": "צומת עירוני",  # from intersect urban dictionary
     "KVISH1": "כביש 1",  # from intersect urban dictionary
-    "KVISH2": "כביש 2",  #from intersect urban dictionary
-    "ZOMET_LO_IRONI": "צומת לא עירוני",  #from non urban dictionary
+    "KVISH2": "כביש 2",  # from intersect urban dictionary
+    "ZOMET_LO_IRONI": "צומת לא עירוני",  # from non urban dictionary
     "YEHIDA": "יחידה",
     "SUG_YOM": "סוג יום",
     "RAMZOR": "רמזור",
@@ -233,10 +194,14 @@ _fields = {
     "MAAMAD_MINIZIPALI": "מעמד מוניציפלי",
     "ZURAT_ISHUV": "צורת יישוב",
     "VEHICLE_TYPE": "סוג רכב",
-    "VIOLATION_TYPE": "סוג עבירה"
+    "VIOLATION_TYPE": "סוג עבירה",
+    "RSA_LICENSE_PLATE": "סוג לוחית רישוי",
 }
 
-_cities = pd.read_csv("static/data/cities.csv", encoding="utf-8", index_col=field_names.sign)
+try:
+    _cities = pd.read_csv("static/data/cities.csv", encoding="utf-8", index_col=field_names.sign)
+except FileNotFoundError:
+    pass
 
 
 def get_field(field, value=None):
@@ -251,9 +216,9 @@ def get_supported_tables():
     return _tables.keys()
 
 
-def get_city_name(symbol_id):
+def get_city_name(symbol_id, lang: str = "he") -> Optional[str]:
+    column_to_fetch = field_names.name if lang == "he" else "ENGLISH_NAME"
     try:
-        city = _cities.loc[symbol_id,field_names.name]
-        return city
-    except Exception as _:
+        return _cities.loc[symbol_id, column_to_fetch]
+    except Exception:
         return None

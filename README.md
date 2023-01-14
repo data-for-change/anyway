@@ -1,102 +1,94 @@
-ANYWAY [![Build Status](https://travis-ci.org/hasadna/anyway.png)](https://travis-ci.org/hasadna/anyway) [![Build status](https://ci.appveyor.com/api/projects/status/pg5qvt62y16bu4k5?svg=true)](https://ci.appveyor.com/project/r-darwish/anyway)
+ANYWAY [![Build Status](https://github.com/hasadna/anyway/workflows/Tests/badge.svg)](https://github.com/hasadna/anyway/actions?query=workflow%3ATests)
 ======
 
-[anyway.co.il](https://www.anyway.co.il/) - Crowd-sourced road hazard reporting website.<br>
-Also available at [oway.org.il](https://www.oway.org.il/).
+Welcome to ANYWAY!
 
-Feel free to contribute to the project.
+ANYWAY is a volunteer based project acting under the umbrella of the Public Knowledge Workshop (“[HASADNA](https://www.hasadna.org.il/about-us/)”).
 
-To report bugs and feature requests, please [open an issue](https://github.com/hasadna/anyway/issues) on GitHub.
+Feel free to contribute to the project. To report bugs and feature requests, please [open an issue](https://github.com/hasadna/anyway/issues) on GitHub. See [Code Directory Tree Structure](docs/CODE.md).
 
-See also our [Android app](https://github.com/samuelregev/anywayAndroidApp/)
-and [iOS app](https://github.com/hasadna/Anyway-iOS/) on GitHub. 
-
-The datasets Anyway uses are documented here:
-* [CBS (Central Bureau of Statistics, למ"ס)](https://github.com/hasadna/anyway/blob/dev/docs/CBS.md)
-* [United Hatzalah (איחוד הצלה)](https://github.com/hasadna/anyway/blob/dev/docs/UNITED.md) - Currently not in use
-
-See [Code Directory Tree Structure](docs/CODE.md).
 
 About
 -----------------------
-Anyway's main goal is raising awareness of road accidents and act to avoid them, by showing road accidents with casualties over map.<br>
-The shown data based on reports supplied by the Israeli Central Bureau of Statistics (CBS) and real time reports from United Hatzalah of Israel.<br>
-Anyway is an open source project, sponsored by The Public Knowledge Workshop (“Hasadna”).
+
+### Our Goal
+
+At ANYWAY we aim to reduce road accidents by: 
+1. Raising public awareness of existing road hazards, thereby leading towards safer road behaviour.
+1. Collaborating with authorities in order to assist and drive them to find solutions in light of Vision Zero. Such solutions will improve road infrastructure and behavioural problems in attempt to prevent road fatalities.
+
+Take a look at our [facebook page](https://www.facebook.com/anywayisrael). See also our [Android app](https://github.com/samuelregev/anywayAndroidApp/) and [iOS app](https://github.com/hasadna/Anyway-iOS/) on GitHub.
+
+
+### ANYWAY’s Interactive Map:
+
+ANYWAY presents locations over an [interactive map](https://www.anyway.co.il/) as well as information regarding traffic accidents including casualties, information originating from the Central Bureau of Statistics (הלשכה המרכזית לסטטיסטיקה) and traffic violations as reported by road vigilantes (שומרי הדרך). The website allows visitors to discuss possible solutions in their residential or drive zone with the goal of coming up with field solutions by both drivers and pedestrians, on both local and national scope.
+
+The map is also available at [oway.org.il](https://www.oway.org.il/).
+
+
+### ANYWAY Schools Report
+
+At the beginning of one of the school years we created a report of pedestrian [accidents around schools](https://reports.anyway.co.il/accidents_around_schools) - this is one simple example of insights that can be extracted from the data that we have.
+
+
+### ANYWAY’s Infographics Generator - Our Next Challenge
+
+ANYWAY’s next challenge is to form an automatic generator of infographics to empower and serve journalists, bloggers, public opinion leaders, community leaders etc. in the era of **data journalism**. The generated infographics will enhance reporting and news writing with the use of **statistics**. Each infographic will be created for a real-time road accident related **news flash** and will provide a deeper insight into the story based on historical data. This, we believe, will increase both the quantity and quality of articles dealing with road accidents, and will result in raising public awareness and creating pressure on decision makers to initiate infrastructure improvements in light of **Vision Zero**.
+Relevant github repositories:
+- [Infographics FrontEnd](https://github.com/hasadna/anyway-newsflash-infographics)
+- [ANYWAY ETL Flows](https://github.com/hasadna/anyway-etl)
+Note: ANYWAY ETL Flows uses current repository code - to update ANYWAY ETL with most updated anyway code, the change needs to be introduced in a release of anyway-etl.
+
+
+### HASADNA
+
+The Public Knowledge Workshop (“[HASADNA](https://www.hasadna.org.il/about-us/)”) is a volunteer-based, non-profit, non-governmental, and non-political organization, working to promote transparency and civic involvement by building open source technological tools to liberate valuable data collected by public institutions and make them accessible, simple and understandable for everyone.
+The Public Knowledge Workshop functions as an organizational basis to the projects acting within it. One of those projects is ANYWAY.
+
+
+### Vision Zero
+
+Read about Vision Zero: [Hebrew](https://ecowiki.org.il/wiki/%D7%97%D7%96%D7%95%D7%9F_%D7%90%D7%A4%D7%A1_%D7%94%D7%A8%D7%95%D7%92%D7%99%D7%9D_%D7%91%D7%AA%D7%90%D7%95%D7%A0%D7%95%D7%AA_%D7%93%D7%A8%D7%9B%D7%99%D7%9D), [English](https://en.wikipedia.org/wiki/Vision_Zero) 
+
+
+### The Israel National Road Safety Authority (הרשות הלאומית לבטיחות בדרכים)
+
+Take a look at the [daily reports](https://www.gov.il/he/Departments/General/daily_report), [2018 yearly report](https://www.gov.il/BlobFolder/reports/trends_2018/he/research_megamot_2018.pdf) (Hebrew)
+
 
 Contributing
 -----------------------
-* We try to follow the process of other Hasadna projects, e.g. [Open-Knesset](https://oknesset-devel.readthedocs.org/en/latest/).
 * Please take a moment to read our ["Contributing to ANYWAY" manifest](docs/CONTRIBUTING.md).
-* To see our GitHub issues in a nicer interface, take a look at [HuBoard](https://huboard.com/hasadna/anyway). Check out the Ready list to find a task to work on. The Backlog list there contains issues that are still not ready to be started. The Working list contains issues already started by developers (make sure to move your issue there once you start working on it), and the Done list contains completed issues that are waiting to be confirmed done and closed.
 
-## Getting the code and Adding CI to your forked repository
+## Getting the code
+
+### If you are setting up anyway on Windows using WSL - PLEASE MAKE SURE TO COMPLETE THE FOLLOWING STEPS FROM YOUR WSL TERMINAL!!!
+
 1. [Fork](https://github.com/hasadna/anyway/fork) this repository on GitHub
-1. Add Travis CI to your forked repository - in your github forked repository: Settings -> Integrations & services -> Add service -> Travis CI
-1. Add AppVeyor to your forked repository - [Login with your GitHub account](https://ci.appveyor.com/login) -> New Project -> GitHub -> anyway
 1. `git clone https://github.com/*you*/anyway`
+1. `cd anyway`
 1. Add the main repository as your upstream remote: `git remote add upstream https://github.com/hasadna/anyway`
 
 * Get updates whenever you start working: `git pull upstream dev`
-* Push to your fork when you've committed your changes and tested them: `git push`. Now make sure CI tests are passing (Travis CI and AppVeyor) and make a pull request from your fork on GitHub
+* Push to your fork when you've committed your changes and tested them: `git push`. Now make sure CI tests are passing (see Actions tab) and make a pull request from your fork on GitHub
 
-## Local Developement: Installing dependencies
+## WSL2
 
-You should be familiar with setting up Python in your computer. You can consult the [wiki](https://github.com/hasadna/anyway/wiki/Setup) for
-platform specific tutorials. Developing by using a [virtual
-environment](https://www.youtube.com/watch?v=N5vscPTWKOk) is highly recommended.
+In order to use WSL2, please follow [these official Docker instructions](https://docs.docker.com/desktop/windows/wsl/). Note that although you run Docker from a Linux distribution, you are instructed to install the Docker Desktop app, and specify usage of WSL2
 
-### Choosing a Python Version
-The project is currently transitioning to Python 3. Both Python 2 and 3 are supported at the moment, and the code is tested in Travis against both versions. If you are setting a new environment, it is recommended that you choose Python 3 for future compatibility. The instructions below are relevant for Python 2.
-
-### Ubuntu
-1. `sudo apt-get install python2-pip python2-dev libpq-dev rabbitmq-server`
-
-### Fedora
-1. `sudo dnf upgrade python-setuptools`
-
-### OS X
-1. `sudo easy_install pip setuptools`
-
-### For all platforms:
-1. Activate your virtualenv (in case of using one): `source *env-name*/bin/activate`
-1. Run `pip install -r requirements.txt -r test_requirements.txt`
-
-### Windows
-See the [Wiki](https://github.com/hasadna/anyway/wiki/Setting-up-a-Python-development-environment-in-Windows).
-
-## Local Developement: Local first run (all platforms)
-1. Set up a PostgreSQL server and create a database for anyway. The instructions for doing that
-   depend on your operating system
-1. Define connection string (needs to be defined whenever you start working):
-  * bash: `export DATABASE_URL='postgresql://postgres@localhost/anyway'`
-  * windows shell: `set DATABASE_URL=postgresql://postgres@localhost/anyway`
-  You might need to add your password to the connection url. For more information: https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING
-
-1. First time, create tables: `alembic upgrade head`
-1. Optionally, get the [complete accidents file](https://drive.google.com/drive/folders/1JVBNP3oTn12zxWExPKeCf_vetNHVCcoo?usp=sharing) after sending a permission request, and extract it into `/static/data/cbs`. Otherwise, you'll use the example accidents files that you already got with the code.
-1. Populate the data (markers etc.): `python main.py process cbs`: this will take a few minutes if
-   you're using the example files (default), but if you have the complete data it may take several
-   hours.
-1. Populate United Hatzalah sample data: `python main.py process united --light` for the complete,
-   or more recent data please contact the Anyway team.
-1. Populate CBS registered vehicles in cities : `python main.py process registered_vehicles`: this will take less than an hour
-1. Get the RSA file from [rsa file](https://drive.google.com/drive/folders/1oR3q-RBKy8AWXf5Z1JNBKD9cqqlEG-jC?usp=sharing) and extract the file into `/static/data/rsa`. To Populate RSA data: `python main.py process rsa <rsa_file_name>`
-1. Run the app: `python main.py testserver`: do this whenever you start working and want to try out your code.
-1. Navigate to http://127.0.0.1:5000 in your browser.
-1. If the site fails to load properly, make sure you have JDK installed on your machine
-1. If you wish to share your app on the local network, you can expose flask by running `python
-    main.py testserver --open` (Please note that this would expose your machine on port 5000 to all
-    local nodes)
-
-It is useful to add the following to your `~/.bashrc` (fixing for the correct path):
-
-    alias anyway='cd *path*/anyway && workon anyway && export DATABASE_URL=postgresql://postgres@localhost/anyway'
-
-Then you can simply start working by running the `anyway` command.
+## Docker
+We are using DOCKER. See [DOCKER](docs/DOCKER.md)  
+See also an [introductory lecture](https://youtu.be/qh-hnPWViZA) by Assaf Dayan.
 
 ## Testing
-To run tests: `pylint -j $(nproc) anyway tests && pytest -m "not browser" ./tests`
+### Pylint
+To run pylint tests: `pylint -j $(nproc) anyway tests && pytest -m "not browser" ./tests`
 
+### Black
+To format the code using black: `black anyway/**/*.py -l 100 anyway` should be executed from the root directory.
+Alternatively, one can execute `docker run -v $(pwd):/code jbbarth/black anyway -l 100` to run the command with docker.
+        
 If you also wish to run the real browser tests, replace`-m "not browser"` with `--driver Chrome` or specify the browser of your choice. To learn more, read about [pytest-selenium](http://pytest-selenium.readthedocs.io/en/latest/user_guide.html#specifying-a-browser).
 
 ## Altering the database schema
@@ -108,9 +100,6 @@ alembic revision --autogenerate -m "Description of the change"
 ```
 
 Make sure to commit your revision together with the code.
-
-## Docker
-See [DOCKER](docs/DOCKER.md)
 
 ## Translation and Localization
 See [TRANSLATE](docs/TRANSLATE.md)

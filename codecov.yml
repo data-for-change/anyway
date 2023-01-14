@@ -1,0 +1,11 @@
+coverage:
+  status:
+    patch: off
+    project:
+      default:
+        target: auto
+        threshold: 0%
+        base: auto 
+        informational: true
+  ignore:
+    - "tests/**"

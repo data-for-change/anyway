@@ -1,0 +1,39 @@
+{
+  "name": "vehicle_accident_vs_all_accidents",
+  "data": {
+    "items": [
+      {
+        "accident_type": "Skid",
+        "כביש 90": 0.3333333333333333,
+        "כל הארץ": 0.29381520341972317
+      },
+      {
+        "accident_type": "Collision of front to side",
+        "כביש 90": 0.21333333333333335,
+        "כל הארץ": 0.1979493617911697
+      },
+      {
+        "accident_type": "Collision of front to rear-end",
+        "כביש 90": 0.12,
+        "כל הארץ": 0.13475622515170538
+      },
+      {
+        "accident_type": "Collision of side to side (lateral)",
+        "כביש 90": 0.09333333333333334,
+        "כל הארץ": 0.2048545720862105
+      },
+      {
+        "accident_type": "Collision with an inanimate object",
+        "כביש 90": 0.06666666666666667,
+        "כל הארץ": 0.02188144561025917
+      }
+    ],
+    "text": {
+      "title": "סוגי תאונות אופנועים בכביש 90 בהשוואה לכל הארץ"
+    }
+  },
+  "meta": {
+    "rank": 25,
+    "information": ""
+  }
+}

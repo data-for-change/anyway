@@ -1,0 +1,35 @@
+{
+    "name": "accident_count_by_accident_type",
+    "data": {
+        "items": [
+            {
+                "accident_type": "התנגשות",
+                "count": 146
+            },
+            {
+                "accident_type": "החלקה",
+                "count": 11
+            },
+            {
+                "accident_type": "התהפכות",
+                "count": 15
+            },
+            {
+                "accident_type": "ירידה מהכביש או עלייה למדרכה",
+                "count": 9
+            },
+            {
+                "accident_type": "נפילה מרכב נע",
+                "count": 2
+            },
+            {
+                "accident_type": "פגיעה בהולך רגל",
+                "count": 5
+            }
+        ]
+    },
+    "meta": {
+        "rank": 6,
+        "information": ""
+    }
+}

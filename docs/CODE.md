@@ -8,8 +8,6 @@ All Python modules reside in the `anyway` subdirectory:
 * `flask_app.py`: main server code, using the Flask web framework.
 * `models.py`: definitions for the classes used in the Python code, and through SQLAlchemy, definitions for the corresponding database tables.
 * `process.py`: loading data from the Central Bureau of Statistics (CBS, למ"ס), of which a sample resides in `static/data/cbs`.
-* `united.py`: loading data from United Hatzalah, of which a sample resides in `static/data/united`.
-* `importmail.py`: connecting to the Gmail inbox we use for storing the United Hatzalah data; used by `united.py`.
 * `clusters_calculator.py`, `globalmaptiles.py`: algorithm for calculating clusters of markers to be sent instead of individual ones in far zoom level.
 * `localization.py`: translation of field values.
 * `field_names.py`: English names of fields from CBS data.
@@ -17,9 +15,20 @@ All Python modules reside in the `anyway` subdirectory:
 * `base.py`, `config.py`, `database.py`: configuration for database and web access.
 * `oauth.py`: user authentication.
 * `utilities.py`: miscellaneous utilities.
-* `save_discussions.py`, `load_discussions.py`: used for saving/loading discussion markers to/from Disqus.
 
 One file, called `main.py` resides in the root of the repository. This file contains all commands needed to manipulate the database and run the server. Run `./main.py --help` for help.
+
+## Widgets
+Widgets can be thought of as individual data collections which are produced for consumtion by the end-user. For example: AccidentCountByAccidentTypeWidget which returns, well, the accident count by accident type 
+
+### Structure
+Widgets are currently divided into 2 kinds/classes (but this could change in the future by adding more sub-classes): Urban and Suburban, both of these are a subclass of the Widget class, and a superclass for all widgets. For example, AccidentCountByAccidentTypeWidget is a subclass of SubUrbanWidget which is itself a subclass of the Widget class
+
+### Adding new widgets
+Every Widget, defined by its own class, should be created in a new file under the relevant module/directory, in snake_casing. In addition, in order to import the newly added widget, you need to add it to the super classe's \_\_init\_\_.py file. For example, if we were to add a new SubUrbanWidget named NewWidget, we should:
+1. Create a file named new_widget.py under the suburban_widgets directory
+2. Write the code for the new widget as a class named NewWidget(SubUrbanWidget)
+3. Add it to the import statement in the \_\_init\_\_.py file of the suburban_widgets module
 
 ## Jinja2 Templates
 We use Jinja2 for templates, to allow embedding data into HTML files. All templates reside in `templates`.

@@ -1,0 +1,105 @@
+name: Tests
+
+on:
+  pull_request:
+      branches:
+        - master
+        - dev
+  push:
+    branches:
+      - master
+      - dev
+jobs:
+  #Eslint:
+  #  runs-on: ubuntu-latest
+  #  steps:
+  #  - uses: actions/checkout@v2
+  #  - name: Setup Node.js environment
+  #    uses: actions/setup-node@v1.4.1
+  #    with:
+  #        node-version: '8.17'
+  #  - run: npm install -g eslint@6.8.0
+  #  - run: eslint static/js --ignore-path=static/js/.eslintignore
+  Pylint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.7'
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r test_requirements.txt -r requirements.txt
+    - name: Pylint
+      run: |
+        bin/pylint.sh
+  Black:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.7'
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade black
+    - name: black formatting
+      run: |
+        bin/black.sh
+  Tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Starting Server and DB
+      run: |
+        docker-compose -f docker-compose.yml up -d --build anyway
+    - name: Waiting for DB startup
+      run: |
+        bash ./wait_for_postgres.sh
+    - name: DB Initialization
+      run: |
+        docker exec anyway alembic upgrade head
+        docker exec anyway ./main.py process registered-vehicles
+        docker exec anyway ./main.py process cbs --source local_dir_for_tests_only
+        docker exec anyway ./main.py process road-segments
+    - name: Tests
+      env:
+        TWITTER_CONSUMER_KEY: ${{ secrets.TWITTER_CONSUMER_KEY }}
+        TWITTER_CONSUMER_SECRET: ${{ secrets.TWITTER_CONSUMER_SECRET }}
+        TWITTER_ACCESS_KEY:  ${{ secrets.TWITTER_ACCESS_KEY }}
+        TWITTER_ACCESS_SECRET:  ${{ secrets.TWITTER_ACCESS_SECRET }}
+        GOOGLE_MAPS_KEY: ${{ secrets.GOOGLE_MAPS_KEY }}
+        APP_SECRET_KEY: ${{ secrets.APP_SECRET_KEY }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        docker exec anyway pip install -r ./test_requirements.txt
+        docker exec \
+          -e TWITTER_CONSUMER_KEY=$TWITTER_CONSUMER_KEY \
+          -e TWITTER_CONSUMER_SECRET=$TWITTER_CONSUMER_SECRET \
+          -e TWITTER_ACCESS_KEY=$TWITTER_ACCESS_KEY \
+          -e TWITTER_ACCESS_SECRET=$TWITTER_ACCESS_SECRET \
+          -e GOOGLE_MAPS_KEY=$GOOGLE_MAPS_KEY \
+          -e APP_SECRET_KEY=$APP_SECRET_KEY \
+          anyway pytest -v tests -m "not browser" --cov=. --cov-report=xml
+
+    - name: Logging docker in case of failure
+      if: failure()
+      run : |
+        docker ps
+        docker container inspect anyway
+        docker logs --details anyway
+        echo +-+-+-
+        docker container inspect db
+        docker logs --details db
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        env_vars: OS,PYTHON
+        name: codecov-umbrella
+        fail_ci_if_error: false

@@ -1,16 +1,18 @@
-import pytest
-import requests
-from anyway import app
 from threading import Thread
 from time import sleep
+
+import pytest
+import requests
 from urlobject import URLObject
 from werkzeug.serving import make_server
+
+from anyway.app_and_db import app
 
 
 class ServerThread(Thread):
     def __init__(self):
         super(ServerThread, self).__init__()
-        self.srv = make_server('127.0.0.1', 5000, app)
+        self.srv = make_server("127.0.0.1", 5000, app)
         self.ctx = app.app_context()
         self.ctx.push()
 

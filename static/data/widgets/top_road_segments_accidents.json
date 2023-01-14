@@ -1,0 +1,34 @@
+{
+  "name": "top_road_segments_accidents",
+  "data": {
+    "items": [
+      {
+        "segment name": "מחלף לה גרדיה - מחלף השלום",
+        "count": 70
+      },
+      {
+        "segment name": "מחלף השלום - מחלף הרכבת",
+        "count": 48
+      },
+      {
+        "segment name": "מחלף וולפסון - מחלף חולון",
+        "count": 48
+      },
+      {
+        "segment name": "מחלף קוממיות - מחלף יוספטל",
+        "count": 34
+      },
+      {
+        "segment name": "מחלף ההלכה - מחלף רוקח ",
+        "count": 31
+      }
+    ],
+    "text": {
+      "title": "5 המקטעים עם כמות התאונות הגדולה ביותר"
+    }
+  },
+  "meta": {
+    "rank": 22,
+    "information": ""
+  }
+}

@@ -1,0 +1,7 @@
+﻿type_id,injured_type,desc_heb,injuries_cost_k,year,data_source
+1,Dead,הרוג,"6,600",2012,נוהל פרת
+2,Severly_injured_Critical,פצוע קשה מאוד,"4,376",2012,נוהל פרת
+3,Severly_injured,פצוע קשה,"1,675",2012,נוהל פרת
+4,mildly_injured,פצוע בינוני,"1,117",2012,נוהל פרת
+5,Slightly_wounded_hospitalized,פצוע קל שאושפז,142,2012,נוהל פרת
+6,Slightly_wounded_not_hospitalized,פצוע קל,25,2012,נוהל פרת

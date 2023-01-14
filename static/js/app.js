@@ -89,6 +89,8 @@ $(function() {
             this.district = 0;
             this.case_type = 0;
             this.total_markers = 0;
+            this.total_accidents = 0;
+            this.total_rsa = 0;
 
             this.dateRanges = [new Date($('#sdateInit').val()), new Date($('#edateInit').val())];
 
@@ -986,6 +988,13 @@ $(function() {
                 event: event,
                 markers: this.markers
             }).render();
+        },
+        handleEmbeddedReportSelection: function(selectObject) {
+            if (selectObject.value === "0") {
+                return;
+            }
+            window.open("https://reports.anyway.co.il/" + selectObject.value, '_self');
+            $("#embeddedReportsList").val("0");
         },
         handleSearchBox: function() {
             var places = this.searchBox.getPlaces();

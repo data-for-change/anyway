@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  anyway-tests:
+    build: .
+    image: docker.pkg.github.com/hasadna/anyway/anyway:latest
+    container_name: anyway-tests
+    ports:
+      - "8081:5000"
+    environment:
+      - DATABASE_URL=postgresql://anyway:anyway@db-tests/anyway
+      - FLASK_ENV=development
+      - TWITTER_CONSUMER_KEY
+      - TWITTER_CONSUMER_SECRET
+      - TWITTER_ACCESS_KEY
+      - TWITTER_ACCESS_SECRET
+      - GOOGLE_APPLICATION_CREDENTIALS=GOOGLE_APPLICATION_CREDENTIALS_KEY.json
+    volumes:
+      - .:/anyway
+    restart: always
+    depends_on:
+      - db-tests
+
+  db-tests:
+    build: db_docker
+    image: docker.pkg.github.com/hasadna/anyway/db:latest
+    container_name: db-tests
+    volumes:
+      - db_tests_data:/var/lib/postgresql/data
+    ports:
+      - "9877:5432"
+    restart: always
+
+volumes:
+  db_tests_data:

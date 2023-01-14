@@ -1,0 +1,14 @@
+{
+  "location_info": {
+    "road1": 90.0,
+    "road_segment_name": "כניסה למצפה שלם - צומת שדי תרומות"
+  },
+  "location_text": "כביש 90 במקטע כניסה למצפה שלם - צומת שדי תרומות",
+  "dates_comment": {
+    "date_range": [
+      2017,
+      2021
+    ],
+    "last_update": "2021-07-31T00:00:00"
+  }
+}

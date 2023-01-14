@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<rss version="2.0">
+    <channel>
+        <title><![CDATA[ynet - מבזקים]]></title>
+        <link><![CDATA[https://www.ynet.co.il]]></link>
+        <description><![CDATA[עדכוני SMS ישירות מחדר החדשות של ynet. שילחו את המילים ''התחל חדשות'' למספר 5335 וקבלו 4 עדכוני SMS ביום. השירות בתשלום.]]></description>
+        <copyright><![CDATA[Ynet - news and content from Israel (Yedioth Ahronoth web site)]]></copyright>
+        <language><![CDATA[he]]></language>
+        <pubDate><![CDATA[Wed, 23 Jun 2021 14:03:59 +0300]]></pubDate>
+        <image>
+            <title><![CDATA[Ynet]]></title>
+            <link><![CDATA[https://www.ynet.co.il/home/0,7340,L-1854,00.html]]></link>
+            <url><![CDATA[http://www.ynet.co.il/images/CENTRAL_logo.gif]]></url>
+        </image>
+        <lastBuildDate><![CDATA[Wed, 23 Jun 2021 14:03:59 +0300]]></lastBuildDate>
+
+    <item>
+        <title><![CDATA[עבודות לתועלת הציבור לסייעת "גן מתוק" בגבעתיים שבו הותקפו ילדים]]></title>
+        <description><![CDATA[]]></description>
+        <link><![CDATA[https://www.ynet.co.il/news/article/HkhoCYxnO]]></link>
+        <pubDate><![CDATA[Wed, 23 Jun 2021 13:58:51 +0300]]></pubDate>
+        <guid><![CDATA[https://www.ynet.co.il/news/article/HkhoCYxnO]]></guid>
+        <tags><![CDATA[]]></tags>
+    </item>
+
+    </channel>
+</rss>

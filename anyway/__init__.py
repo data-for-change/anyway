@@ -1,1 +1,4 @@
-from .flask_app import app
+try:
+    from anyway.flask_app import app
+except ModuleNotFoundError:
+    pass

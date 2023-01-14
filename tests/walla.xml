@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+    <channel>
+        <title></title>
+        <link>https://news.walla.co.il/category/22</link>
+        <description>חדשות מתפרצות ודיווחים על אירועים בארץ ובעולם בזמן אמת, שניות לאחר התרחשותם  כל העדכונים באתר החדשות המוביל בישראל</description>
+        <lastBuildDate>Wed, 23 Jun 2021 14:04:30 GMT</lastBuildDate>
+        <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
+        <generator>Walla RnD</generator>
+        <language>he</language>
+        <image>
+            <title></title>
+            <url>https://img.wcdn.co.il//2/5/4/2/2542044-46.jpg</url>
+            <link>https://news.walla.co.il/category/22</link>
+        </image>
+        <copyright>Copyright © Walla! Communications LTD. All rights reserved. The contents of this feed are available for non-commercial use only.</copyright>
+        <item>
+            <title><![CDATA[חובת המסכות תוחזר אם יהיה ממוצע שבועי של 100 חולים ביום]]></title>
+            <link>https://news.walla.co.il/break/3443829</link>
+            <guid>https://news.walla.co.il/break/3443829</guid>
+            <pubDate>Wed, 23 Jun 2021 13:49:00 GMT</pubDate>
+            <description><![CDATA[<p style="direction:rtl; clear:both"><a href="https://news.walla.co.il/break/3443829"></a><br/>חובת המסכות תוחזר בחללים סגורים אם יהיה ממוצע שבועי של 100 חולים ביום - כך הוחלט היום (רביעי) בדיון השרים.</p>]]></description>
+        </item>
+        <item>
+            <title><![CDATA[ פקיסטן: שמונה הרוגים בפיצוץ באוטובוס ]]></title>
+            <link>https://news.walla.co.il/break/3448092</link>
+            <guid>https://news.walla.co.il/break/3448092</guid>
+            <pubDate>Wed, 14 Jul 2021 06:10:00 GMT</pubDate>
+            <description><![CDATA[ <p style="direction:rtl; clear:both"><a href="https://news.walla.co.il/break/3448092"></a><br/>שמונה בני אדם נהרגו הבוקר (רביעי) בפיצוץ אוטובוס בצפון פקיסטן. בין ההרוגים, שישה מהנדסים תושבי סין. טרם ידוע מקור הפיצוץ.</p> ]]></description>
+        </item>
+    </channel>
+</rss>

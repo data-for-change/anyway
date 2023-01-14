@@ -3,9 +3,10 @@
 /new_local.db
 /envit.sh
 /local.db-journal
-
+pyvenv.cfg.
 # compiled code
 *.py[cod]
+*.log
 
 # C extensions
 *.so
@@ -17,7 +18,6 @@ dist
 build
 eggs
 parts
-bin
 var
 sdist
 develop-eggs
@@ -40,6 +40,7 @@ nosetests.xml
 /.mr.developer.cfg
 /.project
 /.pydevproject
+.idea/
 /.idea
 .DS_Store
 
@@ -54,3 +55,10 @@ venv
 /static/css/app.min.css
 /static/js/app.min.js
 /static/js/years.js
+/anyway/parsers/cbs/tmp*
+
+/.vscode
+/.env*
+
+
+GOOGLE_APPLICATION_CREDENTIALS_KEY.json

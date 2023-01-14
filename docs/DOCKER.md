@@ -6,7 +6,7 @@ Docker is an open source project to pack, ship and run any application as a ligh
 The idea is to deploy a container (light weight environment) that has all our app dependencies installed and ready to go.
 As a developer you can do one of both:
 
-* Use the container do write your code (using vim/nano or any other GNU text editing tool - not recommended)
+* Use the container to write your code (using vim/nano or any other GNU text editing tool - not recommended)
 * Use a git repo cloned to your local machine and use the container as a remote server running the app
 
 The container loads itself with the command given in the instructions, it has the DB on it, deployed and ready to work (at /anyway/local.db)

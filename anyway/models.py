@@ -6,6 +6,7 @@ import logging
 from collections import namedtuple
 from typing import List
 
+
 try:
     from flask_login import UserMixin
 except ModuleNotFoundError:
@@ -871,12 +872,51 @@ class NewsFlash(Base):
     street2_hebrew = Column(Text(), nullable=True)
     non_urban_intersection_hebrew = Column(Text(), nullable=True)
     road_segment_name = Column(Text(), nullable=True)
+    critical = Column(Boolean(), nullable=True)
     newsflash_location_qualification = Column(
         Integer(),
         nullable=False,
         server_default=text(f"{NewsflashLocationQualification.NOT_VERIFIED.value}"),
     )
     location_qualifying_user = Column(BigInteger(), nullable=True)
+
+    def __init__(self, **kwargs):
+        super(NewsFlash, self).__init__(**kwargs)
+        self.critical = self.get_critical()
+
+    def get_critical(
+        self,
+        years_before=5,
+        suburban_road_severe_value=10,
+        suburban_road_killed_value=3,
+        urban_severe_value=2,
+    ):
+        from anyway.widgets.suburban_widgets.injured_count_by_severity_widget import (
+            InjuredCountBySeverityWidget,
+        )
+
+        if self.road1 is None or self.road_segment_name is None or self.date is None:
+            return None
+        resolution = BE_CONST.ResolutionCategories(self.resolution)
+        five_years_ago = self.date.replace(year=self.date.year - years_before)
+        critical_values = InjuredCountBySeverityWidget.get_injured_count_by_severity(
+            self.road1, self.road_segment_name, five_years_ago, self.date
+        )
+        critical = False
+        if (
+            resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD
+            or resolution == BE_CONST.ResolutionCategories.URBAN_JUNCTION
+        ):
+            critical = (
+                (critical_values["severe_injured_count"] / suburban_road_severe_value)
+                + (critical_values["killed_count"] / suburban_road_killed_value)
+            ) >= 1
+        elif resolution == BE_CONST.ResolutionCategories.URBAN_JUNCTION:
+            critical = (
+                (critical_values["severe_injured_count"] / urban_severe_value)
+                + critical_values["killed_count"]
+            ) >= 1
+        return critical
 
     def serialize(self):
         return {
@@ -907,6 +947,7 @@ class NewsFlash(Base):
                 self.newsflash_location_qualification
             ).get_label(),
             "location_qualifying_user": self.location_qualifying_user,
+            "critical": self.critical,
         }
 
     # Flask-Login integration

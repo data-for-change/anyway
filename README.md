@@ -68,7 +68,7 @@ Contributing
 1. [Fork](https://github.com/hasadna/anyway/fork) this repository on GitHub
 1. `git clone https://github.com/*you*/anyway`
 1. `cd anyway`
-1. Add the main repository as your upstream remote: `git remote add upstream https://github.com/hasadna/anyway`
+1. Add the main repository as your upstream remote: `git remote add upstream https://github.com/data-for-change/anyway`
 
 * Get updates whenever you start working: `git pull upstream dev`
 * Push to your fork when you've committed your changes and tested them: `git push`. Now make sure CI tests are passing (see Actions tab) and make a pull request from your fork on GitHub
@@ -81,14 +81,16 @@ In order to use WSL2, please follow [these official Docker instructions](https:/
 We are using DOCKER. See [DOCKER](docs/DOCKER.md)  
 See also an [introductory lecture](https://youtu.be/qh-hnPWViZA) by Assaf Dayan.
 
+## Code formatting
+### Black
+To format the code using black: `black anyway/**/*.py -l 100 anyway` should be executed from the root directory.
+Alternatively, one can execute `docker run -v $(pwd):/code jbbarth/black anyway -l 100` to run the command with docker.
+       
 ## Testing
 ### Pylint
 To run pylint tests: `pylint -j $(nproc) anyway tests && pytest -m "not browser" ./tests`
 
-### Black
-To format the code using black: `black anyway/**/*.py -l 100 anyway` should be executed from the root directory.
-Alternatively, one can execute `docker run -v $(pwd):/code jbbarth/black anyway -l 100` to run the command with docker.
-        
+ 
 If you also wish to run the real browser tests, replace`-m "not browser"` with `--driver Chrome` or specify the browser of your choice. To learn more, read about [pytest-selenium](http://pytest-selenium.readthedocs.io/en/latest/user_guide.html#specifying-a-browser).
 
 ## Altering the database schema

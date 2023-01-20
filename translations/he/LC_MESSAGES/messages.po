@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-01-13 19:31+0200\n"
+"POT-Creation-Date: 2023-01-21 11:50+0200\n"
 "PO-Revision-Date: 2020-10-16 15:42+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: he\n"
@@ -221,7 +221,7 @@ msgid "Severe accidents in street"
 msgstr "תאונות חמורות ברחוב"
 
 #: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:56
-#: anyway/widgets/all_locations_widgets/seriously_injured_killed_in_bicycles_scooter_widget.py:49
+#: anyway/widgets/all_locations_widgets/seriously_injured_killed_in_bicycles_scooter_widget.py:50
 msgid "in "
 msgstr "ב"
 
@@ -253,9 +253,23 @@ msgstr ""
 msgid "Severely injured or killed in bike, e-bike, or scooter accidents"
 msgstr "רוכבי אופניים וקורקינט שנפגעו קשה או נהרגו"
 
-#: anyway/widgets/all_locations_widgets/seriously_injured_killed_in_bicycles_scooter_widget.py:58
+#: anyway/widgets/all_locations_widgets/seriously_injured_killed_in_bicycles_scooter_widget.py:52
+#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_stacked_widget.py:53
+#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_widget.py:42
+msgid "In"
+msgstr "במקטע"
+
+#: anyway/widgets/all_locations_widgets/seriously_injured_killed_in_bicycles_scooter_widget.py:53
 msgid "Number of severely injured or killed in bike, e-bike, or scooter accidents"
 msgstr "מספר נפגעים שנפצעו קשה או נהרגו בתאונות אופנים, אופנים חשמליים וקורקינט"
+
+#: anyway/widgets/no_location_widgets/vision_zero_bike_widget.py:19
+msgid "Main principles in zero vision's bike transportation development"
+msgstr ""
+
+#: anyway/widgets/no_location_widgets/vision_zero_bike_widget.py:32
+msgid "Bike transportation development solution"
+msgstr ""
 
 #: anyway/widgets/suburban_widgets/accident_count_by_accident_type_widget.py:57
 msgid "Number of accidents by accident type"
@@ -352,19 +366,19 @@ msgstr "אחרות"
 msgid "front side"
 msgstr "חזית-צד"
 
-#: anyway/widgets/suburban_widgets/front_to_side_accidents_by_severity.py:135
+#: anyway/widgets/suburban_widgets/front_to_side_accidents_by_severity.py:131
 msgid "Front-side vs other accidents"
 msgstr "תאונות חזית-צד מול סוגי תאונה אחרים"
 
-#: anyway/widgets/suburban_widgets/front_to_side_accidents_by_severity.py:137
+#: anyway/widgets/suburban_widgets/front_to_side_accidents_by_severity.py:133
 msgid "Fatal & severe accidents of type front-to-side in this road segment"
 msgstr "תאונה קטלנית או חמורה מסוג חזית-צד בקטע כביש זה"
 
-#: anyway/widgets/suburban_widgets/front_to_side_accidents_by_severity.py:148
+#: anyway/widgets/suburban_widgets/front_to_side_accidents_by_severity.py:144
 msgid "fatal accidents"
 msgstr "תאונות קטלניות"
 
-#: anyway/widgets/suburban_widgets/front_to_side_accidents_by_severity.py:149
+#: anyway/widgets/suburban_widgets/front_to_side_accidents_by_severity.py:145
 msgid "severe accidents"
 msgstr "תאונות חמורות"
 
@@ -405,11 +419,6 @@ msgstr "מספר תאונות לפי חומרה"
 #: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_stacked_widget.py:52
 msgid "Killed and injury stacked per age group"
 msgstr "חומרת פגיעה לפי קבוצת גיל"
-
-#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_stacked_widget.py:53
-#: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_widget.py:42
-msgid "In"
-msgstr "במקטע"
 
 #: anyway/widgets/suburban_widgets/killed_and_injured_count_per_age_group_widget.py:41
 msgid "Injury per age group"
@@ -468,7 +477,7 @@ msgstr "תאונות קטלניות וקשות לכל קילומטר לפי מק
 msgid "Segments with most accidents"
 msgstr "מקטעים עם הכי הרבה תאונות"
 
-#: anyway/widgets/urban_widgets/injured_accidents_with_pedestrians_widget.py:115
+#: anyway/widgets/urban_widgets/injured_accidents_with_pedestrians_widget.py:114
 msgid "Pedestrian accidents by severity and year"
 msgstr "תאונות הולכי רגל לפי חומרה ולפי שנה"
 
@@ -476,6 +485,10 @@ msgstr "תאונות הולכי רגל לפי חומרה ולפי שנה"
 #: anyway/widgets/urban_widgets/small_motor_severe_fatal_count_by_year_widget.py:60
 msgid "Severe or fatal accidents on bikes, e-bikes, or scooters in "
 msgstr "רוכבי אופנים, אופנים חשמליים, וקורקינט חשמלי שנפצעו קשה או נהרגו ב"
+
+#: anyway/widgets/urban_widgets/vision_zero_10_50_90_widget.py:33
+msgid "A speed limit solution on an urban road"
+msgstr ""
 
 #: templates/index.html:4 templates/index.html:10
 msgid "ANYWAY - Making a difference in any way"

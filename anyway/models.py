@@ -39,7 +39,7 @@ from sqlalchemy import (
 import sqlalchemy
 from sqlalchemy.orm import relationship, load_only, backref
 from sqlalchemy import or_, and_
-from sqlalchemy.dialects.postgresql import Enum, JSON
+#from sqlalchemy.dialects.postgresql import Enum, JSON
 
 from anyway import localization
 from anyway.backend_constants import BE_CONST, NewsflashLocationQualification
@@ -2802,7 +2802,11 @@ class CBSLocations(Base):
     latitude = Column(Float(), nullable=True)
 
 class TelegramGroups(Base):
-    __tablename__ = "telegram_groups"
+     __tablename__ = "telegram_groups"
+     id = Column(Integer(), primary_key=True)
+     filter = Column(JSON())
+
+class TelegramGroupsTest(Base):
+    __tablename__ = "telegram_groups_test"
     id = Column(Integer(), primary_key=True)
     filter = Column(JSON())
-    test_or_prod = Column(Enum("TEST", "PROD", name="test_prod_enum", create_type=True))

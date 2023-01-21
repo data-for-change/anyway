@@ -48,7 +48,7 @@ class SeriouslyInjuredKilledInBicyclesScooterWidget(AllLocationsWidget):
 
     @staticmethod
     def create_location_description(location_info: LocationInfo, location_text: str) -> str:
-        return _("in ") + location_info[Constants.YISHUV_NAME] \
+        return "in " + location_info[Constants.YISHUV_NAME] \
             if Constants.YISHUV_NAME in location_info \
             else location_text
 

@@ -62,7 +62,7 @@ class AccidentCountBySeverityWidget(AllLocationsWidget):
         if request_params.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
             items["data"]["text"] = {
                 "title": _("Number of accidents by severity"),
-                "subtitle": request_params.location_info['road_segment_name']
+                "subtitle": _(request_params.location_info['road_segment_name'])
             }
             items["meta"]["information"] = "{incident_description}{incident_location} {incident_time}.".format(
                 incident_description=_("Fatal, severe and light accidents count in "),
@@ -80,8 +80,8 @@ class AccidentCountBySeverityWidget(AllLocationsWidget):
                 incidents_num=num_accidents,
                 incident_keyword=_("accidents"),
             )
-            subtitle = "{street_name}, {yishuv_name}".format(street_name=request_params.location_info["street1_hebrew"],
-                                                             yishuv_name=request_params.location_info["yishuv_name"])
+            subtitle = _("{street_name}, {yishuv_name}".format(street_name=request_params.location_info["street1_hebrew"],
+                                                               yishuv_name=request_params.location_info["yishuv_name"]))
             items["data"]["text"] = {"title": s, "subtitle": subtitle}
             items["meta"]["information"] = "{incident_description}{incident_location} {incident_time}.".format(
                 incident_description=_("Fatal, severe and light accidents count in "),

@@ -160,8 +160,8 @@ class MostSevereAccidentsTableWidget(AllLocationsWidget):
         title, subtitle = get_most_severe_accidents_table_title(request_params.location_info,
                                                                 request_params.resolution)
         items["data"]["text"] = {
-            "title": title,
-            "subtitle": subtitle
+            "title": _(title),
+            "subtitle": _(subtitle)
         }
         return items
 

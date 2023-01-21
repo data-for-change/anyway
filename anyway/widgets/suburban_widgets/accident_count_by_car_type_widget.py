@@ -142,7 +142,7 @@ class AccidentCountByCarTypeWidget(SubUrbanWidget):
         base_title = _("Comparing vehicle type in accidents relative to national average")
         items["data"]["text"] = {
             "title": base_title,
-            "subtitle": segment_dictionary[request_params.location_info["road_segment_name"]]
+            "subtitle": _(segment_dictionary[request_params.location_info["road_segment_name"]])
         }
         items["meta"]["information"] = _(
             "Vehicle accidents by type in specific segment, sorted by segment, compared to the national average"

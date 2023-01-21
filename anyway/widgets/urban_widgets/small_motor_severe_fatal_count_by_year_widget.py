@@ -58,6 +58,6 @@ class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
             "title": _("Severe or fatal accidents on bikes, e-bikes, or scooters"),
-            "subtitle": request_params.location_info["yishuv_name"]
+            "subtitle": _(request_params.location_info["yishuv_name"])
         }
         return items

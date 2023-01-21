@@ -50,7 +50,7 @@ class KilledInjuredCountPerAgeGroupStackedWidget(SubUrbanWidget):
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
             "title": _("Killed and injury stacked per age group"),
-            "subtitle": request_params.location_info["road_segment_name"],
+            "subtitle": _(request_params.location_info["road_segment_name"]),
             "labels_map": gen_entity_labels(InjurySeverity),
         }
         return items

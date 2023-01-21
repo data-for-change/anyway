@@ -54,9 +54,9 @@ class SeriouslyInjuredKilledInBicyclesScooterWidget(AllLocationsWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        subtitle = SeriouslyInjuredKilledInBicyclesScooterWidget.create_location_description(
+        subtitle = _(SeriouslyInjuredKilledInBicyclesScooterWidget.create_location_description(
             request_params.location_info,
-            request_params.location_text)
+            request_params.location_text))
         items["data"]["text"] = {"title": TITLE,
                                  "subtitle": subtitle}
         return items

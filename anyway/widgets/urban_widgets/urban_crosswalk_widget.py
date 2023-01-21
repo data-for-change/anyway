@@ -73,7 +73,7 @@ class UrbanCrosswalkWidget(UrbanWidget):
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
             "title": _("Pedestrian injury comparison"),
-            "subtitle": request_params.location_info["street1_hebrew"]
+            "subtitle": _(request_params.location_info["street1_hebrew"])
         }
         return items
 

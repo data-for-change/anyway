@@ -14,8 +14,6 @@ from flask_babel import _
 from anyway.request_params import (
     RequestParams,
     get_news_flash_location_text,
-    get_road_segment_location_text,
-    extract_road_segment_location,
     extract_news_flash_obj,
     get_latest_accident_date,
     extract_news_flash_location,
@@ -34,6 +32,7 @@ from anyway.widgets.widget import Widget, widgets_dict
 import anyway.widgets.urban_widgets
 import anyway.widgets.suburban_widgets
 import anyway.widgets.all_locations_widgets
+import anyway.widgets.no_location_widgets
 # pylint: enable=unused-import
 
 logger = logging.getLogger("infographics_utils")
@@ -104,6 +103,7 @@ def get_request_params(
     news_flash_obj: Optional[NewsFlash] = extract_news_flash_obj(news_flash_id)
     if news_flash_obj is None:
         return None
+    news_flash_description = news_flash_obj.description
     location_info = extract_news_flash_location(news_flash_obj)
     if location_info is None:
         return None
@@ -135,53 +135,7 @@ def get_request_params(
         start_time=start_time,
         end_time=end_time,
         lang=lang,
-    )
-    logging.debug(f"Ending get_request_params. params: {request_params}")
-    return request_params
-
-
-def get_request_params_for_road_segment(
-    road_segment_id: int, number_of_years_ago: int, lang: str
-) -> Optional[RequestParams]:
-    try:
-        number_of_years_ago = int(number_of_years_ago)
-    except ValueError:
-        return None
-    if number_of_years_ago < 0 or number_of_years_ago > 100:
-        return None
-    location_info = extract_road_segment_location(road_segment_id)
-    if location_info is None:
-        return None
-    logging.debug("location_info:{}".format(location_info))
-    location_text = get_road_segment_location_text(
-        location_info[DATA]["road1"], location_info[DATA]["road_segment_name"]
-    )
-    logging.debug("location_text:{}".format(location_text))
-    gps = location_info["gps"]
-    location_info = location_info[DATA]
-    resolution = location_info.pop("resolution")
-    if resolution is None:
-        return None
-
-    if all(value is None for value in location_info.values()):
-        return None
-
-    last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
-    # converting to datetime object to get the date
-    end_time = last_accident_date.to_pydatetime().date()
-
-    start_time = datetime.date(end_time.year + 1 - number_of_years_ago, 1, 1)
-
-    request_params = RequestParams(
-        years_ago=number_of_years_ago,
-        location_text=location_text,
-        location_info=location_info,
-        # TODO: getting a warning on resolution=resolution: "Expected type 'dict', got 'int' instead"
-        resolution=resolution,
-        gps=gps,
-        start_time=start_time,
-        end_time=end_time,
-        lang=lang,
+        news_flash_description=news_flash_description
     )
     logging.debug(f"Ending get_request_params. params: {request_params}")
     return request_params
@@ -189,14 +143,6 @@ def get_request_params_for_road_segment(
 
 def create_infographics_data(news_flash_id, number_of_years_ago, lang: str) -> str:
     request_params = get_request_params(news_flash_id, number_of_years_ago, lang)
-    output = create_infographics_items(request_params)
-    return json.dumps(output, default=str)
-
-
-def create_infographics_data_for_road_segment(
-    road_segment_id, number_of_years_ago, lang: str
-) -> str:
-    request_params = get_request_params_for_road_segment(road_segment_id, number_of_years_ago, lang)
     output = create_infographics_items(request_params)
     return json.dumps(output, default=str)
 

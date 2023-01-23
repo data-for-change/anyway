@@ -52,7 +52,6 @@ class FrondToSideAccidentsBySeverityWidget(SubUrbanWidget):
     def _clac_percentage(self, result: List[Dict[str, Any]]) -> List[Dict]:
         ret = []
         for row in result:
-            total = row[OTHER_ACCIDENTS_LABEL] + row[FRONT_SIDE_ACCIDENTS_LABEL]
             severity_name_text = AccidentSeverity(row["accident_severity"]).get_label()
             severity_text = SEVERITY_TEXT.format(severity_name_text)
             ret.extend(
@@ -60,12 +59,12 @@ class FrondToSideAccidentsBySeverityWidget(SubUrbanWidget):
                     {
                         SEVERITY: severity_text,
                         DESC: FRONT_SIDE_DESC,
-                        COUNT: round((row[FRONT_SIDE_ACCIDENTS_LABEL] / total) * 100),
+                        COUNT: row[FRONT_SIDE_ACCIDENTS_LABEL],
                     },
                     {
                         SEVERITY: severity_text,
                         DESC: OTHERS_DESC,
-                        COUNT: round((row[OTHER_ACCIDENTS_LABEL] / total) * 100),
+                        COUNT: row[OTHER_ACCIDENTS_LABEL],
                     },
                 ]
             )
@@ -102,10 +101,7 @@ class FrondToSideAccidentsBySeverityWidget(SubUrbanWidget):
             ]
         )
         query = get_query(
-            table_obj=AccidentMarkerView,
-            filters={},
-            start_time=start_date,
-            end_time=end_date
+            table_obj=AccidentMarkerView, filters={}, start_time=start_date, end_time=end_date
         )
         entities_query = query.with_entities(
             AccidentMarkerView.accident_severity,

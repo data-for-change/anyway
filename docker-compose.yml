@@ -8,7 +8,8 @@ x-redash-service:
     - redis
   env_file: ./.env
   restart: always
-  profiles: [ "redash" ]
+  profiles:
+    - redash
 
 services:
   anyway:

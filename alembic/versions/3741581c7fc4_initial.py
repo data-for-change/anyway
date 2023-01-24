@@ -149,6 +149,7 @@ def upgrade():
                     sa.Column('safety_measures_use', sa.Integer(), nullable=True),
                     sa.Column('late_deceased', sa.Integer(), nullable=True),
                     sa.ForeignKeyConstraint(['accident_id', 'provider_code'], ['markers.id', 'markers.provider_code'],
+                                            name='involved_accident_id_fkey',
                                             ondelete='CASCADE'),
                     sa.PrimaryKeyConstraint('id'),
                     schema='public'
@@ -186,6 +187,7 @@ def upgrade():
                     sa.Column('seats', sa.Integer(), nullable=True),
                     sa.Column('total_weight', sa.Integer(), nullable=True),
                     sa.ForeignKeyConstraint(['accident_id', 'provider_code'], ['markers.id', 'markers.provider_code'],
+                                            name='vehicles_accident_id_fkey',
                                             ondelete='CASCADE'),
                     sa.PrimaryKeyConstraint('id'),
                     schema='public'

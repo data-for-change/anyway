@@ -76,6 +76,12 @@ class TopRoadSegmentsAccidentsPerKmWidget(SubUrbanWidget):
             logging.exception(f"{TopRoadSegmentsAccidentsPerKmWidget.name}: {exception}")
             raise exception
 
+    def is_included(self) -> bool:
+        for item in self.items:
+            if item["road_segment_name"] == self.request_params.location_info["road_segment_name"]:
+                return True
+        return False
+
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {

@@ -59,7 +59,7 @@ from anyway.views.news_flash.api import (
     news_flash_new,
     single_news_flash,
     news_flash_v2,
-    update_new_flash_qualifying,
+    update_news_flash_qualifying,
     DEFAULT_LIMIT_REQ_PARAMETER,
     DEFAULT_OFFSET_REQ_PARAMETER,
 )
@@ -1450,4 +1450,4 @@ class Cities(Resource):
 @api.route("/api/news-flash/<int:id>", methods=["PUT"])
 class SetNewsflashLocationQualification(Resource):
     def put(self, id):
-        return update_new_flash_qualifying(id)
+        return update_news_flash_qualifying(id)

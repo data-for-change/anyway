@@ -105,6 +105,8 @@ services:
     container_name: redash-redis
     image: redis:5.0-alpine
     restart: always
+    profiles:
+      - redash
 
   postgres:
     container_name: redash-db
@@ -120,6 +122,8 @@ services:
       - "5433:5433"
     expose:
       - "5433"
+    profiles:
+      - redash
 
   server:
     <<: *redash-service

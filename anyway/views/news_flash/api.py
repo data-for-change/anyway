@@ -4,6 +4,7 @@
 import datetime
 import json
 import logging
+import pandas as pd
 
 from typing import List, Optional
 from http import HTTPStatus
@@ -21,16 +22,20 @@ from anyway.backend_constants import (
 )
 from anyway.models import NewsFlash, LocationVerificationHistory
 from anyway.infographics_utils import is_news_flash_resolution_supported
+from anyway.request_params import get_request_params_from_request_values
 from pydantic import BaseModel, ValidationError, validator
 
 from anyway.views.user_system.api import roles_accepted, return_json_error
 from anyway.views.user_system.user_functions import get_current_user
 from anyway.error_code_and_strings import Errors as Es
 from anyway.parsers import fields_to_resolution, resolution_dict
+from anyway.models import AccidentMarkerView, InvolvedView
+from anyway.widgets.widget_utils import get_accidents_stats
+from io import BytesIO
 
 DEFAULT_OFFSET_REQ_PARAMETER = 0
 DEFAULT_LIMIT_REQ_PARAMETER = 100
-
+DEFAULT_NUMBER_OF_YEARS_AGO = 5
 
 class NewsFlashQuery(BaseModel):
 
@@ -385,3 +390,94 @@ def update_news_flash_qualifying(id):
             new_qualification=new_location_qualifiction,
         )
         return Response(status=HTTPStatus.OK)
+
+
+def get_downloaded_data(format, years_ago):
+    request_params = get_request_params_from_request_values(request.values)
+    end_time = datetime.datetime.now()
+    start_time = end_time - datetime.timedelta(days=years_ago*365)
+    columns = { AccidentMarkerView.id: 'מס תאונה',
+                AccidentMarkerView.provider_code_hebrew: 'סוג תיק',
+                AccidentMarkerView.accident_type_hebrew: 'סוג תאונה',
+                AccidentMarkerView.accident_severity_hebrew: 'חומרת תאונה',
+                AccidentMarkerView.location_accuracy_hebrew: 'איכות עיגון',
+                AccidentMarkerView.road_type_hebrew: 'סוג דרך',
+                AccidentMarkerView.road_shape_hebrew: 'צורת הדרך',
+                AccidentMarkerView.day_type_hebrew: 'סוג יום',
+                AccidentMarkerView.one_lane_hebrew: 'דרך חד מסלולית',
+                AccidentMarkerView.multi_lane_hebrew: 'דרך רב מסלולית',
+                AccidentMarkerView.speed_limit_hebrew: 'מהירות מותרת',
+                AccidentMarkerView.road_intactness_hebrew: 'תקינות הכביד',
+                AccidentMarkerView.road_width_hebrew: 'רוחב הכביש',
+                AccidentMarkerView.road_sign_hebrew: 'סימון/תמרור',
+                AccidentMarkerView.road_light_hebrew: 'תאורה',
+                AccidentMarkerView.road_control_hebrew: 'בקרה בצומת',
+                AccidentMarkerView.weather_hebrew: 'מזג אוויר',
+                AccidentMarkerView.day_night_hebrew: 'יום/לילה',
+                AccidentMarkerView.day_in_week_hebrew: 'יום בשבוע',
+                AccidentMarkerView.traffic_light_hebrew: 'מרומזר/לא מרומזר',
+                AccidentMarkerView.region_hebrew: 'מחוז-מקום התאונה',
+                AccidentMarkerView.road_surface_hebrew: 'מצב פני הכביש',
+                AccidentMarkerView.road_object_hebrew: 'עצם-סוג',
+                AccidentMarkerView.didnt_cross_hebrew: 'חצייה-לא חצה',
+                AccidentMarkerView.cross_mode_hebrew: 'חצייה-אופן',
+                AccidentMarkerView.cross_location_hebrew: 'חצייה-מקום',
+                AccidentMarkerView.cross_direction_hebrew: 'חצייה-כיוון',
+                AccidentMarkerView.road1: 'מספר דרך- מקום אירוע התאונה',
+                AccidentMarkerView.road2: 'מספר דרך 2',
+                AccidentMarkerView.km: 'מספר הק"מ- מקום אירוע התאונה',
+                AccidentMarkerView.yishuv_name: 'שם היישוב בו אירעה התאונה',
+                AccidentMarkerView.street1_hebrew: 'רחוב- מקום אירוע התאונה',
+                AccidentMarkerView.street2_hebrew: 'רחוב 2',
+                AccidentMarkerView.house_number: 'מספר בית- מקום אירוע התאונה',
+                AccidentMarkerView.non_urban_intersection_hebrew: 'צומת בינעירוני',
+                AccidentMarkerView.accident_year: 'שנה',
+                AccidentMarkerView.accident_month: 'חודש',
+                AccidentMarkerView.accident_day: 'יום',
+                AccidentMarkerView.accident_timestamp: 'חתימת זמן',
+                AccidentMarkerView.longitude: 'קואורדינטה',
+                AccidentMarkerView.latitude: 'קואורדינטה',
+                AccidentMarkerView.x: 'X קואורדינטה',
+                AccidentMarkerView.y: 'Y קואורדינטה'
+                }
+    related_accidents = get_accidents_stats(
+            table_obj=AccidentMarkerView,
+            columns=columns.keys(),
+            filters=request_params.location_info,
+            start_time=start_time,
+            end_time=end_time
+        )
+    accident_ids = list(related_accidents['id'].values())
+    accident_severities = get_accidents_stats(
+            table_obj=InvolvedView,
+            group_by=("accident_id", "injury_severity_hebrew"),
+            count="injury_severity_hebrew",
+            filters={"accident_id": accident_ids}
+        )
+
+    for i, accident_id in enumerate(accident_ids):
+        for severity_hebrew, severity_count in accident_severities[accident_id].items():
+            if severity_hebrew is None:
+                continue
+            if severity_hebrew not in related_accidents:
+                related_accidents[severity_hebrew] = {}
+            related_accidents[severity_hebrew][i] = severity_count
+
+    json_data = json.dumps(related_accidents, default=str)
+    buffer = BytesIO()
+    df = pd.read_json(json_data)
+    df.rename(columns={key.name.replace('_hebrew', ''): value for key, value in columns.items()}, inplace=True)
+
+    if format == 'csv':
+        df.to_csv(buffer, encoding="utf-8")
+        mimetype ='text/csv'
+        file_type = 'csv'
+    elif format == 'xlsx':
+        df.to_excel(buffer, encoding="utf-8")
+        mimetype='application/vnd.ms-excel'
+        file_type = 'xlsx'
+    else:
+        raise Exception(f'File format not supported for downloading : {format}')
+
+    headers = { 'Content-Disposition': f'attachment; filename=anyway_download_{datetime.datetime.now().strftime("%d_%m_%Y_%H_%M_%S")}.{file_type}' }
+    return Response(buffer.getvalue(), mimetype=mimetype, headers=headers)

@@ -46,7 +46,7 @@ def get_most_severe_accidents_table_title(
     if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
         return "Most severe accidents in segment", segment_dictionary[location_info["road_segment_name"]]
     elif resolution == BE_CONST.ResolutionCategories.STREET:
-        return "Severe accidents in street", f" {location_info['street1_hebrew']} " + "in " + f"{location_info['yishuv_name']}"
+        return "Severe accidents in street", f" {location_info['street1_hebrew']} in {location_info['yishuv_name']}"
 
 # count of dead and severely injured
 def get_casualties_count_in_accident(accident_id, provider_code, injury_severity, accident_year):

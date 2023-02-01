@@ -45,11 +45,16 @@ class SeriouslyInjuredKilledInBicyclesScooterWidget(AllLocationsWidget):
         return res
 
     @staticmethod
-    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        location_info = request_params.location_info
-        subtitle = _("in ") + location_info[Constants.YISHUV_NAME] \
+    def create_location_description(location_info: LocationInfo, location_text: str) -> str:
+        return "in " + location_info[Constants.YISHUV_NAME] \
             if Constants.YISHUV_NAME in location_info \
-            else _("In") + " " + location_info["road_segment_name"]
+            else location_text
+
+    @staticmethod
+    def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        subtitle = _(SeriouslyInjuredKilledInBicyclesScooterWidget.create_location_description(
+            request_params.location_info,
+            request_params.location_text))
         items["data"]["text"] = {"title": _("Number of severely injured or killed in bike, e-bike, or scooter accidents"),
                                  "subtitle": subtitle}
         return items

@@ -38,6 +38,7 @@ from sqlalchemy import (
 )
 import sqlalchemy
 from sqlalchemy.orm import relationship, load_only, backref
+from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy import or_, and_
 
 from anyway import localization
@@ -2799,3 +2800,14 @@ class CBSLocations(Base):
     road_segment_name = Column(Text(), nullable=True)
     longitude = Column(Float(), nullable=True)
     latitude = Column(Float(), nullable=True)
+
+
+class TelegramGroupsBase(Base):
+    id = Column(Integer(), primary_key=True)
+    filter = Column(JSON(), nullable=False, server_default="{}")
+
+class TelegramGroups(TelegramGroupsBase):
+    __tablename__ = "telegram_groups"
+
+class TelegramGroupsTest(TelegramGroupsBase):
+    __tablename__ = "telegram_groups_test"

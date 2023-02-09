@@ -57,7 +57,7 @@ class MostSevereAccidentsWidget(AllLocationsWidget):
             table_obj, filters, entities, start_time, end_time, resolution, limit
         )
         for item in items:
-            item["accident_severity"] = _(AccidentSeverity(item["accident_severity"]).get_label())
+            item["accident_severity"] = AccidentSeverity(item["accident_severity"]).get_label()
         return items
 
     @staticmethod
@@ -69,10 +69,11 @@ class MostSevereAccidentsWidget(AllLocationsWidget):
                 logging.exception(
                     f"MostSevereAccidentsWidget.localize_items: Exception while translating {item}."
                 )
+        title, subtitle = get_most_severe_accidents_table_title(
+                          request_params.location_info, request_params.resolution)
         items["data"]["text"] = {
-            "title": get_most_severe_accidents_table_title(
-                request_params.location_info, request_params.resolution
-            )
+            "title": _(title),
+            "subtitle": _(subtitle)
         }
         return items
 

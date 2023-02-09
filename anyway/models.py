@@ -2804,9 +2804,9 @@ class CBSLocations(Base):
 class TelegramGroups(Base):
      __tablename__ = "telegram_groups"
      id = Column(Integer(), primary_key=True)
-     filter = Column(JSON())
+     filter = Column(JSON(), server_default="{}")
 
 class TelegramGroupsTest(Base):
     __tablename__ = "telegram_groups_test"
     id = Column(Integer(), primary_key=True)
-    filter = Column(JSON())
+    filter = Column(JSON(), server_default="{}")

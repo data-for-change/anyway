@@ -45,7 +45,7 @@ jobs:
         python-version: '3.7'
     - name: Install Dependencies
       run: |
-        python -m pip install black==20.8b1
+        python -m pip install black==20.8b1 --no-cache-dir
     - name: black formatting
       run: |
         bin/black.sh

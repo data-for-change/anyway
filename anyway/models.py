@@ -894,24 +894,26 @@ class NewsFlash(Base):
         from anyway.widgets.suburban_widgets.injured_count_by_severity_widget import (
             InjuredCountBySeverityWidget,
         )
+        from anyway.request_params import get_latest_accident_date
 
-        if self.road1 is None or self.road_segment_name is None or self.date is None:
+        if self.road1 is None or self.road_segment_name is None:
             return None
-        resolution = BE_CONST.ResolutionCategories(self.resolution)
-        five_years_ago = self.date.replace(year=self.date.year - years_before)
+        last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
+        end_time = last_accident_date.to_pydatetime().date()
+        start_time = datetime.date(end_time.year + 1 - years_before, 1, 1)
         critical_values = InjuredCountBySeverityWidget.get_injured_count_by_severity(
-            self.road1, self.road_segment_name, five_years_ago, self.date
+            self.road1, self.road_segment_name, start_time, end_time
         )
-        critical = False
-        if (
-            resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD
-            or resolution == BE_CONST.ResolutionCategories.URBAN_JUNCTION
-        ):
+        if critical_values == {}:
+            return None
+        critical = None
+        resolution = BE_CONST.ResolutionCategories(self.resolution)
+        if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
             critical = (
                 (critical_values["severe_injured_count"] / suburban_road_severe_value)
                 + (critical_values["killed_count"] / suburban_road_killed_value)
             ) >= 1
-        elif resolution == BE_CONST.ResolutionCategories.URBAN_JUNCTION:
+        elif resolution == BE_CONST.ResolutionCategories.STREET:
             critical = (
                 (critical_values["severe_injured_count"] / urban_severe_value)
                 + critical_values["killed_count"]

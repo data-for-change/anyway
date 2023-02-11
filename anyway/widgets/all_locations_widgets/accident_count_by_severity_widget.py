@@ -47,7 +47,7 @@ class AccidentCountBySeverityWidget(AllLocationsWidget):
             severity_english = AccidentSeverity.labels()[
                 AccidentSeverity(severity_and_count["accident_severity"])
             ]
-            severity_count_text = "severity_{}_count".format(severity_english)
+            severity_count_text = f"severity_{severity_english}_count"
             items[severity_count_text] = severity_and_count["count"]
             total_accidents_count += severity_and_count["count"]
         if total_accidents_count == 0:
@@ -61,33 +61,32 @@ class AccidentCountBySeverityWidget(AllLocationsWidget):
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         if request_params.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
             items["data"]["text"] = {
-                "title": _("Number of accidents by severity")
-                + f" - {request_params.location_info['road_segment_name']}"
+                "title": _("Number of accidents by severity"),
+                "subtitle": _(request_params.location_info['road_segment_name'])
             }
-            items["meta"]["information"] = "{}{} {}.".format(
-                _("Fatal, severe and light accidents count in "),
-                _("segment"),
-                _("in the selected time"),
+            items["meta"]["information"] = "{incident_description}{incident_location} {incident_time}.".format(
+                incident_description=_("Fatal, severe and light accidents count in "),
+                incident_location=_("segment"),
+                incident_time=_("in the selected time"),
             )
         elif request_params.resolution == BE_CONST.ResolutionCategories.STREET:
             # To have FE to treat it as a different widget
             num_accidents = items["data"]["items"]["total_accidents_count"]
-            s = "{} {} - {} {} {}, {}, {} {} {}".format(
-                _("in years"),
-                request_params.start_time.year,
-                request_params.end_time.year,
-                _("on street"),
-                request_params.location_info["street1_hebrew"],
-                request_params.location_info["yishuv_name"],
-                _("took place"),
-                num_accidents,
-                _("accidents"),
+            s = "{range_keyword} {start_year} - {end_year}, {separator_keyword} {incidents_num} {incident_keyword}".format(
+                range_keyword=_("in years"),
+                start_year=request_params.start_time.year,
+                end_year=request_params.end_time.year,
+                separator_keyword=_("took place"),
+                incidents_num=num_accidents,
+                incident_keyword=_("accidents"),
             )
-            items["data"]["text"] = {"title": s}
-            items["meta"]["information"] = "{}{} {}.".format(
-                _("Fatal, severe and light accidents count in "),
-                _("street"),
-                _("in the selected time"),
+            subtitle = _("{street_name}, {yishuv_name}".format(street_name=request_params.location_info["street1_hebrew"],
+                                                               yishuv_name=request_params.location_info["yishuv_name"]))
+            items["data"]["text"] = {"title": s, "subtitle": subtitle}
+            items["meta"]["information"] = "{incident_description}{incident_location} {incident_time}.".format(
+                incident_description=_("Fatal, severe and light accidents count in "),
+                incident_location=_("street"),
+                incident_time=_("in the selected time"),
             )
         return items
 

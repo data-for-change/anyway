@@ -217,4 +217,4 @@ def get_involved_counts(
         query = query.filter(Involved.vehicle_type.in_([v_type.value for v_type in vehicle_types]))
 
     df = pd.read_sql_query(query.statement, query.session.bind)
-    return df.to_dict(orient="records")
+    return df.to_dict(orient="records")  # pylint: disable=no-member

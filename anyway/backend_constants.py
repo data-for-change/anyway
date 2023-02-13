@@ -78,6 +78,7 @@ class BackEndConstants(object):
     SUPPORTED_RESOLUTIONS: List[ResolutionCategories] = [
         ResolutionCategories.STREET,
         ResolutionCategories.SUBURBAN_ROAD,
+        ResolutionCategories.SUBURBAN_JUNCTION
     ]
 
     class Source(Enum):
@@ -324,8 +325,8 @@ class NewsflashLocationQualification(LabeledCode):
 
 
 QUALIFICATION_TO_ENUM_VALUE = {
-    "not_verified": NewsflashLocationQualification.NOT_VERIFIED.value,
-    "verified": NewsflashLocationQualification.VERIFIED.value,
-    "rejected": NewsflashLocationQualification.REJECTED.value,
-    "manual": NewsflashLocationQualification.MANUAL.value,
+    "not_verified": NewsflashLocationQualification.NOT_VERIFIED.value,  # pylint: disable=no-member
+    "verified": NewsflashLocationQualification.VERIFIED.value,  # pylint: disable=no-member
+    "rejected": NewsflashLocationQualification.REJECTED.value,  # pylint: disable=no-member
+    "manual": NewsflashLocationQualification.MANUAL.value,  # pylint: disable=no-member
 }

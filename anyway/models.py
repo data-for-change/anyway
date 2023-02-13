@@ -4,7 +4,7 @@ import datetime
 import json
 import logging
 from collections import namedtuple
-from typing import List
+from typing import List, Set, Iterable
 
 
 try:
@@ -878,7 +878,7 @@ class NewsFlash(Base):
     newsflash_location_qualification = Column(
         Integer(),
         nullable=False,
-        server_default=text(f"{NewsflashLocationQualification.NOT_VERIFIED.value}"),
+        server_default=text(f"{NewsflashLocationQualification.NOT_VERIFIED.value}"),  # pylint: disable=no-member
     )
     location_qualifying_user = Column(BigInteger(), nullable=True)
 
@@ -889,7 +889,7 @@ class NewsFlash(Base):
         suburban_road_killed_value=3,
         urban_severe_value=2,
     ):
-        from anyway.widgets.suburban_widgets.injured_count_by_severity_widget import (
+        from anyway.widgets.road_segment_widgets.injured_count_by_severity_widget import (
             InjuredCountBySeverityWidget,
         )
         from anyway.request_params import get_latest_accident_date
@@ -1195,11 +1195,50 @@ class SuburbanJunction(Base):
                                            nullable=True)
     roads = Column(postgresql.ARRAY(Integer(), dimensions=1), nullable=False)
 
+    @staticmethod
+    def get_hebrew_name_from_id(non_urban_intersection: int) -> str:
+        res = db.session.query(SuburbanJunction.non_urban_intersection_hebrew).filter(
+            SuburbanJunction.non_urban_intersection == non_urban_intersection).first()
+        if res is None:
+            raise ValueError(f"{non_urban_intersection}: could not find "
+                             f"SuburbanJunction with that symbol")
+        return res.non_urban_intersection_hebrew
+
+    @staticmethod
+    def get_id_from_hebrew_name(non_urban_intersection_hebrew: str) -> int:
+        res = db.session.query(SuburbanJunction.non_urban_intersection).filter(
+            SuburbanJunction.non_urban_intersection == non_urban_intersection_hebrew).first()
+        if res is None:
+            raise ValueError(f"{non_urban_intersection_hebrew}: could not find "
+                             f"SuburbanJunction with that name")
+        return res.non_urban_intersection
+
+    @staticmethod
+    def get_intersection_from_roads(roads: Set[int]) -> dict:
+        if not all([isinstance(x, int) for x in roads]):
+            raise ValueError(f"{roads}: Should be integers")
+        res = db.session.query(SuburbanJunction).filter(
+            SuburbanJunction.roads.contains(roads)).first()
+        if res is None:
+            raise ValueError(f"{roads}: could not find "
+                             f"SuburbanJunction with these roads")
+        return res.serialize()
+
+    @staticmethod
+    def get_all_from_key_value(key: str, val: Iterable) -> dict:
+        if not isinstance(val, Iterable):
+            val = [val]
+        res = db.session.query(SuburbanJunction).filter(
+            (getattr(SuburbanJunction, key)).in_(val)).first()
+        if res is None:
+            raise ValueError(f"{key}:{val}: could not find SuburbanJunction")
+        return res.serialize()
+
     def serialize(self):
         return {
             "non_urban_intersection": self.non_urban_intersection,
             "non_urban_intersection_hebrew": self.non_urban_intersection_hebrew,
-            "roads": self.roads,
+            "roads": set(self.roads),
         }
 
 

@@ -5,7 +5,7 @@ resolution_dict = {
     "רחוב": ["yishuv_name", "street1_hebrew"],
     "צומת עירוני": ["yishuv_name", "street1_hebrew", "street2_hebrew"],
     "כביש בינעירוני": ["road1", "road_segment_name"],
-    "צומת בינעירוני": ["road1", "road_segment_name", "road2", "non_urban_intersection_hebrew"],
+    "צומת בינעירוני": ["non_urban_intersection", "non_urban_intersection_hebrew", "road1", "road2"],
     "אחר": [
         "region_hebrew",
         "district_hebrew",

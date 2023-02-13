@@ -4,16 +4,16 @@ from flask_babel import _
 
 from anyway.backend_constants import BE_CONST as BE
 from anyway.request_params import RequestParams
-from anyway.widgets.suburban_widgets.killed_and_injured_count_per_age_group_widget_utils import (
+from anyway.widgets.road_segment_widgets.killed_and_injured_count_per_age_group_widget_utils import (
     KilledAndInjuredCountPerAgeGroupWidgetUtils
 )
-from anyway.widgets.suburban_widgets import killed_and_injured_count_per_age_group_widget_utils
-from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
+from anyway.widgets.road_segment_widgets import killed_and_injured_count_per_age_group_widget_utils
+from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
 from anyway.widgets.widget import register
 
 
 @register
-class KilledInjuredCountPerAgeGroupWidget(SubUrbanWidget):
+class KilledInjuredCountPerAgeGroupWidget(RoadSegmentWidget):
     name: str = "killed_and_injured_count_per_age_group"
     files = [__file__, killed_and_injured_count_per_age_group_widget_utils.__file__]
 

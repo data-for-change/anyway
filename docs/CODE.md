@@ -22,12 +22,12 @@ One file, called `main.py` resides in the root of the repository. This file cont
 Widgets can be thought of as individual data collections which are produced for consumtion by the end-user. For example: AccidentCountByAccidentTypeWidget which returns, well, the accident count by accident type 
 
 ### Structure
-Widgets are currently divided into 2 kinds/classes (but this could change in the future by adding more sub-classes): Urban and Suburban, both of these are a subclass of the Widget class, and a superclass for all widgets. For example, AccidentCountByAccidentTypeWidget is a subclass of SubUrbanWidget which is itself a subclass of the Widget class
+Widgets are currently divided into 2 kinds/classes (but this could change in the future by adding more sub-classes): Urban and Suburban, both of these are a subclass of the Widget class, and a superclass for all widgets. For example, AccidentCountByAccidentTypeWidget is a subclass of RoadSegmentWidget which is itself a subclass of the Widget class
 
 ### Adding new widgets
-Every Widget, defined by its own class, should be created in a new file under the relevant module/directory, in snake_casing. In addition, in order to import the newly added widget, you need to add it to the super classe's \_\_init\_\_.py file. For example, if we were to add a new SubUrbanWidget named NewWidget, we should:
+Every Widget, defined by its own class, should be created in a new file under the relevant module/directory, in snake_casing. In addition, in order to import the newly added widget, you need to add it to the super classe's \_\_init\_\_.py file. For example, if we were to add a new RoadSegmentWidget named NewWidget, we should:
 1. Create a file named new_widget.py under the suburban_widgets directory
-2. Write the code for the new widget as a class named NewWidget(SubUrbanWidget)
+2. Write the code for the new widget as a class named NewWidget(RoadSegmentWidget)
 3. Add it to the import statement in the \_\_init\_\_.py file of the suburban_widgets module
 
 ## Jinja2 Templates

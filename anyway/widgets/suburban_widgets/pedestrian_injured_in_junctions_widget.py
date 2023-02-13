@@ -29,6 +29,7 @@ class PedestrianInjuredInJunctionsWidget(SubUrbanWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
-            "title": "Number of pedestrian accidents on junctions in Ben Yehuda street in Tel Aviv"
+            "title": "Number of pedestrian accidents on junctions",
+            "subtitle": "Ben Yehuda street in Tel Aviv"
         }
         return items

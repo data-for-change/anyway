@@ -404,6 +404,22 @@ def get_downloaded_data(format, years_ago):
     columns[AccidentMarkerView.accident_severity_hebrew] = 'חומרת תאונה'
     columns[AccidentMarkerView.speed_limit_hebrew] = 'מהירות מותרת'
     columns[AccidentMarkerView.location_accuracy_hebrew] = 'איכות עיגון'
+    
+    columns[AccidentMarkerView.accident_year] = 'שנה'
+    columns[AccidentMarkerView.accident_month] = 'חודש'
+    columns[AccidentMarkerView.accident_day] = 'יום'
+    columns[AccidentMarkerView.accident_timestamp] = 'חתימת זמן'
+    columns[AccidentMarkerView.day_in_week_hebrew] = 'יום בשבוע'
+    columns[AccidentMarkerView.day_type_hebrew] = 'סוג יום'
+
+    columns[AccidentMarkerView.road1] = 'מספר דרך- מקום אירוע התאונה'
+    columns[AccidentMarkerView.road2] = 'מספר דרך 2'
+    columns[AccidentMarkerView.km] = 'מספר הק"מ- מקום אירוע התאונה'
+    columns[AccidentMarkerView.region_hebrew] = 'מחוז-מקום התאונה'
+    columns[AccidentMarkerView.yishuv_name] = 'שם היישוב בו אירעה התאונה'
+    columns[AccidentMarkerView.street1_hebrew] = 'רחוב- מקום אירוע התאונה'
+    columns[AccidentMarkerView.street2_hebrew] = 'רחוב 2'
+    columns[AccidentMarkerView.house_number] = 'מספר בית- מקום אירוע התאונה'
 
     columns[AccidentMarkerView.road_type_hebrew] = 'סוג דרך'
     columns[AccidentMarkerView.non_urban_intersection_hebrew] = 'צומת בינעירוני'
@@ -427,25 +443,11 @@ def get_downloaded_data(format, years_ago):
     columns[AccidentMarkerView.cross_location_hebrew] = 'חצייה-מקום'
     columns[AccidentMarkerView.cross_direction_hebrew] = 'חצייה-כיוון'
 
-    columns[AccidentMarkerView.road1] = 'מספר דרך- מקום אירוע התאונה'
-    columns[AccidentMarkerView.road2] = 'מספר דרך 2'
-    columns[AccidentMarkerView.km] = 'מספר הק"מ- מקום אירוע התאונה'
-    columns[AccidentMarkerView.region_hebrew] = 'מחוז-מקום התאונה'
-    columns[AccidentMarkerView.yishuv_name] = 'שם היישוב בו אירעה התאונה'
-    columns[AccidentMarkerView.street1_hebrew] = 'רחוב- מקום אירוע התאונה'
-    columns[AccidentMarkerView.street2_hebrew] = 'רחוב 2'
-    columns[AccidentMarkerView.house_number] = 'מספר בית- מקום אירוע התאונה'
-    columns[AccidentMarkerView.longitude] = 'קואורדינטה'
-    columns[AccidentMarkerView.latitude] = 'קואורדינטה'
+    columns[AccidentMarkerView.longitude] = 'קו אורך'
+    columns[AccidentMarkerView.latitude] = 'קו רוחב'
     columns[AccidentMarkerView.x] = 'X קואורדינטה'
     columns[AccidentMarkerView.y] = 'Y קואורדינטה'
 
-    columns[AccidentMarkerView.day_in_week_hebrew] = 'יום בשבוע'
-    columns[AccidentMarkerView.day_type_hebrew] = 'סוג יום'
-    columns[AccidentMarkerView.accident_year] = 'שנה'
-    columns[AccidentMarkerView.accident_month] = 'חודש'
-    columns[AccidentMarkerView.accident_day] = 'יום'
-    columns[AccidentMarkerView.accident_timestamp] = 'חתימת זמן'
 
     related_accidents = get_accidents_stats(
             table_obj=AccidentMarkerView,
@@ -480,6 +482,7 @@ def get_downloaded_data(format, years_ago):
     index_to_insert_severities = list(columns.values()).index('מהירות מותרת')
     output_column_names = list(columns.values())[:index_to_insert_severities] + list(severities_hebrew) + list(columns.values())[index_to_insert_severities:]
     df = df[output_column_names]
+    df.rename(columns={'פצוע קל': 'פצוע/ה קל', 'פצוע בינוני': 'פצוע/ה בינוני', 'פצוע קשה': 'פצוע/ה קשה', 'הרוג': 'הרוג/ה'}, inplace=True)
 
     if format == 'csv':
         df.to_csv(buffer, encoding="utf-8")

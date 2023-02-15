@@ -395,7 +395,7 @@ def update_news_flash_qualifying(id):
 def get_downloaded_data(format, years_ago):
     request_params = get_request_params_from_request_values(request.values)
     end_time = datetime.datetime.now()
-    start_time = end_time - datetime.timedelta(days=years_ago*365)    
+    start_time = end_time - datetime.timedelta(days=years_ago*365)
     columns = OrderedDict()
 
     columns[AccidentMarkerView.id] = 'מס תאונה'
@@ -404,7 +404,7 @@ def get_downloaded_data(format, years_ago):
     columns[AccidentMarkerView.accident_severity_hebrew] = 'חומרת תאונה'
     columns[AccidentMarkerView.speed_limit_hebrew] = 'מהירות מותרת'
     columns[AccidentMarkerView.location_accuracy_hebrew] = 'איכות עיגון'
-    
+
     columns[AccidentMarkerView.accident_year] = 'שנה'
     columns[AccidentMarkerView.accident_month] = 'חודש'
     columns[AccidentMarkerView.accident_day] = 'יום'

@@ -4,10 +4,11 @@
 import datetime
 import json
 import logging
+import pandas as pd
 
 from typing import List, Optional
 from http import HTTPStatus
-
+from collections import OrderedDict
 
 from flask import request, Response, make_response, jsonify
 from sqlalchemy import and_, not_, or_
@@ -21,16 +22,20 @@ from anyway.backend_constants import (
 )
 from anyway.models import NewsFlash, LocationVerificationHistory
 from anyway.infographics_utils import is_news_flash_resolution_supported
+from anyway.request_params import get_request_params_from_request_values
 from pydantic import BaseModel, ValidationError, validator
 
 from anyway.views.user_system.api import roles_accepted, return_json_error
 from anyway.views.user_system.user_functions import get_current_user
 from anyway.error_code_and_strings import Errors as Es
 from anyway.parsers import fields_to_resolution, resolution_dict
+from anyway.models import AccidentMarkerView, InvolvedView
+from anyway.widgets.widget_utils import get_accidents_stats
+from io import BytesIO
 
 DEFAULT_OFFSET_REQ_PARAMETER = 0
 DEFAULT_LIMIT_REQ_PARAMETER = 100
-
+DEFAULT_NUMBER_OF_YEARS_AGO = 5
 
 class NewsFlashQuery(BaseModel):
 
@@ -385,3 +390,110 @@ def update_news_flash_qualifying(id):
             new_qualification=new_location_qualifiction,
         )
         return Response(status=HTTPStatus.OK)
+
+
+def get_downloaded_data(format, years_ago):
+    request_params = get_request_params_from_request_values(request.values)
+    end_time = datetime.datetime.now()
+    start_time = end_time - datetime.timedelta(days=years_ago*365)
+    columns = OrderedDict()
+
+    columns[AccidentMarkerView.id] = 'מס תאונה'
+    columns[AccidentMarkerView.provider_code_hebrew] = 'סוג תיק'
+    columns[AccidentMarkerView.accident_type_hebrew] = 'סוג תאונה'
+    columns[AccidentMarkerView.accident_severity_hebrew] = 'חומרת תאונה'
+    columns[AccidentMarkerView.speed_limit_hebrew] = 'מהירות מותרת'
+    columns[AccidentMarkerView.location_accuracy_hebrew] = 'איכות עיגון'
+
+    columns[AccidentMarkerView.accident_year] = 'שנה'
+    columns[AccidentMarkerView.accident_month] = 'חודש'
+    columns[AccidentMarkerView.accident_day] = 'יום'
+    columns[AccidentMarkerView.accident_timestamp] = 'חתימת זמן'
+    columns[AccidentMarkerView.day_in_week_hebrew] = 'יום בשבוע'
+    columns[AccidentMarkerView.day_type_hebrew] = 'סוג יום'
+
+    columns[AccidentMarkerView.road1] = 'מספר דרך- מקום אירוע התאונה'
+    columns[AccidentMarkerView.road2] = 'מספר דרך 2'
+    columns[AccidentMarkerView.km] = 'מספר הק"מ- מקום אירוע התאונה'
+    columns[AccidentMarkerView.region_hebrew] = 'מחוז-מקום התאונה'
+    columns[AccidentMarkerView.yishuv_name] = 'שם היישוב בו אירעה התאונה'
+    columns[AccidentMarkerView.street1_hebrew] = 'רחוב- מקום אירוע התאונה'
+    columns[AccidentMarkerView.street2_hebrew] = 'רחוב 2'
+    columns[AccidentMarkerView.house_number] = 'מספר בית- מקום אירוע התאונה'
+
+    columns[AccidentMarkerView.road_type_hebrew] = 'סוג דרך'
+    columns[AccidentMarkerView.non_urban_intersection_hebrew] = 'צומת בינעירוני'
+    columns[AccidentMarkerView.road_shape_hebrew] = 'צורת הדרך'
+    columns[AccidentMarkerView.road_surface_hebrew] = 'מצב פני הכביש'
+    columns[AccidentMarkerView.road_intactness_hebrew] = 'תקינות הכביש'
+    columns[AccidentMarkerView.road_width_hebrew] = 'רוחב הכביש'
+    columns[AccidentMarkerView.one_lane_hebrew] = 'דרך חד מסלולית'
+    columns[AccidentMarkerView.multi_lane_hebrew] = 'דרך רב מסלולית'
+
+    columns[AccidentMarkerView.road_sign_hebrew] = 'סימון/תמרור'
+    columns[AccidentMarkerView.road_light_hebrew] = 'תאורה'
+    columns[AccidentMarkerView.road_control_hebrew] = 'בקרה בצומת'
+    columns[AccidentMarkerView.traffic_light_hebrew] = 'מרומזר/לא מרומזר'
+    columns[AccidentMarkerView.weather_hebrew] = 'מזג אוויר'
+    columns[AccidentMarkerView.day_night_hebrew] = 'יום/לילה'
+    columns[AccidentMarkerView.road_object_hebrew] = 'עצם-סוג'
+
+    columns[AccidentMarkerView.didnt_cross_hebrew] = 'חצייה-לא חצה'
+    columns[AccidentMarkerView.cross_mode_hebrew] = 'חצייה-אופן'
+    columns[AccidentMarkerView.cross_location_hebrew] = 'חצייה-מקום'
+    columns[AccidentMarkerView.cross_direction_hebrew] = 'חצייה-כיוון'
+
+    columns[AccidentMarkerView.longitude] = 'קו אורך'
+    columns[AccidentMarkerView.latitude] = 'קו רוחב'
+    columns[AccidentMarkerView.x] = 'X קואורדינטה'
+    columns[AccidentMarkerView.y] = 'Y קואורדינטה'
+
+
+    related_accidents = get_accidents_stats(
+            table_obj=AccidentMarkerView,
+            columns=columns.keys(),
+            filters=request_params.location_info,
+            start_time=start_time,
+            end_time=end_time
+        )
+    accident_ids = list(related_accidents['id'].values())
+    accident_severities = get_accidents_stats(
+            table_obj=InvolvedView,
+            group_by=("accident_id", "injury_severity_hebrew"),
+            count="injury_severity_hebrew",
+            filters={"accident_id": accident_ids}
+        )
+
+    severities_hebrew = set()
+    for i, accident_id in enumerate(accident_ids):
+        for severity_hebrew, severity_count in accident_severities[accident_id].items():
+            if severity_hebrew is None:
+                continue
+            severities_hebrew.add(severity_hebrew)
+            if severity_hebrew not in related_accidents:
+                related_accidents[severity_hebrew] = {}
+            related_accidents[severity_hebrew][i] = severity_count
+
+    json_data = json.dumps(related_accidents, default=str)
+    buffer = BytesIO()
+    df = pd.read_json(json_data)
+    df.rename(columns={key.name.replace('_hebrew', ''): value for key, value in columns.items()}, inplace=True)
+
+    index_to_insert_severities = list(columns.values()).index('מהירות מותרת')
+    output_column_names = list(columns.values())[:index_to_insert_severities] + list(severities_hebrew) + list(columns.values())[index_to_insert_severities:]
+    df = df[output_column_names]
+    df.rename(columns={'פצוע קל': 'פצוע/ה קל', 'פצוע בינוני': 'פצוע/ה בינוני', 'פצוע קשה': 'פצוע/ה קשה', 'הרוג': 'הרוג/ה'}, inplace=True)
+
+    if format == 'csv':
+        df.to_csv(buffer, encoding="utf-8")
+        mimetype ='text/csv'
+        file_type = 'csv'
+    elif format == 'xlsx':
+        df.to_excel(buffer, encoding="utf-8")
+        mimetype='application/vnd.ms-excel'
+        file_type = 'xlsx'
+    else:
+        raise Exception(f'File format not supported for downloading : {format}')
+
+    headers = { 'Content-Disposition': f'attachment; filename=anyway_download_{datetime.datetime.now().strftime("%d_%m_%Y_%H_%M_%S")}.{file_type}' }
+    return Response(buffer.getvalue(), mimetype=mimetype, headers=headers)

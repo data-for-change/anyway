@@ -84,6 +84,7 @@ class DBAdapter:
         infographics_data_cache_updater.add_news_flash_to_cache(newsflash)
         if os.environ.get("FLASK_ENV") == "production" and newsflash.accident:
             publish_notification(newsflash)
+        publish_notification(newsflash)
 
     def get_newsflash_by_id(self, id):
         return self.db.session.query(NewsFlash).filter(NewsFlash.id == id)

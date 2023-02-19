@@ -438,6 +438,16 @@ def importemail():
 
     return main()
 
+@cli.group()
+def send():
+    pass
+
+@send.command()
+def send_message():
+    from anyway.telegram_accident_notifications import publish_notification
+
+    publish_notification(None)
+
 
 if __name__ == "__main__":
     cli(sys.argv[1:])  # pylint: disable=too-many-function-args

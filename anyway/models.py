@@ -880,11 +880,7 @@ class NewsFlash(Base):
     )
     location_qualifying_user = Column(BigInteger(), nullable=True)
 
-    def __init__(self, **kwargs):
-        super(NewsFlash, self).__init__(**kwargs)
-        self.critical = self.get_critical()
-
-    def get_critical(
+    def set_critical(
         self,
         years_before=5,
         suburban_road_severe_value=10,
@@ -912,11 +908,6 @@ class NewsFlash(Base):
             critical = (
                 (critical_values["severe_injured_count"] / suburban_road_severe_value)
                 + (critical_values["killed_count"] / suburban_road_killed_value)
-            ) >= 1
-        elif resolution == BE_CONST.ResolutionCategories.STREET:
-            critical = (
-                (critical_values["severe_injured_count"] / urban_severe_value)
-                + critical_values["killed_count"]
             ) >= 1
         return critical
 

@@ -23,6 +23,7 @@ class TestInfographicsDataFromCache(TestCase):
         start_time=datetime.date.today() - datetime.timedelta(days=365),
         end_time=datetime.datetime.today(),
         lang="he",
+        news_flash_description="Test description"
     )
 
     def test_get_not_existing_from_cache(self):

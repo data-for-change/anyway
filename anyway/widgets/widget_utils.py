@@ -23,6 +23,7 @@ def get_query(table_obj, filters, start_time, end_time):
         query = query.filter(getattr(table_obj, "accident_timestamp") <= end_time)
     if filters:
         for field_name, value in filters.items():
+            # TODO: why are we always doing a list check? wouldn't it be more efficient to do a single comparison if it's not a list?
             if isinstance(value, list):
                 values = value
             else:
@@ -33,6 +34,7 @@ def get_query(table_obj, filters, start_time, end_time):
 
 def get_accidents_stats(
     table_obj,
+    columns=None,
     filters=None,
     group_by=None,
     count=None,
@@ -46,6 +48,8 @@ def get_accidents_stats(
 
     # get stats
     query = get_query(table_obj, filters, start_time, end_time)
+    if columns:
+        query = query.with_entities(*columns)
     if group_by:
         if isinstance(group_by, tuple):
             if len(group_by) == 2:

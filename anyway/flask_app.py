@@ -35,6 +35,7 @@ from anyway.models import (
     DiscussionMarker,
     HighlightPoint,
     Involved,
+    InvolvedView,
     LocationSubscribers,
     Vehicle,
     ReportProblem,
@@ -60,8 +61,10 @@ from anyway.views.news_flash.api import (
     single_news_flash,
     news_flash_v2,
     update_news_flash_qualifying,
+    get_downloaded_data,
     DEFAULT_LIMIT_REQ_PARAMETER,
     DEFAULT_OFFSET_REQ_PARAMETER,
+    DEFAULT_NUMBER_OF_YEARS_AGO
 )
 from anyway.views.schools.api import (
     schools_description_api,
@@ -172,7 +175,6 @@ jinja_environment.assets_environment = assets_env
 babel = Babel(app)
 
 SESSION_HIGHLIGHTPOINT_KEY = "gps_highlightpoint_created"
-
 DICTIONARY = "Dictionary"
 DICTCOLUMN1 = "MS_TAVLA"
 DICTCOLUMN2 = "KOD"
@@ -1188,7 +1190,7 @@ class RetrieveNewsFlash(Resource):
 parser = reqparse.RequestParser()
 parser.add_argument("id", type=int, help="News flash id")
 parser.add_argument(
-    "years_ago", type=int, default=5, help="Number of years back to consider accidents"
+    "years_ago", type=int, default=DEFAULT_NUMBER_OF_YEARS_AGO, help=f"Number of years back to consider accidents. Default is {DEFAULT_NUMBER_OF_YEARS_AGO} years"
 )
 parser.add_argument("lang", type=str, default="he", help="Language")
 
@@ -1246,7 +1248,7 @@ def gps_to_cbs_location():
 idbl_parser = reqparse.RequestParser()
 idbl_parser.add_argument("road_segment_id", type=int, help="Road Segment id")
 idbl_parser.add_argument(
-    "years_ago", type=int, default=5, help="Number of years back to consider accidents"
+    "years_ago", type=int, default=DEFAULT_NUMBER_OF_YEARS_AGO, help=f"Number of years back to consider accidents. Default is {DEFAULT_NUMBER_OF_YEARS_AGO} years"
 )
 idbl_parser.add_argument("lang", type=str, default="he", help="Language")
 
@@ -1451,3 +1453,20 @@ class Cities(Resource):
 class SetNewsflashLocationQualification(Resource):
     def put(self, id):
         return update_news_flash_qualifying(id)
+
+
+download_data_parser = reqparse.RequestParser()
+download_data_parser.add_argument("format", type=str, default="csv", 
+help="Format for downloaded data (.csv/.xlsx)")
+download_data_parser.add_argument("years_ago", type=int, default=DEFAULT_NUMBER_OF_YEARS_AGO, 
+help=f"Number of years back to consider accidents. Default is {DEFAULT_NUMBER_OF_YEARS_AGO} years")
+"""
+    Download accidents data with regards to news flash/location
+"""
+@api.route("/api/download-data", methods=["GET"])
+class DownloadData(Resource):
+    @api.doc("download data")
+    @api.expect(parser)
+    def get(self):
+        args = download_data_parser.parse_args()
+        return get_downloaded_data(args.get('format', 'csv'), args.get('years_ago', DEFAULT_NUMBER_OF_YEARS_AGO))

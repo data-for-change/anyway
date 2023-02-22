@@ -44,19 +44,9 @@ def get_most_severe_accidents_table_title(
     location_info: dict, resolution: BE_CONST.ResolutionCategories
 ):
     if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
-        return (
-            _("Most severe accidents in segment")
-            + " "
-            + segment_dictionary[location_info["road_segment_name"]]
-        )
+        return "Most severe accidents in segment", segment_dictionary[location_info["road_segment_name"]]
     elif resolution == BE_CONST.ResolutionCategories.STREET:
-        return (
-            _("Severe accidents in street")
-            + f" {location_info['street1_hebrew']} "
-            + _("in ")
-            + f"{location_info['yishuv_name']}"
-        )
-
+        return "Severe accidents in street", f" {location_info['street1_hebrew']} in {location_info['yishuv_name']}"
 
 # count of dead and severely injured
 def get_casualties_count_in_accident(accident_id, provider_code, injury_severity, accident_year):
@@ -167,10 +157,11 @@ class MostSevereAccidentsTableWidget(AllLocationsWidget):
                     logging.exception(
                         f"MostSevereAccidentsTableWidget.localize_items: Exception while translating {item}."
                     )
+        title, subtitle = get_most_severe_accidents_table_title(request_params.location_info,
+                                                                request_params.resolution)
         items["data"]["text"] = {
-            "title": get_most_severe_accidents_table_title(
-                request_params.location_info, request_params.resolution
-            )
+            "title": _(title),
+            "subtitle": _(subtitle)
         }
         return items
 

@@ -38,7 +38,9 @@ from sqlalchemy import (
 )
 import sqlalchemy
 from sqlalchemy.orm import relationship, load_only, backref
+from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy import or_, and_
+from sqlalchemy.dialects import postgresql
 
 from anyway import localization
 from anyway.backend_constants import BE_CONST, NewsflashLocationQualification
@@ -1149,6 +1151,22 @@ class Streets(Base):
         if res is None:
             raise RuntimeError(f"When retrieving streets of {yishuv_symbol}")
         return res1
+
+
+class SuburbanJunction(Base):
+    __tablename__ = "suburban_junction"
+    MAX_NAME_LEN = 100
+    non_urban_intersection = Column(Integer(), primary_key=True, nullable=False)
+    non_urban_intersection_hebrew = Column(String(length=MAX_NAME_LEN),
+                                           nullable=True)
+    roads = Column(postgresql.ARRAY(Integer(), dimensions=1), nullable=False)
+
+    def serialize(self):
+        return {
+            "non_urban_intersection": self.non_urban_intersection,
+            "non_urban_intersection_hebrew": self.non_urban_intersection_hebrew,
+            "roads": self.roads,
+        }
 
 
 class RegisteredVehicle(Base):
@@ -2799,3 +2817,14 @@ class CBSLocations(Base):
     road_segment_name = Column(Text(), nullable=True)
     longitude = Column(Float(), nullable=True)
     latitude = Column(Float(), nullable=True)
+
+
+class TelegramGroupsBase(Base):
+    id = Column(Integer(), primary_key=True)
+    filter = Column(JSON(), nullable=False, server_default="{}")
+
+class TelegramGroups(TelegramGroupsBase):
+    __tablename__ = "telegram_groups"
+
+class TelegramGroupsTest(TelegramGroupsBase):
+    __tablename__ = "telegram_groups_test"

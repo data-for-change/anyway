@@ -1,14 +1,14 @@
 """add suburban junction table
 
 Revision ID: 13dcbe0a3a64
-Revises: ccc480c5d0a2
+Revises: 203753e10336
 Create Date: 2023-01-16 12:39:03.026479
 
 """
 
 # revision identifiers, used by Alembic.
 revision = '13dcbe0a3a64'
-down_revision = 'ccc480c5d0a2'
+down_revision = '203753e10336'
 branch_labels = None
 depends_on = None
 

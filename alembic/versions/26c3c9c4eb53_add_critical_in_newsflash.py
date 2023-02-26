@@ -1,14 +1,14 @@
 """add critical in newsflash
 
 Revision ID: 26c3c9c4eb53
-Revises: ccc480c5d0a2
+Revises: 13dcbe0a3a64
 Create Date: 2023-01-18 20:58:05.032521
 
 """
 
 # revision identifiers, used by Alembic.
 revision = '26c3c9c4eb53'
-down_revision = 'ccc480c5d0a2'
+down_revision = '13dcbe0a3a64'
 branch_labels = None
 depends_on = None
 

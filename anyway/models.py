@@ -6,6 +6,7 @@ import logging
 from collections import namedtuple
 from typing import List
 
+
 try:
     from flask_login import UserMixin
 except ModuleNotFoundError:
@@ -873,12 +874,44 @@ class NewsFlash(Base):
     street2_hebrew = Column(Text(), nullable=True)
     non_urban_intersection_hebrew = Column(Text(), nullable=True)
     road_segment_name = Column(Text(), nullable=True)
+    critical = Column(Boolean(), nullable=True)
     newsflash_location_qualification = Column(
         Integer(),
         nullable=False,
         server_default=text(f"{NewsflashLocationQualification.NOT_VERIFIED.value}"),
     )
     location_qualifying_user = Column(BigInteger(), nullable=True)
+
+    def set_critical(
+        self,
+        years_before=5,
+        suburban_road_severe_value=10,
+        suburban_road_killed_value=3,
+        urban_severe_value=2,
+    ):
+        from anyway.widgets.suburban_widgets.injured_count_by_severity_widget import (
+            InjuredCountBySeverityWidget,
+        )
+        from anyway.request_params import get_latest_accident_date
+
+        if self.road1 is None or self.road_segment_name is None:
+            return None
+        last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
+        end_time = last_accident_date.to_pydatetime().date()
+        start_time = datetime.date(end_time.year + 1 - years_before, 1, 1)
+        critical_values = InjuredCountBySeverityWidget.get_injured_count_by_severity(
+            self.road1, self.road_segment_name, start_time, end_time
+        )
+        if critical_values == {}:
+            return None
+        critical = None
+        resolution = BE_CONST.ResolutionCategories(self.resolution)
+        if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
+            critical = (
+                (critical_values["severe_injured_count"] / suburban_road_severe_value)
+                + (critical_values["killed_count"] / suburban_road_killed_value)
+            ) >= 1
+        return critical
 
     def serialize(self):
         return {
@@ -909,6 +942,7 @@ class NewsFlash(Base):
                 self.newsflash_location_qualification
             ).get_label(),
             "location_qualifying_user": self.location_qualifying_user,
+            "critical": self.critical,
         }
 
     # Flask-Login integration

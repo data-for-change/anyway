@@ -48,6 +48,7 @@ def scrape_extract_store_rss(site_name, db):
         if newsflash.accident:
             # FIX: No accident-accurate date extracted
             extract_geo_features(db, newsflash)
+            newsflash.set_critical()
         db.insert_new_newsflash(newsflash)
 
 
@@ -61,6 +62,7 @@ def scrape_extract_store_twitter(screen_name, db):
         newsflash.organization = classify_organization("twitter")
         if newsflash.accident:
             extract_geo_features(db, newsflash)
+            newsflash.set_critical()
         db.insert_new_newsflash(newsflash)
 
 

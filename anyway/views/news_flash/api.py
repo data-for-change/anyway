@@ -12,6 +12,7 @@ from collections import OrderedDict
 
 from flask import request, Response, make_response, jsonify
 from sqlalchemy import and_, not_, or_
+from sqlalchemy.orm.query import Query
 
 
 from anyway.app_and_db import db
@@ -199,19 +200,75 @@ def gen_news_flash_query(
 
     return query
 
+def filter_by_road_number(query: Query, value: float, **kwargs) -> Query:
+    return query.filter(NewsFlash.road1 == value)
+
+def filter_by_source(query: Query, value: Optional[List[BE_CONST.Source]], **kwargs) -> Query:
+    if value is None:
+        return query
+    sources = set([source.value for source in value])
+    critical = BE_CONST.Source.CRITICAL.value
+    if critical in sources:
+        query = query.filter(NewsFlash.critical==True)
+        sources.remove(critical)
+        if len(sources) == 0:
+            return query
+    return query.filter(NewsFlash.source.in_(list(sources)))
+
+def filter_by_dates(query: Query, value: Optional[datetime.datetime], **kwargs) -> Query:
+    start_date, end_date = value, kwargs.get('end_date')
+    if start_date:
+        if end_date:
+            query = query.filter(start_date <= NewsFlash.date <= end_date)
+        else:
+            query = query.filter(start_date <= NewsFlash.date)
+    elif end_date:
+        query = query.filter(NewsFlash.date <= end_date)
+    return query
+
+def filter_by_resolutions(query, value: List[str], **kwargs):
+    ands = []
+    if "suburban_road" in value:
+        ands.append(
+            and_(
+                NewsFlash.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD.value,
+                NewsFlash.road_segment_name != None,
+            )
+        )
+    if "street" in value:
+        ands.append(
+            and_(
+                NewsFlash.resolution == BE_CONST.ResolutionCategories.STREET.value,
+                NewsFlash.street1_hebrew != None,
+            )
+        )
+    if len(ands) > 1:
+        return query.filter(or_(*ands))
+    return query.filter(ands.pop())
+
+param_to_query_filter = {
+    "road_number": filter_by_road_number,
+    "source": filter_by_source,
+    "start_date": filter_by_dates,
+    "resolution": filter_by_resolutions
+}
+
+param_to_filter_kwargs = {
+    "start_date": lambda valid_params: {
+        "end_date": valid_params.get("end_date")
+    }
+}
 
 def gen_news_flash_query_v2(session, valid_params: dict):
     query = session.query(NewsFlash)
     for param, value in valid_params.items():
-        if param == "road_number":
-            query = query.filter(NewsFlash.road1 == value)
-        if param == "source":
-            sources = [source.value for source in value]
-            query = query.filter(NewsFlash.source.in_(sources))
-        if param == "start_date":
-            query = query.filter(value <= NewsFlash.date <= valid_params["end_date"])
-        if param == "resolution":
-            query = filter_by_resolutions(query, value)
+        query_filter = param_to_query_filter.get(param)
+        if query_filter is not None:
+            kwargs = {}
+            kwargs_retriever = param_to_filter_kwargs.get(param)
+            if kwargs_retriever is not None:
+                kwargs = kwargs_retriever(valid_params)
+            query = query_filter(query, value, **kwargs)
     query = query.filter(
         and_(
             NewsFlash.accident == True,
@@ -262,27 +319,6 @@ def get_news_flash_by_id(id: int):
     return Response(
         json.dumps(news_flash_with_id.serialize(), default=str), mimetype="application/json"
     )
-
-
-def filter_by_resolutions(query, resolutions: List[str]):
-    ands = []
-    if "suburban_road" in resolutions:
-        ands.append(
-            and_(
-                NewsFlash.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD.value,
-                NewsFlash.road_segment_name != None,
-            )
-        )
-    if "street" in resolutions:
-        ands.append(
-            and_(
-                NewsFlash.resolution == BE_CONST.ResolutionCategories.STREET.value,
-                NewsFlash.street1_hebrew != None,
-            )
-        )
-    if len(ands) > 1:
-        return query.filter(or_(*ands))
-    return query.filter(ands.pop())
 
 
 # Params that can take more than 1 value are kept as lists regardless of number of values supplied

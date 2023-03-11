@@ -22,7 +22,7 @@ LocationInfo = Dict[str, Any]
 @dataclass
 class RequestParams:
     """
-    Input for infographics data generation, per api call
+    Input for infographics data generation, per api call comment
     """
 
     years_ago: int

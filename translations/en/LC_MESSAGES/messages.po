@@ -236,7 +236,6 @@ msgid ""
 msgstr ""
 
 #: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:173
-#, fuzzy
 msgid "Severe accidents in suburban junction"
 msgstr "severe injured"
 
@@ -374,7 +373,6 @@ msgid "fatal accidents"
 msgstr ""
 
 #: anyway/widgets/road_segment_widgets/front_to_side_accidents_by_severity.py:145
-#, fuzzy
 msgid "severe accidents"
 msgstr "severe injured"
 
@@ -571,4 +569,3 @@ msgstr ""
 
 #~ msgid "Severe or fatal accidents on bikes, e-bikes, or scooters in "
 #~ msgstr ""
-

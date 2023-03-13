@@ -307,7 +307,6 @@ msgstr ""
 "חומרת התאונה, בפרק הזמן הנבחר."
 
 #: anyway/widgets/road_segment_widgets/accident_count_by_car_type_widget.py:142
-#, fuzzy
 msgid "Comparing vehicle type in accidents relative to national average"
 msgstr "השוואת אחוז הרכבים בתאונות במקטע {} לעומת ממוצע ארצי"
 
@@ -470,7 +469,6 @@ msgstr "Street view widget"
 
 #: anyway/widgets/road_segment_widgets/suburban_crosswalk_widget.py:72
 #: anyway/widgets/urban_widgets/urban_crosswalk_widget.py:75
-#, fuzzy
 msgid "Pedestrian injury comparison"
 msgstr "פגיעות בהולכי רגל על"
 
@@ -479,7 +477,6 @@ msgid "Segments with most accidents per Km"
 msgstr "מקטעים עם הכי הרבה תאונות לק\"מ "
 
 #: anyway/widgets/road_segment_widgets/top_road_segments_accidents_per_km_widget.py:89
-#, fuzzy
 msgid "road1"
 msgstr "כביש"
 
@@ -497,7 +494,6 @@ msgstr "תאונות הולכי רגל לפי חומרה ולפי שנה"
 
 #: anyway/widgets/urban_widgets/severe_fatal_count_by_vehicle_by_year_widget.py:98
 #: anyway/widgets/urban_widgets/small_motor_severe_fatal_count_by_year_widget.py:60
-#, fuzzy
 msgid "Severe or fatal accidents on bikes, e-bikes, or scooters"
 msgstr "רוכבי אופנים, אופנים חשמליים, וקורקינט חשמלי שנפצעו קשה או נהרגו ב"
 
@@ -507,7 +503,6 @@ msgid "yishuv_name"
 msgstr ""
 
 #: anyway/widgets/urban_widgets/urban_crosswalk_widget.py:76
-#, fuzzy
 msgid "street1_hebrew"
 msgstr "רחוב"
 
@@ -653,4 +648,3 @@ msgstr ""
 
 #~ msgid "In"
 #~ msgstr "במקטע"
-

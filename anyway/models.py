@@ -911,7 +911,7 @@ class NewsFlash(Base):
                 (critical_values["severe_injured_count"] / suburban_road_severe_value)
                 + (critical_values["killed_count"] / suburban_road_killed_value)
             ) >= 1
-        return critical
+        self.critical = critical
 
     def serialize(self):
         return {

@@ -49,6 +49,7 @@ class NewsFlashQuery(BaseModel):
     # from the request
     start_date: Optional[datetime.datetime] = None
     end_date: Optional[datetime.datetime] = None
+    critical: Optional[bool] = None
 
     @validator("end_date", always=True)
     def check_missing_date(cls, v, values):
@@ -212,6 +213,8 @@ def gen_news_flash_query_v2(session, valid_params: dict):
             query = query.filter(value <= NewsFlash.date <= valid_params["end_date"])
         if param == "resolution":
             query = filter_by_resolutions(query, value)
+        if param == "critical":
+            query = query.filter(NewsFlash.critical == value)
     query = query.filter(
         and_(
             NewsFlash.accident == True,

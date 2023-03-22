@@ -7,3 +7,4 @@ pytest-selenium
 jsonschema
 mock
 factory_boy
+pytest-env==0.6.2

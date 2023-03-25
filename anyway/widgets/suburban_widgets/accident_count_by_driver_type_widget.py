@@ -77,7 +77,9 @@ class AccidentCountByDriverTypeWidget(SubUrbanWidget):
                 logging.exception(
                     f"AccidentCountByDriverTypeWidget.localize_items: Exception while translating {item}."
                 )
-        items["data"]["text"] = {"title": _("Number of accidents by driver type")}
+        items["data"]["text"] = {"title": _("Number of accidents by driver type"),
+                                 "subtitle": _(request_params.location_info["road_segment_name"])
+                                 }
         return items
 
 

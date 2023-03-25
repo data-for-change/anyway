@@ -22,5 +22,7 @@ class StreetViewWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        items["data"]["text"] = {"title": _("Street view widget")}
+        items["data"]["text"] = {"title": _("Street view widget"),
+                                 "subtitle": _(request_params.location_info["road_segment_name"])
+                                 }
         return items

@@ -128,7 +128,9 @@ class FrondToSideAccidentsBySeverityWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        items["data"]["text"] = {"title": _("Front-side vs other accidents")}
+        items["data"]["text"] = {"title": _("Front-side vs other accidents"),
+                                 "subtitle": _(request_params.location_info["road_segment_name"])
+                                 }
 
         items["meta"]["information"] = _(
             "Fatal & severe accidents of type front-to-side in this road segment"

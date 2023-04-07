@@ -10,7 +10,7 @@ from sqlalchemy import func, distinct, between, and_
 
 from anyway.app_and_db import db
 from anyway.backend_constants import BE_CONST, LabeledCode, InjurySeverity
-from anyway.models import Involved, AccidentMarker, RoadSegments
+from anyway.models import Involved, AccidentMarker, RoadSegments, InvolvedMarkerView
 from anyway.request_params import LocationInfo
 from anyway.vehicle_type import VehicleType
 
@@ -176,45 +176,39 @@ def get_involved_counts(
     vehicle_types: Sequence[VehicleType],
     location_info: LocationInfo,
 ) -> Dict[str, int]:
+    table = InvolvedMarkerView
+
     selected_columns = (
-        Involved.accident_year.label("label_key"),
-        func.count(distinct(Involved.id)).label("value"),
+        table.accident_year.label("label_key"),
+        func.count(distinct(table.involve_id)).label("value"),
     )
 
     query = (
         db.session.query()
-        .select_from(Involved)
+        .select_from(table)
         .with_entities(*selected_columns)
-        .join(
-            AccidentMarker,
-            and_(
-                AccidentMarker.id == Involved.accident_id,
-                AccidentMarker.provider_code == Involved.provider_code,
-                AccidentMarker.accident_year == Involved.accident_year,
-            ),
-        )
-        .filter(between(Involved.accident_year, start_year, end_year))
-        .order_by(Involved.accident_year)
+        .filter(between(table.accident_year, start_year, end_year))
+        .order_by(table.accident_year)
     )
 
     if "yishuv_symbol" in location_info:
         query = query.filter(
-            AccidentMarker.yishuv_symbol == location_info["yishuv_symbol"]
-        ).group_by(Involved.accident_year)
+            table.accident_yishuv_symbol == location_info["yishuv_symbol"]
+        ).group_by(table.accident_year)
     elif "road_segment_id" in location_info:
         query = (
-            query.join(RoadSegments, AccidentMarker.road1 == RoadSegments.road)
-            .filter(RoadSegments.segment_id == location_info["road_segment_id"])
-            .group_by(Involved.accident_year)
+            query
+            .filter(table.road_segment_id == location_info["road_segment_id"])
+            .group_by(table.accident_year)
         )
 
     if severities:
         query = query.filter(
-            Involved.injury_severity.in_([severity.value for severity in severities])
+            table.injury_severity.in_([severity.value for severity in severities])
         )
 
     if vehicle_types:
-        query = query.filter(Involved.vehicle_type.in_([v_type.value for v_type in vehicle_types]))
+        query = query.filter(table.involve_vehicle_type.in_([v_type.value for v_type in vehicle_types]))
 
     df = pd.read_sql_query(query.statement, query.session.bind)
     return df.to_dict(orient="records")

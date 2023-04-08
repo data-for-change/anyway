@@ -196,19 +196,17 @@ def get_involved_counts(
             table.accident_yishuv_symbol == location_info["yishuv_symbol"]
         ).group_by(table.accident_year)
     elif "road_segment_id" in location_info:
-        query = (
-            query
-            .filter(table.road_segment_id == location_info["road_segment_id"])
-            .group_by(table.accident_year)
+        query = query.filter(table.road_segment_id == location_info["road_segment_id"]).group_by(
+            table.accident_year
         )
 
     if severities:
-        query = query.filter(
-            table.injury_severity.in_([severity.value for severity in severities])
-        )
+        query = query.filter(table.injury_severity.in_([severity.value for severity in severities]))
 
     if vehicle_types:
-        query = query.filter(table.involve_vehicle_type.in_([v_type.value for v_type in vehicle_types]))
+        query = query.filter(
+            table.involve_vehicle_type.in_([v_type.value for v_type in vehicle_types])
+        )
 
     df = pd.read_sql_query(query.statement, query.session.bind)
     return df.to_dict(orient="records")

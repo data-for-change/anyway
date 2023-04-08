@@ -6,11 +6,11 @@ from typing import Dict, Any, List, Type, Optional, Sequence
 
 import pandas as pd
 from flask_babel import _
-from sqlalchemy import func, distinct, between, and_
+from sqlalchemy import func, distinct, between
 
 from anyway.app_and_db import db
 from anyway.backend_constants import BE_CONST, LabeledCode, InjurySeverity
-from anyway.models import Involved, AccidentMarker, RoadSegments, InvolvedMarkerView
+from anyway.models import InvolvedMarkerView
 from anyway.request_params import LocationInfo
 from anyway.vehicle_type import VehicleType
 

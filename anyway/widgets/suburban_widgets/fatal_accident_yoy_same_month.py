@@ -46,7 +46,6 @@ class FatalAccidentYoYSameMonth(SubUrbanWidget):
         items["data"]["text"] = {
             "title": _(
                 "Monthly killed in accidents on year over compared for current month in previous years"
-            ),
-            "subtitle": _(request_params.location_info["road_segment_name"])
+            )
         }
         return items

@@ -67,3 +67,4 @@ services:
 
 volumes:
   redash-postgres-data:
+z

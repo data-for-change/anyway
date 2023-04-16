@@ -457,7 +457,7 @@ def send_message():
 )
 def generate_infographics(id):
     from infographic_image_generator import download_infographics_for_newsflash
-    infographics_directory = "/var/selenium_data/infographics"
+    infographics_directory = "/var/selenium/tempdata"
     if not os.path.exists(infographics_directory):
         os.mkdir(infographics_directory)
         os.chmod(infographics_directory, 0o777)

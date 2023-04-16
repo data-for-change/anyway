@@ -1,14 +1,13 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import *
-#from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 import os
 import pathlib
 import logging
 import time
+import logging
 
 
 def create_chrome_browser_session(downloads_directory_path):
@@ -24,7 +23,10 @@ def create_chrome_browser_session(downloads_directory_path):
     #    "http://selenium:4444",
     #    options=options
     #)
-    browser = webdriver.Chrome(options=options)
+    browser = webdriver.Remote(
+        command_executor="https://gWHSinCXIPQLk:cbVkYC8BqvMumyfy5DIj@selenium.dataforchange.org.il/wd/hub",
+        options=webdriver.ChromeOptions()
+    )
     return browser
 
 
@@ -52,7 +54,7 @@ def download_infographics_for_newsflash_with_browser(browser, newsflash_id, down
         time.sleep(30)
         elements = get_download_button_elements(browser)
         buttons_found = len(elements)
-        print(f"found {buttons_found} buttons")
+        logging.debug(f"found {buttons_found} buttons")
         if buttons_found > 0:
             for element in elements:
                 ActionChains(browser).move_to_element(element).click().perform()
@@ -61,10 +63,10 @@ def download_infographics_for_newsflash_with_browser(browser, newsflash_id, down
                                                                     timeout=60)
         logging.info(f"is download done: {is_download_done}")
     except Exception as e:
-        print(e)
+        logging.error(e)
     finally:
         browser.quit()
-        print("Done")
+        logging.debug("Done")
         return is_download_done, buttons_found
 
 

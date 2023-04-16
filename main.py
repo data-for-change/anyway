@@ -438,15 +438,37 @@ def importemail():
 
     return main()
 
+
 @cli.group()
 def send():
     pass
+
 
 @send.command()
 def send_message():
     from anyway.telegram_accident_notifications import publish_notification
 
     publish_notification(None)
+
+
+@send.command()
+@click.option(
+    "--id", type=int, help="newsflash id"
+)
+def generate_infographics(id):
+    from infographic_image_generator import download_infographics_for_newsflash
+    infographics_directory = "/var/selenium_data/infographics"
+    if not os.path.exists(infographics_directory):
+        os.mkdir(infographics_directory)
+        os.chmod(infographics_directory, 0o777)
+
+    number_of_retries = 5
+    for retry_id in range(1, 1 + number_of_retries):
+        finished_generation, buttons_found = download_infographics_for_newsflash(id, infographics_directory)
+        if finished_generation:
+            logging.info(f"generation success on {retry_id}# try, {buttons_found} infographics")
+            return
+    logging.error("generation failed")
 
 
 if __name__ == "__main__":

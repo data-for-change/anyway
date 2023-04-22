@@ -445,13 +445,6 @@ def send():
 
 
 @send.command()
-def send_message():
-    from anyway.telegram_accident_notifications import publish_notification
-
-    publish_notification(None)
-
-
-@send.command()
 @click.option(
     "--id", type=int, help="newsflash id"
 )

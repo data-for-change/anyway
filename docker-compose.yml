@@ -18,7 +18,6 @@ services:
       - MAPS_API_KEY
     volumes:
       - .:/anyway
-      - selenium_data:/var/selenium_data/
     restart: always
     depends_on:
       - db
@@ -91,20 +90,8 @@ services:
       - airflow-webserver
       - db
 
-  selenium:
-    image: selenium/standalone-chrome:latest
-    restart: unless-stopped
-    ports:
-      - "4444"
-    expose:
-      - "4444"
-      - "80"
-    volumes:
-      - selenium_data:/var/selenium_data/
-
 volumes:
   db_data:
   anyway_etl_data:
   airflow-db:
   airflow-home:
-  selenium_data:

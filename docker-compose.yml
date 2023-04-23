@@ -33,8 +33,6 @@ services:
       - db_data:/var/lib/postgresql/data
     ports:
       - "9876:5432"
-    expose:
-      - "5432"
     restart: always
 
   anyway-etl:

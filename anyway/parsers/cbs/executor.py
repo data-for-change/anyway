@@ -77,6 +77,7 @@ from anyway.models import (
     ProviderCode,
     VehicleDamage,
     Streets,
+    SuburbanJunction,
     AccidentMarkerView,
     InvolvedView,
     InvolvedMarkerView,
@@ -104,6 +105,7 @@ STREETS = "streets"
 ROADS = "roads"
 URBAN_INTERSECTION = "urban_intersection"
 NON_URBAN_INTERSECTION = "non_urban_intersection"
+NON_URBAN_INTERSECTION_HEBREW = "non_urban_intersection_hebrew"
 DICTIONARY = "dictionary"
 INVOLVED = "involved"
 VEHICLES = "vehicles"
@@ -567,6 +569,7 @@ def import_accidents(provider_code, accidents, streets, roads, non_urban_interse
     accidents_result = []
     for _, accident in accidents.iterrows():
         marker = create_marker(provider_code, accident, streets, roads, non_urban_intersection)
+        add_suburban_junction_from_marker(marker)
         accidents_result.append(marker)
     db.session.bulk_insert_mappings(AccidentMarker, accidents_result)
     db.session.commit()
@@ -790,6 +793,8 @@ def import_streets_into_db():
 
 yishuv_street_dict: Dict[Tuple[int, int], str] = {}
 yishuv_name_dict: Dict[Tuple[int, str], int] = {}
+suburban_junctions_dict: Dict[int, dict] = {}
+SUBURBAN_JUNCTION = "suburban_junction"
 
 
 def load_existing_streets():
@@ -835,6 +840,67 @@ def add_street_remove_name_duplicates(street: Dict[str, Any]):
         yishuv_name_dict[k] = street["street"]
     if v is None:
         yishuv_name_dict[k] = street["street"]
+
+
+def import_suburban_junctions_into_db():
+    items = [{"non_urban_intersection": k,
+              NON_URBAN_INTERSECTION_HEBREW: fix_name_len(v[NON_URBAN_INTERSECTION_HEBREW]),
+              ROADS: v[ROADS]} for
+             k, v in suburban_junctions_dict.items()]
+    logging.debug(
+        f"Writing to db: {len(items)} suburban junctions"
+    )
+    db.session.query(SuburbanJunction).delete()
+    db.session.bulk_insert_mappings(SuburbanJunction, items)
+    db.session.commit()
+    logging.debug(f"Done.")
+
+
+def fix_name_len(name: str) -> str:
+    if not isinstance(name, str):
+        return name
+    if len(name) > SuburbanJunction.MAX_NAME_LEN:
+        logging.error(f"Suburban_junction name too long ({len(name)}>"
+                      f"{SuburbanJunction.MAX_NAME_LEN}):{name}.")
+    return name[: SuburbanJunction.MAX_NAME_LEN]
+
+def load_existing_suburban_junctions():
+    junctions: List[SuburbanJunction] = db.session.query(SuburbanJunction).all()
+    for j in junctions:
+        add_suburban_junction(j)
+    logging.debug(f"Loaded suburban junctions: {len(suburban_junctions_dict)}.")
+
+
+def add_suburban_junction(added: SuburbanJunction):
+    if added.non_urban_intersection in suburban_junctions_dict:
+        existing_junction = suburban_junctions_dict[added.non_urban_intersection]
+        if existing_junction[NON_URBAN_INTERSECTION_HEBREW] !=\
+              added.non_urban_intersection_hebrew:
+            logging.error(
+                f"Duplicate non-urban intersection name: {added.non_urban_intersection}: existing:"
+                f"{existing_junction[NON_URBAN_INTERSECTION_HEBREW]}, added {added.non_urban_intersection_hebrew}"
+            )
+            existing_junction[NON_URBAN_INTERSECTION_HEBREW] = added.non_urban_intersection_hebrew
+        existing_junction[ROADS].update(set(added.roads))
+    else:
+        suburban_junctions_dict[added.non_urban_intersection] = {
+            NON_URBAN_INTERSECTION_HEBREW: added.non_urban_intersection_hebrew,
+            ROADS: set(added.roads),
+        }
+
+
+def add_suburban_junction_from_marker(marker: dict):
+    intersection = marker[NON_URBAN_INTERSECTION]
+    if intersection is not None:
+        j = SuburbanJunction()
+        j.non_urban_intersection = intersection
+        j.non_urban_intersection_hebrew = marker[NON_URBAN_INTERSECTION_HEBREW]
+        roads = set()
+        for k in ["road1", "road2"]:
+            if marker[k] is not None:
+                roads.add(marker[k])
+        j.roads = roads
+        add_suburban_junction(j)
 
 
 def delete_invalid_entries(batch_size):
@@ -1111,6 +1177,7 @@ def get_file_type_and_year(file_path):
 def main(batch_size, source, load_start_year=None):
     try:
         load_existing_streets()
+        load_existing_suburban_junctions()
         total = 0
         started = datetime.now()
         if source == "s3":
@@ -1141,7 +1208,6 @@ def main(batch_size, source, load_start_year=None):
                     )
                     total += num_new
                     add_to_streets(streets)
-            import_streets_into_db()
             shutil.rmtree(s3_data_retriever.local_temp_directory)
 
         elif source == "local_dir_for_tests_only":
@@ -1167,10 +1233,8 @@ def main(batch_size, source, load_start_year=None):
                 total += num_new
                 add_to_streets(streets)
 
-        # [Carmel:] not best solution,
-        # need to understand what are all possible values for the 'source' argument
-        if source != "s3":
-            import_streets_into_db()
+        import_streets_into_db()
+        import_suburban_junctions_into_db()
 
         fill_db_geo_data()
 

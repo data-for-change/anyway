@@ -423,6 +423,28 @@ def accidents_around_schools(start_date, end_date, distance, output_path):
         start_date=start_date, end_date=end_date, distance=distance, output_path=output_path
     )
 
+@cli.group()
+def send():
+    pass
+
+
+@send.command()
+@click.option(
+    "--id", type=int, help="newsflash id"
+)
+
+def generate_infographics(id):
+    from anyway.infographic_image_generator import download_infographics_for_newsflash
+    infographics_directory = "/var/selenium/tempdata"
+
+    number_of_retries = 5
+    for retry_id in range(1, 1 + number_of_retries):
+        finished_generation, buttons_found = download_infographics_for_newsflash(id, infographics_directory)
+        if finished_generation:
+            logging.info(f"generation success on {retry_id}# try, {buttons_found} infographics")
+            return
+    logging.error("generation failed")
+
 
 @scripts.command()
 def test_airflow():

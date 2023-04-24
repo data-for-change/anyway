@@ -222,3 +222,180 @@ def get_city_name(symbol_id, lang: str = "he") -> Optional[str]:
         return _cities.loc[symbol_id, column_to_fetch]
     except Exception:
         return None
+
+
+def join_hebrew_strings(strings, sep_a=' ,', sep_b=' ו-'):
+    if len(strings) < 2:
+        return ''.join(strings)
+    elif len(strings) == 2:
+        return sep_b.join(strings)
+    else:
+        return sep_a.join(strings[:-1]) + sep_b + strings[-1]
+        
+def to_hebrew(output):
+    def get_injured_count_hebrew(data):
+        severity_light_count = data.get('light_injured_count')
+        if severity_light_count == 0:
+            severity_light_count_text = ''
+        elif severity_light_count == 1:
+            severity_light_count_text = 'פצוע אחד קל'
+        else:
+            severity_light_count_text = f'{severity_light_count} פצועים קל'
+
+        severity_severe_count = data.get('severe_injured_count')
+        if severity_severe_count == 0:
+            severity_severe_count_text = ''
+        elif severity_severe_count == 1:
+            severity_severe_count_text = 'פצוע אחד קשה'
+        else:
+            severity_severe_count_text = f'{severity_severe_count} פצועים קשה'
+
+        severity_fatal_count = data.get('killed_count')
+        if severity_fatal_count == 0:
+            severity_fatal_count_text = ''
+        elif severity_fatal_count == 1:
+            severity_fatal_count_text = 'הרוג אחד'
+        else:
+            severity_fatal_count_text = f'{severity_fatal_count} הרוגים'
+        return join_hebrew_strings(list(filter(lambda s: s != '', [severity_fatal_count_text, severity_severe_count_text, severity_light_count_text])))
+        
+    
+    def most_severe_accidents_table_hebrew():
+        date_range = output.get('meta').get('dates_comment').get('date_range')
+        most_severe_accidents_table = list(filter(lambda widget: widget.get('name') == 'most_severe_accidents_table', output.get('widgets')))[0]
+        most_severe_accidents_table_items = most_severe_accidents_table.get('data').get('items')
+        
+        if len(most_severe_accidents_table_items) == 1:
+            text = " התאונה החמורה האחרונה שהתרחשה בכביש" 
+        elif len(most_severe_accidents_table_items) > 1:
+            text = f"\u202b{len(most_severe_accidents_table_items)}\u202c התאונות החמורות האחרונות שהתרחשו בכביש " 
+        text += f" {output.get('meta').get('location_info').get('road1')} במקטע {output.get('meta').get('location_info').get('road_segment_name')} בין השנים {date_range[0]}-{date_range[1]}:\n"
+        # todo: change סוג תאונה to the actual type
+        text += '\n'.join([f'בתאריך {item.get("date")} בשעה {item.get("hour")} התרחשה תאונה מסוג {"סוג תאונה"}, נפגעים: {get_injured_count_hebrew(item)}.' for item in most_severe_accidents_table_items])        
+
+        return text
+    
+    def head_on_collisions_comparison_percentage_hebrew():
+        def get_fatal_accidents_percentage(item):
+            frontal_accidents_count = list(filter(lambda x: x.get('desc') == 'frontal',item))[0].get('count')
+            other_accidents_count = list(filter(lambda x: x.get('desc') == 'others',item))[0].get('count')
+            total = frontal_accidents_count + other_accidents_count
+            if total == 0:
+                return None
+            
+            return round(frontal_accidents_count / total * 100)
+
+        date_range = output.get('meta').get('dates_comment').get('date_range')
+        head_on_collisions_comparison = list(filter(lambda widget: widget.get('name') == 'head_on_collisions_comparison', output.get('widgets')))
+        if len(head_on_collisions_comparison) == 0:
+            return ''
+        else:
+            head_on_collisions_comparison = head_on_collisions_comparison[0]
+        head_on_collisions_comparison_items = head_on_collisions_comparison.get('data').get('items')
+        
+        specific_road_segment_fatal_accidents = head_on_collisions_comparison_items.get('specific_road_segment_fatal_accidents')        
+        specific_road_segment_fatal_accidents_percentage = get_fatal_accidents_percentage(specific_road_segment_fatal_accidents)
+        all_roads_fatal_accidents = head_on_collisions_comparison_items.get('all_roads_fatal_accidents')
+        all_roads_fatal_accidents_percentage = get_fatal_accidents_percentage(all_roads_fatal_accidents)
+        text = f'אחוז התאונות הקטלניות החזיתיות בשנים {date_range[0]}-{date_range[1]} בכלל הכבישים הבינעירוניים בארץ עומד על: {all_roads_fatal_accidents_percentage}%. בכביש {output.get("meta").get("location_info").get("road1")} במקטע {output.get("meta").get("location_info").get("road_segment_name")} ניתן לראות אחוז גבוה יחסית של תאונות קטלניות חזיתיות העומד על: {specific_road_segment_fatal_accidents_percentage}%'
+
+        return text
+        
+        
+
+    def injured_count_by_severity_hebrew():
+        date_range = output.get('meta').get('dates_comment').get('date_range')
+        injured_count_by_severity = list(filter(lambda widget: widget.get('name') == 'injured_count_by_severity', output.get('widgets')))
+        if len(injured_count_by_severity) == 0:
+            return ''
+        else:
+            injured_count_by_severity = injured_count_by_severity[0]
+
+        severity_light_count = injured_count_by_severity.get('data').get('items').get('light_injured_count')
+        if severity_light_count == 0:
+            severity_light_count_text = ''
+        elif severity_light_count == 1:
+            severity_light_count_text = 'פצוע אחד קל'
+        else:
+            severity_light_count_text = f'{severity_light_count} פצועים קל'
+
+        severity_severe_count = injured_count_by_severity.get('data').get('items').get('severe_injured_count')
+        if severity_severe_count == 0:
+            severity_severe_count_text = ''
+        elif severity_severe_count == 1:
+            severity_severe_count_text = 'פצוע אחד קשה'
+        else:
+            severity_severe_count_text = f'{severity_severe_count} פצועים קשה'
+
+        severity_fatal_count = injured_count_by_severity.get('data').get('items').get('killed_count')
+        if severity_fatal_count == 0:
+            severity_fatal_count_text = ''
+        elif severity_fatal_count == 1:
+            severity_fatal_count_text = 'הרוג אחד'
+        else:
+            severity_fatal_count_text = f'{severity_fatal_count} הרוגים'
+        total_accidents_count = injured_count_by_severity.get('data').get('items').get('total_injured_count')
+
+        if output.get('meta').get('resolution') == 'STREET':
+            text = f"בעיר {output.get('meta').get('location_info').get('yishuv_name')} ברחוב {output.get('meta').get('location_info').get('street1_hebrew')} "
+        elif output.get('meta').get('resolution') == 'SUBURBAN_ROAD':
+            text = f"בכביש {output.get('meta').get('location_info').get('road1')} במקטע {output.get('meta').get('location_info').get('road_segment_name')} "            
+        else:
+            raise Exception(f"cannot convert to hebrew for resolution : {output.get('meta').get('resolution')}")
+        text += f"בשנים {date_range[0]}-{date_range[1]} נפגעו {total_accidents_count} אנשים כתוצאה מתאונות דרכים, מתוכן: "
+        text += f"{join_hebrew_strings([severity_fatal_count_text, severity_severe_count_text, severity_light_count_text])}"
+        text = f".{text}"
+        return text
+
+    def accident_count_by_severity_hebrew():
+        date_range = output.get('meta').get('dates_comment').get('date_range')
+        accident_count_by_severity = list(filter(lambda widget: widget.get('name') == 'accident_count_by_severity', output.get('widgets')))[0]
+        severity_light_count = accident_count_by_severity.get('data').get('items').get('severity_light_count')
+        if severity_light_count == 0:
+            severity_light_count_text = ''
+        elif severity_light_count == 1:
+            severity_light_count_text = 'קלה אחת' 
+        else:
+            severity_light_count_text = f'{severity_light_count} קלות'
+
+        severity_severe_count = accident_count_by_severity.get('data').get('items').get('severity_severe_count')
+        if severity_severe_count == 0:
+            severity_severe_count_text = ''
+        elif severity_severe_count == 1:
+            severity_severe_count_text = 'קשה אחת'
+        else:
+            severity_severe_count_text = f'{severity_severe_count} קשות'
+
+        severity_fatal_count = accident_count_by_severity.get('data').get('items').get('severity_fatal_count')
+        if severity_fatal_count == 0:
+            severity_fatal_count_text = ''
+        elif severity_fatal_count == 1:
+            severity_fatal_count_text = 'קטלנית אחת'
+        else:
+            severity_fatal_count_text = f'{severity_fatal_count} קטלניות'
+        total_accidents_count = accident_count_by_severity.get('data').get('items').get('total_accidents_count')
+
+
+        if output.get('meta').get('resolution') == 'STREET':
+            text = f"בעיר {output.get('meta').get('location_info').get('yishuv_name')} ברחוב {output.get('meta').get('location_info').get('street1_hebrew')} "
+        elif output.get('meta').get('resolution') == 'SUBURBAN_ROAD':
+            text = f"בכביש {output.get('meta').get('location_info').get('road1')} במקטע {output.get('meta').get('location_info').get('road_segment_name')} "            
+        else:
+            raise Exception(f"cannot convert to hebrew for resolution : {output.get('meta').get('resolution')}")
+        text += f"בשנים {date_range[0]}-{date_range[1]} התרחשו {total_accidents_count} תאונות דרכים, מתוכן: "
+        text += f"{join_hebrew_strings([severity_fatal_count_text, severity_severe_count_text, severity_light_count_text])}"
+        text = f".{text}"
+        return text
+
+
+    result = {}
+    try:
+        result['injured_count_by_severity'] = injured_count_by_severity_hebrew()
+        result['accident_count_by_severity'] = accident_count_by_severity_hebrew()
+        result['most_severe_accidents_table'] = most_severe_accidents_table_hebrew()
+        result['head_on_collisions_comparison_percentage_hebrew'] = head_on_collisions_comparison_percentage_hebrew()
+
+        return result
+    except Exception as exception:
+        result['error'] = exception
+      

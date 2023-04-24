@@ -231,7 +231,7 @@ def join_hebrew_strings(strings, sep_a=' ,', sep_b=' ו-'):
         return sep_b.join(strings)
     else:
         return sep_a.join(strings[:-1]) + sep_b + strings[-1]
-        
+
 def to_hebrew(output):
     def get_injured_count_hebrew(data):
         severity_light_count = data.get('light_injured_count')
@@ -258,23 +258,23 @@ def to_hebrew(output):
         else:
             severity_fatal_count_text = f'{severity_fatal_count} הרוגים'
         return join_hebrew_strings(list(filter(lambda s: s != '', [severity_fatal_count_text, severity_severe_count_text, severity_light_count_text])))
-        
-    
+
+
     def most_severe_accidents_table_hebrew():
         date_range = output.get('meta').get('dates_comment').get('date_range')
         most_severe_accidents_table = list(filter(lambda widget: widget.get('name') == 'most_severe_accidents_table', output.get('widgets')))[0]
         most_severe_accidents_table_items = most_severe_accidents_table.get('data').get('items')
-        
+
         if len(most_severe_accidents_table_items) == 1:
-            text = " התאונה החמורה האחרונה שהתרחשה בכביש" 
+            text = " התאונה החמורה האחרונה שהתרחשה בכביש"
         elif len(most_severe_accidents_table_items) > 1:
-            text = f"\u202b{len(most_severe_accidents_table_items)}\u202c התאונות החמורות האחרונות שהתרחשו בכביש " 
+            text = f"\u202b{len(most_severe_accidents_table_items)}\u202c התאונות החמורות האחרונות שהתרחשו בכביש "
         text += f" {output.get('meta').get('location_info').get('road1')} במקטע {output.get('meta').get('location_info').get('road_segment_name')} בין השנים {date_range[0]}-{date_range[1]}:\n"
         # todo: change סוג תאונה to the actual type
-        text += '\n'.join([f'בתאריך {item.get("date")} בשעה {item.get("hour")} התרחשה תאונה מסוג {"סוג תאונה"}, נפגעים: {get_injured_count_hebrew(item)}.' for item in most_severe_accidents_table_items])        
+        text += '\n'.join([f'בתאריך {item.get("date")} בשעה {item.get("hour")} התרחשה תאונה מסוג {"סוג תאונה"}, נפגעים: {get_injured_count_hebrew(item)}.' for item in most_severe_accidents_table_items])
 
         return text
-    
+
     def head_on_collisions_comparison_percentage_hebrew():
         def get_fatal_accidents_percentage(item):
             frontal_accidents_count = list(filter(lambda x: x.get('desc') == 'frontal',item))[0].get('count')
@@ -282,7 +282,7 @@ def to_hebrew(output):
             total = frontal_accidents_count + other_accidents_count
             if total == 0:
                 return None
-            
+
             return round(frontal_accidents_count / total * 100)
 
         date_range = output.get('meta').get('dates_comment').get('date_range')
@@ -292,16 +292,16 @@ def to_hebrew(output):
         else:
             head_on_collisions_comparison = head_on_collisions_comparison[0]
         head_on_collisions_comparison_items = head_on_collisions_comparison.get('data').get('items')
-        
-        specific_road_segment_fatal_accidents = head_on_collisions_comparison_items.get('specific_road_segment_fatal_accidents')        
+
+        specific_road_segment_fatal_accidents = head_on_collisions_comparison_items.get('specific_road_segment_fatal_accidents')
         specific_road_segment_fatal_accidents_percentage = get_fatal_accidents_percentage(specific_road_segment_fatal_accidents)
         all_roads_fatal_accidents = head_on_collisions_comparison_items.get('all_roads_fatal_accidents')
         all_roads_fatal_accidents_percentage = get_fatal_accidents_percentage(all_roads_fatal_accidents)
         text = f'אחוז התאונות הקטלניות החזיתיות בשנים {date_range[0]}-{date_range[1]} בכלל הכבישים הבינעירוניים בארץ עומד על: {all_roads_fatal_accidents_percentage}%. בכביש {output.get("meta").get("location_info").get("road1")} במקטע {output.get("meta").get("location_info").get("road_segment_name")} ניתן לראות אחוז גבוה יחסית של תאונות קטלניות חזיתיות העומד על: {specific_road_segment_fatal_accidents_percentage}%'
 
         return text
-        
-        
+
+
 
     def injured_count_by_severity_hebrew():
         date_range = output.get('meta').get('dates_comment').get('date_range')
@@ -339,7 +339,7 @@ def to_hebrew(output):
         if output.get('meta').get('resolution') == 'STREET':
             text = f"בעיר {output.get('meta').get('location_info').get('yishuv_name')} ברחוב {output.get('meta').get('location_info').get('street1_hebrew')} "
         elif output.get('meta').get('resolution') == 'SUBURBAN_ROAD':
-            text = f"בכביש {output.get('meta').get('location_info').get('road1')} במקטע {output.get('meta').get('location_info').get('road_segment_name')} "            
+            text = f"בכביש {output.get('meta').get('location_info').get('road1')} במקטע {output.get('meta').get('location_info').get('road_segment_name')} "
         else:
             raise Exception(f"cannot convert to hebrew for resolution : {output.get('meta').get('resolution')}")
         text += f"בשנים {date_range[0]}-{date_range[1]} נפגעו {total_accidents_count} אנשים כתוצאה מתאונות דרכים, מתוכן: "
@@ -354,7 +354,7 @@ def to_hebrew(output):
         if severity_light_count == 0:
             severity_light_count_text = ''
         elif severity_light_count == 1:
-            severity_light_count_text = 'קלה אחת' 
+            severity_light_count_text = 'קלה אחת'
         else:
             severity_light_count_text = f'{severity_light_count} קלות'
 
@@ -379,7 +379,7 @@ def to_hebrew(output):
         if output.get('meta').get('resolution') == 'STREET':
             text = f"בעיר {output.get('meta').get('location_info').get('yishuv_name')} ברחוב {output.get('meta').get('location_info').get('street1_hebrew')} "
         elif output.get('meta').get('resolution') == 'SUBURBAN_ROAD':
-            text = f"בכביש {output.get('meta').get('location_info').get('road1')} במקטע {output.get('meta').get('location_info').get('road_segment_name')} "            
+            text = f"בכביש {output.get('meta').get('location_info').get('road1')} במקטע {output.get('meta').get('location_info').get('road_segment_name')} "
         else:
             raise Exception(f"cannot convert to hebrew for resolution : {output.get('meta').get('resolution')}")
         text += f"בשנים {date_range[0]}-{date_range[1]} התרחשו {total_accidents_count} תאונות דרכים, מתוכן: "
@@ -398,4 +398,3 @@ def to_hebrew(output):
         return result
     except Exception as exception:
         result['error'] = exception
-      

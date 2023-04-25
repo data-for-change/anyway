@@ -424,16 +424,16 @@ def accidents_around_schools(start_date, end_date, distance, output_path):
     )
 
 @cli.group()
-def send():
+def generate():
     pass
 
 
-@send.command()
+@generate.command()
 @click.option(
     "--id", type=int, help="newsflash id"
 )
 
-def generate_infographics(id):
+def infographics_pictures(id):
     from anyway.infographic_image_generator import download_infographics_for_newsflash
     infographics_directory = "/var/selenium/tempdata"
 

@@ -874,13 +874,13 @@ def load_existing_suburban_junctions():
 def add_suburban_junction(added: SuburbanJunction):
     if added.non_urban_intersection in suburban_junctions_dict:
         existing_junction = suburban_junctions_dict[added.non_urban_intersection]
-        if existing_junction[NON_URBAN_INTERSECTION_HEBREW] !=\
-              added.non_urban_intersection_hebrew:
+        added_heb = added.non_urban_intersection_hebrew
+        if existing_junction[NON_URBAN_INTERSECTION_HEBREW] != added_heb and added_heb is not None:
             logging.error(
                 f"Duplicate non-urban intersection name: {added.non_urban_intersection}: existing:"
-                f"{existing_junction[NON_URBAN_INTERSECTION_HEBREW]}, added {added.non_urban_intersection_hebrew}"
+                f"{existing_junction[NON_URBAN_INTERSECTION_HEBREW]}, added: {added_heb}"
             )
-            existing_junction[NON_URBAN_INTERSECTION_HEBREW] = added.non_urban_intersection_hebrew
+            existing_junction[NON_URBAN_INTERSECTION_HEBREW] = added_heb
         existing_junction[ROADS].update(set(added.roads))
     else:
         suburban_junctions_dict[added.non_urban_intersection] = {

@@ -59,14 +59,17 @@ class AccidentCountBySeverityWidget(AllLocationsWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        if request_params.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
+        if request_params.resolution in (BE_CONST.ResolutionCategories.SUBURBAN_ROAD,
+                                         BE_CONST.ResolutionCategories.SUBURBAN_JUNCTION):
+            is_segment = request_params.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD
             items["data"]["text"] = {
                 "title": _("Number of accidents by severity"),
-                "subtitle": _(request_params.location_info['road_segment_name'])
+                "subtitle": _(request_params.location_info['road_segment_name'] if is_segment else
+                              request_params.location_info['non_urban_intersection_hebrew']),
             }
             items["meta"]["information"] = "{incident_description}{incident_location} {incident_time}.".format(
                 incident_description=_("Fatal, severe and light accidents count in "),
-                incident_location=_("segment"),
+                incident_location=_("segment") if is_segment else _("junction"),
                 incident_time=_("in the selected time"),
             )
         elif request_params.resolution == BE_CONST.ResolutionCategories.STREET:
@@ -92,3 +95,4 @@ class AccidentCountBySeverityWidget(AllLocationsWidget):
 
 
 _("Fatal, severe and light accidents count in the specified location.")
+_("junction")

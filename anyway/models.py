@@ -2233,6 +2233,12 @@ class ReportProblem(Base):
 
 class InvolvedMarkerView(Base):
     __tablename__ = "involved_markers_hebrew"
+    __table_args__ = (
+        Index("inv_markers_accident_yishuv_symbol_idx", "accident_yishuv_symbol", unique=False),
+        Index("inv_markers_injury_severity_idx", "injury_severity", unique=False),
+        Index("inv_markers_involve_vehicle_type_idx", "involve_vehicle_type", unique=False)
+    )
+
     accident_id = Column(BigInteger(), primary_key=True)
     provider_and_id = Column(BigInteger())
     provider_code = Column(Integer(), primary_key=True)

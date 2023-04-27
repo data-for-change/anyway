@@ -171,3 +171,5 @@ class MostSevereAccidentsTableWidget(AllLocationsWidget):
 # adding calls to _() for pybabel extraction
 _("Most recent fatal and severe accidents, ordered by date. Up to 10 accidents are presented.")
 _("Severe accidents in suburban junction")
+_("Most severe accidents in segment")
+_("Severe accidents in street")

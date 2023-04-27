@@ -48,7 +48,8 @@ def get_most_severe_accidents_table_title(
     elif resolution == BE_CONST.ResolutionCategories.SUBURBAN_JUNCTION:
         return "Severe accidents in suburban junction", f" {location_info['non_urban_intersection_hebrew']}"
     elif resolution == BE_CONST.ResolutionCategories.STREET:
-        return "Severe accidents in street", f" {location_info['street1_hebrew']} in {location_info['yishuv_name']}"
+        in_str = _("in")
+        return "Severe accidents in street", f" {location_info['street1_hebrew']} {in_str}{location_info['yishuv_name']}"
 
 # count of dead and severely injured
 def get_casualties_count_in_accident(accident_id, provider_code, injury_severity, accident_year):
@@ -173,3 +174,4 @@ _("Most recent fatal and severe accidents, ordered by date. Up to 10 accidents a
 _("Severe accidents in suburban junction")
 _("Most severe accidents in segment")
 _("Severe accidents in street")
+_("in")

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-04-27 10:14+0000\n"
+"POT-Creation-Date: 2023-04-27 10:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -222,7 +222,7 @@ msgstr ""
 
 #: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:51
 #: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:177
-msgid "in yishuv"
+msgid "in"
 msgstr ""
 
 #: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:157

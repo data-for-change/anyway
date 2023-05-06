@@ -78,6 +78,7 @@ class BackEndConstants(object):
     SUPPORTED_RESOLUTIONS: List[ResolutionCategories] = [
         ResolutionCategories.STREET,
         ResolutionCategories.SUBURBAN_ROAD,
+        ResolutionCategories.URBAN_JUNCTION
     ]
 
     class Source(Enum):

@@ -141,7 +141,7 @@ def get_request_params(
     return request_params
 
 
-def create_infographics_data(news_flash_id, number_of_years_ago, lang: str) -> str:
+def create_infographics_data(news_flash_id: int, number_of_years_ago: int, lang: str) -> str:
     request_params = get_request_params(news_flash_id, number_of_years_ago, lang)
     output = create_infographics_items(request_params)
     return json.dumps(output, default=str)

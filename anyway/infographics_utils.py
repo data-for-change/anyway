@@ -30,7 +30,7 @@ from anyway.widgets.widget import Widget, widgets_dict
 # explicitly used here
 # pylint: disable=unused-import
 import anyway.widgets.urban_widgets
-import anyway.widgets.suburban_widgets
+import anyway.widgets.road_segment_widgets
 import anyway.widgets.all_locations_widgets
 import anyway.widgets.no_location_widgets
 # pylint: enable=unused-import

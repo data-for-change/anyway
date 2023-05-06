@@ -43,12 +43,17 @@ def get_most_severe_accidents_with_entities(
 def get_most_severe_accidents_table_title(
     location_info: dict, resolution: BE_CONST.ResolutionCategories
 ):
+    in_str = _("in")
+    and_str = _("and")
     if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
         return "Most severe accidents in segment", segment_dictionary[location_info["road_segment_name"]]
+    elif resolution == BE_CONST.ResolutionCategories.SUBURBAN_JUNCTION:
+        return "Severe accidents in suburban junction", f" {location_info['non_urban_intersection_hebrew']}"
     elif resolution == BE_CONST.ResolutionCategories.STREET:
-        return "Severe accidents in street", f" {location_info['street1_hebrew']} {_('in')} {location_info['yishuv_name']}"
+        return "Severe accidents in street", f" {location_info['street1_hebrew']} {in_str}{location_info['yishuv_name']}"
     elif resolution == BE_CONST.ResolutionCategories.URBAN_JUNCTION:
-        return "Severe accidents in street", f" {location_info['street1_hebrew']} {_('and')} {location_info['street2_hebrew']} {_('in')} {location_info['yishuv_name']}"
+        return "Severe accidents in street", f" {location_info['street1_hebrew']} {and_str} {location_info['street2_hebrew']} {in_str} {location_info['yishuv_name']}"
+
 
 # count of dead and severely injured
 def get_casualties_count_in_accident(accident_id, provider_code, injury_severity, accident_year):
@@ -118,19 +123,19 @@ class MostSevereAccidentsTableWidget(AllLocationsWidget):
             accident["killed_count"] = get_casualties_count_in_accident(
                 accident["id"],
                 accident["provider_code"],
-                InjurySeverity.KILLED.value,
+                InjurySeverity.KILLED.value,  # pylint: disable=no-member
                 accident["accident_year"],
             )
             accident["severe_injured_count"] = get_casualties_count_in_accident(
                 accident["id"],
                 accident["provider_code"],
-                InjurySeverity.SEVERE_INJURED.value,
+                InjurySeverity.SEVERE_INJURED.value,  # pylint: disable=no-member
                 accident["accident_year"],
             )
             accident["light_injured_count"] = get_casualties_count_in_accident(
                 accident["id"],
                 accident["provider_code"],
-                InjurySeverity.LIGHT_INJURED.value,
+                InjurySeverity.LIGHT_INJURED.value,  # pylint: disable=no-member
                 accident["accident_year"],
             )
             # TODO: remove injured_count after FE adaptation to light and severe counts
@@ -170,5 +175,8 @@ class MostSevereAccidentsTableWidget(AllLocationsWidget):
 
 # adding calls to _() for pybabel extraction
 _("Most recent fatal and severe accidents, ordered by date. Up to 10 accidents are presented.")
+_("Severe accidents in suburban junction")
+_("Most severe accidents in segment")
+_("Severe accidents in street")
+_("in")
 _('and')
-_('in')

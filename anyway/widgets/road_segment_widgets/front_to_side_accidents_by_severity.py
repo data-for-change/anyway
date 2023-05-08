@@ -8,7 +8,7 @@ from sqlalchemy import case, func, distinct
 from anyway.backend_constants import AccidentType, AccidentSeverity
 from anyway.models import AccidentMarkerView
 from anyway.request_params import RequestParams
-from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
+from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
 from anyway.widgets.widget import register
 from anyway.widgets.widget_utils import get_query
 
@@ -31,7 +31,7 @@ SEVERITY_TEXT = "{} accidents"
 
 
 @register
-class FrondToSideAccidentsBySeverityWidget(SubUrbanWidget):
+class FrondToSideAccidentsBySeverityWidget(RoadSegmentWidget):
     name: str = "front_to_side_accidents_by_severity"
     files = [__file__]
 
@@ -128,9 +128,7 @@ class FrondToSideAccidentsBySeverityWidget(SubUrbanWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        items["data"]["text"] = {"title": _("Front-side vs other accidents"),
-                                 "subtitle": _(request_params.location_info["road_segment_name"])
-                                 }
+        items["data"]["text"] = {"title": _("Front-side vs other accidents")}
 
         items["meta"]["information"] = _(
             "Fatal & severe accidents of type front-to-side in this road segment"

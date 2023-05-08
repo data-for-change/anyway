@@ -6,12 +6,12 @@ from anyway.request_params import RequestParams
 from anyway.backend_constants import InjurySeverity, BackEndConstants
 from anyway.models import InvolvedMarkerView, AccidentMarker
 from anyway.widgets.widget import register
-from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
+from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
 from anyway.widgets.widget_utils import get_accidents_stats
 
 
 @register
-class FatalAccidentYoYSameMonth(SubUrbanWidget):
+class FatalAccidentYoYSameMonth(RoadSegmentWidget):
     name: str = "fatal_accident_yoy_same_month"
     files = [__file__]
 
@@ -46,7 +46,6 @@ class FatalAccidentYoYSameMonth(SubUrbanWidget):
         items["data"]["text"] = {
             "title": _(
                 "Monthly killed in accidents on year over compared for current month in previous years"
-            ),
-            "subtitle": _(request_params.location_info["road_segment_name"])
+            )
         }
         return items

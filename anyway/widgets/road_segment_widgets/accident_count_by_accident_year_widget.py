@@ -6,7 +6,7 @@ from anyway.backend_constants import AccidentSeverity
 from anyway.infographics_dictionaries import segment_dictionary
 from anyway.models import AccidentMarkerView
 from anyway.request_params import RequestParams
-from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
+from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
 from anyway.widgets.widget import register
 from anyway.widgets.widget_utils import (
     get_accidents_stats,
@@ -17,7 +17,7 @@ from anyway.widgets.widget_utils import (
 
 
 @register
-class AccidentCountByAccidentYearWidget(SubUrbanWidget):
+class AccidentCountByAccidentYearWidget(RoadSegmentWidget):
     name: str = "accident_count_by_accident_year"
     files = [__file__]
 

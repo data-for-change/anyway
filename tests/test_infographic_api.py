@@ -14,7 +14,7 @@ from anyway.widgets.road_segment_widgets.accident_count_by_car_type_widget impor
 
 
 # Reading the mock data into the dictionary and only using the supported resolutions.
-MOCK_DATA_DICTIONARY_PATH = 'mock_data_dictionary.pickle'
+MOCK_DATA_DICTIONARY_PATH = os.path.join('tests','mock_data_dictionary.pickle')
 with open(MOCK_DATA_DICTIONARY_PATH, 'rb') as f:
     mock_data_dictionary = pickle.load(f).get('supported')
 

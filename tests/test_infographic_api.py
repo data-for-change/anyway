@@ -11,7 +11,6 @@ from jsonschema import validate
 from anyway.app_and_db import db
 from anyway.vehicle_type import VehicleCategory
 from anyway.widgets.road_segment_widgets.accident_count_by_car_type_widget import AccidentCountByCarTypeWidget
-from anyway.backend_constants import NewsflashLocationQualification
 
 
 # Reading the mock data into the dictionary and only using the supported resolutions.
@@ -132,7 +131,7 @@ class TestInfographicApi:
             inserted_id = insert_infographic_mock_data(app, values_str=mock_data_dictionary[resolution])
             rv = app.get(f"/api/infographics-data?news_flash_id={inserted_id}")
             delete_new_infographic_data(inserted_id)
-            assert(rv.status_code == http_client.OK.value)
+            assert(rv.status_code == http_client.OK)
 
     def _get_widget_by_name(self, name):
         if self.infographic_data is None:

@@ -157,6 +157,7 @@ def gen_news_flash_query(
     road_segment=None,
     offset=None,
     limit=None,
+    last_minutes=None
 ):
     query = session.query(NewsFlash)
     # get all possible sources
@@ -190,6 +191,9 @@ def gen_news_flash_query(
         query = query.filter(NewsFlash.road1 == road_number)
     if road_segment == "true":
         query = query.filter(not_(NewsFlash.road_segment_name == None))
+    if last_minutes:
+        last_timestamp = datetime.datetime.now() - datetime.timedelta(minutes=last_minutes)
+        query = query.filter(NewsFlash.date >= last_timestamp)
     query = query.filter(
         and_(
             NewsFlash.accident == True,

@@ -445,10 +445,11 @@ def telegram():
 
 
 @telegram.command()
+@click.option("--id", type=int)
 def send_notification():
     from anyway.telegram_accident_notifications import publish_notification
 
-    publish_notification(147277)
+    publish_notification(id)
 
 if __name__ == "__main__":
     cli(sys.argv[1:])  # pylint: disable=too-many-function-args

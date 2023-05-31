@@ -4,13 +4,13 @@ from flask_babel import _
 
 from anyway.backend_constants import InjurySeverity, BE_CONST as BE
 from anyway.request_params import RequestParams
-from anyway.widgets.suburban_widgets.killed_and_injured_count_per_age_group_widget_utils import (
+from anyway.widgets.road_segment_widgets.killed_and_injured_count_per_age_group_widget_utils import (
     KilledAndInjuredCountPerAgeGroupWidgetUtils,
     AGE_RANGE_DICT,
 )
-from anyway.widgets.suburban_widgets import killed_and_injured_count_per_age_group_widget_utils
+from anyway.widgets.road_segment_widgets import killed_and_injured_count_per_age_group_widget_utils
 
-from anyway.widgets.suburban_widgets.sub_urban_widget import SubUrbanWidget
+from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
 from anyway.widgets.widget import register
 from anyway.widgets.widget_utils import add_empty_keys_to_gen_two_level_dict, gen_entity_labels
 
@@ -19,7 +19,7 @@ MAX_AGE = 200
 
 
 @register
-class KilledInjuredCountPerAgeGroupStackedWidget(SubUrbanWidget):
+class KilledInjuredCountPerAgeGroupStackedWidget(RoadSegmentWidget):
     name: str = "killed_and_injured_count_per_age_group_stacked"
     files = [__file__, killed_and_injured_count_per_age_group_widget_utils.__file__]
 

@@ -218,7 +218,7 @@ def extract_road_segment_location(road_segment_id):
     road1, road_segment_name = get_road_segment_name_and_number(road_segment_id)
     data["road1"] = int(road1)
     data["road_segment_name"] = road_segment_name
-    data["road_segment_id"] = road_segment_id
+    data["road_segment_id"] = int(road_segment_id)
     text = get_road_segment_location_text(road1, road_segment_name)
     # fake gps - todo: fix
     gps = {"lat": 32.825610, "lon": 35.165395}

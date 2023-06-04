@@ -2,44 +2,92 @@ import copy
 import logging
 import typing
 from collections import defaultdict
-from typing import Dict, Any, List, Type, Optional, Sequence
+from typing import Dict, Any, List, Type, Optional, Sequence, Tuple
 
 import pandas as pd
 from flask_babel import _
-from sqlalchemy import func, distinct, between, or_
+from sqlalchemy import func, distinct, between, or_, and_
 
 from anyway.app_and_db import db
 from anyway.backend_constants import BE_CONST, LabeledCode, InjurySeverity
 from anyway.models import InvolvedMarkerView
 from anyway.request_params import LocationInfo
 from anyway.vehicle_type import VehicleType
+from anyway.parsers import resolution_dict
 from anyway.models import NewsFlash
 from anyway.request_params import RequestParams
+from anyway.widgets.segment_junctions import SegmentJunctions
 
-
+# todo: check after rebase
 def get_query(table_obj, filters, start_time, end_time):
     query = db.session.query(table_obj)
     if start_time:
         query = query.filter(getattr(table_obj, "accident_timestamp") >= start_time)
     if end_time:
         query = query.filter(getattr(table_obj, "accident_timestamp") <= end_time)
-    if filters:
-        for field_name, value in filters.items():
-            # TODO: why are we always doing a list check? wouldn't it be more efficient to do a single comparison if it's not a list?
-            if isinstance(value, list):
-                values = value
-            else:
-                values = [value]
-            if field_name == "street1_hebrew" or field_name == "street1":
-                query = query.filter(
-                    or_(
-                        (getattr(table_obj, field_name)).in_(values),
-                        (getattr(table_obj, field_name.replace("1", "2"))).in_(values),
-                    )
-                )
-            else:
-                query = query.filter((getattr(table_obj, field_name)).in_(values))
+    if not filters:
+        return query
+    if "road_segment_id" not in filters.keys():
+        query = query.filter(get_expression_for_fields(filters, table_obj, and_))
+        return query
+    location_fields, other_fields = split_location_fields_and_others(filters)
+    if other_fields:
+        query = query.filter(get_expression_for_fields(other_fields, table_obj, and_))
+    query = query.filter(
+        get_expression_for_road_segment_location_fields(location_fields, table_obj)
+    )
     return query
+
+
+def get_expression_for_fields(filters, table_obj, op):
+    inv_val = op == and_
+    ex = op(inv_val, inv_val)
+    for field_name, value in filters.items():
+        ex = op(ex, get_filter_expression(table_obj, field_name, value))
+    return ex
+
+
+# todo: remove road_segment_name if road_segment_id exists.
+def get_expression_for_road_segment_location_fields(filters, table_obj):
+    ex = get_expression_for_fields(filters, table_obj, and_)
+    segment_id = filters["road_segment_id"]
+    junctions_ex = get_expression_for_segment_junctions(segment_id, table_obj)
+    res = or_(ex, junctions_ex)
+    return res
+
+
+def get_expression_for_segment_junctions(segment_id: int, table_obj):
+    sg = SegmentJunctions.get_instance()
+    junctions = sg.get_segment_junctions(segment_id)
+    return getattr(table_obj, "non_urban_intersection").in_(junctions)
+
+
+def get_filter_expression(table_obj, field_name, value):
+    if field_name == "street1_hebrew" or field_name == "street1":
+        if isinstance(value, list):
+            values = value
+        else:
+            values = [value]
+        o = or_(
+            (getattr(table_obj, field_name)).in_(values),
+            (getattr(table_obj, field_name.replace("1", "2"))).in_(values),
+            # (getattr(table_obj, "street1_hebrew")).in_(values),
+            # (getattr(table_obj, "street2_hebrew")).in_(values),
+        )
+    else:
+        if isinstance(value, list):
+            o = (getattr(table_obj, field_name)).in_(value)
+        else:
+            o = (getattr(table_obj, field_name)) == value
+    return o
+
+
+def split_location_fields_and_others(filters: dict) -> Tuple[dict, dict]:
+    all_location_fields = set().union(*resolution_dict.values())
+    fields = filters.keys()
+    location_fields = {x: filters[x] for x in fields if x in all_location_fields}
+    other_fields = {x: filters[x] for x in fields if x not in all_location_fields}
+    return location_fields, other_fields
 
 
 def get_accidents_stats(
@@ -213,9 +261,10 @@ def get_involved_counts(
             table.accident_yishuv_symbol == location_info["yishuv_symbol"]
         ).group_by(table.accident_year)
     elif "road_segment_id" in location_info:
-        query = query.filter(table.road_segment_id == location_info["road_segment_id"]).group_by(
-            table.accident_year
+        ex = get_expression_for_road_segment_location_fields(
+            {"road_segment_id": location_info["road_segment_id"]}, table
         )
+        query = query.filter(ex).group_by(table.accident_year)
 
     if severities:
         query = query.filter(table.injury_severity.in_([severity.value for severity in severities]))
@@ -224,7 +273,7 @@ def get_involved_counts(
         query = query.filter(
             table.involve_vehicle_type.in_([v_type.value for v_type in vehicle_types])
         )
-
+    # todo: check for suburban junction resolution
     df = pd.read_sql_query(query.statement, query.session.bind)
     return df.to_dict(orient="records")  # pylint: disable=no-member
 

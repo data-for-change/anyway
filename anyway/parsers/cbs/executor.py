@@ -34,6 +34,7 @@ from anyway.models import (
     RoadSign,
     RoadLight,
     RoadControl,
+    RoadJunctionKM,
     Weather,
     RoadSurface,
     RoadObjecte,
@@ -570,6 +571,7 @@ def import_accidents(provider_code, accidents, streets, roads, non_urban_interse
     for _, accident in accidents.iterrows():
         marker = create_marker(provider_code, accident, streets, roads, non_urban_intersection)
         add_suburban_junction_from_marker(marker)
+        add_road_junction_km_from_marker(marker)
         accidents_result.append(marker)
     db.session.bulk_insert_mappings(AccidentMarker, accidents_result)
     db.session.commit()
@@ -795,6 +797,8 @@ yishuv_street_dict: Dict[Tuple[int, int], str] = {}
 yishuv_name_dict: Dict[Tuple[int, str], int] = {}
 suburban_junctions_dict: Dict[int, dict] = {}
 SUBURBAN_JUNCTION = "suburban_junction"
+# (road, junction) -> km
+road_junction_km_dict: Dict[Tuple[int, int], int] = {}
 
 
 def load_existing_streets():
@@ -901,6 +905,45 @@ def add_suburban_junction_from_marker(marker: dict):
                 roads.add(marker[k])
         j.roads = roads
         add_suburban_junction(j)
+
+
+def load_existing_road_junction_km_data():
+    rows: List[RoadJunctionKM] = db.session.query(RoadJunctionKM).all()
+    tmp = {(r.road, r.non_urban_intersection): r.km for r in rows}
+    road_junction_km_dict.update(tmp)
+    logging.debug(f"Loaded road-junction-km rows: {len(tmp)}.")
+
+
+def import_road_junction_km_into_db():
+    items = [{"road": k[0], "non_urban_intersection": k[1], "km": v} for
+             k, v in road_junction_km_dict.items()]
+    logging.debug(
+        f"Writing to db: {len(items)} road junction km rows"
+    )
+    db.session.query(RoadJunctionKM).delete()
+    db.session.bulk_insert_mappings(RoadJunctionKM, items)
+    db.session.commit()
+    logging.debug(f"Done.")
+
+
+def add_road_junction_km_from_marker(marker: dict):
+    intersection = marker[NON_URBAN_INTERSECTION]
+    if intersection is not None:
+        road1 = marker["road1"]
+        if not road1:
+            logging.warning(f"Not adding: marker entry {marker['id']} has non_urban"
+                            f" intersection:{intersection},road1: {road1}.")
+            return
+        km_accurate, km = marker.get("km_accurate"), marker.get("km")
+        if not km_accurate or not km:
+            logging.warning(f"Not adding: marker entry {marker['id']} has non "
+                            f"accurate km: km_accurate:{km_accurate},km:{km}.")
+            return
+        k, v = (road1, intersection), km/10
+        exists = road_junction_km_dict.get(k)
+        if exists is not None and exists != v:
+            logging.warning(f"Changed road junction km: from {exists} to {v}.")
+        road_junction_km_dict[k] = v
 
 
 def delete_invalid_entries(batch_size):
@@ -1178,6 +1221,7 @@ def main(batch_size, source, load_start_year=None):
     try:
         load_existing_streets()
         load_existing_suburban_junctions()
+        load_existing_road_junction_km_data()
         total = 0
         started = datetime.now()
         if source == "s3":
@@ -1235,6 +1279,7 @@ def main(batch_size, source, load_start_year=None):
 
         import_streets_into_db()
         import_suburban_junctions_into_db()
+        import_road_junction_km_into_db()
 
         fill_db_geo_data()
 

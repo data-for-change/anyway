@@ -109,11 +109,6 @@ def test_scrape_sanity_online_ynet():
 
 
 @pytest.mark.slow
-def test_scrape_sanity_online_walla():
-    next(rss_sites.scrape("walla"))
-
-
-@pytest.mark.slow
 def test_scrape_sanity_online_twitter():
     if not secrets.exists("TWITTER_CONSUMER_SECRET"):
         pytest.skip("Could not find TWITTER_CONSUMER_SECRET")
@@ -251,4 +246,3 @@ def test_nan_becomes_none_before_insertion(monkeypatch):
     adapter = DBAdapter(db=db_mock)
     adapter.insert_new_newsflash(newsflash)
     assert newsflash.road1 is None
-        

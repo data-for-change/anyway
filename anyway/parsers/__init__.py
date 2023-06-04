@@ -16,6 +16,7 @@ resolution_dict = {
         "road1",
         "road2",
         "road_segment_name",
+        "road_segment_id",
     ],
 }
 

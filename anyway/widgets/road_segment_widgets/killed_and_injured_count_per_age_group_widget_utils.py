@@ -11,6 +11,7 @@ from anyway.backend_constants import BE_CONST, InjurySeverity
 from anyway.models import InvolvedMarkerView
 from anyway.request_params import RequestParams
 from anyway.utilities import parse_age_from_range
+from anyway.widgets.widget_utils import get_expression_for_road_segment_location_fields
 
 # RequestParams is not hashable, so we can't use functools.lru_cache
 cache_dict = OrderedDict()
@@ -29,15 +30,15 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
         request_params: RequestParams,
     ) -> Dict[str, Dict[int, int]]:
         road_number = request_params.location_info["road1"]
-        road_segment = request_params.location_info["road_segment_name"]
+        road_segment_id = request_params.location_info["road_segment_id"]
         start_time = request_params.start_time
         end_time = request_params.end_time
-        cache_key = (road_number, road_segment, start_time, end_time)
+        cache_key = (road_number, road_segment_id, start_time, end_time)
         if cache_dict.get(cache_key):
             return cache_dict.get(cache_key)
 
         query = KilledAndInjuredCountPerAgeGroupWidgetUtils.create_query_for_killed_and_injured_count_per_age_group(
-            end_time, road_number, road_segment, start_time
+            end_time, road_number, road_segment_id, start_time
         )
 
         dict_grouped, has_data = KilledAndInjuredCountPerAgeGroupWidgetUtils.parse_query_data(query)
@@ -89,7 +90,7 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
 
     @staticmethod
     def create_query_for_killed_and_injured_count_per_age_group(
-        end_time: datetime.date, road_number: int, road_segment: str, start_time: datetime.date
+        end_time: datetime.date, road_number: int, road_segment_id: int, start_time: datetime.date
     ) -> BaseQuery:
         query = (
             db.session.query(InvolvedMarkerView)
@@ -113,7 +114,11 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
                 (InvolvedMarkerView.road1 == road_number)
                 | (InvolvedMarkerView.road2 == road_number)
             )
-            .filter(InvolvedMarkerView.road_segment_name == road_segment)
+            .filter(
+                get_expression_for_road_segment_location_fields(
+                    {"road_segment_id": road_segment_id}, InvolvedMarkerView
+                )
+            )
             .group_by(InvolvedMarkerView.age_group, InvolvedMarkerView.injury_severity)
             .with_entities(
                 InvolvedMarkerView.age_group,

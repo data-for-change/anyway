@@ -6,11 +6,11 @@ from typing import Dict, Any, List, Type, Optional, Sequence
 
 import pandas as pd
 from flask_babel import _
-from sqlalchemy import func, distinct, between, and_
+from sqlalchemy import func, distinct, between
 
 from anyway.app_and_db import db
 from anyway.backend_constants import BE_CONST, LabeledCode, InjurySeverity
-from anyway.models import Involved, AccidentMarker, RoadSegments
+from anyway.models import InvolvedMarkerView
 from anyway.request_params import LocationInfo
 from anyway.vehicle_type import VehicleType
 
@@ -23,6 +23,7 @@ def get_query(table_obj, filters, start_time, end_time):
         query = query.filter(getattr(table_obj, "accident_timestamp") <= end_time)
     if filters:
         for field_name, value in filters.items():
+            # TODO: why are we always doing a list check? wouldn't it be more efficient to do a single comparison if it's not a list?
             if isinstance(value, list):
                 values = value
             else:
@@ -33,6 +34,7 @@ def get_query(table_obj, filters, start_time, end_time):
 
 def get_accidents_stats(
     table_obj,
+    columns=None,
     filters=None,
     group_by=None,
     count=None,
@@ -46,6 +48,8 @@ def get_accidents_stats(
 
     # get stats
     query = get_query(table_obj, filters, start_time, end_time)
+    if columns:
+        query = query.with_entities(*columns)
     if group_by:
         if isinstance(group_by, tuple):
             if len(group_by) == 2:
@@ -172,45 +176,37 @@ def get_involved_counts(
     vehicle_types: Sequence[VehicleType],
     location_info: LocationInfo,
 ) -> Dict[str, int]:
+    table = InvolvedMarkerView
+
     selected_columns = (
-        Involved.accident_year.label("label_key"),
-        func.count(distinct(Involved.id)).label("value"),
+        table.accident_year.label("label_key"),
+        func.count(distinct(table.involve_id)).label("value"),
     )
 
     query = (
         db.session.query()
-        .select_from(Involved)
+        .select_from(table)
         .with_entities(*selected_columns)
-        .join(
-            AccidentMarker,
-            and_(
-                AccidentMarker.id == Involved.accident_id,
-                AccidentMarker.provider_code == Involved.provider_code,
-                AccidentMarker.accident_year == Involved.accident_year,
-            ),
-        )
-        .filter(between(Involved.accident_year, start_year, end_year))
-        .order_by(Involved.accident_year)
+        .filter(between(table.accident_year, start_year, end_year))
+        .order_by(table.accident_year)
     )
 
     if "yishuv_symbol" in location_info:
         query = query.filter(
-            AccidentMarker.yishuv_symbol == location_info["yishuv_symbol"]
-        ).group_by(Involved.accident_year)
+            table.accident_yishuv_symbol == location_info["yishuv_symbol"]
+        ).group_by(table.accident_year)
     elif "road_segment_id" in location_info:
-        query = (
-            query.join(RoadSegments, AccidentMarker.road1 == RoadSegments.road)
-            .filter(RoadSegments.segment_id == location_info["road_segment_id"])
-            .group_by(Involved.accident_year)
+        query = query.filter(table.road_segment_id == location_info["road_segment_id"]).group_by(
+            table.accident_year
         )
 
     if severities:
-        query = query.filter(
-            Involved.injury_severity.in_([severity.value for severity in severities])
-        )
+        query = query.filter(table.injury_severity.in_([severity.value for severity in severities]))
 
     if vehicle_types:
-        query = query.filter(Involved.vehicle_type.in_([v_type.value for v_type in vehicle_types]))
+        query = query.filter(
+            table.involve_vehicle_type.in_([v_type.value for v_type in vehicle_types])
+        )
 
     df = pd.read_sql_query(query.statement, query.session.bind)
-    return df.to_dict(orient="records")
+    return df.to_dict(orient="records")  # pylint: disable=no-member

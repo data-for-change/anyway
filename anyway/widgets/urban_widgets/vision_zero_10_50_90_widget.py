@@ -22,7 +22,7 @@ class VisionZero105090Widget(UrbanWidget):
 
     def is_included(self) -> bool:
         for pedestrian_adjective in ["הולך רגל", "הולכת רגל", "הולכי רגל", "הולכות רגל"]:
-            if pedestrian_adjective in self.request_params.news_flash_description:
+            if self.request_params.news_flash_description and pedestrian_adjective in self.request_params.news_flash_description:
                 return True
         return False
 

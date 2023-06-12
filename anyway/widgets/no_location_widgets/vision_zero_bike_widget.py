@@ -25,7 +25,9 @@ class VisionZeroBikeWidget(Widget):
 
     # noinspection PyUnboundLocalVariable
     def is_included(self) -> bool:
-        return "אופניים" in self.request_params.news_flash_description
+        if self.request_params.news_flash_description:
+            return "אופניים" in self.request_params.news_flash_description
+        return False
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:

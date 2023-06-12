@@ -16,6 +16,7 @@ IMAGES_DOWNLOAD_PATH_IN_CONTAINER = "/var/selenium/tempdata"
 selenium_url = secrets.get('SELENIUM_URL')
 selenium_hub_url = f"https://{selenium_url}/wd/hub"
 selenium_remote_results_url = f"https://{selenium_url}/tempdata"
+CHROME_PARTIALLY_DOWNLOADED_FILE_EXTENSION = "crdownload"
 
 
 def create_chrome_browser_session(newsflash_id):
@@ -57,6 +58,13 @@ def get_unique_filenames(filenames):
     return list(names)
 
 
+def contains_partial_files(filenames):
+    for filename in filenames:
+        if filename.endswith(CHROME_PARTIALLY_DOWNLOADED_FILE_EXTENSION):
+            return True
+    return False
+
+
 def wait_for_folder_to_contain_all_files(newsflash_id, number_of_expected_files, timeout):
     for _ in range(timeout):
         time.sleep(1)
@@ -64,7 +72,7 @@ def wait_for_folder_to_contain_all_files(newsflash_id, number_of_expected_files,
             f"{selenium_remote_results_url}/{newsflash_id}/").json()
         filenames = [item['name'] for item in contents]
         unique_filenames = get_unique_filenames(filenames)
-        if len(unique_filenames) == number_of_expected_files:
+        if len(unique_filenames) == number_of_expected_files and not contains_partial_files(unique_filenames):
             return True, unique_filenames
     return False, []
 
@@ -84,7 +92,7 @@ def generate_infographics_in_selenium_container(browser, newsflash_id):
             for element in elements:
                 ActionChains(browser).move_to_element(element).click().perform()
             is_download_done, generated_images_names = wait_for_folder_to_contain_all_files(newsflash_id,
-                                                                                            buttons_found, timeout=1)
+                                                                                            buttons_found, timeout=30)
     except Exception as e:
         logging.error(e)
     finally:

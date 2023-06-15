@@ -471,7 +471,7 @@ def upload():
 def generated_infographics(id, download):
     from anyway.infographic_image_generator import upload_infographics_images_to_s3
 
-    return upload_infographics_images_to_s3(id, download)
+    upload_infographics_images_to_s3(id, download)
 
 
 @cli.group()

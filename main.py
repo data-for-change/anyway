@@ -275,6 +275,20 @@ def infographics_data_cache_for_road_segments():
     return main_for_road_segments()
 
 
+@process.command()
+@click.option(
+    "--id", type=int, help="newsflash id"
+)
+def infographics_pictures(id):
+    from anyway.infographic_image_generator import generate_infographics_for_newsflash
+
+    finished_generation, generated_images_names = generate_infographics_for_newsflash(id)
+    if finished_generation:
+        logging.info(f"generation success, {len(generated_images_names)} infographics")
+    else:
+        raise Exception("generation failed")
+
+
 @process.group()
 def cache():
     pass
@@ -423,24 +437,6 @@ def accidents_around_schools(start_date, end_date, distance, output_path):
         start_date=start_date, end_date=end_date, distance=distance, output_path=output_path
     )
 
-@cli.group()
-def generate():
-    pass
-
-
-@generate.command()
-@click.option(
-    "--id", type=int, help="newsflash id"
-)
-def infographics_pictures(id):
-    from anyway.infographic_image_generator import generate_infographics_for_newsflash
-
-    finished_generation, generated_images_names = generate_infographics_for_newsflash(id)
-    if finished_generation:
-        logging.info(f"generation success, {len(generated_images_names)} infographics")
-        return
-    logging.error("generation failed")
-
 
 @scripts.command()
 def test_airflow():
@@ -455,6 +451,27 @@ def importemail():
     from anyway.parsers.cbs.importmail_cbs import main
 
     return main()
+
+
+@cli.group()
+def upload():
+    pass
+
+
+@click.option(
+    "--id", type=int, help="newsflash id"
+)
+@click.option(
+    "--download",
+    is_flag=True,
+    help="if false, assumes images already exist on default location",
+    default=True,
+)
+@upload.command()
+def generated_infographics(id, download):
+    from anyway.infographic_image_generator import upload_infographics_images_to_s3
+
+    return upload_infographics_images_to_s3(id, download)
 
 
 @cli.group()

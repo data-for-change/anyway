@@ -65,22 +65,25 @@ def contains_partial_files(filenames):
     return False
 
 
+def fetch_generated_image_filenames_for_newsflash(newsflash_id):
+    contents = requests.get(
+        f"{selenium_remote_results_url}/{newsflash_id}/").json()
+    filenames = [item['name'] for item in contents]
+    return get_unique_filenames(filenames)
+
+
 def wait_for_folder_to_contain_all_files(newsflash_id, number_of_expected_files, timeout):
     for _ in range(timeout):
         time.sleep(1)
-        contents = requests.get(
-            f"{selenium_remote_results_url}/{newsflash_id}/").json()
-        filenames = [item['name'] for item in contents]
-        unique_filenames = get_unique_filenames(filenames)
-        if len(unique_filenames) == number_of_expected_files and not contains_partial_files(unique_filenames):
-            return True, unique_filenames
+        image_filenames = fetch_generated_image_filenames_for_newsflash(newsflash_id)
+        if len(image_filenames) == number_of_expected_files and not contains_partial_files(image_filenames):
+            return True, image_filenames
     return False, []
 
 
 def generate_infographics_in_selenium_container(browser, newsflash_id):
     newsflash_page_url = f"{NEWSFLASH_PAGE_BASE_URL}/{newsflash_id}"
     is_download_done = False
-    buttons_found = 0
     generated_images_names = []
     try:
         browser.get(newsflash_page_url)
@@ -92,7 +95,7 @@ def generate_infographics_in_selenium_container(browser, newsflash_id):
             for element in elements:
                 ActionChains(browser).move_to_element(element).click().perform()
             is_download_done, generated_images_names = wait_for_folder_to_contain_all_files(newsflash_id,
-                                                                                            buttons_found, timeout=30)
+                                                                                            buttons_found, timeout=60)
     except Exception as e:
         logging.error(e)
     finally:
@@ -102,12 +105,15 @@ def generate_infographics_in_selenium_container(browser, newsflash_id):
 
 def generate_infographics_for_newsflash(newsflash_id):
     browser = create_chrome_browser_session(newsflash_id)
-    finished_generation, generated_images_names = generate_infographics_in_selenium_container(browser, newsflash_id)
-    if finished_generation:
-        local_infographics_folder = get_local_infographics_folder_name(newsflash_id)
+    return generate_infographics_in_selenium_container(browser, newsflash_id)
+
+
+def upload_infographics_images_to_s3(newsflash_id, should_download=True):
+    local_infographics_folder = get_local_infographics_folder_name(newsflash_id)
+    if should_download:
+        generated_images_names = fetch_generated_image_filenames_for_newsflash(newsflash_id)
         download_infographics_images(generated_images_names, newsflash_id, local_infographics_folder)
-        upload_directory_to_s3(local_infographics_folder, newsflash_id)
-    return finished_generation, generated_images_names
+    upload_directory_to_s3(local_infographics_folder, newsflash_id)
 
 
 def download_infographics_images(generated_images_names, newsflash_id, local_infographics_folder):

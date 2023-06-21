@@ -423,6 +423,24 @@ def accidents_around_schools(start_date, end_date, distance, output_path):
         start_date=start_date, end_date=end_date, distance=distance, output_path=output_path
     )
 
+@cli.group()
+def generate():
+    pass
+
+
+@generate.command()
+@click.option(
+    "--id", type=int, help="newsflash id"
+)
+def infographics_pictures(id):
+    from anyway.infographic_image_generator import generate_infographics_for_newsflash
+
+    finished_generation, generated_images_names = generate_infographics_for_newsflash(id)
+    if finished_generation:
+        logging.info(f"generation success, {len(generated_images_names)} infographics")
+        return
+    logging.error("generation failed")
+
 
 @scripts.command()
 def test_airflow():
@@ -438,6 +456,18 @@ def importemail():
 
     return main()
 
+
+@cli.group()
+def telegram():
+    pass
+
+
+@telegram.command()
+@click.option("--id", type=int)
+def send_notification():
+    from anyway.telegram_accident_notifications import publish_notification
+
+    publish_notification(id)
 
 if __name__ == "__main__":
     cli(sys.argv[1:])  # pylint: disable=too-many-function-args

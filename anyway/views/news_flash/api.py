@@ -50,6 +50,7 @@ class NewsFlashQuery(BaseModel):
     start_date: Optional[datetime.datetime] = None
     end_date: Optional[datetime.datetime] = None
     critical: Optional[bool] = None
+    last_minutes: Optional[int]
 
     @validator("end_date", always=True)
     def check_missing_date(cls, v, values):
@@ -89,6 +90,7 @@ def news_flash():
         interurban_only=request.values.get("interurban_only"),
         road_number=request.values.get("road_number"),
         road_segment=request.values.get("road_segment_only"),
+        last_minutes=request.values.get("last_minutes"),
         offset=request.values.get("offset", DEFAULT_OFFSET_REQ_PARAMETER),
         limit=request.values.get("limit", DEFAULT_LIMIT_REQ_PARAMETER),
     )
@@ -135,6 +137,7 @@ def news_flash_new(args: dict) -> List[dict]:
         road_segment=args.get("road_segment_only"),
         offset=args.get("offset"),
         limit=args.get("limit"),
+        last_minutes=args.get("last_minutes"),
     )
     news_flashes = query.all()
 
@@ -154,6 +157,7 @@ def gen_news_flash_query(
     road_segment=None,
     offset=None,
     limit=None,
+    last_minutes=None
 ):
     query = session.query(NewsFlash)
     # get all possible sources
@@ -187,6 +191,9 @@ def gen_news_flash_query(
         query = query.filter(NewsFlash.road1 == road_number)
     if road_segment == "true":
         query = query.filter(not_(NewsFlash.road_segment_name == None))
+    if last_minutes:
+        last_timestamp = datetime.datetime.now() - datetime.timedelta(minutes=last_minutes)
+        query = query.filter(NewsFlash.date >= last_timestamp)
     query = query.filter(
         and_(
             NewsFlash.accident == True,
@@ -215,6 +222,9 @@ def gen_news_flash_query_v2(session, valid_params: dict):
             query = filter_by_resolutions(query, value)
         if param == "critical":
             query = query.filter(NewsFlash.critical == value)
+        if param == "last_minutes":
+            last_timestamp = datetime.datetime.now() - datetime.timedelta(minutes=value)
+            query = query.filter(NewsFlash.date >= last_timestamp)
     query = query.filter(
         and_(
             NewsFlash.accident == True,

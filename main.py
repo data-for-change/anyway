@@ -432,17 +432,13 @@ def generate():
 @click.option(
     "--id", type=int, help="newsflash id"
 )
-
 def infographics_pictures(id):
-    from anyway.infographic_image_generator import download_infographics_for_newsflash
-    infographics_directory = "/var/selenium/tempdata"
+    from anyway.infographic_image_generator import generate_infographics_for_newsflash
 
-    number_of_retries = 5
-    for retry_id in range(1, 1 + number_of_retries):
-        finished_generation, buttons_found = download_infographics_for_newsflash(id, infographics_directory)
-        if finished_generation:
-            logging.info(f"generation success on {retry_id}# try, {buttons_found} infographics")
-            return
+    finished_generation, generated_images_names = generate_infographics_for_newsflash(id)
+    if finished_generation:
+        logging.info(f"generation success, {len(generated_images_names)} infographics")
+        return
     logging.error("generation failed")
 
 
@@ -460,6 +456,18 @@ def importemail():
 
     return main()
 
+
+@cli.group()
+def telegram():
+    pass
+
+
+@telegram.command()
+@click.option("--id", type=int)
+def send_notification():
+    from anyway.telegram_accident_notifications import publish_notification
+
+    publish_notification(id)
 
 if __name__ == "__main__":
     cli(sys.argv[1:])  # pylint: disable=too-many-function-args

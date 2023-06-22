@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-04-27 10:27+0000\n"
+"POT-Creation-Date: 2023-06-22 13:32+0000\n"
 "PO-Revision-Date: 2020-10-16 15:42+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: he\n"
@@ -170,71 +170,190 @@ msgstr "אופניים/קורקינט"
 msgid "other vehicle"
 msgstr "רכב אחר"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:66
-msgid "Number of accidents by severity"
-msgstr "מספר תאונות לפי חומרה"
-
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:67
-msgid "road_segment_namenon_urban_intersection_hebrew"
-msgstr ""
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:69
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:158
+msgid "one light"
+msgstr "קלה אחת"
 
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:71
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:159
+msgid "light plural"
+msgstr "קלות"
+
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:76
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:160
+msgid "one severe"
+msgstr "קשה אחת"
+
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:78
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:161
+msgid "severe plural"
+msgstr "פצוע/ה קשה"
+
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:83
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:162
+msgid "one fatal"
+msgstr "קטלנית אחת"
+
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:85
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:163
+msgid "fatal plural"
+msgstr "קטלניות"
+
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:88
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:164
+#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:100
+msgid "in yishuv"
+msgstr "ביישוב"
+
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:90
-msgid "Fatal, severe and light accidents count in "
-msgstr "כמות התאונות הקטלניות, הקשות והקלות ב"
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:165
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:166
+#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:102
+msgid "in street"
+msgstr "ברחוב"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:72
-msgid "segment"
-msgstr "מקטע"
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:95
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:166
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:171
+#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:107
+msgid "in road"
+msgstr "בכביש"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:72
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:98
-msgid "junction"
-msgstr "צמת"
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:97
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:164
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:167
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:173
+#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:109
+msgid "in segment"
+msgstr "במקטע"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:73
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:92
-msgid "in the selected time"
-msgstr "בפרק הזמן הנבחר"
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:103
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:168
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:179
+#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:115
+msgid "between the years"
+msgstr "בין השנים"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:79
-msgid "in years"
-msgstr "בשנים"
-
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:82
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:106
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:140
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:169
 msgid "took place"
 msgstr "התרחשו"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:84
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:108
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:142
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:171
 msgid "accidents"
 msgstr "תאונות"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:86
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:109
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:170
+msgid "out of them"
+msgstr "מתוכן"
+
+#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:121
+msgid "out of them"
+msgstr "מתוכם"
+
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:113
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:172
+#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:125
+msgid " and "
+msgstr " ו-"
+
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:122
+msgid "Number of accidents by severity"
+msgstr "מספר תאונות לפי חומרה"
+
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:123
+msgid "road_segment_namenon_urban_intersection_hebrew"
+msgstr ""
+
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:129
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:149
+msgid "Fatal, severe and light accidents count in "
+msgstr "כמות התאונות הקטלניות, הקשות והקלות ב"
+
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:130
+msgid "segment"
+msgstr "מקטע"
+
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:130
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:157
+msgid "junction"
+msgstr "צמת"
+
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:131
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:151
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:173
+msgid "in the selected time"
+msgstr "בפרק הזמן הנבחר"
+
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:137
+msgid "in years"
+msgstr "בשנים"
+
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:144
 msgid "{street_name}, {yishuv_name}"
 msgstr ""
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:91
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:150
 msgid "street"
 msgstr "רחוב"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:97
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:156
 msgid "Fatal, severe and light accidents count in the specified location."
 msgstr "כמות התאונות הקטלניות, הקשות והקלות במקטע בפרק הזמן הנבחר."
 
 #: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:51
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:177
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:226
 msgid "in"
 msgstr "ב"
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:157
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:158
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:227
+msgid "latest severe accident took place"
+msgstr "תאונה חמורה אחרונה התרחשה"
+
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:160
+msgid "latest severe accidents took place"
+msgstr "תאונות חמורות אחרונות התרחשו"
+
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:185
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:228
+msgid "in date"
+msgstr "בתאריך"
+
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:187
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:229
+msgid "in hour"
+msgstr "בשעה"
+
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:189
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:230
+msgid "occured accident"
+msgstr "התרחשה תאונה"
+
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:190
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:231
+msgid "of type"
+msgstr "מסוג"
+
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:192
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:232
+msgid "injured"
+msgstr "פצועים"
+
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:204
 msgid "accident_severity"
 msgstr "חומרת תאונה"
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:158
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:205
 msgid "type"
 msgstr "סוג"
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:173
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:222
 msgid ""
 "Most recent fatal and severe accidents, ordered by date. Up to 10 "
 "accidents are presented."
@@ -242,15 +361,15 @@ msgstr ""
 "התאונות החמורות (קשות וקטלניות) האחרונות, מסודרות לפי תאריך בסדר יורד. "
 "מוצגות עד 10 תאונות."
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:174
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:223
 msgid "Severe accidents in suburban junction"
 msgstr "תאונות חמורות בצמת בינעירוני"
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:175
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:224
 msgid "Most severe accidents in segment"
 msgstr "תאונות חמורות במקטע"
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:176
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:225
 msgid "Severe accidents in street"
 msgstr "תאונות חמורות ברחוב"
 
@@ -304,7 +423,7 @@ msgstr "תאונות במקטע"
 #: anyway/widgets/road_segment_widgets/accident_count_by_road_light_widget.py:33
 #: anyway/widgets/road_segment_widgets/accidents_heat_map_widget.py:54
 #: anyway/widgets/road_segment_widgets/injured_count_by_accident_year_widget.py:56
-#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:74
+#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:133
 #: anyway/widgets/road_segment_widgets/killed_and_injured_count_per_age_group_stacked_widget.py:53
 #: anyway/widgets/road_segment_widgets/killed_and_injured_count_per_age_group_widget.py:42
 #: anyway/widgets/road_segment_widgets/suburban_crosswalk_widget.py:73
@@ -432,7 +551,47 @@ msgstr ""
 "מספר הרוגים, פצועים קשה וקל, לפי שנה במקטע, מחולק לפי חומרת הפגיעה, בפרק "
 "הזמן הנבחר."
 
-#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:73
+#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:81
+#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:146
+msgid "one light injured"
+msgstr "פצוע/ה קל"
+
+#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:83
+#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:147
+msgid "light injured plural"
+msgstr "פצועים/ות קל"
+
+#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:88
+#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:144
+msgid "one severe injured"
+msgstr "פצוע/ה קשה"
+
+#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:90
+#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:145
+msgid "severe injured plural"
+msgstr "פצועים קשה"
+
+#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:95
+#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:142
+msgid "one killed"
+msgstr "הרוג"
+
+#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:97
+#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:143
+msgid "killed plural"
+msgstr "הרוגים"
+
+#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:118
+#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:140
+msgid "injured/killed"
+msgstr "נפצעו/נהרגו"
+
+#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:120
+#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:141
+msgid "people from car accidents"
+msgstr "אנשים מתאונות דרכים"
+
+#: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:132
 msgid "Number of Injuries in accidents by severity"
 msgstr "מספר תאונות לפי חומרה"
 
@@ -649,3 +808,4 @@ msgstr ""
 
 #~ msgid "on street"
 #~ msgstr "ברחוב"
+

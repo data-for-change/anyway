@@ -1278,7 +1278,6 @@ def infographics_data_by_location():
 
     if personalized_data == "true":
         output = widgets_personalisation_for_user(output)
-
     json_data = json.dumps(output, default=str)
     return Response(json_data, mimetype="application/json")
 

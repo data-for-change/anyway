@@ -4,11 +4,11 @@ from .config import ANYWAY_BUCKET
 
 
 class S3DataClass:
-    def __init__(self):
+    def __init__(self, s3_bucket_name=None):
         self._aws_access_key = secrets.get("AWS_ACCESS_KEY")
         self._aws_secret_key = secrets.get("AWS_SECRET_KEY")
         self._s3_resource = None
-        self._s3_bucket = None
+        self._s3_bucket = self.s3_resource.Bucket(s3_bucket_name) if s3_bucket_name else None
         self._client = None
 
     @property

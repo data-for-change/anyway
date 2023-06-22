@@ -22,7 +22,6 @@ from webassets.ext.jinja2 import AssetsExtension
 from werkzeug.exceptions import BadRequestKeyError
 
 from anyway import utilities, secrets
-from anyway.localization import to_hebrew
 from anyway.app_and_db import api, get_cors_config
 from anyway.clusters_calculator import retrieve_clusters
 from anyway.config import ENTRIES_PER_PAGE
@@ -1279,7 +1278,6 @@ def infographics_data_by_location():
 
     if personalized_data == "true":
         output = widgets_personalisation_for_user(output)
-    output['to_hebrew'] = to_hebrew(output)
     json_data = json.dumps(output, default=str)
     return Response(json_data, mimetype="application/json")
 

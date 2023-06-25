@@ -481,7 +481,7 @@ def telegram():
 
 @telegram.command()
 @click.option("--id", type=int)
-def send_notification():
+def send_notification(id):
     from anyway.telegram_accident_notifications import publish_notification
 
     publish_notification(id)

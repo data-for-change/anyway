@@ -7,10 +7,9 @@ TELEGRAM_CHAT_ID = -979313450
 
 
 def publish_notification(newsflash_id):
-    from anyway.slack_accident_notifications import fmt_lnk_mrkdwn
 
     bot = telebot.TeleBot(secrets.get("TELEGRAM_BOT_TOKEN"))
-#    sent_msg = bot.send_message(chat_id, msg_text, parse_mode="Markdown")
+#    sent_msg = bot.send_message(chat_id, msg_text)
 
     urls = create_public_urls_for_infographics_images(newsflash_id)
     for url in urls:

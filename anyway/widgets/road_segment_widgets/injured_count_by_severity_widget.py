@@ -96,7 +96,7 @@ class InjuredCountBySeverityWidget(RoadSegmentWidget):
         else:
             killed_count_text = f'{killed_count} ' +  _("killed plural")
         if request_params.resolution == BE_CONST.ResolutionCategories.STREET:
-            text = "{in_yishuv_keyword} yishuv_name {in_street_keyword} ".format(
+            text = "{in_yishuv_keyword} {yishuv_name} {in_street_keyword} {street_name} ".format(
                 in_yishuv_keyword=_("in yishuv"),
                 yishuv_name=_(request_params.location_info.get('yishuv_name')),
                 in_street_keyword=_("in street"),

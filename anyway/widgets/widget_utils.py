@@ -210,3 +210,12 @@ def get_involved_counts(
 
     df = pd.read_sql_query(query.statement, query.session.bind)
     return df.to_dict(orient="records")  # pylint: disable=no-member
+
+
+def join_strings(strings, sep_a=" ,", sep_b=" ו-"):
+    if len(strings) < 2:
+        return "".join(strings)
+    elif len(strings) == 2:
+        return sep_b.join(strings)
+    else:
+        return sep_a.join(strings[:-1]) + sep_b + strings[-1]

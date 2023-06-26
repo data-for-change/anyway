@@ -94,6 +94,7 @@ def generate_infographics_in_selenium_container(browser, newsflash_id):
         if buttons_found > 0:
             for element in elements:
                 ActionChains(browser).move_to_element(element).click().perform()
+                time.sleep(1) #prevents click arriving before the last finished
             is_download_done, generated_images_names = wait_for_folder_to_contain_all_files(newsflash_id,
                                                                                             buttons_found, timeout=60)
     except Exception as e:

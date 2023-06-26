@@ -5,8 +5,6 @@ import telebot
 import boto3
 import time
 
-from anyway.views.news_flash.api import news_flash_new, single_news_flash, single_news_flash_json
-
 INFOGRAPHICS_S3_BUCKET = "dfc-anyway-infographics-images"
 TELEGRAM_CHANNEL_CHAT_ID = -1001666083560
 TELEGRAM_LINKED_GROUP_CHAT_ID = -1001954877540

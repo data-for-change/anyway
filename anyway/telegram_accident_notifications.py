@@ -11,7 +11,7 @@ INFOGRAPHICS_S3_BUCKET = "dfc-anyway-infographics-images"
 
 TELEGRAM_CHANNEL_CHAT_ID = -1001666083560
 TELEGRAM_LINKED_GROUP_CHAT_ID = -1001954877540
-
+TEXT_FOR_AFTER_INFOGRAPHICS_MESSAGE = 'מקור המידע בלמ"ס, הופק באמצעות ANYWAY מבית "נתון לשינוי" למידע נוסף:'
 
 def send_initial_message_in_channel(bot, text):
     return bot.send_message(TELEGRAM_CHANNEL_CHAT_ID, text)
@@ -30,11 +30,16 @@ def fetch_message_id_for_initial_message_in_discussion_group(bot, thread_startin
     return None
 
 
+def remove_seconds_from_time_and_date(time_and_date):
+    return time_and_date[:time_and_date.rindex(":")]
+
+
 def create_accident_text(newsflash_id):
-    newsflash_json = requests.get(f"{ANYWAY_BASE_API_URL}/news-flash/{newsflash_id}").json()
-    newsflash_title = newsflash_json["title"]
-    newsflash_description = newsflash_json["description"]
-    return f"{newsflash_title}\n\n{newsflash_description}"
+    newsflash = requests.get(f"{ANYWAY_BASE_API_URL}/news-flash/{newsflash_id}").json()
+    organization = newsflash['organization']
+    date_and_time = remove_seconds_from_time_and_date(newsflash['date'])
+    first_line = f"[{organization}] {date_and_time}:"
+    return f"{first_line}\n\n{newsflash['description']}"
 
 
 def fetch_transcription_by_widget_name(newsflash_id):
@@ -45,6 +50,11 @@ def fetch_transcription_by_widget_name(newsflash_id):
                                     if "transcription" in widget["data"]["text"]}
     return transcription_by_widget_name
 
+
+def send_after_infographics_message(bot, message_id_in_group, newsflash_id):
+    newsflash_link = f"https://media.anyway.co.il/newsflash/{newsflash_id}"
+    message = f"{TEXT_FOR_AFTER_INFOGRAPHICS_MESSAGE}\n{newsflash_link}"
+    return bot.send_message(TELEGRAM_LINKED_GROUP_CHAT_ID, message, reply_to_message_id=message_id_in_group)
 
 def publish_notification(newsflash_id):
     #fetch data for send
@@ -65,6 +75,7 @@ def publish_notification(newsflash_id):
             text = transcription_by_widget_name[infographic_name] \
                 if infographic_name in transcription_by_widget_name else None
             bot.send_photo(TELEGRAM_LINKED_GROUP_CHAT_ID, url, reply_to_message_id=message_id_in_group, caption=text)
+        send_after_infographics_message(bot, message_id_in_group, newsflash_id)
     logging.info("notification send done")
 
 def extract_infographic_name_from_s3_object(s3_object_name):

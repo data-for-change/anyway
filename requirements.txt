@@ -6,7 +6,7 @@ Flask-Login==0.6.2
 Flask-SQLAlchemy==3.0.5
 flask-restx==1.1.0
 Jinja2==3.1.2
-SQLAlchemy==2.0.19
+SQLAlchemy==1.4.49
 Werkzeug==2.3.6
 alembic==1.4.2
 attrs==23.1.0

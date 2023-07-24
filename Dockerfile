@@ -47,7 +47,5 @@ COPY . /anyway
 
 EXPOSE 5000
 
-RUN flask assets clean
-
 ENTRYPOINT ["/anyway/docker-entrypoint.sh"]
-CMD FLASK_APP=anyway flask run --host 0.0.0.0
+CMD FLASK_APP=anyway flask --app run --host 0.0.0.0

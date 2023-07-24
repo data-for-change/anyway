@@ -48,4 +48,4 @@ COPY . /anyway
 EXPOSE 5000
 
 ENTRYPOINT ["/anyway/docker-entrypoint.sh"]
-CMD FLASK_APP=anyway flask --app run --host 0.0.0.0
+CMD FLASK_APP=anyway flask --app anyway run --host 0.0.0.0

@@ -40,7 +40,7 @@ COPY --from=builder /venv3 /venv3
 ENV VIRTUAL_ENV=/venv3
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 ENV ALLOW_ALEMBIC_UPGRADE=yes
-ENV FLASK_APP=flask_app.py
+ENV FLASK_APP=anyway
 ENV FLASK_ENV=development
 
 COPY . /anyway

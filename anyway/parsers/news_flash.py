@@ -74,4 +74,4 @@ def scrape_all():
     db = init_db()
     scrape_extract_store_rss("ynet", db)
     scrape_extract_store_rss("walla", db)
-    scrape_extract_store_twitter("mda_israel", db)
+    # scrape_extract_store_twitter("mda_israel", db)

@@ -24,7 +24,6 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from anyway.anyway_dataclasses.user_data import UserData
 from anyway.app_and_db import db, app
 from anyway.backend_constants import BE_CONST
-from anyway.base import _set_cookie_hijack, _clear_cookie_hijack
 from anyway.error_code_and_strings import (
     Errors as Es,
     ERROR_TO_HTTP_CODE_DICT,
@@ -42,9 +41,6 @@ from anyway.views.user_system.user_functions import (
 
 # Setup Flask-login
 login_manager = LoginManager()
-# Those 2 function hijack are a temporary fix - more info in base.py
-login_manager._set_cookie = _set_cookie_hijack
-login_manager._clear_cookie = _clear_cookie_hijack
 login_manager.init_app(app)
 # Setup Flask-Principal
 principals = Principal(app)
@@ -226,7 +222,7 @@ def oauth_callback(provider: str) -> Response:
         if redirect_url_to_check and is_a_safe_redirect_url(redirect_url_to_check):
             redirect_url = redirect_url_to_check
 
-    login_user(user, True)
+    login_user(user, remember=True)
     identity_changed.send(current_app._get_current_object(), identity=Identity(user.id))
 
     return redirect(redirect_url, code=HTTPStatus.FOUND)

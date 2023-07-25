@@ -38,10 +38,10 @@ def run_migrations_offline():
     script output.
 
     """
-    from anyway.app_and_db import db
-
-    url = os.environ.get("DATABASE_URL")
-    context.configure(url=url, target_metadata=db.Model.metadata, literal_binds=True)
+    from anyway.app_and_db import db, app
+    with app.app_context():
+        url = os.environ.get("DATABASE_URL")
+        context.configure(url=url, target_metadata=db.Model.metadata, literal_binds=True)
 
     with context.begin_transaction():
         context.run_migrations()
@@ -54,9 +54,9 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
-    from anyway.app_and_db import db
-
-    connectable = db.engine
+    from anyway.app_and_db import db, app
+    with app.app_context():
+        connectable = db.engine
 
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=db.Model.metadata)

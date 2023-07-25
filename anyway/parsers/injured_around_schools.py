@@ -78,7 +78,7 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
         .filter(Involved.age_group.in_([1, 2, 3, 4]))
     )  # ages 0-19
 
-    df = pd.read_sql_query(query_obj.with_labels().statement, query_obj.session.bind)
+    df = pd.read_sql_query(query_obj.with_labels().statement, db.get_engine())
     if LOCATION_ACCURACY_PRECISE:
         location_accurate = 1
         location_approx = ""

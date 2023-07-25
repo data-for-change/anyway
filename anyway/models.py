@@ -1172,7 +1172,7 @@ class Streets(Base):
         )
         if res is None:
             raise ValueError(f"{name}: could not find street in yishuv:{yishuv_symbol}")
-        return res
+        return res.street
 
     @staticmethod
     def get_streets_by_yishuv(yishuv_symbol: int) -> List[dict]:

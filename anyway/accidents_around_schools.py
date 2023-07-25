@@ -68,7 +68,7 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
         .filter(Involved.age_group.in_([1, 2, 3, 4]))
     )  # ages 0-19
 
-    df = pd.read_sql_query(query_obj.with_labels().statement, query_obj.session.bind)
+    df = pd.read_sql_query(query_obj.with_labels().statement, db.get_engine())
 
     if LOCATION_ACCURACY_PRECISE:
         location_accurate = 1
@@ -110,7 +110,7 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
 
 def main(start_date, end_date, distance, output_path):
     schools_query = sa.select([School])
-    df_schools = pd.read_sql_query(schools_query, db.session.bind)
+    df_schools = pd.read_sql_query(schools_query, db.get_engine())
     df_total = pd.DataFrame()
     df_schools = df_schools.drop_duplicates(  # pylint: disable=no-member
         ["yishuv_name", "longitude", "latitude"]

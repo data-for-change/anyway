@@ -11,6 +11,7 @@ from anyway.request_params import RequestParams
 from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
 from anyway.widgets.widget import register
 from anyway.widgets.widget_utils import get_query
+from anyway.app_and_db import db
 
 ROAD_SEGMENT_ACCIDENTS = "specific_road_segment_accidents"
 
@@ -79,26 +80,16 @@ class FrondToSideAccidentsBySeverityWidget(RoadSegmentWidget):
     ) -> List[Dict[str, Any]]:
 
         other_accidents = case(
-            [
-                (
                     (
                         AccidentMarkerView.accident_type
-                        != AccidentType.COLLISION_OF_FRONT_TO_SIDE.value
-                    ),
-                    AccidentMarkerView.provider_and_id,
+                        != AccidentType.COLLISION_OF_FRONT_TO_SIDE.value,
+                    AccidentMarkerView.provider_and_id)
                 )
-            ]
-        )
         front_side_accidents = case(
-            [
-                (
                     (
                         AccidentMarkerView.accident_type
-                        == AccidentType.COLLISION_OF_FRONT_TO_SIDE.value
-                    ),
-                    AccidentMarkerView.provider_and_id,
-                )
-            ]
+                        == AccidentType.COLLISION_OF_FRONT_TO_SIDE.value,
+                    AccidentMarkerView.provider_and_id),
         )
         query = get_query(
             table_obj=AccidentMarkerView, filters={}, start_time=start_date, end_time=end_date
@@ -123,7 +114,7 @@ class FrondToSideAccidentsBySeverityWidget(RoadSegmentWidget):
         query = query_filtered.group_by(
             AccidentMarkerView.accident_severity, AccidentMarkerView.accident_severity_hebrew
         )
-        results = pd.read_sql_query(query.statement, query.session.bind).to_dict(orient="records")
+        results = pd.read_sql_query(query.statement, db.get_engine()).to_dict(orient="records")
         return results
 
     @staticmethod

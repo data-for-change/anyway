@@ -1051,7 +1051,7 @@ def acc_in_area_query():
         )
     )
 
-    df = pd.read_sql_query(query_obj.with_labels().statement, query_obj.session.bind)
+    df = pd.read_sql_query(query_obj.with_labels().statement, db.get_engine())
     markers_in_area_list = df.to_dict(orient="records")
     response = Response(json.dumps(markers_in_area_list, default=str), mimetype="application/json")
     return response

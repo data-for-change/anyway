@@ -12,7 +12,7 @@ from anyway.widgets.widget import register
 from anyway.widgets.widget_utils import get_query
 from anyway.models import AccidentMarkerView
 from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
-
+from anyway.app_and_db import db
 
 @register
 class TopRoadSegmentsAccidentsPerKmWidget(RoadSegmentWidget):
@@ -69,7 +69,7 @@ class TopRoadSegmentsAccidentsPerKmWidget(RoadSegmentWidget):
                 .limit(limit)
             )
 
-            result = pd.read_sql_query(query.statement, query.session.bind)
+            result = pd.read_sql_query(query.statement, db.get_engine())
             return result.to_dict(orient="records")  # pylint: disable=no-member
 
         except Exception as exception:

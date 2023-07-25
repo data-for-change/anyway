@@ -140,7 +140,7 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
             )
         )
     )
-    markers = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+    markers = pd.read_sql_query(query_obj.statement, db.get_engine())
 
     geod = Geodesic.WGS84
     markers["geohash"] = markers.apply(  # pylint: disable=maybe-no-member

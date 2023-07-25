@@ -7,6 +7,7 @@ from typing import Dict, Any, List, Type, Optional, Sequence
 import pandas as pd
 from flask_babel import _
 from sqlalchemy import func, distinct, between, or_
+from sqlalchemy.sql import text
 
 from anyway.app_and_db import db
 from anyway.backend_constants import BE_CONST, LabeledCode, InjurySeverity
@@ -58,12 +59,14 @@ def get_accidents_stats(
     # get stats
     query = get_query(table_obj, filters, start_time, end_time)
     if columns:
-        query = query.with_entities(*columns)
+        columns_with_entities = [text(c) for c in columns]
+        query = query.with_entities(*columns_with_entities)
     if group_by:
         if isinstance(group_by, tuple):
             if len(group_by) == 2:
                 query = query.group_by(*group_by)
-                query = query.with_entities(*group_by, func.count(count))
+                group_by_with_entities = [text(gb) for gb in group_by]
+                query = query.with_entities(*group_by_with_entities, func.count(count))
                 dd = query.all()
                 res = retro_dictify(dd)
                 return res
@@ -74,9 +77,10 @@ def get_accidents_stats(
         else:
             query = query.group_by(group_by)
             query = query.with_entities(
-                group_by, func.count(count) if not cnt_distinct else func.count(distinct(count))
+                text(group_by),
+                func.count(count) if not cnt_distinct else func.count(distinct(count)),
             )
-    df = pd.read_sql_query(query.statement, query.session.bind)
+    df = pd.read_sql_query(query.statement, db.get_engine())
     df.rename(columns={"count_1": "count"}, inplace=True)  # pylint: disable=no-member
     df.columns = [c.replace("_hebrew", "") for c in df.columns]
     return (  # pylint: disable=no-member
@@ -131,7 +135,7 @@ def get_injured_filters(location_info):
 
 def run_query(query: db.session.query) -> Dict:
     # pylint: disable=no-member
-    return pd.read_sql_query(query.statement, query.session.bind).to_dict(orient="records")
+    return pd.read_sql_query(query.statement, db.get_engine()).to_dict(orient="records")
 
 
 # TODO: Find a better way to deal with typing.Union[int, str]
@@ -217,7 +221,7 @@ def get_involved_counts(
             table.involve_vehicle_type.in_([v_type.value for v_type in vehicle_types])
         )
 
-    df = pd.read_sql_query(query.statement, query.session.bind)
+    df = pd.read_sql_query(query.statement, db.get_engine())
     return df.to_dict(orient="records")  # pylint: disable=no-member
 
 

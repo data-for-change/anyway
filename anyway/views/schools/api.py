@@ -74,7 +74,7 @@ def schools_description_api():
             SchoolWithDescription2020.latitude,
         )
     )
-    df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+    df = pd.read_sql_query(query_obj.statement, db.get_engine())
     schools_list = df.to_dict(orient="records")
     response = Response(json.dumps(schools_list, default=str), mimetype="application/json")
     response.headers.add("Access-Control-Allow-Origin", "*")

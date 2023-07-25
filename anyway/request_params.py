@@ -122,7 +122,6 @@ def get_location_from_news_flash_or_request_values(
         or ("road1" in vals and "road2" in vals)
     ):
         return extract_non_urban_intersection_location(vals)
-
     logging.error(f"Unsupported location:{vals.values()}")
     return None
 
@@ -325,7 +324,7 @@ def get_latest_accident_date(table_obj, filters):
         BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
     ]
     query = db.session.query(func.max(table_obj.accident_timestamp))
-    df = pd.read_sql_query(query.statement, query.session.bind)
+    df = pd.read_sql_query(query.statement, db.get_engine())
     return (df.to_dict(orient="records"))[0].get("max_1")  # pylint: disable=no-member
 
 

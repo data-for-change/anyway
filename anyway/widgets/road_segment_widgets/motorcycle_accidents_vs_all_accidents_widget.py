@@ -11,9 +11,9 @@ from anyway.widgets.widget_utils import get_query
 from anyway.models import InvolvedMarkerView
 from anyway.vehicle_type import VehicleCategory
 from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
+from anyway.app_and_db import db
 from typing import Dict
 from flask_babel import _
-
 
 location_other = "location other"
 location_road = "location road"
@@ -47,13 +47,8 @@ class MotorcycleAccidentsVsAllAccidentsWidget(RoadSegmentWidget):
         ) -> Tuple:
         location_label = "location"
         case_location = case(
-            [
-                (
-                    (InvolvedMarkerView.road1 == road_number)
-                    | (InvolvedMarkerView.road2 == road_number),
-                    location_road,
-                )
-            ],
+                (InvolvedMarkerView.road1 == road_number, location_road),
+                  (InvolvedMarkerView.road2 == road_number ,location_road),
             else_=literal_column(f"'{location_other}'"),
         ).label(location_label)
 
@@ -61,14 +56,11 @@ class MotorcycleAccidentsVsAllAccidentsWidget(RoadSegmentWidget):
         vehicle_other = VehicleCategory.OTHER.get_english_display_name()
         vehicle_motorcycle = VehicleCategory.MOTORCYCLE.get_english_display_name()
         case_vehicle = case(
-            [
-                (
-                    InvolvedMarkerView.involve_vehicle_type.in_(
+                (InvolvedMarkerView.involve_vehicle_type.in_(
                         VehicleCategory.MOTORCYCLE.get_codes()
                     ),
                     literal_column(f"'{vehicle_motorcycle}'"),
-                )
-            ],
+                ),
             else_=literal_column(f"'{vehicle_other}'"),
         ).label(vehicle_label)
 
@@ -94,7 +86,7 @@ class MotorcycleAccidentsVsAllAccidentsWidget(RoadSegmentWidget):
             .order_by(desc(num_accidents_label))
         )
         # pylint: disable=no-member
-        results = pd.read_sql_query(query.statement, query.session.bind).to_dict(
+        results = pd.read_sql_query(query.statement, db.get_engine()).to_dict(
             orient="records"
         )  # pylint: disable=no-member
 

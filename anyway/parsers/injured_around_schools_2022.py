@@ -95,7 +95,7 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
         .filter(InvolvedMarkerView.accident_hour_raw.between(SEVEN_AM_RAW, SEVEN_PM_RAW))
     )
 
-    df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+    df = pd.read_sql_query(query_obj.statement, db.get_engine())
 
     if LOCATION_ACCURACY_PRECISE:
         location_accurate = 1

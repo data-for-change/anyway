@@ -11,7 +11,7 @@ from anyway.request_params import RequestParams
 from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
 from anyway.widgets.widget import register
 from anyway.widgets.widget_utils import get_query
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 
 ROAD_SEGMENT_ACCIDENTS = "specific_road_segment_accidents"
 
@@ -91,30 +91,31 @@ class FrondToSideAccidentsBySeverityWidget(RoadSegmentWidget):
                         == AccidentType.COLLISION_OF_FRONT_TO_SIDE.value,
                     AccidentMarkerView.provider_and_id),
         )
-        query = get_query(
-            table_obj=AccidentMarkerView, filters={}, start_time=start_date, end_time=end_date
-        )
-        entities_query = query.with_entities(
-            AccidentMarkerView.accident_severity,
-            AccidentMarkerView.accident_severity_hebrew,
-            func.count(distinct(other_accidents)).label(OTHER_ACCIDENTS_LABEL),
-            func.count(distinct(front_side_accidents)).label(FRONT_SIDE_ACCIDENTS_LABEL),
-        )
-
-        if road_segment_id:
-            entities_query = entities_query.filter(
-                AccidentMarkerView.road_segment_id == road_segment_id
+        with app.app_context():
+            query = get_query(
+                table_obj=AccidentMarkerView, filters={}, start_time=start_date, end_time=end_date
+            )
+            entities_query = query.with_entities(
+                AccidentMarkerView.accident_severity,
+                AccidentMarkerView.accident_severity_hebrew,
+                func.count(distinct(other_accidents)).label(OTHER_ACCIDENTS_LABEL),
+                func.count(distinct(front_side_accidents)).label(FRONT_SIDE_ACCIDENTS_LABEL),
             )
 
-        query_filtered = entities_query.filter(
-            AccidentMarkerView.accident_severity.in_(
-                [AccidentSeverity.FATAL.value, AccidentSeverity.SEVERE.value]
+            if road_segment_id:
+                entities_query = entities_query.filter(
+                    AccidentMarkerView.road_segment_id == road_segment_id
+                )
+
+            query_filtered = entities_query.filter(
+                AccidentMarkerView.accident_severity.in_(
+                    [AccidentSeverity.FATAL.value, AccidentSeverity.SEVERE.value]
+                )
             )
-        )
-        query = query_filtered.group_by(
-            AccidentMarkerView.accident_severity, AccidentMarkerView.accident_severity_hebrew
-        )
-        results = pd.read_sql_query(query.statement, db.get_engine()).to_dict(orient="records")
+            query = query_filtered.group_by(
+                AccidentMarkerView.accident_severity, AccidentMarkerView.accident_severity_hebrew
+            )
+            results = pd.read_sql_query(query.statement, db.get_engine()).to_dict(orient="records")
         return results
 
     @staticmethod

@@ -349,7 +349,7 @@ class Views(object):
             .join(ProviderCode,
                   and_(AccidentMarker.provider_code == ProviderCode.id),
                   isouter=True)
-        return select(selected_columns) \
+        return select(*selected_columns) \
             .select_from(from_clause)
 
     def create_involved_hebrew_view(self):
@@ -501,7 +501,7 @@ class Views(object):
                        Involved.accident_year == LateDeceased.year,
                        Involved.provider_code == LateDeceased.provider_code),
                   isouter=True)
-        return select(selected_columns) \
+        return select(*selected_columns) \
             .select_from(from_clause)
 
     def create_involved_hebrew_markers_hebrew_view(self):
@@ -681,7 +681,7 @@ class Views(object):
                        InvolvedView.accident_year == VehiclesView.accident_year,
                        InvolvedView.car_id == VehiclesView.car_id),
                   isouter=True)
-        return select(selected_columns) \
+        return select(*selected_columns) \
             .select_from(from_clause)
 
     def create_vehicles_hebrew_view(self):
@@ -748,7 +748,7 @@ class Views(object):
                        Vehicle.accident_year == VehicleDamage.year,
                        Vehicle.provider_code == VehicleDamage.provider_code),
                   isouter=True)
-        return select(selected_columns) \
+        return select(*selected_columns) \
             .select_from(from_clause)
 
     def create_vehicles_markers_hebrew_view(self):
@@ -879,7 +879,7 @@ class Views(object):
                   and_(VehiclesView.provider_code == AccidentMarkerView.provider_code,
                        VehiclesView.accident_id == AccidentMarkerView.id,
                        VehiclesView.accident_year == AccidentMarkerView.accident_year))
-        return select(selected_columns) \
+        return select(*selected_columns) \
             .select_from(from_clause)
 
 VIEWS = Views()

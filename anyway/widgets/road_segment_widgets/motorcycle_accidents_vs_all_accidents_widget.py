@@ -11,7 +11,7 @@ from anyway.widgets.widget_utils import get_query
 from anyway.models import InvolvedMarkerView
 from anyway.vehicle_type import VehicleCategory
 from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 from typing import Dict
 from flask_babel import _
 
@@ -63,32 +63,32 @@ class MotorcycleAccidentsVsAllAccidentsWidget(RoadSegmentWidget):
                 ),
             else_=literal_column(f"'{vehicle_other}'"),
         ).label(vehicle_label)
-
-        query = get_query(
-            table_obj=InvolvedMarkerView, filters={}, start_time=start_time, end_time=end_time
-        )
-
-        num_accidents_label = "num_of_accidents"
-        query = (
-            query.with_entities(
-                case_location,
-                case_vehicle,
-                func.count(distinct(InvolvedMarkerView.provider_and_id)).label(num_accidents_label),
+        with app.app_context():
+            query = get_query(
+                table_obj=InvolvedMarkerView, filters={}, start_time=start_time, end_time=end_time
             )
-            .filter(InvolvedMarkerView.road_type.in_(BE_CONST.NON_CITY_ROAD_TYPES))
-            .filter(
-                InvolvedMarkerView.accident_severity.in_(
-                    # pylint: disable=no-member
-                    [AccidentSeverity.FATAL.value, AccidentSeverity.SEVERE.value]
+
+            num_accidents_label = "num_of_accidents"
+            query = (
+                query.with_entities(
+                    case_location,
+                    case_vehicle,
+                    func.count(distinct(InvolvedMarkerView.provider_and_id)).label(num_accidents_label),
                 )
+                .filter(InvolvedMarkerView.road_type.in_(BE_CONST.NON_CITY_ROAD_TYPES))
+                .filter(
+                    InvolvedMarkerView.accident_severity.in_(
+                        # pylint: disable=no-member
+                        [AccidentSeverity.FATAL.value, AccidentSeverity.SEVERE.value]
+                    )
+                )
+                .group_by(location_label, vehicle_label)
+                .order_by(desc(num_accidents_label))
             )
-            .group_by(location_label, vehicle_label)
-            .order_by(desc(num_accidents_label))
-        )
-        # pylint: disable=no-member
-        results = pd.read_sql_query(query.statement, db.get_engine()).to_dict(
-            orient="records"
-        )  # pylint: disable=no-member
+            # pylint: disable=no-member
+            results = pd.read_sql_query(query.statement, db.get_engine()).to_dict(
+                orient="records"
+            )  # pylint: disable=no-member
 
         counter_road_motorcycle = 0
         counter_other_motorcycle = 0

@@ -7,7 +7,8 @@ import re
 from datetime import datetime
 from anyway.models import RegisteredVehicle, DeprecatedCity
 from anyway.utilities import time_delta, CsvReader, ImporterUI, truncate_tables, decode_hebrew
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
+import sqlalchemy as sa
 
 
 COLUMN_CITY_NAME_ENG = 0
@@ -71,8 +72,8 @@ class DatastoreImporter(object):
             else:
                 self.header_row(row)
             row_count += 1
-
-        db.session.bulk_insert_mappings(RegisteredVehicle, inserts)
+        with app.app_context():
+            db.session.bulk_insert_mappings(RegisteredVehicle, inserts)
         return total
 
     @staticmethod
@@ -131,11 +132,14 @@ def main(specific_folder, delete_all, path):
     started = datetime.now()
     for fname in dir_files:
         total += importer.import_file(fname)
-
-    db.session.commit()
-    db.engine.execute(
-        "UPDATE {0} SET city_id = (SELECT id FROM {1} WHERE {0}.search_name = {1}.search_heb) WHERE city_id IS NULL".format(
-            RegisteredVehicle.__tablename__, DeprecatedCity.__tablename__
-        )
-    )
-    logging.info("Total: {0} items in {1}".format(total, time_delta(started)))
+    with app.app_context():
+        db.session.commit()
+        with db.get_engine().begin() as conn:
+            conn.execute(
+                sa.text(
+                    "UPDATE {0} SET city_id = (SELECT id FROM {1} WHERE {0}.search_name = {1}.search_heb) WHERE city_id IS NULL".format(
+                        RegisteredVehicle.__tablename__, DeprecatedCity.__tablename__
+                    )
+                )
+            )
+        logging.info("Total: {0} items in {1}".format(total, time_delta(started)))

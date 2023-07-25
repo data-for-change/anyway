@@ -2,7 +2,7 @@
 from anyway.models import CasualtiesCosts
 import pandas as pd
 import logging
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 
 
 def _iter_rows(filename):
@@ -21,14 +21,15 @@ def _iter_rows(filename):
 
 
 def parse(filename):
-    for row in _iter_rows(filename):
-        current_report = (
-            db.session.query(CasualtiesCosts).filter(CasualtiesCosts.id == row["id"]).all()
-        )
-        if not current_report:
-            logging.debug(f"adding line {row}")
-            db.session.bulk_insert_mappings(CasualtiesCosts, [row])
-        else:
-            logging.debug(f"updating line {row}")
-            db.session.bulk_update_mappings(CasualtiesCosts, [row])
-        db.session.commit()
+    with app.app_context():
+        for row in _iter_rows(filename):
+            current_report = (
+                db.session.query(CasualtiesCosts).filter(CasualtiesCosts.id == row["id"]).all()
+            )
+            if not current_report:
+                logging.debug(f"adding line {row}")
+                db.session.bulk_insert_mappings(CasualtiesCosts, [row])
+            else:
+                logging.debug(f"updating line {row}")
+                db.session.bulk_update_mappings(CasualtiesCosts, [row])
+            db.session.commit()

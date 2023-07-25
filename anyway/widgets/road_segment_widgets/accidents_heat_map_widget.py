@@ -10,7 +10,7 @@ from anyway.widgets.widget_utils import get_query
 from anyway.models import AccidentMarkerView
 from anyway.widgets.widget import register
 from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 from sqlalchemy.sql import text
 
 @register
@@ -43,9 +43,10 @@ class AccidentsHeatMapWidget(RoadSegmentWidget):
             BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
             BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
         ]
-        query = get_query(AccidentMarkerView, filters, start_time, end_time)
-        query = query.with_entities(text("longitude"), text("latitude"))
-        df = pd.read_sql_query(query.statement, db.get_engine())
+        with app.app_context():
+            query = get_query(AccidentMarkerView, filters, start_time, end_time)
+            query = query.with_entities(text("longitude"), text("latitude"))
+            df = pd.read_sql_query(query.statement, db.get_engine())
         return df.to_dict(orient="records")  # pylint: disable=no-member
 
     @staticmethod

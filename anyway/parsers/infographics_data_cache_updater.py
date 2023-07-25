@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from sqlalchemy import not_
+import sqlalchemy as sa
 from anyway.models import (
     Base,
     InfographicsDataCache,
@@ -17,7 +18,7 @@ from anyway.models import (
 from typing import Dict, Iterable
 from anyway.constants import CONST
 from anyway.backend_constants import BE_CONST
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 from anyway.request_params import RequestParams
 import anyway.infographics_utils
 from anyway.widgets.widget import widgets_dict
@@ -42,12 +43,13 @@ ROAD_SEGMENT_CACHE_TABLES = {
 
 
 def is_in_cache(nf):
-    return (
-        len(CONST.INFOGRAPHICS_CACHE_YEARS_AGO)
-        == db.session.query(InfographicsDataCache)
-        .filter(InfographicsDataCache.news_flash_id == nf.get_id())
-        .count()
-    )
+    with app.app_context():
+        return (
+            len(CONST.INFOGRAPHICS_CACHE_YEARS_AGO)
+            == db.session.query(InfographicsDataCache)
+            .filter(InfographicsDataCache.news_flash_id == nf.get_id())
+            .count()
+        )
 
 
 # noinspection PyUnresolvedReferences
@@ -214,20 +216,22 @@ def copy_temp_into_cache(table: Dict[str, Base]):
     db.session.commit()
     start = datetime.now()
     with db.get_engine().begin() as conn:
-        conn.execute("lock table infographics_data_cache in exclusive mode")
+        conn.execute(sa.text("lock table infographics_data_cache in exclusive mode"))
         logging.debug(f"in transaction, after lock")
-        conn.execute(f"delete from {table[CACHE].__tablename__}")
+        conn.execute(sa.text(f"delete from {table[CACHE].__tablename__}"))
         logging.debug(f"in transaction, after delete")
         conn.execute(
-            f"insert into {table[CACHE].__tablename__} "
-            f"SELECT * from {table[TEMP].__tablename__}"
+            sa.text(
+                f"insert into {table[CACHE].__tablename__} "
+                f"SELECT * from {table[TEMP].__tablename__}"
+            )
         )
         logging.debug(f"in transaction, after insert into")
     logging.info(f"cache unavailable time: {str(datetime.now() - start)}")
     num_items_cache = db.session.query(table[CACHE]).count()
     num_items_temp = db.session.query(table[TEMP]).count()
     logging.debug(f"num items in cache: {num_items_cache}, temp:{num_items_temp}")
-    db.session.execute(f"truncate table {table[TEMP].__tablename__}")
+    db.session.execute(sa.text(f"truncate table {table[TEMP].__tablename__}"))
     db.session.commit()
     num_items_cache = db.session.query(table[CACHE]).count()
     num_items_temp = db.session.query(table[TEMP]).count()

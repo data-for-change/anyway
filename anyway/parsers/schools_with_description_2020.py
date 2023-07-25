@@ -5,6 +5,7 @@ import math
 import numpy as np
 import pandas as pd
 from flask_sqlalchemy import SQLAlchemy
+import sqlalchemy as sa
 
 from ..models import SchoolWithDescription2020
 from ..utilities import init_flask, time_delta, chunks, ItmToWGS84
@@ -123,7 +124,7 @@ def get_schools_with_description(schools_description_filepath, schools_coordinat
 
 def truncate_schools_with_description():
     curr_table = "schools_with_description2020"
-    sql_truncate = "TRUNCATE TABLE " + curr_table
+    sql_truncate = sa.text("TRUNCATE TABLE " + curr_table)
     db.session.execute(sql_truncate)
     db.session.commit()
     logging.info("Truncated table " + curr_table)
@@ -158,7 +159,9 @@ def parse(schools_description_filepath, schools_coordinates_filepath, batch_size
         batch_size=batch_size,
     )
     db.session.execute(
-        "UPDATE schools_with_description SET geom = ST_SetSRID(ST_MakePoint(longitude,latitude),4326)\
+        sa.text(
+            "UPDATE schools_with_description SET geom = ST_SetSRID(ST_MakePoint(longitude,latitude),4326)\
                            WHERE geom IS NULL;"
+        )
     )
     logging.info("Total: {0} schools in {1}".format(total, time_delta(started)))

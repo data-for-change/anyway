@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from anyway.models import EmbeddedReports
 import pandas as pd
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 
 
 def _iter_rows(filename):
@@ -18,14 +18,15 @@ def _iter_rows(filename):
 
 
 def parse(filename):
-    for row in _iter_rows(filename):
-        current_report = (
-            db.session.query(EmbeddedReports)
-            .filter(EmbeddedReports.report_name_english == row["report_name_english"])
-            .all()
-        )
-        if not current_report:
-            db.session.bulk_insert_mappings(EmbeddedReports, [row])
-        else:
-            db.session.bulk_update_mappings(EmbeddedReports, [row])
-        db.session.commit()
+    with app.app_context():
+        for row in _iter_rows(filename):
+            current_report = (
+                db.session.query(EmbeddedReports)
+                .filter(EmbeddedReports.report_name_english == row["report_name_english"])
+                .all()
+            )
+            if not current_report:
+                db.session.bulk_insert_mappings(EmbeddedReports, [row])
+            else:
+                db.session.bulk_update_mappings(EmbeddedReports, [row])
+            db.session.commit()

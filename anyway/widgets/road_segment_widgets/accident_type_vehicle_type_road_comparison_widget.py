@@ -6,7 +6,7 @@ from flask_babel import _
 from sqlalchemy import func, distinct, desc
 
 from anyway.request_params import RequestParams
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 from anyway.widgets.widget_utils import get_query, run_query
 from anyway.models import VehicleMarkerView, AccidentType
 from anyway.vehicle_type import VehicleCategory
@@ -84,20 +84,21 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(RoadSegmentWidget):
         num_accidents_label: str,
         vehicle_types: List[int],
     ) -> db.session.query:
-        return (
-            get_query(
-                table_obj=VehicleMarkerView,
-                start_time=start_time,
-                end_time=end_time,
-                filters={VehicleMarkerView.vehicle_type.name: vehicle_types},
+        with app.app_context():
+            return (
+                get_query(
+                    table_obj=VehicleMarkerView,
+                    start_time=start_time,
+                    end_time=end_time,
+                    filters={VehicleMarkerView.vehicle_type.name: vehicle_types},
+                )
+                .with_entities(
+                    VehicleMarkerView.accident_type,
+                    func.count(distinct(VehicleMarkerView.provider_and_id)).label(num_accidents_label),
+                )
+                .group_by(VehicleMarkerView.accident_type)
+                .order_by(desc(num_accidents_label))
             )
-            .with_entities(
-                VehicleMarkerView.accident_type,
-                func.count(distinct(VehicleMarkerView.provider_and_id)).label(num_accidents_label),
-            )
-            .group_by(VehicleMarkerView.accident_type)
-            .order_by(desc(num_accidents_label))
-        )
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:

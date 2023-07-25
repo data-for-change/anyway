@@ -15,7 +15,7 @@ from anyway.backend_constants import BE_CONST
 from anyway.models import SchoolWithDescription2020, InvolvedMarkerView
 
 from anyway.utilities import time_delta
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 
 
 class SchoolsJsonFile(Enum):
@@ -72,30 +72,31 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
     pol_str_for_google_csv = "POLYGON(({0} {1},{0} {3},{2} {3},{2} {1},{0} {1}))".format(
         round(baseX, 6), round(baseY, 6), round(distanceX, 6), round(distanceY, 6)
     )
-    query_obj = (
-        db.session.query(InvolvedMarkerView)
-        .filter(InvolvedMarkerView.geom.intersects(pol_str))
-        .filter(
-            or_(
-                (InvolvedMarkerView.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_1_CODE),
-                (InvolvedMarkerView.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_3_CODE),
+    with app.app_context():
+        query_obj = (
+            db.session.query(InvolvedMarkerView)
+            .filter(InvolvedMarkerView.geom.intersects(pol_str))
+            .filter(
+                or_(
+                    (InvolvedMarkerView.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_1_CODE),
+                    (InvolvedMarkerView.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_3_CODE),
+                )
             )
-        )
-        .filter(InvolvedMarkerView.accident_timestamp >= start_date)
-        .filter(InvolvedMarkerView.accident_timestamp <= end_date)
-        .filter(InvolvedMarkerView.location_accuracy.in_(LOCATION_ACCURACY_PRECISE_LIST))
-        .filter(InvolvedMarkerView.age_group.in_(AGE_GROUPS))
-        .filter(InvolvedMarkerView.injury_severity.in_(INJURY_SEVERITIES))
-        .filter(
-            or_(
-                (InvolvedMarkerView.injured_type.in_(INJURED_TYPES)),
-                (InvolvedMarkerView.involve_vehicle_type.in_(VEHICLE_TYPES)),
+            .filter(InvolvedMarkerView.accident_timestamp >= start_date)
+            .filter(InvolvedMarkerView.accident_timestamp <= end_date)
+            .filter(InvolvedMarkerView.location_accuracy.in_(LOCATION_ACCURACY_PRECISE_LIST))
+            .filter(InvolvedMarkerView.age_group.in_(AGE_GROUPS))
+            .filter(InvolvedMarkerView.injury_severity.in_(INJURY_SEVERITIES))
+            .filter(
+                or_(
+                    (InvolvedMarkerView.injured_type.in_(INJURED_TYPES)),
+                    (InvolvedMarkerView.involve_vehicle_type.in_(VEHICLE_TYPES)),
+                )
             )
+            .filter(InvolvedMarkerView.accident_hour_raw.between(SEVEN_AM_RAW, SEVEN_PM_RAW))
         )
-        .filter(InvolvedMarkerView.accident_hour_raw.between(SEVEN_AM_RAW, SEVEN_PM_RAW))
-    )
 
-    df = pd.read_sql_query(query_obj.statement, db.get_engine())
+        df = pd.read_sql_query(query_obj.statement, db.get_engine())
 
     if LOCATION_ACCURACY_PRECISE:
         location_accurate = 1
@@ -136,24 +137,25 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
 
 
 def calculate_injured_around_schools(start_date, end_date, distance):
-    schools = (
-        db.session.query(SchoolWithDescription2020)
-        .filter(
-            not_(
-                and_(
-                    SchoolWithDescription2020.latitude == 0,
-                    SchoolWithDescription2020.longitude == 0,
-                )
-            ),
-            not_(
-                and_(
-                    SchoolWithDescription2020.latitude == None,
-                    SchoolWithDescription2020.longitude == None,
-                )
-            ),
+    with app.app_context():
+        schools = (
+            db.session.query(SchoolWithDescription2020)
+            .filter(
+                not_(
+                    and_(
+                        SchoolWithDescription2020.latitude == 0,
+                        SchoolWithDescription2020.longitude == 0,
+                    )
+                ),
+                not_(
+                    and_(
+                        SchoolWithDescription2020.latitude == None,
+                        SchoolWithDescription2020.longitude == None,
+                    )
+                ),
+            )
+            .all()
         )
-        .all()
-    )
     if os.path.exists(ALL_SCHOOLS_DATA_DIR):
         shutil.rmtree(ALL_SCHOOLS_DATA_DIR)
     os.mkdir(ALL_SCHOOLS_DATA_DIR)

@@ -37,31 +37,33 @@ def extract_road_number(location):
 
 def get_road_segment_by_name(road_segment_name: str) -> RoadSegments:
     try:
-        from anyway.app_and_db import db
+        from anyway.app_and_db import db, app
     except ModuleNotFoundError:
         pass  # TODO: maybe throw exception?
     from_name = road_segment_name.split(" - ")[0].strip()
     to_name = road_segment_name.split(" - ")[1].strip()
-    query_obj = (
-        db.session.query(RoadSegments)
-        .filter(RoadSegments.from_name == from_name)
-        .filter(RoadSegments.to_name == to_name)
-    )
-    segment = query_obj.first()
+    with app.app_context():
+        query_obj = (
+            db.session.query(RoadSegments)
+            .filter(RoadSegments.from_name == from_name)
+            .filter(RoadSegments.to_name == to_name)
+        )
+        segment = query_obj.first()
     return segment
 
 
 def get_road_segment_by_name_and_road(road_segment_name: str, road: int) -> RoadSegments:
     try:
-        from anyway.app_and_db import db
+        from anyway.app_and_db import db, app
     except ModuleNotFoundError:
         pass  # TODO: maybe throw exception?
-    segments = db.session.query(RoadSegments).filter(RoadSegments.road == road).all()
-    for segment in segments:
-        if road_segment_name.startswith(segment.from_name) and road_segment_name.endswith(
-            segment.to_name
-        ):
-            return segment
+    with app.app_context():
+        segments = db.session.query(RoadSegments).filter(RoadSegments.road == road).all()
+        for segment in segments:
+            if road_segment_name.startswith(segment.from_name) and road_segment_name.endswith(
+                segment.to_name
+            ):
+                return segment
     err_msg = f"get_road_segment_by_name_and_road:{road_segment_name},{road}: not found"
     logging.error(err_msg)
     raise ValueError(err_msg)
@@ -69,15 +71,18 @@ def get_road_segment_by_name_and_road(road_segment_name: str, road: int) -> Road
 
 def get_road_segment_name_and_number(road_segment_id) -> (float, str):
     try:
-        from anyway.app_and_db import db
+        from anyway.app_and_db import db, app
     except ModuleNotFoundError:
         pass  # TODO: maybe throw exception?
-    query_obj = db.session.query(RoadSegments).filter(RoadSegments.segment_id == road_segment_id)
-    segment = query_obj.first()
-    from_name = segment.from_name  # pylint: disable=maybe-no-member
-    to_name = segment.to_name  # pylint: disable=maybe-no-member
-    road_segment_name = " - ".join([from_name, to_name])
-    road = segment.road  # pylint: disable=maybe-no-member
+    with app.app_context():
+        query_obj = db.session.query(RoadSegments).filter(
+            RoadSegments.segment_id == road_segment_id
+        )
+        segment = query_obj.first()
+        from_name = segment.from_name  # pylint: disable=maybe-no-member
+        to_name = segment.to_name  # pylint: disable=maybe-no-member
+        road_segment_name = " - ".join([from_name, to_name])
+        road = segment.road  # pylint: disable=maybe-no-member
     return float(road), road_segment_name
 
 
@@ -106,7 +111,7 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
         return rad2deg(lat_min), rad2deg(lon_min), rad2deg(lat_max), rad2deg(lon_max)
 
     try:
-        from anyway.app_and_db import db
+        from anyway.app_and_db import db, app
     except ModuleNotFoundError:
         pass  # TODO: maybe throw exception?
 
@@ -121,26 +126,27 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
     )
 
     cutoff_year = (date.today()).year - 6
-    query_obj = (
-        db.session.query(AccidentMarkerView)
-        .filter(AccidentMarkerView.geom.intersects(polygon_str))
-        .filter(AccidentMarkerView.accident_year >= cutoff_year)
-        .filter(AccidentMarkerView.provider_code != BE_CONST.RSA_PROVIDER_CODE)
-        .filter(not_(AccidentMarkerView.road_segment_name == None))
-        .options(
-            load_only(
-                "road1",
-                "road_segment_id",
-                "road_segment_name",
-                "latitude",
-                "longitude",
-                "geom",
-                "accident_year",
-                "provider_code",
+    with app.app_context():
+        query_obj = (
+            db.session.query(AccidentMarkerView)
+            .filter(AccidentMarkerView.geom.intersects(polygon_str))
+            .filter(AccidentMarkerView.accident_year >= cutoff_year)
+            .filter(AccidentMarkerView.provider_code != BE_CONST.RSA_PROVIDER_CODE)
+            .filter(not_(AccidentMarkerView.road_segment_name == None))
+            .options(
+                load_only(
+                    "road1",
+                    "road_segment_id",
+                    "road_segment_name",
+                    "latitude",
+                    "longitude",
+                    "geom",
+                    "accident_year",
+                    "provider_code",
+                )
             )
         )
-    )
-    markers = pd.read_sql_query(query_obj.statement, db.get_engine())
+        markers = pd.read_sql_query(query_obj.statement, db.get_engine())
 
     geod = Geodesic.WGS84
     markers["geohash"] = markers.apply(  # pylint: disable=maybe-no-member
@@ -189,7 +195,10 @@ def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):
     # READ MARKERS FROM DB
     geod = Geodesic.WGS84
     relevant_fields = resolution_dict[resolution]
-    markers = db.get_markers_for_location_extraction()
+    from anyway.app_and_db import app
+
+    with app.app_context():
+        markers = db.get_markers_for_location_extraction()
     markers["geohash"] = markers.apply(
         lambda x: geohash.encode(x["latitude"], x["longitude"], precision=4), axis=1
     )

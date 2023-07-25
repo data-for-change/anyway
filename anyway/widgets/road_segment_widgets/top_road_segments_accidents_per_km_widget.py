@@ -12,7 +12,7 @@ from anyway.widgets.widget import register
 from anyway.widgets.widget_utils import get_query
 from anyway.models import AccidentMarkerView
 from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 
 @register
 class TopRoadSegmentsAccidentsPerKmWidget(RoadSegmentWidget):
@@ -41,35 +41,35 @@ class TopRoadSegmentsAccidentsPerKmWidget(RoadSegmentWidget):
             start_time=start_time,
             end_time=end_time,
         )
-
         try:
-            query = (
-                query.with_entities(
-                    AccidentMarkerView.road_segment_name,
-                    AccidentMarkerView.road_segment_length_km.label("segment_length"),
-                    cast(
-                        (
-                            func.count(AccidentMarkerView.id)
-                            / AccidentMarkerView.road_segment_length_km
-                        ),
-                        Numeric(10, 4),
-                    ).label("accidents_per_km"),
-                    func.count(AccidentMarkerView.id).label("total_accidents"),
-                )
-                .filter(AccidentMarkerView.road_segment_name.isnot(None))
-                .filter(
-                    AccidentMarkerView.accident_severity.in_(
-                        [AccidentSeverity.FATAL.value, AccidentSeverity.SEVERE.value]
+            with app.app_context():
+                query = (
+                    query.with_entities(
+                        AccidentMarkerView.road_segment_name,
+                        AccidentMarkerView.road_segment_length_km.label("segment_length"),
+                        cast(
+                            (
+                                func.count(AccidentMarkerView.id)
+                                / AccidentMarkerView.road_segment_length_km
+                            ),
+                            Numeric(10, 4),
+                        ).label("accidents_per_km"),
+                        func.count(AccidentMarkerView.id).label("total_accidents"),
                     )
+                    .filter(AccidentMarkerView.road_segment_name.isnot(None))
+                    .filter(
+                        AccidentMarkerView.accident_severity.in_(
+                            [AccidentSeverity.FATAL.value, AccidentSeverity.SEVERE.value]
+                        )
+                    )
+                    .group_by(
+                        AccidentMarkerView.road_segment_name, AccidentMarkerView.road_segment_length_km
+                    )
+                    .order_by(desc("accidents_per_km"))
+                    .limit(limit)
                 )
-                .group_by(
-                    AccidentMarkerView.road_segment_name, AccidentMarkerView.road_segment_length_km
-                )
-                .order_by(desc("accidents_per_km"))
-                .limit(limit)
-            )
 
-            result = pd.read_sql_query(query.statement, db.get_engine())
+                result = pd.read_sql_query(query.statement, db.get_engine())
             return result.to_dict(orient="records")  # pylint: disable=no-member
 
         except Exception as exception:

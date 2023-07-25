@@ -80,8 +80,9 @@ def update(source, news_flash_id):
 @update_news_flash.command()
 def remove_duplicate_news_flash_rows():
     from anyway.parsers import news_flash_db_adapter
-
-    news_flash_db_adapter.init_db().remove_duplicate_rows()
+    from anyway.app_and_db import app
+    with app.app_context():
+        news_flash_db_adapter.init_db().remove_duplicate_rows()
 
 
 @cli.group()
@@ -387,7 +388,7 @@ def truncate_cbs(path):
 @click.argument("identifiers", nargs=-1)
 def load_discussions(identifiers):
     from anyway.models import DiscussionMarker
-    from anyway.app_and_db import db
+    from anyway.app_and_db import db, app
 
     identifiers = identifiers or sys.stdin
 
@@ -407,12 +408,14 @@ def load_discussions(identifiers):
             }
         )
         try:
-            db.session.add(marker)
-            db.session.commit()
-            logging.info(f"Added: {identifier}")
+            with app.app_context():
+                db.session.add(marker)
+                db.session.commit()
+                logging.info(f"Added: {identifier}")
         except Exception as e:
-            db.session.rollback()
-            logging.warning(f"Failed: {identifier} {e}")
+            with app.app_context():
+                db.session.rollback()
+                logging.warning(f"Failed: {identifier} {e}")
 
 
 @cli.group()

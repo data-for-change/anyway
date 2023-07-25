@@ -10,6 +10,7 @@ from anyway.parsers import rss_sites, twitter, location_extraction
 from anyway.parsers.news_flash_classifiers import classify_tweets, classify_rss
 from anyway import secrets
 from anyway.parsers.news_flash_db_adapter import init_db
+from anyway.app_and_db import app
 from anyway.models import NewsFlash
 from anyway.parsers import timezones
 from anyway.infographics_utils import is_news_flash_resolution_supported
@@ -98,9 +99,10 @@ def test_scrape_ynet():
 
 def test_sanity_get_latest_date():
     db = init_db()
-    db.get_latest_date_of_source("ynet")
-    db.get_latest_date_of_source("walla")
-    db.get_latest_date_of_source("twitter")
+    with app.app_context():
+        db.get_latest_date_of_source("ynet")
+        db.get_latest_date_of_source("walla")
+        db.get_latest_date_of_source("twitter")
 
 
 @pytest.mark.slow
@@ -249,6 +251,7 @@ def test_nan_becomes_none_before_insertion(monkeypatch):
     db_mock = MagicMock()
     monkeypatch.setattr('anyway.parsers.news_flash_db_adapter.infographics_data_cache_updater', MagicMock())
     adapter = DBAdapter(db=db_mock)
-    adapter.insert_new_newsflash(newsflash)
+    with app.app_context():
+        adapter.insert_new_newsflash(newsflash)
     assert newsflash.road1 is None
         

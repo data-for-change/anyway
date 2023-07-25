@@ -12,6 +12,7 @@ from functools import partial
 from urllib.parse import urlparse
 from sqlalchemy import func, or_
 from sqlalchemy.sql import select
+import sqlalchemy as sa
 
 import phonenumbers
 from dateutil.relativedelta import relativedelta
@@ -174,11 +175,11 @@ def row_to_dict(row):
 
 
 def fetch_first_and_every_nth_value_for_column(conn, column_to_fetch, n):
-    sub_query = select([])\
+    sub_query = select()\
         .column(column_to_fetch)\
         .column(func.row_number().over(order_by=column_to_fetch).label("row_number"))\
         .alias()
-    select_query = select([sub_query]) \
+    select_query = select(sub_query) \
         .where(or_(func.mod(sub_query.c.row_number, n) == 0,
                    sub_query.c.row_number == 1))
     ids_and_row_numbers = conn.execute(select_query).fetchall()
@@ -188,15 +189,17 @@ def fetch_first_and_every_nth_value_for_column(conn, column_to_fetch, n):
 
 def truncate_tables(db, tables):
     logging.info("Deleting tables: " + ", ".join(table.__name__ for table in tables))
-    for table in tables:
-        db.session.query(table).delete()
-        db.session.commit()
+    from anyway.app_and_db import app
+    with app.app_context():
+        for table in tables:
+            db.session.query(table).delete()
+            db.session.commit()
 
 
 def delete_all_rows_from_table(conn, table):
     table_name = table.__tablename__
     logging.info("Deleting all rows from table " + table_name)
-    conn.execute("DELETE FROM " + table_name)
+    conn.execute(sa.text("DELETE FROM " + table_name))
 
 
 def split_query_to_chunks_by_column(base_select, column_to_chunk_by, chunk_size, conn):

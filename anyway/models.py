@@ -49,7 +49,7 @@ from anyway.database import Base
 from anyway.utilities import decode_hebrew
 
 try:
-    from anyway.app_and_db import db
+    from anyway.app_and_db import db, app
 except ModuleNotFoundError:
     pass
 
@@ -333,15 +333,16 @@ class AccidentMarker(MarkerMixin, Base):
 
     @staticmethod
     def get_latest_marker_created_date():
-        latest_created_date = (
-            db.session.query(func.max(AccidentMarker.created))
-            .filter(
-                AccidentMarker.provider_code.in_(
-                    [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
+        with app.app_context():
+            latest_created_date = (
+                db.session.query(func.max(AccidentMarker.created))
+                .filter(
+                    AccidentMarker.provider_code.in_(
+                        [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
+                    )
                 )
+                .first()
             )
-            .first()
-        )
 
         if latest_created_date is None:
             return None
@@ -422,278 +423,280 @@ class AccidentMarker(MarkerMixin, Base):
     def bounding_box_query(
         is_thin=False, yield_per=None, involved_and_vehicles=False, query_entities=None, **kwargs
     ):
-        approx = kwargs.get("approx", True)
-        accurate = kwargs.get("accurate", True)
-        page = kwargs.get("page")
-        per_page = kwargs.get("per_page")
+        with app.app_context():
+            approx = kwargs.get("approx", True)
+            accurate = kwargs.get("accurate", True)
+            page = kwargs.get("page")
+            per_page = kwargs.get("per_page")
 
-        if not kwargs.get("show_markers", True):
-            return MarkerResult(
-                accident_markers=db.session.query(AccidentMarker).filter(sql.false()),
-                rsa_markers=db.session.query(AccidentMarker).filter(sql.false()),
-                total_records=0,
+            if not kwargs.get("show_markers", True):
+                with app.app_context():
+                    return MarkerResult(
+                        accident_markers=db.session.query(AccidentMarker).filter(sql.false()),
+                        rsa_markers=db.session.query(AccidentMarker).filter(sql.false()),
+                        total_records=0,
+                    )
+
+            sw_lat = float(kwargs["sw_lat"])
+            sw_lng = float(kwargs["sw_lng"])
+            ne_lat = float(kwargs["ne_lat"])
+            ne_lng = float(kwargs["ne_lng"])
+            polygon_str = "POLYGON(({0} {1},{0} {3},{2} {3},{2} {1},{0} {1}))".format(
+                sw_lng, sw_lat, ne_lng, ne_lat
             )
 
-        sw_lat = float(kwargs["sw_lat"])
-        sw_lng = float(kwargs["sw_lng"])
-        ne_lat = float(kwargs["ne_lat"])
-        ne_lng = float(kwargs["ne_lng"])
-        polygon_str = "POLYGON(({0} {1},{0} {3},{2} {3},{2} {1},{0} {1}))".format(
-            sw_lng, sw_lat, ne_lng, ne_lat
-        )
-
-        if query_entities is not None:
-            markers = (
-                db.session.query(AccidentMarker)
-                .with_entities(*query_entities)
-                .filter(AccidentMarker.geom.intersects(polygon_str))
-                .filter(AccidentMarker.created >= kwargs["start_date"])
-                .filter(AccidentMarker.created <= kwargs["end_date"])
-                .filter(AccidentMarker.provider_code != BE_CONST.RSA_PROVIDER_CODE)
-                .order_by(desc(AccidentMarker.created))
-            )
-
-            rsa_markers = (
-                db.session.query(AccidentMarker)
-                .with_entities(*query_entities)
-                .filter(AccidentMarker.geom.intersects(polygon_str))
-                .filter(AccidentMarker.created >= kwargs["start_date"])
-                .filter(AccidentMarker.created <= kwargs["end_date"])
-                .filter(AccidentMarker.provider_code == BE_CONST.RSA_PROVIDER_CODE)
-                .order_by(desc(AccidentMarker.created))
-            )
-        else:
-            markers = (
-                db.session.query(AccidentMarker)
-                .filter(AccidentMarker.geom.intersects(polygon_str))
-                .filter(AccidentMarker.created >= kwargs["start_date"])
-                .filter(AccidentMarker.created <= kwargs["end_date"])
-                .filter(AccidentMarker.provider_code != BE_CONST.RSA_PROVIDER_CODE)
-                .order_by(desc(AccidentMarker.created))
-            )
-
-            rsa_markers = (
-                db.session.query(AccidentMarker)
-                .filter(AccidentMarker.geom.intersects(polygon_str))
-                .filter(AccidentMarker.created >= kwargs["start_date"])
-                .filter(AccidentMarker.created <= kwargs["end_date"])
-                .filter(AccidentMarker.provider_code == BE_CONST.RSA_PROVIDER_CODE)
-                .order_by(desc(AccidentMarker.created))
-            )
-
-        if not kwargs["show_rsa"]:
-            rsa_markers = db.session.query(AccidentMarker).filter(sql.false())
-        if not kwargs["show_accidents"]:
-            markers = markers.filter(
-                and_(
-                    AccidentMarker.provider_code != BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
-                    AccidentMarker.provider_code != BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
-                    AccidentMarker.provider_code != BE_CONST.UNITED_HATZALA_CODE,
+            if query_entities is not None:
+                markers = (
+                    db.session.query(AccidentMarker)
+                    .with_entities(*query_entities)
+                    .filter(AccidentMarker.geom.intersects(polygon_str))
+                    .filter(AccidentMarker.created >= kwargs["start_date"])
+                    .filter(AccidentMarker.created <= kwargs["end_date"])
+                    .filter(AccidentMarker.provider_code != BE_CONST.RSA_PROVIDER_CODE)
+                    .order_by(desc(AccidentMarker.created))
                 )
-            )
-        if yield_per:
-            markers = markers.yield_per(yield_per)
-        if accurate and not approx:
-            markers = markers.filter(AccidentMarker.location_accuracy == 1)
-        elif approx and not accurate:
-            markers = markers.filter(AccidentMarker.location_accuracy != 1)
-        elif not accurate and not approx:
-            return MarkerResult(
-                accident_markers=db.session.query(AccidentMarker).filter(sql.false()),
-                rsa_markers=db.session.query(AccidentMarker).filter(sql.false()),
-                total_records=0,
-            )
-        if not kwargs.get("show_fatal", True):
-            markers = markers.filter(AccidentMarker.accident_severity != 1)
-        if not kwargs.get("show_severe", True):
-            markers = markers.filter(AccidentMarker.accident_severity != 2)
-        if not kwargs.get("show_light", True):
-            markers = markers.filter(AccidentMarker.accident_severity != 3)
-        if kwargs.get("show_urban", 3) != 3:
-            if kwargs["show_urban"] == 2:
-                markers = markers.filter(AccidentMarker.road_type >= 1).filter(
-                    AccidentMarker.road_type <= 2
+                rsa_markers = (
+                    db.session.query(AccidentMarker)
+                    .with_entities(*query_entities)
+                    .filter(AccidentMarker.geom.intersects(polygon_str))
+                    .filter(AccidentMarker.created >= kwargs["start_date"])
+                    .filter(AccidentMarker.created <= kwargs["end_date"])
+                    .filter(AccidentMarker.provider_code == BE_CONST.RSA_PROVIDER_CODE)
+                    .order_by(desc(AccidentMarker.created))
                 )
-            elif kwargs["show_urban"] == 1:
-                markers = markers.filter(AccidentMarker.road_type >= 3).filter(
-                    AccidentMarker.road_type <= 4
+            else:
+                markers = (
+                    db.session.query(AccidentMarker)
+                    .filter(AccidentMarker.geom.intersects(polygon_str))
+                    .filter(AccidentMarker.created >= kwargs["start_date"])
+                    .filter(AccidentMarker.created <= kwargs["end_date"])
+                    .filter(AccidentMarker.provider_code != BE_CONST.RSA_PROVIDER_CODE)
+                    .order_by(desc(AccidentMarker.created))
+                )
+
+                rsa_markers = (
+                    db.session.query(AccidentMarker)
+                    .filter(AccidentMarker.geom.intersects(polygon_str))
+                    .filter(AccidentMarker.created >= kwargs["start_date"])
+                    .filter(AccidentMarker.created <= kwargs["end_date"])
+                    .filter(AccidentMarker.provider_code == BE_CONST.RSA_PROVIDER_CODE)
+                    .order_by(desc(AccidentMarker.created))
+                )
+
+            if not kwargs["show_rsa"]:
+                rsa_markers = db.session.query(AccidentMarker).filter(sql.false())
+            if not kwargs["show_accidents"]:
+                markers = markers.filter(
+                    and_(
+                        AccidentMarker.provider_code != BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
+                        AccidentMarker.provider_code != BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+                        AccidentMarker.provider_code != BE_CONST.UNITED_HATZALA_CODE,
+                    )
+                )
+            if yield_per:
+                markers = markers.yield_per(yield_per)
+            if accurate and not approx:
+                markers = markers.filter(AccidentMarker.location_accuracy == 1)
+            elif approx and not accurate:
+                markers = markers.filter(AccidentMarker.location_accuracy != 1)
+            elif not accurate and not approx:
+                return MarkerResult(
+                    accident_markers=db.session.query(AccidentMarker).filter(sql.false()),
+                    rsa_markers=db.session.query(AccidentMarker).filter(sql.false()),
+                    total_records=0,
+                )
+            if not kwargs.get("show_fatal", True):
+                markers = markers.filter(AccidentMarker.accident_severity != 1)
+            if not kwargs.get("show_severe", True):
+                markers = markers.filter(AccidentMarker.accident_severity != 2)
+            if not kwargs.get("show_light", True):
+                markers = markers.filter(AccidentMarker.accident_severity != 3)
+            if kwargs.get("show_urban", 3) != 3:
+                if kwargs["show_urban"] == 2:
+                    markers = markers.filter(AccidentMarker.road_type >= 1).filter(
+                        AccidentMarker.road_type <= 2
+                    )
+                elif kwargs["show_urban"] == 1:
+                    markers = markers.filter(AccidentMarker.road_type >= 3).filter(
+                        AccidentMarker.road_type <= 4
+                    )
+                else:
+                    return MarkerResult(
+                        accident_markers=db.session.query(AccidentMarker).filter(sql.false()),
+                        rsa_markers=rsa_markers,
+                        total_records=None,
+                    )
+            if kwargs.get("show_intersection", 3) != 3:
+                if kwargs["show_intersection"] == 2:
+                    markers = markers.filter(AccidentMarker.road_type != 2).filter(
+                        AccidentMarker.road_type != 4
+                    )
+                elif kwargs["show_intersection"] == 1:
+                    markers = markers.filter(AccidentMarker.road_type != 1).filter(
+                        AccidentMarker.road_type != 3
+                    )
+                else:
+                    return MarkerResult(
+                        accident_markers=db.session.query(AccidentMarker).filter(sql.false()),
+                        rsa_markers=rsa_markers,
+                        total_records=None,
+                    )
+            if kwargs.get("show_lane", 3) != 3:
+                if kwargs["show_lane"] == 2:
+                    markers = markers.filter(AccidentMarker.one_lane >= 2).filter(
+                        AccidentMarker.one_lane <= 3
+                    )
+                elif kwargs["show_lane"] == 1:
+                    markers = markers.filter(AccidentMarker.one_lane == 1)
+                else:
+                    return MarkerResult(
+                        accident_markers=db.session.query(AccidentMarker).filter(sql.false()),
+                        rsa_markers=rsa_markers,
+                        total_records=None,
+                    )
+
+            if kwargs.get("show_day", 7) != 7:
+                markers = markers.filter(
+                    func.extract("dow", AccidentMarker.created) == kwargs["show_day"]
+                )
+            if kwargs.get("show_holiday", 0) != 0:
+                markers = markers.filter(AccidentMarker.day_type == kwargs["show_holiday"])
+
+            if kwargs.get("show_time", 24) != 24:
+                if kwargs["show_time"] == 25:  # Daylight (6-18)
+                    markers = markers.filter(func.extract("hour", AccidentMarker.created) >= 6).filter(
+                        func.extract("hour", AccidentMarker.created) < 18
+                    )
+                elif kwargs["show_time"] == 26:  # Darktime (18-6)
+                    markers = markers.filter(
+                        (func.extract("hour", AccidentMarker.created) >= 18)
+                        | (func.extract("hour", AccidentMarker.created) < 6)
+                    )
+                else:
+                    markers = markers.filter(
+                        func.extract("hour", AccidentMarker.created) >= kwargs["show_time"]
+                    ).filter(func.extract("hour", AccidentMarker.created) < kwargs["show_time"] + 6)
+            elif kwargs["start_time"] != 25 and kwargs["end_time"] != 25:
+                markers = markers.filter(
+                    func.extract("hour", AccidentMarker.created) >= kwargs["start_time"]
+                ).filter(func.extract("hour", AccidentMarker.created) < kwargs["end_time"])
+            if kwargs.get("weather", 0) != 0:
+                markers = markers.filter(AccidentMarker.weather == kwargs["weather"])
+            if kwargs.get("road", 0) != 0:
+                markers = markers.filter(AccidentMarker.road_shape == kwargs["road"])
+            if kwargs.get("separation", 0) != 0:
+                markers = markers.filter(AccidentMarker.multi_lane == kwargs["separation"])
+            if kwargs.get("surface", 0) != 0:
+                markers = markers.filter(AccidentMarker.road_surface == kwargs["surface"])
+            if kwargs.get("acctype", 0) != 0:
+                if kwargs["acctype"] <= 20:
+                    markers = markers.filter(AccidentMarker.accident_type == kwargs["acctype"])
+                elif kwargs["acctype"] == BE_CONST.BIKE_ACCIDENTS:
+                    markers = markers.filter(
+                        AccidentMarker.vehicles.any(Vehicle.vehicle_type == BE_VehicleType.BIKE.value)
+                    )
+            if kwargs.get("controlmeasure", 0) != 0:
+                markers = markers.filter(AccidentMarker.road_control == kwargs["controlmeasure"])
+            if kwargs.get("district", 0) != 0:
+                markers = markers.filter(AccidentMarker.police_unit == kwargs["district"])
+
+            if kwargs.get("case_type", 0) != 0:
+                markers = markers.filter(AccidentMarker.provider_code == kwargs["case_type"])
+
+            if is_thin:
+                markers = markers.options(load_only("id", "longitude", "latitude"))
+
+            if kwargs.get("age_groups"):
+                age_groups_list = kwargs.get("age_groups").split(",")
+                if len(age_groups_list) < (BE_CONST.AGE_GROUPS_NUMBER + 1):
+                    markers = markers.filter(
+                        AccidentMarker.involved.any(Involved.age_group.in_(age_groups_list))
+                    )
+            else:
+                markers = db.session.query(AccidentMarker).filter(sql.false())
+
+            if kwargs.get("light_transportation", False):
+                age_groups_list = kwargs.get("age_groups").split(",")
+                LOCATION_ACCURACY_PRECISE_LIST = [1, 3, 4]
+                markers = markers.filter(
+                    AccidentMarker.location_accuracy.in_(LOCATION_ACCURACY_PRECISE_LIST)
+                )
+                INJURED_TYPES = [1, 6, 7]
+                markers = markers.filter(
+                    or_(
+                        AccidentMarker.involved.any(
+                            and_(
+                                Involved.injured_type.in_(INJURED_TYPES),
+                                Involved.injury_severity >= 1,
+                                Involved.injury_severity <= 3,
+                                Involved.age_group.in_(age_groups_list),
+                            )
+                        ),
+                        AccidentMarker.involved.any(
+                            and_(
+                                Involved.vehicle_type == 15,
+                                Involved.injury_severity >= 1,
+                                Involved.injury_severity <= 3,
+                                Involved.age_group.in_(age_groups_list),
+                            )
+                        ),
+                        AccidentMarker.involved.any(
+                            and_(
+                                Involved.vehicle_type == 21,
+                                Involved.injury_severity >= 1,
+                                Involved.injury_severity <= 3,
+                                Involved.age_group.in_(age_groups_list),
+                            )
+                        ),
+                        AccidentMarker.involved.any(
+                            and_(
+                                Involved.vehicle_type == 23,
+                                Involved.injury_severity >= 1,
+                                Involved.injury_severity <= 3,
+                                Involved.age_group.in_(age_groups_list),
+                            )
+                        ),
+                    )
+                )
+
+            if page and per_page:
+                markers = markers.offset((page - 1) * per_page).limit(per_page)
+
+            if involved_and_vehicles:
+                fetch_markers = kwargs.get("fetch_markers", True)
+                fetch_vehicles = kwargs.get("fetch_vehicles", True)
+                fetch_involved = kwargs.get("fetch_involved", True)
+                markers_ids = [marker.id for marker in markers]
+                markers = None
+                vehicles = None
+                involved = None
+                if fetch_markers:
+                    markers = db.session.query(AccidentMarker).filter(
+                        AccidentMarker.id.in_(markers_ids)
+                    )
+                if fetch_vehicles:
+                    vehicles = db.session.query(Vehicle).filter(Vehicle.accident_id.in_(markers_ids))
+                if fetch_involved:
+                    involved = db.session.query(Involved).filter(Involved.accident_id.in_(markers_ids))
+                result = (
+                    markers.all() if markers is not None else [],
+                    vehicles.all() if vehicles is not None else [],
+                    involved.all() if involved is not None else [],
+                )
+                return MarkerResult(
+                    accident_markers=result,
+                    rsa_markers=db.session.query(AccidentMarker).filter(sql.false()),
+                    total_records=len(result),
                 )
             else:
                 return MarkerResult(
-                    accident_markers=db.session.query(AccidentMarker).filter(sql.false()),
-                    rsa_markers=rsa_markers,
-                    total_records=None,
+                    accident_markers=markers, rsa_markers=rsa_markers, total_records=None
                 )
-        if kwargs.get("show_intersection", 3) != 3:
-            if kwargs["show_intersection"] == 2:
-                markers = markers.filter(AccidentMarker.road_type != 2).filter(
-                    AccidentMarker.road_type != 4
-                )
-            elif kwargs["show_intersection"] == 1:
-                markers = markers.filter(AccidentMarker.road_type != 1).filter(
-                    AccidentMarker.road_type != 3
-                )
-            else:
-                return MarkerResult(
-                    accident_markers=db.session.query(AccidentMarker).filter(sql.false()),
-                    rsa_markers=rsa_markers,
-                    total_records=None,
-                )
-        if kwargs.get("show_lane", 3) != 3:
-            if kwargs["show_lane"] == 2:
-                markers = markers.filter(AccidentMarker.one_lane >= 2).filter(
-                    AccidentMarker.one_lane <= 3
-                )
-            elif kwargs["show_lane"] == 1:
-                markers = markers.filter(AccidentMarker.one_lane == 1)
-            else:
-                return MarkerResult(
-                    accident_markers=db.session.query(AccidentMarker).filter(sql.false()),
-                    rsa_markers=rsa_markers,
-                    total_records=None,
-                )
-
-        if kwargs.get("show_day", 7) != 7:
-            markers = markers.filter(
-                func.extract("dow", AccidentMarker.created) == kwargs["show_day"]
-            )
-        if kwargs.get("show_holiday", 0) != 0:
-            markers = markers.filter(AccidentMarker.day_type == kwargs["show_holiday"])
-
-        if kwargs.get("show_time", 24) != 24:
-            if kwargs["show_time"] == 25:  # Daylight (6-18)
-                markers = markers.filter(func.extract("hour", AccidentMarker.created) >= 6).filter(
-                    func.extract("hour", AccidentMarker.created) < 18
-                )
-            elif kwargs["show_time"] == 26:  # Darktime (18-6)
-                markers = markers.filter(
-                    (func.extract("hour", AccidentMarker.created) >= 18)
-                    | (func.extract("hour", AccidentMarker.created) < 6)
-                )
-            else:
-                markers = markers.filter(
-                    func.extract("hour", AccidentMarker.created) >= kwargs["show_time"]
-                ).filter(func.extract("hour", AccidentMarker.created) < kwargs["show_time"] + 6)
-        elif kwargs["start_time"] != 25 and kwargs["end_time"] != 25:
-            markers = markers.filter(
-                func.extract("hour", AccidentMarker.created) >= kwargs["start_time"]
-            ).filter(func.extract("hour", AccidentMarker.created) < kwargs["end_time"])
-        if kwargs.get("weather", 0) != 0:
-            markers = markers.filter(AccidentMarker.weather == kwargs["weather"])
-        if kwargs.get("road", 0) != 0:
-            markers = markers.filter(AccidentMarker.road_shape == kwargs["road"])
-        if kwargs.get("separation", 0) != 0:
-            markers = markers.filter(AccidentMarker.multi_lane == kwargs["separation"])
-        if kwargs.get("surface", 0) != 0:
-            markers = markers.filter(AccidentMarker.road_surface == kwargs["surface"])
-        if kwargs.get("acctype", 0) != 0:
-            if kwargs["acctype"] <= 20:
-                markers = markers.filter(AccidentMarker.accident_type == kwargs["acctype"])
-            elif kwargs["acctype"] == BE_CONST.BIKE_ACCIDENTS:
-                markers = markers.filter(
-                    AccidentMarker.vehicles.any(Vehicle.vehicle_type == BE_VehicleType.BIKE.value)
-                )
-        if kwargs.get("controlmeasure", 0) != 0:
-            markers = markers.filter(AccidentMarker.road_control == kwargs["controlmeasure"])
-        if kwargs.get("district", 0) != 0:
-            markers = markers.filter(AccidentMarker.police_unit == kwargs["district"])
-
-        if kwargs.get("case_type", 0) != 0:
-            markers = markers.filter(AccidentMarker.provider_code == kwargs["case_type"])
-
-        if is_thin:
-            markers = markers.options(load_only("id", "longitude", "latitude"))
-
-        if kwargs.get("age_groups"):
-            age_groups_list = kwargs.get("age_groups").split(",")
-            if len(age_groups_list) < (BE_CONST.AGE_GROUPS_NUMBER + 1):
-                markers = markers.filter(
-                    AccidentMarker.involved.any(Involved.age_group.in_(age_groups_list))
-                )
-        else:
-            markers = db.session.query(AccidentMarker).filter(sql.false())
-
-        if kwargs.get("light_transportation", False):
-            age_groups_list = kwargs.get("age_groups").split(",")
-            LOCATION_ACCURACY_PRECISE_LIST = [1, 3, 4]
-            markers = markers.filter(
-                AccidentMarker.location_accuracy.in_(LOCATION_ACCURACY_PRECISE_LIST)
-            )
-            INJURED_TYPES = [1, 6, 7]
-            markers = markers.filter(
-                or_(
-                    AccidentMarker.involved.any(
-                        and_(
-                            Involved.injured_type.in_(INJURED_TYPES),
-                            Involved.injury_severity >= 1,
-                            Involved.injury_severity <= 3,
-                            Involved.age_group.in_(age_groups_list),
-                        )
-                    ),
-                    AccidentMarker.involved.any(
-                        and_(
-                            Involved.vehicle_type == 15,
-                            Involved.injury_severity >= 1,
-                            Involved.injury_severity <= 3,
-                            Involved.age_group.in_(age_groups_list),
-                        )
-                    ),
-                    AccidentMarker.involved.any(
-                        and_(
-                            Involved.vehicle_type == 21,
-                            Involved.injury_severity >= 1,
-                            Involved.injury_severity <= 3,
-                            Involved.age_group.in_(age_groups_list),
-                        )
-                    ),
-                    AccidentMarker.involved.any(
-                        and_(
-                            Involved.vehicle_type == 23,
-                            Involved.injury_severity >= 1,
-                            Involved.injury_severity <= 3,
-                            Involved.age_group.in_(age_groups_list),
-                        )
-                    ),
-                )
-            )
-
-        if page and per_page:
-            markers = markers.offset((page - 1) * per_page).limit(per_page)
-
-        if involved_and_vehicles:
-            fetch_markers = kwargs.get("fetch_markers", True)
-            fetch_vehicles = kwargs.get("fetch_vehicles", True)
-            fetch_involved = kwargs.get("fetch_involved", True)
-            markers_ids = [marker.id for marker in markers]
-            markers = None
-            vehicles = None
-            involved = None
-            if fetch_markers:
-                markers = db.session.query(AccidentMarker).filter(
-                    AccidentMarker.id.in_(markers_ids)
-                )
-            if fetch_vehicles:
-                vehicles = db.session.query(Vehicle).filter(Vehicle.accident_id.in_(markers_ids))
-            if fetch_involved:
-                involved = db.session.query(Involved).filter(Involved.accident_id.in_(markers_ids))
-            result = (
-                markers.all() if markers is not None else [],
-                vehicles.all() if vehicles is not None else [],
-                involved.all() if involved is not None else [],
-            )
-            return MarkerResult(
-                accident_markers=result,
-                rsa_markers=db.session.query(AccidentMarker).filter(sql.false()),
-                total_records=len(result),
-            )
-        else:
-            return MarkerResult(
-                accident_markers=markers, rsa_markers=rsa_markers, total_records=None
-            )
 
     @staticmethod
     def get_marker(marker_id):
-        return db.session.query(AccidentMarker).filter_by(id=marker_id)
+        with app.app_context():
+            return db.session.query(AccidentMarker).filter_by(id=marker_id)
 
     @classmethod
     def parse(cls, data):
@@ -731,7 +734,8 @@ class DiscussionMarker(MarkerMixin, Base):
 
     @staticmethod
     def get_by_identifier(identifier):
-        return db.session.query(DiscussionMarker).filter_by(identifier=identifier)
+        with app.app_context():
+            return db.session.query(DiscussionMarker).filter_by(identifier=identifier)
 
     @classmethod
     def parse(cls, data):
@@ -749,17 +753,18 @@ class DiscussionMarker(MarkerMixin, Base):
 
     @staticmethod
     def bounding_box_query(ne_lat, ne_lng, sw_lat, sw_lng, show_discussions):
-        if not show_discussions:
-            return db.session.query(AccidentMarker).filter(sql.false())
-        markers = (
-            db.session.query(DiscussionMarker)
-            .filter(DiscussionMarker.longitude <= ne_lng)
-            .filter(DiscussionMarker.longitude >= sw_lng)
-            .filter(DiscussionMarker.latitude <= ne_lat)
-            .filter(DiscussionMarker.latitude >= sw_lat)
-            .order_by(desc(DiscussionMarker.created))
-        )
-        return markers
+        with app.app_context():
+            if not show_discussions:
+                return db.session.query(AccidentMarker).filter(sql.false())
+            markers = (
+                db.session.query(DiscussionMarker)
+                .filter(DiscussionMarker.longitude <= ne_lng)
+                .filter(DiscussionMarker.longitude >= sw_lng)
+                .filter(DiscussionMarker.latitude <= ne_lat)
+                .filter(DiscussionMarker.latitude >= sw_lat)
+                .order_by(desc(DiscussionMarker.created))
+            )
+            return markers
 
 
 class Involved(Base):
@@ -1044,27 +1049,30 @@ class City(CityFields, Base):
 
     @staticmethod
     def get_name_from_symbol(symbol: int) -> str:
-        res = db.session.query(City.heb_name).filter(City.yishuv_symbol == symbol).first()
-        if res is None:
-            raise ValueError(f"{symbol}: could not find city with that symbol")
-        return res.heb_name
+        with app.app_context():
+            res = db.session.query(City.heb_name).filter(City.yishuv_symbol == symbol).first()
+            if res is None:
+                raise ValueError(f"{symbol}: could not find city with that symbol")
+            return res.heb_name
 
     @staticmethod
     def get_symbol_from_name(name: str) -> int:
-        res: City = db.session.query(City.yishuv_symbol).filter(City.heb_name == name).first()
-        if res is None:
-            logging.error(f"City: no city with name:{name}.")
-            raise ValueError(f"City: no city with name:{name}.")
-        return res.yishuv_symbol
+        with app.app_context():
+            res: City = db.session.query(City.yishuv_symbol).filter(City.heb_name == name).first()
+            if res is None:
+                logging.error(f"City: no city with name:{name}.")
+                raise ValueError(f"City: no city with name:{name}.")
+            return res.yishuv_symbol
 
     @staticmethod
     def get_all_cities() -> List[dict]:
-        res: City = db.session.query(City.yishuv_symbol, City.heb_name).all()
-        if res is None:
-            logging.error(f"Failed to get cities.")
-            raise RuntimeError(f"When retrieving all cities")
-        res1 = [{"yishuv_symbol": c.yishuv_symbol, "yishuv_name": c.heb_name} for c in res]
-        return res1
+        with app.app_context():
+            res: City = db.session.query(City.yishuv_symbol, City.heb_name).all()
+            if res is None:
+                logging.error(f"Failed to get cities.")
+                raise RuntimeError(f"When retrieving all cities")
+            res1 = [{"yishuv_symbol": c.yishuv_symbol, "yishuv_name": c.heb_name} for c in res]
+            return res1
 
 
 class CityTemp(CityFields, Base):
@@ -1092,35 +1100,38 @@ class DeprecatedCity(Base):
 
     @staticmethod
     def get_name_from_symbol(symbol: int) -> str:
-        res = (
-            db.session.query(DeprecatedCity.search_heb)
-            .filter(DeprecatedCity.symbol_code == symbol)
-            .first()
-        )
-        if res is None:
-            raise ValueError(f"{symbol}: could not find city with that symbol")
-        return res.search_heb
+        with app.app_context():
+            res = (
+                db.session.query(DeprecatedCity.search_heb)
+                .filter(DeprecatedCity.symbol_code == symbol)
+                .first()
+            )
+            if res is None:
+                raise ValueError(f"{symbol}: could not find city with that symbol")
+            return res.search_heb
 
     @staticmethod
     def get_symbol_from_name(name: str) -> int:
-        res = (
-            db.session.query(DeprecatedCity.symbol_code)
-            .filter(DeprecatedCity.search_heb == name)
-            .first()
-        )
-        if res is None:
-            logging.error(f"DeprecatedCity: no city with name:{name}.")
-            raise ValueError(f"DeprecatedCity: no city with name:{name}.")
-        return res.symbol_code
+        with app.app_context():
+            res = (
+                db.session.query(DeprecatedCity.symbol_code)
+                .filter(DeprecatedCity.search_heb == name)
+                .first()
+            )
+            if res is None:
+                logging.error(f"DeprecatedCity: no city with name:{name}.")
+                raise ValueError(f"DeprecatedCity: no city with name:{name}.")
+            return res.symbol_code
 
     @staticmethod
     def get_all_cities() -> List[dict]:
-        res = db.session.query(DeprecatedCity.symbol_code, DeprecatedCity.search_heb).all()
-        if res is None:
-            logging.error(f"Failed to get cities.")
-            raise RuntimeError(f"When retrieving all cities")
-        res1 = [{"yishuv_symbol": c.symbol_code, "yishuv_name": c.search_heb} for c in res]
-        return res1
+        with app.app_context():
+            res = db.session.query(DeprecatedCity.symbol_code, DeprecatedCity.search_heb).all()
+            if res is None:
+                logging.error(f"Failed to get cities.")
+                raise RuntimeError(f"When retrieving all cities")
+            res1 = [{"yishuv_symbol": c.symbol_code, "yishuv_name": c.search_heb} for c in res]
+            return res1
 
     # Flask-Login integration
     def is_authenticated(self):
@@ -1152,39 +1163,42 @@ class Streets(Base):
 
     @staticmethod
     def get_street_name_by_street(yishuv_symbol: int, street: int) -> str:
-        res = (
-            db.session.query(Streets.street_hebrew)
-            .filter(Streets.yishuv_symbol == yishuv_symbol)
-            .filter(Streets.street == street)
-            .first()
-        )
-        if res is None:
-            raise ValueError(f"{street}: could not find street in yishuv:{yishuv_symbol}")
-        return res.street_hebrew
+        with app.app_context():
+            res = (
+                db.session.query(Streets.street_hebrew)
+                .filter(Streets.yishuv_symbol == yishuv_symbol)
+                .filter(Streets.street == street)
+                .first()
+            )
+            if res is None:
+                raise ValueError(f"{street}: could not find street in yishuv:{yishuv_symbol}")
+            return res.street_hebrew
 
     @staticmethod
     def get_street_by_street_name(yishuv_symbol: int, name: str) -> int:
-        res = (
-            db.session.query(Streets.street)
-            .filter(Streets.yishuv_symbol == yishuv_symbol)
-            .filter(Streets.street_hebrew == name)
-            .first()
-        )
-        if res is None:
-            raise ValueError(f"{name}: could not find street in yishuv:{yishuv_symbol}")
-        return res.street
+        with app.app_context():
+            res = (
+                db.session.query(Streets.street)
+                .filter(Streets.yishuv_symbol == yishuv_symbol)
+                .filter(Streets.street_hebrew == name)
+                .first()
+            )
+            if res is None:
+                raise ValueError(f"{name}: could not find street in yishuv:{yishuv_symbol}")
+            return res.street
 
     @staticmethod
     def get_streets_by_yishuv(yishuv_symbol: int) -> List[dict]:
-        res = (
-            db.session.query(Streets.street, Streets.street_hebrew)
-            .filter(Streets.yishuv_symbol == yishuv_symbol)
-            .all()
-        )
-        res1 = [{"street": s.street, "street_hebrew": s.street_hebrew} for s in res]
-        if res is None:
-            raise RuntimeError(f"When retrieving streets of {yishuv_symbol}")
-        return res1
+        with app.app_context():
+            res = (
+                db.session.query(Streets.street, Streets.street_hebrew)
+                .filter(Streets.yishuv_symbol == yishuv_symbol)
+                .all()
+            )
+            res1 = [{"street": s.street, "street_hebrew": s.street_hebrew} for s in res]
+            if res is None:
+                raise RuntimeError(f"When retrieving streets of {yishuv_symbol}")
+            return res1
 
 
 class SuburbanJunction(Base):
@@ -1197,42 +1211,46 @@ class SuburbanJunction(Base):
 
     @staticmethod
     def get_hebrew_name_from_id(non_urban_intersection: int) -> str:
-        res = db.session.query(SuburbanJunction.non_urban_intersection_hebrew).filter(
-            SuburbanJunction.non_urban_intersection == non_urban_intersection).first()
-        if res is None:
-            raise ValueError(f"{non_urban_intersection}: could not find "
-                             f"SuburbanJunction with that symbol")
-        return res.non_urban_intersection_hebrew
+        with app.app_context():
+            res = db.session.query(SuburbanJunction.non_urban_intersection_hebrew).filter(
+                SuburbanJunction.non_urban_intersection == non_urban_intersection).first()
+            if res is None:
+                raise ValueError(f"{non_urban_intersection}: could not find "
+                                f"SuburbanJunction with that symbol")
+            return res.non_urban_intersection_hebrew
 
     @staticmethod
     def get_id_from_hebrew_name(non_urban_intersection_hebrew: str) -> int:
-        res = db.session.query(SuburbanJunction.non_urban_intersection).filter(
-            SuburbanJunction.non_urban_intersection == non_urban_intersection_hebrew).first()
-        if res is None:
-            raise ValueError(f"{non_urban_intersection_hebrew}: could not find "
-                             f"SuburbanJunction with that name")
-        return res.non_urban_intersection
+        with app.app_context():
+            res = db.session.query(SuburbanJunction.non_urban_intersection).filter(
+                SuburbanJunction.non_urban_intersection == non_urban_intersection_hebrew).first()
+            if res is None:
+                raise ValueError(f"{non_urban_intersection_hebrew}: could not find "
+                                f"SuburbanJunction with that name")
+            return res.non_urban_intersection
 
     @staticmethod
     def get_intersection_from_roads(roads: Set[int]) -> dict:
         if not all([isinstance(x, int) for x in roads]):
             raise ValueError(f"{roads}: Should be integers")
-        res = db.session.query(SuburbanJunction).filter(
-            SuburbanJunction.roads.contains(roads)).first()
-        if res is None:
-            raise ValueError(f"{roads}: could not find "
-                             f"SuburbanJunction with these roads")
-        return res.serialize()
+        with app.app_context():
+            res = db.session.query(SuburbanJunction).filter(
+                SuburbanJunction.roads.contains(roads)).first()
+            if res is None:
+                raise ValueError(f"{roads}: could not find "
+                                f"SuburbanJunction with these roads")
+            return res.serialize()
 
     @staticmethod
     def get_all_from_key_value(key: str, val: Iterable) -> dict:
         if not isinstance(val, Iterable):
             val = [val]
-        res = db.session.query(SuburbanJunction).filter(
-            (getattr(SuburbanJunction, key)).in_(val)).first()
-        if res is None:
-            raise ValueError(f"{key}:{val}: could not find SuburbanJunction")
-        return res.serialize()
+        with app.app_context():
+            res = db.session.query(SuburbanJunction).filter(
+                (getattr(SuburbanJunction, key)).in_(val)).first()
+            if res is None:
+                raise ValueError(f"{key}:{val}: could not find SuburbanJunction")
+            return res.serialize()
 
     def serialize(self):
         return {

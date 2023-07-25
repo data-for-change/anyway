@@ -7,14 +7,14 @@ from numpy import nan
 from six.moves import http_client
 from anyway import app as flask_app
 from jsonschema import validate
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 from anyway.vehicle_type import VehicleCategory
 from anyway.widgets.road_segment_widgets.accident_count_by_car_type_widget import AccidentCountByCarTypeWidget
 from anyway.backend_constants import NewsflashLocationQualification
-
+import sqlalchemy as sa
 
 def insert_infographic_mock_data(app):
-    sql_insert = f"""
+    sql_insert = sa.text(f"""
         insert into news_flash
         (accident, author, date, description, lat, link, lon, title, source, location, road1, road2, resolution,
         tweet_id, district_hebrew, non_urban_intersection_hebrew, region_hebrew, road_segment_name, street1_hebrew, street2_hebrew, yishuv_name, newsflash_location_qualification, location_qualifying_user)
@@ -42,9 +42,10 @@ def insert_infographic_mock_data(app):
         null,
         {NewsflashLocationQualification.NOT_VERIFIED.value},
         null) returning id;
-    """
-    insert_id = db.session.execute(sql_insert).fetchone()[0]
-    db.session.commit()
+    """)
+    with app.app_context():
+        insert_id = db.session.execute(sql_insert).fetchone()[0]
+        db.session.commit()
 
     return insert_id
 
@@ -61,9 +62,10 @@ def get_infographic_data():
 
 
 def delete_new_infographic_data(new_infographic_data_id):
-    sql_delete = f"DELETE FROM news_flash where id = {new_infographic_data_id}"
-    db.session.execute(sql_delete)
-    db.session.commit()
+    sql_delete = sa.text(f"DELETE FROM news_flash where id = {new_infographic_data_id}")
+    with app.app_context():
+        db.session.execute(sql_delete)
+        db.session.commit()
 
 
 class TestInfographicApi:

@@ -3,7 +3,7 @@ from openpyxl import load_workbook
 
 from anyway.parsers.utils import batch_iterator
 from anyway.models import RoadSegments
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 
 
 def _iter_rows(filename):
@@ -40,5 +40,6 @@ def _iter_rows(filename):
 def parse(filename):
     RoadSegments.query.delete()
     for batch in batch_iterator(_iter_rows(filename), batch_size=50):
-        db.session.bulk_insert_mappings(RoadSegments, batch)
-        db.session.commit()
+        with app.app_context():
+            db.session.bulk_insert_mappings(RoadSegments, batch)
+            db.session.commit()

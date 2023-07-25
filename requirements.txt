@@ -1,9 +1,9 @@
-Flask==2.0.3
+Flask==2.2.5
 Flask-Assets==2.0
 Flask-Babel==3.1.0
 Flask-Compress==1.13
 Flask-Login==0.6.2
-Flask-SQLAlchemy==2.5.1
+Flask-SQLAlchemy==3.0.5
 flask-restx==1.1.0
 Jinja2==3.1.2
 SQLAlchemy==2.0.19

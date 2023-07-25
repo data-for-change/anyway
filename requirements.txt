@@ -8,7 +8,7 @@ flask-restx==1.1.0
 Jinja2==3.1.2
 SQLAlchemy==2.0.19
 Werkzeug==2.3.6
-alembic==1.11.1
+alembic==1.4.2
 attrs==23.1.0
 beautifulsoup4==4.9.0
 chardet==3.0.4

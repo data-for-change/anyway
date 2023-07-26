@@ -8,7 +8,7 @@ from anyway.parsers import infographics_data_cache_updater
 from anyway.parsers import timezones
 from anyway.models import NewsFlash
 from anyway.slack_accident_notifications import publish_notification
-
+from anyway.utilities import trigger_airflow_dag
 
 # fmt: off
 
@@ -75,6 +75,12 @@ class DBAdapter:
         )
         self.commit()
 
+    def trigger_push_notification_to_telegram_dag(newsflash_id):
+        DAG_ID = "generate-and-send-infographics-images"
+        airflow_client = Client("https://airflow.anyway.co.il", None)
+        dag_conf = {"news_flash_id": "{newsflash_id}"}
+        airflow_client.trigger_dag(dag_id=DAG_ID, conf=dag_conf)
+
     def insert_new_newsflash(self, newsflash: NewsFlash) -> None:
         logging.info("Adding newsflash, is accident: {}, date: {}"
                      .format(newsflash.accident, newsflash.date))
@@ -84,6 +90,8 @@ class DBAdapter:
         infographics_data_cache_updater.add_news_flash_to_cache(newsflash)
         if os.environ.get("FLASK_ENV") == "production" and newsflash.accident:
             publish_notification(newsflash)
+            dag_conf = {"news_flash_id": newsflash.id}
+            trigger_airflow_dag("generate-and-send-infographics-images", dag_conf)
 
     def get_newsflash_by_id(self, id):
         return self.db.session.query(NewsFlash).filter(NewsFlash.id == id)

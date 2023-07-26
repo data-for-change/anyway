@@ -11,7 +11,8 @@ INFOGRAPHICS_S3_BUCKET = "dfc-anyway-infographics-images"
 
 TELEGRAM_CHANNEL_CHAT_ID = -1001666083560
 TELEGRAM_LINKED_GROUP_CHAT_ID = -1001954877540
-TEXT_FOR_AFTER_INFOGRAPHICS_MESSAGE = 'מקור המידע בלמ"ס, הופק באמצעות ANYWAY מבית "נתון לשינוי" למידע נוסף:'
+TEXT_FOR_AFTER_INFOGRAPHICS_MESSAGE = 'מקור המידע בלמ"ס. נתוני התאונה שבמבזק לא נכללים באינפוגרפיקה. ' \
+                                      'הופק באמצעות ANYWAY מבית "נתון לשינוי" למידע נוסף:'
 
 def send_initial_message_in_channel(bot, text):
     return bot.send_message(TELEGRAM_CHANNEL_CHAT_ID, text)

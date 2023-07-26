@@ -1,4 +1,4 @@
-Flask==2.2.5
+Flask==2.3.2
 Flask-Assets==2.0
 Flask-Babel==3.1.0
 Flask-Compress==1.13
@@ -37,14 +37,14 @@ python-dateutil==2.8.2
 python-geohash==0.8.5
 rauth==0.7.3
 rcssmin==1.0.6
-requests==2.25.1
+requests==2.31.0
 tweepy==3.8.0
 urllib3==1.26.5
 webassets==2.0
 xlrd==2.0.1
 lxml==4.6.3
 boto3==1.17.68
-py3-validate-email==0.2.16
+py3-validate-email==1.0.5.post1
 phonenumbers==8.12.21
 flask-principal==0.4.0
 pydantic==1.8.2

@@ -7,7 +7,8 @@ import pandas as pd
 
 from anyway.models import SchoolWithDescription
 from anyway.utilities import time_delta, chunks, ItmToWGS84
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
+import sqlalchemy as sa
 
 school_fields = {
     "data_year": "שנה",
@@ -130,9 +131,10 @@ def get_schools_with_description(schools_description_filepath, schools_coordinat
 
 def truncate_schools_with_description():
     curr_table = "schools_with_description"
-    sql_truncate = "TRUNCATE TABLE " + curr_table
-    db.session.execute(sql_truncate)
-    db.session.commit()
+    sql_truncate = sa.text("TRUNCATE TABLE " + curr_table)
+    with app.app_context():
+        db.session.execute(sql_truncate)
+        db.session.commit()
     logging.info("Truncated table " + curr_table)
 
 
@@ -147,8 +149,9 @@ def import_to_datastore(schools_description_filepath, schools_coordinates_filepa
         new_items = 0
         logging.info(f"inserting {len(schools)} new schools")
         for schools_chunk in chunks(schools, batch_size):
-            db.session.bulk_insert_mappings(SchoolWithDescription, schools_chunk)
-            db.session.commit()
+            with app.app_context():
+                db.session.bulk_insert_mappings(SchoolWithDescription, schools_chunk)
+                db.session.commit()
         new_items += len(schools)
         logging.info(f"\t{new_items} items in {time_delta(started)}")
         return new_items
@@ -164,8 +167,11 @@ def parse(schools_description_filepath, schools_coordinates_filepath, batch_size
         schools_coordinates_filepath=schools_coordinates_filepath,
         batch_size=batch_size,
     )
-    db.session.execute(
-        "UPDATE schools_with_description SET geom = ST_SetSRID(ST_MakePoint(longitude,latitude),4326)\
-                           WHERE geom IS NULL;"
-    )
+    with app.app_context():
+        db.session.execute(
+            sa.text(
+                "UPDATE schools_with_description SET geom = ST_SetSRID(ST_MakePoint(longitude,latitude),4326)\
+                            WHERE geom IS NULL;"
+            )
+        )
     logging.info("Total: {0} schools in {1}".format(total, time_delta(started)))

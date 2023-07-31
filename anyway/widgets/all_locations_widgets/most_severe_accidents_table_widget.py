@@ -10,7 +10,8 @@ from anyway.widgets.widget_utils import get_query, get_accidents_stats
 from anyway.models import AccidentMarkerView, InvolvedMarkerView
 from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget
 from anyway.widgets.widget import register
-
+from anyway.app_and_db import db, app
+import sqlalchemy as sa
 
 def get_most_severe_accidents_with_entities(
     table_obj,
@@ -28,14 +29,16 @@ def get_most_severe_accidents_with_entities(
     ]
     # pylint: disable=no-member
     filters["accident_severity"] = [AccidentSeverity.FATAL.value, AccidentSeverity.SEVERE.value]
-    query = get_query(table_obj, filters, start_time, end_time)
-    query = query.with_entities(*entities)
-    query = query.order_by(
-        getattr(table_obj, "accident_timestamp").desc(),
-        getattr(table_obj, "accident_severity").asc(),
-    )
-    query = query.limit(limit)
-    df = pd.read_sql_query(query.statement, query.session.bind)
+    with app.app_context():
+        query = get_query(table_obj, filters, start_time, end_time)
+        columns_with_entities = [sa.text(e) for e in entities]
+        query = query.with_entities(*columns_with_entities)
+        query = query.order_by(
+            getattr(table_obj, "accident_timestamp").desc(),
+            getattr(table_obj, "accident_severity").asc(),
+        )
+        query = query.limit(limit)
+        df = pd.read_sql_query(query.statement, db.get_engine())
     df.columns = [c.replace("_hebrew", "") for c in df.columns]
     return df.to_dict(orient="records")  # pylint: disable=no-member
 

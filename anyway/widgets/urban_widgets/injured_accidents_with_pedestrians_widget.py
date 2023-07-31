@@ -6,7 +6,7 @@ from sqlalchemy import func, or_
 from sqlalchemy.sql.elements import and_
 from flask_babel import _
 from anyway.request_params import RequestParams
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 from anyway.backend_constants import InjurySeverity, InjuredType
 from anyway.widgets.widget_utils import (
     add_empty_keys_to_gen_two_level_dict,
@@ -58,51 +58,51 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
                 # TODO: this will fail since there is no news_flash_obj in request_params
                 logging.exception(f"Could not validate parameters yishuv_name + street1_hebrew in widget : {self.name}")
                 return None
+            with app.app_context():
+                query = (
+                    db.session.query(InvolvedMarkerView)
+                    .with_entities(
+                        InvolvedMarkerView.accident_year,
+                        InvolvedMarkerView.injury_severity,
+                        func.count().label("count"),
+                    )
+                    .filter(InvolvedMarkerView.accident_yishuv_name == yishuv_name)
+                    .filter(
+                        InvolvedMarkerView.injury_severity.in_(
+                            [
+                                InjurySeverity.KILLED.value,
+                                InjurySeverity.SEVERE_INJURED.value,
+                                InjurySeverity.LIGHT_INJURED.value,
+                            ]
+                        )
+                    )
+                    .filter(InvolvedMarkerView.injured_type == InjuredType.PEDESTRIAN.value)
+                    .filter(
+                        or_(
+                            InvolvedMarkerView.street1_hebrew == street1_hebrew,
+                            InvolvedMarkerView.street2_hebrew == street1_hebrew,
+                        )
+                    )
+                    .filter(
+                        and_(
+                            InvolvedMarkerView.accident_timestamp >= self.request_params.start_time,
+                            InvolvedMarkerView.accident_timestamp <= self.request_params.end_time,
+                        )
+                    )
+                    .group_by(InvolvedMarkerView.accident_year, InvolvedMarkerView.injury_severity)
+                )
 
-            query = (
-                db.session.query(InvolvedMarkerView)
-                .with_entities(
-                    InvolvedMarkerView.accident_year,
-                    InvolvedMarkerView.injury_severity,
-                    func.count().label("count"),
+                res = add_empty_keys_to_gen_two_level_dict(
+                    self.convert_to_dict(query.all()),
+                    [
+                        str(year)
+                        for year in range(
+                            self.request_params.start_time.year, self.request_params.end_time.year + 1
+                        )
+                    ],
+                    InjurySeverity.codes(),
                 )
-                .filter(InvolvedMarkerView.accident_yishuv_name == yishuv_name)
-                .filter(
-                    InvolvedMarkerView.injury_severity.in_(
-                        [
-                            InjurySeverity.KILLED.value,
-                            InjurySeverity.SEVERE_INJURED.value,
-                            InjurySeverity.LIGHT_INJURED.value,
-                        ]
-                    )
-                )
-                .filter(InvolvedMarkerView.injured_type == InjuredType.PEDESTRIAN.value)
-                .filter(
-                    or_(
-                        InvolvedMarkerView.street1_hebrew == street1_hebrew,
-                        InvolvedMarkerView.street2_hebrew == street1_hebrew,
-                    )
-                )
-                .filter(
-                    and_(
-                        InvolvedMarkerView.accident_timestamp >= self.request_params.start_time,
-                        InvolvedMarkerView.accident_timestamp <= self.request_params.end_time,
-                    )
-                )
-                .group_by(InvolvedMarkerView.accident_year, InvolvedMarkerView.injury_severity)
-            )
-
-            res = add_empty_keys_to_gen_two_level_dict(
-                self.convert_to_dict(query.all()),
-                [
-                    str(year)
-                    for year in range(
-                        self.request_params.start_time.year, self.request_params.end_time.year + 1
-                    )
-                ],
-                InjurySeverity.codes(),
-            )
-            self.items = format_2_level_items(res, None, InjurySeverity)
+                self.items = format_2_level_items(res, None, InjurySeverity)
 
         except Exception as e:
             logging.error(f"InjuredAccidentsWithPedestriansWidget.generate_items(): {e}")

@@ -5,7 +5,8 @@ from openpyxl import load_workbook
 from anyway.parsers.utils import batch_iterator
 from anyway.backend_constants import BE_CONST
 from anyway.models import AccidentMarker
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
+import sqlalchemy as sa
 
 
 def _iter_rows(filename):
@@ -68,16 +69,23 @@ def _iter_rows(filename):
 
 
 def parse(filename):
-    db.session.execute(f"DELETE from markers where provider_code = {BE_CONST.RSA_PROVIDER_CODE}")
+    with app.app_context():
+        db.session.execute(
+            sa.text(f"DELETE from markers where provider_code = {BE_CONST.RSA_PROVIDER_CODE}")
+        )
     for batch in batch_iterator(_iter_rows(filename), batch_size=50000):
-        db.session.bulk_insert_mappings(AccidentMarker, batch)
-        db.session.commit()
+        with app.app_context():
+            db.session.bulk_insert_mappings(AccidentMarker, batch)
+            db.session.commit()
 
     """
     Fills empty geometry object according to coordinates in database
     """
-    db.session.execute(
-        "UPDATE markers SET geom = ST_SetSRID(ST_MakePoint(longitude,latitude),4326)\
-                           WHERE geom IS NULL;"
-    )
-    db.session.commit()
+    with app.app_context():
+        db.session.execute(
+            sa.text(
+                "UPDATE markers SET geom = ST_SetSRID(ST_MakePoint(longitude,latitude),4326)\
+                            WHERE geom IS NULL;"
+            )
+        )
+        db.session.commit()

@@ -24,7 +24,6 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from anyway.anyway_dataclasses.user_data import UserData
 from anyway.app_and_db import db, app
 from anyway.backend_constants import BE_CONST
-from anyway.base import _set_cookie_hijack, _clear_cookie_hijack
 from anyway.error_code_and_strings import (
     Errors as Es,
     ERROR_TO_HTTP_CODE_DICT,
@@ -42,9 +41,6 @@ from anyway.views.user_system.user_functions import (
 
 # Setup Flask-login
 login_manager = LoginManager()
-# Those 2 function hijack are a temporary fix - more info in base.py
-login_manager._set_cookie = _set_cookie_hijack
-login_manager._clear_cookie = _clear_cookie_hijack
 login_manager.init_app(app)
 # Setup Flask-Principal
 principals = Principal(app)
@@ -93,7 +89,8 @@ def roles_accepted(*roles, need_all_permission=False):
 
 @login_manager.user_loader
 def load_user(id: str) -> Users:
-    return db.session.query(Users).get(id)
+    with app.app_context():
+        return db.session.query(Users).get(id)
 
 
 # noinspection PyUnusedLocal
@@ -168,18 +165,20 @@ def oauth_callback(provider: str) -> Response:
 
     user = None
     try:
-        user = (
-            db.session.query(Users)
-            .filter_by(oauth_provider=provider, oauth_provider_user_id=user_data.service_user_id)
-            .one()
-        )
-    except (NoResultFound, MultipleResultsFound):
-        try:
+        with app.app_context():
             user = (
                 db.session.query(Users)
-                .filter_by(oauth_provider=provider, email=user_data.email)
+                .filter_by(oauth_provider=provider, oauth_provider_user_id=user_data.service_user_id)
                 .one()
             )
+    except (NoResultFound, MultipleResultsFound):
+        try:
+            with app.app_context():
+                user = (
+                    db.session.query(Users)
+                    .filter_by(oauth_provider=provider, email=user_data.email)
+                    .one()
+                )
         except MultipleResultsFound as e:
             # Internal server error - this case should not exists
             raise e
@@ -187,36 +186,36 @@ def oauth_callback(provider: str) -> Response:
             pass
 
     if not user:
-        user = Users(
-            user_register_date=datetime.datetime.now(),
-            user_last_login_date=datetime.datetime.now(),
-            email=user_data.email,
-            oauth_provider_user_name=user_data.name,
-            is_active=True,
-            oauth_provider=provider,
-            oauth_provider_user_id=user_data.service_user_id,
-            oauth_provider_user_domain=user_data.service_user_domain,
-            oauth_provider_user_picture_url=user_data.picture_url,
-            oauth_provider_user_locale=user_data.service_user_locale,
-            oauth_provider_user_profile_url=user_data.user_profile_url,
-        )
-        db.session.add(user)
+        with app.app_context():
+            user = Users(
+                user_register_date=datetime.datetime.now(),
+                user_last_login_date=datetime.datetime.now(),
+                email=user_data.email,
+                oauth_provider_user_name=user_data.name,
+                is_active=True,
+                oauth_provider=provider,
+                oauth_provider_user_id=user_data.service_user_id,
+                oauth_provider_user_domain=user_data.service_user_domain,
+                oauth_provider_user_picture_url=user_data.picture_url,
+                oauth_provider_user_locale=user_data.service_user_locale,
+                oauth_provider_user_profile_url=user_data.user_profile_url,
+            )
+            db.session.add(user)
     else:
         if not user.is_active:
             return return_json_error(Es.BR_USER_NOT_ACTIVE)
-
-        user.user_last_login_date = datetime.datetime.now()
-        if (
-            user.oauth_provider_user_id == "unknown-manual-insert"
-        ):  # Only for anyway@anyway.co.il first login
-            user.oauth_provider_user_id = user_data.service_user_id
-            user.oauth_provider_user_name = user_data.name
-            user.oauth_provider_user_domain = user_data.service_user_domain
-            user.oauth_provider_user_picture_url = user_data.picture_url
-            user.oauth_provider_user_locale = user_data.service_user_locale
-            user.oauth_provider_user_profile_url = user_data.user_profile_url
-
-    db.session.commit()
+        with app.app_context():
+            user.user_last_login_date = datetime.datetime.now()
+            if (
+                user.oauth_provider_user_id == "unknown-manual-insert"
+            ):  # Only for anyway@anyway.co.il first login
+                user.oauth_provider_user_id = user_data.service_user_id
+                user.oauth_provider_user_name = user_data.name
+                user.oauth_provider_user_domain = user_data.service_user_domain
+                user.oauth_provider_user_picture_url = user_data.picture_url
+                user.oauth_provider_user_locale = user_data.service_user_locale
+                user.oauth_provider_user_profile_url = user_data.user_profile_url
+            db.session.commit()
 
     redirect_url = BE_CONST.DEFAULT_REDIRECT_URL
     redirect_url_json_base64 = request.args.get("state", type=str)
@@ -226,7 +225,7 @@ def oauth_callback(provider: str) -> Response:
         if redirect_url_to_check and is_a_safe_redirect_url(redirect_url_to_check):
             redirect_url = redirect_url_to_check
 
-    login_user(user, True)
+    login_user(user, remember=True)
     identity_changed.send(current_app._get_current_object(), identity=Identity(user.id))
 
     return redirect(redirect_url, code=HTTPStatus.FOUND)
@@ -236,8 +235,9 @@ def oauth_callback(provider: str) -> Response:
 @roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def get_all_users_info() -> Response:
     dict_ret = []
-    for user_obj in db.session.query(Users).order_by(Users.user_register_date).all():
-        dict_ret.append(user_obj.serialize_exposed_to_user())
+    with app.app_context():
+        for user_obj in db.session.query(Users).order_by(Users.user_register_date).all():
+            dict_ret.append(user_obj.serialize_exposed_to_user())
     return jsonify(dict_ret)
 
 
@@ -273,51 +273,53 @@ def is_input_fields_malformed(request: Request, allowed_fields: typing.List[str]
 
 
 def change_user_roles(action: str) -> Response:
-    req_dict = request.json
-    if not req_dict:
-        return return_json_error(Es.BR_FIELD_MISSING)
+    with app.app_context():
+        req_dict = request.json
+        if not req_dict:
+            return return_json_error(Es.BR_FIELD_MISSING)
 
-    role_name = req_dict.get("role")
-    if not role_name:
-        return return_json_error(Es.BR_ROLE_NAME_MISSING)
-    role = get_role_object(role_name)
-    if role is None:
-        return return_json_error(Es.BR_ROLE_NOT_EXIST, role_name)
+        role_name = req_dict.get("role")
+        if not role_name:
+            return return_json_error(Es.BR_ROLE_NAME_MISSING)
+        role = get_role_object(role_name)
+        if role is None:
+            return return_json_error(Es.BR_ROLE_NOT_EXIST, role_name)
 
-    email = req_dict.get("email")
-    user = get_user_by_email(db, email)
-    if user is None:
-        return return_json_error(Es.BR_USER_NOT_FOUND, email)
+        email = req_dict.get("email")
+        user = get_user_by_email(db, email)
+        if user is None:
+            return return_json_error(Es.BR_USER_NOT_FOUND, email)
 
-    if action == "add":
-        # Add user to role
-        for user_role in user.roles:
-            if role.name == user_role.name:
-                return return_json_error(Es.BR_USER_ALREADY_IN_ROLE, role_name)
-        user.roles.append(role)
-        # Add user to role in the current instance
-        if current_user.email == user.email:
-            # g is flask global data
-            g.identity.provides.add(RoleNeed(role.name))
-    elif action == "remove":
-        # Remove user from role
-        removed = False
-        for user_role in user.roles:
-            if role.name == user_role.name:
-                d = users_to_roles.delete().where(  # noqa pylint: disable=no-value-for-parameter
-                    (users_to_roles.c.user_id == user.id) & (users_to_roles.c.role_id == role.id)
-                )
-                db.session.execute(d)
-                removed = True
-        if not removed:
-            return return_json_error(Es.BR_USER_NOT_IN_ROLE, email, role_name)
-    db.session.commit()
+        if action == "add":
+            # Add user to role
+            for user_role in user.roles:
+                if role.name == user_role.name:
+                    return return_json_error(Es.BR_USER_ALREADY_IN_ROLE, role_name)
+            user.roles.append(role)
+            # Add user to role in the current instance
+            if current_user.email == user.email:
+                # g is flask global data
+                g.identity.provides.add(RoleNeed(role.name))
+        elif action == "remove":
+            # Remove user from role
+            removed = False
+            for user_role in user.roles:
+                if role.name == user_role.name:
+                    d = users_to_roles.delete().where(  # noqa pylint: disable=no-value-for-parameter
+                        (users_to_roles.c.user_id == user.id) & (users_to_roles.c.role_id == role.id)
+                    )
+                    db.session.execute(d)
+                    removed = True
+            if not removed:
+                return return_json_error(Es.BR_USER_NOT_IN_ROLE, email, role_name)
+        db.session.commit()
 
     return Response(status=HTTPStatus.OK)
 
 
 def get_role_object(role_name):
-    role = db.session.query(Roles).filter(Roles.name == role_name).one()
+    with app.app_context():
+        role = db.session.query(Roles).filter(Roles.name == role_name).one()
     return role
 
 
@@ -445,67 +447,70 @@ def update_user_in_db(
     user_url: str,
     is_user_completed_registration: bool,
 ) -> None:
-    user.first_name = first_name
-    user.last_name = last_name
-    user.email = user_db_email
-    user.phone = phone
-    user.user_type = user_type
-    user.user_url = user_url
-    user.user_desc = user_desc
-    user.is_user_completed_registration = is_user_completed_registration
-    db.session.commit()
+    with app.app_context():
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = user_db_email
+        user.phone = phone
+        user.user_type = user_type
+        user.user_url = user_url
+        user.user_desc = user_desc
+        user.is_user_completed_registration = is_user_completed_registration
+        db.session.commit()
 
 
 @roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def change_user_active_mode() -> Response:
-    req_dict = request.json
-    if not req_dict:
-        return return_json_error(Es.BR_FIELD_MISSING)
+    with app.app_context():
+        req_dict = request.json
+        if not req_dict:
+            return return_json_error(Es.BR_FIELD_MISSING)
 
-    email = req_dict.get("email")
-    user = get_user_by_email(db, email)
-    if user is None:
-        return return_json_error(Es.BR_USER_NOT_FOUND, email)
+        email = req_dict.get("email")
+        user = get_user_by_email(db, email)
+        if user is None:
+            return return_json_error(Es.BR_USER_NOT_FOUND, email)
 
-    mode = req_dict.get("mode")
-    if mode is None:
-        return return_json_error(Es.BR_NO_MODE)
+        mode = req_dict.get("mode")
+        if mode is None:
+            return return_json_error(Es.BR_NO_MODE)
 
-    if type(mode) != bool:
-        return return_json_error(Es.BR_BAD_MODE)
+        if type(mode) != bool:
+            return return_json_error(Es.BR_BAD_MODE)
 
-    user.is_active = mode
-    db.session.commit()
+        user.is_active = mode
+        db.session.commit()
     return Response(status=HTTPStatus.OK)
 
 
 @roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def add_role() -> Response:
-    req_dict = request.json
-    if not req_dict:
-        return return_json_error(Es.BR_FIELD_MISSING)
+    with app.app_context():
+        req_dict = request.json
+        if not req_dict:
+            return return_json_error(Es.BR_FIELD_MISSING)
 
-    name = req_dict.get("name")
-    if not name:
-        return return_json_error(Es.BR_ROLE_NAME_MISSING)
+        name = req_dict.get("name")
+        if not name:
+            return return_json_error(Es.BR_ROLE_NAME_MISSING)
 
-    if not is_a_valid_role_name(name):
-        return return_json_error(Es.BR_BAD_ROLE_NAME)
+        if not is_a_valid_role_name(name):
+            return return_json_error(Es.BR_BAD_ROLE_NAME)
 
-    role = db.session.query(Roles).filter(Roles.name == name).first()
-    if role:
-        return return_json_error(Es.BR_ROLE_EXIST)
+        role = db.session.query(Roles).filter(Roles.name == name).first()
+        if role:
+            return return_json_error(Es.BR_ROLE_EXIST)
 
-    description = req_dict.get("description")
-    if not description:
-        return return_json_error(Es.BR_ROLE_DESCRIPTION_MISSING)
+        description = req_dict.get("description")
+        if not description:
+            return return_json_error(Es.BR_ROLE_DESCRIPTION_MISSING)
 
-    if not is_a_valid_role_description(description):
-        return return_json_error(Es.BR_BAD_ROLE_DESCRIPTION)
+        if not is_a_valid_role_description(description):
+            return return_json_error(Es.BR_BAD_ROLE_DESCRIPTION)
 
-    role = Roles(name=name, description=description, create_date=datetime.datetime.now())
-    db.session.add(role)
-    db.session.commit()
+        role = Roles(name=name, description=description, create_date=datetime.datetime.now())
+        db.session.add(role)
+        db.session.commit()
     return Response(status=HTTPStatus.OK)
 
 
@@ -529,10 +534,11 @@ def is_a_valid_role_description(name: str) -> bool:
 
 @roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def get_roles_list() -> Response:
-    roles_list = db.session.query(Roles).all()
-    send_list = [
-        {"id": role.id, "name": role.name, "description": role.description} for role in roles_list
-    ]
+    with app.app_context():
+        roles_list = db.session.query(Roles).all()
+        send_list = [
+            {"id": role.id, "name": role.name, "description": role.description} for role in roles_list
+        ]
 
     return Response(
         response=json.dumps(send_list), status=HTTPStatus.OK, mimetype="application/json"
@@ -541,8 +547,9 @@ def get_roles_list() -> Response:
 
 @roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def get_organization_list() -> Response:
-    orgs_list = db.session.query(Organization).all()
-    send_list = [org.name for org in orgs_list]
+    with app.app_context():
+        orgs_list = db.session.query(Organization).all()
+        send_list = [org.name for org in orgs_list]
 
     return Response(
         response=json.dumps(send_list), status=HTTPStatus.OK, mimetype="application/json"
@@ -553,47 +560,48 @@ def get_organization_list() -> Response:
 def add_organization(name: str) -> Response:
     if not name:
         return return_json_error(Es.BR_FIELD_MISSING)
-
-    org = db.session.query(Organization).filter(Organization.name == name).first()
-    if not org:
-        org = Organization(name=name, create_date=datetime.datetime.now())
-        db.session.add(org)
-        db.session.commit()
+    with app.app_context():
+        org = db.session.query(Organization).filter(Organization.name == name).first()
+        if not org:
+            org = Organization(name=name, create_date=datetime.datetime.now())
+            db.session.add(org)
+            db.session.commit()
 
     return Response(status=HTTPStatus.OK)
 
 
 @roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def update_user_org(user_email: str, org_name: str) -> Response:
-    user = get_user_by_email(db, user_email)
-    if user is None:
-        return return_json_error(Es.BR_USER_NOT_FOUND, user_email)
+    with app.app_context():
+        user = get_user_by_email(db, user_email)
+        if user is None:
+            return return_json_error(Es.BR_USER_NOT_FOUND, user_email)
 
-    if org_name is not None:
-        try:
-            org_obj = db.session.query(Organization).filter(Organization.name == org_name).one()
-        except NoResultFound:
-            return return_json_error(Es.BR_ORG_NOT_FOUND)
-        user.organizations = [org_obj]
-    else:
-        user.organizations = []
+        if org_name is not None:
+            try:
+                org_obj = db.session.query(Organization).filter(Organization.name == org_name).one()
+            except NoResultFound:
+                return return_json_error(Es.BR_ORG_NOT_FOUND)
+            user.organizations = [org_obj]
+        else:
+            user.organizations = []
 
-    db.session.commit()
+        db.session.commit()
     return Response(status=HTTPStatus.OK)
 
 
 @roles_accepted(BE_CONST.Roles2Names.Admins.value)
 def delete_user(email: str) -> Response:
-    user = get_user_by_email(db, email)
-    if user is None:
-        return return_json_error(Es.BR_USER_NOT_FOUND, email)
+    with app.app_context():
+        user = get_user_by_email(db, email)
+        if user is None:
+            return return_json_error(Es.BR_USER_NOT_FOUND, email)
 
-    # Delete user roles
-    user.roles = []
+        # Delete user roles
+        user.roles = []
 
-    # Delete user organizations membership
-    user.organizations = []
-
-    db.session.delete(user)
-    db.session.commit()
+        # Delete user organizations membership
+        user.organizations = []
+        db.session.delete(user)
+        db.session.commit()
     return Response(status=HTTPStatus.OK)

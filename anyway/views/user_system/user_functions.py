@@ -2,14 +2,15 @@ from typing import Optional
 
 from flask_login import current_user
 from flask_sqlalchemy import SQLAlchemy
-
+from anyway.app_and_db import app
 from anyway.models import Users
 
 
 def get_user_by_email(db: SQLAlchemy, email: str) -> Optional[Users]:
     if not email:
         return None
-    user = db.session.query(Users).filter(Users.email == email).first()
+    with app.app_context():
+        user = db.session.query(Users).filter(Users.email == email).first()
     return user
 
 

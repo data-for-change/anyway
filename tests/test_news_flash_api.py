@@ -3,7 +3,7 @@ import unittest
 from unittest.mock import patch
 from http import HTTPStatus
 from sqlalchemy.orm import sessionmaker
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 from anyway.views.news_flash.api import (
     is_news_flash_resolution_supported,
     gen_news_flash_query,
@@ -20,7 +20,8 @@ Session = sessionmaker()
 # pylint: disable=E1101
 class NewsFlashApiTestCase(unittest.TestCase):
     def setUp(self) -> None:
-        self.connection = db.get_engine().connect()
+        with app.app_context():
+            self.connection = db.get_engine().connect()
         # begin a non-ORM transaction
         self.trans = self.connection.begin()
         # bind an individual Session to the connection

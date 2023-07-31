@@ -5,7 +5,7 @@ from typing import Dict, Tuple, Callable
 from flask_sqlalchemy import BaseQuery
 from sqlalchemy import func, asc
 
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 from anyway.backend_constants import BE_CONST, InjurySeverity
 from anyway.models import InvolvedMarkerView
 from anyway.request_params import RequestParams
@@ -90,35 +90,36 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
     def create_query_for_killed_and_injured_count_per_age_group(
         end_time: datetime.date, road_number: int, road_segment: str, start_time: datetime.date
     ) -> BaseQuery:
-        query = (
-            db.session.query(InvolvedMarkerView)
-            .filter(InvolvedMarkerView.accident_timestamp >= start_time)
-            .filter(InvolvedMarkerView.accident_timestamp <= end_time)
-            .filter(
-                InvolvedMarkerView.provider_code.in_(
-                    [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
+        with app.app_context():
+            query = (
+                db.session.query(InvolvedMarkerView)
+                .filter(InvolvedMarkerView.accident_timestamp >= start_time)
+                .filter(InvolvedMarkerView.accident_timestamp <= end_time)
+                .filter(
+                    InvolvedMarkerView.provider_code.in_(
+                        [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
+                    )
                 )
-            )
-            .filter(
-                InvolvedMarkerView.injury_severity.in_(
-                    [
-                        InjurySeverity.KILLED.value,  # pylint: disable=no-member
-                        InjurySeverity.SEVERE_INJURED.value,  # pylint: disable=no-member
-                        InjurySeverity.LIGHT_INJURED.value,  # pylint: disable=no-member
-                    ]
+                .filter(
+                    InvolvedMarkerView.injury_severity.in_(
+                        [
+                            InjurySeverity.KILLED.value,  # pylint: disable=no-member
+                            InjurySeverity.SEVERE_INJURED.value,  # pylint: disable=no-member
+                            InjurySeverity.LIGHT_INJURED.value,  # pylint: disable=no-member
+                        ]
+                    )
                 )
+                .filter(
+                    (InvolvedMarkerView.road1 == road_number)
+                    | (InvolvedMarkerView.road2 == road_number)
+                )
+                .filter(InvolvedMarkerView.road_segment_name == road_segment)
+                .group_by(InvolvedMarkerView.age_group, InvolvedMarkerView.injury_severity)
+                .with_entities(
+                    InvolvedMarkerView.age_group,
+                    InvolvedMarkerView.injury_severity,
+                    func.count().label("count"),
+                )
+                .order_by(asc(InvolvedMarkerView.age_group))
             )
-            .filter(
-                (InvolvedMarkerView.road1 == road_number)
-                | (InvolvedMarkerView.road2 == road_number)
-            )
-            .filter(InvolvedMarkerView.road_segment_name == road_segment)
-            .group_by(InvolvedMarkerView.age_group, InvolvedMarkerView.injury_severity)
-            .with_entities(
-                InvolvedMarkerView.age_group,
-                InvolvedMarkerView.injury_severity,
-                func.count().label("count"),
-            )
-            .order_by(asc(InvolvedMarkerView.age_group))
-        )
         return query

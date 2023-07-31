@@ -1,8 +1,9 @@
 import os
 import logging
 import pandas as pd
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 from anyway.models import City, CityTemp
+import sqlalchemy as sa
 
 CBS_FILES_HEBREW = {
     "sadot": "Fields",
@@ -88,15 +89,16 @@ def load_cities_data(file_name: str):
     )
     cities_list = cities.to_dict(orient="records")
     logging.info(f"Read {len(cities_list)} from {file_name}")
-    db.session.commit()
-    db.session.execute("DROP table IF EXISTS cbs_cities_temp")
-    db.session.execute("CREATE TABLE cbs_cities_temp AS TABLE cbs_cities with NO DATA")
-    db.session.execute(CityTemp.__table__.insert(), cities_list)
-    db.session.execute("TRUNCATE table cbs_cities")
-    db.session.execute("INSERT INTO cbs_cities SELECT * FROM cbs_cities_temp")
-    db.session.execute("DROP table cbs_cities_temp")
-    db.session.commit()
-    num_items = db.session.query(City).count()
+    with app.app_context():
+        db.session.commit()
+        db.session.execute(sa.text("DROP table IF EXISTS cbs_cities_temp"))
+        db.session.execute(sa.text("CREATE TABLE cbs_cities_temp AS TABLE cbs_cities with NO DATA"))
+        db.session.execute(CityTemp.__table__.insert(), cities_list)
+        db.session.execute(sa.text("TRUNCATE table cbs_cities"))
+        db.session.execute(sa.text("INSERT INTO cbs_cities SELECT * FROM cbs_cities_temp"))
+        db.session.execute(sa.text("DROP table cbs_cities_temp"))
+        db.session.commit()
+        num_items = db.session.query(City).count()
     logging.info(f"num items in cities: {num_items}.")
 
 

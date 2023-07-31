@@ -11,6 +11,7 @@ from datetime import datetime
 import math
 import pandas as pd
 from sqlalchemy import or_, event
+import sqlalchemy as sa
 from typing import Tuple, Dict, List, Any
 
 from anyway.parsers.cbs import preprocessing_cbs_files
@@ -88,7 +89,7 @@ from anyway.parsers.cbs.exceptions import CBSParsingFailed
 from anyway.utilities import ItmToWGS84, time_delta, ImporterUI, truncate_tables, delete_all_rows_from_table, \
     chunks, run_query_and_insert_to_table_in_chunks
 from anyway.db_views import VIEWS
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 from anyway.parsers.cbs.s3 import S3DataRetriever
 
 street_map_type: Dict[int, List[dict]]
@@ -571,8 +572,9 @@ def import_accidents(provider_code, accidents, streets, roads, non_urban_interse
         marker = create_marker(provider_code, accident, streets, roads, non_urban_intersection)
         add_suburban_junction_from_marker(marker)
         accidents_result.append(marker)
-    db.session.bulk_insert_mappings(AccidentMarker, accidents_result)
-    db.session.commit()
+    with app.app_context():
+        db.session.bulk_insert_mappings(AccidentMarker, accidents_result)
+        db.session.commit()
     logging.debug("Finished Importing markers")
     logging.debug("Inserted " + str(len(accidents_result)) + " new accident markers")
     fill_db_geo_data()
@@ -630,8 +632,9 @@ def import_involved(provider_code, involved, **kwargs):
                 "accident_month": get_data_value(involve.get(field_names.accident_month)),
             }
         )
-    db.session.bulk_insert_mappings(Involved, involved_result)
-    db.session.commit()
+    with app.app_context():
+        db.session.bulk_insert_mappings(Involved, involved_result)
+        db.session.commit()
     logging.debug("Finished Importing involved")
     return len(involved_result)
 
@@ -663,8 +666,9 @@ def import_vehicles(provider_code, vehicles, **kwargs):
                 "vehicle_damage": get_data_value(vehicle.get(field_names.vehicle_damage)),
             }
         )
-    db.session.bulk_insert_mappings(Vehicle, vehicles_result)
-    db.session.commit()
+    with app.app_context():
+        db.session.bulk_insert_mappings(Vehicle, vehicles_result)
+        db.session.commit()
     logging.debug("Finished Importing vehicles")
     return len(vehicles_result)
 
@@ -779,9 +783,10 @@ def import_streets_into_db():
     logging.debug(
         f"Writing to db: {len(yishuv_street_dict)}:{len(yishuv_name_dict)} -> {len(items)} rows"
     )
-    db.session.query(Streets).delete()
-    db.session.bulk_insert_mappings(Streets, items)
-    db.session.commit()
+    with app.app_context():
+        db.session.query(Streets).delete()
+        db.session.bulk_insert_mappings(Streets, items)
+        db.session.commit()
     if max_name_len > Streets.MAX_NAME_LEN:
         logging.error(
             f"Importing streets table: Street hebrew name length exceeded: max name: {max_name_len}"
@@ -798,15 +803,16 @@ SUBURBAN_JUNCTION = "suburban_junction"
 
 
 def load_existing_streets():
-    streets = db.session.query(Streets).all()
-    for s in streets:
-        s_dict = {
-            "yishuv_symbol": s.yishuv_symbol,
-            "street": s.street,
-            "street_hebrew": s.street_hebrew,
-        }
-        add_street_remove_name_duplicates(s_dict)
-        add_street_remove_num_duplicates(s_dict)
+    with app.app_context():
+        streets = db.session.query(Streets).all()
+        for s in streets:
+            s_dict = {
+                "yishuv_symbol": s.yishuv_symbol,
+                "street": s.street,
+                "street_hebrew": s.street_hebrew,
+            }
+            add_street_remove_name_duplicates(s_dict)
+            add_street_remove_num_duplicates(s_dict)
     logging.debug(f"Loaded streets: {len(yishuv_street_dict)}:{len(yishuv_name_dict)}")
 
 
@@ -850,9 +856,10 @@ def import_suburban_junctions_into_db():
     logging.debug(
         f"Writing to db: {len(items)} suburban junctions"
     )
-    db.session.query(SuburbanJunction).delete()
-    db.session.bulk_insert_mappings(SuburbanJunction, items)
-    db.session.commit()
+    with app.app_context():
+        db.session.query(SuburbanJunction).delete()
+        db.session.bulk_insert_mappings(SuburbanJunction, items)
+        db.session.commit()
     logging.debug(f"Done.")
 
 
@@ -865,9 +872,10 @@ def fix_name_len(name: str) -> str:
     return name[: SuburbanJunction.MAX_NAME_LEN]
 
 def load_existing_suburban_junctions():
-    junctions: List[SuburbanJunction] = db.session.query(SuburbanJunction).all()
-    for j in junctions:
-        add_suburban_junction(j)
+    with app.app_context():
+        junctions: List[SuburbanJunction] = db.session.query(SuburbanJunction).all()
+        for j in junctions:
+            add_suburban_junction(j)
     logging.debug(f"Loaded suburban junctions: {len(suburban_junctions_dict)}.")
 
 
@@ -908,12 +916,12 @@ def delete_invalid_entries(batch_size):
     deletes all markers in the database with null latitude or longitude
     first deletes from tables Involved and Vehicle, then from table AccidentMarker
     """
-
-    marker_ids_to_delete = (
-        db.session.query(AccidentMarker.id)
-        .filter(or_((AccidentMarker.longitude == None), (AccidentMarker.latitude == None)))
-        .all()
-    )
+    with app.app_context():
+        marker_ids_to_delete = (
+            db.session.query(AccidentMarker.id)
+            .filter(or_((AccidentMarker.longitude == None), (AccidentMarker.latitude == None)))
+            .all()
+        )
 
     marker_ids_to_delete = [acc_id[0] for acc_id in marker_ids_to_delete]
 
@@ -922,24 +930,24 @@ def delete_invalid_entries(batch_size):
     for ids_chunk in chunks(marker_ids_to_delete, batch_size):
 
         logging.debug("Deleting a chunk of " + str(len(ids_chunk)))
+        with app.app_context():
+            q = db.session.query(Involved).filter(Involved.accident_id.in_(ids_chunk))
+            if q.all():
+                logging.debug("deleting invalid entries from Involved")
+                q.delete(synchronize_session="fetch")
+                db.session.commit()
 
-        q = db.session.query(Involved).filter(Involved.accident_id.in_(ids_chunk))
-        if q.all():
-            logging.debug("deleting invalid entries from Involved")
-            q.delete(synchronize_session="fetch")
-            db.session.commit()
+            q = db.session.query(Vehicle).filter(Vehicle.accident_id.in_(ids_chunk))
+            if q.all():
+                logging.debug("deleting invalid entries from Vehicle")
+                q.delete(synchronize_session="fetch")
+                db.session.commit()
 
-        q = db.session.query(Vehicle).filter(Vehicle.accident_id.in_(ids_chunk))
-        if q.all():
-            logging.debug("deleting invalid entries from Vehicle")
-            q.delete(synchronize_session="fetch")
-            db.session.commit()
-
-        q = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_(ids_chunk))
-        if q.all():
-            logging.debug("deleting invalid entries from AccidentMarker")
-            q.delete(synchronize_session="fetch")
-            db.session.commit()
+            q = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_(ids_chunk))
+            if q.all():
+                logging.debug("deleting invalid entries from AccidentMarker")
+                q.delete(synchronize_session="fetch")
+                db.session.commit()
 
 
 def delete_cbs_entries(start_year, batch_size):
@@ -948,17 +956,18 @@ def delete_cbs_entries(start_year, batch_size):
     first deletes from tables Involved and Vehicle, then from table AccidentMarker
     """
     start_date = f"{start_year}-01-01"
-    marker_ids_to_delete = (
-        db.session.query(AccidentMarker.id)
-        .filter(AccidentMarker.created >= datetime.strptime(start_date, "%Y-%m-%d"))
-        .filter(
-            or_(
-                (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_1_CODE),
-                (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_3_CODE),
+    with app.app_context():
+        marker_ids_to_delete = (
+            db.session.query(AccidentMarker.id)
+            .filter(AccidentMarker.created >= datetime.strptime(start_date, "%Y-%m-%d"))
+            .filter(
+                or_(
+                    (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_1_CODE),
+                    (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_3_CODE),
+                )
             )
+            .all()
         )
-        .all()
-    )
 
     marker_ids_to_delete = [acc_id[0] for acc_id in marker_ids_to_delete]
 
@@ -972,24 +981,24 @@ def delete_cbs_entries(start_year, batch_size):
     for ids_chunk in chunks(marker_ids_to_delete, batch_size):
 
         logging.debug("Deleting a chunk of " + str(len(ids_chunk)))
+        with app.app_context():
+            q = db.session.query(Involved).filter(Involved.accident_id.in_(ids_chunk))
+            if q.all():
+                logging.debug("deleting entries from Involved")
+                q.delete(synchronize_session=False)
+                db.session.commit()
 
-        q = db.session.query(Involved).filter(Involved.accident_id.in_(ids_chunk))
-        if q.all():
-            logging.debug("deleting entries from Involved")
-            q.delete(synchronize_session=False)
-            db.session.commit()
+            q = db.session.query(Vehicle).filter(Vehicle.accident_id.in_(ids_chunk))
+            if q.all():
+                logging.debug("deleting entries from Vehicle")
+                q.delete(synchronize_session=False)
+                db.session.commit()
 
-        q = db.session.query(Vehicle).filter(Vehicle.accident_id.in_(ids_chunk))
-        if q.all():
-            logging.debug("deleting entries from Vehicle")
-            q.delete(synchronize_session=False)
-            db.session.commit()
-
-        q = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_(ids_chunk))
-        if q.all():
-            logging.debug("deleting entries from AccidentMarker")
-            q.delete(synchronize_session=False)
-            db.session.commit()
+            q = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_(ids_chunk))
+            if q.all():
+                logging.debug("deleting entries from AccidentMarker")
+                q.delete(synchronize_session=False)
+                db.session.commit()
 
 
 def fill_db_geo_data():
@@ -997,11 +1006,12 @@ def fill_db_geo_data():
     Fills empty geometry object according to coordinates in database
     SRID = 4326
     """
-    db.session.execute(
-        "UPDATE markers SET geom = ST_SetSRID(ST_MakePoint(longitude,latitude),4326)\
-                           WHERE geom IS NULL;"
-    )
-    db.session.commit()
+    with app.app_context():
+        db.session.execute(sa.text(
+            "UPDATE markers SET geom = ST_SetSRID(ST_MakePoint(longitude,latitude),4326)\
+                            WHERE geom IS NULL;"
+        ))
+        db.session.commit()
 
 
 def get_provider_code(directory_name=None):
@@ -1041,7 +1051,7 @@ def fill_dictionary_tables(cbs_dictionary, provider_code, year):
         for inner_k, inner_v in v.items():
             if inner_v is None or (isinstance(inner_v, float) and math.isnan(inner_v)):
                 continue
-            sql_delete = (
+            sql_delete = (sa.text(
                     "DELETE FROM "
                     + curr_table
                     + " WHERE provider_code="
@@ -1050,27 +1060,28 @@ def fill_dictionary_tables(cbs_dictionary, provider_code, year):
                     + str(year)
                     + " AND id="
                     + str(inner_k)
-            )
-            db.session.execute(sql_delete)
-            db.session.commit()
-            sql_insert = (
-                    "INSERT INTO "
-                    + curr_table
-                    + " VALUES ("
-                    + str(inner_k)
-                    + ","
-                    + str(year)
-                    + ","
-                    + str(provider_code)
-                    + ","
-                    + "'"
-                    + inner_v.replace("'", "")
-                    + "'"
-                    + ")"
-                    + " ON CONFLICT DO NOTHING"
-            )
-            db.session.execute(sql_insert)
-            db.session.commit()
+            ))
+            with app.app_context():
+                db.session.execute(sql_delete)
+                db.session.commit()
+                sql_insert = (sa.text(
+                        "INSERT INTO "
+                        + curr_table
+                        + " VALUES ("
+                        + str(inner_k)
+                        + ","
+                        + str(year)
+                        + ","
+                        + str(provider_code)
+                        + ","
+                        + "'"
+                        + inner_v.replace("'", "")
+                        + "'"
+                        + ")"
+                        + " ON CONFLICT DO NOTHING"
+                ))
+                db.session.execute(sql_insert)
+                db.session.commit()
         logging.debug("Inserted/Updated dictionary values into table " + curr_table)
     create_provider_code_table()
 
@@ -1081,17 +1092,19 @@ def truncate_dictionary_tables(dictionary_file):
         if k == 97:
             continue
         curr_table = TABLES_DICT[k]
-        sql_truncate = "TRUNCATE TABLE " + curr_table
-        db.session.execute(sql_truncate)
-        db.session.commit()
+        sql_truncate = sa.text("TRUNCATE TABLE " + curr_table)
+        with app.app_context():
+            db.session.execute(sql_truncate)
+            db.session.commit()
         logging.debug("Truncated table " + curr_table)
 
 
 def create_provider_code_table():
     provider_code_table = "provider_code"
     provider_code_class = ProviderCode
-    table_entries = db.session.query(provider_code_class)
-    table_entries.delete()
+    with app.app_context():
+        table_entries = db.session.query(provider_code_class)
+        table_entries.delete()
     provider_code_dict = {
         1: "הלשכה המרכזית לסטטיסטיקה - סוג תיק 1",
         2: "איחוד הצלה",
@@ -1099,11 +1112,12 @@ def create_provider_code_table():
         4: "שומרי הדרך",
     }
     for k, v in provider_code_dict.items():
-        sql_insert = (
+        sql_insert = (sa.text(
                 "INSERT INTO " + provider_code_table + " VALUES (" + str(k) + "," + "'" + v + "'" + ")"
-        )
-        db.session.execute(sql_insert)
-        db.session.commit()
+        ))
+        with app.app_context():
+            db.session.execute(sql_insert)
+            db.session.commit()
 
 
 def receive_rollback(conn, **kwargs):
@@ -1115,33 +1129,34 @@ def receive_rollback(conn, **kwargs):
 def create_tables():
     chunk_size = 5000
     try:
-        with db.get_engine().begin() as conn:
-            event.listen(conn, "rollback", receive_rollback)
-            delete_all_rows_from_table(conn, AccidentMarkerView)
-            run_query_and_insert_to_table_in_chunks(VIEWS.create_markers_hebrew_view(), AccidentMarkerView,
-                                                    AccidentMarker.id, chunk_size, conn)
-            logging.debug("after insertion to markers_hebrew ")
+        with app.app_context():
+            with db.get_engine().begin() as conn:
+                event.listen(conn, "rollback", receive_rollback)
+                delete_all_rows_from_table(conn, AccidentMarkerView)
+                run_query_and_insert_to_table_in_chunks(VIEWS.create_markers_hebrew_view(), AccidentMarkerView,
+                                                        AccidentMarker.id, chunk_size, conn)
+                logging.debug("after insertion to markers_hebrew ")
 
-            delete_all_rows_from_table(conn, InvolvedView)
-            run_query_and_insert_to_table_in_chunks(VIEWS.create_involved_hebrew_view(), InvolvedView,
-                                                    Involved.id, chunk_size, conn)
-            logging.debug("after insertion to involved_hebrew ")
+                delete_all_rows_from_table(conn, InvolvedView)
+                run_query_and_insert_to_table_in_chunks(VIEWS.create_involved_hebrew_view(), InvolvedView,
+                                                        Involved.id, chunk_size, conn)
+                logging.debug("after insertion to involved_hebrew ")
 
-            delete_all_rows_from_table(conn, VehiclesView)
-            run_query_and_insert_to_table_in_chunks(VIEWS.create_vehicles_hebrew_view(),
-                                                    VehiclesView, Vehicle.id, chunk_size, conn)
-            logging.debug("after insertion to vehicles_hebrew ")
+                delete_all_rows_from_table(conn, VehiclesView)
+                run_query_and_insert_to_table_in_chunks(VIEWS.create_vehicles_hebrew_view(),
+                                                        VehiclesView, Vehicle.id, chunk_size, conn)
+                logging.debug("after insertion to vehicles_hebrew ")
 
-            delete_all_rows_from_table(conn, VehicleMarkerView)
-            run_query_and_insert_to_table_in_chunks(VIEWS.create_vehicles_markers_hebrew_view(),
-                                                    VehicleMarkerView, VehiclesView.id, chunk_size, conn)
-            logging.debug("after insertion to vehicles_markers_hebrew ")
+                delete_all_rows_from_table(conn, VehicleMarkerView)
+                run_query_and_insert_to_table_in_chunks(VIEWS.create_vehicles_markers_hebrew_view(),
+                                                        VehicleMarkerView, VehiclesView.id, chunk_size, conn)
+                logging.debug("after insertion to vehicles_markers_hebrew ")
 
-            delete_all_rows_from_table(conn, InvolvedMarkerView)
-            run_query_and_insert_to_table_in_chunks(VIEWS.create_involved_hebrew_markers_hebrew_view(),
-                                                    InvolvedMarkerView, InvolvedView.accident_id, chunk_size, conn)
-            logging.debug("after insertion to involved_markers_hebrew")
-            logging.debug("Created DB Hebrew Tables")
+                delete_all_rows_from_table(conn, InvolvedMarkerView)
+                run_query_and_insert_to_table_in_chunks(VIEWS.create_involved_hebrew_markers_hebrew_view(),
+                                                        InvolvedMarkerView, InvolvedView.accident_id, chunk_size, conn)
+                logging.debug("after insertion to involved_markers_hebrew")
+                logging.debug("Created DB Hebrew Tables")
     except Exception as e:
         logging.exception(f"Exception while creating hebrew tables, {e}", e)
         raise e

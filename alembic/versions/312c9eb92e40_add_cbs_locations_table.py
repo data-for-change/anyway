@@ -34,7 +34,7 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     conn = op.get_bind()
-    conn.execute("""INSERT INTO cbs_locations 
+    conn.execute(sa.text("""INSERT INTO cbs_locations 
                         (SELECT ROW_NUMBER() OVER (ORDER BY road1) as id, LOCATIONS.*
                         FROM 
                         (SELECT DISTINCT road1,
@@ -52,7 +52,7 @@ def upgrade():
                         WHERE (provider_code=1
                                OR provider_code=3)
                           AND (longitude is not null
-                               AND latitude is not null)) LOCATIONS)""")
+                               AND latitude is not null)) LOCATIONS)"""))
     # ### end Alembic commands ###
 
 

@@ -11,9 +11,9 @@ from anyway.widgets.widget_utils import get_query
 from anyway.models import InvolvedMarkerView
 from anyway.vehicle_type import VehicleCategory
 from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
+from anyway.app_and_db import db, app
 from typing import Dict
 from flask_babel import _
-
 
 location_other = "location other"
 location_road = "location road"
@@ -47,13 +47,8 @@ class MotorcycleAccidentsVsAllAccidentsWidget(RoadSegmentWidget):
         ) -> Tuple:
         location_label = "location"
         case_location = case(
-            [
-                (
-                    (InvolvedMarkerView.road1 == road_number)
-                    | (InvolvedMarkerView.road2 == road_number),
-                    location_road,
-                )
-            ],
+                (InvolvedMarkerView.road1 == road_number, location_road),
+                  (InvolvedMarkerView.road2 == road_number ,location_road),
             else_=literal_column(f"'{location_other}'"),
         ).label(location_label)
 
@@ -61,42 +56,39 @@ class MotorcycleAccidentsVsAllAccidentsWidget(RoadSegmentWidget):
         vehicle_other = VehicleCategory.OTHER.get_english_display_name()
         vehicle_motorcycle = VehicleCategory.MOTORCYCLE.get_english_display_name()
         case_vehicle = case(
-            [
-                (
-                    InvolvedMarkerView.involve_vehicle_type.in_(
+                (InvolvedMarkerView.involve_vehicle_type.in_(
                         VehicleCategory.MOTORCYCLE.get_codes()
                     ),
                     literal_column(f"'{vehicle_motorcycle}'"),
-                )
-            ],
+                ),
             else_=literal_column(f"'{vehicle_other}'"),
         ).label(vehicle_label)
-
-        query = get_query(
-            table_obj=InvolvedMarkerView, filters={}, start_time=start_time, end_time=end_time
-        )
-
-        num_accidents_label = "num_of_accidents"
-        query = (
-            query.with_entities(
-                case_location,
-                case_vehicle,
-                func.count(distinct(InvolvedMarkerView.provider_and_id)).label(num_accidents_label),
+        with app.app_context():
+            query = get_query(
+                table_obj=InvolvedMarkerView, filters={}, start_time=start_time, end_time=end_time
             )
-            .filter(InvolvedMarkerView.road_type.in_(BE_CONST.NON_CITY_ROAD_TYPES))
-            .filter(
-                InvolvedMarkerView.accident_severity.in_(
-                    # pylint: disable=no-member
-                    [AccidentSeverity.FATAL.value, AccidentSeverity.SEVERE.value]
+
+            num_accidents_label = "num_of_accidents"
+            query = (
+                query.with_entities(
+                    case_location,
+                    case_vehicle,
+                    func.count(distinct(InvolvedMarkerView.provider_and_id)).label(num_accidents_label),
                 )
+                .filter(InvolvedMarkerView.road_type.in_(BE_CONST.NON_CITY_ROAD_TYPES))
+                .filter(
+                    InvolvedMarkerView.accident_severity.in_(
+                        # pylint: disable=no-member
+                        [AccidentSeverity.FATAL.value, AccidentSeverity.SEVERE.value]
+                    )
+                )
+                .group_by(location_label, vehicle_label)
+                .order_by(desc(num_accidents_label))
             )
-            .group_by(location_label, vehicle_label)
-            .order_by(desc(num_accidents_label))
-        )
-        # pylint: disable=no-member
-        results = pd.read_sql_query(query.statement, query.session.bind).to_dict(
-            orient="records"
-        )  # pylint: disable=no-member
+            # pylint: disable=no-member
+            results = pd.read_sql_query(query.statement, db.get_engine()).to_dict(
+                orient="records"
+            )  # pylint: disable=no-member
 
         counter_road_motorcycle = 0
         counter_other_motorcycle = 0

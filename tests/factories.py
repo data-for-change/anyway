@@ -1,13 +1,14 @@
 import factory
 
 from anyway import models
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 
 class DefaultFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         abstract = True
-        sqlalchemy_session = db.session
-        sqlalchemy_session_persistence = 'flush'
+        with app.app_context():
+            sqlalchemy_session = db.session
+            sqlalchemy_session_persistence = 'flush'
 
 
 class AccidentMarkerFactory(DefaultFactory):

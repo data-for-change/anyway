@@ -6,7 +6,7 @@ import pandas as pd
 from static.data.schools import school_fields
 from anyway.models import School
 from anyway.utilities import time_delta, chunks
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 
 
 def get_data_value(value):
@@ -57,12 +57,14 @@ def import_to_datastore(filepath, batch_size):
         started = datetime.now()
         schools = get_schools(filepath)
         new_items = 0
-        all_existing_schools_ids = set(map(lambda x: x[0], db.session.query(School.id).all()))
+        with app.app_context():
+            all_existing_schools_ids = set(map(lambda x: x[0], db.session.query(School.id).all()))
         schools = [school for school in schools if school["id"] not in all_existing_schools_ids]
         logging.info(f"inserting {len(schools)} new schools")
         for schools_chunk in chunks(schools, batch_size):
-            db.session.bulk_insert_mappings(School, schools_chunk)
-            db.session.commit()
+            with app.app_context():
+                db.session.bulk_insert_mappings(School, schools_chunk)
+                db.session.commit()
         new_items += len(schools)
         logging.info(f"\t{new_items} items in {time_delta(started)}")
         return new_items

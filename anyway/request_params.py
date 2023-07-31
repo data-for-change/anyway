@@ -12,7 +12,7 @@ from anyway.parsers.location_extraction import (
     get_road_segment_by_name_and_road,
 )
 from anyway.backend_constants import BE_CONST
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 from anyway.parsers import resolution_dict
 
 NON_URBAN_INTERSECTION_HEBREW = "non_urban_intersection_hebrew"
@@ -122,7 +122,6 @@ def get_location_from_news_flash_or_request_values(
         or ("road1" in vals and "road2" in vals)
     ):
         return extract_non_urban_intersection_location(vals)
-
     logging.error(f"Unsupported location:{vals.values()}")
     return None
 
@@ -308,7 +307,8 @@ def extract_news_flash_obj(vals) -> Optional[NewsFlash]:
     news_flash_id = vals.get("news_flash_id")
     if news_flash_id is None:
         return None
-    news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == news_flash_id).first()
+    with app.app_context():
+        news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == news_flash_id).first()
 
     if not news_flash_obj:
         logging.warning(f"Could not find news flash id {news_flash_id}")
@@ -324,8 +324,9 @@ def get_latest_accident_date(table_obj, filters):
         BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
         BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
     ]
-    query = db.session.query(func.max(table_obj.accident_timestamp))
-    df = pd.read_sql_query(query.statement, query.session.bind)
+    with app.app_context():
+        query = db.session.query(func.max(table_obj.accident_timestamp))
+        df = pd.read_sql_query(query.statement, db.get_engine())
     return (df.to_dict(orient="records"))[0].get("max_1")  # pylint: disable=no-member
 
 

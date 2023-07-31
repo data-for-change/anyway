@@ -7,6 +7,7 @@ from datetime import datetime
 import math
 import pandas as pd
 from sqlalchemy import or_, not_, and_
+import sqlalchemy as sa
 
 from anyway.backend_constants import BE_CONST
 from anyway.models import (
@@ -17,7 +18,7 @@ from anyway.models import (
     InjuredAroundSchoolAllData,
 )
 from anyway.utilities import time_delta, chunks
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 
 SUBTYPE_ACCIDENT_WITH_PEDESTRIAN = 1
 LOCATION_ACCURACY_PRECISE = True
@@ -58,27 +59,27 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
     pol_str = "POLYGON(({0} {1},{0} {3},{2} {3},{2} {1},{0} {1}))".format(
         base_x, base_y, distance_x, distance_y
     )
-
-    query_obj = (
-        db.session.query(Involved, AccidentMarker)
-        .join(AccidentMarker, AccidentMarker.provider_and_id == Involved.provider_and_id)
-        .filter(AccidentMarker.geom.intersects(pol_str))
-        .filter(Involved.injured_type == INJURED_TYPE_PEDESTRIAN)
-        .filter(AccidentMarker.provider_and_id == Involved.provider_and_id)
-        .filter(
-            or_(
-                (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_1_CODE),
-                (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_3_CODE),
+    with app.app_context():
+        query_obj = (
+            db.session.query(Involved, AccidentMarker)
+            .join(AccidentMarker, AccidentMarker.provider_and_id == Involved.provider_and_id)
+            .filter(AccidentMarker.geom.intersects(pol_str))
+            .filter(Involved.injured_type == INJURED_TYPE_PEDESTRIAN)
+            .filter(AccidentMarker.provider_and_id == Involved.provider_and_id)
+            .filter(
+                or_(
+                    (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_1_CODE),
+                    (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_3_CODE),
+                )
             )
-        )
-        .filter(AccidentMarker.created >= start_date)
-        .filter(AccidentMarker.created < end_date)
-        .filter(AccidentMarker.location_accuracy == LOCATION_ACCURACY_PRECISE_INT)
-        .filter(AccidentMarker.yishuv_symbol != YISHUV_SYMBOL_NOT_EXIST)
-        .filter(Involved.age_group.in_([1, 2, 3, 4]))
-    )  # ages 0-19
+            .filter(AccidentMarker.created >= start_date)
+            .filter(AccidentMarker.created < end_date)
+            .filter(AccidentMarker.location_accuracy == LOCATION_ACCURACY_PRECISE_INT)
+            .filter(AccidentMarker.yishuv_symbol != YISHUV_SYMBOL_NOT_EXIST)
+            .filter(Involved.age_group.in_([1, 2, 3, 4]))
+        )  # ages 0-19
 
-    df = pd.read_sql_query(query_obj.with_labels().statement, query_obj.session.bind)
+        df = pd.read_sql_query(query_obj.with_labels().statement, db.get_engine())
     if LOCATION_ACCURACY_PRECISE:
         location_accurate = 1
         location_approx = ""
@@ -221,22 +222,26 @@ def select_columns_df_total(df):
 
 
 def get_injured_around_schools(start_date, end_date, distance):
-    schools = (
-        db.session.query(SchoolWithDescription)
-        .filter(
-            not_(and_(SchoolWithDescription.latitude == 0, SchoolWithDescription.longitude == 0)),
-            not_(
-                and_(
-                    SchoolWithDescription.latitude == None, SchoolWithDescription.longitude == None
-                )
-            ),
-            or_(
-                SchoolWithDescription.school_type == "גן ילדים",
-                SchoolWithDescription.school_type == "בית ספר",
-            ),
+    with app.app_context():
+        schools = (
+            db.session.query(SchoolWithDescription)
+            .filter(
+                not_(
+                    and_(SchoolWithDescription.latitude == 0, SchoolWithDescription.longitude == 0)
+                ),
+                not_(
+                    and_(
+                        SchoolWithDescription.latitude == None,
+                        SchoolWithDescription.longitude == None,
+                    )
+                ),
+                or_(
+                    SchoolWithDescription.school_type == "גן ילדים",
+                    SchoolWithDescription.school_type == "בית ספר",
+                ),
+            )
+            .all()
         )
-        .all()
-    )
     data_dir = "tmp_school_data"
     if os.path.exists(data_dir):
         shutil.rmtree(data_dir)
@@ -432,15 +437,17 @@ def get_injured_around_schools(start_date, end_date, distance):
 
 def truncate_injured_around_schools():
     curr_table = "injured_around_school"
-    sql_truncate = "TRUNCATE TABLE " + curr_table
-    db.session.execute(sql_truncate)
-    db.session.commit()
+    sql_truncate = sa.text("TRUNCATE TABLE " + curr_table)
+    with app.app_context():
+        db.session.execute(sql_truncate)
+        db.session.commit()
     logging.info("Truncated table " + curr_table)
 
     curr_table = "injured_around_school_all_data"
-    sql_truncate = "TRUNCATE TABLE " + curr_table
-    db.session.execute(sql_truncate)
-    db.session.commit()
+    sql_truncate = sa.text("TRUNCATE TABLE " + curr_table)
+    with app.app_context():
+        db.session.execute(sql_truncate)
+        db.session.commit()
     logging.info("Truncated table " + curr_table)
 
 
@@ -460,15 +467,17 @@ def import_to_datastore(start_date, end_date, distance, batch_size):
             if chunk_idx % 10 == 0:
                 logging_chunk = f"Chunk idx in injured_around_schools: {chunk_idx}"
                 logging.info(logging_chunk)
-            db.session.bulk_insert_mappings(InjuredAroundSchool, schools_chunk)
-            db.session.commit()
+            with app.app_context():
+                db.session.bulk_insert_mappings(InjuredAroundSchool, schools_chunk)
+                db.session.commit()
         logging.info(f"inserting {len(df_total)} new rows injured_around_school_all_data")
         for chunk_idx, schools_chunk in enumerate(chunks(df_total, batch_size)):
             if chunk_idx % 10 == 0:
                 logging_chunk = f"Chunk idx in injured_around_school_all_data: {chunk_idx}"
                 logging.info(logging_chunk)
-            db.session.bulk_insert_mappings(InjuredAroundSchoolAllData, schools_chunk)
-            db.session.commit()
+            with app.app_context():
+                db.session.bulk_insert_mappings(InjuredAroundSchoolAllData, schools_chunk)
+                db.session.commit()
         new_items += len(injured_around_schools) + len(df_total)
         logging.info(f"\t{new_items} items in {time_delta(started)}")
         return new_items

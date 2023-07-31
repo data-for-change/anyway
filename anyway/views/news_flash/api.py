@@ -14,7 +14,7 @@ from flask import request, Response, make_response, jsonify
 from sqlalchemy import and_, not_, or_
 
 
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 from anyway.backend_constants import (
     BE_CONST,
     NewsflashLocationQualification,
@@ -71,8 +71,9 @@ def news_flash():
     news_flash_id = request.values.get("id")
 
     if news_flash_id is not None:
-        query = db.session.query(NewsFlash)
-        news_flash_obj = query.filter(NewsFlash.id == news_flash_id).first()
+        with app.app_context():
+            query = db.session.query(NewsFlash)
+            news_flash_obj = query.filter(NewsFlash.id == news_flash_id).first()
         if news_flash_obj is not None:
             if is_news_flash_resolution_supported(news_flash_obj):
                 return Response(
@@ -81,22 +82,21 @@ def news_flash():
             else:
                 return Response("News flash location not supported", 406)
         return Response(status=404)
-
-    query = gen_news_flash_query(
-        db.session,
-        source=request.values.get("source"),
-        start_date=request.values.get("start_date"),
-        end_date=request.values.get("end_date"),
-        interurban_only=request.values.get("interurban_only"),
-        road_number=request.values.get("road_number"),
-        road_segment=request.values.get("road_segment_only"),
-        last_minutes=request.values.get("last_minutes"),
-        offset=request.values.get("offset", DEFAULT_OFFSET_REQ_PARAMETER),
-        limit=request.values.get("limit", DEFAULT_LIMIT_REQ_PARAMETER),
-    )
-    news_flashes = query.all()
-
-    news_flashes_jsons = [n.serialize() for n in news_flashes]
+    with app.app_context():
+        query = gen_news_flash_query(
+            db.session,
+            source=request.values.get("source"),
+            start_date=request.values.get("start_date"),
+            end_date=request.values.get("end_date"),
+            interurban_only=request.values.get("interurban_only"),
+            road_number=request.values.get("road_number"),
+            road_segment=request.values.get("road_segment_only"),
+            last_minutes=request.values.get("last_minutes"),
+            offset=request.values.get("offset", DEFAULT_OFFSET_REQ_PARAMETER),
+            limit=request.values.get("limit", DEFAULT_LIMIT_REQ_PARAMETER),
+        )
+        news_flashes = query.all()
+        news_flashes_jsons = [n.serialize() for n in news_flashes]
     for news_flash in news_flashes_jsons:
         set_display_source(news_flash)
     return Response(json.dumps(news_flashes_jsons, default=str), mimetype="application/json")
@@ -111,11 +111,10 @@ def news_flash_v2():
 
     if "id" in validated_query_params:
         return get_news_flash_by_id(validated_query_params["id"])
-
-    query = gen_news_flash_query_v2(db.session, validated_query_params)
-    news_flashes = query.all()
-
-    news_flashes_jsons = [n.serialize() for n in news_flashes]
+    with app.app_context():
+        query = gen_news_flash_query_v2(db.session, validated_query_params)
+        news_flashes = query.all()
+        news_flashes_jsons = [n.serialize() for n in news_flashes]
     for news_flash in news_flashes_jsons:
         set_display_source(news_flash)
     return Response(json.dumps(news_flashes_jsons, default=str), mimetype="application/json")
@@ -126,22 +125,21 @@ def news_flash_new(args: dict) -> List[dict]:
 
     if news_flash_id is not None:
         return single_news_flash(news_flash_id)
-
-    query = gen_news_flash_query(
-        db.session,
-        source=args.get("source"),
-        start_date=args.get("start_date"),
-        end_date=args.get("end_date"),
-        interurban_only=args.get("interurban_only"),
-        road_number=args.get("road_number"),
-        road_segment=args.get("road_segment_only"),
-        offset=args.get("offset"),
-        limit=args.get("limit"),
-        last_minutes=args.get("last_minutes"),
-    )
-    news_flashes = query.all()
-
-    news_flashes_jsons = [n.serialize() for n in news_flashes]
+    with app.app_context():
+        query = gen_news_flash_query(
+            db.session,
+            source=args.get("source"),
+            start_date=args.get("start_date"),
+            end_date=args.get("end_date"),
+            interurban_only=args.get("interurban_only"),
+            road_number=args.get("road_number"),
+            road_segment=args.get("road_segment_only"),
+            offset=args.get("offset"),
+            limit=args.get("limit"),
+            last_minutes=args.get("last_minutes"),
+        )
+        news_flashes = query.all()
+        news_flashes_jsons = [n.serialize() for n in news_flashes]
     for news_flash in news_flashes_jsons:
         set_display_source(news_flash)
     return news_flashes_jsons
@@ -159,11 +157,12 @@ def gen_news_flash_query(
     limit=None,
     last_minutes=None
 ):
-    query = session.query(NewsFlash)
-    # get all possible sources
-    sources = [
-        str(source_name[0]) for source_name in db.session.query(NewsFlash.source).distinct().all()
-    ]
+    with app.app_context():
+        query = session.query(NewsFlash)
+        # get all possible sources
+        sources = [
+            str(source_name[0]) for source_name in db.session.query(NewsFlash.source).distinct().all()
+        ]
     if source:
         if source not in sources:
             return Response(
@@ -209,32 +208,33 @@ def gen_news_flash_query(
 
 
 def gen_news_flash_query_v2(session, valid_params: dict):
-    query = session.query(NewsFlash)
-    for param, value in valid_params.items():
-        if param == "road_number":
-            query = query.filter(NewsFlash.road1 == value)
-        if param == "source":
-            sources = [source.value for source in value]
-            query = query.filter(NewsFlash.source.in_(sources))
-        if param == "start_date":
-            query = query.filter(value <= NewsFlash.date <= valid_params["end_date"])
-        if param == "resolution":
-            query = filter_by_resolutions(query, value)
-        if param == "critical":
-            query = query.filter(NewsFlash.critical == value)
-        if param == "last_minutes":
-            last_timestamp = datetime.datetime.now() - datetime.timedelta(minutes=value)
-            query = query.filter(NewsFlash.date >= last_timestamp)
-    query = query.filter(
-        and_(
-            NewsFlash.accident == True,
-            not_(and_(NewsFlash.lat == 0, NewsFlash.lon == 0)),
-            not_(and_(NewsFlash.lat == None, NewsFlash.lon == None)),
-        )
-    ).order_by(NewsFlash.date.desc())
-    query = query.offset(valid_params["offset"])
-    query = query.limit(valid_params["limit"])
-    return query
+    with app.app_context():
+        query = session.query(NewsFlash)
+        for param, value in valid_params.items():
+            if param == "road_number":
+                query = query.filter(NewsFlash.road1 == value)
+            if param == "source":
+                sources = [source.value for source in value]
+                query = query.filter(NewsFlash.source.in_(sources))
+            if param == "start_date":
+                query = query.filter(value <= NewsFlash.date <= valid_params["end_date"])
+            if param == "resolution":
+                query = filter_by_resolutions(query, value)
+            if param == "critical":
+                query = query.filter(NewsFlash.critical == value)
+            if param == "last_minutes":
+                last_timestamp = datetime.datetime.now() - datetime.timedelta(minutes=value)
+                query = query.filter(NewsFlash.date >= last_timestamp)
+        query = query.filter(
+            and_(
+                NewsFlash.accident == True,
+                not_(and_(NewsFlash.lat == 0, NewsFlash.lon == 0)),
+                not_(and_(NewsFlash.lat == None, NewsFlash.lon == None)),
+            )
+        ).order_by(NewsFlash.date.desc())
+        query = query.offset(valid_params["offset"])
+        query = query.limit(valid_params["limit"])
+        return query
 
 
 def set_display_source(news_flash):
@@ -253,7 +253,8 @@ def filter_by_timeframe(end_date, news_flash_obj, start_date):
 
 
 def single_news_flash(news_flash_id: int):
-    news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == news_flash_id).first()
+    with app.app_context():
+        news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == news_flash_id).first()
     if news_flash_obj is not None:
         return Response(
             json.dumps(news_flash_obj.serialize(), default=str), mimetype="application/json"
@@ -266,8 +267,9 @@ def get_supported_resolutions() -> set:
 
 
 def get_news_flash_by_id(id: int):
-    query = db.session.query(NewsFlash)
-    news_flash_with_id = query.filter(NewsFlash.id == id).first()
+    with app.app_context():
+        query = db.session.query(NewsFlash)
+        news_flash_with_id = query.filter(NewsFlash.id == id).first()
     if news_flash_with_id is None:
         return Response(status=404)
     if not is_news_flash_resolution_supported(news_flash_with_id):
@@ -327,8 +329,9 @@ def update_location_verification_history(
         location_verification_after_change=new_qualification,
         location_after_change=new_location,
     )
-    db.session.add(new_location_qualifiction_history)
-    db.session.commit()
+    with app.app_context():
+        db.session.add(new_location_qualifiction_history)
+        db.session.commit()
 
 
 def extracted_location_and_qualification(news_flash_obj: NewsFlash):
@@ -368,7 +371,8 @@ def update_news_flash_qualifying(id):
         if road_segment_name is not None or street1_hebrew is not None or yishuv_name is not None:
             logging.error("only manual update should contain location details.")
             return return_json_error(Es.BR_BAD_FIELD)
-    news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == id).first()
+    with app.app_context():
+        news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == id).first()
     old_location, old_location_qualifiction = extracted_location_and_qualification(news_flash_obj)
     if news_flash_obj is not None:
         if manual_update:
@@ -390,7 +394,8 @@ def update_news_flash_qualifying(id):
 
         news_flash_obj.newsflash_location_qualification = newsflash_location_qualification
         news_flash_obj.location_qualifying_user = current_user.id
-        db.session.commit()
+        with app.app_context():
+            db.session.commit()
         new_location, new_location_qualifiction = extracted_location_and_qualification(
             news_flash_obj
         )

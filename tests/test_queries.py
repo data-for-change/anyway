@@ -2,7 +2,7 @@ import pytest
 from factory import make_factory, Iterator
 
 from anyway import models
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 from anyway.backend_constants import InjurySeverity
 from tests.factories import InvolvedFactory, UrbanAccidentMarkerFactory, \
     SuburbanAccidentMarkerFactory, RoadSegmentFactory
@@ -12,8 +12,9 @@ from anyway.widgets import widget_utils
 
 @pytest.fixture()
 def db_session():
-    yield db.session
-    db.session.rollback()
+    with app.app_context():
+        yield db.session
+        db.session.rollback()
 
 
 @pytest.mark.skip(reason="requires empty db")

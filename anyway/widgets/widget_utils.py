@@ -7,8 +7,9 @@ from typing import Dict, Any, List, Type, Optional, Sequence
 import pandas as pd
 from flask_babel import _
 from sqlalchemy import func, distinct, between, or_
+from sqlalchemy.sql import text
 
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 from anyway.backend_constants import BE_CONST, LabeledCode, InjurySeverity
 from anyway.models import InvolvedMarkerView
 from anyway.request_params import LocationInfo
@@ -16,29 +17,30 @@ from anyway.vehicle_type import VehicleType
 
 
 def get_query(table_obj, filters, start_time, end_time):
-    query = db.session.query(table_obj)
-    if start_time:
-        query = query.filter(getattr(table_obj, "accident_timestamp") >= start_time)
-    if end_time:
-        query = query.filter(getattr(table_obj, "accident_timestamp") <= end_time)
-    if filters:
-        for field_name, value in filters.items():
-            # TODO: why are we always doing a list check? wouldn't it be more efficient to do a single comparison if it's not a list?
-            if isinstance(value, list):
-                values = value
-            else:
-                values = [value]
+    with app.app_context():
+        query = db.session.query(table_obj)
+        if start_time:
+            query = query.filter(getattr(table_obj, "accident_timestamp") >= start_time)
+        if end_time:
+            query = query.filter(getattr(table_obj, "accident_timestamp") <= end_time)
+        if filters:
+            for field_name, value in filters.items():
+                # TODO: why are we always doing a list check? wouldn't it be more efficient to do a single comparison if it's not a list?
+                if isinstance(value, list):
+                    values = value
+                else:
+                    values = [value]
 
-            if field_name == "street1_hebrew":
-                query = query.filter(
-                    or_(
-                        (getattr(table_obj, "street1_hebrew")).in_(values),
-                        (getattr(table_obj, "street2_hebrew")).in_(values),
+                if field_name == "street1_hebrew":
+                    query = query.filter(
+                        or_(
+                            (getattr(table_obj, "street1_hebrew")).in_(values),
+                            (getattr(table_obj, "street2_hebrew")).in_(values),
+                        )
                     )
-                )
-            else:
-                query = query.filter((getattr(table_obj, field_name)).in_(values))
-    return query
+                else:
+                    query = query.filter((getattr(table_obj, field_name)).in_(values))
+        return query
 
 
 def get_accidents_stats(
@@ -54,29 +56,32 @@ def get_accidents_stats(
     filters = filters or {}
     provider_code_filters = [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
     filters["provider_code"] = filters.get("provider_code", provider_code_filters)
-
-    # get stats
-    query = get_query(table_obj, filters, start_time, end_time)
-    if columns:
-        query = query.with_entities(*columns)
-    if group_by:
-        if isinstance(group_by, tuple):
-            if len(group_by) == 2:
-                query = query.group_by(*group_by)
-                query = query.with_entities(*group_by, func.count(count))
-                dd = query.all()
-                res = retro_dictify(dd)
-                return res
+    with app.app_context():
+        # get stats
+        query = get_query(table_obj, filters, start_time, end_time)
+        if columns:
+            columns_with_entities = [text(c) for c in columns]
+            query = query.with_entities(*columns_with_entities)
+        if group_by:
+            if isinstance(group_by, tuple):
+                if len(group_by) == 2:
+                    query = query.group_by(*group_by)
+                    group_by_with_entities = [text(gb) for gb in group_by]
+                    query = query.with_entities(*group_by_with_entities, func.count(count))
+                    dd = query.all()
+                    res = retro_dictify(dd)
+                    return res
+                else:
+                    err_msg = f"get_accidents_stats: {group_by}: Only a string or a tuple of two are valid for group_by"
+                    logging.error(err_msg)
+                    raise Exception(err_msg)
             else:
-                err_msg = f"get_accidents_stats: {group_by}: Only a string or a tuple of two are valid for group_by"
-                logging.error(err_msg)
-                raise Exception(err_msg)
-        else:
-            query = query.group_by(group_by)
-            query = query.with_entities(
-                group_by, func.count(count) if not cnt_distinct else func.count(distinct(count))
-            )
-    df = pd.read_sql_query(query.statement, query.session.bind)
+                query = query.group_by(group_by)
+                query = query.with_entities(
+                    text(group_by),
+                    func.count(count) if not cnt_distinct else func.count(distinct(count)),
+                )
+        df = pd.read_sql_query(query.statement, db.get_engine())
     df.rename(columns={"count_1": "count"}, inplace=True)  # pylint: disable=no-member
     df.columns = [c.replace("_hebrew", "") for c in df.columns]
     return (  # pylint: disable=no-member
@@ -131,7 +136,8 @@ def get_injured_filters(location_info):
 
 def run_query(query: db.session.query) -> Dict:
     # pylint: disable=no-member
-    return pd.read_sql_query(query.statement, query.session.bind).to_dict(orient="records")
+    with app.app_context():
+        return pd.read_sql_query(query.statement, db.get_engine()).to_dict(orient="records")
 
 
 # TODO: Find a better way to deal with typing.Union[int, str]
@@ -185,39 +191,41 @@ def get_involved_counts(
     vehicle_types: Sequence[VehicleType],
     location_info: LocationInfo,
 ) -> Dict[str, int]:
-    table = InvolvedMarkerView
+    with app.app_context():
+        table = InvolvedMarkerView
 
-    selected_columns = (
-        table.accident_year.label("label_key"),
-        func.count(distinct(table.involve_id)).label("value"),
-    )
-
-    query = (
-        db.session.query()
-        .select_from(table)
-        .with_entities(*selected_columns)
-        .filter(between(table.accident_year, start_year, end_year))
-        .order_by(table.accident_year)
-    )
-
-    if "yishuv_symbol" in location_info:
-        query = query.filter(
-            table.accident_yishuv_symbol == location_info["yishuv_symbol"]
-        ).group_by(table.accident_year)
-    elif "road_segment_id" in location_info:
-        query = query.filter(table.road_segment_id == location_info["road_segment_id"]).group_by(
-            table.accident_year
+        selected_columns = (
+            table.accident_year.label("label_key"),
+            func.count(distinct(table.involve_id)).label("value"),
+        )
+        query = (
+            db.session.query()
+            .select_from(table)
+            .with_entities(*selected_columns)
+            .filter(between(table.accident_year, start_year, end_year))
+            .order_by(table.accident_year)
         )
 
-    if severities:
-        query = query.filter(table.injury_severity.in_([severity.value for severity in severities]))
+        if "yishuv_symbol" in location_info:
+            query = query.filter(
+                table.accident_yishuv_symbol == location_info["yishuv_symbol"]
+            ).group_by(table.accident_year)
+        elif "road_segment_id" in location_info:
+            query = query.filter(
+                table.road_segment_id == location_info["road_segment_id"]
+            ).group_by(table.accident_year)
 
-    if vehicle_types:
-        query = query.filter(
-            table.involve_vehicle_type.in_([v_type.value for v_type in vehicle_types])
-        )
+        if severities:
+            query = query.filter(
+                table.injury_severity.in_([severity.value for severity in severities])
+            )
 
-    df = pd.read_sql_query(query.statement, query.session.bind)
+        if vehicle_types:
+            query = query.filter(
+                table.involve_vehicle_type.in_([v_type.value for v_type in vehicle_types])
+            )
+
+        df = pd.read_sql_query(query.statement, db.get_engine())
     return df.to_dict(orient="records")  # pylint: disable=no-member
 
 

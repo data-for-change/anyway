@@ -8,7 +8,7 @@ from io import StringIO
 
 import jinja2
 import pandas as pd
-from flask import make_response, render_template, abort
+from flask import make_response, render_template, abort, request
 from flask import session
 from flask_assets import Environment
 from flask_babel import Babel, gettext
@@ -22,7 +22,7 @@ from webassets.ext.jinja2 import AssetsExtension
 from werkzeug.exceptions import BadRequestKeyError
 
 from anyway import utilities, secrets
-from anyway.app_and_db import api, get_cors_config
+from anyway.app_and_db import api, get_cors_config, app
 from anyway.clusters_calculator import retrieve_clusters
 from anyway.config import ENTRIES_PER_PAGE
 from anyway.constants import CONST
@@ -172,8 +172,17 @@ jinja_environment = jinja2.Environment(
 )
 jinja_environment.assets_environment = assets_env
 
-babel = Babel(app)
 
+def get_locale():
+    lang = request.values.get("lang")
+    if lang is None:
+        return request.accept_languages.best_match(app.config["LANGUAGES"].keys())
+    else:
+        return lang
+
+
+babel = Babel(app)
+babel.init_app(app, locale_selector=get_locale)
 SESSION_HIGHLIGHTPOINT_KEY = "gps_highlightpoint_created"
 DICTIONARY = "Dictionary"
 DICTCOLUMN1 = "MS_TAVLA"
@@ -297,15 +306,6 @@ def get_kwargs():
     except (ValueError, BadRequestKeyError):
         abort(http_client.BAD_REQUEST)
     return kwargs
-
-
-@babel.localeselector
-def get_locale():
-    lang = request.values.get("lang")
-    if lang is None:
-        return request.accept_languages.best_match(app.config["LANGUAGES"].keys())
-    else:
-        return lang
 
 
 @app.route("/schools", methods=["GET"])
@@ -1051,7 +1051,7 @@ def acc_in_area_query():
         )
     )
 
-    df = pd.read_sql_query(query_obj.with_labels().statement, query_obj.session.bind)
+    df = pd.read_sql_query(query_obj.with_labels().statement, db.get_engine())
     markers_in_area_list = df.to_dict(orient="records")
     response = Response(json.dumps(markers_in_area_list, default=str), mimetype="application/json")
     return response

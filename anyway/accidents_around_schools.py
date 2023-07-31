@@ -7,7 +7,7 @@ from sqlalchemy import or_
 
 from anyway.backend_constants import BE_CONST
 from anyway.models import AccidentMarker, Involved, School
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 
 SUBTYPE_ACCIDENT_WITH_PEDESTRIAN = 1
 LOCATION_ACCURACY_PRECISE = True
@@ -48,27 +48,26 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
     pol_str = "POLYGON(({0} {1},{0} {3},{2} {3},{2} {1},{0} {1}))".format(
         base_x, base_y, distance_x, distance_y
     )
-
-    query_obj = (
-        db.session.query(Involved, AccidentMarker)
-        .join(AccidentMarker, AccidentMarker.provider_and_id == Involved.provider_and_id)
-        .filter(AccidentMarker.geom.intersects(pol_str))
-        .filter(Involved.injured_type == INJURED_TYPE_PEDESTRIAN)
-        .filter(AccidentMarker.provider_and_id == Involved.provider_and_id)
-        .filter(
-            or_(
-                (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_1_CODE),
-                (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_3_CODE),
+    with app.app_context():
+        query_obj = (
+            db.session.query(Involved, AccidentMarker)
+            .join(AccidentMarker, AccidentMarker.provider_and_id == Involved.provider_and_id)
+            .filter(AccidentMarker.geom.intersects(pol_str))
+            .filter(Involved.injured_type == INJURED_TYPE_PEDESTRIAN)
+            .filter(AccidentMarker.provider_and_id == Involved.provider_and_id)
+            .filter(
+                or_(
+                    (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_1_CODE),
+                    (AccidentMarker.provider_code == BE_CONST.CBS_ACCIDENT_TYPE_3_CODE),
+                )
             )
-        )
-        .filter(AccidentMarker.created >= start_date)
-        .filter(AccidentMarker.created < end_date)
-        .filter(AccidentMarker.location_accuracy == LOCATION_ACCURACY_PRECISE_INT)
-        .filter(AccidentMarker.yishuv_symbol != YISHUV_SYMBOL_NOT_EXIST)
-        .filter(Involved.age_group.in_([1, 2, 3, 4]))
-    )  # ages 0-19
-
-    df = pd.read_sql_query(query_obj.with_labels().statement, query_obj.session.bind)
+            .filter(AccidentMarker.created >= start_date)
+            .filter(AccidentMarker.created < end_date)
+            .filter(AccidentMarker.location_accuracy == LOCATION_ACCURACY_PRECISE_INT)
+            .filter(AccidentMarker.yishuv_symbol != YISHUV_SYMBOL_NOT_EXIST)
+            .filter(Involved.age_group.in_([1, 2, 3, 4]))
+        )  # ages 0-19
+        df = pd.read_sql_query(query_obj.with_labels().statement, db.get_engine())
 
     if LOCATION_ACCURACY_PRECISE:
         location_accurate = 1
@@ -110,7 +109,8 @@ def acc_inv_query(longitude, latitude, distance, start_date, end_date, school):
 
 def main(start_date, end_date, distance, output_path):
     schools_query = sa.select([School])
-    df_schools = pd.read_sql_query(schools_query, db.session.bind)
+    with app.app_context():
+        df_schools = pd.read_sql_query(schools_query, db.get_engine())
     df_total = pd.DataFrame()
     df_schools = df_schools.drop_duplicates(  # pylint: disable=no-member
         ["yishuv_name", "longitude", "latitude"]

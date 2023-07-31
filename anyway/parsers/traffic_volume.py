@@ -9,7 +9,7 @@ import pandas as pd
 from anyway.models import TrafficVolume
 from anyway.utilities import chunks
 from anyway.utilities import time_delta
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 
 
 dictionary = {
@@ -34,11 +34,12 @@ def get_value_or_none(param):
 
 
 def delete_traffic_volume_of_year(year):
-    q = db.session.query(TrafficVolume).filter_by(year=year)
-    if q.all():
-        logging.info("Deleting traffic volume of year: " + str(int(year)))
-        q.delete(synchronize_session="fetch")
-        db.session.commit()
+    with app.app_context():
+        q = db.session.query(TrafficVolume).filter_by(year=year)
+        if q.all():
+            logging.info("Deleting traffic volume of year: " + str(int(year)))
+            q.delete(synchronize_session="fetch")
+            db.session.commit()
 
 
 def delete_traffic_volume_of_directory(path):
@@ -85,18 +86,21 @@ def import_to_datastore(path, batch_size):
     try:
         assert batch_size > 0
         dir_list = glob.glob("{0}/*".format(path))
-        for directory in sorted(dir_list, reverse=False):
-            started = datetime.now()
-            delete_traffic_volume_of_directory(directory)
-            traffic_volume_rows = get_traffic_volume_rows(directory)
-            new_items = 0
-            logging.info("inserting " + str(len(traffic_volume_rows)) + " new traffic data rows")
-            for traffic_volume_chunk in chunks(traffic_volume_rows, batch_size):
-                db.session.bulk_insert_mappings(TrafficVolume, traffic_volume_chunk)
-                db.session.commit()
-            new_items += len(traffic_volume_rows)
-            logging.info("\t{0} items in {1}".format(new_items, time_delta(started)))
-        db.session.commit()
+        with app.app_context():
+            for directory in sorted(dir_list, reverse=False):
+                started = datetime.now()
+                delete_traffic_volume_of_directory(directory)
+                traffic_volume_rows = get_traffic_volume_rows(directory)
+                new_items = 0
+                logging.info(
+                    "inserting " + str(len(traffic_volume_rows)) + " new traffic data rows"
+                )
+                for traffic_volume_chunk in chunks(traffic_volume_rows, batch_size):
+                    db.session.bulk_insert_mappings(TrafficVolume, traffic_volume_chunk)
+                    db.session.commit()
+                new_items += len(traffic_volume_rows)
+                logging.info("\t{0} items in {1}".format(new_items, time_delta(started)))
+            db.session.commit()
         return new_items
     except:
         error = (

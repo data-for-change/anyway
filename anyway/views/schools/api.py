@@ -7,37 +7,38 @@ import pandas as pd
 from flask import Response, request
 from sqlalchemy import and_, not_
 
-from anyway.app_and_db import db
+from anyway.app_and_db import db, app
 from anyway.models import School, SchoolWithDescription2020
 
 
 def schools_api():
     logging.debug("getting schools")
-    schools = (
-        db.session.query(School)
-        .filter(
-            not_(and_(School.latitude == 0, School.longitude == 0)),
-            not_(and_(School.latitude == None, School.longitude == None)),
+    with app.app_context():
+        schools = (
+            db.session.query(School)
+            .filter(
+                not_(and_(School.latitude == 0, School.longitude == 0)),
+                not_(and_(School.latitude == None, School.longitude == None)),
+            )
+            .with_entities(
+                School.yishuv_symbol,
+                School.yishuv_name,
+                School.school_name,
+                School.longitude,
+                School.latitude,
+            )
+            .all()
         )
-        .with_entities(
-            School.yishuv_symbol,
-            School.yishuv_name,
-            School.school_name,
-            School.longitude,
-            School.latitude,
-        )
-        .all()
-    )
-    schools_list = [
-        {
-            "yishuv_symbol": x.yishuv_symbol,
-            "yishuv_name": x.yishuv_name,
-            "school_name": x.school_name,
-            "longitude": x.longitude,
-            "latitude": x.latitude,
-        }
-        for x in schools
-    ]
+        schools_list = [
+            {
+                "yishuv_symbol": x.yishuv_symbol,
+                "yishuv_name": x.yishuv_name,
+                "school_name": x.school_name,
+                "longitude": x.longitude,
+                "latitude": x.latitude,
+            }
+            for x in schools
+        ]
     response = Response(json.dumps(schools_list, default=str), mimetype="application/json")
     response.headers.add("Access-Control-Allow-Origin", "*")
     return response
@@ -47,34 +48,35 @@ def schools_description_api():
     # Disable all the no-member violations in this function
     # pylint: disable=no-member
     logging.debug("getting schools with description")
-    query_obj = (
-        db.session.query(SchoolWithDescription2020)
-        .filter(
-            not_(
-                and_(
-                    SchoolWithDescription2020.latitude == 0,
-                    SchoolWithDescription2020.longitude == 0,
-                )
-            ),
-            not_(
-                and_(
-                    SchoolWithDescription2020.latitude == None,
-                    SchoolWithDescription2020.longitude == None,
-                )
-            ),
+    with app.app_context():
+        query_obj = (
+            db.session.query(SchoolWithDescription2020)
+            .filter(
+                not_(
+                    and_(
+                        SchoolWithDescription2020.latitude == 0,
+                        SchoolWithDescription2020.longitude == 0,
+                    )
+                ),
+                not_(
+                    and_(
+                        SchoolWithDescription2020.latitude == None,
+                        SchoolWithDescription2020.longitude == None,
+                    )
+                ),
+            )
+            .with_entities(
+                SchoolWithDescription2020.school_id,
+                SchoolWithDescription2020.school_name,
+                SchoolWithDescription2020.municipality_name,
+                SchoolWithDescription2020.yishuv_name,
+                SchoolWithDescription2020.institution_type,
+                SchoolWithDescription2020.location_accuracy,
+                SchoolWithDescription2020.longitude,
+                SchoolWithDescription2020.latitude,
+            )
         )
-        .with_entities(
-            SchoolWithDescription2020.school_id,
-            SchoolWithDescription2020.school_name,
-            SchoolWithDescription2020.municipality_name,
-            SchoolWithDescription2020.yishuv_name,
-            SchoolWithDescription2020.institution_type,
-            SchoolWithDescription2020.location_accuracy,
-            SchoolWithDescription2020.longitude,
-            SchoolWithDescription2020.latitude,
-        )
-    )
-    df = pd.read_sql_query(query_obj.statement, query_obj.session.bind)
+        df = pd.read_sql_query(query_obj.statement, db.get_engine())
     schools_list = df.to_dict(orient="records")
     response = Response(json.dumps(schools_list, default=str), mimetype="application/json")
     response.headers.add("Access-Control-Allow-Origin", "*")
@@ -83,27 +85,28 @@ def schools_description_api():
 
 def schools_yishuvs_api():
     logging.debug("getting schools yishuvs")
-    schools_yishuvs = (
-        db.session.query(SchoolWithDescription2020)
-        .filter(
-            not_(
-                and_(
-                    SchoolWithDescription2020.latitude == 0,
-                    SchoolWithDescription2020.longitude == 0,
-                )
-            ),
-            not_(
-                and_(
-                    SchoolWithDescription2020.latitude == None,
-                    SchoolWithDescription2020.longitude == None,
-                )
-            ),
+    with app.app_context():
+        schools_yishuvs = (
+            db.session.query(SchoolWithDescription2020)
+            .filter(
+                not_(
+                    and_(
+                        SchoolWithDescription2020.latitude == 0,
+                        SchoolWithDescription2020.longitude == 0,
+                    )
+                ),
+                not_(
+                    and_(
+                        SchoolWithDescription2020.latitude == None,
+                        SchoolWithDescription2020.longitude == None,
+                    )
+                ),
+            )
+            .group_by(SchoolWithDescription2020.yishuv_name)
+            .with_entities(SchoolWithDescription2020.yishuv_name)
+            .all()
         )
-        .group_by(SchoolWithDescription2020.yishuv_name)
-        .with_entities(SchoolWithDescription2020.yishuv_name)
-        .all()
-    )
-    schools_yishuvs_list = sorted([x[0] for x in schools_yishuvs])
+        schools_yishuvs_list = sorted([x[0] for x in schools_yishuvs])
     response = Response(json.dumps(schools_yishuvs_list, default=str), mimetype="application/json")
     response.headers.add("Access-Control-Allow-Origin", "*")
     return response

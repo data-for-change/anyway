@@ -41,13 +41,14 @@ ENV VIRTUAL_ENV=/venv3
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 ENV ALLOW_ALEMBIC_UPGRADE=yes
 ENV FLASK_APP=anyway
+ENV FLASK_DEBUG=1
 ENV FLASK_ENV=development
 
 COPY . /anyway
 
 EXPOSE 5000
 
-RUN flask assets clean
+RUN flask --app anyway:app assets clean
 
 ENTRYPOINT ["/anyway/docker-entrypoint.sh"]
-CMD FLASK_APP=anyway flask run --host 0.0.0.0
+CMD FLASK_APP=anyway flask --app anyway:app run --host 0.0.0.0

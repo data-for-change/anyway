@@ -211,7 +211,7 @@ def split_query_to_chunks_by_column(base_select, column_to_chunk_by, chunk_size,
             select = select.where(column_to_chunk_by < column_values[index + 1])
         chunk = conn.execute(select).fetchall()
         logging.debug("after running query on chunk")
-        yield [dict(row.items()) for row in chunk]
+        yield [row._asdict() for row in chunk]
     logging.debug("after running query on all chunks")
 
 

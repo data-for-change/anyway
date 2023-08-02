@@ -1,4 +1,3 @@
-
 import tweepy
 
 from anyway import secrets

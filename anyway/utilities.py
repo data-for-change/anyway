@@ -71,20 +71,6 @@ def init_flask():
     return app
 
 
-class ProgressSpinner(object):
-    def __init__(self):
-        self.counter = 0
-        self.chars = ["|", "/", "-", "\\"]
-
-    def show(self):
-        """
-        prints a rotating spinner
-        """
-        current_char = self.counter % len(self.chars)
-        sys.stderr.write("\r%s" % self.chars[current_char])
-        self.counter += 1
-
-
 class CsvReader(object):
     """
     loads and handles csv files
@@ -162,15 +148,7 @@ def time_delta(since):
     )
 
 
-def decode_hebrew(s):
-    return s
-
-
 open_utf8 = partial(open, encoding="utf-8")
-
-
-def row_to_dict(row):
-    return row._asdict()
 
 
 def fetch_first_and_every_nth_value_for_column(conn, column_to_fetch, n):

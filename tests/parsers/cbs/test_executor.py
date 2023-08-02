@@ -2,7 +2,6 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from anyway.parsers.cbs.exceptions import CBSParsingFailed
 from anyway.parsers.cbs.executor import main
 
 @pytest.fixture
@@ -33,6 +32,6 @@ def test_cbs_parsing_failed_is_raised_when_something_bad_happens(monkeypatch):
     monkeypatch.setattr('anyway.parsers.cbs.executor.load_existing_streets',
                         MagicMock(side_effect=Exception('something bad')))
 
-    with pytest.raises(CBSParsingFailed, match='Exception occurred while loading the cbs data: something bad'):
+    with pytest.raises(RuntimeError, match='Exception occurred while loading the cbs data: something bad'):
         main(batch_size=MagicMock(), source=MagicMock())
 

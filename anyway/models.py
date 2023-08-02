@@ -46,7 +46,6 @@ from sqlalchemy.dialects import postgresql
 from anyway import localization
 from anyway.backend_constants import BE_CONST, NewsflashLocationQualification
 from anyway.database import Base
-from anyway.utilities import decode_hebrew
 
 try:
     from anyway.app_and_db import db
@@ -221,8 +220,8 @@ class MarkerMixin(Point):
     def format_description(field, value):
         # if the field's value is a static localizable field, fetch it.
         if field in localization.get_supported_tables():
-            value = decode_hebrew(localization.get_field(field, value))
-        name = decode_hebrew(localization.get_field(field))
+            value = localization.get_field(field, value)
+        name = localization.get_field(field)
         return "{0}: {1}".format(name, value)
 
 
@@ -1194,24 +1193,6 @@ class SuburbanJunction(Base):
     non_urban_intersection_hebrew = Column(String(length=MAX_NAME_LEN),
                                            nullable=True)
     roads = Column(postgresql.ARRAY(Integer(), dimensions=1), nullable=False)
-
-    @staticmethod
-    def get_hebrew_name_from_id(non_urban_intersection: int) -> str:
-        res = db.session.query(SuburbanJunction.non_urban_intersection_hebrew).filter(
-            SuburbanJunction.non_urban_intersection == non_urban_intersection).first()
-        if res is None:
-            raise ValueError(f"{non_urban_intersection}: could not find "
-                             f"SuburbanJunction with that symbol")
-        return res.non_urban_intersection_hebrew
-
-    @staticmethod
-    def get_id_from_hebrew_name(non_urban_intersection_hebrew: str) -> int:
-        res = db.session.query(SuburbanJunction.non_urban_intersection).filter(
-            SuburbanJunction.non_urban_intersection == non_urban_intersection_hebrew).first()
-        if res is None:
-            raise ValueError(f"{non_urban_intersection_hebrew}: could not find "
-                             f"SuburbanJunction with that name")
-        return res.non_urban_intersection
 
     @staticmethod
     def get_intersection_from_roads(roads: Set[int]) -> dict:
@@ -2203,9 +2184,6 @@ class RoadSegments(Base):
     def get_id(self):
         return self.id
 
-    def get_segment_id(self):
-        return self.segment_id
-
 
 class ReportProblem(Base):
     __tablename__ = "report_problem"
@@ -2859,9 +2837,6 @@ class CasualtiesCosts(Base):
     injuries_cost_k = Column(Integer())
     year = Column(Integer())
     data_source_hebrew = Column(String())
-
-    def to_str(self):
-        return f"{self.id}:{self.injured_type}:{self.injuries_cost_k}"
 
 
 class SchoolWithDescription2020(Base):

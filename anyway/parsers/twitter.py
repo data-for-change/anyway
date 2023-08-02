@@ -32,15 +32,6 @@ def scrape(screen_name, latest_tweet_id=None, count=100):
         yield parse_tweet(tweet, screen_name)
 
 
-def extract_accident_time(text):
-    # Currently unused
-    reg_exp = r"בשעה (\d{2}:\d{2})"
-    time_search = re.search(reg_exp, text)
-    if time_search:
-        return time_search.group(1)
-    return ""
-
-
 def parse_tweet(tweet, screen_name):
     return NewsFlash(
         link="https://twitter.com/{}/status/{}".format(screen_name, tweet["id_str"]),

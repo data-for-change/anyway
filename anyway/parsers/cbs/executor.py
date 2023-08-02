@@ -84,7 +84,6 @@ from anyway.models import (
     VehiclesView,
     VehicleMarkerView,
 )
-from anyway.parsers.cbs.exceptions import CBSParsingFailed
 from anyway.utilities import ItmToWGS84, time_delta, ImporterUI, truncate_tables, delete_all_rows_from_table, \
     chunks, run_query_and_insert_to_table_in_chunks
 from anyway.db_views import VIEWS
@@ -903,45 +902,6 @@ def add_suburban_junction_from_marker(marker: dict):
         add_suburban_junction(j)
 
 
-def delete_invalid_entries(batch_size):
-    """
-    deletes all markers in the database with null latitude or longitude
-    first deletes from tables Involved and Vehicle, then from table AccidentMarker
-    """
-
-    marker_ids_to_delete = (
-        db.session.query(AccidentMarker.id)
-        .filter(or_((AccidentMarker.longitude == None), (AccidentMarker.latitude == None)))
-        .all()
-    )
-
-    marker_ids_to_delete = [acc_id[0] for acc_id in marker_ids_to_delete]
-
-    logging.debug("There are " + str(len(marker_ids_to_delete)) + " invalid accident_ids to delete")
-
-    for ids_chunk in chunks(marker_ids_to_delete, batch_size):
-
-        logging.debug("Deleting a chunk of " + str(len(ids_chunk)))
-
-        q = db.session.query(Involved).filter(Involved.accident_id.in_(ids_chunk))
-        if q.all():
-            logging.debug("deleting invalid entries from Involved")
-            q.delete(synchronize_session="fetch")
-            db.session.commit()
-
-        q = db.session.query(Vehicle).filter(Vehicle.accident_id.in_(ids_chunk))
-        if q.all():
-            logging.debug("deleting invalid entries from Vehicle")
-            q.delete(synchronize_session="fetch")
-            db.session.commit()
-
-        q = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_(ids_chunk))
-        if q.all():
-            logging.debug("deleting invalid entries from AccidentMarker")
-            q.delete(synchronize_session="fetch")
-            db.session.commit()
-
-
 def delete_cbs_entries(start_year, batch_size):
     """
     deletes all CBS markers (provider_code=1 or provider_code=3) in the database created in year and with provider code provider_code
@@ -1252,5 +1212,5 @@ def main(batch_size, source, load_start_year=None):
         logging.debug("Finished Creating Hebrew DB Tables")
     except Exception as ex:
         print("Traceback: {0}".format(traceback.format_exc()))
-        raise CBSParsingFailed(message=str(ex))
+        raise RuntimeError(str(ex))
         # Todo - send an email that an exception occured

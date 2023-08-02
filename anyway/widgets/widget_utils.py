@@ -6,7 +6,7 @@ from typing import Dict, Any, List, Type, Optional, Sequence
 
 import pandas as pd
 from flask_babel import _
-from sqlalchemy import func, distinct, between
+from sqlalchemy import func, distinct, between, or_
 
 from anyway.app_and_db import db
 from anyway.backend_constants import BE_CONST, LabeledCode, InjurySeverity
@@ -28,7 +28,16 @@ def get_query(table_obj, filters, start_time, end_time):
                 values = value
             else:
                 values = [value]
-            query = query.filter((getattr(table_obj, field_name)).in_(values))
+
+            if field_name == "street1_hebrew":
+                query = query.filter(
+                    or_(
+                        (getattr(table_obj, "street1_hebrew")).in_(values),
+                        (getattr(table_obj, "street2_hebrew")).in_(values),
+                    )
+                )
+            else:
+                query = query.filter((getattr(table_obj, field_name)).in_(values))
     return query
 
 

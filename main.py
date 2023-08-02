@@ -13,6 +13,7 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
+
 def valid_date(date_string):
     date_input_format = "%d-%m-%Y"
     date_input_format_alt = "%Y-%m-%dT%H:%M"
@@ -157,7 +158,7 @@ def schools(filepath, batch_size):
 )
 @click.option("--batch_size", type=int, default=5000)
 def schools_with_description(
-    schools_description_filepath, schools_coordinates_filepath, batch_size
+        schools_description_filepath, schools_coordinates_filepath, batch_size
 ):
     from anyway.parsers.schools_with_description import parse
 
@@ -181,7 +182,7 @@ def schools_with_description(
 )
 @click.option("--batch_size", type=int, default=5000)
 def schools_with_description_2020(
-    schools_description_filepath, schools_coordinates_filepath, batch_size
+        schools_description_filepath, schools_coordinates_filepath, batch_size
 ):
     from anyway.parsers.schools_with_description_2020 import parse
 
@@ -273,6 +274,20 @@ def infographics_data_cache_for_road_segments():
     from anyway.parsers.infographics_data_cache_updater import main_for_road_segments
 
     return main_for_road_segments()
+
+
+@process.command()
+@click.option(
+    "--id", type=int, help="newsflash id"
+)
+def infographics_pictures(id):
+    from anyway.infographic_image_generator import generate_infographics_for_newsflash
+
+    finished_generation, generated_images_names = generate_infographics_for_newsflash(id)
+    if finished_generation:
+        logging.info(f"generation success, {len(generated_images_names)} infographics")
+    else:
+        raise Exception("generation failed")
 
 
 @process.group()
@@ -423,24 +438,6 @@ def accidents_around_schools(start_date, end_date, distance, output_path):
         start_date=start_date, end_date=end_date, distance=distance, output_path=output_path
     )
 
-@cli.group()
-def generate():
-    pass
-
-
-@generate.command()
-@click.option(
-    "--id", type=int, help="newsflash id"
-)
-def infographics_pictures(id):
-    from anyway.infographic_image_generator import generate_infographics_for_newsflash
-
-    finished_generation, generated_images_names = generate_infographics_for_newsflash(id)
-    if finished_generation:
-        logging.info(f"generation success, {len(generated_images_names)} infographics")
-        return
-    logging.error("generation failed")
-
 
 @scripts.command()
 def test_airflow():
@@ -458,16 +455,55 @@ def importemail():
 
 
 @cli.group()
+def upload():
+    pass
+
+
+@click.option(
+    "--id", type=int, help="newsflash id"
+)
+@click.option(
+    "--download",
+    is_flag=True,
+    help="if false, assumes images already exist on default location",
+    default=True,
+)
+@upload.command()
+def generated_infographics(id, download):
+    from anyway.infographic_image_generator import upload_infographics_images_to_s3
+
+    upload_infographics_images_to_s3(id, download)
+
+
+@cli.group()
 def telegram():
     pass
 
 
 @telegram.command()
 @click.option("--id", type=int)
-def send_notification():
+def send_notification(id):
     from anyway.telegram_accident_notifications import publish_notification
 
     publish_notification(id)
+
+
+# this is for testing, in production we use a dag with separate tasks
+@telegram.command()
+@click.option("--id", type=int)
+def generate_images_and_send_notification(id):
+    from anyway.telegram_accident_notifications import publish_notification
+    from anyway.infographic_image_generator import upload_infographics_images_to_s3
+    from anyway.infographic_image_generator import generate_infographics_for_newsflash
+
+    finished_generation, generated_images_names = generate_infographics_for_newsflash(id)
+    if finished_generation:
+        logging.info(f"generation success, {len(generated_images_names)} infographics")
+    else:
+        raise Exception("generation failed")
+    upload_infographics_images_to_s3(id)
+    publish_notification(id)
+
 
 if __name__ == "__main__":
     cli(sys.argv[1:])  # pylint: disable=too-many-function-args

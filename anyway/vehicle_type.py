@@ -1,7 +1,6 @@
 from enum import Enum
-from typing import List, Union
+from typing import List
 import logging
-import math
 
 try:
     from flask_babel import _

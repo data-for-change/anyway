@@ -3,7 +3,6 @@ import logging
 import math
 import os
 import re
-import sys
 import threading
 import typing
 from csv import DictReader

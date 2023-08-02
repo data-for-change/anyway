@@ -1,5 +1,5 @@
 ##
-from math import cos, sin, atan2, sqrt
+from math import sqrt
 
 from anyway import globalmaptiles as globaltiles
 

@@ -6,7 +6,6 @@ import os
 import traceback
 
 from typing import Optional, Dict, List, Type
-from collections import defaultdict
 
 # noinspection PyProtectedMember
 from flask_babel import _
@@ -19,10 +18,9 @@ from anyway.request_params import (
     extract_news_flash_location,
     get_request_params_from_request_values,
 )
-from anyway.backend_constants import BE_CONST, AccidentType
+from anyway.backend_constants import BE_CONST
 from anyway.models import NewsFlash, AccidentMarkerView
 from anyway.parsers import resolution_dict
-from anyway.infographics_dictionaries import head_on_collisions_comparison_dict
 from anyway.parsers import infographics_data_cache_updater
 from anyway.widgets.widget import Widget, widgets_dict
 

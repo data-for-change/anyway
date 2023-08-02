@@ -34,4 +34,3 @@ def test_cbs_parsing_failed_is_raised_when_something_bad_happens(monkeypatch):
 
     with pytest.raises(RuntimeError, match='Exception occurred while loading the cbs data: something bad'):
         main(batch_size=MagicMock(), source=MagicMock())
-

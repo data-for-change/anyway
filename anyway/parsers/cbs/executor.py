@@ -1212,5 +1212,5 @@ def main(batch_size, source, load_start_year=None):
         logging.debug("Finished Creating Hebrew DB Tables")
     except Exception as ex:
         print("Traceback: {0}".format(traceback.format_exc()))
-        raise RuntimeError(str(ex))
+        raise RuntimeError(f'Exception occurred while loading the cbs data: {ex}')
         # Todo - send an email that an exception occured

@@ -8,7 +8,8 @@ from anyway.parsers import infographics_data_cache_updater
 from anyway.parsers import timezones
 from anyway.models import NewsFlash
 from anyway.slack_accident_notifications import publish_notification
-from anyway.utilities import trigger_airflow_dag, newsflash_has_location
+from anyway.utilities import trigger_airflow_dag
+from anyway.widgets.widget_utils import newsflash_has_location
 
 # fmt: off
 

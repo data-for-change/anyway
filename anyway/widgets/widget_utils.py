@@ -13,7 +13,7 @@ from anyway.backend_constants import BE_CONST, LabeledCode, InjurySeverity
 from anyway.models import InvolvedMarkerView
 from anyway.request_params import LocationInfo
 from anyway.vehicle_type import VehicleType
-
+from anyway.models import NewsFlash
 
 def get_query(table_obj, filters, start_time, end_time):
     query = db.session.query(table_obj)
@@ -228,3 +228,9 @@ def join_strings(strings, sep_a=" ,", sep_b=" ו-"):
         return sep_b.join(strings)
     else:
         return sep_a.join(strings[:-1]) + sep_b + strings[-1]
+
+
+def newsflash_has_location(newsflash: NewsFlash):
+    resolution = newsflash.resolution
+    return (resolution == "suburban_road" and newsflash.road_segment_name) or \
+        (resolution == "street" and newsflash.street1_hebrew)

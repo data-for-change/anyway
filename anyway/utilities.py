@@ -15,6 +15,7 @@ from sqlalchemy.sql import select
 
 import phonenumbers
 from dateutil.relativedelta import relativedelta
+from anyway.models import NewsFlash
 
 try:
     from flask import Flask
@@ -354,3 +355,8 @@ def trigger_airflow_dag(dag_id, conf={}):
         dag_run_api_instance = dag_run_api.DAGRunApi(api_client)
         dag_run = DAGRun(conf=conf)
         return dag_run_api_instance.post_dag_run(dag_id, dag_run)
+
+def newsflash_has_location(newsflash: Newsflash):
+    resolution = newsflash.resolution
+    return (resolution == "suburban_road" and newsflash.road_segment_name) or \
+        (resolution == "street" and newsflash.street1_hebrew)

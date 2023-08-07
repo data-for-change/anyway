@@ -62,7 +62,7 @@ def publish_notification(newsflash_id):
     transcription_by_widget_name = fetch_transcription_by_widget_name(newsflash_id)
     urls_by_infographic_name = create_public_urls_for_infographics_images(str(newsflash_id))
 
-    bot = telebot.TeleBot(secrets.get("TELEGRAM_BOT_TOKEN"))
+    bot = telebot.TeleBot(secrets.get("BOT_TOKEN"))
     initial_message_in_channel = send_initial_message_in_channel(bot, accident_text)
     #every message in the channel is automatically forwarded to the linked discussion group.
     #to create a comment on the channel message, we need to send a reply to the

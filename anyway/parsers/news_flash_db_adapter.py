@@ -75,6 +75,19 @@ class DBAdapter:
         )
         self.commit()
 
+    @staticmethod
+    def generate_infographics_and_send_to_telegram(newsflashid):
+        dag_conf = {"news_flash_id": newsflashid}
+        trigger_airflow_dag("generate-and-send-infographics-images", dag_conf)
+
+    @staticmethod
+    def publish_notifications(newsflash: NewsFlash):
+        publish_notification(newsflash)
+        if newsflash_has_location(newsflash):
+            generate_infographics_and_send_to_telegram(newsflash.id)
+        else:
+            logging.debug("newsflash does not have location, not publishing")
+
     def insert_new_newsflash(self, newsflash: NewsFlash) -> None:
         logging.info("Adding newsflash, is accident: {}, date: {}"
                      .format(newsflash.accident, newsflash.date))
@@ -122,16 +135,3 @@ class DBAdapter:
         for key, value in newsflash.__dict__.items():
             if value in self.__null_types:
                 setattr(newsflash, key, None)
-
-    @staticmethod
-    def generate_infographics_and_send_to_telegram(newsflashid):
-        dag_conf = {"news_flash_id": newsflashid}
-        trigger_airflow_dag("generate-and-send-infographics-images", dag_conf)
-
-    @staticmethod
-    def publish_notifications(newsflash: NewsFlash):
-        publish_notification(newsflash)
-        if newsflash_has_location(newsflash):
-            generate_infographics_and_send_to_telegram(newsflash.id)
-        else:
-            logging.debug("newsflash does not have location, not publishing")

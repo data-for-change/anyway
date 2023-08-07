@@ -15,6 +15,7 @@ from anyway.request_params import LocationInfo
 from anyway.vehicle_type import VehicleType
 from anyway.models import NewsFlash
 
+
 def get_query(table_obj, filters, start_time, end_time):
     query = db.session.query(table_obj)
     if start_time:
@@ -52,7 +53,10 @@ def get_accidents_stats(
     end_time=None,
 ):
     filters = filters or {}
-    provider_code_filters = [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    provider_code_filters = [
+        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
+        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+    ]
     filters["provider_code"] = filters.get("provider_code", provider_code_filters)
 
     # get stats
@@ -74,7 +78,8 @@ def get_accidents_stats(
         else:
             query = query.group_by(group_by)
             query = query.with_entities(
-                group_by, func.count(count) if not cnt_distinct else func.count(distinct(count))
+                group_by,
+                func.count(count) if not cnt_distinct else func.count(distinct(count)),
             )
     df = pd.read_sql_query(query.statement, query.session.bind)
     df.rename(columns={"count_1": "count"}, inplace=True)  # pylint: disable=no-member
@@ -98,7 +103,10 @@ def retro_dictify(indexable) -> Dict[Any, Dict[Any, Any]]:
 
 
 def add_empty_keys_to_gen_two_level_dict(
-    d, level_1_values: List[Any], level_2_values: List[Any], default_level_3_value: int = 0
+    d,
+    level_1_values: List[Any],
+    level_2_values: List[Any],
+    default_level_3_value: int = 0,
 ) -> Dict[Any, Dict[Any, int]]:
     for v1 in level_1_values:
         if v1 not in d:
@@ -131,7 +139,9 @@ def get_injured_filters(location_info):
 
 def run_query(query: db.session.query) -> Dict:
     # pylint: disable=no-member
-    return pd.read_sql_query(query.statement, query.session.bind).to_dict(orient="records")
+    return pd.read_sql_query(query.statement, query.session.bind).to_dict(
+        orient="records"
+    )
 
 
 # TODO: Find a better way to deal with typing.Union[int, str]
@@ -205,12 +215,14 @@ def get_involved_counts(
             table.accident_yishuv_symbol == location_info["yishuv_symbol"]
         ).group_by(table.accident_year)
     elif "road_segment_id" in location_info:
-        query = query.filter(table.road_segment_id == location_info["road_segment_id"]).group_by(
-            table.accident_year
-        )
+        query = query.filter(
+            table.road_segment_id == location_info["road_segment_id"]
+        ).group_by(table.accident_year)
 
     if severities:
-        query = query.filter(table.injury_severity.in_([severity.value for severity in severities]))
+        query = query.filter(
+            table.injury_severity.in_([severity.value for severity in severities])
+        )
 
     if vehicle_types:
         query = query.filter(
@@ -232,5 +244,6 @@ def join_strings(strings, sep_a=" ,", sep_b=" ו-"):
 
 def newsflash_has_location(newsflash: NewsFlash):
     resolution = newsflash.resolution
-    return (resolution == "suburban_road" and newsflash.road_segment_name) or \
-        (resolution == "street" and newsflash.street1_hebrew)
+    return (resolution == "suburban_road" and newsflash.road_segment_name) or (
+        resolution == "street" and newsflash.street1_hebrew
+    )

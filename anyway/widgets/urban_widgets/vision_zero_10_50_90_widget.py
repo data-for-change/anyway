@@ -7,7 +7,7 @@ from anyway.widgets.urban_widgets.urban_widget import UrbanWidget
 
 @register
 class VisionZero105090Widget(UrbanWidget):
-    name: str = "vision_zero_10_50_90_widget"
+    name: str = "vision_zero_10_50_90"
     files = [__file__]
 
     def __init__(self, request_params: RequestParams):

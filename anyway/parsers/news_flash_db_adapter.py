@@ -84,7 +84,7 @@ class DBAdapter:
     def publish_notifications(newsflash: NewsFlash):
         publish_notification(newsflash)
         if newsflash_has_location(newsflash):
-            generate_infographics_and_send_to_telegram(newsflash.id)
+            DBAdapter.generate_infographics_and_send_to_telegram(newsflash.id)
         else:
             logging.debug("newsflash does not have location, not publishing")
 
@@ -96,7 +96,7 @@ class DBAdapter:
         self.db.session.commit()
         infographics_data_cache_updater.add_news_flash_to_cache(newsflash)
         if os.environ.get("FLASK_ENV") == "production" and newsflash.accident:
-            publish_notifications(newsflash)
+            DBAdapter.publish_notifications(newsflash)
 
     def get_newsflash_by_id(self, id):
         return self.db.session.query(NewsFlash).filter(NewsFlash.id == id)

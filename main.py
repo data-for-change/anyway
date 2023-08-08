@@ -505,6 +505,13 @@ def generate_images_and_send_notification(id):
     publish_notification(id)
 
 
+@telegram.command()
+@click.option("--id", type=int)
+def trigger_dag(id):
+    from anyway.utilities import trigger_airflow_dag
+    dag_conf = {"news_flash_id": id}
+    trigger_airflow_dag("generate-and-send-infographics-images", dag_conf)
+
 if __name__ == "__main__":
     cli(sys.argv[1:])  # pylint: disable=too-many-function-args
 

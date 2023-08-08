@@ -240,6 +240,7 @@ def join_strings(strings, sep_a=" ,", sep_b=" ו-"):
 
 def newsflash_has_location(newsflash: NewsFlash):
     resolution = newsflash.resolution
-    return (resolution == "suburban_road" and newsflash.road_segment_name) or (
-        resolution == "street" and newsflash.street1_hebrew
-    )
+    return (
+        resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD.value
+        and newsflash.road_segment_name
+    ) or (resolution == BE_CONST.ResolutionCategories.STREET.value and newsflash.street1_hebrew)

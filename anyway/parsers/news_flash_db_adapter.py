@@ -97,7 +97,12 @@ class DBAdapter:
         self.db.session.commit()
         infographics_data_cache_updater.add_news_flash_to_cache(newsflash)
         if os.environ.get("FLASK_ENV") == "production" and newsflash.accident:
-            DBAdapter.publish_notifications(newsflash)
+            try:
+                DBAdapter.publish_notifications(newsflash)
+            except Exception as e:
+                logging.error("publish notifications failed")
+                logging.error(e)
+
 
     def get_newsflash_by_id(self, id):
         return self.db.session.query(NewsFlash).filter(NewsFlash.id == id)

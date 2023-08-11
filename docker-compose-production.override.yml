@@ -36,7 +36,7 @@ services:
 
   db:
     environment:
-      - DBRESTORE_AWS_BUCKET=anyway-full-db-dumps
+      - DBRESTORE_AWS_BUCKET=dfc-anyway-full-db-dumps
       - DBRESTORE_FILE_NAME
       - DBRESTORE_SET_ANYWAY_PASSWORD
       - POSTGRES_USER

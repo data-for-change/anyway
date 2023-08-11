@@ -77,16 +77,21 @@ from anyway.models import (
     ProviderCode,
     VehicleDamage,
     Streets,
+    SuburbanJunction,
+    AccidentMarkerView,
+    InvolvedView,
+    InvolvedMarkerView,
+    VehiclesView,
+    VehicleMarkerView,
 )
 from anyway.parsers.cbs.exceptions import CBSParsingFailed
-from anyway.utilities import ItmToWGS84, time_delta, ImporterUI, truncate_tables, chunks
+from anyway.utilities import ItmToWGS84, time_delta, ImporterUI, truncate_tables, delete_all_rows_from_table, \
+    chunks, run_query_and_insert_to_table_in_chunks
 from anyway.db_views import VIEWS
 from anyway.app_and_db import db
 from anyway.parsers.cbs.s3 import S3DataRetriever
 
-
 street_map_type: Dict[int, List[dict]]
-
 
 failed_dirs = OrderedDict()
 
@@ -100,6 +105,7 @@ STREETS = "streets"
 ROADS = "roads"
 URBAN_INTERSECTION = "urban_intersection"
 NON_URBAN_INTERSECTION = "non_urban_intersection"
+NON_URBAN_INTERSECTION_HEBREW = "non_urban_intersection_hebrew"
 DICTIONARY = "dictionary"
 INVOLVED = "involved"
 VEHICLES = "vehicles"
@@ -271,7 +277,7 @@ def get_address(accident, streets):
     house_number = (
         int(accident.get(field_names.house_number))
         if not pd.isnull(accident.get(field_names.house_number))
-        and int(accident.get(field_names.house_number)) != 9999
+           and int(accident.get(field_names.house_number)) != 9999
         else None
     )
     settlement = localization.get_city_name(accident.get(field_names.yishuv_symbol))
@@ -336,16 +342,16 @@ def get_junction(accident, roads):
     :return: returns the junction or None if it wasn't found
     """
     if (
-        accident.get(field_names.km) is not None
-        and accident.get(field_names.non_urban_intersection) is None
+            accident.get(field_names.km) is not None
+            and accident.get(field_names.non_urban_intersection) is None
     ):
         min_dist = 100000
         key = (), ()
         junc_km = 0
         for option in roads:
             if (
-                accident.get(field_names.road1) == option[0]
-                and abs(accident["KM"] - option[2]) < min_dist
+                    accident.get(field_names.road1) == option[0]
+                    and abs(accident["KM"] - option[2]) < min_dist
             ):
                 min_dist = abs(accident.get(field_names.km) - option[2])
                 key = accident.get(field_names.road1), option[1], option[2]
@@ -358,19 +364,19 @@ def get_junction(accident, roads):
                 direction = "דרומית" if accident.get(field_names.road1) % 2 == 0 else "מערבית"
             if abs(float(accident["KM"] - junc_km) / 10) >= 1:
                 string = (
-                    str(abs(float(accident["KM"]) - junc_km) / 10)
-                    + " ק״מ "
-                    + direction
-                    + " ל"
-                    + junction
+                        str(abs(float(accident["KM"]) - junc_km) / 10)
+                        + " ק״מ "
+                        + direction
+                        + " ל"
+                        + junction
                 )
             elif 0 < abs(float(accident["KM"] - junc_km) / 10) < 1:
                 string = (
-                    str(int((abs(float(accident.get(field_names.km)) - junc_km) / 10) * 1000))
-                    + " מטרים "
-                    + direction
-                    + " ל"
-                    + junction
+                        str(int((abs(float(accident.get(field_names.km)) - junc_km) / 10) * 1000))
+                        + " מטרים "
+                        + direction
+                        + " ל"
+                        + junction
                 )
             else:
                 string = junction
@@ -454,10 +460,10 @@ def create_marker(provider_code, accident, streets, roads, non_urban_intersectio
     if field_names.x not in accident or field_names.y not in accident:
         raise ValueError("Missing x and y coordinates")
     if (
-        accident.get(field_names.x)
-        and not math.isnan(accident.get(field_names.x))
-        and accident.get(field_names.y)
-        and not math.isnan(accident.get(field_names.y))
+            accident.get(field_names.x)
+            and not math.isnan(accident.get(field_names.x))
+            and accident.get(field_names.y)
+            and not math.isnan(accident.get(field_names.y))
     ):
         lng, lat = coordinates_converter.convert(
             accident.get(field_names.x), accident.get(field_names.y)
@@ -563,6 +569,7 @@ def import_accidents(provider_code, accidents, streets, roads, non_urban_interse
     accidents_result = []
     for _, accident in accidents.iterrows():
         marker = create_marker(provider_code, accident, streets, roads, non_urban_intersection)
+        add_suburban_junction_from_marker(marker)
         accidents_result.append(marker)
     db.session.bulk_insert_mappings(AccidentMarker, accidents_result)
     db.session.commit()
@@ -577,7 +584,7 @@ def import_involved(provider_code, involved, **kwargs):
     involved_result = []
     for _, involve in involved.iterrows():
         if not involve.get(field_names.id) or pd.isnull(
-            involve.get(field_names.id)
+                involve.get(field_names.id)
         ):  # skip lines with no accident id
             continue
         file_type_police = involve.get(field_names.file_type_police)
@@ -692,7 +699,7 @@ def get_files(directory):
                             field_names.street_sign: x[field_names.street_sign],
                             field_names.street_name: x[field_names.street_name],
                         }
-                        for _, x in settlement.iterrows()
+                        for _, x in settlement.iterrows() if isinstance(x[field_names.street_name], str)
                     ]
 
                 output_files_dict[name] = streets_map
@@ -712,7 +719,7 @@ def get_files(directory):
 
 
 def import_to_datastore(
-    directory, provider_code, year, batch_size
+        directory, provider_code, year, batch_size
 ) -> Tuple[int, Dict[int, List[dict]]]:
     """
     goes through all the files in a given directory, parses and commits them
@@ -786,6 +793,8 @@ def import_streets_into_db():
 
 yishuv_street_dict: Dict[Tuple[int, int], str] = {}
 yishuv_name_dict: Dict[Tuple[int, str], int] = {}
+suburban_junctions_dict: Dict[int, dict] = {}
+SUBURBAN_JUNCTION = "suburban_junction"
 
 
 def load_existing_streets():
@@ -831,6 +840,67 @@ def add_street_remove_name_duplicates(street: Dict[str, Any]):
         yishuv_name_dict[k] = street["street"]
     if v is None:
         yishuv_name_dict[k] = street["street"]
+
+
+def import_suburban_junctions_into_db():
+    items = [{"non_urban_intersection": k,
+              NON_URBAN_INTERSECTION_HEBREW: fix_name_len(v[NON_URBAN_INTERSECTION_HEBREW]),
+              ROADS: v[ROADS]} for
+             k, v in suburban_junctions_dict.items()]
+    logging.debug(
+        f"Writing to db: {len(items)} suburban junctions"
+    )
+    db.session.query(SuburbanJunction).delete()
+    db.session.bulk_insert_mappings(SuburbanJunction, items)
+    db.session.commit()
+    logging.debug(f"Done.")
+
+
+def fix_name_len(name: str) -> str:
+    if not isinstance(name, str):
+        return name
+    if len(name) > SuburbanJunction.MAX_NAME_LEN:
+        logging.error(f"Suburban_junction name too long ({len(name)}>"
+                      f"{SuburbanJunction.MAX_NAME_LEN}):{name}.")
+    return name[: SuburbanJunction.MAX_NAME_LEN]
+
+def load_existing_suburban_junctions():
+    junctions: List[SuburbanJunction] = db.session.query(SuburbanJunction).all()
+    for j in junctions:
+        add_suburban_junction(j)
+    logging.debug(f"Loaded suburban junctions: {len(suburban_junctions_dict)}.")
+
+
+def add_suburban_junction(added: SuburbanJunction):
+    if added.non_urban_intersection in suburban_junctions_dict:
+        existing_junction = suburban_junctions_dict[added.non_urban_intersection]
+        added_heb = added.non_urban_intersection_hebrew
+        if existing_junction[NON_URBAN_INTERSECTION_HEBREW] != added_heb and added_heb is not None:
+            logging.error(
+                f"Duplicate non-urban intersection name: {added.non_urban_intersection}: existing:"
+                f"{existing_junction[NON_URBAN_INTERSECTION_HEBREW]}, added: {added_heb}"
+            )
+            existing_junction[NON_URBAN_INTERSECTION_HEBREW] = added_heb
+        existing_junction[ROADS].update(set(added.roads))
+    else:
+        suburban_junctions_dict[added.non_urban_intersection] = {
+            NON_URBAN_INTERSECTION_HEBREW: added.non_urban_intersection_hebrew,
+            ROADS: set(added.roads),
+        }
+
+
+def add_suburban_junction_from_marker(marker: dict):
+    intersection = marker[NON_URBAN_INTERSECTION]
+    if intersection is not None:
+        j = SuburbanJunction()
+        j.non_urban_intersection = intersection
+        j.non_urban_intersection_hebrew = marker[NON_URBAN_INTERSECTION_HEBREW]
+        roads = set()
+        for k in ["road1", "road2"]:
+            if marker[k] is not None:
+                roads.add(marker[k])
+        j.roads = roads
+        add_suburban_junction(j)
 
 
 def delete_invalid_entries(batch_size):
@@ -972,32 +1042,32 @@ def fill_dictionary_tables(cbs_dictionary, provider_code, year):
             if inner_v is None or (isinstance(inner_v, float) and math.isnan(inner_v)):
                 continue
             sql_delete = (
-                "DELETE FROM "
-                + curr_table
-                + " WHERE provider_code="
-                + str(provider_code)
-                + " AND year="
-                + str(year)
-                + " AND id="
-                + str(inner_k)
+                    "DELETE FROM "
+                    + curr_table
+                    + " WHERE provider_code="
+                    + str(provider_code)
+                    + " AND year="
+                    + str(year)
+                    + " AND id="
+                    + str(inner_k)
             )
             db.session.execute(sql_delete)
             db.session.commit()
             sql_insert = (
-                "INSERT INTO "
-                + curr_table
-                + " VALUES ("
-                + str(inner_k)
-                + ","
-                + str(year)
-                + ","
-                + str(provider_code)
-                + ","
-                + "'"
-                + inner_v.replace("'", "")
-                + "'"
-                + ")"
-                + " ON CONFLICT DO NOTHING"
+                    "INSERT INTO "
+                    + curr_table
+                    + " VALUES ("
+                    + str(inner_k)
+                    + ","
+                    + str(year)
+                    + ","
+                    + str(provider_code)
+                    + ","
+                    + "'"
+                    + inner_v.replace("'", "")
+                    + "'"
+                    + ")"
+                    + " ON CONFLICT DO NOTHING"
             )
             db.session.execute(sql_insert)
             db.session.commit()
@@ -1030,7 +1100,7 @@ def create_provider_code_table():
     }
     for k, v in provider_code_dict.items():
         sql_insert = (
-            "INSERT INTO " + provider_code_table + " VALUES (" + str(k) + "," + "'" + v + "'" + ")"
+                "INSERT INTO " + provider_code_table + " VALUES (" + str(k) + "," + "'" + v + "'" + ")"
         )
         db.session.execute(sql_insert)
         db.session.commit()
@@ -1043,33 +1113,34 @@ def receive_rollback(conn, **kwargs):
 
 
 def create_tables():
+    chunk_size = 5000
     try:
         with db.get_engine().begin() as conn:
             event.listen(conn, "rollback", receive_rollback)
-            logging.debug("begin create tables")
-            conn.execute("TRUNCATE involved_markers_hebrew")
-            logging.debug("after TRUNCATE involved_markers_hebrew")
-            conn.execute("TRUNCATE vehicles_markers_hebrew")
-            logging.debug("after TRUNCATE vehicles_markers_hebrew")
-            conn.execute("TRUNCATE vehicles_hebrew")
-            logging.debug("after TRUNCATE vehicles_hebrew")
-            conn.execute("TRUNCATE involved_hebrew")
-            logging.debug("after TRUNCATE involved_hebrew")
-            conn.execute("TRUNCATE markers_hebrew")
-            logging.debug("after TRUNCATE markers_hebrew")
-            conn.execute("INSERT INTO markers_hebrew " + VIEWS.MARKERS_HEBREW_VIEW)
-            logging.debug("after INSERT INTO markers_hebrew")
-            conn.execute("INSERT INTO involved_hebrew " + VIEWS.INVOLVED_HEBREW_VIEW)
-            logging.debug("after INSERT INTO involved_hebrew")
-            conn.execute("INSERT INTO vehicles_hebrew " + VIEWS.VEHICLES_HEBREW_VIEW)
-            logging.debug("after INSERT INTO vehicles_hebrew ")
-            conn.execute(
-                "INSERT INTO vehicles_markers_hebrew " + VIEWS.VEHICLES_MARKERS_HEBREW_VIEW
-            )
-            logging.debug("after INSERT INTO vehicles_markers_hebrew")
-            conn.execute(
-                "INSERT INTO involved_markers_hebrew " + VIEWS.INVOLVED_HEBREW_MARKERS_HEBREW_VIEW
-            )
+            delete_all_rows_from_table(conn, AccidentMarkerView)
+            run_query_and_insert_to_table_in_chunks(VIEWS.create_markers_hebrew_view(), AccidentMarkerView,
+                                                    AccidentMarker.id, chunk_size, conn)
+            logging.debug("after insertion to markers_hebrew ")
+
+            delete_all_rows_from_table(conn, InvolvedView)
+            run_query_and_insert_to_table_in_chunks(VIEWS.create_involved_hebrew_view(), InvolvedView,
+                                                    Involved.id, chunk_size, conn)
+            logging.debug("after insertion to involved_hebrew ")
+
+            delete_all_rows_from_table(conn, VehiclesView)
+            run_query_and_insert_to_table_in_chunks(VIEWS.create_vehicles_hebrew_view(),
+                                                    VehiclesView, Vehicle.id, chunk_size, conn)
+            logging.debug("after insertion to vehicles_hebrew ")
+
+            delete_all_rows_from_table(conn, VehicleMarkerView)
+            run_query_and_insert_to_table_in_chunks(VIEWS.create_vehicles_markers_hebrew_view(),
+                                                    VehicleMarkerView, VehiclesView.id, chunk_size, conn)
+            logging.debug("after insertion to vehicles_markers_hebrew ")
+
+            delete_all_rows_from_table(conn, InvolvedMarkerView)
+            run_query_and_insert_to_table_in_chunks(VIEWS.create_involved_hebrew_markers_hebrew_view(),
+                                                    InvolvedMarkerView, InvolvedView.accident_id, chunk_size, conn)
+            logging.debug("after insertion to involved_markers_hebrew")
             logging.debug("Created DB Hebrew Tables")
     except Exception as e:
         logging.exception(f"Exception while creating hebrew tables, {e}", e)
@@ -1106,6 +1177,7 @@ def get_file_type_and_year(file_path):
 def main(batch_size, source, load_start_year=None):
     try:
         load_existing_streets()
+        load_existing_suburban_junctions()
         total = 0
         started = datetime.now()
         if source == "s3":
@@ -1136,7 +1208,6 @@ def main(batch_size, source, load_start_year=None):
                     )
                     total += num_new
                     add_to_streets(streets)
-            import_streets_into_db()
             shutil.rmtree(s3_data_retriever.local_temp_directory)
 
         elif source == "local_dir_for_tests_only":
@@ -1162,10 +1233,8 @@ def main(batch_size, source, load_start_year=None):
                 total += num_new
                 add_to_streets(streets)
 
-        # [Carmel:] not best solution,
-        # need to understand what are all possible values for the 'source' argument
-        if source != "s3":
-            import_streets_into_db()
+        import_streets_into_db()
+        import_suburban_junctions_into_db()
 
         fill_db_geo_data()
 

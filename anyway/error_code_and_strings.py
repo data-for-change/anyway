@@ -30,6 +30,7 @@ class Errors:
     BR_ORG_NOT_FOUND = 26
     BR_USER_NOT_IN_ORG = 27
     BR_USER_ALREADY_IN_ORG = 28
+    BR_BAD_FIELD = 29
 
 
 ERROR_TO_STRING_DICT = {
@@ -61,6 +62,7 @@ ERROR_TO_STRING_DICT = {
     Errors.BR_ORG_NOT_FOUND: "Bad Request (Organization not found).",
     Errors.BR_USER_NOT_IN_ORG: "Bad Request (User is not in org {}).",
     Errors.BR_USER_ALREADY_IN_ORG: "Bad Request (User is already in org).",
+    Errors.BR_BAD_FIELD: "Bad Request (Bad field).",
 }
 
 ERROR_TO_HTTP_CODE_DICT = {
@@ -92,6 +94,7 @@ ERROR_TO_HTTP_CODE_DICT = {
     Errors.BR_ORG_NOT_FOUND: HTTPStatus.BAD_REQUEST,
     Errors.BR_USER_NOT_IN_ORG: HTTPStatus.BAD_REQUEST,
     Errors.BR_USER_ALREADY_IN_ORG: HTTPStatus.BAD_REQUEST,
+    Errors.BR_BAD_FIELD: HTTPStatus.BAD_REQUEST,
 }
 
 

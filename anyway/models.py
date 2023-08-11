@@ -4,7 +4,8 @@ import datetime
 import json
 import logging
 from collections import namedtuple
-from typing import List
+from typing import List, Set, Iterable
+
 
 try:
     from flask_login import UserMixin
@@ -38,10 +39,12 @@ from sqlalchemy import (
 )
 import sqlalchemy
 from sqlalchemy.orm import relationship, load_only, backref
+from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy import or_, and_
+from sqlalchemy.dialects import postgresql
 
 from anyway import localization
-from anyway.backend_constants import BE_CONST
+from anyway.backend_constants import BE_CONST, NewsflashLocationQualification
 from anyway.database import Base
 from anyway.utilities import decode_hebrew
 
@@ -613,7 +616,9 @@ class AccidentMarker(MarkerMixin, Base):
         if kwargs.get("light_transportation", False):
             age_groups_list = kwargs.get("age_groups").split(",")
             LOCATION_ACCURACY_PRECISE_LIST = [1, 3, 4]
-            markers = markers.filter(AccidentMarker.location_accuracy.in_(LOCATION_ACCURACY_PRECISE_LIST))
+            markers = markers.filter(
+                AccidentMarker.location_accuracy.in_(LOCATION_ACCURACY_PRECISE_LIST)
+            )
             INJURED_TYPES = [1, 6, 7]
             markers = markers.filter(
                 or_(
@@ -869,6 +874,44 @@ class NewsFlash(Base):
     street2_hebrew = Column(Text(), nullable=True)
     non_urban_intersection_hebrew = Column(Text(), nullable=True)
     road_segment_name = Column(Text(), nullable=True)
+    critical = Column(Boolean(), nullable=True)
+    newsflash_location_qualification = Column(
+        Integer(),
+        nullable=False,
+        server_default=text(f"{NewsflashLocationQualification.NOT_VERIFIED.value}"),  # pylint: disable=no-member
+    )
+    location_qualifying_user = Column(BigInteger(), nullable=True)
+
+    def set_critical(
+        self,
+        years_before=5,
+        suburban_road_severe_value=10,
+        suburban_road_killed_value=3,
+        urban_severe_value=2,
+    ):
+        from anyway.widgets.road_segment_widgets.injured_count_by_severity_widget import (
+            InjuredCountBySeverityWidget,
+        )
+        from anyway.request_params import get_latest_accident_date
+
+        if self.road1 is None or self.road_segment_name is None:
+            return None
+        last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
+        end_time = last_accident_date.to_pydatetime().date()
+        start_time = datetime.date(end_time.year + 1 - years_before, 1, 1)
+        critical_values = InjuredCountBySeverityWidget.get_injured_count_by_severity(
+            self.road1, self.road_segment_name, start_time, end_time
+        )
+        if critical_values == {}:
+            return None
+        critical = None
+        resolution = BE_CONST.ResolutionCategories(self.resolution)
+        if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
+            critical = (
+                (critical_values["severe_injured_count"] / suburban_road_severe_value)
+                + (critical_values["killed_count"] / suburban_road_killed_value)
+            ) >= 1
+        self.critical = critical
 
     def serialize(self):
         return {
@@ -895,6 +938,11 @@ class NewsFlash(Base):
             "street2_hebrew": self.street2_hebrew,
             "non_urban_intersection_hebrew": self.non_urban_intersection_hebrew,
             "road_segment_name": self.road_segment_name,
+            "newsflash_location_qualification": NewsflashLocationQualification(
+                self.newsflash_location_qualification
+            ).get_label(),
+            "location_qualifying_user": self.location_qualifying_user,
+            "critical": self.critical,
         }
 
     # Flask-Login integration
@@ -909,6 +957,34 @@ class NewsFlash(Base):
 
     def get_id(self):
         return self.id
+
+
+class LocationVerificationHistory(Base):
+    __tablename__ = "location_verification_history"
+    id = Column(BigInteger(), primary_key=True)
+    user_id = Column(BigInteger(), ForeignKey("users.id"), nullable=False)
+    news_flash_id = Column(BigInteger(), ForeignKey("news_flash.id"), nullable=False)
+    location_verification_before_change = Column(Integer(), nullable=False)
+    location_before_change = Column(Text(), nullable=False)
+    location_verification_after_change = Column(Integer(), nullable=False)
+    location_after_change = Column(Text(), nullable=False)
+    date = Column(DateTime, default=datetime.datetime.now, nullable=False)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "news_flash": self.news_flash_id,
+            "location_verification_before_change": NewsflashLocationQualification(
+                self.location_verification_before_change
+            ).get_label(),
+            "location_before_change": self.location_before_change,
+            "location_verification_after_change": NewsflashLocationQualification(
+                self.location_verification_after_change
+            ).get_label(),
+            "location_after_change": self.location_after_change,
+            "date": self.date,
+        }
 
 
 class CityFields(object):
@@ -1109,6 +1185,61 @@ class Streets(Base):
         if res is None:
             raise RuntimeError(f"When retrieving streets of {yishuv_symbol}")
         return res1
+
+
+class SuburbanJunction(Base):
+    __tablename__ = "suburban_junction"
+    MAX_NAME_LEN = 100
+    non_urban_intersection = Column(Integer(), primary_key=True, nullable=False)
+    non_urban_intersection_hebrew = Column(String(length=MAX_NAME_LEN),
+                                           nullable=True)
+    roads = Column(postgresql.ARRAY(Integer(), dimensions=1), nullable=False)
+
+    @staticmethod
+    def get_hebrew_name_from_id(non_urban_intersection: int) -> str:
+        res = db.session.query(SuburbanJunction.non_urban_intersection_hebrew).filter(
+            SuburbanJunction.non_urban_intersection == non_urban_intersection).first()
+        if res is None:
+            raise ValueError(f"{non_urban_intersection}: could not find "
+                             f"SuburbanJunction with that symbol")
+        return res.non_urban_intersection_hebrew
+
+    @staticmethod
+    def get_id_from_hebrew_name(non_urban_intersection_hebrew: str) -> int:
+        res = db.session.query(SuburbanJunction.non_urban_intersection).filter(
+            SuburbanJunction.non_urban_intersection == non_urban_intersection_hebrew).first()
+        if res is None:
+            raise ValueError(f"{non_urban_intersection_hebrew}: could not find "
+                             f"SuburbanJunction with that name")
+        return res.non_urban_intersection
+
+    @staticmethod
+    def get_intersection_from_roads(roads: Set[int]) -> dict:
+        if not all([isinstance(x, int) for x in roads]):
+            raise ValueError(f"{roads}: Should be integers")
+        res = db.session.query(SuburbanJunction).filter(
+            SuburbanJunction.roads.contains(roads)).first()
+        if res is None:
+            raise ValueError(f"{roads}: could not find "
+                             f"SuburbanJunction with these roads")
+        return res.serialize()
+
+    @staticmethod
+    def get_all_from_key_value(key: str, val: Iterable) -> dict:
+        if not isinstance(val, Iterable):
+            val = [val]
+        res = db.session.query(SuburbanJunction).filter(
+            (getattr(SuburbanJunction, key)).in_(val)).first()
+        if res is None:
+            raise ValueError(f"{key}:{val}: could not find SuburbanJunction")
+        return res.serialize()
+
+    def serialize(self):
+        return {
+            "non_urban_intersection": self.non_urban_intersection,
+            "non_urban_intersection_hebrew": self.non_urban_intersection_hebrew,
+            "roads": set(self.roads),
+        }
 
 
 class RegisteredVehicle(Base):
@@ -2102,6 +2233,12 @@ class ReportProblem(Base):
 
 class InvolvedMarkerView(Base):
     __tablename__ = "involved_markers_hebrew"
+    __table_args__ = (
+        Index("inv_markers_accident_yishuv_symbol_idx", "accident_yishuv_symbol", unique=False),
+        Index("inv_markers_injury_severity_idx", "injury_severity", unique=False),
+        Index("inv_markers_involve_vehicle_type_idx", "involve_vehicle_type", unique=False)
+    )
+
     accident_id = Column(BigInteger(), primary_key=True)
     provider_and_id = Column(BigInteger())
     provider_code = Column(Integer(), primary_key=True)
@@ -2589,6 +2726,16 @@ class InfographicsRoadSegmentsDataCache(InfographicsRoadSegmentsDataCacheFields,
     def get_data(self):
         return self.data
 
+    def set_data(self, data):
+        self.data = data
+
+    def as_dict(self) -> dict:
+        return {
+            "road_segment_id": self.road_segment_id,
+            "years_ago": self.years_ago,
+            "data": self.data,
+        }
+
     def serialize(self):
         return {
             "road_segment_id": self.road_segment_id,
@@ -2622,6 +2769,9 @@ class InfographicsTwoRoadsDataCache(InfographicsTwoRoadsDataCacheFields, Base):
 
     def get_data(self):
         return self.data
+
+    def set_data(self, json_data: str):
+        self.data = json_data
 
     def serialize(self):
         return {
@@ -2685,6 +2835,17 @@ class InfographicsStreetDataCache(InfographicsStreetDataCacheFields, Base):
     def get_data(self):
         return self.data
 
+    def set_data(self, json_data: str):
+        self.data = json_data
+
+    def as_dict(self) -> dict:
+        return {
+            "street": self.street,
+            "yishuv_symbol": self.yishuv_symbol,
+            "years_ago": self.years_ago,
+            "data": self.data,
+        }
+
 
 class InfographicsStreetDataCacheTemp(InfographicsStreetDataCacheFields, Base):
     __tablename__ = "infographics_street_data_cache_temp"
@@ -2735,3 +2896,14 @@ class CBSLocations(Base):
     road_segment_name = Column(Text(), nullable=True)
     longitude = Column(Float(), nullable=True)
     latitude = Column(Float(), nullable=True)
+
+
+class TelegramGroupsBase(Base):
+    id = Column(Integer(), primary_key=True)
+    filter = Column(JSON(), nullable=False, server_default="{}")
+
+class TelegramGroups(TelegramGroupsBase):
+    __tablename__ = "telegram_groups"
+
+class TelegramGroupsTest(TelegramGroupsBase):
+    __tablename__ = "telegram_groups_test"

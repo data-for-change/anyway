@@ -27,7 +27,6 @@ from anyway.clusters_calculator import retrieve_clusters
 from anyway.config import ENTRIES_PER_PAGE
 from anyway.constants import CONST
 from anyway.infographics_utils import (
-    get_infographics_data,
     get_infographics_mock_data,
     get_infographics_data_for_location,
 )
@@ -36,6 +35,7 @@ from anyway.models import (
     DiscussionMarker,
     HighlightPoint,
     Involved,
+    InvolvedView,
     LocationSubscribers,
     Vehicle,
     ReportProblem,
@@ -60,8 +60,11 @@ from anyway.views.news_flash.api import (
     news_flash_new,
     single_news_flash,
     news_flash_v2,
+    update_news_flash_qualifying,
+    get_downloaded_data,
     DEFAULT_LIMIT_REQ_PARAMETER,
     DEFAULT_OFFSET_REQ_PARAMETER,
+    DEFAULT_NUMBER_OF_YEARS_AGO
 )
 from anyway.views.schools.api import (
     schools_description_api,
@@ -172,7 +175,6 @@ jinja_environment.assets_environment = assets_env
 babel = Babel(app)
 
 SESSION_HIGHLIGHTPOINT_KEY = "gps_highlightpoint_created"
-
 DICTIONARY = "Dictionary"
 DICTCOLUMN1 = "MS_TAVLA"
 DICTCOLUMN2 = "KOD"
@@ -1148,6 +1150,8 @@ news_flash_fields_model = api.model(
         "street2_hebrew": fields.String(),
         "non_urban_intersection_hebrew": fields.String(),
         "road_segment_name": fields.String(),
+        "newsflash_location_qualification": fields.Integer(),
+        "location_qualifying_user": fields.Integer(),
     },
 )
 news_flash_list_model = api.model(
@@ -1186,7 +1190,7 @@ class RetrieveNewsFlash(Resource):
 parser = reqparse.RequestParser()
 parser.add_argument("id", type=int, help="News flash id")
 parser.add_argument(
-    "years_ago", type=int, default=5, help="Number of years back to consider accidents"
+    "years_ago", type=int, default=DEFAULT_NUMBER_OF_YEARS_AGO, help=f"Number of years back to consider accidents. Default is {DEFAULT_NUMBER_OF_YEARS_AGO} years"
 )
 parser.add_argument("lang", type=str, default="he", help="Language")
 
@@ -1197,44 +1201,6 @@ class InfographicsData(Resource):
     @api.expect(parser)
     def get(self):
         return infographics_data_by_location()
-
-
-def infographics_data():
-    mock_data = request.values.get("mock", "false")
-    personalized_data = request.values.get("personalized", "false")
-    if mock_data == "true":
-        output = get_infographics_mock_data()
-    elif mock_data == "false":
-        news_flash_id = request.values.get("news_flash_id")
-        if news_flash_id is None:
-            log_bad_request(request)
-            return abort(http_client.BAD_REQUEST)
-
-        number_of_years_ago = request.values.get("years_ago", BE_CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
-        lang: str = request.values.get("lang", "he")
-        logging.debug(
-            (
-                "getting infographics data for news_flash_id: {news_flash_id}, "
-                + "in time period:{number_of_years_ago}, lang:{lang}"
-            ).format(
-                news_flash_id=news_flash_id, number_of_years_ago=number_of_years_ago, lang=lang
-            )
-        )
-        output = get_infographics_data(
-            news_flash_id=news_flash_id, years_ago=number_of_years_ago, lang=lang
-        )
-        if not output:
-            log_bad_request(request)
-            return abort(http_client.NOT_FOUND)
-    else:
-        log_bad_request(request)
-        return abort(http_client.BAD_REQUEST)
-
-    if personalized_data == "true":
-        output = widgets_personalisation_for_user(output)
-
-    json_data = json.dumps(output, default=str)
-    return Response(json_data, mimetype="application/json")
 
 
 """
@@ -1282,7 +1248,7 @@ def gps_to_cbs_location():
 idbl_parser = reqparse.RequestParser()
 idbl_parser.add_argument("road_segment_id", type=int, help="Road Segment id")
 idbl_parser.add_argument(
-    "years_ago", type=int, default=5, help="Number of years back to consider accidents"
+    "years_ago", type=int, default=DEFAULT_NUMBER_OF_YEARS_AGO, help=f"Number of years back to consider accidents. Default is {DEFAULT_NUMBER_OF_YEARS_AGO} years"
 )
 idbl_parser.add_argument("lang", type=str, default="he", help="Language")
 
@@ -1312,7 +1278,6 @@ def infographics_data_by_location():
 
     if personalized_data == "true":
         output = widgets_personalisation_for_user(output)
-
     json_data = json.dumps(output, default=str)
     return Response(json_data, mimetype="application/json")
 
@@ -1481,3 +1446,26 @@ class Cities(Resource):
     @api.doc("get get all cities")
     def get(self):
         return City.get_all_cities()
+
+
+@api.route("/api/news-flash/<int:id>", methods=["PUT"])
+class SetNewsflashLocationQualification(Resource):
+    def put(self, id):
+        return update_news_flash_qualifying(id)
+
+
+download_data_parser = reqparse.RequestParser()
+download_data_parser.add_argument("format", type=str, default="csv", 
+help="Format for downloaded data (.csv/.xlsx)")
+download_data_parser.add_argument("years_ago", type=int, default=DEFAULT_NUMBER_OF_YEARS_AGO, 
+help=f"Number of years back to consider accidents. Default is {DEFAULT_NUMBER_OF_YEARS_AGO} years")
+"""
+    Download accidents data with regards to news flash/location
+"""
+@api.route("/api/download-data", methods=["GET"])
+class DownloadData(Resource):
+    @api.doc("download data")
+    @api.expect(parser)
+    def get(self):
+        args = download_data_parser.parse_args()
+        return get_downloaded_data(args.get('format', 'csv'), args.get('years_ago', DEFAULT_NUMBER_OF_YEARS_AGO))

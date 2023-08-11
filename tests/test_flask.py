@@ -321,10 +321,10 @@ def get_mock_current_user(get_current_user: mock.MagicMock) -> mock.MagicMock:
     return ret_obj
 
 
-def set_current_user_mock(current_user: mock.MagicMock) -> None:
+def set_current_user_mock(current_user: mock.MagicMock, user_id=USER_ID) -> None:
     current_user.return_value = mock.MagicMock()
     current_user.return_value.is_anonymous = False
-    current_user.return_value.id = USER_ID
+    current_user.return_value.id = user_id
 
 
 def test_user_remove_from_role(app):

@@ -9,14 +9,15 @@ from anyway import app as flask_app
 from jsonschema import validate
 from anyway.app_and_db import db
 from anyway.vehicle_type import VehicleCategory
-from anyway.widgets.suburban_widgets.accident_count_by_car_type_widget import AccidentCountByCarTypeWidget
+from anyway.widgets.road_segment_widgets.accident_count_by_car_type_widget import AccidentCountByCarTypeWidget
+from anyway.backend_constants import NewsflashLocationQualification
 
 
 def insert_infographic_mock_data(app):
-    sql_insert = """
+    sql_insert = f"""
         insert into news_flash
         (accident, author, date, description, lat, link, lon, title, source, location, road1, road2, resolution,
-        tweet_id, district_hebrew, non_urban_intersection_hebrew, region_hebrew, road_segment_name, street1_hebrew, street2_hebrew, yishuv_name)
+        tweet_id, district_hebrew, non_urban_intersection_hebrew, region_hebrew, road_segment_name, street1_hebrew, street2_hebrew, yishuv_name, newsflash_location_qualification, location_qualifying_user)
         values (
         true,
         'ynet',
@@ -38,6 +39,8 @@ def insert_infographic_mock_data(app):
         'כניסה למצפה שלם - צומת שדי תרומות',
         null,
         null,
+        null,
+        {NewsflashLocationQualification.NOT_VERIFIED.value},
         null) returning id;
     """
     insert_id = db.session.execute(sql_insert).fetchone()[0]
@@ -68,7 +71,7 @@ class TestInfographicApi:
     def app(self):
         return flask_app.test_client()
 
-    infographic_data = get_infographic_data()
+    infographic_data = None
 
     def test_no_news_flash_id(self, app):
         """Should success and be empty when no flash id is sent"""
@@ -127,7 +130,8 @@ class TestInfographicApi:
             gps={},
             start_time=start_time,
             end_time=end_time,
-            lang="he"
+            lang="he",
+            news_flash_description="Test description"
         )
         actual = AccidentCountByCarTypeWidget.get_stats_accidents_by_car_type_with_national_data(
             request_params, vehicle_grouped_by_type_count_unique=vehicle_grouped_by_type_count_unique_test
@@ -141,6 +145,9 @@ class TestInfographicApi:
         assert actual == expected
 
     def _get_widget_by_name(self, name):
+        if self.infographic_data is None:
+            self.infographic_data = get_infographic_data()
+
         widget = next(
             (widget for widget in self.infographic_data["widgets"] if widget["name"] == name), None,
         )

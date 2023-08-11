@@ -10,6 +10,7 @@ from anyway.widgets.all_locations_widgets.most_severe_accidents_table_widget imp
     get_most_severe_accidents_with_entities,
     get_most_severe_accidents_table_title,
 )
+from anyway.widgets.all_locations_widgets import most_severe_accidents_table_widget
 from anyway.models import AccidentMarkerView
 from anyway.widgets.widget import register
 from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget
@@ -18,9 +19,10 @@ from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocatio
 @register
 class MostSevereAccidentsWidget(AllLocationsWidget):
     name: str = "most_severe_accidents"
+    files = [__file__, most_severe_accidents_table_widget.__file__]
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, type(self).name)
+        super().__init__(request_params)
         self.rank = 3
         self.information = "Most recent fatal and severe accidents displayed on a map. Up to 10 accidents are presented."
 
@@ -55,7 +57,7 @@ class MostSevereAccidentsWidget(AllLocationsWidget):
             table_obj, filters, entities, start_time, end_time, resolution, limit
         )
         for item in items:
-            item["accident_severity"] = _(AccidentSeverity(item["accident_severity"]).get_label())
+            item["accident_severity"] = AccidentSeverity(item["accident_severity"]).get_label()
         return items
 
     @staticmethod
@@ -67,10 +69,11 @@ class MostSevereAccidentsWidget(AllLocationsWidget):
                 logging.exception(
                     f"MostSevereAccidentsWidget.localize_items: Exception while translating {item}."
                 )
+        title, subtitle = get_most_severe_accidents_table_title(
+                          request_params.location_info, request_params.resolution)
         items["data"]["text"] = {
-            "title": get_most_severe_accidents_table_title(
-                request_params.location_info, request_params.resolution
-            )
+            "title": _(title),
+            "subtitle": _(subtitle)
         }
         return items
 

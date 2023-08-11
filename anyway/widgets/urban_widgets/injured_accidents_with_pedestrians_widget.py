@@ -13,7 +13,7 @@ from anyway.widgets.widget_utils import (
     gen_entity_labels,
     format_2_level_items,
 )
-from anyway.models import NewsFlash, InvolvedMarkerView
+from anyway.models import InvolvedMarkerView
 from anyway.widgets.widget import register
 from anyway.widgets.urban_widgets.urban_widget import UrbanWidget
 
@@ -21,9 +21,10 @@ from anyway.widgets.urban_widgets.urban_widget import UrbanWidget
 @register
 class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
     name: str = "injured_accidents_with_pedestrians"
+    files = [__file__]
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, type(self).name)
+        super().__init__(request_params)
         self.rank = 18
         self.information = "Injured and killed pedestrians by severity and year"
 
@@ -54,9 +55,8 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
             street1_hebrew = self.request_params.location_info.get("street1_hebrew")
 
             if not self.validate_parameters(yishuv_name, street1_hebrew):
-                logging.exception(
-                    f"Could not validate parameters for {NewsFlash} : {self.request_params.news_flash_obj.id}"
-                )
+                # TODO: this will fail since there is no news_flash_obj in request_params
+                logging.exception(f"Could not validate parameters yishuv_name + street1_hebrew in widget : {self.name}")
                 return None
 
             query = (
@@ -111,8 +111,8 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
-            "title": _("Pedestrian accidents by severity and year")
-            + f" - {request_params.location_text}",
+            "title": _("Pedestrian accidents by severity and year"),
+            "subtitle": _(request_params.location_text),
             "labels": gen_entity_labels(InjurySeverity),
         }
         return items

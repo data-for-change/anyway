@@ -209,6 +209,20 @@ def injured_around_schools_2022(start_date, end_date, distance, batch_size):
 
 @process.command()
 @click.option(
+    "--start_date", default="01-07-2013", type=valid_date, help="The Start Date - format DD-MM-YYYY"
+)
+@click.option(
+    "--end_date", default="01-07-2023", type=valid_date, help="The End Date - format DD-MM-YYYY"
+)
+@click.option("--distance", default=0.5, help="float In KM. Default is 0.5 (500m)", type=float)
+@click.option("--batch_size", type=int, default=5000)
+def injured_around_schools_2023(start_date, end_date, distance, batch_size):
+    from anyway.parsers.injured_around_schools_2023 import parse
+    return parse(start_date=start_date, end_date=end_date, distance=distance, batch_size=batch_size)
+
+
+@process.command()
+@click.option(
     "--from_s3",
     "-f",
     is_flag=True,

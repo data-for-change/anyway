@@ -5,6 +5,8 @@ import json
 import logging
 from collections import namedtuple
 from typing import List, Set, Iterable
+from enum import Enum
+
 
 
 try:
@@ -22,6 +24,7 @@ from sqlalchemy import (
     Integer,
     String,
     Boolean,
+    Enum,
     Float,
     ForeignKey,
     DateTime,
@@ -52,6 +55,7 @@ try:
     from anyway.app_and_db import db
 except ModuleNotFoundError:
     pass
+
 
 from anyway.vehicle_type import VehicleType as BE_VehicleType
 
@@ -2204,7 +2208,21 @@ class RoadSegments(Base):
         return self.id
 
     def get_segment_id(self):
+
         return self.segment_id
+
+
+
+class Comment(Base):
+    __tablename__ = "comments"
+    id = Column(BigInteger(), autoincrement=True, primary_key=True, index=True)
+    author = Column(Integer(), ForeignKey("users.id"), nullable=False)
+    parent = Column(Integer, ForeignKey("comments.id"), nullable=True)
+    created_time = Column(DateTime, default=None, index=True)
+    street = Column(Text(), nullable=True, index=True)
+    city = Column(Text(), nullable=True,  index=True)
+    road_segment_id = Column(Integer(), nullable=True, index=True)
+    type = Column(Enum(BE_CONST.ResolutionCategories), nullable=False, index=True)
 
 
 class ReportProblem(Base):

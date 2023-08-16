@@ -30,6 +30,8 @@ from anyway.infographics_utils import (
     get_infographics_mock_data,
     get_infographics_data_for_location,
 )
+
+
 from anyway.models import (
     AccidentMarker,
     DiscussionMarker,
@@ -53,6 +55,7 @@ from anyway.models import (
     EmbeddedReports,
     City,
     Streets,
+    Comment,
 )
 from anyway.request_params import get_request_params_from_request_values
 from anyway.views.news_flash.api import (
@@ -315,6 +318,45 @@ def schools():
     else:
         return Response("Method Not Allowed", 405)
 
+@app.route("/comments", methods=["GET"])
+def comments():
+    logging.debug("getting comments by resolution")
+
+    params = get_request_params_from_request_values(request.values)
+    comments = get_comments_by_resolution(params)
+    
+    if not comments:
+        log_bad_request(request)
+        return abort(http_client.NOT_FOUND)
+
+    json_data = json.dumps(comments, default=str)
+    
+    return Response(json_data, mimetype="application/json")
+
+
+def get_comments_by_resolution(params):
+    resolution = params.resolution
+    location = params.location_info
+    
+    if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
+        return (
+            db.session.query(Comment)
+            .filter(
+                Comment.road_segment_id
+                == int(params.location_info["road_segment_id"])
+            ))
+    elif resolution == BE_CONST.ResolutionCategories.STREET:
+        return (
+            db.session.query(Comment)
+            .filter(Comment.yishuv_symbol == location["yishuv_symbol"])
+            .filter(Comment.street == location["street1"])
+        )
+    else:
+        msg = f"Cache unsupported resolution: {resolution}, params:{params}"
+        logging.error(msg)
+        raise ValueError(msg)
+
+
 
 @app.route("/markers", methods=["GET"])
 def markers():
@@ -351,7 +393,6 @@ def markers():
         return generate_json(
             accident_markers, rsa_markers, discussions, is_thin, total_records=result.total_records
         )
-
 
 @app.route("/markers_by_yishuv_symbol", methods=["GET"])
 def markers_by_yishuv_symbol():

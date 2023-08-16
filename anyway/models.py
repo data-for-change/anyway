@@ -55,7 +55,7 @@ try:
 except ModuleNotFoundError:
     pass
 
-from db import Enum as DbEnum
+#from db import Enum as DbEnum
 
 from anyway.vehicle_type import VehicleType as BE_VehicleType
 
@@ -2233,12 +2233,12 @@ class Comment(Base):
     #     return db.session.query(Comment).filter(Comment.section == section_id)
             
 
-class Section(Base):
-    __tablename__ = "sections"
-    id = Column(BigInteger(), autoincrement=True, primary_key=True, index=True)
-    street = Column(Integer(), primary_key=True, nullable=False)
-    city = Column(Integer(), primary_key=True, nullable=False)
-    type = Column(DbEnum(SectionType), nullable=False)
+# class Section(Base):
+#     __tablename__ = "sections"
+#     id = Column(BigInteger(), autoincrement=True, primary_key=True, index=True)
+#     street = Column(Integer(), primary_key=True, nullable=False)
+#     city = Column(Integer(), primary_key=True, nullable=False)
+#     type = Column(DbEnum(SectionType), nullable=False)
 
     # @staticmethod
     # def find_section_by_type(dto):

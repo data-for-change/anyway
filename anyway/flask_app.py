@@ -22,7 +22,8 @@ from webassets.ext.jinja2 import AssetsExtension
 from werkzeug.exceptions import BadRequestKeyError
 
 from anyway import utilities, secrets
-from anyway.app_and_db import api, get_cors_config
+from anyway.views.user_system.api import *
+from anyway.app_and_db import api, get_cors_config, app
 from anyway.clusters_calculator import retrieve_clusters
 from anyway.config import ENTRIES_PER_PAGE
 from anyway.constants import CONST
@@ -53,8 +54,6 @@ from anyway.models import (
     EmbeddedReports,
     City,
     Streets,
-    Comment,
-    Section
 )
 from anyway.request_params import get_request_params_from_request_values
 from anyway.views.news_flash.api import (
@@ -77,7 +76,6 @@ from anyway.views.schools.api import (
     injured_around_schools_months_graphs_data_api,
     injured_around_schools_api,
 )
-from anyway.views.user_system.api import *
 
 DEFAULT_MAPS_API_KEY = "AIzaSyDUIWsBLkvIUwzLHMHos9qFebyJ63hEG2M"
 

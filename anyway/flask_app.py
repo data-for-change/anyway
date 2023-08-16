@@ -53,6 +53,8 @@ from anyway.models import (
     EmbeddedReports,
     City,
     Streets,
+    Comment,
+    Section
 )
 from anyway.request_params import get_request_params_from_request_values
 from anyway.views.news_flash.api import (
@@ -316,6 +318,16 @@ def schools():
         return Response("Method Not Allowed", 405)
 
 
+# @app.route("/comments", methods=["GET"])
+# def comments():
+#     logging.debug("getting comments")
+#     dto = {
+#         type:request.args.get("type"),
+#         section_id:request.args.get("sectionId")
+#         }
+#     section_id = Section.find_section_by_type(dto)
+#     return Comment.get_comments_by_section(section_id)
+
 @app.route("/markers", methods=["GET"])
 def markers():
     logging.debug("getting markers")
@@ -351,7 +363,6 @@ def markers():
         return generate_json(
             accident_markers, rsa_markers, discussions, is_thin, total_records=result.total_records
         )
-
 
 @app.route("/markers_by_yishuv_symbol", methods=["GET"])
 def markers_by_yishuv_symbol():

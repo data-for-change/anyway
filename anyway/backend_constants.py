@@ -266,6 +266,13 @@ class InjuredType(LabeledCode):
             InjuredType.PASSENGER_UNKNOWN_VEHICLE: "Passenger of an unknown vehicle",
         }
 
+import enum
+from sqlalchemy import Enum
+
+class SectionType(enum.Enum):
+    STREET = 1
+    ROAD_SEGMENT = 2
+
 
 class CrossLocation(Enum):
     UNKNOWN = 9

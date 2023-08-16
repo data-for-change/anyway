@@ -5,6 +5,8 @@ import json
 import logging
 from collections import namedtuple
 from typing import List, Set, Iterable
+from enum import Enum
+
 
 
 try:
@@ -52,6 +54,8 @@ try:
     from anyway.app_and_db import db
 except ModuleNotFoundError:
     pass
+
+from db import Enum as DbEnum
 
 from anyway.vehicle_type import VehicleType as BE_VehicleType
 
@@ -2204,7 +2208,47 @@ class RoadSegments(Base):
         return self.id
 
     def get_segment_id(self):
+
         return self.segment_id
+
+
+
+from backend_constants import SectionType
+
+class Comment(Base):
+    __tablename__ = "comments"
+    id = Column(BigInteger(), autoincrement=True, primary_key=True, index=True)
+    author = Column(Integer(), ForeignKey("users.id"), nullable=False)
+    parent = Column(Integer, ForeignKey("comments.id"), nullable=True)
+    section = Column(Integer(), ForeignKey("sections.id"), nullable=True)
+    createdTime = Column(DateTime, default=None, index=True)
+
+    # @staticmethod
+    # def get_comments_by_section(
+    #     section_id
+    # ):
+    #     # 1. (find the section first by section type and metadata)
+    #     # 2. get all comments by with matched section id.
+        
+    #     return db.session.query(Comment).filter(Comment.section == section_id)
+            
+
+class Section(Base):
+    __tablename__ = "sections"
+    id = Column(BigInteger(), autoincrement=True, primary_key=True, index=True)
+    street = Column(Integer(), primary_key=True, nullable=False)
+    city = Column(Integer(), primary_key=True, nullable=False)
+    type = Column(DbEnum(SectionType), nullable=False)
+
+    # @staticmethod
+    # def find_section_by_type(dto):
+    #     # 1. (find the section first by section type and metadata)
+    #     # 2. get all comments by with matched section id.
+
+    #     return db.session.query(Section).filter(Section.type == type and Section.city == city and Section.street == street).first() 
+            
+
+
 
 
 class ReportProblem(Base):

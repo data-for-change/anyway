@@ -43,8 +43,13 @@ ALL_SCHOOLS_DATA_DIR = os.path.join(
 )
 
 ALL_SCHOOLS_DATA_DIR_COPY = os.path.join(
-    pathlib.Path(__file__).parent.parent.parent, "static", "data", "schools", "all_schools_data_orig"
+    pathlib.Path(__file__).parent.parent.parent,
+    "static",
+    "data",
+    "schools",
+    "all_schools_data_orig",
 )
+
 
 def get_bounding_box(latitude, longitude, distance_in_km):
     latitude = math.radians(latitude)
@@ -185,6 +190,7 @@ def calculate_injured_around_schools(start_date, end_date, distance):
     if os.path.exists(ALL_SCHOOLS_DATA_DIR_COPY):
         shutil.rmtree(ALL_SCHOOLS_DATA_DIR_COPY)
     shutil.copytree(ALL_SCHOOLS_DATA_DIR, ALL_SCHOOLS_DATA_DIR_COPY)
+
 
 def import_to_datastore(start_date, end_date, distance, batch_size):
     assert batch_size > 0

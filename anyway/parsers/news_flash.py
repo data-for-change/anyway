@@ -1,5 +1,8 @@
 import os
 import sys
+import requests
+from bs4 import BeautifulSoup
+import logging
 
 from anyway.parsers import twitter, rss_sites
 from anyway.parsers.news_flash_db_adapter import init_db
@@ -37,6 +40,17 @@ def update_all_in_db(source=None, newsflash_id=None):
     db.commit()
 
 
+def scrape_hour_for_walla_newsflash(newsflash):
+    try:
+        page = requests.get(newsflash.link).content
+        time_element = BeautifulSoup(page, "html.parser").find('div', class_='time')
+        time = time_element.get_text()
+        scraped_hour = int(time[:2])
+        newsflash.date = newsflash.date.replace(hour=scraped_hour)
+    except Exception as e:
+        logging.error(f"during scraping hour for newsflash {e}")
+
+
 def scrape_extract_store_rss(site_name, db):
     latest_date = db.get_latest_date_of_source(site_name)
     for newsflash in rss_sites.scrape(site_name):
@@ -45,6 +59,8 @@ def scrape_extract_store_rss(site_name, db):
         # TODO: pass both title and description, leaving this choice to the classifier
         newsflash.accident = classify_rss(newsflash.title or newsflash.description)
         newsflash.organization = classify_organization(site_name)
+        if site_name == "walla": # walla's rss feed currently shows wrong time zone
+            scrape_hour_for_walla_newsflash(newsflash)
         if newsflash.accident:
             # FIX: No accident-accurate date extracted
             extract_geo_features(db, newsflash)

@@ -23,7 +23,6 @@ from sqlalchemy import (
     Integer,
     String,
     Boolean,
-    Enum,
     Float,
     ForeignKey,
     DateTime,

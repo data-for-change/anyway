@@ -13,33 +13,37 @@ from anyway.backend_constants import BE_CONST
 
 from anyway.request_params import get_location_from_request_values
 
-def update_comment():
-    current_user = get_current_user()
-    params = get_location_from_request_values(request.values)
-    location = params["data"]
-    resolution = location["resolution"]
-    parent = request.get("parent")
+def create_comment():
+    current_user =  get_current_user()
+
+    json_data = request.get_json(force=True)
+
+    logging.debug(json_data)
+ 
+    resolution = json_data["resolution"]
+    parent = json_data["parent"]
     road_segment_id = None
     city = None
     street = None
-    if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
-        road_segment_id = int(location["road_segment_id"])
-    elif resolution == BE_CONST.ResolutionCategories.STREET:
-        city = location["yishuv_name"]
-        street = location["street"]
+    if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD.value:
+        road_segment_id = int(json_data["road_segment_id"])
+    elif resolution == BE_CONST.ResolutionCategories.STREET.value:
+        city = json_data["yishuv_name"]
+        street = json_data["street"]
     else:
-        msg = f"Cache unsupported resolution: {resolution}, params:{params}"
-        logging.error(msg)
-        raise ValueError(msg)
+        raise ValueError("Invalid comment data")
 
-    comment = Comment(author=current_user.id,
+    comment = Comment(
+                 author= current_user.id,
                       parent=parent,
                       street=street,
                       city=city,
                       road_segment_id=road_segment_id,
-                      resolution=resolution)
+                    )
     db.session.add(comment)
-    db.session.commit()
+    x = db.session.commit()
+
+    return Response()
 
 def get_comments():
     logging.debug("getting comments by resolution")

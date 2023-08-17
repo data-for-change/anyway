@@ -5,7 +5,6 @@ import json
 import logging
 from collections import namedtuple
 from typing import List, Set, Iterable
-from enum import Enum
 
 
 
@@ -2222,7 +2221,7 @@ class RoadSegments(Base):
         return self.id
 
     def get_segment_id(self):
-        return self.segment_id    
+        return self.segment_id
 
     @staticmethod
     def get_segments_by_segment(road_segment_id: int):
@@ -2262,7 +2261,7 @@ class Comment(Base):
     street = Column(Text(), nullable=True, index=True)
     city = Column(Text(), nullable=True,  index=True)
     road_segment_id = Column(Integer(), nullable=True, index=True)
-   
+
     def serialize(self):
         return {
             "id": self.id,

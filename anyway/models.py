@@ -2222,10 +2222,36 @@ class RoadSegments(Base):
         return self.id
 
     def get_segment_id(self):
+        return self.segment_id    
 
-        return self.segment_id
+    @staticmethod
+    def get_segments_by_segment(road_segment_id: int):
+        curr_road = (db.session.query(RoadSegments.road)
+                    .filter(RoadSegments.segment_id == road_segment_id)
+                    .all())
+        curr_road_processed = [{"road": s.road} for s in curr_road]
+        if curr_road is None or curr_road_processed is None:
+            raise RuntimeError(f"When retrieving segments of {road_segment_id}")
+        road = curr_road_processed[0]["road"]
+        res = (db.session.query(RoadSegments.segment_id, RoadSegments.from_name, RoadSegments.to_name)
+               .filter(RoadSegments.road == road)
+               .all())
+        res1 = [{"road": road, "road_segment_id": s.segment_id, "road_segment_name": " - ".join([s.from_name, s.to_name])} for s in res]
+        return res1
 
 
+    @staticmethod
+    def get_streets_by_yishuv_name(yishuv_name: str) -> List[dict]:
+        yishuv_symbol = City.get_symbol_from_name(yishuv_name)
+        res = (
+            db.session.query(Streets.street, Streets.street_hebrew)
+            .filter(Streets.yishuv_symbol == yishuv_symbol)
+            .all()
+        )
+        res1 = [{"street": s.street, "street_hebrew": s.street_hebrew} for s in res]
+        if res is None:
+            raise RuntimeError(f"When retrieving streets of {yishuv_symbol}")
+        return res1
 
 class Comment(Base):
     __tablename__ = "comments"

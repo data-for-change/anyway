@@ -39,6 +39,7 @@ from anyway.models import (
     Involved,
     InvolvedView,
     LocationSubscribers,
+    RoadSegments,
     Vehicle,
     ReportProblem,
     EngineVolume,
@@ -1441,6 +1442,11 @@ get_streets_by_yishuv_name_parser.add_argument(
 )
 
 
+get_segments_by_segments_parsers = api.parser()
+get_segments_by_segments_parsers.add_argument(
+    "road_segment_id", type=int, required=True, help="road segment id"
+)
+
 @api.route("/api/streets")
 @api.expect(get_streets_parser)
 class GetAllStreetsOfYishuv(Resource):
@@ -1460,6 +1466,15 @@ class GetAllStreetsOfYishuvByYishuvName(Resource):
         yishuv_name = args["yishuv_name"]
         return Streets.get_streets_by_yishuv_name(yishuv_name)
 
+
+@api.route("/api/segments-by-segment")
+@api.expect(get_segments_by_segments_parsers)
+class GetAllSegementsBySegment(Resource):
+    @api.doc("Get all segments in road of current segment")
+    def get(self):
+        args = get_segments_by_segments_parsers.parse_args()
+        road_segment_id = args["road_segment_id"]
+        return RoadSegments.get_segments_by_segment(road_segment_id)
 
 
 @api.route("/api/city", methods=["GET"])

@@ -2222,6 +2222,19 @@ class Comment(Base):
     street = Column(Text(), nullable=True, index=True)
     city = Column(Text(), nullable=True,  index=True)
     road_segment_id = Column(Integer(), nullable=True, index=True)
+   
+    def serialize(self):
+        return {
+            "id": self.id,
+            "author": self.author,
+            "create_date": self.created_time,
+            "street": self.street,
+            "parent": self.parent,
+            "city": self.city,
+            "road_segment_id": self.road_segment_id
+
+        }
+
 
 
 class ReportProblem(Base):

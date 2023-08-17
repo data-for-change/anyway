@@ -51,9 +51,10 @@ def get_comments():
         log_bad_request(request)
         return abort(http_client.NOT_FOUND)
 
-    json_data = json.dumps(comments, default=str)
-    
-    return Response(json_data, mimetype="application/json")
+    comments = comments.all()
+    comments_jsons = [doc.serialize() for doc in comments]
+
+    return Response(json.dumps(comments_jsons, default=str), mimetype="application/json")
 
 def get_comments_by_resolution(params):
     location = params["data"]

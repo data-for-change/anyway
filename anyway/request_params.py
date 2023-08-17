@@ -358,13 +358,13 @@ def extract_news_flash_location(news_flash_obj: NewsFlash):
 
 
 def get_location_from_request_values(
-   vals: dict
+   values: dict
 ):
-    road_segment_id = vals.get("road_segment_id")
+    road_segment_id = values.get("road_segment_id")
     if road_segment_id is not None:
         return extract_road_segment_location(road_segment_id)
-    elif ("yishuv_name" in vals) and (
-        "street" in vals):
-        return extract_street_location_suggestion_version(vals)
-    logging.error(f"Unsupported location:{vals.values()}")
+    elif ("yishuv_name" in values) and (
+        "street" in values):
+        return extract_street_location_suggestion_version(values)
+    logging.error(f"Unsupported location:{values.values()}")
     return None

@@ -234,6 +234,16 @@ def extract_street_location(input_vals: dict):
     return {"name": "location", "data": data, "gps": gps, "text": text}
 
 
+def extract_street_location_suggestion_version(input_vals: dict):
+    vals = fill_missing_street_values(input_vals)
+    # noinspection PyDictCreation
+    data = {"resolution": BE_CONST.ResolutionCategories.STREET}
+    for k in ["yishuv_name", "street", "yishuv_symbol"]:
+        data[k] = vals[k]
+    text = get_street_location_text(vals["yishuv_name"], vals["street"])
+    return {"name": "location", "data": data, "text": text}
+
+
 def fill_missing_street_values(vals: dict) -> dict:
     res = copy.copy(vals)
     if "yishuv_symbol" in res and "yishuv_name" not in res:
@@ -347,19 +357,14 @@ def extract_news_flash_location(news_flash_obj: NewsFlash):
     return {"name": "location", "data": data, "gps": gps}
 
 
-
-
 def get_location_from_request_values(
    vals: dict
 ):
     road_segment_id = vals.get("road_segment_id")
     if road_segment_id is not None:
         return extract_road_segment_location(road_segment_id)
-    elif ("yishuv_name" in vals or "yishuv_symbol" in vals) and (
-        "street1" in vals or "street1_hebrew" in vals
-    ):
-        return extract_street_location(vals)
-   
-
+    elif ("yishuv_name" in vals) and (
+        "street" in vals):
+        return extract_street_location_suggestion_version(vals)
     logging.error(f"Unsupported location:{vals.values()}")
     return None

@@ -2218,7 +2218,7 @@ class Comment(Base):
     id = Column(BigInteger(), autoincrement=True, primary_key=True, index=True)
     author = Column(Integer(), ForeignKey("users.id"), nullable=False)
     parent = Column(Integer, ForeignKey("comments.id"), nullable=True)
-    created_time = Column(DateTime, default=None, index=True)
+    created_time = Column(DateTime, default=datetime.datetime.now, index=True, nullable=False)
     street = Column(Text(), nullable=True, index=True)
     city = Column(Text(), nullable=True,  index=True)
     road_segment_id = Column(Integer(), nullable=True, index=True)

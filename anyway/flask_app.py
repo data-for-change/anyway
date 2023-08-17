@@ -80,7 +80,7 @@ from anyway.views.schools.api import (
 )
 from anyway.views.user_system.api import *
 
-from anyway.views.comments.api import get_comments
+from anyway.views.comments.api import get_comments, update_comment
 
 DEFAULT_MAPS_API_KEY = "AIzaSyDUIWsBLkvIUwzLHMHos9qFebyJ63hEG2M"
 
@@ -1088,7 +1088,7 @@ app.add_url_rule(
 )
 app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash_v2, methods=["GET"])
 app.add_url_rule("/api/comments", endpoint=None, view_func=get_comments, methods=["GET"])
-
+app.add_url_rule("/api/update_comment", endpoint=None, view_func=update_comment, methods=["POST"])
 
 app.add_url_rule("/api/v1/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
 

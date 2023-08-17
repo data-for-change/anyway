@@ -80,6 +80,8 @@ from anyway.views.schools.api import (
 )
 from anyway.views.user_system.api import *
 
+from anyway.views.comments.api import get_comments
+
 DEFAULT_MAPS_API_KEY = "AIzaSyDUIWsBLkvIUwzLHMHos9qFebyJ63hEG2M"
 
 
@@ -317,46 +319,6 @@ def schools():
         return render_template("schools_redirect.html")
     else:
         return Response("Method Not Allowed", 405)
-
-@app.route("/api/comments", methods=["GET"])
-def comments():
-    logging.debug("getting comments by resolution")
-
-    params = get_request_params_from_request_values(request.values)
-    comments = get_comments_by_resolution(params)
-    
-    if not comments:
-        log_bad_request(request)
-        return abort(http_client.NOT_FOUND)
-
-    json_data = json.dumps(comments, default=str)
-    
-    return Response(json_data, mimetype="application/json")
-
-
-def get_comments_by_resolution(params):
-    resolution = params.resolution
-    location = params.location_info
-    
-    if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
-        return (
-            db.session.query(Comment)
-            .filter(
-                Comment.road_segment_id
-                == int(params.location_info["road_segment_id"])
-            ))
-    elif resolution == BE_CONST.ResolutionCategories.STREET:
-        return (
-            db.session.query(Comment)
-            .filter(Comment.yishuv_symbol == location["yishuv_symbol"])
-            .filter(Comment.street == location["street1"])
-        )
-    else:
-        msg = f"Cache unsupported resolution: {resolution}, params:{params}"
-        logging.error(msg)
-        raise ValueError(msg)
-
-
 
 @app.route("/markers", methods=["GET"])
 def markers():
@@ -1125,6 +1087,8 @@ app.add_url_rule(
     methods=["GET"],
 )
 app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash_v2, methods=["GET"])
+app.add_url_rule("/api/comments", endpoint=None, view_func=get_comments, methods=["GET"])
+
 
 app.add_url_rule("/api/v1/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
 

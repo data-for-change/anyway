@@ -345,3 +345,21 @@ def extract_news_flash_location(news_flash_obj: NewsFlash):
             data[field] = curr_field
     gps = {"lat": news_flash_obj.lat, "lon": news_flash_obj.lon}
     return {"name": "location", "data": data, "gps": gps}
+
+
+
+
+def get_location_from_request_values(
+   vals: dict
+):
+    road_segment_id = vals.get("road_segment_id")
+    if road_segment_id is not None:
+        return extract_road_segment_location(road_segment_id)
+    elif ("yishuv_name" in vals or "yishuv_symbol" in vals) and (
+        "street1" in vals or "street1_hebrew" in vals
+    ):
+        return extract_street_location(vals)
+   
+
+    logging.error(f"Unsupported location:{vals.values()}")
+    return None

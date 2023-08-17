@@ -363,8 +363,12 @@ def get_location_from_request_values(
     road_segment_id = values.get("road_segment_id")
     if road_segment_id is not None:
         return extract_road_segment_location(road_segment_id)
-    elif ("yishuv_name" in values) and (
-        "street" in values):
-        return extract_street_location_suggestion_version(values)
+    elif ("yishuv_name" in values) and ("street" in values):
+        data = {"resolution": BE_CONST.ResolutionCategories.STREET}
+        data["street"] = values["street"]
+        data["yishuv_name"] = values["yishuv_name"]
+
+        return {"name": "location", "data": data }
+
     logging.error(f"Unsupported location:{values.values()}")
     return None

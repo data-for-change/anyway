@@ -42,6 +42,7 @@ def get_cors_config() -> dict:
         r"/api/news-flash-v2": {"origins": "*"},
         r"/api/embedded-reports": {"origins": "*"},
         r"/api/streets": {"origins": "*"},
+        r"/api/streets-by-yishuv": {"origins": "*"},
         r"/api/city": {"origins": "*"},
         r"/api/comments": {"origins": "*"},
         r"/api/update_user": {"origins": "*"},

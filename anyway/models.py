@@ -1191,6 +1191,20 @@ class Streets(Base):
         return res1
 
 
+    @staticmethod
+    def get_streets_by_yishuv_name(yishuv_name: str) -> List[dict]:
+        yishuv_symbol = City.get_symbol_from_name(yishuv_name)
+        res = (
+            db.session.query(Streets.street, Streets.street_hebrew)
+            .filter(Streets.yishuv_symbol == yishuv_symbol)
+            .all()
+        )
+        res1 = [{"street": s.street, "street_hebrew": s.street_hebrew} for s in res]
+        if res is None:
+            raise RuntimeError(f"When retrieving streets of {yishuv_symbol}")
+        return res1
+
+
 class SuburbanJunction(Base):
     __tablename__ = "suburban_junction"
     MAX_NAME_LEN = 100

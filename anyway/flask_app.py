@@ -1435,6 +1435,11 @@ get_streets_parser.add_argument(
     "yishuv_symbol", type=int, required=True, help="Symbol of yishuv to get streets of."
 )
 
+get_streets_by_yishuv_name_parser = api.parser()
+get_streets_by_yishuv_name_parser.add_argument(
+    "yishuv_name", type=str, required=True, help="Name of yishuv to get streets of."
+)
+
 
 @api.route("/api/streets")
 @api.expect(get_streets_parser)
@@ -1444,6 +1449,17 @@ class GetAllStreetsOfYishuv(Resource):
         args = get_streets_parser.parse_args()
         yishuv_symbol = args["yishuv_symbol"]
         return Streets.get_streets_by_yishuv(yishuv_symbol)
+
+
+@api.route("/api/streets-by-yishuv")
+@api.expect(get_streets_by_yishuv_name_parser)
+class GetAllStreetsOfYishuvByYishuvName(Resource):
+    @api.doc("Get all streets of yishuv by yishuv name")
+    def get(self):
+        args = get_streets_by_yishuv_name_parser.parse_args()
+        yishuv_name = args["yishuv_name"]
+        return Streets.get_streets_by_yishuv_name(yishuv_name)
+
 
 
 @api.route("/api/city", methods=["GET"])

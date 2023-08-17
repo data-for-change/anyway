@@ -318,7 +318,7 @@ def schools():
     else:
         return Response("Method Not Allowed", 405)
 
-@app.route("/comments", methods=["GET"])
+@app.route("/api/comments", methods=["GET"])
 def comments():
     logging.debug("getting comments by resolution")
 

@@ -43,6 +43,7 @@ def get_cors_config() -> dict:
         r"/api/embedded-reports": {"origins": "*"},
         r"/api/streets": {"origins": "*"},
         r"/api/city": {"origins": "*"},
+        r"/api/comments": {"origins": "*"},
         r"/authorize/*": {"origins": cors_site_list, "supports_credentials": True},
         r"/callback/*": {"origins": cors_site_list, "supports_credentials": True},
         r"/user/*": {"origins": cors_site_list, "supports_credentials": True},

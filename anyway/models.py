@@ -2222,7 +2222,6 @@ class Comment(Base):
     street = Column(Text(), nullable=True, index=True)
     city = Column(Text(), nullable=True,  index=True)
     road_segment_id = Column(Integer(), nullable=True, index=True)
-    resolution = Column(Enum(BE_CONST.ResolutionCategories), nullable=False, index=True)
 
 
 class ReportProblem(Base):

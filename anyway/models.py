@@ -7,6 +7,7 @@ from collections import namedtuple
 from typing import List, Set, Iterable
 
 
+
 try:
     from flask_login import UserMixin
 except ModuleNotFoundError:
@@ -52,6 +53,7 @@ try:
     from anyway.app_and_db import db
 except ModuleNotFoundError:
     pass
+
 
 from anyway.vehicle_type import VehicleType as BE_VehicleType
 
@@ -1187,6 +1189,20 @@ class Streets(Base):
         return res1
 
 
+    @staticmethod
+    def get_streets_by_yishuv_name(yishuv_name: str) -> List[dict]:
+        yishuv_symbol = City.get_symbol_from_name(yishuv_name)
+        res = (
+            db.session.query(Streets.street, Streets.street_hebrew)
+            .filter(Streets.yishuv_symbol == yishuv_symbol)
+            .all()
+        )
+        res1 = [{"street": s.street, "street_hebrew": s.street_hebrew} for s in res]
+        if res is None:
+            raise RuntimeError(f"When retrieving streets of {yishuv_symbol}")
+        return res1
+
+
 class SuburbanJunction(Base):
     __tablename__ = "suburban_junction"
     MAX_NAME_LEN = 100
@@ -2205,6 +2221,58 @@ class RoadSegments(Base):
 
     def get_segment_id(self):
         return self.segment_id
+
+    @staticmethod
+    def get_segments_by_segment(road_segment_id: int):
+        curr_road = (db.session.query(RoadSegments.road)
+                    .filter(RoadSegments.segment_id == road_segment_id)
+                    .all())
+        curr_road_processed = [{"road": s.road} for s in curr_road]
+        if curr_road is None or curr_road_processed is None:
+            raise RuntimeError(f"When retrieving segments of {road_segment_id}")
+        road = curr_road_processed[0]["road"]
+        res = (db.session.query(RoadSegments.segment_id, RoadSegments.from_name, RoadSegments.to_name)
+               .filter(RoadSegments.road == road)
+               .all())
+        res1 = [{"road": road, "road_segment_id": s.segment_id, "road_segment_name": " - ".join([s.from_name, s.to_name])} for s in res]
+        return res1
+
+
+    @staticmethod
+    def get_streets_by_yishuv_name(yishuv_name: str) -> List[dict]:
+        yishuv_symbol = City.get_symbol_from_name(yishuv_name)
+        res = (
+            db.session.query(Streets.street, Streets.street_hebrew)
+            .filter(Streets.yishuv_symbol == yishuv_symbol)
+            .all()
+        )
+        res1 = [{"street": s.street, "street_hebrew": s.street_hebrew} for s in res]
+        if res is None:
+            raise RuntimeError(f"When retrieving streets of {yishuv_symbol}")
+        return res1
+
+class Comment(Base):
+    __tablename__ = "comments"
+    id = Column(BigInteger(), autoincrement=True, primary_key=True, index=True)
+    author = Column(Integer(), ForeignKey("users.id"), nullable=False)
+    parent = Column(Integer, ForeignKey("comments.id"), nullable=True)
+    created_time = Column(DateTime, default=datetime.datetime.now, index=True, nullable=False)
+    street = Column(Text(), nullable=True, index=True)
+    city = Column(Text(), nullable=True,  index=True)
+    road_segment_id = Column(Integer(), nullable=True, index=True)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "author": self.author,
+            "create_date": self.created_time,
+            "street": self.street,
+            "parent": self.parent,
+            "city": self.city,
+            "road_segment_id": self.road_segment_id
+
+        }
+
 
 
 class ReportProblem(Base):

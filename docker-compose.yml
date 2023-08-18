@@ -21,6 +21,15 @@ services:
     restart: always
     depends_on:
       - db
+      - anyway-newsflash-infographics
+
+  anyway-newsflash-infographics:
+    build: ./anyway-newsflash-infographics/anyway-newsflash-infographics/.
+    image: anyway-newsflash-infographics:latest
+    container_name: anyway-newsflash-infographics
+    ports:
+      - "3000:3000"
+    restart: always
 
   db:
     build: db_docker

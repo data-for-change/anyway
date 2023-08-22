@@ -63,10 +63,9 @@ def scrape_extract_store_rss(site_name, db):
             scrape_hour_for_walla_newsflash(newsflash)
         if newsflash.accident:
             # FIX: No accident-accurate date extracted
-    #        extract_geo_features(db, newsflash)
+            extract_geo_features(db, newsflash)
             newsflash.set_critical()
         db.insert_new_newsflash(newsflash)
-        print(newsflash.date)
 
 
 def scrape_extract_store_twitter(screen_name, db):

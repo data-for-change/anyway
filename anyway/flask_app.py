@@ -30,6 +30,8 @@ from anyway.infographics_utils import (
     get_infographics_mock_data,
     get_infographics_data_for_location,
 )
+
+
 from anyway.models import (
     AccidentMarker,
     DiscussionMarker,
@@ -37,6 +39,7 @@ from anyway.models import (
     Involved,
     InvolvedView,
     LocationSubscribers,
+    RoadSegments,
     Vehicle,
     ReportProblem,
     EngineVolume,
@@ -53,6 +56,7 @@ from anyway.models import (
     EmbeddedReports,
     City,
     Streets,
+    Comment,
 )
 from anyway.request_params import get_request_params_from_request_values
 from anyway.views.news_flash.api import (
@@ -76,6 +80,8 @@ from anyway.views.schools.api import (
     injured_around_schools_api,
 )
 from anyway.views.user_system.api import *
+
+from anyway.views.comments.api import get_comments, create_comment
 
 DEFAULT_MAPS_API_KEY = "AIzaSyDUIWsBLkvIUwzLHMHos9qFebyJ63hEG2M"
 
@@ -315,7 +321,6 @@ def schools():
     else:
         return Response("Method Not Allowed", 405)
 
-
 @app.route("/markers", methods=["GET"])
 def markers():
     logging.debug("getting markers")
@@ -351,7 +356,6 @@ def markers():
         return generate_json(
             accident_markers, rsa_markers, discussions, is_thin, total_records=result.total_records
         )
-
 
 @app.route("/markers_by_yishuv_symbol", methods=["GET"])
 def markers_by_yishuv_symbol():
@@ -1084,6 +1088,8 @@ app.add_url_rule(
     methods=["GET"],
 )
 app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash_v2, methods=["GET"])
+app.add_url_rule("/api/comments", endpoint=None, view_func=get_comments, methods=["GET"])
+app.add_url_rule("/api/comments", endpoint=None, view_func=create_comment, methods=["POST"])
 
 app.add_url_rule("/api/v1/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
 
@@ -1430,6 +1436,16 @@ get_streets_parser.add_argument(
     "yishuv_symbol", type=int, required=True, help="Symbol of yishuv to get streets of."
 )
 
+get_streets_by_yishuv_name_parser = api.parser()
+get_streets_by_yishuv_name_parser.add_argument(
+    "yishuv_name", type=str, required=True, help="Name of yishuv to get streets of."
+)
+
+
+get_segments_by_segments_parsers = api.parser()
+get_segments_by_segments_parsers.add_argument(
+    "road_segment_id", type=int, required=True, help="road segment id"
+)
 
 @api.route("/api/streets")
 @api.expect(get_streets_parser)
@@ -1439,6 +1455,26 @@ class GetAllStreetsOfYishuv(Resource):
         args = get_streets_parser.parse_args()
         yishuv_symbol = args["yishuv_symbol"]
         return Streets.get_streets_by_yishuv(yishuv_symbol)
+
+
+@api.route("/api/streets-by-yishuv")
+@api.expect(get_streets_by_yishuv_name_parser)
+class GetAllStreetsOfYishuvByYishuvName(Resource):
+    @api.doc("Get all streets of yishuv by yishuv name")
+    def get(self):
+        args = get_streets_by_yishuv_name_parser.parse_args()
+        yishuv_name = args["yishuv_name"]
+        return Streets.get_streets_by_yishuv_name(yishuv_name)
+
+
+@api.route("/api/segments-by-segment")
+@api.expect(get_segments_by_segments_parsers)
+class GetAllSegementsBySegment(Resource):
+    @api.doc("Get all segments in road of current segment")
+    def get(self):
+        args = get_segments_by_segments_parsers.parse_args()
+        road_segment_id = args["road_segment_id"]
+        return RoadSegments.get_segments_by_segment(road_segment_id)
 
 
 @api.route("/api/city", methods=["GET"])

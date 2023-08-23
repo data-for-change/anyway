@@ -3,6 +3,7 @@ import sys
 import requests
 from bs4 import BeautifulSoup
 import logging
+from pytz import timezone
 
 from anyway.parsers import twitter, rss_sites
 from anyway.parsers.news_flash_db_adapter import init_db
@@ -12,6 +13,7 @@ from anyway.parsers.news_flash_classifiers import (
     classify_organization,
 )
 from anyway.parsers.location_extraction import extract_geo_features
+from anyway.parsers.timezones import ISREAL_SUMMER_TIMEZONE
 
 # FIX: classifier should be chosen by source (screen name), so `twitter` should be `mda`
 news_flash_classifiers = {"ynet": classify_rss, "twitter": classify_tweets, "walla": classify_rss}
@@ -42,11 +44,15 @@ def update_all_in_db(source=None, newsflash_id=None):
 
 def scrape_hour_for_walla_newsflash(newsflash):
     try:
+        israel_tz = timezone('Asia/Jerusalem')
+
         page = requests.get(newsflash.link).content
         time_element = BeautifulSoup(page, "html.parser").find("div", class_="time")
         time = time_element.get_text()
         scraped_hour = int(time[:2])
-        newsflash.date = newsflash.date.replace(hour=scraped_hour)
+        newsflash.date = newsflash.date.replace(hour=scraped_hour).replace(tzinfo=None)
+        newsflash_date_localized = israel_tz.localize(newsflash.date)
+        newsflash.date = timezone("UTC").normalize(newsflash_date_localized)
     except Exception as e:
         logging.error(f"during scraping hour for newsflash {e}")
 

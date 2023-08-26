@@ -47,7 +47,7 @@ Second, copy the token that you just generate and run docker login command like 
 $ docker login docker.pkg.github.com -u USERNAME 
 ```
 
-**6.** Go to the project's root directory and run:
+**6.** Enter to anyway-newsflash-infographics directory and run: `bash run.bash` this will download the anyway-newsflash-infographics repo. then go to the project's root directory and run:
     `sudo docker-compose up --build anyway`
 This will start the containers. It will take a few minutes until it's done.
 

@@ -4,7 +4,7 @@ Relevant commands in schools report to create both schools and injured around sc
 
 `python main.py process injured-around-schools-2023`
 
-Laser activate jupyter notebook (to run jupyter use `jupyter notebook` command).
+Later activate jupyter notebook (to run jupyter use `jupyter notebook` command from the main directory).
 
 Run the following notebook to create the result files (both csvs and json files):
-Notebook path: `anyway/static/data/schools/all_schools_data/schools_2023.ipynb`
+Notebook path: `anyway/parsers/schools_2023.ipynb`

@@ -47,19 +47,22 @@ Second, copy the token that you just generate and run docker login command like 
 $ docker login docker.pkg.github.com -u USERNAME 
 ```
 
-**6.** Go to the project's root directory and run:
+**6.** Enter to anyway-newsflash-infographics directory and run: `bash run.bash` this will download the anyway-newsflash-infographics repository.
+
+**7**
+Go to the project's root directory and run:
     `sudo docker-compose up --build anyway`
 This will start the containers. It will take a few minutes until it's done.
 
-**7.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
+**8.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
 If you need to see the map contact atalya via slack to get a developer key.  
 The developer key need to replace the production key in the file /anyway/blob/dev/templates/index.html where you can find: "https://maps.googleapis.com/maps/api/js?key=AIzaSyDUIWsBLkvIUwzLHMHos9qFebyJ63hEG2M&libraries=places,visualization&language=iw" (google maps url)
 So if the developer key is "12345" the new url need to be is: "https://maps.googleapis.com/maps/api/js?key=12345&libraries=places,visualization&language=iw"
 
-**8.** To stop the containers run: `docker-compose down`
+**9.** To stop the containers run: `docker-compose down`
 
-**9.** To restore fresh DB data, delete all existing volumes: `docker-compose down -v` then restart from step 6 
+**10.** To restore fresh DB data, delete all existing volumes: `docker-compose down -v` then restart from step 6 
 
 **For Windows:**
 You have three options: 
@@ -95,20 +98,21 @@ Second, copy the token that you just generate and run docker login command like 
 ```bash
 $ sudo docker login docker.pkg.github.com -u USERNAME 
 ```
+**6.** Enter to anyway-newsflash-infographics directory and run: `bash run.bash` this will download the anyway-newsflash-infographics repository.
 
-**6.** Go to the project's root directory and run:
+**7.** Go to the project's root directory and run:
     `sudo docker-compose up --build anyway`
 This will start the containers. It will take a few minutes until it's done.
 
-**7.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
+**8.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
 If you need to see the map for development email us [anyway@anyway.co.il](mailto:anyway@anyway.co.il) to get a developer key.  
 The developer key need to replace the production key in the file /anyway/blob/dev/templates/index.html where you can find: "https://maps.googleapis.com/maps/api/js?key=AIzaSyDUIWsBLkvIUwzLHMHos9qFebyJ63hEG2M&libraries=places,visualization&language=iw" (google maps url)
 So if the developer key is "12345" the new url need to be is: "https://maps.googleapis.com/maps/api/js?key=12345&libraries=places,visualization&language=iw"
 
-**7.** To stop the containers run: `sudo docker-compose down`
+**9.** To stop the containers run: `sudo docker-compose down`
 
-**8.** To restore fresh DB data, delete all existing volumes: `docker-compose down -v` then restart from step 7
+**10.** To restore fresh DB data, delete all existing volumes: `docker-compose down -v` then restart from step 7
 
 Using VSCODE
 -----------------------

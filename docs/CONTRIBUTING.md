@@ -23,7 +23,7 @@ the information in the used open-source databases, please let us know.
 Also, if you happen to stumble upon a bug, don't hesitate and raise a flag and we will get it fixed. You can send any your reports to [anyway@anyway.co.il](mailto:anyway@anyway.co.il).
 Don't forget to mention which operating system and browser you were using, so we can easily track down the issue.
 
-If you are already digging through the code and our [website](https://www.anyway.co.il) and you happen to find a bug, please go ahead and [open a new issue](https://github.com/hasadna/anyway/issues).
+If you are already digging through the code and our [website](https://www.anyway.co.il) and you happen to find a bug, please go ahead and [open a new issue](https://github.com/data-for-change/anyway/issues).
  Just remember to look through the pre-existing ones to make sure there are no duplicates. Even better if you can take it on yourself, then we encourage you to report the issue, assign yourself and submit a Pull Request with a fix.
 
 **Issue Report Format:**
@@ -39,7 +39,7 @@ Once you are done with the basics, don't forget to tag it with `bug` and `1 - Re
 ## Feature Requests
 
 New feature requests are more than welcome, just don't forget to pass them by the team and also check the issue list to avoid duplicates.
-We generally submit **major changes** via direct email to our [mail center](mailto:anyway@anyway.co.il) and request **small changes** by [submitting an issue](https://github.com/hasadna/anyway/issues).
+We generally submit **major changes** via direct email to our [mail center](mailto:anyway@anyway.co.il) and request **small changes** by [submitting an issue](https://github.com/data-for-change/anyway/issues).
 
 **Feature Request Format:**
 
@@ -84,7 +84,7 @@ A standard procedure for working on an issue would be to:
 3. Work on your new branch - commit - repeat
 4. Change to dev branch: `git checkout dev` and git pull at `dev`: `git pull upstream dev`
 5. Change to your branch: `git checkout dev` and merge: `git merge your-branch-name` and solve conflicts if they exist
-6. Push branch dev to **your forked directory** using `git push origin dev` and open PR to hasadna's `dev` branch.
+6. Push branch dev to **your forked directory** using `git push origin dev` and open PR to data-for-change's `dev` branch.
 7. Get a code review approval / reject
 8. After approval, merge your PR
 9. Delete your branch after merge
@@ -126,7 +126,7 @@ You are more than welcome to join us - [email us](mailto:anyway@anyway.co.il).
 
 **Slack**
 
-[Our Slack channel](https://hasadna.slack.com/) is our communication tool and is connected to the relevant git notifications.
+[Our Slack channel](https://oway.slack.com/) is our communication tool and is connected to the relevant git notifications.
 If you want to join us, [Email us](mailto:anyway@anyway.co.il) and we'll add you to our workspace.
 
 **Points of Contacts**

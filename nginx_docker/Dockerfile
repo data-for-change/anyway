@@ -1,4 +1,4 @@
-FROM ghcr.io/hasadna/anyway/anyway:latest AS builder
+FROM ghcr.io/data-for-change/anyway/anyway:latest AS builder
 RUN flask assets build
 
 FROM nginx:stable

@@ -19,11 +19,11 @@ Read more on the docker [Github project](https://github.com/docker/docker)
 Instructions
 -----------------------
 
-* Please complete ANYWAY’s [“getting the code” section](https://github.com/hasadna/anyway#getting-the-code) before starting
+* Please complete ANYWAY’s [“getting the code” section](https://github.com/data-for-change/anyway#getting-the-code) before starting
 
 **NOTE:** If you're using windows, complete the "getting the code" section after installing WSL, inside the new ubuntu environment.
 
-**1.** [Get the code](https://github.com/hasadna/anyway#getting-the-code)
+**1.** [Get the code](https://github.com/data-for-change/anyway#getting-the-code)
 
 **2.** [Install Docker](https://docs.docker.com/install/) and [Install Docker Compose](https://docs.docker.com/compose/install/)
 
@@ -120,7 +120,7 @@ In order to use VSCODE in debugging mode with DOCKER, check out [VSCODE_CONFIGUR
 
 ## Working on anyway-etl and Airflow
 
-Anyway ETL processes and Airflow server are developed in a different repository: [hasadna/anyway-etl](https://github.com/hasadna/anyway-etl)
+Anyway ETL processes and Airflow server are developed in a different repository: [data-for-change/anyway-etl](https://github.com/data-for-change/anyway-etl)
 but we use the same Docker Compose environment.
 
 For some tasks you will also need to set secret values in the `.env` file, ask a team member for these values.
@@ -133,7 +133,7 @@ For some tasks you will also need to set secret values in the `.env` file, ask a
 
 **Developing anyway-etl tasks**
 
-To develop anyway-etl using the Docker Compose environment you first need to clone [hasadna/anyway-etl](https://github.com/hasadna/anyway-etl).
+To develop anyway-etl using the Docker Compose environment you first need to clone [data-for-change/anyway-etl](https://github.com/data-for-change/anyway-etl).
 The clone should be a sibling directory to anyway, so it will be at `../anyway-etl` relative to anyway repository.
 
 * Build the anyway-etl Docker image: `docker-compose -f docker-compose.yml -f ../anyway-etl/docker-compose-override.yaml build anyway-etl`
@@ -240,7 +240,7 @@ This loads the ./anyway dir (relative to the docker-compose file) as /anyway/any
 
 Questions and ideas
 -----------------
-Talk to Atalya on HASADNA's Slack (atalya) or email us [anyway@anyway.co.il](mailto:anyway@anyway.co.il).
+Talk to Atalya on ANYWAY's Slack (atalya) or email us [anyway@anyway.co.il](mailto:anyway@anyway.co.il).
 
 
 Testing production environment locally

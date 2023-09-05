@@ -15,7 +15,7 @@ jobs:
     if: github.repository == "${{ github.repository_owner }}/anyway"
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Build and push anyway Docker image
       uses: docker/build-push-action@v1.1.1
       with:
@@ -31,7 +31,7 @@ jobs:
     if: github.repository == "${{ github.repository_owner }}/anyway"
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Build and push database Docker image
       uses: docker/build-push-action@v1.1.1
       with:
@@ -47,7 +47,7 @@ jobs:
     if: github.repository == "${{ github.repository_owner }}/anyway"
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Build and push database backup Docker image
       uses: docker/build-push-action@v1.1.1
       with:
@@ -65,7 +65,7 @@ jobs:
     needs: Build-anyway
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - env:
         DOCKER_USERNAME: ${{ github.repository_owner }}
         DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
@@ -79,7 +79,7 @@ jobs:
     - Build-nginx
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - env:
         DOCKER_REPOSITORY_ANYWAY: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_ANYWAY }}
         DOCKER_REPOSITORY_DB: ${{ env.SERVER }}/${{ env.DOCKER_REPOSITORY_DB }}

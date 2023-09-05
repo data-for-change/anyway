@@ -123,7 +123,7 @@ jobs:
             echo "${ANYWAY_ETL_DEPLOY_KEY}" > anyway_etl_deploy_key &&\
             chmod 400 anyway_etl_deploy_key &&\
             export GIT_SSH_COMMAND="ssh -i `pwd`/anyway_etl_deploy_key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" &&\
-            git clone git@github.com:hasadna/anyway-etl.git &&\
+            git clone git@github.com:data-for-change/anyway-etl.git &&\
             cd anyway-etl &&\
             if [ "${GITHUB_REF}" == "refs/heads/dev" ]; then
               ANYWAY_ETL_COMMIT_FILENAME=anyway-dev-commit.txt

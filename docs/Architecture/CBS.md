@@ -65,10 +65,10 @@ Environment Variables: AWS_ACCESS_KEY, AWS_SECRET_KEY
 
 #### Relevant Work:
 - [Dvir's value_mapping branch](https://github.com/dvirein/anyway-backend/tree/value_mapping)
-- [Current Data Base models and methods](https://github.com/hasadna/anyway/blob/dev/anyway/models.py)
-- [Current CBS Data Processing Code](https://github.com/hasadna/anyway/blob/dev/anyway/parsers/cbs/executor.py)
-- [Current tables usage in infographics utils](https://github.com/hasadna/anyway/blob/dev/anyway/infographics_utils.py)
-- [Dictionaries that are constants in infographics utils](https://github.com/hasadna/anyway/blob/dev/anyway/infographics_dictionaries.py)
+- [Current Data Base models and methods](https://github.com/data-for-change/anyway/blob/dev/anyway/models.py)
+- [Current CBS Data Processing Code](https://github.com/data-for-change/anyway/blob/dev/anyway/parsers/cbs/executor.py)
+- [Current tables usage in infographics utils](https://github.com/data-for-change/anyway/blob/dev/anyway/infographics_utils.py)
+- [Dictionaries that are constants in infographics utils](https://github.com/data-for-change/anyway/blob/dev/anyway/infographics_dictionaries.py)
 
 ### Data Team
 1. Data Exploration

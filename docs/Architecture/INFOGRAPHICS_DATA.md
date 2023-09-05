@@ -17,7 +17,7 @@ See NEWS_FLASH.md for more details
 1. Architecture Planning:
    - Create aggregation tables for infographics data, if needed
    - Possibility: Query data in location geographically rather than categorically (depends on OSM tasks)
-   - Rule Based - [see Assaf’s work here](https://github.com/hasadna/anyway/pull/1737)
+   - Rule Based - [see Assaf’s work here](https://github.com/data-for-change/anyway/pull/1737)
    - Possible: Recommender System
 3. Documentation including swagger
 4. Possible: Infographics Templates (Bar Graph, )

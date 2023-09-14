@@ -33,7 +33,6 @@ class KilledInjuredCountPerAgeGroupWidget(RoadSegmentWidget):
             structured_data_list.append({BE.LKEY: age_group, BE.VAL: count_total})
         self.items = structured_data_list
 
-
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {

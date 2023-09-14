@@ -5,6 +5,9 @@ from typing import Dict, Tuple, Callable
 from flask_sqlalchemy import BaseQuery
 from sqlalchemy import func, asc
 
+from flask_babel import _
+import logging
+
 from anyway.app_and_db import db
 from anyway.backend_constants import BE_CONST, InjurySeverity
 from anyway.models import InvolvedMarkerView
@@ -48,6 +51,8 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
             cache_dict.popitem(last=False)
 
         cache_dict[cache_key] = dict_grouped
+        logging.debug("groooo")
+        logging.debug(dict_grouped)
         return dict_grouped
 
     @staticmethod
@@ -79,11 +84,11 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
                         break
 
                 if not found_age_range:
-                    dict_grouped[UNKNOWN][injury_id] += count
-
+                    dict_grouped[UNKNOWN    ][injury_id] += count
         # Rename the last key
         dict_grouped[SIXTY_FIVE_PLUS] = dict_grouped[SIXTY_TWOHUNDRED]
         del dict_grouped[SIXTY_TWOHUNDRED]
+        dict_grouped[_("unknown")] = dict_grouped.pop(UNKNOWN)
         return dict_grouped, has_data
 
     @staticmethod

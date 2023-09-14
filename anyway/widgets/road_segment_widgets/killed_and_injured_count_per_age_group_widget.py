@@ -10,7 +10,6 @@ from anyway.widgets.road_segment_widgets.killed_and_injured_count_per_age_group_
 from anyway.widgets.road_segment_widgets import killed_and_injured_count_per_age_group_widget_utils
 from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
 from anyway.widgets.widget import register
-import logging
 
 @register
 class KilledInjuredCountPerAgeGroupWidget(RoadSegmentWidget):
@@ -32,7 +31,6 @@ class KilledInjuredCountPerAgeGroupWidget(RoadSegmentWidget):
                 count_total += count
 
             structured_data_list.append({BE.LKEY: age_group, BE.VAL: count_total})
-        #KilledInjuredCountPerAgeGroupWidget.prepare_data_for_ui(structured_data_list)
         self.items = structured_data_list
 
 

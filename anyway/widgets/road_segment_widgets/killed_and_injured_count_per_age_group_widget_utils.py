@@ -4,6 +4,7 @@ from typing import Dict, Tuple, Callable
 
 from flask_sqlalchemy import BaseQuery
 from sqlalchemy import func, asc
+from flask_babel import _
 
 from anyway.app_and_db import db
 from anyway.backend_constants import BE_CONST, InjurySeverity

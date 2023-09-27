@@ -13,6 +13,7 @@ from anyway.backend_constants import BE_CONST, LabeledCode, InjurySeverity
 from anyway.models import InvolvedMarkerView
 from anyway.request_params import LocationInfo
 from anyway.vehicle_type import VehicleType
+from anyway.models import NewsFlash
 
 
 def get_query(table_obj, filters, start_time, end_time):
@@ -52,7 +53,10 @@ def get_accidents_stats(
     end_time=None,
 ):
     filters = filters or {}
-    provider_code_filters = [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    provider_code_filters = [
+        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
+        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+    ]
     filters["provider_code"] = filters.get("provider_code", provider_code_filters)
 
     # get stats
@@ -74,7 +78,8 @@ def get_accidents_stats(
         else:
             query = query.group_by(group_by)
             query = query.with_entities(
-                group_by, func.count(count) if not cnt_distinct else func.count(distinct(count))
+                group_by,
+                func.count(count) if not cnt_distinct else func.count(distinct(count)),
             )
     df = pd.read_sql_query(query.statement, query.session.bind)
     df.rename(columns={"count_1": "count"}, inplace=True)  # pylint: disable=no-member
@@ -98,7 +103,10 @@ def retro_dictify(indexable) -> Dict[Any, Dict[Any, Any]]:
 
 
 def add_empty_keys_to_gen_two_level_dict(
-    d, level_1_values: List[Any], level_2_values: List[Any], default_level_3_value: int = 0
+    d,
+    level_1_values: List[Any],
+    level_2_values: List[Any],
+    default_level_3_value: int = 0,
 ) -> Dict[Any, Dict[Any, int]]:
     for v1 in level_1_values:
         if v1 not in d:
@@ -228,3 +236,11 @@ def join_strings(strings, sep_a=" ,", sep_b=" ו-"):
         return sep_b.join(strings)
     else:
         return sep_a.join(strings[:-1]) + sep_b + strings[-1]
+
+
+def newsflash_has_location(newsflash: NewsFlash):
+    resolution = newsflash.resolution
+    return (
+        resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD.value
+        and newsflash.road_segment_name
+    ) or (resolution == BE_CONST.ResolutionCategories.STREET.value and newsflash.street1_hebrew)

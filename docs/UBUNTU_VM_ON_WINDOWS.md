@@ -18,7 +18,7 @@ you need to enable virtualization in the BIOS Screen – Base on your computer, 
 
 **6.** You have Ubuntu VM on your Windows!
 
-**7.** Go back to the [environment instructions](https://github.com/hasadna/anyway/blob/dev/docs/DOCKER.md)
+**7.** Go back to the [environment instructions](https://github.com/data-for-change/anyway/blob/dev/docs/DOCKER.md)
  - fork the code
  - install docker for Linux 
  - config and run Anyway Container for Ubuntu

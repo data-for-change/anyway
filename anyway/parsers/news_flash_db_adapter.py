@@ -8,7 +8,8 @@ from anyway.parsers import infographics_data_cache_updater
 from anyway.parsers import timezones
 from anyway.models import NewsFlash
 from anyway.slack_accident_notifications import publish_notification
-
+from anyway.utilities import trigger_airflow_dag
+from anyway.widgets.widget_utils import newsflash_has_location
 
 # fmt: off
 
@@ -51,6 +52,19 @@ class DBAdapter:
         )
         self.commit()
 
+    @staticmethod
+    def generate_infographics_and_send_to_telegram(newsflashid):
+        dag_conf = {"news_flash_id": newsflashid}
+        trigger_airflow_dag("generate-and-send-infographics-images", dag_conf)
+
+    @staticmethod
+    def publish_notifications(newsflash: NewsFlash):
+        publish_notification(newsflash)
+        if newsflash_has_location(newsflash):
+            DBAdapter.generate_infographics_and_send_to_telegram(newsflash.id)
+        else:
+            logging.debug("newsflash does not have location, not publishing")
+
     def insert_new_newsflash(self, newsflash: NewsFlash) -> None:
         logging.info("Adding newsflash, is accident: {}, date: {}"
                      .format(newsflash.accident, newsflash.date))
@@ -59,7 +73,12 @@ class DBAdapter:
         self.db.session.commit()
         infographics_data_cache_updater.add_news_flash_to_cache(newsflash)
         if os.environ.get("FLASK_ENV") == "production" and newsflash.accident:
-            publish_notification(newsflash)
+            try:
+                DBAdapter.publish_notifications(newsflash)
+            except Exception as e:
+                logging.error("publish notifications failed")
+                logging.error(e)
+
 
     def get_newsflash_by_id(self, id):
         return self.db.session.query(NewsFlash).filter(NewsFlash.id == id)

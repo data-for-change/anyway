@@ -315,3 +315,22 @@ def is_a_valid_email(tmp_given_user_email: str) -> bool:
 
 def half_rounded_up(num: int):
     return math.ceil(num / 2)
+
+def trigger_airflow_dag(dag_id, conf=None):
+    import airflow_client.client
+    from airflow_client.client.api import dag_run_api
+    from airflow_client.client.model.dag_run import DAGRun
+    from anyway import secrets
+
+    if conf is None:
+        conf = {}
+    airflow_api_url = "https://airflow.anyway.co.il/api/v1"
+    configuration = airflow_client.client.Configuration(
+        host=airflow_api_url,
+        username=secrets.get("AIRFLOW_USER"),
+        password=secrets.get("AIRFLOW_PASSWORD")
+    )
+    with airflow_client.client.ApiClient(configuration) as api_client:
+        dag_run_api_instance = dag_run_api.DAGRunApi(api_client)
+        dag_run = DAGRun(conf=conf)
+        return dag_run_api_instance.post_dag_run(dag_id, dag_run)

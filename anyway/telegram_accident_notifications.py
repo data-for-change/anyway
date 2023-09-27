@@ -11,7 +11,8 @@ INFOGRAPHICS_S3_BUCKET = "dfc-anyway-infographics-images"
 
 TELEGRAM_CHANNEL_CHAT_ID = -1001666083560
 TELEGRAM_LINKED_GROUP_CHAT_ID = -1001954877540
-TEXT_FOR_AFTER_INFOGRAPHICS_MESSAGE = 'מקור המידע בלמ"ס, הופק באמצעות ANYWAY מבית "נתון לשינוי" למידע נוסף:'
+TEXT_FOR_AFTER_INFOGRAPHICS_MESSAGE = 'מקור המידע בלמ"ס. נתוני התאונה שבמבזק לא נכללים באינפוגרפיקה. ' \
+                                      'הופק באמצעות ANYWAY מבית "נתון לשינוי" למידע נוסף:'
 
 def send_initial_message_in_channel(bot, text):
     return bot.send_message(TELEGRAM_CHANNEL_CHAT_ID, text)
@@ -62,7 +63,7 @@ def publish_notification(newsflash_id):
     transcription_by_widget_name = fetch_transcription_by_widget_name(newsflash_id)
     urls_by_infographic_name = create_public_urls_for_infographics_images(str(newsflash_id))
 
-    bot = telebot.TeleBot(secrets.get("TELEGRAM_BOT_TOKEN"))
+    bot = telebot.TeleBot(secrets.get("BOT_TOKEN"))
     initial_message_in_channel = send_initial_message_in_channel(bot, accident_text)
     #every message in the channel is automatically forwarded to the linked discussion group.
     #to create a comment on the channel message, we need to send a reply to the

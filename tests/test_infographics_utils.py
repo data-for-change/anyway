@@ -2,7 +2,7 @@ import unittest
 from anyway.widgets.widget_utils import format_2_level_items
 from anyway.backend_constants import AccidentSeverity
 
-
+# comment
 class TestInfographicsUtilsCase(unittest.TestCase):
     item1 = {
         "2019": {

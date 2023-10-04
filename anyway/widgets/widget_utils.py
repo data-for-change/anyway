@@ -29,12 +29,11 @@ def get_query(table_obj, filters, start_time, end_time):
                 values = value
             else:
                 values = [value]
-
-            if field_name == "street1_hebrew":
+            if field_name == "street1_hebrew" or field_name == "street1":
                 query = query.filter(
                     or_(
-                        (getattr(table_obj, "street1_hebrew")).in_(values),
-                        (getattr(table_obj, "street2_hebrew")).in_(values),
+                        (getattr(table_obj, field_name)).in_(values),
+                        (getattr(table_obj, field_name.replace("1", "2"))).in_(values),
                     )
                 )
             else:

@@ -90,7 +90,7 @@ class InjuredCountBySeverityWidget(RoadSegmentWidget):
             severity_severe_count_text = f'{severity_severe_count} '+  _("severe injured plural")
         killed_count = items.get("killed_count")
         if killed_count == 0:
-            killed_count = ''
+            killed_count_text = ''
         elif killed_count == 1:
             killed_count_text = _("one killed")
         else:

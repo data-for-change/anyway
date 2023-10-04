@@ -24,7 +24,7 @@ Environment Variables: AWS_ACCESS_KEY, AWS_SECRET_KEY
      Note: We need to be compatible with current APIs OR create new tables
    - Star/Snowflake schema exists but can be improved
    - Pick indices wisely (e.g. avoid large text fields)
-   - Possible Minor Affect: Table Size and Tables Index will be reduced - [see current sizes](https://app.redash.io/hasadna/queries/833839/source)
+   - Possible Minor Affect: Table Size and Tables Index will be reduced - [see current sizes](https://redash.dataforchange.org.il/queries/36/source)
 2. Adding Data Documentation:
    - Best Practices / Tools
    - Separate calculated fields and original CBS fields
@@ -38,9 +38,9 @@ Environment Variables: AWS_ACCESS_KEY, AWS_SECRET_KEY
 4. Data Cleaning and Enrichment Pipeline:
     - Handling Missing Values
     - Adding calculated fields  
-    - CBS Accidents Duplicates across years (remove early year data - minor issue - [see query here](https://app.redash.io/hasadna/queries/834111/source))
+    - CBS Accidents Duplicates across years (remove early year data - minor issue - [see query here](https://redash.dataforchange.org.il/queries/25))
 5. Hebrew Tables Creation
-    - Nowadays used by infographics utils and by data team (exported to csvs or [using redash](https://app.redash.io/hasadna))
+    - Nowadays used by infographics utils and by data team (exported to csvs or using redash - ask Atalya for access)
     - Nowadays creation consumes a lot of memory - since the whole table is loaded to DB - this needs to be improved (perhaps use views / materialized views instead of a table?)
     - Add process creating csv files for the Data Team to work with
 5. Data Loading - Separate to multiple stages - see [CBS ETL in process refactoring](https://docs.google.com/document/d/1LirLg1u7B3ekvcjetj6LhVExijVqctMZ83fJHUYzlrI/edit?usp=sharing)

@@ -84,52 +84,6 @@ def add_news_flash_to_cache(news_flash: NewsFlash):
         return False
 
 
-def get_infographics_data_from_cache(news_flash_id, years_ago) -> Dict:
-    db_item = (
-        db.session.query(InfographicsDataCache)
-        .filter(InfographicsDataCache.news_flash_id == news_flash_id)
-        .filter(InfographicsDataCache.years_ago == years_ago)
-        .first()
-    )
-    logging.debug(f"retrieved from cache {type(db_item)}:{db_item}"[:70])
-    db.session.commit()
-    try:
-        if db_item:
-            return json.loads(db_item.get_data())
-        else:
-            return {}
-    except Exception as e:
-        logging.error(
-            f"Exception while extracting data from returned cache item flash_id:{news_flash_id},years:{years_ago})"
-            f"returned value {type(db_item)}"
-            f":cause:{e.__cause__}, class:{e.__class__}"
-        )
-        return {}
-
-
-def get_infographics_data_from_cache_by_road_segment(road_segment_id, years_ago) -> Dict:
-    db_item = (
-        db.session.query(InfographicsRoadSegmentsDataCache)
-        .filter(InfographicsRoadSegmentsDataCache.road_segment_id == int(road_segment_id))
-        .filter(InfographicsRoadSegmentsDataCache.years_ago == int(years_ago))
-        .first()
-    )
-    logging.debug(f"retrieved from cache {type(db_item)}:{db_item}"[:70])
-    db.session.commit()
-    try:
-        if db_item:
-            return json.loads(db_item.get_data())
-        else:
-            return {}
-    except Exception as e:
-        logging.error(
-            f"Exception while extracting data from returned cache item flash_id:{road_segment_id},years:{years_ago})"
-            f"returned value {type(db_item)}"
-            f":cause:{e.__cause__}, class:{e.__class__}"
-        )
-        return {}
-
-
 def get_cache_retrieval_query(params: RequestParams):
     res = params.resolution
     loc = params.location_info

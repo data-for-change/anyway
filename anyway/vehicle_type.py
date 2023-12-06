@@ -1,7 +1,6 @@
 from enum import Enum
-from typing import List, Union
+from typing import List
 import logging
-import math
 
 try:
     from flask_babel import _
@@ -37,13 +36,6 @@ class VehicleType(Enum):
     TRUCK_3_5_TO_10 = 24
     TRUCK_10_TO_12 = 25
 
-    def get_categories(self) -> List[int]:
-        res = []
-        for t in list(VehicleCategory):
-            if self in t.value:
-                res.append(t)
-        return res
-
     def get_english_display_name(self):
         english_vehicle_type_display_names = {
             VehicleType.CAR: "private car",
@@ -76,23 +68,6 @@ class VehicleType(Enum):
         except (KeyError, TypeError):
             logging.exception(f"VehicleType.get_display_name: {self}: no display string defined")
             return "no display name defined"
-
-    @staticmethod
-    def to_type_code(db_val: Union[float, int]) -> int:
-        """Values read from DB may arrive as float, and empty values come as nan"""
-        if isinstance(db_val, float):
-            if math.isnan(db_val):
-                return VehicleType.OTHER_AND_UNKNOWN.value
-            else:
-                return int(db_val)
-        elif isinstance(db_val, int):
-            return db_val
-        else:
-            logging.error(
-                f"VehicleType.fo_type_code: unknown value: {db_val}({type(db_val)})"
-                ". returning OTHER_AND_UNKNOWN"
-            )
-            return VehicleType.OTHER_AND_UNKNOWN.value
 
 
 VT = VehicleType

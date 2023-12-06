@@ -6,7 +6,6 @@ import os
 import traceback
 
 from typing import Optional, Dict, List, Type
-from collections import defaultdict
 
 # noinspection PyProtectedMember
 from flask_babel import _
@@ -19,10 +18,9 @@ from anyway.request_params import (
     extract_news_flash_location,
     get_request_params_from_request_values,
 )
-from anyway.backend_constants import BE_CONST, AccidentType
+from anyway.backend_constants import BE_CONST
 from anyway.models import NewsFlash, AccidentMarkerView
 from anyway.parsers import resolution_dict
-from anyway.infographics_dictionaries import head_on_collisions_comparison_dict
 from anyway.parsers import infographics_data_cache_updater
 from anyway.widgets.widget import Widget, widgets_dict
 
@@ -46,40 +44,8 @@ DATA = "data"
 ITEMS = "items"
 
 
-def get_widget_factories() -> List[Type[Widget]]:
-    """Returns list of callables that generate all widget instances"""
-    return list(widgets_dict.values())
-
-
 def get_widget_class_by_name(name: str) -> Type[Widget]:
     return widgets_dict.get(name)
-
-
-def sum_road_accidents_by_specific_type(road_data, field_name):
-    dict_merge = defaultdict(int)
-    dict_merge[field_name] = 0
-    dict_merge[head_on_collisions_comparison_dict["others"]] = 0
-
-    for accident_data in road_data:
-        if accident_data["accident_type"] == field_name:
-            dict_merge[field_name] += accident_data["count"]
-        else:
-            dict_merge[head_on_collisions_comparison_dict["others"]] += accident_data["count"]
-    return dict_merge
-
-
-def convert_roads_fatal_accidents_to_frontend_view(data_dict):
-    data_list = []
-    for key, value in data_dict.items():
-        # pylint: disable=no-member
-        if key == AccidentType.HEAD_ON_FRONTAL_COLLISION.value:
-            data_list.append(
-                {"desc": head_on_collisions_comparison_dict["head_to_head"], "count": value}
-            )
-        else:
-            data_list.append({"desc": key, "count": value})
-
-    return data_list
 
 
 def generate_widgets_data(request_params: RequestParams) -> List[dict]:

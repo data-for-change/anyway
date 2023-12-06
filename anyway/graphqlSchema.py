@@ -20,9 +20,5 @@ class Query(graphene.ObjectType):
     node = relay.Node.Field()
     accident_markers_hebrew = graphene.List(AccidentMarkerHebrew)
 
-    def resolve_accident_markers_hebrew(self, info):
-        query = AccidentMarkerHebrew.get_query(info)
-        return query.all()
-
 
 schema = graphene.Schema(query=Query)

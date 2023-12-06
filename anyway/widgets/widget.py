@@ -35,12 +35,6 @@ class Widget:
         self.meta = {"widget_digest": self.widget_digest}
         self.information = ""
 
-    def get_name(self) -> str:
-        return self.name
-
-    def get_rank(self) -> int:
-        return self.rank
-
     @staticmethod
     def is_in_cache() -> bool:
         """Whether this widget is stored in the cache"""
@@ -68,10 +62,6 @@ class Widget:
         else:
             logging.error(f"Widget.localize_items: bad input (missing 'name' key):{items}")
         return items
-
-    @classmethod
-    def get_widget_files(cls) -> List[str]:
-        return cls.files
 
     @staticmethod
     def calc_widget_digest(files: List[str]) -> str:

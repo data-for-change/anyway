@@ -1,5 +1,3 @@
-import re
-
 import tweepy
 
 from anyway import secrets
@@ -30,15 +28,6 @@ def scrape(screen_name, latest_tweet_id=None, count=100):
         # FIX: why the count param here ^ ?
     for tweet in all_tweets:
         yield parse_tweet(tweet, screen_name)
-
-
-def extract_accident_time(text):
-    # Currently unused
-    reg_exp = r"בשעה (\d{2}:\d{2})"
-    time_search = re.search(reg_exp, text)
-    if time_search:
-        return time_search.group(1)
-    return ""
 
 
 def parse_tweet(tweet, screen_name):

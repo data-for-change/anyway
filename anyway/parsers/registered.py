@@ -6,7 +6,7 @@ import os
 import re
 from datetime import datetime
 from anyway.models import RegisteredVehicle, DeprecatedCity
-from anyway.utilities import time_delta, CsvReader, ImporterUI, truncate_tables, decode_hebrew
+from anyway.utilities import time_delta, CsvReader, ImporterUI, truncate_tables
 from anyway.app_and_db import db
 
 
@@ -88,9 +88,9 @@ class DatastoreImporter(object):
 
         return {
             "year": self._report_year,
-            "name": decode_hebrew(name),
+            "name": name,
             "name_eng": row[COLUMN_CITY_NAME_ENG].strip(),
-            "search_name": decode_hebrew(search_name),
+            "search_name": search_name,
             "motorcycle": self.as_int(row[COLUMN_CITY_TOTAL_MOTORCYCLE]),
             "special": self.as_int(row[COLUMN_CITY_TOTAL_SPECIAL]),
             "taxi": self.as_int(row[COLUMN_CITY_TOTAL_TAXI]),

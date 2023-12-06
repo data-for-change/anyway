@@ -215,12 +215,6 @@ class GlobalMercator(object):
         ty = int(math.ceil(py / float(self.tileSize)) - 1)
         return tx, ty
 
-    def PixelsToRaster(self, px, py, zoom):
-        "Move the origin of pixel coordinates to top-left corner"
-
-        mapSize = self.tileSize << zoom
-        return px, mapSize - py
-
     def MetersToTile(self, mx, my, zoom):
         "Returns tile for given mercator coordinates"
 
@@ -248,13 +242,6 @@ class GlobalMercator(object):
 
         # return (2 * math.pi * 6378137) / (self.tileSize * 2**zoom)
         return self.initialResolution / (2 ** zoom)
-
-    def ZoomForPixelSize(self, pixelSize):
-        "Maximal scaledown zoom of the pyramid closest to the pixelSize."
-
-        for i in range(30):
-            if pixelSize > self.Resolution(i):
-                return i - 1 if i != 0 else 0  # We don't want to scale up
 
     def GoogleTile(self, tx, ty, zoom):
         "Converts TMS tile coordinates to Google Tile coordinates"
@@ -319,14 +306,6 @@ class GlobalGeodetic(object):
 
     def __init__(self, tileSize=256):
         self.tileSize = tileSize
-
-    def LatLonToPixels(self, lat, lon, zoom):
-        "Converts lat/lon to pixel coordinates in given zoom of the EPSG:4326 pyramid"
-
-        res = 180 / 256.0 / 2 ** zoom
-        px = (180 + lat) / res
-        py = (90 + lon) / res
-        return px, py
 
     def PixelsToTile(self, px, py):
         "Returns coordinates of the tile covering region in pixel coordinates"

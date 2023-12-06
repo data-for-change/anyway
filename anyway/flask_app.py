@@ -27,16 +27,19 @@ from anyway.clusters_calculator import retrieve_clusters
 from anyway.config import ENTRIES_PER_PAGE
 from anyway.constants import CONST
 from anyway.infographics_utils import (
-    get_infographics_data,
     get_infographics_mock_data,
     get_infographics_data_for_location,
 )
+
+
 from anyway.models import (
     AccidentMarker,
     DiscussionMarker,
     HighlightPoint,
     Involved,
+    InvolvedView,
     LocationSubscribers,
+    RoadSegments,
     Vehicle,
     ReportProblem,
     EngineVolume,
@@ -53,6 +56,7 @@ from anyway.models import (
     EmbeddedReports,
     City,
     Streets,
+    Comment,
 )
 from anyway.request_params import get_request_params_from_request_values
 from anyway.views.news_flash.api import (
@@ -60,8 +64,11 @@ from anyway.views.news_flash.api import (
     news_flash_new,
     single_news_flash,
     news_flash_v2,
+    update_news_flash_qualifying,
+    get_downloaded_data,
     DEFAULT_LIMIT_REQ_PARAMETER,
     DEFAULT_OFFSET_REQ_PARAMETER,
+    DEFAULT_NUMBER_OF_YEARS_AGO
 )
 from anyway.views.schools.api import (
     schools_description_api,
@@ -73,6 +80,8 @@ from anyway.views.schools.api import (
     injured_around_schools_api,
 )
 from anyway.views.user_system.api import *
+
+from anyway.views.comments.api import get_comments, create_comment
 
 DEFAULT_MAPS_API_KEY = "AIzaSyDUIWsBLkvIUwzLHMHos9qFebyJ63hEG2M"
 
@@ -172,7 +181,6 @@ jinja_environment.assets_environment = assets_env
 babel = Babel(app)
 
 SESSION_HIGHLIGHTPOINT_KEY = "gps_highlightpoint_created"
-
 DICTIONARY = "Dictionary"
 DICTCOLUMN1 = "MS_TAVLA"
 DICTCOLUMN2 = "KOD"
@@ -313,7 +321,6 @@ def schools():
     else:
         return Response("Method Not Allowed", 405)
 
-
 @app.route("/markers", methods=["GET"])
 def markers():
     logging.debug("getting markers")
@@ -349,7 +356,6 @@ def markers():
         return generate_json(
             accident_markers, rsa_markers, discussions, is_thin, total_records=result.total_records
         )
-
 
 @app.route("/markers_by_yishuv_symbol", methods=["GET"])
 def markers_by_yishuv_symbol():
@@ -1082,6 +1088,8 @@ app.add_url_rule(
     methods=["GET"],
 )
 app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash_v2, methods=["GET"])
+app.add_url_rule("/api/comments", endpoint=None, view_func=get_comments, methods=["GET"])
+app.add_url_rule("/api/comments", endpoint=None, view_func=create_comment, methods=["POST"])
 
 app.add_url_rule("/api/v1/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
 
@@ -1148,6 +1156,8 @@ news_flash_fields_model = api.model(
         "street2_hebrew": fields.String(),
         "non_urban_intersection_hebrew": fields.String(),
         "road_segment_name": fields.String(),
+        "newsflash_location_qualification": fields.Integer(),
+        "location_qualifying_user": fields.Integer(),
     },
 )
 news_flash_list_model = api.model(
@@ -1186,7 +1196,7 @@ class RetrieveNewsFlash(Resource):
 parser = reqparse.RequestParser()
 parser.add_argument("id", type=int, help="News flash id")
 parser.add_argument(
-    "years_ago", type=int, default=5, help="Number of years back to consider accidents"
+    "years_ago", type=int, default=DEFAULT_NUMBER_OF_YEARS_AGO, help=f"Number of years back to consider accidents. Default is {DEFAULT_NUMBER_OF_YEARS_AGO} years"
 )
 parser.add_argument("lang", type=str, default="he", help="Language")
 
@@ -1197,44 +1207,6 @@ class InfographicsData(Resource):
     @api.expect(parser)
     def get(self):
         return infographics_data_by_location()
-
-
-def infographics_data():
-    mock_data = request.values.get("mock", "false")
-    personalized_data = request.values.get("personalized", "false")
-    if mock_data == "true":
-        output = get_infographics_mock_data()
-    elif mock_data == "false":
-        news_flash_id = request.values.get("news_flash_id")
-        if news_flash_id is None:
-            log_bad_request(request)
-            return abort(http_client.BAD_REQUEST)
-
-        number_of_years_ago = request.values.get("years_ago", BE_CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
-        lang: str = request.values.get("lang", "he")
-        logging.debug(
-            (
-                "getting infographics data for news_flash_id: {news_flash_id}, "
-                + "in time period:{number_of_years_ago}, lang:{lang}"
-            ).format(
-                news_flash_id=news_flash_id, number_of_years_ago=number_of_years_ago, lang=lang
-            )
-        )
-        output = get_infographics_data(
-            news_flash_id=news_flash_id, years_ago=number_of_years_ago, lang=lang
-        )
-        if not output:
-            log_bad_request(request)
-            return abort(http_client.NOT_FOUND)
-    else:
-        log_bad_request(request)
-        return abort(http_client.BAD_REQUEST)
-
-    if personalized_data == "true":
-        output = widgets_personalisation_for_user(output)
-
-    json_data = json.dumps(output, default=str)
-    return Response(json_data, mimetype="application/json")
 
 
 """
@@ -1282,7 +1254,7 @@ def gps_to_cbs_location():
 idbl_parser = reqparse.RequestParser()
 idbl_parser.add_argument("road_segment_id", type=int, help="Road Segment id")
 idbl_parser.add_argument(
-    "years_ago", type=int, default=5, help="Number of years back to consider accidents"
+    "years_ago", type=int, default=DEFAULT_NUMBER_OF_YEARS_AGO, help=f"Number of years back to consider accidents. Default is {DEFAULT_NUMBER_OF_YEARS_AGO} years"
 )
 idbl_parser.add_argument("lang", type=str, default="he", help="Language")
 
@@ -1312,7 +1284,6 @@ def infographics_data_by_location():
 
     if personalized_data == "true":
         output = widgets_personalisation_for_user(output)
-
     json_data = json.dumps(output, default=str)
     return Response(json_data, mimetype="application/json")
 
@@ -1451,9 +1422,7 @@ delete_user_parser.add_argument("email", type=str, required=True)
 @api.route("/user/delete_user")
 @api.expect(delete_user_parser)
 class DeleteUser(Resource):
-    @api.doc(
-        "Delete a user and all of its connections (roles, Orgs . . .)"
-    )
+    @api.doc("Delete a user and all of its connections (roles, Orgs . . .)")
     @api.response(200, "")
     @api.response(400, "User is not in the DB")
     def post(self):
@@ -1464,12 +1433,19 @@ class DeleteUser(Resource):
 
 get_streets_parser = api.parser()
 get_streets_parser.add_argument(
-    "yishuv_symbol",
-    type=int,
-    required=True,
-    help="Symbol of yishuv to get streets of.",
+    "yishuv_symbol", type=int, required=True, help="Symbol of yishuv to get streets of."
 )
 
+get_streets_by_yishuv_name_parser = api.parser()
+get_streets_by_yishuv_name_parser.add_argument(
+    "yishuv_name", type=str, required=True, help="Name of yishuv to get streets of."
+)
+
+
+get_segments_by_segments_parsers = api.parser()
+get_segments_by_segments_parsers.add_argument(
+    "road_segment_id", type=int, required=True, help="road segment id"
+)
 
 @api.route("/api/streets")
 @api.expect(get_streets_parser)
@@ -1481,8 +1457,51 @@ class GetAllStreetsOfYishuv(Resource):
         return Streets.get_streets_by_yishuv(yishuv_symbol)
 
 
+@api.route("/api/streets-by-yishuv")
+@api.expect(get_streets_by_yishuv_name_parser)
+class GetAllStreetsOfYishuvByYishuvName(Resource):
+    @api.doc("Get all streets of yishuv by yishuv name")
+    def get(self):
+        args = get_streets_by_yishuv_name_parser.parse_args()
+        yishuv_name = args["yishuv_name"]
+        return Streets.get_streets_by_yishuv_name(yishuv_name)
+
+
+@api.route("/api/segments-by-segment")
+@api.expect(get_segments_by_segments_parsers)
+class GetAllSegementsBySegment(Resource):
+    @api.doc("Get all segments in road of current segment")
+    def get(self):
+        args = get_segments_by_segments_parsers.parse_args()
+        road_segment_id = args["road_segment_id"]
+        return RoadSegments.get_segments_by_segment(road_segment_id)
+
+
 @api.route("/api/city", methods=["GET"])
 class Cities(Resource):
     @api.doc("get get all cities")
     def get(self):
         return City.get_all_cities()
+
+
+@api.route("/api/news-flash/<int:id>", methods=["PUT"])
+class SetNewsflashLocationQualification(Resource):
+    def put(self, id):
+        return update_news_flash_qualifying(id)
+
+
+download_data_parser = reqparse.RequestParser()
+download_data_parser.add_argument("format", type=str, default="csv", 
+help="Format for downloaded data (.csv/.xlsx)")
+download_data_parser.add_argument("years_ago", type=int, default=DEFAULT_NUMBER_OF_YEARS_AGO, 
+help=f"Number of years back to consider accidents. Default is {DEFAULT_NUMBER_OF_YEARS_AGO} years")
+"""
+    Download accidents data with regards to news flash/location
+"""
+@api.route("/api/download-data", methods=["GET"])
+class DownloadData(Resource):
+    @api.doc("download data")
+    @api.expect(parser)
+    def get(self):
+        args = download_data_parser.parse_args()
+        return get_downloaded_data(args.get('format', 'csv'), args.get('years_ago', DEFAULT_NUMBER_OF_YEARS_AGO))

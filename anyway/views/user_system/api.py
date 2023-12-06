@@ -51,7 +51,7 @@ principals = Principal(app)
 
 
 # Copied and modified from flask-security
-def roles_accepted(*roles):
+def roles_accepted(*roles, need_all_permission=False):
     """Decorator which specifies that a user must have at least one of the
     specified roles. Example::
 
@@ -69,9 +69,15 @@ def roles_accepted(*roles):
     def wrapper(fn):
         @wraps(fn)
         def decorated_view(*args, **kwargs):
-            perm = Permission(*[RoleNeed(role) for role in roles])
-            if perm.can():
-                return fn(*args, **kwargs)
+            if need_all_permission:
+                permissions = [Permission(RoleNeed(role)) for role in roles]
+                if False not in map(lambda perm: perm.can(), permissions):
+                    return fn(*args, **kwargs)
+            else:
+                perm = Permission(*[RoleNeed(role) for role in roles])
+                if perm.can():
+                    return fn(*args, **kwargs)
+
             user_email = "not logged in"
             if not current_user.is_anonymous:
                 user_email = current_user.email
@@ -591,4 +597,3 @@ def delete_user(email: str) -> Response:
     db.session.delete(user)
     db.session.commit()
     return Response(status=HTTPStatus.OK)
-

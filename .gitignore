@@ -60,5 +60,5 @@ venv
 /.vscode
 /.env*
 
-*.ipynb*
+
 GOOGLE_APPLICATION_CREDENTIALS_KEY.json

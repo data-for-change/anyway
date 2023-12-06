@@ -6,7 +6,7 @@ import copy
 from sqlalchemy import func
 import pandas as pd
 
-from anyway.models import NewsFlash, AccidentMarkerView, City, Streets
+from anyway.models import NewsFlash, AccidentMarkerView, City, Streets, SuburbanJunction
 from anyway.parsers.location_extraction import (
     get_road_segment_name_and_number,
     get_road_segment_by_name_and_road,
@@ -14,6 +14,11 @@ from anyway.parsers.location_extraction import (
 from anyway.backend_constants import BE_CONST
 from anyway.app_and_db import db
 from anyway.parsers import resolution_dict
+
+NON_URBAN_INTERSECTION_HEBREW = "non_urban_intersection_hebrew"
+NON_URBAN_INTERSECTION = "non_urban_intersection"
+
+LocationInfo = Dict[str, Any]
 
 
 @dataclass
@@ -24,12 +29,13 @@ class RequestParams:
 
     years_ago: int
     location_text: str
-    location_info: Dict[str, Any]
+    location_info: LocationInfo
     resolution: BE_CONST.ResolutionCategories
     gps: Dict
     start_time: datetime.date
     end_time: datetime.date
     lang: str
+    news_flash_description: Optional[str]
 
     def __str__(self):
         return (
@@ -42,7 +48,13 @@ class RequestParams:
 
 # todo: merge with get_request_params()
 def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams]:
-    location = get_location_from_request_values(vals)
+    news_flash_obj = extract_news_flash_obj(vals)
+    news_flash_description = (
+        news_flash_obj.description
+        if news_flash_obj is not None and news_flash_obj.description is not None
+        else None
+    )
+    location = get_location_from_news_flash_or_request_values(news_flash_obj, vals)
     if location is None:
         return None
     years_ago = vals.get("years_ago", BE_CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
@@ -50,6 +62,7 @@ def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams
     location_text = location["text"]
     gps = location["gps"]
     location_info = location["data"]
+
     if location_info is None:
         return None
     logging.debug("location_info:{}".format(location_info))
@@ -84,15 +97,18 @@ def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams
         start_time=start_time,
         end_time=end_time,
         lang=lang,
+        news_flash_description=news_flash_description,
     )
     logging.debug(f"Ending get_request_params. params: {request_params}")
     return request_params
 
 
-def get_location_from_request_values(vals: dict) -> Optional[dict]:
-    news_flash_id = vals.get("news_flash_id")
-    if news_flash_id is not None:
-        return get_location_from_news_flash(news_flash_id)
+def get_location_from_news_flash_or_request_values(
+    news_flash_obj: Optional[NewsFlash], vals: dict
+) -> Optional[dict]:
+    if news_flash_obj is not None:
+        return get_location_from_news_flash(news_flash_obj)
+
     road_segment_id = vals.get("road_segment_id")
     if road_segment_id is not None:
         return extract_road_segment_location(road_segment_id)
@@ -100,19 +116,32 @@ def get_location_from_request_values(vals: dict) -> Optional[dict]:
         "street1" in vals or "street1_hebrew" in vals
     ):
         return extract_street_location(vals)
+    if (
+        "non_urban_intersection" in vals
+        or "non_urban_intersection_hebrew" in vals
+        or ("road1" in vals and "road2" in vals)
+    ):
+        return extract_non_urban_intersection_location(vals)
+
     logging.error(f"Unsupported location:{vals.values()}")
     return None
 
 
-def get_location_from_news_flash(news_flash_id: str) -> Optional[dict]:
-    news_flash = extract_news_flash_obj(news_flash_id)
-    if news_flash is None:
-        return None
+def get_location_from_news_flash(news_flash: Optional[NewsFlash]) -> Optional[dict]:
     loc = extract_news_flash_location(news_flash)
     if loc is None:
         return None
     res = loc["data"]["resolution"]
+    # This test is here assuming only SuburbanJunction resolution is still problematic in NewsFlash items.
     loc["data"]["resolution"] = BE_CONST.ResolutionCategories(res)
+    if loc["data"]["resolution"] == BE_CONST.ResolutionCategories.SUBURBAN_JUNCTION and not loc[
+        "data"
+    ].get(NON_URBAN_INTERSECTION_HEBREW):
+        logging.error(
+            f"SuburbanJunction resolution: {loc['data']['resolution']} "
+            f"missing mandatory field:NON_URBAN_INTERSECTION_HEBREW."
+        )
+        return None
     loc["text"] = get_news_flash_location_text(news_flash)
     add_numeric_field_values(loc, news_flash)
     return loc
@@ -121,9 +150,7 @@ def get_location_from_news_flash(news_flash_id: str) -> Optional[dict]:
 def add_numeric_field_values(loc: dict, news_flash: NewsFlash) -> None:
     if loc["data"]["resolution"] == BE_CONST.ResolutionCategories.STREET:
         if "yishuv_symbol" not in loc["data"]:
-            loc["data"]["yishuv_symbol"] = City.get_symbol_from_name(
-                loc["data"]["yishuv_name"]
-            )
+            loc["data"]["yishuv_symbol"] = City.get_symbol_from_name(loc["data"]["yishuv_name"])
         if "street1" not in loc["data"]:
             loc["data"]["street1"] = Streets.get_street_by_street_name(
                 loc["data"]["yishuv_symbol"], loc["data"]["street1_hebrew"]
@@ -134,6 +161,9 @@ def add_numeric_field_values(loc: dict, news_flash: NewsFlash) -> None:
                 loc["data"]["road_segment_name"], loc["data"]["road1"]
             )
             loc["data"]["road_segment_id"] = segment.segment_id
+    elif loc["data"]["resolution"] == BE_CONST.ResolutionCategories.SUBURBAN_JUNCTION:
+        if NON_URBAN_INTERSECTION_HEBREW not in loc["data"] or "roads" not in loc["data"]:
+            loc["data"] = fill_missing_non_urban_intersection_values(loc["data"])
 
 
 # generate text describing location or road segment of news flash
@@ -157,7 +187,7 @@ def get_news_flash_location_text(news_flash_obj: NewsFlash):
     elif resolution == "צומת בינעירוני" and road1 and road_segment_name:
         res = "כביש " + road1 + " במקטע " + road_segment_name
     elif resolution == "רחוב" and yishuv_name and street1_hebrew:
-        res = " רחוב " + street1_hebrew + " ב" + yishuv_name
+        res = get_street_location_text(yishuv_name, street1_hebrew)
     else:
         logging.warning(
             "Did not found quality resolution. Using location field. News Flash id:{}".format(
@@ -176,7 +206,7 @@ def get_road_segment_location_text(road1: int, road_segment_name: str):
 
 
 def get_street_location_text(yishuv_name, street1_hebrew):
-    return " רחוב " + street1_hebrew + " ב" + yishuv_name
+    return "רחוב " + street1_hebrew + " ב" + yishuv_name
 
 
 def extract_road_segment_location(road_segment_id):
@@ -204,6 +234,16 @@ def extract_street_location(input_vals: dict):
     return {"name": "location", "data": data, "gps": gps, "text": text}
 
 
+def extract_street_location_suggestion_version(input_vals: dict):
+    vals = fill_missing_street_values(input_vals)
+    # noinspection PyDictCreation
+    data = {"resolution": BE_CONST.ResolutionCategories.STREET}
+    for k in ["yishuv_name", "street", "yishuv_symbol"]:
+        data[k] = vals[k]
+    text = get_street_location_text(vals["yishuv_name"], vals["street"])
+    return {"name": "location", "data": data, "text": text}
+
+
 def fill_missing_street_values(vals: dict) -> dict:
     res = copy.copy(vals)
     if "yishuv_symbol" in res and "yishuv_name" not in res:
@@ -221,11 +261,67 @@ def fill_missing_street_values(vals: dict) -> dict:
     return res
 
 
-def extract_news_flash_obj(news_flash_id) -> Optional[NewsFlash]:
+def extract_non_urban_intersection_location(input_vals: dict):
+    vals = fill_missing_non_urban_intersection_values(input_vals)
+    # noinspection PyDictCreation
+    data = {"resolution": BE_CONST.ResolutionCategories.SUBURBAN_JUNCTION}
+    for k in ["non_urban_intersection", "non_urban_intersection_hebrew", "road1", "road2"]:
+        data[k] = vals[k]
+    # fake gps - todo: fix
+    gps = {"lat": 32.825610, "lon": 35.165395}
+    return {
+        "name": "location",
+        "data": data,
+        "gps": gps,
+        "text": vals["non_urban_intersection_hebrew"],
+    }
+
+
+def fill_missing_non_urban_intersection_values(vals: dict) -> dict:
+    """
+    Fill code and name. roads are not filled as they cannot be used for filtering
+    because of the order of road1 and
+    """
+    res = copy.copy(vals)
+    if "non_urban_intersection_hebrew" in res and "non_urban_intersection" not in res:
+        res.update(
+            SuburbanJunction.get_all_from_key_value(
+                "non_urban_intersection_hebrew", [res["non_urban_intersection_hebrew"]]
+            )
+        )
+    elif "non_urban_intersection" in res and "non_urban_intersection_hebrew" not in res:
+        res.update(
+            SuburbanJunction.get_all_from_key_value(
+                "non_urban_intersection", [res["non_urban_intersection"]]
+            )
+        )
+    elif (
+        "non_urban_intersection" not in res
+        and "non_urban_intersection_hebrew" not in res
+        and "road1" in res
+        and "road2" in res
+    ):
+        res.update(SuburbanJunction.get_intersection_from_roads({int(res["road1"]), int(res["road2"])}))
+    else:
+        raise ValueError(f"Cannot get non_urban_intersection from input: {vals}")
+    #   TODO: temporarily removing "roads" field, as it is not used correctly in the filters.
+    if res.get("road1") is None or res.get("road2") is None and len(res.get("roads")) > 2:
+        roads = list(res["roads"])
+        res["road1"] = roads[0]
+        res["road2"] = roads[1]
+    if "roads" in res:
+        res.pop("roads")
+    return res
+
+
+def extract_news_flash_obj(vals) -> Optional[NewsFlash]:
+    news_flash_id = vals.get("news_flash_id")
+    if news_flash_id is None:
+        return None
     news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == news_flash_id).first()
 
     if not news_flash_obj:
-        logging.warning("Could not find news flash id {}".format(news_flash_id))
+        logging.warning(f"Could not find news flash id {news_flash_id}")
         return None
 
     return news_flash_obj
@@ -252,10 +348,27 @@ def extract_news_flash_location(news_flash_obj: NewsFlash):
         return None
     data = {"resolution": resolution}
     for field in resolution_dict[resolution]:
-        curr_field = getattr(news_flash_obj, field)
+        curr_field = getattr(news_flash_obj, field, None)
         if curr_field is not None:
             if isinstance(curr_field, float):
                 curr_field = int(curr_field)
             data[field] = curr_field
     gps = {"lat": news_flash_obj.lat, "lon": news_flash_obj.lon}
     return {"name": "location", "data": data, "gps": gps}
+
+
+def get_location_from_request_values(
+   values: dict
+):
+    road_segment_id = values.get("road_segment_id")
+    if road_segment_id is not None:
+        return extract_road_segment_location(road_segment_id)
+    elif ("yishuv_name" in values) and ("street" in values):
+        data = {"resolution": BE_CONST.ResolutionCategories.STREET}
+        data["street"] = values["street"]
+        data["yishuv_name"] = values["yishuv_name"]
+
+        return {"name": "location", "data": data }
+
+    logging.error(f"Unsupported location:{values.values()}")
+    return None

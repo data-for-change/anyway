@@ -12,11 +12,12 @@ from flask_babel import _
 # TODO: pretty sure there are errors in this widget, for example, is_included returns self.items
 class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
     name: str = "accidents_on_small_motor_by_vehicle_by_year"
+    files = [__file__]
     # TODO: when accident vehicle becomes available in request params,
     # make it so widget is only included on newsflashes that have a relevant vehicle
 
     def __init__(self, request_params: RequestParams):
-        super().__init__(request_params, type(self).name)
+        super().__init__(request_params)
         self.rank = 28
 
     def generate_items(self) -> None:
@@ -94,11 +95,15 @@ class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
-            "title": _("Severe or fatal accidents on bikes, e-bikes, or scooters in ")
-            + request_params.location_info["yishuv_name"]
+            "title": _("Severe or fatal accidents on bikes, e-bikes, or scooters"),
+            "subtitle": _(request_params.location_info["yishuv_name"])
         }
         return items
 
     def is_included(self) -> bool:
-        count = self.items["bikes"][-1]["count"] + self.items["e_bikes"][-1]["count"] + self.items["e_scooters"][-1]["count"]
+        count = (
+            self.items["bikes"][-1]["count"]
+            + self.items["e_bikes"][-1]["count"]
+            + self.items["e_scooters"][-1]["count"]
+        )
         return count > 1

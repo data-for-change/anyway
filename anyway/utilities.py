@@ -1,5 +1,6 @@
 import argparse
 import logging
+import math
 import os
 import re
 import sys
@@ -9,6 +10,8 @@ from csv import DictReader
 from datetime import datetime
 from functools import partial
 from urllib.parse import urlparse
+from sqlalchemy import func, or_
+from sqlalchemy.sql import select
 
 import phonenumbers
 from dateutil.relativedelta import relativedelta
@@ -166,11 +169,52 @@ def decode_hebrew(s):
 open_utf8 = partial(open, encoding="utf-8")
 
 
+def row_to_dict(row):
+    return row._asdict()
+
+
+def fetch_first_and_every_nth_value_for_column(conn, column_to_fetch, n):
+    sub_query = select([])\
+        .column(column_to_fetch)\
+        .column(func.row_number().over(order_by=column_to_fetch).label("row_number"))\
+        .alias()
+    select_query = select([sub_query]) \
+        .where(or_(func.mod(sub_query.c.row_number, n) == 0,
+                   sub_query.c.row_number == 1))
+    ids_and_row_numbers = conn.execute(select_query).fetchall()
+    ids = [id_and_row_number[0] for id_and_row_number in ids_and_row_numbers]
+    return ids
+
+
 def truncate_tables(db, tables):
     logging.info("Deleting tables: " + ", ".join(table.__name__ for table in tables))
     for table in tables:
         db.session.query(table).delete()
         db.session.commit()
+
+
+def delete_all_rows_from_table(conn, table):
+    table_name = table.__tablename__
+    logging.info("Deleting all rows from table " + table_name)
+    conn.execute("DELETE FROM " + table_name)
+
+
+def split_query_to_chunks_by_column(base_select, column_to_chunk_by, chunk_size, conn):
+    column_values = fetch_first_and_every_nth_value_for_column(conn, column_to_chunk_by, chunk_size)
+    logging.debug("after fetching every nth column")
+    for index in range(len(column_values)):
+        select = base_select.where(column_to_chunk_by >= column_values[index])
+        if index + 1 < len(column_values):
+            select = select.where(column_to_chunk_by < column_values[index + 1])
+        chunk = conn.execute(select).fetchall()
+        logging.debug("after running query on chunk")
+        yield [dict(row.items()) for row in chunk]
+    logging.debug("after running query on all chunks")
+
+
+def run_query_and_insert_to_table_in_chunks(query, table_inserted_to, column_to_chunk_by, chunk_size, conn):
+    for chunk in split_query_to_chunks_by_column(query, column_to_chunk_by, chunk_size, conn):
+        conn.execute(table_inserted_to.__table__.insert(), chunk)
 
 
 def valid_date(date_string):
@@ -271,6 +315,7 @@ def is_a_safe_redirect_url(url: str) -> bool:
         "anyway-infographics-staging.web.app",
         "anyway-infographics.web.app",
         "anyway-infographics-demo.web.app",
+        "media.anyway.co.il"
     ]:
         return True
 
@@ -289,3 +334,26 @@ def is_a_valid_email(tmp_given_user_email: str) -> bool:
         email_address=tmp_given_user_email, check_regex=True, check_mx=False, use_blacklist=False
     )
     return is_valid
+
+
+def half_rounded_up(num: int):
+    return math.ceil(num / 2)
+
+def trigger_airflow_dag(dag_id, conf=None):
+    import airflow_client.client
+    from airflow_client.client.api import dag_run_api
+    from airflow_client.client.model.dag_run import DAGRun
+    from anyway import secrets
+
+    if conf is None:
+        conf = {}
+    airflow_api_url = "https://airflow.anyway.co.il/api/v1"
+    configuration = airflow_client.client.Configuration(
+        host=airflow_api_url,
+        username=secrets.get("AIRFLOW_USER"),
+        password=secrets.get("AIRFLOW_PASSWORD")
+    )
+    with airflow_client.client.ApiClient(configuration) as api_client:
+        dag_run_api_instance = dag_run_api.DAGRunApi(api_client)
+        dag_run = DAGRun(conf=conf)
+        return dag_run_api_instance.post_dag_run(dag_id, dag_run)

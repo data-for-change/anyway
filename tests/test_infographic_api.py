@@ -1,5 +1,7 @@
 import datetime
 import pytest
+import pickle
+import os
 import anyway.request_params
 import anyway.widgets.widget_utils as widget_utils
 
@@ -10,38 +12,19 @@ from jsonschema import validate
 from anyway.app_and_db import db
 from anyway.vehicle_type import VehicleCategory
 from anyway.widgets.road_segment_widgets.accident_count_by_car_type_widget import AccidentCountByCarTypeWidget
-from anyway.backend_constants import NewsflashLocationQualification
 
 
-def insert_infographic_mock_data(app):
+# Reading the mock data into the dictionary and only using the supported resolutions.
+MOCK_DATA_DICTIONARY_PATH = os.path.join('tests','mock_data_dictionary.pickle')
+with open(MOCK_DATA_DICTIONARY_PATH, 'rb') as f:
+    mock_data_dictionary = pickle.load(f).get('supported')
+
+def insert_infographic_mock_data(app, values_str=mock_data_dictionary['orig']):
     sql_insert = f"""
         insert into news_flash
         (accident, author, date, description, lat, link, lon, title, source, location, road1, road2, resolution,
         tweet_id, district_hebrew, non_urban_intersection_hebrew, region_hebrew, road_segment_name, street1_hebrew, street2_hebrew, yishuv_name, newsflash_location_qualification, location_qualifying_user)
-        values (
-        true,
-        'ynet',
-        '2020-01-19 02:03:30',
-        'גבר בשנות ה-30 בחייו נהרג בתאונת דרכים בין רכב למשאית בכביש 90, סמוך למפגש הבקעה שבבקעת הירדן. הוא חולץ מרכבו שעלה באש ללא סימני חיים. נהג המשאית, גבר כבן 50, נפצע באורח קל. צוות מד"א פינה אותו לבית החולים העמק בעפולה.',
-        32.0554748,
-        'http://www.ynet.co.il/articles/0,7340,L-5662301,00.html',
-        35.4699107,
-        'גבר נהרג בתאונת דרכים עם משאית בכביש הבקעה',
-        'ynet',
-        'מפגש הבקעה שבבקעת הירדןסמוך לכביש 90, ',
-        90,
-        null,
-        'כביש בינעירוני',
-        null,
-        null,
-        null,
-        null,
-        'כניסה למצפה שלם - צומת שדי תרומות',
-        null,
-        null,
-        null,
-        {NewsflashLocationQualification.NOT_VERIFIED.value},
-        null) returning id;
+        values ({values_str}) returning id;
     """
     insert_id = db.session.execute(sql_insert).fetchone()[0]
     db.session.commit()
@@ -143,6 +126,13 @@ class TestInfographicApi:
         widget_utils.get_accidents_stats = tmp_func  # Restore function ref - So we don't affect other tests
         assert len(actual) == len(expected)
         assert actual == expected
+
+    def test_different_resolutions(self, app):
+        for resolution in mock_data_dictionary:
+            inserted_id = insert_infographic_mock_data(app, values_str=mock_data_dictionary[resolution])
+            rv = app.get(f"/api/infographics-data?news_flash_id={inserted_id}")
+            delete_new_infographic_data(inserted_id)
+            assert(rv.status_code == http_client.OK)
 
     def _get_widget_by_name(self, name):
         if self.infographic_data is None:

@@ -1335,6 +1335,14 @@ def embedded_reports_api():
     return response
 
 
+@app.route("/api/telegram/webhook", methods=["POST"])
+def telegram_webhook():
+    update = request.json  # Telegram sends updates in JSON format
+    logging.info(f"Received Telegram update: {update}")
+
+    return jsonify(success=True)
+
+
 # User system API
 app.add_url_rule("/user/add_role", view_func=add_role, methods=["POST"])
 app.add_url_rule(

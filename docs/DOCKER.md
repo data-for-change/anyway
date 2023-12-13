@@ -104,6 +104,8 @@ $ sudo docker login docker.pkg.github.com -u USERNAME
     `sudo docker-compose up --build anyway`
 This will start the containers. It will take a few minutes until it's done.
 
+Note - If the "anyway" container does not start because of the error: "exec /anyway/docker-entrypoint.sh: no such file or directory", run `dos2unix` on all files mentioned in "important" note under the Windows section and go back to step 7.
+
 **8.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
 If you need to see the map for development email us [anyway@anyway.co.il](mailto:anyway@anyway.co.il) to get a developer key.  

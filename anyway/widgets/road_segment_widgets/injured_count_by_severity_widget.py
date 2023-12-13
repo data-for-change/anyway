@@ -130,7 +130,7 @@ class InjuredCountBySeverityWidget(RoadSegmentWidget):
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
             "title": _("Number of Injuries in accidents by severity"),
-            "subtitle": f'{_("in segment")} {_(request_params.location_info["road_segment_name"])}',
+            "subtitle": _(request_params.location_info['road_segment_name']),
             "transcription": InjuredCountBySeverityWidget.get_transcription(request_params=request_params,
                                                                             items=items["data"]["items"])
         }

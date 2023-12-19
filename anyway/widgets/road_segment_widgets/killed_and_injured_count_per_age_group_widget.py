@@ -37,6 +37,6 @@ class KilledInjuredCountPerAgeGroupWidget(RoadSegmentWidget):
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
             "title": _("Injury per age group"),
-            "subtitle": _(request_params.location_info["road_segment_name"]),
+            "subtitle": f'{_("in segment")} {_(request_params.location_info["road_segment_name"])}',
         }
         return items

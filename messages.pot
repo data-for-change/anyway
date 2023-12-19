@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-09-14 15:58+0300\n"
+"POT-Creation-Date: 2023-12-19 21:10+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -263,15 +263,12 @@ msgid "Number of accidents by severity"
 msgstr ""
 
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:123
-#: anyway/widgets/road_segment_widgets/accident_count_by_accident_year_widget.py:57
 #: anyway/widgets/road_segment_widgets/accident_count_by_car_type_widget.py:145
 #: anyway/widgets/road_segment_widgets/accident_count_by_hour_widget.py:31
 #: anyway/widgets/road_segment_widgets/accident_count_by_road_light_widget.py:33
 #: anyway/widgets/road_segment_widgets/accidents_heat_map_widget.py:54
-#: anyway/widgets/road_segment_widgets/injured_count_by_accident_year_widget.py:56
 #: anyway/widgets/road_segment_widgets/injured_count_by_severity_widget.py:133
 #: anyway/widgets/road_segment_widgets/killed_and_injured_count_per_age_group_stacked_widget.py:53
-#: anyway/widgets/road_segment_widgets/killed_and_injured_count_per_age_group_widget.py:50
 #: anyway/widgets/road_segment_widgets/suburban_crosswalk_widget.py:73
 msgid "road_segment_name"
 msgstr ""
@@ -314,6 +311,12 @@ msgstr ""
 
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:156
 msgid "Fatal, severe and light accidents count in the specified location."
+msgstr ""
+
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:47
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:49
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:52
+msgid "Severe accidents"
 msgstr ""
 
 #: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:51
@@ -407,18 +410,18 @@ msgstr ""
 msgid "Number of accidents by accident type"
 msgstr ""
 
-#: anyway/widgets/road_segment_widgets/accident_count_by_accident_type_widget.py:64
+#: anyway/widgets/road_segment_widgets/accident_count_by_accident_type_widget.py:65
 msgid "Collision"
 msgstr ""
 
-#: anyway/widgets/road_segment_widgets/accident_count_by_accident_type_widget.py:65
+#: anyway/widgets/road_segment_widgets/accident_count_by_accident_type_widget.py:66
 msgid ""
 "Distribution of accidents by type in the selected segment and time "
 "period. Three most common accident types are displayed"
 msgstr ""
 
 #: anyway/widgets/road_segment_widgets/accident_count_by_accident_year_widget.py:56
-msgid "Accidents in segment"
+msgid "Number of accidents, per year, split by severity"
 msgstr ""
 
 #: anyway/widgets/road_segment_widgets/accident_count_by_accident_year_widget.py:63
@@ -441,7 +444,7 @@ msgstr ""
 msgid "Accidents by time"
 msgstr ""
 
-#: anyway/widgets/road_segment_widgets/accident_count_by_day_night_widget.py:39
+#: anyway/widgets/road_segment_widgets/accident_count_by_day_night_widget.py:40
 msgid ""
 "Distribution of accidents by day/night. Day/night are determined by "
 "sunrise and sunset at each day of the year."
@@ -455,7 +458,7 @@ msgstr ""
 msgid "Number of accidents by driver type"
 msgstr ""
 
-#: anyway/widgets/road_segment_widgets/accident_count_by_driver_type_widget.py:85
+#: anyway/widgets/road_segment_widgets/accident_count_by_driver_type_widget.py:86
 msgid ""
 "Driver involvement in accident by driver type: professional - trucks, "
 "taxi, bus, work, minibus, tractor, private - private car, motorcycle, "
@@ -581,14 +584,12 @@ msgstr ""
 msgid "Killed and injury stacked per age group"
 msgstr ""
 
-#: anyway/widgets/road_segment_widgets/killed_and_injured_count_per_age_group_widget.py:29
-#: anyway/widgets/road_segment_widgets/killed_and_injured_count_per_age_group_widget_utils.py:87
-#: anyway/widgets/road_segment_widgets/killed_and_injured_count_per_age_group_widget_utils.py:91
-msgid "unknown"
+#: anyway/widgets/road_segment_widgets/killed_and_injured_count_per_age_group_widget.py:39
+msgid "Injury per age group"
 msgstr ""
 
-#: anyway/widgets/road_segment_widgets/killed_and_injured_count_per_age_group_widget.py:49
-msgid "Injury per age group"
+#: anyway/widgets/road_segment_widgets/killed_and_injured_count_per_age_group_widget_utils.py:87
+msgid "unknown"
 msgstr ""
 
 #: anyway/widgets/road_segment_widgets/motorcycle_accidents_vs_all_accidents_widget.py:21

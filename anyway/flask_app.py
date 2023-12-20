@@ -1194,7 +1194,7 @@ class RetrieveNewsFlash(Resource):
     Returns infographics-data API
 """
 parser = reqparse.RequestParser()
-parser.add_argument("id", type=int, help="News flash id")
+parser.add_argument("news_flash_id", type=int, help="News flash id")
 parser.add_argument(
     "years_ago", type=int, default=DEFAULT_NUMBER_OF_YEARS_AGO, help=f"Number of years back to consider accidents. Default is {DEFAULT_NUMBER_OF_YEARS_AGO} years"
 )

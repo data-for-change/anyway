@@ -97,6 +97,10 @@ class AccidentCountBySeverityWidget(AllLocationsWidget):
                 in_segment_keyword=_("in segment"),
                 segment_name=_(request_params.location_info.get('road_segment_name')),
             )
+        elif request_params.resolution == BE_CONST.ResolutionCategories.SUBURBAN_JUNCTION:
+            text = "{in_urban_intersection}".format(
+                in_urban_intersection=request_params.location_info.get('non_urban_intersection_hebrew')
+            )
         else:
             raise Exception(f"cannot convert to hebrew for resolution : {request_params.resolution.get('resolution')}")
         text += "{between_years_keyword} {start_year} - {end_year}, {separator_keyword} {incidents_num} {incident_keyword}, {out_of_them_keywoard} ".format(

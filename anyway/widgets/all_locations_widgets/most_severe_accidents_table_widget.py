@@ -44,12 +44,12 @@ def get_most_severe_accidents_table_title(
     location_info: dict, resolution: BE_CONST.ResolutionCategories
 ):
     if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
-        return "Most severe accidents in segment", segment_dictionary[location_info["road_segment_name"]]
+        return _("Severe accidents"), f'{_("in segment")} {_(segment_dictionary[location_info["road_segment_name"]])}'
     elif resolution == BE_CONST.ResolutionCategories.SUBURBAN_JUNCTION:
-        return "Severe accidents in suburban junction", f" {location_info['non_urban_intersection_hebrew']}"
+        return _("Severe accidents"), f"{_('in')}{location_info['non_urban_intersection_hebrew']}"
     elif resolution == BE_CONST.ResolutionCategories.STREET:
         in_str = _("in")
-        return "Severe accidents in street", f" {location_info['street1_hebrew']} {in_str}{location_info['yishuv_name']}"
+        return _("Severe accidents"), f"{_('in street')} {location_info['street1_hebrew']} {in_str}{location_info['yishuv_name']}"
 
 # count of dead and severely injured
 def get_casualties_count_in_accident(accident_id, provider_code, injury_severity, accident_year):
@@ -210,8 +210,8 @@ class MostSevereAccidentsTableWidget(AllLocationsWidget):
         title, subtitle = get_most_severe_accidents_table_title(request_params.location_info,
                                                                 request_params.resolution)
         items["data"]["text"] = {
-            "title": _(title),
-            "subtitle": _(subtitle),
+            "title": title,
+            "subtitle": subtitle,
             "transcription": MostSevereAccidentsTableWidget.get_transcription(request_params=request_params,
                                                items=items["data"]["items"])
         }

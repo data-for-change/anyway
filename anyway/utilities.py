@@ -174,15 +174,13 @@ def row_to_dict(row):
 
 
 def fetch_first_and_every_nth_value_for_column(conn, column_to_fetch, n):
-    sub_query = (
-        select([])
-        .column(column_to_fetch)
-        .column(func.row_number().over(order_by=column_to_fetch).label("row_number"))
+    sub_query = select([])\
+        .column(column_to_fetch)\
+        .column(func.row_number().over(order_by=column_to_fetch).label("row_number"))\
         .alias()
-    )
-    select_query = select([sub_query]).where(
-        or_(func.mod(sub_query.c.row_number, n) == 0, sub_query.c.row_number == 1)
-    )
+    select_query = select([sub_query]) \
+        .where(or_(func.mod(sub_query.c.row_number, n) == 0,
+                   sub_query.c.row_number == 1))
     ids_and_row_numbers = conn.execute(select_query).fetchall()
     ids = [id_and_row_number[0] for id_and_row_number in ids_and_row_numbers]
     return ids
@@ -214,9 +212,7 @@ def split_query_to_chunks_by_column(base_select, column_to_chunk_by, chunk_size,
     logging.debug("after running query on all chunks")
 
 
-def run_query_and_insert_to_table_in_chunks(
-    query, table_inserted_to, column_to_chunk_by, chunk_size, conn
-):
+def run_query_and_insert_to_table_in_chunks(query, table_inserted_to, column_to_chunk_by, chunk_size, conn):
     for chunk in split_query_to_chunks_by_column(query, column_to_chunk_by, chunk_size, conn):
         conn.execute(table_inserted_to.__table__.insert(), chunk)
 
@@ -319,7 +315,7 @@ def is_a_safe_redirect_url(url: str) -> bool:
         "anyway-infographics-staging.web.app",
         "anyway-infographics.web.app",
         "anyway-infographics-demo.web.app",
-        "media.anyway.co.il",
+        "media.anyway.co.il"
     ]:
         return True
 
@@ -343,7 +339,6 @@ def is_a_valid_email(tmp_given_user_email: str) -> bool:
 def half_rounded_up(num: int):
     return math.ceil(num / 2)
 
-
 def trigger_airflow_dag(dag_id, conf=None):
     import airflow_client.client
     from airflow_client.client.api import dag_run_api
@@ -356,7 +351,7 @@ def trigger_airflow_dag(dag_id, conf=None):
     configuration = airflow_client.client.Configuration(
         host=airflow_api_url,
         username=secrets.get("AIRFLOW_USER"),
-        password=secrets.get("AIRFLOW_PASSWORD"),
+        password=secrets.get("AIRFLOW_PASSWORD")
     )
     with airflow_client.client.ApiClient(configuration) as api_client:
         dag_run_api_instance = dag_run_api.DAGRunApi(api_client)

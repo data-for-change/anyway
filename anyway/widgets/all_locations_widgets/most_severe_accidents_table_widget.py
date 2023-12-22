@@ -149,10 +149,11 @@ class MostSevereAccidentsTableWidget(AllLocationsWidget):
             ).get_label()
         return accidents
 
+
     @staticmethod
     def get_transcription(request_params: RequestParams, items: Dict):
         if len(items) == 0:
-            return ""
+            return ''
         elif len(items) == 1:
             text = _("latest severe accident took place")
         else:
@@ -161,44 +162,39 @@ class MostSevereAccidentsTableWidget(AllLocationsWidget):
         if request_params.resolution == BE_CONST.ResolutionCategories.STREET:
             text += " {in_yishuv_keyword} {yishuv_name} {in_street_keyword} {street_name} ".format(
                 in_yishuv_keyword=_("in yishuv"),
-                yishuv_name=_(request_params.location_info.get("yishuv_name")),
+                yishuv_name=_(request_params.location_info.get('yishuv_name')),
                 in_street_keyword=_("in street"),
-                street_name=_(request_params.location_info.get("street1_hebrew")),
+                street_name=_(request_params.location_info.get('street1_hebrew')),
             )
         elif request_params.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
             text += " {in_road_keyword} {road_num} {in_segment_keyword} {segment_name} ".format(
                 in_road_keyword=_("in road"),
-                road_num=request_params.location_info.get("road1"),
+                road_num=request_params.location_info.get('road1'),
                 in_segment_keyword=_("in segment"),
-                segment_name=_(request_params.location_info.get("road_segment_name")),
+                segment_name=_(request_params.location_info.get('road_segment_name')),
             )
         else:
-            raise Exception(
-                f"cannot convert to hebrew for resolution : {request_params.resolution.get('resolution')}"
-            )
+            raise Exception(f"cannot convert to hebrew for resolution : {request_params.resolution.get('resolution')}")
         text += "{between_years_keyword} {start_year} - {end_year}:\n".format(
             between_years_keyword=_("between the years"),
             start_year=request_params.start_time.year,
             end_year=request_params.end_time.year,
         )
         logging.debug(items)
-        text += "\n".join(
-            [
-                "{in_date_keyword} {date} {in_hour_keyword} {hour} {accident_occured_text} {accident_type_keyword} {type}, {injured_count_keyword}: {injured_count}.".format(
-                    in_date_keyword=_("in date"),
-                    date=item.get("date"),
-                    in_hour_keyword=_("in hour"),
-                    hour=item.get("hour"),
-                    accident_occured_text=_("occured accident"),
-                    accident_type_keyword=_("of type"),
-                    type=_(item.get("type")),
-                    injured_count_keyword=_("injured"),
-                    injured_count=item.get("injured_count"),
-                )
-                for item in items
-            ]
-        )
+        text += '\n'.join(['{in_date_keyword} {date} {in_hour_keyword} {hour} {accident_occured_text} {accident_type_keyword} {type}, {injured_count_keyword}: {injured_count}.'.format(
+                           in_date_keyword=_("in date"),
+                           date=item.get("date"),
+                           in_hour_keyword=_("in hour"),
+                           hour=item.get("hour"),
+                           accident_occured_text=_("occured accident"),
+                           accident_type_keyword=_("of type"),
+                           type=_(item.get("type")),
+                           injured_count_keyword=_("injured"),
+                           injured_count=item.get("injured_count")
+                           )
+                           for item in items])
         return text
+
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
@@ -211,9 +207,8 @@ class MostSevereAccidentsTableWidget(AllLocationsWidget):
                     logging.exception(
                         f"MostSevereAccidentsTableWidget.localize_items: Exception while translating {item}."
                     )
-        title, subtitle = get_most_severe_accidents_table_title(
-            request_params.location_info, request_params.resolution
-        )
+        title, subtitle = get_most_severe_accidents_table_title(request_params.location_info,
+                                                                request_params.resolution)
         items["data"]["text"] = {
             "title": title,
             "subtitle": subtitle,

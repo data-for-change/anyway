@@ -33,7 +33,6 @@ import anyway.widgets.urban_widgets
 import anyway.widgets.road_segment_widgets
 import anyway.widgets.all_locations_widgets
 import anyway.widgets.no_location_widgets
-
 # pylint: enable=unused-import
 
 logger = logging.getLogger("infographics_utils")
@@ -136,7 +135,7 @@ def get_request_params(
         start_time=start_time,
         end_time=end_time,
         lang=lang,
-        news_flash_description=news_flash_description,
+        news_flash_description=news_flash_description
     )
     logging.debug(f"Ending get_request_params. params: {request_params}")
     return request_params

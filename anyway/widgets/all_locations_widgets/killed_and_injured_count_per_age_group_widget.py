@@ -12,7 +12,6 @@ from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocatio
 from anyway.widgets.widget import register
 from anyway.widgets.widget_utils import get_location_text
 
-
 @register
 class KilledInjuredCountPerAgeGroupWidget(AllLocationsWidget):
     name: str = "killed_and_injured_count_per_age_group"
@@ -38,5 +37,8 @@ class KilledInjuredCountPerAgeGroupWidget(AllLocationsWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         location_text = get_location_text(request_params)
-        items["data"]["text"] = {"title": _("Injury per age group"), "subtitle": _(location_text)}
+        items["data"]["text"] = {
+            "title": _("Injury per age group"),
+            "subtitle": _(location_text)
+        }
         return items

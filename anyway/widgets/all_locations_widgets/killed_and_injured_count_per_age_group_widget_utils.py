@@ -27,19 +27,19 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
     def filter_and_group_injured_count_per_age_group(
         request_params: RequestParams,
     ) -> Dict[str, Dict[int, int]]:
-
+        
         start_time = request_params.start_time
         end_time = request_params.end_time
         if request_params.resolution == BE_CONST.ResolutionCategories.STREET:
-            involve_yishuv_name = request_params.location_info["yishuv_name"]
-            street1_hebrew = request_params.location_info["street1_hebrew"]
+            involve_yishuv_name = request_params.location_info['yishuv_name']
+            street1_hebrew = request_params.location_info['street1_hebrew']
             cache_key = (involve_yishuv_name, street1_hebrew, start_time, end_time)
 
         elif request_params.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
             road_number = request_params.location_info["road1"]
             road_segment = request_params.location_info["road_segment_name"]
             cache_key = (road_number, road_segment, start_time, end_time)
-
+        
         if cache_dict.get(cache_key):
             return cache_dict.get(cache_key)
 
@@ -100,17 +100,9 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
         end_time, start_time, location_info, resolution
     ) -> BaseQuery:
         if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
-            location_filter = (
-                (InvolvedMarkerView.road1 == location_info["road1"])
-                | (InvolvedMarkerView.road2 == location_info["road1"])
-            ) & (InvolvedMarkerView.road_segment_name == location_info["road_segment_name"])
+            location_filter = ((InvolvedMarkerView.road1 == location_info["road1"]) | (InvolvedMarkerView.road2 == location_info["road1"])) & (InvolvedMarkerView.road_segment_name == location_info["road_segment_name"])
         elif resolution == BE_CONST.ResolutionCategories.STREET:
-            location_filter = (
-                InvolvedMarkerView.involve_yishuv_name == location_info["yishuv_name"]
-            ) & (
-                (InvolvedMarkerView.street1_hebrew == location_info["street1_hebrew"])
-                | (InvolvedMarkerView.street2_hebrew == location_info["street1_hebrew"])
-            )
+            location_filter = (InvolvedMarkerView.involve_yishuv_name == location_info["yishuv_name"]) & ((InvolvedMarkerView.street1_hebrew == location_info["street1_hebrew"]) | (InvolvedMarkerView.street2_hebrew == location_info["street1_hebrew"]))
 
         query = (
             db.session.query(InvolvedMarkerView)

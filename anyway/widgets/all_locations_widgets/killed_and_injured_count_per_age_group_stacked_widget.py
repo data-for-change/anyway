@@ -4,22 +4,22 @@ from flask_babel import _
 
 from anyway.backend_constants import InjurySeverity, BE_CONST as BE
 from anyway.request_params import RequestParams
-from anyway.widgets.road_segment_widgets.killed_and_injured_count_per_age_group_widget_utils import (
+from anyway.widgets.all_locations_widgets.killed_and_injured_count_per_age_group_widget_utils import (
     KilledAndInjuredCountPerAgeGroupWidgetUtils,
     AGE_RANGE_DICT,
 )
-from anyway.widgets.road_segment_widgets import killed_and_injured_count_per_age_group_widget_utils
+from anyway.widgets.all_locations_widgets import killed_and_injured_count_per_age_group_widget_utils
 
-from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
+from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget
 from anyway.widgets.widget import register
-from anyway.widgets.widget_utils import add_empty_keys_to_gen_two_level_dict, gen_entity_labels
+from anyway.widgets.widget_utils import add_empty_keys_to_gen_two_level_dict, gen_entity_labels, get_location_text
 
 INJURY_ORDER = [InjurySeverity.LIGHT_INJURED, InjurySeverity.SEVERE_INJURED, InjurySeverity.KILLED]
 MAX_AGE = 200
 
 
 @register
-class KilledInjuredCountPerAgeGroupStackedWidget(RoadSegmentWidget):
+class KilledInjuredCountPerAgeGroupStackedWidget(AllLocationsWidget):
     name: str = "killed_and_injured_count_per_age_group_stacked"
     files = [__file__, killed_and_injured_count_per_age_group_widget_utils.__file__]
 
@@ -48,9 +48,10 @@ class KilledInjuredCountPerAgeGroupStackedWidget(RoadSegmentWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        location_text = get_location_text(request_params)
         items["data"]["text"] = {
             "title": _("Killed and injury stacked per age group"),
-            "subtitle": _(request_params.location_info["road_segment_name"]),
+            "subtitle": _(location_text),
             "labels_map": gen_entity_labels(InjurySeverity),
         }
         return items

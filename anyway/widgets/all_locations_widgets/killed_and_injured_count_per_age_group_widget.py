@@ -4,15 +4,16 @@ from flask_babel import _
 
 from anyway.backend_constants import BE_CONST as BE
 from anyway.request_params import RequestParams
-from anyway.widgets.road_segment_widgets.killed_and_injured_count_per_age_group_widget_utils import (
+from anyway.widgets.all_locations_widgets.killed_and_injured_count_per_age_group_widget_utils import (
     KilledAndInjuredCountPerAgeGroupWidgetUtils
 )
-from anyway.widgets.road_segment_widgets import killed_and_injured_count_per_age_group_widget_utils
-from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
+from anyway.widgets.all_locations_widgets import killed_and_injured_count_per_age_group_widget_utils
+from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget
 from anyway.widgets.widget import register
+from anyway.widgets.widget_utils import get_location_text
 
 @register
-class KilledInjuredCountPerAgeGroupWidget(RoadSegmentWidget):
+class KilledInjuredCountPerAgeGroupWidget(AllLocationsWidget):
     name: str = "killed_and_injured_count_per_age_group"
     files = [__file__, killed_and_injured_count_per_age_group_widget_utils.__file__]
 
@@ -35,8 +36,9 @@ class KilledInjuredCountPerAgeGroupWidget(RoadSegmentWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        location_text = get_location_text(request_params)
         items["data"]["text"] = {
             "title": _("Injury per age group"),
-            "subtitle": f'{_("in segment")} {_(request_params.location_info["road_segment_name"])}',
+            "subtitle": _(location_text)
         }
         return items

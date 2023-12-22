@@ -1,17 +1,16 @@
 from typing import Dict
-
 from anyway.request_params import RequestParams
 from anyway.backend_constants import InjurySeverity
 from anyway.models import InvolvedMarkerView
+from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget
 from anyway.widgets.widget import register
-from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
-from anyway.widgets.widget_utils import get_accidents_stats, join_strings
+from anyway.widgets.widget_utils import get_accidents_stats, join_strings, get_location_text
 from anyway.backend_constants import BE_CONST
 from flask_babel import _
 
 
 @register
-class InjuredCountBySeverityWidget(RoadSegmentWidget):
+class InjuredCountBySeverityWidget(AllLocationsWidget):
     name: str = "injured_count_by_severity"
     files = [__file__]
 
@@ -22,29 +21,35 @@ class InjuredCountBySeverityWidget(RoadSegmentWidget):
 
     def generate_items(self) -> None:
         self.items = InjuredCountBySeverityWidget.get_injured_count_by_severity(
-            self.request_params.location_info["road1"],
-            self.request_params.location_info["road_segment_name"],
+            self.request_params.resolution,
+            self.request_params.location_info,
             self.request_params.start_time,
-            self.request_params.end_time,
+            self.request_params.end_time
         )
 
     @staticmethod
-    def get_injured_count_by_severity(road, segment, start_time, end_time):
-        count_by_severity = get_accidents_stats(
-            table_obj=InvolvedMarkerView,
-            filters={
-                "injury_severity": [
+    def get_injured_count_by_severity(resolution, location_info, start_time, end_time):
+        filters = {}
+        filters["injury_severity"] = [
                     InjurySeverity.KILLED.value,
                     InjurySeverity.SEVERE_INJURED.value,
                     InjurySeverity.LIGHT_INJURED.value,
-                ],
-                "road1": road,
-                "road_segment_name": segment,
-            },
-            group_by="injury_severity",
-            count="injury_severity",
-            start_time=start_time,
-            end_time=end_time,
+                ]
+         
+        if resolution == BE_CONST.ResolutionCategories.STREET: 
+            filters["involve_yishuv_name"] = location_info.get('yishuv_name')
+            filters["street1_hebrew"] = location_info.get('street1_hebrew')
+        elif resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
+            filters["road1"] = location_info.get('road1')
+            filters["road_segment_name"] = location_info.get('road_segment_name')
+        
+        count_by_severity = get_accidents_stats(
+            table_obj = InvolvedMarkerView,
+            filters = filters,
+            group_by = "injury_severity",
+            count = "injury_severity",
+            start_time = start_time,
+            end_time = end_time,
         )
         found_severities = [d["injury_severity"] for d in count_by_severity]
         items = {}
@@ -128,13 +133,16 @@ class InjuredCountBySeverityWidget(RoadSegmentWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+
+        subtitle = get_location_text(request_params)
         items["data"]["text"] = {
             "title": _("Number of Injuries in accidents by severity"),
-            "subtitle": _(request_params.location_info['road_segment_name']),
+            "subtitle": _(subtitle),
             "transcription": InjuredCountBySeverityWidget.get_transcription(request_params=request_params,
                                                                             items=items["data"]["items"])
         }
         return items
+    
 
 
 _("injured/killed")

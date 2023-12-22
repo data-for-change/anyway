@@ -15,21 +15,19 @@ class VisionZero105090Widget(UrbanWidget):
         self.rank = 38
         self.information = "A speed limit solution on an urban road"
 
-
     def generate_items(self) -> None:
         self.items = {"image_src": "vision_zero_10_50_90"}
 
-
     def is_included(self) -> bool:
         for pedestrian_adjective in ["הולך רגל", "הולכת רגל", "הולכי רגל", "הולכות רגל"]:
-            if self.request_params.news_flash_description and pedestrian_adjective in self.request_params.news_flash_description:
+            if (
+                self.request_params.news_flash_description
+                and pedestrian_adjective in self.request_params.news_flash_description
+            ):
                 return True
         return False
 
-
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        items["data"]["text"] = {
-            "title": _("A speed limit solution on an urban road")
-        }
+        items["data"]["text"] = {"title": _("A speed limit solution on an urban road")}
         return items

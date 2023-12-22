@@ -61,7 +61,7 @@ from anyway.models import (
     ProviderCode,
     VehicleDamage,
     RoadSegments,
-    AccidentMarkerView
+    AccidentMarkerView,
 )
 
 
@@ -77,7 +77,7 @@ class Views(object):
             AccidentType.accident_type_hebrew,
             AccidentMarker.accident_severity,
             AccidentSeverity.accident_severity_hebrew,
-            AccidentMarker.created.label('accident_timestamp'),
+            AccidentMarker.created.label("accident_timestamp"),
             AccidentMarker.location_accuracy,
             LocationAccuracy.location_accuracy_hebrew,
             AccidentMarker.road_type,
@@ -125,12 +125,12 @@ class Views(object):
             AccidentMarker.km,
             AccidentMarker.km_raw,
             AccidentMarker.km_accurate,
-            RoadSegments.segment_id.label('road_segment_id'),
-            RoadSegments.segment.label('road_segment_number'),
-            (RoadSegments.from_name + " - " + RoadSegments.to_name).label('road_segment_name'),
-            RoadSegments.from_km.label('road_segment_from_km'),
-            RoadSegments.to_km.label('road_segment_to_km'),
-            (RoadSegments.to_km - RoadSegments.from_km).label('road_segment_length_km'),
+            RoadSegments.segment_id.label("road_segment_id"),
+            RoadSegments.segment.label("road_segment_number"),
+            (RoadSegments.from_name + " - " + RoadSegments.to_name).label("road_segment_name"),
+            RoadSegments.from_km.label("road_segment_from_km"),
+            RoadSegments.to_km.label("road_segment_to_km"),
+            (RoadSegments.to_km - RoadSegments.from_km).label("road_segment_length_km"),
             AccidentMarker.yishuv_symbol,
             AccidentMarker.yishuv_name,
             AccidentMarker.geo_area,
@@ -171,186 +171,320 @@ class Views(object):
             AccidentMarker.longitude,
             AccidentMarker.latitude,
             AccidentMarker.x,
-            AccidentMarker.y
+            AccidentMarker.y,
         ]
 
         table = AccidentMarker.__table__
-        from_clause = table \
-            .join(RoadSegments,
-                  and_(AccidentMarker.road1 == RoadSegments.road,
-                       RoadSegments.from_km <= AccidentMarker.km / 10,
-                       AccidentMarker.km / 10 < RoadSegments.to_km),
-                  isouter=True) \
-            .join(AccidentType,
-                  and_(AccidentMarker.accident_type == AccidentType.id,
-                       AccidentMarker.accident_year == AccidentType.year,
-                       AccidentMarker.provider_code == AccidentType.provider_code),
-                  isouter=True) \
-            .join(AccidentSeverity,
-                  and_(AccidentMarker.accident_severity == AccidentSeverity.id,
-                       AccidentMarker.accident_year == AccidentSeverity.year,
-                       AccidentMarker.provider_code == AccidentSeverity.provider_code),
-                  isouter=True) \
-            .join(LocationAccuracy,
-                  and_(AccidentMarker.location_accuracy == LocationAccuracy.id,
-                       AccidentMarker.accident_year == LocationAccuracy.year,
-                       AccidentMarker.provider_code == LocationAccuracy.provider_code),
-                  isouter=True) \
-            .join(RoadType,
-                  and_(AccidentMarker.road_type == RoadType.id,
-                       AccidentMarker.accident_year == RoadType.year,
-                       AccidentMarker.provider_code == RoadType.provider_code),
-                  isouter=True) \
-            .join(RoadShape,
-                  and_(AccidentMarker.road_shape == RoadShape.id,
-                       AccidentMarker.accident_year == RoadShape.year,
-                       AccidentMarker.provider_code == RoadShape.provider_code),
-                  isouter=True) \
-            .join(DayType,
-                  and_(AccidentMarker.day_type == DayType.id,
-                       AccidentMarker.accident_year == DayType.year,
-                       AccidentMarker.provider_code == DayType.provider_code),
-                  isouter=True) \
-            .join(PoliceUnit,
-                  and_(AccidentMarker.police_unit == PoliceUnit.id,
-                       AccidentMarker.accident_year == PoliceUnit.year,
-                       AccidentMarker.provider_code == PoliceUnit.provider_code),
-                  isouter=True) \
-            .join(OneLane,
-                  and_(AccidentMarker.one_lane == OneLane.id,
-                       AccidentMarker.accident_year == OneLane.year,
-                       AccidentMarker.provider_code == OneLane.provider_code),
-                  isouter=True) \
-            .join(MultiLane,
-                  and_(AccidentMarker.multi_lane == MultiLane.id,
-                       AccidentMarker.accident_year == MultiLane.year,
-                       AccidentMarker.provider_code == MultiLane.provider_code),
-                  isouter=True) \
-            .join(SpeedLimit,
-                  and_(AccidentMarker.speed_limit == SpeedLimit.id,
-                       AccidentMarker.accident_year == SpeedLimit.year,
-                       AccidentMarker.provider_code == SpeedLimit.provider_code),
-                  isouter=True) \
-            .join(RoadIntactness,
-                  and_(AccidentMarker.road_intactness == RoadIntactness.id,
-                       AccidentMarker.accident_year == RoadIntactness.year,
-                       AccidentMarker.provider_code == RoadIntactness.provider_code),
-                  isouter=True) \
-            .join(RoadWidth,
-                  and_(AccidentMarker.road_width == RoadWidth.id,
-                       AccidentMarker.accident_year == RoadWidth.year,
-                       AccidentMarker.provider_code == RoadWidth.provider_code),
-                  isouter=True) \
-            .join(RoadSign,
-                  and_(AccidentMarker.road_sign == RoadSign.id,
-                       AccidentMarker.accident_year == RoadSign.year,
-                       AccidentMarker.provider_code == RoadSign.provider_code),
-                  isouter=True) \
-            .join(RoadLight,
-                  and_(AccidentMarker.road_light == RoadLight.id,
-                       AccidentMarker.accident_year == RoadLight.year,
-                       AccidentMarker.provider_code == RoadLight.provider_code),
-                  isouter=True) \
-            .join(RoadControl,
-                  and_(AccidentMarker.road_control == RoadControl.id,
-                       AccidentMarker.accident_year == RoadControl.year,
-                       AccidentMarker.provider_code == RoadControl.provider_code),
-                  isouter=True) \
-            .join(Weather,
-                  and_(AccidentMarker.weather == Weather.id,
-                       AccidentMarker.accident_year == Weather.year,
-                       AccidentMarker.provider_code == Weather.provider_code),
-                  isouter=True) \
-            .join(RoadSurface,
-                  and_(AccidentMarker.road_surface == RoadSurface.id,
-                       AccidentMarker.accident_year == RoadSurface.year,
-                       AccidentMarker.provider_code == RoadSurface.provider_code),
-                  isouter=True) \
-            .join(RoadObjecte,
-                  and_(AccidentMarker.road_object == RoadObjecte.id,
-                       AccidentMarker.accident_year == RoadObjecte.year,
-                       AccidentMarker.provider_code == RoadObjecte.provider_code),
-                  isouter=True) \
-            .join(ObjectDistance,
-                  and_(AccidentMarker.object_distance == ObjectDistance.id,
-                       AccidentMarker.accident_year == ObjectDistance.year,
-                       AccidentMarker.provider_code == ObjectDistance.provider_code),
-                  isouter=True) \
-            .join(DidntCross,
-                  and_(AccidentMarker.didnt_cross == DidntCross.id,
-                       AccidentMarker.accident_year == DidntCross.year,
-                       AccidentMarker.provider_code == DidntCross.provider_code),
-                  isouter=True) \
-            .join(CrossMode,
-                  and_(AccidentMarker.cross_mode == CrossMode.id,
-                       AccidentMarker.accident_year == CrossMode.year,
-                       AccidentMarker.provider_code == CrossMode.provider_code),
-                  isouter=True) \
-            .join(CrossLocation,
-                  and_(AccidentMarker.cross_location == CrossLocation.id,
-                       AccidentMarker.accident_year == CrossLocation.year,
-                       AccidentMarker.provider_code == CrossLocation.provider_code),
-                  isouter=True) \
-            .join(CrossDirection,
-                  and_(AccidentMarker.cross_direction == CrossDirection.id,
-                       AccidentMarker.accident_year == CrossDirection.year,
-                       AccidentMarker.provider_code == CrossDirection.provider_code),
-                  isouter=True) \
-            .join(GeoArea,
-                  and_(AccidentMarker.geo_area == GeoArea.id,
-                       AccidentMarker.accident_year == GeoArea.year,
-                       AccidentMarker.provider_code == GeoArea.provider_code),
-                  isouter=True) \
-            .join(DayNight,
-                  and_(AccidentMarker.day_night == DayNight.id,
-                       AccidentMarker.accident_year == DayNight.year,
-                       AccidentMarker.provider_code == DayNight.provider_code),
-                  isouter=True) \
-            .join(DayInWeek,
-                  and_(AccidentMarker.day_in_week == DayInWeek.id,
-                       AccidentMarker.accident_year == DayInWeek.year,
-                       AccidentMarker.provider_code == DayInWeek.provider_code),
-                  isouter=True) \
-            .join(TrafficLight,
-                  and_(AccidentMarker.traffic_light == TrafficLight.id,
-                       AccidentMarker.accident_year == TrafficLight.year,
-                       AccidentMarker.provider_code == TrafficLight.provider_code),
-                  isouter=True) \
-            .join(Region,
-                  and_(AccidentMarker.region == Region.id,
-                       AccidentMarker.accident_year == Region.year,
-                       AccidentMarker.provider_code == Region.provider_code),
-                  isouter=True) \
-            .join(District,
-                  and_(AccidentMarker.district == District.id,
-                       AccidentMarker.accident_year == District.year,
-                       AccidentMarker.provider_code == District.provider_code),
-                  isouter=True) \
-            .join(NaturalArea,
-                  and_(AccidentMarker.natural_area == NaturalArea.id,
-                       AccidentMarker.accident_year == NaturalArea.year,
-                       AccidentMarker.provider_code == NaturalArea.provider_code),
-                  isouter=True) \
-            .join(MunicipalStatus,
-                  and_(AccidentMarker.municipal_status == MunicipalStatus.id,
-                       AccidentMarker.accident_year == MunicipalStatus.year,
-                       AccidentMarker.provider_code == MunicipalStatus.provider_code),
-                  isouter=True) \
-            .join(YishuvShape,
-                  and_(AccidentMarker.yishuv_shape == YishuvShape.id,
-                       AccidentMarker.accident_year == YishuvShape.year,
-                       AccidentMarker.provider_code == YishuvShape.provider_code),
-                  isouter=True) \
-            .join(AccidentHourRaw,
-                  and_(AccidentMarker.accident_hour_raw == AccidentHourRaw.id,
-                       AccidentMarker.accident_year == AccidentHourRaw.year,
-                       AccidentMarker.provider_code == AccidentHourRaw.provider_code),
-                  isouter=True) \
-            .join(ProviderCode,
-                  and_(AccidentMarker.provider_code == ProviderCode.id),
-                  isouter=True)
-        return select(selected_columns) \
-            .select_from(from_clause)
+        from_clause = (
+            table.join(
+                RoadSegments,
+                and_(
+                    AccidentMarker.road1 == RoadSegments.road,
+                    RoadSegments.from_km <= AccidentMarker.km / 10,
+                    AccidentMarker.km / 10 < RoadSegments.to_km,
+                ),
+                isouter=True,
+            )
+            .join(
+                AccidentType,
+                and_(
+                    AccidentMarker.accident_type == AccidentType.id,
+                    AccidentMarker.accident_year == AccidentType.year,
+                    AccidentMarker.provider_code == AccidentType.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                AccidentSeverity,
+                and_(
+                    AccidentMarker.accident_severity == AccidentSeverity.id,
+                    AccidentMarker.accident_year == AccidentSeverity.year,
+                    AccidentMarker.provider_code == AccidentSeverity.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                LocationAccuracy,
+                and_(
+                    AccidentMarker.location_accuracy == LocationAccuracy.id,
+                    AccidentMarker.accident_year == LocationAccuracy.year,
+                    AccidentMarker.provider_code == LocationAccuracy.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                RoadType,
+                and_(
+                    AccidentMarker.road_type == RoadType.id,
+                    AccidentMarker.accident_year == RoadType.year,
+                    AccidentMarker.provider_code == RoadType.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                RoadShape,
+                and_(
+                    AccidentMarker.road_shape == RoadShape.id,
+                    AccidentMarker.accident_year == RoadShape.year,
+                    AccidentMarker.provider_code == RoadShape.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                DayType,
+                and_(
+                    AccidentMarker.day_type == DayType.id,
+                    AccidentMarker.accident_year == DayType.year,
+                    AccidentMarker.provider_code == DayType.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                PoliceUnit,
+                and_(
+                    AccidentMarker.police_unit == PoliceUnit.id,
+                    AccidentMarker.accident_year == PoliceUnit.year,
+                    AccidentMarker.provider_code == PoliceUnit.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                OneLane,
+                and_(
+                    AccidentMarker.one_lane == OneLane.id,
+                    AccidentMarker.accident_year == OneLane.year,
+                    AccidentMarker.provider_code == OneLane.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                MultiLane,
+                and_(
+                    AccidentMarker.multi_lane == MultiLane.id,
+                    AccidentMarker.accident_year == MultiLane.year,
+                    AccidentMarker.provider_code == MultiLane.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                SpeedLimit,
+                and_(
+                    AccidentMarker.speed_limit == SpeedLimit.id,
+                    AccidentMarker.accident_year == SpeedLimit.year,
+                    AccidentMarker.provider_code == SpeedLimit.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                RoadIntactness,
+                and_(
+                    AccidentMarker.road_intactness == RoadIntactness.id,
+                    AccidentMarker.accident_year == RoadIntactness.year,
+                    AccidentMarker.provider_code == RoadIntactness.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                RoadWidth,
+                and_(
+                    AccidentMarker.road_width == RoadWidth.id,
+                    AccidentMarker.accident_year == RoadWidth.year,
+                    AccidentMarker.provider_code == RoadWidth.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                RoadSign,
+                and_(
+                    AccidentMarker.road_sign == RoadSign.id,
+                    AccidentMarker.accident_year == RoadSign.year,
+                    AccidentMarker.provider_code == RoadSign.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                RoadLight,
+                and_(
+                    AccidentMarker.road_light == RoadLight.id,
+                    AccidentMarker.accident_year == RoadLight.year,
+                    AccidentMarker.provider_code == RoadLight.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                RoadControl,
+                and_(
+                    AccidentMarker.road_control == RoadControl.id,
+                    AccidentMarker.accident_year == RoadControl.year,
+                    AccidentMarker.provider_code == RoadControl.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                Weather,
+                and_(
+                    AccidentMarker.weather == Weather.id,
+                    AccidentMarker.accident_year == Weather.year,
+                    AccidentMarker.provider_code == Weather.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                RoadSurface,
+                and_(
+                    AccidentMarker.road_surface == RoadSurface.id,
+                    AccidentMarker.accident_year == RoadSurface.year,
+                    AccidentMarker.provider_code == RoadSurface.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                RoadObjecte,
+                and_(
+                    AccidentMarker.road_object == RoadObjecte.id,
+                    AccidentMarker.accident_year == RoadObjecte.year,
+                    AccidentMarker.provider_code == RoadObjecte.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                ObjectDistance,
+                and_(
+                    AccidentMarker.object_distance == ObjectDistance.id,
+                    AccidentMarker.accident_year == ObjectDistance.year,
+                    AccidentMarker.provider_code == ObjectDistance.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                DidntCross,
+                and_(
+                    AccidentMarker.didnt_cross == DidntCross.id,
+                    AccidentMarker.accident_year == DidntCross.year,
+                    AccidentMarker.provider_code == DidntCross.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                CrossMode,
+                and_(
+                    AccidentMarker.cross_mode == CrossMode.id,
+                    AccidentMarker.accident_year == CrossMode.year,
+                    AccidentMarker.provider_code == CrossMode.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                CrossLocation,
+                and_(
+                    AccidentMarker.cross_location == CrossLocation.id,
+                    AccidentMarker.accident_year == CrossLocation.year,
+                    AccidentMarker.provider_code == CrossLocation.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                CrossDirection,
+                and_(
+                    AccidentMarker.cross_direction == CrossDirection.id,
+                    AccidentMarker.accident_year == CrossDirection.year,
+                    AccidentMarker.provider_code == CrossDirection.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                GeoArea,
+                and_(
+                    AccidentMarker.geo_area == GeoArea.id,
+                    AccidentMarker.accident_year == GeoArea.year,
+                    AccidentMarker.provider_code == GeoArea.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                DayNight,
+                and_(
+                    AccidentMarker.day_night == DayNight.id,
+                    AccidentMarker.accident_year == DayNight.year,
+                    AccidentMarker.provider_code == DayNight.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                DayInWeek,
+                and_(
+                    AccidentMarker.day_in_week == DayInWeek.id,
+                    AccidentMarker.accident_year == DayInWeek.year,
+                    AccidentMarker.provider_code == DayInWeek.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                TrafficLight,
+                and_(
+                    AccidentMarker.traffic_light == TrafficLight.id,
+                    AccidentMarker.accident_year == TrafficLight.year,
+                    AccidentMarker.provider_code == TrafficLight.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                Region,
+                and_(
+                    AccidentMarker.region == Region.id,
+                    AccidentMarker.accident_year == Region.year,
+                    AccidentMarker.provider_code == Region.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                District,
+                and_(
+                    AccidentMarker.district == District.id,
+                    AccidentMarker.accident_year == District.year,
+                    AccidentMarker.provider_code == District.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                NaturalArea,
+                and_(
+                    AccidentMarker.natural_area == NaturalArea.id,
+                    AccidentMarker.accident_year == NaturalArea.year,
+                    AccidentMarker.provider_code == NaturalArea.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                MunicipalStatus,
+                and_(
+                    AccidentMarker.municipal_status == MunicipalStatus.id,
+                    AccidentMarker.accident_year == MunicipalStatus.year,
+                    AccidentMarker.provider_code == MunicipalStatus.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                YishuvShape,
+                and_(
+                    AccidentMarker.yishuv_shape == YishuvShape.id,
+                    AccidentMarker.accident_year == YishuvShape.year,
+                    AccidentMarker.provider_code == YishuvShape.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                AccidentHourRaw,
+                and_(
+                    AccidentMarker.accident_hour_raw == AccidentHourRaw.id,
+                    AccidentMarker.accident_year == AccidentHourRaw.year,
+                    AccidentMarker.provider_code == AccidentHourRaw.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(ProviderCode, and_(AccidentMarker.provider_code == ProviderCode.id), isouter=True)
+        )
+        return select(selected_columns).select_from(from_clause)
 
     def create_involved_hebrew_view(self):
         selected_columns = [
@@ -402,107 +536,183 @@ class Views(object):
             Involved.car_id,
             Involved.involve_id,
             Involved.accident_year,
-            Involved.accident_month
+            Involved.accident_month,
         ]
         table = Involved.__table__
-        from_clause = table \
-            .join(InvolvedType,
-                  and_(Involved.involved_type == InvolvedType.id,
-                       Involved.accident_year == InvolvedType.year,
-                       Involved.provider_code == InvolvedType.provider_code),
-                  isouter=True) \
-            .join(AgeGroup,
-                  and_(Involved.age_group == AgeGroup.id,
-                       Involved.accident_year == AgeGroup.year,
-                       Involved.provider_code == AgeGroup.provider_code),
-                  isouter=True) \
-            .join(Sex,
-                  and_(Involved.sex == Sex.id,
-                       Involved.accident_year == Sex.year,
-                       Involved.provider_code == Sex.provider_code),
-                  isouter=True) \
-            .join(VehicleType,
-                  and_(Involved.vehicle_type == VehicleType.id,
-                       Involved.accident_year == VehicleType.year,
-                       Involved.provider_code == VehicleType.provider_code),
-                  isouter=True) \
-            .join(SafetyMeasures,
-                  and_(Involved.safety_measures == SafetyMeasures.id,
-                       Involved.accident_year == SafetyMeasures.year,
-                       Involved.provider_code == SafetyMeasures.provider_code),
-                  isouter=True) \
-            .join(InjurySeverity,
-                  and_(Involved.injury_severity == InjurySeverity.id,
-                       Involved.accident_year == InjurySeverity.year,
-                       Involved.provider_code == InjurySeverity.provider_code),
-                  isouter=True) \
-            .join(InjuredType,
-                  and_(Involved.injured_type == InjuredType.id,
-                       Involved.accident_year == InjuredType.year,
-                       Involved.provider_code == InjuredType.provider_code),
-                  isouter=True) \
-            .join(InjuredPosition,
-                  and_(Involved.injured_position == InjuredPosition.id,
-                       Involved.accident_year == InjuredPosition.year,
-                       Involved.provider_code == InjuredPosition.provider_code),
-                  isouter=True) \
-            .join(PopulationType,
-                  and_(Involved.population_type == PopulationType.id,
-                       Involved.accident_year == PopulationType.year,
-                       Involved.provider_code == PopulationType.provider_code),
-                  isouter=True) \
-            .join(Region,
-                  and_(Involved.home_region == Region.id,
-                       Involved.accident_year == Region.year,
-                       Involved.provider_code == Region.provider_code),
-                  isouter=True) \
-            .join(District,
-                  and_(Involved.home_district == District.id,
-                       Involved.accident_year == District.year,
-                       Involved.provider_code == District.provider_code),
-                  isouter=True) \
-            .join(NaturalArea,
-                  and_(Involved.home_natural_area == NaturalArea.id,
-                       Involved.accident_year == NaturalArea.year,
-                       Involved.provider_code == NaturalArea.provider_code),
-                  isouter=True) \
-            .join(MunicipalStatus,
-                  and_(Involved.home_municipal_status == MunicipalStatus.id,
-                       Involved.accident_year == MunicipalStatus.year,
-                       Involved.provider_code == MunicipalStatus.provider_code),
-                  isouter=True) \
-            .join(YishuvShape,
-                  and_(Involved.home_yishuv_shape == YishuvShape.id,
-                       Involved.accident_year == YishuvShape.year,
-                       Involved.provider_code == YishuvShape.provider_code),
-                  isouter=True) \
-            .join(HospitalTime,
-                  and_(Involved.hospital_time == HospitalTime.id,
-                       Involved.accident_year == HospitalTime.year,
-                       Involved.provider_code == HospitalTime.provider_code),
-                  isouter=True) \
-            .join(MedicalType,
-                  and_(Involved.medical_type == MedicalType.id,
-                       Involved.accident_year == MedicalType.year,
-                       Involved.provider_code == MedicalType.provider_code),
-                  isouter=True) \
-            .join(ReleaseDest,
-                  and_(Involved.release_dest == ReleaseDest.id,
-                       Involved.accident_year == ReleaseDest.year,
-                       Involved.provider_code == ReleaseDest.provider_code),
-                  isouter=True) \
-            .join(SafetyMeasuresUse,
-                  and_(Involved.safety_measures_use == SafetyMeasuresUse.id,
-                       Involved.accident_year == SafetyMeasuresUse.year,
-                       Involved.provider_code == SafetyMeasuresUse.provider_code),
-                  isouter=True) \
-            .join(LateDeceased,
-                  and_(Involved.late_deceased == LateDeceased.id,
-                       Involved.accident_year == LateDeceased.year,
-                       Involved.provider_code == LateDeceased.provider_code),
-                  isouter=True)
-        return select(selected_columns) \
-            .select_from(from_clause)
+        from_clause = (
+            table.join(
+                InvolvedType,
+                and_(
+                    Involved.involved_type == InvolvedType.id,
+                    Involved.accident_year == InvolvedType.year,
+                    Involved.provider_code == InvolvedType.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                AgeGroup,
+                and_(
+                    Involved.age_group == AgeGroup.id,
+                    Involved.accident_year == AgeGroup.year,
+                    Involved.provider_code == AgeGroup.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                Sex,
+                and_(
+                    Involved.sex == Sex.id,
+                    Involved.accident_year == Sex.year,
+                    Involved.provider_code == Sex.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                VehicleType,
+                and_(
+                    Involved.vehicle_type == VehicleType.id,
+                    Involved.accident_year == VehicleType.year,
+                    Involved.provider_code == VehicleType.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                SafetyMeasures,
+                and_(
+                    Involved.safety_measures == SafetyMeasures.id,
+                    Involved.accident_year == SafetyMeasures.year,
+                    Involved.provider_code == SafetyMeasures.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                InjurySeverity,
+                and_(
+                    Involved.injury_severity == InjurySeverity.id,
+                    Involved.accident_year == InjurySeverity.year,
+                    Involved.provider_code == InjurySeverity.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                InjuredType,
+                and_(
+                    Involved.injured_type == InjuredType.id,
+                    Involved.accident_year == InjuredType.year,
+                    Involved.provider_code == InjuredType.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                InjuredPosition,
+                and_(
+                    Involved.injured_position == InjuredPosition.id,
+                    Involved.accident_year == InjuredPosition.year,
+                    Involved.provider_code == InjuredPosition.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                PopulationType,
+                and_(
+                    Involved.population_type == PopulationType.id,
+                    Involved.accident_year == PopulationType.year,
+                    Involved.provider_code == PopulationType.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                Region,
+                and_(
+                    Involved.home_region == Region.id,
+                    Involved.accident_year == Region.year,
+                    Involved.provider_code == Region.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                District,
+                and_(
+                    Involved.home_district == District.id,
+                    Involved.accident_year == District.year,
+                    Involved.provider_code == District.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                NaturalArea,
+                and_(
+                    Involved.home_natural_area == NaturalArea.id,
+                    Involved.accident_year == NaturalArea.year,
+                    Involved.provider_code == NaturalArea.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                MunicipalStatus,
+                and_(
+                    Involved.home_municipal_status == MunicipalStatus.id,
+                    Involved.accident_year == MunicipalStatus.year,
+                    Involved.provider_code == MunicipalStatus.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                YishuvShape,
+                and_(
+                    Involved.home_yishuv_shape == YishuvShape.id,
+                    Involved.accident_year == YishuvShape.year,
+                    Involved.provider_code == YishuvShape.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                HospitalTime,
+                and_(
+                    Involved.hospital_time == HospitalTime.id,
+                    Involved.accident_year == HospitalTime.year,
+                    Involved.provider_code == HospitalTime.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                MedicalType,
+                and_(
+                    Involved.medical_type == MedicalType.id,
+                    Involved.accident_year == MedicalType.year,
+                    Involved.provider_code == MedicalType.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                ReleaseDest,
+                and_(
+                    Involved.release_dest == ReleaseDest.id,
+                    Involved.accident_year == ReleaseDest.year,
+                    Involved.provider_code == ReleaseDest.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                SafetyMeasuresUse,
+                and_(
+                    Involved.safety_measures_use == SafetyMeasuresUse.id,
+                    Involved.accident_year == SafetyMeasuresUse.year,
+                    Involved.provider_code == SafetyMeasuresUse.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                LateDeceased,
+                and_(
+                    Involved.late_deceased == LateDeceased.id,
+                    Involved.accident_year == LateDeceased.year,
+                    Involved.provider_code == LateDeceased.provider_code,
+                ),
+                isouter=True,
+            )
+        )
+        return select(selected_columns).select_from(from_clause)
 
     def create_involved_hebrew_markers_hebrew_view(self):
         selected_columns = [
@@ -666,23 +876,28 @@ class Views(object):
             VehiclesView.vehicle_type.label("vehicle_vehicle_type"),
             VehiclesView.vehicle_type_hebrew.label("vehicle_vehicle_type_hebrew"),
             VehiclesView.vehicle_damage,
-            VehiclesView.vehicle_damage_hebrew
+            VehiclesView.vehicle_damage_hebrew,
         ]
         table = InvolvedView.__table__
-        from_clause = table \
-            .join(AccidentMarkerView,
-                  and_(InvolvedView.provider_code == AccidentMarkerView.provider_code,
-                       InvolvedView.accident_id == AccidentMarkerView.id,
-                       InvolvedView.accident_year == AccidentMarkerView.accident_year),
-                  isouter=True) \
-            .join(VehiclesView,
-                  and_(InvolvedView.provider_code == VehiclesView.provider_code,
-                       InvolvedView.accident_id == VehiclesView.accident_id,
-                       InvolvedView.accident_year == VehiclesView.accident_year,
-                       InvolvedView.car_id == VehiclesView.car_id),
-                  isouter=True)
-        return select(selected_columns) \
-            .select_from(from_clause)
+        from_clause = table.join(
+            AccidentMarkerView,
+            and_(
+                InvolvedView.provider_code == AccidentMarkerView.provider_code,
+                InvolvedView.accident_id == AccidentMarkerView.id,
+                InvolvedView.accident_year == AccidentMarkerView.accident_year,
+            ),
+            isouter=True,
+        ).join(
+            VehiclesView,
+            and_(
+                InvolvedView.provider_code == VehiclesView.provider_code,
+                InvolvedView.accident_id == VehiclesView.accident_id,
+                InvolvedView.accident_year == VehiclesView.accident_year,
+                InvolvedView.car_id == VehiclesView.car_id,
+            ),
+            isouter=True,
+        )
+        return select(selected_columns).select_from(from_clause)
 
     def create_vehicles_hebrew_view(self):
         selected_columns = [
@@ -709,47 +924,75 @@ class Views(object):
             Vehicle.vehicle_damage,
             VehicleDamage.vehicle_damage_hebrew,
             Vehicle.accident_year,
-            Vehicle.accident_month
+            Vehicle.accident_month,
         ]
         table = Vehicle.__table__
-        from_clause = table \
-            .join(EngineVolume,
-                  and_(Vehicle.engine_volume == EngineVolume.id,
-                       Vehicle.accident_year == EngineVolume.year,
-                       Vehicle.provider_code == EngineVolume.provider_code),
-                  isouter=True) \
-            .join(DrivingDirections,
-                  and_(Vehicle.driving_directions == DrivingDirections.id,
-                       Vehicle.accident_year == DrivingDirections.year,
-                       Vehicle.provider_code == DrivingDirections.provider_code),
-                  isouter=True) \
-            .join(VehicleStatus,
-                  and_(Vehicle.vehicle_status == VehicleStatus.id,
-                       Vehicle.accident_year == VehicleStatus.year,
-                       Vehicle.provider_code == VehicleStatus.provider_code),
-                  isouter=True) \
-            .join(VehicleAttribution,
-                  and_(Vehicle.vehicle_attribution == VehicleAttribution.id,
-                       Vehicle.accident_year == VehicleAttribution.year,
-                       Vehicle.provider_code == VehicleAttribution.provider_code),
-                  isouter=True) \
-            .join(TotalWeight,
-                  and_(Vehicle.total_weight == TotalWeight.id,
-                       Vehicle.accident_year == TotalWeight.year,
-                       Vehicle.provider_code == TotalWeight.provider_code),
-                  isouter=True) \
-            .join(VehicleType,
-                  and_(Vehicle.vehicle_type == VehicleType.id,
-                       Vehicle.accident_year == VehicleType.year,
-                       Vehicle.provider_code == VehicleType.provider_code),
-                  isouter=True) \
-            .join(VehicleDamage,
-                  and_(Vehicle.vehicle_damage == VehicleDamage.id,
-                       Vehicle.accident_year == VehicleDamage.year,
-                       Vehicle.provider_code == VehicleDamage.provider_code),
-                  isouter=True)
-        return select(selected_columns) \
-            .select_from(from_clause)
+        from_clause = (
+            table.join(
+                EngineVolume,
+                and_(
+                    Vehicle.engine_volume == EngineVolume.id,
+                    Vehicle.accident_year == EngineVolume.year,
+                    Vehicle.provider_code == EngineVolume.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                DrivingDirections,
+                and_(
+                    Vehicle.driving_directions == DrivingDirections.id,
+                    Vehicle.accident_year == DrivingDirections.year,
+                    Vehicle.provider_code == DrivingDirections.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                VehicleStatus,
+                and_(
+                    Vehicle.vehicle_status == VehicleStatus.id,
+                    Vehicle.accident_year == VehicleStatus.year,
+                    Vehicle.provider_code == VehicleStatus.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                VehicleAttribution,
+                and_(
+                    Vehicle.vehicle_attribution == VehicleAttribution.id,
+                    Vehicle.accident_year == VehicleAttribution.year,
+                    Vehicle.provider_code == VehicleAttribution.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                TotalWeight,
+                and_(
+                    Vehicle.total_weight == TotalWeight.id,
+                    Vehicle.accident_year == TotalWeight.year,
+                    Vehicle.provider_code == TotalWeight.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                VehicleType,
+                and_(
+                    Vehicle.vehicle_type == VehicleType.id,
+                    Vehicle.accident_year == VehicleType.year,
+                    Vehicle.provider_code == VehicleType.provider_code,
+                ),
+                isouter=True,
+            )
+            .join(
+                VehicleDamage,
+                and_(
+                    Vehicle.vehicle_damage == VehicleDamage.id,
+                    Vehicle.accident_year == VehicleDamage.year,
+                    Vehicle.provider_code == VehicleDamage.provider_code,
+                ),
+                isouter=True,
+            )
+        )
+        return select(selected_columns).select_from(from_clause)
 
     def create_vehicles_markers_hebrew_view(self):
         selected_columns = [
@@ -871,15 +1114,18 @@ class Views(object):
             VehiclesView.vehicle_type_hebrew,
             VehiclesView.vehicle_damage,
             VehiclesView.vehicle_damage_hebrew,
-            VehiclesView.car_id
+            VehiclesView.car_id,
         ]
         table = VehiclesView.__table__
-        from_clause = table \
-            .join(AccidentMarkerView,
-                  and_(VehiclesView.provider_code == AccidentMarkerView.provider_code,
-                       VehiclesView.accident_id == AccidentMarkerView.id,
-                       VehiclesView.accident_year == AccidentMarkerView.accident_year))
-        return select(selected_columns) \
-            .select_from(from_clause)
+        from_clause = table.join(
+            AccidentMarkerView,
+            and_(
+                VehiclesView.provider_code == AccidentMarkerView.provider_code,
+                VehiclesView.accident_id == AccidentMarkerView.id,
+                VehiclesView.accident_year == AccidentMarkerView.accident_year,
+            ),
+        )
+        return select(selected_columns).select_from(from_clause)
+
 
 VIEWS = Views()

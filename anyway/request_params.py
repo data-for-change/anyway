@@ -301,7 +301,9 @@ def fill_missing_non_urban_intersection_values(vals: dict) -> dict:
         and "road1" in res
         and "road2" in res
     ):
-        res.update(SuburbanJunction.get_intersection_from_roads({int(res["road1"]), int(res["road2"])}))
+        res.update(
+            SuburbanJunction.get_intersection_from_roads({int(res["road1"]), int(res["road2"])})
+        )
     else:
         raise ValueError(f"Cannot get non_urban_intersection from input: {vals}")
     #   TODO: temporarily removing "roads" field, as it is not used correctly in the filters.
@@ -357,9 +359,7 @@ def extract_news_flash_location(news_flash_obj: NewsFlash):
     return {"name": "location", "data": data, "gps": gps}
 
 
-def get_location_from_request_values(
-   values: dict
-):
+def get_location_from_request_values(values: dict):
     road_segment_id = values.get("road_segment_id")
     if road_segment_id is not None:
         return extract_road_segment_location(road_segment_id)
@@ -368,7 +368,7 @@ def get_location_from_request_values(
         data["street"] = values["street"]
         data["yishuv_name"] = values["yishuv_name"]
 
-        return {"name": "location", "data": data }
+        return {"name": "location", "data": data}
 
     logging.error(f"Unsupported location:{values.values()}")
     return None

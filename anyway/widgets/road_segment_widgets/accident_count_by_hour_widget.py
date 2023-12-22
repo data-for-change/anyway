@@ -28,6 +28,6 @@ class AccidentCountByHourWidget(RoadSegmentWidget):
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
             "title": _("Number of accidents by hour"),
-            "subtitle": _(request_params.location_info['road_segment_name'])
+            "subtitle": _(request_params.location_info["road_segment_name"]),
         }
         return items

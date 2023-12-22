@@ -14,14 +14,15 @@ class VisionZeroBikeWidget(Widget):
 
     def __init__(self, request_params: RequestParams):
         if request_params.news_flash_description is None:
-            logging.error(f"VisionZeroBikeWidget initialized with missing description field : {request_params}")
+            logging.error(
+                f"VisionZeroBikeWidget initialized with missing description field : {request_params}"
+            )
         super().__init__(request_params)
         self.information = _("Main principles in zero vision's bike transportation development")
         self.rank = 33
 
     def generate_items(self) -> None:
         self.items = {"image_src": "vision_zero_bike"}
-
 
     # noinspection PyUnboundLocalVariable
     def is_included(self) -> bool:

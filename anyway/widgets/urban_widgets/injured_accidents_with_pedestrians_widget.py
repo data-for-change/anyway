@@ -56,7 +56,9 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
 
             if not self.validate_parameters(yishuv_name, street1_hebrew):
                 # TODO: this will fail since there is no news_flash_obj in request_params
-                logging.exception(f"Could not validate parameters yishuv_name + street1_hebrew in widget : {self.name}")
+                logging.exception(
+                    f"Could not validate parameters yishuv_name + street1_hebrew in widget : {self.name}"
+                )
                 return None
 
             query = (

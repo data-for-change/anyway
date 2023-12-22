@@ -26,10 +26,7 @@ from anyway.app_and_db import api, get_cors_config
 from anyway.clusters_calculator import retrieve_clusters
 from anyway.config import ENTRIES_PER_PAGE
 from anyway.constants import CONST
-from anyway.infographics_utils import (
-    get_infographics_mock_data,
-    get_infographics_data_for_location,
-)
+from anyway.infographics_utils import get_infographics_mock_data, get_infographics_data_for_location
 
 
 from anyway.models import (
@@ -68,7 +65,7 @@ from anyway.views.news_flash.api import (
     get_downloaded_data,
     DEFAULT_LIMIT_REQ_PARAMETER,
     DEFAULT_OFFSET_REQ_PARAMETER,
-    DEFAULT_NUMBER_OF_YEARS_AGO
+    DEFAULT_NUMBER_OF_YEARS_AGO,
 )
 from anyway.views.schools.api import (
     schools_description_api,
@@ -321,6 +318,7 @@ def schools():
     else:
         return Response("Method Not Allowed", 405)
 
+
 @app.route("/markers", methods=["GET"])
 def markers():
     logging.debug("getting markers")
@@ -356,6 +354,7 @@ def markers():
         return generate_json(
             accident_markers, rsa_markers, discussions, is_thin, total_records=result.total_records
         )
+
 
 @app.route("/markers_by_yishuv_symbol", methods=["GET"])
 def markers_by_yishuv_symbol():
@@ -1196,7 +1195,10 @@ class RetrieveNewsFlash(Resource):
 parser = reqparse.RequestParser()
 parser.add_argument("news_flash_id", type=int, help="News flash id")
 parser.add_argument(
-    "years_ago", type=int, default=DEFAULT_NUMBER_OF_YEARS_AGO, help=f"Number of years back to consider accidents. Default is {DEFAULT_NUMBER_OF_YEARS_AGO} years"
+    "years_ago",
+    type=int,
+    default=DEFAULT_NUMBER_OF_YEARS_AGO,
+    help=f"Number of years back to consider accidents. Default is {DEFAULT_NUMBER_OF_YEARS_AGO} years",
 )
 parser.add_argument("lang", type=str, default="he", help="Language")
 
@@ -1254,7 +1256,10 @@ def gps_to_cbs_location():
 idbl_parser = reqparse.RequestParser()
 idbl_parser.add_argument("road_segment_id", type=int, help="Road Segment id")
 idbl_parser.add_argument(
-    "years_ago", type=int, default=DEFAULT_NUMBER_OF_YEARS_AGO, help=f"Number of years back to consider accidents. Default is {DEFAULT_NUMBER_OF_YEARS_AGO} years"
+    "years_ago",
+    type=int,
+    default=DEFAULT_NUMBER_OF_YEARS_AGO,
+    help=f"Number of years back to consider accidents. Default is {DEFAULT_NUMBER_OF_YEARS_AGO} years",
 )
 idbl_parser.add_argument("lang", type=str, default="he", help="Language")
 
@@ -1455,6 +1460,7 @@ get_segments_by_segments_parsers.add_argument(
     "road_segment_id", type=int, required=True, help="road segment id"
 )
 
+
 @api.route("/api/streets")
 @api.expect(get_streets_parser)
 class GetAllStreetsOfYishuv(Resource):
@@ -1499,17 +1505,26 @@ class SetNewsflashLocationQualification(Resource):
 
 
 download_data_parser = reqparse.RequestParser()
-download_data_parser.add_argument("format", type=str, default="csv", 
-help="Format for downloaded data (.csv/.xlsx)")
-download_data_parser.add_argument("years_ago", type=int, default=DEFAULT_NUMBER_OF_YEARS_AGO, 
-help=f"Number of years back to consider accidents. Default is {DEFAULT_NUMBER_OF_YEARS_AGO} years")
+download_data_parser.add_argument(
+    "format", type=str, default="csv", help="Format for downloaded data (.csv/.xlsx)"
+)
+download_data_parser.add_argument(
+    "years_ago",
+    type=int,
+    default=DEFAULT_NUMBER_OF_YEARS_AGO,
+    help=f"Number of years back to consider accidents. Default is {DEFAULT_NUMBER_OF_YEARS_AGO} years",
+)
 """
     Download accidents data with regards to news flash/location
 """
+
+
 @api.route("/api/download-data", methods=["GET"])
 class DownloadData(Resource):
     @api.doc("download data")
     @api.expect(parser)
     def get(self):
         args = download_data_parser.parse_args()
-        return get_downloaded_data(args.get('format', 'csv'), args.get('years_ago', DEFAULT_NUMBER_OF_YEARS_AGO))
+        return get_downloaded_data(
+            args.get("format", "csv"), args.get("years_ago", DEFAULT_NUMBER_OF_YEARS_AGO)
+        )

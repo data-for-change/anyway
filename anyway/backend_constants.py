@@ -78,7 +78,7 @@ class BackEndConstants(object):
     SUPPORTED_RESOLUTIONS: List[ResolutionCategories] = [
         ResolutionCategories.STREET,
         ResolutionCategories.SUBURBAN_ROAD,
-        ResolutionCategories.SUBURBAN_JUNCTION
+        ResolutionCategories.SUBURBAN_JUNCTION,
     ]
 
     class Source(Enum):
@@ -109,6 +109,7 @@ class BackEndConstants(object):
     SERIES = "series"
 
     YISHUV_NAME = "yishuv_name"
+
 
 BE_CONST = BackEndConstants()
 

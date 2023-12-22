@@ -12,7 +12,11 @@ from anyway.widgets.all_locations_widgets import killed_and_injured_count_per_ag
 
 from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget
 from anyway.widgets.widget import register
-from anyway.widgets.widget_utils import add_empty_keys_to_gen_two_level_dict, gen_entity_labels, get_location_text
+from anyway.widgets.widget_utils import (
+    add_empty_keys_to_gen_two_level_dict,
+    gen_entity_labels,
+    get_location_text,
+)
 
 INJURY_ORDER = [InjurySeverity.LIGHT_INJURED, InjurySeverity.SEVERE_INJURED, InjurySeverity.KILLED]
 MAX_AGE = 200

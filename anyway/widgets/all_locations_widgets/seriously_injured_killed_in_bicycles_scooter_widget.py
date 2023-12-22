@@ -33,30 +33,39 @@ class SeriouslyInjuredKilledInBicyclesScooterWidget(AllLocationsWidget):
 
     @staticmethod
     def get_seriously_injured_killed_in_bicycles_scooter(
-            start_year: int,
-            end_year: int,
-            location_info: LocationInfo
+        start_year: int, end_year: int, location_info: LocationInfo
     ):
 
-        res = get_involved_counts(start_year, end_year,
-                                  SeriouslyInjuredKilledInBicyclesScooterWidget.severities,
-                                  SeriouslyInjuredKilledInBicyclesScooterWidget.vehicle_types,
-                                  location_info)
+        res = get_involved_counts(
+            start_year,
+            end_year,
+            SeriouslyInjuredKilledInBicyclesScooterWidget.severities,
+            SeriouslyInjuredKilledInBicyclesScooterWidget.vehicle_types,
+            location_info,
+        )
         return res
 
     @staticmethod
     def create_location_description(location_info: LocationInfo, location_text: str) -> str:
-        return _("in") + location_info[Constants.YISHUV_NAME] \
-            if Constants.YISHUV_NAME in location_info \
+        return (
+            _("in") + location_info[Constants.YISHUV_NAME]
+            if Constants.YISHUV_NAME in location_info
             else location_text
+        )
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        subtitle = _(SeriouslyInjuredKilledInBicyclesScooterWidget.create_location_description(
-            request_params.location_info,
-            request_params.location_text))
-        items["data"]["text"] = {"title": _("Number of severely injured or killed in bike, e-bike, or scooter accidents"),
-                                 "subtitle": subtitle}
+        subtitle = _(
+            SeriouslyInjuredKilledInBicyclesScooterWidget.create_location_description(
+                request_params.location_info, request_params.location_text
+            )
+        )
+        items["data"]["text"] = {
+            "title": _(
+                "Number of severely injured or killed in bike, e-bike, or scooter accidents"
+            ),
+            "subtitle": subtitle,
+        }
         return items
 
     def is_included(self) -> bool:

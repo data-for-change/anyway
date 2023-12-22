@@ -133,11 +133,3 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
             .order_by(asc(InvolvedMarkerView.age_group))
         )
         return query
-
-    @staticmethod
-    def get_location_text(request_params : RequestParams) -> str :
-        if request_params.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
-            return request_params.location_info["road_segment_name"]
-        elif request_params.resolution == BE_CONST.ResolutionCategories.STREET:
-            return str.format("{0}-{1}",request_params.location_info["yishuv_name"], request_params.location_info["street1_hebrew"])
-        

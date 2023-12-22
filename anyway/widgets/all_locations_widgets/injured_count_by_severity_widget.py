@@ -5,7 +5,7 @@ from anyway.backend_constants import InjurySeverity
 from anyway.models import InvolvedMarkerView
 from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget
 from anyway.widgets.widget import register
-from anyway.widgets.widget_utils import get_accidents_stats, join_strings
+from anyway.widgets.widget_utils import get_accidents_stats, join_strings, get_location_text
 from anyway.backend_constants import BE_CONST
 from flask_babel import _
 
@@ -135,8 +135,7 @@ class InjuredCountBySeverityWidget(AllLocationsWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
 
-        subtitle = InjuredCountBySeverityWidget.get_injured_count_by_severity_table_title(request_params.location_info,
-                                                                request_params.resolution)
+        subtitle = get_location_text(request_params)
         items["data"]["text"] = {
             "title": _("Number of Injuries in accidents by severity"),
             "subtitle": _(subtitle),
@@ -145,14 +144,6 @@ class InjuredCountBySeverityWidget(AllLocationsWidget):
         }
         return items
     
-    @staticmethod
-    def get_injured_count_by_severity_table_title(location_info: dict, resolution: BE_CONST.ResolutionCategories):
-        if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
-            return location_info["road_segment_name"]
-        elif resolution == BE_CONST.ResolutionCategories.STREET:
-            in_str = _("in")
-            return f"{location_info['street1_hebrew']} {in_str}{location_info['yishuv_name']}"
-
 
 
 _("injured/killed")

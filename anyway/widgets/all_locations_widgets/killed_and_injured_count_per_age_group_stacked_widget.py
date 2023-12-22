@@ -12,7 +12,7 @@ from anyway.widgets.all_locations_widgets import killed_and_injured_count_per_ag
 
 from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget
 from anyway.widgets.widget import register
-from anyway.widgets.widget_utils import add_empty_keys_to_gen_two_level_dict, gen_entity_labels
+from anyway.widgets.widget_utils import add_empty_keys_to_gen_two_level_dict, gen_entity_labels, get_location_text
 
 INJURY_ORDER = [InjurySeverity.LIGHT_INJURED, InjurySeverity.SEVERE_INJURED, InjurySeverity.KILLED]
 MAX_AGE = 200
@@ -48,10 +48,10 @@ class KilledInjuredCountPerAgeGroupStackedWidget(AllLocationsWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        location_text = KilledAndInjuredCountPerAgeGroupWidgetUtils.get_location_text(request_params)
+        location_text = get_location_text(request_params)
         items["data"]["text"] = {
             "title": _("Killed and injury stacked per age group"),
-            "subtitle": location_text,
+            "subtitle": _(location_text),
             "labels_map": gen_entity_labels(InjurySeverity),
         }
         return items

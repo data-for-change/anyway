@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-12-20 23:08+0200\n"
+"POT-Creation-Date: 2023-12-22 13:01+0200\n"
 "PO-Revision-Date: 2020-11-26 16:45+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -170,6 +170,13 @@ msgstr ""
 msgid "other vehicle"
 msgstr ""
 
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:51
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:226
+#: anyway/widgets/all_locations_widgets/seriously_injured_killed_in_bicycles_scooter_widget.py:49
+#: anyway/widgets/widget_utils.py:249
+msgid "in"
+msgstr "in "
+
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:69
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:162
 msgid "one light"
@@ -315,69 +322,62 @@ msgid "Fatal, severe and light accidents count in the specified location."
 msgstr ""
 
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:87
-#: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:164
+#: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:155
 #, fuzzy
 msgid "one light injured"
 msgstr "light injured"
 
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:89
-#: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:165
+#: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:156
 #, fuzzy
 msgid "light injured plural"
 msgstr "light injured"
 
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:94
-#: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:162
+#: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:153
 #, fuzzy
 msgid "one severe injured"
 msgstr "severe injured"
 
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:96
-#: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:163
+#: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:154
 #, fuzzy
 msgid "severe injured plural"
 msgstr "severe injured"
 
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:101
-#: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:160
+#: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:151
 #, fuzzy
 msgid "one killed"
 msgstr "killed"
 
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:103
-#: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:161
+#: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:152
 #, fuzzy
 msgid "killed plural"
 msgstr "killed"
 
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:124
-#: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:158
+#: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:149
 #, fuzzy
 msgid "injured/killed"
 msgstr "killed"
 
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:126
-#: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:159
+#: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:150
 #, fuzzy
 msgid "people from car accidents"
 msgstr "severe injured"
 
-#: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:141
+#: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:140
 msgid "Number of Injuries in accidents by severity"
 msgstr ""
-
-#: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:153
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:51
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:226
-#: anyway/widgets/all_locations_widgets/seriously_injured_killed_in_bicycles_scooter_widget.py:49
-msgid "in"
-msgstr "in "
 
 #: anyway/widgets/all_locations_widgets/killed_and_injured_count_per_age_group_stacked_widget.py:53
 msgid "Killed and injury stacked per age group"
 msgstr ""
 
-#: anyway/widgets/all_locations_widgets/killed_and_injured_count_per_age_group_widget.py:40
+#: anyway/widgets/all_locations_widgets/killed_and_injured_count_per_age_group_widget.py:41
 msgid "Injury per age group"
 msgstr ""
 

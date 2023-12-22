@@ -1,5 +1,4 @@
 from typing import Dict
-import copy
 from anyway.request_params import RequestParams
 from anyway.backend_constants import InjurySeverity
 from anyway.models import InvolvedMarkerView

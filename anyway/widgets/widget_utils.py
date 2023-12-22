@@ -53,7 +53,10 @@ def get_accidents_stats(
     end_time=None,
 ):
     filters = filters or {}
-    provider_code_filters = [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
+    provider_code_filters = [
+        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
+        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+    ]
     filters["provider_code"] = filters.get("provider_code", provider_code_filters)
 
     # get stats
@@ -75,7 +78,8 @@ def get_accidents_stats(
         else:
             query = query.group_by(group_by)
             query = query.with_entities(
-                group_by, func.count(count) if not cnt_distinct else func.count(distinct(count))
+                group_by,
+                func.count(count) if not cnt_distinct else func.count(distinct(count)),
             )
     df = pd.read_sql_query(query.statement, query.session.bind)
     df.rename(columns={"count_1": "count"}, inplace=True)  # pylint: disable=no-member
@@ -99,7 +103,10 @@ def retro_dictify(indexable) -> Dict[Any, Dict[Any, Any]]:
 
 
 def add_empty_keys_to_gen_two_level_dict(
-    d, level_1_values: List[Any], level_2_values: List[Any], default_level_3_value: int = 0
+    d,
+    level_1_values: List[Any],
+    level_2_values: List[Any],
+    default_level_3_value: int = 0,
 ) -> Dict[Any, Dict[Any, int]]:
     for v1 in level_1_values:
         if v1 not in d:
@@ -238,10 +245,9 @@ def newsflash_has_location(newsflash: NewsFlash):
         and newsflash.road_segment_name
     ) or (resolution == BE_CONST.ResolutionCategories.STREET.value and newsflash.street1_hebrew)
 
-
-def get_location_text(request_params: RequestParams) -> str:
-    in_str = _("in")
-    if request_params.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
-        return f'{_("in segment")} {_(request_params.location_info["road_segment_name"])}'
-    elif request_params.resolution == BE_CONST.ResolutionCategories.STREET:
-        return f'{_("in street")} {request_params.location_info["street1_hebrew"]} {in_str}{request_params.location_info["yishuv_name"]}'
+def get_location_text(request_params : RequestParams) -> str :
+        in_str = _("in")
+        if request_params.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
+            return f'{_("in segment")} {_(request_params.location_info["road_segment_name"])}'
+        elif request_params.resolution == BE_CONST.ResolutionCategories.STREET:
+            return f'{_("in street")} {request_params.location_info["street1_hebrew"]} {in_str}{request_params.location_info["yishuv_name"]}'

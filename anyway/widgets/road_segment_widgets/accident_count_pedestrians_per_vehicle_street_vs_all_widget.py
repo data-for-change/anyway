@@ -41,6 +41,6 @@ class AccidentCountPedestriansPerVehicleStreetVsAllWidget(RoadSegmentWidget):
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
             "title": "Number of pedestrian accidents by type of hitting vehicle compared to urban accidents across the country",
-            "subtitle": "Ben Yehuda street in Tel Aviv",
+            "subtitle": "Ben Yehuda street in Tel Aviv"
         }
         return items

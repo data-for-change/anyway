@@ -61,7 +61,11 @@ class FrondToSideAccidentsBySeverityWidget(RoadSegmentWidget):
                         DESC: FRONT_SIDE_DESC,
                         COUNT: row[FRONT_SIDE_ACCIDENTS_LABEL],
                     },
-                    {SEVERITY: severity_text, DESC: OTHERS_DESC, COUNT: row[OTHER_ACCIDENTS_LABEL]},
+                    {
+                        SEVERITY: severity_text,
+                        DESC: OTHERS_DESC,
+                        COUNT: row[OTHER_ACCIDENTS_LABEL],
+                    },
                 ]
             )
 

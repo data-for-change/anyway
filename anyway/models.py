@@ -7,6 +7,7 @@ from collections import namedtuple
 from typing import List, Set, Iterable
 
 
+
 try:
     from flask_login import UserMixin
 except ModuleNotFoundError:
@@ -879,9 +880,7 @@ class NewsFlash(Base):
     newsflash_location_qualification = Column(
         Integer(),
         nullable=False,
-        server_default=text(
-            f"{NewsflashLocationQualification.NOT_VERIFIED.value}"
-        ),  # pylint: disable=no-member
+        server_default=text(f"{NewsflashLocationQualification.NOT_VERIFIED.value}"),  # pylint: disable=no-member
     )
     location_qualifying_user = Column(BigInteger(), nullable=True)
 
@@ -893,7 +892,7 @@ class NewsFlash(Base):
         urban_severe_value=2,
     ):
         from anyway.widgets.all_locations_widgets.injured_count_by_severity_widget import (
-            InjuredCountBySeverityWidget
+            InjuredCountBySeverityWidget,
         )
         from anyway.request_params import get_latest_accident_date
 
@@ -1189,6 +1188,7 @@ class Streets(Base):
             raise RuntimeError(f"When retrieving streets of {yishuv_symbol}")
         return res1
 
+
     @staticmethod
     def get_streets_by_yishuv_name(yishuv_name: str) -> List[dict]:
         yishuv_symbol = City.get_symbol_from_name(yishuv_name)
@@ -1207,58 +1207,45 @@ class SuburbanJunction(Base):
     __tablename__ = "suburban_junction"
     MAX_NAME_LEN = 100
     non_urban_intersection = Column(Integer(), primary_key=True, nullable=False)
-    non_urban_intersection_hebrew = Column(String(length=MAX_NAME_LEN), nullable=True)
+    non_urban_intersection_hebrew = Column(String(length=MAX_NAME_LEN),
+                                           nullable=True)
     roads = Column(postgresql.ARRAY(Integer(), dimensions=1), nullable=False)
 
     @staticmethod
     def get_hebrew_name_from_id(non_urban_intersection: int) -> str:
-        res = (
-            db.session.query(SuburbanJunction.non_urban_intersection_hebrew)
-            .filter(SuburbanJunction.non_urban_intersection == non_urban_intersection)
-            .first()
-        )
+        res = db.session.query(SuburbanJunction.non_urban_intersection_hebrew).filter(
+            SuburbanJunction.non_urban_intersection == non_urban_intersection).first()
         if res is None:
-            raise ValueError(
-                f"{non_urban_intersection}: could not find " f"SuburbanJunction with that symbol"
-            )
+            raise ValueError(f"{non_urban_intersection}: could not find "
+                             f"SuburbanJunction with that symbol")
         return res.non_urban_intersection_hebrew
 
     @staticmethod
     def get_id_from_hebrew_name(non_urban_intersection_hebrew: str) -> int:
-        res = (
-            db.session.query(SuburbanJunction.non_urban_intersection)
-            .filter(SuburbanJunction.non_urban_intersection == non_urban_intersection_hebrew)
-            .first()
-        )
+        res = db.session.query(SuburbanJunction.non_urban_intersection).filter(
+            SuburbanJunction.non_urban_intersection == non_urban_intersection_hebrew).first()
         if res is None:
-            raise ValueError(
-                f"{non_urban_intersection_hebrew}: could not find "
-                f"SuburbanJunction with that name"
-            )
+            raise ValueError(f"{non_urban_intersection_hebrew}: could not find "
+                             f"SuburbanJunction with that name")
         return res.non_urban_intersection
 
     @staticmethod
     def get_intersection_from_roads(roads: Set[int]) -> dict:
         if not all([isinstance(x, int) for x in roads]):
             raise ValueError(f"{roads}: Should be integers")
-        res = (
-            db.session.query(SuburbanJunction)
-            .filter(SuburbanJunction.roads.contains(roads))
-            .first()
-        )
+        res = db.session.query(SuburbanJunction).filter(
+            SuburbanJunction.roads.contains(roads)).first()
         if res is None:
-            raise ValueError(f"{roads}: could not find " f"SuburbanJunction with these roads")
+            raise ValueError(f"{roads}: could not find "
+                             f"SuburbanJunction with these roads")
         return res.serialize()
 
     @staticmethod
     def get_all_from_key_value(key: str, val: Iterable) -> dict:
         if not isinstance(val, Iterable):
             val = [val]
-        res = (
-            db.session.query(SuburbanJunction)
-            .filter((getattr(SuburbanJunction, key)).in_(val))
-            .first()
-        )
+        res = db.session.query(SuburbanJunction).filter(
+            (getattr(SuburbanJunction, key)).in_(val)).first()
         if res is None:
             raise ValueError(f"{key}:{val}: could not find SuburbanJunction")
         return res.serialize()
@@ -2237,29 +2224,19 @@ class RoadSegments(Base):
 
     @staticmethod
     def get_segments_by_segment(road_segment_id: int):
-        curr_road = (
-            db.session.query(RoadSegments.road)
-            .filter(RoadSegments.segment_id == road_segment_id)
-            .all()
-        )
+        curr_road = (db.session.query(RoadSegments.road)
+                    .filter(RoadSegments.segment_id == road_segment_id)
+                    .all())
         curr_road_processed = [{"road": s.road} for s in curr_road]
         if curr_road is None or curr_road_processed is None:
             raise RuntimeError(f"When retrieving segments of {road_segment_id}")
         road = curr_road_processed[0]["road"]
-        res = (
-            db.session.query(RoadSegments.segment_id, RoadSegments.from_name, RoadSegments.to_name)
-            .filter(RoadSegments.road == road)
-            .all()
-        )
-        res1 = [
-            {
-                "road": road,
-                "road_segment_id": s.segment_id,
-                "road_segment_name": " - ".join([s.from_name, s.to_name]),
-            }
-            for s in res
-        ]
+        res = (db.session.query(RoadSegments.segment_id, RoadSegments.from_name, RoadSegments.to_name)
+               .filter(RoadSegments.road == road)
+               .all())
+        res1 = [{"road": road, "road_segment_id": s.segment_id, "road_segment_name": " - ".join([s.from_name, s.to_name])} for s in res]
         return res1
+
 
     @staticmethod
     def get_streets_by_yishuv_name(yishuv_name: str) -> List[dict]:
@@ -2274,7 +2251,6 @@ class RoadSegments(Base):
             raise RuntimeError(f"When retrieving streets of {yishuv_symbol}")
         return res1
 
-
 class Comment(Base):
     __tablename__ = "comments"
     id = Column(BigInteger(), autoincrement=True, primary_key=True, index=True)
@@ -2282,7 +2258,7 @@ class Comment(Base):
     parent = Column(Integer, ForeignKey("comments.id"), nullable=True)
     created_time = Column(DateTime, default=datetime.datetime.now, index=True, nullable=False)
     street = Column(Text(), nullable=True, index=True)
-    city = Column(Text(), nullable=True, index=True)
+    city = Column(Text(), nullable=True,  index=True)
     road_segment_id = Column(Integer(), nullable=True, index=True)
 
     def serialize(self):
@@ -2293,8 +2269,10 @@ class Comment(Base):
             "street": self.street,
             "parent": self.parent,
             "city": self.city,
-            "road_segment_id": self.road_segment_id,
+            "road_segment_id": self.road_segment_id
+
         }
+
 
 
 class ReportProblem(Base):
@@ -2326,7 +2304,7 @@ class InvolvedMarkerView(Base):
     __table_args__ = (
         Index("inv_markers_accident_yishuv_symbol_idx", "accident_yishuv_symbol", unique=False),
         Index("inv_markers_injury_severity_idx", "injury_severity", unique=False),
-        Index("inv_markers_involve_vehicle_type_idx", "involve_vehicle_type", unique=False),
+        Index("inv_markers_involve_vehicle_type_idx", "involve_vehicle_type", unique=False)
     )
 
     accident_id = Column(BigInteger(), primary_key=True)
@@ -2992,17 +2970,14 @@ class TelegramGroupsBase(Base):
     id = Column(Integer(), primary_key=True)
     filter = Column(JSON(), nullable=False, server_default="{}")
 
-
 class TelegramGroups(TelegramGroupsBase):
     __tablename__ = "telegram_groups"
-
 
 class TelegramGroupsTest(TelegramGroupsBase):
     __tablename__ = "telegram_groups_test"
 
-
-class TelegramForwardedMessages:
-    __tablename__ = "telegram_forwarded_messages"
+class TelegramForwardedMessages():
+    __tablename__ = 'telegram_forwarded_messages'
     message_id = Column(String(), primary_key=True)
     newsflash_id = Column(BigInteger(), nullable=False)
-    group_sent = (Column(String(), nullable=False),)
+    group_sent = Column(String(), nullable=False),

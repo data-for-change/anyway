@@ -13,14 +13,13 @@ from anyway.backend_constants import BE_CONST
 
 from anyway.request_params import get_location_from_request_values
 
-
 def create_comment():
-    current_user = get_current_user()
+    current_user =  get_current_user()
 
     json_data = request.get_json(force=True)
 
     logging.debug(json_data)
-
+ 
     resolution = json_data["resolution"]
     parent = json_data["parent"]
     road_segment_id = None
@@ -35,24 +34,23 @@ def create_comment():
         raise ValueError("Invalid comment data")
 
     comment = Comment(
-        author=current_user.id,
-        parent=parent,
-        street=street,
-        city=city,
-        road_segment_id=road_segment_id,
-    )
+                 author= current_user.id,
+                      parent=parent,
+                      street=street,
+                      city=city,
+                      road_segment_id=road_segment_id,
+                    )
     db.session.add(comment)
     x = db.session.commit()
 
     return Response()
-
 
 def get_comments():
     logging.debug("getting comments by resolution")
 
     params = get_location_from_request_values(request.values)
     comments = get_comments_by_resolution(params)
-
+    
     if not comments:
         log_bad_request(request)
         return abort(http_client.NOT_FOUND)
@@ -62,15 +60,17 @@ def get_comments():
 
     return Response(json.dumps(comments_jsons, default=str), mimetype="application/json")
 
-
 def get_comments_by_resolution(params):
     location = params["data"]
     resolution = location["resolution"]
-
+    
     if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
-        return db.session.query(Comment).filter(
-            Comment.road_segment_id == int(location["road_segment_id"])
-        )
+        return (
+            db.session.query(Comment)
+            .filter(
+                Comment.road_segment_id
+                == int(location["road_segment_id"])
+            ))
     elif resolution == BE_CONST.ResolutionCategories.STREET:
         return (
             db.session.query(Comment)
@@ -92,3 +92,5 @@ def log_bad_request(request):
         )
     except AttributeError:
         logging.debug("Bad request:{0}".format(str(request)))
+
+

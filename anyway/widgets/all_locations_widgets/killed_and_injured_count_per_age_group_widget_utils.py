@@ -1,5 +1,4 @@
 from collections import defaultdict, OrderedDict
-from datetime import datetime
 from typing import Dict, Tuple, Callable
 
 from flask_sqlalchemy import BaseQuery

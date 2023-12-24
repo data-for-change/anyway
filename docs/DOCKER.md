@@ -54,6 +54,9 @@ Go to the project's root directory and run:
     `sudo docker-compose up --build anyway`
 This will start the containers. It will take a few minutes until it's done.
 
+*notice*
+The docker image, after copying the DB, will be around 20GB and defaultly on C: drive. If you don't have enough space, follow this instractions in order to move the docker image to a different drive - https://needlify.com/post/how-to-move-wsl-distributions-including-docker-images-to-new-locations-on-windows-6412384cbd14c
+
 **8.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
 If you need to see the map contact atalya via slack to get a developer key.  

@@ -56,7 +56,8 @@ def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams
         else None
     )
     news_flash_title = (
-        news_flash_obj.title if news_flash_obj and news_flash_obj is not None
+        news_flash_obj.title
+        if news_flash_obj is not None and news_flash_obj.title is not None
         else None
     )
     location = get_location_from_news_flash_or_request_values(news_flash_obj, vals)

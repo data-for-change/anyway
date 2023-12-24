@@ -35,7 +35,7 @@ class RequestParams:
     start_time: datetime.date
     end_time: datetime.date
     lang: str
-    news_flash_description: Optional[str] = None
+    news_flash_description: Optional[str]
     news_flash_title: Optional[str] = None
 
     def __str__(self):

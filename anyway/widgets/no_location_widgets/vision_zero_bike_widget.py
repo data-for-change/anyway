@@ -25,8 +25,10 @@ class VisionZeroBikeWidget(Widget):
 
     # noinspection PyUnboundLocalVariable
     def is_included(self) -> bool:
-        if self.request_params.news_flash_description:
-            return "אופניים" in self.request_params.news_flash_description
+        if self.request_params.news_flash_description and "אופניים" in self.request_params.news_flash_description:
+            return True
+        if self.request_params.news_flash_title and "אופניים" in self.request_params.news_flash_title:
+            return True
         return False
 
     @staticmethod

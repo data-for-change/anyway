@@ -111,7 +111,10 @@ Note - At some point you should gett the message "Waiting for postgres server, 4
 
 Note - If the "anyway" container does not start because of the error: "exec /anyway/docker-entrypoint.sh: no such file or directory", run `dos2unix` on all files mentioned in "important" note under the Windows section and go back to step 7.
 
-**8.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
+**8.** (Optional) To free up disk space: Run `docker buildx prune -f`. This will clear the build cache.
+To remove all unused artifacts Docker has produced, run `docker system prune -f`. This will remove all unused containers, images, networks, and build cache.
+
+**9.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
 You now need to see the map for development, so contact us via email [anyway@anyway.co.il](mailto:anyway@anyway.co.il) to get a developer key.  
 The developer key needs to replace the production key in the file /anyway/blob/dev/templates/index.html where you can find: "https://maps.googleapis.com/maps/api/js?key=AIzaSyDUIWsBLkvIUwzLHMHos9qFebyJ63hEG2M&libraries=places,visualization&language=iw" (google maps url)

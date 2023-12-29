@@ -45,7 +45,6 @@ def assert_all_equal(items_actual, items_expected):
         for k in to_dict(expected):
             assert (i, getattr(actual, k)) == (i, getattr(expected, k))
 
-@pytest.mark.skip
 def test_scrape_walla():
     # Reuters is marked differently than Walla's authors
     items_expected = [
@@ -108,7 +107,7 @@ def test_scrape_sanity_online_ynet():
     next(rss_sites.scrape("ynet"))
 
 
-@pytest.mark.slow
+@pytest.mark.skip
 def test_scrape_sanity_online_walla():
     next(rss_sites.scrape("walla"))
 

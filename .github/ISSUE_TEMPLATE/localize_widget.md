@@ -26,7 +26,13 @@ Current Widget Title for localization, if exists.
 (Note - if translation in file is not adequate - please create a better translation)
 
 **Flask Babel**
-For updating messages.pot with all strings for translation - use the following command: `pybabel extract -F babel.cfg -o messages.pot .`
-For updating existing po files with new strings: `pybabel update -i messages.pot -d translations`
-For compiling pybabel mo files use: `pybabel compile -d translations`
-It's important to compile the files for the transations to take place
+For updating messages.pot with all strings for translation - use the following commands:
+
+1. Go to anyway container: `docker exec -it anyway`
+2. Perform the following updates:
+- `pybabel extract -F babel.cfg -o messages.pot .`
+- For updating existing po files with new strings: `pybabel update -i messages.pot -d translations`
+- Update manually the translations: modify translation files - po files per language.
+- For compiling pybabel mo files use: `pybabel compile -d translations`
+_It's important to compile the files for the transations to take place_
+**Make sure to add all po, mo and pot files to pull request**

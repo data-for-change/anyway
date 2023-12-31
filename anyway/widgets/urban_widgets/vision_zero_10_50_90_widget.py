@@ -24,6 +24,8 @@ class VisionZero105090Widget(UrbanWidget):
         for pedestrian_adjective in ["הולך רגל", "הולכת רגל", "הולכי רגל", "הולכות רגל"]:
             if self.request_params.news_flash_description and pedestrian_adjective in self.request_params.news_flash_description:
                 return True
+            if self.request_params.news_flash_title and pedestrian_adjective in self.request_params.news_flash_title:
+                return True
         return False
 
 

@@ -28,7 +28,7 @@ Current Widget Title for localization, if exists.
 **Flask Babel**
 For updating messages.pot with all strings for translation - use the following commands:
 
-1. Go to anyway container: `docker exec -it anyway`
+1. Go to anyway container: `docker exec -it anyway bash`
 2. Perform the following updates:
 - `pybabel extract -F babel.cfg -o messages.pot .`
 - For updating existing po files with new strings: `pybabel update -i messages.pot -d translations`

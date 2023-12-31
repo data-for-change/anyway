@@ -14,6 +14,7 @@ from anyway.models import InvolvedMarkerView
 from anyway.request_params import LocationInfo
 from anyway.vehicle_type import VehicleType
 from anyway.models import NewsFlash
+from anyway.request_params import RequestParams
 
 
 def get_query(table_obj, filters, start_time, end_time):
@@ -243,3 +244,11 @@ def newsflash_has_location(newsflash: NewsFlash):
         resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD.value
         and newsflash.road_segment_name
     ) or (resolution == BE_CONST.ResolutionCategories.STREET.value and newsflash.street1_hebrew)
+
+
+def get_location_text(request_params: RequestParams) -> str:
+    in_str = _("in")
+    if request_params.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
+        return f'{_("in segment")} {_(request_params.location_info["road_segment_name"])}'
+    elif request_params.resolution == BE_CONST.ResolutionCategories.STREET:
+        return f'{_("in street")} {request_params.location_info["street1_hebrew"]} {in_str}{request_params.location_info["yishuv_name"]}'

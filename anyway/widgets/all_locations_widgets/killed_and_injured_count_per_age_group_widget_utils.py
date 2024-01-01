@@ -63,7 +63,7 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
             return lambda: defaultdict(int)
 
         dict_grouped = defaultdict(defaultdict_int_factory())
-        #initialize the dict for fixed order of the ranges
+        # initialize the dict for fixed order of the ranges
         for item_min_range, item_max_range in AGE_RANGE_DICT.items():
             for injury_id in InjurySeverity.codes():
                 string_age_range = f"{item_min_range:02}-{item_max_range:02}"

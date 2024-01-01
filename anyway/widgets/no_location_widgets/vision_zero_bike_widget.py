@@ -7,7 +7,6 @@ from flask_babel import _
 import logging
 
 
-@register
 class VisionZeroBikeWidget(Widget):
     name: str = "vision_zero_bike"
     files = [__file__]

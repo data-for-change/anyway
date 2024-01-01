@@ -1,11 +1,9 @@
 from typing import Dict
 from flask_babel import _
 from anyway.request_params import RequestParams
-from anyway.widgets.widget import register
 from anyway.widgets.urban_widgets.urban_widget import UrbanWidget
 
 
-@register
 class VisionZero105090Widget(UrbanWidget):
     name: str = "vision_zero_10_50_90"
     files = [__file__]

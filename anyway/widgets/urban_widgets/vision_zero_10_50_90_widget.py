@@ -1,7 +1,6 @@
 from typing import Dict
 from flask_babel import _
 from anyway.request_params import RequestParams
-from anyway.widgets.widget import register
 from anyway.widgets.urban_widgets.urban_widget import UrbanWidget
 
 

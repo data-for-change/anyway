@@ -107,7 +107,6 @@ def get_request_params(
     location_info = extract_news_flash_location(news_flash_obj)
     if location_info is None:
         return None
-    logging.debug("location_info:{}".format(location_info))
     location_text = get_news_flash_location_text(news_flash_obj)
     logging.debug("location_text:{}".format(location_text))
     gps = location_info["gps"]
@@ -179,8 +178,6 @@ def create_infographics_items(request_params: RequestParams) -> Dict:
             return {}
         if number_of_years_ago < 0 or number_of_years_ago > 100:
             return {}
-        logging.debug("location_info:{}".format(request_params.location_info))
-        logging.debug("location_text:{}".format(request_params.location_text))
         output["meta"] = {
             "location_info": request_params.location_info.copy(),
             "location_text": request_params.location_text,

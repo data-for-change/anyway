@@ -104,7 +104,6 @@ def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams
         news_flash_description=news_flash_description,
         news_flash_title=news_flash_title,
     )
-    logging.debug(f"Ending get_request_params. params: {request_params}")
     return request_params
 
 

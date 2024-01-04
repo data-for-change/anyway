@@ -87,7 +87,6 @@ class Widget:
     def generate_widget_data(cls, request_params: RequestParams):
         if cls.is_relevant(request_params):
             w = cls(request_params)  # pylint: disable=E1120
-            logging.info(f"Generating items for : {w.name}")
             try:
                 w.generate_items()
                 return w.serialize()

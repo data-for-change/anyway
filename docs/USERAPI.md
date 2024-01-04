@@ -547,3 +547,13 @@ described in the [errors](#Errors) section of this document.
 | Field missing                       | 24         | Bad Request (Field {} is missing from json).                                                 | 400              |
 
 
+### For Debug - Make System Work Locally
+1. In https://console.cloud.google.com/apis/credentials, under the anyway project, use the credentials of 
+"Web client - Debug", or create new credentials under "OAuth 2.0 Client IDs".
+2. Add in file docker-compose.yml, under services.environment, the following lines:
+      - GOOGLE_LOGIN_CLIENT_ID=<client_id>
+      - GOOGLE_LOGIN_CLIENT_SECRET=<secret>
+      - APP_SECRET_KEY=secretkey
+   Where client_id and secret are the credentials from #1.
+3. Make sure to run docker-compose down and up, if it was up.
+Login should work at this point.

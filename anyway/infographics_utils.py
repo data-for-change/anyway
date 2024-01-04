@@ -137,7 +137,6 @@ def get_request_params(
         lang=lang,
         news_flash_description=news_flash_description
     )
-    logging.debug(f"Ending get_request_params. params: {request_params}")
     return request_params
 
 
@@ -148,7 +147,6 @@ def create_infographics_data(news_flash_id, number_of_years_ago, lang: str) -> s
 
 
 def create_infographics_data_for_location(vals: dict) -> str:
-    logger.debug(f"create_infographics_data_for_location({vals})")
     try:
         request_params = get_request_params_from_request_values(vals)
         output = create_infographics_items(request_params)

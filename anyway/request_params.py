@@ -71,8 +71,6 @@ def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams
 
     if location_info is None:
         return None
-    logging.debug("location_info:{}".format(location_info))
-    logging.debug("location_text:{}".format(location_text))
     resolution = location_info.pop("resolution")
     if resolution is None or resolution not in BE_CONST.SUPPORTED_RESOLUTIONS:
         logging.error(f"Resolution empty or not supported: {resolution}.")

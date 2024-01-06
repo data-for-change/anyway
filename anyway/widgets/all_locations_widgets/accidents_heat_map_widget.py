@@ -6,14 +6,14 @@ from flask_babel import _
 from anyway.request_params import RequestParams
 from anyway.backend_constants import AccidentSeverity, BE_CONST
 from anyway.infographics_dictionaries import segment_dictionary
-from anyway.widgets.widget_utils import get_query
+from anyway.widgets.widget_utils import get_query, get_location_text
 from anyway.models import AccidentMarkerView
 from anyway.widgets.widget import register
-from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
+from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget
 
 
 @register
-class AccidentsHeatMapWidget(RoadSegmentWidget):
+class AccidentsHeatMapWidget(AllLocationsWidget):
     name: str = "accidents_heat_map"
     files = [__file__]
 
@@ -49,8 +49,9 @@ class AccidentsHeatMapWidget(RoadSegmentWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        location_text = get_location_text(request_params)
         items["data"]["text"] = {
             "title": _("Fatal and severe accidents heat map"),
-            "subtitle": _(segment_dictionary[request_params.location_info["road_segment_name"]])
+            "subtitle": _(location_text)
         }
         return items

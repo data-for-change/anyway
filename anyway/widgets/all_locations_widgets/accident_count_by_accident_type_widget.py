@@ -55,8 +55,10 @@ class AccidentCountByAccidentTypeWidget(AllLocationsWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         location_text = get_location_text(request_params)
-        items["data"]["text"] = {"title": _("Number of accidents by accident type"),
-                                 "subtitle": _(location_text)}
+        items["data"]["text"] = {
+            "title": _("Number of accidents by accident type"),
+            "subtitle": _(location_text),
+        }
         for item in items["data"]["items"]:
             to_translate = item["accident_type"]
             item["accident_type"] = _(to_translate)

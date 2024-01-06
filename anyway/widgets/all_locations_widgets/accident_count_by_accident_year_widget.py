@@ -30,7 +30,6 @@ class AccidentCountByAccidentYearWidget(AllLocationsWidget):
         self.information = "Fatal, severe and light accidents count in the specified years, split by accident severity"
 
     def generate_items(self) -> None:
-
         res1 = get_accidents_stats(
             table_obj=AccidentMarkerView,
             filters=self.request_params.location_info,

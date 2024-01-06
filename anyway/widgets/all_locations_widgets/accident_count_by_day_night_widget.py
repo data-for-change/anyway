@@ -33,8 +33,7 @@ class AccidentCountByDayNightWidget(AllLocationsWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         location_text = get_location_text(request_params)
-        items["data"]["text"] = {"title": _("Accidents by time"),
-                                 "subtitle": _(location_text)}
+        items["data"]["text"] = {"title": _("Accidents by time"), "subtitle": _(location_text)}
         return items
 
 

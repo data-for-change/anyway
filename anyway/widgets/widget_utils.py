@@ -124,7 +124,8 @@ def gen_entity_labels(entity: Type[LabeledCode]) -> dict:
         res[label] = _(label)
     return res
 
-def get_involved_marker_view_location_filters(request_params : RequestParams):
+
+def get_involved_marker_view_location_filters(request_params: RequestParams):
     filters = {}
     if request_params.resolution == BE_CONST.ResolutionCategories.STREET:
         filters["involve_yishuv_name"] = request_params.location_info.get("yishuv_name")
@@ -132,17 +133,17 @@ def get_involved_marker_view_location_filters(request_params : RequestParams):
     elif request_params.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
         filters["road1"] = request_params.location_info.get("road1")
         filters["road_segment_name"] = request_params.location_info.get("road_segment_name")
-    
+
     return filters
 
 
-def get_injured_filters(request_params : RequestParams):
-    new_filters = get_involved_marker_view_location_filters(request_params)    
+def get_injured_filters(request_params: RequestParams):
+    new_filters = get_involved_marker_view_location_filters(request_params)
     for curr_filter, curr_values in request_params.location_info.items():
         if curr_filter in ["region_hebrew", "district_hebrew", "yishuv_name"]:
             new_filter_name = "accident_" + curr_filter
             new_filters[new_filter_name] = curr_values
-    
+
     new_filters["injury_severity"] = [1, 2, 3, 4, 5]
     return new_filters
 

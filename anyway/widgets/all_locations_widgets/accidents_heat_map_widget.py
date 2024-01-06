@@ -52,6 +52,6 @@ class AccidentsHeatMapWidget(AllLocationsWidget):
         location_text = get_location_text(request_params)
         items["data"]["text"] = {
             "title": _("Fatal and severe accidents heat map"),
-            "subtitle": _(location_text)
+            "subtitle": _(location_text),
         }
         return items

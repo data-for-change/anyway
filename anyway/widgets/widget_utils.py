@@ -18,7 +18,7 @@ from anyway.models import NewsFlash
 from anyway.request_params import RequestParams
 from anyway.widgets.segment_junctions import SegmentJunctions
 
-# todo: check after rebase
+
 def get_query(table_obj, filters, start_time, end_time):
     query = db.session.query(table_obj)
     if start_time:

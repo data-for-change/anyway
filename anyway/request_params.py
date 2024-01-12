@@ -309,10 +309,12 @@ def fill_missing_non_urban_intersection_values(vals: dict) -> dict:
     else:
         raise ValueError(f"Cannot get non_urban_intersection from input: {vals}")
     #   TODO: temporarily removing "roads" field, as it is not used correctly in the filters.
-    if res.get("road1") is None or res.get("road2") is None and len(res.get("roads")) > 2:
+    if res.get("road1") is None or res.get("road2") is None:
         roads = list(res["roads"])
-        res["road1"] = roads[0]
-        res["road2"] = roads[1]
+        if len(roads) > 0:
+            res["road1"] = roads[0]
+        if len(roads) > 1:
+            res["road2"] = roads[1]
     if "roads" in res:
         res.pop("roads")
     return res

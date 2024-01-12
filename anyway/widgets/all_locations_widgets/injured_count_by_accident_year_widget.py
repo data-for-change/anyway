@@ -3,7 +3,6 @@ from typing import Dict
 from flask_babel import _
 
 from anyway.backend_constants import InjurySeverity
-from anyway.infographics_dictionaries import segment_dictionary
 from anyway.models import InvolvedMarkerView
 from anyway.request_params import RequestParams
 from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget

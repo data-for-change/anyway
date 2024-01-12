@@ -894,15 +894,14 @@ class NewsFlash(Base):
         from anyway.widgets.all_locations_widgets.injured_count_by_severity_widget import (
             InjuredCountBySeverityWidget,
         )
-        from anyway.request_params import get_latest_accident_date, RequestParams, LocationInfo
+        from anyway.request_params import get_latest_accident_date, LocationInfo
 
-        if self.road1 is None or self.road_segment_name is None:
+        if (self.road1 is None or self.road_segment_name is None) and (self.yishuv_name is None or self.street1_hebrew is None) :
             return None
         last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
         resolution = BE_CONST.ResolutionCategories(self.resolution)
         end_time = last_accident_date.to_pydatetime().date()
         start_time = datetime.date(end_time.year + 1 - years_before, 1, 1)
-        request_params = RequestParams()
         location_info = LocationInfo()
         if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
             location_info["road1"]
@@ -911,11 +910,7 @@ class NewsFlash(Base):
             location_info["yishuv_name"] = self.yishuv_name
             location_info["street1_hebrew"] = self.street1_hebrew
 
-        request_params.start_time = start_time
-        request_params.end_time = end_time
-        request_params.location_info = location_info
-
-        critical_values = InjuredCountBySeverityWidget.get_injured_count_by_severity(request_params)
+        critical_values = InjuredCountBySeverityWidget.get_injured_count_by_severity(resolution, location_info, start_time, end_time)
         if critical_values == {}:
             return None
         critical = None

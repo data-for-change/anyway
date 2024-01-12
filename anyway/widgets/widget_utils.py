@@ -125,20 +125,20 @@ def gen_entity_labels(entity: Type[LabeledCode]) -> dict:
     return res
 
 
-def get_involved_marker_view_location_filters(request_params: RequestParams):
+def get_involved_marker_view_location_filters(resolution : BE_CONST.ResolutionCategories, location_info : LocationInfo):
     filters = {}
-    if request_params.resolution == BE_CONST.ResolutionCategories.STREET:
-        filters["involve_yishuv_name"] = request_params.location_info.get("yishuv_name")
-        filters["street1_hebrew"] = request_params.location_info.get("street1_hebrew")
-    elif request_params.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
-        filters["road1"] = request_params.location_info.get("road1")
-        filters["road_segment_name"] = request_params.location_info.get("road_segment_name")
+    if resolution == BE_CONST.ResolutionCategories.STREET:
+        filters["involve_yishuv_name"] = location_info.get("yishuv_name")
+        filters["street1_hebrew"] = location_info.get("street1_hebrew")
+    elif resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
+        filters["road1"] = location_info.get("road1")
+        filters["road_segment_name"] = location_info.get("road_segment_name")
 
     return filters
 
 
 def get_injured_filters(request_params: RequestParams):
-    new_filters = get_involved_marker_view_location_filters(request_params)
+    new_filters = get_involved_marker_view_location_filters(request_params.resolution, request_params.location_info)
     for curr_filter, curr_values in request_params.location_info.items():
         if curr_filter in ["region_hebrew", "district_hebrew", "yishuv_name"]:
             new_filter_name = "accident_" + curr_filter

@@ -21,12 +21,15 @@ class InjuredCountBySeverityWidget(AllLocationsWidget):
 
     def generate_items(self) -> None:
         self.items = InjuredCountBySeverityWidget.get_injured_count_by_severity(
-            self.request_params
+            self.request_params.resolution,
+            self.request_params.location_info,
+            self.request_params.start_time,
+            self.request_params.end_time,
         )
 
     @staticmethod
-    def get_injured_count_by_severity(request_params):
-        filters = get_involved_marker_view_location_filters(request_params)
+    def get_injured_count_by_severity(resolution, location_info, start_time, end_time):
+        filters = get_involved_marker_view_location_filters(resolution, location_info)
         filters["injury_severity"] = [
             InjurySeverity.KILLED.value,
             InjurySeverity.SEVERE_INJURED.value,

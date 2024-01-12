@@ -1,10 +1,15 @@
 from typing import Dict
-from anyway.request_params import RequestParams
+from anyway.request_params import RequestParams, LocationInfo
 from anyway.backend_constants import InjurySeverity
 from anyway.models import InvolvedMarkerView
 from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget
 from anyway.widgets.widget import register
-from anyway.widgets.widget_utils import get_accidents_stats, join_strings, get_location_text, get_involved_marker_view_location_filters
+from anyway.widgets.widget_utils import (
+    get_accidents_stats,
+    join_strings,
+    get_location_text,
+    get_involved_marker_view_location_filters,
+)
 from anyway.backend_constants import BE_CONST
 from flask_babel import _
 
@@ -28,7 +33,12 @@ class InjuredCountBySeverityWidget(AllLocationsWidget):
         )
 
     @staticmethod
-    def get_injured_count_by_severity(resolution, location_info, start_time, end_time):
+    def get_injured_count_by_severity(
+        resolution: BE_CONST.ResolutionCategories,
+        location_info: LocationInfo,
+        start_time: datetime.date,
+        end_time: datetime.date,
+    ):
         filters = get_involved_marker_view_location_filters(resolution, location_info)
         filters["injury_severity"] = [
             InjurySeverity.KILLED.value,
@@ -41,14 +51,14 @@ class InjuredCountBySeverityWidget(AllLocationsWidget):
             filters=filters,
             group_by="injury_severity",
             count="injury_severity",
-            start_time=request_params.start_time,
-            end_time=request_params.end_time,
+            start_time=start_time,
+            end_time=end_time,
         )
         found_severities = [d["injury_severity"] for d in count_by_severity]
         items = {}
         total_injured_count = 0
-        start_year = request_params.start_time.year
-        end_year = request_params.end_time.year
+        start_year = start_time.year
+        end_year = end_time.year
         for sev in InjurySeverity:
             if sev.value not in found_severities:
                 count_by_severity.append({"injury_severity": sev.value, "count": 0})

@@ -1,13 +1,11 @@
 from typing import Dict
 from anyway.widgets.widget import Widget
 from anyway.request_params import RequestParams
-from anyway.widgets.widget import register
 from typing import Dict
 from flask_babel import _
 import logging
 
 
-@register
 class VisionZeroBikeWidget(Widget):
     name: str = "vision_zero_bike"
     files = [__file__]
@@ -25,8 +23,10 @@ class VisionZeroBikeWidget(Widget):
 
     # noinspection PyUnboundLocalVariable
     def is_included(self) -> bool:
-        if self.request_params.news_flash_description:
-            return "אופניים" in self.request_params.news_flash_description
+        if self.request_params.news_flash_description and "אופניים" in self.request_params.news_flash_description:
+            return True
+        if self.request_params.news_flash_title and "אופניים" in self.request_params.news_flash_title:
+            return True
         return False
 
     @staticmethod

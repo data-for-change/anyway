@@ -9,7 +9,6 @@ from . import (
     accident_severity_by_cross_location_widget,
     accidents_heat_map_widget,
     head_on_collisions_comparison_widget,
-    killed_and_injured_count_per_age_group_widget,
     pedestrian_injured_in_junctions_widget,
     accident_count_by_hour_widget,
     accident_count_by_driver_type_widget,
@@ -19,10 +18,8 @@ from . import (
     accident_count_by_accident_type_widget,
     accident_count_by_car_type_widget,
     injured_count_by_accident_year_widget,
-    injured_count_by_severity_widget,
     motorcycle_accidents_vs_all_accidents_widget,
     suburban_crosswalk_widget,
-    killed_and_injured_count_per_age_group_stacked_widget,
     fatal_accident_yoy_same_month,
     front_to_side_accidents_by_severity,
 )

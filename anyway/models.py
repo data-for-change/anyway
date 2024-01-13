@@ -891,7 +891,7 @@ class NewsFlash(Base):
         suburban_road_killed_value=3,
         urban_severe_value=2,
     ):
-        from anyway.widgets.road_segment_widgets.injured_count_by_severity_widget import (
+        from anyway.widgets.all_locations_widgets.injured_count_by_severity_widget import (
             InjuredCountBySeverityWidget,
         )
         from anyway.request_params import get_latest_accident_date
@@ -2975,3 +2975,9 @@ class TelegramGroups(TelegramGroupsBase):
 
 class TelegramGroupsTest(TelegramGroupsBase):
     __tablename__ = "telegram_groups_test"
+
+class TelegramForwardedMessages():
+    __tablename__ = 'telegram_forwarded_messages'
+    message_id = Column(String(), primary_key=True)
+    newsflash_id = Column(BigInteger(), nullable=False)
+    group_sent = Column(String(), nullable=False),

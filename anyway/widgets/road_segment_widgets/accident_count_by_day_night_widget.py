@@ -32,7 +32,8 @@ class AccidentCountByDayNightWidget(RoadSegmentWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        items["data"]["text"] = {"title": _("Accidents by time")}
+        items["data"]["text"] = {"title": _("Accidents by time"),
+                                 "subtitle": f'{_("in segment")} {_(request_params.location_info["road_segment_name"])}'}
         return items
 
 

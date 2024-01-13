@@ -1,11 +1,9 @@
 from typing import Dict
 from flask_babel import _
 from anyway.request_params import RequestParams
-from anyway.widgets.widget import register
 from anyway.widgets.urban_widgets.urban_widget import UrbanWidget
 
 
-@register
 class VisionZero105090Widget(UrbanWidget):
     name: str = "vision_zero_10_50_90"
     files = [__file__]
@@ -23,6 +21,8 @@ class VisionZero105090Widget(UrbanWidget):
     def is_included(self) -> bool:
         for pedestrian_adjective in ["הולך רגל", "הולכת רגל", "הולכי רגל", "הולכות רגל"]:
             if self.request_params.news_flash_description and pedestrian_adjective in self.request_params.news_flash_description:
+                return True
+            if self.request_params.news_flash_title and pedestrian_adjective in self.request_params.news_flash_title:
                 return True
         return False
 

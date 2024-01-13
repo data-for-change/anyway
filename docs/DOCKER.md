@@ -54,7 +54,13 @@ Go to the project's root directory and run:
     `sudo docker-compose up --build anyway`
 This will start the containers. It will take a few minutes until it's done.
 
-**8.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
+*notice*
+The docker image, after copying the DB, will be around 20GB and defaultly on C: drive. If you don't have enough space, follow this instractions in order to move the docker image to a different drive - https://needlify.com/post/how-to-move-wsl-distributions-including-docker-images-to-new-locations-on-windows-6412384cbd14c
+
+**8.** (Optional) To free up disk space: Run `docker buildx prune -f`. This will clear the build cache.
+To remove all unused artifacts Docker has produced, run `docker system prune -f`. This will remove all unused containers, images, networks, and build cache.
+
+**9.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
 If you need to see the map contact atalya via slack to get a developer key.  
 The developer key need to replace the production key in the file /anyway/blob/dev/templates/index.html where you can find: "https://maps.googleapis.com/maps/api/js?key=AIzaSyDUIWsBLkvIUwzLHMHos9qFebyJ63hEG2M&libraries=places,visualization&language=iw" (google maps url)
@@ -104,11 +110,18 @@ $ sudo docker login docker.pkg.github.com -u USERNAME
     `sudo docker-compose up --build anyway`
 This will start the containers. It will take a few minutes until it's done.
 
-**8.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
+Note - At some point you should gett the message "Waiting for postgres server, 40 remaining attempts..." and a "count-down" from 40 will start. This is normal, let it continue running.
+
+Note - If the "anyway" container does not start because of the error: "exec /anyway/docker-entrypoint.sh: no such file or directory", run `dos2unix` on all files mentioned in "important" note under the Windows section and go back to step 7.
+
+**8.** (Optional) To free up disk space: Run `docker buildx prune -f`. This will clear the build cache.
+To remove all unused artifacts Docker has produced, run `docker system prune -f`. This will remove all unused containers, images, networks, and build cache.
+
+**9.** **You're all set!** ANYWAY is up and running with the DB data - connect to http://127.0.0.1:8080
 Note - you won't see the map since the key works in production.
-If you need to see the map for development email us [anyway@anyway.co.il](mailto:anyway@anyway.co.il) to get a developer key.  
-The developer key need to replace the production key in the file /anyway/blob/dev/templates/index.html where you can find: "https://maps.googleapis.com/maps/api/js?key=AIzaSyDUIWsBLkvIUwzLHMHos9qFebyJ63hEG2M&libraries=places,visualization&language=iw" (google maps url)
-So if the developer key is "12345" the new url need to be is: "https://maps.googleapis.com/maps/api/js?key=12345&libraries=places,visualization&language=iw"
+You now need to see the map for development, so contact us via email [anyway@anyway.co.il](mailto:anyway@anyway.co.il) to get a developer key.  
+The developer key needs to replace the production key in the file /anyway/blob/dev/templates/index.html where you can find: "https://maps.googleapis.com/maps/api/js?key=AIzaSyDUIWsBLkvIUwzLHMHos9qFebyJ63hEG2M&libraries=places,visualization&language=iw" (google maps url)
+So, for example, if the developer key is "12345" the new url need to be is: "https://maps.googleapis.com/maps/api/js?key=12345&libraries=places,visualization&language=iw"
 
 **9.** To stop the containers run: `sudo docker-compose down`
 

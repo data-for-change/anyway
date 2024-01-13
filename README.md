@@ -63,7 +63,7 @@ Contributing
 
 ## Getting the code
 
-### If you are setting up anyway on Windows using WSL - PLEASE MAKE SURE TO COMPLETE THE FOLLOWING STEPS FROM YOUR WSL TERMINAL!!!
+### NOTE: If you are setting up anyway on Windows using WSL - PLEASE MAKE SURE TO COMPLETE THE FOLLOWING STEPS FROM YOUR WSL TERMINAL!!!
 
 1. [Fork](https://github.com/data-for-change/anyway/fork) this repository on GitHub
 1. `git clone https://github.com/*you*/anyway`

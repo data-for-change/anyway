@@ -107,7 +107,6 @@ def get_request_params(
     location_info = extract_news_flash_location(news_flash_obj)
     if location_info is None:
         return None
-    logging.debug("location_info:{}".format(location_info))
     location_text = get_news_flash_location_text(news_flash_obj)
     logging.debug("location_text:{}".format(location_text))
     gps = location_info["gps"]
@@ -137,7 +136,6 @@ def get_request_params(
         lang=lang,
         news_flash_description=news_flash_description
     )
-    logging.debug(f"Ending get_request_params. params: {request_params}")
     return request_params
 
 
@@ -148,7 +146,6 @@ def create_infographics_data(news_flash_id, number_of_years_ago, lang: str) -> s
 
 
 def create_infographics_data_for_location(vals: dict) -> str:
-    logger.debug(f"create_infographics_data_for_location({vals})")
     try:
         request_params = get_request_params_from_request_values(vals)
         output = create_infographics_items(request_params)
@@ -181,8 +178,6 @@ def create_infographics_items(request_params: RequestParams) -> Dict:
             return {}
         if number_of_years_ago < 0 or number_of_years_ago > 100:
             return {}
-        logging.debug("location_info:{}".format(request_params.location_info))
-        logging.debug("location_text:{}".format(request_params.location_text))
         output["meta"] = {
             "location_info": request_params.location_info.copy(),
             "location_text": request_params.location_text,

@@ -919,7 +919,7 @@ class NewsFlash(Base):
                 (critical_values["severe_injured_count"] / suburban_road_severe_value)
                 + (critical_values["killed_count"] / suburban_road_killed_value)
             ) >= 1
-        elif resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
+        elif resolution == BE_CONST.ResolutionCategories.STREET:
             critical = (
                 (critical_values["severe_injured_count"] / urban_severe_value)
                 + (critical_values["killed_count"] / urban_severe_value)

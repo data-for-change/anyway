@@ -98,9 +98,7 @@ class AccidentCountBySeverityWidget(AllLocationsWidget):
                 segment_name=_(request_params.location_info.get("road_segment_name")),
             )
         else:
-            raise Exception(
-                f"cannot convert to hebrew for resolution : {request_params.resolution.get('resolution')}"
-            )
+            raise Exception(f"cannot convert to hebrew for resolution : {request_params.resolution.value}")
         text += "{between_years_keyword} {start_year} - {end_year}, {separator_keyword} {incidents_num} {incident_keyword}, {out_of_them_keywoard} ".format(
             between_years_keyword=_("between the years"),
             start_year=request_params.start_time.year,

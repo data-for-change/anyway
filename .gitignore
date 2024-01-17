@@ -25,6 +25,9 @@ develop-eggs
 lib
 lib64
 
+# newsflash-ifografics
+anyway-newsflash-infographics/anyway-newsflash-infographics/
+
 # Installer logs
 pip-log.txt
 

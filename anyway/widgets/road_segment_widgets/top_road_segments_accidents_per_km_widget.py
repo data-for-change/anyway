@@ -56,6 +56,7 @@ class TopRoadSegmentsAccidentsPerKmWidget(RoadSegmentWidget):
                     ).label("accidents_per_km"),
                     func.count(AccidentMarkerView.id).label("total_accidents"),
                 )
+                # todo: check how to implement
                 .filter(AccidentMarkerView.road_segment_name.isnot(None))
                 .filter(
                     AccidentMarkerView.accident_severity.in_(

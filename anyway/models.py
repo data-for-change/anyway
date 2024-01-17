@@ -1269,6 +1269,21 @@ class SuburbanJunction(Base):
         }
 
 
+class RoadJunctionKM(Base):
+    __tablename__ = "road_junction_km"
+    MAX_NAME_LEN = 100
+    road = Column(Integer(), primary_key=True, nullable=False)
+    non_urban_intersection = Column(Integer(), primary_key=True, nullable=False)
+    km = Column(Float(), nullable=False)
+
+    def serialize(self):
+        return {
+            "road": self.road,
+            "non_urban_intersection": self.non_urban_intersection,
+            "km": self.km,
+        }
+
+
 class RegisteredVehicle(Base):
     __tablename__ = "cities_vehicles_registered"
     id = Column(Integer(), primary_key=True)

@@ -101,7 +101,10 @@ class FrondToSideAccidentsBySeverityWidget(RoadSegmentWidget):
             ]
         )
         query = get_query(
-            table_obj=AccidentMarkerView, filters={}, start_time=start_date, end_time=end_date
+            table_obj=AccidentMarkerView,
+            filters={"road_segment_id": road_segment_id},
+            start_time=start_date,
+            end_time=end_date,
         )
         entities_query = query.with_entities(
             AccidentMarkerView.accident_severity,
@@ -109,11 +112,6 @@ class FrondToSideAccidentsBySeverityWidget(RoadSegmentWidget):
             func.count(distinct(other_accidents)).label(OTHER_ACCIDENTS_LABEL),
             func.count(distinct(front_side_accidents)).label(FRONT_SIDE_ACCIDENTS_LABEL),
         )
-
-        if road_segment_id:
-            entities_query = entities_query.filter(
-                AccidentMarkerView.road_segment_id == road_segment_id
-            )
 
         query_filtered = entities_query.filter(
             AccidentMarkerView.accident_severity.in_(

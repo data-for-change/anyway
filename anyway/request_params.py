@@ -218,7 +218,7 @@ def extract_road_segment_location(road_segment_id):
     road1, road_segment_name = get_road_segment_name_and_number(road_segment_id)
     data["road1"] = int(road1)
     data["road_segment_name"] = road_segment_name
-    data["road_segment_id"] = road_segment_id
+    data["road_segment_id"] = int(road_segment_id)
     text = get_road_segment_location_text(road1, road_segment_name)
     # fake gps - todo: fix
     gps = {"lat": 32.825610, "lon": 35.165395}
@@ -309,10 +309,12 @@ def fill_missing_non_urban_intersection_values(vals: dict) -> dict:
     else:
         raise ValueError(f"Cannot get non_urban_intersection from input: {vals}")
     #   TODO: temporarily removing "roads" field, as it is not used correctly in the filters.
-    if res.get("road1") is None or res.get("road2") is None and len(res.get("roads")) > 2:
+    if res.get("road1") is None or res.get("road2") is None:
         roads = list(res["roads"])
-        res["road1"] = roads[0]
-        res["road2"] = roads[1]
+        if len(roads) > 0:
+            res["road1"] = roads[0]
+        if len(roads) > 1:
+            res["road2"] = roads[1]
     if "roads" in res:
         res.pop("roads")
     return res

@@ -556,5 +556,5 @@ described in the [errors](#Errors) section of this document.
       - GOOGLE_LOGIN_CLIENT_SECRET=<secret>
       - APP_SECRET_KEY=secretkey
    Where client_id and secret are the credentials from #1.
-4. Make sure to run docker-compose down and up, if it was up.
+3. Make sure to run docker-compose down and up, if it was up.
 Login should work at this point.

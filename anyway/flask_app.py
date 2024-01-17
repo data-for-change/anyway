@@ -1167,13 +1167,20 @@ news_flash_list_model = api.model(
 )
 
 
-@api.route("/api/news-flash/<int:news_flash_id>")
-class RetrieveSingleNewsFlash(Resource):
+@api.route("/api/news-flash/<int:news_flash_id>", methods=["GET", "PATCH"])
+class ManageSingleNewsFlash(Resource):
     @api.doc("get single news flash")
     @api.response(404, "News flash not found")
     @api.response(200, "Retrieve single news-flash item", news_flash_fields_model)
     def get(self, news_flash_id):
         return single_news_flash(news_flash_id)
+
+    @api.doc("update single news flash")
+    @api.response(400, "News flash new location is bad")
+    @api.response(404, "News flash not found")
+    @api.response(200, "Retrieve single news-flash item", news_flash_fields_model)
+    def patch(self, news_flash_id):
+        return update_news_flash_qualifying(news_flash_id)
 
 
 @api.route("/api/news-flash-new", methods=["GET"])
@@ -1499,12 +1506,6 @@ class Cities(Resource):
     @api.doc("get get all cities")
     def get(self):
         return City.get_all_cities()
-
-
-@api.route("/api/news-flash/<int:id>", methods=["PUT"])
-class SetNewsflashLocationQualification(Resource):
-    def put(self, id):
-        return update_news_flash_qualifying(id)
 
 
 download_data_parser = reqparse.RequestParser()

@@ -550,7 +550,8 @@ described in the [errors](#Errors) section of this document.
 ### For Debug - Make System Work Locally
 1. In https://console.cloud.google.com/apis/credentials, under the anyway project, use the credentials of 
 "Web client - Debug", or create new credentials under "OAuth 2.0 Client IDs".
-2. Add in file docker-compose.yml, under services.environment, the following lines:
+2. We want to add environment variables to the anyway docker service. One way to do that is to
+   add in the file anyway/docker-compose.yml, under services.environment, the following lines:
       - GOOGLE_LOGIN_CLIENT_ID=<client_id>
       - GOOGLE_LOGIN_CLIENT_SECRET=<secret>
       - APP_SECRET_KEY=secretkey

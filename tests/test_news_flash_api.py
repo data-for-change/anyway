@@ -81,7 +81,7 @@ class NewsFlashApiTestCase(unittest.TestCase):
         tests_flask.set_current_user_mock(current_user, user_id=user_id)
         with patch("anyway.views.news_flash.api.db", db_mock):
             mock_request = unittest.mock.MagicMock()
-            values = {"newsflash_location_qualification": "manual", "road_segment_name": "road"}
+            values = {"newsflash_location_qualification": "manual", "road_segment_name": "road", "road1": "1"}
             mock_request.values.get = lambda key: values.get(key)
             with patch("anyway.views.news_flash.api.request", mock_request):
                 id = self.session.query(NewsFlash).all()[0].id
@@ -91,10 +91,11 @@ class NewsFlashApiTestCase(unittest.TestCase):
                     self.session.query(LocationVerificationHistory).all()[0].serialize()
                 )
                 self.assertEqual(location_verifiction_history["user_id"], user_id)
-                saved_road_segment_name = json.loads(
-                    location_verifiction_history["location_after_change"]
-                )["road_segment_name"]
+                saved_location = json.loads(location_verifiction_history["location_after_change"])
+                saved_road_segment_name = saved_location["road_segment_name"]
+                saved_road_num = saved_location["road1"]
                 self.assertEqual(saved_road_segment_name, values["road_segment_name"])
+                self.assertEqual(saved_road_num, float(values["road1"]))
                 self.assertEqual(
                     values["newsflash_location_qualification"],
                     location_verifiction_history["location_verification_after_change"],
@@ -120,7 +121,7 @@ class NewsFlashApiTestCase(unittest.TestCase):
         the test tries to change manually the road_segment_name of a news flash.
         """
         mock_request = unittest.mock.MagicMock()
-        values = {"newsflash_location_qualification": "manual", "road_segment_name": "road"}
+        values = {"newsflash_location_qualification": "manual", "road_segment_name": "road", "road1": "1"}
         mock_request.values.get = lambda key: values.get(key)
         with patch("anyway.views.news_flash.api.request", mock_request):
             id = self.session.query(NewsFlash).all()[0].id
@@ -146,7 +147,7 @@ class NewsFlashApiTestCase(unittest.TestCase):
         also a new location
         """
         mock_request = unittest.mock.MagicMock()
-        values = {"newsflash_location_qualification": "rejected", "road_segment_name": "road"}
+        values = {"newsflash_location_qualification": "rejected", "road_segment_name": "road", "road1": "1"}
         mock_request.values.get = lambda key: values.get(key)
         with patch("anyway.views.news_flash.api.request", mock_request):
             id = self.session.query(NewsFlash).all()[0].id
@@ -230,6 +231,23 @@ class NewsFlashApiTestCase(unittest.TestCase):
 
         # return connection to the Engine
         self.connection.close()
+
+    def test_temp(self):
+        from anyway.models import AccidentMarker
+        from sqlalchemy import or_, and_
+        query = db.session.query(AccidentMarker)
+        query = query.filter((AccidentMarker.road_type).in_([2]))
+        a1 = AccidentMarker.road2 == 17
+        a2 = and_(AccidentMarker.street1 == 1,
+                AccidentMarker.road1 == 3)
+        o = (AccidentMarker.road1).in_([4, 5])
+        fil = and_(a1, or_(a2, o))
+        query = query.filter(fil)
+        a = and_(True, True)
+        a = and_(a, AccidentMarker.road_shape == 3)
+        query = query.filter(a)
+        res = query.first()
+        print(type(res))
 
 
 if __name__ == "__main__":

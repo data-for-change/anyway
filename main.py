@@ -141,6 +141,14 @@ def road_segments(filename):
 
 
 @process.command()
+@click.argument("filename", type=str, default="static/data/suburban_junctions/suburban_junctions.xlsx")
+def suburban_junctions(filename):
+    from anyway.parsers.suburban_junctions import parse
+
+    return parse(filename)
+
+
+@process.command()
 @click.argument("filepath", type=str, default="static/data/schools/schools.csv")
 @click.option("--batch_size", type=int, default=5000)
 def schools(filepath, batch_size):
@@ -528,4 +536,3 @@ def trigger_dag(id):
 
 if __name__ == "__main__":
     cli(sys.argv[1:])  # pylint: disable=too-many-function-args
-

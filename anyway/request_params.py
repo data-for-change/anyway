@@ -35,7 +35,8 @@ class RequestParams:
     start_time: datetime.date
     end_time: datetime.date
     lang: str
-    news_flash_description: Optional[str]
+    news_flash_description: Optional[str] = None
+    news_flash_title: Optional[str] = None
 
     def __str__(self):
         return (
@@ -54,6 +55,11 @@ def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams
         if news_flash_obj is not None and news_flash_obj.description is not None
         else None
     )
+    news_flash_title = (
+        news_flash_obj.title
+        if news_flash_obj is not None and news_flash_obj.title is not None
+        else None
+    )
     location = get_location_from_news_flash_or_request_values(news_flash_obj, vals)
     if location is None:
         return None
@@ -65,8 +71,6 @@ def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams
 
     if location_info is None:
         return None
-    logging.debug("location_info:{}".format(location_info))
-    logging.debug("location_text:{}".format(location_text))
     resolution = location_info.pop("resolution")
     if resolution is None or resolution not in BE_CONST.SUPPORTED_RESOLUTIONS:
         logging.error(f"Resolution empty or not supported: {resolution}.")
@@ -98,8 +102,8 @@ def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams
         end_time=end_time,
         lang=lang,
         news_flash_description=news_flash_description,
+        news_flash_title=news_flash_title,
     )
-    logging.debug(f"Ending get_request_params. params: {request_params}")
     return request_params
 
 
@@ -214,7 +218,7 @@ def extract_road_segment_location(road_segment_id):
     road1, road_segment_name = get_road_segment_name_and_number(road_segment_id)
     data["road1"] = int(road1)
     data["road_segment_name"] = road_segment_name
-    data["road_segment_id"] = road_segment_id
+    data["road_segment_id"] = int(road_segment_id)
     text = get_road_segment_location_text(road1, road_segment_name)
     # fake gps - todo: fix
     gps = {"lat": 32.825610, "lon": 35.165395}
@@ -305,10 +309,12 @@ def fill_missing_non_urban_intersection_values(vals: dict) -> dict:
     else:
         raise ValueError(f"Cannot get non_urban_intersection from input: {vals}")
     #   TODO: temporarily removing "roads" field, as it is not used correctly in the filters.
-    if res.get("road1") is None or res.get("road2") is None and len(res.get("roads")) > 2:
+    if res.get("road1") is None or res.get("road2") is None:
         roads = list(res["roads"])
-        res["road1"] = roads[0]
-        res["road2"] = roads[1]
+        if len(roads) > 0:
+            res["road1"] = roads[0]
+        if len(roads) > 1:
+            res["road2"] = roads[1]
     if "roads" in res:
         res.pop("roads")
     return res

@@ -29,11 +29,11 @@ class Road2Plus1Widget(RoadSegmentWidget):
         road_data = {}
         filter_dict = {"road_type": BE_CONST.ROAD_TYPE_NOT_IN_CITY_NOT_IN_INTERSECTION}
 
-        if location_info["road1"] and location_info["road_segment_name"]:
+        if location_info["road1"] and location_info["road_segment_id"]:
             filter_dict.update(
                 {
                     "road1": location_info["road1"],
-                    "road_segment_name": location_info["road_segment_name"],
+                    "road_segment_id": location_info["road_segment_id"],
                 }
             )
             road_data = get_accidents_stats(

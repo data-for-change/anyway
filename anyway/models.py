@@ -891,7 +891,7 @@ class NewsFlash(Base):
         suburban_road_killed_value=3,
         urban_severe_value=2,
     ):
-        from anyway.widgets.road_segment_widgets.injured_count_by_severity_widget import (
+        from anyway.widgets.all_locations_widgets.injured_count_by_severity_widget import (
             InjuredCountBySeverityWidget,
         )
         from anyway.request_params import get_latest_accident_date
@@ -1255,6 +1255,21 @@ class SuburbanJunction(Base):
             "non_urban_intersection": self.non_urban_intersection,
             "non_urban_intersection_hebrew": self.non_urban_intersection_hebrew,
             "roads": set(self.roads),
+        }
+
+
+class RoadJunctionKM(Base):
+    __tablename__ = "road_junction_km"
+    MAX_NAME_LEN = 100
+    road = Column(Integer(), primary_key=True, nullable=False)
+    non_urban_intersection = Column(Integer(), primary_key=True, nullable=False)
+    km = Column(Float(), nullable=False)
+
+    def serialize(self):
+        return {
+            "road": self.road,
+            "non_urban_intersection": self.non_urban_intersection,
+            "km": self.km,
         }
 
 

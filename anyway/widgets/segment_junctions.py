@@ -42,7 +42,7 @@ class SegmentJunctions:
                 logging.warning(f"No junctions in road {seg.road}.")
                 continue
             junctions = [
-                rkj[seg.road][km] for km in rkj[seg.road].keys() if seg.from_km <= km <= seg.to_km
+                rkj[seg.road][km] for km in rkj[seg.road].keys() if seg.from_km <= km < seg.to_km
             ]
             res[seg_id] = junctions
         return res

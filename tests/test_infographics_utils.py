@@ -75,9 +75,9 @@ class TestInfographicsUtilsCase(unittest.TestCase):
         db.session.query.return_value = db.session.query
         sg = SegmentJunctions()
         actual = sg.get_segment_junctions(1)
-        self.assertEqual([1], actual, "1")
+        self.assertEqual([], actual, "1")
         actual = sg.get_segment_junctions(3)
-        self.assertEqual([1, 2, 3], actual, "2")
+        self.assertEqual([1, 2], actual, "2")
 
     def test_get_filter_expression(self):
         actual = get_filter_expression(AccidentMarkerView, "road_segment_name", "seg1")

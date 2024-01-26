@@ -100,6 +100,8 @@ jobs:
           NGINX_IMAGE="${DOCKER_REPOSITORY_NGINX}:${SHA_TAG}" &&\
           echo NGINX_IMAGE=$NGINX_IMAGE &&\
           if ! git log -1 --pretty=format:"%s" | grep -- --no-deploy; then
+            git config --global user.name "Anyway CI" &&\
+            git config --global user.email "anyway-ci@localhost" &&\
             if [ "${GITHUB_REF}" == "refs/heads/master" ]; then
               cd `mktemp -d` &&\
               echo "${DFC_IAC_DEPLOY_KEY}" > dfc_iac_deploy_key &&\
@@ -108,9 +110,7 @@ jobs:
               git clone git@github.com:data-for-change/dfc-iac.git &&\
               cd dfc-iac &&\
               bin/update_anyway_env.py '{"image":"'${ANYWAY_IMAGE}'","dbImage":"'${DB_IMAGE}'","dbBackupImage":"'${DB_BACKUP_IMAGE}'","nginxImage":"'${NGINX_IMAGE}'"}' &&\
-              git config --global user.name "Anyway CI" &&\
-              git config --global user.email "anyway-ci@localhost" &&\
-              git add apps/anyway/.env && git commit -m "automatic update of anyway"
+              git add apps/anyway/.env && git commit -m "automatic update of anyway" &&\
               git push origin main
             fi &&\
             cd `mktemp -d` &&\

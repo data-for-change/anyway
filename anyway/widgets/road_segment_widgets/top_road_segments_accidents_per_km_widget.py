@@ -31,6 +31,7 @@ class TopRoadSegmentsAccidentsPerKmWidget(RoadSegmentWidget):
             end_time=self.request_params.end_time,
         )
 
+    # noinspection PyUnresolvedReferences
     @staticmethod
     def get_top_road_segments_accidents_per_km(
         resolution, location_info, start_time=None, end_time=None, limit=3

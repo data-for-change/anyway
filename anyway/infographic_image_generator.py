@@ -14,7 +14,7 @@ NEWSFLASH_PAGE_BASE_URL = "https://media.anyway.co.il/newsflash"
 IMAGES_DOWNLOAD_PATH_IN_CONTAINER = "/var/selenium/tempdata"
 
 selenium_url = secrets.get('SELENIUM_URL')
-selenium_hub_url = f"https://{selenium_url}/wd/hub"
+selenium_hub_url = f"https://{selenium_url.replace("selenium.", "selenium-hub.")}/wd/hub"
 selenium_remote_results_url = f"https://{selenium_url}/tempdata"
 CHROME_PARTIALLY_DOWNLOADED_FILE_EXTENSION = "crdownload"
 

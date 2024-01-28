@@ -10,6 +10,7 @@ from datetime import datetime
 
 import math
 import pandas as pd
+from anyway.parsers.news_flash_db_adapter import init_db
 from sqlalchemy import or_, event
 from typing import Tuple, Dict, List, Any
 
@@ -1143,7 +1144,6 @@ def main(batch_size, source, load_start_year=None):
                     total += num_new
                     add_to_streets(streets)
             shutil.rmtree(s3_data_retriever.local_temp_directory)
-
         elif source == "local_dir_for_tests_only":
             path = "static/data/cbs"
             import_ui = ImporterUI(path)
@@ -1170,7 +1170,6 @@ def main(batch_size, source, load_start_year=None):
         import_streets_into_db()
 
         fill_db_geo_data()
-
         failed = [
             "\t'{0}' ({1})".format(directory, fail_reason)
             for directory, fail_reason in failed_dirs.items()
@@ -1183,6 +1182,9 @@ def main(batch_size, source, load_start_year=None):
         logging.debug("Total: {0} items in {1}".format(total, time_delta(started)))
         create_tables()
         logging.debug("Finished Creating Hebrew DB Tables")
+        lc_db = init_db()
+        lc_db.recreate_table_for_location_extraction()
+        logging.debug("Finished Recreating tables for location extraction")
     except Exception as ex:
         print("Traceback: {0}".format(traceback.format_exc()))
         raise CBSParsingFailed(message=str(ex))

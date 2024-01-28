@@ -10,7 +10,6 @@ from datetime import datetime
 
 import math
 import pandas as pd
-from anyway.parsers.news_flash_db_adapter import init_db
 from sqlalchemy import or_, event
 from typing import Tuple, Dict, List, Any
 

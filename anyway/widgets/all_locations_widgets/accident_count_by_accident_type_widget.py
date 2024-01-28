@@ -1,8 +1,8 @@
 from anyway.request_params import RequestParams
-from anyway.widgets.widget_utils import get_accidents_stats
+from anyway.widgets.widget_utils import get_accidents_stats, get_location_text
 from anyway.models import AccidentMarkerView
 from anyway.widgets.widget import register
-from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
+from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget
 from typing import Dict
 
 # noinspection PyProtectedMember
@@ -11,7 +11,7 @@ from anyway.backend_constants import AccidentType
 
 
 @register
-class AccidentCountByAccidentTypeWidget(RoadSegmentWidget):
+class AccidentCountByAccidentTypeWidget(AllLocationsWidget):
     name: str = "accident_count_by_accident_type"
     files = [__file__]
 
@@ -54,8 +54,11 @@ class AccidentCountByAccidentTypeWidget(RoadSegmentWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
-        items["data"]["text"] = {"title": _("Number of accidents by accident type"),
-                                 "subtitle": f'{_("in segment")} {_(request_params.location_info["road_segment_name"])}'}
+        location_text = get_location_text(request_params)
+        items["data"]["text"] = {
+            "title": _("Number of accidents by accident type"),
+            "subtitle": _(location_text),
+        }
         for item in items["data"]["items"]:
             to_translate = item["accident_type"]
             item["accident_type"] = _(to_translate)

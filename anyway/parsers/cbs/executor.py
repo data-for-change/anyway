@@ -1109,6 +1109,30 @@ def get_file_type_and_year(file_path):
     year = df.loc[:, field_names.accident_year].mode().values[0]
     return int(provider_code), int(year)
 
+def recreate_table_for_location_extraction():
+    db.session.execute("""TRUNCATE cbs_locations""")
+    db.session.execute("""INSERT INTO cbs_locations
+            (SELECT ROW_NUMBER() OVER (ORDER BY road1) as id, LOCATIONS.*
+            FROM 
+            (SELECT DISTINCT road1,
+                road2,
+                non_urban_intersection_hebrew,
+                yishuv_name,
+                street1_hebrew,
+                street2_hebrew,
+                district_hebrew,
+                region_hebrew,
+                road_segment_name,
+                longitude,
+                latitude
+            FROM markers_hebrew
+            WHERE (provider_code=1
+                    OR provider_code=3)
+                AND (longitude is not null
+                    AND latitude is not null)) LOCATIONS)"""
+                            )
+    db.session.commit()
+
 
 def main(batch_size, source, load_start_year=None):
     try:
@@ -1182,8 +1206,7 @@ def main(batch_size, source, load_start_year=None):
         logging.debug("Total: {0} items in {1}".format(total, time_delta(started)))
         create_tables()
         logging.debug("Finished Creating Hebrew DB Tables")
-        lc_db = init_db()
-        lc_db.recreate_table_for_location_extraction()
+        recreate_table_for_location_extraction()
         logging.debug("Finished Recreating tables for location extraction")
     except Exception as ex:
         print("Traceback: {0}".format(traceback.format_exc()))

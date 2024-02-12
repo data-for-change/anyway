@@ -69,6 +69,11 @@ class Widget:
             logging.error(f"Widget.localize_items: bad input (missing 'name' key):{items}")
         return items
 
+    @staticmethod
+    def update_result(request_params: RequestParams, cached_items: Dict) -> Dict:
+        """This is called after fetching the data from the cache"""
+        return cached_items
+
     @classmethod
     def get_widget_files(cls) -> List[str]:
         return cls.files

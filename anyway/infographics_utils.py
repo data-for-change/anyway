@@ -214,19 +214,24 @@ def get_infographics_data_for_location(request_params: RequestParams) -> Dict:
         logging.error(f"get_infographics_data: 'widgets' key missing from output:{output}")
     else:
         non_empty = list(filter(lambda x: x[DATA][ITEMS], output[WIDGETS]))
-        output[WIDGETS] = localize_after_cache(request_params, non_empty)
+        output[WIDGETS] = update_cache_results(request_params, non_empty)
     return output
 
 
-def localize_after_cache(request_params: RequestParams, items_list: List[Dict]) -> List[Dict]:
+def update_cache_results(request_params: RequestParams, items_list: List[Dict]) -> List[Dict]:
+    """
+    Calls localize_items and update_result Widget methods after items fetched from cache
+    """
     res = []
     for items in items_list:
         if NAME in items:
             widget_class = get_widget_class_by_name(items[NAME])
             if widget_class:
-                res.append(widget_class.localize_items(request_params, items))
+                localized_items = widget_class.localize_items(request_params, items)
+                updated_items = widget_class.update_result(request_params, localized_items)
+                res.append(updated_items)
         else:
-            logging.error(f"localize_after_cache: bad input (missing 'name' key):{items}")
+            logging.error(f"update_cache_results: bad input (missing 'name' key):{items}")
         items["meta"]["information"] = _(items.get("meta", {}).get("information", ""))
     return res
 

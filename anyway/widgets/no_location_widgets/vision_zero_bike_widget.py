@@ -33,3 +33,8 @@ class VisionZeroBikeWidget(Widget):
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {"title": _("Bike transportation development solution")}
         return items
+    
+    @staticmethod
+    def update_result(request_params: RequestParams, cached_items: Dict) -> Dict:
+        # TODO: Implement returning items based on location cached items
+        pass

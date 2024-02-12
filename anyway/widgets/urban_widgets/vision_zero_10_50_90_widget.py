@@ -33,3 +33,8 @@ class VisionZero105090Widget(UrbanWidget):
             "title": _("A speed limit solution on an urban road")
         }
         return items
+
+    @staticmethod
+    def update_result(request_params: RequestParams, cached_items: Dict) -> Dict:
+        # TODO: Implement returning items based on location cached items
+        pass

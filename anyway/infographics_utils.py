@@ -104,6 +104,7 @@ def get_request_params(
     if news_flash_obj is None:
         return None
     news_flash_description = news_flash_obj.description
+    news_flash_title = news_flash_obj.title
     location_info = extract_news_flash_location(news_flash_obj)
     if location_info is None:
         return None
@@ -134,7 +135,8 @@ def get_request_params(
         start_time=start_time,
         end_time=end_time,
         lang=lang,
-        news_flash_description=news_flash_description
+        news_flash_description=news_flash_description,
+        news_flash_title=news_flash_title,
     )
     return request_params
 

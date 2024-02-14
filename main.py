@@ -67,14 +67,15 @@ def update_news_flash():
 @update_news_flash.command()
 @click.option("--source", default="", type=str)
 @click.option("--news_flash_id", default="", type=str)
-def update(source, news_flash_id):
+@click.option("--update_cbs_location_only", is_flag=True)
+def update(source, news_flash_id, update_cbs_location_only):
     from anyway.parsers import news_flash
 
     if not source:
         source = None
     if not news_flash_id:
         news_flash_id = None
-    return news_flash.update_all_in_db(source, news_flash_id)
+    return news_flash.update_all_in_db(source, news_flash_id, update_cbs_location_only)
 
 
 @update_news_flash.command()

@@ -506,18 +506,25 @@ def extract_location_text(text):
     return text
 
 
-def extract_geo_features(db, newsflash: NewsFlash) -> None:
-    newsflash.location = extract_location_text(newsflash.description) or extract_location_text(
-        newsflash.title
-    )
-    geo_location = geocode_extract(newsflash.location)
-    if geo_location is not None:
-        newsflash.lat = geo_location["geom"]["lat"]
-        newsflash.lon = geo_location["geom"]["lng"]
-        newsflash.resolution = set_accident_resolution(geo_location)
+def extract_geo_features(db, newsflash: NewsFlash, update_cbs_location_only: bool) -> None:
+    location_from_db = None
+    if update_cbs_location_only:
         location_from_db = get_db_matching_location(
-            db, newsflash.lat, newsflash.lon, newsflash.resolution, geo_location["road_no"]
+            db, newsflash.lat, newsflash.lon, newsflash.resolution, newsflash.road1
         )
+    else:
+        newsflash.location = extract_location_text(newsflash.description) or extract_location_text(
+            newsflash.title
+        )
+        geo_location = geocode_extract(newsflash.location)
+        if geo_location is not None:
+            newsflash.lat = geo_location["geom"]["lat"]
+            newsflash.lon = geo_location["geom"]["lng"]
+            newsflash.resolution = set_accident_resolution(geo_location)
+            location_from_db = get_db_matching_location(
+                db, newsflash.lat, newsflash.lon, newsflash.resolution, geo_location["road_no"]
+            )
+    if location_from_db is not None:
         for k, v in location_from_db.items():
             setattr(newsflash, k, v)
         all_resolutions = []

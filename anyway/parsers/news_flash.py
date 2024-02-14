@@ -14,7 +14,7 @@ from anyway.parsers.location_extraction import extract_geo_features
 news_flash_classifiers = {"ynet": classify_rss, "twitter": classify_tweets, "walla": classify_rss}
 
 
-def update_all_in_db(source=None, newsflash_id=None):
+def update_all_in_db(source=None, newsflash_id=None, update_cbs_location_only=False):
     """
     main function for newsflash updating.
 
@@ -29,11 +29,14 @@ def update_all_in_db(source=None, newsflash_id=None):
         newsflash_items = db.get_all_newsflash()
 
     for newsflash in newsflash_items:
-        classify = news_flash_classifiers[newsflash.source]
-        newsflash.organization = classify_organization(newsflash.source)
-        newsflash.accident = classify(newsflash.description or newsflash.title)
+        if not update_cbs_location_only:
+            classify = news_flash_classifiers[newsflash.source]
+            newsflash.organization = classify_organization(newsflash.source)
+            newsflash.accident = classify(newsflash.description or newsflash.title)
         if newsflash.accident:
-            extract_geo_features(db, newsflash)
+            extract_geo_features(
+                db=db, newsflash=newsflash, update_cbs_location_only=update_cbs_location_only
+            )
     db.commit()
 
 
@@ -47,7 +50,7 @@ def scrape_extract_store_rss(site_name, db):
         newsflash.organization = classify_organization(site_name)
         if newsflash.accident:
             # FIX: No accident-accurate date extracted
-            extract_geo_features(db, newsflash)
+            extract_geo_features(db=db, newsflash=newsflash, update_cbs_location_only=False)
             newsflash.set_critical()
         db.insert_new_newsflash(newsflash)
 
@@ -61,7 +64,7 @@ def scrape_extract_store_twitter(screen_name, db):
         newsflash.accident = classify_tweets(newsflash.description)
         newsflash.organization = classify_organization("twitter")
         if newsflash.accident:
-            extract_geo_features(db, newsflash)
+            extract_geo_features(db=db, newsflash=newsflash, update_cbs_location_only=False)
             newsflash.set_critical()
         db.insert_new_newsflash(newsflash)
 

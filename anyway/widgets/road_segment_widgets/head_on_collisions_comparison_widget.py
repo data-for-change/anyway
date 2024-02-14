@@ -46,6 +46,7 @@ class HeadOnCollisionsComparisonWidget(RoadSegmentWidget):
                 {
                     "road1": location_info["road1"],
                     "road_segment_name": location_info["road_segment_name"],
+                    "road_segment_id": location_info["road_segment_id"],
                 }
             )
             road_data = get_accidents_stats(

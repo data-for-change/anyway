@@ -186,7 +186,7 @@ def get_involved_marker_view_location_filters(
     elif resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
         filters["road1"] = location_info.get("road1")
         filters["road_segment_name"] = location_info.get("road_segment_name")
-
+        filters["road_segment_id"] = location_info.get("road_segment_id")
     return filters
 
 

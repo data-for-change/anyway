@@ -3,6 +3,7 @@ import os
 import logging
 import pandas as pd
 import numpy as np
+from sqlalchemy import desc
 from flask_sqlalchemy import SQLAlchemy
 from anyway.parsers import infographics_data_cache_updater
 from anyway.parsers import timezones
@@ -111,7 +112,7 @@ class DBAdapter:
         return self.db.session.query(NewsFlash).filter(NewsFlash.source == source)
 
     def get_all_newsflash(self):
-        return self.db.session.query(NewsFlash)
+        return self.db.session.query(NewsFlash).order_by(desc(NewsFlash.date))
 
     def get_latest_date_of_source(self, source):
         """

@@ -1108,6 +1108,30 @@ def get_file_type_and_year(file_path):
     year = df.loc[:, field_names.accident_year].mode().values[0]
     return int(provider_code), int(year)
 
+def recreate_table_for_location_extraction():
+    db.session.execute("""TRUNCATE cbs_locations""")
+    db.session.execute("""INSERT INTO cbs_locations
+            (SELECT ROW_NUMBER() OVER (ORDER BY road1) as id, LOCATIONS.*
+            FROM 
+            (SELECT DISTINCT road1,
+                road2,
+                non_urban_intersection_hebrew,
+                yishuv_name,
+                street1_hebrew,
+                street2_hebrew,
+                district_hebrew,
+                region_hebrew,
+                road_segment_name,
+                longitude,
+                latitude
+            FROM markers_hebrew
+            WHERE (provider_code=1
+                    OR provider_code=3)
+                AND (longitude is not null
+                    AND latitude is not null)) LOCATIONS)"""
+                            )
+    db.session.commit()
+
 
 def main(batch_size, source, load_start_year=None):
     try:
@@ -1143,7 +1167,6 @@ def main(batch_size, source, load_start_year=None):
                     total += num_new
                     add_to_streets(streets)
             shutil.rmtree(s3_data_retriever.local_temp_directory)
-
         elif source == "local_dir_for_tests_only":
             path = "static/data/cbs"
             import_ui = ImporterUI(path)
@@ -1170,7 +1193,6 @@ def main(batch_size, source, load_start_year=None):
         import_streets_into_db()
 
         fill_db_geo_data()
-
         failed = [
             "\t'{0}' ({1})".format(directory, fail_reason)
             for directory, fail_reason in failed_dirs.items()
@@ -1183,6 +1205,8 @@ def main(batch_size, source, load_start_year=None):
         logging.debug("Total: {0} items in {1}".format(total, time_delta(started)))
         create_tables()
         logging.debug("Finished Creating Hebrew DB Tables")
+        recreate_table_for_location_extraction()
+        logging.debug("Finished Recreating tables for location extraction")
     except Exception as ex:
         print("Traceback: {0}".format(traceback.format_exc()))
         raise CBSParsingFailed(message=str(ex))

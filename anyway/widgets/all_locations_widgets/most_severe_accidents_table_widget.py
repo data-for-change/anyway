@@ -180,7 +180,6 @@ class MostSevereAccidentsTableWidget(AllLocationsWidget):
             start_year=request_params.start_time.year,
             end_year=request_params.end_time.year,
         )
-        logging.debug(items)
         text += '\n'.join(['{in_date_keyword} {date} {in_hour_keyword} {hour} {accident_occured_text} {accident_type_keyword} {type}, {injured_count_keyword}: {injured_count}.'.format(
                            in_date_keyword=_("in date"),
                            date=item.get("date"),

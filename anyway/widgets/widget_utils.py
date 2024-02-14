@@ -20,6 +20,9 @@ from anyway.widgets.segment_junctions import SegmentJunctions
 
 
 def get_query(table_obj, filters, start_time, end_time):
+    if "road_segment_name" in filters and "road_segment_id" in filters:
+        filters = copy.copy(filters)
+        filters.pop("road_segment_name")
     query = db.session.query(table_obj)
     if start_time:
         query = query.filter(getattr(table_obj, "accident_timestamp") >= start_time)
@@ -249,6 +252,7 @@ def sort_and_fill_gaps_for_stacked_bar(
     return res2
 
 
+# noinspection PyUnresolvedReferences
 def get_involved_counts(
     start_year: int,
     end_year: int,

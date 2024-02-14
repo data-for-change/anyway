@@ -3,7 +3,7 @@ ANYWAY [![Build Status](https://github.com/data-for-change/anyway/workflows/Test
 
 Welcome to ANYWAY!
 
-ANYWAY is a volunteer based project acting under the umbrella of the Data For Change
+ANYWAY is a volunteer based project acting under the umbrella of the Data For Change Organization.
 
 Feel free to contribute to the project. To report bugs and feature requests, please [open an issue](https://github.com/data-for-change/anyway/issues) on GitHub. See [Code Directory Tree Structure](docs/CODE.md).
 

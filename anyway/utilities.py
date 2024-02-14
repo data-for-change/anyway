@@ -259,6 +259,18 @@ def chunks(l, n):
         yield l[i : i + n]
 
 
+def chunked_generator(input_generator, chunk_size):
+    chunk = []
+    for item in input_generator:
+        chunk.append(item)
+        if len(chunk) == chunk_size:
+            yield chunk
+            chunk = []
+
+    if chunk:
+        yield chunk
+
+
 def parse_age_from_range(age_range: int) -> typing.Optional[typing.Tuple[int, int]]:
     # Convert from 'age_group' field in the table 'involved_markers_hebrew' to age range numbers
     ret_age_code_to_age_range = {

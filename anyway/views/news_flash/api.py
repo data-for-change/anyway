@@ -371,10 +371,10 @@ def update_news_flash_qualifying(id):
             logging.error("only manual update should contain location details.")
             return return_json_error(Es.BR_BAD_FIELD)
     news_flash_obj = db.session.query(NewsFlash).filter(NewsFlash.id == id).first()
-    old_location, old_location_qualifiction = extracted_location_and_qualification(news_flash_obj)
     if news_flash_obj is None:
         return Response(status=404)
     else:
+        old_location, old_location_qualifiction = extracted_location_and_qualification(news_flash_obj)
         if manual_update:
             if use_road_segment:
                 news_flash_obj.road_segment_name = road_segment_name

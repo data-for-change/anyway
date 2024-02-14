@@ -232,6 +232,23 @@ class NewsFlashApiTestCase(unittest.TestCase):
         # return connection to the Engine
         self.connection.close()
 
+    def test_temp(self):
+        from anyway.models import AccidentMarker
+        from sqlalchemy import or_, and_
+        query = db.session.query(AccidentMarker)
+        query = query.filter((AccidentMarker.road_type).in_([2]))
+        a1 = AccidentMarker.road2 == 17
+        a2 = and_(AccidentMarker.street1 == 1,
+                AccidentMarker.road1 == 3)
+        o = (AccidentMarker.road1).in_([4, 5])
+        fil = and_(a1, or_(a2, o))
+        query = query.filter(fil)
+        a = and_(True, True)
+        a = and_(a, AccidentMarker.road_shape == 3)
+        query = query.filter(a)
+        res = query.first()
+        print(type(res))
+
 
 if __name__ == "__main__":
     unittest.main()

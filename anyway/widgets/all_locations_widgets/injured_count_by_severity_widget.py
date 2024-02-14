@@ -1,10 +1,16 @@
+import datetime
 from typing import Dict
-from anyway.request_params import RequestParams
+from anyway.request_params import RequestParams, LocationInfo
 from anyway.backend_constants import InjurySeverity
 from anyway.models import InvolvedMarkerView
 from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget
 from anyway.widgets.widget import register
-from anyway.widgets.widget_utils import get_accidents_stats, join_strings, get_location_text
+from anyway.widgets.widget_utils import (
+    get_accidents_stats,
+    join_strings,
+    get_location_text,
+    get_involved_marker_view_location_filters,
+)
 from anyway.backend_constants import BE_CONST
 from flask_babel import _
 
@@ -28,20 +34,18 @@ class InjuredCountBySeverityWidget(AllLocationsWidget):
         )
 
     @staticmethod
-    def get_injured_count_by_severity(resolution, location_info, start_time, end_time):
-        filters = {}
+    def get_injured_count_by_severity(
+        resolution: BE_CONST.ResolutionCategories,
+        location_info: LocationInfo,
+        start_time: datetime.date,
+        end_time: datetime.date,
+    ):
+        filters = get_involved_marker_view_location_filters(resolution, location_info)
         filters["injury_severity"] = [
             InjurySeverity.KILLED.value,
             InjurySeverity.SEVERE_INJURED.value,
             InjurySeverity.LIGHT_INJURED.value,
         ]
-
-        if resolution == BE_CONST.ResolutionCategories.STREET:
-            filters["involve_yishuv_name"] = location_info.get("yishuv_name")
-            filters["street1_hebrew"] = location_info.get("street1_hebrew")
-        elif resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
-            filters["road1"] = location_info.get("road1")
-            filters["road_segment_name"] = location_info.get("road_segment_name")
 
         count_by_severity = get_accidents_stats(
             table_obj=InvolvedMarkerView,

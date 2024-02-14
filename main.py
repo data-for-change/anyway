@@ -67,14 +67,15 @@ def update_news_flash():
 @update_news_flash.command()
 @click.option("--source", default="", type=str)
 @click.option("--news_flash_id", default="", type=str)
-def update(source, news_flash_id):
+@click.option("--update_cbs_location_only", is_flag=True)
+def update(source, news_flash_id, update_cbs_location_only):
     from anyway.parsers import news_flash
 
     if not source:
         source = None
     if not news_flash_id:
         news_flash_id = None
-    return news_flash.update_all_in_db(source, news_flash_id)
+    return news_flash.update_all_in_db(source, news_flash_id, update_cbs_location_only)
 
 
 @update_news_flash.command()
@@ -136,6 +137,14 @@ def rsa(filename):
 @click.argument("filename", type=str, default="static/data/segments/road_segments.xlsx")
 def road_segments(filename):
     from anyway.parsers.road_segments import parse
+
+    return parse(filename)
+
+
+@process.command()
+@click.argument("filename", type=str, default="static/data/suburban_junctions/suburban_junctions.xlsx")
+def suburban_junctions(filename):
+    from anyway.parsers.suburban_junctions import parse
 
     return parse(filename)
 
@@ -528,4 +537,3 @@ def trigger_dag(id):
 
 if __name__ == "__main__":
     cli(sys.argv[1:])  # pylint: disable=too-many-function-args
-

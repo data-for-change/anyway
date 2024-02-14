@@ -21,6 +21,7 @@ from anyway.app_and_db import db
 from anyway.request_params import RequestParams
 import anyway.infographics_utils
 from anyway.widgets.widget import widgets_dict
+from anyway.utilities import chunked_generator
 import logging
 import json
 
@@ -287,18 +288,19 @@ def build_street_cache_into_temp():
     start = datetime.now()
     db.session.query(InfographicsStreetDataCacheTemp).delete()
     db.session.commit()
-    db.get_engine().execute(
-        InfographicsStreetDataCacheTemp.__table__.insert(),  # pylint: disable=no-member
-        [
-            {
-                "yishuv_symbol": d["yishuv_symbol"],
-                "street": d["street1"],
-                "years_ago": d["years_ago"],
-                "data": anyway.infographics_utils.create_infographics_data_for_location(d),
-            }
-            for d in get_street_infographic_keys()
-        ],
-    )
+    for chunk in chunked_generator(get_street_infographic_keys(), 4960):
+        db.get_engine().execute(
+            InfographicsStreetDataCacheTemp.__table__.insert(),  # pylint: disable=no-member
+            [
+                {
+                    "yishuv_symbol": d["yishuv_symbol"],
+                    "street": d["street1"],
+                    "years_ago": d["years_ago"],
+                    "data": anyway.infographics_utils.create_infographics_data_for_location(d),
+                }
+                for d in chunk
+            ],
+        )
     db.session.commit()
     logging.info(f"cache rebuild took:{str(datetime.now() - start)}")
 

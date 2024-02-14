@@ -10,6 +10,7 @@ from anyway.backend_constants import BE_CONST, InjurySeverity
 from anyway.models import InvolvedMarkerView
 from anyway.request_params import RequestParams
 from anyway.utilities import parse_age_from_range
+from anyway.widgets.widget_utils import get_expression_for_road_segment_location_fields
 
 # RequestParams is not hashable, so we can't use functools.lru_cache
 cache_dict = OrderedDict()
@@ -36,8 +37,8 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
 
         elif request_params.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
             road_number = request_params.location_info["road1"]
-            road_segment = request_params.location_info["road_segment_name"]
-            cache_key = (road_number, road_segment, start_time, end_time)
+            road_segment_id = request_params.location_info["road_segment_id"]
+            cache_key = (road_number, road_segment_id, start_time, end_time)
 
         if cache_dict.get(cache_key):
             return cache_dict.get(cache_key)
@@ -105,10 +106,12 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
         end_time, start_time, location_info, resolution
     ) -> BaseQuery:
         if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
-            location_filter = (
-                (InvolvedMarkerView.road1 == location_info["road1"])
-                | (InvolvedMarkerView.road2 == location_info["road1"])
-            ) & (InvolvedMarkerView.road_segment_name == location_info["road_segment_name"])
+            location_filter = get_expression_for_road_segment_location_fields(
+                {"road_segment_id": location_info["road_segment_id"]}, InvolvedMarkerView
+            )
+            # (InvolvedMarkerView.road1 == location_info["road1"])
+            # | (InvolvedMarkerView.road2 == location_info["road1"])
+            # ) & (InvolvedMarkerView.road_segment_name == location_info["road_segment_name"])
         elif resolution == BE_CONST.ResolutionCategories.STREET:
             location_filter = (
                 InvolvedMarkerView.involve_yishuv_name == location_info["yishuv_name"]

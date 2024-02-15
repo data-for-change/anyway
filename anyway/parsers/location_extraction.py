@@ -509,9 +509,10 @@ def extract_location_text(text):
 def extract_geo_features(db, newsflash: NewsFlash, update_cbs_location_only: bool) -> None:
     location_from_db = None
     if update_cbs_location_only:
-        location_from_db = get_db_matching_location(
-            db, newsflash.lat, newsflash.lon, newsflash.resolution, newsflash.road1
-        )
+        if newsflash.resolution in ["כביש בינעירוני", "רחוב"]:
+            location_from_db = get_db_matching_location(
+                db, newsflash.lat, newsflash.lon, newsflash.resolution, newsflash.road1
+            )
     else:
         newsflash.location = extract_location_text(newsflash.description) or extract_location_text(
             newsflash.title

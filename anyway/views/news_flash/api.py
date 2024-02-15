@@ -379,7 +379,7 @@ def update_news_flash_qualifying(id):
             if use_road_segment:
                 news_flash_obj.road_segment_name = road_segment_name
                 news_flash_obj.road1 = road1
-                news_flash_obj.resolution = fields_to_resolution.get("road_segment_name", "road1")
+                news_flash_obj.resolution = fields_to_resolution.get(("road_segment_name", "road1"))
             else:
                 news_flash_obj.yishuv_name = yishuv_name
                 news_flash_obj.street1_hebrew = street1_hebrew

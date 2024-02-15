@@ -27,8 +27,7 @@ def update_all_in_db(source=None, newsflash_id=None, update_cbs_location_only=Fa
         newsflash_items = db.select_newsflash_where_source(source)
     else:
         newsflash_items = db.get_all_newsflash()
-
-    for newsflash in newsflash_items:
+    for i, newsflash in enumerate(newsflash_items):
         if not update_cbs_location_only:
             classify = news_flash_classifiers[newsflash.source]
             newsflash.organization = classify_organization(newsflash.source)
@@ -37,6 +36,8 @@ def update_all_in_db(source=None, newsflash_id=None, update_cbs_location_only=Fa
             extract_geo_features(
                 db=db, newsflash=newsflash, update_cbs_location_only=update_cbs_location_only
             )
+        if i % 1000 == 0:
+            db.commit()
     db.commit()
 
 

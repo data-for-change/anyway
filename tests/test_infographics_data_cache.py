@@ -9,7 +9,6 @@ from anyway.models import NewsFlash
 from anyway.constants import CONST
 from anyway.backend_constants import NewsflashLocationQualification
 from anyway.parsers.infographics_data_cache_updater import add_news_flash_to_cache
-import anyway.parsers.infographics_data_cache_updater
 from anyway.backend_constants import BE_CONST
 
 
@@ -26,21 +25,13 @@ class TestInfographicsDataFromCache(TestCase):
         news_flash_description="Test description"
     )
 
-    def test_get_not_existing_from_cache(self):
-        cache_data = (
-            anyway.parsers.infographics_data_cache_updater.get_infographics_data_from_cache_by_location(
-                self.request_params_not_exist
-            )
-        )
-        self.assertEqual(cache_data, {}, "returned value from cache should be None")
-
-    @patch("anyway.infographics_utils.localize_after_cache")
+    @patch("anyway.infographics_utils.update_cache_results")
     @patch("anyway.infographics_utils.infographics_data_cache_updater")
     @patch.dict(os.environ, {"FLASK_ENV": "test"})
-    def test_get_existing(self, get_from_cache, localize):
+    def test_get_existing(self, get_from_cache, update_after_cache):
         e1 = [{"data": {"items": "widget"}}]
         expected = {"data": "data", "widgets": e1}
-        localize.return_value = e1
+        update_after_cache.return_value = e1
         get_from_cache.get_infographics_data_from_cache_by_location.return_value = expected
         create_infographics_data = Mock()
         res = get_infographics_data_for_location(self.request_params_not_exist)

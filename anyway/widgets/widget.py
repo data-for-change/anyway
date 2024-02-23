@@ -69,9 +69,13 @@ class Widget:
             logging.error(f"Widget.localize_items: bad input (missing 'name' key):{items}")
         return items
 
-    @staticmethod
-    def update_result(request_params: RequestParams, cached_items: Dict) -> Dict:
-        """This is called after fetching the data from the cache"""
+    @classmethod
+    def update_result(cls, request_params: RequestParams, cached_items: Dict) -> Optional[Dict]:
+        """This is called after fetching the data from the cache.
+        It will calculate whether the widget should appear in current request results, and update
+        the items if needed.
+        Will return the updated items, or None if widget should not be included
+        """
         return cached_items
 
     @classmethod

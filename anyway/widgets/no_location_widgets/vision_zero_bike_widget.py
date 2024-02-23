@@ -1,11 +1,13 @@
 from typing import Dict
 from anyway.widgets.widget import Widget
+from anyway.widgets.widget import register
 from anyway.request_params import RequestParams
-from typing import Dict
+from typing import Dict, Optional
 from flask_babel import _
 import logging
 
 
+@register
 class VisionZeroBikeWidget(Widget):
     name: str = "vision_zero_bike"
     files = [__file__]
@@ -20,21 +22,17 @@ class VisionZeroBikeWidget(Widget):
     def generate_items(self) -> None:
         self.items = {"image_src": "vision_zero_bike"}
 
-
-    # noinspection PyUnboundLocalVariable
-    def is_included(self) -> bool:
-        if self.request_params.news_flash_description and "אופניים" in self.request_params.news_flash_description:
-            return True
-        if self.request_params.news_flash_title and "אופניים" in self.request_params.news_flash_title:
-            return True
-        return False
+    @staticmethod
+    def is_included_according_to_request_params(request_params: RequestParams) -> bool:
+        return (request_params.news_flash_description and
+                "אופניים" in request_params.news_flash_description) or\
+               (request_params.news_flash_title and "אופניים" in request_params.news_flash_title)
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {"title": _("Bike transportation development solution")}
         return items
-    
-    @staticmethod
-    def update_result(request_params: RequestParams, cached_items: Dict) -> Dict:
-        # TODO: Implement returning items based on location cached items
-        pass
+
+    @classmethod
+    def update_result(cls, request_params: RequestParams, cached_items: Dict) -> Optional[Dict]:
+        return cached_items if cls.is_included_according_to_request_params(request_params) else None

@@ -221,6 +221,7 @@ def get_infographics_data_for_location(request_params: RequestParams) -> Dict:
 def update_cache_results(request_params: RequestParams, items_list: List[Dict]) -> List[Dict]:
     """
     Calls localize_items and update_result Widget methods after items fetched from cache
+    or generated in development environment
     """
     res = []
     for items in items_list:
@@ -229,7 +230,8 @@ def update_cache_results(request_params: RequestParams, items_list: List[Dict]) 
             if widget_class:
                 localized_items = widget_class.localize_items(request_params, items)
                 updated_items = widget_class.update_result(request_params, localized_items)
-                res.append(updated_items)
+                if updated_items is not None:
+                    res.append(updated_items)
         else:
             logging.error(f"update_cache_results: bad input (missing 'name' key):{items}")
         items["meta"]["information"] = _(items.get("meta", {}).get("information", ""))

@@ -1,6 +1,8 @@
 import logging
 
 from anyway import secrets
+from anyway.models import TelegramForwardedMessages
+from anyway.app_and_db import db
 import telebot
 import boto3
 import time
@@ -57,26 +59,36 @@ def send_after_infographics_message(bot, message_id_in_group, newsflash_id):
     message = f"{TEXT_FOR_AFTER_INFOGRAPHICS_MESSAGE}\n{newsflash_link}"
     return bot.send_message(TELEGRAM_LINKED_GROUP_CHAT_ID, message, reply_to_message_id=message_id_in_group)
 
-def publish_notification(newsflash_id):
-    #fetch data for send
-    accident_text = create_accident_text(newsflash_id)
-    transcription_by_widget_name = fetch_transcription_by_widget_name(newsflash_id)
-    urls_by_infographic_name = create_public_urls_for_infographics_images(str(newsflash_id))
 
+def publish_notification(newsflash_id):
+    print(newsflash_id)
+    accident_text = create_accident_text(newsflash_id)
+    print(accident_text)
+    logging.info(accident_text)
     bot = telebot.TeleBot(secrets.get("BOT_TOKEN"))
     initial_message_in_channel = send_initial_message_in_channel(bot, accident_text)
+    forwarded_message = TelegramForwardedMessages(message_id=initial_message_in_channel.message_id,
+                                                  newsflash_id=newsflash_id,
+                                                  group_sent=TELEGRAM_CHANNEL_CHAT_ID
+                                                  )
+    db.session.add(forwarded_message)
+    db.session.commit()
+
+
+def send_infographics_to_telegram(root_message_id, newsflash_id):
     #every message in the channel is automatically forwarded to the linked discussion group.
     #to create a comment on the channel message, we need to send a reply to the
     #forwareded message in the discussion group.
-    message_id_in_group = \
-        fetch_message_id_for_initial_message_in_discussion_group(bot, initial_message_in_channel)
+    bot = telebot.TeleBot(secrets.get("BOT_TOKEN"))
 
-    if message_id_in_group:
-        for infographic_name, url in urls_by_infographic_name.items():
-            text = transcription_by_widget_name[infographic_name] \
-                if infographic_name in transcription_by_widget_name else None
-            bot.send_photo(TELEGRAM_LINKED_GROUP_CHAT_ID, url, reply_to_message_id=message_id_in_group, caption=text)
-        send_after_infographics_message(bot, message_id_in_group, newsflash_id)
+    transcription_by_widget_name = fetch_transcription_by_widget_name(newsflash_id)
+    urls_by_infographic_name = create_public_urls_for_infographics_images(str(newsflash_id))
+
+    for infographic_name, url in urls_by_infographic_name.items():
+        text = transcription_by_widget_name[infographic_name] \
+            if infographic_name in transcription_by_widget_name else None
+        bot.send_photo(TELEGRAM_LINKED_GROUP_CHAT_ID, url, reply_to_message_id=root_message_id, caption=text)
+    send_after_infographics_message(bot, root_message_id, newsflash_id)
     logging.info("notification send done")
 
 def extract_infographic_name_from_s3_object(s3_object_name):
@@ -86,6 +98,8 @@ def extract_infographic_name_from_s3_object(s3_object_name):
 
 
 def create_public_urls_for_infographics_images(folder_name):
+    logging.info("aws " + secrets.get("AWS_ACCESS_KEY"))
+    logging.info("aws " + secrets.get("AWS_SECRET_KEY"))
     S3_client = boto3.client('s3',
                              aws_access_key_id=secrets.get("AWS_ACCESS_KEY"),
                              aws_secret_access_key=secrets.get("AWS_SECRET_KEY")

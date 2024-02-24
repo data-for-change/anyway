@@ -61,10 +61,7 @@ def send_after_infographics_message(bot, message_id_in_group, newsflash_id):
 
 
 def publish_notification(newsflash_id):
-    print(newsflash_id)
     accident_text = create_accident_text(newsflash_id)
-    print(accident_text)
-    logging.info(accident_text)
     bot = telebot.TeleBot(secrets.get("BOT_TOKEN"))
     initial_message_in_channel = send_initial_message_in_channel(bot, accident_text)
     forwarded_message = TelegramForwardedMessages(message_id=initial_message_in_channel.message_id,
@@ -98,8 +95,6 @@ def extract_infographic_name_from_s3_object(s3_object_name):
 
 
 def create_public_urls_for_infographics_images(folder_name):
-    logging.info("aws " + secrets.get("AWS_ACCESS_KEY"))
-    logging.info("aws " + secrets.get("AWS_SECRET_KEY"))
     S3_client = boto3.client('s3',
                              aws_access_key_id=secrets.get("AWS_ACCESS_KEY"),
                              aws_secret_access_key=secrets.get("AWS_SECRET_KEY")

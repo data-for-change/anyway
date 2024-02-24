@@ -1356,7 +1356,7 @@ def embedded_reports_api():
 def telegram_webhook():
     try:
         update = request.json  # Telegram sends updates in JSON format
-        logging.info(f"Received Telegram update: {update}")
+        logging.debug(f"Received Telegram update: {update}")
         message_id = update['message']['message_id']
         forward_from_message_id = update['message']['forward_from_message_id']
         forwarded_message = db.session.query(TelegramForwardedMessages)\
@@ -1365,8 +1365,7 @@ def telegram_webhook():
         return jsonify(success=True)
     except Exception as e:
         logging.exception("Failed to process Telegram webhook: %s", e)
-        #return jsonify(success=False), 500
-        return jsonify(success=True)
+        return jsonify(success=True) #marked as success to prevent re-sends
 
 # User system API
 app.add_url_rule("/user/add_role", view_func=add_role, methods=["POST"])

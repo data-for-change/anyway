@@ -535,5 +535,6 @@ def trigger_dag(id):
     dag_conf = {"news_flash_id": id}
     trigger_airflow_dag("generate-and-send-infographics-images", dag_conf)
 
+
 if __name__ == "__main__":
     cli(sys.argv[1:])  # pylint: disable=too-many-function-args

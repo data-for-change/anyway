@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 
@@ -28,6 +29,7 @@ def update_all_in_db(source=None, newsflash_id=None, update_cbs_location_only=Fa
     else:
         newsflash_items = db.get_all_newsflash()
     for i, newsflash in enumerate(newsflash_items):
+        logging.debug(f"Updating news-flash:{newsflash.id}")
         if not update_cbs_location_only:
             classify = news_flash_classifiers[newsflash.source]
             newsflash.organization = classify_organization(newsflash.source)

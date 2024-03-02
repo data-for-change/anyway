@@ -34,7 +34,6 @@ def parse_html_walla(item_rss, html_soup):
     description = BeautifulSoup(item_rss["summary"], features="lxml").text
 
     author = get_author_from_walla_html_soup(html_soup)
-    print(f"author: {author}")
     return author, description
 
 

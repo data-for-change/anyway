@@ -51,7 +51,7 @@ def test_scrape_walla():
     items_expected = [
         NewsFlash(
             date=datetime.datetime(2024, 3, 4, 14, 36, tzinfo=timezones.ISREAL_SUMMER_TIMEZONE),
-            title="ההתרעה על חדירת כלי טיס עוין -התרעת שווא",
+            title="ההתרעה על חדירת כלי טיס עוין - התרעת שווא",
             link="https://news.walla.co.il/break/3648139",
             source="walla",
             author="אלי אשכנזי",

@@ -50,7 +50,7 @@ def test_scrape_walla():
     # Reuters is marked differently than Walla's authors
     items_expected = [
         NewsFlash(
-            date=datetime.datetime(2024, 3, 4, 11, 36, tzinfo=timezones.ISREAL_SUMMER_TIMEZONE),
+            date=datetime.datetime(2024, 3, 4, 14, 36, tzinfo=timezones.ISREAL_SUMMER_TIMEZONE),
             title="ההתרעה על חדירת כלי טיס עוין -התרעת שווא",
             link="https://news.walla.co.il/break/3648139",
             source="walla",
@@ -58,7 +58,7 @@ def test_scrape_walla():
             description="ההתרעה שהתקבלה לפני זמן קצר בישובי הגליל העליון על חדירת כלי טיס עוין הינה התרעת שווא.",
         ),
         NewsFlash(
-            date=datetime.datetime(2024, 3, 3, 13, 52, tzinfo=timezones.ISREAL_SUMMER_TIMEZONE),
+            date=datetime.datetime(2024, 3, 3, 16, 52, tzinfo=timezones.ISREAL_SUMMER_TIMEZONE),
             title="ראש הממשלה ביטל את הדיון בוועדת חוץ וביטחון בשל שפעת",
             link="https://news.walla.co.il/break/3647947",
             source="walla",

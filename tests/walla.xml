@@ -4,29 +4,31 @@
         <title></title>
         <link>https://news.walla.co.il/category/22</link>
         <description>חדשות מתפרצות ודיווחים על אירועים בארץ ובעולם בזמן אמת, שניות לאחר התרחשותם  כל העדכונים באתר החדשות המוביל בישראל</description>
-        <lastBuildDate>Wed, 23 Jun 2021 14:04:30 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 04 Mar 2024 21:16:57 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>Walla RnD</generator>
         <language>he</language>
         <image>
             <title></title>
-            <url>https://img.wcdn.co.il//2/5/4/2/2542044-46.jpg</url>
+            <url>https://images.wcdn.co.il//2/5/4/2/2542044-46.jpg</url>
             <link>https://news.walla.co.il/category/22</link>
         </image>
         <copyright>Copyright © Walla! Communications LTD. All rights reserved. The contents of this feed are available for non-commercial use only.</copyright>
         <item>
-            <title><![CDATA[חובת המסכות תוחזר אם יהיה ממוצע שבועי של 100 חולים ביום]]></title>
-            <link>https://news.walla.co.il/break/3443829</link>
-            <guid>https://news.walla.co.il/break/3443829</guid>
-            <pubDate>Wed, 23 Jun 2021 13:49:00 GMT</pubDate>
-            <description><![CDATA[<p style="direction:rtl; clear:both"><a href="https://news.walla.co.il/break/3443829"></a><br/>חובת המסכות תוחזר בחללים סגורים אם יהיה ממוצע שבועי של 100 חולים ביום - כך הוחלט היום (רביעי) בדיון השרים.</p>]]></description>
+            <title><![CDATA[ההתרעה על חדירת כלי טיס עוין - התרעת שווא]]></title>
+            <link>https://news.walla.co.il/break/3648139</link>
+            <guid>https://news.walla.co.il/break/3648139</guid>
+            <pubDate>Mon, 04 Mar 2024 11:36:00 GMT</pubDate>
+            <description><![CDATA[<p style="direction:rtl; clear:both"><a href="https://news.walla.co.il/break/3648139"><img hspace=5 border=0 align="right" src="https://images.wcdn.co.il/f_auto,q_auto,w_300/3/3/3/0/3330736-46.png" /></a><br/>ההתרעה שהתקבלה לפני זמן קצר בישובי הגליל העליון על חדירת כלי טיס עוין הינה התרעת שווא.</p>]]></description>
+            <enclosure url="https://images.wcdn.co.il/f_auto,q_auto,w_300/3/3/3/0/3330736-46.png" length="0" type="image/png"/>
         </item>
         <item>
-            <title><![CDATA[ פקיסטן: שמונה הרוגים בפיצוץ באוטובוס ]]></title>
-            <link>https://news.walla.co.il/break/3448092</link>
-            <guid>https://news.walla.co.il/break/3448092</guid>
-            <pubDate>Wed, 14 Jul 2021 06:10:00 GMT</pubDate>
-            <description><![CDATA[ <p style="direction:rtl; clear:both"><a href="https://news.walla.co.il/break/3448092"></a><br/>שמונה בני אדם נהרגו הבוקר (רביעי) בפיצוץ אוטובוס בצפון פקיסטן. בין ההרוגים, שישה מהנדסים תושבי סין. טרם ידוע מקור הפיצוץ.</p> ]]></description>
+            <title><![CDATA[ראש הממשלה ביטל את הדיון בוועדת חוץ וביטחון בשל שפעת]]></title>
+            <link>https://news.walla.co.il/break/3647947</link>
+            <guid>https://news.walla.co.il/break/3647947</guid>
+            <pubDate>Sun, 03 Mar 2024 13:52:00 GMT</pubDate>
+            <description><![CDATA[<p style="direction:rtl; clear:both"><a href="https://news.walla.co.il/break/3647947"><img hspace=5 border=0 align="right" src="https://images.wcdn.co.il/f_auto,q_auto,w_300/3/3/3/0/3330736-46.png" /></a><br/>ראש הממשלה, בנימין נתניהו, הודיע היום (ראשון) על ביטול הדיון שהיה אמור להתקיים מחר בוועדת חוץ וביטחון בהשתתפותו בשל מחלת השפעת.</p>]]></description>
+            <enclosure url="https://images.wcdn.co.il/f_auto,q_auto,w_300/3/3/3/0/3330736-46.png" length="0" type="image/png"/>
         </item>
     </channel>
 </rss>

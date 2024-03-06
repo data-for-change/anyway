@@ -1,14 +1,39 @@
 import requests
 from bs4 import BeautifulSoup
 import feedparser
+import json
 from anyway.parsers import timezones
+
+
+def get_author_from_walla_html_soup(html_soup):
+    script_tags = html_soup.find_all("script", {"type": "application/ld+json"})
+    results = []
+    for script_tag in script_tags:
+        script_text = script_tag.string.strip()
+        data = json.loads(script_text)
+
+        if isinstance(data.get("author"), dict):
+            # there is one author
+            author_section = data["author"]
+            results.append(author_section.get("name", ""))
+        else:
+            # there are multiple authors
+            authors_section = data.get("author", [])
+            author_names = [author_section.get("name", "") for author_section in authors_section]
+            if len(author_names) == 1:
+                results.append(author_names[0])
+            elif len(author_names) > 1:
+                results.append(", ".join(author_names))
+    joined_results = ", ".join(results)
+    joined_results = joined_results.strip()
+    return joined_results
 
 
 def parse_html_walla(item_rss, html_soup):
     # For some reason there's html here
     description = BeautifulSoup(item_rss["summary"], features="lxml").text
 
-    author = html_soup.find("div", class_="author").get_text().strip()
+    author = get_author_from_walla_html_soup(html_soup)
     return author, description
 
 

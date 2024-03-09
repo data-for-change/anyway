@@ -905,8 +905,8 @@ class NewsFlash(Base):
         start_time = datetime.date(end_time.year + 1 - years_before, 1, 1)
         location_info = LocationInfo()
         if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
-            location_info["road1"]
-            location_info["road_segment_name"]
+            location_info["road1"] = self.road1
+            location_info["road_segment_id"] = self.road_segment_id
         elif resolution == BE_CONST.ResolutionCategories.STREET:
             location_info["yishuv_name"] = self.yishuv_name
             location_info["street1_hebrew"] = self.street1_hebrew

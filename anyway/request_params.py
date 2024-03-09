@@ -181,7 +181,7 @@ def get_news_flash_location_text(news_flash_obj: NewsFlash):
     street1_hebrew = nf["street1_hebrew"] if nf["street1_hebrew"] else ""
     road_segment_id = nf.get("road_segment_id", "")
     if resolution == "כביש בינעירוני" and road1 and road_segment_id:
-        res = "כביש " + road1 + " במקטע " + road_segment_id
+        res = "כביש " + road1 + " במקטע " + str(road_segment_id)
     elif resolution == "עיר" and not yishuv_name:
         res = nf["location"]
     elif resolution == "עיר" and yishuv_name:
@@ -189,7 +189,7 @@ def get_news_flash_location_text(news_flash_obj: NewsFlash):
     elif resolution == "צומת בינעירוני" and road1 and road2:
         res = "צומת כביש " + road1 + " עם כביש " + road2
     elif resolution == "צומת בינעירוני" and road1 and road_segment_id:
-        res = "כביש " + road1 + " במקטע " + road_segment_id
+        res = "כביש " + road1 + " במקטע " + str(road_segment_id)
     elif resolution == "רחוב" and yishuv_name and street1_hebrew:
         res = get_street_location_text(yishuv_name, street1_hebrew)
     else:

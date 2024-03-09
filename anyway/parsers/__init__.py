@@ -23,4 +23,5 @@ resolution_dict = {
 fields_to_resolution = {
     ("yishuv_name", "street1_hebrew"): "רחוב",
     ("road_segment_name", "road1"): "כביש בינעירוני",
+    ("road_segment_id", "road1"): "כביש בינעירוני",
 }

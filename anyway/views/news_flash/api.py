@@ -190,7 +190,7 @@ def gen_news_flash_query(
     if road_number:
         query = query.filter(NewsFlash.road1 == road_number)
     if road_segment == "true":
-        query = query.filter(not_(NewsFlash.road_segment_name == None))
+        query = query.filter(not_(NewsFlash.road_segment_id == None))
     if last_minutes:
         last_timestamp = datetime.datetime.now() - datetime.timedelta(minutes=last_minutes)
         query = query.filter(NewsFlash.date >= last_timestamp)
@@ -283,7 +283,7 @@ def filter_by_resolutions(query, resolutions: List[str]):
         ands.append(
             and_(
                 NewsFlash.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD.value,
-                NewsFlash.road_segment_name != None,
+                NewsFlash.road_segment_id != None,
             )
         )
     if "street" in resolutions:
@@ -352,21 +352,21 @@ def update_news_flash_qualifying(id):
     use_road_segment = True
 
     newsflash_location_qualification = request.values.get("newsflash_location_qualification")
-    road_segment_name = request.values.get("road_segment_name")
+    road_segment_id = request.values.get("road_segment_id")
     road1 = request.values.get("road1")
     yishuv_name = request.values.get("yishuv_name")
     street1_hebrew = request.values.get("street1_hebrew")
     newsflash_location_qualification = QUALIFICATION_TO_ENUM_VALUE[newsflash_location_qualification]
     if newsflash_location_qualification == NewsflashLocationQualification.MANUAL.value:
         manual_update = True
-        if (road_segment_name is None) or (road1 is None):
+        if (road_segment_id is None) or (road1 is None):
             if (yishuv_name is None) or (street1_hebrew is None):
                 logging.error("manual update must include location detalis.")
                 return return_json_error(Es.BR_FIELD_MISSING)
             else:
                 use_road_segment = False
     else:
-        if road_segment_name is not None or road1 is not None or \
+        if road_segment_id is not None or road1 is not None or \
                 street1_hebrew is not None or yishuv_name is not None:
             logging.error("only manual update should contain location details.")
             return return_json_error(Es.BR_BAD_FIELD)
@@ -377,9 +377,9 @@ def update_news_flash_qualifying(id):
         old_location, old_location_qualifiction = extracted_location_and_qualification(news_flash_obj)
         if manual_update:
             if use_road_segment:
-                news_flash_obj.road_segment_name = road_segment_name
+                news_flash_obj.road_segment_id = road_segment_id
                 news_flash_obj.road1 = road1
-                news_flash_obj.resolution = fields_to_resolution.get(("road_segment_name", "road1"))
+                news_flash_obj.resolution = fields_to_resolution.get(("road_segment_id", "road1"))
             else:
                 news_flash_obj.yishuv_name = yishuv_name
                 news_flash_obj.street1_hebrew = street1_hebrew
@@ -387,7 +387,7 @@ def update_news_flash_qualifying(id):
                     ("yishuv_name", "street1_hebrew")
                 )
         else:
-            if ((news_flash_obj.road_segment_name is None) or (news_flash_obj.road1 is None)) and (
+            if ((news_flash_obj.road_segment_id is None) or (news_flash_obj.road1 is None)) and (
                 (news_flash_obj.yishuv_name is None) or (news_flash_obj.street1_hebrew is None)
             ):
                 logging.error("try to set qualification on empty location.")

@@ -3,6 +3,8 @@
 from datetime import datetime
 from anyway.models import (
     Base,
+    InfographicsDataCache,
+    NewsFlash,
     RoadSegments,
     InfographicsRoadSegmentsDataCache,
     InfographicsRoadSegmentsDataCacheTemp,

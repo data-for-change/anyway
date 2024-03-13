@@ -81,7 +81,7 @@ class NewsFlashApiTestCase(unittest.TestCase):
         tests_flask.set_current_user_mock(current_user, user_id=user_id)
         with patch("anyway.views.news_flash.api.db", db_mock):
             mock_request = unittest.mock.MagicMock()
-            values = {"newsflash_location_qualification": "manual", "road_segment_name": "road", "road1": "1"}
+            values = {"newsflash_location_qualification": "manual", "road_segment_id": 100, "road1": "1"}
             mock_request.values.get = lambda key: values.get(key)
             with patch("anyway.views.news_flash.api.request", mock_request):
                 id = self.session.query(NewsFlash).all()[0].id
@@ -92,9 +92,9 @@ class NewsFlashApiTestCase(unittest.TestCase):
                 )
                 self.assertEqual(location_verifiction_history["user_id"], user_id)
                 saved_location = json.loads(location_verifiction_history["location_after_change"])
-                saved_road_segment_name = saved_location["road_segment_name"]
+                saved_road_segment_id = saved_location["road_segment_id"]
                 saved_road_num = saved_location["road1"]
-                self.assertEqual(saved_road_segment_name, values["road_segment_name"])
+                self.assertEqual(saved_road_segment_id, values["road_segment_id"])
                 self.assertEqual(saved_road_num, float(values["road1"]))
                 self.assertEqual(
                     values["newsflash_location_qualification"],
@@ -121,12 +121,12 @@ class NewsFlashApiTestCase(unittest.TestCase):
         the test tries to change manually the road_segment_name of a news flash.
         """
         mock_request = unittest.mock.MagicMock()
-        values = {"newsflash_location_qualification": "manual", "road_segment_name": "road", "road1": "1"}
+        values = {"newsflash_location_qualification": "manual", "road_segment_id": 100, "road1": "1"}
         mock_request.values.get = lambda key: values.get(key)
         with patch("anyway.views.news_flash.api.request", mock_request):
             id = self.session.query(NewsFlash).all()[0].id
             return_value = update_news_flash_qualifying(id)
-            self.assertEqual(return_value.status_code, HTTPStatus.OK.value)
+            self.assertEqual(return_value.status_code, HTTPStatus.OK.value, "1")
 
     def _test_update_news_flash_qualifying_manual_without_location(self):
         """
@@ -139,7 +139,7 @@ class NewsFlashApiTestCase(unittest.TestCase):
         with patch("anyway.views.news_flash.api.request", mock_request):
             id = self.session.query(NewsFlash).all()[0].id
             return_value = update_news_flash_qualifying(id)
-            self.assertEqual(return_value.status_code, HTTPStatus.BAD_REQUEST.value)
+            self.assertEqual(return_value.status_code, HTTPStatus.BAD_REQUEST.value, "2")
 
     def _test_update_news_flash_qualifying_not_manual_with_location(self):
         """
@@ -152,7 +152,7 @@ class NewsFlashApiTestCase(unittest.TestCase):
         with patch("anyway.views.news_flash.api.request", mock_request):
             id = self.session.query(NewsFlash).all()[0].id
             return_value = update_news_flash_qualifying(id)
-            self.assertEqual(return_value.status_code, HTTPStatus.BAD_REQUEST.value)
+            self.assertEqual(return_value.status_code, HTTPStatus.BAD_REQUEST.value, "3")
 
     def _test_update_news_flash_qualifying_not_manual_empty_location_db(self):
         """
@@ -173,7 +173,7 @@ class NewsFlashApiTestCase(unittest.TestCase):
         with patch("anyway.views.news_flash.api.request", mock_request):
             id = news_flash.id
             return_value = update_news_flash_qualifying(id)
-            self.assertEqual(return_value.status_code, HTTPStatus.BAD_REQUEST.value)
+            self.assertEqual(return_value.status_code, HTTPStatus.BAD_REQUEST.value, "4")
 
     def _test_update_news_flash_qualifying_not_manual_exists_location_db(self):
         """
@@ -186,6 +186,7 @@ class NewsFlashApiTestCase(unittest.TestCase):
             accident=True,
             resolution="כביש בינעירוני",
             road_segment_name="road",
+            road_segment_id=100,
             lat=32.0192988,
             lon=34.7971384,
         )
@@ -196,7 +197,7 @@ class NewsFlashApiTestCase(unittest.TestCase):
         with patch("anyway.views.news_flash.api.request", mock_request):
             id = news_flash.id
             return_value = update_news_flash_qualifying(id)
-            self.assertEqual(return_value.status_code, HTTPStatus.OK.value)
+            self.assertEqual(return_value.status_code, HTTPStatus.OK.value, "5")
 
     def test_gen_news_flash_query(self):
         orig_supported_resolutions = BE_CONST.SUPPORTED_RESOLUTIONS

@@ -17,7 +17,7 @@ def insert_infographic_mock_data(app):
     sql_insert = f"""
         insert into news_flash
         (accident, author, date, description, lat, link, lon, title, source, location, road1, road2, resolution,
-        tweet_id, district_hebrew, non_urban_intersection_hebrew, region_hebrew, road_segment_name, street1_hebrew, street2_hebrew, yishuv_name, newsflash_location_qualification, location_qualifying_user)
+        tweet_id, district_hebrew, non_urban_intersection_hebrew, region_hebrew, road_segment_id, road_segment_name, street1_hebrew, street2_hebrew, yishuv_name, newsflash_location_qualification, location_qualifying_user)
         values (
         true,
         'ynet',
@@ -36,6 +36,7 @@ def insert_infographic_mock_data(app):
         null,
         null,
         null,
+        900810,
         'כניסה למצפה שלם - צומת שדי תרומות',
         null,
         null,
@@ -125,7 +126,7 @@ class TestInfographicApi:
         request_params = anyway.request_params.RequestParams(
             years_ago=1,
             location_text='',
-            location_info=None,
+            location_info={},
             resolution={},
             gps={},
             start_time=start_time,

@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
-from sqlalchemy import not_
 from anyway.models import (
     Base,
-    InfographicsDataCache,
-    InfographicsDataCacheTemp,
-    NewsFlash,
     RoadSegments,
     InfographicsRoadSegmentsDataCache,
     InfographicsRoadSegmentsDataCacheTemp,

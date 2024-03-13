@@ -544,7 +544,11 @@ def extract_geo_features(db, newsflash: NewsFlash, update_cbs_location_only: boo
         for resolution in all_resolutions:
             if resolution not in location_from_db:
                 setattr(newsflash, resolution, None)
-    if newsflash.road_segment_name is not None and newsflash.road1 is not None:
+    if (
+        newsflash.road_segment_id is None
+        and newsflash.road_segment_name is not None
+        and newsflash.road1 is not None
+    ):
         try:
             seg = get_road_segment_by_name_and_road(newsflash.road_segment_name, newsflash.road1)
             newsflash.road_segment_id = seg.segment_id

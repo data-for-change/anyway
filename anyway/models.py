@@ -897,7 +897,7 @@ class NewsFlash(Base):
         )
         from anyway.request_params import get_latest_accident_date, LocationInfo
 
-        if (self.road1 is None or self.road_segment_name is None) and (self.yishuv_name is None or self.street1_hebrew is None) :
+        if (self.road1 is None or self.road_segment_id is None) and (self.yishuv_name is None or self.street1_hebrew is None) :
             return None
         last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
         resolution = BE_CONST.ResolutionCategories(self.resolution)
@@ -905,8 +905,8 @@ class NewsFlash(Base):
         start_time = datetime.date(end_time.year + 1 - years_before, 1, 1)
         location_info = LocationInfo()
         if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
-            location_info["road1"]
-            location_info["road_segment_name"]
+            location_info["road1"] = self.road1
+            location_info["road_segment_id"] = self.road_segment_id
         elif resolution == BE_CONST.ResolutionCategories.STREET:
             location_info["yishuv_name"] = self.yishuv_name
             location_info["street1_hebrew"] = self.street1_hebrew
@@ -951,7 +951,7 @@ class NewsFlash(Base):
             "street1_hebrew": self.street1_hebrew,
             "street2_hebrew": self.street2_hebrew,
             "non_urban_intersection_hebrew": self.non_urban_intersection_hebrew,
-            "road_segment_name": self.road_segment_name,
+            "road_segment_id": self.road_segment_id,
             "newsflash_location_qualification": NewsflashLocationQualification(
                 self.newsflash_location_qualification
             ).get_label(),

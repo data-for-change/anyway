@@ -21,7 +21,7 @@ from anyway.request_params import (
 )
 from anyway.backend_constants import BE_CONST, AccidentType
 from anyway.models import NewsFlash, AccidentMarkerView
-from anyway.parsers import resolution_dict
+from anyway.parsers.resolution_fields import ResolutionFields as RF
 from anyway.infographics_dictionaries import head_on_collisions_comparison_dict
 from anyway.parsers import infographics_data_cache_updater
 from anyway.widgets.widget import Widget, widgets_dict
@@ -244,7 +244,7 @@ def is_news_flash_resolution_supported(news_flash_obj: NewsFlash) -> bool:
         return False
     location = location_data[DATA]
     for cat in BE_CONST.SUPPORTED_RESOLUTIONS:
-        if cat.value in resolution_dict and set(resolution_dict[cat.value]) <= location.keys():
+        if set(RF.get_required_fields(cat.value)) <= location.keys():
             return True
     return False
 

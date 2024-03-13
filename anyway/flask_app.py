@@ -57,6 +57,7 @@ from anyway.models import (
     City,
     Streets,
     Comment,
+    TelegramForwardedMessages
 )
 from anyway.request_params import get_request_params_from_request_values
 from anyway.views.news_flash.api import (
@@ -82,6 +83,7 @@ from anyway.views.schools.api import (
 from anyway.views.user_system.api import *
 
 from anyway.views.comments.api import get_comments, create_comment
+from anyway.telegram_accident_notifications import send_infographics_to_telegram
 
 DEFAULT_MAPS_API_KEY = "AIzaSyDUIWsBLkvIUwzLHMHos9qFebyJ63hEG2M"
 
@@ -1352,11 +1354,18 @@ def embedded_reports_api():
 
 @app.route("/api/telegram/webhook", methods=["POST"])
 def telegram_webhook():
-    update = request.json  # Telegram sends updates in JSON format
-    logging.info(f"Received Telegram update: {update}")
-
-    return jsonify(success=True)
-
+    try:
+        update = request.json  # Telegram sends updates in JSON format
+        logging.debug(f"Received Telegram update: {update}")
+        message_id = update['message']['message_id']
+        forward_from_message_id = update['message']['forward_from_message_id']
+        forwarded_message = db.session.query(TelegramForwardedMessages)\
+            .filter(TelegramForwardedMessages.message_id == str(forward_from_message_id)).first()
+        send_infographics_to_telegram(message_id, forwarded_message.newsflash_id)
+        return jsonify(success=True)
+    except Exception as e:
+        logging.exception("Failed to process Telegram webhook: %s", e)
+        return jsonify(success=True) #marked as success to prevent re-sends
 
 # User system API
 app.add_url_rule("/user/add_role", view_func=add_role, methods=["POST"])

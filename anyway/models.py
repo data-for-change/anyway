@@ -3002,8 +3002,8 @@ class TelegramGroups(TelegramGroupsBase):
 class TelegramGroupsTest(TelegramGroupsBase):
     __tablename__ = "telegram_groups_test"
 
-class TelegramForwardedMessages():
+class TelegramForwardedMessages(Base):
     __tablename__ = 'telegram_forwarded_messages'
     message_id = Column(String(), primary_key=True)
     newsflash_id = Column(BigInteger(), nullable=False)
-    group_sent = Column(String(), nullable=False),
+    group_sent = Column(String(), nullable=False)

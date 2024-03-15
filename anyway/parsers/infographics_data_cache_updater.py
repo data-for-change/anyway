@@ -34,78 +34,11 @@ NAME = "name"
 META = "meta"
 DATA = "data"
 ITEMS = "items"
-REGULAR_CACHE_TABLES = {CACHE: InfographicsDataCache, TEMP: InfographicsDataCacheTemp}
 STREET_CACHE_TABLES = {CACHE: InfographicsStreetDataCache, TEMP: InfographicsStreetDataCacheTemp}
 ROAD_SEGMENT_CACHE_TABLES = {
     CACHE: InfographicsRoadSegmentsDataCache,
     TEMP: InfographicsRoadSegmentsDataCacheTemp,
 }
-
-
-def is_in_cache(nf):
-    return (
-        len(CONST.INFOGRAPHICS_CACHE_YEARS_AGO)
-        == db.session.query(InfographicsDataCache)
-        .filter(InfographicsDataCache.news_flash_id == nf.get_id())
-        .count()
-    )
-
-
-# noinspection PyUnresolvedReferences
-def add_news_flash_to_cache(news_flash: NewsFlash):
-    try:
-        if not (
-            news_flash.accident
-            and anyway.infographics_utils.is_news_flash_resolution_supported(news_flash)
-            and news_flash.newsflash_location_qualification is not None
-        ):
-            logging.debug(
-                f"add_news_flash_to_cache: news flash does not qualify:{news_flash.serialize()}"
-            )
-            return True
-        db.get_engine().execute(
-            InfographicsDataCache.__table__.insert(),  # pylint: disable=no-member
-            [
-                {
-                    "news_flash_id": news_flash.get_id(),
-                    "years_ago": y,
-                    "data": anyway.infographics_utils.create_infographics_data(
-                        news_flash.get_id(), y, "he"
-                    ),
-                }
-                for y in CONST.INFOGRAPHICS_CACHE_YEARS_AGO
-            ],
-        )
-        logging.info(f"{news_flash.get_id()} added to cache")
-        return True
-    except Exception as e:
-        logging.exception(
-            f"Exception while inserting to cache. flash_id:{news_flash}), cause:{e.__cause__}"
-        )
-        return False
-
-
-def get_infographics_data_from_cache(news_flash_id, years_ago) -> Dict:
-    db_item = (
-        db.session.query(InfographicsDataCache)
-        .filter(InfographicsDataCache.news_flash_id == news_flash_id)
-        .filter(InfographicsDataCache.years_ago == years_ago)
-        .first()
-    )
-    logging.debug(f"retrieved from cache {type(db_item)}:{db_item}"[:70])
-    db.session.commit()
-    try:
-        if db_item:
-            return json.loads(db_item.get_data())
-        else:
-            return {}
-    except Exception as e:
-        logging.error(
-            f"Exception while extracting data from returned cache item flash_id:{news_flash_id},years:{years_ago})"
-            f"returned value {type(db_item)}"
-            f":cause:{e.__cause__}, class:{e.__class__}"
-        )
-        return {}
 
 
 def get_infographics_data_from_cache_by_road_segment(road_segment_id, years_ago) -> Dict:
@@ -236,33 +169,6 @@ def copy_temp_into_cache(table: Dict[str, Base]):
     db.session.commit()
 
 
-# noinspection PyUnresolvedReferences
-def build_cache_into_temp():
-    start = datetime.now()
-    db.session.query(InfographicsDataCacheTemp).delete()
-    db.session.commit()
-    supported_resolutions = set([x.value for x in BE_CONST.SUPPORTED_RESOLUTIONS])
-    for y in CONST.INFOGRAPHICS_CACHE_YEARS_AGO:
-        logging.debug(f"processing years_ago:{y}")
-        db.get_engine().execute(
-            InfographicsDataCacheTemp.__table__.insert(),  # pylint: disable=no-member
-            [
-                {
-                    "news_flash_id": new_flash.get_id(),
-                    "years_ago": y,
-                    "data": anyway.infographics_utils.create_infographics_data(
-                        new_flash.get_id(), y, "he"
-                    ),
-                }
-                for new_flash in db.session.query(NewsFlash)
-                .filter(NewsFlash.accident)
-                .filter(NewsFlash.resolution.in_(supported_resolutions))
-                .all()
-            ],
-        )
-    logging.info(f"cache rebuild took:{str(datetime.now() - start)}")
-
-
 def get_streets() -> Iterable[Streets]:
     t = Streets
     street_iter = iter(db.session.query(t.yishuv_symbol, t.street).all())
@@ -340,21 +246,6 @@ def build_road_segments_cache_into_temp():
     logging.info(f"cache rebuild took:{str(datetime.now() - start)}")
 
 
-def get_cache_info():
-    cache_items = db.session.query(InfographicsDataCache).count()
-    tmp_items = db.session.query(InfographicsDataCacheTemp).count()
-    num_acc_flash_items = db.session.query(NewsFlash).filter(NewsFlash.accident).count()
-    num_acc_suburban_flash_items = (
-        db.session.query(NewsFlash)
-        .filter(NewsFlash.accident)
-        .filter(NewsFlash.resolution.in_(["כביש בינעירוני"]))
-        .filter(not_(NewsFlash.road_segment_name == None))
-        .count()
-    )
-    db.session.commit()
-    return f"num items in cache: {cache_items}, temp table: {tmp_items}, accident flashes:{num_acc_flash_items}, flashes processed:{num_acc_suburban_flash_items}"
-
-
 def main_for_road_segments():
     logging.info("Refreshing road segments infographics cache...")
     build_road_segments_cache_into_temp()
@@ -365,15 +256,3 @@ def main_for_road_segments():
 def main_for_street():
     build_street_cache_into_temp()
     copy_temp_into_cache(STREET_CACHE_TABLES)
-
-
-def main(update, info):
-    if update:
-        logging.info("Refreshing infographics cache...")
-        build_cache_into_temp()
-        copy_temp_into_cache(REGULAR_CACHE_TABLES)
-        logging.info("Refreshing infographics cache Done")
-    if info:
-        logging.info(get_cache_info())
-    else:
-        logging.debug(f"{info}")

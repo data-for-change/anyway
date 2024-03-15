@@ -13,14 +13,7 @@ from anyway.parsers.news_flash_db_adapter import init_db
 from anyway.models import NewsFlash
 from anyway.parsers import timezones
 from anyway.infographics_utils import is_news_flash_resolution_supported
-from anyway.parsers.infographics_data_cache_updater import is_in_cache
 from anyway.parsers.news_flash_db_adapter import DBAdapter
-
-
-def verify_cache(news_flash_list):
-    for nf in news_flash_list:
-        if is_news_flash_resolution_supported(nf):
-            assert is_in_cache(nf), f"NewsFlash {nf.get_id()} not in cache"
 
 
 def fetch_html_walla(link):

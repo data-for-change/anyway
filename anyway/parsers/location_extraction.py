@@ -299,7 +299,9 @@ def reverse_geocode_extract(latitude, longitude):
                 road_no = int(item["short_name"])
             else:
                 street = item["long_name"]
-        elif "point_of_interest" in item["types"] or "intersection" in item["types"]:
+        elif "point_of_interest" in item["types"]:
+            street = item["long_name"]
+        elif "intersection" in item["types"]:
             intersection = item["long_name"]
         elif "locality" in item["types"]:
             city = item["long_name"]

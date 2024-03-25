@@ -38,7 +38,6 @@ def update_all_in_db(source=None, newsflash_id=None, update_cbs_location_only=Fa
             extract_geo_features(
                 db=db, newsflash=newsflash, update_cbs_location_only=update_cbs_location_only
             )
-            #newsflash.set_critical()
         if i % 1000 == 0:
             db.commit()
     db.commit()
@@ -55,7 +54,6 @@ def scrape_extract_store_rss(site_name, db):
         if newsflash.accident:
             # FIX: No accident-accurate date extracted
             extract_geo_features(db=db, newsflash=newsflash, update_cbs_location_only=False)
-            #newsflash.set_critical()
         db.insert_new_newsflash(newsflash)
 
 
@@ -69,7 +67,6 @@ def scrape_extract_store_twitter(screen_name, db):
         newsflash.organization = classify_organization("twitter")
         if newsflash.accident:
             extract_geo_features(db=db, newsflash=newsflash, update_cbs_location_only=False)
-            #newsflash.set_critical()
         db.insert_new_newsflash(newsflash)
 
 

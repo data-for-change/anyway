@@ -38,6 +38,7 @@ def update_all_in_db(source=None, newsflash_id=None, update_cbs_location_only=Fa
             extract_geo_features(
                 db=db, newsflash=newsflash, update_cbs_location_only=update_cbs_location_only
             )
+            newsflash.set_critical()
         if i % 1000 == 0:
             db.commit()
     db.commit()

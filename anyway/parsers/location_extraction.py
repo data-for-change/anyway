@@ -16,6 +16,9 @@ from sqlalchemy.orm import load_only
 from datetime import date
 
 
+INTEGER_FIELDS = ["road1", "road2", "road_segment_id", "yishuv_symbol", "street1", "street2"]
+
+
 def extract_road_number(location):
     """
     extract road number from location if exist
@@ -231,6 +234,10 @@ def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):
         if loc not in [None, "", "nan"]:
             if not (isinstance(loc, np.float64) and np.isnan(loc)):
                 final_loc[field] = loc
+    for field in INTEGER_FIELDS:
+        if field in final_loc and math.isnan(final_loc[field]):
+            logging.debug(f"Converting field {field} from {final_loc[field]} to None.")
+            final_loc[field] = None
     return final_loc
 
 
@@ -292,7 +299,9 @@ def reverse_geocode_extract(latitude, longitude):
                 road_no = int(item["short_name"])
             else:
                 street = item["long_name"]
-        elif "point_of_interest" in item["types"] or "intersection" in item["types"]:
+        elif "point_of_interest" in item["types"]:
+            street = item["long_name"]
+        elif "intersection" in item["types"]:
             intersection = item["long_name"]
         elif "locality" in item["types"]:
             city = item["long_name"]
@@ -331,6 +340,9 @@ def geocode_extract(location):
     geom = {"lat": None, "lng": None}
     for candidate_location_string in get_candidate_location_strings(location):
         try:
+            if not candidate_location_string:
+                logging.debug(f"Skipping empty location string:{candidate_location_string}.")
+                continue
             logging.debug(f'using location string: "{candidate_location_string}"')
             gmaps = googlemaps.Client(key=secrets.get("GOOGLE_MAPS_KEY"))
             geocode_result = gmaps.geocode(candidate_location_string, region="il")
@@ -351,7 +363,7 @@ def geocode_extract(location):
                     else:
                         street = item["long_name"]
                 elif "point_of_interest" in item["types"] or "intersection" in item["types"]:
-                    intersection = item["long_name"]
+                    street = item["long_name"]
                 elif "locality" in item["types"]:
                     city = item["long_name"]
                 elif "administrative_area_level_2" in item["types"]:
@@ -534,6 +546,20 @@ def extract_geo_features(db, newsflash: NewsFlash, update_cbs_location_only: boo
         for resolution in all_resolutions:
             if resolution not in location_from_db:
                 setattr(newsflash, resolution, None)
+    if (
+        newsflash.road_segment_id is None
+        and newsflash.road_segment_name is not None
+        and newsflash.road1 is not None
+    ):
+        try:
+            seg = get_road_segment_by_name_and_road(newsflash.road_segment_name, newsflash.road1)
+            newsflash.road_segment_id = seg.segment_id
+        except ValueError as _:
+            logging.exception(
+                "Failed trying to set road_segment_id to news-flash:"
+                f"news-flash:{newsflash.id},segment name:{newsflash.road_segment_name}"
+                f",road1:{newsflash.road1}."
+            )
 
 
 def get_candidate_location_strings(location_string):

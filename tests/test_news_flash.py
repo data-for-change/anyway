@@ -50,20 +50,20 @@ def test_scrape_walla():
     # Reuters is marked differently than Walla's authors
     items_expected = [
         NewsFlash(
-            date=datetime.datetime(2021, 6, 23, 16, 49, tzinfo=timezones.ISREAL_SUMMER_TIMEZONE),
-            title='חובת המסכות תוחזר אם יהיה ממוצע שבועי של 100 חולים ביום',
-            link="https://news.walla.co.il/break/3443829",
+            date=datetime.datetime(2024, 3, 4, 14, 36, tzinfo=timezones.ISREAL_SUMMER_TIMEZONE),
+            title="ההתרעה על חדירת כלי טיס עוין - התרעת שווא",
+            link="https://news.walla.co.il/break/3648139",
             source="walla",
-            author="מירב כהן",
-            description='חובת המסכות תוחזר בחללים סגורים אם יהיה ממוצע שבועי של 100 חולים ביום - כך הוחלט היום (רביעי) בדיון השרים.',
+            author="אלי אשכנזי",
+            description="ההתרעה שהתקבלה לפני זמן קצר בישובי הגליל העליון על חדירת כלי טיס עוין הינה התרעת שווא.",
         ),
         NewsFlash(
-            date=datetime.datetime(2021, 7, 14, 9, 10, tzinfo=timezones.ISREAL_SUMMER_TIMEZONE),
-            title="פקיסטן: שמונה הרוגים בפיצוץ באוטובוס",
-            link="https://news.walla.co.il/break/3448092",
+            date=datetime.datetime(2024, 3, 3, 16, 52, tzinfo=timezones.ISREAL_SUMMER_TIMEZONE),
+            title="ראש הממשלה ביטל את הדיון בוועדת חוץ וביטחון בשל שפעת",
+            link="https://news.walla.co.il/break/3647947",
             source="walla",
-            author="רויטרס",
-            description="שמונה בני אדם נהרגו הבוקר (רביעי) בפיצוץ אוטובוס בצפון פקיסטן. בין ההרוגים, שישה מהנדסים תושבי סין. טרם ידוע מקור הפיצוץ.",
+            author="טל שלו",
+            description="ראש הממשלה, בנימין נתניהו, הודיע היום (ראשון) על ביטול הדיון שהיה אמור להתקיים מחר בוועדת חוץ וביטחון בהשתתפותו בשל מחלת השפעת.",
         ),
     ]
 
@@ -82,7 +82,7 @@ def test_scrape_ynet():
                 2021, 6, 23, 13, 58, 51, tzinfo=timezones.ISREAL_SUMMER_TIMEZONE
             ),
             title='עבודות לתועלת הציבור לסייעת "גן מתוק" בגבעתיים שבו הותקפו ילדים',
-            link='https://www.ynet.co.il/news/article/HkhoCYxnO',
+            link="https://www.ynet.co.il/news/article/HkhoCYxnO",
             source="ynet",
             author="גלעד מורג",
             description='בית משפט השלום בתל אביב קבע שלא להרשיע את סייעת "גן מתוק" בגבעתיים, אורנה אקבלי. הוא קבע שביצעה עבירת סיוע לתקיפה אך בגלל נסיבות החריגות של המקרה ובגלל שהייתה מעורבת בדיווח על האלימות בגן לא תורשע. עם זאת על אקבלי הוטלו 180 שעות עבודות לתועלת הציבור, צו מבחן, ו-3,000 שקל פיצויים.',
@@ -161,17 +161,16 @@ def test_twitter_parse():
 def test_location_extraction_extract_location_text():
     for description, expected_location_text in [
         (
-                'רוכב אופנוע כבן 20 נפצע באורח בינוני מפגיעת רכב היום (ראשון) בכביש 65 סמוך לצומת אלון. צוות מד"א שהגיע למקום העניק לו טיפול רפואי ופינה אותו לבית החולים הלל יפה בחדרה.]]>'
-                , 'כביש 65 סמוך לצומת אלון'
+            'רוכב אופנוע כבן 20 נפצע באורח בינוני מפגיעת רכב היום (ראשון) בכביש 65 סמוך לצומת אלון. צוות מד"א שהגיע למקום העניק לו טיפול רפואי ופינה אותו לבית החולים הלל יפה בחדרה.]]>',
+            "כביש 65 סמוך לצומת אלון",
         ),
         (
-                'רוכב אופנוע בן 23 נפצע היום (שבת) באורח בינוני לאחר שהחליק בכביש ליד כפר חיטים הסמוך לטבריה. צוות מד"א העניק לו טיפול ראשוני ופינה אותו לבית החולים פוריה בטבריה.]]>'
-                , 'כביש ליד כפר חיטים הסמוך לטבריה'
-
+            'רוכב אופנוע בן 23 נפצע היום (שבת) באורח בינוני לאחר שהחליק בכביש ליד כפר חיטים הסמוך לטבריה. צוות מד"א העניק לו טיפול ראשוני ופינה אותו לבית החולים פוריה בטבריה.]]>',
+            "כביש ליד כפר חיטים הסמוך לטבריה",
         ),
         (
-                'רוכב אופנוע בן 23 החליק הלילה (שבת) בנסיעה בכביש 3 סמוך למושב בקוע, ליד בית שמש. מצבו מוגדר בינוני. צוות מד"א העניק לו טיפול רפואי ופינה אותו עם חבלה רב מערכתית לבית החולים שמיר אסף הרופא בבאר יעקב.]]>'
-                , 'כביש 3 סמוך למושב בקוע, ליד בית שמש'
+            'רוכב אופנוע בן 23 החליק הלילה (שבת) בנסיעה בכביש 3 סמוך למושב בקוע, ליד בית שמש. מצבו מוגדר בינוני. צוות מד"א העניק לו טיפול רפואי ופינה אותו עם חבלה רב מערכתית לבית החולים שמיר אסף הרופא בבאר יעקב.]]>',
+            "כביש 3 סמוך למושב בקוע, ליד בית שמש",
         ),
     ]:
         actual_location_text = location_extraction.extract_location_text(description)
@@ -184,14 +183,14 @@ def test_location_extraction_geocode_extract():
         pytest.skip("Could not find GOOGLE_MAPS_KEY")
 
     expected_location = {
-        'street': None,
-        'road_no': None,
-        'intersection': None,
-        'city': None,
-        'address': 'Lower Galilee, Israel',
-        'subdistrict': 'Kinneret',
-        'district': 'North District',
-        'geom': mock.ANY,
+        "street": None,
+        "road_no": None,
+        "intersection": None,
+        "city": None,
+        "address": "Lower Galilee, Israel",
+        "subdistrict": "Kinneret",
+        "district": "North District",
+        "geom": mock.ANY,
     }
     location = location_extraction.geocode_extract("גבר נהרג בתאונת דרכים בגליל התחתון")
     assert location == expected_location
@@ -216,8 +215,8 @@ def test_classification_statistics_ynet():
     # The classification in the file is "definitional", meaning:
     # We don't care if it is "about" an accident, but rather whether it us "THE report".
     # In other words, is it the _first_ report about a _recent_ accident
-    with open('tests/accidents_definitional_ynet.tsv', encoding='utf8') as f:
-        data = [line.split('\t') for line in f.read().split('\n')]
+    with open("tests/accidents_definitional_ynet.tsv", encoding="utf8") as f:
+        data = [line.split("\t") for line in f.read().split("\n")]
 
     stats = {True: {True: 0, False: 0}, False: {True: 0, False: 0}}
     for title, expected in data:
@@ -237,12 +236,15 @@ def test_classification_statistics_ynet():
     assert recall > BEST_RECALL_YNET
     assert f1 > BEST_F1_YNET
 
+
 def test_nan_becomes_none_before_insertion(monkeypatch):
     newsflash = NewsFlash(
         road1=np.nan,
     )
     db_mock = MagicMock()
-    monkeypatch.setattr('anyway.parsers.news_flash_db_adapter.infographics_data_cache_updater', MagicMock())
+    monkeypatch.setattr(
+        "anyway.parsers.news_flash_db_adapter.infographics_data_cache_updater", MagicMock()
+    )
     adapter = DBAdapter(db=db_mock)
     adapter.insert_new_newsflash(newsflash)
     assert newsflash.road1 is None

@@ -861,8 +861,8 @@ class NewsFlash(Base):
     lat = Column(Float(), nullable=True)
     link = Column(Text(), nullable=True)
     lon = Column(Float(), nullable=True)
-    road1 = Column(Float(), nullable=True)
-    road2 = Column(Float(), nullable=True)
+    road1 = Column(Integer(), nullable=True)
+    road2 = Column(Integer(), nullable=True)
     resolution = Column(Text(), nullable=True)
     title = Column(Text(), nullable=True)
     source = Column(Text(), nullable=True)
@@ -876,6 +876,7 @@ class NewsFlash(Base):
     street2_hebrew = Column(Text(), nullable=True)
     non_urban_intersection_hebrew = Column(Text(), nullable=True)
     road_segment_name = Column(Text(), nullable=True)
+    road_segment_id = Column(Integer(), nullable=True)
     critical = Column(Boolean(), nullable=True)
     newsflash_location_qualification = Column(
         Integer(),
@@ -3002,8 +3003,8 @@ class TelegramGroups(TelegramGroupsBase):
 class TelegramGroupsTest(TelegramGroupsBase):
     __tablename__ = "telegram_groups_test"
 
-class TelegramForwardedMessages():
+class TelegramForwardedMessages(Base):
     __tablename__ = 'telegram_forwarded_messages'
     message_id = Column(String(), primary_key=True)
     newsflash_id = Column(BigInteger(), nullable=False)
-    group_sent = Column(String(), nullable=False),
+    group_sent = Column(String(), nullable=False)

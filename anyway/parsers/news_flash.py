@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 
@@ -28,10 +29,11 @@ def update_all_in_db(source=None, newsflash_id=None, update_cbs_location_only=Fa
     else:
         newsflash_items = db.get_all_newsflash()
     for i, newsflash in enumerate(newsflash_items):
+        logging.debug(f"Updating news-flash:{newsflash.id}")
         if not update_cbs_location_only:
             classify = news_flash_classifiers[newsflash.source]
             newsflash.organization = classify_organization(newsflash.source)
-            newsflash.accident = classify(newsflash.description or newsflash.title)
+            newsflash.accident = classify(newsflash.title)
         if newsflash.accident:
             extract_geo_features(
                 db=db, newsflash=newsflash, update_cbs_location_only=update_cbs_location_only
@@ -47,12 +49,11 @@ def scrape_extract_store_rss(site_name, db):
         if newsflash.date <= latest_date:
             break
         # TODO: pass both title and description, leaving this choice to the classifier
-        newsflash.accident = classify_rss(newsflash.title or newsflash.description)
+        newsflash.accident = classify_rss(newsflash.title)
         newsflash.organization = classify_organization(site_name)
         if newsflash.accident:
             # FIX: No accident-accurate date extracted
             extract_geo_features(db=db, newsflash=newsflash, update_cbs_location_only=False)
-            newsflash.set_critical()
         db.insert_new_newsflash(newsflash)
 
 
@@ -66,7 +67,6 @@ def scrape_extract_store_twitter(screen_name, db):
         newsflash.organization = classify_organization("twitter")
         if newsflash.accident:
             extract_geo_features(db=db, newsflash=newsflash, update_cbs_location_only=False)
-            newsflash.set_critical()
         db.insert_new_newsflash(newsflash)
 
 

@@ -341,6 +341,12 @@ def update_casualties_costs(filename):
 
     return parse(filename)
 
+@process.command()
+def compare_cbs_anyway():
+    from anyway.parsers.compare_cbs_and_anyway_road_segments_accidents import parse
+    return parse()
+
+
 
 @cli.group()
 def preprocess():

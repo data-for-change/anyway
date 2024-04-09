@@ -9,7 +9,9 @@ from anyway.parsers import infographics_data_cache_updater
 from anyway.parsers import timezones
 from anyway.models import NewsFlash
 from anyway.slack_accident_notifications import publish_notification
-from anyway.telegram_accident_notifications import trigger_generate_infographics_and_send_to_telegram
+from anyway.telegram_accident_notifications import (
+    trigger_generate_infographics_and_send_to_telegram,
+)
 from anyway.widgets.widget_utils import newsflash_has_location
 
 # fmt: off

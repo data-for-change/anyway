@@ -361,7 +361,7 @@ def geocode_extract(location):
                     else:
                         street = item["long_name"]
                 elif "point_of_interest" in item["types"] or "intersection" in item["types"]:
-                    intersection = item["long_name"]
+                    street = item["long_name"]
                 elif "locality" in item["types"]:
                     city = item["long_name"]
                 elif "administrative_area_level_2" in item["types"]:

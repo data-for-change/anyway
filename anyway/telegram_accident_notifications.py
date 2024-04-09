@@ -2,6 +2,7 @@ import logging
 
 from anyway import secrets
 from anyway.models import TelegramForwardedMessages
+from anyway.utilities import trigger_airflow_dag
 from anyway.app_and_db import db
 import telebot
 import boto3
@@ -12,6 +13,7 @@ ANYWAY_BASE_API_URL = "https://www.anyway.co.il/api"
 INFOGRAPHICS_S3_BUCKET = "dfc-anyway-infographics-images"
 
 TELEGRAM_CHANNEL_CHAT_ID = -1001666083560
+TELEGRAM_POST_VERIFICATION_CHANNEL_CHAT_ID = -1002064130267
 TELEGRAM_LINKED_GROUP_CHAT_ID = -1001954877540
 TEXT_FOR_AFTER_INFOGRAPHICS_MESSAGE = 'מקור המידע בלמ"ס. נתוני התאונה שבמבזק לא נכללים באינפוגרפיקה. ' \
                                       'הופק באמצעות ANYWAY מבית "נתון לשינוי" למידע נוסף:'
@@ -109,3 +111,10 @@ def create_public_urls_for_infographics_images(folder_name):
         infographic_name = extract_infographic_name_from_s3_object(key)
         presigned_urls[infographic_name] = url
     return presigned_urls
+
+@staticmethod
+def trigger_generate_infographics_and_send_to_telegram(newsflash_id, pre_verification_chat=True):
+    dag_conf = {"news_flash_id": newsflash_id}
+    dag_conf["chat_id"] = TELEGRAM_CHANNEL_CHAT_ID if pre_verification_chat \
+        else TELEGRAM_POST_VERIFICATION_CHANNEL_CHAT_ID
+    trigger_airflow_dag("generate-and-send-infographics-images", dag_conf)

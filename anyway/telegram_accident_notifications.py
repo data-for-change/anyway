@@ -15,6 +15,9 @@ INFOGRAPHICS_S3_BUCKET = "dfc-anyway-infographics-images"
 TELEGRAM_CHANNEL_CHAT_ID = -1001666083560
 TELEGRAM_POST_VERIFICATION_CHANNEL_CHAT_ID = -1002064130267
 TELEGRAM_LINKED_GROUP_CHAT_ID = -1001954877540
+TELEGRAM_POST_VERIFICATION_LINKED_GROUP_CHAT_ID = -1001990172076
+telegram_linked_group_by_channel = {TELEGRAM_CHANNEL_CHAT_ID: TELEGRAM_POST_VERIFICATION_CHANNEL_CHAT_ID,
+                                    TELEGRAM_LINKED_GROUP_CHAT_ID: TELEGRAM_POST_VERIFICATION_LINKED_GROUP_CHAT_ID}
 TEXT_FOR_AFTER_INFOGRAPHICS_MESSAGE = 'מקור המידע בלמ"ס. נתוני התאונה שבמבזק לא נכללים באינפוגרפיקה. ' \
                                       'הופק באמצעות ANYWAY מבית "נתון לשינוי" למידע נוסף:'
 
@@ -56,10 +59,10 @@ def fetch_transcription_by_widget_name(newsflash_id):
     return transcription_by_widget_name
 
 
-def send_after_infographics_message(bot, message_id_in_group, newsflash_id):
+def send_after_infographics_message(bot, message_id_in_group, newsflash_id, linked_group):
     newsflash_link = f"https://media.anyway.co.il/newsflash/{newsflash_id}"
     message = f"{TEXT_FOR_AFTER_INFOGRAPHICS_MESSAGE}\n{newsflash_link}"
-    return bot.send_message(TELEGRAM_LINKED_GROUP_CHAT_ID, message, reply_to_message_id=message_id_in_group)
+    return bot.send_message(linked_group, message, reply_to_message_id=message_id_in_group)
 
 
 def publish_notification(newsflash_id, chat_id=TELEGRAM_CHANNEL_CHAT_ID):
@@ -74,7 +77,7 @@ def publish_notification(newsflash_id, chat_id=TELEGRAM_CHANNEL_CHAT_ID):
     db.session.commit()
 
 
-def send_infographics_to_telegram(root_message_id, newsflash_id):
+def send_infographics_to_telegram(root_message_id, newsflash_id, channel_of_initial_message):
     #every message in the channel is automatically forwarded to the linked discussion group.
     #to create a comment on the channel message, we need to send a reply to the
     #forwareded message in the discussion group.
@@ -83,11 +86,12 @@ def send_infographics_to_telegram(root_message_id, newsflash_id):
     transcription_by_widget_name = fetch_transcription_by_widget_name(newsflash_id)
     urls_by_infographic_name = create_public_urls_for_infographics_images(str(newsflash_id))
 
+    linked_group = telegram_linked_group_by_channel[channel_of_initial_message]
     for infographic_name, url in urls_by_infographic_name.items():
         text = transcription_by_widget_name[infographic_name] \
             if infographic_name in transcription_by_widget_name else None
-        bot.send_photo(TELEGRAM_LINKED_GROUP_CHAT_ID, url, reply_to_message_id=root_message_id, caption=text)
-    send_after_infographics_message(bot, root_message_id, newsflash_id)
+        bot.send_photo(linked_group, url, reply_to_message_id=root_message_id, caption=text)
+    send_after_infographics_message(bot, root_message_id, newsflash_id, linked_group)
     logging.info("notification send done")
 
 def extract_infographic_name_from_s3_object(s3_object_name):

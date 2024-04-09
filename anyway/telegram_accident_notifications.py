@@ -16,8 +16,8 @@ TELEGRAM_LINKED_GROUP_CHAT_ID = -1001954877540
 TEXT_FOR_AFTER_INFOGRAPHICS_MESSAGE = 'מקור המידע בלמ"ס. נתוני התאונה שבמבזק לא נכללים באינפוגרפיקה. ' \
                                       'הופק באמצעות ANYWAY מבית "נתון לשינוי" למידע נוסף:'
 
-def send_initial_message_in_channel(bot, text):
-    return bot.send_message(TELEGRAM_CHANNEL_CHAT_ID, text)
+def send_initial_message_in_channel(bot, text, chat_id):
+    return bot.send_message(chat_id, text)
 
 
 def fetch_message_id_for_initial_message_in_discussion_group(bot, thread_starting_message_in_channel):
@@ -60,10 +60,10 @@ def send_after_infographics_message(bot, message_id_in_group, newsflash_id):
     return bot.send_message(TELEGRAM_LINKED_GROUP_CHAT_ID, message, reply_to_message_id=message_id_in_group)
 
 
-def publish_notification(newsflash_id):
+def publish_notification(newsflash_id, chat_id=TELEGRAM_CHANNEL_CHAT_ID):
     accident_text = create_accident_text(newsflash_id)
     bot = telebot.TeleBot(secrets.get("BOT_TOKEN"))
-    initial_message_in_channel = send_initial_message_in_channel(bot, accident_text)
+    initial_message_in_channel = send_initial_message_in_channel(bot, accident_text, chat_id)
     forwarded_message = TelegramForwardedMessages(message_id=initial_message_in_channel.message_id,
                                                   newsflash_id=newsflash_id,
                                                   group_sent=TELEGRAM_CHANNEL_CHAT_ID

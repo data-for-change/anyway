@@ -3,7 +3,6 @@ import logging
 from anyway import secrets
 from anyway.models import TelegramForwardedMessages, NewsFlash
 from anyway.app_and_db import db
-from anyway.slack_accident_notifications import publish_notification
 from anyway.utilities import trigger_airflow_dag
 from anyway.widgets.widget_utils import newsflash_has_location
 import telebot

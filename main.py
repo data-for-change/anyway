@@ -505,7 +505,7 @@ def telegram():
 
 @telegram.command()
 @click.option("--id", type=int)
-@click.option("--chat", type=int)
+@click.option("--chat", type=int, required=False)
 def send_notification(id, chat):
     from anyway.telegram_accident_notifications import publish_notification
 
@@ -515,7 +515,7 @@ def send_notification(id, chat):
 # this is for testing, in production we use a dag with separate tasks
 @telegram.command()
 @click.option("--id", type=int)
-@click.option("--chat", type=int)
+@click.option("--chat", type=int, required=False)
 def generate_images_and_send_notification(id, chat):
     from anyway.telegram_accident_notifications import publish_notification
     from anyway.infographic_image_generator import upload_infographics_images_to_s3

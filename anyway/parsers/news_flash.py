@@ -10,6 +10,7 @@ from anyway.parsers.news_flash_classifiers import (
     classify_organization,
 )
 from anyway.parsers.location_extraction import extract_geo_features
+from anyway.telegram_accident_notifications import publish_notifications
 
 # FIX: classifier should be chosen by source (screen name), so `twitter` should be `mda`
 news_flash_classifiers = {"ynet": classify_rss, "twitter": classify_tweets, "walla": classify_rss}
@@ -54,7 +55,7 @@ def scrape_extract_store_rss(site_name, db):
         if newsflash.accident:
             # FIX: No accident-accurate date extracted
             extract_geo_features(db=db, newsflash=newsflash, update_cbs_location_only=False)
-        db.insert_new_newsflash(newsflash)
+        db.insert_new_newsflash(newsflash, after_insertion_callback=send_notifications)
 
 
 def scrape_extract_store_twitter(screen_name, db):
@@ -67,7 +68,7 @@ def scrape_extract_store_twitter(screen_name, db):
         newsflash.organization = classify_organization("twitter")
         if newsflash.accident:
             extract_geo_features(db=db, newsflash=newsflash, update_cbs_location_only=False)
-        db.insert_new_newsflash(newsflash)
+        db.insert_new_newsflash(newsflash, after_insertion_callback=publish_notifications)
 
 
 def scrape_all():
@@ -79,3 +80,10 @@ def scrape_all():
     scrape_extract_store_rss("ynet", db)
     scrape_extract_store_rss("walla", db)
     # scrape_extract_store_twitter("mda_israel", db)
+
+
+def send_notifications(newsflash):
+    try:
+        publish_notifications(newsflash)
+    except Exception:
+        logging.error("Failed to publish notifications", exc_info=True)

@@ -2,6 +2,7 @@ import logging
 
 from anyway import secrets
 from anyway.models import TelegramForwardedMessages
+from anyway.utilities import trigger_airflow_dag
 from anyway.app_and_db import db
 import telebot
 import boto3
@@ -12,12 +13,16 @@ ANYWAY_BASE_API_URL = "https://www.anyway.co.il/api"
 INFOGRAPHICS_S3_BUCKET = "dfc-anyway-infographics-images"
 
 TELEGRAM_CHANNEL_CHAT_ID = -1001666083560
+TELEGRAM_POST_VERIFICATION_CHANNEL_CHAT_ID = -1002064130267
 TELEGRAM_LINKED_GROUP_CHAT_ID = -1001954877540
+TELEGRAM_POST_VERIFICATION_LINKED_GROUP_CHAT_ID = -1001990172076
+telegram_linked_group_by_channel = {TELEGRAM_CHANNEL_CHAT_ID: TELEGRAM_POST_VERIFICATION_CHANNEL_CHAT_ID,
+                                    TELEGRAM_LINKED_GROUP_CHAT_ID: TELEGRAM_POST_VERIFICATION_LINKED_GROUP_CHAT_ID}
 TEXT_FOR_AFTER_INFOGRAPHICS_MESSAGE = 'מקור המידע בלמ"ס. נתוני התאונה שבמבזק לא נכללים באינפוגרפיקה. ' \
                                       'הופק באמצעות ANYWAY מבית "נתון לשינוי" למידע נוסף:'
 
-def send_initial_message_in_channel(bot, text):
-    return bot.send_message(TELEGRAM_CHANNEL_CHAT_ID, text)
+def send_initial_message_in_channel(bot, text, chat_id):
+    return bot.send_message(chat_id, text)
 
 
 def fetch_message_id_for_initial_message_in_discussion_group(bot, thread_starting_message_in_channel):
@@ -54,16 +59,16 @@ def fetch_transcription_by_widget_name(newsflash_id):
     return transcription_by_widget_name
 
 
-def send_after_infographics_message(bot, message_id_in_group, newsflash_id):
+def send_after_infographics_message(bot, message_id_in_group, newsflash_id, linked_group):
     newsflash_link = f"https://media.anyway.co.il/newsflash/{newsflash_id}"
     message = f"{TEXT_FOR_AFTER_INFOGRAPHICS_MESSAGE}\n{newsflash_link}"
-    return bot.send_message(TELEGRAM_LINKED_GROUP_CHAT_ID, message, reply_to_message_id=message_id_in_group)
+    return bot.send_message(linked_group, message, reply_to_message_id=message_id_in_group)
 
 
-def publish_notification(newsflash_id):
+def publish_notification(newsflash_id, chat_id=TELEGRAM_CHANNEL_CHAT_ID):
     accident_text = create_accident_text(newsflash_id)
     bot = telebot.TeleBot(secrets.get("BOT_TOKEN"))
-    initial_message_in_channel = send_initial_message_in_channel(bot, accident_text)
+    initial_message_in_channel = send_initial_message_in_channel(bot, accident_text, chat_id)
     forwarded_message = TelegramForwardedMessages(message_id=initial_message_in_channel.message_id,
                                                   newsflash_id=newsflash_id,
                                                   group_sent=TELEGRAM_CHANNEL_CHAT_ID
@@ -72,7 +77,7 @@ def publish_notification(newsflash_id):
     db.session.commit()
 
 
-def send_infographics_to_telegram(root_message_id, newsflash_id):
+def send_infographics_to_telegram(root_message_id, newsflash_id, channel_of_initial_message):
     #every message in the channel is automatically forwarded to the linked discussion group.
     #to create a comment on the channel message, we need to send a reply to the
     #forwareded message in the discussion group.
@@ -81,11 +86,12 @@ def send_infographics_to_telegram(root_message_id, newsflash_id):
     transcription_by_widget_name = fetch_transcription_by_widget_name(newsflash_id)
     urls_by_infographic_name = create_public_urls_for_infographics_images(str(newsflash_id))
 
+    linked_group = telegram_linked_group_by_channel[channel_of_initial_message]
     for infographic_name, url in urls_by_infographic_name.items():
         text = transcription_by_widget_name[infographic_name] \
             if infographic_name in transcription_by_widget_name else None
-        bot.send_photo(TELEGRAM_LINKED_GROUP_CHAT_ID, url, reply_to_message_id=root_message_id, caption=text)
-    send_after_infographics_message(bot, root_message_id, newsflash_id)
+        bot.send_photo(linked_group, url, reply_to_message_id=root_message_id, caption=text)
+    send_after_infographics_message(bot, root_message_id, newsflash_id, linked_group)
     logging.info("notification send done")
 
 def extract_infographic_name_from_s3_object(s3_object_name):
@@ -109,3 +115,10 @@ def create_public_urls_for_infographics_images(folder_name):
         infographic_name = extract_infographic_name_from_s3_object(key)
         presigned_urls[infographic_name] = url
     return presigned_urls
+
+@staticmethod
+def trigger_generate_infographics_and_send_to_telegram(newsflash_id, pre_verification_chat=True):
+    dag_conf = {"news_flash_id": newsflash_id}
+    dag_conf["chat_id"] = TELEGRAM_CHANNEL_CHAT_ID if pre_verification_chat \
+        else TELEGRAM_POST_VERIFICATION_CHANNEL_CHAT_ID
+    trigger_airflow_dag("generate-and-send-infographics-images", dag_conf)

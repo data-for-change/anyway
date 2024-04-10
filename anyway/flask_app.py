@@ -1361,7 +1361,7 @@ def telegram_webhook():
         forward_from_message_id = update['message']['forward_from_message_id']
         forwarded_message = db.session.query(TelegramForwardedMessages)\
             .filter(TelegramForwardedMessages.message_id == str(forward_from_message_id)).first()
-        send_infographics_to_telegram(message_id, forwarded_message.newsflash_id)
+        send_infographics_to_telegram(message_id, forwarded_message.newsflash_id, forwarded_message.group_sent)
         return jsonify(success=True)
     except Exception as e:
         logging.exception("Failed to process Telegram webhook: %s", e)

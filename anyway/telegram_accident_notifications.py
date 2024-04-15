@@ -71,7 +71,7 @@ def publish_notification(newsflash_id, chat_id=TELEGRAM_CHANNEL_CHAT_ID):
     initial_message_in_channel = send_initial_message_in_channel(bot, accident_text, chat_id)
     forwarded_message = TelegramForwardedMessages(message_id=initial_message_in_channel.message_id,
                                                   newsflash_id=newsflash_id,
-                                                  group_sent=TELEGRAM_CHANNEL_CHAT_ID
+                                                  group_sent=chat_id
                                                   )
     db.session.add(forwarded_message)
     db.session.commit()

@@ -13,6 +13,7 @@ from collections import OrderedDict
 from flask import request, Response, make_response, jsonify
 from sqlalchemy import and_, not_, or_
 
+
 from anyway.app_and_db import db
 from anyway.backend_constants import (
     BE_CONST,
@@ -37,8 +38,8 @@ DEFAULT_OFFSET_REQ_PARAMETER = 0
 DEFAULT_LIMIT_REQ_PARAMETER = 100
 DEFAULT_NUMBER_OF_YEARS_AGO = 5
 
-
 class NewsFlashQuery(BaseModel):
+
     id: Optional[int]
     road_number: Optional[int]
     offset: Optional[int] = DEFAULT_OFFSET_REQ_PARAMETER
@@ -199,7 +200,7 @@ def gen_news_flash_query(
             NewsFlash.accident == True,
             not_(and_(NewsFlash.lat == 0, NewsFlash.lon == 0)),
             not_(and_(NewsFlash.lat == None, NewsFlash.lon == None)),
-        )
+            )
     ).order_by(NewsFlash.date.desc())
 
     query = query.offset(offset)
@@ -230,7 +231,7 @@ def gen_news_flash_query_v2(session, valid_params: dict):
             NewsFlash.accident == True,
             not_(and_(NewsFlash.lat == 0, NewsFlash.lon == 0)),
             not_(and_(NewsFlash.lat == None, NewsFlash.lon == None)),
-        )
+            )
     ).order_by(NewsFlash.date.desc())
     query = query.offset(valid_params["offset"])
     query = query.limit(valid_params["limit"])
@@ -284,14 +285,14 @@ def filter_by_resolutions(query, resolutions: List[str]):
             and_(
                 NewsFlash.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD.value,
                 NewsFlash.road_segment_name != None,
-            )
+                )
         )
     if "street" in resolutions:
         ands.append(
             and_(
                 NewsFlash.resolution == BE_CONST.ResolutionCategories.STREET.value,
                 NewsFlash.street1_hebrew != None,
-            )
+                )
         )
     if len(ands) > 1:
         return query.filter(or_(*ands))
@@ -409,14 +410,14 @@ def update_news_flash_qualifying(id):
         )
         if new_location_qualifiction == NewsflashLocationQualification.MANUAL.value and \
                 old_location_qualifiction != NewsflashLocationQualification.MANUAL.value:
-                    trigger_generate_infographics_and_send_to_telegram(id, False)
+            trigger_generate_infographics_and_send_to_telegram(id, False)
         return Response(status=HTTPStatus.OK)
 
 
 def get_downloaded_data(format, years_ago):
     request_params = get_request_params_from_request_values(request.values)
     end_time = datetime.datetime.now()
-    start_time = end_time - datetime.timedelta(days=years_ago * 365)
+    start_time = end_time - datetime.timedelta(days=years_ago*365)
     columns = OrderedDict()
 
     columns[AccidentMarkerView.id] = 'מס תאונה'
@@ -469,6 +470,7 @@ def get_downloaded_data(format, years_ago):
     columns[AccidentMarkerView.x] = 'X קואורדינטה'
     columns[AccidentMarkerView.y] = 'Y קואורדינטה'
 
+
     related_accidents = get_accidents_stats(
         table_obj=AccidentMarkerView,
         columns=columns.keys(),
@@ -500,24 +502,20 @@ def get_downloaded_data(format, years_ago):
     df.rename(columns={key.name.replace('_hebrew', ''): value for key, value in columns.items()}, inplace=True)
 
     index_to_insert_severities = list(columns.values()).index('מהירות מותרת')
-    output_column_names = list(columns.values())[:index_to_insert_severities] + list(severities_hebrew) + list(
-        columns.values())[index_to_insert_severities:]
+    output_column_names = list(columns.values())[:index_to_insert_severities] + list(severities_hebrew) + list(columns.values())[index_to_insert_severities:]
     df = df[output_column_names]
-    df.rename(
-        columns={'פצוע קל': 'פצוע/ה קל', 'פצוע בינוני': 'פצוע/ה בינוני', 'פצוע קשה': 'פצוע/ה קשה', 'הרוג': 'הרוג/ה'},
-        inplace=True)
+    df.rename(columns={'פצוע קל': 'פצוע/ה קל', 'פצוע בינוני': 'פצוע/ה בינוני', 'פצוע קשה': 'פצוע/ה קשה', 'הרוג': 'הרוג/ה'}, inplace=True)
 
     if format == 'csv':
         df.to_csv(buffer, encoding="utf-8")
-        mimetype = 'text/csv'
+        mimetype ='text/csv'
         file_type = 'csv'
     elif format == 'xlsx':
         df.to_excel(buffer, encoding="utf-8")
-        mimetype = 'application/vnd.ms-excel'
+        mimetype='application/vnd.ms-excel'
         file_type = 'xlsx'
     else:
         raise Exception(f'File format not supported for downloading : {format}')
 
-    headers = {
-        'Content-Disposition': f'attachment; filename=anyway_download_{datetime.datetime.now().strftime("%d_%m_%Y_%H_%M_%S")}.{file_type}'}
+    headers = { 'Content-Disposition': f'attachment; filename=anyway_download_{datetime.datetime.now().strftime("%d_%m_%Y_%H_%M_%S")}.{file_type}' }
     return Response(buffer.getvalue(), mimetype=mimetype, headers=headers)

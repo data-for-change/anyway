@@ -13,7 +13,6 @@ from collections import OrderedDict
 from flask import request, Response, make_response, jsonify
 from sqlalchemy import and_, not_, or_
 
-
 from anyway.app_and_db import db
 from anyway.backend_constants import (
     BE_CONST,
@@ -31,14 +30,15 @@ from anyway.error_code_and_strings import Errors as Es
 from anyway.parsers import fields_to_resolution, resolution_dict
 from anyway.models import AccidentMarkerView, InvolvedView
 from anyway.widgets.widget_utils import get_accidents_stats
+from anyway.telegram_accident_notifications import trigger_generate_infographics_and_send_to_telegram
 from io import BytesIO
 
 DEFAULT_OFFSET_REQ_PARAMETER = 0
 DEFAULT_LIMIT_REQ_PARAMETER = 100
 DEFAULT_NUMBER_OF_YEARS_AGO = 5
 
-class NewsFlashQuery(BaseModel):
 
+class NewsFlashQuery(BaseModel):
     id: Optional[int]
     road_number: Optional[int]
     offset: Optional[int] = DEFAULT_OFFSET_REQ_PARAMETER
@@ -148,16 +148,16 @@ def news_flash_new(args: dict) -> List[dict]:
 
 
 def gen_news_flash_query(
-    session,
-    source=None,
-    start_date=None,
-    end_date=None,
-    interurban_only=None,
-    road_number=None,
-    road_segment=None,
-    offset=None,
-    limit=None,
-    last_minutes=None
+        session,
+        source=None,
+        start_date=None,
+        end_date=None,
+        interurban_only=None,
+        road_number=None,
+        road_segment=None,
+        offset=None,
+        limit=None,
+        last_minutes=None
 ):
     query = session.query(NewsFlash)
     # get all possible sources
@@ -312,12 +312,12 @@ def normalize_query(params: dict):
 
 
 def update_location_verification_history(
-    user_id: int,
-    news_flash_id: int,
-    prev_location: str,
-    prev_qualification: int,
-    new_location: str,
-    new_qualification: int,
+        user_id: int,
+        news_flash_id: int,
+        prev_location: str,
+        prev_qualification: int,
+        new_location: str,
+        new_qualification: int,
 ):
     new_location_qualifiction_history = LocationVerificationHistory(
         user_id=user_id,
@@ -388,7 +388,7 @@ def update_news_flash_qualifying(id):
                 )
         else:
             if ((news_flash_obj.road_segment_name is None) or (news_flash_obj.road1 is None)) and (
-                (news_flash_obj.yishuv_name is None) or (news_flash_obj.street1_hebrew is None)
+                    (news_flash_obj.yishuv_name is None) or (news_flash_obj.street1_hebrew is None)
             ):
                 logging.error("try to set qualification on empty location.")
                 return return_json_error(Es.BR_BAD_FIELD)
@@ -407,13 +407,16 @@ def update_news_flash_qualifying(id):
             new_location=new_location,
             new_qualification=new_location_qualifiction,
         )
+        if new_location_qualifiction == NewsflashLocationQualification.MANUAL.value and \
+                old_location_qualifiction != NewsflashLocationQualification.MANUAL.value:
+                    trigger_generate_infographics_and_send_to_telegram(id, False)
         return Response(status=HTTPStatus.OK)
 
 
 def get_downloaded_data(format, years_ago):
     request_params = get_request_params_from_request_values(request.values)
     end_time = datetime.datetime.now()
-    start_time = end_time - datetime.timedelta(days=years_ago*365)
+    start_time = end_time - datetime.timedelta(days=years_ago * 365)
     columns = OrderedDict()
 
     columns[AccidentMarkerView.id] = 'מס תאונה'
@@ -466,21 +469,20 @@ def get_downloaded_data(format, years_ago):
     columns[AccidentMarkerView.x] = 'X קואורדינטה'
     columns[AccidentMarkerView.y] = 'Y קואורדינטה'
 
-
     related_accidents = get_accidents_stats(
-            table_obj=AccidentMarkerView,
-            columns=columns.keys(),
-            filters=request_params.location_info,
-            start_time=start_time,
-            end_time=end_time
-        )
+        table_obj=AccidentMarkerView,
+        columns=columns.keys(),
+        filters=request_params.location_info,
+        start_time=start_time,
+        end_time=end_time
+    )
     accident_ids = list(related_accidents['id'].values())
     accident_severities = get_accidents_stats(
-            table_obj=InvolvedView,
-            group_by=("accident_id", "injury_severity_hebrew"),
-            count="injury_severity_hebrew",
-            filters={"accident_id": accident_ids}
-        )
+        table_obj=InvolvedView,
+        group_by=("accident_id", "injury_severity_hebrew"),
+        count="injury_severity_hebrew",
+        filters={"accident_id": accident_ids}
+    )
 
     severities_hebrew = set()
     for i, accident_id in enumerate(accident_ids):
@@ -498,20 +500,24 @@ def get_downloaded_data(format, years_ago):
     df.rename(columns={key.name.replace('_hebrew', ''): value for key, value in columns.items()}, inplace=True)
 
     index_to_insert_severities = list(columns.values()).index('מהירות מותרת')
-    output_column_names = list(columns.values())[:index_to_insert_severities] + list(severities_hebrew) + list(columns.values())[index_to_insert_severities:]
+    output_column_names = list(columns.values())[:index_to_insert_severities] + list(severities_hebrew) + list(
+        columns.values())[index_to_insert_severities:]
     df = df[output_column_names]
-    df.rename(columns={'פצוע קל': 'פצוע/ה קל', 'פצוע בינוני': 'פצוע/ה בינוני', 'פצוע קשה': 'פצוע/ה קשה', 'הרוג': 'הרוג/ה'}, inplace=True)
+    df.rename(
+        columns={'פצוע קל': 'פצוע/ה קל', 'פצוע בינוני': 'פצוע/ה בינוני', 'פצוע קשה': 'פצוע/ה קשה', 'הרוג': 'הרוג/ה'},
+        inplace=True)
 
     if format == 'csv':
         df.to_csv(buffer, encoding="utf-8")
-        mimetype ='text/csv'
+        mimetype = 'text/csv'
         file_type = 'csv'
     elif format == 'xlsx':
         df.to_excel(buffer, encoding="utf-8")
-        mimetype='application/vnd.ms-excel'
+        mimetype = 'application/vnd.ms-excel'
         file_type = 'xlsx'
     else:
         raise Exception(f'File format not supported for downloading : {format}')
 
-    headers = { 'Content-Disposition': f'attachment; filename=anyway_download_{datetime.datetime.now().strftime("%d_%m_%Y_%H_%M_%S")}.{file_type}' }
+    headers = {
+        'Content-Disposition': f'attachment; filename=anyway_download_{datetime.datetime.now().strftime("%d_%m_%Y_%H_%M_%S")}.{file_type}'}
     return Response(buffer.getvalue(), mimetype=mimetype, headers=headers)

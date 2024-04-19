@@ -31,10 +31,14 @@ class SegmentJunctions:
         tmp: List[RoadJunctionKM] = db.session.query(RoadJunctionKM).all()
         res = {}
         rkj = {}
+        road_last_junction_km = {}
         for t in tmp:
             if t.road not in rkj:
                 rkj[t.road] = {}
+                road_last_junction_km[t.road] = -1
             rkj[t.road][t.km] = t.non_urban_intersection
+            if road_last_junction_km[t.road] < t.km:
+                road_last_junction_km[t.road] = t.km
         tmp: List[RoadSegments] = db.session.query(RoadSegments).all()
         segments = {t.segment_id: t for t in tmp}
         for seg_id, seg in segments.items():
@@ -42,7 +46,15 @@ class SegmentJunctions:
                 logging.warning(f"No junctions in road {seg.road}.")
                 continue
             junctions = [
-                rkj[seg.road][km] for km in rkj[seg.road].keys() if seg.from_km <= km < seg.to_km
+                rkj[seg.road][km]
+                for km in rkj[seg.road].keys()
+                if is_junction_km_in_segment(km, seg, road_last_junction_km.get(seg.road))
             ]
             res[seg_id] = junctions
         return res
+
+
+def is_junction_km_in_segment(km: float, seg: RoadSegments, road_last_km: int) -> bool:
+    a = seg.from_km <= km < seg.to_km
+    b = km == road_last_km and seg.to_km == road_last_km
+    return a or b

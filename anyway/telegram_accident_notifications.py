@@ -12,12 +12,12 @@ import requests
 ANYWAY_BASE_API_URL = "https://www.anyway.co.il/api"
 INFOGRAPHICS_S3_BUCKET = "dfc-anyway-infographics-images"
 
-TELEGRAM_CHANNEL_CHAT_ID = -1001666083560
-TELEGRAM_POST_VERIFICATION_CHANNEL_CHAT_ID = -1002064130267
+TELEGRAM_CHANNEL_CHAT_ID = "-1001666083560"
+TELEGRAM_POST_VERIFICATION_CHANNEL_CHAT_ID = "-1002064130267"
 TELEGRAM_LINKED_GROUP_CHAT_ID = -1001954877540
 TELEGRAM_POST_VERIFICATION_LINKED_GROUP_CHAT_ID = -1001990172076
-telegram_linked_group_by_channel = {TELEGRAM_CHANNEL_CHAT_ID: TELEGRAM_POST_VERIFICATION_CHANNEL_CHAT_ID,
-                                    TELEGRAM_LINKED_GROUP_CHAT_ID: TELEGRAM_POST_VERIFICATION_LINKED_GROUP_CHAT_ID}
+telegram_linked_group_by_channel = {TELEGRAM_CHANNEL_CHAT_ID: TELEGRAM_LINKED_GROUP_CHAT_ID,
+                                    TELEGRAM_POST_VERIFICATION_CHANNEL_CHAT_ID: TELEGRAM_POST_VERIFICATION_LINKED_GROUP_CHAT_ID}
 TEXT_FOR_AFTER_INFOGRAPHICS_MESSAGE = 'מקור המידע בלמ"ס. נתוני התאונה שבמבזק לא נכללים באינפוגרפיקה. ' \
                                       'הופק באמצעות ANYWAY מבית "נתון לשינוי" למידע נוסף:'
 
@@ -71,7 +71,7 @@ def publish_notification(newsflash_id, chat_id=TELEGRAM_CHANNEL_CHAT_ID):
     initial_message_in_channel = send_initial_message_in_channel(bot, accident_text, chat_id)
     forwarded_message = TelegramForwardedMessages(message_id=initial_message_in_channel.message_id,
                                                   newsflash_id=newsflash_id,
-                                                  group_sent=TELEGRAM_CHANNEL_CHAT_ID
+                                                  group_sent=chat_id
                                                   )
     db.session.add(forwarded_message)
     db.session.commit()

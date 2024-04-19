@@ -3,6 +3,7 @@ import logging
 from typing import Union, Dict, List, Optional, Type
 import hashlib
 from anyway.request_params import RequestParams
+from anyway.widgets.widget_utils import get_accidents_stats
 
 
 class Widget:
@@ -18,6 +19,7 @@ class Widget:
       `is_in_cache()` and `is_included()` when needed.
     """
 
+    __LOCATION_ACCURACY_FILTER: Optional[dict] = None
     request_params: RequestParams
     name: str
     rank: int
@@ -91,6 +93,37 @@ class Widget:
                 h.update(file_bytes)
         d = h.digest()
         return d.hex()
+
+    @classmethod
+    def add_widget_accuracy_filter(cls, filters: Optional[dict]) -> Optional[dict]:
+        if cls.__LOCATION_ACCURACY_FILTER is None:
+            return filters
+        elif filters is None:
+            return cls.__LOCATION_ACCURACY_FILTER
+        else:
+            return filters.update(cls.__LOCATION_ACCURACY_FILTER)
+
+    @classmethod
+    def widget_accidents_stats(cls,
+                               table_obj,
+                               columns=None,
+                               filters=None,
+                               group_by=None,
+                               count=None,
+                               cnt_distinct=False,
+                               start_time=None,
+                               end_time=None,
+                               ):
+        return get_accidents_stats(
+            table_obj=table_obj,
+            columns=columns,
+            filters=cls.add_widget_accuracy_filter(filters),
+            group_by=group_by,
+            count=count,
+            cnt_distinct=cnt_distinct,
+            start_time=start_time,
+            end_time=end_time,
+        )
 
     @classmethod
     def generate_widget_data(cls, request_params: RequestParams):

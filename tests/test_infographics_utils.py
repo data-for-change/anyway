@@ -50,7 +50,7 @@ class TestInfographicsUtilsCase(unittest.TestCase):
     ]
     segments = [
         RoadSegments(segment_id=1, road=1, from_km=0.0, to_km=1.0),
-        # RoadSegments(segment_id=2, road=1, from_km=1.0, to_km=2.0),
+        RoadSegments(segment_id=2, road=1, from_km=1.0, to_km=2.0),
         RoadSegments(segment_id=3, road=1, from_km=1.0, to_km=3.0),
         RoadSegments(segment_id=4, road=1, from_km=3.0, to_km=4.0),
         RoadSegments(segment_id=11, road=10, from_km=0.0, to_km=10.0),
@@ -76,8 +76,10 @@ class TestInfographicsUtilsCase(unittest.TestCase):
         sg = SegmentJunctions()
         actual = sg.get_segment_junctions(1)
         self.assertEqual([], actual, "1")
+        actual = sg.get_segment_junctions(2)
+        self.assertEqual([1], actual, "2")
         actual = sg.get_segment_junctions(3)
-        self.assertEqual([1, 2], actual, "2")
+        self.assertEqual([1, 2, 3], actual, "3")
 
     def test_get_filter_expression(self):
         actual = get_filter_expression(AccidentMarkerView, "road_segment_name", "seg1")

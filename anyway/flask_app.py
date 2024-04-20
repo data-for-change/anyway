@@ -171,7 +171,7 @@ assets.register(
     ),
 )
 
-CORS(app, resources=get_cors_config())
+CORS(app, resources=get_cors_config(), allow_credentials=True)
 
 jinja_environment = jinja2.Environment(
     autoescape=True,

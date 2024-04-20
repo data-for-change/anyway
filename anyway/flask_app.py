@@ -1099,8 +1099,9 @@ app.add_url_rule("/api/v1/news-flash", endpoint=None, view_func=news_flash, meth
 
 @app.after_request
 def add_allow_methods_header(response):
-    if request.method == 'OPTIONS' and request.path.startswith("/api/news-flash/"):
+    if request.path.startswith("/api/news-flash/"):
         response.headers['Access-Control-Allow-Methods'] = "GET, POST, PATCH"
+        response.headers['Access-Control-Allow-Origin'] = "*"
     return response
 
 nf_parser = reqparse.RequestParser()

@@ -1547,3 +1547,17 @@ class DownloadData(Resource):
         return get_downloaded_data(
             args.get("format", "csv"), args.get("years_ago", DEFAULT_NUMBER_OF_YEARS_AGO)
         )
+
+
+@api.route("/api/test_roles", methods=["GET"])
+def test_roles():
+    return test_roles_func()
+
+
+@roles_accepted(
+    BE_CONST.Roles2Names.Authenticated.value,
+    BE_CONST.Roles2Names.Location_verification.value,
+    need_all_permission=True,
+)
+def test_roles_func():
+    return jsonify({"message": "Roles test successful!"}), 200

@@ -171,7 +171,7 @@ assets.register(
     ),
 )
 
-CORS(app, resources=get_cors_config())
+CORS(app, resources=get_cors_config(), allow_credentials=True)
 
 jinja_environment = jinja2.Environment(
     autoescape=True,
@@ -1097,6 +1097,12 @@ app.add_url_rule("/api/comments", endpoint=None, view_func=create_comment, metho
 
 app.add_url_rule("/api/v1/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
 
+@app.after_request
+def add_allow_methods_header(response):
+    if request.path.startswith("/api/news-flash/"):
+        response.headers['Access-Control-Allow-Methods'] = "GET, POST, PATCH"
+        response.headers['Access-Control-Allow-Origin'] = "*"
+    return response
 
 nf_parser = reqparse.RequestParser()
 nf_parser.add_argument("id", type=int, help="News flash id")

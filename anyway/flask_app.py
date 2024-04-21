@@ -1097,6 +1097,7 @@ app.add_url_rule("/api/comments", endpoint=None, view_func=create_comment, metho
 
 app.add_url_rule("/api/v1/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
 
+
 @app.after_request
 def add_allow_methods_header(response):
     if request.path.startswith("/api/news-flash/"):
@@ -1547,3 +1548,19 @@ class DownloadData(Resource):
         return get_downloaded_data(
             args.get("format", "csv"), args.get("years_ago", DEFAULT_NUMBER_OF_YEARS_AGO)
         )
+
+
+def test_roles():
+    return test_roles_func()
+
+
+@roles_accepted(
+    BE_CONST.Roles2Names.Authenticated.value,
+    BE_CONST.Roles2Names.Location_verification.value,
+    need_all_permission=True,
+)
+def test_roles_func():
+    return jsonify({"message": "Roles test successful!"}), 200
+
+
+app.add_url_rule("/api/test_roles", endpoint=None, view_func=test_roles, methods=["GET"])

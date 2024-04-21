@@ -1096,7 +1096,7 @@ app.add_url_rule("/api/comments", endpoint=None, view_func=get_comments, methods
 app.add_url_rule("/api/comments", endpoint=None, view_func=create_comment, methods=["POST"])
 
 app.add_url_rule("/api/v1/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
-app.add_url_rule("/api/test_roles", endpoint=None, view_func=test_roles, methods=["GET"])
+
 
 @app.after_request
 def add_allow_methods_header(response):
@@ -1561,3 +1561,6 @@ def test_roles():
 )
 def test_roles_func():
     return jsonify({"message": "Roles test successful!"}), 200
+
+
+app.add_url_rule("/api/test_roles", endpoint=None, view_func=test_roles, methods=["GET"])

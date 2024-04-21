@@ -342,7 +342,8 @@ def extracted_location_and_qualification(news_flash_obj: NewsFlash):
 
 
 @roles_accepted(
-    BE_CONST.Roles2Names.Admins.value
+    BE_CONST.Roles2Names.Admins.value,
+    BE_CONST.Roles2Names.Location_verification.value
 )
 def update_news_flash_qualifying(id):
     current_user = get_current_user()

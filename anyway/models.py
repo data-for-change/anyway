@@ -885,48 +885,6 @@ class NewsFlash(Base):
     )
     location_qualifying_user = Column(BigInteger(), nullable=True)
 
-    def set_critical(
-        self,
-        years_before=5,
-        suburban_road_severe_value=10,
-        suburban_road_killed_value=3,
-        urban_severe_value=2,
-    ):
-        from anyway.widgets.all_locations_widgets.injured_count_by_severity_widget import (
-            InjuredCountBySeverityWidget,
-        )
-        from anyway.request_params import get_latest_accident_date, LocationInfo
-
-        if (self.road1 is None or self.road_segment_id is None) and (self.yishuv_name is None or self.street1_hebrew is None) :
-            return None
-        last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
-        resolution = BE_CONST.ResolutionCategories(self.resolution)
-        end_time = last_accident_date.to_pydatetime().date()
-        start_time = datetime.date(end_time.year + 1 - years_before, 1, 1)
-        location_info = LocationInfo()
-        if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
-            location_info["road1"] = self.road1
-            location_info["road_segment_id"] = self.road_segment_id
-        elif resolution == BE_CONST.ResolutionCategories.STREET:
-            location_info["yishuv_name"] = self.yishuv_name
-            location_info["street1_hebrew"] = self.street1_hebrew
-
-        critical_values = InjuredCountBySeverityWidget.get_injured_count_by_severity(resolution, location_info, start_time, end_time)
-        if critical_values == {}:
-            return None
-        critical = None
-        if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
-            critical = (
-                (critical_values["severe_injured_count"] / suburban_road_severe_value)
-                + (critical_values["killed_count"] / suburban_road_killed_value)
-            ) >= 1
-        elif resolution == BE_CONST.ResolutionCategories.STREET:
-            critical = (
-                (critical_values["severe_injured_count"] / urban_severe_value)
-                + (critical_values["killed_count"] / urban_severe_value)
-            ) >= 1
-        self.critical = critical
-
     def serialize(self):
         return {
             "id": self.id,

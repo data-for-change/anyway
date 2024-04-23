@@ -6,12 +6,12 @@ from anyway.models import InvolvedMarkerView
 from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget
 from anyway.widgets.widget import register
 from anyway.widgets.widget_utils import (
-    get_accidents_stats,
     join_strings,
     get_location_text,
     get_involved_marker_view_location_filters,
 )
 from anyway.backend_constants import BE_CONST
+# noinspection PyProtectedMember
 from flask_babel import _
 
 
@@ -26,15 +26,15 @@ class InjuredCountBySeverityWidget(AllLocationsWidget):
         self.information = "Fatal, severe and light injuries count in the specified location."
 
     def generate_items(self) -> None:
-        self.items = InjuredCountBySeverityWidget.get_injured_count_by_severity(
+        self.items = self.get_injured_count_by_severity(
             self.request_params.resolution,
             self.request_params.location_info,
             self.request_params.start_time,
             self.request_params.end_time,
         )
 
-    @staticmethod
     def get_injured_count_by_severity(
+        self,
         resolution: BE_CONST.ResolutionCategories,
         location_info: LocationInfo,
         start_time: datetime.date,
@@ -47,7 +47,7 @@ class InjuredCountBySeverityWidget(AllLocationsWidget):
             InjurySeverity.LIGHT_INJURED.value,
         ]
 
-        count_by_severity = get_accidents_stats(
+        count_by_severity = self.widget_accidents_stats(
             table_obj=InvolvedMarkerView,
             filters=filters,
             group_by="injury_severity",
@@ -121,14 +121,14 @@ class InjuredCountBySeverityWidget(AllLocationsWidget):
             raise Exception(
                 f"cannot convert to hebrew for resolution : {request_params.resolution.get('resolution')}"
             )
-        text += "{between_years_keyword} {start_year} - {end_year}, {injured_killed_keyword} {injured_num} {people_phrase}, {out_of_them_keywoard} ".format(
+        text += "{between_years_keyword} {start_year} - {end_year}, {injured_killed_keyword} {injured_num} {people_phrase}, {out_of_theme_keyword} ".format(
             between_years_keyword=_("between the years"),
             start_year=request_params.start_time.year,
             end_year=request_params.end_time.year,
             injured_killed_keyword=_("injured/killed"),
             injured_num=total_injured_count,
             people_phrase=_("people from car accidents"),
-            out_of_them_keywoard=_("out of them"),
+            out_of_theme_keyword=_("out of them"),
         )
         text += join_strings(
             [killed_count_text, severity_severe_count_text, severity_light_count_text],
@@ -137,6 +137,7 @@ class InjuredCountBySeverityWidget(AllLocationsWidget):
         )
         return text
 
+    # noinspection PyUnresolvedReferences
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         subtitle = get_location_text(request_params)

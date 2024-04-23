@@ -1,7 +1,7 @@
 from typing import Dict
-
+import copy
+# noinspection PyProtectedMember
 from flask_babel import _
-
 from anyway.backend_constants import BE_CONST as BE
 from anyway.request_params import RequestParams
 from anyway.widgets.all_locations_widgets.killed_and_injured_count_per_age_group_widget_utils import (
@@ -23,8 +23,13 @@ class KilledInjuredCountPerAgeGroupWidget(AllLocationsWidget):
         self.rank = 14
 
     def generate_items(self) -> None:
+        # todo: check that it works OK
+        rp_location_accuracy = copy.copy(self.request_params)
+        rp_location_accuracy.location_info = self.add_widget_location_accuracy_filter(
+            rp_location_accuracy.location_info, rp_location_accuracy.resolution
+        )
         raw_data = KilledAndInjuredCountPerAgeGroupWidgetUtils.filter_and_group_injured_count_per_age_group(
-            self.request_params
+            rp_location_accuracy
         )
         structured_data_list = []
         for age_group, severity_dict in raw_data.items():

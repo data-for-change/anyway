@@ -8,7 +8,6 @@ from anyway.request_params import RequestParams
 from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget
 from anyway.widgets.widget import register
 from anyway.widgets.widget_utils import (
-    get_accidents_stats,
     gen_entity_labels,
     format_2_level_items,
     sort_and_fill_gaps_for_stacked_bar,
@@ -30,13 +29,14 @@ class AccidentCountByAccidentYearWidget(AllLocationsWidget):
         self.information = "Fatal, severe and light accidents count in the specified years, split by accident severity"
 
     def generate_items(self) -> None:
-        res1 = get_accidents_stats(
+        res1 = self.widget_accidents_stats(
             table_obj=AccidentMarkerView,
             filters=self.request_params.location_info,
             group_by=("accident_year", "accident_severity"),
             count="accident_severity",
             start_time=self.request_params.start_time,
             end_time=self.request_params.end_time,
+            resolution=self.request_params.resolution
         )
         res2 = sort_and_fill_gaps_for_stacked_bar(
             res1,

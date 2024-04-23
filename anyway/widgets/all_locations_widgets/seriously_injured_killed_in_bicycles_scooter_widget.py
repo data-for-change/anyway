@@ -25,23 +25,25 @@ class SeriouslyInjuredKilledInBicyclesScooterWidget(AllLocationsWidget):
 
     def generate_items(self) -> None:
         # noinspection PyUnresolvedReferences
-        self.items = SeriouslyInjuredKilledInBicyclesScooterWidget.get_seriously_injured_killed_in_bicycles_scooter(
+        self.items = self.get_seriously_injured_killed_in_bicycles_scooter(
             self.request_params.start_time.year,
             self.request_params.end_time.year,
             self.request_params.location_info,
         )
 
-    @staticmethod
     def get_seriously_injured_killed_in_bicycles_scooter(
-            start_year: int,
-            end_year: int,
-            location_info: LocationInfo
+        self,
+        start_year: int,
+        end_year: int,
+        location_info: LocationInfo
     ):
-
-        res = get_involved_counts(start_year, end_year,
-                                  SeriouslyInjuredKilledInBicyclesScooterWidget.severities,
-                                  SeriouslyInjuredKilledInBicyclesScooterWidget.vehicle_types,
-                                  location_info)
+        res = get_involved_counts(
+            start_year, end_year,
+            self.severities,
+            self.vehicle_types,
+            location_info,
+            self.get_location_accuracy_filter(self.request_params.resolution)
+        )
         return res
 
     @staticmethod
@@ -50,6 +52,7 @@ class SeriouslyInjuredKilledInBicyclesScooterWidget(AllLocationsWidget):
             if Constants.YISHUV_NAME in location_info \
             else location_text
 
+    # noinspection PyUnresolvedReferences
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         subtitle = _(SeriouslyInjuredKilledInBicyclesScooterWidget.create_location_description(

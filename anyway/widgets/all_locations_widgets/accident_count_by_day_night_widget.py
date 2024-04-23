@@ -1,5 +1,5 @@
 from anyway.request_params import RequestParams
-from anyway.widgets.widget_utils import get_accidents_stats, get_location_text
+from anyway.widgets.widget_utils import get_location_text
 from anyway.models import AccidentMarkerView
 from anyway.widgets.widget import register
 from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget
@@ -21,13 +21,14 @@ class AccidentCountByDayNightWidget(AllLocationsWidget):
         )
 
     def generate_items(self) -> None:
-        self.items = get_accidents_stats(
+        self.items = self.widget_accidents_stats(
             table_obj=AccidentMarkerView,
             filters=self.request_params.location_info,
             group_by="day_night_hebrew",
             count="day_night_hebrew",
             start_time=self.request_params.start_time,
             end_time=self.request_params.end_time,
+            resolution=self.request_params.resolution
         )
 
     @staticmethod

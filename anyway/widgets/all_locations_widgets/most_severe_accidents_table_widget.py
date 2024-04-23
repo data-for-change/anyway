@@ -2,6 +2,7 @@ import logging
 from typing import Dict
 
 import pandas as pd
+# noinspection PyProtectedMember
 from flask_babel import _
 from anyway.request_params import RequestParams
 from anyway.backend_constants import BE_CONST, AccidentSeverity, AccidentType, InjurySeverity
@@ -18,7 +19,6 @@ def get_most_severe_accidents_with_entities(
     entities,
     start_time,
     end_time,
-    resolution: BE_CONST.ResolutionCategories,
     limit=10,
 ):
     filters = filters or {}
@@ -50,6 +50,7 @@ def get_most_severe_accidents_table_title(
     elif resolution == BE_CONST.ResolutionCategories.STREET:
         in_str = _("in")
         return _("Severe accidents"), f"{_('in street')} {location_info['street1_hebrew']} {in_str}{location_info['yishuv_name']}"
+
 
 # count of dead and severely injured
 def get_casualties_count_in_accident(accident_id, provider_code, injury_severity, accident_year):
@@ -84,16 +85,15 @@ class MostSevereAccidentsTableWidget(AllLocationsWidget):
     def generate_items(self) -> None:
         # noinspection PyUnresolvedReferences
         self.items = MostSevereAccidentsTableWidget.prepare_table(
-            self.request_params.location_info,
+            self.add_widget_location_accuracy_filter(self.request_params.location_info,
+                                                     self.request_params.resolution
+                                                     ),
             self.request_params.start_time,
             self.request_params.end_time,
-            self.request_params.resolution,
         )
 
     @staticmethod
-    def prepare_table(
-        location_info, start_time, end_time, resolution: BE_CONST.ResolutionCategories
-    ):
+    def prepare_table(location_info, start_time, end_time):
         entities = (
             "id",
             "provider_code",
@@ -108,7 +108,6 @@ class MostSevereAccidentsTableWidget(AllLocationsWidget):
             entities=entities,
             start_time=start_time,
             end_time=end_time,
-            resolution=resolution,
         )
         # Add casualties
         for accident in accidents:
@@ -149,7 +148,6 @@ class MostSevereAccidentsTableWidget(AllLocationsWidget):
             ).get_label()
         return accidents
 
-
     @staticmethod
     def get_transcription(request_params: RequestParams, items: Dict):
         if len(items) == 0:
@@ -180,12 +178,12 @@ class MostSevereAccidentsTableWidget(AllLocationsWidget):
             start_year=request_params.start_time.year,
             end_year=request_params.end_time.year,
         )
-        text += '\n'.join(['{in_date_keyword} {date} {in_hour_keyword} {hour} {accident_occured_text} {accident_type_keyword} {type}, {injured_count_keyword}: {injured_count}.'.format(
+        text += '\n'.join(['{in_date_keyword} {date} {in_hour_keyword} {hour} {accident_occurred_text} {accident_type_keyword} {type}, {injured_count_keyword}: {injured_count}.'.format(
                            in_date_keyword=_("in date"),
                            date=item.get("date"),
                            in_hour_keyword=_("in hour"),
                            hour=item.get("hour"),
-                           accident_occured_text=_("occured accident"),
+                           accident_occurred_text=_("occurred accident"),
                            accident_type_keyword=_("of type"),
                            type=_(item.get("type")),
                            injured_count_keyword=_("injured"),
@@ -193,7 +191,6 @@ class MostSevereAccidentsTableWidget(AllLocationsWidget):
                            )
                            for item in items])
         return text
-
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
@@ -208,11 +205,13 @@ class MostSevereAccidentsTableWidget(AllLocationsWidget):
                     )
         title, subtitle = get_most_severe_accidents_table_title(request_params.location_info,
                                                                 request_params.resolution)
+        # noinspection PyUnresolvedReferences
         items["data"]["text"] = {
             "title": title,
             "subtitle": subtitle,
-            "transcription": MostSevereAccidentsTableWidget.get_transcription(request_params=request_params,
-                                               items=items["data"]["items"])
+            "transcription": MostSevereAccidentsTableWidget.get_transcription(
+                request_params=request_params,
+                items=items["data"]["items"])
         }
         return items
 
@@ -226,6 +225,6 @@ _("in")
 _("latest severe accident took place")
 _("in date")
 _("in hour")
-_("occured accident")
+_("occurred accident")
 _("of type")
 _("injured")

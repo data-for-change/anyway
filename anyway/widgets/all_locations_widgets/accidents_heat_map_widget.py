@@ -1,6 +1,7 @@
 from typing import Dict
 
 import pandas as pd
+# noinspection PyProtectedMember
 from flask_babel import _
 
 from anyway.request_params import RequestParams
@@ -28,20 +29,25 @@ class AccidentsHeatMapWidget(AllLocationsWidget):
             # pylint: disable=no-member
             AccidentSeverity.SEVERE.value,
         ]
-        self.items = AccidentsHeatMapWidget.get_accidents_heat_map(
+        # noinspection PyUnresolvedReferences
+        self.items = self.get_accidents_heat_map(
             filters=accidents_heat_map_filters,
             start_time=self.request_params.start_time,
             end_time=self.request_params.end_time,
         )
 
-    @staticmethod
-    def get_accidents_heat_map(filters, start_time, end_time):
+    def get_accidents_heat_map(self, filters, start_time, end_time):
         filters = filters or {}
         filters["provider_code"] = [
             BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
             BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
         ]
-        query = get_query(AccidentMarkerView, filters, start_time, end_time)
+        query = get_query(
+            AccidentMarkerView,
+            self.add_widget_location_accuracy_filter(filters,
+                                                     self.request_params.resolution),
+            start_time, end_time
+        )
         query = query.with_entities("longitude", "latitude")
         df = pd.read_sql_query(query.statement, query.session.bind)
         return df.to_dict(orient="records")  # pylint: disable=no-member

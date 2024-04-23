@@ -1,7 +1,11 @@
 import logging
+from typing import Optional
 from anyway.request_params import RequestParams
 from anyway.widgets.widget import Widget
+from anyway.widgets.urban_widgets.urban_widget import UrbanWidget
+from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
 from anyway.backend_constants import BE_CONST
+RC = BE_CONST.ResolutionCategories
 
 
 class AllLocationsWidget(Widget):
@@ -23,3 +27,13 @@ class AllLocationsWidget(Widget):
     @staticmethod
     def is_relevant(request_params: RequestParams) -> bool:
         return AllLocationsWidget.is_all_locations(request_params)
+
+    @classmethod
+    def get_location_accuracy_filter(cls, res: RC) -> Optional[dict]:
+        if res == RC.STREET or res == RC.URBAN_JUNCTION:
+            result = UrbanWidget.get_location_accuracy_filter(res)
+        elif res == RC.SUBURBAN_ROAD or res == RC.SUBURBAN_JUNCTION:
+            result = RoadSegmentWidget.get_location_accuracy_filter(res)
+        else:
+            result = Widget.get_location_accuracy_filter(res)
+        return result

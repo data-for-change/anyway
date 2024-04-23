@@ -1,14 +1,13 @@
 from typing import Dict
 
+# noinspection PyProtectedMember
 from flask_babel import _
-
 from anyway.backend_constants import InjurySeverity
 from anyway.models import InvolvedMarkerView
 from anyway.request_params import RequestParams
 from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget
 from anyway.widgets.widget import register
 from anyway.widgets.widget_utils import (
-    get_accidents_stats,
     gen_entity_labels,
     get_injured_filters,
     format_2_level_items,
@@ -30,13 +29,14 @@ class InjuredCountByAccidentYearWidget(AllLocationsWidget):
         )
 
     def generate_items(self) -> None:
-        res1 = get_accidents_stats(
+        res1 = self.widget_accidents_stats(
             table_obj=InvolvedMarkerView,
             filters=get_injured_filters(self.request_params),
             group_by=("accident_year", "injury_severity"),
             count="injury_severity",
             start_time=self.request_params.start_time,
             end_time=self.request_params.end_time,
+            resolution=self.request_params.resolution,
         )
         res2 = sort_and_fill_gaps_for_stacked_bar(
             res1,

@@ -4,6 +4,9 @@ from typing import Union, Dict, List, Optional, Type
 import hashlib
 from anyway.request_params import RequestParams
 from anyway.widgets.widget_utils import get_accidents_stats
+from anyway.backend_constants import BE_CONST
+
+RC = BE_CONST.ResolutionCategories
 
 
 class Widget:
@@ -42,6 +45,10 @@ class Widget:
 
     def get_rank(self) -> int:
         return self.rank
+
+    @classmethod
+    def get_location_accuracy_filter(cls, _: RC) -> Optional[dict]:
+        return cls.__LOCATION_ACCURACY_FILTER
 
     @staticmethod
     def is_in_cache() -> bool:
@@ -95,29 +102,36 @@ class Widget:
         return d.hex()
 
     @classmethod
-    def add_widget_accuracy_filter(cls, filters: Optional[dict]) -> Optional[dict]:
-        if cls.__LOCATION_ACCURACY_FILTER is None:
+    def add_widget_location_accuracy_filter(
+        cls, filters: Optional[dict], resolution: RC
+    ) -> Optional[dict]:
+        la = cls.get_location_accuracy_filter(resolution)
+        if la is None:
             return filters
         elif filters is None:
-            return cls.__LOCATION_ACCURACY_FILTER
+            return la
         else:
-            return filters.update(cls.__LOCATION_ACCURACY_FILTER)
+            res = copy.copy(filters)
+            res.update(la)
+            return res
 
     @classmethod
-    def widget_accidents_stats(cls,
-                               table_obj,
-                               columns=None,
-                               filters=None,
-                               group_by=None,
-                               count=None,
-                               cnt_distinct=False,
-                               start_time=None,
-                               end_time=None,
-                               ):
+    def widget_accidents_stats(
+        cls,
+        table_obj,
+        columns=None,
+        filters=None,
+        group_by=None,
+        count=None,
+        cnt_distinct=False,
+        start_time=None,
+        end_time=None,
+        resolution=BE_CONST.ResolutionCategories.OTHER,
+    ):
         return get_accidents_stats(
             table_obj=table_obj,
             columns=columns,
-            filters=cls.add_widget_accuracy_filter(filters),
+            filters=cls.add_widget_location_accuracy_filter(filters, resolution),
             group_by=group_by,
             count=count,
             cnt_distinct=cnt_distinct,

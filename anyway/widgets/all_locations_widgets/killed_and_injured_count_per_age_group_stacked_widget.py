@@ -1,7 +1,7 @@
+import copy
 from typing import Dict, List
-
+# noinspection PyProtectedMember
 from flask_babel import _
-
 from anyway.backend_constants import InjurySeverity, BE_CONST as BE
 from anyway.request_params import RequestParams
 from anyway.widgets.all_locations_widgets.killed_and_injured_count_per_age_group_widget_utils import (
@@ -9,7 +9,6 @@ from anyway.widgets.all_locations_widgets.killed_and_injured_count_per_age_group
     AGE_RANGE_DICT,
 )
 from anyway.widgets.all_locations_widgets import killed_and_injured_count_per_age_group_widget_utils
-
 from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget
 from anyway.widgets.widget import register
 from anyway.widgets.widget_utils import (
@@ -32,8 +31,13 @@ class KilledInjuredCountPerAgeGroupStackedWidget(AllLocationsWidget):
         self.rank = 30
 
     def generate_items(self) -> None:
+        # todo: check that it works OK
+        rp_location_accuracy = copy.copy(self.request_params)
+        rp_location_accuracy.location_info = self.add_widget_location_accuracy_filter(
+            rp_location_accuracy.location_info, rp_location_accuracy.resolution
+        )
         raw_data = KilledAndInjuredCountPerAgeGroupWidgetUtils.filter_and_group_injured_count_per_age_group(
-            self.request_params
+            rp_location_accuracy
         )
 
         partial_processed = add_empty_keys_to_gen_two_level_dict(

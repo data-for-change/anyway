@@ -1,5 +1,6 @@
 import datetime
 import pytest
+import unittest
 import anyway.request_params
 import anyway.widgets.widget_utils as widget_utils
 
@@ -9,8 +10,16 @@ from anyway import app as flask_app
 from jsonschema import validate
 from anyway.app_and_db import db
 from anyway.vehicle_type import VehicleCategory
-from anyway.widgets.road_segment_widgets.accident_count_by_car_type_widget import AccidentCountByCarTypeWidget
-from anyway.backend_constants import NewsflashLocationQualification
+from anyway.widgets.road_segment_widgets.accident_count_by_car_type_widget import (
+    AccidentCountByCarTypeWidget,
+)
+from anyway.backend_constants import NewsflashLocationQualification, BE_CONST
+
+RC = BE_CONST.ResolutionCategories
+from anyway.widgets.widget import Widget
+from anyway.widgets.urban_widgets.urban_widget import UrbanWidget
+from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
+from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget
 
 
 def insert_infographic_mock_data(app):
@@ -94,54 +103,84 @@ class TestInfographicApi:
         assert rv.status_code == http_client.NOT_FOUND
 
     def test_accident_count_by_car_type(self, app):
-        test_involved_by_vehicle_type_data = [{"vehicle_type": 1, "count": 3},
-                                              {"vehicle_type": 25, "count": 2},
-                                              {"vehicle_type": 15, "count": 1}]
-        output_tmp = AccidentCountByCarTypeWidget.percentage_accidents_by_car_type(test_involved_by_vehicle_type_data)
+        test_involved_by_vehicle_type_data = [
+            {"vehicle_type": 1, "count": 3},
+            {"vehicle_type": 25, "count": 2},
+            {"vehicle_type": 15, "count": 1},
+        ]
+        # noinspection PyUnresolvedReferences
+        output_tmp = AccidentCountByCarTypeWidget.percentage_accidents_by_car_type(
+            test_involved_by_vehicle_type_data
+        )
         assert len(output_tmp) == 3
         assert output_tmp[VehicleCategory.CAR.value] == 51
         assert output_tmp[VehicleCategory.LARGE.value] == 33
         assert output_tmp[VehicleCategory.BICYCLE_AND_SMALL_MOTOR.value] == 16
 
-        def mock_get_accidents_stats(table_obj, filters=None, group_by=None, count=None, start_time=None,
-                                     end_time=None):
-            return [{'vehicle_type': nan, 'count': 2329}, {'vehicle_type': 14.0, 'count': 112},
-                    {'vehicle_type': 25.0, 'count': 86}, {'vehicle_type': 17.0, 'count': 1852},
-                    {'vehicle_type': 12.0, 'count': 797}, {'vehicle_type': 8.0, 'count': 186},
-                    {'vehicle_type': 1.0, 'count': 28693}, {'vehicle_type': 15.0, 'count': 429},
-                    {'vehicle_type': 10.0, 'count': 930}, {'vehicle_type': 11.0, 'count': 1936},
-                    {'vehicle_type': 18.0, 'count': 319}, {'vehicle_type': 16.0, 'count': 21},
-                    {'vehicle_type': 6.0, 'count': 383}, {'vehicle_type': 19.0, 'count': 509},
-                    {'vehicle_type': 2.0, 'count': 1092}, {'vehicle_type': 21.0, 'count': 259},
-                    {'vehicle_type': 3.0, 'count': 696}, {'vehicle_type': 23.0, 'count': 516},
-                    {'vehicle_type': 5.0, 'count': 103}, {'vehicle_type': 13.0, 'count': 22},
-                    {'vehicle_type': 22.0, 'count': 39}, {'vehicle_type': 9.0, 'count': 1073},
-                    {'vehicle_type': 24.0, 'count': 582}, {'vehicle_type': 7.0, 'count': 115}]
+        def mock_get_accidents_stats(
+            table_obj, filters=None, group_by=None, count=None, start_time=None, end_time=None
+        ):
+            return [
+                {"vehicle_type": nan, "count": 2329},
+                {"vehicle_type": 14.0, "count": 112},
+                {"vehicle_type": 25.0, "count": 86},
+                {"vehicle_type": 17.0, "count": 1852},
+                {"vehicle_type": 12.0, "count": 797},
+                {"vehicle_type": 8.0, "count": 186},
+                {"vehicle_type": 1.0, "count": 28693},
+                {"vehicle_type": 15.0, "count": 429},
+                {"vehicle_type": 10.0, "count": 930},
+                {"vehicle_type": 11.0, "count": 1936},
+                {"vehicle_type": 18.0, "count": 319},
+                {"vehicle_type": 16.0, "count": 21},
+                {"vehicle_type": 6.0, "count": 383},
+                {"vehicle_type": 19.0, "count": 509},
+                {"vehicle_type": 2.0, "count": 1092},
+                {"vehicle_type": 21.0, "count": 259},
+                {"vehicle_type": 3.0, "count": 696},
+                {"vehicle_type": 23.0, "count": 516},
+                {"vehicle_type": 5.0, "count": 103},
+                {"vehicle_type": 13.0, "count": 22},
+                {"vehicle_type": 22.0, "count": 39},
+                {"vehicle_type": 9.0, "count": 1073},
+                {"vehicle_type": 24.0, "count": 582},
+                {"vehicle_type": 7.0, "count": 115},
+            ]
 
         tmp_func = widget_utils.get_accidents_stats  # Backup function ref
         widget_utils.get_accidents_stats = mock_get_accidents_stats
-        vehicle_grouped_by_type_count_unique_test = [{'vehicle_type': 1, 'count': 11}]
+        vehicle_grouped_by_type_count_unique_test = [{"vehicle_type": 1, "count": 11}]
         end_time = datetime.date(2020, 6, 30)
         start_time = datetime.date(2020, 1, 1)
         request_params = anyway.request_params.RequestParams(
             years_ago=1,
-            location_text='',
+            location_text="",
             location_info={},
             resolution={},
             gps={},
             start_time=start_time,
             end_time=end_time,
             lang="he",
-            news_flash_description="Test description"
+            news_flash_description="Test description",
         )
+        # noinspection PyUnresolvedReferences
         actual = AccidentCountByCarTypeWidget.get_stats_accidents_by_car_type_with_national_data(
-            request_params, vehicle_grouped_by_type_count_unique=vehicle_grouped_by_type_count_unique_test
+            request_params,
+            vehicle_grouped_by_type_count_unique=vehicle_grouped_by_type_count_unique_test,
         )
-        expected = [{'label_key': 4,
-                     'series': [{'label_key': 'percentage_segment', 'value': 100},
-                                {'label_key': 'percentage_country', 'value': 68}]}]
+        expected = [
+            {
+                "label_key": 4,
+                "series": [
+                    {"label_key": "percentage_segment", "value": 100},
+                    {"label_key": "percentage_country", "value": 68},
+                ],
+            }
+        ]
 
-        widget_utils.get_accidents_stats = tmp_func  # Restore function ref - So we don't affect other tests
+        widget_utils.get_accidents_stats = (
+            tmp_func  # Restore function ref - So we don't affect other tests
+        )
         assert len(actual) == len(expected)
         assert actual == expected
 
@@ -150,7 +189,8 @@ class TestInfographicApi:
             self.infographic_data = get_infographic_data()
 
         widget = next(
-            (widget for widget in self.infographic_data["widgets"] if widget["name"] == name), None,
+            (widget for widget in self.infographic_data["widgets"] if widget["name"] == name),
+            None,
         )
 
         return widget
@@ -202,7 +242,10 @@ class TestInfographicApi:
 
         schema = {
             "type": "object",
-            "properties": {"desc": {"type": "string"}, "count": {"type": "number"}, },
+            "properties": {
+                "desc": {"type": "string"},
+                "count": {"type": "number"},
+            },
         }
 
         items = widget["data"]["items"]
@@ -217,7 +260,10 @@ class TestInfographicApi:
 
         schema = {
             "type": "object",
-            "properties": {"accident_type": {"type": "string"}, "count": {"type": "number"}, },
+            "properties": {
+                "accident_type": {"type": "string"},
+                "count": {"type": "number"},
+            },
         }
 
         validate(widget["data"]["items"][0], schema)
@@ -242,7 +288,10 @@ class TestInfographicApi:
 
         schema = {
             "type": "object",
-            "properties": {"accident_year": {"type": "number"}, "count": {"type": "number"}, },
+            "properties": {
+                "accident_year": {"type": "number"},
+                "count": {"type": "number"},
+            },
         }
 
         validate(widget["data"]["items"][0], schema)
@@ -254,7 +303,10 @@ class TestInfographicApi:
 
         schema = {
             "type": "object",
-            "properties": {"accident_year": {"type": "number"}, "count": {"type": "number"}, },
+            "properties": {
+                "accident_year": {"type": "number"},
+                "count": {"type": "number"},
+            },
         }
 
         validate(widget["data"]["items"][0], schema)
@@ -267,11 +319,17 @@ class TestInfographicApi:
 
         schema = {
             "type": "object",
-            "properties": {"label_key": {"type": "number"}, "value": {"type": "number"}, },
+            "properties": {
+                "label_key": {"type": "number"},
+                "value": {"type": "number"},
+            },
         }
-        assert widget["data"]["items"][0] == {'label_key': 2014, 'value': 32}
+        assert widget["data"]["items"][0] == {"label_key": 2014, "value": 32}
         validate(widget["data"]["items"][0], schema)
-        assert widget["data"]["text"]["title"] == "כמות ההרוגים בתאונות דרכים בחודש הנוכחי בהשוואה לשנים קודמות"
+        assert (
+            widget["data"]["text"]["title"]
+            == "כמות ההרוגים בתאונות דרכים בחודש הנוכחי בהשוואה לשנים קודמות"
+        )
 
     def _accident_count_by_day_night_test(self):
         widget = self._get_widget_by_name(name="accident_count_by_day_night")
@@ -279,7 +337,10 @@ class TestInfographicApi:
 
         schema = {
             "type": "object",
-            "properties": {"day_night": {"type": "string"}, "count": {"type": "number"}, },
+            "properties": {
+                "day_night": {"type": "string"},
+                "count": {"type": "number"},
+            },
         }
 
         validate(widget["data"]["items"][0], schema)
@@ -291,7 +352,10 @@ class TestInfographicApi:
 
         schema = {
             "type": "object",
-            "properties": {"accident_hour": {"type": "number"}, "count": {"type": "number"}, },
+            "properties": {
+                "accident_hour": {"type": "number"},
+                "count": {"type": "number"},
+            },
         }
 
         validate(widget["data"]["items"][0], schema)
@@ -303,7 +367,10 @@ class TestInfographicApi:
 
         schema = {
             "type": "object",
-            "properties": {"road_light": {"type": "string"}, "count": {"type": "number"}, },
+            "properties": {
+                "road_light": {"type": "string"},
+                "count": {"type": "number"},
+            },
         }
 
         validate(widget["data"]["items"][0], schema)
@@ -354,3 +421,28 @@ class TestInfographicApi:
         }
 
         validate(widget["data"]["items"][0], schema)
+
+
+class InforgraphicsUtilsTest(unittest.TestCase):
+    def test_add_widget_location_accuracy_filter(self):
+        actual = Widget.add_widget_location_accuracy_filter(None, RC.STREET)
+        self.assertIsNone(actual, "1")
+        f = {"1": 1}
+        actual = Widget.add_widget_location_accuracy_filter(f, RC.STREET)
+        self.assertEqual(f, actual, "2")
+        actual = UrbanWidget.add_widget_location_accuracy_filter(None, RC.STREET)
+        self.assertEqual(UrbanWidget.get_location_accuracy_filter(RC.STREET), actual, "3")
+        actual = UrbanWidget.add_widget_location_accuracy_filter(f, RC.STREET)
+        self.assertEqual({'1': 1, 'location_accuracy': [1, 3]}, actual, "4")
+        actual = RoadSegmentWidget.add_widget_location_accuracy_filter(None, RC.SUBURBAN_ROAD)
+        self.assertEqual({'location_accuracy': [1, 4]}, actual, "5"
+        )
+        actual = RoadSegmentWidget.add_widget_location_accuracy_filter(f, RC.SUBURBAN_JUNCTION)
+        self.assertEqual({'1': 1, 'location_accuracy': [1, 4]},
+            actual,
+            "6",
+        )
+        actual = AllLocationsWidget.add_widget_location_accuracy_filter(None, RC.STREET)
+        self.assertEqual({'location_accuracy': [1, 3]}, actual, "7")
+        actual = AllLocationsWidget.add_widget_location_accuracy_filter(f, RC.OTHER)
+        self.assertEqual(f, actual, "8")

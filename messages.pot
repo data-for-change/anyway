@@ -397,7 +397,7 @@ msgstr ""
 
 #: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:189
 #: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:230
-msgid "occured accident"
+msgid "occurred accident"
 msgstr ""
 
 #: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:190
@@ -704,4 +704,3 @@ msgstr ""
 #: templates/index.html:490
 msgid "Login with Google"
 msgstr ""
-

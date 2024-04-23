@@ -406,8 +406,8 @@ msgstr ""
 
 #: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:189
 #: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:230
-msgid "occured accident"
-msgstr "occured accident"
+msgid "occurred accident"
+msgstr "occurred accident"
 
 #: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:190
 #: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:231
@@ -759,4 +759,3 @@ msgstr ""
 
 #~ msgid "road_segment_namenon_urban_intersection_hebrew"
 #~ msgstr ""
-

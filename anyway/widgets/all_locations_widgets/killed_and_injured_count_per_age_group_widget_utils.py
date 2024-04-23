@@ -3,8 +3,8 @@ from typing import Dict, Tuple, Callable
 
 from flask_sqlalchemy import BaseQuery
 from sqlalchemy import func, asc
+# noinspection PyProtectedMember
 from flask_babel import _
-
 from anyway.app_and_db import db
 from anyway.backend_constants import BE_CONST, InjurySeverity
 from anyway.models import InvolvedMarkerView
@@ -16,7 +16,7 @@ from anyway.widgets.widget_utils import get_expression_for_road_segment_location
 cache_dict = OrderedDict()
 
 SIXTY_FIVE_PLUS = "65+"
-SIXTY_TWOHUNDRED = "65-200"
+SIXTY_TWO_HUNDRED = "65-200"
 UNKNOWN = "unknown"
 CACHE_MAX_SIZE = 10
 
@@ -30,6 +30,7 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
     ) -> Dict[str, Dict[int, int]]:
         start_time = request_params.start_time
         end_time = request_params.end_time
+        cache_key = ()
         if request_params.resolution == BE_CONST.ResolutionCategories.STREET:
             involve_yishuv_name = request_params.location_info["yishuv_name"]
             street1_hebrew = request_params.location_info["street1_hebrew"]
@@ -71,6 +72,7 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
                 dict_grouped[string_age_range][injury_id] = 0
 
         has_data = False
+        # noinspection PyTypeChecker
         for row in query:
             has_data = True
             age_range = row.age_group
@@ -95,16 +97,18 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
                 if not found_age_range:
                     dict_grouped[UNKNOWN][injury_id] += count
         # Rename the last key
-        dict_grouped[SIXTY_FIVE_PLUS] = dict_grouped[SIXTY_TWOHUNDRED]
-        del dict_grouped[SIXTY_TWOHUNDRED]
+        dict_grouped[SIXTY_FIVE_PLUS] = dict_grouped[SIXTY_TWO_HUNDRED]
+        del dict_grouped[SIXTY_TWO_HUNDRED]
         if UNKNOWN in dict_grouped:
             dict_grouped[_("unknown")] = dict_grouped.pop(UNKNOWN)
         return dict_grouped, has_data
 
+    # noinspection PyUnresolvedReferences
     @staticmethod
     def create_query_for_killed_and_injured_count_per_age_group(
         end_time, start_time, location_info, resolution
     ) -> BaseQuery:
+        location_filter = True
         if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
             location_filter = get_expression_for_road_segment_location_fields(
                 {"road_segment_id": location_info["road_segment_id"]}, InvolvedMarkerView

@@ -1210,4 +1210,4 @@ def main(batch_size, source, load_start_year=None):
     except Exception as ex:
         print("Traceback: {0}".format(traceback.format_exc()))
         raise CBSParsingFailed(message=str(ex))
-        # Todo - send an email that an exception occured
+        # Todo - send an email that an exception occurred

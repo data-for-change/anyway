@@ -43,7 +43,8 @@ def test_get_involved_counts_urban_location(db_session):
     results = widget_utils.get_involved_counts(start_year - 1, start_year + years_with_data + 1,
                                                     severities_to_include,
                                                     vehicle_types_to_include,
-                                                    {'yishuv_symbol': 1})
+                                                    {'yishuv_symbol': 1},
+                                               {"location_accuracy": [1, 4]})
     assert len(results) == years_with_data
     for res in results:
         assert res['value'] == len(severities_to_include) * \

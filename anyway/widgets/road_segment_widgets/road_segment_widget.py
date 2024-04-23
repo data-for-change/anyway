@@ -1,9 +1,15 @@
 import logging
+from typing import Optional
 from anyway.request_params import RequestParams
 from anyway.widgets.widget import Widget
+from anyway.backend_constants import BE_CONST
+RC = BE_CONST.ResolutionCategories
 
 
 class RoadSegmentWidget(Widget):
+    # location_accuracy = 1 (עיגון מדויק) OR location_accuracy = 4 (מרכז קילומטר)
+    __LOCATION_ACCURACY_FILTER: Optional[dict] = {"location_accuracy": [1, 4]}
+
     def __init__(self, request_params: RequestParams):
         if not RoadSegmentWidget.is_sub_urban(request_params):
             logging.error(
@@ -26,3 +32,7 @@ class RoadSegmentWidget(Widget):
     @staticmethod
     def is_relevant(request_params: RequestParams) -> bool:
         return RoadSegmentWidget.is_sub_urban(request_params)
+
+    @classmethod
+    def get_location_accuracy_filter(cls, _: RC) -> Optional[dict]:
+        return cls.__LOCATION_ACCURACY_FILTER

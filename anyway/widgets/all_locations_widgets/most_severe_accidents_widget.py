@@ -5,7 +5,7 @@ from typing import Dict
 from flask_babel import _
 
 from anyway.request_params import RequestParams
-from anyway.backend_constants import AccidentSeverity, AccidentType, BE_CONST
+from anyway.backend_constants import AccidentSeverity, AccidentType
 from anyway.widgets.all_locations_widgets.most_severe_accidents_table_widget import (
     get_most_severe_accidents_with_entities,
     get_most_severe_accidents_table_title,
@@ -30,10 +30,11 @@ class MostSevereAccidentsWidget(AllLocationsWidget):
         # noinspection PyUnresolvedReferences
         self.items = MostSevereAccidentsWidget.get_most_severe_accidents(
             AccidentMarkerView,
-            self.request_params.location_info,
+            self.add_widget_location_accuracy_filter(self.request_params.location_info,
+                                                     self.request_params.resolution
+                                                     ),
             self.request_params.start_time,
             self.request_params.end_time,
-            self.request_params.resolution,
         )
 
     @staticmethod
@@ -42,7 +43,6 @@ class MostSevereAccidentsWidget(AllLocationsWidget):
         filters,
         start_time,
         end_time,
-        resolution: BE_CONST.ResolutionCategories,
         limit=10,
     ):
         entities = (
@@ -54,7 +54,7 @@ class MostSevereAccidentsWidget(AllLocationsWidget):
         )
 
         items = get_most_severe_accidents_with_entities(
-            table_obj, filters, entities, start_time, end_time, resolution, limit
+            table_obj, filters, entities, start_time, end_time, limit
         )
         for item in items:
             item["accident_severity"] = AccidentSeverity(item["accident_severity"]).get_label()

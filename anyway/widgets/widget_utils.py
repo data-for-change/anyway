@@ -258,6 +258,7 @@ def get_involved_counts(
     severities: Sequence[InjurySeverity],
     vehicle_types: Sequence[VehicleType],
     location_info: LocationInfo,
+    other_filters: Optional[dict] = None,
 ) -> Dict[str, int]:
     table = InvolvedMarkerView
 
@@ -291,6 +292,10 @@ def get_involved_counts(
         query = query.filter(
             table.involve_vehicle_type.in_([v_type.value for v_type in vehicle_types])
         )
+
+    if other_filters:
+        query = query.filter(get_expression_for_fields(other_filters, table, and_))
+
     # todo: check for suburban junction resolution
     df = pd.read_sql_query(query.statement, query.session.bind)
     return df.to_dict(orient="records")  # pylint: disable=no-member

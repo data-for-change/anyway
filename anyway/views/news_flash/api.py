@@ -5,6 +5,7 @@ import datetime
 import json
 import logging
 import pandas as pd
+import os
 
 from typing import List, Optional
 from http import HTTPStatus
@@ -12,7 +13,6 @@ from collections import OrderedDict
 
 from flask import request, Response, make_response, jsonify
 from sqlalchemy import and_, not_, or_
-
 
 from anyway.app_and_db import db
 from anyway.backend_constants import (
@@ -38,8 +38,8 @@ DEFAULT_OFFSET_REQ_PARAMETER = 0
 DEFAULT_LIMIT_REQ_PARAMETER = 100
 DEFAULT_NUMBER_OF_YEARS_AGO = 5
 
-class NewsFlashQuery(BaseModel):
 
+class NewsFlashQuery(BaseModel):
     id: Optional[int]
     road_number: Optional[int]
     offset: Optional[int] = DEFAULT_OFFSET_REQ_PARAMETER
@@ -407,7 +407,8 @@ def update_news_flash_qualifying(id):
             new_location=new_location,
             new_qualification=new_location_qualifiction,
         )
-        if new_location_qualifiction == NewsflashLocationQualification.MANUAL.value and \
+        if os.environ.get("FLASK_ENV") == "production" and \
+                new_location_qualifiction == NewsflashLocationQualification.MANUAL.value and \
                 old_location_qualifiction != NewsflashLocationQualification.MANUAL.value:
             trigger_generate_infographics_and_send_to_telegram(id, False)
         return Response(status=HTTPStatus.OK)
@@ -468,7 +469,6 @@ def get_downloaded_data(format, years_ago):
     columns[AccidentMarkerView.latitude] = 'קו רוחב'
     columns[AccidentMarkerView.x] = 'X קואורדינטה'
     columns[AccidentMarkerView.y] = 'Y קואורדינטה'
-
 
     related_accidents = get_accidents_stats(
         table_obj=AccidentMarkerView,

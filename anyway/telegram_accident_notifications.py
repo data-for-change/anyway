@@ -116,7 +116,7 @@ def create_public_urls_for_infographics_images(folder_name):
         presigned_urls[infographic_name] = url
     return presigned_urls
 
-@staticmethod
+
 def trigger_generate_infographics_and_send_to_telegram(newsflash_id, pre_verification_chat=True):
     dag_conf = {"news_flash_id": newsflash_id}
     dag_conf["chat_id"] = TELEGRAM_CHANNEL_CHAT_ID if pre_verification_chat \

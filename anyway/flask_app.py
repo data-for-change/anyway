@@ -1097,14 +1097,6 @@ app.add_url_rule("/api/comments", endpoint=None, view_func=create_comment, metho
 
 app.add_url_rule("/api/v1/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
 
-
-@app.after_request
-def add_allow_methods_header(response):
-    if request.path.startswith("/api/news-flash/"):
-        response.headers['Access-Control-Allow-Methods'] = "GET, OPTIONS, PATCH"
-        response.headers['Access-Control-Allow-Origin'] = "*"
-    return response
-
 nf_parser = reqparse.RequestParser()
 nf_parser.add_argument("id", type=int, help="News flash id")
 nf_parser.add_argument("source", type=str, help="news flash source")

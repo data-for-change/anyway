@@ -43,12 +43,15 @@ def get_anyway_count():
     dfs = []
     for road_segment in tqdm(RoadSegments.query.all()):
         road_segment_id = road_segment.segment_id
+        if road_segment_id != 97790010:
+            continue
         road = road_segment.road
         segment = road_segment.segment
         road_segment_name = road_segment.from_name + ' - ' + road_segment.to_name
+        print(road_segment_name)
         ROAD_SEGMENTS_DICT[road_segment_id] = road_segment_name
         filters={"road_segment_id": road_segment_id,
-                "accident_year": [2020,2021,2022]}
+                "accident_year": [2019, 2020,2021,2022, 2023]}
         query = db.session.query(AccidentMarkerView)
         location_fields, other_fields = split_location_fields_and_others(filters)
         if other_fields:
@@ -56,6 +59,17 @@ def get_anyway_count():
         query = query.filter(
             get_expression_for_road_segment_location_fields(location_fields, AccidentMarkerView)
         )
+        test_query = query
+        test_query = test_query.group_by(AccidentMarkerView.location_accuracy_hebrew)
+        test_query = test_query.group_by(AccidentMarkerView.location_accuracy_hebrew, AccidentMarkerView.provider_code, AccidentMarkerView.accident_year)
+        test_query = test_query.with_entities(
+            AccidentMarkerView.provider_code,
+            AccidentMarkerView.location_accuracy_hebrew,
+            AccidentMarkerView.accident_year,
+            func.count(AccidentMarkerView.location_accuracy_hebrew))
+        
+        df2 = pd.read_sql_query(test_query.statement, test_query.session.bind)
+        print(df2)
         query = query.group_by(AccidentMarkerView.provider_code,
                             AccidentMarkerView.accident_severity,
                             AccidentMarkerView.accident_year)
@@ -66,6 +80,9 @@ def get_anyway_count():
             AccidentMarkerView.accident_year,
             func.count(AccidentMarkerView.accident_severity),
         )
+
+ 
+
         df = pd.read_sql_query(query.statement, query.session.bind)
         df.rename(columns={"count_1": "anyway_count"}, inplace=True)  # pylint: disable=no-member
         df["road_segment_id"] = road_segment_id

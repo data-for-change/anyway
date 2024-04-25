@@ -927,6 +927,40 @@ class NewsFlash(Base):
             ) >= 1
         self.critical = critical
 
+
+    # generate text describing location or road segment of news flash to be used by
+    # Use case 1 - FE display of curr location in location qualification
+    # Use case 2 - Widgets e.g most severe accidents additional info widget
+    def get_news_flash_location_text(self):
+        resolution = self.resolution if self.resolution else ""
+        yishuv_name = self.yishuv_name if self.yishuv_name else ""
+        road1 = str(int(self.road1)) if self.road1 else ""
+        road2 = str(int(self.road2)) if self.road2 else ""
+        street1_hebrew = self.street1_hebrew if self.street1_hebrew else ""
+        road_segment_name = self.road_segment_name if self.road_segment_name else ""
+        if resolution == "כביש בינעירוני" and road1 and road_segment_name:
+            res = "כביש " + road1 + " במקטע " + road_segment_name
+        elif resolution == "עיר" and not yishuv_name:
+            res = self.location
+        elif resolution == "עיר" and yishuv_name:
+            res = self.yishuv_name
+        elif resolution == "צומת בינעירוני" and road1 and road2:
+            res = "צומת כביש " + road1 + " עם כביש " + road2
+        elif resolution == "צומת בינעירוני" and road1 and road_segment_name:
+            res = "כביש " + road1 + " במקטע " + road_segment_name
+        elif resolution == "רחוב" and yishuv_name and street1_hebrew:
+            def get_street_location_text(yishuv_name, street1_hebrew):
+                return "רחוב " + street1_hebrew + " ב" + yishuv_name
+            res = get_street_location_text(yishuv_name, street1_hebrew)
+        else:
+            logging.warning(
+                "Did not found quality resolution. Using location field. News Flash id:{}".format(
+                    self.id
+                )
+            )
+            res = self.location
+        return res
+
     def serialize(self):
         return {
             "id": self.id,
@@ -957,7 +991,9 @@ class NewsFlash(Base):
             ).get_label(),
             "location_qualifying_user": self.location_qualifying_user,
             "critical": self.critical,
+            "curr_cbs_location_text": self.get_news_flash_location_text(),
         }
+
 
     # Flask-Login integration
     def is_authenticated(self):

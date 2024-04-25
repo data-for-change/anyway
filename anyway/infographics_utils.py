@@ -13,7 +13,6 @@ from flask_babel import _
 
 from anyway.request_params import (
     RequestParams,
-    get_news_flash_location_text,
     extract_news_flash_obj,
     get_latest_accident_date,
     extract_news_flash_location,
@@ -108,7 +107,7 @@ def get_request_params(
     location_info = extract_news_flash_location(news_flash_obj)
     if location_info is None:
         return None
-    location_text = get_news_flash_location_text(news_flash_obj)
+    location_text = news_flash_obj.get_news_flash_location_text()
     logging.debug("location_text:{}".format(location_text))
     gps = location_info["gps"]
     location_info = location_info[DATA]

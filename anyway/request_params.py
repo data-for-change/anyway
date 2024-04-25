@@ -146,7 +146,7 @@ def get_location_from_news_flash(news_flash: Optional[NewsFlash]) -> Optional[di
             f"missing mandatory field:NON_URBAN_INTERSECTION_HEBREW."
         )
         return None
-    loc["text"] = get_news_flash_location_text(news_flash)
+    loc["text"] = news_flash.get_news_flash_location_text()
     add_numeric_field_values(loc, news_flash)
     return loc
 
@@ -168,39 +168,6 @@ def add_numeric_field_values(loc: dict, news_flash: NewsFlash) -> None:
     elif loc["data"]["resolution"] == BE_CONST.ResolutionCategories.SUBURBAN_JUNCTION:
         if NON_URBAN_INTERSECTION_HEBREW not in loc["data"] or "roads" not in loc["data"]:
             loc["data"] = fill_missing_non_urban_intersection_values(loc["data"])
-
-
-# generate text describing location or road segment of news flash
-# to be used by most severe accidents additional info widget
-def get_news_flash_location_text(news_flash_obj: NewsFlash):
-    nf = news_flash_obj.serialize()
-    resolution = nf["resolution"] if nf["resolution"] else ""
-    yishuv_name = nf["yishuv_name"] if nf["yishuv_name"] else ""
-    road1 = str(int(nf["road1"])) if nf["road1"] else ""
-    road2 = str(int(nf["road2"])) if nf["road2"] else ""
-    street1_hebrew = nf["street1_hebrew"] if nf["street1_hebrew"] else ""
-    road_segment_name = nf["road_segment_name"] if nf["road_segment_name"] else ""
-    if resolution == "כביש בינעירוני" and road1 and road_segment_name:
-        res = "כביש " + road1 + " במקטע " + road_segment_name
-    elif resolution == "עיר" and not yishuv_name:
-        res = nf["location"]
-    elif resolution == "עיר" and yishuv_name:
-        res = nf["yishuv_name"]
-    elif resolution == "צומת בינעירוני" and road1 and road2:
-        res = "צומת כביש " + road1 + " עם כביש " + road2
-    elif resolution == "צומת בינעירוני" and road1 and road_segment_name:
-        res = "כביש " + road1 + " במקטע " + road_segment_name
-    elif resolution == "רחוב" and yishuv_name and street1_hebrew:
-        res = get_street_location_text(yishuv_name, street1_hebrew)
-    else:
-        logging.warning(
-            "Did not found quality resolution. Using location field. News Flash id:{}".format(
-                nf["id"]
-            )
-        )
-        res = nf["location"]
-    return res
-
 
 # generate text describing location or road segment of news flash
 # to be used by most severe accidents additional info widget

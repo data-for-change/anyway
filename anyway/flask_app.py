@@ -1176,7 +1176,7 @@ news_flash_list_model = api.model(
 )
 
 
-@api.route("/api/news-flash/<int:news_flash_id>", methods=["GET", "PATCH"])
+@api.route("/api/news-flash/<int:news_flash_id>", methods=["GET", "PATCH", "OPTIONS"])
 class ManageSingleNewsFlash(Resource):
     @api.doc("get single news flash")
     @api.response(404, "News flash not found")

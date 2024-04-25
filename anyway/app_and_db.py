@@ -38,7 +38,7 @@ def get_cors_config() -> dict:
         r"/api/infographics-data": {"origins": "*"},
         r"/api/infographics-data-by-location": {"origins": "*"},
         r"/api/gps-to-location": {"origins": "*"},
-        r"/api/news-flash": {"origins": "*", "methods": ["GET", "PATCH", "OPTIONS"]},
+        r"/api/news-flash/*": {"origins": "*", "methods": ["GET", "PATCH", "OPTIONS"], "supports_credentials": True},
         r"/api/news-flash-v2": {"origins": "*"},
         r"/api/embedded-reports": {"origins": "*"},
         r"/api/streets": {"origins": "*"},

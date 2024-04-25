@@ -1097,14 +1097,6 @@ app.add_url_rule("/api/comments", endpoint=None, view_func=create_comment, metho
 
 app.add_url_rule("/api/v1/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
 
-
-@app.after_request
-def add_allow_methods_header(response):
-    if request.path.startswith("/api/news-flash/"):
-        response.headers['Access-Control-Allow-Methods'] = "GET, POST, PATCH"
-        response.headers['Access-Control-Allow-Origin'] = "*"
-    return response
-
 nf_parser = reqparse.RequestParser()
 nf_parser.add_argument("id", type=int, help="News flash id")
 nf_parser.add_argument("source", type=str, help="news flash source")
@@ -1176,7 +1168,7 @@ news_flash_list_model = api.model(
 )
 
 
-@api.route("/api/news-flash/<int:news_flash_id>", methods=["GET", "PATCH"])
+@api.route("/api/news-flash/<int:news_flash_id>", methods=["GET", "PATCH", "OPTIONS"])
 class ManageSingleNewsFlash(Resource):
     @api.doc("get single news flash")
     @api.response(404, "News flash not found")

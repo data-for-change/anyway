@@ -1091,7 +1091,7 @@ app.add_url_rule(
     view_func=injured_around_schools_api,
     methods=["GET"],
 )
-app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash_v2, methods=["GET"])
+app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash_v2, methods=["GET", "PATCH", "OPTIONS"])
 app.add_url_rule("/api/comments", endpoint=None, view_func=get_comments, methods=["GET"])
 app.add_url_rule("/api/comments", endpoint=None, view_func=create_comment, methods=["POST"])
 

@@ -88,7 +88,7 @@ def generate_infographics_in_selenium_container(browser, newsflash_id):
     generated_images_names = []
     try:
         browser.get(newsflash_page_url)
-        time.sleep(15)
+        time.sleep(60)
         elements = get_download_button_elements(browser)
         buttons_found = len(elements)
         logging.debug(f"found {buttons_found} buttons")

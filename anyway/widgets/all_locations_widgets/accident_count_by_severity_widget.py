@@ -19,14 +19,15 @@ class AccidentCountBySeverityWidget(AllLocationsWidget):
         self.rank = 1
 
     def generate_items(self) -> None:
-        self.items = AccidentCountBySeverityWidget.get_accident_count_by_severity(
-            self.request_params.location_info,
-            self.request_params.start_time,
-            self.request_params.end_time,
+        self.items = self.get_accident_count_by_severity(
+            location_info=self.request_params.location_info,
+            start_time=self.request_params.start_time,
+            end_time=self.request_params.end_time,
+            resolution=self.request_params.resolution,
         )
 
     @staticmethod
-    def get_accident_count_by_severity(location_info, start_time, end_time):
+    def get_accident_count_by_severity(location_info, start_time, end_time, resolution):
         count_by_severity = get_accidents_stats(
             table_obj=AccidentMarkerView,
             filters=location_info,
@@ -34,6 +35,7 @@ class AccidentCountBySeverityWidget(AllLocationsWidget):
             count="accident_severity",
             start_time=start_time,
             end_time=end_time,
+            resolution=resolution
         )
         found_severities = [d["accident_severity"] for d in count_by_severity]
         items = {}

@@ -5,7 +5,9 @@ from flask_babel import _
 
 from anyway.request_params import RequestParams
 from anyway.backend_constants import AccidentSeverity, BE_CONST
-from anyway.widgets.widget_utils import get_query, get_location_text
+from anyway.widgets.widget_utils import (
+    get_query, get_location_text, add_resolution_location_accuracy_filter
+)
 from anyway.models import AccidentMarkerView
 from anyway.widgets.widget import register
 from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget
@@ -21,14 +23,17 @@ class AccidentsHeatMapWidget(AllLocationsWidget):
         self.rank = 7
 
     def generate_items(self) -> None:
-        accidents_heat_map_filters = self.request_params.location_info.copy()
+        accidents_heat_map_filters = add_resolution_location_accuracy_filter(
+            self.request_params.location_info.copy(),
+            self.request_params.resolution
+        )
         accidents_heat_map_filters["accident_severity"] = [
             # pylint: disable=no-member
             AccidentSeverity.FATAL.value,
             # pylint: disable=no-member
             AccidentSeverity.SEVERE.value,
         ]
-        self.items = AccidentsHeatMapWidget.get_accidents_heat_map(
+        self.items = self.get_accidents_heat_map(
             filters=accidents_heat_map_filters,
             start_time=self.request_params.start_time,
             end_time=self.request_params.end_time,

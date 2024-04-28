@@ -46,7 +46,6 @@ class InjuredCountBySeverityWidget(AllLocationsWidget):
             InjurySeverity.SEVERE_INJURED.value,
             InjurySeverity.LIGHT_INJURED.value,
         ]
-
         count_by_severity = get_accidents_stats(
             table_obj=InvolvedMarkerView,
             filters=filters,
@@ -54,6 +53,7 @@ class InjuredCountBySeverityWidget(AllLocationsWidget):
             count="injury_severity",
             start_time=start_time,
             end_time=end_time,
+            resolution=resolution,
         )
         found_severities = [d["injury_severity"] for d in count_by_severity]
         items = {}

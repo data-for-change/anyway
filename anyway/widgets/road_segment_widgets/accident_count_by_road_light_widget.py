@@ -24,6 +24,7 @@ class AccidentCountByRoadLightWidget(RoadSegmentWidget):
             count="road_light_hebrew",
             start_time=self.request_params.start_time,
             end_time=self.request_params.end_time,
+            resolution=self.request_params.resolution,
         )
 
     @staticmethod

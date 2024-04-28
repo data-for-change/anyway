@@ -25,10 +25,11 @@ class UrbanCrosswalkWidget(UrbanWidget):
             self.request_params.location_info["street1_hebrew"],
             self.request_params.start_time,
             self.request_params.end_time,
+            self.request_params.resolution,
         )
 
     @staticmethod
-    def get_crosswalk(yishuv, street, start_time, end_time) -> Dict[str, Any]:
+    def get_crosswalk(yishuv, street, start_time, end_time, resolution) -> Dict[str, Any]:
         cross_output = {
             "with_crosswalk": get_accidents_stats(
                 table_obj=InvolvedMarkerView,
@@ -45,6 +46,7 @@ class UrbanCrosswalkWidget(UrbanWidget):
                 count="street1_hebrew",
                 start_time=start_time,
                 end_time=end_time,
+                resolution=resolution,
             ),
             "without_crosswalk": get_accidents_stats(
                 table_obj=InvolvedMarkerView,
@@ -61,6 +63,7 @@ class UrbanCrosswalkWidget(UrbanWidget):
                 count="street1_hebrew",
                 start_time=start_time,
                 end_time=end_time,
+                resolution=resolution,
             ),
         }
         if not cross_output["with_crosswalk"]:

@@ -15,7 +15,7 @@ from anyway.backend_constants import NewsflashLocationQualification
 
 def insert_infographic_mock_data(app):
     sql_insert = f"""
-        insert into news_flash
+          insert into news_flash
         (accident, author, date, description, lat, link, lon, title, source, location, road1, road2, resolution,
         tweet_id, district_hebrew, non_urban_intersection_hebrew, region_hebrew, road_segment_name, street1_hebrew, street2_hebrew, yishuv_name, newsflash_location_qualification, location_qualifying_user)
         values (

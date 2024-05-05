@@ -27,7 +27,7 @@ class AccidentCountByCarTypeWidget(RoadSegmentWidget):
         self.rank = 17
 
     def generate_items(self) -> None:
-        self.items = AccidentCountByCarTypeWidget.get_stats_accidents_by_car_type_with_national_data(
+        self.items = self.get_stats_accidents_by_car_type_with_national_data(
             self.request_params
         )
 

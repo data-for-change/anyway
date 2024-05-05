@@ -5,7 +5,6 @@ import requests
 from anyway import secrets
 
 from anyway.models import NewsFlash
-from anyway.parsers.infographics_data_cache_updater import is_in_cache
 
 INFOGRAPHIC_URL = "https://media.anyway.co.il/newsflash/"
 
@@ -37,15 +36,14 @@ def gen_notification(newsflash: NewsFlash) -> Notification:
     blocks = []
     title = Block(type="section", text=Text(type="plain_text", text=newsflash.title))
     blocks.append(title)
-    if is_in_cache(newsflash):
-        infographic_link = Block(
-            type="section",
-            text=Text(
-                type="mrkdwn",
-                text=fmt_lnk_mrkdwn(f"{INFOGRAPHIC_URL}{newsflash.id}", "infographic"),
-            ),
-        )
-        blocks.append(infographic_link)
+    infographic_link = Block(
+        type="section",
+        text=Text(
+            type="mrkdwn",
+            text=fmt_lnk_mrkdwn(f"{INFOGRAPHIC_URL}{newsflash.id}", "infographic"),
+        ),
+    )
+    blocks.append(infographic_link)
     return Notification(blocks=blocks)
 
 

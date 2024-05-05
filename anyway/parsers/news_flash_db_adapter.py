@@ -5,7 +5,6 @@ import pandas as pd
 import numpy as np
 from sqlalchemy import desc
 from flask_sqlalchemy import SQLAlchemy
-from anyway.parsers import infographics_data_cache_updater
 from anyway.parsers import timezones
 from anyway.models import NewsFlash
 from anyway.slack_accident_notifications import publish_notification
@@ -69,7 +68,6 @@ class DBAdapter:
         self.__fill_na(newsflash)
         self.db.session.add(newsflash)
         self.db.session.commit()
-        infographics_data_cache_updater.add_news_flash_to_cache(newsflash)
         if os.environ.get("FLASK_ENV") == "production" and newsflash.accident:
             try:
                 DBAdapter.publish_notifications(newsflash)
@@ -77,9 +75,8 @@ class DBAdapter:
                 logging.error("publish notifications failed")
                 logging.error(e)
 
-
-    def get_newsflash_by_id(self, id):
-        return self.db.session.query(NewsFlash).filter(NewsFlash.id == id)
+    def get_newsflash_by_id(self, nid):
+        return self.db.session.query(NewsFlash).filter(NewsFlash.id == nid)
 
     def select_newsflash_where_source(self, source):
         return self.db.session.query(NewsFlash).filter(NewsFlash.source == source)

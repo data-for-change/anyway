@@ -13,7 +13,7 @@ from anyway.backend_constants import BE_CONST, LabeledCode, InjurySeverity
 from anyway.models import InvolvedMarkerView
 from anyway.request_params import LocationInfo
 from anyway.vehicle_type import VehicleType
-from anyway.parsers import resolution_dict
+from anyway.parsers.resolution_fields import ResolutionFields as RF
 from anyway.models import NewsFlash
 from anyway.request_params import RequestParams
 from anyway.widgets.segment_junctions import SegmentJunctions
@@ -86,7 +86,7 @@ def get_filter_expression(table_obj, field_name, value):
 
 
 def split_location_fields_and_others(filters: dict) -> Tuple[dict, dict]:
-    all_location_fields = set().union(*resolution_dict.values())
+    all_location_fields = RF.get_all_location_fields()
     fields = filters.keys()
     location_fields = {x: filters[x] for x in fields if x in all_location_fields}
     other_fields = {x: filters[x] for x in fields if x not in all_location_fields}

@@ -28,7 +28,7 @@ from pydantic import BaseModel, ValidationError, validator
 from anyway.views.user_system.api import roles_accepted, return_json_error
 from anyway.views.user_system.user_functions import get_current_user
 from anyway.error_code_and_strings import Errors as Es
-from anyway.parsers import fields_to_resolution, resolution_dict
+from anyway.parsers.resolution_fields import ResolutionFields as RF
 from anyway.models import AccidentMarkerView, InvolvedView
 from anyway.widgets.widget_utils import get_accidents_stats
 from anyway.telegram_accident_notifications import trigger_generate_infographics_and_send_to_telegram
@@ -149,16 +149,16 @@ def news_flash_new(args: dict) -> List[dict]:
 
 
 def gen_news_flash_query(
-        session,
-        source=None,
-        start_date=None,
-        end_date=None,
-        interurban_only=None,
-        road_number=None,
-        road_segment=None,
-        offset=None,
-        limit=None,
-        last_minutes=None
+    session,
+    source=None,
+    start_date=None,
+    end_date=None,
+    interurban_only=None,
+    road_number=None,
+    road_segment=None,
+    offset=None,
+    limit=None,
+    last_minutes=None
 ):
     query = session.query(NewsFlash)
     # get all possible sources
@@ -191,7 +191,7 @@ def gen_news_flash_query(
     if road_number:
         query = query.filter(NewsFlash.road1 == road_number)
     if road_segment == "true":
-        query = query.filter(not_(NewsFlash.road_segment_name == None))
+        query = query.filter(not_(NewsFlash.road_segment_id == None))
     if last_minutes:
         last_timestamp = datetime.datetime.now() - datetime.timedelta(minutes=last_minutes)
         query = query.filter(NewsFlash.date >= last_timestamp)
@@ -200,7 +200,7 @@ def gen_news_flash_query(
             NewsFlash.accident == True,
             not_(and_(NewsFlash.lat == 0, NewsFlash.lon == 0)),
             not_(and_(NewsFlash.lat == None, NewsFlash.lon == None)),
-            )
+        )
     ).order_by(NewsFlash.date.desc())
 
     query = query.offset(offset)
@@ -231,7 +231,7 @@ def gen_news_flash_query_v2(session, valid_params: dict):
             NewsFlash.accident == True,
             not_(and_(NewsFlash.lat == 0, NewsFlash.lon == 0)),
             not_(and_(NewsFlash.lat == None, NewsFlash.lon == None)),
-            )
+        )
     ).order_by(NewsFlash.date.desc())
     query = query.offset(valid_params["offset"])
     query = query.limit(valid_params["limit"])
@@ -284,15 +284,15 @@ def filter_by_resolutions(query, resolutions: List[str]):
         ands.append(
             and_(
                 NewsFlash.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD.value,
-                NewsFlash.road_segment_name != None,
-                )
+                NewsFlash.road_segment_id != None,
+            )
         )
     if "street" in resolutions:
         ands.append(
             and_(
                 NewsFlash.resolution == BE_CONST.ResolutionCategories.STREET.value,
                 NewsFlash.street1_hebrew != None,
-                )
+            )
         )
     if len(ands) > 1:
         return query.filter(or_(*ands))
@@ -313,12 +313,12 @@ def normalize_query(params: dict):
 
 
 def update_location_verification_history(
-        user_id: int,
-        news_flash_id: int,
-        prev_location: str,
-        prev_qualification: int,
-        new_location: str,
-        new_qualification: int,
+    user_id: int,
+    news_flash_id: int,
+    prev_location: str,
+    prev_qualification: int,
+    new_location: str,
+    new_qualification: int,
 ):
     new_location_qualifiction_history = LocationVerificationHistory(
         user_id=user_id,
@@ -334,7 +334,7 @@ def update_location_verification_history(
 
 def extracted_location_and_qualification(news_flash_obj: NewsFlash):
     news_flash_resolution = {}
-    resolution = resolution_dict[news_flash_obj.resolution]
+    resolution = RF.get_possible_fields(news_flash_obj.resolution)
     for field in resolution:
         value = getattr(news_flash_obj, field)
         news_flash_resolution[field] = value
@@ -352,21 +352,22 @@ def update_news_flash_qualifying(id):
     use_road_segment = True
 
     newsflash_location_qualification = request.values.get("newsflash_location_qualification")
-    road_segment_name = request.values.get("road_segment_name")
+    road_segment_id = request.values.get("road_segment_id")
     road1 = request.values.get("road1")
     yishuv_name = request.values.get("yishuv_name")
     street1_hebrew = request.values.get("street1_hebrew")
     newsflash_location_qualification = QUALIFICATION_TO_ENUM_VALUE[newsflash_location_qualification]
     if newsflash_location_qualification == NewsflashLocationQualification.MANUAL.value:
         manual_update = True
-        if (road_segment_name is None) or (road1 is None):
+        # todo: generalize code to support more resolutions
+        if (road_segment_id is None) or (road1 is None):
             if (yishuv_name is None) or (street1_hebrew is None):
                 logging.error("manual update must include location detalis.")
                 return return_json_error(Es.BR_FIELD_MISSING)
             else:
                 use_road_segment = False
     else:
-        if road_segment_name is not None or road1 is not None or \
+        if road_segment_id is not None or road1 is not None or \
                 street1_hebrew is not None or yishuv_name is not None:
             logging.error("only manual update should contain location details.")
             return return_json_error(Es.BR_BAD_FIELD)
@@ -377,18 +378,16 @@ def update_news_flash_qualifying(id):
         old_location, old_location_qualifiction = extracted_location_and_qualification(news_flash_obj)
         if manual_update:
             if use_road_segment:
-                news_flash_obj.road_segment_name = road_segment_name
+                news_flash_obj.road_segment_id = road_segment_id
                 news_flash_obj.road1 = road1
-                news_flash_obj.resolution = fields_to_resolution.get(("road_segment_name", "road1"))
+                news_flash_obj.resolution = BE_CONST.ResolutionCategories.SUBURBAN_ROAD.value
             else:
                 news_flash_obj.yishuv_name = yishuv_name
                 news_flash_obj.street1_hebrew = street1_hebrew
-                news_flash_obj.resolution = fields_to_resolution.get(
-                    ("yishuv_name", "street1_hebrew")
-                )
+                news_flash_obj.resolution = BE_CONST.ResolutionCategories.STREET.value
         else:
-            if ((news_flash_obj.road_segment_name is None) or (news_flash_obj.road1 is None)) and (
-                    (news_flash_obj.yishuv_name is None) or (news_flash_obj.street1_hebrew is None)
+            if ((news_flash_obj.road_segment_id is None) or (news_flash_obj.road1 is None)) and (
+                (news_flash_obj.yishuv_name is None) or (news_flash_obj.street1_hebrew is None)
             ):
                 logging.error("try to set qualification on empty location.")
                 return return_json_error(Es.BR_BAD_FIELD)

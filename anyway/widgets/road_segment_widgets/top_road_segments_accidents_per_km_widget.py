@@ -80,7 +80,7 @@ class TopRoadSegmentsAccidentsPerKmWidget(RoadSegmentWidget):
 
     def is_included(self) -> bool:
         for item in self.items:
-            if item["road_segment_name"] == self.request_params.location_info["road_segment_name"]:
+            if item["road_segment_name"] == self.request_params.widget_specific["road_segment_name"]:
                 return True
         return False
 

@@ -286,9 +286,7 @@ def embedded_reports(filename):
 )
 def infographics_data_cache(info, update):
     """Will refresh the infographics data cache"""
-    from anyway.parsers.infographics_data_cache_updater import main
-
-    return main(update=update, info=info)
+    raise NotImplementedError("General, or news-flash cache is not used any more.")
 
 
 @process.command()

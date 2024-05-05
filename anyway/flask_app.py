@@ -1159,6 +1159,7 @@ news_flash_fields_model = api.model(
         "street2_hebrew": fields.String(),
         "non_urban_intersection_hebrew": fields.String(),
         "road_segment_name": fields.String(),
+        "road_segment_id": fields.Integer(),
         "newsflash_location_qualification": fields.Integer(),
         "location_qualifying_user": fields.Integer(),
     },

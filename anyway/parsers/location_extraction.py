@@ -7,7 +7,7 @@ import numpy as np
 from geographiclib.geodesic import Geodesic
 from anyway.backend_constants import BE_CONST
 from anyway.models import NewsFlash
-from anyway.parsers import resolution_dict
+from anyway.parsers.resolution_fields import ResolutionFields as RF
 from anyway import secrets
 from anyway.models import AccidentMarkerView, RoadSegments
 from sqlalchemy import not_
@@ -191,7 +191,7 @@ def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):
     """
     # READ MARKERS FROM DB
     geod = Geodesic.WGS84
-    relevant_fields = resolution_dict[resolution]
+    relevant_fields = RF.get_possible_fields(resolution)
     markers = db.get_markers_for_location_extraction()
     markers["geohash"] = markers.apply(
         lambda x: geohash.encode(x["latitude"], x["longitude"], precision=4), axis=1
@@ -538,12 +538,9 @@ def extract_geo_features(db, newsflash: NewsFlash, update_cbs_location_only: boo
     if location_from_db is not None:
         for k, v in location_from_db.items():
             setattr(newsflash, k, v)
-        all_resolutions = []
-        for _, v in resolution_dict.items():
-            all_resolutions += v
-        for resolution in all_resolutions:
-            if resolution not in location_from_db:
-                setattr(newsflash, resolution, None)
+        for field in RF.get_all_location_fields():
+            if field not in location_from_db:
+                setattr(newsflash, field, None)
     if (
         newsflash.road_segment_id is None
         and newsflash.road_segment_name is not None

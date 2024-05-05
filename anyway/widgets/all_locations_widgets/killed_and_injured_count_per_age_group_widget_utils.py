@@ -148,5 +148,5 @@ def adapt_location_fields_to_involve_table(filter: dict) -> dict:
     res = copy.copy(filter)
     for field in ["yishuv_name", "yishuv_symbol"]:
         if field in res:
-            res[f"involve_{field}"] = res.pop(field)
+            res[f"accident_{field}"] = res.pop(field)
     return res

@@ -338,16 +338,8 @@ def get_location_text(request_params: RequestParams) -> str:
         return f'{_("in street")} {request_params.location_info["street1_hebrew"]} {in_str}{request_params.location_info["yishuv_name"]}'
 
 
-__RESOLUTION_ACCURACY_VALUES: dict = {
-    RC.SUBURBAN_JUNCTION: [1, 4],
-    RC.SUBURBAN_ROAD: [1, 4],
-    RC.URBAN_JUNCTION: [1, 3],
-    RC.STREET: [1, 3],
-}
-
-
 def get_resolution_location_accuracy_filter(rc: RC) -> Optional[dict]:
-    vals = __RESOLUTION_ACCURACY_VALUES.get(rc)
+    vals = BE_CONST.RESOLUTION_ACCURACY_VALUES.get(rc)
     return {"location_accuracy": vals} if vals else None
 
 

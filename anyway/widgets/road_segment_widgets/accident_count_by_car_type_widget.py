@@ -8,6 +8,7 @@ from flask_babel import _
 
 import anyway.widgets.widget_utils as widget_utils
 from anyway.backend_constants import BE_CONST
+RC = BE_CONST.ResolutionCategories
 from anyway.infographics_dictionaries import segment_dictionary
 from anyway.models import VehicleMarkerView
 from anyway.request_params import RequestParams
@@ -44,6 +45,7 @@ class AccidentCountByCarTypeWidget(RoadSegmentWidget):
                 count="provider_and_id",
                 start_time=request_params.start_time,
                 end_time=request_params.end_time,
+                resolution=request_params.resolution,
             )
 
         start_time = request_params.start_time
@@ -127,6 +129,7 @@ class AccidentCountByCarTypeWidget(RoadSegmentWidget):
             count="provider_and_id",
             start_time=start_time,
             end_time=end_time,
+            resolution=RC.SUBURBAN_ROAD,
         )
         return AccidentCountByCarTypeWidget.percentage_accidents_by_car_type(
             vehicle_grouped_by_type_count_unique

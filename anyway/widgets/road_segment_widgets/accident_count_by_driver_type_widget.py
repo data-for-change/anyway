@@ -28,7 +28,7 @@ class AccidentCountByDriverTypeWidget(RoadSegmentWidget):
         )
 
     @staticmethod
-    def count_accidents_by_driver_type(request_params):
+    def count_accidents_by_driver_type(request_params: RequestParams):
         filters = get_injured_filters(request_params)
         filters["involved_type"] = [
             consts.InvolvedType.DRIVER.value,
@@ -42,6 +42,7 @@ class AccidentCountByDriverTypeWidget(RoadSegmentWidget):
             cnt_distinct=True,
             start_time=request_params.start_time,
             end_time=request_params.end_time,
+            resolution=request_params.resolution,
         )
         driver_types = defaultdict(int)
         for item in involved_by_vehicle_type_data:

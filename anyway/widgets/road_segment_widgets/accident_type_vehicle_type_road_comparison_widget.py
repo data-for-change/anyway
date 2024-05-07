@@ -4,10 +4,16 @@ from typing import List, Dict
 
 from flask_babel import _
 from sqlalchemy import func, distinct, desc
-
+from anyway.backend_constants import BE_CONST
+RC = BE_CONST.ResolutionCategories
 from anyway.request_params import RequestParams
 from anyway.app_and_db import db
-from anyway.widgets.widget_utils import get_query, run_query
+from anyway.widgets.widget_utils import (
+    get_query,
+    run_query,
+    add_resolution_location_accuracy_filter,
+    get_expression_for_fields,
+)
 from anyway.models import VehicleMarkerView, AccidentType
 from anyway.vehicle_type import VehicleCategory
 from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
@@ -55,6 +61,9 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(RoadSegmentWidget):
         road_query = all_roads_query.filter(
             (VehicleMarkerView.road1 == road_number) | (VehicleMarkerView.road2 == road_number)
         )
+        loc_filter = add_resolution_location_accuracy_filter(None, RC.SUBURBAN_ROAD)
+        loc_ex = get_expression_for_fields(loc_filter, VehicleMarkerView)
+        road_query = road_query.filter(loc_ex)
         road_query_result = run_query(road_query)
         road_sum_accidents = 0
         types_to_report = []
@@ -84,12 +93,16 @@ class AccidentTypeVehicleTypeRoadComparisonWidget(RoadSegmentWidget):
         num_accidents_label: str,
         vehicle_types: List[int],
     ) -> db.session.query:
+        filters = add_resolution_location_accuracy_filter(
+            {VehicleMarkerView.vehicle_type.name: vehicle_types},
+            RC.SUBURBAN_ROAD
+        )
         return (
             get_query(
                 table_obj=VehicleMarkerView,
                 start_time=start_time,
                 end_time=end_time,
-                filters={VehicleMarkerView.vehicle_type.name: vehicle_types},
+                filters=filters,
             )
             .with_entities(
                 VehicleMarkerView.accident_type,

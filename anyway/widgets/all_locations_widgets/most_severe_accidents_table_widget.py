@@ -6,7 +6,9 @@ from flask_babel import _
 from anyway.request_params import RequestParams
 from anyway.backend_constants import BE_CONST, AccidentSeverity, AccidentType, InjurySeverity
 from anyway.infographics_dictionaries import segment_dictionary
-from anyway.widgets.widget_utils import get_query, get_accidents_stats
+from anyway.widgets.widget_utils import (
+    get_query, get_accidents_stats, add_resolution_location_accuracy_filter,
+)
 from anyway.models import AccidentMarkerView, InvolvedMarkerView
 from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget
 from anyway.widgets.widget import register
@@ -28,6 +30,7 @@ def get_most_severe_accidents_with_entities(
     ]
     # pylint: disable=no-member
     filters["accident_severity"] = [AccidentSeverity.FATAL.value, AccidentSeverity.SEVERE.value]
+    filters = add_resolution_location_accuracy_filter(filters, resolution)
     query = get_query(table_obj, filters, start_time, end_time)
     query = query.with_entities(*entities)
     query = query.order_by(

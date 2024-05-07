@@ -37,6 +37,7 @@ class InjuredCountByAccidentYearWidget(AllLocationsWidget):
             count="injury_severity",
             start_time=self.request_params.start_time,
             end_time=self.request_params.end_time,
+            resolution=self.request_params.resolution,
         )
         res2 = sort_and_fill_gaps_for_stacked_bar(
             res1,

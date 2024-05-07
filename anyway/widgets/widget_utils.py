@@ -5,6 +5,8 @@ from collections import defaultdict
 from typing import Dict, Any, List, Type, Optional, Sequence, Tuple
 
 import pandas as pd
+
+# noinspection PyProtectedMember
 from flask_babel import _
 from sqlalchemy import func, distinct, between, or_, and_
 
@@ -17,6 +19,8 @@ from anyway.parsers.resolution_fields import ResolutionFields as RF
 from anyway.models import NewsFlash
 from anyway.request_params import RequestParams
 from anyway.widgets.segment_junctions import SegmentJunctions
+
+RC = BE_CONST.ResolutionCategories
 
 
 def get_query(table_obj, filters, start_time, end_time):
@@ -31,28 +35,45 @@ def get_query(table_obj, filters, start_time, end_time):
     if not filters:
         return query
     if "road_segment_id" not in filters.keys():
-        query = query.filter(get_expression_for_fields(filters, table_obj, and_))
+        query = query.filter(get_expression_for_non_road_segment_fields(filters, table_obj, and_))
         return query
     location_fields, other_fields = split_location_fields_and_others(filters)
     if other_fields:
-        query = query.filter(get_expression_for_fields(other_fields, table_obj, and_))
+        query = query.filter(
+            get_expression_for_non_road_segment_fields(other_fields, table_obj, and_)
+        )
     query = query.filter(
         get_expression_for_road_segment_location_fields(location_fields, table_obj)
     )
     return query
 
 
-def get_expression_for_fields(filters, table_obj, op):
-    inv_val = op == and_
-    ex = op(inv_val, inv_val)
-    for field_name, value in filters.items():
-        ex = op(ex, get_filter_expression(table_obj, field_name, value))
+def get_expression_for_fields(filters: dict, table_obj):
+    op_other, op_segment = None, None
+    if "road_segment_id" not in filters.keys():
+        return get_expression_for_non_road_segment_fields(filters, table_obj, and_)
+    location_fields, other_fields = split_location_fields_and_others(filters)
+    if other_fields:
+        op_other = get_expression_for_non_road_segment_fields(other_fields, table_obj, and_)
+    op_segment = get_expression_for_road_segment_location_fields(location_fields, table_obj)
+    return op_segment if op_other is None else and_(op_segment, op_other)
+
+
+def get_expression_for_non_road_segment_fields(filters, table_obj, op):
+    items = list(filters.items())
+    if len(items) == 0:
+        return True
+    field_name, value = items[0]
+    ex = get_filter_expression(table_obj, field_name, value)
+    for field_name, value in items[1:]:
+        ex2 = get_filter_expression(table_obj, field_name, value)
+        ex = op(ex, ex2)
     return ex
 
 
 # todo: remove road_segment_name if road_segment_id exists.
 def get_expression_for_road_segment_location_fields(filters, table_obj):
-    ex = get_expression_for_fields(filters, table_obj, and_)
+    ex = get_expression_for_non_road_segment_fields(filters, table_obj, and_)
     segment_id = filters["road_segment_id"]
     junctions_ex = get_expression_for_segment_junctions(segment_id, table_obj)
     res = or_(ex, junctions_ex)
@@ -67,22 +88,19 @@ def get_expression_for_segment_junctions(segment_id: int, table_obj):
 
 def get_filter_expression(table_obj, field_name, value):
     if field_name == "street1_hebrew" or field_name == "street1":
-        if isinstance(value, list):
-            values = value
-        else:
-            values = [value]
-        o = or_(
-            (getattr(table_obj, field_name)).in_(values),
-            (getattr(table_obj, field_name.replace("1", "2"))).in_(values),
-            # (getattr(table_obj, "street1_hebrew")).in_(values),
-            # (getattr(table_obj, "street2_hebrew")).in_(values),
+        return or_(
+            get_filter_expression_raw(table_obj, field_name, value),
+            get_filter_expression_raw(table_obj, field_name.replace("1", "2"), value),
         )
     else:
-        if isinstance(value, list):
-            o = (getattr(table_obj, field_name)).in_(value)
-        else:
-            o = (getattr(table_obj, field_name)) == value
-    return o
+        return get_filter_expression_raw(table_obj, field_name, value)
+
+
+def get_filter_expression_raw(table_obj, field_name, value):
+    if isinstance(value, list):
+        return (getattr(table_obj, field_name)).in_(value)
+    else:
+        return (getattr(table_obj, field_name)) == value
 
 
 def split_location_fields_and_others(filters: dict) -> Tuple[dict, dict]:
@@ -102,8 +120,10 @@ def get_accidents_stats(
     cnt_distinct=False,
     start_time=None,
     end_time=None,
+    resolution: Optional[RC] = None,
 ):
     filters = filters or {}
+    filters = add_resolution_location_accuracy_filter(filters, resolution)
     provider_code_filters = [
         BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
         BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
@@ -141,9 +161,9 @@ def get_accidents_stats(
 
 
 # noinspection Mypy
-def retro_dictify(indexable) -> Dict[Any, Dict[Any, Any]]:
+def retro_dictify(iterable) -> Dict[Any, Dict[Any, Any]]:
     d = defaultdict(dict)
-    for row in indexable:
+    for row in iterable:
         here = d
         for elem in row[:-2]:
             if elem not in here:
@@ -273,16 +293,13 @@ def get_involved_counts(
         .filter(between(table.accident_year, start_year, end_year))
         .order_by(table.accident_year)
     )
-
+    filters = add_resolution_location_accuracy_filter(location_info, table)
     if "yishuv_symbol" in location_info:
-        query = query.filter(
-            table.accident_yishuv_symbol == location_info["yishuv_symbol"]
-        ).group_by(table.accident_year)
-    elif "road_segment_id" in location_info:
-        ex = get_expression_for_road_segment_location_fields(
-            {"road_segment_id": location_info["road_segment_id"]}, table
-        )
-        query = query.filter(ex).group_by(table.accident_year)
+        filters["accident_yishuv_symbol"] = filters["yishuv_symbol"]
+        filters.pop("yishuv_symbol")
+        filters.pop("yishuv_name", None)
+    ex = get_expression_for_fields(filters, table)
+    query = query.filter(ex).group_by(table.accident_year)
 
     if severities:
         query = query.filter(table.injury_severity.in_([severity.value for severity in severities]))
@@ -319,3 +336,22 @@ def get_location_text(request_params: RequestParams) -> str:
         return f'{_("in segment")} {_(request_params.location_info["road_segment_name"])}'
     elif request_params.resolution == BE_CONST.ResolutionCategories.STREET:
         return f'{_("in street")} {request_params.location_info["street1_hebrew"]} {in_str}{request_params.location_info["yishuv_name"]}'
+
+
+def get_resolution_location_accuracy_filter(rc: RC) -> Optional[dict]:
+    vals = BE_CONST.RESOLUTION_ACCURACY_VALUES.get(rc)
+    return {"location_accuracy": vals} if vals else None
+
+
+def add_resolution_location_accuracy_filter(
+    filters: Optional[dict], resolution: RC
+) -> Optional[dict]:
+    la = get_resolution_location_accuracy_filter(resolution)
+    if la is None:
+        return filters
+    elif filters is None:
+        return la
+    else:
+        res = copy.copy(filters)
+        res.update(la)
+        return res

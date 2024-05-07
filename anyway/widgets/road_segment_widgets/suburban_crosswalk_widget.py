@@ -1,7 +1,8 @@
 from typing import Dict, Any
 
 from anyway.request_params import RequestParams
-from anyway.backend_constants import InjurySeverity
+from anyway.backend_constants import InjurySeverity, BE_CONST
+RC = BE_CONST.ResolutionCategories
 from anyway.models import InvolvedMarkerView
 from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
 from anyway.widgets.widget_utils import get_accidents_stats
@@ -24,10 +25,11 @@ class SuburbanCrosswalkWidget(RoadSegmentWidget):
             self.request_params.location_info["road_segment_name"],
             self.request_params.start_time,
             self.request_params.end_time,
+            self.request_params.resolution,
         )
 
     @staticmethod
-    def get_crosswalk(road, start_time, end_time) -> Dict[str, Any]:
+    def get_crosswalk(road, start_time, end_time, resolution: RC) -> Dict[str, Any]:
         cross_output = {
             "with_crosswalk": get_accidents_stats(
                 table_obj=InvolvedMarkerView,
@@ -43,6 +45,7 @@ class SuburbanCrosswalkWidget(RoadSegmentWidget):
                 count="road_segment_name",
                 start_time=start_time,
                 end_time=end_time,
+                resolution=resolution
             ),
             "without_crosswalk": get_accidents_stats(
                 table_obj=InvolvedMarkerView,
@@ -58,6 +61,7 @@ class SuburbanCrosswalkWidget(RoadSegmentWidget):
                 count="road_segment_name",
                 start_time=start_time,
                 end_time=end_time,
+                resolution=resolution,
             ),
         }
         if not cross_output["with_crosswalk"]:

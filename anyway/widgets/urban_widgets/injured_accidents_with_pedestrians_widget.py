@@ -12,6 +12,8 @@ from anyway.widgets.widget_utils import (
     add_empty_keys_to_gen_two_level_dict,
     gen_entity_labels,
     format_2_level_items,
+    add_resolution_location_accuracy_filter,
+    get_expression_for_fields,
 )
 from anyway.models import InvolvedMarkerView
 from anyway.widgets.widget import register
@@ -54,11 +56,16 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
             yishuv_name = self.request_params.location_info.get("yishuv_name")
             street1_hebrew = self.request_params.location_info.get("street1_hebrew")
 
-            if not self.validate_parameters(yishuv_name, street1_hebrew):
-                # TODO: this will fail since there is no news_flash_obj in request_params
-                logging.exception(f"Could not validate parameters yishuv_name + street1_hebrew in widget : {self.name}")
-                return None
+            # if not self.validate_parameters(yishuv_name, street1_hebrew):
+            #     # TODO: this will fail since there is no news_flash_obj in request_params
+            #     logging.exception(f"Could not validate parameters yishuv_name + street1_hebrew in widget : {self.name}")
+            #     return None
 
+            loc_accuracy = add_resolution_location_accuracy_filter(
+                None,
+                self.request_params.resolution
+            )
+            loc_ex = get_expression_for_fields(loc_accuracy, InvolvedMarkerView)
             query = (
                 db.session.query(InvolvedMarkerView)
                 .with_entities(
@@ -66,6 +73,7 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
                     InvolvedMarkerView.injury_severity,
                     func.count().label("count"),
                 )
+                .filter(loc_ex)
                 .filter(InvolvedMarkerView.accident_yishuv_name == yishuv_name)
                 .filter(
                     InvolvedMarkerView.injury_severity.in_(

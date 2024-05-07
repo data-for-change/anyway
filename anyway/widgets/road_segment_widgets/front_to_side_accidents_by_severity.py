@@ -5,12 +5,13 @@ import pandas as pd
 from flask_babel import _
 from sqlalchemy import case, func, distinct
 
-from anyway.backend_constants import AccidentType, AccidentSeverity
+from anyway.backend_constants import AccidentType, AccidentSeverity, BE_CONST
+RC = BE_CONST.ResolutionCategories
 from anyway.models import AccidentMarkerView
 from anyway.request_params import RequestParams
 from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
 from anyway.widgets.widget import register
-from anyway.widgets.widget_utils import get_query
+from anyway.widgets.widget_utils import get_query, add_resolution_location_accuracy_filter
 
 ROAD_SEGMENT_ACCIDENTS = "specific_road_segment_accidents"
 
@@ -100,9 +101,13 @@ class FrondToSideAccidentsBySeverityWidget(RoadSegmentWidget):
                 )
             ]
         )
+        filters = add_resolution_location_accuracy_filter(
+            {"road_segment_id": road_segment_id},
+            RC.SUBURBAN_ROAD,
+        )
         query = get_query(
             table_obj=AccidentMarkerView,
-            filters={"road_segment_id": road_segment_id},
+            filters=filters,
             start_time=start_date,
             end_time=end_date,
         )

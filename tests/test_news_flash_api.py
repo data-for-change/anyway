@@ -202,7 +202,7 @@ class NewsFlashApiTestCase(unittest.TestCase):
     def test_gen_news_flash_query(self):
         orig_supported_resolutions = BE_CONST.SUPPORTED_RESOLUTIONS
         BE_CONST.SUPPORTED_RESOLUTIONS = [BE_CONST.ResolutionCategories.DISTRICT]
-        actual = gen_news_flash_query(self.session, road_number=12345678)
+        actual = gen_news_flash_query(self.session, {"road_number": 12345678})
         news_flashes = actual.all()
         self.assertEqual(len(news_flashes), 1, "single news flash")
         self.assertEqual(
@@ -210,13 +210,13 @@ class NewsFlashApiTestCase(unittest.TestCase):
         )
 
         BE_CONST.SUPPORTED_RESOLUTIONS = [BE_CONST.ResolutionCategories.REGION]
-        actual = gen_news_flash_query(self.session, road_number=12345678)
+        actual = gen_news_flash_query(self.session, {"road_number": 12345678})
         news_flashes = actual.all()
         self.assertEqual(len(news_flashes), 1, "single news flash")
         self.assertEqual(news_flashes[0].description, self.region_description, "region description")
 
         BE_CONST.SUPPORTED_RESOLUTIONS = [BE_CONST.ResolutionCategories.CITY]
-        actual = gen_news_flash_query(self.session, road_number=12345678)
+        actual = gen_news_flash_query(self.session, {"road_number": 12345678})
         news_flashes = actual.all()
         self.assertEqual(len(news_flashes), 0, "zero news flash")
 

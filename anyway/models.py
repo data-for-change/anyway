@@ -903,7 +903,7 @@ class NewsFlash(Base):
         resolution = BE_CONST.ResolutionCategories(self.resolution)
         end_time = last_accident_date.to_pydatetime().date()
         start_time = datetime.date(end_time.year + 1 - years_before, 1, 1)
-        location_info = LocationInfo()
+        location_info: LocationInfo = {}
         if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
             location_info["road1"] = self.road1
             location_info["road_segment_id"] = self.road_segment_id

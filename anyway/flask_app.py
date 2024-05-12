@@ -14,7 +14,7 @@ from flask_assets import Environment
 from flask_babel import Babel, gettext
 from flask_compress import Compress
 from flask_cors import CORS
-from flask_restx import Resource, fields, reqparse
+from flask_restx import Resource, fields, reqparse, Model
 from sqlalchemy import and_, not_, or_
 from sqlalchemy import func
 from webassets import Environment as AssetsEnvironment, Bundle as AssetsBundle
@@ -57,7 +57,8 @@ from anyway.models import (
     City,
     Streets,
     Comment,
-    TelegramForwardedMessages
+    TelegramForwardedMessages,
+    NewsFlash
 )
 from anyway.request_params import get_request_params_from_request_values
 from anyway.views.news_flash.api import (
@@ -70,6 +71,7 @@ from anyway.views.news_flash.api import (
     DEFAULT_LIMIT_REQ_PARAMETER,
     DEFAULT_OFFSET_REQ_PARAMETER,
     DEFAULT_NUMBER_OF_YEARS_AGO,
+    search_newsflashes_by_resolution
 )
 from anyway.views.schools.api import (
     schools_description_api,
@@ -1128,6 +1130,19 @@ nf_parser.add_argument(
     help="limit number of retrieved items to given limit",
 )
 
+def is_true(value):
+    return value.lower() == 'true'
+
+newsflash_fields = [column.name for column in NewsFlash.__table__.columns]
+nfbr_parser = reqparse.RequestParser()
+nfbr_parser.add_argument("resolutions", type=str, action="append", required=True,
+                         help="List of resolutions to filter by")
+nfbr_parser.add_argument("include", type=is_true, required=True,
+                         help="Flag to include or exclude the specified resolutions")
+nfbr_parser.add_argument("limit", type=int, help="Maximum number of records to return")
+nfbr_parser.add_argument("fields", type=str, choices=newsflash_fields, action="append",
+                          help="List of fields to include in the response")
+
 
 def datetime_to_str(val: datetime.datetime) -> str:
     return val.strftime("%Y-%m-%d %H:%M:%S") if isinstance(val, datetime.datetime) else "None"
@@ -1184,7 +1199,30 @@ class ManageSingleNewsFlash(Resource):
         return update_news_flash_qualifying(news_flash_id)
     def options(self, news_flash_id):
         return single_news_flash(news_flash_id)
-    
+
+
+def filter_json_fields(json_data, fields):
+    return {field: json_data[field] for field in fields if field in json_data}
+
+
+@api.route("/api/news-flash/by-resolution", methods=["GET"])
+class RetrieveNewsFlashByResolution(Resource):
+    @api.doc("get news flash records by resolution")
+    @api.expect(nfbr_parser)
+    @api.response(404, "Parameter value not supported or missing")
+    @api.response(
+        200, "Retrieve news-flash items filtered by given parameters", news_flash_list_model
+    )
+    def get(self):
+        args = nfbr_parser.parse_args()
+        limit = args["limit"] if "limit" in args else None
+        query = search_newsflashes_by_resolution(db.session, args["resolutions"], args["include"], limit)
+        res = query.all()
+        news_flashes_jsons = [n.serialize() for n in res]
+        logging.debug(news_flashes_jsons)
+        filtered_jsons = [filter_json_fields(json_data, args["fields"]) for json_data in news_flashes_jsons]
+        return Response(json.dumps(filtered_jsons, default=str), mimetype="application/json")
+
 
 @api.route("/api/news-flash-new", methods=["GET"])
 class RetrieveNewsFlash(Resource):

@@ -34,7 +34,8 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
     ) -> Dict[str, Dict[int, int]]:
         start_time = request_params.start_time
         end_time = request_params.end_time
-        cache_key = None #prevent Black warning
+        cache_key = None #prevent pylint warning
+        
         if request_params.resolution == BE_CONST.ResolutionCategories.STREET:
             involve_yishuv_name = request_params.location_info["yishuv_name"]
             street1_hebrew = request_params.location_info["street1_hebrew"]

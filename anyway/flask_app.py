@@ -20,6 +20,7 @@ from sqlalchemy import func
 from webassets import Environment as AssetsEnvironment, Bundle as AssetsBundle
 from webassets.ext.jinja2 import AssetsExtension
 from werkzeug.exceptions import BadRequestKeyError
+import json
 
 from anyway import utilities, secrets
 from anyway.app_and_db import api, get_cors_config
@@ -1130,18 +1131,16 @@ nf_parser.add_argument(
     help="limit number of retrieved items to given limit",
 )
 
-def is_true(value):
-    return value.lower() == 'true'
-
-newsflash_fields = [column.name for column in NewsFlash.__table__.columns]
+newsflash_fields = tuple(column.name for column in NewsFlash.__table__.columns)
 nfbr_parser = reqparse.RequestParser()
 nfbr_parser.add_argument("resolutions", type=str, action="append", required=True,
                          help="List of resolutions to filter by")
-nfbr_parser.add_argument("include", type=is_true, required=True,
-                         help="Flag to include or exclude the specified resolutions")
+nfbr_parser.add_argument("include", type=str, required=True, choices=["True", "False"],
+                         help="Flag to include or exclude the specified resolutions (True\False)")
 nfbr_parser.add_argument("limit", type=int, help="Maximum number of records to return")
-nfbr_parser.add_argument("fields", type=str, choices=newsflash_fields, action="append",
-                          help="List of fields to include in the response")
+nfbr_parser.add_argument("fields", type=str, choices=(*newsflash_fields, ""), action="append",
+                          help=f"List of fields to include in the response (Empty array to fetch all).\n"
+                               f"Available values: {', '.join(newsflash_fields)}")
 
 
 def datetime_to_str(val: datetime.datetime) -> str:
@@ -1219,8 +1218,10 @@ class RetrieveNewsFlashByResolution(Resource):
         query = search_newsflashes_by_resolution(db.session, args["resolutions"], args["include"], limit)
         res = query.all()
         news_flashes_jsons = [n.serialize() for n in res]
-        logging.debug(news_flashes_jsons)
-        filtered_jsons = [filter_json_fields(json_data, args["fields"]) for json_data in news_flashes_jsons]
+        if not args["fields"]:
+            filtered_jsons = news_flashes_jsons
+        else:
+            filtered_jsons = [filter_json_fields(json_data, args["fields"]) for json_data in news_flashes_jsons]
         return Response(json.dumps(filtered_jsons, default=str), mimetype="application/json")
 
 

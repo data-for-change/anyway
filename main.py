@@ -286,9 +286,7 @@ def embedded_reports(filename):
 )
 def infographics_data_cache(info, update):
     """Will refresh the infographics data cache"""
-    from anyway.parsers.infographics_data_cache_updater import main
-
-    return main(update=update, info=info)
+    raise NotImplementedError("General, or news-flash cache is not used any more.")
 
 
 @process.command()
@@ -511,16 +509,18 @@ def telegram():
 
 @telegram.command()
 @click.option("--id", type=int)
-def send_notification(id):
+@click.option("--chat", type=int, required=False)
+def send_notification(id, chat):
     from anyway.telegram_accident_notifications import publish_notification
 
-    publish_notification(id)
+    publish_notification(id, chat)
 
 
 # this is for testing, in production we use a dag with separate tasks
 @telegram.command()
 @click.option("--id", type=int)
-def generate_images_and_send_notification(id):
+@click.option("--chat", type=int, required=False)
+def generate_images_and_send_notification(id, chat):
     from anyway.telegram_accident_notifications import publish_notification
     from anyway.infographic_image_generator import upload_infographics_images_to_s3
     from anyway.infographic_image_generator import generate_infographics_for_newsflash
@@ -531,7 +531,7 @@ def generate_images_and_send_notification(id):
     else:
         raise Exception("generation failed")
     upload_infographics_images_to_s3(id)
-    publish_notification(id)
+    publish_notification(id, chat)
 
 
 @telegram.command()

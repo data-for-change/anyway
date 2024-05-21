@@ -1,3 +1,4 @@
+import copy
 from collections import defaultdict, OrderedDict
 from typing import Dict, Tuple, Callable
 
@@ -10,7 +11,10 @@ from anyway.backend_constants import BE_CONST, InjurySeverity
 from anyway.models import InvolvedMarkerView
 from anyway.request_params import RequestParams
 from anyway.utilities import parse_age_from_range
-from anyway.widgets.widget_utils import get_expression_for_road_segment_location_fields
+from anyway.widgets.widget_utils import (
+    get_expression_for_fields,
+    add_resolution_location_accuracy_filter,
+)
 
 # RequestParams is not hashable, so we can't use functools.lru_cache
 cache_dict = OrderedDict()
@@ -30,6 +34,8 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
     ) -> Dict[str, Dict[int, int]]:
         start_time = request_params.start_time
         end_time = request_params.end_time
+        cache_key = None #prevent pylint warning
+        
         if request_params.resolution == BE_CONST.ResolutionCategories.STREET:
             involve_yishuv_name = request_params.location_info["yishuv_name"]
             street1_hebrew = request_params.location_info["street1_hebrew"]
@@ -105,20 +111,10 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
     def create_query_for_killed_and_injured_count_per_age_group(
         end_time, start_time, location_info, resolution
     ) -> BaseQuery:
-        if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
-            location_filter = get_expression_for_road_segment_location_fields(
-                {"road_segment_id": location_info["road_segment_id"]}, InvolvedMarkerView
-            )
-            # (InvolvedMarkerView.road1 == location_info["road1"])
-            # | (InvolvedMarkerView.road2 == location_info["road1"])
-            # ) & (InvolvedMarkerView.road_segment_name == location_info["road_segment_name"])
-        elif resolution == BE_CONST.ResolutionCategories.STREET:
-            location_filter = (
-                InvolvedMarkerView.involve_yishuv_name == location_info["yishuv_name"]
-            ) & (
-                (InvolvedMarkerView.street1_hebrew == location_info["street1_hebrew"])
-                | (InvolvedMarkerView.street2_hebrew == location_info["street1_hebrew"])
-            )
+        loc_filter = adapt_location_fields_to_involve_table(location_info)
+        loc_filter = add_resolution_location_accuracy_filter(loc_filter,
+                                                             resolution)
+        loc_ex = get_expression_for_fields(loc_filter, InvolvedMarkerView)
 
         query = (
             db.session.query(InvolvedMarkerView)
@@ -138,7 +134,7 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
                     ]
                 )
             )
-            .filter(location_filter)
+            .filter(loc_ex)
             .group_by(InvolvedMarkerView.age_group, InvolvedMarkerView.injury_severity)
             .with_entities(
                 InvolvedMarkerView.age_group,
@@ -148,3 +144,11 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
             .order_by(asc(InvolvedMarkerView.age_group))
         )
         return query
+
+
+def adapt_location_fields_to_involve_table(filter: dict) -> dict:
+    res = copy.copy(filter)
+    for field in ["yishuv_name", "yishuv_symbol"]:
+        if field in res:
+            res[f"accident_{field}"] = res.pop(field)
+    return res

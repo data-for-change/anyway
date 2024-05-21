@@ -1,8 +1,8 @@
-from typing import Dict
 from anyway.widgets.widget import Widget
 from anyway.widgets.widget import register
 from anyway.request_params import RequestParams
 from typing import Dict, Optional
+# noinspection PyProtectedMember
 from flask_babel import _
 import logging
 

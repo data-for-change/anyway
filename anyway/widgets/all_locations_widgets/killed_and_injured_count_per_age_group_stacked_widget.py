@@ -1,7 +1,6 @@
 from typing import Dict, List
-
+# noinspection PyProtectedMember
 from flask_babel import _
-
 from anyway.backend_constants import InjurySeverity, BE_CONST as BE
 from anyway.request_params import RequestParams
 from anyway.widgets.all_locations_widgets.killed_and_injured_count_per_age_group_widget_utils import (
@@ -9,7 +8,6 @@ from anyway.widgets.all_locations_widgets.killed_and_injured_count_per_age_group
     AGE_RANGE_DICT,
 )
 from anyway.widgets.all_locations_widgets import killed_and_injured_count_per_age_group_widget_utils
-
 from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget
 from anyway.widgets.widget import register
 from anyway.widgets.widget_utils import (

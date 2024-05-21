@@ -24,12 +24,13 @@ class AccidentCountByRoadLightWidget(RoadSegmentWidget):
             count="road_light_hebrew",
             start_time=self.request_params.start_time,
             end_time=self.request_params.end_time,
+            resolution=self.request_params.resolution,
         )
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
             "title": _("Number of accidents by road light"),
-            "subtitle": _(request_params.location_info['road_segment_name'])
+            "subtitle": _(request_params.location_text)
         }
         return items

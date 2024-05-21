@@ -13,7 +13,6 @@ from flask_babel import _
 
 from anyway.request_params import (
     RequestParams,
-    get_news_flash_location_text,
     extract_news_flash_obj,
     get_latest_accident_date,
     extract_news_flash_location,
@@ -21,7 +20,7 @@ from anyway.request_params import (
 )
 from anyway.backend_constants import BE_CONST, AccidentType
 from anyway.models import NewsFlash, AccidentMarkerView
-from anyway.parsers import resolution_dict
+from anyway.parsers.resolution_fields import ResolutionFields as RF
 from anyway.infographics_dictionaries import head_on_collisions_comparison_dict
 from anyway.parsers import infographics_data_cache_updater
 from anyway.widgets.widget import Widget, widgets_dict
@@ -108,7 +107,7 @@ def get_request_params(
     location_info = extract_news_flash_location(news_flash_obj)
     if location_info is None:
         return None
-    location_text = get_news_flash_location_text(news_flash_obj)
+    location_text = news_flash_obj.get_news_flash_location_text()
     logging.debug("location_text:{}".format(location_text))
     gps = location_info["gps"]
     location_info = location_info[DATA]
@@ -244,7 +243,7 @@ def is_news_flash_resolution_supported(news_flash_obj: NewsFlash) -> bool:
         return False
     location = location_data[DATA]
     for cat in BE_CONST.SUPPORTED_RESOLUTIONS:
-        if cat.value in resolution_dict and set(resolution_dict[cat.value]) <= location.keys():
+        if set(RF.get_required_fields(cat.value)) <= location.keys():
             return True
     return False
 

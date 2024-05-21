@@ -14,12 +14,13 @@ from flask_assets import Environment
 from flask_babel import Babel, gettext
 from flask_compress import Compress
 from flask_cors import CORS
-from flask_restx import Resource, fields, reqparse
+from flask_restx import Resource, fields, reqparse, Model
 from sqlalchemy import and_, not_, or_
 from sqlalchemy import func
 from webassets import Environment as AssetsEnvironment, Bundle as AssetsBundle
 from webassets.ext.jinja2 import AssetsExtension
 from werkzeug.exceptions import BadRequestKeyError
+import json
 
 from anyway import utilities, secrets
 from anyway.app_and_db import api, get_cors_config
@@ -57,7 +58,8 @@ from anyway.models import (
     City,
     Streets,
     Comment,
-    TelegramForwardedMessages
+    TelegramForwardedMessages,
+    NewsFlash
 )
 from anyway.request_params import get_request_params_from_request_values
 from anyway.views.news_flash.api import (
@@ -70,6 +72,7 @@ from anyway.views.news_flash.api import (
     DEFAULT_LIMIT_REQ_PARAMETER,
     DEFAULT_OFFSET_REQ_PARAMETER,
     DEFAULT_NUMBER_OF_YEARS_AGO,
+    search_newsflashes_by_resolution
 )
 from anyway.views.schools.api import (
     schools_description_api,
@@ -171,7 +174,7 @@ assets.register(
     ),
 )
 
-CORS(app, resources=get_cors_config())
+CORS(app, resources=get_cors_config(), allow_credentials=True)
 
 jinja_environment = jinja2.Environment(
     autoescape=True,
@@ -1091,12 +1094,11 @@ app.add_url_rule(
     view_func=injured_around_schools_api,
     methods=["GET"],
 )
-app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash_v2, methods=["GET"])
+app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash_v2, methods=["GET", "PATCH", "OPTIONS"])
 app.add_url_rule("/api/comments", endpoint=None, view_func=get_comments, methods=["GET"])
 app.add_url_rule("/api/comments", endpoint=None, view_func=create_comment, methods=["POST"])
 
 app.add_url_rule("/api/v1/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
-
 
 nf_parser = reqparse.RequestParser()
 nf_parser.add_argument("id", type=int, help="News flash id")
@@ -1129,6 +1131,17 @@ nf_parser.add_argument(
     help="limit number of retrieved items to given limit",
 )
 
+newsflash_fields = tuple(column.name for column in NewsFlash.__table__.columns)
+nfbr_parser = reqparse.RequestParser()
+nfbr_parser.add_argument("resolutions", type=str, action="append", required=True,
+                         help="List of resolutions to filter by")
+nfbr_parser.add_argument("include", type=str, required=True, choices=["True", "False"],
+                         help="Flag to include or exclude the specified resolutions (True\False)")
+nfbr_parser.add_argument("limit", type=int, help="Maximum number of records to return")
+nfbr_parser.add_argument("fields", type=str, choices=(*newsflash_fields, ""), action="append",
+                          help=f"List of fields to include in the response (Empty array to fetch all).\n"
+                               f"Available values: {', '.join(newsflash_fields)}")
+
 
 def datetime_to_str(val: datetime.datetime) -> str:
     return val.strftime("%Y-%m-%d %H:%M:%S") if isinstance(val, datetime.datetime) else "None"
@@ -1160,6 +1173,7 @@ news_flash_fields_model = api.model(
         "street2_hebrew": fields.String(),
         "non_urban_intersection_hebrew": fields.String(),
         "road_segment_name": fields.String(),
+        "road_segment_id": fields.Integer(),
         "newsflash_location_qualification": fields.Integer(),
         "location_qualifying_user": fields.Integer(),
     },
@@ -1169,20 +1183,46 @@ news_flash_list_model = api.model(
 )
 
 
-@api.route("/api/news-flash/<int:news_flash_id>", methods=["GET", "PATCH"])
+@api.route("/api/news-flash/<int:news_flash_id>", methods=["GET", "PATCH", "OPTIONS"])
 class ManageSingleNewsFlash(Resource):
     @api.doc("get single news flash")
     @api.response(404, "News flash not found")
     @api.response(200, "Retrieve single news-flash item", news_flash_fields_model)
     def get(self, news_flash_id):
         return single_news_flash(news_flash_id)
-
     @api.doc("update single news flash")
     @api.response(400, "News flash new location is bad")
     @api.response(404, "News flash not found")
     @api.response(200, "Retrieve single news-flash item", news_flash_fields_model)
     def patch(self, news_flash_id):
         return update_news_flash_qualifying(news_flash_id)
+    def options(self, news_flash_id):
+        return single_news_flash(news_flash_id)
+
+
+def filter_json_fields(json_data, fields):
+    return {field: json_data[field] for field in fields if field in json_data}
+
+
+@api.route("/api/news-flash/by-resolution", methods=["GET"])
+class RetrieveNewsFlashByResolution(Resource):
+    @api.doc("get news flash records by resolution")
+    @api.expect(nfbr_parser)
+    @api.response(404, "Parameter value not supported or missing")
+    @api.response(
+        200, "Retrieve news-flash items filtered by given parameters", news_flash_list_model
+    )
+    def get(self):
+        args = nfbr_parser.parse_args()
+        limit = args["limit"] if "limit" in args else None
+        query = search_newsflashes_by_resolution(db.session, args["resolutions"], args["include"], limit)
+        res = query.all()
+        news_flashes_jsons = [n.serialize() for n in res]
+        if not args["fields"]:
+            filtered_jsons = news_flashes_jsons
+        else:
+            filtered_jsons = [filter_json_fields(json_data, args["fields"]) for json_data in news_flashes_jsons]
+        return Response(json.dumps(filtered_jsons, default=str), mimetype="application/json")
 
 
 @api.route("/api/news-flash-new", methods=["GET"])
@@ -1361,7 +1401,7 @@ def telegram_webhook():
         forward_from_message_id = update['message']['forward_from_message_id']
         forwarded_message = db.session.query(TelegramForwardedMessages)\
             .filter(TelegramForwardedMessages.message_id == str(forward_from_message_id)).first()
-        send_infographics_to_telegram(message_id, forwarded_message.newsflash_id)
+        send_infographics_to_telegram(message_id, forwarded_message.newsflash_id, forwarded_message.group_sent)
         return jsonify(success=True)
     except Exception as e:
         logging.exception("Failed to process Telegram webhook: %s", e)
@@ -1541,3 +1581,19 @@ class DownloadData(Resource):
         return get_downloaded_data(
             args.get("format", "csv"), args.get("years_ago", DEFAULT_NUMBER_OF_YEARS_AGO)
         )
+
+
+def test_roles():
+    return test_roles_func()
+
+
+@roles_accepted(
+    BE_CONST.Roles2Names.Authenticated.value,
+    BE_CONST.Roles2Names.Location_verification.value,
+    need_all_permission=True,
+)
+def test_roles_func():
+    return jsonify({"message": "Roles test successful!"}), 200
+
+
+app.add_url_rule("/api/test_roles", endpoint=None, view_func=test_roles, methods=["GET"])

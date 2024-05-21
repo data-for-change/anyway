@@ -32,6 +32,7 @@ class FatalAccidentYoYSameMonth(RoadSegmentWidget):
             count=InvolvedMarkerView.injury_severity.name,
             start_time=self.request_params.start_time,
             end_time=self.request_params.end_time,
+            resolution=self.request_params.resolution,
         ):
             structured_data_list.append(
                 {

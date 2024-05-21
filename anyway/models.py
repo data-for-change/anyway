@@ -897,16 +897,16 @@ class NewsFlash(Base):
         )
         from anyway.request_params import get_latest_accident_date, LocationInfo
 
-        if (self.road1 is None or self.road_segment_name is None) and (self.yishuv_name is None or self.street1_hebrew is None) :
+        if (self.road1 is None or self.road_segment_id is None) and (self.yishuv_name is None or self.street1_hebrew is None) :
             return None
         last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
         resolution = BE_CONST.ResolutionCategories(self.resolution)
         end_time = last_accident_date.to_pydatetime().date()
         start_time = datetime.date(end_time.year + 1 - years_before, 1, 1)
-        location_info = LocationInfo()
+        location_info: LocationInfo = {}
         if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
-            location_info["road1"]
-            location_info["road_segment_name"]
+            location_info["road1"] = self.road1
+            location_info["road_segment_id"] = self.road_segment_id
         elif resolution == BE_CONST.ResolutionCategories.STREET:
             location_info["yishuv_name"] = self.yishuv_name
             location_info["street1_hebrew"] = self.street1_hebrew
@@ -926,6 +926,40 @@ class NewsFlash(Base):
                 + (critical_values["killed_count"] / urban_severe_value)
             ) >= 1
         self.critical = critical
+
+
+    # generate text describing location or road segment of news flash to be used by
+    # Use case 1 - FE display of curr location in location qualification
+    # Use case 2 - Widgets e.g most severe accidents additional info widget
+    def get_news_flash_location_text(self):
+        resolution = self.resolution if self.resolution else ""
+        yishuv_name = self.yishuv_name if self.yishuv_name else ""
+        road1 = str(int(self.road1)) if self.road1 else ""
+        road2 = str(int(self.road2)) if self.road2 else ""
+        street1_hebrew = self.street1_hebrew if self.street1_hebrew else ""
+        road_segment_name = self.road_segment_name if self.road_segment_name else ""
+        if resolution == "כביש בינעירוני" and road1 and road_segment_name:
+            res = "כביש " + road1 + " במקטע " + road_segment_name
+        elif resolution == "עיר" and not yishuv_name:
+            res = self.location
+        elif resolution == "עיר" and yishuv_name:
+            res = self.yishuv_name
+        elif resolution == "צומת בינעירוני" and road1 and road2:
+            res = "צומת כביש " + road1 + " עם כביש " + road2
+        elif resolution == "צומת בינעירוני" and road1 and road_segment_name:
+            res = "כביש " + road1 + " במקטע " + road_segment_name
+        elif resolution == "רחוב" and yishuv_name and street1_hebrew:
+            def get_street_location_text(yishuv_name, street1_hebrew):
+                return "רחוב " + street1_hebrew + " ב" + yishuv_name
+            res = get_street_location_text(yishuv_name, street1_hebrew)
+        else:
+            logging.warning(
+                "Did not found quality resolution. Using location field. News Flash id:{}".format(
+                    self.id
+                )
+            )
+            res = self.location
+        return res
 
     def serialize(self):
         return {
@@ -951,13 +985,15 @@ class NewsFlash(Base):
             "street1_hebrew": self.street1_hebrew,
             "street2_hebrew": self.street2_hebrew,
             "non_urban_intersection_hebrew": self.non_urban_intersection_hebrew,
-            "road_segment_name": self.road_segment_name,
+            "road_segment_id": self.road_segment_id,
             "newsflash_location_qualification": NewsflashLocationQualification(
                 self.newsflash_location_qualification
             ).get_label(),
             "location_qualifying_user": self.location_qualifying_user,
             "critical": self.critical,
+            "curr_cbs_location_text": self.get_news_flash_location_text(),
         }
+
 
     # Flask-Login integration
     def is_authenticated(self):

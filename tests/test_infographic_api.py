@@ -2,7 +2,6 @@ import datetime
 import pytest
 import anyway.request_params
 import anyway.widgets.widget_utils as widget_utils
-
 from numpy import nan
 from six.moves import http_client
 from anyway import app as flask_app
@@ -10,14 +9,16 @@ from jsonschema import validate
 from anyway.app_and_db import db
 from anyway.vehicle_type import VehicleCategory
 from anyway.widgets.road_segment_widgets.accident_count_by_car_type_widget import AccidentCountByCarTypeWidget
-from anyway.backend_constants import NewsflashLocationQualification
+from anyway.backend_constants import NewsflashLocationQualification, BE_CONST
+RC = BE_CONST.ResolutionCategories
+
 
 
 def insert_infographic_mock_data(app):
     sql_insert = f"""
         insert into news_flash
         (accident, author, date, description, lat, link, lon, title, source, location, road1, road2, resolution,
-        tweet_id, district_hebrew, non_urban_intersection_hebrew, region_hebrew, road_segment_name, street1_hebrew, street2_hebrew, yishuv_name, newsflash_location_qualification, location_qualifying_user)
+        tweet_id, district_hebrew, non_urban_intersection_hebrew, region_hebrew, road_segment_id, road_segment_name, street1_hebrew, street2_hebrew, yishuv_name, newsflash_location_qualification, location_qualifying_user)
         values (
         true,
         'ynet',
@@ -36,6 +37,7 @@ def insert_infographic_mock_data(app):
         null,
         null,
         null,
+        900810,
         'כניסה למצפה שלם - צומת שדי תרומות',
         null,
         null,
@@ -103,7 +105,7 @@ class TestInfographicApi:
         assert output_tmp[VehicleCategory.BICYCLE_AND_SMALL_MOTOR.value] == 16
 
         def mock_get_accidents_stats(table_obj, filters=None, group_by=None, count=None, start_time=None,
-                                     end_time=None):
+                                     end_time=None, resolution=None):
             return [{'vehicle_type': nan, 'count': 2329}, {'vehicle_type': 14.0, 'count': 112},
                     {'vehicle_type': 25.0, 'count': 86}, {'vehicle_type': 17.0, 'count': 1852},
                     {'vehicle_type': 12.0, 'count': 797}, {'vehicle_type': 8.0, 'count': 186},
@@ -125,7 +127,7 @@ class TestInfographicApi:
         request_params = anyway.request_params.RequestParams(
             years_ago=1,
             location_text='',
-            location_info=None,
+            location_info={},
             resolution={},
             gps={},
             start_time=start_time,
@@ -268,7 +270,7 @@ class TestInfographicApi:
             "type": "object",
             "properties": {"label_key": {"type": "number"}, "value": {"type": "number"}, },
         }
-        assert widget["data"]["items"][0] == {'label_key': 2014, 'value': 32}
+        assert widget["data"]["items"][0] == {'label_key': 2014, 'value': 24}
         validate(widget["data"]["items"][0], schema)
         assert widget["data"]["text"]["title"] == "כמות ההרוגים בתאונות דרכים בחודש הנוכחי בהשוואה לשנים קודמות"
 

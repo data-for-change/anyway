@@ -9,7 +9,7 @@ from flask_babel import _
 from anyway.request_params import RequestParams
 from anyway.backend_constants import AccidentSeverity
 from anyway.widgets.widget import register
-from anyway.widgets.widget_utils import get_query
+from anyway.widgets.widget_utils import get_query, add_resolution_location_accuracy_filter
 from anyway.models import AccidentMarkerView
 from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
 
@@ -36,9 +36,11 @@ class TopRoadSegmentsAccidentsPerKmWidget(RoadSegmentWidget):
     def get_top_road_segments_accidents_per_km(
         resolution, location_info, start_time=None, end_time=None, limit=3
     ):
+        filters = {"road1": location_info["road1"]}
+        filters = add_resolution_location_accuracy_filter(filters, resolution)
         query = get_query(
             table_obj=AccidentMarkerView,
-            filters={"road1": location_info["road1"]},
+            filters=filters,
             start_time=start_time,
             end_time=end_time,
         )
@@ -80,7 +82,7 @@ class TopRoadSegmentsAccidentsPerKmWidget(RoadSegmentWidget):
 
     def is_included(self) -> bool:
         for item in self.items:
-            if item["road_segment_name"] == self.request_params.location_info["road_segment_name"]:
+            if item["road_segment_name"] == self.request_params.widget_specific["road_segment_name"]:
                 return True
         return False
 

@@ -12,15 +12,7 @@ from anyway import secrets
 from anyway.parsers.news_flash_db_adapter import init_db
 from anyway.models import NewsFlash
 from anyway.parsers import timezones
-from anyway.infographics_utils import is_news_flash_resolution_supported
-from anyway.parsers.infographics_data_cache_updater import is_in_cache
 from anyway.parsers.news_flash_db_adapter import DBAdapter
-
-
-def verify_cache(news_flash_list):
-    for nf in news_flash_list:
-        if is_news_flash_resolution_supported(nf):
-            assert is_in_cache(nf), f"NewsFlash {nf.get_id()} not in cache"
 
 
 def fetch_html_walla(link):
@@ -71,7 +63,6 @@ def test_scrape_walla():
         rss_sites.scrape("walla", rss_source="tests/walla.xml", fetch_html=fetch_html_walla)
     )
     assert_all_equal(items_actual, items_expected)
-    verify_cache(items_actual)
 
 
 def test_scrape_ynet():
@@ -93,7 +84,6 @@ def test_scrape_ynet():
         rss_sites.scrape("ynet", rss_source="tests/ynet.xml", fetch_html=fetch_html_ynet)
     )
     assert_all_equal(items_actual, items_expected)
-    verify_cache(items_actual)
 
 
 def test_sanity_get_latest_date():
@@ -154,6 +144,7 @@ def test_twitter_parse():
         for k in raw_fields:
             assert getattr(actual, k) == getattr(expected, k)
 
+        actual.set_critical()
         actual.accident = classify_tweets(actual.description)
         assert actual.accident == expected.accident
 
@@ -243,7 +234,7 @@ def test_nan_becomes_none_before_insertion(monkeypatch):
     )
     db_mock = MagicMock()
     monkeypatch.setattr(
-        "anyway.parsers.news_flash_db_adapter.infographics_data_cache_updater", MagicMock()
+        "anyway.parsers.news_flash_db_adapter", MagicMock()
     )
     adapter = DBAdapter(db=db_mock)
     adapter.insert_new_newsflash(newsflash)

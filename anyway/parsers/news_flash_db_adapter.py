@@ -5,11 +5,12 @@ import pandas as pd
 import numpy as np
 from sqlalchemy import desc
 from flask_sqlalchemy import SQLAlchemy
-from anyway.parsers import infographics_data_cache_updater
 from anyway.parsers import timezones
 from anyway.models import NewsFlash
 from anyway.slack_accident_notifications import publish_notification
-from anyway.utilities import trigger_airflow_dag
+from anyway.telegram_accident_notifications import (
+    trigger_generate_infographics_and_send_to_telegram,
+)
 from anyway.widgets.widget_utils import newsflash_has_location
 
 # fmt: off
@@ -54,15 +55,10 @@ class DBAdapter:
         self.commit()
 
     @staticmethod
-    def generate_infographics_and_send_to_telegram(newsflashid):
-        dag_conf = {"news_flash_id": newsflashid}
-        trigger_airflow_dag("generate-and-send-infographics-images", dag_conf)
-
-    @staticmethod
     def publish_notifications(newsflash: NewsFlash):
         publish_notification(newsflash)
         if newsflash_has_location(newsflash):
-            DBAdapter.generate_infographics_and_send_to_telegram(newsflash.id)
+            trigger_generate_infographics_and_send_to_telegram(newsflash.id)
         else:
             logging.debug("newsflash does not have location, not publishing")
 
@@ -72,7 +68,6 @@ class DBAdapter:
         self.__fill_na(newsflash)
         self.db.session.add(newsflash)
         self.db.session.commit()
-        infographics_data_cache_updater.add_news_flash_to_cache(newsflash)
         if os.environ.get("FLASK_ENV") == "production" and newsflash.accident:
             try:
                 DBAdapter.publish_notifications(newsflash)
@@ -80,9 +75,8 @@ class DBAdapter:
                 logging.error("publish notifications failed")
                 logging.error(e)
 
-
-    def get_newsflash_by_id(self, id):
-        return self.db.session.query(NewsFlash).filter(NewsFlash.id == id)
+    def get_newsflash_by_id(self, nid):
+        return self.db.session.query(NewsFlash).filter(NewsFlash.id == nid)
 
     def select_newsflash_where_source(self, source):
         return self.db.session.query(NewsFlash).filter(NewsFlash.source == source)

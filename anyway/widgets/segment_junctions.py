@@ -39,8 +39,10 @@ class SegmentJunctions:
             if t.km not in rkj[t.road]:
                 rkj[t.road][t.km] = []
             else:
-                logging.debug(f"Two junctions in same location:road:{t.road},km:{t.km},1:"
-                              f"{rkj[t.road][t.km]},2:{t.non_urban_intersection}.")
+                logging.debug(
+                    f"Two junctions in same location:road:{t.road},km:{t.km},1:"
+                    f"{rkj[t.road][t.km]},2:{t.non_urban_intersection}."
+                )
             rkj[t.road][t.km].append(t.non_urban_intersection)
             if road_last_junction_km[t.road] < t.km:
                 road_last_junction_km[t.road] = t.km

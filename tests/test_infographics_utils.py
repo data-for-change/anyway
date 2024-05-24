@@ -54,9 +54,11 @@ class TestInfographicsUtilsCase(unittest.TestCase):
     rjks = [
         RoadJunctionKM(road=1, non_urban_intersection=1, km=1.0),
         RoadJunctionKM(road=1, non_urban_intersection=2, km=2.0),
+        RoadJunctionKM(road=1, non_urban_intersection=22, km=2.0),
         RoadJunctionKM(road=1, non_urban_intersection=3, km=3.0),
         RoadJunctionKM(road=10, non_urban_intersection=1, km=10.0),
         RoadJunctionKM(road=20, non_urban_intersection=2, km=10.0),
+        RoadJunctionKM(road=20, non_urban_intersection=22, km=10.0),
         RoadJunctionKM(road=30, non_urban_intersection=3, km=10.0),
     ]
     segments = [
@@ -90,7 +92,11 @@ class TestInfographicsUtilsCase(unittest.TestCase):
         actual = sg.get_segment_junctions(2)
         self.assertEqual([1], actual, "2")
         actual = sg.get_segment_junctions(3)
-        self.assertEqual([1, 2, 3], actual, "3")
+        self.assertEqual([1, 2, 22, 3], actual, "3")
+        actual = sg.get_segment_junctions(4)
+        self.assertEqual([3], actual, "4")
+        actual = sg.get_segment_junctions(21)
+        self.assertEqual([2, 22], actual, "5")
 
     def test_get_filter_expression(self):
         actual = get_filter_expression(AccidentMarkerView, "road_segment_name", "seg1")

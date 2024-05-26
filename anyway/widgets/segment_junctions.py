@@ -36,7 +36,14 @@ class SegmentJunctions:
             if t.road not in rkj:
                 rkj[t.road] = {}
                 road_last_junction_km[t.road] = -1
-            rkj[t.road][t.km] = t.non_urban_intersection
+            if t.km not in rkj[t.road]:
+                rkj[t.road][t.km] = []
+            else:
+                logging.debug(
+                    f"Two junctions in same location:road:{t.road},km:{t.km},1:"
+                    f"{rkj[t.road][t.km]},2:{t.non_urban_intersection}."
+                )
+            rkj[t.road][t.km].append(t.non_urban_intersection)
             if road_last_junction_km[t.road] < t.km:
                 road_last_junction_km[t.road] = t.km
         tmp: List[RoadSegments] = db.session.query(RoadSegments).all()
@@ -45,11 +52,10 @@ class SegmentJunctions:
             if seg.road not in rkj:
                 logging.warning(f"No junctions in road {seg.road}.")
                 continue
-            junctions = [
-                rkj[seg.road][km]
-                for km in rkj[seg.road].keys()
-                if is_junction_km_in_segment(km, seg, road_last_junction_km.get(seg.road))
-            ]
+            junctions = []
+            for km in rkj[seg.road].keys():
+                if is_junction_km_in_segment(km, seg, road_last_junction_km.get(seg.road)):
+                    junctions.extend(rkj[seg.road][km])
             res[seg_id] = junctions
         return res
 

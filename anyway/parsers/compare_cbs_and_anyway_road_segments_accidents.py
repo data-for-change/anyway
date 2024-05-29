@@ -157,7 +157,8 @@ def get_anyway_count():
             query = query.filter(
                 get_expression_for_road_segment_location_fields(location_fields, AccidentMarkerView)
             )
-        query = query.filter(AccidentMarkerView.location_accuracy.in_([1, 3, 4, 9]))
+        # use only location accuracy filters with the following Accurate (No.1), Road Center (No.3), KM Center (w/o not ancored No.9)
+        query = query.filter(AccidentMarkerView.location_accuracy.in_([1, 3, 4]))
         query = query.group_by(AccidentMarkerView.provider_code, AccidentMarkerView.accident_year)
         query = query.with_entities(
             AccidentMarkerView.provider_code,

@@ -270,7 +270,7 @@ class TestInfographicApi:
             "type": "object",
             "properties": {"label_key": {"type": "number"}, "value": {"type": "number"}, },
         }
-        assert widget["data"]["items"][0] == {'label_key': 2014, 'value': 24}
+        assert widget["data"]["items"][0] == {'label_key': 2014, 'value': 29}
         validate(widget["data"]["items"][0], schema)
         assert widget["data"]["text"]["title"] == "כמות ההרוגים בתאונות דרכים בחודש הנוכחי בהשוואה לשנים קודמות"
 

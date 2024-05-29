@@ -129,12 +129,12 @@ class TestInfographicsUtilsCase(unittest.TestCase):
         actual = add_resolution_location_accuracy_filter(None, RC.STREET)
         self.assertEqual({'location_accuracy': [1, 3]}, actual, "3")
         actual = add_resolution_location_accuracy_filter(f, RC.SUBURBAN_JUNCTION)
-        self.assertEqual({'1': 1, 'location_accuracy': [1, 4]}, actual, "4")
+        self.assertEqual({'1': 1, 'location_accuracy': [1, 3, 4]}, actual, "4")
         actual = add_resolution_location_accuracy_filter(None, RC.SUBURBAN_ROAD)
-        self.assertEqual({'location_accuracy': [1, 4]}, actual, "5"
+        self.assertEqual({'location_accuracy': [1, 3, 4]}, actual, "5"
                          )
         actual = add_resolution_location_accuracy_filter(f, RC.SUBURBAN_JUNCTION)
-        self.assertEqual({'1': 1, 'location_accuracy': [1, 4]}, actual, "6",)
+        self.assertEqual({'1': 1, 'location_accuracy': [1, 3, 4]}, actual, "6",)
         actual = add_resolution_location_accuracy_filter(None, RC.STREET)
         self.assertEqual({'location_accuracy': [1, 3]}, actual, "7")
         actual = add_resolution_location_accuracy_filter(f, RC.OTHER)

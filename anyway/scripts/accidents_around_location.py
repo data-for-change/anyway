@@ -5,6 +5,7 @@ To run:
 python accidents_around_location.py <input_file> [flags]
 
 """
+
 import argparse
 import io
 from datetime import datetime

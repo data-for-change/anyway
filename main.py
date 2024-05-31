@@ -136,6 +136,7 @@ def rsa(filename):
 @process.command()
 @click.argument("filename", type=str, default="static/data/segments/road_segments.xlsx")
 def road_segments(filename):
+    """Update road_segments table from xlsx file"""
     from anyway.parsers.road_segments import parse
 
     return parse(filename)
@@ -144,9 +145,19 @@ def road_segments(filename):
 @process.command()
 @click.argument("filename", type=str, default="static/data/suburban_junctions/suburban_junctions.xlsx")
 def suburban_junctions(filename):
+    """Update suburban_junction table from xlsx file"""
     from anyway.parsers.suburban_junctions import parse
 
     return parse(filename)
+
+
+@process.command()
+@click.argument("chunk-size", type=int, default=1000)
+def streets(chunk_size):
+    """Update streets table from CBS site"""
+    from anyway.parsers.streets import parse
+
+    return parse(chunk_size)
 
 
 @process.command()

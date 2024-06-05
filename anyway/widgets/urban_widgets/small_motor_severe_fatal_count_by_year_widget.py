@@ -37,7 +37,7 @@ class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
                     InjurySeverity.SEVERE_INJURED.value,
                 ],
                 "involve_vehicle_type": VehicleCategory.BICYCLE_AND_SMALL_MOTOR.get_codes(),
-                "involve_yishuv_name": location_info,
+                "accident_yishuv_name": location_info,
             },
             group_by="accident_year",
             count="accident_year",

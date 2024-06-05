@@ -201,7 +201,7 @@ def get_involved_marker_view_location_filters(
 ):
     filters = {}
     if resolution == BE_CONST.ResolutionCategories.STREET:
-        filters["involve_yishuv_name"] = location_info.get("yishuv_name")
+        filters["accident_yishuv_name"] = location_info.get("yishuv_name")
         filters["street1_hebrew"] = location_info.get("street1_hebrew")
     elif resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
         filters["road1"] = location_info.get("road1")

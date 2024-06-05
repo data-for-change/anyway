@@ -38,9 +38,9 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
         cache_key = None  # prevent pylint warning
 
         if request_params.resolution == BE_CONST.ResolutionCategories.STREET:
-            involve_yishuv_name = request_params.location_info["yishuv_name"]
+            accident_yishuv_name = request_params.location_info["yishuv_name"]
             street1_hebrew = request_params.location_info["street1_hebrew"]
-            cache_key = (involve_yishuv_name, street1_hebrew, start_time, end_time)
+            cache_key = (accident_yishuv_name, street1_hebrew, start_time, end_time)
 
         elif request_params.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
             road_number = request_params.location_info["road1"]

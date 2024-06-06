@@ -8,7 +8,9 @@ import logging
 CBS_STREETS_RESOURCES_URL = "https://data.gov.il/api/3/action/package_show?id=321"
 RESOURCE_NAME = "רשימת רחובות בישראל - מתעדכן"
 BASE_GET_DATA_GOV = "https://data.gov.il/dataset/321"
-RESOURCE_DOWNLOAD_TEMPLATE = "https://data.gov.il/api/3/action/datastore_search?resource_id={id}&limit=100000"
+RESOURCE_DOWNLOAD_TEMPLATE = (
+    "https://data.gov.il/api/3/action/datastore_search?resource_id={id}&limit=100000"
+)
 STREETS_FIlE_YISHUV_NAME = "שם_ישוב"
 STREETS_FIlE_YISHUV_SYMBOL = "סמל_ישוב"
 STREETS_FIlE_STREET_NAME = "שם_רחוב"
@@ -23,13 +25,20 @@ class UpdateStreetsFromCSB:
     def get_cbs_streets_download_url(self):
         response = self.s.get(CBS_STREETS_RESOURCES_URL)
         if not response.ok:
-            raise Exception(f"Could not get streets url. reason:{response.reason}:{response.status_code}")
+            raise Exception(
+                f"Could not get streets url. reason:{response.reason}:{response.status_code}"
+            )
         data = json.loads(response.text)
-        if not data.get("success") and not data.get("result") and not data["result"].get("resources"):
+        if (
+            not data.get("success")
+            and not data.get("result")
+            and not data["result"].get("resources")
+        ):
             raise Exception(f"Could not get streets url. received bad data:{data.get('success')}")
         it = filter(
             lambda x: x["name"] == RESOURCE_NAME and x["format"] == "CSV",
-            data["result"].get("resources"))
+            data["result"].get("resources"),
+        )
         item = list(it)[0]
         url = RESOURCE_DOWNLOAD_TEMPLATE.format(id=item["id"])
         logging.info(f"Streets data last updated: {item['last_modified']}")
@@ -45,7 +54,7 @@ class UpdateStreetsFromCSB:
         data = json.loads(r.text)
         chunk = []
         logging.debug(f"read {len(data['result']['records'])} records from {url}.")
-        for item in data['result']['records']:
+        for item in data["result"]["records"]:
             street_name = item[STREETS_FIlE_STREET_NAME]
             street_name_len = len(street_name)
             street_entry = {
@@ -60,24 +69,6 @@ class UpdateStreetsFromCSB:
         if chunk:
             logging.debug(f"last chunk: {len(chunk)}.")
             yield chunk
-
-    # def get_streets_data_from_file(self, fn: str, chunk_size: int) -> Iterable[Iterable[Dict[str, Any]]]:
-    #     chunk = []
-    #     df = pd.read_csv(fn, encoding='windows-1255')
-    #     for _, item in df.iterrows():
-    #         street_name = item[STREETS_FIlE_STREET_NAME]
-    #         street_name_len = len(street_name)
-    #         street_entry = {
-    #             "yishuv_symbol": item[STREETS_FIlE_YISHUV_SYMBOL],
-    #             "street": item[STREETS_FIlE_STREET_SYMBOL],
-    #             "street_hebrew": street_name[: min(street_name_len, Streets.MAX_NAME_LEN)],
-    #         }
-    #         chunk.append(street_entry)
-    #         if len(chunk) == chunk_size:
-    #             yield chunk
-    #             chunk = []
-    #     if chunk:
-    #         yield chunk
 
     def import_street_file_into_db(self, url: str, chunk_size: int):
         num = 0

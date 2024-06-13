@@ -177,19 +177,7 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
     return final_loc
 
 
-def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):
-    """
-    extracts location from db by closest geo point to location found, using road number if provided and limits to
-    requested resolution
-    :param db: the DB
-    :param latitude: location latitude
-    :param longitude: location longitude
-    :param resolution: wanted resolution
-    :param road_no: road number if there is
-    :return: a dict containing all the geo fields stated in
-    resolution dict, with values filled according to resolution
-    """
-    # READ MARKERS FROM DB
+def read_markers_and_distance_from_location(db, latitude, longitude, resolution, road_no=None):
     geod = Geodesic.WGS84
     relevant_fields = RF.get_possible_fields(resolution)
     markers = db.get_markers_for_location_extraction()
@@ -199,9 +187,9 @@ def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):
     markers_orig = markers.copy()
     if resolution != "אחר":
         if (
-            road_no is not None
-            and road_no > 0
-            and ("road1" in relevant_fields or "road2" in relevant_fields)
+                road_no is not None
+                and road_no > 0
+                and ("road1" in relevant_fields or "road2" in relevant_fields)
         ):
             markers = markers.loc[(markers["road1"] == road_no) | (markers["road2"] == road_no)]
         for field in relevant_fields:
@@ -223,6 +211,24 @@ def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):
     markers["dist_point"] = markers.apply(
         lambda x: geod.Inverse(latitude, longitude, x["latitude"], x["longitude"])["s12"], axis=1
     ).replace({np.nan: None})
+    return markers
+
+
+def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):
+    """
+    extracts location from db by closest geo point to location found, using road number if provided and limits to
+    requested resolution
+    :param db: the DB
+    :param latitude: location latitude
+    :param longitude: location longitude
+    :param resolution: wanted resolution
+    :param road_no: road number if there is
+    :return: a dict containing all the geo fields stated in
+    resolution dict, with values filled according to resolution
+    """
+    # READ MARKERS FROM DB
+    relevant_fields = RF.get_possible_fields(resolution)
+    markers = read_markers_and_distance_from_location(db, latitude, longitude, resolution, road_no)
 
     most_fit_loc = (
         markers.loc[markers["dist_point"] == markers["dist_point"].min()].iloc[0].to_dict()

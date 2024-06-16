@@ -31,6 +31,7 @@ from anyway.error_code_and_strings import Errors as Es
 from anyway.parsers.resolution_fields import ResolutionFields as RF
 from anyway.models import AccidentMarkerView, InvolvedView
 from anyway.widgets.widget_utils import get_accidents_stats
+from anyway.parsers.location_extraction import get_road_segment_name_and_number
 from anyway.telegram_accident_notifications import trigger_generate_infographics_and_send_to_telegram
 from io import BytesIO
 
@@ -378,12 +379,25 @@ def update_news_flash_qualifying(id):
         old_location, old_location_qualifiction = extracted_location_and_qualification(news_flash_obj)
         if manual_update:
             if use_road_segment:
+                road_number, road_segment_name = get_road_segment_name_and_number(road_segment_id)
+                if road_number != road1:
+                    logging.error("road number from road_segment_id does not match road1 input.")
+                    return return_json_error(Es.BR_BAD_FIELD)
                 news_flash_obj.road_segment_id = road_segment_id
-                news_flash_obj.road1 = road1
+                news_flash_obj.road_segment_name = road_segment_name
+                news_flash_obj.road1 = road_number
+                news_flash_obj.road2 = None
+                news_flash_obj.yishuv_name = None
+                news_flash_obj.street1_hebrew = None
+                news_flash_obj.street2_hebrew = None
                 news_flash_obj.resolution = BE_CONST.ResolutionCategories.SUBURBAN_ROAD.value
             else:
                 news_flash_obj.yishuv_name = yishuv_name
                 news_flash_obj.street1_hebrew = street1_hebrew
+                news_flash_obj.road_segment_id = None
+                news_flash_obj.road_segment_name = None
+                news_flash_obj.road1 = None
+                news_flash_obj.road2 = None
                 news_flash_obj.resolution = BE_CONST.ResolutionCategories.STREET.value
         else:
             if ((news_flash_obj.road_segment_id is None) or (news_flash_obj.road1 is None)) and (

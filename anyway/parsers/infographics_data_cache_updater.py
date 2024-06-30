@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from sqlalchemy import or_
 from datetime import datetime
 from anyway.models import (
     Base,
@@ -9,6 +10,7 @@ from anyway.models import (
     InfographicsStreetDataCacheTemp,
     InfographicsStreetDataCache,
     Streets,
+    AccidentMarker,
 )
 from typing import Dict, Iterable
 from anyway.constants import CONST
@@ -190,21 +192,33 @@ def build_street_cache_into_temp():
     start = datetime.now()
     db.session.query(InfographicsStreetDataCacheTemp).delete()
     db.session.commit()
-    for chunk in chunked_generator(get_street_infographic_keys(), 4960):
-        db.get_engine().execute(
-            InfographicsStreetDataCacheTemp.__table__.insert(),  # pylint: disable=no-member
-            [
-                {
-                    "yishuv_symbol": d["yishuv_symbol"],
-                    "street": d["street1"],
-                    "years_ago": d["years_ago"],
-                    "data": anyway.infographics_utils.create_infographics_data_for_location(d),
-                }
-                for d in chunk
-            ],
-        )
+    for n, chunk in enumerate(chunked_generator(get_street_infographic_keys(), 4960)):
+        cache_chunk = [
+            {
+                "yishuv_symbol": d["yishuv_symbol"],
+                "street": d["street1"],
+                "years_ago": d["years_ago"],
+                "data": anyway.infographics_utils.create_infographics_data_for_location(d),
+            }
+            for d in chunk
+            if street_has_accidents(d["yishuv_symbol"], d["street1"])
+        ]
+        if cache_chunk:
+            logging.debug(f"Adding chunk num {n}, {len(chunk)} entries.")
+            # pylint: disable=no-member
+            db.get_engine().execute(InfographicsStreetDataCacheTemp.__table__.insert(), cache_chunk)
     db.session.commit()
     logging.info(f"cache rebuild took:{str(datetime.now() - start)}")
+
+
+def street_has_accidents(yishuv_symbol: int, street: int) -> bool:
+    return (
+        db.session.query(AccidentMarker)
+        .filter(AccidentMarker.yishuv_symbol == yishuv_symbol)
+        .filter(or_(AccidentMarker.street1 == street, AccidentMarker.street2 == street))
+        .count()
+        > 0
+    )
 
 
 def get_road_segments() -> Iterable[RoadSegments]:

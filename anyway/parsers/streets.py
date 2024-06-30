@@ -9,7 +9,7 @@ CBS_STREETS_RESOURCES_URL = "https://data.gov.il/api/3/action/package_show?id=32
 RESOURCE_NAME = "רשימת רחובות בישראל - מתעדכן"
 BASE_GET_DATA_GOV = "https://data.gov.il/dataset/321"
 RESOURCE_DOWNLOAD_TEMPLATE = (
-    "https://data.gov.il/api/3/action/datastore_search?resource_id={id}&limit=100000"
+    "https://data.gov.il/api/3/action/datastore_search?resource_id={id}&limit=1000000"
 )
 STREETS_FIlE_YISHUV_NAME = "שם_ישוב"
 STREETS_FIlE_YISHUV_SYMBOL = "סמל_ישוב"

@@ -36,3 +36,7 @@ class VisionZeroBikeWidget(Widget):
     @classmethod
     def update_result(cls, request_params: RequestParams, cached_items: Dict) -> Optional[Dict]:
         return cached_items if cls.is_included_according_to_request_params(request_params) else None
+
+    @staticmethod
+    def is_relevant(request_params: RequestParams) -> bool:
+        return request_params.news_flash_description is not None

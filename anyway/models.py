@@ -4,7 +4,7 @@ import datetime
 import json
 import logging
 from collections import namedtuple
-from typing import List, Set, Iterable
+from typing import List, Set, Iterable, Optional
 
 
 try:
@@ -1098,11 +1098,18 @@ class City(CityFields, Base):
     __tablename__ = "cbs_cities"
 
     @staticmethod
-    def get_name_from_symbol(symbol: int) -> str:
-        res = db.session.query(City.heb_name).filter(City.yishuv_symbol == symbol).first()
+    def get_name_from_symbol(symbol: int, lang: str = 'he') -> str:
+        res: City = db.session.query(City.heb_name, City.eng_name).filter(City.yishuv_symbol == int(symbol)).first()
         if res is None:
             raise ValueError(f"{symbol}: could not find city with that symbol")
-        return res.heb_name
+        return res.heb_name if lang == 'he' else res.eng_name
+
+    @staticmethod
+    def get_name_from_symbol_or_none(symbol: int, lang: str = 'he') -> Optional[str]:
+        try:
+            return City.get_name_from_symbol(symbol, lang)
+        except ValueError:
+            return None
 
     @staticmethod
     def get_symbol_from_name(name: str) -> int:

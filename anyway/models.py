@@ -1099,9 +1099,10 @@ class City(CityFields, Base):
 
     @staticmethod
     def get_name_from_symbol(symbol: int, lang: str = 'he') -> str:
-        res: City = db.session.query(City.heb_name, City.eng_name).filter(City.yishuv_symbol == int(symbol)).first()
+        int_sym = int(symbol)
+        res: City = db.session.query(City.heb_name, City.eng_name).filter(City.yishuv_symbol == int_sym).first()
         if res is None:
-            raise ValueError(f"{symbol}: could not find city with that symbol")
+            raise ValueError(f"{int_sym}({symbol}): could not find city with that symbol")
         return res.heb_name if lang == 'he' else res.eng_name
 
     @staticmethod

@@ -5,8 +5,8 @@ from anyway.models import City
 from anyway.app_and_db import db
 import logging
 
-CBS_CITIES_RESOURCES_URL = "https://data.gov.il/dataset/citiesandsettelments"
-CBS_CITIES_RESOURCES_ID = "8f714b6f-c35c-4b40-a0e7-547b675eee0e"
+DATA_GOV_CITIES_RESOURCES_URL = "https://data.gov.il/dataset/citiesandsettelments"
+DATA_GOV_CITIES_RESOURCES_ID = "8f714b6f-c35c-4b40-a0e7-547b675eee0e"
 RESOURCE_NAME = "רשימת רחובות בישראל - מתעדכן"
 BASE_GET_DATA_GOV = "https://data.gov.il/dataset/321"
 RESOURCE_DOWNLOAD_TEMPLATE = (
@@ -29,12 +29,12 @@ NAPA = "Regional_Council_code"
 CHUNK_SIZE = 1000
 
 
-class UpdateCitiesFromCSB:
+class UpdateCitiesFromDataGov:
     def __init__(self):
         self.s = requests.Session()
 
-    def get_cbs_streets_download_url(self):
-        url = RESOURCE_DOWNLOAD_TEMPLATE.format(id=CBS_CITIES_RESOURCES_ID)
+    def get_streets_download_url(self):
+        url = RESOURCE_DOWNLOAD_TEMPLATE.format(id=DATA_GOV_CITIES_RESOURCES_ID)
         return url
 
     def get_city_data_chunks(self, url: str, chunk_size: int) -> Iterable[List[Dict[str, Any]]]:
@@ -72,8 +72,8 @@ class UpdateCitiesFromCSB:
 
 
 def parse(chunk_size=CHUNK_SIZE):
-    instance = UpdateCitiesFromCSB()
-    res = instance.get_cbs_streets_download_url()
+    instance = UpdateCitiesFromDataGov()
+    res = instance.get_streets_download_url()
     instance.import_citis_into_db(res, chunk_size)
 
 

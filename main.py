@@ -156,7 +156,7 @@ def suburban_junctions(filename):
 @process.command()
 @click.argument("chunk-size", type=int, default=1000)
 def streets(chunk_size):
-    """Update streets table from CBS site"""
+    """Update streets table from data.gov site"""
     from anyway.parsers.streets import parse
 
     return parse(chunk_size)
@@ -165,7 +165,7 @@ def streets(chunk_size):
 @process.command()
 @click.argument("chunk-size", type=int, default=1000)
 def cities(chunk_size):
-    """Update cities table from CBS site"""
+    """Update cities table from data.gov site"""
     from anyway.parsers.cities import parse
 
     return parse(chunk_size)

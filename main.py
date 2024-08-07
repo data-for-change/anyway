@@ -143,7 +143,9 @@ def road_segments(filename):
 
 
 @process.command()
-@click.argument("filename", type=str, default="static/data/suburban_junctions/suburban_junctions.xlsx")
+@click.argument(
+    "filename", type=str, default="static/data/suburban_junctions/suburban_junctions.xlsx"
+)
 def suburban_junctions(filename):
     """Update suburban_junction table from xlsx file"""
     from anyway.parsers.suburban_junctions import parse
@@ -154,8 +156,17 @@ def suburban_junctions(filename):
 @process.command()
 @click.argument("chunk-size", type=int, default=1000)
 def streets(chunk_size):
-    """Update streets table from CBS site"""
+    """Update streets table from data.gov site"""
     from anyway.parsers.streets import parse
+
+    return parse(chunk_size)
+
+
+@process.command()
+@click.argument("chunk-size", type=int, default=1000)
+def cities(chunk_size):
+    """Update cities table from data.gov site"""
+    from anyway.parsers.cities import parse
 
     return parse(chunk_size)
 
@@ -178,7 +189,7 @@ def schools(filepath, batch_size):
 )
 @click.option("--batch_size", type=int, default=5000)
 def schools_with_description(
-        schools_description_filepath, schools_coordinates_filepath, batch_size
+    schools_description_filepath, schools_coordinates_filepath, batch_size
 ):
     from anyway.parsers.schools_with_description import parse
 
@@ -202,7 +213,7 @@ def schools_with_description(
 )
 @click.option("--batch_size", type=int, default=5000)
 def schools_with_description_2020(
-        schools_description_filepath, schools_coordinates_filepath, batch_size
+    schools_description_filepath, schools_coordinates_filepath, batch_size
 ):
     from anyway.parsers.schools_with_description_2020 import parse
 
@@ -224,6 +235,7 @@ def schools_with_description_2020(
 @click.option("--batch_size", type=int, default=5000)
 def injured_around_schools_2022(start_date, end_date, distance, batch_size):
     from anyway.parsers.injured_around_schools_2022 import parse
+
     return parse(start_date=start_date, end_date=end_date, distance=distance, batch_size=batch_size)
 
 
@@ -238,6 +250,7 @@ def injured_around_schools_2022(start_date, end_date, distance, batch_size):
 @click.option("--batch_size", type=int, default=5000)
 def injured_around_schools_2023(start_date, end_date, distance, batch_size):
     from anyway.parsers.injured_around_schools_2023 import parse
+
     return parse(start_date=start_date, end_date=end_date, distance=distance, batch_size=batch_size)
 
 
@@ -309,9 +322,7 @@ def infographics_data_cache_for_road_segments():
 
 
 @process.command()
-@click.option(
-    "--id", type=int, help="newsflash id"
-)
+@click.option("--id", type=int, help="newsflash id")
 def infographics_pictures(id):
     from anyway.infographic_image_generator import generate_infographics_for_newsflash
 
@@ -350,11 +361,12 @@ def update_casualties_costs(filename):
 
     return parse(filename)
 
+
 @process.command()
 def compare_cbs_anyway():
     from anyway.parsers.compare_cbs_and_anyway_road_segments_accidents import parse
-    return parse()
 
+    return parse()
 
 
 @cli.group()
@@ -380,19 +392,6 @@ def create_cbs_tables():
     from anyway.parsers.cbs.executor import create_tables
 
     return create_tables()
-
-
-@create_tables.command()
-@click.option(
-    "--file-name",
-    type=str,
-    help="csv file to load from. Default is static/data/cities.csv",
-    default="%s/static/data/cities.csv" % os.path.abspath(os.path.dirname(__file__)),
-)
-def update_cities_table(file_name):
-    from anyway.parsers.cbs.preprocessing_cbs_files import load_cities_data
-
-    return load_cities_data(file_name=file_name)
 
 
 @cli.group()
@@ -479,10 +478,10 @@ def accidents_around_schools(start_date, end_date, distance, output_path):
 
 @scripts.command()
 def test_airflow():
-    print('my print')
-    logging.info('info log')
-    logging.warning('warning log')
-    logging.debug('debug log')
+    print("my print")
+    logging.info("info log")
+    logging.warning("warning log")
+    logging.debug("debug log")
 
 
 @scripts.command()
@@ -497,9 +496,7 @@ def upload():
     pass
 
 
-@click.option(
-    "--id", type=int, help="newsflash id"
-)
+@click.option("--id", type=int, help="newsflash id")
 @click.option(
     "--download",
     is_flag=True,
@@ -549,6 +546,7 @@ def generate_images_and_send_notification(id, chat):
 @click.option("--id", type=int)
 def trigger_dag(id):
     from anyway.utilities import trigger_airflow_dag
+
     dag_conf = {"news_flash_id": id}
     trigger_airflow_dag("generate-and-send-infographics-images", dag_conf)
 

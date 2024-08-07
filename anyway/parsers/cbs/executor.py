@@ -81,6 +81,7 @@ from anyway.models import (
     InvolvedMarkerView,
     VehiclesView,
     VehicleMarkerView,
+    City,
 )
 from anyway.parsers.cbs.exceptions import CBSParsingFailed
 from anyway.utilities import ItmToWGS84, time_delta, ImporterUI, truncate_tables, delete_all_rows_from_table, \
@@ -278,7 +279,7 @@ def get_address(accident, streets):
            and int(accident.get(field_names.house_number)) != 9999
         else None
     )
-    settlement = localization.get_city_name(accident.get(field_names.yishuv_symbol))
+    settlement = City.get_name_from_symbol_or_none(accident.get(field_names.yishuv_symbol))
 
     if not house_number and not settlement:
         return street
@@ -522,7 +523,7 @@ def create_marker(provider_code, accident, streets, roads, non_urban_intersectio
         "km_raw": get_data_value(accident.get(field_names.km)),
         "km_accurate": km_accurate,
         "yishuv_symbol": get_data_value(accident.get(field_names.yishuv_symbol)),
-        "yishuv_name": localization.get_city_name(accident.get(field_names.yishuv_symbol)),
+        "yishuv_name": City.get_name_from_symbol_or_none(accident.get(field_names.yishuv_symbol)),
         "geo_area": get_data_value(accident.get(field_names.geo_area)),
         "day_night": get_data_value(accident.get(field_names.day_night)),
         "day_in_week": get_data_value(accident.get(field_names.day_in_week)),
@@ -602,7 +603,7 @@ def import_involved(provider_code, involved, **kwargs):
                 "involve_yishuv_symbol": get_data_value(
                     involve.get(field_names.involve_yishuv_symbol)
                 ),
-                "involve_yishuv_name": localization.get_city_name(
+                "involve_yishuv_name": City.get_name_from_symbol_or_none(
                     involve.get(field_names.involve_yishuv_symbol)
                 ),
                 "injury_severity": get_data_value(involve.get(field_names.injury_severity)),

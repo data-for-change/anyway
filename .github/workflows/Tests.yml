@@ -58,7 +58,7 @@ jobs:
         cd ./anyway-newsflash-infographics/
         bash run.bash
         cd ../
-        docker-compose -f docker-compose.yml up -d --build anyway
+        docker compose -f docker-compose.yml up -d --build anyway
     - name: Waiting for DB startup
       run: |
         bash ./wait_for_postgres.sh

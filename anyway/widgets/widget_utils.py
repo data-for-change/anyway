@@ -24,9 +24,7 @@ RC = BE_CONST.ResolutionCategories
 
 
 def get_query(table_obj, filters, start_time, end_time):
-    if "road_segment_name" in filters and "road_segment_id" in filters:
-        filters = copy.copy(filters)
-        filters.pop("road_segment_name")
+    filters = remove_loc_text_fields_from_filter(filters)
     query = db.session.query(table_obj)
     if start_time:
         query = query.filter(getattr(table_obj, "accident_timestamp") >= start_time)
@@ -46,6 +44,20 @@ def get_query(table_obj, filters, start_time, end_time):
         get_expression_for_road_segment_location_fields(location_fields, table_obj)
     )
     return query
+
+
+def remove_loc_text_fields_from_filter(filters: dict) -> dict:
+    def remove_first_if_both_exist(d: dict, first: str, second: str) -> dict:
+        if first in d and second in d:
+            d.pop(first)
+
+    res = copy.copy(filters)
+    remove_first_if_both_exist(res, "road_segment_name", "road_segment_id")
+    remove_first_if_both_exist(res, "yishuv_name", "yishuv_symbol")
+    remove_first_if_both_exist(res, "street1_hebrew", "street1")
+    remove_first_if_both_exist(res, "street2_hebrew", "street2")
+    remove_first_if_both_exist(res, "accident_yishuv_name", "accident_yishuv_symbol")
+    return res
 
 
 def get_expression_for_fields(filters: dict, table_obj):
@@ -196,27 +208,26 @@ def gen_entity_labels(entity: Type[LabeledCode]) -> dict:
     return res
 
 
-def get_involved_marker_view_location_filters(
-    resolution: BE_CONST.ResolutionCategories, location_info: LocationInfo
-):
-    filters = {}
-    if resolution == BE_CONST.ResolutionCategories.STREET:
-        filters["accident_yishuv_name"] = location_info.get("yishuv_name")
-        filters["street1_hebrew"] = location_info.get("street1_hebrew")
-    elif resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
-        filters["road1"] = location_info.get("road1")
-        filters["road_segment_id"] = location_info.get("road_segment_id")
-    return filters
+# def get_involved_marker_view_location_filters(
+#     resolution: BE_CONST.ResolutionCategories, location_info: LocationInfo
+# ):
+#     filters = {}
+#     if resolution == BE_CONST.ResolutionCategories.STREET:
+#         filters["accident_yishuv_name"] = location_info.get("yishuv_name")
+#         filters["street1_hebrew"] = location_info.get("street1_hebrew")
+#     elif resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
+#         filters["road1"] = location_info.get("road1")
+#         filters["road_segment_id"] = location_info.get("road_segment_id")
+#     return filters
 
 
-def get_injured_filters(request_params: RequestParams):
-    new_filters = get_involved_marker_view_location_filters(
-        request_params.resolution, request_params.location_info
-    )
-    for curr_filter, curr_values in request_params.location_info.items():
-        if curr_filter in ["region_hebrew", "district_hebrew", "yishuv_name"]:
+def get_injured_filters(location_info: dict):
+    new_filters = copy.copy(location_info)
+    for curr_filter, curr_value in location_info.items():
+        if curr_filter in ["region_hebrew", "district_hebrew", "yishuv_name", "yishuv_symbol"]:
             new_filter_name = "accident_" + curr_filter
-            new_filters[new_filter_name] = curr_values
+            new_filters[new_filter_name] = curr_value
+            new_filters.pop(curr_filter)
 
     new_filters["injury_severity"] = [1, 2, 3, 4, 5]
     return new_filters
@@ -294,10 +305,10 @@ def get_involved_counts(
         .order_by(table.accident_year)
     )
     filters = add_resolution_location_accuracy_filter(location_info, table)
-    if "yishuv_symbol" in location_info:
+    filters = remove_loc_text_fields_from_filter(filters)
+    if "yishuv_symbol" in filters:
         filters["accident_yishuv_symbol"] = filters["yishuv_symbol"]
         filters.pop("yishuv_symbol")
-        filters.pop("yishuv_name", None)
     ex = get_expression_for_fields(filters, table)
     query = query.filter(ex).group_by(table.accident_year)
 

@@ -30,11 +30,11 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
         self.rank = 18
         self.information = "Injured and killed pedestrians by severity and year"
 
-    def validate_parameters(self, yishuv_name, street1_hebrew):
+    def validate_parameters(self, yishuv_symbol, street1):
         # TODO: validate each parameter and display message accordingly
         return (
-            yishuv_name is not None
-            and street1_hebrew is not None
+            yishuv_symbol is not None
+            and street1 is not None
             and self.request_params.years_ago is not None
         )
 
@@ -53,10 +53,10 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
 
     def generate_items(self) -> None:
         try:
-            yishuv_name = self.request_params.location_info.get("yishuv_name")
-            street1_hebrew = self.request_params.location_info.get("street1_hebrew")
+            yishuv_symbol = self.request_params.location_info.get("yishuv_symbol")
+            street1 = self.request_params.location_info.get("street1")
 
-            # if not self.validate_parameters(yishuv_name, street1_hebrew):
+            # if not self.validate_parameters(yishuv_symbol, street1_hebrew):
             #     # TODO: this will fail since there is no news_flash_obj in request_params
             #     logging.exception(f"Could not validate parameters yishuv_name + street1_hebrew in widget : {self.name}")
             #     return None
@@ -74,7 +74,7 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
                     func.count().label("count"),
                 )
                 .filter(loc_ex)
-                .filter(InvolvedMarkerView.accident_yishuv_name == yishuv_name)
+                .filter(InvolvedMarkerView.accident_yishuv_symbol == yishuv_symbol)
                 .filter(
                     InvolvedMarkerView.injury_severity.in_(
                         [
@@ -87,8 +87,8 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
                 .filter(InvolvedMarkerView.injured_type == InjuredType.PEDESTRIAN.value)
                 .filter(
                     or_(
-                        InvolvedMarkerView.street1_hebrew == street1_hebrew,
-                        InvolvedMarkerView.street2_hebrew == street1_hebrew,
+                        InvolvedMarkerView.street1 == street1,
+                        InvolvedMarkerView.street2 == street1,
                     )
                 )
                 .filter(

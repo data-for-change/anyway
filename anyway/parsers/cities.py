@@ -47,9 +47,9 @@ class UpdateCitiesFromDataGov:
         logging.debug(f"read {len(data['result']['records'])} records from {url}.")
         for item in data["result"]["records"]:
             city_entry = {
-                "heb_name": item[CITY_NAME],
+                "heb_name": item[CITY_NAME].lstrip().rstrip(),
                 "yishuv_symbol": item[YISHUV_SYMBOL],
-                "eng_name": item[CITY_NAME_EN],
+                "eng_name": item[CITY_NAME_EN].lstrip().rstrip(),
                 # "napa": item[NAPA],
                 # "municipal_stance": item[MUNICIPAL_STANCE],
             }

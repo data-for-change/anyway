@@ -53,6 +53,9 @@ class UpdateCitiesFromDataGov:
                 # "napa": item[NAPA],
                 # "municipal_stance": item[MUNICIPAL_STANCE],
             }
+            if city_entry["yishuv_symbol"] == 0:
+                city_entry["heb_name"] = None
+                city_entry["eng_name"] = None
             chunk.append(city_entry)
             if len(chunk) == chunk_size:
                 yield chunk

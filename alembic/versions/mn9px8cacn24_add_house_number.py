@@ -1,14 +1,14 @@
 """add house number
 
 Revision ID: mn9px8cacn24
-Revises: 53d0b00fb750
+Revises: 97740b33407d
 Create Date: 2024-06-16 15:05:30.522542
 
 """
 
 # revision identifiers, used by Alembic.
 revision = 'mn9px8cacn24'
-down_revision = '53d0b00fb750'
+down_revision = '97740b33407d'
 branch_labels = None
 depends_on = None
 

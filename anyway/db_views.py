@@ -638,6 +638,7 @@ class Views(object):
             AccidentMarkerView.street1_hebrew,
             AccidentMarkerView.street2,
             AccidentMarkerView.street2_hebrew,
+            AccidentMarkerView.house_number,
             AccidentMarkerView.non_urban_intersection,
             AccidentMarkerView.non_urban_intersection_hebrew,
             AccidentMarkerView.non_urban_intersection_by_junction_number,

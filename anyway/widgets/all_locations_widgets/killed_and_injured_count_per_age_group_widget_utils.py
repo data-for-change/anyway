@@ -15,6 +15,7 @@ from anyway.utilities import parse_age_from_range
 from anyway.widgets.widget_utils import (
     get_expression_for_fields,
     add_resolution_location_accuracy_filter,
+    remove_loc_text_fields_from_filter,
 )
 
 # RequestParams is not hashable, so we can't use functools.lru_cache
@@ -35,19 +36,20 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
     ) -> Dict[str, Dict[int, int]]:
         start_time = request_params.start_time
         end_time = request_params.end_time
-        cache_key = None  # prevent pylint warning
+        cache_key = tuple(request_params.location_info.values()) +\
+                    (start_time, end_time)
 
-        if request_params.resolution == BE_CONST.ResolutionCategories.STREET:
-            involve_yishuv_name = request_params.location_info["yishuv_name"]
-            street1_hebrew = request_params.location_info["street1_hebrew"]
-            cache_key = (involve_yishuv_name, street1_hebrew, start_time, end_time)
+        # if request_params.resolution == BE_CONST.ResolutionCategories.STREET:
+        #     accident_yishuv_name = request_params.location_info["yishuv_name"]
+        #     street1_hebrew = request_params.location_info["street1_hebrew"]
+        #     cache_key = (accident_yishuv_name, street1_hebrew, start_time, end_time)
 
-        elif request_params.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
-            road_number = request_params.location_info["road1"]
-            road_segment_id = request_params.location_info["road_segment_id"]
-            cache_key = (road_number, road_segment_id, start_time, end_time)
+        # elif request_params.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
+        #     road_number = request_params.location_info["road1"]
+        #     road_segment_id = request_params.location_info["road_segment_id"]
+        #     cache_key = (road_number, road_segment_id, start_time, end_time)
 
-        if cache_dict.get(cache_key):
+        if cache_key in cache_dict:
             return cache_dict.get(cache_key)
 
         query = KilledAndInjuredCountPerAgeGroupWidgetUtils.create_query_for_killed_and_injured_count_per_age_group(
@@ -115,6 +117,7 @@ class KilledAndInjuredCountPerAgeGroupWidgetUtils:
         loc_filter = adapt_location_fields_to_involve_table(location_info)
         loc_filter = add_resolution_location_accuracy_filter(loc_filter,
                                                              resolution)
+        loc_filter = remove_loc_text_fields_from_filter(loc_filter)
         loc_ex = get_expression_for_fields(loc_filter, InvolvedMarkerView)
 
         query = (

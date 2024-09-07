@@ -32,7 +32,7 @@ class InjuredCountByAccidentYearWidget(AllLocationsWidget):
     def generate_items(self) -> None:
         res1 = get_accidents_stats(
             table_obj=InvolvedMarkerView,
-            filters=get_injured_filters(self.request_params),
+            filters=get_injured_filters(self.request_params.location_info),
             group_by=("accident_year", "injury_severity"),
             count="injury_severity",
             start_time=self.request_params.start_time,

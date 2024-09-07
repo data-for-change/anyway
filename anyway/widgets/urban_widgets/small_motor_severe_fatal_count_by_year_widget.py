@@ -21,14 +21,14 @@ class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
 
     def generate_items(self) -> None:
         self.items = SmallMotorSevereFatalCountByYearWidget.get_motor_stats(
-            self.request_params.location_info["yishuv_name"],
+            self.request_params.location_info["yishuv_symbol"],
             self.request_params.start_time,
             self.request_params.end_time,
             self.request_params.resolution,
         )
 
     @staticmethod
-    def get_motor_stats(location_info, start_time, end_time, resolution):
+    def get_motor_stats(yishuv_symbol, start_time, end_time, resolution):
         count_by_year = get_accidents_stats(
             table_obj=InvolvedMarkerView,
             filters={
@@ -37,7 +37,7 @@ class SmallMotorSevereFatalCountByYearWidget(UrbanWidget):
                     InjurySeverity.SEVERE_INJURED.value,
                 ],
                 "involve_vehicle_type": VehicleCategory.BICYCLE_AND_SMALL_MOTOR.get_codes(),
-                "involve_yishuv_name": location_info,
+                "accident_yishuv_symbol": yishuv_symbol,
             },
             group_by="accident_year",
             count="accident_year",

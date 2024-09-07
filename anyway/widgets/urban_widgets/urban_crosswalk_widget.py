@@ -10,7 +10,6 @@ from anyway.widgets.urban_widgets.urban_widget import UrbanWidget
 from anyway.widgets.widget_utils import get_accidents_stats
 
 
-# TODO: pretty sure there are errors in this widget, for example, is_included returns self.items
 class UrbanCrosswalkWidget(UrbanWidget):
     name: str = "urban_accidents_by_cross_location"
     files = [__file__]
@@ -21,15 +20,14 @@ class UrbanCrosswalkWidget(UrbanWidget):
 
     def generate_items(self) -> None:
         self.items = UrbanCrosswalkWidget.get_crosswalk(
-            self.request_params.location_info["yishuv_name"],
-            self.request_params.location_info["street1_hebrew"],
+            self.request_params.location_info,
             self.request_params.start_time,
             self.request_params.end_time,
             self.request_params.resolution,
         )
 
     @staticmethod
-    def get_crosswalk(yishuv, street, start_time, end_time, resolution) -> Dict[str, Any]:
+    def get_crosswalk(location_info: dict, start_time, end_time, resolution) -> Dict[str, Any]:
         cross_output = {
             "with_crosswalk": get_accidents_stats(
                 table_obj=InvolvedMarkerView,
@@ -39,11 +37,11 @@ class UrbanCrosswalkWidget(UrbanWidget):
                         InjurySeverity.SEVERE_INJURED.value,
                     ],
                     "cross_location": CrossCategory.CROSSWALK.get_codes(),
-                    "involve_yishuv_name": yishuv,
-                    "street1_hebrew": street,
+                    "accident_yishuv_symbol": location_info["yishuv_symbol"],
+                    "street1": location_info["street"],
                 },
-                group_by="street1_hebrew",
-                count="street1_hebrew",
+                group_by="street1",
+                count="street1",
                 start_time=start_time,
                 end_time=end_time,
                 resolution=resolution,
@@ -56,20 +54,22 @@ class UrbanCrosswalkWidget(UrbanWidget):
                         InjurySeverity.SEVERE_INJURED.value,
                     ],
                     "cross_location": CrossCategory.NONE.get_codes(),
-                    "involve_yishuv_name": yishuv,
-                    "street1_hebrew": street,
+                    "accident_yishuv_symbol": location_info["yishuv_symbol"],
+                    "street1": location_info["street"],
                 },
-                group_by="street1_hebrew",
-                count="street1_hebrew",
+                group_by="street1",
+                count="street1",
                 start_time=start_time,
                 end_time=end_time,
                 resolution=resolution,
             ),
         }
         if not cross_output["with_crosswalk"]:
-            cross_output["with_crosswalk"] = [{"street1_hebrew": street, "count": 0}]
+            cross_output["with_crosswalk"] = [{"street1_hebrew": location_info["street1_hebrew"],
+                                               "count": 0}]
         if not cross_output["without_crosswalk"]:
-            cross_output["without_crosswalk"] = [{"street1_hebrew": street, "count": 0}]
+            cross_output["without_crosswalk"] = [{"street1_hebrew": location_info["street1_hebrew"],
+                                                   "count": 0}]
         return cross_output
 
     @staticmethod

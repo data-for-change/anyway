@@ -8,7 +8,7 @@ from anyway.widgets.widget_utils import (format_2_level_items,
                                          get_filter_expression_raw,
                                          get_filter_expression,
                                          get_expression_for_non_road_segment_fields,
-
+                                         remove_loc_text_fields_from_filter,
                                          )
 from anyway.backend_constants import AccidentSeverity
 from anyway.models import AccidentMarkerView, RoadJunctionKM, RoadSegments, InvolvedMarkerView
@@ -212,6 +212,31 @@ class TestInfographicsUtilsCase(unittest.TestCase):
                       str(actual), "3")
         self.assertIn(" AND ",
                       str(actual), "4")
+
+    def test_remove_names_from_filters(self):
+        self.assertEqual({}, remove_loc_text_fields_from_filter({}), "1")
+        expected = {"a": 1, "yishuv_symbol": 2}
+        test = {"a": 1, "yishuv_symbol": 2, "yishuv_name": "yishuv"}
+        actual = remove_loc_text_fields_from_filter(test)
+        self.assertEqual(expected, actual, "2")
+        expected = {"a": 1, "yishuv_symbol": 2,
+                    "street1": 3, "street2": 4,
+                    "road_segment_id": 17}
+        test = {"a": 1, "yishuv_symbol": 2, "yishuv_name": "yishuv",
+                "street1": 3, "street1_hebrew": "Hebrew",
+                "street2": 4, "street2_hebrew": "Hebrew2",
+                "road_segment_name": "seg name", "road_segment_id": 17}
+        actual = remove_loc_text_fields_from_filter(test)
+        self.assertEqual(expected, actual, "3")
+        expected = {"a": 1, "accident_yishuv_symbol": 2,
+                    "street1_hebrew": "Hebrew", "street2": 4,
+                    "road_segment_id": 17}
+        test = {"a": 1, "accident_yishuv_symbol": 2, "accident_yishuv_name": "yishuv",
+                "street1_hebrew": "Hebrew",
+                "street2": 4, "street2_hebrew": "Hebrew2",
+                "road_segment_name": "seg name", "road_segment_id": 17}
+        actual = remove_loc_text_fields_from_filter(test)
+        self.assertEqual(expected, actual, "3")
 
 
 if __name__ == '__main__':

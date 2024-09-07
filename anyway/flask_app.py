@@ -63,10 +63,8 @@ from anyway.models import (
 )
 from anyway.request_params import get_request_params_from_request_values
 from anyway.views.news_flash.api import (
-    news_flash,
-    news_flash_new,
     single_news_flash,
-    news_flash_v2,
+    news_flash,
     update_news_flash_qualifying,
     get_downloaded_data,
     DEFAULT_LIMIT_REQ_PARAMETER,
@@ -1094,11 +1092,9 @@ app.add_url_rule(
     view_func=injured_around_schools_api,
     methods=["GET"],
 )
-app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash_v2, methods=["GET", "PATCH", "OPTIONS"])
+app.add_url_rule("/api/news-flash", endpoint=None, view_func=news_flash, methods=["GET", "PATCH", "OPTIONS"])
 app.add_url_rule("/api/comments", endpoint=None, view_func=get_comments, methods=["GET"])
 app.add_url_rule("/api/comments", endpoint=None, view_func=create_comment, methods=["POST"])
-
-app.add_url_rule("/api/v1/news-flash", endpoint=None, view_func=news_flash, methods=["GET"])
 
 nf_parser = reqparse.RequestParser()
 nf_parser.add_argument("id", type=int, help="News flash id")
@@ -1176,10 +1172,9 @@ news_flash_fields_model = api.model(
         "road_segment_id": fields.Integer(),
         "newsflash_location_qualification": fields.Integer(),
         "location_qualifying_user": fields.Integer(),
+        "curr_cbs_location_text": fields.String(),
+        "critical": fields.Boolean(),
     },
-)
-news_flash_list_model = api.model(
-    "news_flash_list", {"news_flashes": fields.List(fields.Nested(news_flash_fields_model))}
 )
 
 
@@ -1198,47 +1193,6 @@ class ManageSingleNewsFlash(Resource):
         return update_news_flash_qualifying(news_flash_id)
     def options(self, news_flash_id):
         return single_news_flash(news_flash_id)
-
-
-def filter_json_fields(json_data, fields):
-    return {field: json_data[field] for field in fields if field in json_data}
-
-
-@api.route("/api/news-flash/by-resolution", methods=["GET"])
-class RetrieveNewsFlashByResolution(Resource):
-    @api.doc("get news flash records by resolution")
-    @api.expect(nfbr_parser)
-    @api.response(404, "Parameter value not supported or missing")
-    @api.response(
-        200, "Retrieve news-flash items filtered by given parameters", news_flash_list_model
-    )
-    def get(self):
-        args = nfbr_parser.parse_args()
-        limit = args["limit"] if "limit" in args else None
-        query = search_newsflashes_by_resolution(db.session, args["resolutions"], args["include"], limit)
-        res = query.all()
-        news_flashes_jsons = [n.serialize() for n in res]
-        if not args["fields"]:
-            filtered_jsons = news_flashes_jsons
-        else:
-            filtered_jsons = [filter_json_fields(json_data, args["fields"]) for json_data in news_flashes_jsons]
-        return Response(json.dumps(filtered_jsons, default=str), mimetype="application/json")
-
-
-@api.route("/api/news-flash-new", methods=["GET"])
-class RetrieveNewsFlash(Resource):
-    @api.doc("get news flash records")
-    @api.expect(nf_parser)
-    @api.response(404, "Parameter value not supported or missing")
-    @api.response(
-        200, "Retrieve news-flash items filtered by given parameters", news_flash_list_model
-    )
-    def get(self):
-        args = nf_parser.parse_args()
-        res = news_flash_new(args)
-        for d in res:
-            d["date"] = datetime_to_str(d["date"]) if "date" in d else "None"
-        return {"news_flashes": res}
 
 
 """

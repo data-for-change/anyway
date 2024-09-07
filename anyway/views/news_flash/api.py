@@ -89,6 +89,8 @@ def news_flash():
 
 def gen_news_flash_query(session, valid_params: dict):
     query = session.query(NewsFlash)
+    supported_resolutions = set([x.value for x in BE_CONST.SUPPORTED_RESOLUTIONS])
+    query = query.filter(NewsFlash.resolution.in_(supported_resolutions))
     for param, value in valid_params.items():
         if param == "road_number":
             query = query.filter(NewsFlash.road1 == value)

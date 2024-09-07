@@ -65,10 +65,10 @@ class UrbanCrosswalkWidget(UrbanWidget):
             ),
         }
         if not cross_output["with_crosswalk"]:
-            cross_output["with_crosswalk"] = [{"street1_hebrew": location_info["_hebrew"],
+            cross_output["with_crosswalk"] = [{"street1_hebrew": location_info["street1_hebrew"],
                                                "count": 0}]
         if not cross_output["without_crosswalk"]:
-            cross_output["without_crosswalk"] = [{"street1_hebrew": location_info["street_hebrew"],
+            cross_output["without_crosswalk"] = [{"street1_hebrew": location_info["street1_hebrew"],
                                                    "count": 0}]
         return cross_output
 

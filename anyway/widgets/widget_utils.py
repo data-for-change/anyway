@@ -229,7 +229,7 @@ def get_injured_filters(location_info: dict):
             new_filters[new_filter_name] = curr_value
             new_filters.pop(curr_filter)
 
-    new_filters["injury_severity"] = [1, 2, 3, 4, 5]
+    new_filters["injury_severity"] = [1, 2, 3]
     return new_filters
 
 

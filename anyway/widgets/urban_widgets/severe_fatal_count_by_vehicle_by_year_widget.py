@@ -25,10 +25,11 @@ class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
             self.request_params.location_info["yishuv_name"],
             self.request_params.start_time,
             self.request_params.end_time,
+            self.request_params.resolution,
         )
 
     @staticmethod
-    def separate_data(yishuv, start_time, end_time) -> Dict[str, Any]:
+    def separate_data(yishuv, start_time, end_time, resolution) -> Dict[str, Any]:
         output = {
             "e_bikes": get_accidents_stats(
                 table_obj=InvolvedMarkerView,
@@ -38,12 +39,13 @@ class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
                         InjurySeverity.SEVERE_INJURED.value,
                     ],
                     "involve_vehicle_type": VehicleType.ELECTRIC_BIKE.value,
-                    "involve_yishuv_name": yishuv,
+                    "accident_yishuv_name": yishuv,
                 },
                 group_by="accident_year",
                 count="accident_year",
                 start_time=start_time,
                 end_time=end_time,
+                resolution=resolution,
             ),
             "bikes": get_accidents_stats(
                 table_obj=InvolvedMarkerView,
@@ -53,12 +55,13 @@ class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
                         InjurySeverity.SEVERE_INJURED.value,
                     ],
                     "involve_vehicle_type": VehicleType.BIKE.value,
-                    "involve_yishuv_name": yishuv,
+                    "accident_yishuv_name": yishuv,
                 },
                 group_by="accident_year",
                 count="accident_year",
                 start_time=start_time,
                 end_time=end_time,
+                resolution=resolution,
             ),
             "e_scooters": get_accidents_stats(
                 table_obj=InvolvedMarkerView,
@@ -68,12 +71,13 @@ class SevereFatalCountByVehicleByYearWidget(UrbanWidget):
                         InjurySeverity.SEVERE_INJURED.value,
                     ],
                     "involve_vehicle_type": VehicleType.ELECTRIC_SCOOTER.value,
-                    "involve_yishuv_name": yishuv,
+                    "accident_yishuv_name": yishuv,
                 },
                 group_by="accident_year",
                 count="accident_year",
                 start_time=start_time,
                 end_time=end_time,
+                resolution=resolution,
             ),
         }
         bike_accidents = [d["accident_year"] for d in output["bikes"] if "accident_year" in d]

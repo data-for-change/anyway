@@ -3,7 +3,6 @@
 import pandas as pd
 
 from anyway import field_names
-from typing import Optional
 
 import logging
 
@@ -214,11 +213,3 @@ def get_field(field, value=None):
 
 def get_supported_tables():
     return _tables.keys()
-
-
-def get_city_name(symbol_id, lang: str = "he") -> Optional[str]:
-    column_to_fetch = field_names.name if lang == "he" else "ENGLISH_NAME"
-    try:
-        return _cities.loc[symbol_id, column_to_fetch]
-    except Exception:
-        return None

@@ -25,14 +25,15 @@ class AccidentCountByAccidentTypeWidget(AllLocationsWidget):
 
     def generate_items(self) -> None:
         # noinspection PyUnresolvedReferences
-        self.items = AccidentCountByAccidentTypeWidget.get_accident_count_by_accident_type(
+        self.items = self.get_accident_count_by_accident_type(
             location_info=self.request_params.location_info,
             start_time=self.request_params.start_time,
             end_time=self.request_params.end_time,
+            resolution=self.request_params.resolution
         )
 
     @staticmethod
-    def get_accident_count_by_accident_type(location_info, start_time, end_time):
+    def get_accident_count_by_accident_type(location_info, start_time, end_time, resolution):
         all_accident_type_count = get_accidents_stats(
             table_obj=AccidentMarkerView,
             filters=location_info,
@@ -40,6 +41,7 @@ class AccidentCountByAccidentTypeWidget(AllLocationsWidget):
             count="accident_type",
             start_time=start_time,
             end_time=end_time,
+            resolution=resolution
         )
         merged_accident_type_count = [{"accident_type": "Collision", "count": 0}]
         for item in all_accident_type_count:

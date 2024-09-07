@@ -25,10 +25,11 @@ class UrbanCrosswalkWidget(UrbanWidget):
             self.request_params.location_info["street1_hebrew"],
             self.request_params.start_time,
             self.request_params.end_time,
+            self.request_params.resolution,
         )
 
     @staticmethod
-    def get_crosswalk(yishuv, street, start_time, end_time) -> Dict[str, Any]:
+    def get_crosswalk(yishuv, street, start_time, end_time, resolution) -> Dict[str, Any]:
         cross_output = {
             "with_crosswalk": get_accidents_stats(
                 table_obj=InvolvedMarkerView,
@@ -38,13 +39,14 @@ class UrbanCrosswalkWidget(UrbanWidget):
                         InjurySeverity.SEVERE_INJURED.value,
                     ],
                     "cross_location": CrossCategory.CROSSWALK.get_codes(),
-                    "involve_yishuv_name": yishuv,
+                    "accident_yishuv_name": yishuv,
                     "street1_hebrew": street,
                 },
                 group_by="street1_hebrew",
                 count="street1_hebrew",
                 start_time=start_time,
                 end_time=end_time,
+                resolution=resolution,
             ),
             "without_crosswalk": get_accidents_stats(
                 table_obj=InvolvedMarkerView,
@@ -54,13 +56,14 @@ class UrbanCrosswalkWidget(UrbanWidget):
                         InjurySeverity.SEVERE_INJURED.value,
                     ],
                     "cross_location": CrossCategory.NONE.get_codes(),
-                    "involve_yishuv_name": yishuv,
+                    "accident_yishuv_name": yishuv,
                     "street1_hebrew": street,
                 },
                 group_by="street1_hebrew",
                 count="street1_hebrew",
                 start_time=start_time,
                 end_time=end_time,
+                resolution=resolution,
             ),
         }
         if not cross_output["with_crosswalk"]:

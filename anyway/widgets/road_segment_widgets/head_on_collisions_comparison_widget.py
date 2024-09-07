@@ -39,13 +39,13 @@ class HeadOnCollisionsComparisonWidget(RoadSegmentWidget):
             count="accident_type",
             start_time=self.request_params.start_time,
             end_time=self.request_params.end_time,
+            resolution=self.request_params.resolution,
         )
 
         if location_info["road1"] and location_info["road_segment_name"]:
             filter_dict.update(
                 {
                     "road1": location_info["road1"],
-                    "road_segment_name": location_info["road_segment_name"],
                     "road_segment_id": location_info["road_segment_id"],
                 }
             )
@@ -56,6 +56,7 @@ class HeadOnCollisionsComparisonWidget(RoadSegmentWidget):
                 count="accident_type",
                 start_time=self.request_params.start_time,
                 end_time=self.request_params.end_time,
+                resolution=self.request_params.resolution,
             )
 
         road_sums = self.sum_count_of_accident_type(
@@ -106,7 +107,7 @@ class HeadOnCollisionsComparisonWidget(RoadSegmentWidget):
                 segment_others = item["count"]
             else:
                 raise ValueError
-        segment_total = segment_h2h + segment_others
+        segment_total = segment_h2h + segment_others  # pylint: disable=E0606
         all_items = self.items[self.ALL_ROADS_SUBTITLE]
         for item in all_items:
             if item["desc"] == "frontal":
@@ -115,7 +116,7 @@ class HeadOnCollisionsComparisonWidget(RoadSegmentWidget):
                 all_others = item["count"]
             else:
                 raise ValueError
-        all_total = all_h2h + all_others
+        all_total = all_h2h + all_others  # pylint: disable=E0606
         return segment_h2h > 0 and (segment_h2h / segment_total) > all_h2h / all_total
 
 

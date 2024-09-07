@@ -1,8 +1,8 @@
-from typing import Dict
 from anyway.widgets.widget import Widget
 from anyway.widgets.widget import register
 from anyway.request_params import RequestParams
 from typing import Dict, Optional
+# noinspection PyProtectedMember
 from flask_babel import _
 import logging
 
@@ -36,3 +36,7 @@ class VisionZeroBikeWidget(Widget):
     @classmethod
     def update_result(cls, request_params: RequestParams, cached_items: Dict) -> Optional[Dict]:
         return cached_items if cls.is_included_according_to_request_params(request_params) else None
+
+    @staticmethod
+    def is_relevant(request_params: RequestParams) -> bool:
+        return request_params.news_flash_description is not None

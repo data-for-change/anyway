@@ -144,6 +144,7 @@ def test_twitter_parse():
         for k in raw_fields:
             assert getattr(actual, k) == getattr(expected, k)
 
+        actual.set_critical()
         actual.accident = classify_tweets(actual.description)
         assert actual.accident == expected.accident
 

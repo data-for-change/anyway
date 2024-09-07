@@ -43,6 +43,7 @@ class Road2Plus1Widget(RoadSegmentWidget):
                 count="accident_type",
                 start_time=self.request_params.end_time - datetime.timedelta(days=365),
                 end_time=self.request_params.end_time,
+                resolution=self.request_params.resolution
             )
 
             road_sums = self.sum_count_of_accident_type(

@@ -1,7 +1,8 @@
 import unittest
 from unittest.mock import patch
 from datetime import date
-from pandas._libs.tslibs.timestamps import Timestamp
+# noinspection PyProtectedMember
+from pandas._libs.tslibs.timestamps import Timestamp  # pylint: disable=E0611
 from anyway.request_params import (
     extract_non_urban_intersection_location,
     get_request_params_from_request_values,
@@ -22,16 +23,16 @@ class TestRequestParams(unittest.TestCase):
                      }
     junction_1277_roads = {"non_urban_intersection": 1277,
                            "non_urban_intersection_hebrew": "צומת השיטה",
-                           "roads": set([669, 71]),
+                           "roads": {669, 71},
                            }
     loc_1 = {'data': {'non_urban_intersection': 1277,
-                           'non_urban_intersection_hebrew': 'צומת השיטה',
-                           'resolution': BE_CONST.ResolutionCategories.SUBURBAN_JUNCTION,
-                           'road1': 669,
-                           'road2': 71},
-                  'gps': {'lat': 32.82561, 'lon': 35.165395},
-                  'name': 'location',
-                  'text': 'צומת השיטה'}
+                      'non_urban_intersection_hebrew': 'צומת השיטה',
+                      'resolution': BE_CONST.ResolutionCategories.SUBURBAN_JUNCTION,
+                      'road1': 669,
+                      'road2': 71},
+             'gps': {'lat': 32.82561, 'lon': 35.165395},
+             'name': 'location',
+             'text': 'צומת השיטה'}
     nf = NewsFlash()
     nf.description = "description"
     nf.title = "title"
@@ -69,7 +70,7 @@ class TestRequestParams(unittest.TestCase):
         actual = fill_missing_non_urban_intersection_values(input_params)
         self.assertEqual(self.junction_1277, actual, "2")  # add assertion here
 
-        input_params = {"non_urban_intersection_hebrew": "צומת השיטה",}
+        input_params = {"non_urban_intersection_hebrew": "צומת השיטה"}
         from_key.return_value = self.junction_1277_roads
         actual = fill_missing_non_urban_intersection_values(input_params)
         self.assertEqual(self.junction_1277, actual, "2")  # add assertion here
@@ -79,6 +80,7 @@ class TestRequestParams(unittest.TestCase):
     @patch("anyway.request_params.get_location_from_news_flash_or_request_values")
     def test_get_request_params_from_request_values(self, get_location, extract_nf, get_date):
         get_location.return_value = self.loc_1
+        # noinspection PyTypeChecker
         get_date.return_value = Timestamp("2018-01-02 01:15:16")
         extract_nf.return_value = self.nf
         input_params = {"road1": 669, "road2": 71}

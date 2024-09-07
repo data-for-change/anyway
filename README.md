@@ -19,7 +19,7 @@ At ANYWAY we aim to reduce road accidents by:
 1. Raising public awareness of existing road hazards, thereby leading towards safer road behaviour.
 1. Collaborating with authorities in order to assist and drive them to find solutions in light of Vision Zero. Such solutions will improve road infrastructure and behavioural problems in attempt to prevent road fatalities.
 
-Take a look at our [facebook page](https://www.facebook.com/anywayisrael). See also our [Android app](https://github.com/samuelregev/anywayAndroidApp/) and [iOS app](https://github.com/data-for-change/Anyway-iOS/) on GitHub.
+Take a look at our [facebook page](https://www.facebook.com/anywayisrael). See also our [Android app](https://github.com/data-for-change/anywayAndroidApp/) and [iOS app](https://github.com/data-for-change/Anyway-iOS/) on GitHub.
 
 
 ### ANYWAY’s Interactive Map:

@@ -7,11 +7,16 @@ from sqlalchemy import case, literal_column, func, distinct, desc
 from anyway.widgets.widget import register
 from anyway.request_params import RequestParams
 from anyway.backend_constants import BE_CONST, AccidentSeverity
-from anyway.widgets.widget_utils import get_query
+RC = BE_CONST.ResolutionCategories
+from anyway.widgets.widget_utils import (
+    get_query,
+    add_resolution_location_accuracy_filter,
+)
 from anyway.models import InvolvedMarkerView
 from anyway.vehicle_type import VehicleCategory
 from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
 from typing import Dict
+# noinspection PyProtectedMember
 from flask_babel import _
 
 
@@ -34,6 +39,7 @@ class MotorcycleAccidentsVsAllAccidentsWidget(RoadSegmentWidget):
             "Percentage of serious and fatal motorcycle accidents in the selected section compared to the average percentage of accidents in other road sections throughout the country"
         )
 
+    # noinspection PyAttributeOutsideInit
     def generate_items(self) -> None:
         # noinspection PyUnresolvedReferences
         res = MotorcycleAccidentsVsAllAccidentsWidget.motorcycle_accidents_vs_all_accidents(
@@ -44,7 +50,7 @@ class MotorcycleAccidentsVsAllAccidentsWidget(RoadSegmentWidget):
     @staticmethod
     def motorcycle_accidents_vs_all_accidents(
         start_time: datetime.date, end_time: datetime.date, road_number: str
-        ) -> Tuple:
+    ) -> Tuple:
         location_label = "location"
         case_location = case(
             [
@@ -60,6 +66,7 @@ class MotorcycleAccidentsVsAllAccidentsWidget(RoadSegmentWidget):
         vehicle_label = "vehicle"
         vehicle_other = VehicleCategory.OTHER.get_english_display_name()
         vehicle_motorcycle = VehicleCategory.MOTORCYCLE.get_english_display_name()
+        # noinspection PyUnresolvedReferences
         case_vehicle = case(
             [
                 (
@@ -72,8 +79,14 @@ class MotorcycleAccidentsVsAllAccidentsWidget(RoadSegmentWidget):
             else_=literal_column(f"'{vehicle_other}'"),
         ).label(vehicle_label)
 
+        filters = {"road_type": BE_CONST.NON_CITY_ROAD_TYPES,
+                   "accident_severity": [AccidentSeverity.FATAL.value, AccidentSeverity.SEVERE.value]}
+        filters = add_resolution_location_accuracy_filter(
+            filters,
+            RC.SUBURBAN_ROAD,
+        )
         query = get_query(
-            table_obj=InvolvedMarkerView, filters={}, start_time=start_time, end_time=end_time
+            table_obj=InvolvedMarkerView, filters=filters, start_time=start_time, end_time=end_time
         )
 
         num_accidents_label = "num_of_accidents"
@@ -82,13 +95,6 @@ class MotorcycleAccidentsVsAllAccidentsWidget(RoadSegmentWidget):
                 case_location,
                 case_vehicle,
                 func.count(distinct(InvolvedMarkerView.provider_and_id)).label(num_accidents_label),
-            )
-            .filter(InvolvedMarkerView.road_type.in_(BE_CONST.NON_CITY_ROAD_TYPES))
-            .filter(
-                InvolvedMarkerView.accident_severity.in_(
-                    # pylint: disable=no-member
-                    [AccidentSeverity.FATAL.value, AccidentSeverity.SEVERE.value]
-                )
             )
             .group_by(location_label, vehicle_label)
             .order_by(desc(num_accidents_label))
@@ -178,6 +184,7 @@ class MotorcycleAccidentsVsAllAccidentsWidget(RoadSegmentWidget):
     # noinspection PyUnboundLocalVariable
     def is_included(self) -> bool:
         return self.counter_road_motorcycle >= 3 and self.motorcycle_road_percentage >= 2*self.motorcycle_all_roads_percentage
+
 
 _("road")
 _("Percentage of serious and fatal motorcycle accidents in the selected section compared to the average percentage of accidents in other road sections throughout the country")

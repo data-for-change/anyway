@@ -81,6 +81,13 @@ class BackEndConstants(object):
         ResolutionCategories.SUBURBAN_JUNCTION
     ]
 
+    RESOLUTION_ACCURACY_VALUES: dict = {
+        ResolutionCategories.SUBURBAN_JUNCTION: [1, 3, 4],
+        ResolutionCategories.SUBURBAN_ROAD: [1, 3, 4],
+        ResolutionCategories.URBAN_JUNCTION: [1, 3],
+        ResolutionCategories.STREET: [1, 3],
+    }
+
     class Source(Enum):
         @classmethod
         def _missing_(cls, value):

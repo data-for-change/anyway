@@ -14,12 +14,13 @@ from flask_assets import Environment
 from flask_babel import Babel, gettext
 from flask_compress import Compress
 from flask_cors import CORS
-from flask_restx import Resource, fields, reqparse
+from flask_restx import Resource, fields, reqparse, Model
 from sqlalchemy import and_, not_, or_
 from sqlalchemy import func
 from webassets import Environment as AssetsEnvironment, Bundle as AssetsBundle
 from webassets.ext.jinja2 import AssetsExtension
 from werkzeug.exceptions import BadRequestKeyError
+import json
 
 from anyway import utilities, secrets
 from anyway.app_and_db import api, get_cors_config
@@ -57,7 +58,8 @@ from anyway.models import (
     City,
     Streets,
     Comment,
-    TelegramForwardedMessages
+    TelegramForwardedMessages,
+    NewsFlash
 )
 from anyway.request_params import get_request_params_from_request_values
 from anyway.views.news_flash.api import (
@@ -68,6 +70,7 @@ from anyway.views.news_flash.api import (
     DEFAULT_LIMIT_REQ_PARAMETER,
     DEFAULT_OFFSET_REQ_PARAMETER,
     DEFAULT_NUMBER_OF_YEARS_AGO,
+    search_newsflashes_by_resolution
 )
 from anyway.views.schools.api import (
     schools_description_api,
@@ -1123,6 +1126,17 @@ nf_parser.add_argument(
     default=DEFAULT_LIMIT_REQ_PARAMETER,
     help="limit number of retrieved items to given limit",
 )
+
+newsflash_fields = tuple(column.name for column in NewsFlash.__table__.columns)
+nfbr_parser = reqparse.RequestParser()
+nfbr_parser.add_argument("resolutions", type=str, action="append", required=True,
+                         help="List of resolutions to filter by")
+nfbr_parser.add_argument("include", type=str, required=True, choices=["True", "False"],
+                         help="Flag to include or exclude the specified resolutions (True\False)")
+nfbr_parser.add_argument("limit", type=int, help="Maximum number of records to return")
+nfbr_parser.add_argument("fields", type=str, choices=(*newsflash_fields, ""), action="append",
+                          help=f"List of fields to include in the response (Empty array to fetch all).\n"
+                               f"Available values: {', '.join(newsflash_fields)}")
 
 
 def datetime_to_str(val: datetime.datetime) -> str:

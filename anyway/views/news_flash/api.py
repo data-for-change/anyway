@@ -397,3 +397,19 @@ def get_downloaded_data(format, years_ago):
 
     headers = { 'Content-Disposition': f'attachment; filename=anyway_download_{datetime.datetime.now().strftime("%d_%m_%Y_%H_%M_%S")}.{file_type}' }
     return Response(buffer.getvalue(), mimetype=mimetype, headers=headers)
+
+
+def search_newsflashes_by_resolution(session, resolutions, include_resolutions, limit=None):
+    query = session.query(NewsFlash)
+    if include_resolutions:
+        query = query.filter(NewsFlash.resolution.in_(resolutions))
+    else:
+        query = query.filter(NewsFlash.resolution.notin_(resolutions))
+
+    query = query.filter(NewsFlash.accident == True) \
+        .order_by(NewsFlash.date.desc())
+
+    limit = DEFAULT_LIMIT_REQ_PARAMETER if not limit else limit
+    query = query.limit(limit)
+
+    return query

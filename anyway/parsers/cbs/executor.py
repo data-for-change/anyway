@@ -695,9 +695,10 @@ def get_files(directory):
                     streets_map[key] = [
                         {
                             field_names.street_sign: x[field_names.street_sign],
-                            field_names.street_name: x[field_names.street_name],
+                            field_names.street_name: str(x[field_names.street_name]),
                         }
-                        for _, x in settlement.iterrows() if isinstance(x[field_names.street_name], str)
+                        for _, x in settlement.iterrows() if isinstance(x[field_names.street_name], str) \
+                            or ((isinstance(x[field_names.street_name], int) or isinstance(x[field_names.street_name], float)) and x[field_names.street_name] > 0)
                     ]
 
                 output_files_dict[name] = streets_map

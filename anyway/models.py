@@ -1231,7 +1231,7 @@ class Streets(Base):
         )
         if res is None:
             raise ValueError(f"{name}: could not find street in yishuv:{yishuv_symbol}")
-        return res
+        return res.street
 
     @staticmethod
     def get_streets_by_yishuv(yishuv_symbol: int) -> List[dict]:
@@ -2532,6 +2532,7 @@ class InvolvedMarkerView(Base):
     street1_hebrew = Column(Text(), index=True)
     street2 = Column(Integer())
     street2_hebrew = Column(Text(), index=True)
+    house_number = Column(Integer())
     non_urban_intersection = Column(Integer())
     non_urban_intersection_hebrew = Column(Text())
     non_urban_intersection_by_junction_number = Column(Text())
@@ -2729,6 +2730,7 @@ class VehicleMarkerView(Base):
     street1_hebrew = Column(Text(), index=True)
     street2 = Column(Integer())
     street2_hebrew = Column(Text(), index=True)
+    house_number = Column(Integer())
     non_urban_intersection = Column(Integer())
     non_urban_intersection_hebrew = Column(Text())
     non_urban_intersection_by_junction_number = Column(Text())

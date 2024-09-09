@@ -7,7 +7,7 @@ import logging
 import pandas as pd
 import os
 
-from typing import List, Optional
+from typing import List, Optional, Tuple, Any
 from http import HTTPStatus
 from collections import OrderedDict
 
@@ -37,12 +37,20 @@ from io import BytesIO
 DEFAULT_OFFSET_REQ_PARAMETER = 0
 DEFAULT_LIMIT_REQ_PARAMETER = 100
 DEFAULT_NUMBER_OF_YEARS_AGO = 5
+PAGE_NUMBER = "pageNumber"
+PAGE_SIZE = "pageSize"
+NEWS_FALSH_ID = "newsFlash_Id"
+ID = "id"
+LIMIT = "limit"
+OFFSET = "offset"
 
 
 class NewsFlashQuery(BaseModel):
     id: Optional[int]
     road_number: Optional[int]
     offset: Optional[int] = DEFAULT_OFFSET_REQ_PARAMETER
+    pageNumber: Optional[int]
+    pageSize: Optional[int]
     limit: Optional[int] = DEFAULT_LIMIT_REQ_PARAMETER
     resolution: Optional[List[str]]
     source: Optional[List[BE_CONST.Source]]
@@ -75,19 +83,54 @@ def news_flash():
     except ValidationError as e:
         return make_response(jsonify(e.errors()[0]["msg"]), 404)
 
-    if "id" in validated_query_params:
-        return get_news_flash_by_id(validated_query_params["id"])
+    pagination, validated_query_params = set_pagination_params(validated_query_params)
 
-    query = gen_news_flash_query(db.session, validated_query_params)
+    if ID in validated_query_params:
+        return get_news_flash_by_id(validated_query_params[ID])
+
+    total, query = gen_news_flash_query(db.session, validated_query_params)
     news_flashes = query.all()
 
-    news_flashes_jsons = [n.serialize() for n in news_flashes]
-    for news_flash in news_flashes_jsons:
+    news_flashes_dicts = [n.serialize() for n in news_flashes]
+    for news_flash in news_flashes_dicts:
         set_display_source(news_flash)
-    return Response(json.dumps(news_flashes_jsons, default=str), mimetype="application/json")
+
+    if pagination:
+        res = add_pagination_to_result(validated_query_params, news_flashes_dicts, total)
+    else:
+        res = news_flashes_dicts
+    return Response(json.dumps(res, default=str), mimetype="application/json")
 
 
-def gen_news_flash_query(session, valid_params: dict):
+def set_pagination_params(validated_params: dict) -> Tuple[bool, dict]:
+    pagination = False
+    if NEWS_FALSH_ID in validated_params:
+        validated_params[ID] = validated_params.pop(NEWS_FALSH_ID)
+    if PAGE_NUMBER in validated_params:
+        pagination = True
+        page_number = validated_params[PAGE_NUMBER]
+        page_size = validated_params.get(PAGE_SIZE, DEFAULT_LIMIT_REQ_PARAMETER)
+        validated_params[OFFSET] = (page_number - 1) * page_size
+        validated_params[LIMIT] = page_size
+    return pagination, validated_params
+
+
+def add_pagination_to_result(validated_params: dict, news_flashes: list, num_nf: int) -> dict:
+    page_size = validated_params[PAGE_SIZE]
+    page_num = validated_params[PAGE_NUMBER]
+    total_pages = num_nf // page_size + (1 if num_nf % page_size else 0)
+    return {
+        "data": news_flashes,
+        "pagination": {
+            "pageNumber": page_num,
+            "pageSize": page_size,
+            "totalPages": total_pages,
+            "totalRecords": num_nf
+        }
+    }
+
+
+def gen_news_flash_query(session, valid_params: dict) -> Tuple[int, Any]:
     query = session.query(NewsFlash)
     supported_resolutions = set([x.value for x in BE_CONST.SUPPORTED_RESOLUTIONS])
     query = query.filter(NewsFlash.resolution.in_(supported_resolutions))
@@ -113,11 +156,12 @@ def gen_news_flash_query(session, valid_params: dict):
             not_(and_(NewsFlash.lat == None, NewsFlash.lon == None)),
         )
     ).order_by(NewsFlash.date.desc())
+    total = query.count()
     if "offset" in valid_params:
         query = query.offset(valid_params["offset"])
     if "limit" in valid_params:
         query = query.limit(valid_params["limit"])
-    return query
+    return total, query
 
 
 def set_display_source(news_flash):

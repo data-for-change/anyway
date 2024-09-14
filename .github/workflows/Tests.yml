@@ -58,13 +58,15 @@ jobs:
         cd ./anyway-newsflash-infographics/
         bash run.bash
         cd ../
-        docker-compose -f docker-compose.yml up -d --build anyway
+        docker compose -f docker-compose.yml up -d --build anyway
     - name: Waiting for DB startup
       run: |
         bash ./wait_for_postgres.sh
     - name: DB Initialization
       run: |
         docker exec anyway alembic upgrade head
+        docker exec anyway ./main.py process cities
+        docker exec anyway ./main.py process streets
         docker exec anyway ./main.py process registered-vehicles
         docker exec anyway ./main.py process cbs --source local_dir_for_tests_only
         docker exec anyway ./main.py process road-segments

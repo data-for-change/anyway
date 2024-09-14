@@ -29,7 +29,7 @@ class AccidentCountByDriverTypeWidget(RoadSegmentWidget):
 
     @staticmethod
     def count_accidents_by_driver_type(request_params: RequestParams):
-        filters = get_injured_filters(request_params)
+        filters = get_injured_filters(request_params.location_info)
         filters["involved_type"] = [
             consts.InvolvedType.DRIVER.value,
             consts.InvolvedType.INJURED_DRIVER.value,

@@ -5,25 +5,25 @@ from anyway.models import Streets
 from anyway.app_and_db import db
 import logging
 
-CBS_STREETS_RESOURCES_URL = "https://data.gov.il/api/3/action/package_show?id=321"
+DATA_GOV_STREETS_RESOURCES_URL = "https://data.gov.il/api/3/action/package_show?id=321"
 RESOURCE_NAME = "רשימת רחובות בישראל - מתעדכן"
 BASE_GET_DATA_GOV = "https://data.gov.il/dataset/321"
 RESOURCE_DOWNLOAD_TEMPLATE = (
     "https://data.gov.il/api/3/action/datastore_search?resource_id={id}&limit=1000000"
 )
-STREETS_FIlE_YISHUV_NAME = "שם_ישוב"
-STREETS_FIlE_YISHUV_SYMBOL = "סמל_ישוב"
-STREETS_FIlE_STREET_NAME = "שם_רחוב"
-STREETS_FIlE_STREET_SYMBOL = "סמל_רחוב"
+STREETS_FILE_YISHUV_NAME = "שם_ישוב"
+STREETS_FILE_YISHUV_SYMBOL = "סמל_ישוב"
+STREETS_FILE_STREET_NAME = "שם_רחוב"
+STREETS_FILE_STREET_SYMBOL = "סמל_רחוב"
 CHUNK_SIZE = 1000
 
 
-class UpdateStreetsFromCSB:
+class UpdateStreetsFromDataGov:
     def __init__(self):
         self.s = requests.Session()
 
-    def get_cbs_streets_download_url(self):
-        response = self.s.get(CBS_STREETS_RESOURCES_URL)
+    def get_streets_download_url(self):
+        response = self.s.get(DATA_GOV_STREETS_RESOURCES_URL)
         if not response.ok:
             raise Exception(
                 f"Could not get streets url. reason:{response.reason}:{response.status_code}"
@@ -55,11 +55,11 @@ class UpdateStreetsFromCSB:
         chunk = []
         logging.debug(f"read {len(data['result']['records'])} records from {url}.")
         for item in data["result"]["records"]:
-            street_name = item[STREETS_FIlE_STREET_NAME]
+            street_name = item[STREETS_FILE_STREET_NAME]
             street_name_len = len(street_name)
             street_entry = {
-                "yishuv_symbol": item[STREETS_FIlE_YISHUV_SYMBOL],
-                "street": item[STREETS_FIlE_STREET_SYMBOL],
+                "yishuv_symbol": item[STREETS_FILE_YISHUV_SYMBOL],
+                "street": item[STREETS_FILE_STREET_SYMBOL],
                 "street_hebrew": street_name[: min(street_name_len, Streets.MAX_NAME_LEN)],
             }
             chunk.append(street_entry)
@@ -81,8 +81,8 @@ class UpdateStreetsFromCSB:
 
 
 def parse(chunk_size=CHUNK_SIZE):
-    instance = UpdateStreetsFromCSB()
-    res = instance.get_cbs_streets_download_url()
+    instance = UpdateStreetsFromDataGov()
+    res = instance.get_streets_download_url()
     instance.import_street_file_into_db(res, chunk_size)
 
 

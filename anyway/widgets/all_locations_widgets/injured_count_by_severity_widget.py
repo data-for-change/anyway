@@ -9,7 +9,7 @@ from anyway.widgets.widget_utils import (
     get_accidents_stats,
     join_strings,
     get_location_text,
-    get_involved_marker_view_location_filters,
+    get_injured_filters,
 )
 from anyway.backend_constants import BE_CONST
 from flask_babel import _
@@ -40,7 +40,7 @@ class InjuredCountBySeverityWidget(AllLocationsWidget):
         start_time: datetime.date,
         end_time: datetime.date,
     ):
-        filters = get_involved_marker_view_location_filters(resolution, location_info)
+        filters = get_injured_filters(location_info)
         filters["injury_severity"] = [
             InjurySeverity.KILLED.value,
             InjurySeverity.SEVERE_INJURED.value,

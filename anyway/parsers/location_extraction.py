@@ -15,7 +15,6 @@ import pandas as pd
 from sqlalchemy.orm import load_only
 from datetime import date
 
-
 INTEGER_FIELDS = ["road1", "road2", "road_segment_id", "yishuv_symbol", "street1", "street2"]
 
 
@@ -62,7 +61,7 @@ def get_road_segment_by_name_and_road(road_segment_name: str, road: int) -> Road
     segments = db.session.query(RoadSegments).filter(RoadSegments.road == road).all()
     for segment in segments:
         if road_segment_name.startswith(segment.from_name) and road_segment_name.endswith(
-            segment.to_name
+                segment.to_name
         ):
             return segment
     err_msg = f"get_road_segment_by_name_and_road:{road_segment_name},{road}: not found"
@@ -199,9 +198,9 @@ def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):
     markers_orig = markers.copy()
     if resolution != "אחר":
         if (
-            road_no is not None
-            and road_no > 0
-            and ("road1" in relevant_fields or "road2" in relevant_fields)
+                road_no is not None
+                and road_no > 0
+                and ("road1" in relevant_fields or "road2" in relevant_fields)
         ):
             markers = markers.loc[(markers["road1"] == road_no) | (markers["road2"] == road_no)]
         for field in relevant_fields:
@@ -453,30 +452,30 @@ def extract_location_text(text):
                     punc_after_ind = text.find(punc_to_try, forbid_ind)
                     if punc_before_ind != -1 or punc_after_ind != -1:
                         if punc_before_ind == -1:
-                            text = text[(punc_after_ind + 1) :]
+                            text = text[(punc_after_ind + 1):]
                         elif punc_after_ind == -1:
                             text = text[:punc_before_ind]
                         else:
-                            text = text[:punc_before_ind] + " " + text[(punc_after_ind + 1) :]
+                            text = text[:punc_before_ind] + " " + text[(punc_after_ind + 1):]
                         removed_punc = True
                         break
                 if (not removed_punc) and (forbid_word in hospital_words):
                     for hospital_name in hospital_names:
                         hospital_ind = text.find(hospital_name)
                         if (
-                            hospital_ind == forbid_ind + len(forbid_word) + 1
-                            or hospital_ind == forbid_ind + len(forbid_word) + 2
+                                hospital_ind == forbid_ind + len(forbid_word) + 1
+                                or hospital_ind == forbid_ind + len(forbid_word) + 2
                         ):
                             text = (
-                                text[:hospital_ind] + text[hospital_ind + len(hospital_name) + 1 :]
+                                    text[:hospital_ind] + text[hospital_ind + len(hospital_name) + 1:]
                             )
                             forbid_ind = text.find(forbid_word)
-                            text = text[:forbid_ind] + text[forbid_ind + len(forbid_word) + 1 :]
+                            text = text[:forbid_ind] + text[forbid_ind + len(forbid_word) + 1:]
                             found_hospital = True
                 if (not found_hospital) and (not removed_punc):
                     text = (
-                        text[:forbid_ind]
-                        + text[text.find(" ", forbid_ind + len(forbid_word) + 2) :]
+                            text[:forbid_ind]
+                            + text[text.find(" ", forbid_ind + len(forbid_word) + 2):]
                     )
 
     except Exception as _:
@@ -512,40 +511,49 @@ def extract_location_text(text):
     for token in near_tokens:
         i = text.find(token)
         if i >= 0:
-            text = text[:i] + token + text[i + len(token) :]
+            text = text[:i] + token + text[i + len(token):]
     return text
 
 
-def extract_geo_features(db, newsflash: NewsFlash, update_cbs_location_only: bool) -> None:
-    location_from_db = None
-    if update_cbs_location_only:
-        if newsflash.resolution in ["כביש בינעירוני", "רחוב"]:
-            location_from_db = get_db_matching_location(
-                db, newsflash.lat, newsflash.lon, newsflash.resolution, newsflash.road1
-            )
-    else:
-        newsflash.location = extract_location_text(newsflash.description) or extract_location_text(
-            newsflash.title
+def update_coordinates_and_resolution_using_location_text(newsflash):
+    newsflash.location = extract_location_text(newsflash.description) or extract_location_text(
+        newsflash.title
+    )
+    geo_location = geocode_extract(newsflash.location)
+    if geo_location is not None:
+        newsflash.lat = geo_location["geom"]["lat"]
+        newsflash.lon = geo_location["geom"]["lng"]
+        newsflash.road1 = geo_location["road_no"]
+        newsflash.resolution = set_accident_resolution(geo_location)
+    return geo_location is not None
+
+
+def extract_geo_features(db, newsflash: NewsFlash, use_existing_coordinates_only: bool) -> None:
+    if not use_existing_coordinates_only:
+        update_coordinates_and_resolution_using_location_text(newsflash)
+
+    if newsflash.resolution in [BE_CONST.ResolutionCategories.STREET,
+                                BE_CONST.ResolutionCategories.SUBURBAN_ROAD]:
+        location_from_db = get_db_matching_location(
+            db, newsflash.lat, newsflash.lon, newsflash.resolution, newsflash.road1
         )
-        geo_location = geocode_extract(newsflash.location)
-        if geo_location is not None:
-            newsflash.lat = geo_location["geom"]["lat"]
-            newsflash.lon = geo_location["geom"]["lng"]
-            newsflash.resolution = set_accident_resolution(geo_location)
-            location_from_db = get_db_matching_location(
-                db, newsflash.lat, newsflash.lon, newsflash.resolution, geo_location["road_no"]
-            )
-    if location_from_db is not None:
-        for k, v in location_from_db.items():
-            setattr(newsflash, k, v)
-        for field in RF.get_all_location_fields():
-            if field not in location_from_db:
-                setattr(newsflash, field, None)
-    if (
-        newsflash.road_segment_id is None
-        and newsflash.road_segment_name is not None
-        and newsflash.road1 is not None
-    ):
+        if location_from_db is not None:
+            update_location_fields(newsflash, location_from_db)
+    try_find_segment_id(newsflash)
+
+
+def update_location_fields(newsflash, location_from_db):
+    for k, v in location_from_db.items():
+        setattr(newsflash, k, v)
+    for field in RF.get_all_location_fields():
+        if field not in location_from_db:
+            setattr(newsflash, field, None)
+
+
+def try_find_segment_id(newsflash):
+    if (newsflash.road_segment_id is None
+            and newsflash.road_segment_name is not None
+            and newsflash.road1 is not None):
         try:
             seg = get_road_segment_by_name_and_road(newsflash.road_segment_name, newsflash.road1)
             newsflash.road_segment_id = seg.segment_id

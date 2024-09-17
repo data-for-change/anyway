@@ -532,10 +532,7 @@ def extract_geo_features(db, newsflash: NewsFlash, use_existing_coordinates_only
     if not use_existing_coordinates_only:
         update_coordinates_and_resolution_using_location_text(newsflash)
 
-    if newsflash.resolution in [
-        BE_CONST.ResolutionCategories.STREET,
-        BE_CONST.ResolutionCategories.SUBURBAN_ROAD,
-    ]:
+    if newsflash.resolution in BE_CONST.SUPPORTED_RESOLUTIONS:
         location_from_db = get_db_matching_location(
             db, newsflash.lat, newsflash.lon, newsflash.resolution, newsflash.road1
         )

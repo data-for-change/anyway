@@ -15,7 +15,6 @@ import pandas as pd
 from sqlalchemy.orm import load_only
 from datetime import date
 
-
 INTEGER_FIELDS = ["road1", "road2", "road_segment_id", "yishuv_symbol", "street1", "street2"]
 
 
@@ -522,31 +521,41 @@ def extract_location_text(text):
     return text
 
 
-def extract_geo_features(db, newsflash: NewsFlash, update_cbs_location_only: bool) -> None:
-    location_from_db = None
-    if update_cbs_location_only:
-        if newsflash.resolution in ["כביש בינעירוני", "רחוב"]:
-            location_from_db = get_db_matching_location(
-                db, newsflash.lat, newsflash.lon, newsflash.resolution, newsflash.road1
-            )
-    else:
-        newsflash.location = extract_location_text(newsflash.description) or extract_location_text(
-            newsflash.title
+def update_coordinates_and_resolution_using_location_text(newsflash):
+    newsflash.location = extract_location_text(newsflash.description) or extract_location_text(
+        newsflash.title
+    )
+    geo_location = geocode_extract(newsflash.location)
+    if geo_location is not None:
+        newsflash.lat = geo_location["geom"]["lat"]
+        newsflash.lon = geo_location["geom"]["lng"]
+        newsflash.road1 = geo_location["road_no"]
+        newsflash.resolution = set_accident_resolution(geo_location)
+    return geo_location is not None
+
+
+def extract_geo_features(db, newsflash: NewsFlash, use_existing_coordinates_only: bool) -> None:
+    if not use_existing_coordinates_only:
+        update_coordinates_and_resolution_using_location_text(newsflash)
+
+    if newsflash.resolution in BE_CONST.SUPPORTED_RESOLUTIONS:
+        location_from_db = get_db_matching_location(
+            db, newsflash.lat, newsflash.lon, newsflash.resolution, newsflash.road1
         )
-        geo_location = geocode_extract(newsflash.location)
-        if geo_location is not None:
-            newsflash.lat = geo_location["geom"]["lat"]
-            newsflash.lon = geo_location["geom"]["lng"]
-            newsflash.resolution = set_accident_resolution(geo_location)
-            location_from_db = get_db_matching_location(
-                db, newsflash.lat, newsflash.lon, newsflash.resolution, geo_location["road_no"]
-            )
-    if location_from_db is not None:
-        for k, v in location_from_db.items():
-            setattr(newsflash, k, v)
-        for field in RF.get_all_location_fields():
-            if field not in location_from_db:
-                setattr(newsflash, field, None)
+        if location_from_db is not None:
+            update_location_fields(newsflash, location_from_db)
+    try_find_segment_id(newsflash)
+
+
+def update_location_fields(newsflash, location_from_db):
+    for k, v in location_from_db.items():
+        setattr(newsflash, k, v)
+    for field in RF.get_all_location_fields():
+        if field not in location_from_db:
+            setattr(newsflash, field, None)
+
+
+def try_find_segment_id(newsflash):
     if (
         newsflash.road_segment_id is None
         and newsflash.road_segment_name is not None

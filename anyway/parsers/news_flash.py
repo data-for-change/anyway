@@ -15,7 +15,7 @@ from anyway.parsers.location_extraction import extract_geo_features
 news_flash_classifiers = {"ynet": classify_rss, "twitter": classify_tweets, "walla": classify_rss}
 
 
-def update_all_in_db(source=None, newsflash_id=None, update_cbs_location_only=False):
+def update_all_in_db(source=None, newsflash_id=None, use_existing_coordinates_only=False):
     """
     main function for newsflash updating.
 
@@ -30,13 +30,15 @@ def update_all_in_db(source=None, newsflash_id=None, update_cbs_location_only=Fa
         newsflash_items = db.get_all_newsflash()
     for i, newsflash in enumerate(newsflash_items):
         logging.debug(f"Updating news-flash:{newsflash.id}")
-        if not update_cbs_location_only:
+        if not use_existing_coordinates_only:
             classify = news_flash_classifiers[newsflash.source]
             newsflash.organization = classify_organization(newsflash.source)
             newsflash.accident = classify(newsflash.title)
         if newsflash.accident:
             extract_geo_features(
-                db=db, newsflash=newsflash, use_existing_coordinates_only=update_cbs_location_only
+                db=db,
+                newsflash=newsflash,
+                use_existing_coordinates_only=use_existing_coordinates_only,
             )
         if i % 1000 == 0:
             db.commit()

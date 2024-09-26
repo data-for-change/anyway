@@ -36,7 +36,9 @@ def update_all_in_db(source=None, newsflash_id=None, use_existing_coordinates_on
             newsflash.accident = classify(newsflash.title)
         if newsflash.accident:
             extract_geo_features(
-                db=db, newsflash=newsflash, use_existing_coordinates_only=use_existing_coordinates_only
+                db=db,
+                newsflash=newsflash,
+                use_existing_coordinates_only=use_existing_coordinates_only,
             )
         if i % 1000 == 0:
             db.commit()

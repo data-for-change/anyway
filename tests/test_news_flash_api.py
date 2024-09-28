@@ -8,6 +8,9 @@ from anyway.views.news_flash.api import (
     is_news_flash_resolution_supported,
     gen_news_flash_query,
     update_news_flash_qualifying,
+    add_pagination_to_result,
+    PAGE_SIZE,
+    OFFSET,
 )
 from anyway.backend_constants import BE_CONST
 from anyway.models import LocationVerificationHistory, NewsFlash, Users
@@ -221,6 +224,48 @@ class NewsFlashApiTestCase(unittest.TestCase):
         self.assertEqual(len(news_flashes), 0, "zero news flash")
 
         BE_CONST.SUPPORTED_RESOLUTIONS = orig_supported_resolutions
+
+    def test_add_pagination_to_result(self):
+        actual = add_pagination_to_result({PAGE_SIZE: 3, OFFSET: 0}, [], 10)
+        self.assertEqual(
+            {
+                "pageNumber": 1,
+                "pageSize": 3,
+                "totalPages": 4,
+                "totalRecords": 10
+            },
+            actual["pagination"],
+            "1")
+        actual = add_pagination_to_result({PAGE_SIZE: 3, OFFSET: 2}, [], 10)
+        self.assertEqual(
+            {
+                "pageNumber": 1,
+                "pageSize": 3,
+                "totalPages": 4,
+                "totalRecords": 10
+            },
+            actual["pagination"],
+            "2")
+        actual = add_pagination_to_result({PAGE_SIZE: 3, OFFSET: 3}, [], 10)
+        self.assertEqual(
+            {
+                "pageNumber": 2,
+                "pageSize": 3,
+                "totalPages": 4,
+                "totalRecords": 10
+            },
+            actual["pagination"],
+            "3")
+        actual = add_pagination_to_result({PAGE_SIZE: 3, OFFSET: 9}, [], 10)
+        self.assertEqual(
+            {
+                "pageNumber": 4,
+                "pageSize": 3,
+                "totalPages": 4,
+                "totalRecords": 10
+            },
+            actual["pagination"],
+            "4")
 
     def tearDown(self):
         self.session.close()

@@ -264,18 +264,6 @@ def read_n_closest_streets(db, n, latitude, longitude, road_no=None):
     return [result["street1_hebrew"] for result in result_dicts]
 
 
-def read_n_closest_markers(db, n, latitude, longitude, resolution, road_no=None):
-    markers = read_markers_and_distance_from_location(db, latitude, longitude, resolution, road_no)
-    # Sort by distance
-    sorted_markers = markers.sort_values(by="dist_point")
-
-    top_n_unique_streets = sorted_markers.head(n)
-
-    # Convert to dictionary if needed
-    result_dicts = top_n_unique_streets.to_dict(orient='records')
-    return result_dicts
-
-
 def set_accident_resolution(accident_row):
     """
     set the resolution of the accident

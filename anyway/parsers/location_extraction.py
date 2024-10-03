@@ -10,6 +10,7 @@ from anyway.models import NewsFlash
 from anyway.parsers.resolution_fields import ResolutionFields as RF
 from anyway import secrets
 from anyway.models import AccidentMarkerView, RoadSegments
+from anyway.llm import ask_ai_about_street_matching
 from sqlalchemy import not_
 import pandas as pd
 from sqlalchemy.orm import load_only
@@ -61,7 +62,7 @@ def get_road_segment_by_name_and_road(road_segment_name: str, road: int) -> Road
     segments = db.session.query(RoadSegments).filter(RoadSegments.road == road).all()
     for segment in segments:
         if road_segment_name.startswith(segment.from_name) and road_segment_name.endswith(
-            segment.to_name
+                segment.to_name
         ):
             return segment
     err_msg = f"get_road_segment_by_name_and_road:{road_segment_name},{road}: not found"
@@ -246,6 +247,35 @@ def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):
     return final_loc
 
 
+def read_n_closest_streets(db, n, latitude, longitude, road_no=None):
+    markers = read_markers_and_distance_from_location(db, latitude, longitude,
+                                                      BE_CONST.ResolutionCategories.STREET, road_no)
+    # Sort by distance
+    sorted_markers = markers.sort_values(by="dist_point")
+
+    # Drop duplicates to ensure unique street1_hebrew values
+    unique_street_markers = sorted_markers.drop_duplicates(subset="street1_hebrew")
+
+    # Select the top n entries
+    top_n_unique_streets = unique_street_markers.head(n)
+
+    # Convert to dictionary if needed
+    result_dicts = top_n_unique_streets.to_dict(orient='records')
+    return [result["street1_hebrew"] for result in result_dicts]
+
+
+def read_n_closest_markers(db, n, latitude, longitude, resolution, road_no=None):
+    markers = read_markers_and_distance_from_location(db, latitude, longitude, resolution, road_no)
+    # Sort by distance
+    sorted_markers = markers.sort_values(by="dist_point")
+
+    top_n_unique_streets = sorted_markers.head(n)
+
+    # Convert to dictionary if needed
+    result_dicts = top_n_unique_streets.to_dict(orient='records')
+    return result_dicts
+
+
 def set_accident_resolution(accident_row):
     """
     set the resolution of the accident
@@ -288,11 +318,12 @@ def reverse_geocode_extract(latitude, longitude):
     try:
         gmaps = googlemaps.Client(key=secrets.get("GOOGLE_MAPS_KEY"))
         geocode_result = gmaps.reverse_geocode((latitude, longitude))
-
+        print(geocode_result)
         # if we got no results, move to next iteration of location string
         if not geocode_result:
             return None
     except Exception as _:
+        logging.info(_)
         logging.info("exception in gmaps")
         return None
     # logging.info(geocode_result)
@@ -458,30 +489,30 @@ def extract_location_text(text):
                     punc_after_ind = text.find(punc_to_try, forbid_ind)
                     if punc_before_ind != -1 or punc_after_ind != -1:
                         if punc_before_ind == -1:
-                            text = text[(punc_after_ind + 1) :]
+                            text = text[(punc_after_ind + 1):]
                         elif punc_after_ind == -1:
                             text = text[:punc_before_ind]
                         else:
-                            text = text[:punc_before_ind] + " " + text[(punc_after_ind + 1) :]
+                            text = text[:punc_before_ind] + " " + text[(punc_after_ind + 1):]
                         removed_punc = True
                         break
                 if (not removed_punc) and (forbid_word in hospital_words):
                     for hospital_name in hospital_names:
                         hospital_ind = text.find(hospital_name)
                         if (
-                            hospital_ind == forbid_ind + len(forbid_word) + 1
-                            or hospital_ind == forbid_ind + len(forbid_word) + 2
+                                hospital_ind == forbid_ind + len(forbid_word) + 1
+                                or hospital_ind == forbid_ind + len(forbid_word) + 2
                         ):
                             text = (
-                                text[:hospital_ind] + text[hospital_ind + len(hospital_name) + 1 :]
+                                    text[:hospital_ind] + text[hospital_ind + len(hospital_name) + 1:]
                             )
                             forbid_ind = text.find(forbid_word)
-                            text = text[:forbid_ind] + text[forbid_ind + len(forbid_word) + 1 :]
+                            text = text[:forbid_ind] + text[forbid_ind + len(forbid_word) + 1:]
                             found_hospital = True
                 if (not found_hospital) and (not removed_punc):
                     text = (
-                        text[:forbid_ind]
-                        + text[text.find(" ", forbid_ind + len(forbid_word) + 2) :]
+                            text[:forbid_ind]
+                            + text[text.find(" ", forbid_ind + len(forbid_word) + 2):]
                     )
 
     except Exception as _:
@@ -517,7 +548,7 @@ def extract_location_text(text):
     for token in near_tokens:
         i = text.find(token)
         if i >= 0:
-            text = text[:i] + token + text[i + len(token) :]
+            text = text[:i] + token + text[i + len(token):]
     return text
 
 
@@ -545,6 +576,36 @@ def extract_geo_features(db, newsflash: NewsFlash, use_existing_coordinates_only
         if location_from_db is not None:
             update_location_fields(newsflash, location_from_db)
     try_find_segment_id(newsflash)
+    logging.debug(newsflash.resolution)
+    if newsflash.resolution == BE_CONST.ResolutionCategories.STREET:
+        try_improve_street_identification(newsflash)
+
+
+def try_improve_street_identification(newsflash):
+    from anyway.parsers import news_flash_db_adapter
+
+    db = news_flash_db_adapter.init_db()
+    all_closest_streets = read_n_closest_streets(db, 20, newsflash.lat, newsflash.lon)
+
+    num_of_streets_for_first_try = 5
+    streets_for_first_try = all_closest_streets[:num_of_streets_for_first_try]
+    streets_for_second_try = all_closest_streets[num_of_streets_for_first_try:]
+
+    result, result_in_input = ask_ai_about_street_matching(streets_for_first_try, newsflash.location)
+    logging.debug(f"result of 1st try {result}")
+    if not result_in_input:
+        logging.debug(f"street matching failed first try for newsflash {newsflash.id}")
+        result, result_in_input = ask_ai_about_street_matching(streets_for_second_try, newsflash.location)
+        logging.debug(f"result of 2nd try {result}")
+    if result_in_input:
+        if result == newsflash.street1_hebrew:
+            logging.debug("street matching succeeded, street not changed")
+        else:
+            logging.debug(f"street matching succeeded, street updated for {newsflash.id} "
+                          f"from {newsflash.street1_hebrew} to {result}")
+            newsflash.street1_hebrew = result
+    else:
+        logging.debug(f"street matching failed second try for newsflash {newsflash.id}")
 
 
 def update_location_fields(newsflash, location_from_db):
@@ -557,9 +618,9 @@ def update_location_fields(newsflash, location_from_db):
 
 def try_find_segment_id(newsflash):
     if (
-        newsflash.road_segment_id is None
-        and newsflash.road_segment_name is not None
-        and newsflash.road1 is not None
+            newsflash.road_segment_id is None
+            and newsflash.road_segment_name is not None
+            and newsflash.road1 is not None
     ):
         try:
             seg = get_road_segment_by_name_and_road(newsflash.road_segment_name, newsflash.road1)

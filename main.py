@@ -75,7 +75,7 @@ def update(source, news_flash_id, update_cbs_location_only):
         source = None
     if not news_flash_id:
         news_flash_id = None
-    return news_flash.update_all_in_db(source, news_flash_id, update_cbs_location_only)
+    return news_flash.update_all_in_db(source, news_flash_id, False)
 
 
 @update_news_flash.command()
@@ -331,6 +331,17 @@ def infographics_pictures(id):
         logging.info(f"generation success, {len(generated_images_names)} infographics")
     else:
         raise Exception("generation failed")
+
+
+@process.command()
+@click.option("--id", type=int)
+def street_name(id):
+    from anyway.parsers import news_flash_db_adapter
+    from anyway.parsers.location_extraction import try_improve_street_identification
+
+    db = news_flash_db_adapter.init_db()
+    newsflash = db.get_newsflash_by_id(id).first()
+    try_improve_street_identification(newsflash)
 
 
 @process.group()

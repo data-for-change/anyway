@@ -13,7 +13,7 @@ from anyway.views.news_flash.api import (
     OFFSET,
 )
 from anyway.backend_constants import BE_CONST
-from anyway.models import LocationVerificationHistory, NewsFlash, Users
+from anyway.models import LocationVerificationHistory, NewsFlash, Users, RoadSegments
 import tests.test_flask as tests_flask
 
 # global application scope.  create Session class, engine
@@ -82,27 +82,36 @@ class NewsFlashApiTestCase(unittest.TestCase):
         db_mock.session = self.session
         user_id = self.session.query(Users).all()[0].id
         tests_flask.set_current_user_mock(current_user, user_id=user_id)
+        road_segment = RoadSegments(
+            segment_id=100,
+            road=1,
+            from_name='from_name',
+            to_name='to_name',
+        )
+        db_mock.session.add(road_segment)
+        db_mock.session.commit()
         with patch("anyway.views.news_flash.api.db", db_mock):
-            mock_request = unittest.mock.MagicMock()
-            values = {"newsflash_location_qualification": "manual", "road_segment_id": 100, "road1": "1"}
-            mock_request.values.get = lambda key: values.get(key)
-            with patch("anyway.views.news_flash.api.request", mock_request):
-                id = self.session.query(NewsFlash).all()[0].id
-                return_value = update_news_flash_qualifying(id)
-                self.assertEqual(return_value.status_code, HTTPStatus.OK.value)
-                location_verifiction_history = (
-                    self.session.query(LocationVerificationHistory).all()[0].serialize()
-                )
-                self.assertEqual(location_verifiction_history["user_id"], user_id)
-                saved_location = json.loads(location_verifiction_history["location_after_change"])
-                saved_road_segment_id = saved_location["road_segment_id"]
-                saved_road_num = saved_location["road1"]
-                self.assertEqual(saved_road_segment_id, values["road_segment_id"])
-                self.assertEqual(saved_road_num, float(values["road1"]))
-                self.assertEqual(
-                    values["newsflash_location_qualification"],
-                    location_verifiction_history["location_verification_after_change"],
-                )
+            with patch("anyway.app_and_db.db", db_mock):
+                mock_request = unittest.mock.MagicMock()
+                values = {"newsflash_location_qualification": "manual", "road_segment_id": 100, "road1": 1}
+                mock_request.values.get = lambda key: values.get(key)
+                with patch("anyway.views.news_flash.api.request", mock_request):
+                    id = self.session.query(NewsFlash).all()[0].id
+                    return_value = update_news_flash_qualifying(id)
+                    self.assertEqual(return_value.status_code, HTTPStatus.OK.value)
+                    location_verifiction_history = (
+                        self.session.query(LocationVerificationHistory).all()[0].serialize()
+                    )
+                    self.assertEqual(location_verifiction_history["user_id"], user_id)
+                    saved_location = json.loads(location_verifiction_history["location_after_change"])
+                    saved_road_segment_id = saved_location["road_segment_id"]
+                    saved_road_num = saved_location["road1"]
+                    self.assertEqual(saved_road_segment_id, values["road_segment_id"])
+                    self.assertEqual(saved_road_num, float(values["road1"]))
+                    self.assertEqual(
+                        values["newsflash_location_qualification"],
+                        location_verifiction_history["location_verification_after_change"],
+                    )
 
     @patch("flask_principal.Permission.can", return_value=True)
     @patch("flask_login.utils._get_user")
@@ -123,13 +132,24 @@ class NewsFlashApiTestCase(unittest.TestCase):
         """
         the test tries to change manually the road_segment_name of a news flash.
         """
+        db_mock = unittest.mock.MagicMock()
+        db_mock.session = self.session
         mock_request = unittest.mock.MagicMock()
-        values = {"newsflash_location_qualification": "manual", "road_segment_id": 100, "road1": "1"}
+        values = {"newsflash_location_qualification": "manual", "road_segment_id": 100, "road1": 1}
         mock_request.values.get = lambda key: values.get(key)
-        with patch("anyway.views.news_flash.api.request", mock_request):
-            id = self.session.query(NewsFlash).all()[0].id
-            return_value = update_news_flash_qualifying(id)
-            self.assertEqual(return_value.status_code, HTTPStatus.OK.value, "1")
+        road_segment = RoadSegments(
+            segment_id=100,
+            road=1,
+            from_name='from_name',
+            to_name='to_name',
+        )
+        db_mock.session.add(road_segment)
+        db_mock.session.commit()
+        with patch("anyway.app_and_db.db", db_mock):
+            with patch("anyway.views.news_flash.api.request", mock_request):
+                id = self.session.query(NewsFlash).all()[0].id
+                return_value = update_news_flash_qualifying(id)
+                self.assertEqual(return_value.status_code, HTTPStatus.OK.value, "1")
 
     def _test_update_news_flash_qualifying_manual_without_location(self):
         """
@@ -150,7 +170,7 @@ class NewsFlashApiTestCase(unittest.TestCase):
         also a new location
         """
         mock_request = unittest.mock.MagicMock()
-        values = {"newsflash_location_qualification": "rejected", "road_segment_name": "road", "road1": "1"}
+        values = {"newsflash_location_qualification": "rejected", "road_segment_name": "road", "road1": 1}
         mock_request.values.get = lambda key: values.get(key)
         with patch("anyway.views.news_flash.api.request", mock_request):
             id = self.session.query(NewsFlash).all()[0].id

@@ -297,7 +297,19 @@ def update_news_flash_qualifying(id):
 
     newsflash_location_qualification = request.values.get("newsflash_location_qualification")
     road_segment_id = request.values.get("road_segment_id")
+    if road_segment_id:
+        if road_segment_id.isdigit():
+            road_segment_id = int(road_segment_id)
+        else:
+            logging.error("road_segment_id is not a number")
+            return return_json_error(Es.BR_BAD_FIELD)
     road1 = request.values.get("road1")
+    if road1:
+        if road1.isdigit():
+            road1 = int(road1)
+        else:
+            logging.error("road1 is not a number")
+            return return_json_error(Es.BR_BAD_FIELD)
     yishuv_name = request.values.get("yishuv_name")
     street1_hebrew = request.values.get("street1_hebrew")
     newsflash_location_qualification = QUALIFICATION_TO_ENUM_VALUE[newsflash_location_qualification]

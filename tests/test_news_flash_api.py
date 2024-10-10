@@ -90,7 +90,7 @@ class NewsFlashApiTestCase(unittest.TestCase):
         with patch("anyway.views.news_flash.api.db", db_mock):
             with patch("anyway.app_and_db.db", db_mock):
                 mock_request = unittest.mock.MagicMock()
-                values = {"newsflash_location_qualification": "manual", "road_segment_id": 100, "road1": "1"}
+                values = {"newsflash_location_qualification": "manual", "road_segment_id": 100, "road1": 1}
                 mock_request.values.get = lambda key: values.get(key)
                 with patch("anyway.views.news_flash.api.request", mock_request):
                     id = self.session.query(NewsFlash).all()[0].id
@@ -132,7 +132,7 @@ class NewsFlashApiTestCase(unittest.TestCase):
         db_mock = unittest.mock.MagicMock()
         db_mock.session = self.session
         mock_request = unittest.mock.MagicMock()
-        values = {"newsflash_location_qualification": "manual", "road_segment_id": 100, "road1": "1"}
+        values = {"newsflash_location_qualification": "manual", "road_segment_id": 100, "road1": 1}
         mock_request.values.get = lambda key: values.get(key)
         road_segment = RoadSegments(
             segment_id=100,
@@ -167,7 +167,7 @@ class NewsFlashApiTestCase(unittest.TestCase):
         also a new location
         """
         mock_request = unittest.mock.MagicMock()
-        values = {"newsflash_location_qualification": "rejected", "road_segment_name": "road", "road1": "1"}
+        values = {"newsflash_location_qualification": "rejected", "road_segment_name": "road", "road1": 1}
         mock_request.values.get = lambda key: values.get(key)
         with patch("anyway.views.news_flash.api.request", mock_request):
             id = self.session.query(NewsFlash).all()[0].id

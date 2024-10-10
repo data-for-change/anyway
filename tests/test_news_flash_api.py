@@ -103,7 +103,7 @@ class NewsFlashApiTestCase(unittest.TestCase):
                     saved_location = json.loads(location_verifiction_history["location_after_change"])
                     saved_road_segment_id = saved_location["road_segment_id"]
                     saved_road_num = saved_location["road1"]
-                    self.assertEqual(saved_road_segment_id, int(values["road_segment_id"])
+                    self.assertEqual(saved_road_segment_id, int(values["road_segment_id"]))
                     self.assertEqual(saved_road_num, float(values["road1"]))
                     self.assertEqual(
                         values["newsflash_location_qualification"],

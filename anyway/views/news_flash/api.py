@@ -31,6 +31,7 @@ from anyway.error_code_and_strings import Errors as Es
 from anyway.parsers.resolution_fields import ResolutionFields as RF
 from anyway.models import AccidentMarkerView, InvolvedView
 from anyway.widgets.widget_utils import get_accidents_stats
+from anyway.parsers.location_extraction import get_road_segment_name_and_number
 from anyway.telegram_accident_notifications import trigger_generate_infographics_and_send_to_telegram
 from io import BytesIO
 
@@ -39,7 +40,7 @@ DEFAULT_LIMIT_REQ_PARAMETER = 100
 DEFAULT_NUMBER_OF_YEARS_AGO = 5
 PAGE_NUMBER = "pageNumber"
 PAGE_SIZE = "pageSize"
-NEWS_FALSH_ID = "newsFlash_Id"
+NEWS_FLASH_ID = "newsFlashId"
 ID = "id"
 LIMIT = "limit"
 OFFSET = "offset"
@@ -51,6 +52,7 @@ class NewsFlashQuery(BaseModel):
     offset: Optional[int] = DEFAULT_OFFSET_REQ_PARAMETER
     pageNumber: Optional[int]
     pageSize: Optional[int]
+    newsFlashId: Optional[int]
     limit: Optional[int] = DEFAULT_LIMIT_REQ_PARAMETER
     resolution: Optional[List[str]]
     source: Optional[List[BE_CONST.Source]]
@@ -75,6 +77,12 @@ class NewsFlashQuery(BaseModel):
             raise ValueError(f"Resolution must be one of: {supported_resolutions}")
         return requested_resolutions
 
+    @validator(PAGE_NUMBER)
+    def check_page_number(cls, v, values):
+        if v <= 0:
+            raise ValueError("pageNumber must be positive")
+        return v
+
 
 def news_flash():
     requested_query_params = normalize_query(request.args)
@@ -85,10 +93,10 @@ def news_flash():
 
     pagination, validated_query_params = set_pagination_params(validated_query_params)
 
-    if ID in validated_query_params:
+    if  not pagination and ID in validated_query_params:
         return get_news_flash_by_id(validated_query_params[ID])
 
-    total, query = gen_news_flash_query(db.session, validated_query_params)
+    total, query = gen_news_flash_query(db.session, validated_query_params, pagination)
     news_flashes = query.all()
 
     news_flashes_dicts = [n.serialize() for n in news_flashes]
@@ -104,20 +112,22 @@ def news_flash():
 
 def set_pagination_params(validated_params: dict) -> Tuple[bool, dict]:
     pagination = False
-    if NEWS_FALSH_ID in validated_params:
-        validated_params[ID] = validated_params.pop(NEWS_FALSH_ID)
-    if PAGE_NUMBER in validated_params:
+    page_size = validated_params.get(PAGE_SIZE, DEFAULT_LIMIT_REQ_PARAMETER)
+    if NEWS_FLASH_ID in validated_params:
+        validated_params[ID] = validated_params.pop(NEWS_FLASH_ID)
+        pagination = True
+    elif PAGE_NUMBER in validated_params:
         pagination = True
         page_number = validated_params[PAGE_NUMBER]
-        page_size = validated_params.get(PAGE_SIZE, DEFAULT_LIMIT_REQ_PARAMETER)
         validated_params[OFFSET] = (page_number - 1) * page_size
+    if pagination:
         validated_params[LIMIT] = page_size
     return pagination, validated_params
 
 
 def add_pagination_to_result(validated_params: dict, news_flashes: list, num_nf: int) -> dict:
     page_size = validated_params[PAGE_SIZE]
-    page_num = validated_params[PAGE_NUMBER]
+    page_num = validated_params[OFFSET] // page_size + 1
     total_pages = num_nf // page_size + (1 if num_nf % page_size else 0)
     return {
         "data": news_flashes,
@@ -130,7 +140,7 @@ def add_pagination_to_result(validated_params: dict, news_flashes: list, num_nf:
     }
 
 
-def gen_news_flash_query(session, valid_params: dict) -> Tuple[int, Any]:
+def gen_news_flash_query(session, valid_params: dict, pagination: bool = False) -> Tuple[int, Any]:
     query = session.query(NewsFlash)
     supported_resolutions = set([x.value for x in BE_CONST.SUPPORTED_RESOLUTIONS])
     query = query.filter(NewsFlash.resolution.in_(supported_resolutions))
@@ -156,6 +166,14 @@ def gen_news_flash_query(session, valid_params: dict) -> Tuple[int, Any]:
             not_(and_(NewsFlash.lat == None, NewsFlash.lon == None)),
         )
     ).order_by(NewsFlash.date.desc())
+    if pagination and "id" in valid_params:
+        nf = query.filter(NewsFlash.id == valid_params["id"]).first()
+        if nf is None:
+            raise ValueError(f"{valid_params['id']}: not found")
+        id_offset = query.filter(NewsFlash.date > nf.date).count()
+        page_number = id_offset // valid_params[LIMIT]
+        valid_params["offset"] = page_number * valid_params["limit"]
+
     total = query.count()
     if "offset" in valid_params:
         query = query.offset(valid_params["offset"])
@@ -279,7 +297,19 @@ def update_news_flash_qualifying(id):
 
     newsflash_location_qualification = request.values.get("newsflash_location_qualification")
     road_segment_id = request.values.get("road_segment_id")
+    if road_segment_id:
+        if road_segment_id.isdigit():
+            road_segment_id = int(road_segment_id)
+        else:
+            logging.error("road_segment_id is not a number")
+            return return_json_error(Es.BR_BAD_FIELD)
     road1 = request.values.get("road1")
+    if road1:
+        if road1.isdigit():
+            road1 = int(road1)
+        else:
+            logging.error("road1 is not a number")
+            return return_json_error(Es.BR_BAD_FIELD)
     yishuv_name = request.values.get("yishuv_name")
     street1_hebrew = request.values.get("street1_hebrew")
     newsflash_location_qualification = QUALIFICATION_TO_ENUM_VALUE[newsflash_location_qualification]
@@ -304,12 +334,25 @@ def update_news_flash_qualifying(id):
         old_location, old_location_qualifiction = extracted_location_and_qualification(news_flash_obj)
         if manual_update:
             if use_road_segment:
+                road_number, road_segment_name = get_road_segment_name_and_number(road_segment_id)
+                if road_number != road1:
+                    logging.error("road number from road_segment_id does not match road1 input.")
+                    return return_json_error(Es.BR_BAD_FIELD)
                 news_flash_obj.road_segment_id = road_segment_id
-                news_flash_obj.road1 = road1
+                news_flash_obj.road_segment_name = road_segment_name
+                news_flash_obj.road1 = road_number
+                news_flash_obj.road2 = None
+                news_flash_obj.yishuv_name = None
+                news_flash_obj.street1_hebrew = None
+                news_flash_obj.street2_hebrew = None
                 news_flash_obj.resolution = BE_CONST.ResolutionCategories.SUBURBAN_ROAD.value
             else:
                 news_flash_obj.yishuv_name = yishuv_name
                 news_flash_obj.street1_hebrew = street1_hebrew
+                news_flash_obj.road_segment_id = None
+                news_flash_obj.road_segment_name = None
+                news_flash_obj.road1 = None
+                news_flash_obj.road2 = None
                 news_flash_obj.resolution = BE_CONST.ResolutionCategories.STREET.value
         else:
             if ((news_flash_obj.road_segment_id is None) or (news_flash_obj.road1 is None)) and (

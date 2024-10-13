@@ -2,7 +2,7 @@ from openai import OpenAI
 import json
 import tiktoken
 
-from langchain.output_parsers import PydanticOutputParser, EnumOutputParser
+from langchain.output_parsers import EnumOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 import langchain

@@ -25,7 +25,7 @@ Instructions
 
 **1.** [Get the code](https://github.com/data-for-change/anyway#getting-the-code)
 
-**2.** [Install Docker](https://docs.docker.com/install/) and [Install Docker Compose](https://docs.docker.com/compose/install/)
+**2.** [Install Docker](https://docs.docker.com/install/) and [Install Docker Compose](https://docs.docker.com/compose/install/). (Install Docker for Windows, also when using WSL2)
 
 **3.** Get the `.env` file with the required secret values and place in the project **root directory** - can be downloaded [from here](https://drive.google.com/file/d/1bgMyKlHoAAIixlk8qqmZaXPdmqCxldLu/view?usp=sharing). Note that this file **needs to be saved as `.env`** - with the `.` at the beginning of the name of the file.
 **Continue with your OS, See below**
@@ -250,6 +250,17 @@ services:
 ```
 
 This loads the ./anyway dir (relative to the docker-compose file) as /anyway/anyway in the docker overriding the inner volume and allowing you to run your own code inside the docker.
+
+
+Common Errors
+-----------------------
+Q: When working in Windows environment you might encounter in this error during the build proccess.
+```
+anyway_1  | standard_init_linux.go:211: exec user process caused "no such file or directory"
+```
+A: The solution is very simple. You need to go to the docker-entrypoint.sh file and save it as CRLF (encoding of new line in Windows) instead of LF (encoding of new line in Linux). 
+In VS code just open the file and choose CLRF at the button right of the screen, for other IDEs check online for instructions.
+
 
 Questions and ideas
 -----------------

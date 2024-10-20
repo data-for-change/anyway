@@ -30,7 +30,7 @@ class Widget:
     def __init__(self, request_params: RequestParams):
         self.request_params = copy.deepcopy(request_params)
         self.rank = -1
-        self.items = {}
+        self.items = None
         self.text = {}
         self.meta = {"widget_digest": self.widget_digest}
         self.information = ""
@@ -53,7 +53,7 @@ class Widget:
 
     def generate_items(self) -> None:
         """Generates the data of the widget and set it to self.items"""
-        pass
+        self.items = {}
 
     @staticmethod
     def is_relevant(request_params: RequestParams) -> bool:
@@ -104,7 +104,7 @@ class Widget:
         return {}
 
     def serialize(self):
-        if not self.items:
+        if self.items is None:
             self.generate_items()
         output = {"name": self.name, "data": {}}
         output["data"]["items"] = self.items if self.is_included() else {}

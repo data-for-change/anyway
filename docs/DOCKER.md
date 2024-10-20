@@ -25,7 +25,7 @@ Instructions
 
 **1.** [Get the code](https://github.com/data-for-change/anyway#getting-the-code)
 
-**2.** [Install Docker](https://docs.docker.com/install/) and [Install Docker Compose](https://docs.docker.com/compose/install/). (Install Docker on Windows!! not on Ubuntu.)
+**2.** [Install Docker](https://docs.docker.com/install/) and [Install Docker Compose](https://docs.docker.com/compose/install/). (Install Docker on Windows, also when using WSL2)
 
 **3.** Get the `.env` file with the required secret values and place in the project **root directory** - can be downloaded [from here](https://drive.google.com/file/d/1bgMyKlHoAAIixlk8qqmZaXPdmqCxldLu/view?usp=sharing). Note that this file **needs to be saved as `.env`** - with the `.` at the beginning of the name of the file.
 **Continue with your OS, See below**

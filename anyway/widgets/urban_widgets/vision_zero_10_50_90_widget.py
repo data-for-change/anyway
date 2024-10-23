@@ -13,7 +13,6 @@ class VisionZero105090Widget(UrbanWidget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params)
         self.rank = 38
-        self.information = "A speed limit solution on an urban road"
 
     def generate_items(self) -> None:
         self.items = {"image_src": "vision_zero_10_50_90"}
@@ -30,8 +29,9 @@ class VisionZero105090Widget(UrbanWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {
-            "title": _("A speed limit solution on an urban road")
+            "title": _("A speed limit solution on an urban road by vizion zero")
         }
+        items["meta"]["information"] = _("A speed limit solution on an urban road by vizion zero")
         return items
 
     @classmethod

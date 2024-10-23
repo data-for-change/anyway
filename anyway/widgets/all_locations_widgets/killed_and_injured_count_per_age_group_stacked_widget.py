@@ -1,3 +1,4 @@
+import logging
 from typing import Dict, List
 # noinspection PyProtectedMember
 from flask_babel import _
@@ -50,12 +51,21 @@ class KilledInjuredCountPerAgeGroupStackedWidget(AllLocationsWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        if request_params.lang != "en":
+            for item in items["data"]["items"]:
+                try:
+                    item["label_key"] = _(item["label_key"])
+                except KeyError:
+                    logging.exception(
+                        f"KilledInjuredCountPerAgeGroupStackedWidget.localize_items: Exception while translating {item}."
+                    )
         location_text = get_location_text(request_params)
         items["data"]["text"] = {
             "title": _("Killed and injury stacked per age group"),
             "subtitle": _(location_text),
             "labels_map": gen_entity_labels(InjurySeverity),
         }
+        items["meta"]["information"] = _("Injured count per age group and injurey severity. The graph shows all injury severities: fatal, severe, and light.")
         return items
 
     @staticmethod

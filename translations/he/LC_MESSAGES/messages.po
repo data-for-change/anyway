@@ -195,7 +195,7 @@ msgstr "קשה אחת"
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:78
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:165
 msgid "severe plural"
-msgstr "פצוע/ה קשה"
+msgstr "קשות"
 
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:83
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:166

@@ -183,7 +183,8 @@ class MostSevereAccidentsTableWidget(AllLocationsWidget):
             start_year=request_params.start_time.year,
             end_year=request_params.end_time.year,
         )
-        text += '\n'.join(['{in_date_keyword} {date} {in_hour_keyword} {hour} {accident_occured_text} {accident_type_keyword} {type}, {injured_count_keyword}: {injured_count}.'.format(
+        text += '\n'.join(['{in_date_keyword} {date} {in_hour_keyword} {hour} {accident_occured_text} {accident_type_keyword} {type}, \
+                           {killed_count_keyword}: {killed_count}, {severe_injured_count_keyword}: {severe_injured_count}, {light_injured_count_keyword}: {light_injured_count}.'.format(
                            in_date_keyword=_("in date"),
                            date=item.get("date"),
                            in_hour_keyword=_("in hour"),
@@ -191,8 +192,12 @@ class MostSevereAccidentsTableWidget(AllLocationsWidget):
                            accident_occured_text=_("occured accident"),
                            accident_type_keyword=_("of type"),
                            type=_(item.get("type")),
-                           injured_count_keyword=_("injured"),
-                           injured_count=item.get("injured_count")
+                           killed_count_keyword=_("killed plural"),
+                           killed_count=item.get("killed_count"),
+                           severe_injured_count_keyword=_("severe injured plural"),
+                           severe_injured_count=item.get("severe_injured_count"),
+                           light_injured_count_keyword=_("light injured plural"),
+                           light_injured_count=item.get("light_injured_count")
                            )
                            for item in items])
         return text

@@ -108,7 +108,7 @@ class AccidentCountBySeverityWidget(AllLocationsWidget):
             separator_keyword=_("took place"),
             incidents_num=total_accidents_count,
             incident_keyword=_("accidents"),
-            out_of_them_keywoard=_("out of them"),
+            out_of_them_keywoard=_("out of them (feminine)"),
         )
         text += join_strings(
             [severity_fatal_count_text, severity_severe_count_text, severity_light_count_text],
@@ -174,7 +174,6 @@ class AccidentCountBySeverityWidget(AllLocationsWidget):
         return items
 
 
-_("Fatal, severe and light accidents count in the specified location.")
 _("junction")
 _("one light")
 _("light plural")
@@ -188,7 +187,6 @@ _("in road")
 _("in segment")
 _("between the years")
 _("took place")
-_("out of them")
 _("accidents")
 _(" and ")
 _("in the selected time")

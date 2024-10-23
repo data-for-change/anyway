@@ -16,7 +16,6 @@ class VisionZeroBikeWidget(Widget):
         if request_params.news_flash_description is None:
             logging.error(f"VisionZeroBikeWidget initialized with missing description field : {request_params}")
         super().__init__(request_params)
-        self.information = _("Main principles in zero vision's bike transportation development")
         self.rank = 33
 
     def generate_items(self) -> None:
@@ -31,6 +30,7 @@ class VisionZeroBikeWidget(Widget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {"title": _("Bike transportation development solution")}
+        items["meta"]["information"] = _("Main principles in zero vision's bike transportation development")
         return items
 
     @classmethod

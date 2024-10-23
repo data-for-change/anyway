@@ -1,3 +1,4 @@
+import logging
 from typing import Dict
 
 from flask_babel import _
@@ -37,6 +38,16 @@ class KilledInjuredCountPerAgeGroupWidget(AllLocationsWidget):
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
+        if request_params.lang != "en":
+            for item in items["data"]["items"]:
+                try:
+                    item["label_key"] = _(item["label_key"])
+                except KeyError:
+                    logging.exception(
+                        f"KilledInjuredCountPerAgeGroupWidget.localize_items: Exception while translating {item}."
+                    )
+
         location_text = get_location_text(request_params)
         items["data"]["text"] = {"title": _("Injury per age group"), "subtitle": _(location_text)}
+        items["meta"]["information"] = _("Injured count per age group. The graph shows all injury severities: fatal, severe, and light.")
         return items

@@ -23,7 +23,6 @@ class InjuredCountBySeverityWidget(AllLocationsWidget):
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params)
         self.rank = 29
-        self.information = "Fatal, severe and light injuries count in the specified location."
 
     def generate_items(self) -> None:
         self.items = InjuredCountBySeverityWidget.get_injured_count_by_severity(
@@ -128,7 +127,7 @@ class InjuredCountBySeverityWidget(AllLocationsWidget):
             injured_killed_keyword=_("injured/killed"),
             injured_num=total_injured_count,
             people_phrase=_("people from car accidents"),
-            out_of_them_keywoard=_("out of them"),
+            out_of_them_keywoard=_("out of them (masculine plural)"),
         )
         text += join_strings(
             [killed_count_text, severity_severe_count_text, severity_light_count_text],
@@ -147,6 +146,22 @@ class InjuredCountBySeverityWidget(AllLocationsWidget):
                 request_params=request_params, items=items["data"]["items"]
             ),
         }
+        incident_location = str()
+        if request_params.resolution in (
+            BE_CONST.ResolutionCategories.SUBURBAN_ROAD,
+            BE_CONST.ResolutionCategories.SUBURBAN_JUNCTION,
+        ):
+            is_segment = request_params.resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD
+            incident_location = _("segment") if is_segment else _("junction")
+        elif request_params.resolution == BE_CONST.ResolutionCategories.STREET:
+            incident_location = _("street")
+        items["meta"][
+                    "information"
+                ] = "{incident_description}{incident_location} {incident_time}.".format(
+                    incident_description=_("Fatal, severe and light injuries count in"),
+                    incident_location=incident_location,
+                    incident_time=_("in the selected time"),
+                )
         return items
 
 

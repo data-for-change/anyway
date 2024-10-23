@@ -18,7 +18,7 @@ class Road2Plus1Widget(RoadSegmentWidget):
 
     def __init__(self, request_params: RequestParams):
         super().__init__(request_params)
-        self.information = "Road 2 plus 1 solution to prevent fatal accidents."
+        self.information = "Road 2 plus 1 solution to prevent fatal accidents"
         self.rank = 24
 
     def generate_items(self) -> None:
@@ -69,4 +69,5 @@ class Road2Plus1Widget(RoadSegmentWidget):
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {"title": _("Road 2 plus 1 solution to prevent fatal accidents")}
+        items["meta"]["information"] = _(items["meta"]["information"])
         return items

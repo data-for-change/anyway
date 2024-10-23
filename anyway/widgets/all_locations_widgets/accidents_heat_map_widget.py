@@ -4,7 +4,7 @@ import pandas as pd
 from flask_babel import _
 
 from anyway.request_params import RequestParams
-from anyway.backend_constants import AccidentSeverity, BE_CONST
+from anyway.backend_constants import BE_CONST
 from anyway.widgets.widget_utils import (
     get_query, get_location_text, add_resolution_location_accuracy_filter
 )
@@ -27,12 +27,6 @@ class AccidentsHeatMapWidget(AllLocationsWidget):
             self.request_params.location_info.copy(),
             self.request_params.resolution
         )
-        accidents_heat_map_filters["accident_severity"] = [
-            # pylint: disable=no-member
-            AccidentSeverity.FATAL.value,
-            # pylint: disable=no-member
-            AccidentSeverity.SEVERE.value,
-        ]
         self.items = self.get_accidents_heat_map(
             filters=accidents_heat_map_filters,
             start_time=self.request_params.start_time,
@@ -55,7 +49,8 @@ class AccidentsHeatMapWidget(AllLocationsWidget):
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         location_text = get_location_text(request_params)
         items["data"]["text"] = {
-            "title": _("Fatal and severe accidents heat map"),
+            "title": _("All accidents heat map"),
             "subtitle": _(location_text),
         }
+        items["meta"]["information"] = _("All accidents heat map (fatal, severe, light) in location")
         return items

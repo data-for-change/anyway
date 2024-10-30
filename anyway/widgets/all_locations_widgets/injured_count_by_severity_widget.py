@@ -131,7 +131,6 @@ class InjuredCountBySeverityWidget(AllLocationsWidget):
         )
 
         non_empty_texts = [text for text in [killed_count_text, severity_severe_count_text, severity_light_count_text] if text]
-        
         text += join_strings(
             non_empty_texts,
             sep_a=" ,",

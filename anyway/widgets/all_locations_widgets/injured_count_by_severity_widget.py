@@ -129,8 +129,11 @@ class InjuredCountBySeverityWidget(AllLocationsWidget):
             people_phrase=_("people from car accidents"),
             out_of_them_keywoard=_("out of them (masculine plural)"),
         )
+
+        non_empty_texts = [text for text in [killed_count_text, severity_severe_count_text, severity_light_count_text] if text]
+        
         text += join_strings(
-            [killed_count_text, severity_severe_count_text, severity_light_count_text],
+            non_empty_texts,
             sep_a=" ,",
             sep_b=_(" and "),
         )

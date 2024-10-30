@@ -110,8 +110,9 @@ class AccidentCountBySeverityWidget(AllLocationsWidget):
             incident_keyword=_("accidents"),
             out_of_them_keywoard=_("out of them (feminine)"),
         )
+        non_empty_texts = [text for text in [severity_fatal_count_text, severity_severe_count_text, severity_light_count_text] if text]
         text += join_strings(
-            [severity_fatal_count_text, severity_severe_count_text, severity_light_count_text],
+            non_empty_texts,
             sep_a=" ,",
             sep_b=_(" and "),
         )

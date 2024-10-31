@@ -32,6 +32,9 @@ class InjuredCountBySeverityWidget(AllLocationsWidget):
             self.request_params.end_time,
         )
 
+    def is_included(self) -> bool:
+        return self.items["total_injured_count"] > 0
+
     @staticmethod
     def get_injured_count_by_severity(
         resolution: BE_CONST.ResolutionCategories,

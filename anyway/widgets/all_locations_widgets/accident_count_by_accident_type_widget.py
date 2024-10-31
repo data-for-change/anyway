@@ -32,6 +32,10 @@ class AccidentCountByAccidentTypeWidget(AllLocationsWidget):
             resolution=self.request_params.resolution
         )
 
+    def is_included(self) -> bool:
+        accidents_count = sum(item['count'] for item in self.items)
+        return accidents_count > 0
+
     @staticmethod
     def get_accident_count_by_accident_type(location_info, start_time, end_time, resolution):
         all_accident_type_count = get_accidents_stats(

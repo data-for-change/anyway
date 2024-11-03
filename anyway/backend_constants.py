@@ -292,6 +292,18 @@ class CrossLocation(Enum):
         }
 
 
+class DayNight(Enum):
+    DAY = 1
+    NIGHT = 5
+
+    @classmethod
+    def labels(cls):
+        return {
+            DayNight.DAY: "Day",
+            DayNight.NIGHT: "Night",
+        }
+
+
 class CrossCategory(Enum):
     UNKNOWN = 0
     NONE = 1

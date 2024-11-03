@@ -117,7 +117,7 @@ class HeadOnCollisionsComparisonWidget(RoadSegmentWidget):
             else:
                 raise ValueError
         all_total = all_h2h + all_others  # pylint: disable=E0606
-        return segment_h2h > 0 and (segment_h2h / segment_total) > all_h2h / all_total
+        return segment_h2h > 1 and (segment_h2h / segment_total) > all_h2h / all_total
 
 
 # adding calls to _() for pybabel extraction

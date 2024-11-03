@@ -46,7 +46,6 @@ class Widget:
         """Whether this widget is stored in the cache"""
         return True
 
-    # noinspection PyMethodMayBeStatic
     def is_included(self) -> bool:
         """Whether this widget is included in the response"""
         return bool(self.items)

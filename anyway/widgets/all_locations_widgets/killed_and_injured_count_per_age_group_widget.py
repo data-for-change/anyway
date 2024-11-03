@@ -36,6 +36,10 @@ class KilledInjuredCountPerAgeGroupWidget(AllLocationsWidget):
             structured_data_list.append({BE.LKEY: age_group, BE.VAL: count_total})
         self.items = structured_data_list
 
+    def is_included(self) -> bool:
+        accidents_count = sum(item['value'] for item in self.items)
+        return accidents_count > 0
+
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         if request_params.lang != "en":

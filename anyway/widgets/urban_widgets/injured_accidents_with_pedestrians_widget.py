@@ -116,6 +116,10 @@ class InjuredAccidentsWithPedestriansWidget(UrbanWidget):
             logging.error(f"InjuredAccidentsWithPedestriansWidget.generate_items(): {e}")
             raise
 
+    def is_included(self) -> bool:
+        accidents_with_pedestrians_count = sum(item['value'] for entry in self.items for item in entry['series'])
+        return accidents_with_pedestrians_count > 0
+
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {

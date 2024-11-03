@@ -68,6 +68,10 @@ class KilledInjuredCountPerAgeGroupStackedWidget(AllLocationsWidget):
         items["meta"]["information"] = _("Injured count per age group and injurey severity. The graph shows all injury severities: fatal, severe, and light.")
         return items
 
+    def is_included(self) -> bool:
+        killed_injured_count = sum(item['value'] for entry in self.items for item in entry['series'])
+        return killed_injured_count > 0
+
     @staticmethod
     def get_age_range_list() -> List[str]:
         age_list = []

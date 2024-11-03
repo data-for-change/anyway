@@ -292,7 +292,7 @@ class CrossLocation(Enum):
         }
 
 
-class DayNight(Enum):
+class DayNight(LabeledCode):
     DAY = 1
     NIGHT = 5
 

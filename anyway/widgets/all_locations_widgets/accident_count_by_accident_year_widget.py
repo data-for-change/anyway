@@ -50,6 +50,10 @@ class AccidentCountByAccidentYearWidget(AllLocationsWidget):
         )
         self.items = format_2_level_items(res2, None, AccidentSeverity)
 
+    def is_included(self) -> bool:
+        accidents_count = sum(item['value'] for entry in self.items for item in entry['series'])
+        return accidents_count > 0
+
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         location_text = get_location_text(request_params)

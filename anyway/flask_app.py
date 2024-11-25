@@ -59,7 +59,11 @@ from anyway.models import (
     Streets,
     Comment,
     TelegramForwardedMessages,
-    NewsFlash
+    NewsFlash,
+    Sex,
+    RoadLight,
+    RoadType,
+    AgeGroup,
 )
 from anyway.request_params import get_request_params_from_request_values
 from anyway.views.news_flash.api import (
@@ -1544,10 +1548,76 @@ def test_roles():
 @roles_accepted(
     BE_CONST.Roles2Names.Authenticated.value,
     BE_CONST.Roles2Names.Location_verification.value,
-    need_all_permission=True,
+    need_all_permission=False,
 )
 def test_roles_func():
     return jsonify({"message": "Roles test successful!"}), 200
 
 
 app.add_url_rule("/api/test_roles", endpoint=None, view_func=test_roles, methods=["GET"])
+
+
+@app.route("/safety-data-test", methods=["GET"])
+def safety_data_test():
+    from anyway.models import City, InjurySeverity, Streets
+    from sqlalchemy.orm import aliased
+    S1: Streets = aliased(Streets)
+    S2: Streets = aliased(Streets)
+    yishuv_symbol = request.values.get("yishuv_symbol")
+    res = (
+        db.session.query(Involved,
+                         AccidentMarkerView,
+                         City,
+                         InjurySeverity,
+                         Streets,
+                         Sex,
+                         RoadLight,
+                         RoadType,
+                         AgeGroup,
+                         )
+        .join(AccidentMarkerView,
+              and_(Involved.provider_code == AccidentMarkerView.provider_code,
+                   Involved.accident_id == AccidentMarkerView.id,
+                   Involved.accident_year == AccidentMarkerView.accident_year))
+        .join(City, AccidentMarkerView.yishuv_symbol == City.yishuv_symbol)
+        .join(InjurySeverity, and_(Involved.injury_severity == InjurySeverity.id,
+                                   Involved.accident_year == InjurySeverity.year,
+                                   Involved.provider_code == InjurySeverity.provider_code))
+        .join(S1, and_(AccidentMarkerView.street1 == S1.street,
+                       AccidentMarkerView.yishuv_symbol == S1.yishuv_symbol))
+        .join(S2, and_(AccidentMarkerView.street2 == S2.street,
+                       AccidentMarkerView.yishuv_symbol == S2.yishuv_symbol))
+        .join(Sex, and_(Involved.sex == Sex.id,
+                        Involved.accident_year == Sex.year,
+                        Involved.provider_code == Sex.provider_code))
+        .join(RoadLight, and_(AccidentMarkerView.road_light == RoadLight.id,
+                        AccidentMarkerView.accident_year == RoadLight.year,
+                        AccidentMarkerView.provider_code == RoadLight.provider_code))
+        .join(RoadType, and_(AccidentMarkerView.road_type == RoadType.id,
+                        AccidentMarkerView.accident_year == RoadType.year,
+                        AccidentMarkerView.provider_code == RoadType.provider_code))
+        .join(AgeGroup, and_(Involved.age_group == AgeGroup.id,
+                        Involved.accident_year == AgeGroup.year,
+                        Involved.provider_code == AgeGroup.provider_code))
+        # .filter(AccidentMarkerView.yishuv_symbol == 5000)
+        # .filter(Involved.id == 26833652)
+        .with_entities(
+            Involved.id,
+            AccidentMarkerView.accident_year,
+            AccidentMarkerView.accident_timestamp,
+            City.heb_name,
+            S1.street_hebrew,
+            S2.street_hebrew,
+            RoadLight.road_light_hebrew,
+            RoadType.road_type_hebrew,
+            AccidentMarkerView.latitude,
+            AccidentMarkerView.longitude,
+            InjurySeverity.injury_severity_hebrew,
+            Sex.sex_hebrew,
+            AgeGroup.age_group_hebrew,
+        )
+        .limit(50).all()
+    )
+    return Response(json.dumps(res, default=str), mimetype="application/json")
+
+

@@ -3081,3 +3081,22 @@ class TelegramForwardedMessages(Base):
     message_id = Column(String(), primary_key=True)
     newsflash_id = Column(BigInteger(), nullable=False)
     group_sent = Column(String(), nullable=False)
+
+
+class SafetyDataInvolved(Base):
+    ''' fields that chagned to Integer: injury_severity_hebrew, age_group_hebrew
+        age_group_hebrew sex_hebrew accident_yishuv_name street1_hebrew street2_hebrew road_type_hebrew road_light_hebrew latitude longitude'''
+    __tablename__ = "safety_data_involved"
+    id = Column(BigInteger(), primary_key=True)
+    accident_year = Column(Integer(), default=None, index=True)
+    accident_timestamp = Column(DateTime, default=None, index=True)
+    injury_severity = Column(Integer(), default=None, index=True)
+    age_group = Column(Integer(), default=None, index=True)
+    sex = Column(Integer(), default=None, index=True)
+    accident_yishuv_symbol = Column(Integer(), default=None, index=True)
+    street1 = Column(Integer(), default=None, index=True)
+    street2 = Column(Integer(), default=None, index=True)
+    road_type = Column(Integer(), default=None, index=True)
+    road_light = Column(Integer(), default=None, index=True)
+    latitude = Column(Float())
+    longitude = Column(Float())

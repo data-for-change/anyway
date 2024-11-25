@@ -1049,18 +1049,21 @@ class CityFields(object):
     eng_name = Column(String())
     district = Column(Integer())
     napa = Column(Integer())
-    # natural_zone = Column(Integer(), nullable=True)
     municipal_stance = Column(Integer(), nullable=True)
     metropolitan = Column(Integer(), nullable=True)
+    population = Column(Integer(), nullable=True)
+    center = Column(BigInteger(), nullable=True)
+    id_osm = Column(BigInteger(), nullable=True)
+    lat = Column(Float(), nullable=True)
+    lon = Column(Float(), nullable=True)
+    # natural_zone = Column(Integer(), nullable=True)
     # religion = Column(Integer(), nullable=True)
-    # population = Column(Integer(), nullable=True)
     # other = Column(Float(), nullable=True)
     # jews = Column(Float(), nullable=True)
     # arab = Column(Float(), nullable=True)
     # founded = Column(Integer(), nullable=True)
     # tzura = Column(Integer(), nullable=True)
     # irgun = Column(Integer(), nullable=True)
-    center = Column(BigInteger(), nullable=True)
     # altitude = Column(Integer(), nullable=True)
     # planning = Column(Integer(), nullable=True)
     # police = Column(Integer(), nullable=True)
@@ -3081,3 +3084,51 @@ class TelegramForwardedMessages(Base):
     message_id = Column(String(), primary_key=True)
     newsflash_id = Column(BigInteger(), nullable=False)
     group_sent = Column(String(), nullable=False)
+
+
+class SDAccident(Base):
+    __tablename__ = "safety_data_accident"
+    accident_id = Column(Integer(), primary_key=True, nullable=False)
+    accident_year = Column(Integer(), primary_key=True, nullable=False)
+    provider_code = Column(Integer(), primary_key=True, nullable=False)
+    accident_month = Column(Integer())
+    accident_timestamp = Column(DateTime, default=None, index=True)
+    accident_type = Column(Integer(), nullable=True)
+    accident_yishuv_symbol = Column(Integer(), nullable=True)
+    day_in_week = Column(Integer(), nullable=True)
+    day_night = Column(Integer(), nullable=True)
+    location_accuracy = Column(Integer(), nullable=True)
+    multi_lane = Column(Integer(), nullable=True)
+    one_lane = Column(Integer(), nullable=True)
+    road1 = Column(Integer(), nullable=True)
+    road2 = Column(Integer(), nullable=True)
+    road_segment_number = Column(Integer(), nullable=True)
+    road_type = Column(Integer(), nullable=True)
+    road_width = Column(Integer(), nullable=True)
+    speed_limit = Column(Integer(), nullable=True)
+    street1 = Column(Integer(), nullable=True)
+    street2 = Column(Integer(), nullable=True)
+    vehicles = Column(Integer(), nullable=True)
+    latitude = Column(Float(), nullable=True)
+    longitude = Column(Float(), nullable=True)
+
+
+class SDInvolved(Base):
+    __tablename__ = "safety_data_involved"
+    _id = Column(Integer(), primary_key=True)
+    accident_id = Column(BigInteger())
+    accident_year = Column(Integer())
+    provider_code = Column(Integer())
+    age_group = Column(Integer(), nullable=True)
+    injured_type = Column(Integer(), nullable=True)
+    injury_severity = Column(Integer(), nullable=True)
+    population_type = Column(Integer(), nullable=True)
+    sex = Column(Integer(), nullable=True)
+    vehicle_type = Column(Integer(), nullable=True)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            [accident_id, provider_code, accident_year],
+            [SDAccident.accident_id, SDAccident.provider_code, SDAccident.accident_year],
+            ondelete="CASCADE",
+        ),
+    )

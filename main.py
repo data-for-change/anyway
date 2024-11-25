@@ -101,6 +101,14 @@ def cbs(batch_size, load_start_year, source):
 
 
 @process.command()
+def safety_data_tables():
+    """Update safety data tables"""
+    from anyway.views.safety_data import sd_utils
+
+    return sd_utils.load_data()
+
+
+@process.command()
 def news_flash():
     from anyway.parsers.news_flash import scrape_all
 

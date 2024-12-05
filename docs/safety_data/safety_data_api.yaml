@@ -6,9 +6,8 @@ info:
   contact:
     email: feedback@anyway.co.il
 servers:
-  # Added by API Auto Mocking Plugin
-  - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/ANYWAY_1/anyway-safety-data/1.0.0
+  - description: SwaggerHub API
+    url: https://app.swaggerhub.com/apis/ANYWAY_1/anyway-safety-data/1.0.0
 tags:
   - name: involved
     description: Operations for accidents' involved data

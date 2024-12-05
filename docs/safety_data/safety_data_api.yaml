@@ -1,0 +1,375 @@
+openapi: 3.0.0
+info:
+  title: Safety Data API
+  description: API for querying and grouping accidents' involved data and city information.
+  version: "1.0.0"
+  contact:
+    email: feedback@anyway.co.il
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/ANYWAY_1/anyway-safety-data/1.0.0
+tags:
+  - name: involved
+    description: Operations for accidents' involved data
+  - name: involved_groupby
+    description: Operations for accidents' involved grouped data
+  - name: cities
+    description: Operations for city data
+  - name: junctions_hotspots
+    description: Junctions hotspots
+  - name: streets_hotspots
+    description: Streets hotspots
+  - name: combined_streets_junctions_hotspots
+    description: Combined streets junctions hotspots
+paths:
+  /involved:
+    get:
+      tags:
+        - involved
+      summary: Retrieve involvement data
+      description: |
+        Retrieve involvement data based on various filters.
+      operationId: getInvolvedData
+      parameters:
+        - $ref: '#/components/parameters/sy'
+        - $ref: '#/components/parameters/ey'
+        - $ref: '#/components/parameters/sev'
+        - $ref: '#/components/parameters/injt'
+        - $ref: '#/components/parameters/city'
+        - $ref: '#/components/parameters/st'
+        - $ref: '#/components/parameters/rd'
+        - $ref: '#/components/parameters/rds'
+        - $ref: '#/components/parameters/sex'
+        - $ref: '#/components/parameters/age'
+        - $ref: '#/components/parameters/pt'
+        - $ref: '#/components/parameters/dn'
+        - $ref: '#/components/parameters/mn'
+        - $ref: '#/components/parameters/acc'
+        - $ref: '#/components/parameters/vcl'
+        - $ref: '#/components/parameters/rt'
+        - $ref: '#/components/parameters/sp'
+        - $ref: '#/components/parameters/rw'
+        - $ref: '#/components/parameters/ml'
+        - $ref: '#/components/parameters/ol'
+      responses:
+        '200':
+          description: |
+            - Returns a list of involved data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Involved'
+        '400':
+          description: Invalid input parameters or missing required `gb` parameter for groupby.
+  /involved/groupby:
+    get:
+      tags:
+        - involved_groupby
+      summary: Retrieve grouped involved data
+      description: |
+        Retrieve gropuped involved data based on various filters and groupby fields. 
+        The `gb` query parameter is mandatory to specify the field to group the results by.
+        The `gb2` query parameter for second level filtering is optional
+      operationId: getGroupedInvolvedData
+      parameters:
+        - in: query
+          name: gb
+          required: true
+          schema:
+            type: string
+          description: Group by a specific field. Can be any of components/parameters. Can be also cpop which is city population.
+        - in: query
+          name: gb2
+          schema:
+            type: string
+          description: Optional second-level grouping field. Can be any of components/parameters. Can be also cpop which is city population.
+        - $ref: '#/components/parameters/sy'
+        - $ref: '#/components/parameters/ey'
+        - $ref: '#/components/parameters/sev'
+        - $ref: '#/components/parameters/injt'
+        - $ref: '#/components/parameters/city'
+        - $ref: '#/components/parameters/st'
+        - $ref: '#/components/parameters/rd'
+        - $ref: '#/components/parameters/rds'
+        - $ref: '#/components/parameters/sex'
+        - $ref: '#/components/parameters/age'
+        - $ref: '#/components/parameters/pt'
+        - $ref: '#/components/parameters/dn'
+        - $ref: '#/components/parameters/mn'
+        - $ref: '#/components/parameters/acc'
+        - $ref: '#/components/parameters/vcl'
+        - $ref: '#/components/parameters/rt'
+        - $ref: '#/components/parameters/sp'
+        - $ref: '#/components/parameters/rw'
+        - $ref: '#/components/parameters/ml'
+        - $ref: '#/components/parameters/ol'
+      responses:
+        '200':
+          description: |
+            - Returns grouped involved data if `gb` is provided.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupResult'
+        '400':
+          description: Invalid input parameters or missing required `gb` parameter for groupby.
+  /city:
+    get:
+      tags:
+        - cities
+      summary: Get city data
+      description: Retrieve city data based on filters like name.
+      operationId: getCities
+      parameters:
+        - in: query
+          name: name_he
+          schema:
+            type: string
+          description: Hebrew name of the city to search for.
+      responses:
+        '200':
+          description: List of cities matching the query.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/City'
+        '400':
+          description: Invalid input parameters.
+
+components:
+  parameters:
+    sy:
+      in: query
+      name: sy
+      schema:
+        type: string
+      description: Start year.
+    ey:
+      in: query
+      name: ey
+      schema:
+        type: string
+      description: End year.
+    sev:
+      in: query
+      name: sev
+      schema:
+        type: array
+        items:
+          type: integer
+      description: List of severity levels identifiers (integers)
+    injt:
+      in: query
+      name: injt
+      schema:
+        type: array
+        items:
+          type: integer
+      description: List of injured types identifiers (integers)
+    city:
+      in: query
+      name: city
+      schema:
+        type: array
+        items:
+          type: string
+      description: List of city names in hebrew (strings)
+    st:
+      in: query
+      name: st
+      schema:
+        type: array
+        items:
+          type: string
+      description: List of street names in hebrew (strings)
+    rd:
+      in: query
+      name: rd
+      schema:
+        type: array
+        items:
+          type: integer
+      description: List of road numbers (integers)
+    rds:
+      in: query
+      name: rds
+      schema:
+        type: array
+        items:
+          type: string
+      description: List of road segment names (strings)
+    sex:
+      in: query
+      name: sex
+      schema:
+        type: array
+        items:
+          type: integer
+      description: List of gender identifiers (integers)
+    age:
+      in: query
+      name: age
+      schema:
+        type: array
+        items:
+          type: integer
+      description: List of Age group identifiers (integers)
+    pt:
+      in: query
+      name: pt
+      schema:
+        type: array
+        items:
+          type: integer
+      description: List of Population type identifiers (integers)
+    dn:
+      in: query
+      name: dn
+      schema:
+        type: array
+        items:
+          type: integer
+      description: List of Day/Night identifiers (integers)
+    mn:
+      in: query
+      name: mn
+      schema:
+        type: array
+        items:
+          type: integer
+      description: List of months identifiers (integers)
+    acc:
+      in: query
+      name: acc
+      schema:
+        type: array
+        items:
+          type: integer
+      description: List of accident type identifiers (integers)
+    vcl:
+      in: query
+      name: vcl
+      schema:
+        type: array
+        items:
+          type: integer
+      description: List of vehicle type identifiers (integers)
+    rt:
+      in: query
+      name: rt
+      schema:
+        type: array
+        items:
+          type: integer
+      description: List of road type identifiers (integers)
+    sp:
+      in: query
+      name: sp
+      schema:
+        type: array
+        items:
+          type: integer
+      description: List of speed limit identifiers (integers)
+    rw:
+      in: query
+      name: rw
+      schema:
+        type: array
+        items:
+          type: integer
+      description: List of road width identifiers (integers)
+    ml:
+      in: query
+      name: ml
+      schema:
+        type: array
+        items:
+          type: integer
+      description: List of Multi-lane identifiers (integers)
+    ol:
+      in: query
+      name: ol
+      schema:
+        type: array
+        items:
+          type: integer
+      description: List of One-lane identifiers (integers)
+
+  schemas:
+    Involved:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 60800bb23319636a681d5305
+        injury_severity_hebrew:
+          type: string
+          example: הרוג
+        injured_type_hebrew:
+          type: string
+          example: נהג - רכב לא ידוע
+        age_group_hebrew:
+          type: string
+          example: 40-44
+        sex_hebrew:
+          type: string
+          example: זכר
+        population_type_hebrew:
+          type: string
+          example: זרים
+        vehicles:
+          type: string
+          example: אופניים חשמליים,מכונית
+        accident_year:
+          type: integer
+          example: 2019
+        accident_timestamp:
+          type: string
+          format: date-time
+          example: "2019-03-23 06:00"
+        latitude:
+          type: string
+          example: "32.1020191794664"
+        longitude:
+          type: string
+          example: "34.9214348524812"
+    GroupResult:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 2019
+        count:
+          type: integer
+          example: 355
+    City:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 5f12ea6fb60eb0b2e54b8599
+        id_osm:
+          type: string
+          example: 1382494
+        lat:
+          type: string
+          example: "32.0881602"
+        lon:
+          type: string
+          example: "34.7956882"
+        name:
+          type: string
+          example: תל אביב-יפו
+        name_he:
+          type: string
+          example: תל אביב -יפו
+        population:
+          type: integer
+          example: 432891

@@ -26,9 +26,9 @@ paths:
     get:
       tags:
         - involved
-      summary: Retrieve involvement data
+      summary: Retrieve involved data
       description: |
-        Retrieve involvement data based on various filters.
+        Retrieve involved data based on various filters.
       operationId: getInvolvedData
       parameters:
         - $ref: '#/components/parameters/sy'

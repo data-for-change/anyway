@@ -15,31 +15,56 @@ depends_on = None
 from alembic import op
 import sqlalchemy as sa
 
-_table_name = "safety_data_involved"
+sd_involved_table = "safety_data_involved"
+sd_accident_table = "safety_data_accident"
 
 
 def downgrade():
-    op.drop_table(_table_name)
+    op.drop_table(sd_involved_table) # pylint: disable=no-member
+    op.drop_table(sd_accident_table) # pylint: disable=no-member
 
 
 def upgrade():
-    op.create_table(
-        _table_name,
+    op.create_table( # pylint: disable=no-member
+        sd_involved_table,
         sa.Column('id', sa.Integer(), autoincrement=False, nullable=False),
-        sa.Column('accident_year', sa.Integer()),
-        sa.Column('accident_timestamp', sa.TIMESTAMP()),
+        sa.Column('accident_id', sa.Integer()),
         sa.Column('injury_severity', sa.Integer(), nullable=True),
+        sa.Column('injured_type', sa.Integer(), nullable=True),
         sa.Column('age_group', sa.Integer(), nullable=True),
         sa.Column('sex', sa.Integer(), nullable=True),
-        sa.Column('accident_yishuv_symbol', sa.Integer(), nullable=True),
+        sa.Column('population_type', sa.Integer(), nullable=True),
+    )
+    for field in ['accident_id', 'injury_severity', 'injured_type', 'age_group', 'sex', 'population_type']:
+         # pylint: disable=no-member
+        op.create_index(op.f(f'ix_{sd_involved_table}_{field}'), sd_involved_table, [field], unique=False)
+
+    op.create_table( # pylint: disable=no-member
+        sd_accident_table,
+        sa.Column('acc_id', sa.Integer(), autoincrement=False, nullable=False),
+        sa.Column('acc_year', sa.Integer()),
+        sa.Column('acc_month', sa.Integer()),
+        sa.Column('acc_timestamp', sa.TIMESTAMP()),
+        sa.Column('road_type', sa.Integer(), nullable=True),
+        sa.Column('road_width', sa.Integer(), nullable=True),
+        sa.Column('day_night', sa.Integer(), nullable=True),
+        sa.Column('one_lane_type', sa.Integer(), nullable=True),
+        sa.Column('multi_lane_type', sa.Integer(), nullable=True),
+        sa.Column('speed_limit_type', sa.Integer(), nullable=True),
+        sa.Column('yishuv_symbol', sa.Integer(), nullable=True),
         sa.Column('street1', sa.Integer(), nullable=True),
         sa.Column('street2', sa.Integer(), nullable=True),
-        sa.Column('road_type', sa.Integer(), nullable=True),
-        sa.Column('road_light', sa.Integer(), nullable=True),
-        sa.Column('latitude', sa.Float(), nullable=True),
-        sa.Column('longitude', sa.Float(), nullable=True),
+        sa.Column('road', sa.Integer(), nullable=True),
+        sa.Column('road_segment', sa.Integer(), nullable=True),
+        sa.Column('vehicle_types', sa.Integer(), nullable=True), # bit map
+        sa.Column('lat', sa.Float(), nullable=True),
+        sa.Column('lon', sa.Float(), nullable=True),
     )
-    for field in ['accident_year', 'accident_timestamp', 'injury_severity',
-                  'age_group', 'sex', 'accident_yishuv_symbol', 'street1',
-                  'street2', 'road_type', 'road_light']:
-        op.create_index(op.f(f'ix_accident_hour_raw_{field}'), _table_name, [field], unique=False)
+    for field in ['acc_id', 'acc_year', 'acc_month', 'acc_timestamp',
+                  'road_type', 'road_width', 'day_night',
+                  'one_lane_type', 'multi_lane_type', 'speed_limit_type',
+                  'yishuv_symbol', 'street1', 'street2', 'road', 'road_segment', 'vehicle_types',
+                  'lat', 'lon',
+                  ]:
+         # pylint: disable=no-member
+        op.create_index(op.f(f'ix_{sd_accident_table}_{field}'), sd_accident_table, [field], unique=False)

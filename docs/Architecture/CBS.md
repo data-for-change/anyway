@@ -6,7 +6,7 @@
 - **Relevant output**: unzipped CBS files saved in S3
 - **Relevant Storage directory**: S3 -> Bucket: dfc-anyway-cbs
 - **command**: `python3 main.py scripts importemail`
-- **Scheduling**: Nowadays runs in Jenkins once a week
+- **Scheduling**: Nowadays runs in Airflow once a week
 
 ### CBS: pulls data from s3, processes cbs data and pushes it to CBS tables
 Environment Variables: AWS_ACCESS_KEY, AWS_SECRET_KEY

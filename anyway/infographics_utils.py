@@ -28,9 +28,9 @@ from anyway.widgets.widget import Widget, widgets_dict
 # We need to import the modules, which in turn imports all the widgets, and registers them, even if they are not
 # explicitly used here
 # pylint: disable=unused-import
-import anyway.widgets.urban_widgets
-import anyway.widgets.road_segment_widgets
 import anyway.widgets.all_locations_widgets
+import anyway.widgets.road_segment_widgets
+import anyway.widgets.urban_widgets
 import anyway.widgets.no_location_widgets
 # pylint: enable=unused-import
 

@@ -45,7 +45,7 @@ class TestRequestParams(unittest.TestCase):
         lang='he',
         news_flash_description=nf.description,
         news_flash_title=nf.title,
-        gps={"lat": None, "lon": None}
+        gps={}
     )
 
     @patch("anyway.request_params.fill_missing_non_urban_intersection_values")

@@ -16,9 +16,12 @@ class StreetViewWidget(RoadSegmentWidget):
 
     def generate_items(self) -> None:
         self.items = {
-            "longitude": self.request_params.gps["lon"],
-            "latitude": self.request_params.gps["lat"],
+            "longitude": self.request_params.gps.get("lon"),
+            "latitude": self.request_params.gps.get("lat"),
         }
+
+    def is_included(self):
+        return self.request_params.gps is not None
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:

@@ -95,7 +95,7 @@ def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams
     years_ago = vals.get("years_ago", BE_CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
     lang = vals.get("lang", "he")
     location_text = location["text"]
-    gps = {"lat": news_flash_obj.lat, "lon": news_flash_obj.lon}
+    gps = location.get("gps")
     location_info = location["data"]
 
     if location_info is None:

@@ -1285,10 +1285,10 @@ def infographics_data_by_location():
         output = get_infographics_mock_data()
     elif mock_data == "false":
         request_params = get_request_params_from_request_values(request.values)
-        output = get_infographics_data_for_location(request_params)
-        if not output:
+        if request_params is None:
             log_bad_request(request)
             return abort(http_client.NOT_FOUND)
+        output = get_infographics_data_for_location(request_params)
     else:
         log_bad_request(request)
         return abort(http_client.BAD_REQUEST)

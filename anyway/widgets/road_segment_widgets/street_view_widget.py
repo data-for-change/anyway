@@ -21,7 +21,7 @@ class StreetViewWidget(RoadSegmentWidget):
         }
 
     def is_included(self):
-        return self.request_params.gps is not None
+        return self.request_params.gps
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:

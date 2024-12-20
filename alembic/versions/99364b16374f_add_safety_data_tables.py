@@ -27,24 +27,30 @@ def downgrade():
 def upgrade():
     op.create_table( # pylint: disable=no-member
         sd_involved_table,
-        sa.Column('id', sa.Integer(), autoincrement=False, nullable=False),
-        sa.Column('accident_id', sa.Integer()),
+        sa.Column('id', sa.Integer(), autoincrement=True, nullable=True),
+        sa.Column('involve_id', sa.Integer(), primary_key=True, autoincrement=False, nullable=False),
+        sa.Column('accident_id', sa.BigInteger(), primary_key=True, autoincrement=False, nullable=False),
+        sa.Column('accident_year', sa.Integer(), primary_key=True, autoincrement=False, nullable=False),
+        sa.Column('provider_code', sa.Integer(), primary_key=True, autoincrement=False, nullable=False),
         sa.Column('injury_severity', sa.Integer(), nullable=True),
         sa.Column('injured_type', sa.Integer(), nullable=True),
         sa.Column('age_group', sa.Integer(), nullable=True),
         sa.Column('sex', sa.Integer(), nullable=True),
         sa.Column('population_type', sa.Integer(), nullable=True),
     )
-    for field in ['accident_id', 'injury_severity', 'injured_type', 'age_group', 'sex', 'population_type']:
+    op.create_index(op.f(f'ix_{sd_involved_table}_inv_acc'), sd_involved_table,
+                    ['involve_id', 'accident_id', 'accident_year', 'provider_code'], unique=True)
+    for field in ['injury_severity', 'injured_type', 'age_group', 'sex', 'population_type']:
          # pylint: disable=no-member
         op.create_index(op.f(f'ix_{sd_involved_table}_{field}'), sd_involved_table, [field], unique=False)
 
     op.create_table( # pylint: disable=no-member
         sd_accident_table,
-        sa.Column('acc_id', sa.Integer(), autoincrement=False, nullable=False),
-        sa.Column('acc_year', sa.Integer()),
-        sa.Column('acc_month', sa.Integer()),
-        sa.Column('acc_timestamp', sa.TIMESTAMP()),
+        sa.Column('accident_id', sa.BigInteger(), primary_key=True, autoincrement=False, nullable=False),
+        sa.Column('accident_year', sa.Integer(), primary_key=True, autoincrement=False, nullable=False),
+        sa.Column('provider_code', sa.Integer(), primary_key=True, autoincrement=False, nullable=False),
+        sa.Column('accident_month', sa.Integer()),
+        sa.Column('accident_timestamp', sa.TIMESTAMP()),
         sa.Column('road_type', sa.Integer(), nullable=True),
         sa.Column('road_width', sa.Integer(), nullable=True),
         sa.Column('day_night', sa.Integer(), nullable=True),
@@ -60,7 +66,9 @@ def upgrade():
         sa.Column('lat', sa.Float(), nullable=True),
         sa.Column('lon', sa.Float(), nullable=True),
     )
-    for field in ['acc_id', 'acc_year', 'acc_month', 'acc_timestamp',
+    op.create_index(op.f(f'ix_{sd_accident_table}_acc_ids'), sd_accident_table,
+                    ['accident_id', 'accident_year', 'provider_code'], unique=True)
+    for field in ['accident_year', 'accident_month', 'accident_timestamp',
                   'road_type', 'road_width', 'day_night',
                   'one_lane_type', 'multi_lane_type', 'speed_limit_type',
                   'yishuv_symbol', 'street1', 'street2', 'road', 'road_segment', 'vehicle_types',

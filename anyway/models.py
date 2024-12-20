@@ -3083,20 +3083,38 @@ class TelegramForwardedMessages(Base):
     group_sent = Column(String(), nullable=False)
 
 
-class SafetyDataInvolved(Base):
-    ''' fields that chagned to Integer: injury_severity_hebrew, age_group_hebrew
-        age_group_hebrew sex_hebrew accident_yishuv_name street1_hebrew street2_hebrew road_type_hebrew road_light_hebrew latitude longitude'''
+class SDInvolved(Base):
     __tablename__ = "safety_data_involved"
-    id = Column(BigInteger(), primary_key=True)
-    accident_year = Column(Integer(), default=None, index=True)
+    id = Column(Integer(), autoincrement=True)
+    involve_id = Column(Integer(), primary_key=True)
+    accident_id = Column(BigInteger())
+    accident_year = Column(Integer(), primary_key=True)
+    provider_code = Column(Integer(), primary_key=True)
+    injury_severity = Column(Integer(), nullable=True)
+    injured_type = Column(Integer(), nullable=True)
+    age_group = Column(Integer(), nullable=True)
+    sex = Column(Integer(), nullable=True)
+    population_type = Column(Integer(), nullable=True)
+
+
+class SDAccident(Base):
+    __tablename__ = "safety_data_accident"
+    accident_id = Column(Integer(), primary_key=True, autoincrement=False, nullable=False)
+    accident_year = Column(Integer(), primary_key=True, autoincrement=False, nullable=False)
+    provider_code = Column(Integer(), primary_key=True)
+    accident_month = Column(Integer())
     accident_timestamp = Column(DateTime, default=None, index=True)
-    injury_severity = Column(Integer(), default=None, index=True)
-    age_group = Column(Integer(), default=None, index=True)
-    sex = Column(Integer(), default=None, index=True)
-    accident_yishuv_symbol = Column(Integer(), default=None, index=True)
-    street1 = Column(Integer(), default=None, index=True)
-    street2 = Column(Integer(), default=None, index=True)
-    road_type = Column(Integer(), default=None, index=True)
-    road_light = Column(Integer(), default=None, index=True)
-    latitude = Column(Float())
-    longitude = Column(Float())
+    road_type = Column(Integer(), nullable=True)
+    road_width = Column(Integer(), nullable=True)
+    day_night = Column(Integer(), nullable=True)
+    one_lane_type = Column(Integer(), nullable=True)
+    multi_lane_type = Column(Integer(), nullable=True)
+    speed_limit_type = Column(Integer(), nullable=True)
+    yishuv_symbol = Column(Integer(), nullable=True)
+    street1 = Column(Integer(), nullable=True)
+    street2 = Column(Integer(), nullable=True)
+    road = Column(Integer(), nullable=True)
+    road_segment = Column(Integer(), nullable=True)
+    vehicle_types = Column(Integer(), nullable=True) # bit map
+    lat = Column(Float(), nullable=True)
+    lon = Column(Float(), nullable=True)

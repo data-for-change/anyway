@@ -6,36 +6,38 @@
 ### `data_safety_involved` table:
 ```
     _id: int
+    involve_id: int
     accident_id: int
+    accident_year: int
+    provider_code: int
     injury_severity: int
     injured_type: int
     age_group: int
     sex: int
-    # fields for filtering:
-    age_group: int
     population_type: int
 ```
 ### `data_safety_accident` table:
 ```
     id: int
-    vehicle_types: Array of int? Bitmap?
-    year: int. Do we want to calculate from time-stamp?
-    timestamp: int
-    month: int
-    lat: float
-    lon: float
+    accident_id: int
+    accident_year: int
+    provider_code: int
+    accident_month: int
+    accident_timestamp: int
     road_type: int
-    speed_limit_type: int
-    road_width_type: int
-    multi_lane_type: int
-    one_lane_type: int
+    road_width: int
     day_night: int
-    # fields for filtering
+    one_lane_type: int
+    multi_lane_type: int
+    speed_limit_type: int
     yishuv_symbol
     street1: int
     street2: int
     road: int
     road_segment: int
+    vehicle_types: Array of int? Bitmap?
+    lat: float
+    lon: float
 ```
 ### `cbs_cities` table:
 Consider adding the fields:

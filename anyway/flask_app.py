@@ -1560,7 +1560,13 @@ app.add_url_rule("/api/test_roles", endpoint=None, view_func=test_roles, methods
 @app.route("/safety-data-test", methods=["GET"])
 def safety_data_test():
     from anyway.views.safety_data import sd_utils as sdu
+    from anyway.views.safety_data import involved_query as ac
 
     load_data = request.values.get("load-data")
     if load_data:
         return sdu.load_data()
+
+    iq = ac.InvolvedQuery()
+    res = iq.get_data()
+    return Response(json.dumps(res, default=str), mimetype="application/json")
+

@@ -103,6 +103,7 @@ def get_involved_data():
                         InvolvedMarkerView.injured_type,
                         InvolvedMarkerView.age_group,
                         InvolvedMarkerView.sex,
+                        InvolvedMarkerView.population_type,
                         )\
         .limit(1000):
         yield{
@@ -114,6 +115,7 @@ def get_involved_data():
                 "injured_type": d.injured_type,
                 "age_group": d.age_group,
                 "sex": d.sex,
+                "population_type": d.population_type,
             }
 
 def sd_load_accident():

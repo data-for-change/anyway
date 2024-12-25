@@ -96,7 +96,7 @@ def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams
         years_ago = vals.get("years_ago", BE_CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
         lang = vals.get("lang", "he")
         location_text = location["text"]
-        gps = location["gps"]
+        gps = location.get("gps", {})
         location_info = location["data"]
 
         if location_info is None:
@@ -223,9 +223,7 @@ def extract_road_segment_location(road_segment_id):
     data["road_segment_name"] = road_segment_name
     data["road_segment_id"] = int(road_segment_id)
     text = get_road_segment_location_text(road1, road_segment_name)
-    # fake gps - todo: fix
-    gps = {"lat": 32.825610, "lon": 35.165395}
-    return {"name": "location", "data": data, "gps": gps, "text": text}
+    return {"name": "location", "data": data, "text": text}
 
 
 # todo: fill both codes and names into location
@@ -236,9 +234,7 @@ def extract_street_location(input_vals: dict):
     for k in ["yishuv_name", "yishuv_symbol", "street1", "street1_hebrew"]:
         data[k] = vals[k]
     text = get_street_location_text(vals["yishuv_name"], vals["street1_hebrew"])
-    # fake gps - todo: fix
-    gps = {"lat": 32.825610, "lon": 35.165395}
-    return {"name": "location", "data": data, "gps": gps, "text": text}
+    return {"name": "location", "data": data, "text": text}
 
 
 def extract_street_location_suggestion_version(input_vals: dict):
@@ -274,12 +270,9 @@ def extract_non_urban_intersection_location(input_vals: dict):
     data = {"resolution": BE_CONST.ResolutionCategories.SUBURBAN_JUNCTION}
     for k in ["non_urban_intersection", "non_urban_intersection_hebrew", "road1", "road2"]:
         data[k] = vals[k]
-    # fake gps - todo: fix
-    gps = {"lat": 32.825610, "lon": 35.165395}
     return {
         "name": "location",
         "data": data,
-        "gps": gps,
         "text": vals["non_urban_intersection_hebrew"],
     }
 

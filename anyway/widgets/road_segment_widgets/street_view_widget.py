@@ -21,7 +21,8 @@ class StreetViewWidget(RoadSegmentWidget):
         }
 
     def is_included(self):
-        return self.request_params.gps
+        return self.request_params.gps and self.request_params.gps.get("lon") and self.request_params.gps.get("lat")
+
 
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:

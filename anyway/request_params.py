@@ -78,67 +78,70 @@ class RequestParams:
 
 # todo: merge with get_request_params()
 def get_request_params_from_request_values(vals: dict) -> Optional[RequestParams]:
-    news_flash_obj = extract_news_flash_obj(vals)
-    news_flash_description = (
-        news_flash_obj.description
-        if news_flash_obj is not None and news_flash_obj.description is not None
-        else None
-    )
-    news_flash_title = (
-        news_flash_obj.title
-        if news_flash_obj is not None and news_flash_obj.title is not None
-        else None
-    )
-    location = get_location_from_news_flash_or_request_values(news_flash_obj, vals)
-    if location is None:
-        return None
-    years_ago = vals.get("years_ago", BE_CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
-    lang = vals.get("lang", "he")
-    location_text = location["text"]
-    gps = location["gps"]
-    location_info = location["data"]
-
-    if location_info is None:
-        return None
-    resolution = location_info.pop("resolution")
-    if resolution is None or resolution not in BE_CONST.SUPPORTED_RESOLUTIONS:
-        logging.error(f"Resolution empty or not supported: {resolution}.")
-        return None
-
-    if all(value is None for value in location_info.values()):
-        return None
-
     try:
-        years_ago = int(years_ago)
-    except (ValueError, TypeError):
+        news_flash_obj = extract_news_flash_obj(vals)
+        news_flash_description = (
+            news_flash_obj.description
+            if news_flash_obj is not None and news_flash_obj.description is not None
+            else None
+        )
+        news_flash_title = (
+            news_flash_obj.title
+            if news_flash_obj is not None and news_flash_obj.title is not None
+            else None
+        )
+        location = get_location_from_news_flash_or_request_values(news_flash_obj, vals)
+        if location is None:
+            return None
+        years_ago = vals.get("years_ago", BE_CONST.DEFAULT_NUMBER_OF_YEARS_AGO)
+        lang = vals.get("lang", "he")
+        location_text = location["text"]
+        gps = location.get("gps", {})
+        location_info = location["data"]
+
+        if location_info is None:
+            return None
+        resolution = location_info.pop("resolution")
+        if resolution is None or resolution not in BE_CONST.SUPPORTED_RESOLUTIONS:
+            logging.error(f"Resolution empty or not supported: {resolution}.")
+            return None
+
+        if all(value is None for value in location_info.values()):
+            return None
+
+        try:
+            years_ago = int(years_ago)
+        except (ValueError, TypeError):
+            return None
+        if years_ago < 0 or years_ago > 100:
+            return None
+        last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
+        # converting to datetime object to get the date
+        end_time = last_accident_date.to_pydatetime().date()
+        start_time = datetime.date(end_time.year + 1 - years_ago, 1, 1)
+
+        widget_specific = {}
+        if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
+            widget_specific.update({"road_segment_name": location_info.get("road_segment_name")})
+
+        request_params = RequestParams(
+            years_ago=years_ago,
+            location_text=location_text,
+            location_info=location_info,
+            # TODO: getting a warning on resolution=resolution: "Expected type 'dict', got 'int' instead"
+            resolution=resolution,
+            gps=gps,
+            start_time=start_time,
+            end_time=end_time,
+            lang=lang,
+            news_flash_description=news_flash_description,
+            news_flash_title=news_flash_title,
+            widget_specific=widget_specific
+        )
+        return request_params
+    except ValueError:
+        logging.exception(f"Exception while preparing request params. vals:{vals}.")
         return None
-    if years_ago < 0 or years_ago > 100:
-        return None
-    last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
-    # converting to datetime object to get the date
-    end_time = last_accident_date.to_pydatetime().date()
-    start_time = datetime.date(end_time.year + 1 - years_ago, 1, 1)
-
-    widget_specific = {}
-    if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
-        widget_specific.update({"road_segment_name": location_info.get("road_segment_name")})
-
-    request_params = RequestParams(
-        years_ago=years_ago,
-        location_text=location_text,
-        location_info=location_info,
-        # TODO: getting a warning on resolution=resolution: "Expected type 'dict', got 'int' instead"
-        resolution=resolution,
-        gps=gps,
-        start_time=start_time,
-        end_time=end_time,
-        lang=lang,
-        news_flash_description=news_flash_description,
-        news_flash_title=news_flash_title,
-        widget_specific=widget_specific
-    )
-    return request_params
-
 
 def get_location_from_news_flash_or_request_values(
     news_flash_obj: Optional[NewsFlash], vals: dict
@@ -220,9 +223,7 @@ def extract_road_segment_location(road_segment_id):
     data["road_segment_name"] = road_segment_name
     data["road_segment_id"] = int(road_segment_id)
     text = get_road_segment_location_text(road1, road_segment_name)
-    # fake gps - todo: fix
-    gps = {"lat": 32.825610, "lon": 35.165395}
-    return {"name": "location", "data": data, "gps": gps, "text": text}
+    return {"name": "location", "data": data, "text": text}
 
 
 # todo: fill both codes and names into location
@@ -233,9 +234,7 @@ def extract_street_location(input_vals: dict):
     for k in ["yishuv_name", "yishuv_symbol", "street1", "street1_hebrew"]:
         data[k] = vals[k]
     text = get_street_location_text(vals["yishuv_name"], vals["street1_hebrew"])
-    # fake gps - todo: fix
-    gps = {"lat": 32.825610, "lon": 35.165395}
-    return {"name": "location", "data": data, "gps": gps, "text": text}
+    return {"name": "location", "data": data, "text": text}
 
 
 def extract_street_location_suggestion_version(input_vals: dict):
@@ -271,12 +270,9 @@ def extract_non_urban_intersection_location(input_vals: dict):
     data = {"resolution": BE_CONST.ResolutionCategories.SUBURBAN_JUNCTION}
     for k in ["non_urban_intersection", "non_urban_intersection_hebrew", "road1", "road2"]:
         data[k] = vals[k]
-    # fake gps - todo: fix
-    gps = {"lat": 32.825610, "lon": 35.165395}
     return {
         "name": "location",
         "data": data,
-        "gps": gps,
         "text": vals["non_urban_intersection_hebrew"],
     }
 

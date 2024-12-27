@@ -79,9 +79,67 @@ class ParamFilterExp:
     PFE = {
         "sy": {
             "col": SDAccident.accident_year,
-            "op": Column.__ge__,
-            "type": str, # default is int
+            "op": Column.__ge__, # default is __eq__ or in_ for a list
             "single": True, # default is multipe values
+        },
+        "ey": {
+            "col": SDAccident.accident_year,
+            "op": Column.__le__,
+            "single": True, # default is multipe values
+        },
+        "sev": {
+            "col": SDInvolved.injury_severity,
+        },
+        "injt": {
+            "col": SDInvolved.injured_type,
+        },
+        "city": {
+            "col": SDAccident.yishuv_symbol,
+        },
+        "st": {
+            "col": SDAccident.street1,
+        },
+        "rd": {
+            "col": SDAccident.road,
+        },
+        "rds": {
+            "col": SDAccident.road_segment,
+        },
+        "sex": {
+            "col": SDInvolved.sex,
+        },
+        "age": {
+            "col": SDInvolved.age_group,
+        },
+        "pt": {
+            "col": SDInvolved.population_type,
+        },
+        "dn": {
+            "col": SDAccident.day_night,
+        },
+        "mn": {
+            "col": SDAccident.accident_month,
+        },
+        # "acc": {
+        #     "col": SDAccident.accident_type,
+        # },
+        "vcl": {
+            "col": SDAccident.vehicle_types,
+        },
+        "rt": {
+            "col": SDAccident.road_type,
+        },
+        "sp": {
+            "col": SDAccident.speed_limit_type,
+        },
+        "rw": {
+            "col": SDAccident.road_width,
+        },
+        "ml": {
+            "col": SDAccident.multi_lane_type,
+        },
+        "ol": {
+            "col": SDAccident.one_lane_type,
         },
     }
 
@@ -93,7 +151,7 @@ class ParamFilterExp:
         for k, v in params.items():
             p = ParamFilterExp.PFE.get(k)
             if (p is not None and
-                ("type" not in p or all([isinstance(x, p["type"]) for x in v])) and
+                all([x.isdigit() for x in v]) and
                 ("single" not in p or len(v) == 1)
                 ):
                 f = (ParamFilterExp.PFE[k]["op"] if "op" in ParamFilterExp.PFE[k] else

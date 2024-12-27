@@ -51,6 +51,7 @@ def upgrade():
         sa.Column('provider_code', sa.Integer(), primary_key=True, autoincrement=False, nullable=False),
         sa.Column('accident_month', sa.Integer()),
         sa.Column('accident_timestamp', sa.TIMESTAMP()),
+        sa.Column('accident_type', sa.Integer(), nullable=True),
         sa.Column('road_type', sa.Integer(), nullable=True),
         sa.Column('road_width', sa.Integer(), nullable=True),
         sa.Column('day_night', sa.Integer(), nullable=True),
@@ -68,7 +69,7 @@ def upgrade():
     )
     op.create_index(op.f(f'ix_{sd_accident_table}_acc_ids'), sd_accident_table,
                     ['accident_id', 'accident_year', 'provider_code'], unique=True)
-    for field in ['accident_year', 'accident_month', 'accident_timestamp',
+    for field in ['accident_year', 'accident_month', 'accident_timestamp', 'accident_type',
                   'road_type', 'road_width', 'day_night',
                   'one_lane_type', 'multi_lane_type', 'speed_limit_type',
                   'yishuv_symbol', 'street1', 'street2', 'road', 'road_segment', 'vehicle_types',

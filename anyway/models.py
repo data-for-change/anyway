@@ -3104,6 +3104,7 @@ class SDAccident(Base):
     provider_code = Column(Integer(), primary_key=True)
     accident_month = Column(Integer())
     accident_timestamp = Column(DateTime, default=None, index=True)
+    accident_type = Column(Integer(), nullable=True)
     road_type = Column(Integer(), nullable=True)
     road_width = Column(Integer(), nullable=True)
     day_night = Column(Integer(), nullable=True)

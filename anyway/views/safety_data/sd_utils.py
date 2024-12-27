@@ -104,8 +104,8 @@ def get_involved_data():
                         InvolvedMarkerView.age_group,
                         InvolvedMarkerView.sex,
                         InvolvedMarkerView.population_type,
-                        )\
-        .limit(1000):
+                        ):
+        # .limit(100000):
         yield{
                 "involve_id": d.involve_id,
                 "accident_id": d.accident_id,
@@ -166,7 +166,7 @@ def sd_load_accident():
                            AccidentMarkerView.latitude,
                            AccidentMarkerView.longitude,
                            )
-                           .limit(1000)
+                        #    .limit(10000)
         ]
     )
     db.session.commit()

@@ -1567,6 +1567,13 @@ def safety_data_test():
         return sdu.load_data()
 
     iq = ac.InvolvedQuery()
-    res = iq.get_data()
-    return Response(json.dumps(res, default=str), mimetype="application/json")
+    try:
+        res = iq.get_data()
+        return Response(json.dumps(res, default=str), mimetype="application/json")
+    except ValueError as e:
+        logging.exception(e)
+        return abort(http_client.BAD_REQUEST)
+    except Exception as e:
+        logging.exception(e)
+        return abort(http_client.INTERNAL_SERVER_ERROR)
 

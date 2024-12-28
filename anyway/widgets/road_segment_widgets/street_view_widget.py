@@ -1,7 +1,8 @@
+import logging
 from anyway.request_params import RequestParams
 from anyway.widgets.widget import register
 from anyway.widgets.road_segment_widgets.road_segment_widget import RoadSegmentWidget
-from typing import Dict
+from typing import Dict, Optional
 from flask_babel import _
 
 
@@ -23,8 +24,18 @@ class StreetViewWidget(RoadSegmentWidget):
     def is_included(self):
         return self.request_params.gps and self.request_params.gps.get("lon") and self.request_params.gps.get("lat")
 
-
     @staticmethod
     def localize_items(request_params: RequestParams, items: Dict) -> Dict:
         items["data"]["text"] = {"title": _("Street view widget")}
         return items
+
+    @classmethod
+    def update_result(cls, request_params: RequestParams, cached_items: Dict) -> Optional[Dict]:
+        if cls.is_relevant(request_params):
+            w = cls(request_params)  # pylint: disable=E1120
+            try:
+                w.generate_items()
+                updated_widget_data = w.serialize()
+                return updated_widget_data if w.is_included() else None
+            except Exception as e:
+                logging.debug(f"Encountered error when generating items for {w.name} : {e}")

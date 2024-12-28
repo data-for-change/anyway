@@ -31,11 +31,7 @@ class StreetViewWidget(RoadSegmentWidget):
 
     @classmethod
     def update_result(cls, request_params: RequestParams, cached_items: Dict) -> Optional[Dict]:
-        if cls.is_relevant(request_params):
-            w = cls(request_params)  # pylint: disable=E1120
-            try:
-                w.generate_items()
-                updated_widget_data = w.serialize()
-                return updated_widget_data if w.is_included() else None
-            except Exception as e:
-                logging.debug(f"Encountered error when generating items for {w.name} : {e}")
+        try:
+            return cls.generate_widget_data(request_params)
+        except Exception as e:
+            logging.debug(f"Encountered error when generating items for widget class {cls} : {e}")

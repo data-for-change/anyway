@@ -65,6 +65,8 @@ def send_after_infographics_message(bot, message_id_in_group, newsflash_id, link
     return bot.send_message(linked_group, message, reply_to_message_id=message_id_in_group)
 
 
+#this function sends the "root" message for the newsflash in telegram.
+#the flow continues when the telegram server sends a request to our /api/telegram/webhook
 def publish_notification(newsflash_id, chat_id=TELEGRAM_CHANNEL_CHAT_ID):
     accident_text = create_accident_text(newsflash_id)
     bot = telebot.TeleBot(secrets.get("BOT_TOKEN"))

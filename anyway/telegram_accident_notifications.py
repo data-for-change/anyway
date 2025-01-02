@@ -79,20 +79,28 @@ def publish_notification(newsflash_id, chat_id=TELEGRAM_CHANNEL_CHAT_ID):
     db.session.commit()
 
 
+def get_items_for_send(newsflash_id):
+    items = []
+    transcription_by_widget_name = fetch_transcription_by_widget_name(newsflash_id)
+    urls_by_infographic_name = create_public_urls_for_infographics_images(str(newsflash_id))
+    for infographic_name, url in urls_by_infographic_name.items():
+        text = transcription_by_widget_name[infographic_name] \
+            if infographic_name in transcription_by_widget_name else None
+        items.append((url, text))
+    return items
+
+
 def send_infographics_to_telegram(root_message_id, newsflash_id, channel_of_initial_message):
     #every message in the channel is automatically forwarded to the linked discussion group.
     #to create a comment on the channel message, we need to send a reply to the
     #forwareded message in the discussion group.
     bot = telebot.TeleBot(secrets.get("BOT_TOKEN"))
 
-    transcription_by_widget_name = fetch_transcription_by_widget_name(newsflash_id)
-    urls_by_infographic_name = create_public_urls_for_infographics_images(str(newsflash_id))
-
     linked_group = telegram_linked_group_by_channel[channel_of_initial_message]
-    for infographic_name, url in urls_by_infographic_name.items():
-        text = transcription_by_widget_name[infographic_name] \
-            if infographic_name in transcription_by_widget_name else None
+    items_for_send = get_items_for_send(newsflash_id)
+    for url, text in items_for_send:
         bot.send_photo(linked_group, url, reply_to_message_id=root_message_id, caption=text)
+
     send_after_infographics_message(bot, root_message_id, newsflash_id, linked_group)
     logging.info("notification send done")
 

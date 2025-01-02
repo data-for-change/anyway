@@ -18,7 +18,7 @@ selenium_hub_url = selenium_url.replace("selenium.", "selenium-hub.")
 selenium_hub_url = f"https://{selenium_hub_url}/wd/hub"
 selenium_remote_results_url = f"https://{selenium_url}/tempdata"
 CHROME_PARTIALLY_DOWNLOADED_FILE_EXTENSION = "crdownload"
-
+SLEEP_DURATION_FOR_MAP_TO_HAVE_FOCUS = 5
 
 def create_chrome_browser_session(newsflash_id):
     options = webdriver.ChromeOptions()
@@ -94,7 +94,9 @@ def generate_infographics_in_selenium_container(browser, newsflash_id):
         logging.debug(f"found {buttons_found} buttons")
         if buttons_found > 0:
             for element in elements:
-                ActionChains(browser).move_to_element(element).click().perform()
+                ActionChains(browser).move_to_element(element).perform()
+                time.sleep(SLEEP_DURATION_FOR_MAP_TO_HAVE_FOCUS) #without sleep map infographic may be blurry
+                element.click()
                 time.sleep(1) #prevents click arriving before the last finished
             is_download_done, generated_images_names = wait_for_folder_to_contain_all_files(newsflash_id,
                                                                                             buttons_found, timeout=60)

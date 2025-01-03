@@ -3,7 +3,7 @@ from sqlalchemy.orm import aliased
 from sqlalchemy import and_
 from flask import request, Response
 from anyway.models import (
-    InvolvedMarkerView, SDAccident, SDInvolved, AccidentMarkerView,
+    Involved, SDAccident, SDInvolved, AccidentMarkerView,
     City, InjurySeverity, Streets, Sex, RoadLight, RoadType, AgeGroup,
     Involved,
 )
@@ -90,36 +90,42 @@ def sd_load_involved():
     db.session.commit()
 
 def get_involved_data():
-    for d in db.session.query(InvolvedMarkerView, SDAccident)\
+    for d in db.session.query(Involved, SDAccident)\
         .join(SDAccident,
-            and_(SDAccident.provider_code == InvolvedMarkerView.provider_code,
-                 SDAccident.accident_id == InvolvedMarkerView.accident_id,
-                 SDAccident.accident_year == InvolvedMarkerView.accident_year))\
-        .with_entities(InvolvedMarkerView.involve_id,
-                        InvolvedMarkerView.accident_id,
-                        InvolvedMarkerView.accident_year,
-                        InvolvedMarkerView.provider_code,
-                        InvolvedMarkerView.injury_severity,
-                        InvolvedMarkerView.injured_type,
-                        InvolvedMarkerView.age_group,
-                        InvolvedMarkerView.sex,
-                        InvolvedMarkerView.population_type,
+            and_(SDAccident.provider_code == Involved.provider_code,
+                 SDAccident.accident_id == Involved.accident_id,
+                 SDAccident.accident_year == Involved.accident_year))\
+        .with_entities(Involved.id,
+                        Involved.accident_id,
+                        Involved.accident_year,
+                        Involved.provider_code,
+                        Involved.age_group,
+                        Involved.injured_type,
+                        Involved.injury_severity,
+                        Involved.population_type,
+                        Involved.sex,
                         ):
         # .limit(100000):
         yield{
-                "involve_id": d.involve_id,
+                "_id": d.id,
                 "accident_id": d.accident_id,
                 "accident_year": d.accident_year,
                 "provider_code": d.provider_code,
-                "injury_severity": d.injury_severity,
-                "injured_type": d.injured_type,
                 "age_group": d.age_group,
-                "sex": d.sex,
+                "injured_type": d.injured_type,
+                "injury_severity": d.injury_severity,
                 "population_type": d.population_type,
+                "sex": d.sex,
+                "vehicle_vehicle_type_hebrew": 0, # todo
+                "vehicles": 0, # todo
             }
 
 def sd_load_accident():
-    from anyway.models import SDAccident, AccidentMarkerView, SDInvolved
+    sd_load_accident_main()
+    set_vehicles_in_sd_acc_table()
+
+def sd_load_accident_main():
+    from anyway.models import SDAccident, AccidentMarker, SDInvolved
     db.session.query(SDAccident).delete()
     db.session.commit()
     db.get_engine().execute(
@@ -131,43 +137,78 @@ def sd_load_accident():
                 "provider_code": d.provider_code,
                 "accident_month": d.accident_month,
                 "accident_timestamp": d.accident_timestamp,
+                "accident_type": d.accident_type,
+                "accident_yishuv_symbol": d.yishuv_symbol,
+                "day_in_week": d.day_in_week,
+                "day_night": d.day_night,
+                "location_accuracy": d.location_accuracy,
+                "multi_lane": d.multi_lane,
+                "one_lane": d.one_lane,
+                "road1": d.road1,
+                "road2": d.road2,
+                "road_segment_number": d.road_segment_number,
                 "road_type": d.road_type,
                 "road_width": d.road_width,
-                "day_night": d.day_night,
-                "one_lane_type": d.one_lane,
-                "multi_lane_type": d.multi_lane,
-                "speed_limit_type": d.speed_limit,
-                "yishuv_symbol": d.yishuv_symbol,
+                "speed_limit": d.speed_limit,
                 "street1": d.street1,
                 "street2": d.street2,
-                "road": d.road1,
-                "road_segment": d.road_segment_number,
-                "lat": d.latitude,
-                "lon": d.longitude,
+                "latitude": d.latitude,
+                "longitude": d.longitude,
             }
             for d in db.session.query(AccidentMarkerView)
             .with_entities(AccidentMarkerView.id,
                            AccidentMarkerView.accident_year,
                            AccidentMarkerView.provider_code,
-                           AccidentMarkerView.accident_year,
                            AccidentMarkerView.accident_month,
                            AccidentMarkerView.accident_timestamp,
+                           AccidentMarkerView.accident_type,
+                           AccidentMarkerView.yishuv_symbol,
+                           AccidentMarkerView.day_in_week,
+                           AccidentMarkerView.day_night,
+                           AccidentMarkerView.location_accuracy,
+                           AccidentMarkerView.multi_lane,
+                           AccidentMarkerView.one_lane,
+                           AccidentMarkerView.road1,
+                           AccidentMarkerView.road2,
+                           AccidentMarkerView.road_segment_number,
                            AccidentMarkerView.road_type,
                            AccidentMarkerView.road_width,
-                           AccidentMarkerView.day_night,
-                           AccidentMarkerView.one_lane,
-                           AccidentMarkerView.multi_lane,
                            AccidentMarkerView.speed_limit,
-                           AccidentMarkerView.yishuv_symbol,
                            AccidentMarkerView.street1,
                            AccidentMarkerView.street2,
-                           AccidentMarkerView.road1,
-                           AccidentMarkerView.road_segment_number,
                            AccidentMarkerView.latitude,
                            AccidentMarkerView.longitude,
                            )
-                        #    .limit(10000)
+                           .limit(10000)
         ]
+    )
+    db.session.commit()
+
+def set_vehicles_in_sd_acc_table():
+    db.session.execute("""
+        UPDATE safety_data_accident
+        SET vehicles=subquery.vt_bitmap
+        FROM
+          (SELECT accident_id,
+                  provider_code,
+                  accident_year,
+                  bit_or(vt_power2) AS vt_bitmap
+           FROM
+             (SELECT DISTINCT vehicles.accident_id,
+                              vehicles.provider_code,
+                              vehicles.accident_year,
+                              1 << vehicle_type AS vt_power2
+              FROM vehicles
+              LEFT JOIN vehicle_type ON vehicles.vehicle_type = vehicle_type.id
+              AND vehicles.accident_year = vehicle_type.year
+              AND vehicles.provider_code = vehicle_type.provider_code) IVT
+           GROUP BY accident_id,
+                    provider_code,
+                    accident_year) AS subquery
+        WHERE safety_data_accident.accident_id=subquery.accident_id
+          AND safety_data_accident.accident_year=subquery.accident_year
+          AND safety_data_accident.provider_code=subquery.provider_code
+        """
     )
     db.session.commit()
 

@@ -94,16 +94,16 @@ class ParamFilterExp:
             "col": SDInvolved.injured_type,
         },
         "city": {
-            "col": SDAccident.yishuv_symbol,
+            "col": SDAccident.accident_yishuv_symbol,
         },
         "st": {
             "col": SDAccident.street1,
         },
         "rd": {
-            "col": SDAccident.road,
+            "col": SDAccident.road1,
         },
         "rds": {
-            "col": SDAccident.road_segment,
+            "col": SDAccident.road_segment_number,
         },
         "sex": {
             "col": SDInvolved.sex,
@@ -123,23 +123,23 @@ class ParamFilterExp:
         # "acc": {
         #     "col": SDAccident.accident_type,
         # },
-        "vcl": {
-            "col": SDAccident.vehicle_types,
-        },
+        # "vcl": {
+        #     "col": SDAccident.vehicle_types,
+        # },
         "rt": {
             "col": SDAccident.road_type,
         },
         "sp": {
-            "col": SDAccident.speed_limit_type,
+            "col": SDAccident.speed_limit,
         },
         "rw": {
             "col": SDAccident.road_width,
         },
         "ml": {
-            "col": SDAccident.multi_lane_type,
+            "col": SDAccident.multi_lane,
         },
         "ol": {
-            "col": SDAccident.one_lane_type,
+            "col": SDAccident.one_lane,
         },
     }
 

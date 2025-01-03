@@ -40,24 +40,25 @@ def create_safety_data_accident_table():
         sa.Column('accident_yishuv_symbol', sa.Integer(), nullable=True),
         sa.Column('day_in_week', sa.Integer(), nullable=True),
         sa.Column('day_night', sa.Integer(), nullable=True),
+        sa.Column('location_accuracy', sa.Integer(), nullable=True),
         sa.Column('multi_lane', sa.Integer(), nullable=True),
         sa.Column('one_lane', sa.Integer(), nullable=True),
         sa.Column('road1', sa.Integer(), nullable=True),
         sa.Column('road2', sa.Integer(), nullable=True),
-        sa.Column('road_segment', sa.Integer(), nullable=True),
+        sa.Column('road_segment_number', sa.Integer(), nullable=True),
         sa.Column('road_type', sa.Integer(), nullable=True),
         sa.Column('road_width', sa.Integer(), nullable=True),
         sa.Column('speed_limit', sa.Integer(), nullable=True),
         sa.Column('street1', sa.Integer(), nullable=True),
         sa.Column('street2', sa.Integer(), nullable=True),
-        sa.Column('location_accurary', sa.Integer(), nullable=True),
+        sa.Column('vehicles', sa.Integer(), nullable=True),
         sa.Column('latitude', sa.Float(), nullable=True),
         sa.Column('longitude', sa.Float(), nullable=True),
     )
     for field in ['accident_year', 'accident_month', 'accident_timestamp',
                   'accident_type', 'accident_yishuv_symbol',
                   'day_night', 'multi_lane', 'one_lane',
-                  'road1', 'road2', 'road_segment', 'road_type', 'road_width',
+                  'road1', 'road2', 'road_segment_number', 'road_type', 'road_width',
                   'speed_limit',
                   'street1', 'street2',
                   'latitude', 'longitude',
@@ -73,12 +74,11 @@ def create_safety_data_involved_table():
         sa.Column('accident_year', sa.Integer(), nullable=False),
         sa.Column('provider_code', sa.Integer(), nullable=False),
         sa.Column('age_group', sa.Integer(), nullable=True),
-        sa.Column('injury_severity', sa.Integer(), nullable=True),
         sa.Column('injured_type', sa.Integer(), nullable=True),
+        sa.Column('injury_severity', sa.Integer(), nullable=True),
         sa.Column('population_type', sa.Integer(), nullable=True),
         sa.Column('sex', sa.Integer(), nullable=True),
         sa.Column('vehicle_vehicle_type_hebrew', sa.Integer(), nullable=True),
-        sa.Column('vehicles', sa.Integer(), nullable=True),
     )
     op.create_foreign_key(f'{sd_involved_table}_accident_id_fkey',
                           sd_involved_table, sd_accident_table,
@@ -86,7 +86,7 @@ def create_safety_data_involved_table():
                           ['accident_id', 'provider_code', 'accident_year'],
                           ondelete='CASCADE')
     op.create_index(op.f(f'ix_{sd_involved_table}_inv_acc'), sd_involved_table,
-                    ['accident_id', 'accident_year', 'provider_code'], unique=True)
+                    ['accident_id', 'accident_year', 'provider_code'], unique=False)
     for field in ['injury_severity', 'injured_type',
                   'age_group', 'sex', 'population_type']:
          # pylint: disable=no-member

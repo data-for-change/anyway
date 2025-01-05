@@ -3094,7 +3094,7 @@ class SDInvolved(Base):
     injury_severity = Column(Integer(), nullable=True)
     population_type = Column(Integer(), nullable=True)
     sex = Column(Integer(), nullable=True)
-    vehicle_vehicle_type_hebrew = Column(Integer(), nullable=True)
+    vehicle_vehicle_type = Column(Integer(), nullable=True)
 
 
 class SDAccident(Base):

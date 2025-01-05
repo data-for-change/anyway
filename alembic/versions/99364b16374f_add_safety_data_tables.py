@@ -78,14 +78,14 @@ def create_safety_data_involved_table():
         sa.Column('injury_severity', sa.Integer(), nullable=True),
         sa.Column('population_type', sa.Integer(), nullable=True),
         sa.Column('sex', sa.Integer(), nullable=True),
-        sa.Column('vehicle_vehicle_type_hebrew', sa.Integer(), nullable=True),
+        sa.Column('vehicle_vehicle_type', sa.Integer(), nullable=True),
     )
-    op.create_foreign_key(f'{sd_involved_table}_accident_id_fkey',
+    op.create_foreign_key(f'{sd_involved_table}_accident_id_fkey', # pylint: disable=no-member
                           sd_involved_table, sd_accident_table,
                           ['accident_id', 'provider_code', 'accident_year'],
                           ['accident_id', 'provider_code', 'accident_year'],
                           ondelete='CASCADE')
-    op.create_index(op.f(f'ix_{sd_involved_table}_inv_acc'), sd_involved_table,
+    op.create_index(op.f(f'ix_{sd_involved_table}_inv_acc'), sd_involved_table, # pylint: disable=no-member
                     ['accident_id', 'accident_year', 'provider_code'], unique=False)
     for field in ['injury_severity', 'injured_type',
                   'age_group', 'sex', 'population_type']:

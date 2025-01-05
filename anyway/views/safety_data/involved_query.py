@@ -3,43 +3,59 @@ import pandas as pd
 from sqlalchemy.orm import aliased
 from sqlalchemy import and_
 from sqlalchemy.schema import Column
+from sqlalchemy.orm.query import Query
 import logging
 from flask import request
 from anyway.models import (
+    AccidentType,
+    AgeGroup,
+    City,
+    DayNight,
+    InjuredType,
+    InjurySeverity,
+    LocationAccuracy,
+    MultiLane,
+    OneLane,
+    PopulationType,
+    RoadSegments,
+    RoadType,
+    RoadWidth,
     SDAccident,
     SDInvolved,
+    Sex,
+    SpeedLimit,
     Streets,
 )
 from anyway.app_and_db import db
 
 
 class InvolvedQuery:
-    vehiclt_type_to_str = [None for _ in range(1, 27)]
-    vehiclt_type_to_str[1] = "רכב נוסעים פרטי"
-    vehiclt_type_to_str[2] = "טרנזיט"
-    vehiclt_type_to_str[3] = "טנדר"
-    vehiclt_type_to_str[4] = "משאית"
-    vehiclt_type_to_str[5] = "משאית"
-    vehiclt_type_to_str[6] = "משאית"
-    vehiclt_type_to_str[7] = "משאית"
-    vehiclt_type_to_str[8] = "אופנוע"
-    vehiclt_type_to_str[9] = "אופנוע"
-    vehiclt_type_to_str[10] = "אופנוע"
-    vehiclt_type_to_str[11] = "אוטובוס"
-    vehiclt_type_to_str[12] = "מונית"
-    vehiclt_type_to_str[13] = "רכב עבודה"
-    vehiclt_type_to_str[14] = "טרקטור"
-    vehiclt_type_to_str[15] = "אופניים"
-    vehiclt_type_to_str[16] = "רכבת"
-    vehiclt_type_to_str[17] = "אחר ולא ידוע"
-    vehiclt_type_to_str[18] = "אוטובוס"
-    vehiclt_type_to_str[19] = "אופנוע"
-    vehiclt_type_to_str[20] = None
-    vehiclt_type_to_str[21] = "קורקינט חשמלי"
-    vehiclt_type_to_str[22] = "קלנועית חשמלית"
-    vehiclt_type_to_str[23] = "אופניים חשמליים"
-    vehiclt_type_to_str[24] = "משאית"
-    vehiclt_type_to_str[25] = "משאית"
+    vehicle_type_to_str = [None for _ in range(1, 27)]
+    vehicle_type_to_str[1] = "רכב נוסעים פרטי"
+    vehicle_type_to_str[2] = "טרנזיט"
+    vehicle_type_to_str[3] = "טנדר"
+    vehicle_type_to_str[4] = "משאית"
+    vehicle_type_to_str[5] = "משאית"
+    vehicle_type_to_str[6] = "משאית"
+    vehicle_type_to_str[7] = "משאית"
+    vehicle_type_to_str[8] = "אופנוע"
+    vehicle_type_to_str[9] = "אופנוע"
+    vehicle_type_to_str[10] = "אופנוע"
+    vehicle_type_to_str[11] = "אוטובוס"
+    vehicle_type_to_str[12] = "מונית"
+    vehicle_type_to_str[13] = "רכב עבודה"
+    vehicle_type_to_str[14] = "טרקטור"
+    vehicle_type_to_str[15] = "אופניים"
+    vehicle_type_to_str[16] = "רכבת"
+    vehicle_type_to_str[17] = "אחר ולא ידוע"
+    vehicle_type_to_str[18] = "אוטובוס"
+    vehicle_type_to_str[19] = "אופנוע"
+    vehicle_type_to_str[20] = None
+    vehicle_type_to_str[21] = "קורקינט חשמלי"
+    vehicle_type_to_str[22] = "קלנועית חשמלית"
+    vehicle_type_to_str[23] = "אופניים חשמליים"
+    vehicle_type_to_str[24] = "משאית"
+    vehicle_type_to_str[25] = "משאית"
 
     def __init__(self):
         self.S1: Streets = aliased(Streets)
@@ -54,21 +70,21 @@ class InvolvedQuery:
         # pylint: disable=no-member
         df = pd.read_sql_query(query.statement, query.session.bind)
         df.rename(columns={
-            'accident_type': 'accident_type_hebrew',
-            'day_night': 'day_night_hebrew',
+            # 'accident_type': 'accident_type_hebrew',
+            # 'day_night': 'day_night_hebrew',
             "multi_lane": "multi_lane_hebrew",
             "one_lane": "one_lane_hebrew",
             "road_type": "road_type_hebrew",
             "road_width": "road_width_hebrew",
             "speed_limit": "speed_limit_hebrew",
-            "street1": "street1_hebrew",
-            "street2": "street2_hebrew",
+            # "street1": "street1_hebrew",
+            # "street2": "street2_hebrew",
             "location_accuracy": "location_accuracy_hebrew",
-            "age_group": "age_group_hebrew",
-            "injured_type": "injured_type_hebrew",
-            "injury_severity": "injury_severity_hebrew",
-            "population_type": "population_type_hebrew",
-            "sex": "sex_hebrew",
+            # "age_group": "age_group_hebrew",
+            # "injured_type": "injured_type_hebrew",
+            # "injury_severity": "injury_severity_hebrew",
+            # "population_type": "population_type_hebrew",
+            # "sex": "sex_hebrew",
             "vehicle_vehicle_type": "vehicle_vehicle_type_hebrew",
             },
             inplace=True,
@@ -82,8 +98,33 @@ class InvolvedQuery:
     def get_base_query(self):
         query = (
             db.session.query(
-                SDInvolved,
-                SDAccident,
+                SDAccident.accident_timestamp,
+                AccidentType.accident_type_hebrew,
+                SDAccident.accident_year,
+                City.heb_name.label("accident_yishuv_name"),
+                SDAccident.day_in_week.label("day_in_week_hebrew"),
+                DayNight.day_night_hebrew,
+                LocationAccuracy.location_accuracy_hebrew,
+                MultiLane.multi_lane_hebrew,
+                OneLane.one_lane_hebrew,
+                SDAccident.road1.label("road1"),
+                SDAccident.road2.label("road2"),
+                (RoadSegments.from_name + " - " + RoadSegments.to_name).label(
+                    'road_segment_name'),
+                RoadType.road_type_hebrew,
+                RoadWidth.road_width_hebrew,
+                SpeedLimit.speed_limit_hebrew,
+                self.S1.street_hebrew.label("street1_hebrew"),
+                self.S2.street_hebrew.label("street2_hebrew"),
+                SDAccident.vehicles,
+                SDAccident.latitude,
+                SDAccident.longitude,
+                SDInvolved._id,
+                AgeGroup.age_group_hebrew,
+                InjuredType.injured_type_hebrew,
+                InjurySeverity.injury_severity_hebrew,
+                PopulationType.population_type_hebrew,
+                Sex.sex_hebrew
             ).join(
                 SDAccident,
                 and_(
@@ -91,44 +132,122 @@ class InvolvedQuery:
                     SDInvolved.accident_id == SDAccident.accident_id,
                     SDInvolved.accident_year == SDAccident.accident_year,
                 ),
+            ).outerjoin(self.S1, and_(
+                SDAccident.street1 == self.S1.street,
+                SDAccident.accident_yishuv_symbol == self.S1.yishuv_symbol,
+                )
+            ).outerjoin(self.S2, and_(
+                SDAccident.street2 == self.S2.street,
+                SDAccident.accident_yishuv_symbol == self.S2.yishuv_symbol,
+                )
+            ).outerjoin(AccidentType, and_(
+                SDAccident.accident_type == AccidentType.id,
+                SDAccident.accident_year == AccidentType.year,
+                SDAccident.provider_code == AccidentType.provider_code,
+                )
+            ).outerjoin(DayNight, and_(
+                SDAccident.accident_type == DayNight.id,
+                SDAccident.accident_year == DayNight.year,
+                SDAccident.provider_code == DayNight.provider_code,
+                )
+            ).outerjoin(LocationAccuracy, and_(
+                SDAccident.accident_type == LocationAccuracy.id,
+                SDAccident.accident_year == LocationAccuracy.year,
+                SDAccident.provider_code == LocationAccuracy.provider_code,
+                )
+            ).outerjoin(MultiLane, and_(
+                SDAccident.accident_type == MultiLane.id,
+                SDAccident.accident_year == MultiLane.year,
+                SDAccident.provider_code == MultiLane.provider_code,
+                )
+            ).outerjoin(OneLane, and_(
+                SDAccident.accident_type == OneLane.id,
+                SDAccident.accident_year == OneLane.year,
+                SDAccident.provider_code == OneLane.provider_code,
+                )
+            ).outerjoin(RoadType, and_(
+                SDAccident.accident_type == RoadType.id,
+                SDAccident.accident_year == RoadType.year,
+                SDAccident.provider_code == RoadType.provider_code,
+                )
+            ).outerjoin(RoadWidth, and_(
+                SDAccident.accident_type == RoadWidth.id,
+                SDAccident.accident_year == RoadWidth.year,
+                SDAccident.provider_code == RoadWidth.provider_code,
+                )
+            ).outerjoin(SpeedLimit, and_(
+                SDAccident.accident_type == SpeedLimit.id,
+                SDAccident.accident_year == SpeedLimit.year,
+                SDAccident.provider_code == SpeedLimit.provider_code,
+                )
+            ).outerjoin(AgeGroup, and_(
+                SDAccident.accident_type == AgeGroup.id,
+                SDAccident.accident_year == AgeGroup.year,
+                SDAccident.provider_code == AgeGroup.provider_code,
+                )
+            ).outerjoin(InjuredType, and_(
+                SDAccident.accident_type == InjuredType.id,
+                SDAccident.accident_year == InjuredType.year,
+                SDAccident.provider_code == InjuredType.provider_code,
+                )
+            ).outerjoin(InjurySeverity, and_(
+                SDAccident.accident_type == InjurySeverity.id,
+                SDAccident.accident_year == InjurySeverity.year,
+                SDAccident.provider_code == InjurySeverity.provider_code,
+                )
+            ).outerjoin(PopulationType, and_(
+                SDAccident.accident_type == PopulationType.id,
+                SDAccident.accident_year == PopulationType.year,
+                SDAccident.provider_code == PopulationType.provider_code,
+                )
+            ).outerjoin(Sex, and_(
+                SDAccident.accident_type == Sex.id,
+                SDAccident.accident_year == Sex.year,
+                SDAccident.provider_code == Sex.provider_code,
+                )
+            ).outerjoin(City, SDAccident.accident_yishuv_symbol == City.yishuv_symbol
+            ).outerjoin(RoadSegments, SDAccident.road_segment_number == RoadSegments.segment
             )
             # .filter(Column.__ge__(SDAccident.yishuv_symbol, 5000))
             # .filter(SDInvolved.id == 26833652)
-            .with_entities(
-                SDAccident.accident_timestamp,
-                SDAccident.accident_year,
-                SDInvolved.population_type,
-                SDAccident.vehicles,
-                SDAccident.latitude,
-                SDAccident.longitude,
-                SDInvolved._id,
-                SDInvolved.age_group,
-                SDInvolved.injured_type,
-                SDInvolved.injury_severity,
-                SDInvolved.sex,
-            )
+            # .with_entities(
+            #     SDAccident.accident_timestamp,
+            #     SDAccident.accident_type,
+            #     SDAccident.accident_year,
+            #     SDAccident.vehicles,
+            #     SDAccident.latitude,
+            #     SDAccident.longitude,
+            #     SDInvolved._id,
+            #     SDInvolved.age_group,
+            #     SDInvolved.injured_type,
+            #     SDInvolved.injury_severity,
+            #     SDInvolved.population_type,
+            #     SDInvolved.sex,
+            # )
         )
         return query
 
     def add_text(self, d: dict) -> None:
-        n = d["injury_severity_hebrew"]
-        d["injury_severity_hebrew"] = self.injury_severity[n] if n else None
-        n = d["sex_hebrew"]
-        d["sex_hebrew"] = self.sex[n] if n else None
-        n = d["age_group_hebrew"]
-        d["age_group_hebrew"] = ("85+" if n == 99 else self.age_group[n]) if n else None
-        n = d["injured_type_hebrew"]
-        d["injured_type_hebrew"] = self.injured_type[n] if n else None
-        n = d["population_type_hebrew"]
-        d["population_type_hebrew"] = self.population_type[n] if n else None
+        # n = d["injury_severity_hebrew"]
+        # d["injury_severity_hebrew"] = self.injury_severity[n] if n else None
+        # n = d["sex_hebrew"]
+        # d["sex_hebrew"] = self.sex[n] if n else None
+        # n = d["age_group_hebrew"]
+        # d["age_group_hebrew"] = ("85+" if n == 99 else self.age_group[n]) if n else None
+        # n = d["injured_type_hebrew"]
+        # d["injured_type_hebrew"] = self.injured_type[n] if n else None
+        # n = d["population_type_hebrew"]
+        # d["population_type_hebrew"] = self.population_type[n] if n else None
         d["vehicles"] = self.vehicle_type_bit_2_heb(d["vehicles"])
+        n = d["day_in_week_hebrew"]
+        d["day_in_week_hebrew"] = self.day_in_week[n] if n else None
 
     @staticmethod
     def vehicle_type_bit_2_heb(bit_map: int) -> str:
         if bit_map == 0:
             return ""
         res = [
-            InvolvedQuery.vehiclt_type_to_str[vehicle_type]
+            InvolvedQuery.vehicle_type_to_str[vehicle_type]
             for vehicle_type in [
                 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 24, 25,
             ]
@@ -173,6 +292,7 @@ class InvolvedQuery:
             "נוסע - רכב לא ידוע",
         ]
         self.population_type = ["0", "יהודים", "ערבים", "אחרים", "זרים"]
+        self.day_in_week = ["0", "ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"]
 
 
 class ParamFilterExp:

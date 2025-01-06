@@ -30,32 +30,34 @@ from anyway.app_and_db import db
 
 
 class InvolvedQuery:
+    PEDESTRIAN_IN_VEHICLE_TYPE_ENRICHED = 99
+    PEDESTRIAN_HEBREW = "הולך רגל"
     vehicle_type_to_str = [None for _ in range(1, 27)]
-    vehicle_type_to_str[1] = "רכב נוסעים פרטי"
-    vehicle_type_to_str[2] = "טרנזיט"
-    vehicle_type_to_str[3] = "טנדר"
-    vehicle_type_to_str[4] = "משאית"
-    vehicle_type_to_str[5] = "משאית"
-    vehicle_type_to_str[6] = "משאית"
-    vehicle_type_to_str[7] = "משאית"
-    vehicle_type_to_str[8] = "אופנוע"
-    vehicle_type_to_str[9] = "אופנוע"
-    vehicle_type_to_str[10] = "אופנוע"
-    vehicle_type_to_str[11] = "אוטובוס"
-    vehicle_type_to_str[12] = "מונית"
-    vehicle_type_to_str[13] = "רכב עבודה"
-    vehicle_type_to_str[14] = "טרקטור"
-    vehicle_type_to_str[15] = "אופניים"
-    vehicle_type_to_str[16] = "רכבת"
-    vehicle_type_to_str[17] = "אחר ולא ידוע"
-    vehicle_type_to_str[18] = "אוטובוס"
-    vehicle_type_to_str[19] = "אופנוע"
-    vehicle_type_to_str[20] = None
-    vehicle_type_to_str[21] = "קורקינט חשמלי"
-    vehicle_type_to_str[22] = "קלנועית חשמלית"
-    vehicle_type_to_str[23] = "אופניים חשמליים"
-    vehicle_type_to_str[24] = "משאית"
-    vehicle_type_to_str[25] = "משאית"
+    vehicle_type_to_str[1] = ("רכב נוסעים פרטי", "רכב נוסעים פרטי")
+    vehicle_type_to_str[2] = ("טרנזיט", "משא עד 3.5 טון - אחוד (טרנזיט)")
+    vehicle_type_to_str[3] = ("טנדר", "משא עד 3.5 טון - לא אחוד (טנדר)")
+    vehicle_type_to_str[4] = ("משאית", "משא 3.6 עד 12.0 טון")
+    vehicle_type_to_str[5] = ("משאית", "משא 12.1 עד 15.9 טון")
+    vehicle_type_to_str[6] = ("משאית", "משא 16.0 עד 33.9 טון")
+    vehicle_type_to_str[7] = ("משאית", "משא 34.0+ טון")
+    vehicle_type_to_str[8] = ("אופנוע", 'אופנוע עד 50 סמ"ק')
+    vehicle_type_to_str[9] = ("אופנוע", 'אופנוע 51 עד 125 סמ"ק')
+    vehicle_type_to_str[10] = ("אופנוע", 'אופנוע 126 עד 400 סמ"ק')
+    vehicle_type_to_str[11] = ("אוטובוס", 'אופנוע 126 עד 400 סמ"ק')
+    vehicle_type_to_str[12] = ("מונית", "מונית")
+    vehicle_type_to_str[13] = ("רכב עבודה", "רכב עבודה")
+    vehicle_type_to_str[14] = ("טרקטור", "טרקטור")
+    vehicle_type_to_str[15] = ("אופניים", "אופניים")
+    vehicle_type_to_str[16] = ("רכבת", "רכבת")
+    vehicle_type_to_str[17] = ("אחר ולא ידוע", "אחר ולא ידוע")
+    vehicle_type_to_str[18] = ("אוטובוס", "אוטובוס זעיר")
+    vehicle_type_to_str[19] = ("אופנוע", 'אופנוע 401 סמ"ק ומעלה')
+    vehicle_type_to_str[20] = (None, None)
+    vehicle_type_to_str[21] = ("קורקינט חשמלי", "קורקינט חשמלי")
+    vehicle_type_to_str[22] = ("קלנועית חשמלית", "קלנועית חשמלית")
+    vehicle_type_to_str[23] = ("אופניים חשמליים", "אופניים חשמליים")
+    vehicle_type_to_str[24] = ("משאית", "משא 3.6 עד 9.9 טון")
+    vehicle_type_to_str[25] = ("משאית", "משא 10.0 עד 12.0 טון")
 
     def __init__(self):
         self.S1: Streets = aliased(Streets)
@@ -69,29 +71,28 @@ class InvolvedQuery:
         query = ParamFilterExp.add_params_filter(query, vals)
         # pylint: disable=no-member
         df = pd.read_sql_query(query.statement, query.session.bind)
-        df.rename(columns={
-            # 'accident_type': 'accident_type_hebrew',
-            # 'day_night': 'day_night_hebrew',
-            "multi_lane": "multi_lane_hebrew",
-            "one_lane": "one_lane_hebrew",
-            "road_type": "road_type_hebrew",
-            "road_width": "road_width_hebrew",
-            "speed_limit": "speed_limit_hebrew",
-            # "street1": "street1_hebrew",
-            # "street2": "street2_hebrew",
-            "location_accuracy": "location_accuracy_hebrew",
-            # "age_group": "age_group_hebrew",
-            # "injured_type": "injured_type_hebrew",
-            # "injury_severity": "injury_severity_hebrew",
-            # "population_type": "population_type_hebrew",
-            # "sex": "sex_hebrew",
-            "vehicle_vehicle_type": "vehicle_vehicle_type_hebrew",
+        df.rename(
+            columns={
+                # 'accident_type': 'accident_type_hebrew',
+                # 'day_night': 'day_night_hebrew',
+                # "multi_lane": "multi_lane_hebrew",
+                # "one_lane": "one_lane_hebrew",
+                # "road_type": "road_type_hebrew",
+                # "road_width": "road_width_hebrew",
+                # "speed_limit": "speed_limit_hebrew",
+                # "street1": "street1_hebrew",
+                # "street2": "street2_hebrew",
+                # "location_accuracy": "location_accuracy_hebrew",
+                # "age_group": "age_group_hebrew",
+                # "injured_type": "injured_type_hebrew",
+                # "injury_severity": "injury_severity_hebrew",
+                # "population_type": "population_type_hebrew",
+                # "sex": "sex_hebrew",
+                "vehicle_vehicle_type": "vehicle_vehicle_type_hebrew",
             },
             inplace=True,
-            )
-        data = df.to_dict(
-            orient="records"
-        )  # pylint: disable=no-member
+        )
+        data = df.to_dict(orient="records")  # pylint: disable=no-member
         [self.add_text(d) for d in data]
         return data
 
@@ -109,8 +110,7 @@ class InvolvedQuery:
                 OneLane.one_lane_hebrew,
                 SDAccident.road1.label("road1"),
                 SDAccident.road2.label("road2"),
-                (RoadSegments.from_name + " - " + RoadSegments.to_name).label(
-                    'road_segment_name'),
+                (RoadSegments.from_name + " - " + RoadSegments.to_name).label("road_segment_name"),
                 RoadType.road_type_hebrew,
                 RoadWidth.road_width_hebrew,
                 SpeedLimit.speed_limit_hebrew,
@@ -124,90 +124,137 @@ class InvolvedQuery:
                 InjuredType.injured_type_hebrew,
                 InjurySeverity.injury_severity_hebrew,
                 PopulationType.population_type_hebrew,
-                Sex.sex_hebrew
-            ).join(
+                SDInvolved.vehicle_vehicle_type.label("vehicle_vehicle_type_hebrew"),
+                Sex.sex_hebrew,
+            )
+            .join(
                 SDAccident,
                 and_(
                     SDInvolved.provider_code == SDAccident.provider_code,
                     SDInvolved.accident_id == SDAccident.accident_id,
                     SDInvolved.accident_year == SDAccident.accident_year,
                 ),
-            ).outerjoin(self.S1, and_(
-                SDAccident.street1 == self.S1.street,
-                SDAccident.accident_yishuv_symbol == self.S1.yishuv_symbol,
-                )
-            ).outerjoin(self.S2, and_(
-                SDAccident.street2 == self.S2.street,
-                SDAccident.accident_yishuv_symbol == self.S2.yishuv_symbol,
-                )
-            ).outerjoin(AccidentType, and_(
-                SDAccident.accident_type == AccidentType.id,
-                SDAccident.accident_year == AccidentType.year,
-                SDAccident.provider_code == AccidentType.provider_code,
-                )
-            ).outerjoin(DayNight, and_(
-                SDAccident.accident_type == DayNight.id,
-                SDAccident.accident_year == DayNight.year,
-                SDAccident.provider_code == DayNight.provider_code,
-                )
-            ).outerjoin(LocationAccuracy, and_(
-                SDAccident.accident_type == LocationAccuracy.id,
-                SDAccident.accident_year == LocationAccuracy.year,
-                SDAccident.provider_code == LocationAccuracy.provider_code,
-                )
-            ).outerjoin(MultiLane, and_(
-                SDAccident.accident_type == MultiLane.id,
-                SDAccident.accident_year == MultiLane.year,
-                SDAccident.provider_code == MultiLane.provider_code,
-                )
-            ).outerjoin(OneLane, and_(
-                SDAccident.accident_type == OneLane.id,
-                SDAccident.accident_year == OneLane.year,
-                SDAccident.provider_code == OneLane.provider_code,
-                )
-            ).outerjoin(RoadType, and_(
-                SDAccident.accident_type == RoadType.id,
-                SDAccident.accident_year == RoadType.year,
-                SDAccident.provider_code == RoadType.provider_code,
-                )
-            ).outerjoin(RoadWidth, and_(
-                SDAccident.accident_type == RoadWidth.id,
-                SDAccident.accident_year == RoadWidth.year,
-                SDAccident.provider_code == RoadWidth.provider_code,
-                )
-            ).outerjoin(SpeedLimit, and_(
-                SDAccident.accident_type == SpeedLimit.id,
-                SDAccident.accident_year == SpeedLimit.year,
-                SDAccident.provider_code == SpeedLimit.provider_code,
-                )
-            ).outerjoin(AgeGroup, and_(
-                SDAccident.accident_type == AgeGroup.id,
-                SDAccident.accident_year == AgeGroup.year,
-                SDAccident.provider_code == AgeGroup.provider_code,
-                )
-            ).outerjoin(InjuredType, and_(
-                SDAccident.accident_type == InjuredType.id,
-                SDAccident.accident_year == InjuredType.year,
-                SDAccident.provider_code == InjuredType.provider_code,
-                )
-            ).outerjoin(InjurySeverity, and_(
-                SDAccident.accident_type == InjurySeverity.id,
-                SDAccident.accident_year == InjurySeverity.year,
-                SDAccident.provider_code == InjurySeverity.provider_code,
-                )
-            ).outerjoin(PopulationType, and_(
-                SDAccident.accident_type == PopulationType.id,
-                SDAccident.accident_year == PopulationType.year,
-                SDAccident.provider_code == PopulationType.provider_code,
-                )
-            ).outerjoin(Sex, and_(
-                SDAccident.accident_type == Sex.id,
-                SDAccident.accident_year == Sex.year,
-                SDAccident.provider_code == Sex.provider_code,
-                )
-            ).outerjoin(City, SDAccident.accident_yishuv_symbol == City.yishuv_symbol
-            ).outerjoin(RoadSegments, SDAccident.road_segment_number == RoadSegments.segment
             )
+            .outerjoin(
+                self.S1,
+                and_(
+                    SDAccident.street1 == self.S1.street,
+                    SDAccident.accident_yishuv_symbol == self.S1.yishuv_symbol,
+                ),
+            )
+            .outerjoin(
+                self.S2,
+                and_(
+                    SDAccident.street2 == self.S2.street,
+                    SDAccident.accident_yishuv_symbol == self.S2.yishuv_symbol,
+                ),
+            )
+            .outerjoin(
+                AccidentType,
+                and_(
+                    SDAccident.accident_type == AccidentType.id,
+                    SDAccident.accident_year == AccidentType.year,
+                    SDAccident.provider_code == AccidentType.provider_code,
+                ),
+            )
+            .outerjoin(
+                DayNight,
+                and_(
+                    SDAccident.accident_type == DayNight.id,
+                    SDAccident.accident_year == DayNight.year,
+                    SDAccident.provider_code == DayNight.provider_code,
+                ),
+            )
+            .outerjoin(
+                LocationAccuracy,
+                and_(
+                    SDAccident.accident_type == LocationAccuracy.id,
+                    SDAccident.accident_year == LocationAccuracy.year,
+                    SDAccident.provider_code == LocationAccuracy.provider_code,
+                ),
+            )
+            .outerjoin(
+                MultiLane,
+                and_(
+                    SDAccident.accident_type == MultiLane.id,
+                    SDAccident.accident_year == MultiLane.year,
+                    SDAccident.provider_code == MultiLane.provider_code,
+                ),
+            )
+            .outerjoin(
+                OneLane,
+                and_(
+                    SDAccident.accident_type == OneLane.id,
+                    SDAccident.accident_year == OneLane.year,
+                    SDAccident.provider_code == OneLane.provider_code,
+                ),
+            )
+            .outerjoin(
+                RoadType,
+                and_(
+                    SDAccident.accident_type == RoadType.id,
+                    SDAccident.accident_year == RoadType.year,
+                    SDAccident.provider_code == RoadType.provider_code,
+                ),
+            )
+            .outerjoin(
+                RoadWidth,
+                and_(
+                    SDAccident.accident_type == RoadWidth.id,
+                    SDAccident.accident_year == RoadWidth.year,
+                    SDAccident.provider_code == RoadWidth.provider_code,
+                ),
+            )
+            .outerjoin(
+                SpeedLimit,
+                and_(
+                    SDAccident.accident_type == SpeedLimit.id,
+                    SDAccident.accident_year == SpeedLimit.year,
+                    SDAccident.provider_code == SpeedLimit.provider_code,
+                ),
+            )
+            .outerjoin(
+                AgeGroup,
+                and_(
+                    SDAccident.accident_type == AgeGroup.id,
+                    SDAccident.accident_year == AgeGroup.year,
+                    SDAccident.provider_code == AgeGroup.provider_code,
+                ),
+            )
+            .outerjoin(
+                InjuredType,
+                and_(
+                    SDAccident.accident_type == InjuredType.id,
+                    SDAccident.accident_year == InjuredType.year,
+                    SDAccident.provider_code == InjuredType.provider_code,
+                ),
+            )
+            .outerjoin(
+                InjurySeverity,
+                and_(
+                    SDAccident.accident_type == InjurySeverity.id,
+                    SDAccident.accident_year == InjurySeverity.year,
+                    SDAccident.provider_code == InjurySeverity.provider_code,
+                ),
+            )
+            .outerjoin(
+                PopulationType,
+                and_(
+                    SDAccident.accident_type == PopulationType.id,
+                    SDAccident.accident_year == PopulationType.year,
+                    SDAccident.provider_code == PopulationType.provider_code,
+                ),
+            )
+            .outerjoin(
+                Sex,
+                and_(
+                    SDAccident.accident_type == Sex.id,
+                    SDAccident.accident_year == Sex.year,
+                    SDAccident.provider_code == Sex.provider_code,
+                ),
+            )
+            .outerjoin(City, SDAccident.accident_yishuv_symbol == City.yishuv_symbol)
+            .outerjoin(RoadSegments, SDAccident.road_segment_number == RoadSegments.segment)
             # .filter(Column.__ge__(SDAccident.yishuv_symbol, 5000))
             # .filter(SDInvolved.id == 26833652)
             # .with_entities(
@@ -241,15 +288,48 @@ class InvolvedQuery:
         d["vehicles"] = self.vehicle_type_bit_2_heb(d["vehicles"])
         n = d["day_in_week_hebrew"]
         d["day_in_week_hebrew"] = self.day_in_week[n] if n else None
+        n = d["vehicle_vehicle_type_hebrew"]
+        d["vehicle_vehicle_type_hebrew"] = (
+            (
+                self.PEDESTRIAN_HEBREW
+                if n == self.PEDESTRIAN_IN_VEHICLE_TYPE_ENRICHED
+                else self.vehicle_type_to_str[n][1]
+            )
+            if n
+            else None
+        )
 
     @staticmethod
     def vehicle_type_bit_2_heb(bit_map: int) -> str:
         if bit_map == 0:
             return ""
         res = [
-            InvolvedQuery.vehicle_type_to_str[vehicle_type]
+            InvolvedQuery.vehicle_type_to_str[vehicle_type][0]
             for vehicle_type in [
-                1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 24, 25,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19,
+                21,
+                22,
+                23,
+                24,
+                25,
             ]
             if bit_map & (1 << vehicle_type) != 0
         ]

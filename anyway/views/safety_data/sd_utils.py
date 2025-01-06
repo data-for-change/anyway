@@ -8,6 +8,7 @@ from anyway.models import (
     Involved,
 )
 from anyway.app_and_db import app, db
+from anyway.views.safety_data.involved_query import InvolvedQuery
 
 
 def load_data():
@@ -83,10 +84,19 @@ def sd_load_data():
 def sd_load_involved():
     db.session.query(SDInvolved).delete()
     db.session.commit()
-    db.get_engine().execute(
-        SDInvolved.__table__.insert(),
-          [d for d in get_involved_data()]
-          )
+    rows = []
+    for d in get_involved_data():
+        rows.append(d)
+        if len(rows) == 1000:
+            db.get_engine().execute(
+                SDInvolved.__table__.insert(),
+                rows
+            )
+            rows = []
+    # db.get_engine().execute(
+        # SDInvolved.__table__.insert(),
+        #   [d for d in get_involved_data()]
+        #   )
     db.session.commit()
 
 def get_involved_data():
@@ -104,9 +114,10 @@ def get_involved_data():
                         Involved.injury_severity,
                         Involved.population_type,
                         Involved.sex,
+                        Involved.vehicle_type,
                         ):
         # .limit(100000):
-        yield{
+        yield {
                 "_id": d.id,
                 "accident_id": d.accident_id,
                 "accident_year": d.accident_year,
@@ -116,9 +127,11 @@ def get_involved_data():
                 "injury_severity": d.injury_severity,
                 "population_type": d.population_type,
                 "sex": d.sex,
-                "vehicle_vehicle_type_hebrew": 0, # todo
-                "vehicles": 0, # todo
-            }
+                "vehicle_vehicle_type": (
+                    InvolvedQuery.PEDESTRIAN_IN_VEHICLE_TYPE_ENRICHED
+                    if d.injured_type == 1 else d.vehicle_type
+                ),
+             }
 
 def sd_load_accident():
     sd_load_accident_main()

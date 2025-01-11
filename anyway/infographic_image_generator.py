@@ -29,6 +29,7 @@ def create_chrome_browser_session(newsflash_id):
         "profile.content_settings.exceptions.automatic_downloads.*.setting": 1,
     }
     options.add_experimental_option("prefs", prefs)
+    options.add_argument("--incognito")
 
     browser = webdriver.Remote(
         command_executor=selenium_hub_url,
@@ -146,3 +147,77 @@ class S3Uploader(S3DataClass):
         local_filename = os.path.basename(local_file_path)
         s3_filename = f"{newsflash_id}/{local_filename}"
         self.s3_bucket.upload_file(local_file_path, s3_filename)
+
+
+def stuff():
+    options = webdriver.ChromeOptions()
+    driver = webdriver.Chrome(options=options)
+    driver.execute_cdp_cmd("Network.enable", {})
+    print("miao")
+    # Create a listener to capture requests and responses
+    def capture_infographics_data(request_id, response_body):
+        try:
+            # Parse the JSON response
+            response_json = json.loads(response_body)
+
+            # Check if the response contains "meta"
+            if "meta" in response_json:
+                meta_data = response_json["meta"]
+                print(f"Meta Section: {meta_data}")
+
+                # Save to a JSON file
+                with open("meta_section.json", "w") as f:
+                    json.dump(meta_data, f, indent=4)
+                print("Meta section saved to meta_section.json")
+        except Exception as e:
+            print(f"Error processing response: {e}")
+
+    # Start listening for responses
+    saved_requests = {}
+
+    def on_response_received(event):
+        request_id = event["requestId"]
+        if "response" in event and "/api/infographics-data" in event["response"]["url"]:
+            # Save the request ID to fetch its body later
+            saved_requests[request_id] = event["response"]["url"]
+
+    def on_loading_finished(event):
+        request_id = event["requestId"]
+        if request_id in saved_requests:
+            # Get the response body
+            response_body = driver.execute_cdp_cmd("Network.getResponseBody", {"requestId": request_id})
+            capture_infographics_data(request_id, response_body.get("body", "{}"))
+
+    # Register CDP event listeners
+    driver.execute_script(
+        "const onNetworkEvent = arguments[0]; window.addEventListener('message', e => onNetworkEvent(e.data));",
+        on_response_received
+    )
+
+    # Navigate to the page
+    driver.get("https://media.anyway.co.il/newsflash/233429")
+
+    # Wait for some time to ensure the API request is captured
+    driver.implicitly_wait(10)
+
+    # Cleanup
+    driver.quit()
+
+
+import selenium.webdriver.common.devtools.v111 as devtools
+import trio
+
+
+def execute_cdp(driver: webdriver.Remote, cmd):
+    async def execute_cdp_async():
+        async with driver.bidi_connection() as session:
+            cdp_session = session.session
+            return await cdp_session.execute(cmd)
+    # It will have error if we use asyncio.run
+    # https://github.com/SeleniumHQ/selenium/issues/11244
+    return trio.run(execute_cdp_async)
+
+driver = create_chrome_browser_session(233429)
+# Use it this way:
+execute_cdp(driver, devtools.network.enable())
+mhtml = execute_cdp(driver, devtools.page.capture_snapshot())

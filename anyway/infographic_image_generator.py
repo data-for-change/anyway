@@ -29,6 +29,7 @@ def create_chrome_browser_session(newsflash_id):
         "profile.content_settings.exceptions.automatic_downloads.*.setting": 1,
     }
     options.add_experimental_option("prefs", prefs)
+    options.add_argument("--incognito")
 
     browser = webdriver.Remote(
         command_executor=selenium_hub_url,

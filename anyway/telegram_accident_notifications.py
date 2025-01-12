@@ -4,6 +4,7 @@ from anyway import secrets
 from anyway.models import TelegramForwardedMessages
 from anyway.utilities import trigger_airflow_dag
 from anyway.app_and_db import db
+from anyway.infographics_utils import get_infographics_data_by_newsflash
 import telebot
 import boto3
 import time
@@ -77,33 +78,9 @@ def publish_notification(newsflash_id, chat_id=TELEGRAM_CHANNEL_CHAT_ID):
     db.session.commit()
 
 
-def fetch_widgets_with_retries(newsflash_id, wait_times):
-    url = f"https://www.anyway.co.il/api/infographics-data?news_flash_id={newsflash_id}"
-    for attempt, wait_time in enumerate(wait_times):
-        try:
-            logging.debug(f"Attempt {attempt + 1}: Fetching data widgets for newsflash {newsflash_id}")
-            response = requests.get(url)
-            if response.ok:
-                response_json = response.json()
-                widgets = response_json.get("widgets", [])
-                if len(widgets) > 0:
-                    return widgets
-        except requests.exceptions.RequestException as e:
-            logging.debug(e)
-        time.sleep(wait_time)
-    raise RuntimeError(f"Failed to fetch data from {url}")
-
-
-def fetch_widgets(newsflash_id):
-    retry_timeouts = [10, 20, 30, 60]
-    widgets = fetch_widgets_with_retries(newsflash_id, retry_timeouts)
-    return [widget.get("name") for widget in widgets]
-
-
 def get_items_for_send(newsflash_id):
     items = []
-    retry_timeouts = [10, 20, 30, 60]
-    widgets = fetch_widgets_with_retries(newsflash_id, retry_timeouts)
+    widgets = get_infographics_data_by_newsflash(newsflash_id)["widgets"]
     transcription_by_widget_name = get_transcription_by_widget_name(widgets)
     urls_by_infographic_name = create_public_urls_for_infographics_images(str(newsflash_id))
     for widget in widgets:

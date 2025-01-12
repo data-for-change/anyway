@@ -265,3 +265,8 @@ def get_infographics_mock_data():
             mock_data[WIDGETS].append(widget)
     mock_data[WIDGETS] = sorted(mock_data[WIDGETS], key=lambda widget: widget[META]["rank"])
     return mock_data
+
+
+def get_infographics_data_by_newsflash(newsflash_id):
+    request_params = get_request_params_from_request_values({"news_flash_id": newsflash_id})
+    return get_infographics_data_for_location(request_params)

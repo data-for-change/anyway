@@ -78,6 +78,12 @@ class InvolvedQuery:
         query = ParamFilterExp.add_params_filter(query, vals)
         # pylint: disable=no-member
         df = pd.read_sql_query(query.statement, query.session.bind)
+        # df.rename(
+            # columns={
+                # "vehicle_type": "vehicle_vehicle_type_hebrew",
+            # },
+            # inplace=True,
+        # )
         data = df.to_dict(orient="records")  # pylint: disable=no-member
         [self.add_text(d) for d in data]
         return data
@@ -107,7 +113,7 @@ class InvolvedQuery:
                 SDAccident.longitude,
                 SDInvolved._id,
                 AgeGroup.age_group_hebrew,
-                SDInvolved.injured_type.label("injured_type_hebrew"),
+                InjuredType.injured_type_hebrew,
                 InjurySeverity.injury_severity_hebrew,
                 PopulationType.population_type_hebrew,
                 SDInvolved.vehicle_type.label("vehicle_vehicle_type_hebrew"),
@@ -260,6 +266,14 @@ class InvolvedQuery:
             )
         )
         d["injured_type_hebrew"] = self.get_injured_type_enriched_hebrew(injured_type, vehicle_type)
+        # d["injured_type_hebrew"] = (
+        #     f"{self.vehicle_type_to_str[vehicle_type][0]} - מעורב שלא נפגע" if not injured_type
+        #     else (f"{self.injured_type[injured_type]}-  "
+        #           if vehicle_type is not None else (
+
+        #     )
+        #     )
+        # )
 
     def get_injured_type_enriched_hebrew(self, injured_type: Optional[int], vehicle_type: Optional[int]) -> Optional[str]:
         vehicle_hebrew_short = self.vehicle_type_to_str[vehicle_type][0] if vehicle_type else None

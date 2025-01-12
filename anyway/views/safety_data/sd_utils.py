@@ -122,6 +122,7 @@ def get_involved_data():
                 "population_type": d.population_type,
                 "sex": d.sex,
                 "vehicle_type": d.vehicle_type,
+                # ),
              }
 
 def sd_load_accident():

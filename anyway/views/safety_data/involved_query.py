@@ -255,6 +255,16 @@ class InvolvedQuery:
         return query
 
     def add_text(self, d: dict) -> None:
+        # n = d["injury_severity_hebrew"]
+        # d["injury_severity_hebrew"] = self.injury_severity[n] if n else None
+        # n = d["sex_hebrew"]
+        # d["sex_hebrew"] = self.sex[n] if n else None
+        # n = d["age_group_hebrew"]
+        # d["age_group_hebrew"] = ("85+" if n == 99 else self.age_group[n]) if n else None
+        # n = d["injured_type_hebrew"]
+        # d["injured_type_hebrew"] = self.injured_type[n] if n else None
+        # n = d["population_type_hebrew"]
+        # d["population_type_hebrew"] = self.population_type[n] if n else None
         d["vehicles"] = self.vehicle_type_bit_2_heb(d["vehicles"])
         n = d["day_in_week_hebrew"]
         d["day_in_week_hebrew"] = self.day_in_week[n] if n else None

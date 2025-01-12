@@ -116,7 +116,6 @@ def get_involved_data():
                 "population_type": d.population_type,
                 "sex": d.sex,
                 "vehicle_type": d.vehicle_type,
-                # ),
              }
 
 def sd_load_accident():
@@ -178,6 +177,7 @@ def sd_load_accident_main():
                            AccidentMarkerView.latitude,
                            AccidentMarkerView.longitude,
                            )
+                           .limit(100000)
         ]
     )
     db.session.commit()

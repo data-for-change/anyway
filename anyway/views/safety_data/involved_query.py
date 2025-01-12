@@ -1,4 +1,5 @@
-from typing import List, Dict
+from typing import List, Dict, Optional
+import math
 import pandas as pd
 from sqlalchemy.orm import aliased
 from sqlalchemy import and_
@@ -32,6 +33,8 @@ from anyway.app_and_db import db
 class InvolvedQuery:
     PEDESTRIAN_IN_VEHICLE_TYPE_ENRICHED = 99
     PEDESTRIAN_HEBREW = "הולך רגל"
+    INJURED_ENRICHED_MULT_FACTOR = 1000
+    INJURED_ENRICHED_ADD_FACTOR = 100
     vehicle_type_to_str = [None for _ in range(1, 27)]
     vehicle_type_to_str[1] = ("רכב נוסעים פרטי", "רכב נוסעים פרטי")
     vehicle_type_to_str[2] = ("טרנזיט", "משא עד 3.5 טון - אחוד (טרנזיט)")
@@ -65,33 +68,16 @@ class InvolvedQuery:
         self.fill_text_tables()
 
     def get_data(self):
+        def f(v: List[str]) -> List[str]:
+            res = []
+            [res.extend(x.split(",")) for x in v]
+            return res
         params = request.values
-        vals = {k: params.getlist(key=k) for k in params.keys()}
+        vals = {k: f(params.getlist(key=k)) for k in params.keys()}
         query = self.get_base_query()
         query = ParamFilterExp.add_params_filter(query, vals)
         # pylint: disable=no-member
         df = pd.read_sql_query(query.statement, query.session.bind)
-        df.rename(
-            columns={
-                # 'accident_type': 'accident_type_hebrew',
-                # 'day_night': 'day_night_hebrew',
-                # "multi_lane": "multi_lane_hebrew",
-                # "one_lane": "one_lane_hebrew",
-                # "road_type": "road_type_hebrew",
-                # "road_width": "road_width_hebrew",
-                # "speed_limit": "speed_limit_hebrew",
-                # "street1": "street1_hebrew",
-                # "street2": "street2_hebrew",
-                # "location_accuracy": "location_accuracy_hebrew",
-                # "age_group": "age_group_hebrew",
-                # "injured_type": "injured_type_hebrew",
-                # "injury_severity": "injury_severity_hebrew",
-                # "population_type": "population_type_hebrew",
-                # "sex": "sex_hebrew",
-                "vehicle_vehicle_type": "vehicle_vehicle_type_hebrew",
-            },
-            inplace=True,
-        )
         data = df.to_dict(orient="records")  # pylint: disable=no-member
         [self.add_text(d) for d in data]
         return data
@@ -121,11 +107,13 @@ class InvolvedQuery:
                 SDAccident.longitude,
                 SDInvolved._id,
                 AgeGroup.age_group_hebrew,
-                InjuredType.injured_type_hebrew,
+                SDInvolved.injured_type.label("injured_type_hebrew"),
                 InjurySeverity.injury_severity_hebrew,
                 PopulationType.population_type_hebrew,
-                SDInvolved.vehicle_vehicle_type.label("vehicle_vehicle_type_hebrew"),
+                SDInvolved.vehicle_type.label("vehicle_vehicle_type_hebrew"),
                 Sex.sex_hebrew,
+                SDInvolved.vehicle_type.label("TEST-vehicle_type"),
+                SDInvolved.injured_type.label("TEST-injured_type"),
             )
             .join(
                 SDAccident,
@@ -255,49 +243,34 @@ class InvolvedQuery:
             )
             .outerjoin(City, SDAccident.accident_yishuv_symbol == City.yishuv_symbol)
             .outerjoin(RoadSegments, SDAccident.road_segment_number == RoadSegments.segment)
-            # .filter(Column.__ge__(SDAccident.yishuv_symbol, 5000))
-            # .filter(SDInvolved.id == 26833652)
-            # .with_entities(
-            #     SDAccident.accident_timestamp,
-            #     SDAccident.accident_type,
-            #     SDAccident.accident_year,
-            #     SDAccident.vehicles,
-            #     SDAccident.latitude,
-            #     SDAccident.longitude,
-            #     SDInvolved._id,
-            #     SDInvolved.age_group,
-            #     SDInvolved.injured_type,
-            #     SDInvolved.injury_severity,
-            #     SDInvolved.population_type,
-            #     SDInvolved.sex,
-            # )
         )
         return query
 
     def add_text(self, d: dict) -> None:
-        # n = d["injury_severity_hebrew"]
-        # d["injury_severity_hebrew"] = self.injury_severity[n] if n else None
-        # n = d["sex_hebrew"]
-        # d["sex_hebrew"] = self.sex[n] if n else None
-        # n = d["age_group_hebrew"]
-        # d["age_group_hebrew"] = ("85+" if n == 99 else self.age_group[n]) if n else None
-        # n = d["injured_type_hebrew"]
-        # d["injured_type_hebrew"] = self.injured_type[n] if n else None
-        # n = d["population_type_hebrew"]
-        # d["population_type_hebrew"] = self.population_type[n] if n else None
         d["vehicles"] = self.vehicle_type_bit_2_heb(d["vehicles"])
         n = d["day_in_week_hebrew"]
         d["day_in_week_hebrew"] = self.day_in_week[n] if n else None
-        n = d["vehicle_vehicle_type_hebrew"]
+        injured_type = d["injured_type_hebrew"]
+        vehicle_type = d["vehicle_vehicle_type_hebrew"]
+        vehicle_type = None if math.isnan(vehicle_type) else int(vehicle_type)
         d["vehicle_vehicle_type_hebrew"] = (
-            (
-                self.PEDESTRIAN_HEBREW
-                if n == self.PEDESTRIAN_IN_VEHICLE_TYPE_ENRICHED
-                else self.vehicle_type_to_str[n][1]
+            self.PEDESTRIAN_HEBREW if injured_type == 1 else (
+                self.vehicle_type_to_str[vehicle_type][1] if vehicle_type
+                else None
             )
-            if n
-            else None
         )
+        d["injured_type_hebrew"] = self.get_injured_type_enriched_hebrew(injured_type, vehicle_type)
+
+    def get_injured_type_enriched_hebrew(self, injured_type: Optional[int], vehicle_type: Optional[int]) -> Optional[str]:
+        vehicle_hebrew_short = self.vehicle_type_to_str[vehicle_type][0] if vehicle_type else None
+        injured_hebrew = self.injured_type[injured_type] if isinstance(injured_type, int) else None
+        if not injured_type:
+            return f"{vehicle_hebrew_short} - מעורב שלא נפגע"
+        elif vehicle_type is not None:
+            return f"{injured_hebrew.split(' - ')[0]} - {vehicle_hebrew_short}"
+        else:
+            return injured_hebrew
+
 
     @staticmethod
     def vehicle_type_bit_2_heb(bit_map: int) -> str:
@@ -420,12 +393,9 @@ class ParamFilterExp:
         "mn": {
             "col": SDAccident.accident_month,
         },
-        # "acc": {
-        #     "col": SDAccident.accident_type,
-        # },
-        # "vcl": {
-        #     "col": SDAccident.vehicle_types,
-        # },
+        "acc": {
+            "col": SDAccident.accident_type,
+        },
         "rt": {
             "col": SDAccident.road_type,
         },

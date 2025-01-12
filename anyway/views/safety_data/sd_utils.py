@@ -1,4 +1,5 @@
 import json
+from typing import Optional
 from sqlalchemy.orm import aliased
 from sqlalchemy import and_
 from flask import request, Response
@@ -55,8 +56,6 @@ def get_data():
         .join(AgeGroup, and_(Involved.age_group == AgeGroup.id,
                         Involved.accident_year == AgeGroup.year,
                         Involved.provider_code == AgeGroup.provider_code))
-        # .filter(AccidentMarkerView.yishuv_symbol == 5000)
-        # .filter(Involved.id == 26833652)
         .with_entities(
             Involved.id,
             AccidentMarkerView.accident_year,
@@ -93,10 +92,6 @@ def sd_load_involved():
                 rows
             )
             rows = []
-    # db.get_engine().execute(
-        # SDInvolved.__table__.insert(),
-        #   [d for d in get_involved_data()]
-        #   )
     db.session.commit()
 
 def get_involved_data():
@@ -116,7 +111,6 @@ def get_involved_data():
                         Involved.sex,
                         Involved.vehicle_type,
                         ):
-        # .limit(100000):
         yield {
                 "_id": d.id,
                 "accident_id": d.accident_id,
@@ -127,10 +121,7 @@ def get_involved_data():
                 "injury_severity": d.injury_severity,
                 "population_type": d.population_type,
                 "sex": d.sex,
-                "vehicle_vehicle_type": (
-                    InvolvedQuery.PEDESTRIAN_IN_VEHICLE_TYPE_ENRICHED
-                    if d.injured_type == 1 else d.vehicle_type
-                ),
+                "vehicle_type": d.vehicle_type,
              }
 
 def sd_load_accident():
@@ -192,7 +183,7 @@ def sd_load_accident_main():
                            AccidentMarkerView.latitude,
                            AccidentMarkerView.longitude,
                            )
-                           .limit(10000)
+                           .limit(100000)
         ]
     )
     db.session.commit()

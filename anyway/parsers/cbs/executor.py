@@ -89,6 +89,7 @@ from anyway.utilities import ItmToWGS84, time_delta, ImporterUI, truncate_tables
 from anyway.db_views import VIEWS
 from anyway.app_and_db import db
 from anyway.parsers.cbs.s3 import S3DataRetriever
+from anyway.views.safety_data import sd_utils
 
 street_map_type: Dict[int, List[dict]]
 
@@ -1122,6 +1123,9 @@ def main(batch_size, source, load_start_year=None):
         logging.debug("Finished Creating Hebrew DB Tables")
         recreate_table_for_location_extraction()
         logging.debug("Finished Recreating tables for location extraction")
+        logging.debug("Loading safety data tables")
+        sd_utils.sd_load_data()
+        logging.debug("Completed load of safety data tables")
     except Exception as ex:
         print("Traceback: {0}".format(traceback.format_exc()))
         raise CBSParsingFailed(message=str(ex))

@@ -12,6 +12,12 @@ from anyway.app_and_db import app, db
 from anyway.views.safety_data.involved_query import InvolvedQuery
 
 
+def load_data():
+    load_data = request.values.get("load-data")
+    if load_data:
+        return sd_load_data()
+
+
 def sd_involved_query_from_anyway_tables():
     S1: Streets = aliased(Streets)
     S2: Streets = aliased(Streets)
@@ -50,6 +56,8 @@ def sd_involved_query_from_anyway_tables():
         .join(AgeGroup, and_(Involved.age_group == AgeGroup.id,
                         Involved.accident_year == AgeGroup.year,
                         Involved.provider_code == AgeGroup.provider_code))
+        # .filter(AccidentMarkerView.yishuv_symbol == 5000)
+        # .filter(Involved.id == 26833652)
         .with_entities(
             Involved.id,
             AccidentMarkerView.accident_year,

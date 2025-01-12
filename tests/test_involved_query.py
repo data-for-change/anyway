@@ -1,5 +1,5 @@
 import unittest
-from anyway.views.safety_data.involved_query import ParamFilterExp, InvolvedQuery
+from anyway.views.safety_data.involved_query import InvolvedQuery
 
 class TestInvolvedQuery(unittest.TestCase):
     def test_vehicle_type_bit_2_heb(self):

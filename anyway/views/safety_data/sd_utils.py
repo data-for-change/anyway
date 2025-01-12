@@ -18,7 +18,7 @@ def load_data():
         return sd_load_data()
 
 
-def get_data():
+def sd_involved_query_from_anyway_tables():
     S1: Streets = aliased(Streets)
     S2: Streets = aliased(Streets)
     res = (
@@ -184,7 +184,6 @@ def sd_load_accident_main():
                            AccidentMarkerView.latitude,
                            AccidentMarkerView.longitude,
                            )
-                           .limit(100000)
         ]
     )
     db.session.commit()

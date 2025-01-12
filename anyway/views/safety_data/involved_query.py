@@ -32,6 +32,7 @@ from anyway.app_and_db import db
 
 class InvolvedQuery:
     PEDESTRIAN_IN_VEHICLE_TYPE_ENRICHED = 99
+    INVOLVED_NOT_INJURED_HEBERW = "מעורב שלא נפגע"
     PEDESTRIAN_HEBREW = "הולך רגל"
     INJURED_ENRICHED_MULT_FACTOR = 1000
     INJURED_ENRICHED_ADD_FACTOR = 100
@@ -114,6 +115,7 @@ class InvolvedQuery:
                 SDInvolved._id,
                 AgeGroup.age_group_hebrew,
                 InjuredType.injured_type_hebrew,
+                SDInvolved.injured_type.label("injured_type_short_hebrew"),
                 InjurySeverity.injury_severity_hebrew,
                 PopulationType.population_type_hebrew,
                 SDInvolved.vehicle_type.label("vehicle_vehicle_type_hebrew"),
@@ -256,16 +258,22 @@ class InvolvedQuery:
         d["vehicles"] = self.vehicle_type_bit_2_heb(d["vehicles"])
         n = d["day_in_week_hebrew"]
         d["day_in_week_hebrew"] = self.day_in_week[n] if n else None
-        injured_type = d["injured_type_hebrew"]
+        injured_type = d["TEST-injured_type"]
+        injured_type_hebrew = d["injured_type_hebrew"]
+        d["injured_type_short_hebrew"] = (
+            injured_type_hebrew.split(" - ")[0] if injured_type_hebrew
+            else self.INVOLVED_NOT_INJURED_HEBERW
+        )
         vehicle_type = d["vehicle_vehicle_type_hebrew"]
         vehicle_type = None if math.isnan(vehicle_type) else int(vehicle_type)
+        d["vehicle_type_short_hebrew"] = self.vehicle_type_to_str[vehicle_type][0] if vehicle_type else None
         d["vehicle_vehicle_type_hebrew"] = (
             self.PEDESTRIAN_HEBREW if injured_type == 1 else (
                 self.vehicle_type_to_str[vehicle_type][1] if vehicle_type
                 else None
             )
         )
-        d["injured_type_hebrew"] = self.get_injured_type_enriched_hebrew(injured_type, vehicle_type)
+        # d["injured_type_hebrew"] = self.get_injured_type_enriched_hebrew(injured_type, vehicle_type)
         # d["injured_type_hebrew"] = (
         #     f"{self.vehicle_type_to_str[vehicle_type][0]} - מעורב שלא נפגע" if not injured_type
         #     else (f"{self.injured_type[injured_type]}-  "

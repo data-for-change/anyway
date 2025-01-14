@@ -97,14 +97,40 @@ def send_infographics_to_telegram(root_message_id, newsflash_id, channel_of_init
     #to create a comment on the channel message, we need to send a reply to the
     #forwareded message in the discussion group.
     bot = telebot.TeleBot(secrets.get("BOT_TOKEN"))
+    sent_items = []
+    channel_type = "post verification" if channel_of_initial_message == TELEGRAM_POST_VERIFICATION_CHANNEL_CHAT_ID \
+        else "pre verification"
 
-    linked_group = telegram_linked_group_by_channel[channel_of_initial_message]
-    items_for_send = get_items_for_send(newsflash_id)
-    for url, text in items_for_send:
-        bot.send_photo(linked_group, url, reply_to_message_id=root_message_id, caption=text)
+    log_message = {
+        "event": "send infographics to telegram",
+        "newsflash_id": newsflash_id,
+        "root_message_id": root_message_id,
+        "channel_of_initial_message": channel_of_initial_message,
+        "channel_type": channel_type
+    }
+    try:
+        linked_group = telegram_linked_group_by_channel[channel_of_initial_message]
+        items_for_send = get_items_for_send(newsflash_id)
 
-    send_after_infographics_message(bot, root_message_id, newsflash_id, linked_group)
-    logging.info("notification send done")
+        for url, text in items_for_send:
+            bot.send_photo(linked_group, url, reply_to_message_id=root_message_id, caption=text)
+            sent_items.append((url, text))
+
+        send_after_infographics_message(bot, root_message_id, newsflash_id, linked_group)
+        log_message.update({
+            "status": "success",
+            "sent_count": len(sent_items)
+        })
+
+    except Exception as e:
+        log_message.update({
+            "sent_items": sent_items,
+            "sent_count": len(sent_items),
+            "status": "failure",
+            "error": str(e)
+        })
+        logging.error(json.dumps(log_message))
+        raise
 
 
 def extract_infographic_name_from_s3_object(s3_object_name):

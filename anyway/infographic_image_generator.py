@@ -133,11 +133,35 @@ def download_infographics_images(generated_images_names, newsflash_id, local_inf
 
 
 def upload_directory_to_s3(download_directory, newsflash_id):
-    s3uploader = S3Uploader()
-    path = f"{download_directory}/"
-    for filename in os.listdir(path):
-        s3uploader.upload_to_s3(f"{path}/{filename}", newsflash_id)
+    log_message = {
+        "event": "upload_to_s3",
+        "newsflash_id": newsflash_id
+    }
+    uploaded_files = []
+    try:
+        s3uploader = S3Uploader()
+        path = f"{download_directory}/"
+        filenames = os.listdir(path)
+        for filename in filenames:
+            s3uploader.upload_to_s3(f"{path}/{filename}", newsflash_id)
+            uploaded_files.append(filename)
 
+        log_message.update ({
+            "status": "success",
+            "file_count": len(filenames),
+            "files": filenames
+        })
+        logging.info(json.dumps(log_message))
+
+    except Exception as e:
+        log_message.update ({
+            "status": "failure",
+            "uploaded_files": uploaded_files,
+            "error": str(e),
+            "traceback": repr(e),
+        })
+        logging.error(json.dumps(log_message))
+        raise #raise exception again to fail dag
 
 class S3Uploader(S3DataClass):
     def __init__(self):

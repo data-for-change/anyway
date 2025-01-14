@@ -4,7 +4,7 @@ from anyway import secrets
 from anyway.models import TelegramForwardedMessages
 from anyway.utilities import trigger_airflow_dag
 from anyway.app_and_db import db
-from anyway.infographics_utils import get_infographics_data_by_newsflash
+from anyway.infographics_utils import get_infographics_data_by_newsflash, WIDGETS
 import telebot
 import boto3
 import time
@@ -131,7 +131,12 @@ def create_public_urls_for_infographics_images(folder_name):
 
 
 def trigger_generate_infographics_and_send_to_telegram(newsflash_id, pre_verification_chat=True):
-    dag_conf = {"news_flash_id": newsflash_id}
-    dag_conf["chat_id"] = TELEGRAM_CHANNEL_CHAT_ID if pre_verification_chat \
-        else TELEGRAM_POST_VERIFICATION_CHANNEL_CHAT_ID
-    trigger_airflow_dag("generate-and-send-infographics-images", dag_conf)
+    infographics_data = get_infographics_data_by_newsflash(newsflash_id)
+    if WIDGETS not in infographics_data:
+        logging.warning(f"no infographics to send for newsflash {newsflash_id}")
+    else:
+        logging.info(f"widgets found in json for {newsflash_id}, triggering dag")
+        dag_conf = {"news_flash_id": newsflash_id}
+        dag_conf["chat_id"] = TELEGRAM_CHANNEL_CHAT_ID if pre_verification_chat \
+            else TELEGRAM_POST_VERIFICATION_CHANNEL_CHAT_ID
+        trigger_airflow_dag("generate-and-send-infographics-images", dag_conf)

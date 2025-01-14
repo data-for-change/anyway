@@ -33,7 +33,7 @@ class InjuredCountBySeverityWidget(AllLocationsWidget):
         )
 
     def is_included(self) -> bool:
-        return self.items["total_injured_count"] > 0
+        return self.items.get("total_injured_count", 0) > 0
 
     @staticmethod
     def get_injured_count_by_severity(

@@ -27,7 +27,7 @@ class AccidentCountBySeverityWidget(AllLocationsWidget):
         )
 
     def is_included(self) -> bool:
-        return self.items["total_accidents_count"] > 0
+        return self.items.get("total_accidents_count", 0) > 0
 
     @staticmethod
     def get_accident_count_by_severity(location_info, start_time, end_time, resolution):

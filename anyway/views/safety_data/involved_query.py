@@ -68,13 +68,21 @@ class InvolvedQuery:
         self.S2: Streets = aliased(Streets)
         self.fill_text_tables()
 
-    def get_data(self):
+    def get_params(self) -> dict:
         def f(v: List[str]) -> List[str]:
             res = []
             [res.extend(x.split(",")) for x in v]
             return res
         params = request.values
         vals = {k: f(params.getlist(key=k)) for k in params.keys()}
+        return vals
+
+    def get_data(self):
+        def f(v: List[str]) -> List[str]:
+            res = []
+            [res.extend(x.split(",")) for x in v]
+            return res
+        vals = self.get_params()
         query = self.get_base_query()
         query = ParamFilterExp.add_params_filter(query, vals)
         # pylint: disable=no-member
@@ -241,7 +249,7 @@ class InvolvedQuery:
                     SDAccident.provider_code == PopulationType.provider_code,
                 ),
             )
-            .outerjoin(
+            .join(
                 Sex,
                 and_(
                     SDAccident.accident_type == Sex.id,

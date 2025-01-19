@@ -900,7 +900,6 @@ def fill_dictionary_tables(cbs_dictionary, provider_code, year):
                     + str(inner_k)
             )
             db.session.execute(sql_delete)
-            db.session.commit()
             sql_insert = (
                     "INSERT INTO "
                     + curr_table
@@ -918,8 +917,12 @@ def fill_dictionary_tables(cbs_dictionary, provider_code, year):
                     + " ON CONFLICT DO NOTHING"
             )
             db.session.execute(sql_insert)
-            db.session.commit()
-        logging.debug("Inserted/Updated dictionary values into table " + curr_table)
+    try:
+        db.session.commit()
+    except Exception as e:
+        logging.error(f"Error updating Dictionary tables: {e}")
+        db.session.rollback()
+    logging.debug("Inserted/Updated dictionary values into table " + curr_table)
     create_provider_code_table()
 
 
@@ -951,7 +954,11 @@ def create_provider_code_table():
                 "INSERT INTO " + provider_code_table + " VALUES (" + str(k) + "," + "'" + v + "'" + ")"
         )
         db.session.execute(sql_insert)
+    try:
         db.session.commit()
+    except Exception as e:
+        logging.error(f"Error updating table {provider_code_table}: {e}")
+        db.session.rollback()
 
 
 def receive_rollback(conn, **kwargs):

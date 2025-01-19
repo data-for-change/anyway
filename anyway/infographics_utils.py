@@ -212,8 +212,8 @@ def get_infographics_data_for_location(request_params: RequestParams) -> Dict:
     elif WIDGETS not in output:
         logging.error(f"get_infographics_data: 'widgets' key missing from output:{output}")
     else:
-        non_empty = list(filter(lambda x: x[DATA][ITEMS], output[WIDGETS]))
-        output[WIDGETS] = update_cache_results(request_params, non_empty)
+        updated_output = update_cache_results(request_params, output[WIDGETS])
+        output[WIDGETS] = list(filter(lambda x: x[DATA][ITEMS], updated_output))
     return output
 
 

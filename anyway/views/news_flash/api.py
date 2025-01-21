@@ -375,8 +375,10 @@ def update_news_flash_qualifying(id):
             new_location=new_location,
             new_qualification=new_location_qualifiction,
         )
+        VERIFIED_QUALIFICATIONS = [NewsflashLocationQualification.MANUAL.value,
+                                   NewsflashLocationQualification.VERIFIED.value]
         if os.environ.get("FLASK_ENV") == "production" and \
-                new_location_qualifiction == NewsflashLocationQualification.MANUAL.value and \
+                new_location_qualifiction in VERIFIED_QUALIFICATIONS and \
                 old_location_qualifiction != NewsflashLocationQualification.MANUAL.value:
             trigger_generate_infographics_and_send_to_telegram(id, False)
         return Response(status=HTTPStatus.OK)

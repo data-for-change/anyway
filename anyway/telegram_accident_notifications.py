@@ -4,6 +4,7 @@ from anyway import secrets
 from anyway.models import TelegramForwardedMessages
 from anyway.utilities import trigger_airflow_dag
 from anyway.app_and_db import db
+from anyway.infographics_utils import get_infographics_data_by_newsflash
 import telebot
 import boto3
 import time
@@ -50,11 +51,9 @@ def create_accident_text(newsflash_id):
     return f"{first_line}\n\n{newsflash['description']}"
 
 
-def fetch_transcription_by_widget_name(newsflash_id):
-    widgets_url = f"{ANYWAY_BASE_API_URL}/infographics-data?lang=he&news_flash_id={newsflash_id}&years_ago=5"
-    widgets_json = requests.get(widgets_url).json()
+def get_transcription_by_widget_name(widgets):
     transcription_by_widget_name = {widget["name"]: widget["data"]["text"]["transcription"]
-                                    for widget in widgets_json["widgets"]
+                                    for widget in widgets
                                     if "transcription" in widget["data"]["text"]}
     return transcription_by_widget_name
 
@@ -65,6 +64,8 @@ def send_after_infographics_message(bot, message_id_in_group, newsflash_id, link
     return bot.send_message(linked_group, message, reply_to_message_id=message_id_in_group)
 
 
+#this function sends the "root" message for the newsflash in telegram.
+#the flow continues when the telegram server sends a request to our /api/telegram/webhook
 def publish_notification(newsflash_id, chat_id=TELEGRAM_CHANNEL_CHAT_ID):
     accident_text = create_accident_text(newsflash_id)
     bot = telebot.TeleBot(secrets.get("BOT_TOKEN"))
@@ -77,22 +78,34 @@ def publish_notification(newsflash_id, chat_id=TELEGRAM_CHANNEL_CHAT_ID):
     db.session.commit()
 
 
+def get_items_for_send(newsflash_id):
+    items = []
+    widgets = get_infographics_data_by_newsflash(newsflash_id)["widgets"]
+    transcription_by_widget_name = get_transcription_by_widget_name(widgets)
+    urls_by_infographic_name = create_public_urls_for_infographics_images(str(newsflash_id))
+    for widget in widgets:
+        name = widget.get("name")
+        if name in urls_by_infographic_name:
+            url = urls_by_infographic_name.get(name)
+            text = transcription_by_widget_name.get(name)
+            items.append((url, text))
+    return items
+
+
 def send_infographics_to_telegram(root_message_id, newsflash_id, channel_of_initial_message):
     #every message in the channel is automatically forwarded to the linked discussion group.
     #to create a comment on the channel message, we need to send a reply to the
     #forwareded message in the discussion group.
     bot = telebot.TeleBot(secrets.get("BOT_TOKEN"))
 
-    transcription_by_widget_name = fetch_transcription_by_widget_name(newsflash_id)
-    urls_by_infographic_name = create_public_urls_for_infographics_images(str(newsflash_id))
-
     linked_group = telegram_linked_group_by_channel[channel_of_initial_message]
-    for infographic_name, url in urls_by_infographic_name.items():
-        text = transcription_by_widget_name[infographic_name] \
-            if infographic_name in transcription_by_widget_name else None
+    items_for_send = get_items_for_send(newsflash_id)
+    for url, text in items_for_send:
         bot.send_photo(linked_group, url, reply_to_message_id=root_message_id, caption=text)
+
     send_after_infographics_message(bot, root_message_id, newsflash_id, linked_group)
     logging.info("notification send done")
+
 
 def extract_infographic_name_from_s3_object(s3_object_name):
     left = s3_object_name.rindex("/")

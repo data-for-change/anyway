@@ -1,5 +1,6 @@
 from typing import List, Dict, Optional, Tuple, Any
 import math
+from copy import deepcopy, copy
 import pandas as pd
 from sqlalchemy.orm import aliased
 from sqlalchemy import and_
@@ -69,16 +70,16 @@ class InvolvedQuery_GB(InvolvedQuery):
     def add_gb_filter(self, query: Query, gb: str, gb2: Optional[str]) -> Query:
         c1 = GBFilt2Col.get_col(gb)
         if gb2 is None:
-            return (query
-                    .group_by(c1)
-                    # pylint: disable=no-member
-                    .with_entities(c1.label(gb), db.func.count(SDInvolved._id).label("count"))
+            return (
+                query.group_by(c1)
+                # pylint: disable=no-member
+                .with_entities(c1.label(gb), db.func.count(SDInvolved._id).label("count"))
             )
         c2 = GBFilt2Col.get_col(gb2)
-        return (query
-                .group_by(c1, c2)
-                # pylint: disable=no-member
-                .with_entities(c1, c2, db.func.count(SDInvolved._id).label("count"))
+        return (
+            query.group_by(c1, c2)
+            # pylint: disable=no-member
+            .with_entities(c1, c2, db.func.count(SDInvolved._id).label("count"))
         )
 
     @staticmethod
@@ -89,15 +90,76 @@ class InvolvedQuery_GB(InvolvedQuery):
             res.append({"_id": k, "count": [{"grp2": k1, "count": v1} for k1, v1 in v.items()]})
         return res
 
+
 class GBFilt2Col:
-    PFE = {
-        "year": {
-            "col": SDAccident.accident_year,
-        },
-        "sex": {
-            "col": Sex.sex_hebrew,
-        },
-    }
+    PFE = copy(ParamFilterExp.PFE)
+    PFE.update(
+        {
+            "year": {
+                "col": SDAccident.accident_year,
+            },
+            "sex": {
+                "col": Sex.sex_hebrew,
+            },
+            "ol": {
+                "col": OneLane.one_lane_hebrew,
+            },
+            "ml": {
+                "col": MultiLane.multi_lane_hebrew,
+            },
+            "age": {
+                "col": AgeGroup.age_group_hebrew,
+            },
+            "pt": {
+                "col": PopulationType.population_type_hebrew,
+            },
+            "mn": {
+                "col": SDAccident.accident_month,
+            },
+            "dn": {
+                "col": DayNight.day_night_hebrew,
+            },
+            "wd": {
+                "col": SDAccident.day_in_week,
+            },
+            "rt": {
+                "col": RoadType.road_type_hebrew,
+            },
+            "lca": {
+                "col": LocationAccuracy.location_accuracy_hebrew,
+            },
+            "city": {
+                "col": City.heb_name,
+            },
+            # "cpop": {
+            #     "col": City.population, # todo
+            # },
+            # "st": {
+            #     "col": self.S1.street_hebrew, # todo need to pass the S1 alias to here
+            # },
+            "rd": {
+                "col": SDAccident.road1,
+            },
+            "acc": {
+                "col": AccidentType.accident_type_hebrew,
+            },
+            "selfacc": {
+                "col": AccidentType.accident_type_hebrew,
+            },
+            "vcli": {
+                "col": SDAccident.vehicles, # todo
+            },
+            "sp": {
+                "col": SpeedLimit.speed_limit_hebrew,
+            },
+            "rw": {
+                "col": RoadWidth.road_width_hebrew,
+            },
+            "sev": {
+                "col": InjurySeverity.injury_severity_hebrew,
+            },
+        }
+    )
 
     @staticmethod
     def get_col(filt: str) -> Column:

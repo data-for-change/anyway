@@ -3,7 +3,7 @@ import math
 from copy import deepcopy, copy
 import pandas as pd
 from sqlalchemy.orm import aliased
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 from sqlalchemy.schema import Column
 from sqlalchemy.orm.query import Query
 import logging
@@ -39,6 +39,7 @@ GB2 = "gb2"
 class InvolvedQuery_GB(InvolvedQuery):
     def __init__(self):
         super().__init__()
+        self.gb_filt = GBFilt2Col(self.S1)
 
     def get_data(self) -> List[Dict[str, Optional[str]]]:
         vals = self.get_params()
@@ -56,7 +57,7 @@ class InvolvedQuery_GB(InvolvedQuery):
                 raise ValueError(msg)
             gb2 = gb2[0]
         query = self.get_base_query()
-        query = ParamFilterExp.add_params_filter(query, vals)
+        query = self.add_params_filter(query, vals)
         query = self.add_gb_filter(query, gb, gb2)
         # pylint: disable=no-member
         data = query.all()
@@ -68,14 +69,14 @@ class InvolvedQuery_GB(InvolvedQuery):
         return res
 
     def add_gb_filter(self, query: Query, gb: str, gb2: Optional[str]) -> Query:
-        c1 = GBFilt2Col.get_col(gb)
+        c1 = self.gb_filt.get_col(gb)
         if gb2 is None:
             return (
                 query.group_by(c1)
                 # pylint: disable=no-member
                 .with_entities(c1.label(gb), db.func.count(SDInvolved._id).label("count"))
             )
-        c2 = GBFilt2Col.get_col(gb2)
+        c2 = self.gb_filt.get_col(gb2)
         return (
             query.group_by(c1, c2)
             # pylint: disable=no-member
@@ -90,8 +91,48 @@ class InvolvedQuery_GB(InvolvedQuery):
             res.append({"_id": k, "count": [{"grp2": k1, "count": v1} for k1, v1 in v.items()]})
         return res
 
+    def add_params_filter(self, query, params: Dict[str, List[str]]):
+        pass_filters = {}
+        for k, v in params.items():
+            if k == "vcl":
+                query = self.add_vcl_filter(query, v)
+            else:
+                pass_filters[k] = v
+            # p = ParamFilterExp.PFE.get(k)
+            # if (
+            #     p is not None
+            #     and all([x.isdigit() for x in v])
+            #     and ("single" not in p or len(v) == 1)
+            # ):
+            #     f = (
+            #         ParamFilterExp.PFE[k]["op"]
+            #         if "op" in ParamFilterExp.PFE[k]
+            #         else (Column.__eq__ if len(v) == 1 else Column.in_)
+            #     )
+            #     val = v[0] if len(v) == 1 else v
+            #     query = query.filter(f(ParamFilterExp.PFE[k]["col"], val))
+            # else:
+            #     pass_filters[k] = v
+        return ParamFilterExp.add_params_filter(query, pass_filters)
+
+    def add_vcl_filter(self, query, values: List[str]):
+        expressions = []
+        for v in values:
+            if v.isdigit():
+                val = int(v)
+            else:
+                raise ValueError(f"{v}:invalid vcl filter value")
+            if val == 0:
+                expressions.append(SDInvolved.injured_type == 1)
+            else:
+                expressions.append(SDInvolved.vehicle_type == val)
+        query = query.filter(or_(*expressions))
+        return query
+
 
 class GBFilt2Col:
+    def __init__(self, s1_table):
+        self.s1_table = s1_table
     PFE = copy(ParamFilterExp.PFE)
     PFE.update(
         {
@@ -134,9 +175,6 @@ class GBFilt2Col:
             # "cpop": {
             #     "col": City.population, # todo
             # },
-            # "st": {
-            #     "col": self.S1.street_hebrew, # todo need to pass the S1 alias to here
-            # },
             "rd": {
                 "col": SDAccident.road1,
             },
@@ -161,10 +199,11 @@ class GBFilt2Col:
         }
     )
 
-    @staticmethod
-    def get_col(filt: str) -> Column:
-        if filt not in GBFilt2Col.PFE:
+    def get_col(self, filt: str) -> Column:
+        if filt == "st":
+            return self.s1_table.street_hebrew
+        elif filt not in self.PFE:
             msg = f"filter not recognized as group by: {filt}"
             logging.error(msg)
             raise ValueError(msg)
-        return GBFilt2Col.PFE[filt]["col"]
+        return self.PFE[filt]["col"]

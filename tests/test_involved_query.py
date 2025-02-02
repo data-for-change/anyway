@@ -1,6 +1,4 @@
 import unittest
-import sys
-import os
 from anyway.views.safety_data.involved_query import InvolvedQuery
 from anyway.views.safety_data.involved_query_gb import InvolvedQuery_GB
 

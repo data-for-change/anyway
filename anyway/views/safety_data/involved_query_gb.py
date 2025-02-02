@@ -98,21 +98,6 @@ class InvolvedQuery_GB(InvolvedQuery):
                 query = self.add_vcl_filter(query, v)
             else:
                 pass_filters[k] = v
-            # p = ParamFilterExp.PFE.get(k)
-            # if (
-            #     p is not None
-            #     and all([x.isdigit() for x in v])
-            #     and ("single" not in p or len(v) == 1)
-            # ):
-            #     f = (
-            #         ParamFilterExp.PFE[k]["op"]
-            #         if "op" in ParamFilterExp.PFE[k]
-            #         else (Column.__eq__ if len(v) == 1 else Column.in_)
-            #     )
-            #     val = v[0] if len(v) == 1 else v
-            #     query = query.filter(f(ParamFilterExp.PFE[k]["col"], val))
-            # else:
-            #     pass_filters[k] = v
         return ParamFilterExp.add_params_filter(query, pass_filters)
 
     def add_vcl_filter(self, query, values: List[str]):

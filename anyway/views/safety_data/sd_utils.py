@@ -1,6 +1,7 @@
 import json
-from typing import Optional
-from sqlalchemy.orm import aliased
+import logging
+from typing import Optional, Iterable, Dict, Any
+from sqlalchemy.orm import aliased, sessionmaker, Session
 from sqlalchemy import and_
 from flask import request, Response
 from anyway.models import (
@@ -10,6 +11,7 @@ from anyway.models import (
 )
 from anyway.app_and_db import app, db
 from anyway.views.safety_data.involved_query import InvolvedQuery
+from anyway.utilities import chunked_generator
 
 
 def load_data():
@@ -78,26 +80,29 @@ def sd_involved_query_from_anyway_tables():
     return Response(json.dumps(res, default=str), mimetype="application/json")
 
 def sd_load_data():
-    sd_load_accident()
-    sd_load_involved()
-    return Response(json.dumps("Tables loaded", default=str), mimetype="application/json")
+    conn = db.get_engine().connect()
+    trans = conn.begin()
+    sess = sessionmaker()(bind=conn)
+    try:
+        sess.query(SDInvolved).delete()
+        sess.query(SDAccident).delete()
+        sd_load_accident(sess)
+        sd_load_involved(sess)
+        trans.commit()
+        return Response(json.dumps("Tables loaded", default=str), mimetype="application/json")
+    except Exception as e:
+        trans.rollback()
+        logging.exception("Error loading data: %s", e)
+    finally:
+        sess.close()
+        conn.close()
 
-def sd_load_involved():
-    db.session.query(SDInvolved).delete()
-    db.session.commit()
-    rows = []
-    for d in get_involved_data():
-        rows.append(d)
-        if len(rows) == 1000:
-            db.get_engine().execute(
-                SDInvolved.__table__.insert(),
-                rows
-            )
-            rows = []
-    db.session.commit()
+def sd_load_involved(sess: Session):
+    for chunk in chunked_generator(get_involved_data(sess), 4069):
+            sess.execute(SDInvolved.__table__.insert(), chunk)
 
-def get_involved_data():
-    for d in db.session.query(Involved, SDAccident)\
+def get_involved_data(sess: Session):
+    for d in sess.query(Involved, SDAccident)\
         .join(SDAccident,
             and_(SDAccident.provider_code == Involved.provider_code,
                  SDAccident.accident_id == Involved.accident_id,
@@ -126,17 +131,16 @@ def get_involved_data():
                 "vehicle_type": d.vehicle_type,
              }
 
-def sd_load_accident():
-    sd_load_accident_main()
-    set_vehicles_in_sd_acc_table()
+def sd_load_accident(sess: Session):
+    sd_load_accident_main(sess)
+    set_vehicles_in_sd_acc_table(sess)
 
-def sd_load_accident_main():
-    from anyway.models import SDAccident, AccidentMarker, SDInvolved
-    db.session.query(SDAccident).delete()
-    db.session.commit()
-    db.get_engine().execute(
-        SDAccident.__table__.insert(),
-        [
+def sd_load_accident_main(sess: Session):
+    for chunk in chunked_generator(sd_get_accident_data(sess), 1024):
+        sess.execute(SDAccident.__table__.insert(), chunk)
+
+def sd_get_accident_data(sess: Session) -> Iterable[Dict[str, Any]]:
+    return (
             {
                 "accident_id": d.id,
                 "accident_year": d.accident_year,
@@ -161,7 +165,7 @@ def sd_load_accident_main():
                 "latitude": d.latitude,
                 "longitude": d.longitude,
             }
-            for d in db.session.query(AccidentMarkerView)
+            for d in sess.query(AccidentMarkerView)
             .with_entities(AccidentMarkerView.id,
                            AccidentMarkerView.accident_year,
                            AccidentMarkerView.provider_code,
@@ -185,13 +189,10 @@ def sd_load_accident_main():
                            AccidentMarkerView.latitude,
                            AccidentMarkerView.longitude,
                            )
-                           .limit(100000)
-        ]
     )
-    db.session.commit()
 
-def set_vehicles_in_sd_acc_table():
-    db.session.execute("""
+def set_vehicles_in_sd_acc_table(sess: Session):
+    sess.execute("""
         UPDATE safety_data_accident
         SET vehicles=subquery.vt_bitmap
         FROM
@@ -216,6 +217,3 @@ def set_vehicles_in_sd_acc_table():
           AND safety_data_accident.provider_code=subquery.provider_code
         """
     )
-    db.session.commit()
-
-

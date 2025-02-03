@@ -1568,10 +1568,10 @@ def safety_involved():
         return Response(json.dumps(res, default=str), mimetype="application/json")
     except ValueError as e:
         logging.exception(e)
-        return abort(http_client.BAD_REQUEST)
+        return Response(e.args[0], http_client.BAD_REQUEST)
     except Exception as e:
         logging.exception(e)
-        return abort(http_client.INTERNAL_SERVER_ERROR)
+        return Response(e.args[0], http_client.INTERNAL_SERVER_ERROR)
 
 
 @app.route("/involved/groupby", methods=["GET"])
@@ -1585,8 +1585,7 @@ def safety_involved_groupby():
         return Response(json.dumps(res, default=str), mimetype="application/json")
     except ValueError as e:
         logging.exception(e)
-        return abort(http_client.BAD_REQUEST)
+        return Response(e.args[0], http_client.BAD_REQUEST)
     except Exception as e:
         logging.exception(e)
-        return abort(http_client.INTERNAL_SERVER_ERROR)
-
+        return Response(e.args[0], http_client.INTERNAL_SERVER_ERROR)

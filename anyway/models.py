@@ -3083,20 +3083,6 @@ class TelegramForwardedMessages(Base):
     group_sent = Column(String(), nullable=False)
 
 
-class SDInvolved(Base):
-    __tablename__ = "safety_data_involved"
-    _id = Column(Integer(), primary_key=True)
-    accident_id = Column(BigInteger())
-    accident_year = Column(Integer())
-    provider_code = Column(Integer())
-    age_group = Column(Integer(), nullable=True)
-    injured_type = Column(Integer(), nullable=True)
-    injury_severity = Column(Integer(), nullable=True)
-    population_type = Column(Integer(), nullable=True)
-    sex = Column(Integer(), nullable=True)
-    vehicle_type = Column(Integer(), nullable=True)
-
-
 class SDAccident(Base):
     __tablename__ = "safety_data_accident"
     accident_id = Column(Integer(), primary_key=True, nullable=False)
@@ -3122,3 +3108,24 @@ class SDAccident(Base):
     vehicles = Column(Integer(), nullable=True)
     latitude = Column(Float(), nullable=True)
     longitude = Column(Float(), nullable=True)
+
+
+class SDInvolved(Base):
+    __tablename__ = "safety_data_involved"
+    _id = Column(Integer(), primary_key=True)
+    accident_id = Column(BigInteger())
+    accident_year = Column(Integer())
+    provider_code = Column(Integer())
+    age_group = Column(Integer(), nullable=True)
+    injured_type = Column(Integer(), nullable=True)
+    injury_severity = Column(Integer(), nullable=True)
+    population_type = Column(Integer(), nullable=True)
+    sex = Column(Integer(), nullable=True)
+    vehicle_type = Column(Integer(), nullable=True)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            [accident_id, provider_code, accident_year],
+            [SDAccident.accident_id, SDAccident.provider_code, SDAccident.accident_year],
+            ondelete="CASCADE",
+        ),
+    )

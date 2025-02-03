@@ -192,6 +192,9 @@ def sd_get_accident_data(sess: Session) -> Iterable[Dict[str, Any]]:
     )
 
 def set_vehicles_in_sd_acc_table(sess: Session):
+    """
+    vehicles is a bitmap of vehicle types involved in the accident
+    """
     sess.execute("""
         UPDATE safety_data_accident
         SET vehicles=subquery.vt_bitmap

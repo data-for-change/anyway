@@ -436,6 +436,9 @@ class ParamFilterExp:
         "acc": {
             "col": SDAccident.accident_type,
         },
+        "selfacc": {
+            "col": SDAccident.accident_type,
+        },
         "rt": {
             "col": SDAccident.road_type,
         },

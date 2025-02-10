@@ -7,5 +7,6 @@ urlobject
 pytest-selenium==4.0.1
 jsonschema
 mock
-factory_boy
+Faker==35.2.0
+factory_boy==3.3.3
 pytest-env==1.0.1

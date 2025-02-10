@@ -59,7 +59,11 @@ from anyway.models import (
     Streets,
     Comment,
     TelegramForwardedMessages,
-    NewsFlash
+    NewsFlash,
+    Sex,
+    RoadLight,
+    RoadType,
+    AgeGroup,
 )
 from anyway.request_params import get_request_params_from_request_values
 from anyway.views.news_flash.api import (
@@ -85,6 +89,10 @@ from anyway.views.user_system.api import *
 
 from anyway.views.comments.api import get_comments, create_comment
 from anyway.telegram_accident_notifications import send_infographics_to_telegram
+
+from anyway.views.safety_data import involved_query_gb
+from anyway.views.safety_data import involved_query
+from anyway.views.safety_data import city_query
 
 DEFAULT_MAPS_API_KEY = "AIzaSyDUIWsBLkvIUwzLHMHos9qFebyJ63hEG2M"
 
@@ -1551,3 +1559,45 @@ def test_roles_func():
 
 
 app.add_url_rule("/api/test_roles", endpoint=None, view_func=test_roles, methods=["GET"])
+
+
+@app.route("/involved", methods=["GET"])
+def safety_involved():
+    iq = involved_query.InvolvedQuery()
+    try:
+        res = iq.get_data()
+        return Response(json.dumps(res, default=str), mimetype="application/json")
+    except ValueError as e:
+        logging.exception(e)
+        return Response(e.args[0], http_client.BAD_REQUEST)
+    except Exception as e:
+        logging.exception(e)
+        return Response(e.args[0], http_client.INTERNAL_SERVER_ERROR)
+
+
+@app.route("/involved/groupby", methods=["GET"])
+def safety_involved_groupby():
+    iq = involved_query_gb.InvolvedQuery_GB()
+    try:
+        res = iq.get_data()
+        return Response(json.dumps(res, default=str), mimetype="application/json")
+    except ValueError as e:
+        logging.exception(e)
+        return Response(e.args[0], http_client.BAD_REQUEST)
+    except Exception as e:
+        logging.exception(e)
+        return Response(e.args[0], http_client.INTERNAL_SERVER_ERROR)
+
+
+@app.route("/city", methods=["GET"])
+def safety_city():
+    cq = city_query.CityQuery()
+    try:
+        res = cq.get_data()
+        return Response(json.dumps(res, default=str), mimetype="application/json")
+    except ValueError as e:
+        logging.exception(e)
+        return Response(e.args[0], http_client.BAD_REQUEST)
+    except Exception as e:
+        logging.exception(e)
+        return Response(e.args[0], http_client.INTERNAL_SERVER_ERROR)

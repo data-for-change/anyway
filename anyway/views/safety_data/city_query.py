@@ -19,6 +19,8 @@ class CityQuery:
         else:
             raise ValueError(f"Missing 'yishuv_symbol' or 'name_he' in params:{vals}")
         data = query.first()
+        if data is None:
+            raise ValueError(f"City not found for {vals}", 404)
         res = {
             "_id": data.yishuv_symbol,
             "name": data.heb_name,

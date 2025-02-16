@@ -1563,10 +1563,17 @@ app.add_url_rule("/api/test_roles", endpoint=None, view_func=test_roles, methods
 
 @app.route("/involved", methods=["GET"])
 def safety_involved():
+    chunk_size = 4096
     iq = involved_query.InvolvedQuery()
     try:
         res = iq.get_data()
-        return Response(json.dumps(res, default=str), mimetype="application/json")
+        j = json.dumps(res, default=str)
+        def generate():
+            chunked = [j[i : i + chunk_size] for i in range(0, len(j), chunk_size)]
+            for c in chunked:
+                yield c
+
+        return Response(generate(), mimetype='application/json')
     except ValueError as e:
         logging.exception(e)
         return Response(e.args[0], http_client.BAD_REQUEST)

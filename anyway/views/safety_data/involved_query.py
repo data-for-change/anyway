@@ -144,7 +144,7 @@ class InvolvedQuery:
             .outerjoin(
                 DayNight,
                 and_(
-                    SDAccident.accident_type == DayNight.id,
+                    SDAccident.day_night == DayNight.id,
                     SDAccident.accident_year == DayNight.year,
                     SDAccident.provider_code == DayNight.provider_code,
                 ),
@@ -152,7 +152,7 @@ class InvolvedQuery:
             .outerjoin(
                 LocationAccuracy,
                 and_(
-                    SDAccident.accident_type == LocationAccuracy.id,
+                    SDAccident.location_accuracy == LocationAccuracy.id,
                     SDAccident.accident_year == LocationAccuracy.year,
                     SDAccident.provider_code == LocationAccuracy.provider_code,
                 ),
@@ -160,7 +160,7 @@ class InvolvedQuery:
             .outerjoin(
                 MultiLane,
                 and_(
-                    SDAccident.accident_type == MultiLane.id,
+                    SDAccident.multi_lane == MultiLane.id,
                     SDAccident.accident_year == MultiLane.year,
                     SDAccident.provider_code == MultiLane.provider_code,
                 ),
@@ -168,7 +168,7 @@ class InvolvedQuery:
             .outerjoin(
                 OneLane,
                 and_(
-                    SDAccident.accident_type == OneLane.id,
+                    SDAccident.one_lane == OneLane.id,
                     SDAccident.accident_year == OneLane.year,
                     SDAccident.provider_code == OneLane.provider_code,
                 ),
@@ -176,7 +176,7 @@ class InvolvedQuery:
             .outerjoin(
                 RoadType,
                 and_(
-                    SDAccident.accident_type == RoadType.id,
+                    SDAccident.road_type == RoadType.id,
                     SDAccident.accident_year == RoadType.year,
                     SDAccident.provider_code == RoadType.provider_code,
                 ),
@@ -184,7 +184,7 @@ class InvolvedQuery:
             .outerjoin(
                 RoadWidth,
                 and_(
-                    SDAccident.accident_type == RoadWidth.id,
+                    SDAccident.road_width == RoadWidth.id,
                     SDAccident.accident_year == RoadWidth.year,
                     SDAccident.provider_code == RoadWidth.provider_code,
                 ),
@@ -192,7 +192,7 @@ class InvolvedQuery:
             .outerjoin(
                 SpeedLimit,
                 and_(
-                    SDAccident.accident_type == SpeedLimit.id,
+                    SDAccident.speed_limit == SpeedLimit.id,
                     SDAccident.accident_year == SpeedLimit.year,
                     SDAccident.provider_code == SpeedLimit.provider_code,
                 ),
@@ -200,41 +200,41 @@ class InvolvedQuery:
             .outerjoin(
                 AgeGroup,
                 and_(
-                    SDAccident.accident_type == AgeGroup.id,
-                    SDAccident.accident_year == AgeGroup.year,
-                    SDAccident.provider_code == AgeGroup.provider_code,
+                    SDInvolved.age_group == AgeGroup.id,
+                    SDInvolved.accident_year == AgeGroup.year,
+                    SDInvolved.provider_code == AgeGroup.provider_code,
                 ),
             )
             .outerjoin(
                 InjuredType,
                 and_(
-                    SDAccident.accident_type == InjuredType.id,
-                    SDAccident.accident_year == InjuredType.year,
-                    SDAccident.provider_code == InjuredType.provider_code,
+                    SDInvolved.injured_type == InjuredType.id,
+                    SDInvolved.accident_year == InjuredType.year,
+                    SDInvolved.provider_code == InjuredType.provider_code,
                 ),
             )
             .outerjoin(
                 InjurySeverity,
                 and_(
-                    SDAccident.accident_type == InjurySeverity.id,
-                    SDAccident.accident_year == InjurySeverity.year,
-                    SDAccident.provider_code == InjurySeverity.provider_code,
+                    SDInvolved.injury_severity == InjurySeverity.id,
+                    SDInvolved.accident_year == InjurySeverity.year,
+                    SDInvolved.provider_code == InjurySeverity.provider_code,
                 ),
             )
             .outerjoin(
                 PopulationType,
                 and_(
-                    SDAccident.accident_type == PopulationType.id,
-                    SDAccident.accident_year == PopulationType.year,
-                    SDAccident.provider_code == PopulationType.provider_code,
+                    SDInvolved.population_type == PopulationType.id,
+                    SDInvolved.accident_year == PopulationType.year,
+                    SDInvolved.provider_code == PopulationType.provider_code,
                 ),
             )
             .join(
                 Sex,
                 and_(
-                    SDAccident.accident_type == Sex.id,
-                    SDAccident.accident_year == Sex.year,
-                    SDAccident.provider_code == Sex.provider_code,
+                    SDInvolved.sex == Sex.id,
+                    SDInvolved.accident_year == Sex.year,
+                    SDInvolved.provider_code == Sex.provider_code,
                 ),
             )
             .outerjoin(City, SDAccident.accident_yishuv_symbol == City.yishuv_symbol)

@@ -1597,7 +1597,12 @@ def safety_city():
         return Response(json.dumps(res, default=str), mimetype="application/json")
     except ValueError as e:
         logging.exception(e)
-        return Response(e.args[0], http_client.BAD_REQUEST)
+        status = (
+            e.args[1]
+            if (len(e.args) > 1 and isinstance(e.args[1], int))
+            else http_client.BAD_REQUEST
+        )
+        return Response(e.args[0], status)
     except Exception as e:
         logging.exception(e)
         return Response(e.args[0], http_client.INTERNAL_SERVER_ERROR)

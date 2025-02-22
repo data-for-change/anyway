@@ -238,7 +238,7 @@ class InvolvedQuery:
                 ),
             )
             .outerjoin(City, SDAccident.accident_yishuv_symbol == City.yishuv_symbol)
-            .outerjoin(RoadSegments, SDAccident.road_segment_number == RoadSegments.segment)
+            .outerjoin(RoadSegments, SDAccident.road_segment_id == RoadSegments.segment_id)
         )
         return query
 
@@ -254,7 +254,10 @@ class InvolvedQuery:
             else self.INVOLVED_NOT_INJURED_HEBERW
         )
         vehicle_type = d["vehicle_vehicle_type_hebrew"]
-        vehicle_type = None if math.isnan(vehicle_type) else int(vehicle_type)
+        vehicle_type = (None
+                        if vehicle_type is None or math.isnan(vehicle_type)
+                        else int(vehicle_type)
+        )
         d["vehicle_type_short_hebrew"] = (
             self.vehicle_type_to_str[vehicle_type][0] if vehicle_type else None
         )
@@ -263,6 +266,9 @@ class InvolvedQuery:
             if injured_type == 1
             else (self.vehicle_type_to_str[vehicle_type][1] if vehicle_type else None)
         )
+        d["accident_timestamp"] = pd.to_datetime(d["accident_timestamp"]).strftime('%Y-%m-%d %H:%M')
+        d["latitude"] = f"{d['latitude']:.13f}"
+        d["longitude"] = f"{d['longitude']:.13f}"
 
     def get_injured_type_enriched_hebrew(
         self, injured_type: Optional[int], vehicle_type: Optional[int]
@@ -380,7 +386,7 @@ class ParamFilterExp:
             "col": [SDAccident.road1, SDAccident.road2],
         },
         "rds": {
-            "col": [SDAccident.road_segment_number],
+            "col": [SDAccident.road_segment_id],
         },
         "sex": {
             "col": [SDInvolved.sex],

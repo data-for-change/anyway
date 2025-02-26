@@ -61,6 +61,8 @@ class InvolvedQuery:
     vehicle_type_to_str[23] = ("אופניים חשמליים", "אופניים חשמליים")
     vehicle_type_to_str[24] = ("משאית", "משא 3.6 עד 9.9 טון")
     vehicle_type_to_str[25] = ("משאית", "משא 10.0 עד 12.0 טון")
+    PAGE_NUMBER_DEFAULT = 0
+    PAGE_SIZE_DEFAULT = 8192
 
     def __init__(self):
         self.S1: Streets = aliased(Streets)
@@ -70,12 +72,18 @@ class InvolvedQuery:
     def get_data(self):
         vals = sdu.get_params()
         query = self.get_base_query()
-        query = ParamFilterExp.add_params_filter(query, vals)
+        query, p_num, p_size  = ParamFilterExp.add_params_filter(query, vals)
         # pylint: disable=no-member
         df = pd.read_sql_query(query.statement, query.session.bind)
         data = df.to_dict(orient="records")  # pylint: disable=no-member
         [self.add_text(d) for d in data]
-        return data
+        return {
+            "data": data,
+            "pagination": {
+                "page_size": p_size,
+                "page_number": p_num,
+            }
+        }
 
     def get_base_query(self):
         query = (
@@ -431,22 +439,39 @@ class ParamFilterExp:
 
     @staticmethod
     def add_params_filter(query, params: Dict[str, List[str]]):
+        p_num = InvolvedQuery.PAGE_NUMBER_DEFAULT
+        p_size = InvolvedQuery.PAGE_SIZE_DEFAULT
+        param_ok = True
         for k, v in params.items():
-            p = ParamFilterExp.PFE.get(k)
-            if (
-                p is not None
-                and all([x.isdigit() for x in v])
-                and ("single" not in p or len(v) == 1)
-            ):
-                f = (
-                    ParamFilterExp.PFE[k]["op"]
-                    if "op" in ParamFilterExp.PFE[k]
-                    else (Column.__eq__ if len(v) == 1 else Column.in_)
-                )
-                val = v[0] if len(v) == 1 else v
-                query = query.filter(or_(*[f(x, val) for x in ParamFilterExp.PFE[k]["col"]]))
+            if k == "page_number":
+                if param_ok and len(v) == 1 and v[0].isdigit() and int(v[0]) >= 0:
+                    p_num = int(v[0])
+                else:
+                    param_ok = False
+            elif k == "page_size":
+                if param_ok and len(v) == 1 and v[0].isdigit() and int(v[0]) >= 0:
+                    p_size = int(v[0])
+                else:
+                    param_ok = False
             else:
+                p = ParamFilterExp.PFE.get(k)
+                if (
+                    p is not None
+                    and all([x.isdigit() for x in v])
+                    and ("single" not in p or len(v) == 1)
+                ):
+                    f = (
+                        ParamFilterExp.PFE[k]["op"]
+                        if "op" in ParamFilterExp.PFE[k]
+                        else (Column.__eq__ if len(v) == 1 else Column.in_)
+                    )
+                    val = v[0] if len(v) == 1 else v
+                    query = query.filter(or_(*[f(x, val) for x in ParamFilterExp.PFE[k]["col"]]))
+                else:
+                    param_ok = False
+            if not param_ok:
                 msg = f"Unsupported filter: {k}={v}{', param def:'+str(p) if p else ''}"
                 logging.error(msg)
                 raise ValueError(msg)
-        return query
+        query = query.offset(p_num * p_size).limit(p_size)
+        return query, p_num, p_size

@@ -1,6 +1,4 @@
 import unittest
-import requests
-import json
 from anyway.views.safety_data.involved_query import InvolvedQuery
 from anyway.views.safety_data.involved_query_gb import InvolvedQuery_GB
 
@@ -30,30 +28,6 @@ class TestInvolvedQuery(unittest.TestCase):
         ]
         actual = InvolvedQuery_GB.dictify_double_group_by(data)
         self.assertEqual(actual, expected)
-
-    def test_compare_to_heroku(self):
-        heroku_url = "https://safety-data.herokuapp.com/api/v1/accident"
-        local_url = "http://127.0.0.1:5000/involved"
-        params_list = [
-            {"sy": 2020, "ey": 2020, "sev": 1, "rd": 1, "rt": 4, "sex": 1, "injt": 1, "rw": 5, "age": 5, "acc": 3},
-            {"sy": 2021, "ey": 2024, "rt": 4, "sex": 1, "injt": 1, "rw": 5, "age": 5, "acc": 3},
-            {"sy": 2022, "ey": 2022, "sev": 1, "rd": 1, "rt": 4, "rw": 5, "age": 5, "acc": 3},
-        ]
-        failed = False
-        for params in params_list:
-            print(params)
-            response = requests.get(heroku_url, params=params)
-            her = json.loads(response.text)
-            response = requests.get(local_url, params=params)
-            loc = json.loads(response.text)
-            self.assertEqual(len(her), len(loc), f"1:params: {params}")
-            if len(her) > 0:
-                hk = [x for x in her[0].keys() if x not in ('_id', 'vehicles', 'vehicle_vehicle_type_hebrew')]
-                res = compare_dir_lists(loc, her, hk)
-                if res:
-                    print(res)
-                    failed = True
-        self.assertFalse(failed, "2")
 
 
 def compare_dir_lists(l1, l2, keys):

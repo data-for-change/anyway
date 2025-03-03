@@ -29,5 +29,19 @@ class TestInvolvedQuery(unittest.TestCase):
         actual = InvolvedQuery_GB.dictify_double_group_by(data)
         self.assertEqual(actual, expected)
 
+
+def compare_dir_lists(l1, l2, keys):
+    res = {}
+    l1k = {x["accident_timestamp"]: x for x in l1}
+    for d2 in l2:
+        d1 = l1k[d2["accident_timestamp"]]
+        eres = []
+        for k in keys:
+            if d1[k] != d2[k] and (d1[k] or d2[k]):
+                eres.append(( k, d1[k], d2[k]))
+        if len(eres) > 0:
+            res[d2["accident_timestamp"]] = eres
+    return res
+
 if __name__ == '__main__':
     unittest.main()

@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Safety Data API
   description: API for querying and grouping accidents' involved data and city information.
-  version: "1.0.0"
+  version: "1.0.1"
   contact:
     email: feedback@anyway.co.il
 servers:
@@ -51,6 +51,8 @@ paths:
         - $ref: '#/components/parameters/rw'
         - $ref: '#/components/parameters/ml'
         - $ref: '#/components/parameters/ol'
+        - $ref: '#/components/parameters/page_number'
+        - $ref: '#/components/parameters/page_size'
       responses:
         '200':
           description: |
@@ -58,9 +60,8 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Involved'
+                $ref: '#/components/schemas/Involved'
+
         '400':
           description: Invalid input parameters or missing required `gb` parameter for groupby.
   /involved/groupby:
@@ -69,7 +70,7 @@ paths:
         - involved_groupby
       summary: Retrieve grouped involved data
       description: |
-        Retrieve gropuped involved data based on various filters and groupby fields. 
+        Retrieve gropuped involved data based on various filters and groupby fields.
         The `gb` query parameter is mandatory to specify the field to group the results by.
         The `gb2` query parameter for second level filtering is optional
       operationId: getGroupedInvolvedData
@@ -300,39 +301,123 @@ components:
         items:
           type: integer
       description: List of One-lane identifiers (integers)
+    page_number:
+        in: query
+        name: page_number
+        schema:
+          type: integer
+    page_size:
+        in: query
+        name: page_size
+        schema:
+          type: integer
+        description: Number of recods, or less if end of data reached
 
   schemas:
     Involved:
       type: object
       properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Involved_item'
+        pagination:
+          type: object
+          properties:
+            page_number:
+              type: integer
+            page_size:
+              type: integer
+              example: 8192
+    Involved_item:
+      type: object
+      properties:
         _id:
           type: string
           example: 60800bb23319636a681d5305
-        injury_severity_hebrew:
-          type: string
-          example: הרוג
-        injured_type_hebrew:
-          type: string
-          example: נהג - רכב לא ידוע
-        age_group_hebrew:
-          type: string
-          example: 40-44
-        sex_hebrew:
-          type: string
-          example: זכר
-        population_type_hebrew:
-          type: string
-          example: זרים
-        vehicles:
-          type: string
-          example: אופניים חשמליים,מכונית
-        accident_year:
-          type: integer
-          example: 2019
         accident_timestamp:
           type: string
           format: date-time
           example: "2019-03-23 06:00"
+        accident_type_hebrew:
+          type: string
+          example: "פגיעה בהולך רגל"
+        accident_year:
+          type: integer
+          example: 2019
+        accident_yishub_name:
+          type: string
+          example: "חיפה"
+        day_in_week_hebrew:
+          type: string
+          example: "ראשון"
+        day_night_hebrew:
+          type: string
+          example: "יום"
+        location_accuracy_hebrew:
+          type: string
+          example: "עיגון מדויק"
+        multi_lane_hebrew:
+          type: string
+          example: "מיפרדה מסומנת בצבע"
+        one_lane_hebrew:
+          type: string
+          example: "חד סיטרי"
+        road1:
+          type: integer
+          example: 1
+        road2:
+          type: integer
+          example: 2
+        road_segment_name:
+          type: string
+          example: מחלף דרוריום - צמת קדימה
+        road_type_hebrew:
+          type: string
+          example: לא-עירונית לא בצומת
+        road_width_hebrew:
+          type: string
+          example: 10.5 עד 14 מטר
+        speed_limit_hebrew:
+          type: string
+          example: 80 קמ\"ש
+        street1_hebrew:
+          type: string
+          example: קבוץ גלויות
+        street2_hebrew:
+          type: string
+          example: קבוץ גלויות
+        age_group_hebrew:
+          type: string
+          example: 40-44
+        injured_type_hebrew:
+          type: string
+          example: נהג - רכב לא ידוע
+        injured_type_short_hebrew:
+          type: string
+          example: נהג - רכב לא ידוע
+          description: 'with the logic of injured_type_short_hebrew in [this query](https://redash.dataforchange.org.il/queries/174/source)'
+        injury_severity_hebrew:
+          type: string
+          example: הרוג
+        population_type_hebrew:
+          type: string
+          example: זרים
+        sex_hebrew:
+          type: string
+          example: זכר
+        vehicle_type_short_hebrew:
+          type: string
+          example: אופנוע 51 עד 125 סמ\"ק
+          description: '[by this mapping](https://redash.dataforchange.org.il/queries/170/source)'
+        vehicle_vehicle_type_hebrew:
+          type: string
+          example: אופנוע 51 עד 125 סמ\"ק
+          description: 'with the logic of vehicle_type_enriched_hebrew field in [this query](https://redash.dataforchange.org.il/queries/172/source)'
+        vehicles:
+          type: string
+          example: אופניים חשמליים,מכונית
+          description: 'with the logic of vehicles in [this query](https://redash.dataforchange.org.il/queries/173/source)'
         latitude:
           type: string
           example: "32.1020191794664"

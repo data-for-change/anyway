@@ -3102,7 +3102,7 @@ class SDAccident(Base):
     one_lane = Column(Integer(), nullable=True)
     road1 = Column(Integer(), nullable=True)
     road2 = Column(Integer(), nullable=True)
-    road_segment_number = Column(Integer(), nullable=True)
+    road_segment_id = Column(Integer(), nullable=True)
     road_type = Column(Integer(), nullable=True)
     road_width = Column(Integer(), nullable=True)
     speed_limit = Column(Integer(), nullable=True)

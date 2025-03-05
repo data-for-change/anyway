@@ -51,7 +51,7 @@ class InvolvedQuery_GB(InvolvedQuery):
                 raise ValueError(msg)
             gb2 = gb2[0]
         query = self.get_base_query()
-        query = self.add_params_filter(query, vals)
+        query, _, _ = self.add_params_filter(query, vals)
         query = self.add_gb_filter(query, gb, gb2)
         # pylint: disable=no-member
         data = query.all()

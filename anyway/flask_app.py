@@ -1514,6 +1514,7 @@ class GetAllSegementsBySegment(Resource):
 
 @api.route("/api/city", methods=["GET"])
 class Cities(Resource):
+    """Deprateced. Use /city instead"""
     @api.doc("get get all cities")
     def get(self):
         return City.get_all_cities()

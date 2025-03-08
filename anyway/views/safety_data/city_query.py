@@ -10,6 +10,15 @@ GB2 = "gb2"
 class CityQuery:
     def get_data(self) -> List[Dict[str, Optional[str]]]:
         vals = sdu.get_params()
+        if len(vals) == 0:
+            query = db.session.query(
+                City.yishuv_symbol,
+                City.heb_name,
+                City.eng_name
+                )
+            data = query.all()
+            res = [{"_id": x.yishuv_symbol, "name_he": x.heb_name, "name_en": x.eng_name} for x in data]
+            return res
         if "yishuv_symbol" in vals:
             val = vals["yishuv_symbol"][0]
             query = db.session.query(City).filter(City.yishuv_symbol == val)

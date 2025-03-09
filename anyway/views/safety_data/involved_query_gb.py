@@ -9,6 +9,7 @@ from anyway.models import (
     AgeGroup,
     City,
     DayNight,
+    InjuredType,
     InjurySeverity,
     LocationAccuracy,
     MultiLane,
@@ -209,6 +210,9 @@ class GBFilt2Col:
             },
             "sev": {
                 "col": InjurySeverity.injury_severity_hebrew,
+            },
+            "injt": {
+                "col": InjuredType.injured_type_hebrew,
             },
         }
     )

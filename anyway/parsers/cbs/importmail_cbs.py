@@ -162,4 +162,4 @@ class MailImporter:
 
 def main():
     importer = MailImporter()
-    importer.import_cbs_data_to_s3(emails_num=1)
+    importer.import_cbs_data_to_s3(emails_num=2)

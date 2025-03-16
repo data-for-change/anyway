@@ -1,4 +1,5 @@
 from typing import List, Dict, Optional
+from collections import namedtuple
 import math
 import pandas as pd
 from sqlalchemy.orm import aliased
@@ -35,32 +36,38 @@ class InvolvedQuery:
     PEDESTRIAN_HEBREW = "הולך רגל"
     INJURED_ENRICHED_MULT_FACTOR = 1000
     INJURED_ENRICHED_ADD_FACTOR = 100
-    vehicle_type_to_str = [None for _ in range(1, 27)]
-    vehicle_type_to_str[1] = ("רכב נוסעים פרטי", "רכב נוסעים פרטי")
-    vehicle_type_to_str[2] = ("טרנזיט", "משא עד 3.5 טון - אחוד (טרנזיט)")
-    vehicle_type_to_str[3] = ("טנדר", "משא עד 3.5 טון - לא אחוד (טנדר)")
-    vehicle_type_to_str[4] = ("משאית", "משא 3.6 עד 12.0 טון")
-    vehicle_type_to_str[5] = ("משאית", "משא 12.1 עד 15.9 טון")
-    vehicle_type_to_str[6] = ("משאית", "משא 16.0 עד 33.9 טון")
-    vehicle_type_to_str[7] = ("משאית", "משא 34.0+ טון")
-    vehicle_type_to_str[8] = ("אופנוע", 'אופנוע עד 50 סמ"ק')
-    vehicle_type_to_str[9] = ("אופנוע", 'אופנוע 51 עד 125 סמ"ק')
-    vehicle_type_to_str[10] = ("אופנוע", 'אופנוע 126 עד 400 סמ"ק')
-    vehicle_type_to_str[11] = ("אוטובוס", 'אופנוע 126 עד 400 סמ"ק')
-    vehicle_type_to_str[12] = ("מונית", "מונית")
-    vehicle_type_to_str[13] = ("רכב עבודה", "רכב עבודה")
-    vehicle_type_to_str[14] = ("טרקטור", "טרקטור")
-    vehicle_type_to_str[15] = ("אופניים", "אופניים")
-    vehicle_type_to_str[16] = ("רכבת", "רכבת")
-    vehicle_type_to_str[17] = ("אחר ולא ידוע", "אחר ולא ידוע")
-    vehicle_type_to_str[18] = ("אוטובוס", "אוטובוס זעיר")
-    vehicle_type_to_str[19] = ("אופנוע", 'אופנוע 401 סמ"ק ומעלה')
-    vehicle_type_to_str[20] = (None, None)
-    vehicle_type_to_str[21] = ("קורקינט חשמלי", "קורקינט חשמלי")
-    vehicle_type_to_str[22] = ("קלנועית חשמלית", "קלנועית חשמלית")
-    vehicle_type_to_str[23] = ("אופניים חשמליים", "אופניים חשמליים")
-    vehicle_type_to_str[24] = ("משאית", "משא 3.6 עד 9.9 טון")
-    vehicle_type_to_str[25] = ("משאית", "משא 10.0 עד 12.0 טון")
+    """Holds the mapping of vehicle type to string representation, where:
+    - The first element is the short representation, named 'vehicle_type_short_hebrew'
+    - The second element is the long representation, named 'vehicle_type_hebrew'"""
+    VehicleTypeHebrew = namedtuple("VehicleTypeHebrew", ["short", "full"])
+    # to support group by vcl (vehicle_vehicle_type)
+    vehicle_type_to_str: List[VehicleTypeHebrew] = [None for _ in range(1, 27)]
+    vehicle_type_to_str[0] = VehicleTypeHebrew(None, PEDESTRIAN_HEBREW)
+    vehicle_type_to_str[1] = VehicleTypeHebrew("רכב נוסעים פרטי", "רכב נוסעים פרטי")
+    vehicle_type_to_str[2] = VehicleTypeHebrew("טרנזיט", "משא עד 3.5 טון - אחוד (טרנזיט)")
+    vehicle_type_to_str[3] = VehicleTypeHebrew("טנדר", "משא עד 3.5 טון - לא אחוד (טנדר)")
+    vehicle_type_to_str[4] = VehicleTypeHebrew("משאית", "משא 3.6 עד 12.0 טון")
+    vehicle_type_to_str[5] = VehicleTypeHebrew("משאית", "משא 12.1 עד 15.9 טון")
+    vehicle_type_to_str[6] = VehicleTypeHebrew("משאית", "משא 16.0 עד 33.9 טון")
+    vehicle_type_to_str[7] = VehicleTypeHebrew("משאית", "משא 34.0+ טון")
+    vehicle_type_to_str[8] = VehicleTypeHebrew("אופנוע", 'אופנוע עד 50 סמ"ק')
+    vehicle_type_to_str[9] = VehicleTypeHebrew("אופנוע", 'אופנוע 51 עד 125 סמ"ק')
+    vehicle_type_to_str[10] = VehicleTypeHebrew("אופנוע", 'אופנוע 126 עד 400 סמ"ק')
+    vehicle_type_to_str[11] = VehicleTypeHebrew("אוטובוס", 'אופנוע 126 עד 400 סמ"ק')
+    vehicle_type_to_str[12] = VehicleTypeHebrew("מונית", "מונית")
+    vehicle_type_to_str[13] = VehicleTypeHebrew("רכב עבודה", "רכב עבודה")
+    vehicle_type_to_str[14] = VehicleTypeHebrew("טרקטור", "טרקטור")
+    vehicle_type_to_str[15] = VehicleTypeHebrew("אופניים", "אופניים")
+    vehicle_type_to_str[16] = VehicleTypeHebrew("רכבת", "רכבת")
+    vehicle_type_to_str[17] = VehicleTypeHebrew("אחר ולא ידוע", "אחר ולא ידוע")
+    vehicle_type_to_str[18] = VehicleTypeHebrew("אוטובוס", "אוטובוס זעיר")
+    vehicle_type_to_str[19] = VehicleTypeHebrew("אופנוע", 'אופנוע 401 סמ"ק ומעלה')
+    vehicle_type_to_str[20] = VehicleTypeHebrew(None, None)
+    vehicle_type_to_str[21] = VehicleTypeHebrew("קורקינט חשמלי", "קורקינט חשמלי")
+    vehicle_type_to_str[22] = VehicleTypeHebrew("קלנועית חשמלית", "קלנועית חשמלית")
+    vehicle_type_to_str[23] = VehicleTypeHebrew("אופניים חשמליים", "אופניים חשמליים")
+    vehicle_type_to_str[24] = VehicleTypeHebrew("משאית", "משא 3.6 עד 9.9 טון")
+    vehicle_type_to_str[25] = VehicleTypeHebrew("משאית", "משא 10.0 עד 12.0 טון")
     PAGE_NUMBER_DEFAULT = 0
     PAGE_SIZE_DEFAULT = 8192
 
@@ -114,7 +121,9 @@ class InvolvedQuery:
                 SDInvolved.injured_type.label("injured_type_short_hebrew"),
                 InjurySeverity.injury_severity_hebrew,
                 PopulationType.population_type_hebrew,
-                SDInvolved.vehicle_type.label("vehicle_vehicle_type_hebrew"),
+                (0 if SDInvolved.injured_type == 1 else SDInvolved.vehicle_type).label(
+                    "vehicle_vehicle_type_hebrew"
+                ),
                 Sex.sex_hebrew,
                 SDInvolved.vehicle_type.label("TEST-vehicle_type"),
                 SDInvolved.injured_type.label("TEST-injured_type"),
@@ -269,12 +278,12 @@ class InvolvedQuery:
             None if vehicle_type is None or math.isnan(vehicle_type) else int(vehicle_type)
         )
         d["vehicle_type_short_hebrew"] = (
-            self.vehicle_type_to_str[vehicle_type][0] if vehicle_type else None
+            self.vehicle_type_to_str[vehicle_type].short if vehicle_type else None
         )
         d["vehicle_vehicle_type_hebrew"] = (
             self.PEDESTRIAN_HEBREW
             if injured_type == 1
-            else (self.vehicle_type_to_str[vehicle_type][1] if vehicle_type else None)
+            else (self.vehicle_type_to_str[vehicle_type].full if vehicle_type else None)
         )
         d["accident_timestamp"] = pd.to_datetime(d["accident_timestamp"]).strftime("%Y-%m-%d %H:%M")
         for k in ["latitude", "longitude"]:
@@ -286,7 +295,9 @@ class InvolvedQuery:
     def get_injured_type_enriched_hebrew(
         self, injured_type: Optional[int], vehicle_type: Optional[int]
     ) -> Optional[str]:
-        vehicle_hebrew_short = self.vehicle_type_to_str[vehicle_type][0] if vehicle_type else None
+        vehicle_hebrew_short = (
+            self.vehicle_type_to_str[vehicle_type].short if vehicle_type else None
+        )
         injured_hebrew = self.injured_type[injured_type] if isinstance(injured_type, int) else None
         if not injured_type:
             return f"{vehicle_hebrew_short} - מעורב שלא נפגע"

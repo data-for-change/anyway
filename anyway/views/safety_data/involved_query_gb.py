@@ -1,6 +1,6 @@
 from typing import List, Dict, Optional, Tuple, Any
 from copy import copy
-from sqlalchemy import or_
+from sqlalchemy import or_, case
 from sqlalchemy.schema import Column
 from sqlalchemy.orm.query import Query
 import logging
@@ -9,6 +9,7 @@ from anyway.models import (
     AgeGroup,
     City,
     DayNight,
+    InjuredType,
     InjurySeverity,
     LocationAccuracy,
     MultiLane,
@@ -54,12 +55,13 @@ class InvolvedQuery_GB(InvolvedQuery):
         query, _, _ = self.add_params_filter(query, vals)
         query = self.add_gb_filter(query, gb, gb2)
         # pylint: disable=no-member
-        data = query.all()
+        dat = query.all()
+        add_text_f = self.add_gb_text if gb2 is None else self.add_gb2_text
+        data = add_text_f(dat, gb, gb2)
         if gb2 is None:
             res = [{"_id": x[0], "count": x[1]} for x in data]
         else:
             res = self.dictify_double_group_by(data)
-        # [self.add_text(d) for d in data]
         return res
 
     def add_gb_filter(self, query: Query, gb: str, gb2: Optional[str]) -> Query:
@@ -76,6 +78,23 @@ class InvolvedQuery_GB(InvolvedQuery):
             # pylint: disable=no-member
             .with_entities(c1, c2, db.func.count(SDInvolved._id).label("count"))
         )
+
+    def add_gb_text(self, d: List[Tuple], gb: str, gb2: Optional[str]) -> List[Tuple]:
+        if gb == "vcl":
+            res = [(self.vehicle_type_to_str[x[0]].full, x[1]) for x in d]
+        else:
+            res = d
+        return res
+
+    def add_gb2_text(self, d: List[Tuple], gb: str, gb2: Optional[str]) -> List[Tuple]:
+        if gb == "vcl":
+            res = [
+                (self.vehicle_type_to_str[x[0]].full if x[0] is not None else None, x[1], x[2])
+                for x in d
+            ]
+        else:
+            res = d
+        return res
 
     @staticmethod
     def dictify_double_group_by(data: List[Tuple[Any, Any, Any]]) -> List[Dict[str, Any]]:
@@ -198,6 +217,9 @@ class GBFilt2Col:
             "selfacc": {
                 "col": AccidentType.accident_type_hebrew,
             },
+            "vcl": {
+                "col": case([(SDInvolved.injured_type == 1, 0)], else_=SDInvolved.vehicle_type),
+            },
             "vcli": {
                 "col": SDAccident.vehicles,
             },
@@ -209,6 +231,9 @@ class GBFilt2Col:
             },
             "sev": {
                 "col": InjurySeverity.injury_severity_hebrew,
+            },
+            "injt": {
+                "col": InjuredType.injured_type_hebrew,
             },
         }
     )

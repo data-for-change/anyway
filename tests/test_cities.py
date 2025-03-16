@@ -4,7 +4,6 @@ import json
 from anyway.parsers.cities import UpdateCitiesFromDataGov
 
 class TestUpdateCitiesFromDataGov(unittest.TestCase):
-    # ...existing code...
 
     @patch('anyway.parsers.cities.requests.Session.get')
     def test_add_osm_data(self, mock_get):

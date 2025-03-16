@@ -260,7 +260,10 @@ components:
         type: array
         items:
           type: integer
-      description: List of vehicle type identifiers (integers)
+      description: |
+            List of vehicle_vehicle_type identifiers (integers)
+            Note that the vehicle_vehicle_type field is enriched with the logic of vehicle_type_enriched_hebrew field in [this query](https://redash.dataforchange.org.il/queries/172/source)
+            filter by `0` means  `הולך רגל`)
     rt:
       in: query
       name: rt

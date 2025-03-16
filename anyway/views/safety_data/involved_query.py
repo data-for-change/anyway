@@ -53,7 +53,7 @@ class InvolvedQuery:
     vehicle_type_to_str[8] = VehicleTypeHebrew("אופנוע", 'אופנוע עד 50 סמ"ק')
     vehicle_type_to_str[9] = VehicleTypeHebrew("אופנוע", 'אופנוע 51 עד 125 סמ"ק')
     vehicle_type_to_str[10] = VehicleTypeHebrew("אופנוע", 'אופנוע 126 עד 400 סמ"ק')
-    vehicle_type_to_str[11] = VehicleTypeHebrew("אוטובוס", 'אופנוע 126 עד 400 סמ"ק')
+    vehicle_type_to_str[11] = VehicleTypeHebrew("אוטובוס", "אוטובוס")
     vehicle_type_to_str[12] = VehicleTypeHebrew("מונית", "מונית")
     vehicle_type_to_str[13] = VehicleTypeHebrew("רכב עבודה", "רכב עבודה")
     vehicle_type_to_str[14] = VehicleTypeHebrew("טרקטור", "טרקטור")

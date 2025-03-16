@@ -49,6 +49,28 @@ class TestInvolvedQuery(unittest.TestCase):
         actual = InvolvedQuery_GB.dictify_double_group_by(data)
         self.assertEqual(actual, expected)
 
+    def test_e2e(self):
+        test_client = flask_app.test_client()
+
+        actual = test_client.get("/involved?sy=2014&ey=2014&sex=2&age=15&injt=1"
+                                    "&sev=2&st=2551")
+        self.assertEqual("200 OK", actual.status, "3")
+        self.maxDiff = None
+        res = actual.json["data"][0]
+        res.pop("street1_hebrew")
+        self.assertEqual(self.involved_result, res, "4")
+
+        expected = [{'_id': 2014,
+                    'count': [{'grp2': 'מרכז דרך', 'count': 691},
+                                {'grp2': 'מרכז ישוב', 'count': 55},
+                                {'grp2': 'עיגון מדויק', 'count': 1844}
+                                ]
+                    }
+        ]
+        actual = test_client.get("/involved/groupby?sy=2014&ey=2014&gb=year&gb2=lca&city=5000,1")
+        self.assertEqual("200 OK", actual.status, "5")
+        self.assertEqual(expected, actual.json, "6")
+
 
 def compare_dir_lists(l1, l2, keys):
     res = {}
@@ -62,28 +84,6 @@ def compare_dir_lists(l1, l2, keys):
         if len(eres) > 0:
             res[d2["accident_timestamp"]] = eres
     return res
-
-def test_e2e(self):
-    test_client = flask_app.test_client()
-
-    actual = test_client.get("/involved?sy=2014&ey=2014&sex=2&age=15&injt=1"
-                                "&sev=2&st=2551")
-    self.assertEqual("200 OK", actual.status, "3")
-    self.maxDiff = None
-    res = actual.json["data"][0]
-    res.pop("street1_hebrew")
-    self.assertEqual(self.involved_result, res, "4")
-
-    expected = [{'_id': 2014,
-                'count': [{'grp2': 'מרכז דרך', 'count': 691},
-                            {'grp2': 'מרכז ישוב', 'count': 55},
-                            {'grp2': 'עיגון מדויק', 'count': 1844}
-                            ]
-                }
-    ]
-    actual = test_client.get("/involved/groupby?sy=2014&ey=2014&gb=year&gb2=lca&city=5000,1")
-    self.assertEqual("200 OK", actual.status, "5")
-    self.assertEqual(expected, actual.json, "6")
 
 if __name__ == '__main__':
     unittest.main()

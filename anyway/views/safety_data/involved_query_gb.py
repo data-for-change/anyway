@@ -56,8 +56,7 @@ class InvolvedQuery_GB(InvolvedQuery):
         query = self.add_gb_filter(query, gb, gb2)
         # pylint: disable=no-member
         dat = query.all()
-        add_text_f = self.add_gb_text if gb2 is None else self.add_gb2_text
-        data = add_text_f(dat, gb, gb2)
+        data = self.add_gb_text(dat, gb, gb2)
         if gb2 is None:
             res = [{"_id": x[0], "count": x[1]} for x in data]
         else:
@@ -81,7 +80,12 @@ class InvolvedQuery_GB(InvolvedQuery):
 
     def add_gb_text(self, d: List[Tuple], gb: str, gb2: Optional[str]) -> List[Tuple]:
         if gb == "vcl":
-            res = [(self.vehicle_type_to_str[x[0]].full, x[1]) for x in d]
+            res = [
+                (self.vehicle_type_to_str[x[0]].full if x[0] is not None else None, *x[1:])
+                for x in d
+            ]
+        elif gb == "cpop":
+            res = self.add_cpop_text(d, gb2)
         else:
             res = d
         return res
@@ -89,11 +93,37 @@ class InvolvedQuery_GB(InvolvedQuery):
     def add_gb2_text(self, d: List[Tuple], gb: str, gb2: Optional[str]) -> List[Tuple]:
         if gb == "vcl":
             res = [
-                (self.vehicle_type_to_str[x[0]].full if x[0] is not None else None, x[1], x[2])
+                (self.vehicle_type_to_str[x[0]].full if x[0] is not None else None, *x[1:])
                 for x in d
             ]
+        elif gb == "cpop":
+            res = self.add_cpop_text(d, gb2)
         else:
             res = d
+        return res
+
+    @staticmethod
+    def add_cpop_text(d: List[Tuple], bg2: str) -> List[Tuple]:
+
+        def get_city(sym: int) -> tuple:
+            return (
+                db.session.query(City.heb_name, City.population)
+                .filter(City.yishuv_symbol == sym)
+                .first()
+            )
+
+        res = []
+        for x in d:
+            if x[0] in [None, 0]:
+                continue
+            c = get_city(x[0])
+            if c is None:
+                continue
+            name, pop = c
+            if bg2:
+                res.append((name, x[1], (x[2] * 100000) / pop))
+            else:
+                res.append((name, (x[1] * 100000) / pop))
         return res
 
     @staticmethod
@@ -205,9 +235,9 @@ class GBFilt2Col:
             "city": {
                 "col": City.heb_name,
             },
-            # "cpop": {
-            #     "col": City.population, # todo
-            # },
+            "cpop": {
+                "col": City.yishuv_symbol,
+            },
             "rd": {
                 "col": SDAccident.road1,
             },

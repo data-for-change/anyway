@@ -84,6 +84,10 @@ class InvolvedQuery_GB(InvolvedQuery):
                 (self.vehicle_type_to_str[x[0]].full if x[0] is not None else None, *x[1:])
                 for x in d
             ]
+        elif gb == "vcli":
+            res = [
+                (self.vehicle_type_bit_2_heb(x[0]) if x[0] is not None else None, *x[1:]) for x in d
+            ]
         elif gb == "cpop":
             res = self.add_cpop_text(d, gb2)
         else:
@@ -96,6 +100,10 @@ class InvolvedQuery_GB(InvolvedQuery):
                 (self.vehicle_type_to_str[x[0]].full if x[0] is not None else None, *x[1:])
                 for x in d
             ]
+        if gb == "vcli":
+            res = [
+                (self.vehicle_type_bit_2_heb(x[0]) if x[0] is not None else None, *x[1:]) for x in d
+            ]
         elif gb == "cpop":
             res = self.add_cpop_text(d, gb2)
         else:
@@ -104,7 +112,6 @@ class InvolvedQuery_GB(InvolvedQuery):
 
     @staticmethod
     def add_cpop_text(d: List[Tuple], bg2: str) -> List[Tuple]:
-
         def get_city(sym: int) -> tuple:
             return (
                 db.session.query(City.heb_name, City.population)

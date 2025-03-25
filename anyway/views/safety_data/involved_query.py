@@ -459,21 +459,32 @@ class ParamFilterExp:
         p_size = InvolvedQuery.PAGE_SIZE_DEFAULT
         param_ok = True
         for k, v in params.items():
-            if k == "page_number":
-                if param_ok and len(v) == 1 and v[0].isdigit() and int(v[0]) >= 0:
+            if not all([x.isdigit() for x in v]):
+                param_ok = False
+            elif k == "page_number":
+                if param_ok and len(v) == 1 and int(v[0]) >= 0:
                     p_num = int(v[0])
                 else:
                     param_ok = False
             elif k == "page_size":
-                if param_ok and len(v) == 1 and v[0].isdigit() and int(v[0]) >= 0:
+                if param_ok and len(v) == 1 and int(v[0]) >= 0:
                     p_size = int(v[0])
                 else:
                     param_ok = False
+            elif k == "vcl":
+                expressions = []
+                if '0' in v:
+                    expressions.append(Column.__eq__(SDInvolved.injured_type, 1))
+                    v.remove('0')
+                if len(v) > 0:
+                    expressions.append(Column.in_(SDInvolved.vehicle_type, v))
+                if not expressions:
+                    param_ok = False
+                query = query.filter(or_(*expressions))
             else:
                 p = ParamFilterExp.PFE.get(k)
                 if (
                     p is not None
-                    and all([x.isdigit() for x in v])
                     and ("single" not in p or len(v) == 1)
                 ):
                     f = (

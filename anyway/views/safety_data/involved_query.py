@@ -383,6 +383,24 @@ class InvolvedQuery:
 
 
 class ParamFilterExp:
+    VCLI_FILTER_DATA = {
+        1: {"val": sum([1 << x for x in [1]]), "name": "מכונית"},
+        2: {"val": sum([1 << x for x in [2]]), "name": "טרנזיט"},
+        3: {"val": sum([1 << x for x in [3]]), "name": "טנדר"},
+        5: {"val": sum([1 << x for x in [4, 5, 6, 7, 24, 25]]), "name": "משאית"},
+        8: {"val": sum([1 << x for x in [8, 9, 10, 19]]), "name": "אופנוע"},
+        11: {"val": sum([1 << x for x in [11, 18]]), "name": "אוטובוס"},
+        12: {"val": sum([1 << x for x in [12]]), "name": "מונית"},
+        13: {"val": sum([1 << x for x in [13]]), "name": "רכב עבודה"},
+        14: {"val": sum([1 << x for x in [14]]), "name": "טרקטור"},
+        15: {"val": sum([1 << x for x in [15]]), "name": "אופניים"},
+        16: {"val": sum([1 << x for x in [16]]), "name": "רכבת"},
+        17: {"val": sum([1 << x for x in [17]]), "name": "אחר"},
+        21: {"val": sum([1 << x for x in [21]]), "name": "קורקינט חשמלי"},
+        22: {"val": sum([1 << x for x in [22]]), "name": "קלנועית"},
+        23: {"val": sum([1 << x for x in [23]]), "name": "אופניים חשמליים"},
+    }
+
     PFE = {
         "sy": {
             "col": [SDAccident.accident_year],
@@ -472,15 +490,9 @@ class ParamFilterExp:
                 else:
                     param_ok = False
             elif k == "vcl":
-                expressions = []
-                if '0' in v:
-                    expressions.append(Column.__eq__(SDInvolved.injured_type, 1))
-                    v.remove('0')
-                if len(v) > 0:
-                    expressions.append(Column.in_(SDInvolved.vehicle_type, v))
-                if not expressions:
-                    param_ok = False
-                query = query.filter(or_(*expressions))
+                query = ParamFilterExp.add_vcl_filter(query, v)
+            elif k == "vcli":
+                query = ParamFilterExp.add_vcli_filter(query, v)
             else:
                 p = ParamFilterExp.PFE.get(k)
                 if (
@@ -503,3 +515,33 @@ class ParamFilterExp:
         if add_pagination:
             query = query.offset(p_num * p_size).limit(p_size)
         return query, p_num, p_size
+
+    @staticmethod
+    def add_vcl_filter(query, values: List[str]):
+        expressions = []
+        for v in values:
+            if v.isdigit():
+                val = int(v)
+            else:
+                raise ValueError(f"{v}:invalid vcl filter value")
+            if val == 0:
+                expressions.append(SDInvolved.injured_type == 1)
+            else:
+                expressions.append(SDInvolved.vehicle_type == val)
+        query = query.filter(or_(*expressions))
+        return query
+
+    @staticmethod
+    def add_vcli_filter(query, values: List[str]):
+        all_valuse = 0
+        for v in values:
+            if v.isdigit():
+                val = int(v)
+            else:
+                raise ValueError(f"{v}:invalid vcli filter value")
+            if val in ParamFilterExp.VCLI_FILTER_DATA:
+                all_valuse |= ParamFilterExp.VCLI_FILTER_DATA[val]["val"]
+            else:
+                raise ValueError(f"{v}:invalid vcli filter value")
+        query = query.filter(SDAccident.vehicles.op("&")(all_valuse) != 0)
+        return query

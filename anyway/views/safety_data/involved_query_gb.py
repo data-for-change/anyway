@@ -52,7 +52,7 @@ class InvolvedQuery_GB(InvolvedQuery):
                 raise ValueError(msg)
             gb2 = gb2[0]
         query = self.get_base_query()
-        query, _, _ = self.add_params_filter(query, vals)
+        query, _, _ = ParamFilterExp.add_params_filter(query, vals)
         query = self.add_gb_filter(query, gb, gb2)
         # pylint: disable=no-member
         dat = query.all()
@@ -141,62 +141,16 @@ class InvolvedQuery_GB(InvolvedQuery):
             res.append({"_id": k, "count": [{"grp2": k1, "count": v1} for k1, v1 in v.items()]})
         return res
 
-    def add_params_filter(self, query, params: Dict[str, List[str]]):
-        pass_filters = {}
-        for k, v in params.items():
-            if k == "vcl":
-                query = self.add_vcl_filter(query, v)
-            elif k == "vcli":
-                query = self.add_vcli_filter(query, v)
-            else:
-                pass_filters[k] = v
-        return ParamFilterExp.add_params_filter(query, pass_filters)
-
-    def add_vcl_filter(self, query, values: List[str]):
-        expressions = []
-        for v in values:
-            if v.isdigit():
-                val = int(v)
-            else:
-                raise ValueError(f"{v}:invalid vcl filter value")
-            if val == 0:
-                expressions.append(SDInvolved.injured_type == 1)
-            else:
-                expressions.append(SDInvolved.vehicle_type == val)
-        query = query.filter(or_(*expressions))
-        return query
-
-    VCLI_FILTER_DATA = {
-        1: {"val": sum([1 << x for x in [1]]), "name": "מכונית"},
-        2: {"val": sum([1 << x for x in [2]]), "name": "טרנזיט"},
-        3: {"val": sum([1 << x for x in [3]]), "name": "טנדר"},
-        5: {"val": sum([1 << x for x in [4, 5, 6, 7, 24, 25]]), "name": "משאית"},
-        8: {"val": sum([1 << x for x in [8, 9, 10, 19]]), "name": "אופנוע"},
-        11: {"val": sum([1 << x for x in [11, 18]]), "name": "אוטובוס"},
-        12: {"val": sum([1 << x for x in [12]]), "name": "מונית"},
-        13: {"val": sum([1 << x for x in [13]]), "name": "רכב עבודה"},
-        14: {"val": sum([1 << x for x in [14]]), "name": "טרקטור"},
-        15: {"val": sum([1 << x for x in [15]]), "name": "אופניים"},
-        16: {"val": sum([1 << x for x in [16]]), "name": "רכבת"},
-        17: {"val": sum([1 << x for x in [17]]), "name": "אחר"},
-        21: {"val": sum([1 << x for x in [21]]), "name": "קורקינט חשמלי"},
-        22: {"val": sum([1 << x for x in [22]]), "name": "קלנועית"},
-        23: {"val": sum([1 << x for x in [23]]), "name": "אופניים חשמליים"},
-    }
-
-    def add_vcli_filter(self, query, values: List[str]):
-        all_valuse = 0
-        for v in values:
-            if v.isdigit():
-                val = int(v)
-            else:
-                raise ValueError(f"{v}:invalid vcli filter value")
-            if val in self.VCLI_FILTER_DATA:
-                all_valuse |= self.VCLI_FILTER_DATA[val]["val"]
-            else:
-                raise ValueError(f"{v}:invalid vcli filter value")
-        query = query.filter(SDAccident.vehicles.op("&")(all_valuse) != 0)
-        return query
+    # def add_params_filter(self, query, params: Dict[str, List[str]]):
+    #     pass_filters = {}
+    #     for k, v in params.items():
+    #         # if k == "vcl":
+    #         #     query = self.add_vcl_filter(query, v)
+    #         # if k == "vcli":
+    #         #     query = self.add_vcli_filter(query, v)
+    #         # else:
+    #             pass_filters[k] = v
+    #     return ParamFilterExp.add_params_filter(query, pass_filters)
 
 
 class GBFilt2Col:

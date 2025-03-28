@@ -61,23 +61,24 @@ class TestInvolvedQuery(unittest.TestCase):
         self.assertEqual(self.involved_result, res, "4")
 
         expected = [{'_id': 2014,
-                    'count': [{'grp2': 'מרכז דרך', 'count': 691},
-                                {'grp2': 'מרכז ישוב', 'count': 55},
-                                {'grp2': 'עיגון מדויק', 'count': 1844}
-                                ]
-                    }
+                    'count': [
+                        {'grp2': 'עיגון מדויק', 'count': 1844},
+                        {'grp2': 'מרכז דרך', 'count': 691},
+                        {'grp2': 'מרכז ישוב', 'count': 55},
+                    ]
+                   }
         ]
         actual = test_client.get("/involved/groupby?sy=2014&ey=2014&gb=year&gb2=lca&city=5000,1")
         self.assertEqual("200 OK", actual.status, "5")
         self.assertEqual(expected, actual.json, "6")
         actual = test_client.get("/involved/groupby?sy=2014&ey=2014&city=5000,1&gb=vcl")
         self.assertEqual("200 OK", actual.status, "7")
-        self.assertEqual({'_id': 'הולך רגל', 'count': 362}, actual.json[0], "8")
-        self.assertEqual(18, len(actual.json), "9")
+        self.assertEqual({'_id': 'רכב נוסעים פרטי', 'count': 1262}, actual.json[0], "8")
+        self.assertEqual(15, len(actual.json), "9")
         actual = test_client.get("/involved/groupby?sy=2014&ey=2014&city=5000,1&gb=cpop")
-        self.assertEqual("200 OK", actual.status, "7")
-        self.assertEqual('תל אביב - יפו', actual.json[0]["_id"], "8")
-        self.assertEqual(1, len(actual.json), "9")
+        self.assertEqual("200 OK", actual.status, "10")
+        self.assertEqual('תל אביב - יפו', actual.json[0]["_id"], "11")
+        self.assertEqual(1, len(actual.json), "12")
 
 
 def compare_dir_lists(l1, l2, keys):

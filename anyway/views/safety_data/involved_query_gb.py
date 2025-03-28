@@ -1,6 +1,6 @@
 from typing import List, Dict, Optional, Tuple, Any
 from copy import copy
-from sqlalchemy import or_, case
+from sqlalchemy import or_, case, desc
 from sqlalchemy.schema import Column
 from sqlalchemy.orm.query import Query
 import logging
@@ -39,6 +39,8 @@ class InvolvedQuery_GB(InvolvedQuery):
     def get_data(self) -> List[Dict[str, Optional[str]]]:
         vals = sdu.get_params()
         gb = vals.pop(GB, None)
+        limit = vals.pop("lim", ["15"])[0]
+        limit = int(limit) if limit.isdigit() else 15
         if gb is None or len(gb) != 1:
             msg = f"'gb' missing or invalid: params: {vals}"
             logging.error(msg)
@@ -53,7 +55,7 @@ class InvolvedQuery_GB(InvolvedQuery):
             gb2 = gb2[0]
         query = self.get_base_query()
         query, _, _ = ParamFilterExp.add_params_filter(query, vals)
-        query = self.add_gb_filter(query, gb, gb2)
+        query = self.add_gb_filter(query, gb, gb2, limit)
         # pylint: disable=no-member
         dat = query.all()
         data = self.add_gb_text(dat, gb, gb2)
@@ -63,20 +65,22 @@ class InvolvedQuery_GB(InvolvedQuery):
             res = self.dictify_double_group_by(data)
         return res
 
-    def add_gb_filter(self, query: Query, gb: str, gb2: Optional[str]) -> Query:
+    def add_gb_filter(self, query: Query, gb: str, gb2: Optional[str], limit: int) -> Query:
         c1 = self.gb_filt.get_col(gb)
         if gb2 is None:
-            return (
+            query = (
                 query.group_by(c1)
                 # pylint: disable=no-member
                 .with_entities(c1.label(gb), db.func.count(SDInvolved._id).label("count"))
             )
-        c2 = self.gb_filt.get_col(gb2)
-        return (
-            query.group_by(c1, c2)
-            # pylint: disable=no-member
-            .with_entities(c1, c2, db.func.count(SDInvolved._id).label("count"))
-        )
+        else:
+            c2 = self.gb_filt.get_col(gb2)
+            query = (
+                query.group_by(c1, c2)
+                # pylint: disable=no-member
+                .with_entities(c1, c2, db.func.count(SDInvolved._id).label("count"))
+            )
+        return query.order_by(desc("count")).limit(limit)
 
     def add_gb_text(self, d: List[Tuple], gb: str, gb2: Optional[str]) -> List[Tuple]:
         if gb == "vcl":

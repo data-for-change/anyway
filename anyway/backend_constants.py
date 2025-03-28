@@ -55,6 +55,7 @@ class BackEndConstants(object):
         "https://anyway-infographics-demo.web.app",
         "https://media.anyway.co.il",
         "https://dev.anyway.co.il",
+        "https://safety-data.anyway.co.il",
     ]
 
     ANYWAY_CORS_SITE_LIST_DEV = ANYWAY_CORS_SITE_LIST_PROD + [

@@ -68,16 +68,16 @@ class TestInvolvedQuery(unittest.TestCase):
                     ]
                    }
         ]
-        actual = test_client.get("/involved/groupby?sy=2014&ey=2014&gb=year&gb2=lca&city=5000,1")
+        actual = test_client.get("/involved/groupby?sy=2014&ey=2014&gb=year&gb2=lca&city=5000,1&sort=d")
         self.assertEqual("200 OK", actual.status, "5")
         self.assertEqual(expected, actual.json, "6")
         actual = test_client.get("/involved/groupby?sy=2014&ey=2014&city=5000,1&gb=vcl")
         self.assertEqual("200 OK", actual.status, "7")
-        self.assertEqual({'_id': 'רכב נוסעים פרטי', 'count': 1262}, actual.json[0], "8")
+        self.assertEqual({'_id': 'הולך רגל', 'count': 362}, actual.json[0], "8")
         self.assertEqual(15, len(actual.json), "9")
-        actual = test_client.get("/involved/groupby?sy=2014&ey=2014&city=5000,1&gb=cpop")
+        actual = test_client.get("/involved/groupby?sy=2014&ey=2014&city=5000,1&gb=cpop&sort=a")
         self.assertEqual("200 OK", actual.status, "10")
-        self.assertEqual('תל אביב - יפו', actual.json[0]["_id"], "11")
+        self.assertEqual(438, int(actual.json[0]["count"]), "11")
         self.assertEqual(1, len(actual.json), "12")
 
 

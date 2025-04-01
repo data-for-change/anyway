@@ -1,6 +1,6 @@
 from typing import List, Dict, Optional, Tuple, Any
 from copy import copy
-from sqlalchemy import or_, case, desc
+from sqlalchemy import or_, case, desc, asc
 from sqlalchemy.schema import Column
 from sqlalchemy.orm.query import Query
 import logging
@@ -29,6 +29,8 @@ from anyway.views.safety_data import sd_utils as sdu
 
 GB = "gb"
 GB2 = "gb2"
+LIMIT = "lim"
+SORT = "sort"
 
 
 class InvolvedQuery_GB(InvolvedQuery):
@@ -38,9 +40,27 @@ class InvolvedQuery_GB(InvolvedQuery):
 
     def get_data(self) -> List[Dict[str, Optional[str]]]:
         vals = sdu.get_params()
-        gb = vals.pop(GB, None)
-        limit = vals.pop("lim", ["15"])[0]
+        involved_vals, gb_vals = split_dict(vals, [GB, GB2, LIMIT, SORT])
+        query = self.get_base_query()
+        query, _, _ = ParamFilterExp.add_params_filter(query, involved_vals)
+        query, gb, gb2 = self.add_gb_filter(query, gb_vals)
+        # pylint: disable=no-member
+        dat = query.all()
+        data = self.add_gb_text(dat, gb, gb2)
+        if gb2 is None:
+            res = [{"_id": x[0], "count": x[1]} for x in data]
+        else:
+            res = self.dictify_double_group_by(data)
+        return res
+
+    def add_gb_filter(self, query: Query, vals: dict) -> Query:
+        limit = vals.pop(LIMIT, ["15"])[0]
         limit = int(limit) if limit.isdigit() else 15
+        sort = vals.pop(SORT, [None])
+        if len(sort) > 1 or sort[0] not in [None, "a", "d"]:
+            raise ValueError(f"Invalid sort value: {sort}")
+        sort_f = desc if sort[0] == "d" else (asc if sort[0] == "a" else None)
+        gb = vals.pop(GB, None)
         if gb is None or len(gb) != 1:
             msg = f"'gb' missing or invalid: params: {vals}"
             logging.error(msg)
@@ -53,19 +73,6 @@ class InvolvedQuery_GB(InvolvedQuery):
                 logging.error(msg)
                 raise ValueError(msg)
             gb2 = gb2[0]
-        query = self.get_base_query()
-        query, _, _ = ParamFilterExp.add_params_filter(query, vals)
-        query = self.add_gb_filter(query, gb, gb2, limit)
-        # pylint: disable=no-member
-        dat = query.all()
-        data = self.add_gb_text(dat, gb, gb2)
-        if gb2 is None:
-            res = [{"_id": x[0], "count": x[1]} for x in data]
-        else:
-            res = self.dictify_double_group_by(data)
-        return res
-
-    def add_gb_filter(self, query: Query, gb: str, gb2: Optional[str], limit: int) -> Query:
         c1 = self.gb_filt.get_col(gb)
         if gb2 is None:
             query = (
@@ -80,7 +87,9 @@ class InvolvedQuery_GB(InvolvedQuery):
                 # pylint: disable=no-member
                 .with_entities(c1, c2, db.func.count(SDInvolved._id).label("count"))
             )
-        return query.order_by(desc("count")).limit(limit)
+        if sort_f:
+            query = query.order_by(sort_f("count"))
+        return query.limit(limit), gb, gb2
 
     def add_gb_text(self, d: List[Tuple], gb: str, gb2: Optional[str]) -> List[Tuple]:
         if gb == "vcl":
@@ -155,6 +164,17 @@ class InvolvedQuery_GB(InvolvedQuery):
     #         # else:
     #             pass_filters[k] = v
     #     return ParamFilterExp.add_params_filter(query, pass_filters)
+
+
+def split_dict(d: dict, keys: List[str]) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    orig = {}
+    new = {}
+    for k, v in d.items():
+        if k in keys:
+            new[k] = v
+        else:
+            orig[k] = v
+    return orig, new
 
 
 class GBFilt2Col:

@@ -32,6 +32,7 @@ from anyway.infographics_utils import (
     get_infographics_data_for_location,
 )
 
+
 from anyway.models import (
     AccidentMarker,
     DiscussionMarker,
@@ -1617,4 +1618,5 @@ def safety_city():
 @app.route("/api/latest-cbs-update-date", methods=["GET"])
 def latest_cbs_update_date():
     last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
-    return jsonify({"last_update": last_accident_date})
+    seconds_since_epoch = int(last_accident_date.timestamp())
+    return jsonify({"last_update": seconds_since_epoch})

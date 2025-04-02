@@ -93,6 +93,7 @@ from anyway.telegram_accident_notifications import send_infographics_to_telegram
 from anyway.views.safety_data import involved_query_gb
 from anyway.views.safety_data import involved_query
 from anyway.views.safety_data import city_query
+from anyway.request_params import get_latest_accident_date
 
 DEFAULT_MAPS_API_KEY = "AIzaSyDUIWsBLkvIUwzLHMHos9qFebyJ63hEG2M"
 
@@ -1614,3 +1615,9 @@ def safety_city():
     except Exception as e:
         logging.exception(e)
         return Response(e.args[0], http_client.INTERNAL_SERVER_ERROR)
+
+@app.route("/api/latest-cbs-update-date", methods=["GET"])
+def latest_cbs_update_date():
+    last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
+    seconds_since_epoch = int(last_accident_date.timestamp())
+    return jsonify({"last_update": seconds_since_epoch})

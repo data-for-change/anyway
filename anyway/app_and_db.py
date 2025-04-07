@@ -48,6 +48,7 @@ def get_cors_config() -> dict:
         r"/city": {"origins": "*"},
         r"/involved/*": {"origins": "*"},
         r"/api/comments": {"origins": "*"},
+        r"/api/latest-cbs-update-date": {"origins": "*"},
         r"/authorize/*": {"origins": cors_site_list, "supports_credentials": True},
         r"/callback/*": {"origins": cors_site_list, "supports_credentials": True},
         r"/user/*": {"origins": cors_site_list, "supports_credentials": True},

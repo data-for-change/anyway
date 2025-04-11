@@ -1,6 +1,6 @@
 from typing import List, Dict, Optional, Tuple, Any
 from copy import copy
-from sqlalchemy import or_, case, desc, asc
+from sqlalchemy import case, desc, asc
 from sqlalchemy.schema import Column
 from sqlalchemy.orm.query import Query
 import logging
@@ -76,16 +76,18 @@ class InvolvedQuery_GB(InvolvedQuery):
         c1 = self.gb_filt.get_col(gb)
         if gb2 is None:
             query = (
-                query.group_by(c1)
+                query.filter(c1[-1].isnot(None)).group_by(c1[0])
                 # pylint: disable=no-member
-                .with_entities(c1.label(gb), db.func.count(SDInvolved._id).label("count"))
+                .with_entities(c1[0].label(gb), db.func.count(SDInvolved._id).label("count"))
             )
         else:
             c2 = self.gb_filt.get_col(gb2)
             query = (
-                query.group_by(c1, c2)
+                query.filter(c1[-1].isnot(None))
+                .filter(c2[-1].isnot(None))
+                .group_by(c1[0], c2[0])
                 # pylint: disable=no-member
-                .with_entities(c1, c2, db.func.count(SDInvolved._id).label("count"))
+                .with_entities(c1[0], c2[0], db.func.count(SDInvolved._id).label("count"))
             )
         if sort_f:
             query = query.order_by(sort_f("count"))
@@ -181,83 +183,81 @@ class GBFilt2Col:
     def __init__(self, s1_table):
         self.s1_table = s1_table
 
-    PFE = copy(ParamFilterExp.PFE)
-    PFE.update(
-        {
-            "year": {
-                "col": SDAccident.accident_year,
-            },
-            "sex": {
-                "col": Sex.sex_hebrew,
-            },
-            "ol": {
-                "col": OneLane.one_lane_hebrew,
-            },
-            "ml": {
-                "col": MultiLane.multi_lane_hebrew,
-            },
-            "age": {
-                "col": AgeGroup.age_group_hebrew,
-            },
-            "pt": {
-                "col": PopulationType.population_type_hebrew,
-            },
-            "mn": {
-                "col": SDAccident.accident_month,
-            },
-            "dn": {
-                "col": DayNight.day_night_hebrew,
-            },
-            "wd": {
-                "col": SDAccident.day_in_week,
-            },
-            "rt": {
-                "col": RoadType.road_type_hebrew,
-            },
-            "lca": {
-                "col": LocationAccuracy.location_accuracy_hebrew,
-            },
-            "city": {
-                "col": City.heb_name,
-            },
-            "cpop": {
-                "col": City.yishuv_symbol,
-            },
-            "rd": {
-                "col": SDAccident.road1,
-            },
-            "acc": {
-                "col": AccidentType.accident_type_hebrew,
-            },
-            "selfacc": {
-                "col": AccidentType.accident_type_hebrew,
-            },
-            "vcl": {
-                "col": case([(SDInvolved.injured_type == 1, 0)], else_=SDInvolved.vehicle_type),
-            },
-            "vcli": {
-                "col": SDAccident.vehicles,
-            },
-            "sp": {
-                "col": SpeedLimit.speed_limit_hebrew,
-            },
-            "rw": {
-                "col": RoadWidth.road_width_hebrew,
-            },
-            "sev": {
-                "col": InjurySeverity.injury_severity_hebrew,
-            },
-            "injt": {
-                "col": InjuredType.injured_type_hebrew,
-            },
-        }
-    )
+    PFE_GB = copy(ParamFilterExp.PFE)
+    PFE_GB: Dict[str, Tuple] = {
+        "year": {
+            "col": (SDAccident.accident_year,),
+        },
+        "sex": {
+            "col": (Sex.sex_hebrew, SDInvolved.sex),
+        },
+        "ol": {
+            "col": (OneLane.one_lane_hebrew, SDAccident.one_lane),
+        },
+        "ml": {
+            "col": (MultiLane.multi_lane_hebrew, SDAccident.multi_lane),
+        },
+        "age": {
+            "col": (AgeGroup.age_group_hebrew, SDInvolved.age_group),
+        },
+        "pt": {
+            "col": (PopulationType.population_type_hebrew, SDInvolved.population_type),
+        },
+        "mn": {
+            "col": (SDAccident.accident_month,),
+        },
+        "dn": {
+            "col": (DayNight.day_night_hebrew, SDAccident.day_night),
+        },
+        "wd": {
+            "col": (SDAccident.day_in_week,),
+        },
+        "rt": {
+            "col": (RoadType.road_type_hebrew, SDAccident.road_type),
+        },
+        "lca": {
+            "col": (LocationAccuracy.location_accuracy_hebrew, SDAccident.location_accuracy),
+        },
+        "city": {
+            "col": (City.heb_name, SDAccident.accident_yishuv_symbol),
+        },
+        "cpop": {
+            "col": (City.yishuv_symbol,),
+        },
+        "rd": {
+            "col": (SDAccident.road1,),
+        },
+        "acc": {
+            "col": (AccidentType.accident_type_hebrew, SDAccident.accident_type),
+        },
+        "selfacc": {
+            "col": (AccidentType.accident_type_hebrew, SDAccident.accident_type),
+        },
+        "vcl": {
+            "col": (case([(SDInvolved.injured_type == 1, 0)], else_=SDInvolved.vehicle_type),),
+        },
+        "vcli": {
+            "col": (SDAccident.vehicles,),
+        },
+        "sp": {
+            "col": (SpeedLimit.speed_limit_hebrew, SDAccident.speed_limit),
+        },
+        "rw": {
+            "col": (RoadWidth.road_width_hebrew, SDAccident.road_width),
+        },
+        "sev": {
+            "col": (InjurySeverity.injury_severity_hebrew, SDInvolved.injury_severity),
+        },
+        "injt": {
+            "col": (InjuredType.injured_type_hebrew, SDInvolved.injured_type),
+        },
+    }
 
-    def get_col(self, filt: str) -> Column:
+    def get_col(self, filt: str) -> Tuple[Column, ...]:
         if filt == "st":
             return self.s1_table.street_hebrew
-        elif filt not in self.PFE:
+        elif filt not in self.PFE_GB:
             msg = f"filter not recognized as group by: {filt}"
             logging.error(msg)
             raise ValueError(msg)
-        return self.PFE[filt]["col"]
+        return self.PFE_GB[filt]["col"]

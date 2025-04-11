@@ -51,6 +51,7 @@ paths:
         - $ref: '#/components/parameters/rw'
         - $ref: '#/components/parameters/ml'
         - $ref: '#/components/parameters/ol'
+        - $ref: '#/components/parameters/lca'
         - $ref: '#/components/parameters/page_number'
         - $ref: '#/components/parameters/page_size'
       responses:
@@ -106,6 +107,7 @@ paths:
         - $ref: '#/components/parameters/rw'
         - $ref: '#/components/parameters/ml'
         - $ref: '#/components/parameters/ol'
+        - $ref: '#/components/parameters/lca'
       responses:
         '200':
           description: |
@@ -304,6 +306,14 @@ components:
         items:
           type: integer
       description: List of One-lane identifiers (integers)
+    lca:
+      in: query
+      name: ol
+      schema:
+        type: array
+        items:
+          type: integer
+      description: List of location_accuracy identifiers (integers)
     page_number:
         in: query
         name: page_number

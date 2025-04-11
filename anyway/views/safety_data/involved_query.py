@@ -466,6 +466,9 @@ class ParamFilterExp:
         "ol": {
             "col": [SDAccident.one_lane],
         },
+        "lca": {
+            "col": [SDAccident.location_accuracy],
+        },
     }
 
     def __init__(self):

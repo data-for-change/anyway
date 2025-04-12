@@ -49,7 +49,6 @@ class TestInvolvedQuery(unittest.TestCase):
         actual = InvolvedQuery_GB.dictify_double_group_by(data)
         self.assertEqual(actual, expected)
 
-    @unittest.skip("flakey test")
     def test_e2e(self):
         test_client = flask_app.test_client()
 
@@ -80,6 +79,13 @@ class TestInvolvedQuery(unittest.TestCase):
         self.assertEqual("200 OK", actual.status, "10")
         self.assertEqual(438, int(actual.json[0]["count"]), "11")
         self.assertEqual(1, len(actual.json), "12")
+        actual = test_client.get(
+            "/involved/groupby?sy=2014&ey=2014&city=5000,1&sev=1&st=1&rd=1" \
+            "&rds=1&sex=1&age=1&pt=1&dn=1&mn=1&acc=1&selfacc=1&rt=1&sp=1&rw=1" \
+            "&ml=1&ol=1&lca=1" \
+            "&gb=cpop&gb2=injt&sort=a&lim=1")
+        self.assertEqual("200 OK", actual.status, "13")
+        self.assertEqual(0, len(actual.json), "14")
 
 
 def compare_dir_lists(l1, l2, keys):

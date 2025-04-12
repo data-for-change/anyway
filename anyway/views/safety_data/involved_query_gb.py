@@ -1,6 +1,6 @@
 from typing import List, Dict, Optional, Tuple, Any
 from copy import copy
-from sqlalchemy import case, desc, asc
+from sqlalchemy import case, desc, asc, not_
 from sqlalchemy.schema import Column
 from sqlalchemy.orm.query import Query
 import logging
@@ -74,17 +74,19 @@ class InvolvedQuery_GB(InvolvedQuery):
                 raise ValueError(msg)
             gb2 = gb2[0]
         c1 = self.gb_filt.get_col(gb)
+        c1_val = self.gb_filt.get_gb_filt_val(gb)
         if gb2 is None:
             query = (
-                query.filter(c1[-1].isnot(None)).group_by(c1[0])
+                query.filter(not_(c1[-1] == c1_val)).group_by(c1[0])
                 # pylint: disable=no-member
                 .with_entities(c1[0].label(gb), db.func.count(SDInvolved._id).label("count"))
             )
         else:
             c2 = self.gb_filt.get_col(gb2)
+            c2_val = self.gb_filt.get_gb_filt_val(gb2)
             query = (
-                query.filter(c1[-1].isnot(None))
-                .filter(c2[-1].isnot(None))
+                query.filter(not_(c1[-1] == c1_val))
+                .filter(not_(c2[-1] == c2_val))
                 .group_by(c1[0], c2[0])
                 # pylint: disable=no-member
                 .with_entities(c1[0], c2[0], db.func.count(SDInvolved._id).label("count"))
@@ -261,3 +263,6 @@ class GBFilt2Col:
             logging.error(msg)
             raise ValueError(msg)
         return self.PFE_GB[filt]["col"]
+
+    def get_gb_filt_val(self, filt: str) -> Any:
+        return 0 if filt == "city" else None

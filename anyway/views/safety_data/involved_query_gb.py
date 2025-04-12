@@ -255,7 +255,7 @@ class GBFilt2Col:
 
     def get_col(self, filt: str) -> Tuple[Column, ...]:
         if filt == "st":
-            return self.s1_table.street_hebrew
+            return (self.s1_table.street_hebrew, SDAccident.street1)
         elif filt not in self.PFE_GB:
             msg = f"filter not recognized as group by: {filt}"
             logging.error(msg)

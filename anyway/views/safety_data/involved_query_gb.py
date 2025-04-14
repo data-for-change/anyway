@@ -54,12 +54,46 @@ class InvolvedQuery_GB(InvolvedQuery):
         return res
 
     def add_gb_filter(self, query: Query, vals: dict) -> Query:
+        gb, gb2, vals = self.get_gb_vals(vals)
+        c1 = self.gb_filt.get_col(gb)
+        c1_val = self.gb_filt.get_gb_filt_val(gb)
+        if c1_val is not None:
+            query = query.filter(not_(c1[-1].in_(c1_val)))
+        query = query.filter(c1[-1] != None)
+        if gb2 is None:
+            query = (
+                query.group_by(c1[0])
+                # pylint: disable=no-member
+                .with_entities(c1[0].label(gb), db.func.count(SDInvolved._id).label("count"))
+            )
+        else:
+            c2 = self.gb_filt.get_col(gb2)
+            c2_val = self.gb_filt.get_gb_filt_val(gb2)
+            if c2_val is not None:
+                query = query.filter(not_(c2[-1].in_(c2_val)))
+            query = query.filter(c2[-1] != None)
+            query = (
+                query.group_by(c1[0], c2[0])
+                # pylint: disable=no-member
+                .with_entities(c1[0], c2[0], db.func.count(SDInvolved._id).label("count"))
+            )
+        query, vals = self.add_gb_sort_limit(query, vals)
+        return query, gb, gb2
+
+    def add_gb_sort_limit(self, query: Query, vals_orig: dict) -> Tuple[Query, dict]:
+        vals = vals_orig.copy()
         limit = vals.pop(LIMIT, ["15"])[0]
         limit = int(limit) if limit.isdigit() else 15
         sort = vals.pop(SORT, [None])
         if len(sort) > 1 or sort[0] not in [None, "a", "d"]:
             raise ValueError(f"Invalid sort value: {sort}")
         sort_f = desc if sort[0] == "d" else (asc if sort[0] == "a" else None)
+        if sort_f:
+            query = query.order_by(sort_f("count"))
+        return query.limit(limit), vals
+
+    def get_gb_vals(self, vals_orig: dict) -> Tuple[str, Optional[str], dict]:
+        vals = vals_orig.copy()
         gb = vals.pop(GB, None)
         if gb is None or len(gb) != 1:
             msg = f"'gb' missing or invalid: params: {vals}"
@@ -73,27 +107,7 @@ class InvolvedQuery_GB(InvolvedQuery):
                 logging.error(msg)
                 raise ValueError(msg)
             gb2 = gb2[0]
-        c1 = self.gb_filt.get_col(gb)
-        c1_val = self.gb_filt.get_gb_filt_val(gb)
-        if gb2 is None:
-            query = (
-                query.filter(not_(c1[-1] == c1_val)).group_by(c1[0])
-                # pylint: disable=no-member
-                .with_entities(c1[0].label(gb), db.func.count(SDInvolved._id).label("count"))
-            )
-        else:
-            c2 = self.gb_filt.get_col(gb2)
-            c2_val = self.gb_filt.get_gb_filt_val(gb2)
-            query = (
-                query.filter(not_(c1[-1] == c1_val))
-                .filter(not_(c2[-1] == c2_val))
-                .group_by(c1[0], c2[0])
-                # pylint: disable=no-member
-                .with_entities(c1[0], c2[0], db.func.count(SDInvolved._id).label("count"))
-            )
-        if sort_f:
-            query = query.order_by(sort_f("count"))
-        return query.limit(limit), gb, gb2
+        return gb, gb2, vals
 
     def add_gb_text(self, d: List[Tuple], gb: str, gb2: Optional[str]) -> List[Tuple]:
         if gb == "vcl":
@@ -157,17 +171,6 @@ class InvolvedQuery_GB(InvolvedQuery):
         for k, v in r.items():
             res.append({"_id": k, "count": [{"grp2": k1, "count": v1} for k1, v1 in v.items()]})
         return res
-
-    # def add_params_filter(self, query, params: Dict[str, List[str]]):
-    #     pass_filters = {}
-    #     for k, v in params.items():
-    #         # if k == "vcl":
-    #         #     query = self.add_vcl_filter(query, v)
-    #         # if k == "vcli":
-    #         #     query = self.add_vcli_filter(query, v)
-    #         # else:
-    #             pass_filters[k] = v
-    #     return ParamFilterExp.add_params_filter(query, pass_filters)
 
 
 def split_dict(d: dict, keys: List[str]) -> Tuple[Dict[str, Any], Dict[str, Any]]:
@@ -264,5 +267,15 @@ class GBFilt2Col:
             raise ValueError(msg)
         return self.PFE_GB[filt]["col"]
 
+    FILT_TO_EMPTY = {
+        "city": [0],
+        "age": [99],
+        "ol": [0],
+        "ml": [0],
+        "sev": [0],
+        "injt": [0],
+        "rw": [0],
+    }
+
     def get_gb_filt_val(self, filt: str) -> Any:
-        return 0 if filt == "city" else None
+        return self.FILT_TO_EMPTY.get(filt, None)

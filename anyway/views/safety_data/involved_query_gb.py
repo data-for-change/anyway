@@ -82,15 +82,19 @@ class InvolvedQuery_GB(InvolvedQuery):
 
     def add_gb_sort_limit(self, query: Query, vals_orig: dict) -> Tuple[Query, dict]:
         vals = vals_orig.copy()
-        limit = vals.pop(LIMIT, ["15"])[0]
-        limit = int(limit) if limit.isdigit() else 15
+        limit = vals.pop(LIMIT, ["0"])[0]
+        if not limit.isdigit():
+            raise ValueError(f"Invalid limit value: {limit}")
+        limit = int(limit)
         sort = vals.pop(SORT, [None])
         if len(sort) > 1 or sort[0] not in [None, "a", "d"]:
             raise ValueError(f"Invalid sort value: {sort}")
         sort_f = desc if sort[0] == "d" else (asc if sort[0] == "a" else None)
         if sort_f:
             query = query.order_by(sort_f("count"))
-        return query.limit(limit), vals
+        if limit:
+            query = query.limit(limit)
+        return query, vals
 
     def get_gb_vals(self, vals_orig: dict) -> Tuple[str, Optional[str], dict]:
         vals = vals_orig.copy()

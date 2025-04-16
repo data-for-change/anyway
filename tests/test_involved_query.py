@@ -71,7 +71,7 @@ class TestInvolvedQuery(unittest.TestCase):
         actual = test_client.get("/involved/groupby?sy=2014&ey=2014&gb=year&gb2=lca&city=5000,1&sort=d")
         self.assertEqual("200 OK", actual.status, "5")
         self.assertEqual(expected, actual.json, "6")
-        actual = test_client.get("/involved/groupby?sy=2014&ey=2014&city=5000,1&gb=vcl")
+        actual = test_client.get("/involved/groupby?sy=2014&ey=2014&city=5000,1&gb=vcl&lim=15")
         self.assertEqual("200 OK", actual.status, "7")
         self.assertEqual({'_id': 'הולך רגל', 'count': 362}, actual.json[0], "8")
         self.assertEqual(15, len(actual.json), "9")

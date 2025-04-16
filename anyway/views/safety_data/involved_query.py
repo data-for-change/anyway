@@ -469,6 +469,16 @@ class ParamFilterExp:
         "lca": {
             "col": [SDAccident.location_accuracy],
         },
+        "pmin": {
+            "col": [City.population],
+            "op": Column.__ge__,  # default is __eq__ or in_ for a list
+            "single": True,
+        },
+        "pmax": {
+            "col": [City.population],
+            "op": Column.__le__,
+            "single": True,
+        },
     }
 
     def __init__(self):
@@ -498,10 +508,7 @@ class ParamFilterExp:
                 query = ParamFilterExp.add_vcli_filter(query, v)
             else:
                 p = ParamFilterExp.PFE.get(k)
-                if (
-                    p is not None
-                    and ("single" not in p or len(v) == 1)
-                ):
+                if p is not None and ("single" not in p or len(v) == 1):
                     f = (
                         ParamFilterExp.PFE[k]["op"]
                         if "op" in ParamFilterExp.PFE[k]

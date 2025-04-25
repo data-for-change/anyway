@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple, Any
 from collections import namedtuple
 import math
 import pandas as pd
@@ -79,7 +79,12 @@ class InvolvedQuery:
     def get_data(self):
         vals = sdu.get_params()
         query = self.get_base_query()
-        query, p_num, p_size = ParamFilterExp.add_params_filter(query, vals, add_pagination=True)
+        query, p_num, p_size, count = ParamFilterExp.add_params_filter(
+            query, vals, add_pagination=True
+        )
+        if count:
+            num_items = query.count()
+            return {"count": num_items}
         # pylint: disable=no-member
         df = pd.read_sql_query(query.statement, query.session.bind)
         data = df.to_dict(orient="records")  # pylint: disable=no-member
@@ -246,7 +251,7 @@ class InvolvedQuery:
                     SDInvolved.provider_code == PopulationType.provider_code,
                 ),
             )
-            .join(
+            .outerjoin(
                 Sex,
                 and_(
                     SDInvolved.sex == Sex.id,
@@ -485,12 +490,17 @@ class ParamFilterExp:
         pass
 
     @staticmethod
-    def add_params_filter(query, params: Dict[str, List[str]], add_pagination=False):
+    def add_params_filter(
+        query, params: Dict[str, List[str]], add_pagination=False
+    ) -> Tuple[Any, int, int, bool]:
         p_num = InvolvedQuery.PAGE_NUMBER_DEFAULT
         p_size = InvolvedQuery.PAGE_SIZE_DEFAULT
         param_ok = True
+        count = False
         for k, v in params.items():
-            if not all([x.isdigit() for x in v]):
+            if k == "count":
+                count = True
+            elif not all([x.isdigit() for x in v]):
                 param_ok = False
             elif k == "page_number":
                 if param_ok and len(v) == 1 and int(v[0]) >= 0:
@@ -522,9 +532,9 @@ class ParamFilterExp:
                 msg = f"Unsupported filter: {k}={v}{', param def:'+str(p) if p else ''}"
                 logging.error(msg)
                 raise ValueError(msg)
-        if add_pagination:
+        if add_pagination and not count:
             query = query.offset(p_num * p_size).limit(p_size)
-        return query, p_num, p_size
+        return query, p_num, p_size, count
 
     @staticmethod
     def add_vcl_filter(query, values: List[str]):

@@ -42,7 +42,9 @@ class InvolvedQuery_GB(InvolvedQuery):
         vals = sdu.get_params()
         involved_vals, gb_vals = split_dict(vals, [GB, GB2, LIMIT, SORT])
         query = self.get_base_query()
-        query, _, _ = ParamFilterExp.add_params_filter(query, involved_vals)
+        query, _, _, count = ParamFilterExp.add_params_filter(query, involved_vals)
+        if count:
+            raise ValueError("count is not supported in group by. params: %s" % vals)
         query, gb, gb2 = self.add_gb_filter(query, gb_vals)
         # pylint: disable=no-member
         dat = query.all()

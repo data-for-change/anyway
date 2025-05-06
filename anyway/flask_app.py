@@ -95,7 +95,7 @@ from anyway.views.safety_data import involved_query
 from anyway.views.safety_data import city_query
 from anyway.request_params import get_latest_accident_date
 
-DEFAULT_MAPS_API_KEY = "AIzaSyDUIWsBLkvIUwzLHMHos9qFebyJ63hEG2M"
+DEFAULT_MAPS_API_KEY = "AIzaSyANaM04RFXP3JjhIE-VlJVpLpJTU_SkE0c"
 
 
 app.config.from_object(__name__)

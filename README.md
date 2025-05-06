@@ -7,7 +7,7 @@ ANYWAY is a volunteer based project acting under the umbrella of the Data For Ch
 
 Feel free to contribute to the project. To report bugs and feature requests, please [open an issue](https://github.com/data-for-change/anyway/issues) on GitHub. See [Code Directory Tree Structure](docs/CODE.md).
 
-Note: This is ANYWAY BackEnd repository. If you're a FrontEnd developer see our [FE repository here](https://github.com/data-for-change/anyway-newsflash-infographics).
+Note: This is ANYWAY BackEnd and Map repository. If you're a FrontEnd developer see our [FE Infographics repository here](https://github.com/data-for-change/anyway-newsflash-infographics).
 
 
 About

@@ -95,8 +95,6 @@ from anyway.views.safety_data import involved_query
 from anyway.views.safety_data import city_query
 from anyway.request_params import get_latest_accident_date
 
-DEFAULT_MAPS_API_KEY = "AIzaSyANaM04RFXP3JjhIE-VlJVpLpJTU_SkE0c"
-
 
 app.config.from_object(__name__)
 app.config["SWAGGER_UI_DOC_EXPANSION"] = "list"
@@ -902,7 +900,7 @@ def index(marker=None, message=None):
     context["iteritems"] = dict.items
     context["hide_search"] = True if request.values.get("hide_search") == "true" else False
     context["embedded_reports"] = get_embedded_reports()
-    context["maps_api_key"] = os.environ.get("MAPS_API_KEY", DEFAULT_MAPS_API_KEY)
+    context["fe_maps_api_key"] = os.environ.get("DEFAULT_FE_MAPS_API_KEY") # this key is only for FE use and is exposed in client-side, hence restricted
     return render_template("index.html", **context)
 
 

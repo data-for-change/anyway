@@ -900,7 +900,7 @@ def index(marker=None, message=None):
     context["iteritems"] = dict.items
     context["hide_search"] = True if request.values.get("hide_search") == "true" else False
     context["embedded_reports"] = get_embedded_reports()
-    context["FE_maps_api_key"] = os.environ.get("DEFAULT_FE_MAPS_API_KEY") # this key is only for FE use and is exposed in client-side, hence restricted
+    context["fe_maps_api_key"] = os.environ.get("DEFAULT_FE_MAPS_API_KEY") # this key is only for FE use and is exposed in client-side, hence restricted
     return render_template("index.html", **context)
 
 

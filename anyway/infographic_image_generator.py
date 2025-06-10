@@ -40,8 +40,9 @@ def create_chrome_browser_session(newsflash_id):
 
 def get_download_button_elements(browser):
     svg_path = "M13 5v6h1.17L12 13.17 9.83 11H11V5h2m2-2H9v6H5l7 7 7-7h-4V3zm4 15H5v2h14v-2z"
-    svgs = browser.find_elements(By.CSS_SELECTOR, f"path[d='{svg_path}']")
-    return svgs
+    svg_path_elements = browser.find_elements(By.CSS_SELECTOR, f"path[d='{svg_path}']")
+    svg_elements = [element.find_element(By.XPATH, "./..") for element in svg_path_elements]
+    return svg_elements
 
 
 def get_local_infographics_folder_name(newsflash_id):

@@ -642,13 +642,16 @@ def import_vehicles(provider_code, vehicles, **kwargs):
         file_type_police = vehicle.get(field_names.file_type_police)
         if file_type_police is None:
             file_type_police = provider_code
+        engine_volume = vehicle.get(field_names.engine_volume)
+        if engine_volume is None or math.isnan(engine_volume):
+            engine_volume = 0
         vehicles_result.append(
             {
                 "accident_id": int(vehicle.get(field_names.id)),
                 "provider_and_id": int(str(provider_code) + str(int(vehicle.get(field_names.id)))),
                 "provider_code": provider_code,
                 "file_type_police": file_type_police,
-                "engine_volume": int(vehicle.get(field_names.engine_volume)),
+                "engine_volume": engine_volume,
                 "manufacturing_year": get_data_value(vehicle.get(field_names.manufacturing_year)),
                 "driving_directions": get_data_value(vehicle.get(field_names.driving_directions)),
                 "vehicle_status": get_data_value(vehicle.get(field_names.vehicle_status)),

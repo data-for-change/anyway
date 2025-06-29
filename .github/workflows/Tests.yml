@@ -59,8 +59,7 @@ jobs:
       run: |
         cd ./anyway-newsflash-infographics/
         bash run.bash
-        echo "Contents of ./anyway-newsflash-infographics/:"
-        ls
+        docker compose build anyway-newsflash-infographics
     - name: Starting Server and DB
       run: |
         docker compose -f docker-compose.yml up -d --build anyway

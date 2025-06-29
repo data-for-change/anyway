@@ -58,7 +58,7 @@ jobs:
         cd ./anyway-newsflash-infographics/
         bash run.bash
         cd ../
-        docker compose -f docker-compose.yml --build db anyway-newsflash-infographics
+        docker compose -f docker-compose.yml build db anyway-newsflash-infographics
     - name: Starting Server and DB
       run: |
         docker compose -f docker-compose.yml up -d --build anyway

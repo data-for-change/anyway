@@ -53,6 +53,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: Pull db image (for debugging)
+      run: docker pull ghcr.io/data-for-change/anyway/db:latest
     - name: run run.bash
       run: |
         cd ./anyway-newsflash-infographics/

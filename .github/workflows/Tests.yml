@@ -53,13 +53,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Starting Server and DB
+    - name: run run.bash
       run: |
         cd ./anyway-newsflash-infographics/
         bash run.bash
         echo "Contents of ./anyway-newsflash-infographics/:"
         ls
-        cd ../
+    - name: Starting Server and DB
+      run: |
         docker compose -f docker-compose.yml up -d --build anyway
     - name: Waiting for DB startup
       run: |

@@ -27,7 +27,6 @@ services:
 
   anyway-newsflash-infographics:
     build: ./anyway-newsflash-infographics/anyway-newsflash-infographics/.
-    image: anyway-newsflash-infographics:latest
     container_name: anyway-newsflash-infographics
     ports:
       - "3000:3000"

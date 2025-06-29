@@ -57,6 +57,8 @@ jobs:
       run: |
         cd ./anyway-newsflash-infographics/
         bash run.bash
+        echo "Contents of ./anyway-newsflash-infographics/:"
+        ls
         cd ../
         docker compose -f docker-compose.yml up -d --build anyway
     - name: Waiting for DB startup

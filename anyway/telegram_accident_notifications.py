@@ -21,6 +21,7 @@ telegram_linked_group_by_channel = {TELEGRAM_CHANNEL_CHAT_ID: TELEGRAM_LINKED_GR
                                     TELEGRAM_POST_VERIFICATION_CHANNEL_CHAT_ID: TELEGRAM_POST_VERIFICATION_LINKED_GROUP_CHAT_ID}
 TEXT_FOR_AFTER_INFOGRAPHICS_MESSAGE = 'מקור המידע בלמ"ס. נתוני התאונה שבמבזק לא נכללים באינפוגרפיקה. ' \
                                       'הופק באמצעות ANYWAY מבית "נתון לשינוי" למידע נוסף:'
+MAX_IMAGE_CAPTION_LENGTH = 1024
 
 def send_initial_message_in_channel(bot, text, chat_id):
     return bot.send_message(chat_id, text)
@@ -101,7 +102,11 @@ def send_infographics_to_telegram(root_message_id, newsflash_id, channel_of_init
     linked_group = telegram_linked_group_by_channel[channel_of_initial_message]
     items_for_send = get_items_for_send(newsflash_id)
     for url, text in items_for_send:
-        bot.send_photo(linked_group, url, reply_to_message_id=root_message_id, caption=text)
+        if len(text) > MAX_IMAGE_CAPTION_LENGTH:
+            bot.send_photo(linked_group, url, reply_to_message_id=root_message_id)
+            bot.send_message(linked_group, text, reply_to_message_id=root_message_id)
+        else:
+            bot.send_photo(linked_group, url, reply_to_message_id=root_message_id, caption=text)
 
     send_after_infographics_message(bot, root_message_id, newsflash_id, linked_group)
     logging.info("notification send done")

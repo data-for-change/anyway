@@ -53,13 +53,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Pull db image (for debugging)
-      run: docker pull ghcr.io/data-for-change/anyway/db:latest
-    - name: Starting Server and DB
+    - name: build anyway dependencies
       run: |
         cd ./anyway-newsflash-infographics/
         bash run.bash
         cd ../
+        docker compose -f docker-compose.yml build db anyway-newsflash-infographics
+    - name: Starting Server and DB
+      run: |
         docker compose -f docker-compose.yml up -d --build anyway
     - name: Waiting for DB startup
       run: |

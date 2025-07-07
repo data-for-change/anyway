@@ -102,7 +102,7 @@ def send_infographics_to_telegram(root_message_id, newsflash_id, channel_of_init
     linked_group = telegram_linked_group_by_channel[channel_of_initial_message]
     items_for_send = get_items_for_send(newsflash_id)
     for url, text in items_for_send:
-        if len(text) > MAX_IMAGE_CAPTION_LENGTH:
+        if text and len(text) > MAX_IMAGE_CAPTION_LENGTH:
             bot.send_photo(linked_group, url, reply_to_message_id=root_message_id)
             bot.send_message(linked_group, text, reply_to_message_id=root_message_id)
         else:

@@ -142,9 +142,14 @@ def trigger_generate_infographics_and_send_to_telegram(newsflash_id, pre_verific
     trigger_airflow_dag("generate-and-send-infographics-images", dag_conf)
 
 
+def fetch_message_by_id(message_id):
+    return db.session.query(TelegramForwardedMessages) \
+        .filter(TelegramForwardedMessages.message_id == str(message_id)).first()
+
+
 def handle_webhook(update):
-    message_id = update['message']['message_id']
-    forward_from_message_id = update['message']['forward_from_message_id']
-    forwarded_message = db.session.query(TelegramForwardedMessages) \
-        .filter(TelegramForwardedMessages.message_id == str(forward_from_message_id)).first()
+    message = update['message']
+    message_id = message['message_id']
+    forward_from_message_id = message['forward_from_message_id']
+    forwarded_message = fetch_message_by_id(forward_from_message_id)
     send_infographics_to_telegram(message_id, forwarded_message.newsflash_id, forwarded_message.group_sent)

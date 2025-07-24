@@ -140,3 +140,11 @@ def trigger_generate_infographics_and_send_to_telegram(newsflash_id, pre_verific
     dag_conf["chat_id"] = TELEGRAM_CHANNEL_CHAT_ID if pre_verification_chat \
         else TELEGRAM_POST_VERIFICATION_CHANNEL_CHAT_ID
     trigger_airflow_dag("generate-and-send-infographics-images", dag_conf)
+
+
+def handle_webhook(update):
+    message_id = update['message']['message_id']
+    forward_from_message_id = update['message']['forward_from_message_id']
+    forwarded_message = db.session.query(TelegramForwardedMessages) \
+        .filter(TelegramForwardedMessages.message_id == str(forward_from_message_id)).first()
+    send_infographics_to_telegram(message_id, forwarded_message.newsflash_id, forwarded_message.group_sent)

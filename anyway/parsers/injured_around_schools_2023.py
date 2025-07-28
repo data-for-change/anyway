@@ -5,7 +5,6 @@ import shutil
 from datetime import datetime
 from enum import Enum
 import pathlib
-import swifter  # pylint: disable=unused-import
 
 import math
 import pandas as pd
@@ -186,7 +185,8 @@ def calculate_injured_around_schools(start_date, end_date, distance):
         df_curr.to_pickle(curr_pkl_path)
         df_curr.to_csv(curr_csv_path, index=False)
 
-    df_schools["schools"].swifter.apply(lambda school: create_school_data(school))
+    for _, school in df_schools["schools"].iteritems():
+        create_school_data(school)
     if os.path.exists(ALL_SCHOOLS_DATA_DIR_COPY):
         shutil.rmtree(ALL_SCHOOLS_DATA_DIR_COPY)
     shutil.copytree(ALL_SCHOOLS_DATA_DIR, ALL_SCHOOLS_DATA_DIR_COPY)

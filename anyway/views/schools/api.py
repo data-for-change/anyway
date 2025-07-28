@@ -117,7 +117,7 @@ def schools_yishuvs_api():
 def load_school_file_from_s3(filename):
     s3_data_object = S3DataClass(s3_bucket_name=S3_BUCKET)
     object = s3_data_object.s3_bucket.Object(os.path.join(S3_SCHOOLS_FILE_PATH,filename))
-    data = json.loads(object.get()['Body'])
+    data = json.loads(object.get()['Body'].read().decode('utf-8'))
     return data
 
 

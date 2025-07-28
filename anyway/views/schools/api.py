@@ -2,14 +2,19 @@
 
 import json
 import logging
-
+import os
+from functools import lru_cache
 import pandas as pd
 from flask import Response, request
 from sqlalchemy import and_, not_
 
+from anyway.parsers.cbs.s3.base import S3DataClass
+
 from anyway.app_and_db import db
 from anyway.models import School, SchoolWithDescription2020
 
+S3_BUCKET = "dfc-anyway"
+S3_SCHOOLS_FILE_PATH = "schools_report/output"
 
 def schools_api():
     logging.debug("getting schools")
@@ -108,12 +113,19 @@ def schools_yishuvs_api():
     response.headers.add("Access-Control-Allow-Origin", "*")
     return response
 
+@lru_cache(maxsize=10)
+def load_school_file_from_s3(filename):
+    s3_data_object = S3DataClass(s3_bucket_name=S3_BUCKET)
+    object = s3_data_object.s3_bucket.Object(os.path.join(S3_SCHOOLS_FILE_PATH,filename))
+    data = json.loads(object.get()['Body'].read().decode('utf-8'))
+    return data
+
 
 def schools_names_api():
     # Disable all the no-member violations in this function
     # pylint: disable=no-member
     logging.debug("getting schools names")
-    schools_data = json.load(open("static/data/schools/schools_names.json"))
+    schools_data = load_school_file_from_s3("schools_names.json")
     response = Response(json.dumps(schools_data, default=str), mimetype="application/json")
     response.headers.add("Access-Control-Allow-Origin", "*")
     return response
@@ -124,7 +136,7 @@ def injured_around_schools_api():
     # pylint: disable=no-member
     logging.debug("getting injured around schools api")
     school_id = request.values.get("school_id")
-    all_data = json.load(open("static/data/schools/injured_around_schools_api.json"))
+    all_data = load_school_file_from_s3("injured_around_schools_api.json")
     school_data = all_data[school_id]
     response = Response(json.dumps(school_data, default=str), mimetype="application/json")
     response.headers.add("Access-Control-Allow-Origin", "*")
@@ -136,9 +148,7 @@ def injured_around_schools_sex_graphs_data_api():
     # pylint: disable=no-member
     logging.debug("getting injured around schools sex graphs data api")
     school_id = request.values.get("school_id")
-    all_data = json.load(
-        open("static/data/schools/injured_around_schools_sex_graphs_data_api.json")
-    )
+    all_data = load_school_file_from_s3("injured_around_schools_sex_graphs_data_api.json")
     school_data = all_data[school_id]
     response = Response(json.dumps(school_data, default=str), mimetype="application/json")
     response.headers.add("Access-Control-Allow-Origin", "*")
@@ -146,11 +156,11 @@ def injured_around_schools_sex_graphs_data_api():
 
 
 def injured_around_schools_months_graphs_data_api():
+    # Disable all the no-member violations in this function
+    # pylint: disable=no-member
     logging.debug("getting injured around schools months graphs data api")
     school_id = request.values.get("school_id")
-    all_data = json.load(
-        open("static/data/schools/injured_around_schools_months_graphs_data_api.json")
-    )
+    all_data = load_school_file_from_s3("injured_around_schools_months_graphs_data_api.json")
     school_data = all_data[school_id]
     response = Response(json.dumps(school_data, default=str), mimetype="application/json")
     response.headers.add("Access-Control-Allow-Origin", "*")

@@ -17,8 +17,13 @@ TELEGRAM_CHANNEL_CHAT_ID = "-1001666083560"
 TELEGRAM_POST_VERIFICATION_CHANNEL_CHAT_ID = "-1002064130267"
 TELEGRAM_LINKED_GROUP_CHAT_ID = -1001954877540
 TELEGRAM_POST_VERIFICATION_LINKED_GROUP_CHAT_ID = -1001990172076
+TELEGRAM_PUBLICATION_CHAT_ID = -1002676767390
+TELEGRAM_PUBLICATION_LINKED_GROUP_CHAT_ID = -1002716463353
+
 telegram_linked_group_by_channel = {TELEGRAM_CHANNEL_CHAT_ID: TELEGRAM_LINKED_GROUP_CHAT_ID,
-                                    TELEGRAM_POST_VERIFICATION_CHANNEL_CHAT_ID: TELEGRAM_POST_VERIFICATION_LINKED_GROUP_CHAT_ID}
+                                    TELEGRAM_POST_VERIFICATION_CHANNEL_CHAT_ID: TELEGRAM_POST_VERIFICATION_LINKED_GROUP_CHAT_ID,
+                                    TELEGRAM_PUBLICATION_CHAT_ID: TELEGRAM_PUBLICATION_LINKED_GROUP_CHAT_ID}
+
 TEXT_FOR_AFTER_INFOGRAPHICS_MESSAGE = 'מקור המידע בלמ"ס. נתוני התאונה שבמבזק לא נכללים באינפוגרפיקה. ' \
                                       'הופק באמצעות ANYWAY מבית "נתון לשינוי" למידע נוסף:'
 MAX_IMAGE_CAPTION_LENGTH = 1024
@@ -146,10 +151,18 @@ def fetch_message_by_id(message_id):
     return db.session.query(TelegramForwardedMessages) \
         .filter(TelegramForwardedMessages.message_id == str(message_id)).first()
 
+def is_message_send_command(message):
+    return "text" in message and message["text"] == "פרסם"
 
 def handle_webhook(update):
     message = update['message']
     message_id = message['message_id']
     forward_from_message_id = message['forward_from_message_id']
-    forwarded_message = fetch_message_by_id(forward_from_message_id)
-    send_infographics_to_telegram(message_id, forwarded_message.newsflash_id, forwarded_message.group_sent)
+    if "forward_from_message_id" in message:
+        forwarded_message = fetch_message_by_id(forward_from_message_id)
+        send_infographics_to_telegram(message_id, forwarded_message.newsflash_id, forwarded_message.group_sent)
+    else:
+        if message["chat"] == TELEGRAM_POST_VERIFICATION_LINKED_GROUP_CHAT_ID and \
+            is_message_send_command(message):
+            trigger_generate_infographics_and_send_to_telegram()
+

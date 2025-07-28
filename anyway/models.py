@@ -3081,9 +3081,11 @@ class TelegramGroupsTest(TelegramGroupsBase):
 
 class TelegramForwardedMessages(Base):
     __tablename__ = "telegram_forwarded_messages"
-    message_id = Column(String(), primary_key=True)
+    id = Column(Integer(), primary_key=True) #message_id is not unique across chats
+    message_id = Column(String())
     newsflash_id = Column(BigInteger(), nullable=False)
     group_sent = Column(String(), nullable=False)
+    timestamp = Column(DateTime(), nullable=False, server_default=text("now()"))
 
 
 class SDAccident(Base):

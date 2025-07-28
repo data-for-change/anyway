@@ -171,7 +171,7 @@ def parse(batch_size):
         batch_size=batch_size,
     )
     db.session.execute(
-        "UPDATE schools_with_description SET geom = ST_SetSRID(ST_MakePoint(longitude,latitude),4326)\
+        "UPDATE schools_with_description2020 SET geom = ST_SetSRID(ST_MakePoint(longitude,latitude),4326)\
                            WHERE geom IS NULL;"
     )
     db.session.commit()

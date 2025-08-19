@@ -10,6 +10,8 @@ import boto3
 import time
 import requests
 
+TELEGRAM_SYSTEM_USER = 777000
+
 ANYWAY_BASE_API_URL = "https://www.anyway.co.il/api"
 INFOGRAPHICS_S3_BUCKET = "dfc-anyway-infographics-images"
 
@@ -19,6 +21,8 @@ TELEGRAM_LINKED_GROUP_CHAT_ID = -1001954877540
 TELEGRAM_POST_VERIFICATION_LINKED_GROUP_CHAT_ID = -1001990172076
 TELEGRAM_PUBLICATION_CHAT_ID = -1002676767390
 TELEGRAM_PUBLICATION_LINKED_GROUP_CHAT_ID = -1002716463353
+
+PUBLISH_COMMAND_MESSAGE = "פרסם"
 
 telegram_linked_group_by_channel = {TELEGRAM_CHANNEL_CHAT_ID: TELEGRAM_LINKED_GROUP_CHAT_ID,
                                     TELEGRAM_POST_VERIFICATION_CHANNEL_CHAT_ID: TELEGRAM_POST_VERIFICATION_LINKED_GROUP_CHAT_ID,
@@ -140,29 +144,64 @@ def create_public_urls_for_infographics_images(folder_name):
     return presigned_urls
 
 
-def trigger_generate_infographics_and_send_to_telegram(newsflash_id, pre_verification_chat=True):
+def trigger_generate_infographics_and_send_to_telegram(newsflash_id, chat_id, skip_generation=False):
     dag_conf = {"news_flash_id": newsflash_id}
-    dag_conf["chat_id"] = TELEGRAM_CHANNEL_CHAT_ID if pre_verification_chat \
-        else TELEGRAM_POST_VERIFICATION_CHANNEL_CHAT_ID
+    dag_conf["chat_id"] = chat_id
+    if skip_generation:
+        dag_conf["skip_generation"] = True
     trigger_airflow_dag("generate-and-send-infographics-images", dag_conf)
 
 
-def fetch_message_by_id(message_id):
-    return db.session.query(TelegramForwardedMessages) \
-        .filter(TelegramForwardedMessages.message_id == str(message_id)).first()
+def publish_telegram_notification_on_newsflash_added(newsflash_id):
+    trigger_generate_infographics_and_send_to_telegram(newsflash_id, TELEGRAM_CHANNEL_CHAT_ID)
 
-def is_message_send_command(message):
-    return "text" in message and message["text"] == "פרסם"
+
+def publish_telegram_notification_on_location_verified(newsflash_id):
+    trigger_generate_infographics_and_send_to_telegram(newsflash_id, TELEGRAM_POST_VERIFICATION_CHANNEL_CHAT_ID)
+
+
+def publish_telegram_notification_on_publication_decision(newsflash_id):
+    trigger_generate_infographics_and_send_to_telegram(newsflash_id, TELEGRAM_PUBLICATION_CHAT_ID, True)
+
+
+def fetch_message_by_id(message_id, chat_id):
+    return db.session.query(TelegramForwardedMessages) \
+        .filter(TelegramForwardedMessages.message_id == str(message_id),
+                TelegramForwardedMessages.group_sent == str(chat_id)).first()
+
+def is_message_publish_command(message):
+    return message["chat"]["id"] == TELEGRAM_POST_VERIFICATION_LINKED_GROUP_CHAT_ID and \
+            "text" in message and message["text"] == PUBLISH_COMMAND_MESSAGE
 
 def handle_webhook(update):
     message = update['message']
-    message_id = message['message_id']
-    forward_from_message_id = message['forward_from_message_id']
-    if "forward_from_message_id" in message:
-        forwarded_message = fetch_message_by_id(forward_from_message_id)
-        send_infographics_to_telegram(message_id, forwarded_message.newsflash_id, forwarded_message.group_sent)
-    else:
-        if message["chat"] == TELEGRAM_POST_VERIFICATION_LINKED_GROUP_CHAT_ID and \
-            is_message_send_command(message):
-            trigger_generate_infographics_and_send_to_telegram()
 
+    if is_message_publish_command(message):
+        send_to_publication_channel(message)
+        return
+
+    if not message["from"]["id"] == TELEGRAM_SYSTEM_USER: #ignore messages by users other than the system user
+        return
+
+    if "forward_from_message_id" in message:
+        send_info_after_initial_message(message)
+
+def send_info_after_initial_message(message):
+    forward_from_message_id = message['forward_from_message_id']
+    chat_sent = message["sender_chat"]["id"]
+    forwarded_message = fetch_message_by_id(forward_from_message_id, chat_sent)
+    send_infographics_to_telegram(message["message_id"], forwarded_message.newsflash_id, forwarded_message.group_sent)
+
+def store_telegram_message(message_id, newsflash_id, chat):
+    db_message = TelegramForwardedMessages(message_id=message_id,
+                                           newsflash_id=newsflash_id,
+                                           group_sent=chat)
+    db.session.add(db_message)
+    db.session.commit()
+
+def send_to_publication_channel(message):
+    forward_origin = message['reply_to_message']['forward_origin']
+    forward_from_message_id = forward_origin['message_id']
+    chat_sent = forward_origin['chat']['id']
+    thread_starting_message = fetch_message_by_id(forward_from_message_id, chat_sent)
+    publish_telegram_notification_on_publication_decision(thread_starting_message.newsflash_id)

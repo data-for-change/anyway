@@ -9,7 +9,7 @@ from anyway.parsers import timezones
 from anyway.models import NewsFlash
 from anyway.slack_accident_notifications import publish_notification
 from anyway.telegram_accident_notifications import (
-    trigger_generate_infographics_and_send_to_telegram,
+    publish_telegram_notification_on_newsflash_added,
 )
 from anyway.widgets.widget_utils import newsflash_has_location
 
@@ -58,7 +58,7 @@ class DBAdapter:
     def publish_notifications(newsflash: NewsFlash):
         publish_notification(newsflash)
         if newsflash_has_location(newsflash):
-            trigger_generate_infographics_and_send_to_telegram(newsflash.id)
+            publish_telegram_notification_on_newsflash_added(newsflash.id)
         else:
             logging.debug("newsflash does not have location, not publishing")
 

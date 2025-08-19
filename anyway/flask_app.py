@@ -1357,14 +1357,12 @@ def embedded_reports_api():
 
 @app.route("/api/telegram/webhook", methods=["POST"])
 def telegram_webhook():
+    from anyway.telegram_accident_notifications import handle_webhook
+
     try:
         update = request.json  # Telegram sends updates in JSON format
         logging.debug(f"Received Telegram update: {update}")
-        message_id = update['message']['message_id']
-        forward_from_message_id = update['message']['forward_from_message_id']
-        forwarded_message = db.session.query(TelegramForwardedMessages)\
-            .filter(TelegramForwardedMessages.message_id == str(forward_from_message_id)).first()
-        send_infographics_to_telegram(message_id, forwarded_message.newsflash_id, forwarded_message.group_sent)
+        handle_webhook(update)
         return jsonify(success=True)
     except Exception as e:
         logging.exception("Failed to process Telegram webhook: %s", e)

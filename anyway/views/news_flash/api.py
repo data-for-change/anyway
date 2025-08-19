@@ -32,7 +32,7 @@ from anyway.parsers.resolution_fields import ResolutionFields as RF
 from anyway.models import AccidentMarkerView, InvolvedView
 from anyway.widgets.widget_utils import get_accidents_stats
 from anyway.parsers.location_extraction import get_road_segment_name_and_number
-from anyway.telegram_accident_notifications import trigger_generate_infographics_and_send_to_telegram
+from anyway.telegram_accident_notifications import publish_telegram_notification_on_location_verified
 from io import BytesIO
 
 DEFAULT_OFFSET_REQ_PARAMETER = 0
@@ -380,7 +380,7 @@ def update_news_flash_qualifying(id):
         if os.environ.get("FLASK_ENV") == "production" and \
                 new_location_qualifiction in VERIFIED_QUALIFICATIONS and \
                 old_location_qualifiction != NewsflashLocationQualification.MANUAL.value:
-            trigger_generate_infographics_and_send_to_telegram(id, False)
+            publish_telegram_notification_on_location_verified(id)
         return Response(status=HTTPStatus.OK)
 
 

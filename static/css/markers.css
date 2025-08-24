@@ -67,6 +67,9 @@ div[title*='תאונה']:after, div[title*='תאונות']:after,div[title*='א�
     -o-transform: rotate(45deg);
     -ms-transform: rotate(45deg);
     transform: rotate(45deg);
+    position: absolute;
+    top: 0%;
+    left: 0%;
 }
 
 div[title$='.']{
@@ -168,6 +171,9 @@ div[title*='מיקום נוכחי']:after{
     -o-transform: rotate(45deg);
     -ms-transform: rotate(45deg);
     transform: rotate(45deg);
+    position: absolute;
+    top: 0%;
+    left: 0%;
 }
 
 div[title*='איחוד הצלה']:after {
@@ -221,9 +227,3 @@ div[title*='הולך רגל']:after{
     box-shadow: 0px 0px 25px 12px rgb(160,100,140);
 }
 
-/* Mobile responsive fixes for marker positioning */
-@media (max-width: 767px) {
-    div[title*='תאונה']:after, div[title*='תאונות']:after,div[title*='איחוד הצלה']:after, div[title*='שומרי הדרך']:after {
-        margin: 4px -12px 0px 0px;
-    }
-}

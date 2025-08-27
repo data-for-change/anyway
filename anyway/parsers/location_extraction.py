@@ -10,6 +10,7 @@ from anyway.models import NewsFlash
 from anyway.parsers.resolution_fields import ResolutionFields as RF
 from anyway import secrets
 from anyway.models import AccidentMarkerView, RoadSegments
+from anyway.llm import ask_ai_about_street_matching
 from sqlalchemy import not_
 import pandas as pd
 from sqlalchemy.orm import load_only
@@ -176,19 +177,7 @@ def get_db_matching_location_interurban(latitude, longitude) -> dict:
     return final_loc
 
 
-def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):
-    """
-    extracts location from db by closest geo point to location found, using road number if provided and limits to
-    requested resolution
-    :param db: the DB
-    :param latitude: location latitude
-    :param longitude: location longitude
-    :param resolution: wanted resolution
-    :param road_no: road number if there is
-    :return: a dict containing all the geo fields stated in
-    resolution dict, with values filled according to resolution
-    """
-    # READ MARKERS FROM DB
+def read_markers_and_distance_from_location(db, latitude, longitude, resolution, road_no=None):
     geod = Geodesic.WGS84
     relevant_fields = RF.get_possible_fields(resolution)
     markers = db.get_markers_for_location_extraction()
@@ -222,6 +211,24 @@ def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):
     markers["dist_point"] = markers.apply(
         lambda x: geod.Inverse(latitude, longitude, x["latitude"], x["longitude"])["s12"], axis=1
     ).replace({np.nan: None})
+    return markers
+
+
+def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):
+    """
+    extracts location from db by closest geo point to location found, using road number if provided and limits to
+    requested resolution
+    :param db: the DB
+    :param latitude: location latitude
+    :param longitude: location longitude
+    :param resolution: wanted resolution
+    :param road_no: road number if there is
+    :return: a dict containing all the geo fields stated in
+    resolution dict, with values filled according to resolution
+    """
+    # READ MARKERS FROM DB
+    relevant_fields = RF.get_possible_fields(resolution)
+    markers = read_markers_and_distance_from_location(db, latitude, longitude, resolution, road_no)
 
     most_fit_loc = (
         markers.loc[markers["dist_point"] == markers["dist_point"].min()].iloc[0].to_dict()
@@ -238,6 +245,24 @@ def get_db_matching_location(db, latitude, longitude, resolution, road_no=None):
             logging.debug(f"Converting field {field} from {final_loc[field]} to None.")
             final_loc[field] = None
     return final_loc
+
+
+def read_n_closest_streets(db, n, latitude, longitude, road_no=None):
+    markers = read_markers_and_distance_from_location(
+        db, latitude, longitude, BE_CONST.ResolutionCategories.STREET, road_no
+    )
+    # Sort by distance
+    sorted_markers = markers.sort_values(by="dist_point")
+
+    # Drop duplicates to ensure unique street1_hebrew values
+    unique_street_markers = sorted_markers.drop_duplicates(subset="street1_hebrew")
+
+    # Select the top n entries
+    top_n_unique_streets = unique_street_markers.head(n)
+
+    # Convert to dictionary if needed
+    result_dicts = top_n_unique_streets.to_dict(orient="records")
+    return [result["street1_hebrew"] for result in result_dicts]
 
 
 def set_accident_resolution(accident_row):
@@ -282,11 +307,12 @@ def reverse_geocode_extract(latitude, longitude):
     try:
         gmaps = googlemaps.Client(key=secrets.get("GOOGLE_MAPS_KEY"))
         geocode_result = gmaps.reverse_geocode((latitude, longitude))
-
+        print(geocode_result)
         # if we got no results, move to next iteration of location string
         if not geocode_result:
             return None
     except Exception as _:
+        logging.info(_)
         logging.info("exception in gmaps")
         return None
     # logging.info(geocode_result)
@@ -539,6 +565,42 @@ def extract_geo_features(db, newsflash: NewsFlash, use_existing_coordinates_only
         if location_from_db is not None:
             update_location_fields(newsflash, location_from_db)
     try_find_segment_id(newsflash)
+    logging.debug(newsflash.resolution)
+    if newsflash.resolution == BE_CONST.ResolutionCategories.STREET:
+        try_improve_street_identification(newsflash)
+
+
+def try_improve_street_identification(newsflash):
+    from anyway.parsers import news_flash_db_adapter
+
+    db = news_flash_db_adapter.init_db()
+    all_closest_streets = read_n_closest_streets(db, 20, newsflash.lat, newsflash.lon)
+
+    num_of_streets_for_first_try = 5
+    streets_for_first_try = all_closest_streets[:num_of_streets_for_first_try]
+    streets_for_second_try = all_closest_streets[num_of_streets_for_first_try:]
+
+    result, result_in_input = ask_ai_about_street_matching(
+        streets_for_first_try, newsflash.location
+    )
+    logging.debug(f"result of 1st try {result}")
+    if not result_in_input:
+        logging.debug(f"street matching failed first try for newsflash {newsflash.id}")
+        result, result_in_input = ask_ai_about_street_matching(
+            streets_for_second_try, newsflash.location
+        )
+        logging.debug(f"result of 2nd try {result}")
+    if result_in_input:
+        if result == newsflash.street1_hebrew:
+            logging.debug("street matching succeeded, street not changed")
+        else:
+            logging.debug(
+                f"street matching succeeded, street updated for {newsflash.id} "
+                f"from {newsflash.street1_hebrew} to {result}"
+            )
+            newsflash.street1_hebrew = result
+    else:
+        logging.debug(f"street matching failed second try for newsflash {newsflash.id}")
 
 
 def update_location_fields(newsflash, location_from_db):

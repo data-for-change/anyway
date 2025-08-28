@@ -32,7 +32,7 @@ services:
       - APP_SECRET_KEY
     volumes:
       - "${GOOGLE_APPLICATION_CREDENTIALS_HOST_PATH}:${GOOGLE_APPLICATION_CREDENTIALS}"
-    command: "gunicorn -b 0.0.0.0:5000 -w 4 -t 120 anyway:app"
+    command: "gunicorn -b 0.0.0.0:5000 -k gevent -w 4 -t 120 anyway:app"
 
   db:
     environment:

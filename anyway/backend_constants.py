@@ -78,7 +78,7 @@ class BackEndConstants(object):
     SUPPORTED_RESOLUTIONS: List[ResolutionCategories] = [
         ResolutionCategories.STREET,
         ResolutionCategories.SUBURBAN_ROAD,
-        ResolutionCategories.SUBURBAN_JUNCTION
+        ResolutionCategories.SUBURBAN_JUNCTION,
     ]
 
     RESOLUTION_ACCURACY_VALUES: dict = {
@@ -116,6 +116,7 @@ class BackEndConstants(object):
     SERIES = "series"
 
     YISHUV_NAME = "yishuv_name"
+
 
 BE_CONST = BackEndConstants()
 
@@ -272,6 +273,20 @@ class InjuredType(LabeledCode):
             InjuredType.DRIVER_UNKNOWN_VEHICLE: "Driver of an unknown vehicle",
             InjuredType.PASSENGER_UNKNOWN_VEHICLE: "Passenger of an unknown vehicle",
         }
+
+
+try:
+    _("Pedestrian")
+    _("Driver of a vehicle with 4 wheel or more")
+    _("Passenger of a vehicle with 4 wheel or more")
+    _("Motorcycle driver")
+    _("Motorcycle passenger")
+    _("Bicycle driver")
+    _("Bicycle passenger")
+    _("Driver of an unknown vehicle")
+    _("Passenger of an unknown vehicle")
+except NameError:
+    pass
 
 
 class CrossLocation(Enum):

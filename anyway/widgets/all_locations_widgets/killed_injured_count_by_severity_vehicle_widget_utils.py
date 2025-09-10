@@ -7,7 +7,7 @@ from sqlalchemy import func
 
 from anyway.app_and_db import db
 from anyway.vehicle_type import VehicleType, UNKNOWN_VEHICLE_TYPE
-from anyway.backend_constants import BE_CONST, InjurySeverity
+from anyway.backend_constants import BE_CONST, InjurySeverityExpanded
 from anyway.models import InvolvedMarkerView
 from anyway.request_params import RequestParams
 from anyway.widgets.widget_utils import (
@@ -58,7 +58,7 @@ class KilledInjuredCountPerSeverityVehicleWidgetUtils:
         dict_grouped = defaultdict(defaultdict_int_factory())
         # initialize the dict for fixed order of the vehicle types
         for vehicle_type in [UNKNOWN_VEHICLE_TYPE] + VehicleType.codes():
-            for injury_id in InjurySeverity.codes():
+            for injury_id in InjurySeverityExpanded.codes():
                 dict_grouped[vehicle_type][injury_id] = 0
 
         has_data = False
@@ -96,15 +96,6 @@ class KilledInjuredCountPerSeverityVehicleWidgetUtils:
             .filter(
                 InvolvedMarkerView.provider_code.in_(
                     [BE_CONST.CBS_ACCIDENT_TYPE_1_CODE, BE_CONST.CBS_ACCIDENT_TYPE_3_CODE]
-                )
-            )
-            .filter(
-                InvolvedMarkerView.injury_severity.in_(
-                    [
-                        InjurySeverity.KILLED.value,
-                        InjurySeverity.SEVERE_INJURED.value,
-                        InjurySeverity.LIGHT_INJURED.value,
-                    ]
                 )
             )
             .filter(loc_ex)

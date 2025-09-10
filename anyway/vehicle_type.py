@@ -18,15 +18,15 @@ UNKNOWN_VEHICLE_TYPE = -1
 
 class VehicleType(LabeledCode):
     CAR = 1
-    TRUCK_UPTO_4 = 2
-    PICKUP_UPTO_4 = 3
-    TRUCK_4_TO_10 = 4
+    TRUCK_UPTO_3_5 = 2
+    PICKUP_UPTO_3_5 = 3
+    TRUCK_4_TO_10 = 4  # from old dictionary, kept for backward compatibility
     TRUCK_12_TO_16 = 5
     TRUCK_16_TO_34 = 6
     TRUCK_ABOVE_34 = 7
     MOTORCYCLE_UPTO_50 = 8
     MOTORCYCLE_50_TO_250 = 9
-    MOTORCYCLE_250_TO_500 = 10
+    MOTORCYCLE_250_TO_400 = 10
     BUS = 11
     TAXI = 12
     WORK = 13
@@ -35,7 +35,7 @@ class VehicleType(LabeledCode):
     TRAIN = 16
     OTHER_AND_UNKNOWN = 17
     MINIBUS = 18
-    MOTORCYCLE_ABOVE_500 = 19
+    MOTORCYCLE_ABOVE_400 = 19
     ELECTRIC_SCOOTER = 21
     MOBILITY_SCOOTER = 22
     ELECTRIC_BIKE = 23
@@ -52,15 +52,15 @@ class VehicleType(LabeledCode):
     def get_english_display_name(self):
         english_vehicle_type_display_names = {
             VehicleType.CAR: "private car",
-            VehicleType.TRUCK_UPTO_4: "truck upto 4 tons",
-            VehicleType.PICKUP_UPTO_4: "pickup upto 4 tons",
+            VehicleType.TRUCK_UPTO_3_5: "truck upto 3.5 tons",
+            VehicleType.PICKUP_UPTO_3_5: "pickup upto 3.5 tons",
             VehicleType.TRUCK_4_TO_10: "truck 4 to 10 tons",
             VehicleType.TRUCK_12_TO_16: "truck 12 to 16 tons",
             VehicleType.TRUCK_16_TO_34: "truck 16 to 34 tons",
             VehicleType.TRUCK_ABOVE_34: "truck above 34 tons",
             VehicleType.MOTORCYCLE_UPTO_50: "motorcycle upto 50 cc",
             VehicleType.MOTORCYCLE_50_TO_250: "motorcycle 50 to 250 cc",
-            VehicleType.MOTORCYCLE_250_TO_500: "motorcycle 250 to 500 cc",
+            VehicleType.MOTORCYCLE_250_TO_400: "motorcycle 250 to 400 cc",
             VehicleType.BUS: "bus",
             VehicleType.TAXI: "taxi",
             VehicleType.WORK: "work vehicle",
@@ -69,7 +69,7 @@ class VehicleType(LabeledCode):
             VehicleType.TRAIN: "train",
             VehicleType.OTHER_AND_UNKNOWN: "other and unknown",
             VehicleType.MINIBUS: "minibus",
-            VehicleType.MOTORCYCLE_ABOVE_500: "motorcycle above 500 cc",
+            VehicleType.MOTORCYCLE_ABOVE_400: "motorcycle above 400 cc",
             VehicleType.ELECTRIC_SCOOTER: "electric scooter",
             VehicleType.MOBILITY_SCOOTER: "mobility scooter",
             VehicleType.ELECTRIC_BIKE: "electric bike",
@@ -99,6 +99,34 @@ class VehicleType(LabeledCode):
             )
             return VehicleType.OTHER_AND_UNKNOWN.value
 
+try:
+    _("private car")
+    _("truck upto 3.5 tons")
+    _("pickup upto 3.5 tons")
+    _("truck 4 to 10 tons")
+    _("truck 12 to 16 tons")
+    _("truck 16 to 34 tons")
+    _("truck above 34 tons")
+    _("motorcycle upto 50 cc")
+    _("motorcycle 50 to 250 cc")
+    _("motorcycle 250 to 400 cc")
+    _("bus")
+    _("taxi")
+    _("work vehicle")
+    _("tractor")
+    _("bike")
+    _("train")
+    _("other and unknown")
+    _("minibus")
+    _("motorcycle above 400 cc")
+    _("electric scooter")
+    _("mobility scooter")
+    _("electric bike")
+    _("truck 3.5 to 10 tons")
+    _("truck 10 to 12 tons")
+except Exception:
+    pass
+
 
 VT = VehicleType
 
@@ -117,8 +145,8 @@ class VehicleCategory(Enum):
         """returns VehicleType codes of category"""
         category_vehicle_types = {
             VehicleCategory.PROFESSIONAL_DRIVER: [
-                VehicleType.TRUCK_UPTO_4,
-                VehicleType.PICKUP_UPTO_4,
+                VehicleType.TRUCK_UPTO_3_5,
+                VehicleType.PICKUP_UPTO_3_5,
                 VehicleType.TRUCK_4_TO_10,
                 VehicleType.TRUCK_12_TO_16,
                 VehicleType.TRUCK_16_TO_34,
@@ -135,8 +163,8 @@ class VehicleCategory(Enum):
                 VehicleType.CAR,
                 VehicleType.MOTORCYCLE_UPTO_50,
                 VehicleType.MOTORCYCLE_50_TO_250,
-                VehicleType.MOTORCYCLE_250_TO_500,
-                VehicleType.MOTORCYCLE_ABOVE_500,
+                VehicleType.MOTORCYCLE_250_TO_400,
+                VehicleType.MOTORCYCLE_ABOVE_400,
             ],
             VehicleCategory.LIGHT_ELECTRIC: [
                 VehicleType.ELECTRIC_SCOOTER,
@@ -145,8 +173,8 @@ class VehicleCategory(Enum):
             ],
             VehicleCategory.CAR: [VehicleType.CAR, VehicleType.TAXI],
             VehicleCategory.LARGE: [
-                VehicleType.TRUCK_UPTO_4,
-                VehicleType.PICKUP_UPTO_4,
+                VehicleType.TRUCK_UPTO_3_5,
+                VehicleType.PICKUP_UPTO_3_5,
                 VehicleType.TRUCK_4_TO_10,
                 VehicleType.TRUCK_12_TO_16,
                 VehicleType.TRUCK_16_TO_34,
@@ -161,8 +189,8 @@ class VehicleCategory(Enum):
             VehicleCategory.MOTORCYCLE: [
                 VehicleType.MOTORCYCLE_UPTO_50,
                 VehicleType.MOTORCYCLE_50_TO_250,
-                VehicleType.MOTORCYCLE_250_TO_500,
-                VehicleType.MOTORCYCLE_ABOVE_500,
+                VehicleType.MOTORCYCLE_250_TO_400,
+                VehicleType.MOTORCYCLE_ABOVE_400,
             ],
             VehicleCategory.BICYCLE_AND_SMALL_MOTOR: [
                 VehicleType.BIKE,

@@ -3,10 +3,7 @@ from collections import defaultdict, OrderedDict
 from typing import Dict, Tuple, Callable
 
 from flask_sqlalchemy import BaseQuery
-from sqlalchemy import func, asc
-
-# noinspection PyProtectedMember
-from flask_babel import _
+from sqlalchemy import func
 
 from anyway.app_and_db import db
 from anyway.vehicle_type import VehicleType, UNKNOWN_VEHICLE_TYPE

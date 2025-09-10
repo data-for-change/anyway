@@ -62,7 +62,7 @@ class KilledInjuredCountPerSeverityVehicleWidgetUtils:
         # initialize the dict for fixed order of the vehicle types
         for vehicle_type in [UNKNOWN_VEHICLE_TYPE] + VehicleType.codes():
             for injury_id in InjurySeverity.codes():
-                dict_grouped[vehicle_type.value][injury_id] = 0
+                dict_grouped[vehicle_type][injury_id] = 0
 
         has_data = False
         for row in query:

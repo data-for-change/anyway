@@ -5,13 +5,13 @@ from typing import Dict, List
 from flask_babel import _
 from anyway.backend_constants import InjurySeverity, InjuredType, BE_CONST as BE
 from anyway.request_params import RequestParams
-from anyway.widgets.all_locations_widgets.killed_injured_count_per_severity_vehicle_widget_utils import (
+from anyway.widgets.all_locations_widgets.killed_injured_count_by_severity_vehicle_widget_utils import (
     KilledInjuredCountPerSeverityVehicleWidgetUtils,
 )
-from anyway.widgets.all_locations_widgets.all_locations_widget import (
-    AllLocationsWidget,
-    killed_injured_count_by_severity_vehicle_widget_utils,
-)
+
+from anyway.widgets.all_locations_widgets.all_locations_widget import AllLocationsWidget
+from anyway.widgets.all_locations_widgets import killed_injured_count_by_severity_vehicle_widget_utils
+
 from anyway.widgets.widget import register
 from anyway.widgets.widget_utils import (
     add_empty_keys_to_gen_two_level_dict,
@@ -40,8 +40,8 @@ class KilledInjuredCountPerVehicleStackedWidget(AllLocationsWidget):
 
         partial_processed = add_empty_keys_to_gen_two_level_dict(
             raw_data,
-            [vehicle_type.get_label() for vehicle_type in VehicleType]
-            + [InjuredType.PEDESTRIAN.get_label()],
+            VehicleType.codes()
+            + [UNKNOWN_VEHICLE_TYPE],
             InjurySeverity.codes(),
         )
 
@@ -61,12 +61,14 @@ class KilledInjuredCountPerVehicleStackedWidget(AllLocationsWidget):
             for item in items["data"]["items"]:
 
                 try:
+                    logging.debug(f"item before translation: {item}")
                     if item["label_key"] == UNKNOWN_VEHICLE_TYPE:
-                        item["label_key"] = _(InjuredType.PEDESTRIAN.get_label())
+                        label = _(InjuredType.PEDESTRIAN.get_label())
                     else:
-                        item["label_key"] = _(
+                        label = _(
                             VehicleType(item["label_key"]).get_english_display_name()
                         )
+                    item["label_key"] = label
                 except ValueError:
                     logging.exception(
                         f"KilledInjuredCountPerVehicleTypeStackedWidget.localize_items: item:{item}"

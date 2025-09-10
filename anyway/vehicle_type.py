@@ -3,6 +3,8 @@ from typing import List, Union
 import logging
 import math
 
+from anyway.backend_constants import LabeledCode
+
 try:
     from flask_babel import _
 except ModuleNotFoundError:
@@ -11,7 +13,10 @@ except ModuleNotFoundError:
         return str
 
 
-class VehicleType(Enum):
+UNKNOWN_VEHICLE_TYPE = -1
+
+
+class VehicleType(LabeledCode):
     CAR = 1
     TRUCK_UPTO_4 = 2
     PICKUP_UPTO_4 = 3

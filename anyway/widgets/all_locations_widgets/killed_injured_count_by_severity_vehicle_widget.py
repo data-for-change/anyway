@@ -3,7 +3,7 @@ from typing import Dict, List
 
 # noinspection PyProtectedMember
 from flask_babel import _
-from anyway.backend_constants import InjurySeverity, InjuredType, BE_CONST as BE
+from anyway.backend_constants import InjurySeverityExpanded, InjuredType, BE_CONST as BE
 from anyway.request_params import RequestParams
 from anyway.widgets.all_locations_widgets.killed_injured_count_by_severity_vehicle_widget_utils import (
     KilledInjuredCountPerSeverityVehicleWidgetUtils,
@@ -20,7 +20,7 @@ from anyway.widgets.widget_utils import (
 )
 from anyway.vehicle_type import VehicleType, UNKNOWN_VEHICLE_TYPE
 
-INJURY_ORDER = [InjurySeverity.LIGHT_INJURED, InjurySeverity.SEVERE_INJURED, InjurySeverity.KILLED]
+INJURY_ORDER = [InjurySeverityExpanded.NOT_INJURED, InjurySeverityExpanded.LIGHT_INJURED, InjurySeverityExpanded.SEVERE_INJURED, InjurySeverityExpanded.KILLED]
 
 
 @register
@@ -42,7 +42,7 @@ class KilledInjuredCountPerVehicleStackedWidget(AllLocationsWidget):
             raw_data,
             VehicleType.codes()
             + [UNKNOWN_VEHICLE_TYPE],
-            InjurySeverity.codes(),
+            InjurySeverityExpanded.codes(),
         )
 
         structured_data_list = []
@@ -78,7 +78,7 @@ class KilledInjuredCountPerVehicleStackedWidget(AllLocationsWidget):
         items["data"]["text"] = {
             "title": _("Killed and injured stacked per vehicle type"),
             "subtitle": _(location_text),
-            "labels_map": gen_entity_labels(InjurySeverity),
+            "labels_map": gen_entity_labels(InjurySeverityExpanded),
         }
         items["meta"]["information"] = _(
             "Injured count per vehicle type and injury severity. The graph shows all injury severities: fatal, severe, and light."

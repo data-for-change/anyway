@@ -7,9 +7,7 @@ Create Date: 2021-03-31 21:31:47.278834
 """
 
 # revision identifiers, used by Alembic.
-import datetime
-
-from sqlalchemy import orm, text
+from sqlalchemy import text
 from sqlalchemy.engine.reflection import Inspector
 
 
@@ -66,46 +64,33 @@ def upgrade():
         sa.PrimaryKeyConstraint("user_id", "role_id"),
     )
 
-    from anyway.models import Roles, Users, users_to_roles
+    # Use raw SQL to avoid schema mismatch with future 'app' column addition
+    # Insert admin role
+    op.execute("""
+        INSERT INTO roles (name, description, create_date)
+        VALUES ('admins', 'This is the default admin role.', now())
+    """)
 
-    bind = op.get_bind()
-    session = orm.Session(bind=bind)
+    # Insert admin user if not exists
+    op.execute(f"""
+        INSERT INTO users (user_register_date, user_last_login_date, email, oauth_provider_user_name,
+                          is_active, oauth_provider, is_user_completed_registration, oauth_provider_user_id)
+        SELECT now(), now(), '{ADMIN_EMAIL}', '{ADMIN_EMAIL}',
+               true, 'google', true, 'unknown-manual-insert'
+        WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = '{ADMIN_EMAIL}')
+    """)
 
-    role_admins = Roles(
-        name="admins",
-        description="This is the default admin role.",
-        create_date=datetime.datetime.now(),
-    )
-    session.add(role_admins)
-
-    res = session.query(Users).with_entities(Users.email).filter(Users.email == ADMIN_EMAIL).first()
-    if res is None:
-        user = Users(
-            user_register_date=datetime.datetime.now(),
-            user_last_login_date=datetime.datetime.now(),
-            email=ADMIN_EMAIL,
-            oauth_provider_user_name=ADMIN_EMAIL,
-            is_active=True,
-            oauth_provider="google",
-            is_user_completed_registration=True,
-            oauth_provider_user_id="unknown-manual-insert",
+    # Insert user-role association
+    op.execute(f"""
+        INSERT INTO users_to_roles (user_id, role_id, create_date)
+        SELECT u.id, r.id, now()
+        FROM users u, roles r
+        WHERE u.email = '{ADMIN_EMAIL}' AND r.name = 'admins'
+        AND NOT EXISTS (
+            SELECT 1 FROM users_to_roles utr
+            WHERE utr.user_id = u.id AND utr.role_id = r.id
         )
-        session.add(user)
-
-    user_id = (
-        session.query(Users).with_entities(Users.id).filter(Users.email == ADMIN_EMAIL).first()
-    )
-
-    role_id = session.query(Roles).with_entities(Roles.id).filter(Roles.name == "admins").first()
-
-    insert_users_to_roles = users_to_roles.insert().values(
-        user_id=user_id.id,
-        role_id=role_id.id,
-        create_date=datetime.datetime.now(),
-    )
-    session.execute(insert_users_to_roles)
-
-    session.commit()
+    """)
 
 
 def downgrade():

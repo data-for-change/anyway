@@ -1,8 +1,87 @@
 # User API documentation
 
-This is the documentation for the new user API (Version 2) that was created in 2020.
+This is the documentation for the new user API with the Safety Data users added.
 
 Note: All the info about https://www.anyway.co.il is relevant to https://dev.anyway.co.il as well
+
+## User System Database Schema
+
+The following diagram shows the database tables with only primary keys (PK) and foreign keys (FK):
+
+```mermaid
+erDiagram
+    users ||--o{ users_to_roles : "has"
+    users ||--o{ users_to_organizations : "belongs to"
+    users ||--o{ users_to_grants : "has"
+    roles ||--o{ users_to_roles : "assigned to"
+    organization ||--o{ users_to_organizations : "has members"
+    grants ||--o{ users_to_grants : "granted to"
+
+    users {
+        bigint id PK
+        int app
+    }
+
+    roles {
+        int id PK
+        int app
+    }
+
+    organization {
+        bigint id PK
+        int app
+    }
+
+    grants {
+        int id PK
+        int app
+    }
+
+    users_to_roles {
+        bigint user_id PK_FK
+        int role_id PK_FK
+        int app PK
+    }
+
+    users_to_organizations {
+        bigint user_id PK_FK
+        bigint organization_id PK_FK
+        int app PK
+    }
+
+    users_to_grants {
+        bigint user_id PK_FK
+        int grant_id PK_FK
+        int app PK
+    }
+```
+
+### Key Points
+
+- **Primary Keys (PK)**:
+  - `users.id` - Auto-incrementing bigint
+  - `roles.id` - Auto-incrementing integer
+  - `organization.id` - Auto-incrementing bigint
+  - `grants.id` - Auto-incrementing integer
+  - Junction tables use composite primary keys: `(user_id, role_id, app)`, `(user_id, organization_id, app)`, `(user_id, grant_id, app)`
+
+- **Foreign Keys (FK)**:
+  - `users_to_roles.user_id` → `users.id`
+  - `users_to_roles.role_id` → `roles.id`
+  - `users_to_organizations.user_id` → `users.id`
+  - `users_to_organizations.organization_id` → `organization.id`
+  - `users_to_grants.user_id` → `users.id`
+  - `users_to_grants.grant_id` → `grants.id`
+
+- **App Separation**:
+  - All tables include an `app` column (0 = Anyway, 1 = Safety Data)
+  - Junction tables include `app` in their composite primary keys to maintain app-specific relationships
+
+- **Relationships**:
+  - **Many-to-Many**: Users ↔ Roles (via `users_to_roles`)
+  - **Many-to-Many**: Users ↔ Organizations (via `users_to_organizations`)
+  - **Many-to-Many**: Users ↔ Grants (via `users_to_grants`)
+  - All relationships are scoped by the `app` column, allowing the same user email to have different roles/organizations/grants in each app
 
 ### Authorization
 
@@ -10,8 +89,51 @@ Note: All the info about https://www.anyway.co.il is relevant to https://dev.any
 
 User authorization is been done with OAuth 2.0 and Google as the OAuth 2.0 provider. When calling the authentication URL you will
 be redirected to Google OAuth system (So the user need to be able to see the screen), after Google will authenticate the user he will be redirected
-to https://www.anyway.co.il/authorize/google/callback/google and from there the flow will be redirected to the URL that was given in
+to https://www.anyway.co.il/callback/google (for Anyway app) or https://www.anyway.co.il/sd-callback/google (for Safety Data app), and from there the flow will be redirected to the URL that was given in
 the param `redirect_url` or to the default URL.
+
+**Note**: Both Anyway and Safety Data apps use the same Google OAuth credentials. Users with the same email can have separate accounts in each app (identified by the `app` column in the database), allowing concurrent login to both apps. The callback endpoint determines which app the user belongs to.
+
+#### Authorization Flow Diagram
+
+The following diagram illustrates the OAuth 2.0 authorization flow for both Anyway and Safety Data apps:
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend as Frontend App
+    participant AnywayAPI as Anyway API
+    participant Google as Google OAuth
+    participant Database as Database
+
+    Note over User,Database: Anyway App Flow (app=0)
+    User->>Frontend: Click "Login with Google"
+    Frontend->>AnywayAPI: GET /authorize/google?redirect_url=...
+    AnywayAPI->>Google: Redirect to Google OAuth
+    Google->>User: Show login screen
+    User->>Google: Enter credentials
+    Google->>AnywayAPI: Redirect to /callback/google?code=...
+    AnywayAPI->>Google: Exchange code for token
+    Google->>AnywayAPI: Return access token + user info
+    AnywayAPI->>Database: Find/Create user (app=0)
+    Database->>AnywayAPI: User record (app=0)
+    AnywayAPI->>User: Set session cookie, redirect to redirect_url
+
+    Note over User,Database: Safety Data App Flow (app=1)
+    User->>Frontend: Click "Login with Google"
+    Frontend->>AnywayAPI: GET /sd-authorize/google?redirect_url=...
+    AnywayAPI->>Google: Redirect to Google OAuth
+    Google->>User: Show login screen
+    User->>Google: Enter credentials
+    Google->>AnywayAPI: Redirect to /sd-callback/google?code=...
+    AnywayAPI->>Google: Exchange code for token
+    Google->>AnywayAPI: Return access token + user info
+    AnywayAPI->>Database: Find/Create user (app=1)
+    Database->>AnywayAPI: User record (app=1)
+    AnywayAPI->>User: Set session cookie, redirect to redirect_url
+
+    Note over User,Database: Key Points:<br/>- Same Google OAuth credentials for both apps<br/>- Callback endpoint determines app_id<br/>- Same email can have separate accounts (app=0 vs app=1)<br/>- Concurrent login supported
+```
 
 #### URL struct
 
@@ -30,12 +152,12 @@ the param `redirect_url` or to the default URL.
 **redirect_url** - _string_ This parameter is optional. The param is a URL, if set it will redirect(HTTP 302 code) to
 the given URL after the authentication is finished, there is validation on the URL to prevent errors and malicious use:
 For local address(127.0.0.1, localhost) you can access by one of the following scheme:
-https or http, you can also add a port number and add a path after the domain. 
+https or http, you can also add a port number and add a path after the domain.
 For non-local address you can only access one of the following domain:
-> www.anyway.co.il  
-> anyway-infographics-staging.web.app  
-> anyway-infographics.web.app  
-> anyway-infographics-demo.web.app  
+> www.anyway.co.il
+> anyway-infographics-staging.web.app
+> anyway-infographics.web.app
+> anyway-infographics-demo.web.app
 
 only in https, but you can add any path you want after the domain.
 #### Returns
@@ -61,13 +183,13 @@ Update the user personal info. User must be logged in.
 #### Parameters
 
 There are no params that are passed in the URL query. All params should be passed as JSON in body of the POST request -
-the following fields can be present in the JSON:  
-**first_name** - _string_ ,Required, the user first name.  
-**last_name** - _string_ ,Required, the user last name  
+the following fields can be present in the JSON:
+**first_name** - _string_ ,Required, the user first name.
+**last_name** - _string_ ,Required, the user last name
 **email** - _string_ ,Required/Optional, if it was not given in the past(By the OAuth provider, or the user) then it is
-Required else this Optional, this the email of the user  
-**phone** - _string_ ,Optional, phone number, can be given with or without israeli calling code `+972`, can contain `-`, e.g. 03-1234567, 0541234567, 054-123-1234, +972-054-123-1234  
-**user_type** - _string_ ,Optional, this param describe if the user is journalist / academic researcher or something else, valid values are:  
+Required else this Optional, this the email of the user
+**phone** - _string_ ,Optional, phone number, can be given with or without israeli calling code `+972`, can contain `-`, e.g. 03-1234567, 0541234567, 054-123-1234, +972-054-123-1234
+**user_type** - _string_ ,Optional, this param describe if the user is journalist / academic researcher or something else, valid values are:
 
 1. journalist
 2. academic researcher
@@ -76,8 +198,8 @@ Required else this Optional, this the email of the user
 5. non-relevant professional
 6. other
 
-**user_url** - _string_ ,Optional, a URL to the user site  
-**user_desc** - _string_ ,Optional, a self-description of the user  
+**user_url** - _string_ ,Optional, a URL to the user site
+**user_desc** - _string_ ,Optional, a self-description of the user
 
 Examples for good JSON:
 
@@ -153,16 +275,16 @@ If no error has occurred then you will get a JSON with an HTTP 200 response. Exa
 }
 ```
 
-**email** - _string_ ,What was given by the OAuth provider or by the user.  
-**id** - _int_ ,Our id for this user.  
-**is_active** - _bool_ ,Is the user active.  
-**is_user_completed_registration** - _bool_ ,Have the user completed the registration process.  
-**oauth_provider_user_name** - _string_ ,Sometimes we are given a username by the OAuth provider.  
+**email** - _string_ ,What was given by the OAuth provider or by the user.
+**id** - _int_ ,Our id for this user.
+**is_active** - _bool_ ,Is the user active.
+**is_user_completed_registration** - _bool_ ,Have the user completed the registration process.
+**oauth_provider_user_name** - _string_ ,Sometimes we are given a username by the OAuth provider.
 **oauth_provider_user_picture_url** - _string_ ,A URL for a picture of the user(only available if the OAuth provider
-have given us, Sometimes the OAuth provider is given us a blank picture).  
-**phone** - _string_ , Phone number - e.g. 03-1234567, 0541234567, 054-123-1234, +972-054-123-1234  
-**roles** - _[string]_ ,The roles assigned to the user - e.g. admins . . .   
-Other fields are self-explanatory, so they are not described here.  
+have given us, Sometimes the OAuth provider is given us a blank picture).
+**phone** - _string_ , Phone number - e.g. 03-1234567, 0541234567, 054-123-1234, +972-054-123-1234
+**roles** - _[string]_ ,The roles assigned to the user - e.g. admins . . .
+Other fields are self-explanatory, so they are not described here.
 Otherwise, you will get one of the errors described in the [errors](#Errors) section of this document.
 
 ### Logout
@@ -192,7 +314,7 @@ You will get HTTP 200 response.
 #### Description
 
 Enable or disable a user, this API doesn't delete the user from the DB,
-user with admin rights must be logged in to use this api.  
+user with admin rights must be logged in to use this api.
 An inactive user (disabled user) can't log in to the site.
 
 #### URL struct
@@ -204,9 +326,9 @@ An inactive user (disabled user) can't log in to the site.
 > https://www.anyway.co.il/user/change_user_active_mode
 
 #### Parameters
-JSON with the fields:  
-**email** - _string_ ,Required , email.  
-**mode** - _bool_ ,Required , true for active, false for inactive/disabled user.  
+JSON with the fields:
+**email** - _string_ ,Required , email.
+**mode** - _bool_ ,Required , true for active, false for inactive/disabled user.
 
 #### Returns
 
@@ -228,8 +350,8 @@ Add a role to DB, user with admin rights must be logged in to use this api.
 > https://www.anyway.co.il/user/add_role
 
 #### Parameters
-JSON with the fields:  
-**name** - _string_ ,Required, at lest 2 chars and less than 127 chars, can contain only chars from regex "a-zA-Z0-9_-".  
+JSON with the fields:
+**name** - _string_ ,Required, at lest 2 chars and less than 127 chars, can contain only chars from regex "a-zA-Z0-9_-".
 **description** - _string_ ,Required, up to 255 chars.
 
 #### Returns
@@ -252,8 +374,8 @@ Add user to role, user with admin rights must be logged in to use this api.
 > https://www.anyway.co.il/user/add_to_role
 
 #### Parameters
-JSON with the fields:  
-**role** - _string_ ,Required, a role from the DB.  
+JSON with the fields:
+**role** - _string_ ,Required, a role from the DB.
 **email** - _string_ , Required, email of the user that will be added to the role.
 
 #### Returns
@@ -276,8 +398,8 @@ Remove user from role, user with admin rights must be logged in to use this api.
 > https://www.anyway.co.il/user/remove_from_role
 
 #### Parameters
-JSON with the fields:  
-**role** - _string_ ,Required, a role from the DB.  
+JSON with the fields:
+**role** - _string_ ,Required, a role from the DB.
 **email** - _string_ , Required, email of the user that will be removed from the role.
 
 #### Returns
@@ -290,7 +412,7 @@ described in the [errors](#Errors) section of this document.
 #### Description
 
 Delete a user and all of it's association (roles, organization . . ), user with admin rights must be logged in to use this api.
-A user can delete itself. 
+A user can delete itself.
 
 #### URL struct
 
@@ -301,7 +423,7 @@ A user can delete itself.
 > https://www.anyway.co.il/user/delete_user
 
 #### Parameters
-JSON with the fields:    
+JSON with the fields:
 **email** - _string_ , Required, email of the user that will be deleted.
 
 #### Returns
@@ -348,13 +470,157 @@ If no error has occurred then you will get a JSON with an HTTP 200 response. Exa
 
 struct:
 
-[  
-{  
-**id** - _int_ ,Id of the role, int.  
-**name** - _string_ , Name of the role.  
-**description** - _string_ , Name of the role.  
-}  
-]  
+[
+{
+**id** - _int_ ,Id of the role, int.
+**name** - _string_ , Name of the role.
+**description** - _string_ , Name of the role.
+}
+]
+
+Otherwise, you will get one of the errors described in the [errors](#Errors) section of this document.
+
+### Add a grant to DB
+
+#### Description
+
+Add a grant to DB, user with admin rights must be logged in to use this api.
+
+#### URL struct
+
+> POST https://www.anyway.co.il/sd-user/add_grant
+
+#### Example
+
+> https://www.anyway.co.il/sd-user/add_grant
+
+#### Parameters
+JSON with the fields:
+**name** - _string_ ,Required, at lest 2 chars and less than 100 chars, can contain only chars from regex "a-zA-Z0-9_-".
+**description** - _string_ ,Required, up to 255 chars.
+
+#### Returns
+
+If no error has occurred then you will get an empty HTTP 200 response. Otherwise, you will get one of the errors
+described in the [errors](#Errors) section of this document.
+
+### Add user to grant
+
+#### Description
+
+Add user to grant, user with admin rights must be logged in to use this api.
+
+#### URL struct
+
+> POST https://www.anyway.co.il/sd-user/add_to_grant
+
+#### Example
+
+> https://www.anyway.co.il/sd-user/add_to_grant
+
+#### Parameters
+JSON with the fields:
+**grant** - _string_ ,Required, a grant from the DB.
+**email** - _string_ , Required, email of the user that will be added to the grant.
+
+#### Returns
+
+If no error has occurred then you will get an empty HTTP 200 response. Otherwise, you will get one of the errors
+described in the [errors](#Errors) section of this document.
+
+### Remove user from grant
+
+#### Description
+
+Remove user from grant, user with admin rights must be logged in to use this api.
+
+#### URL struct
+
+> POST https://www.anyway.co.il/sd-user/remove_from_grant
+
+#### Example
+
+> https://www.anyway.co.il/sd-user/remove_from_grant
+
+#### Parameters
+JSON with the fields:
+**grant** - _string_ ,Required, a grant from the DB.
+**email** - _string_ , Required, email of the user that will be removed from the grant.
+
+#### Returns
+
+If no error has occurred then you will get an empty HTTP 200 response. Otherwise, you will get one of the errors
+described in the [errors](#Errors) section of this document.
+
+### Delete grant
+
+#### Description
+
+Delete a grant and all of its associations (users), user with admin rights must be logged in to use this api.
+
+#### URL struct
+
+> POST https://www.anyway.co.il/sd-user/delete_grant
+
+#### Example
+
+> https://www.anyway.co.il/sd-user/delete_grant
+
+#### Parameters
+JSON with the fields:
+**grant** - _string_ , Required, name of the grant that will be deleted.
+
+#### Returns
+
+If no error has occurred then you will get an empty HTTP 200 response. Otherwise, you will get one of the errors
+described in the [errors](#Errors) section of this document.
+
+### Get grants list from DB
+
+#### Description
+
+Return a JSON with a list of grants in the DB, user with admin rights must be logged in to use this api.
+
+#### URL struct
+
+> GET https://www.anyway.co.il/sd-user/get_grants_list
+
+#### Example
+
+> https://www.anyway.co.il/sd-user/get_grants_list
+
+#### Parameters
+
+There are no params to pass.
+
+#### Returns
+
+If no error has occurred then you will get a JSON with an HTTP 200 response. Example of expected result:
+
+```json
+[
+    {
+        "id": 1,
+        "name": "view_reports",
+        "description": "Can view safety reports"
+    },
+    {
+        "id": 2,
+        "name": "edit_reports",
+        "description": "Can edit safety reports"
+    }
+]
+```
+
+struct:
+
+[
+{
+**id** - _int_ ,Id of the grant, int.
+**name** - _string_ , Name of the grant.
+**description** - _string_ , Description of the grant.
+}
+]
 
 Otherwise, you will get one of the errors described in the [errors](#Errors) section of this document.
 
@@ -363,7 +629,7 @@ Otherwise, you will get one of the errors described in the [errors](#Errors) sec
 
 #### Description
 
-This is a partial documentation of this API (only what is user specific).  
+This is a partial documentation of this API (only what is user specific).
 This API allows user specific and user unspecific data retrieval of infographic data.
 
 #### URL struct
@@ -373,18 +639,18 @@ This API allows user specific and user unspecific data retrieval of infographic 
 #### Example
 
 > https://www.anyway.co.il/api/infographics-data?lang=he&news_flash_id=38203&years_ago=5&personalized=true
-> 
+>
 > https://www.anyway.co.il/api/infographics-data?lang=he&news_flash_id=38203&years_ago=5
 
 #### Parameters
 
-**personalized** - _bool_ ,Optional, Get user specific infographic data.  
+**personalized** - _bool_ ,Optional, Get user specific infographic data.
 
-And other params that are not documented here. . . 
+And other params that are not documented here. . .
 
 #### Returns
 
-If no error has occurred then you will get a JSON with HTTP 200 response.   
+If no error has occurred then you will get a JSON with HTTP 200 response.
 In some cases of error (like user not logged in and personalized=true) you will receive user unspecific data.
 
 
@@ -436,7 +702,7 @@ If no error has occurred then you will get a JSON with an HTTP 200 response. Exa
     "oauth_provider_user_picture_url": "https://lh3.googleusercontent.com/a/default-user=s96-c",
     "phone": "0541234567",
     "roles": [
-      
+
     ],
     "user_desc": "A student in the Open university, and a part time journalist.",
     "user_register_date": "Wed, 02 Jun 2021 21:00:08 GMT",
@@ -445,17 +711,17 @@ If no error has occurred then you will get a JSON with an HTTP 200 response. Exa
   }
 ]
 ```
-each dict object in the list has the following struct:  
-**email** - _string_ ,What was given by the OAuth provider or by the user.  
-**id** - _int_ ,Our id for this user.  
-**is_active** - _bool_ ,Is the user active.  
-**is_user_completed_registration** - _bool_ ,Have the user completed the registration process.  
-**oauth_provider_user_name** - _string_ ,Sometimes we are given a username by the OAuth provider.  
+each dict object in the list has the following struct:
+**email** - _string_ ,What was given by the OAuth provider or by the user.
+**id** - _int_ ,Our id for this user.
+**is_active** - _bool_ ,Is the user active.
+**is_user_completed_registration** - _bool_ ,Have the user completed the registration process.
+**oauth_provider_user_name** - _string_ ,Sometimes we are given a username by the OAuth provider.
 **oauth_provider_user_picture_url** - _string_ ,A URL for a picture of the user(only available if the OAuth provider
-have given us, Sometimes the OAuth provider is given us a blank picture).  
-**phone** - _string_ , Phone number - e.g. 03-1234567, 0541234567, 054-123-1234, +972-054-123-1234  
-**roles** - _[string]_ ,The roles assigned to the user - e.g. admins . . .   
-Other fields are self-explanatory, so they are not described here.  
+have given us, Sometimes the OAuth provider is given us a blank picture).
+**phone** - _string_ , Phone number - e.g. 03-1234567, 0541234567, 054-123-1234, +972-054-123-1234
+**roles** - _[string]_ ,The roles assigned to the user - e.g. admins . . .
+Other fields are self-explanatory, so they are not described here.
 Otherwise, you will get one of the errors described in the [errors](#Errors) section of this document.
 
 ### User info update by admin
@@ -475,15 +741,15 @@ Update the user's info in the DB, user with admin rights must be logged in to us
 #### Parameters
 
 There are no params that are passed in the URL query. All params should be passed as JSON in body of the POST request -
-the following fields must be present in the JSON:  
-**user_current_email** - _string_ ,Required, the "id" of the relevant user.  
-**email** - _string_ ,Required, new email.  
-**first_name** - _string_ ,Required, the user first name.  
-**is_user_completed_registration** - _bool_, Required, self-explanatory.  
-**last_name** - _string_ ,Required, the user last name.  
-**phone** - _string_ ,Required, phone number, can be given with or without israeli calling code `+972`, can contain `-`, e.g. 03-1234567, 0541234567, 054-123-1234, +972-054-123-1234  
-**user_desc** - _string_ ,Required, a self-description of the user  
-**user_type** - _string_ ,Required, this param describe if the user is journalist / academic researcher or something else, valid values are:  
+the following fields must be present in the JSON:
+**user_current_email** - _string_ ,Required, the "id" of the relevant user.
+**email** - _string_ ,Required, new email.
+**first_name** - _string_ ,Required, the user first name.
+**is_user_completed_registration** - _bool_, Required, self-explanatory.
+**last_name** - _string_ ,Required, the user last name.
+**phone** - _string_ ,Required, phone number, can be given with or without israeli calling code `+972`, can contain `-`, e.g. 03-1234567, 0541234567, 054-123-1234, +972-054-123-1234
+**user_desc** - _string_ ,Required, a self-description of the user
+**user_type** - _string_ ,Required, this param describe if the user is journalist / academic researcher or something else, valid values are:
 
 1. journalist
 2. academic researcher
@@ -492,9 +758,9 @@ the following fields must be present in the JSON:
 5. non-relevant professional
 6. other
 
-**user_url** - _string_ ,Required, a URL to the user site  
+**user_url** - _string_ ,Required, a URL to the user site
 
-Please note that all fields are Required, if no change was made in one of the field then send the same value as you got 
+Please note that all fields are Required, if no change was made in one of the field then send the same value as you got
 from the [Get users list with info](# Get users list with info) API.
 
 Examples for good JSON:
@@ -548,13 +814,20 @@ described in the [errors](#Errors) section of this document.
 
 
 ### For Debug - Make System Work Locally
-1. In https://console.cloud.google.com/apis/credentials, under the anyway project, use the credentials of 
+1. In https://console.cloud.google.com/apis/credentials, under the anyway project, use the credentials of
 "Web client - Debug", or create new credentials under "OAuth 2.0 Client IDs".
-2. We want to add environment variables to the anyway docker service. One way to do that is to
+2. **Important**: Register both callback URLs in Google Cloud Console OAuth credentials:
+   - `http://127.0.0.1:5000/callback/google` (for Anyway app)
+   - `http://127.0.0.1:5000/sd-callback/google` (for Safety Data app)
+   For production, register:
+   - `https://your-domain.com/callback/google` (for Anyway app)
+   - `https://your-domain.com/sd-callback/google` (for Safety Data app)
+3. We want to add environment variables to the anyway docker service. One way to do that is to
    add in the file anyway/docker-compose.yml, under services.environment, the following lines:
       - GOOGLE_LOGIN_CLIENT_ID=<client_id>
       - GOOGLE_LOGIN_CLIENT_SECRET=<secret>
       - APP_SECRET_KEY=secretkey
    Where client_id and secret are the credentials from #1.
-3. Make sure to run docker-compose down and up, if it was up.
+   **Note**: Both Anyway and Safety Data apps use the same Google OAuth credentials. User separation is handled by the `app` column in the database, allowing users with the same email to have separate accounts in each app.
+4. Make sure to run docker-compose down and up, if it was up.
 Login should work at this point.

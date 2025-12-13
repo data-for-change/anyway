@@ -71,39 +71,39 @@ def upgrade():
     bind = op.get_bind()
     session = orm.Session(bind=bind)
 
-    role_admins = Roles(
-        name="admins",
-        description="This is the default admin role.",
-        create_date=datetime.datetime.now(),
-    )
-    session.add(role_admins)
+    # role_admins = Roles(
+    #     name="admins",
+    #     description="This is the default admin role.",
+    #     create_date=datetime.datetime.now(),
+    # )
+    # session.add(role_admins)
 
-    res = session.query(Users).with_entities(Users.email).filter(Users.email == ADMIN_EMAIL).first()
-    if res is None:
-        user = Users(
-            user_register_date=datetime.datetime.now(),
-            user_last_login_date=datetime.datetime.now(),
-            email=ADMIN_EMAIL,
-            oauth_provider_user_name=ADMIN_EMAIL,
-            is_active=True,
-            oauth_provider="google",
-            is_user_completed_registration=True,
-            oauth_provider_user_id="unknown-manual-insert",
-        )
-        session.add(user)
+    # res = session.query(Users).with_entities(Users.email).filter(Users.email == ADMIN_EMAIL).first()
+    # if res is None:
+    #     user = Users(
+    #         user_register_date=datetime.datetime.now(),
+    #         user_last_login_date=datetime.datetime.now(),
+    #         email=ADMIN_EMAIL,
+    #         oauth_provider_user_name=ADMIN_EMAIL,
+    #         is_active=True,
+    #         oauth_provider="google",
+    #         is_user_completed_registration=True,
+    #         oauth_provider_user_id="unknown-manual-insert",
+    #     )
+    #     session.add(user)
 
-    user_id = (
-        session.query(Users).with_entities(Users.id).filter(Users.email == ADMIN_EMAIL).first()
-    )
+    # user_id = (
+    #     session.query(Users).with_entities(Users.id).filter(Users.email == ADMIN_EMAIL).first()
+    # )
 
-    role_id = session.query(Roles).with_entities(Roles.id).filter(Roles.name == "admins").first()
+    # role_id = session.query(Roles).with_entities(Roles.id).filter(Roles.name == "admins").first()
 
-    insert_users_to_roles = users_to_roles.insert().values(
-        user_id=user_id.id,
-        role_id=role_id.id,
-        create_date=datetime.datetime.now(),
-    )
-    session.execute(insert_users_to_roles)
+    # insert_users_to_roles = users_to_roles.insert().values(
+    #     user_id=user_id.id,
+    #     role_id=role_id.id,
+    #     create_date=datetime.datetime.now(),
+    # )
+    # session.execute(insert_users_to_roles)
 
     session.commit()
 

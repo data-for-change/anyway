@@ -111,7 +111,7 @@ def upgrade():
     op.execute(f"""INSERT INTO roles (name, description, app, create_date)
                    VALUES ('admins', 'Safety-Data administrator', {SAFETY_DATA_APP_ID}, now())""")
 
-    add_builtin_safety_data_admin()
+    # add_builtin_safety_data_admin()
 
 
 def downgrade():

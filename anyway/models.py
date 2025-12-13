@@ -80,9 +80,8 @@ users_to_roles = Table(
         nullable=False,
         server_default=FetchedValue(),
     ),
-    Column("app", Integer(), nullable=False, index=True),
     Column("create_date", DateTime(), nullable=False, server_default=text("now()")),
-    PrimaryKeyConstraint("user_id", "role_id", "app"),
+    PrimaryKeyConstraint("user_id", "role_id"),
 )
 
 users_to_organizations = Table(
@@ -97,26 +96,8 @@ users_to_organizations = Table(
         nullable=False,
         server_default=FetchedValue(),
     ),
-    Column("app", Integer(), nullable=False, index=True),
     Column("create_date", DateTime(), nullable=False, server_default=text("now()")),
-    PrimaryKeyConstraint("user_id", "organization_id", "app"),
-)
-
-users_to_grants = Table(
-    "users_to_grants",
-    Base.metadata,
-    Column("user_id", BigInteger(), ForeignKey("users.id"), index=True, nullable=False),
-    Column(
-        "grant_id",
-        Integer(),
-        ForeignKey("grants.id"),
-        index=True,
-        nullable=False,
-        server_default=FetchedValue(),
-    ),
-    Column("app", Integer(), nullable=False, index=True),
-    Column("create_date", DateTime(), nullable=False, server_default=text("now()")),
-    PrimaryKeyConstraint("user_id", "grant_id", "app"),
+    PrimaryKeyConstraint("user_id", "organization_id"),
 )
 
 
@@ -141,21 +122,16 @@ class Users(Base, UserMixin):
     user_url = Column(String(2083))
     user_desc = Column(String(2048))
     is_user_completed_registration = Column(Boolean)
-    app = Column(Integer, nullable=False, default=0, index=True)
     roles = relationship(
         "Roles", secondary=users_to_roles, backref=backref("users", lazy="dynamic")
     )
     organizations = relationship(
         "Organization", secondary=users_to_organizations, backref=backref("users", lazy="dynamic")
     )
-    grants = relationship(
-        "Grant", secondary=users_to_grants, backref=backref("users", lazy="dynamic")
-    )
 
     def serialize_exposed_to_user(self):
         roles = self.roles
         organizations = self.organizations
-        grants = self.grants
         return {
             "id": self.id,
             "user_register_date": self.user_register_date,
@@ -171,27 +147,15 @@ class Users(Base, UserMixin):
             "user_url": self.user_url,
             "user_desc": self.user_desc,
             "is_user_completed_registration": self.is_user_completed_registration,
-            "app": self.app,
             "roles": [role.name for role in roles],
             "organizations": [org.name for org in organizations],
-            "grants": [perm.name for perm in grants],
         }
 
 
 class Organization(Base):
     __tablename__ = "organization"
     id = Column(BigInteger, autoincrement=True, nullable=False, primary_key=True, index=True)
-    name = Column(String(255), index=True, nullable=False)
-    app = Column(Integer, nullable=False, default=0, index=True)
-    create_date = Column(DateTime(), nullable=False, server_default=text("now()"))
-
-
-class Grant(Base):
-    __tablename__ = "grants"
-    id = Column(Integer(), primary_key=True, autoincrement=True, nullable=False)
-    name = Column(String(100), nullable=False)
-    app = Column(Integer, nullable=False, index=True)
-    description = Column(String(255))
+    name = Column(String(255), unique=True, index=True, nullable=False)
     create_date = Column(DateTime(), nullable=False, server_default=text("now()"))
 
 
@@ -236,8 +200,7 @@ class LocationSubscribers(Base, UserMixin):
 class Roles(Base):
     __tablename__ = "roles"
     id = Column(Integer(), primary_key=True, autoincrement=True, nullable=False)
-    name = Column(String(127), index=True, nullable=False)
-    app = Column(Integer, nullable=False, default=0, index=True)
+    name = Column(String(127), unique=True, index=True, nullable=False)
     description = Column(String(255))
     create_date = Column(DateTime(), nullable=False)
 

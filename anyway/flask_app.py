@@ -1619,3 +1619,6 @@ def latest_cbs_update_date():
     last_accident_date = get_latest_accident_date(table_obj=AccidentMarkerView, filters=None)
     seconds_since_epoch = int(last_accident_date.timestamp())
     return jsonify({"last_update": seconds_since_epoch})
+
+
+# just to be able to push and PR

@@ -107,13 +107,6 @@ def upgrade():
     op.create_index(op.f('ix_users_to_grants_user_id'), 'users_to_grants', ['user_id'], unique=False)
     op.create_index('ix_users_to_grants_user_grant_app', 'users_to_grants', ['user_id', 'grant_id', 'app'], unique=True)
 
-    # Insert default roles for safety_data (app = 1)
-    op.execute(f"""INSERT INTO roles (name, description, app, create_date)
-                   VALUES ('anonymous', 'Anonymous user', {SAFETY_DATA_APP_ID}, now())""")
-    op.execute(f"""INSERT INTO roles (name, description, app, create_date)
-                   VALUES ('authenticated', 'Basic authenticated user', {SAFETY_DATA_APP_ID}, now())""")
-    op.execute(f"""INSERT INTO roles (name, description, app, create_date)
-                   VALUES ('admins', 'Safety-Data administrator', {SAFETY_DATA_APP_ID}, now())""")
 
     add_builtin_safety_data_admin()
 

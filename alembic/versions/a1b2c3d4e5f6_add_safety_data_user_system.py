@@ -22,9 +22,6 @@ ANYWAY_APP_ID_STR = '0'
 SAFETY_DATA_APP_ID = 1
 
 def upgrade():
-    print("Empty Upgrade")
-    bind = op.get_bind()
-    Inspector = sa.inspect(bind)
     # Drop non-PK constraints and non-primary indexes on users (PostgreSQL)
     for table in existing_tables:
         op.execute(f"""
@@ -111,40 +108,39 @@ def upgrade():
 
 
 def downgrade():
-    pass
-    # # Remove default roles (app = 1 for safety_data)
-    # for table in existing_tables:
-    #     op.execute(f"DELETE FROM {table} WHERE app = 1")
+    # Remove default roles (app = 1 for safety_data)
+    for table in existing_tables:
+        op.execute(f"DELETE FROM {table} WHERE app = 1")
 
-    # # Revert users_to_grants table
-    # op.drop_table('users_to_grants')
-    # op.drop_table('grants')
+    # Revert users_to_grants table
+    op.drop_table('users_to_grants')
+    op.drop_table('grants')
 
-    # # users_to_organizations
-    # op.drop_index('ix_users_to_organizations_user_org_app', table_name='users_to_organizations')
-    # op.create_index('ix_users_to_organizations_user_org', 'users_to_organizations', ['user_id', 'organization_id'], unique=True)
-    # op.drop_column('users_to_organizations', 'app')
+    # users_to_organizations
+    op.drop_index('ix_users_to_organizations_user_org_app', table_name='users_to_organizations')
+    op.create_index('ix_users_to_organizations_user_org', 'users_to_organizations', ['user_id', 'organization_id'], unique=True)
+    op.drop_column('users_to_organizations', 'app')
 
-    # # Revert users_to_roles table
-    # op.drop_index('ix_users_to_roles_user_role_app', table_name='users_to_roles')
-    # op.create_index('ix_users_to_roles_user_role', 'users_to_roles', ['user_id', 'role_id'], unique=True)
-    # op.drop_column('users_to_roles', 'app')
+    # Revert users_to_roles table
+    op.drop_index('ix_users_to_roles_user_role_app', table_name='users_to_roles')
+    op.create_index('ix_users_to_roles_user_role', 'users_to_roles', ['user_id', 'role_id'], unique=True)
+    op.drop_column('users_to_roles', 'app')
 
-    # # Revert organization table
-    # op.drop_index(op.f('ix_organization_name_app'), table_name='organization')
-    # op.create_index('ix_organization_name', 'organization', ['name'], unique=True)
-    # # op.create_unique_constraint('organization_name_key', 'organization', ['name']) # Implicitly created by unique index?
-    # op.drop_column('organization', 'app')
+    # Revert organization table
+    op.drop_index(op.f('ix_organization_name_app'), table_name='organization')
+    op.create_index('ix_organization_name', 'organization', ['name'], unique=True)
+    # op.create_unique_constraint('organization_name_key', 'organization', ['name']) # Implicitly created by unique index?
+    op.drop_column('organization', 'app')
 
-    # # Revert roles table
-    # op.drop_index(op.f('ix_roles_name_app'), table_name='roles')
-    # op.create_index('ix_roles_name', 'roles', ['name'], unique=True)
-    # # op.create_unique_constraint('roles_name_key', 'roles', ['name'])
-    # op.drop_column('roles', 'app')
+    # Revert roles table
+    op.drop_index(op.f('ix_roles_name_app'), table_name='roles')
+    op.create_index('ix_roles_name', 'roles', ['name'], unique=True)
+    # op.create_unique_constraint('roles_name_key', 'roles', ['name'])
+    op.drop_column('roles', 'app')
 
-    # # Revert users table
-    # op.drop_index(op.f('ix_users_email_app'), table_name='users')
-    # op.drop_column('users', 'app')
+    # Revert users table
+    op.drop_index(op.f('ix_users_email_app'), table_name='users')
+    op.drop_column('users', 'app')
 
 def add_builtin_safety_data_admin():
     from anyway.models import Roles, Users, users_to_roles

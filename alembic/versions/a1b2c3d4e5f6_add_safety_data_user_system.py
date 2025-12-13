@@ -22,8 +22,12 @@ ANYWAY_APP_ID_STR = '0'
 SAFETY_DATA_APP_ID = 1
 
 def upgrade():
+    bind = op.get_bind()
+    Inspector = sa.inspect(bind)
     # Drop non-PK constraints and non-primary indexes on users (PostgreSQL)
     for table in existing_tables:
+        if not Inspector.has_table(table):
+            continue
         op.execute(f"""
     DO $$
     DECLARE r RECORD;

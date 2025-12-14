@@ -237,7 +237,7 @@ class Roles(Base):
     __tablename__ = "roles"
     id = Column(Integer(), primary_key=True, autoincrement=True, nullable=False)
     name = Column(String(127), index=True, nullable=False)
-    app = Column(Integer, nullable=False, default=0, index=True)
+    app = Column(Integer, nullable=False, index=True)
     description = Column(String(255))
     create_date = Column(DateTime(), nullable=False)
 

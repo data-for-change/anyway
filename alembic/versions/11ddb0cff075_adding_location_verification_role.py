@@ -14,32 +14,18 @@ depends_on = None
 
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy import orm
-import datetime
 
 
 def upgrade():
-    from anyway.models import Roles
-
-    bind = op.get_bind()
-    session = orm.Session(bind=bind)
-
-    role_location_verification = Roles(
-        name="location_verification",
-        description="Allows user to change and verify newsflash location.",
-        create_date=datetime.datetime.now(),
-    )
-    session.add(role_location_verification)
-    session.commit()
+    # Use raw SQL to avoid schema mismatch with future 'app' column addition
+    op.execute("""
+        INSERT INTO roles (name, description, create_date)
+        VALUES ('location_verification', 'Allows user to change and verify newsflash location.', now())
+    """)
 
 
 def downgrade():
-    from anyway.models import Roles
-
-    bind = op.get_bind()
-    session = orm.Session(bind=bind)
-
-    # Delete the role added in the upgrade
-    session.query(Roles).filter(Roles.name == "location_verification").delete()
-
-    session.commit()
+    # Use raw SQL to avoid schema mismatch with future 'app' column addition
+    op.execute("""
+        DELETE FROM roles WHERE name = 'location_verification'
+    """)

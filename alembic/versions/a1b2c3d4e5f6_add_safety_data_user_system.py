@@ -110,8 +110,8 @@ def upgrade():
                    VALUES ('authenticated', 'Basic authenticated user', {SAFETY_DATA_APP_ID}, now())""")
     op.execute(f"""INSERT INTO roles (name, description, app, create_date)
                    VALUES ('admins', 'Safety-Data administrator', {SAFETY_DATA_APP_ID}, now())""")
-    op.execute(f"""INSERT INTO grants (name, description, app, create_date)
-                   VALUES ('hot_spots_tab_grant', 'Access to hot spots tab', {SAFETY_DATA_APP_ID}, now())""")
+    # op.execute(f"""INSERT INTO grants (name, description, app, create_date)
+    #              VALUES ('hot_spots_tab_grant', 'Access to hot spots tab', {SAFETY_DATA_APP_ID}, now())""")
 
     add_builtin_safety_data_admin()
 

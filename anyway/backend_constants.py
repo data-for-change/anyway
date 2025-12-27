@@ -55,6 +55,7 @@ class BackEndConstants(object):
         "https://anyway-infographics-demo.web.app",
         "https://media.anyway.co.il",
         "https://dev.anyway.co.il",
+        "https://safety-data.anyway.co.il",
     ]
 
     ANYWAY_CORS_SITE_LIST_DEV = ANYWAY_CORS_SITE_LIST_PROD + [
@@ -63,6 +64,8 @@ class BackEndConstants(object):
         "https://localhost:3000",
         "http://127.0.0.1:3000",
         "https://127.0.0.1:3000",
+        "http://127.0.0.1:5000",
+        "http://localhost:5000",
     ]
 
     class ResolutionCategories(Enum):

@@ -101,8 +101,10 @@ DEFAULT_MAPS_API_KEY = "AIzaSyANaM04RFXP3JjhIE-VlJVpLpJTU_SkE0c"
 app.config.from_object(__name__)
 app.config["SWAGGER_UI_DOC_EXPANSION"] = "list"
 app.config["SESSION_COOKIE_SAMESITE"] = "none"
-app.config["SESSION_COOKIE_SECURE"] = True
-app.config["REMEMBER_COOKIE_SECURE"] = True
+# Only use Secure cookies in production (HTTPS). For local development (HTTP), set to False
+is_production = os.getenv("FLASK_ENV") != "development"
+app.config["SESSION_COOKIE_SECURE"] = is_production
+app.config["REMEMBER_COOKIE_SECURE"] = is_production
 app.config["BABEL_DEFAULT_LOCALE"] = "he"
 app.config["OAUTH_CREDENTIALS"] = {
     "facebook": {"id": secrets.get("FACEBOOK_KEY"), "secret": secrets.get("FACEBOOK_SECRET")},
@@ -181,7 +183,7 @@ assets.register(
     ),
 )
 
-CORS(app, resources=get_cors_config(), allow_credentials=True)
+CORS(app, resources=get_cors_config(), supports_credentials=True)
 
 jinja_environment = jinja2.Environment(
     autoescape=True,
@@ -1369,20 +1371,42 @@ def telegram_webhook():
         return jsonify(success=True) #marked as success to prevent re-sends
 
 # User system API
-app.add_url_rule("/user/add_role", view_func=add_role, methods=["POST"])
+app.add_url_rule("/user/add_role", view_func=an_add_role, methods=["POST"])
 app.add_url_rule(
-    "/user/change_user_active_mode", view_func=change_user_active_mode, methods=["POST"]
+    "/user/change_user_active_mode", view_func=an_change_user_active_mode, methods=["POST"]
 )
-app.add_url_rule("/user/update", view_func=user_update, methods=["POST"])
-app.add_url_rule("/user/update_user", view_func=admin_update_user, methods=["POST"])
-app.add_url_rule("/user/add_to_role", view_func=add_to_role, methods=["POST"])
-app.add_url_rule("/user/remove_from_role", view_func=remove_from_role, methods=["POST"])
-app.add_url_rule("/user/info", view_func=get_user_info, methods=["GET"])
-app.add_url_rule("/user/is_user_logged_in", view_func=is_user_logged_in, methods=["GET"])
-app.add_url_rule("/user/get_all_users_info", view_func=get_all_users_info, methods=["GET"])
-app.add_url_rule("/user/get_roles_list", view_func=get_roles_list, methods=["GET"])
-app.add_url_rule("/callback/<provider>", view_func=oauth_callback, methods=["GET"])
-app.add_url_rule("/authorize/<provider>", view_func=oauth_authorize, methods=["GET"])
+app.add_url_rule("/user/update", view_func=an_user_update, methods=["POST"])
+app.add_url_rule("/user/update_user", view_func=an_admin_update_user, methods=["POST"])
+app.add_url_rule("/user/add_to_role", view_func=an_add_to_role, methods=["POST"])
+app.add_url_rule("/user/remove_from_role", view_func=an_remove_from_role, methods=["POST"])
+app.add_url_rule("/user/info", view_func=an_get_user_info, methods=["GET"])
+app.add_url_rule("/user/is_user_logged_in", view_func=an_is_user_logged_in, methods=["GET"])
+app.add_url_rule("/user/get_all_users_info", view_func=an_get_all_users_info, methods=["GET"])
+app.add_url_rule("/user/get_roles_list", view_func=an_get_roles_list, methods=["GET"])
+app.add_url_rule("/callback/<provider>", view_func=an_oauth_callback, methods=["GET"])
+app.add_url_rule("/authorize/<provider>", view_func=an_oauth_authorize, methods=["GET"])
+
+# Safety Data user system API
+app.add_url_rule("/sd-user/add_role", view_func=sd_add_role, methods=["POST"])
+app.add_url_rule(
+    "/sd-user/change_user_active_mode", view_func=sd_change_user_active_mode, methods=["POST"]
+)
+app.add_url_rule("/sd-user/update", view_func=sd_user_update, methods=["POST"])
+app.add_url_rule("/sd-user/update_user", view_func=sd_admin_update_user, methods=["POST"])
+app.add_url_rule("/sd-user/add_to_role", view_func=sd_add_to_role, methods=["POST"])
+app.add_url_rule("/sd-user/remove_from_role", view_func=sd_remove_from_role, methods=["POST"])
+app.add_url_rule("/sd-user/info", view_func=sd_get_user_info, methods=["GET"])
+app.add_url_rule("/sd-user/is_user_logged_in", view_func=sd_is_user_logged_in, methods=["GET"])
+app.add_url_rule("/sd-user/get_all_users_info", view_func=sd_get_all_users_info, methods=["GET"])
+app.add_url_rule("/sd-user/get_roles_list", view_func=sd_get_roles_list, methods=["GET"])
+app.add_url_rule("/sd-user/add_grant", view_func=sd_add_grant, methods=["POST"])
+app.add_url_rule("/sd-user/add_to_grant", view_func=sd_add_to_grant, methods=["POST"])
+app.add_url_rule("/sd-user/remove_from_grant", view_func=sd_remove_from_grant, methods=["POST"])
+app.add_url_rule("/sd-user/delete_grant", view_func=sd_delete_grant, methods=["POST"])
+app.add_url_rule("/sd-user/get_grants_list", view_func=sd_get_grants_list, methods=["GET"])
+app.add_url_rule("/sd-user/test_grant_and_admin", view_func=sd_test_grant_and_admin_endpoint, methods=["GET"])
+app.add_url_rule("/sd-callback/<provider>", view_func=sd_oauth_callback, methods=["GET"])
+app.add_url_rule("/sd-authorize/<provider>", view_func=sd_oauth_authorize, methods=["GET"])
 
 # A hack for Jinja template that is looking for /logout
 app.add_url_rule("/logout", view_func=logout, methods=["GET"])
@@ -1402,7 +1426,16 @@ class GetOrganizationList(Resource):
     @api.response(200, "", fields.List(fields.String(example="Anyway")))
     @api.response(401, "Unauthorized")
     def get(self):
-        return get_organization_list()
+        return an_get_organization_list()
+
+
+@api.route("/sd-user/get_organization_list")
+class SDGetOrganizationList(Resource):
+    @api.doc("Get a list of organizations from the DB")
+    @api.response(200, "", fields.List(fields.String(example="Anyway")))
+    @api.response(401, "Unauthorized")
+    def get(self):
+        return sd_get_organization_list()
 
 
 add_org_parser = api.parser()
@@ -1419,7 +1452,20 @@ class AddOrganization(Resource):
     def post(self):
         args = add_org_parser.parse_args()
         org_name = args["name"]
-        return add_organization(org_name)
+        return an_add_organization(org_name)
+
+
+@api.route("/sd-user/add_organization")
+@api.expect(add_org_parser)
+class SDAddOrganization(Resource):
+    @api.doc("Add an organization to the DB")
+    @api.response(200, "")
+    @api.response(400, "Name is missing from the request")
+    @api.response(401, "Unauthorized")
+    def post(self):
+        args = add_org_parser.parse_args()
+        org_name = args["name"]
+        return sd_add_organization(org_name)
 
 
 update_user_org_parser = api.parser()
@@ -1445,7 +1491,23 @@ class UpdateUserOrg(Resource):
         args = update_user_org_parser.parse_args()
         user_email = args["email"]
         org_name = args["org"]
-        return update_user_org(user_email, org_name)
+        return an_update_user_org(user_email, org_name)
+
+
+@api.route("/sd-user/update_user_org")
+@api.expect(update_user_org_parser)
+class SDUpdateUserOrg(Resource):
+    @api.doc(
+        "Add user as a member in organization, if 'org' argument is missing then the user will not be a "
+        "member of any organization"
+    )
+    @api.response(200, "")
+    @api.response(400, "Organization or User is not in the DB")
+    def post(self):
+        args = update_user_org_parser.parse_args()
+        user_email = args["email"]
+        org_name = args["org"]
+        return sd_update_user_org(user_email, org_name)
 
 
 delete_user_parser = api.parser()
@@ -1461,7 +1523,19 @@ class DeleteUser(Resource):
     def post(self):
         args = delete_user_parser.parse_args()
         user_email = args["email"]
-        return delete_user(email=user_email)
+        return an_delete_user(email=user_email)
+
+
+@api.route("/sd-user/delete_user")
+@api.expect(delete_user_parser)
+class SDDeleteUser(Resource):
+    @api.doc("Delete a user and all of its connections (roles, Orgs . . .)")
+    @api.response(200, "")
+    @api.response(400, "User is not in the DB")
+    def post(self):
+        args = delete_user_parser.parse_args()
+        user_email = args["email"]
+        return sd_delete_user(email=user_email)
 
 
 get_streets_parser = api.parser()

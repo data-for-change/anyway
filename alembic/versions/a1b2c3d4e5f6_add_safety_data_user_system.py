@@ -91,9 +91,6 @@ def upgrade():
     )
     op.create_index(op.f('ix_grants_name_app'), 'grants', ['name', 'app'], unique=True)
 
-    op.execute(f"""INSERT INTO grants (name, description, app, create_date)
-                 VALUES ('hot_spots_tab_grant', 'Access to hot spots tab', {SAFETY_DATA_APP_ID}, now())""")
-
     # Create users_to_grants table
     op.create_table('users_to_grants',
         sa.Column('user_id', sa.BigInteger(), nullable=False),

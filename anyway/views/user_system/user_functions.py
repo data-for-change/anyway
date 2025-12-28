@@ -6,10 +6,10 @@ from flask_sqlalchemy import SQLAlchemy
 from anyway.models import Users
 
 
-def get_user_by_email(db: SQLAlchemy, email: str) -> Optional[Users]:
+def get_user_by_email(db: SQLAlchemy, email: str, app_id: int) -> Optional[Users]:
     if not email:
         return None
-    user = db.session.query(Users).filter(Users.email == email).first()
+    user = db.session.query(Users).filter(Users.email == email).filter(Users.app == app_id).first()
     return user
 
 

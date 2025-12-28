@@ -672,10 +672,33 @@ def import_vehicles(provider_code, vehicles, **kwargs):
 
 
 def get_files(directory):
-    output_files_dict = {}
-    for name, filename in cbs_files.items():
-        if name not in (STREETS, NON_URBAN_INTERSECTION, ACCIDENTS, INVOLVED, VEHICLES, DICTIONARY):
-            continue
+    def read_streets(df):
+        streets_map = {}
+        groups = df.groupby(field_names.settlement)
+        for key, settlement in groups:
+            streets_map[key] = [
+                {
+                    field_names.street_sign: x[field_names.street_sign],
+                    field_names.street_name: str(x[field_names.street_name]),
+                }
+                for _, x in settlement.iterrows() if isinstance(x[field_names.street_name], str) \
+                    or ((isinstance(x[field_names.street_name], int) or isinstance(x[field_names.street_name], float)) and x[field_names.street_name] > 0)
+            ]
+        return {STREETS: streets_map}
+
+    def read_non_urban_intersection(df):
+        roads = {
+            (x[field_names.road1], x[field_names.road2], x[field_names.km]): x[
+                field_names.junction_name
+            ]
+            for _, x in df.iterrows()
+        }
+        non_urban_intersection = {
+            x[field_names.junction]: x[field_names.junction_name] for _, x in df.iterrows()
+        }
+        return {ROADS: roads, NON_URBAN_INTERSECTION: non_urban_intersection}
+
+    def get_single_file(filename):
         files = [path for path in os.listdir(directory) if filename.lower() in path.lower()]
         amount = len(files)
         if amount == 0:
@@ -683,41 +706,27 @@ def get_files(directory):
         if amount > 1:
             raise ValueError("Ambiguous: '%s'" % filename)
         file_path = os.path.join(directory, files[0])
+        return file_path
+
+    custom_handlers = {
+        STREETS: read_streets,
+        NON_URBAN_INTERSECTION: read_non_urban_intersection,
+    }
+    output_files_dict = {}
+    for name, filename in cbs_files.items():
+        if name not in (STREETS, NON_URBAN_INTERSECTION, ACCIDENTS, INVOLVED, VEHICLES, DICTIONARY):
+            continue
+        file_path = get_single_file(filename)
         if name == DICTIONARY:
             output_files_dict[name] = read_dictionary(file_path)
-        elif name in (ACCIDENTS, INVOLVED, VEHICLES):
-            df = pd.read_csv(file_path, encoding=CONTENT_ENCODING)
-            df.columns = [column.upper() for column in df.columns]
-            output_files_dict[name] = df
         else:
             df = pd.read_csv(file_path, encoding=CONTENT_ENCODING)
             df.columns = [column.upper() for column in df.columns]
-            if name == STREETS:
-                streets_map = {}
-                groups = df.groupby(field_names.settlement)
-                for key, settlement in groups:
-                    streets_map[key] = [
-                        {
-                            field_names.street_sign: x[field_names.street_sign],
-                            field_names.street_name: str(x[field_names.street_name]),
-                        }
-                        for _, x in settlement.iterrows() if isinstance(x[field_names.street_name], str) \
-                            or ((isinstance(x[field_names.street_name], int) or isinstance(x[field_names.street_name], float)) and x[field_names.street_name] > 0)
-                    ]
-
-                output_files_dict[name] = streets_map
-            elif name == NON_URBAN_INTERSECTION:
-                roads = {
-                    (x[field_names.road1], x[field_names.road2], x[field_names.km]): x[
-                        field_names.junction_name
-                    ]
-                    for _, x in df.iterrows()
-                }
-                non_urban_intersection = {
-                    x[field_names.junction]: x[field_names.junction_name] for _, x in df.iterrows()
-                }
-                output_files_dict[ROADS] = roads
-                output_files_dict[NON_URBAN_INTERSECTION] = non_urban_intersection
+            if name in custom_handlers:
+                output = custom_handlers[name](df)
+                output_files_dict.update(output)
+            else:
+                output_files_dict[name] = df
     return output_files_dict
 
 

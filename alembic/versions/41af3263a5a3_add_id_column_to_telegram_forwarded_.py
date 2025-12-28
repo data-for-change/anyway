@@ -29,4 +29,3 @@ def downgrade():
     op.drop_column('telegram_forwarded_messages', 'id')
     op.create_primary_key('message_id', 'telegram_forwarded_messages', ['message_id'])
     op.drop_column('telegram_forwarded_messages', 'timestamp')
-

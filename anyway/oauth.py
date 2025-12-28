@@ -18,14 +18,14 @@ class OAuthSignIn(object):
         self.consumer_id = credentials["id"]
         self.consumer_secret = credentials["secret"]
 
-    def authorize(self, **kwargs):
+    def authorize(self, callback_endpoint: str = "oauth_callback", **kwargs):
         pass
 
-    def callback(self) -> typing.Optional[UserData]:
+    def callback(self, callback_endpoint: str = "oauth_callback") -> typing.Optional[UserData]:
         pass
 
-    def get_callback_url(self):
-        return url_for("oauth_callback", provider=self.provider_name, _external=True)
+    def get_callback_url(self, callback_endpoint: str = "oauth_callback"):
+        return url_for(callback_endpoint, provider=self.provider_name, _external=True)
 
     @classmethod
     def get_provider(cls, provider_name: str):
@@ -53,7 +53,7 @@ class GoogleSignIn(OAuthSignIn):
             access_token_url=google_params.get("token_endpoint"),
         )
 
-    def authorize(self, **kwargs) -> Response:
+    def authorize(self, callback_endpoint: str = "oauth_callback", **kwargs) -> Response:
         redirect_url = kwargs["redirect_url"]
         state = {"redirect_url": redirect_url}
         state_json = json.dumps(state)
@@ -63,19 +63,19 @@ class GoogleSignIn(OAuthSignIn):
             self.service.get_authorize_url(
                 scope="email",
                 response_type="code",
-                redirect_uri=self.get_callback_url(),
+                redirect_uri=self.get_callback_url(callback_endpoint),
                 state=state_encoded_for_url,
             )
         )
 
-    def callback(self) -> typing.Optional[UserData]:
+    def callback(self, callback_endpoint: str = "oauth_callback") -> typing.Optional[UserData]:
         if "code" not in request.args:
             return None
         oauth_session = self.service.get_auth_session(
             data={
                 "code": request.args["code"],
                 "grant_type": "authorization_code",
-                "redirect_uri": self.get_callback_url(),
+                "redirect_uri": self.get_callback_url(callback_endpoint),
             },
             decoder=json.loads,
         )

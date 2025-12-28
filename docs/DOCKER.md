@@ -286,6 +286,11 @@ FACEBOOK_KEY=
 FACEBOOK_SECRET=
 GOOGLE_LOGIN_CLIENT_ID=
 GOOGLE_LOGIN_CLIENT_SECRET=
+# Note: Both Anyway and Safety Data apps use the same Google OAuth credentials.
+# Register both callback URLs in Google Cloud Console:
+# - http://127.0.0.1:5000/callback/google (for Anyway app)
+# - http://127.0.0.1:5000/sd-callback/google (for Safety Data app)
+# For production, register: https://your-domain.com/callback/google and https://your-domain.com/sd-callback/google
 MAILUSER=
 MAILPASS=
 GOOGLE_APPLICATION_CREDENTIALS=/secrets/GOOGLE_APPLICATION_CREDENTIALS_KEY.json

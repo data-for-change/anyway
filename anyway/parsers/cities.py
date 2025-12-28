@@ -30,7 +30,7 @@ NAPA = "Regional_Council_code"
 CHUNK_SIZE = 1000
 POP_CITY_CODE = "סמל_ישוב"
 POP_CITY_POP = "סהכ"
-OVERPASS_OSP_API_URL = "https://overpass-api.de/api/interpreter?data=%5Bout%3Ajson%5D%5Btimeout%3A25%5D%3B%0Aarea%28id%3A3601473946%29-%3E.searchArea%3B%0A%0A%2F%2F%20Fetch%20all%20relevant%20places%0A%28%0A%20%20node%5B%22place%22~%22village%7Ctown%7Ccity%7CRegional%20Council%7CLocal%20Council%22%5D%28area.searchArea%29%3B%0A%29%3B%0A%0A%2F%2F%20Output%20the%20results%20with%20specified%20fields%0Aout%20body%3B%0A%3E%3B%0Aout%20skel%20qt%3B%0A"
+OVERPASS_OSP_API_URL = "https://overpass-api.de/api/interpreter?data=%5Bout%3Ajson%5D%5Btimeout%3A100%5D%3B%0Aarea%28id%3A3601473946%29-%3E.searchArea%3B%0A%0A%2F%2F%20Fetch%20all%20relevant%20places%0A%28%0A%20%20node%5B%22place%22~%22village%7Ctown%7Ccity%7CRegional%20Council%7CLocal%20Council%22%5D%28area.searchArea%29%3B%0A%29%3B%0A%0A%2F%2F%20Output%20the%20results%20with%20specified%20fields%0Aout%20body%3B%0A%3E%3B%0Aout%20skel%20qt%3B%0A"
 CBS_OSM_FIELD_NAME_MAPPING = {
     "heb_name": ["name:he", "alt_name:he", "name:he1", "name:he2"],
     "eng_name": [
@@ -113,9 +113,17 @@ class UpdateCitiesFromDataGov:
         return res
 
     def add_osm_data(self, heb_name_dict: Dict[str, Any], eng_name_dict: Dict[str, Any]) -> None:
-        r = self.s.get(OVERPASS_OSP_API_URL)
-        if not r.ok:
-            raise Exception(f"Could not get OSM data. reason:{r.reason}:{r.status_code}")
+        max_retries = 10
+        for attempt in range(max_retries):
+            try:
+                r = self.s.get(OVERPASS_OSP_API_URL)
+                if not r.ok:
+                    raise Exception(f"Could not get OSM data. reason:{r.reason}:{r.status_code}.")
+                break
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    raise
+                logging.warning(f"Attempt {attempt + 1} failed: {e}. Retrying...")
 
         r.encoding = "utf-8"
         data = json.loads(r.text)

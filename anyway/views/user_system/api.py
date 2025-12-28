@@ -201,8 +201,10 @@ def roles_and_grants_accepted(
             user_email = current_user.email
 
             # Check roles if specified (skip if None or empty list)
-            user_roles = {role.name for role in current_user.roles}
-            user_grants = {grant.name for grant in current_user.grants}
+            user_roles = {role.name for role in current_user.roles if role.app == app_id}
+            if not current_user.is_anonymous:
+                user_roles.add("authenticated")
+            user_grants = {grant.name for grant in current_user.grants if grant.app == app_id}
             has_roles = set(roles).issubset(user_roles) if need_all_permissions else set(roles) & user_roles
             has_grants = set(grants).issubset(user_grants) if need_all_permissions else set(grants) & user_grants
             if has_roles and has_grants if need_all_permissions else (has_roles or has_grants):
@@ -263,18 +265,19 @@ def return_json_error(error_code: int, *argv) -> Response:
 
 
 def an_oauth_authorize(provider: str) -> Response:
-    return oauth_authorize(provider, callback_endpoint="an_oauth_callback")
+    return oauth_authorize(provider, callback_endpoint="an_oauth_callback", app_id=ANYWAY_APP_ID)
 
 
 def sd_oauth_authorize(provider: str) -> Response:
-    return oauth_authorize(provider, callback_endpoint="sd_oauth_callback")
+    return oauth_authorize(provider, callback_endpoint="sd_oauth_callback", app_id=SAFETY_DATA_APP_ID)
 
 
-def oauth_authorize(provider: str, callback_endpoint: str) -> Response:
+def oauth_authorize(provider: str, callback_endpoint: str, app_id: int) -> Response:
     if provider != "google":
         return return_json_error(Es.BR_ONLY_SUPPORT_GOOGLE)
 
-    if not current_user.is_anonymous:
+    # Allow login if user is anonymous OR logged into a different app
+    if not current_user.is_anonymous and current_user.app == app_id:
         return return_json_error(Es.BR_USER_ALREADY_LOGGED_IN)
 
     redirect_url_from_url = request.args.get("redirect_url", type=str)

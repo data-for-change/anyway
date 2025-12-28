@@ -52,5 +52,6 @@ def get_cors_config() -> dict:
         r"/authorize/*": {"origins": cors_site_list, "supports_credentials": True},
         r"/callback/*": {"origins": cors_site_list, "supports_credentials": True},
         r"/user/*": {"origins": cors_site_list, "supports_credentials": True},
+        r"/sd-user/*": {"origins": cors_site_list, "supports_credentials": True},
         r"/logout": {"origins": cors_site_list, "supports_credentials": True},
     }

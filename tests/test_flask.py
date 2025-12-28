@@ -339,10 +339,10 @@ def set_current_user_mock(get_curr_user: mock.MagicMock, user_id=USER_ID) -> Non
     get_curr_user.return_value.email = USER_EMAIL
     authenticated = mock.MagicMock()
     authenticated.name = BE_CONST.Roles2Names.Authenticated.value
+    authenticated.app = 0
     get_curr_user.return_value.roles = [authenticated]
 
 
-@pytest.mark.single_test
 @pytest.mark.user_system
 def test_user_remove_from_role(app):
     user_add_or_remove_role(app, "/user/remove_from_role")
@@ -360,7 +360,7 @@ def user_add_or_remove_role(app: FlaskClient, path: str) -> None:
         set_mock_and_test_perm(app, current_user, path)
 
         rv = post_json(app, path, json_data={"email": "a"})
-        assert_return_code_for_user_update(Errors.BR_NAME_MISSING, rv)
+        assert_return_code_for_user_update(Errors.BR_NAME_MISSING, rv, msg="2")
 
         with patch("anyway.views.user_system.api.get_role_object") as get_role_object:
             get_role_object.return_value = mock.MagicMock()
@@ -369,7 +369,7 @@ def user_add_or_remove_role(app: FlaskClient, path: str) -> None:
             rv = post_json(
                 app, path, json_data={"role": BE_CONST.Roles2Names.Admins.value, "email": "a"}
             )
-            assert_return_code_for_user_update(Errors.BR_USER_NOT_FOUND, rv, extra="a", msg="2")
+            assert_return_code_for_user_update(Errors.BR_USER_NOT_FOUND, rv, extra="a", msg="3")
 
 
 def set_mock_and_test_perm(app, current_user, path):
@@ -378,6 +378,7 @@ def set_mock_and_test_perm(app, current_user, path):
     assert_return_code_for_user_update(Errors.BR_BAD_AUTH, rv, msg="3")
     role = mock.MagicMock()
     role.name = BE_CONST.Roles2Names.Admins.value
+    role.app = 0
     current_user.return_value.roles = [role]
 
 
@@ -402,6 +403,7 @@ def test_is_a_valid_role_name():
         assert is_a_valid_role_name(url)
 
 
+@pytest.mark.single_test
 @pytest.mark.user_system
 def test_user_change_user_active_mode(app: FlaskClient) -> None:
     path = "/user/change_user_active_mode"

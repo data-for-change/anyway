@@ -329,6 +329,7 @@ def is_a_safe_redirect_url(url: str) -> bool:
         "anyway-infographics-demo.web.app",
         "media.anyway.co.il",
         "www.safety-data.anyway.co.il",
+        "safety-data.anyway.co.il",
     ]:
         return True
 

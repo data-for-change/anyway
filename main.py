@@ -559,5 +559,165 @@ def trigger_dag(id):
     trigger_airflow_dag("generate-and-send-infographics-images", dag_conf)
 
 
+@cli.group()
+def sd_user():
+    """Safety Data user management commands"""
+    pass
+
+
+@sd_user.command()
+@click.option("--email", type=str, default=None, help="Email address of the user to add")
+@click.option("--stdin", is_flag=True, default=False, help="Read emails from stdin (comma or newline separated)")
+def add(email, stdin):
+    """Add Safety Data user(s)"""
+    import sys
+    from anyway.views.user_system.api import add_safety_data_users
+
+    emails = []
+
+    # Collect emails from either --email option or stdin
+    if stdin:
+        stdin_content = sys.stdin.read().strip()
+        # Split by comma or newline
+        for part in stdin_content.replace(',', '\n').split('\n'):
+            email_stripped = part.strip()
+            if email_stripped:
+                emails.append(email_stripped)
+    elif email:
+        emails.append(email)
+    else:
+        logging.error("Error: Must provide either --email or --stdin")
+        return
+
+    # Call the business logic function
+    summary = add_safety_data_users(emails)
+
+    # Print summary
+    print("\n=== Summary ===")
+    if len(summary['added']) > 0:
+        print(f"Successfully added: {len(summary['added'])} user(s)")
+        for email_addr in summary["added"]:
+            print(f"  - {email_addr}")
+
+    if summary["already_exists"]:
+        print(f"\nAlready exists: {len(summary['already_exists'])} user(s)")
+        for email_addr in summary["already_exists"]:
+            print(f"  - {email_addr}")
+
+    if summary.get("invalid_email"):
+        print(f"\nInvalid email format: {len(summary['invalid_email'])} email(s)")
+        for email_addr in summary["invalid_email"]:
+            print(f"  - {email_addr}")
+
+    if summary["failed"]:
+        print(f"\nFailed: {len(summary['failed'])} user(s)")
+        for item in summary["failed"]:
+            print(f"  - {item['email']}: {item['error']}")
+
+
+@sd_user.command()
+@click.option("--email", type=str, required=True, help="Email address of the user to remove")
+def remove(email):
+    """Remove a Safety Data user"""
+    from anyway.views.user_system.api import remove_safety_data_user
+
+    # Call the business logic function
+    summary = remove_safety_data_user(email)
+
+    # Print summary
+    print("\n=== Summary ===")
+    if summary["removed"]:
+        print(f"Successfully removed: {len(summary['removed'])} user(s)")
+        for email_addr in summary["removed"]:
+            print(f"  - {email_addr}")
+
+    if summary["not_found"]:
+        print(f"\nNot found: {len(summary['not_found'])} user(s)")
+        for email_addr in summary["not_found"]:
+            print(f"  - {email_addr}")
+
+    if summary["failed"]:
+        print(f"\nFailed: {len(summary['failed'])} user(s)")
+        for item in summary["failed"]:
+            print(f"  - {item['email']}: {item['error']}")
+
+
+@sd_user.command(name="add-user-to-grant")
+@click.option("--email", type=str, required=True, help="Email address of the user")
+@click.option("--grant", "grant_name", type=str, required=True, help="Name of the grant to add")
+def add_grant(email, grant_name):
+    """Add a grant to a Safety Data user"""
+    from anyway.views.user_system.api import add_grant_to_safety_data_user
+
+    # Call the business logic function
+    summary = add_grant_to_safety_data_user(email, grant_name)
+
+    # Print summary
+    print("\n=== Summary ===")
+    if summary["added"]:
+        print(f"Successfully added grant:")
+        for item in summary["added"]:
+            print(f"  - Grant '{item['grant']}' to user {item['email']}")
+
+    if summary["already_has_grant"]:
+        print(f"\nUser already has grant:")
+        for item in summary["already_has_grant"]:
+            print(f"  - User {item['email']} already has grant '{item['grant']}'")
+
+    if summary["user_not_found"]:
+        print(f"\nUser not found:")
+        for email_addr in summary["user_not_found"]:
+            print(f"  - {email_addr}")
+
+    if summary["grant_not_found"]:
+        print(f"\nGrant not found:")
+        for grant_n in summary["grant_not_found"]:
+            print(f"  - {grant_n}")
+        print("Note: Grants are not created automatically. Please create the grant first.")
+
+    if summary["failed"]:
+        print(f"\nFailed:")
+        for item in summary["failed"]:
+            print(f"  - Grant '{item['grant']}' to user {item['email']}: {item['error']}")
+
+
+@sd_user.command(name="remove-user-from-grant")
+@click.option("--email", type=str, required=True, help="Email address of the user")
+@click.option("--grant", "grant_name", type=str, required=True, help="Name of the grant to remove")
+def remove_grant(email, grant_name):
+    """Remove a grant from a Safety Data user"""
+    from anyway.views.user_system.api import remove_grant_from_safety_data_user
+
+    # Call the business logic function
+    summary = remove_grant_from_safety_data_user(email, grant_name)
+
+    # Print summary
+    print("\n=== Summary ===")
+    if summary["removed"]:
+        print(f"Successfully removed grant:")
+        for item in summary["removed"]:
+            print(f"  - Grant '{item['grant']}' from user {item['email']}")
+
+    if summary["does_not_have_grant"]:
+        print(f"\nUser does not have grant:")
+        for item in summary["does_not_have_grant"]:
+            print(f"  - User {item['email']} does not have grant '{item['grant']}'")
+
+    if summary["user_not_found"]:
+        print(f"\nUser not found:")
+        for email_addr in summary["user_not_found"]:
+            print(f"  - {email_addr}")
+
+    if summary["grant_not_found"]:
+        print(f"\nGrant not found:")
+        for grant_n in summary["grant_not_found"]:
+            print(f"  - {grant_n}")
+
+    if summary["failed"]:
+        print(f"\nFailed:")
+        for item in summary["failed"]:
+            print(f"  - Grant '{item['grant']}' from user {item['email']}: {item['error']}")
+
+
 if __name__ == "__main__":
     cli(sys.argv[1:])  # pylint: disable=too-many-function-args

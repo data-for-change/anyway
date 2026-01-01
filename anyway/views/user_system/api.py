@@ -31,7 +31,15 @@ from anyway.error_code_and_strings import (
     ERROR_TO_HTTP_CODE_DICT,
     build_json_for_user_api_error,
 )
-from anyway.models import Organization, Roles, Users, users_to_roles, users_to_organizations, Grant, users_to_grants
+from anyway.models import (
+    Organization,
+    Roles,
+    Users,
+    users_to_roles,
+    users_to_organizations,
+    Grant,
+    users_to_grants,
+)
 from anyway.oauth import OAuthSignIn
 
 from anyway.utilities import is_valid_number, is_a_valid_email, is_a_safe_redirect_url
@@ -53,6 +61,7 @@ principals = Principal(app)
 ANYWAY_APP_ID = 0
 SAFETY_DATA_APP_ID = 1
 ADMIN_EMAIL = "anyway@anyway.co.il"
+
 
 # Copied and modified from flask-security
 def roles_accepted(*roles, need_all_permission=False):
@@ -175,16 +184,18 @@ def roles_and_grants_accepted(
                 return return_json_error(Es.BR_BAD_AUTH)
 
             # If authenticated user doesn't have "app" attribute, it's an internal server error
-            if not hasattr(current_user, 'app'):
-                user_email = getattr(current_user, 'email', 'unknown')
+            if not hasattr(current_user, "app"):
+                user_email = getattr(current_user, "email", "unknown")
                 logging.error(
                     f'roles_and_grants_accepted: Authenticated user "{user_email}" does not have "app" attribute for Path {request.url_rule}'
                 )
                 return Response(
-                    response=json.dumps({
-                        "error_code": 0,
-                        "error_msg": "Internal server error: authenticated user missing app attribute"
-                    }),
+                    response=json.dumps(
+                        {
+                            "error_code": 0,
+                            "error_msg": "Internal server error: authenticated user missing app attribute",
+                        }
+                    ),
                     status=HTTPStatus.INTERNAL_SERVER_ERROR,
                     mimetype="application/json",
                 )
@@ -192,7 +203,9 @@ def roles_and_grants_accepted(
             # If user has app with different value than app_id, handle as bad auth
             if current_user.app != app_id:
                 user_email = current_user.email
-                error_msg = f"belongs to a different app (app_id: {current_user.app}, required: {app_id})"
+                error_msg = (
+                    f"belongs to a different app (app_id: {current_user.app}, required: {app_id})"
+                )
                 logging.info(
                     f'roles_and_grants_accepted: User "{user_email}" {error_msg} for Path {request.url_rule}'
                 )
@@ -205,8 +218,14 @@ def roles_and_grants_accepted(
             if not current_user.is_anonymous:
                 user_roles.add("authenticated")
             user_grants = {grant.name for grant in current_user.grants if grant.app == app_id}
-            has_roles = set(roles).issubset(user_roles) if need_all_permissions else set(roles) & user_roles
-            has_grants = set(grants).issubset(user_grants) if need_all_permissions else set(grants) & user_grants
+            has_roles = (
+                set(roles).issubset(user_roles) if need_all_permissions else set(roles) & user_roles
+            )
+            has_grants = (
+                set(grants).issubset(user_grants)
+                if need_all_permissions
+                else set(grants) & user_grants
+            )
             if has_roles and has_grants if need_all_permissions else (has_roles or has_grants):
                 return fn(*args, **kwargs)
             else:
@@ -269,7 +288,9 @@ def an_oauth_authorize(provider: str) -> Response:
 
 
 def sd_oauth_authorize(provider: str) -> Response:
-    return oauth_authorize(provider, callback_endpoint="sd_oauth_callback", app_id=SAFETY_DATA_APP_ID)
+    return oauth_authorize(
+        provider, callback_endpoint="sd_oauth_callback", app_id=SAFETY_DATA_APP_ID
+    )
 
 
 def oauth_authorize(provider: str, callback_endpoint: str, app_id: int) -> Response:
@@ -298,8 +319,12 @@ def logout() -> Response:
 def an_oauth_callback(provider: str, app_id: int = ANYWAY_APP_ID) -> Response:
     return oauth_callback(provider, app_id=ANYWAY_APP_ID, callback_endpoint="an_oauth_callback")
 
+
 def sd_oauth_callback(provider: str, app_id: int = ANYWAY_APP_ID) -> Response:
-    return oauth_callback(provider, app_id=SAFETY_DATA_APP_ID, callback_endpoint="sd_oauth_callback")
+    return oauth_callback(
+        provider, app_id=SAFETY_DATA_APP_ID, callback_endpoint="sd_oauth_callback"
+    )
+
 
 def oauth_callback(provider: str, app_id: int, callback_endpoint: str) -> Response:
     if provider != "google":
@@ -382,7 +407,9 @@ def oauth_callback(provider: str, app_id: int, callback_endpoint: str) -> Respon
 # TODO: in the future add pagination if needed
 def get_all_users_info(app_id: int) -> Response:
     dict_ret = []
-    for user_obj in db.session.query(Users).filter(Users.app == app_id).order_by(Users.user_register_date).all():
+    for user_obj in (
+        db.session.query(Users).filter(Users.app == app_id).order_by(Users.user_register_date).all()
+    ):
         dict_ret.append(user_obj.serialize_exposed_to_user())
     return jsonify(dict_ret)
 
@@ -412,14 +439,16 @@ def an_get_user_info() -> Response:
     return get_user_info(app_id=ANYWAY_APP_ID)
 
 
-@roles_and_grants_accepted(roles=[BE_CONST.Roles2Names.Authenticated.value], app_id=SAFETY_DATA_APP_ID)
+@roles_and_grants_accepted(
+    roles=[BE_CONST.Roles2Names.Authenticated.value], app_id=SAFETY_DATA_APP_ID
+)
 def sd_get_user_info() -> Response:
     return get_user_info(app_id=SAFETY_DATA_APP_ID)
 
 
 def is_user_logged_in(app_id: int) -> Response:
     is_logged_in = not current_user.is_anonymous
-    if is_logged_in and hasattr(current_user, 'app') and current_user.app != app_id:
+    if is_logged_in and hasattr(current_user, "app") and current_user.app != app_id:
         is_logged_in = False
     return jsonify({"is_user_logged_in": is_logged_in})
 
@@ -494,19 +523,21 @@ def change_user_roles(action: str, app_id: int) -> Response:
     if action == "add":
         # Add user to role
         # Check if user already has this role in this app
-        existing = db.session.query(users_to_roles).filter(
-            (users_to_roles.c.user_id == user.id) &
-            (users_to_roles.c.role_id == role.id) &
-            (users_to_roles.c.app == app_id)
-        ).first()
+        existing = (
+            db.session.query(users_to_roles)
+            .filter(
+                (users_to_roles.c.user_id == user.id)
+                & (users_to_roles.c.role_id == role.id)
+                & (users_to_roles.c.app == app_id)
+            )
+            .first()
+        )
         if existing:
             return return_json_error(Es.BR_USER_ALREADY_IN, role_name)
         # Insert into users_to_roles with app_id
         db.session.execute(
             users_to_roles.insert().values(  # pylint: disable=no-value-for-parameter
-            user_id=user.id,
-            role_id=role.id,
-            app=app_id
+                user_id=user.id, role_id=role.id, app=app_id
             )
         )
         # Refresh user to get updated roles
@@ -518,7 +549,9 @@ def change_user_roles(action: str, app_id: int) -> Response:
     elif action == "remove":
         # Remove user from role
         d = users_to_roles.delete().where(  # noqa pylint: disable=no-value-for-parameter
-            (users_to_roles.c.user_id == user.id) & (users_to_roles.c.role_id == role.id) & (users_to_roles.c.app == app_id)
+            (users_to_roles.c.user_id == user.id)
+            & (users_to_roles.c.role_id == role.id)
+            & (users_to_roles.c.app == app_id)
         )
         result = db.session.execute(d)
         if result.rowcount == 0:
@@ -529,7 +562,9 @@ def change_user_roles(action: str, app_id: int) -> Response:
 
 
 def get_role_object(role_name, app_id: int) -> typing.Optional[Roles]:
-    role = db.session.query(Roles).filter(Roles.name == role_name).filter(Roles.app == app_id).first()
+    role = (
+        db.session.query(Roles).filter(Roles.name == role_name).filter(Roles.app == app_id).first()
+    )
     return role
 
 
@@ -662,7 +697,9 @@ def an_user_update() -> Response:
     return user_update(app_id=ANYWAY_APP_ID)
 
 
-@roles_and_grants_accepted(roles=[BE_CONST.Roles2Names.Authenticated.value], app_id=SAFETY_DATA_APP_ID)
+@roles_and_grants_accepted(
+    roles=[BE_CONST.Roles2Names.Authenticated.value], app_id=SAFETY_DATA_APP_ID
+)
 def sd_user_update() -> Response:
     return user_update(app_id=SAFETY_DATA_APP_ID)
 
@@ -744,7 +781,9 @@ def add_role(app_id: int) -> Response:
     if not is_a_valid_role_description(description):
         return return_json_error(Es.BR_BAD_DESCRIPTION)
 
-    role = Roles(name=name, description=description, create_date=datetime.datetime.now(), app=app_id)
+    role = Roles(
+        name=name, description=description, create_date=datetime.datetime.now(), app=app_id
+    )
     db.session.add(role)
     db.session.commit()
     return Response(status=HTTPStatus.OK)
@@ -822,7 +861,12 @@ def add_organization(name: str, app_id: int) -> Response:
     if not name:
         return return_json_error(Es.BR_FIELD_MISSING)
 
-    org = db.session.query(Organization).filter(Organization.name == name).filter(Organization.app == app_id).first()
+    org = (
+        db.session.query(Organization)
+        .filter(Organization.name == name)
+        .filter(Organization.app == app_id)
+        .first()
+    )
     if not org:
         org = Organization(name=name, create_date=datetime.datetime.now(), app=app_id)
         db.session.add(org)
@@ -855,15 +899,18 @@ def update_user_org(user_email: str, org_name: str, app_id: int) -> Response:
 
     if org_name is not None:
         try:
-            org_obj = db.session.query(Organization).filter(Organization.name == org_name).filter(Organization.app == app_id).one()
+            org_obj = (
+                db.session.query(Organization)
+                .filter(Organization.name == org_name)
+                .filter(Organization.app == app_id)
+                .one()
+            )
         except NoResultFound:
             return return_json_error(Es.BR_ORG_NOT_FOUND)
         # Insert into users_to_organizations with app_id
         db.session.execute(
             users_to_organizations.insert().values(  # pylint: disable=no-value-for-parameter
-                user_id=user.id,
-                organization_id=org_obj.id,
-                app=app_id
+                user_id=user.id, organization_id=org_obj.id, app=app_id
             )
         )
 
@@ -934,7 +981,9 @@ def is_a_valid_grant_description(description: str) -> bool:
 
 
 def get_grant_object(grant_name: str, app_id: int):
-    grant = db.session.query(Grant).filter(Grant.name == grant_name).filter(Grant.app == app_id).first()
+    grant = (
+        db.session.query(Grant).filter(Grant.name == grant_name).filter(Grant.app == app_id).first()
+    )
     return grant
 
 
@@ -961,7 +1010,9 @@ def add_grant(app_id: int) -> Response:
     if not is_a_valid_grant_description(description):
         return return_json_error(Es.BR_BAD_DESCRIPTION)
 
-    grant = Grant(name=name, description=description, create_date=datetime.datetime.now(), app=app_id)
+    grant = Grant(
+        name=name, description=description, create_date=datetime.datetime.now(), app=app_id
+    )
     db.session.add(grant)
     db.session.commit()
     return Response(status=HTTPStatus.OK)
@@ -992,19 +1043,21 @@ def change_user_grants(action: str, app_id: int) -> Response:
     if action == "add":
         # Add user to grant
         # Check if user already has this grant in this app
-        existing = db.session.query(users_to_grants).filter(
-            (users_to_grants.c.user_id == user.id) &
-            (users_to_grants.c.grant_id == grant.id) &
-            (users_to_grants.c.app == app_id)
-        ).first()
+        existing = (
+            db.session.query(users_to_grants)
+            .filter(
+                (users_to_grants.c.user_id == user.id)
+                & (users_to_grants.c.grant_id == grant.id)
+                & (users_to_grants.c.app == app_id)
+            )
+            .first()
+        )
         if existing:
             return return_json_error(Es.BR_USER_ALREADY_IN, grant_name)
         # Insert into users_to_grants with app_id
         db.session.execute(
             users_to_grants.insert().values(  # pylint: disable=no-value-for-parameter
-                user_id=user.id,
-                grant_id=grant.id,
-                app=app_id
+                user_id=user.id, grant_id=grant.id, app=app_id
             )
         )
         # Refresh user to get updated grants
@@ -1012,7 +1065,9 @@ def change_user_grants(action: str, app_id: int) -> Response:
     elif action == "remove":
         # Remove user from grant
         d = users_to_grants.delete().where(  # noqa pylint: disable=no-value-for-parameter
-            (users_to_grants.c.user_id == user.id) & (users_to_grants.c.grant_id == grant.id) & (users_to_grants.c.app == app_id)
+            (users_to_grants.c.user_id == user.id)
+            & (users_to_grants.c.grant_id == grant.id)
+            & (users_to_grants.c.app == app_id)
         )
         result = db.session.execute(d)
         if result.rowcount == 0:
@@ -1073,7 +1128,8 @@ def sd_delete_grant() -> Response:
 def get_grants_list(app_id: int) -> Response:
     grants_list = db.session.query(Grant).filter(Grant.app == app_id).all()
     send_list = [
-        {"id": grant.id, "name": grant.name, "description": grant.description} for grant in grants_list
+        {"id": grant.id, "name": grant.name, "description": grant.description}
+        for grant in grants_list
     ]
 
     return Response(
@@ -1095,3 +1151,286 @@ def sd_get_grants_list() -> Response:
 def sd_test_grant_and_admin_endpoint() -> Response:
     """Test endpoint that requires both admin role and test_grant grant."""
     return jsonify({"message": "Access granted: user has both admin role and test_grant grant"})
+
+
+# CLI Helper Functions for Safety Data User Management
+
+
+def add_safety_data_users(emails: typing.List[str]) -> dict:
+    """
+    Add one or more Safety Data users.
+
+    Args:
+        emails: List of email addresses to add
+
+    Returns:
+        Dictionary with keys: 'added', 'already_exists', 'invalid_email', 'failed'
+    """
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    from anyway.config import SQLALCHEMY_DATABASE_URI
+
+    engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=False)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    summary = {"added": [], "already_exists": [], "invalid_email": [], "failed": []}
+
+    for email in emails:
+        # Validate email structure
+        if not is_a_valid_email(email):
+            logging.warning(f"Invalid email format: {email}")
+            summary["invalid_email"].append(email)
+            continue
+
+        try:
+            # Check if user already exists
+            existing_user = (
+                session.query(Users)
+                .filter(Users.email == email, Users.app == SAFETY_DATA_APP_ID)
+                .first()
+            )
+
+            if existing_user:
+                logging.info(f"User already exists: {email}")
+                summary["already_exists"].append(email)
+                continue
+
+            # Create new user following the pattern from add_builtin_safety_data_admin
+            user = Users(
+                user_register_date=datetime.datetime.now(),
+                user_last_login_date=datetime.datetime.now(),
+                email=email,
+                oauth_provider_user_name=email,
+                is_active=True,
+                oauth_provider="manual",
+                is_user_completed_registration=True,
+                oauth_provider_user_id=f"manual-{email}",
+                app=SAFETY_DATA_APP_ID,
+            )
+            session.add(user)
+            session.commit()
+            logging.info(f"Successfully added user: {email}")
+            summary["added"].append(email)
+
+        except Exception as e:
+            session.rollback()
+            logging.error(f"Failed to add user {email}: {e}")
+            summary["failed"].append({"email": email, "error": str(e)})
+
+    session.close()
+    return summary
+
+
+def remove_safety_data_user(email: str) -> dict:
+    """
+    Remove a Safety Data user.
+
+    Args:
+        email: Email address of the user to remove
+
+    Returns:
+        Dictionary with keys: 'removed', 'not_found', 'failed'
+    """
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    from anyway.config import SQLALCHEMY_DATABASE_URI
+
+    engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=False)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    summary = {"removed": [], "not_found": [], "failed": []}
+
+    try:
+        user = (
+            session.query(Users)
+            .filter(Users.email == email, Users.app == SAFETY_DATA_APP_ID)
+            .first()
+        )
+
+        if not user:
+            logging.warning(f"User not found: {email}")
+            summary["not_found"].append(email)
+        else:
+            session.delete(user)
+            session.commit()
+            logging.info(f"Successfully removed user: {email}")
+            summary["removed"].append(email)
+
+    except Exception as e:
+        session.rollback()
+        logging.error(f"Failed to remove user {email}: {e}")
+        summary["failed"].append({"email": email, "error": str(e)})
+
+    session.close()
+    return summary
+
+
+def add_grant_to_safety_data_user(email: str, grant_name: str) -> dict:
+    """
+    Add a grant to a Safety Data user.
+
+    Args:
+        email: Email address of the user
+        grant_name: Name of the grant to add
+
+    Returns:
+        Dictionary with keys: 'added', 'already_has_grant', 'user_not_found', 'grant_not_found', 'failed'
+    """
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    from anyway.config import SQLALCHEMY_DATABASE_URI
+
+    engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=False)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    summary = {
+        "added": [],
+        "already_has_grant": [],
+        "user_not_found": [],
+        "grant_not_found": [],
+        "failed": [],
+    }
+
+    try:
+        # Find user
+        user = (
+            session.query(Users)
+            .filter(Users.email == email, Users.app == SAFETY_DATA_APP_ID)
+            .first()
+        )
+
+        if not user:
+            logging.warning(f"User not found: {email}")
+            summary["user_not_found"].append(email)
+            session.close()
+            return summary
+
+        # Find grant
+        grant = (
+            session.query(Grant)
+            .filter(Grant.name == grant_name, Grant.app == SAFETY_DATA_APP_ID)
+            .first()
+        )
+
+        if not grant:
+            logging.warning(f"Grant not found: {grant_name}")
+            summary["grant_not_found"].append(grant_name)
+            session.close()
+            return summary
+
+        # Check if user already has this grant
+        existing = (
+            session.query(users_to_grants)
+            .filter(
+                users_to_grants.c.user_id == user.id,
+                users_to_grants.c.grant_id == grant.id,
+                users_to_grants.c.app == SAFETY_DATA_APP_ID,
+            )
+            .first()
+        )
+
+        if existing:
+            logging.info(f"User {email} already has grant {grant_name}")
+            summary["already_has_grant"].append({"email": email, "grant": grant_name})
+        else:
+            # Add grant to user following the pattern from add_builtin_safety_data_admin
+            insert_stmt = users_to_grants.insert().values(  # pylint: disable=no-value-for-parameter
+                user_id=user.id,
+                grant_id=grant.id,
+                app=SAFETY_DATA_APP_ID,
+                create_date=datetime.datetime.now(),
+            )
+            session.execute(insert_stmt)
+            session.commit()
+            logging.info(f"Successfully added grant {grant_name} to user {email}")
+            summary["added"].append({"email": email, "grant": grant_name})
+
+    except Exception as e:
+        session.rollback()
+        logging.error(f"Failed to add grant {grant_name} to user {email}: {e}")
+        summary["failed"].append({"email": email, "grant": grant_name, "error": str(e)})
+
+    session.close()
+    return summary
+
+
+def remove_grant_from_safety_data_user(email: str, grant_name: str) -> dict:
+    """
+    Remove a grant from a Safety Data user.
+
+    Args:
+        email: Email address of the user
+        grant_name: Name of the grant to remove
+
+    Returns:
+        Dictionary with keys: 'removed', 'does_not_have_grant', 'user_not_found', 'grant_not_found', 'failed'
+    """
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    from anyway.config import SQLALCHEMY_DATABASE_URI
+
+    engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=False)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    summary = {
+        "removed": [],
+        "does_not_have_grant": [],
+        "user_not_found": [],
+        "grant_not_found": [],
+        "failed": [],
+    }
+
+    try:
+        # Find user
+        user = (
+            session.query(Users)
+            .filter(Users.email == email, Users.app == SAFETY_DATA_APP_ID)
+            .first()
+        )
+
+        if not user:
+            logging.warning(f"User not found: {email}")
+            summary["user_not_found"].append(email)
+            session.close()
+            return summary
+
+        # Find grant
+        grant = (
+            session.query(Grant)
+            .filter(Grant.name == grant_name, Grant.app == SAFETY_DATA_APP_ID)
+            .first()
+        )
+
+        if not grant:
+            logging.warning(f"Grant not found: {grant_name}")
+            summary["grant_not_found"].append(grant_name)
+            session.close()
+            return summary
+
+        # Delete grant from user
+        delete_stmt = users_to_grants.delete().where(  # pylint: disable=no-value-for-parameter
+            (users_to_grants.c.user_id == user.id)
+            & (users_to_grants.c.grant_id == grant.id)
+            & (users_to_grants.c.app == SAFETY_DATA_APP_ID)
+        )
+        result = session.execute(delete_stmt)
+
+        if result.rowcount == 0:
+            logging.info(f"User {email} does not have grant {grant_name}")
+            summary["does_not_have_grant"].append({"email": email, "grant": grant_name})
+        else:
+            session.commit()
+            logging.info(f"Successfully removed grant {grant_name} from user {email}")
+            summary["removed"].append({"email": email, "grant": grant_name})
+
+    except Exception as e:
+        session.rollback()
+        logging.error(f"Failed to remove grant {grant_name} from user {email}: {e}")
+        summary["failed"].append({"email": email, "grant": grant_name, "error": str(e)})
+
+    session.close()
+    return summary

@@ -1387,6 +1387,8 @@ app.add_url_rule("/callback/<provider>", view_func=an_oauth_callback, methods=["
 app.add_url_rule("/authorize/<provider>", view_func=an_oauth_authorize, methods=["GET"])
 
 # Safety Data user system API
+app.add_url_rule("/sd-user/add", view_func=sd_add_user, methods=["POST"])
+app.add_url_rule("/sd-user/remove", view_func=sd_remove_user, methods=["POST"])
 app.add_url_rule("/sd-user/add_role", view_func=sd_add_role, methods=["POST"])
 app.add_url_rule(
     "/sd-user/change_user_active_mode", view_func=sd_change_user_active_mode, methods=["POST"]

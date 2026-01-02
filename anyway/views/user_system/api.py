@@ -962,6 +962,73 @@ def sd_delete_user(email: str) -> Response:
     return delete_user(email, app_id=SAFETY_DATA_APP_ID)
 
 
+@roles_and_grants_accepted(roles=[BE_CONST.Roles2Names.Admins.value], app_id=SAFETY_DATA_APP_ID)
+def sd_add_user() -> Response:
+    req_dict = request.json
+    email = req_dict.get("email")
+
+    if not email:
+        return return_json_error(Es.BR_NO_EMAIL, "Email is required")
+
+    result = add_safety_data_users([email])
+
+    if result["added"]:
+        return Response(
+            response=json.dumps({"message": f"User {email} added successfully"}),
+            status=HTTPStatus.OK,
+            mimetype="application/json"
+        )
+    elif result["already_exists"]:
+        return return_json_error(Es.BR_EXIST, email)
+    elif result["invalid_email"]:
+        return return_json_error(Es.BR_BAD_EMAIL, "Invalid email format")
+    elif result["failed"]:
+        error_detail = result["failed"][0].get("error", "Unknown error")
+        return Response(response=json.dumps({"error_msg": error_detail}),
+            status=HTTPStatus.INTERNAL_SERVER_ERROR,
+            mimetype="application/json",
+        )
+
+    return Response(
+        response=json.dumps({"error_msg": "Internal server error: Faild to add user"}),
+        status=HTTPStatus.INTERNAL_SERVER_ERROR,
+        mimetype="application/json",
+    )
+
+
+@roles_and_grants_accepted(roles=[BE_CONST.Roles2Names.Admins.value], app_id=SAFETY_DATA_APP_ID)
+def sd_remove_user() -> Response:
+    req_dict = request.json
+    email = req_dict.get("email")
+
+    if not email:
+        return return_json_error(Es.BR_NO_EMAIL, "Email is required")
+
+    result = remove_safety_data_user(email)
+
+    if result["removed"]:
+        return Response(
+            response=json.dumps({"message": f"User {email} removed successfully"}),
+            status=HTTPStatus.OK,
+            mimetype="application/json"
+        )
+    elif result["not_found"]:
+        return return_json_error(Es.BR_USER_NOT_FOUND, email)
+    elif result["failed"]:
+        error_detail = result["failed"][0].get("error", "Unknown error")
+        return Response(
+            response=json.dumps({"error_msg": error_detail}),
+            status=HTTPStatus.INTERNAL_SERVER_ERROR,
+            mimetype="application/json",
+        )
+
+    return Response(
+        response=json.dumps({"error_msg": "Internal server error: Failed to remove user"}),
+        status=HTTPStatus.INTERNAL_SERVER_ERROR,
+        mimetype="application/json",
+    )
+
+
 def is_a_valid_grant_name(name: str) -> bool:
     if len(name) < 2 or len(name) >= Grant.name.type.length:
         return False

@@ -431,6 +431,66 @@ JSON with the fields:
 If no error has occurred then you will get an empty HTTP 200 response. Otherwise, you will get one of the errors
 described in the [errors](#Errors) section of this document.
 
+### Add safety-data user
+
+#### Description
+
+Add a user to the Safety Data app, user with admin rights must be logged in to use this api.
+
+#### URL struct
+
+> POST https://www.anyway.co.il/sd-user/add
+
+#### Example
+
+> https://www.anyway.co.il/sd-user/add
+
+#### Parameters
+JSON with the fields:
+**email** - _string_ , Required, email of the user that will be added.
+
+#### Returns
+
+If no error has occurred then you will get a JSON with an HTTP 200 response. Example of expected result:
+
+```json
+{
+  "message": "User example@gmail.com added successfully"
+}
+```
+
+Otherwise, you will get one of the errors described in the [errors](#Errors) section of this document.
+
+### Remove safety-data user
+
+#### Description
+
+Remove a user from the Safety Data app, user with admin rights must be logged in to use this api.
+
+#### URL struct
+
+> POST https://www.anyway.co.il/sd-user/remove
+
+#### Example
+
+> https://www.anyway.co.il/sd-user/remove
+
+#### Parameters
+JSON with the fields:
+**email** - _string_ , Required, email of the user that will be removed.
+
+#### Returns
+
+If no error has occurred then you will get a JSON with an HTTP 200 response. Example of expected result:
+
+```json
+{
+  "message": "User example@gmail.com removed successfully"
+}
+```
+
+Otherwise, you will get one of the errors described in the [errors](#Errors) section of this document.
+
 ### Get roles list from DB
 
 #### Description

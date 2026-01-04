@@ -529,7 +529,7 @@ class ParamFilterExp:
                 else:
                     param_ok = False
             if not param_ok:
-                msg = f"Unsupported filter: {k}={v}{', param def:'+str(p) if p else ''}"
+                msg = f"Unsupported filter: {k}={v}"
                 logging.error(msg)
                 raise ValueError(msg)
         if add_pagination and not count:

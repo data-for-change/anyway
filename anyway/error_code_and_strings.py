@@ -45,7 +45,7 @@ ERROR_TO_STRING_DICT = {
     Errors.BR_ONLY_SUPPORT_GOOGLE: "Google is the only supported OAuth 2.0 provider.",
     Errors.BR_UNKNOWN_FIELD: "Bad Request (Unknown field {}).",
     Errors.BR_NAME_MISSING: "Bad Request (Name is missing from request json).",
-    Errors.BR_NOT_EXIST: "Bad Request ({} doesn't exist in DB).",
+    Errors.BR_NOT_EXIST: "Bad Request ({} doesn't exist in DB for requested app).",
     Errors.BR_USER_NOT_FOUND: "Bad Request (User(email:{}) not found).",
     Errors.BR_USER_ALREADY_IN: "Bad Request (User is already in {}).",
     Errors.BR_MISSING_PERMISSION: "Bad Request (User is missing permission to access this resource).",

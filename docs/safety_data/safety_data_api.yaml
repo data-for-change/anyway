@@ -52,6 +52,7 @@ paths:
         - $ref: '#/components/parameters/ml'
         - $ref: '#/components/parameters/ol'
         - $ref: '#/components/parameters/lca'
+        - $ref: '#/components/parameters/pc'
         - $ref: '#/components/parameters/page_number'
         - $ref: '#/components/parameters/page_size'
       responses:
@@ -108,6 +109,7 @@ paths:
         - $ref: '#/components/parameters/ml'
         - $ref: '#/components/parameters/ol'
         - $ref: '#/components/parameters/lca'
+        - $ref: '#/components/parameters/pc'
       responses:
         '200':
           description: |
@@ -314,6 +316,14 @@ components:
         items:
           type: integer
       description: List of location_accuracy identifiers (integers)
+    pc:
+      in: query
+      name: pc
+      schema:
+        type: array
+        items:
+          type: integer
+      description: List of provider code identifiers (integers)
     page_number:
         in: query
         name: page_number

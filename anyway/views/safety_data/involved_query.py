@@ -484,6 +484,9 @@ class ParamFilterExp:
             "op": Column.__le__,
             "single": True,
         },
+        "pc": {
+            "col": [SDAccident.provider_code],
+        },
     }
 
     def __init__(self):

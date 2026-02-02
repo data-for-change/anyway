@@ -2126,6 +2126,51 @@ class VehicleDamage(Base):
     vehicle_damage_hebrew = Column(Text(), nullable=True)
 
 
+#KodKnisaYetzia in cbs file
+class EntranceExit(Base):
+    __tablename__ = "entrance_exit"
+    id = Column(Integer(), primary_key=True, index=True)
+    year = Column(Integer(), primary_key=True, index=True)
+    provider_code = Column(Integer(), primary_key=True, index=True)
+    entrance_exit_hebrew = Column(Text(), nullable=True)
+
+
+#KodTvaiHaderech in cbs file
+class RoadAlignment(Base):
+    __tablename__ = "road_alignment"
+    id = Column(Integer(), primary_key=True, index=True)
+    year = Column(Integer(), primary_key=True, index=True)
+    provider_code = Column(Integer(), primary_key=True, index=True)
+    road_alignment_hebrew = Column(Text(), nullable=True)
+
+
+#KodNetuneiTashtitKlali in cbs file
+class InfrastructureType(Base):
+    __tablename__ = "infrastructure_type"
+    id = Column(Integer(), primary_key=True, index=True)
+    year = Column(Integer(), primary_key=True, index=True)
+    provider_code = Column(Integer(), primary_key=True, index=True)
+    infrastructure_type_hebrew = Column(Text(), nullable=True)
+
+
+#KodGeometria in cbs file
+class RoadGeometry(Base):
+    __tablename__ = "road_geometry"
+    id = Column(Integer(), primary_key=True, index=True)
+    year = Column(Integer(), primary_key=True, index=True)
+    provider_code = Column(Integer(), primary_key=True, index=True)
+    road_geometry_hebrew = Column(Text(), nullable=True)
+
+
+#KodYeudHarechev in cbs file
+class VehiclePurpose(Base):
+    __tablename__ = "vehicle_purpose"
+    id = Column(Integer(), primary_key=True, index=True)
+    year = Column(Integer(), primary_key=True, index=True)
+    provider_code = Column(Integer(), primary_key=True, index=True)
+    vehicle_purpose_hebrew = Column(Text(), nullable=True)
+
+
 class AccidentMarkerView(Base):
     __tablename__ = "markers_hebrew"
     id = Column(BigInteger(), primary_key=True)

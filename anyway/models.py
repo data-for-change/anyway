@@ -1368,6 +1368,26 @@ class SuburbanJunction(Base):
             "roads": set(self.roads),
         }
 
+class Junction(Base):
+    __tablename__ = "junction"
+    MAX_NAME_LEN = 100
+    junction = Column(Integer(), primary_key=True, nullable=False)
+    junction_hebrew = Column(String(length=MAX_NAME_LEN), nullable=True)
+    x = Column(Float(), nullable=True)
+    y = Column(Float(), nullable=True)
+
+
+class JunctionArm(Base):
+    __tablename__ = "junction_arm"
+    arm_symbol = Column(Integer(), primary_key=True, index=True)
+    junction_symbol = Column(Integer())
+    is_suburban = Column(Boolean())
+    road_symbol = Column(Integer())
+    km = Column(Float())
+    yishuv_symbol = Column(Integer())
+    street_symbol = Column(Integer())
+    arm_name = Column(Text())
+
 
 class RoadJunctionKM(Base):
     __tablename__ = "road_junction_km"

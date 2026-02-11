@@ -162,6 +162,20 @@ def suburban_junctions(filename):
 
 
 @process.command()
+@click.argument(
+    "junction_arms_filename", type=str, default="static/data/junctions/junction_arms.csv",
+)
+@click.argument(
+    "junctions_filename", type=str, default="static/data/junctions/junctions.csv",
+)
+def junctions(junction_arms_filename, junctions_filename):
+    """Update junction tables from csv files"""
+    from anyway.parsers.junctions import parse
+
+    return parse(junction_arms_filename, junctions_filename)
+
+
+@process.command()
 @click.argument("chunk-size", type=int, default=1000)
 def streets(chunk_size):
     """Update streets table from data.gov site"""

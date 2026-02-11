@@ -351,9 +351,6 @@ class AccidentMarker(MarkerMixin, Base):
     street2 = Column(Integer())
     street2_hebrew = Column(Text())
     house_number = Column(Integer())
-    urban_intersection = Column(Integer())
-    non_urban_intersection = Column(Integer())
-    non_urban_intersection_hebrew = Column(Text())
     intersection = Column(Integer())
     intersection_hebrew = Column(Text())
     accident_year = Column(Integer(), primary_key=True)
@@ -367,7 +364,6 @@ class AccidentMarker(MarkerMixin, Base):
     vehicle_type_rsa = Column(Text())
     violation_type_rsa = Column(Text())
     geom = Column(Geometry("POINT"))
-    non_urban_intersection_by_junction_number = Column(Text())
     rsa_severity = Column(Integer())
     rsa_license_plate = Column(Text())
 
@@ -2283,10 +2279,6 @@ class AccidentMarkerView(Base):
     street2 = Column(Integer())
     street2_hebrew = Column(Text(), index=True)
     house_number = Column(Integer())
-    non_urban_intersection = Column(Integer())
-    non_urban_intersection_hebrew = Column(Text())
-    non_urban_intersection_by_junction_number = Column(Text())
-    urban_intersection = Column(Integer())
     intersection = Column(Integer())
     intersection_hebrew = Column(Text())
     accident_year = Column(Integer(), primary_key=True, index=True)
@@ -2382,7 +2374,6 @@ class AccidentMarkerView(Base):
             "street1_hebrew": self.street1_hebrew,
             "street2": self.street2,
             "street2_hebrew": self.street2_hebrew,
-            "non_urban_intersection_hebrew": self.non_urban_intersection_hebrew,
             "intersection_hebrew": self.intersection_hebrew,
             "accident_year": self.accident_year,
             "accident_month": self.accident_month,
@@ -2643,10 +2634,6 @@ class InvolvedMarkerView(Base):
     street2 = Column(Integer())
     street2_hebrew = Column(Text(), index=True)
     house_number = Column(Integer())
-    non_urban_intersection = Column(Integer())
-    non_urban_intersection_hebrew = Column(Text())
-    non_urban_intersection_by_junction_number = Column(Text())
-    urban_intersection = Column(Integer())
     accident_day = Column(Integer())
     accident_hour_raw = Column(Integer())
     accident_hour_raw_hebrew = Column(Text())
@@ -2841,12 +2828,8 @@ class VehicleMarkerView(Base):
     street2 = Column(Integer())
     street2_hebrew = Column(Text(), index=True)
     house_number = Column(Integer())
-    non_urban_intersection = Column(Integer())
-    non_urban_intersection_hebrew = Column(Text())
-    non_urban_intersection_by_junction_number = Column(Text())
     intersection = Column(Integer())
     intersection_hebrew = Column(Text())
-    urban_intersection = Column(Integer())
     accident_month = Column(Integer())
     accident_day = Column(Integer())
     accident_hour_raw = Column(Integer())

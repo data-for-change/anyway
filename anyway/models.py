@@ -305,7 +305,6 @@ class AccidentMarker(MarkerMixin, Base):
     address = Column(Text())
     location_accuracy = Column(Integer())
     road_type = Column(Integer())
-    road_shape = Column(Integer())
     day_type = Column(Integer())
     mainStreet = Column(Text())
     secondaryStreet = Column(Text())
@@ -412,7 +411,6 @@ class AccidentMarker(MarkerMixin, Base):
                     "type": self.type,
                     "accident_type": self.accident_type,
                     "road_type": self.road_type,
-                    "road_shape": self.road_shape,
                     "day_type": self.day_type,
                     "mainStreet": self.mainStreet,
                     "secondaryStreet": self.secondaryStreet,
@@ -614,8 +612,6 @@ class AccidentMarker(MarkerMixin, Base):
             ).filter(func.extract("hour", AccidentMarker.created) < kwargs["end_time"])
         if kwargs.get("weather", 0) != 0:
             markers = markers.filter(AccidentMarker.weather == kwargs["weather"])
-        if kwargs.get("road", 0) != 0:
-            markers = markers.filter(AccidentMarker.road_shape == kwargs["road"])
         if kwargs.get("separation", 0) != 0:
             markers = markers.filter(AccidentMarker.multi_lane == kwargs["separation"])
         if kwargs.get("surface", 0) != 0:
@@ -1590,7 +1586,6 @@ class InjuredAroundSchoolAllData(Base):
     markers_address = Column(Text())
     markers_location_accuracy = Column(Float())
     markers_road_type = Column(Float())
-    markers_road_shape = Column(Float())
     markers_day_type = Column(Float())
     markers_mainStreet = Column(Text())
     markers_secondaryStreet = Column(Text())
@@ -1723,14 +1718,6 @@ class AccidentType(Base):
     year = Column(Integer(), primary_key=True, index=True)
     provider_code = Column(Integer(), primary_key=True, index=True)
     accident_type_hebrew = Column(Text(), nullable=True)
-
-
-class RoadShape(Base):
-    __tablename__ = "road_shape"
-    id = Column(Integer(), primary_key=True, index=True)
-    year = Column(Integer(), primary_key=True, index=True)
-    provider_code = Column(Integer(), primary_key=True, index=True)
-    road_shape_hebrew = Column(Text(), nullable=True)
 
 
 class OneLane(Base):
@@ -2192,8 +2179,6 @@ class AccidentMarkerView(Base):
     location_accuracy_hebrew = Column(Text())
     road_type = Column(Integer())
     road_type_hebrew = Column(Text())
-    road_shape = Column(Integer())
-    road_shape_hebrew = Column(Text())
     day_type = Column(Integer())
     day_type_hebrew = Column(Text())
     one_lane = Column(Integer())
@@ -2292,8 +2277,6 @@ class AccidentMarkerView(Base):
             "location_accuracy_hebrew": self.location_accuracy_hebrew,
             "road_type": self.road_type,
             "road_type_hebrew": self.road_type_hebrew,
-            "road_shape": self.road_shape,
-            "road_shape_hebrew": self.road_shape_hebrew,
             "day_type": self.day_type,
             "day_type_hebrew": self.day_type_hebrew,
             "one_lane": self.one_lane,
@@ -2543,8 +2526,6 @@ class InvolvedMarkerView(Base):
     location_accuracy_hebrew = Column(Text())
     road_type = Column(Integer(), index=True)
     road_type_hebrew = Column(Text(), index=True)
-    road_shape = Column(Integer())
-    road_shape_hebrew = Column(Text())
     day_type = Column(Integer())
     day_type_hebrew = Column(Text())
     one_lane = Column(Integer())
@@ -2735,8 +2716,6 @@ class VehicleMarkerView(Base):
     location_accuracy_hebrew = Column(Text())
     road_type = Column(Integer())
     road_type_hebrew = Column(Text())
-    road_shape = Column(Integer())
-    road_shape_hebrew = Column(Text())
     day_type = Column(Integer())
     day_type_hebrew = Column(Text())
     one_lane = Column(Integer())

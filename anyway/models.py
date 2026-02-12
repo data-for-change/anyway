@@ -320,10 +320,6 @@ class AccidentMarker(MarkerMixin, Base):
     road_surface = Column(Integer())
     road_object = Column(Integer())
     object_distance = Column(Integer())
-    didnt_cross = Column(Integer())
-    cross_mode = Column(Integer())
-    cross_location = Column(Integer())
-    cross_direction = Column(Integer())
     involved = relationship("Involved")
     vehicles = relationship("Vehicle")
     video_link = Column(Text())
@@ -434,10 +430,6 @@ class AccidentMarker(MarkerMixin, Base):
                 "road_surface": self.road_surface,
                 "road_object": self.road_object,
                 "object_distance": self.object_distance,
-                "didnt_cross": self.didnt_cross,
-                "cross_mode": self.cross_mode,
-                "cross_location": self.cross_location,
-                "cross_direction": self.cross_direction,
                 "video_link": self.video_link,
                 "road1": self.road1,
                 "road2": self.road2,
@@ -822,6 +814,10 @@ class Involved(Base):
     accident_year = Column(Integer())
     accident_month = Column(Integer())
     injury_severity_mais = Column(Integer())
+    didnt_cross = Column(Integer())
+    cross_mode = Column(Integer())
+    cross_location = Column(Integer())
+    cross_direction = Column(Integer())
     __table_args__ = (
         ForeignKeyConstraint(
             [accident_id, provider_code, accident_year],
@@ -2182,14 +2178,6 @@ class AccidentMarkerView(Base):
     road_object_hebrew = Column(Text())
     object_distance = Column(Integer())
     object_distance_hebrew = Column(Text())
-    didnt_cross = Column(Integer())
-    didnt_cross_hebrew = Column(Text())
-    cross_mode = Column(Integer())
-    cross_mode_hebrew = Column(Text())
-    cross_location = Column(Integer())
-    cross_location_hebrew = Column(Text())
-    cross_direction = Column(Integer())
-    cross_direction_hebrew = Column(Text())
     road1 = Column(Integer(), index=True)
     road2 = Column(Integer(), index=True)
     km = Column(Float())
@@ -2278,14 +2266,6 @@ class AccidentMarkerView(Base):
             "road_object_hebrew": self.road_object_hebrew,
             "object_distance": self.object_distance,
             "object_distance_hebrew": self.object_distance_hebrew,
-            "didnt_cross": self.didnt_cross,
-            "didnt_cross_hebrew": self.didnt_cross_hebrew,
-            "cross_mode": self.cross_mode,
-            "cross_mode_hebrew": self.cross_mode_hebrew,
-            "cross_location": self.cross_location,
-            "cross_location_hebrew": self.cross_location_hebrew,
-            "cross_direction": self.cross_direction,
-            "cross_direction_hebrew": self.cross_direction_hebrew,
             "road1": self.road1,
             "road2": self.road2,
             "km": self.km,
@@ -2646,6 +2626,14 @@ class InvolvedView(Base):
     involve_id = Column(Integer(), primary_key=True)
     accident_year = Column(Integer(), primary_key=True, index=True)
     accident_month = Column(Integer())
+    didnt_cross = Column(Integer())
+    didnt_cross_hebrew = Column(Text())
+    cross_mode = Column(Integer())
+    cross_mode_hebrew = Column(Text())
+    cross_location = Column(Integer())
+    cross_location_hebrew = Column(Text())
+    cross_direction = Column(Integer())
+    cross_direction_hebrew = Column(Text())
 
 
 class VehiclesView(Base):
@@ -2709,14 +2697,6 @@ class VehicleMarkerView(Base):
     road_object_hebrew = Column(Text())
     object_distance = Column(Integer())
     object_distance_hebrew = Column(Text())
-    didnt_cross = Column(Integer())
-    didnt_cross_hebrew = Column(Text())
-    cross_mode = Column(Integer())
-    cross_mode_hebrew = Column(Text())
-    cross_location = Column(Integer())
-    cross_location_hebrew = Column(Text())
-    cross_direction = Column(Integer())
-    cross_direction_hebrew = Column(Text())
     road1 = Column(Integer(), index=True)
     road2 = Column(Integer(), index=True)
     km = Column(Float())

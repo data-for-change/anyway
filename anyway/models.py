@@ -1455,7 +1455,6 @@ class Vehicle(Base):
     engine_volume = Column(Integer())
     manufacturing_year = Column(Integer())
     driving_directions = Column(Integer())
-    vehicle_status = Column(Integer())
     vehicle_attribution = Column(Integer())
     vehicle_type = Column(Integer())
     seats = Column(Integer())
@@ -1483,7 +1482,6 @@ class Vehicle(Base):
             "engine_volume": self.engine_volume,
             "manufacturing_year": self.manufacturing_year,
             "driving_directions": self.driving_directions,
-            "vehicle_status": self.vehicle_status,
             "vehicle_attribution": self.vehicle_attribution,
             "vehicle_type": self.vehicle_type,
             "seats": self.seats,
@@ -1843,14 +1841,6 @@ class DrivingDirections(Base):
     year = Column(Integer(), primary_key=True, index=True)
     provider_code = Column(Integer(), primary_key=True, index=True)
     driving_directions_hebrew = Column(Text(), nullable=True)
-
-
-class VehicleStatus(Base):
-    __tablename__ = "vehicle_status"
-    id = Column(Integer(), primary_key=True, index=True)
-    year = Column(Integer(), primary_key=True, index=True)
-    provider_code = Column(Integer(), primary_key=True, index=True)
-    vehicle_status_hebrew = Column(Text(), nullable=True)
 
 
 class InvolvedType(Base):
@@ -2594,8 +2584,6 @@ class InvolvedMarkerView(Base):
     manufacturing_year = Column(Integer())
     driving_directions = Column(Integer())
     driving_directions_hebrew = Column(Text())
-    vehicle_status = Column(Integer())
-    vehicle_status_hebrew = Column(Text())
     vehicle_attribution = Column(Integer())
     vehicle_attribution_hebrew = Column(Text())
     seats = Column(Integer())
@@ -2673,8 +2661,6 @@ class VehiclesView(Base):
     manufacturing_year = Column(Integer())
     driving_directions = Column(Integer())
     driving_directions_hebrew = Column(Text())
-    vehicle_status = Column(Integer())
-    vehicle_status_hebrew = Column(Text())
     vehicle_attribution = Column(Integer())
     vehicle_attribution_hebrew = Column(Text())
     seats = Column(Integer())
@@ -2791,8 +2777,6 @@ class VehicleMarkerView(Base):
     manufacturing_year = Column(Integer())
     driving_directions = Column(Integer())
     driving_directions_hebrew = Column(Text())
-    vehicle_status = Column(Integer())
-    vehicle_status_hebrew = Column(Text())
     vehicle_attribution = Column(Integer())
     vehicle_attribution_hebrew = Column(Text())
     seats = Column(Integer())

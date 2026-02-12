@@ -85,7 +85,6 @@ field_names_dict = {
     "engine_volume": "NEFAH",
     "manufacturing_year": "SHNAT_YITZUR",
     "driving_directions": "KIVUNE_NESIA",
-    "vehicle_status": "MATZAV_REHEV",
     "vehicle_attribution": "SHIYUH_REHEV_LMS",
     "vehicle_type_vehicles": "SUG_REHEV_LMS",
     "seats": "MEKOMOT_YESHIVA_LMS",

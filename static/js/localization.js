@@ -314,7 +314,6 @@ var fields = {
     "NEFAH": "נפח מנוע",
     "SHNAT_YITZUR": "שנת ייצור",
     "KIVUNE_NESIA": "כיוון נסיעה",
-    "MATZAV_REHEV": "מצב רכב",
     "SHIYUH_REHEV_LMS": "שיוך רכב",
     "SUG_REHEV_LMS": "סוג רכב",
     "MEKOMOT_YESHIVA_LMS": "מקומות ישיבה",

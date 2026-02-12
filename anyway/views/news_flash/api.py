@@ -415,7 +415,6 @@ def get_downloaded_data(format, years_ago):
 
     columns[AccidentMarkerView.road_type_hebrew] = 'סוג דרך'
     columns[AccidentMarkerView.non_urban_intersection_hebrew] = 'צומת בינעירוני'
-    columns[AccidentMarkerView.road_shape_hebrew] = 'צורת הדרך'
     columns[AccidentMarkerView.road_surface_hebrew] = 'מצב פני הכביש'
     columns[AccidentMarkerView.road_intactness_hebrew] = 'תקינות הכביש'
     columns[AccidentMarkerView.road_width_hebrew] = 'רוחב הכביש'

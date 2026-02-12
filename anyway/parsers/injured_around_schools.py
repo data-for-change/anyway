@@ -130,7 +130,6 @@ def select_columns_df_total(df):
             "markers_address",
             "markers_location_accuracy",
             "markers_road_type",
-            "markers_road_shape",
             "markers_day_type",
             "markers_mainStreet",
             "markers_secondaryStreet",

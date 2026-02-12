@@ -139,7 +139,6 @@ def select_columns_df_total(df):
             "markers_speed_limit",
             "markers_road_intactness",
             "markers_road_width",
-            "markers_road_sign",
             "markers_road_light",
             "markers_road_control",
             "markers_weather",

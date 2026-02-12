@@ -102,15 +102,22 @@ jobs:
           if ! git log -1 --pretty=format:"%s" | grep -- --no-deploy; then
             git config --global user.name "Anyway CI" &&\
             git config --global user.email "anyway-ci@localhost" &&\
-            if [ "${GITHUB_REF}" == "refs/heads/master" ]; then
+            if [ "${GITHUB_REF}" == "refs/heads/master" ] || [ "${GITHUB_REF}" == "refs/heads/dev" ]; then
               cd `mktemp -d` &&\
               echo "${DFC_IAC_DEPLOY_KEY}" > dfc_iac_deploy_key &&\
               chmod 400 dfc_iac_deploy_key &&\
               export GIT_SSH_COMMAND="ssh -i `pwd`/dfc_iac_deploy_key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" &&\
               git clone git@github.com:data-for-change/dfc-iac.git &&\
               cd dfc-iac &&\
-              bin/update_anyway_env.py '{"image":"'${ANYWAY_IMAGE}'","dbImage":"'${DB_IMAGE}'","dbBackupImage":"'${DB_BACKUP_IMAGE}'","nginxImage":"'${NGINX_IMAGE}'"}' &&\
-              git add apps/anyway/.env && git commit -m "automatic update of anyway" &&\
+              if [ "${GITHUB_REF}" == "refs/heads/master" ]; then
+                  DFC_APPS_DIR=apps
+              else
+                  DFC_APPS_DIR=apps-dfc2
+              fi &&\
+              bin/update_anyway_env.py \
+                '{"image":"'${ANYWAY_IMAGE}'","dbImage":"'${DB_IMAGE}'","dbBackupImage":"'${DB_BACKUP_IMAGE}'","nginxImage":"'${NGINX_IMAGE}'"}' \
+                "$DFC_APPS_DIR" &&\
+              git add $DFC_APPS_DIR/anyway/.env && git commit -m "automatic update of anyway $DFC_APPS_DIR" &&\
               git push origin main
             fi &&\
             cd `mktemp -d` &&\

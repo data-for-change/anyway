@@ -421,7 +421,6 @@ def get_downloaded_data(format, years_ago):
     columns[AccidentMarkerView.one_lane_hebrew] = 'דרך חד מסלולית'
     columns[AccidentMarkerView.multi_lane_hebrew] = 'דרך רב מסלולית'
 
-    columns[AccidentMarkerView.road_sign_hebrew] = 'סימון/תמרור'
     columns[AccidentMarkerView.road_light_hebrew] = 'תאורה'
     columns[AccidentMarkerView.road_control_hebrew] = 'בקרה בצומת'
     columns[AccidentMarkerView.traffic_light_hebrew] = 'מרומזר/לא מרומזר'

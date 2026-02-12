@@ -100,7 +100,6 @@ var MarkerView = Backbone.View.extend({
             this.localize("MEHIRUT_MUTERET", "speed_limit");
             this.localize("TKINUT", "road_intactness");
             this.localize("ROHAV", "road_width");
-            this.localize("SIMUN_TIMRUR", "road_sign");
             this.localize("TEURA", "road_light");
             this.localize("BAKARA", "road_control");
             this.localize("MEZEG_AVIR", "weather");

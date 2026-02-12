@@ -314,7 +314,6 @@ class AccidentMarker(MarkerMixin, Base):
     speed_limit = Column(Integer())
     road_intactness = Column(Integer())
     road_width = Column(Integer())
-    road_sign = Column(Integer())
     road_light = Column(Integer())
     road_control = Column(Integer())
     weather = Column(Integer())
@@ -429,7 +428,6 @@ class AccidentMarker(MarkerMixin, Base):
                 "speed_limit": self.speed_limit,
                 "road_intactness": self.road_intactness,
                 "road_width": self.road_width,
-                "road_sign": self.road_sign,
                 "road_light": self.road_light,
                 "road_control": self.road_control,
                 "weather": self.weather,
@@ -1595,7 +1593,6 @@ class InjuredAroundSchoolAllData(Base):
     markers_speed_limit = Column(Float())
     markers_road_intactness = Column(Float())
     markers_road_width = Column(Float())
-    markers_road_sign = Column(Float())
     markers_road_light = Column(Float())
     markers_road_control = Column(Float())
     markers_weather = Column(Float())
@@ -1758,14 +1755,6 @@ class RoadWidth(Base):
     year = Column(Integer(), primary_key=True, index=True)
     provider_code = Column(Integer(), primary_key=True, index=True)
     road_width_hebrew = Column(Text(), nullable=True)
-
-
-class RoadSign(Base):
-    __tablename__ = "road_sign"
-    id = Column(Integer(), primary_key=True, index=True)
-    year = Column(Integer(), primary_key=True, index=True)
-    provider_code = Column(Integer(), primary_key=True, index=True)
-    road_sign_hebrew = Column(Text(), nullable=True)
 
 
 class RoadLight(Base):
@@ -2191,8 +2180,6 @@ class AccidentMarkerView(Base):
     road_intactness_hebrew = Column(Text())
     road_width = Column(Integer())
     road_width_hebrew = Column(Text())
-    road_sign = Column(Integer())
-    road_sign_hebrew = Column(Text())
     road_light = Column(Integer())
     road_light_hebrew = Column(Text())
     road_control = Column(Integer())
@@ -2289,8 +2276,6 @@ class AccidentMarkerView(Base):
             "road_intactness_hebrew": self.road_intactness_hebrew,
             "road_width": self.road_width,
             "road_width_hebrew": self.road_width_hebrew,
-            "road_sign": self.road_sign,
-            "road_sign_hebrew": self.road_sign_hebrew,
             "road_light": self.road_light,
             "road_light_hebrew": self.road_light_hebrew,
             "road_control": self.road_control,
@@ -2538,8 +2523,6 @@ class InvolvedMarkerView(Base):
     road_intactness_hebrew = Column(Text())
     road_width = Column(Integer())
     road_width_hebrew = Column(Text())
-    road_sign = Column(Integer())
-    road_sign_hebrew = Column(Text())
     road_light = Column(Integer())
     road_light_hebrew = Column(Text())
     road_control = Column(Integer())
@@ -2728,8 +2711,6 @@ class VehicleMarkerView(Base):
     road_intactness_hebrew = Column(Text())
     road_width = Column(Integer())
     road_width_hebrew = Column(Text())
-    road_sign = Column(Integer())
-    road_sign_hebrew = Column(Text())
     road_light = Column(Integer())
     road_light_hebrew = Column(Text())
     road_control = Column(Integer())

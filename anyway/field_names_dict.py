@@ -35,7 +35,6 @@ field_names_dict = {
     "speed_limit": "MEHIRUT_MUTERET",
     "road_intactness": "TKINUT",
     "road_width": "ROHAV",
-    "road_sign": "SIMUN_TIMRUR",
     "road_light": "TEURA",
     "road_control": "BAKARA",
     "weather": "MEZEG_AVIR",

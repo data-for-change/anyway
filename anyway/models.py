@@ -415,7 +415,6 @@ class AccidentMarker(MarkerMixin, Base):
                     "road_type": self.road_type,
                     "road_shape": self.road_shape,
                     "day_type": self.day_type,
-                    "police_unit": self.police_unit,
                     "mainStreet": self.mainStreet,
                     "secondaryStreet": self.secondaryStreet,
                     "junction": self.junction,
@@ -631,8 +630,6 @@ class AccidentMarker(MarkerMixin, Base):
                 )
         if kwargs.get("controlmeasure", 0) != 0:
             markers = markers.filter(AccidentMarker.road_control == kwargs["controlmeasure"])
-        if kwargs.get("district", 0) != 0:
-            markers = markers.filter(AccidentMarker.police_unit == kwargs["district"])
 
         if kwargs.get("case_type", 0) != 0:
             markers = markers.filter(AccidentMarker.provider_code == kwargs["case_type"])

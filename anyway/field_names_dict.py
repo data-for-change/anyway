@@ -31,7 +31,6 @@ field_names_dict = {
     "road_type": "SUG_DEREH",  # part of the desciption
     "day_type": "SUG_YOM",  # part of the desciption
     "road_shape": "ZURAT_DEREH",  # part of the desciption
-    "police_unit": "YEHIDA",  # part of the desciption
     "one_lane": "HAD_MASLUL",
     "multi_lane": "RAV_MASLUL",
     "speed_limit": "MEHIRUT_MUTERET",

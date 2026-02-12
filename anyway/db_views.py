@@ -61,7 +61,8 @@ from anyway.models import (
     ProviderCode,
     VehicleDamage,
     RoadSegments,
-    AccidentMarkerView
+    AccidentMarkerView,
+    Junction
 )
 
 
@@ -156,10 +157,8 @@ class Views(object):
             AccidentMarker.street2,
             AccidentMarker.street2_hebrew,
             AccidentMarker.house_number,
-            AccidentMarker.non_urban_intersection,
-            AccidentMarker.non_urban_intersection_hebrew,
-            AccidentMarker.non_urban_intersection_by_junction_number,
-            AccidentMarker.urban_intersection,
+            AccidentMarker.intersection,
+            Junction.junction_hebrew,
             AccidentMarker.accident_year,
             AccidentMarker.accident_month,
             AccidentMarker.accident_day,
@@ -348,7 +347,8 @@ class Views(object):
                   isouter=True) \
             .join(ProviderCode,
                   and_(AccidentMarker.provider_code == ProviderCode.id),
-                  isouter=True)
+                  isouter=True) \
+            .join(Junction, AccidentMarker.intersection == Junction.junction, isouter=True)
         return select(selected_columns) \
             .select_from(from_clause)
 
@@ -639,10 +639,6 @@ class Views(object):
             AccidentMarkerView.street2,
             AccidentMarkerView.street2_hebrew,
             AccidentMarkerView.house_number,
-            AccidentMarkerView.non_urban_intersection,
-            AccidentMarkerView.non_urban_intersection_hebrew,
-            AccidentMarkerView.non_urban_intersection_by_junction_number,
-            AccidentMarkerView.urban_intersection,
             AccidentMarkerView.accident_day,
             AccidentMarkerView.accident_hour_raw,
             AccidentMarkerView.accident_hour_raw_hebrew,
@@ -838,10 +834,8 @@ class Views(object):
             AccidentMarkerView.street2,
             AccidentMarkerView.street2_hebrew,
             AccidentMarkerView.house_number,
-            AccidentMarkerView.non_urban_intersection,
-            AccidentMarkerView.non_urban_intersection_hebrew,
-            AccidentMarkerView.non_urban_intersection_by_junction_number,
-            AccidentMarkerView.urban_intersection,
+            AccidentMarkerView.intersection,
+            AccidentMarkerView.intersection_hebrew,
             AccidentMarkerView.accident_day,
             AccidentMarkerView.accident_hour_raw,
             AccidentMarkerView.accident_hour_raw_hebrew,

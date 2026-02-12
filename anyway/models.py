@@ -822,6 +822,10 @@ class Involved(Base):
     accident_year = Column(Integer())
     accident_month = Column(Integer())
     injury_severity_mais = Column(Integer())
+    didnt_cross = Column(Integer())
+    cross_mode = Column(Integer())
+    cross_location = Column(Integer())
+    cross_direction = Column(Integer())
     __table_args__ = (
         ForeignKeyConstraint(
             [accident_id, provider_code, accident_year],
@@ -2646,6 +2650,14 @@ class InvolvedView(Base):
     involve_id = Column(Integer(), primary_key=True)
     accident_year = Column(Integer(), primary_key=True, index=True)
     accident_month = Column(Integer())
+    didnt_cross = Column(Integer())
+    didnt_cross_hebrew = Column(Text())
+    cross_mode = Column(Integer())
+    cross_mode_hebrew = Column(Text())
+    cross_location = Column(Integer())
+    cross_location_hebrew = Column(Text())
+    cross_direction = Column(Integer())
+    cross_direction_hebrew = Column(Text())
 
 
 class VehiclesView(Base):

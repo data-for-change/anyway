@@ -428,11 +428,6 @@ def get_downloaded_data(format, years_ago):
     columns[AccidentMarkerView.day_night_hebrew] = 'יום/לילה'
     columns[AccidentMarkerView.road_object_hebrew] = 'עצם-סוג'
 
-    columns[AccidentMarkerView.didnt_cross_hebrew] = 'חצייה-לא חצה'
-    columns[AccidentMarkerView.cross_mode_hebrew] = 'חצייה-אופן'
-    columns[AccidentMarkerView.cross_location_hebrew] = 'חצייה-מקום'
-    columns[AccidentMarkerView.cross_direction_hebrew] = 'חצייה-כיוון'
-
     columns[AccidentMarkerView.longitude] = 'קו אורך'
     columns[AccidentMarkerView.latitude] = 'קו רוחב'
     columns[AccidentMarkerView.x] = 'X קואורדינטה'

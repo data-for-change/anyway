@@ -307,7 +307,6 @@ class AccidentMarker(MarkerMixin, Base):
     road_type = Column(Integer())
     road_shape = Column(Integer())
     day_type = Column(Integer())
-    police_unit = Column(Integer())
     mainStreet = Column(Text())
     secondaryStreet = Column(Text())
     junction = Column(Text())
@@ -1593,7 +1592,6 @@ class InjuredAroundSchoolAllData(Base):
     markers_road_type = Column(Float())
     markers_road_shape = Column(Float())
     markers_day_type = Column(Float())
-    markers_police_unit = Column(Float())
     markers_mainStreet = Column(Text())
     markers_secondaryStreet = Column(Text())
     markers_junction = Column(Text())
@@ -1701,14 +1699,6 @@ class TrafficVolume(Base):
     volume = Column(Integer())
     status = Column(Integer())
     duplicate_count = Column(Integer())
-
-
-class PoliceUnit(Base):
-    __tablename__ = "police_unit"
-    id = Column(Integer(), primary_key=True, index=True)
-    year = Column(Integer(), primary_key=True, index=True)
-    provider_code = Column(Integer(), primary_key=True, index=True)
-    police_unit_hebrew = Column(Text(), nullable=True)
 
 
 class RoadType(Base):
@@ -2206,8 +2196,6 @@ class AccidentMarkerView(Base):
     road_shape_hebrew = Column(Text())
     day_type = Column(Integer())
     day_type_hebrew = Column(Text())
-    police_unit = Column(Integer())
-    police_unit_hebrew = Column(Text())
     one_lane = Column(Integer())
     one_lane_hebrew = Column(Text())
     multi_lane = Column(Integer())
@@ -2308,8 +2296,6 @@ class AccidentMarkerView(Base):
             "road_shape_hebrew": self.road_shape_hebrew,
             "day_type": self.day_type,
             "day_type_hebrew": self.day_type_hebrew,
-            "police_unit": self.police_unit,
-            "police_unit_hebrew": self.police_unit_hebrew,
             "one_lane": self.one_lane,
             "one_lane_hebrew": self.one_lane_hebrew,
             "multi_lane": self.multi_lane,
@@ -2561,8 +2547,6 @@ class InvolvedMarkerView(Base):
     road_shape_hebrew = Column(Text())
     day_type = Column(Integer())
     day_type_hebrew = Column(Text())
-    police_unit = Column(Integer())
-    police_unit_hebrew = Column(Text())
     one_lane = Column(Integer())
     one_lane_hebrew = Column(Text())
     multi_lane = Column(Integer())
@@ -2755,8 +2739,6 @@ class VehicleMarkerView(Base):
     road_shape_hebrew = Column(Text())
     day_type = Column(Integer())
     day_type_hebrew = Column(Text())
-    police_unit = Column(Integer())
-    police_unit_hebrew = Column(Text())
     one_lane = Column(Integer())
     one_lane_hebrew = Column(Text())
     multi_lane = Column(Integer())

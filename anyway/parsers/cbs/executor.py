@@ -5,7 +5,7 @@ import os
 import re
 import shutil
 import traceback
-from collections import OrderedDict, defaultdict
+from collections import OrderedDict
 from datetime import datetime
 
 import math
@@ -20,7 +20,6 @@ from anyway.models import (
     AccidentMarker,
     Involved,
     Vehicle,
-    ProviderCode,
     AccidentMarkerView,
     InvolvedView,
     InvolvedMarkerView,
@@ -35,12 +34,14 @@ from anyway.db_views import VIEWS
 from anyway.app_and_db import db
 from anyway.parsers.cbs.s3 import S3DataRetriever
 from anyway.views.safety_data import sd_utils
+from anyway.parsers.cbs.dictionary_tables import read_dictionary, fill_dictionary_tables
 
 street_map_type: Dict[int, List[dict]]
 
 failed_dirs = OrderedDict()
 
-CONTENT_ENCODING = "cp1252"
+# CBS Hebrew files are encoded in Windows-1255.
+CONTENT_ENCODING = "cp1255"
 ACCIDENT_TYPE_REGEX = re.compile(r"accidents_type_(?P<type>\d)")
 ACCIDENTS_TYPE_PREFIX = "accidents_type"
 
@@ -65,66 +66,6 @@ cbs_files = {
     VEHICLES: "VehData.csv",
 }
 
-DICTCOLUMN1 = "ms_tavla"
-DICTCOLUMN2 = "kod"
-DICTCOLUMN3 = "teur"
-
-TABLES_DICT = {
-    0: "columns_description",
-    2: "road_type",
-    3: "entrance_exit",
-    4: "accident_severity",
-    5: "accident_type",
-    6: "road_alignment",
-    7: "infrastructure_type",
-    8: "road_geometry",
-    10: "one_lane",
-    11: "multi_lane",
-    12: "speed_limit",
-    13: "road_intactness",
-    14: "road_width",
-    16: "road_light",
-    17: "road_control",
-    18: "weather",
-    19: "road_surface",
-    20: "vehicle_purpose",
-    21: "road_object",
-    22: "object_distance",
-    23: "didnt_cross",
-    24: "cross_mode",
-    25: "cross_location",
-    26: "cross_direction",
-    28: "driving_directions",
-    29: "vehicle_damage",
-    31: "involved_type",
-    33: "safety_measures_use", #need to verify if exists in new format
-    34: "safety_measures",
-    35: "injury_severity",
-    37: "day_type",
-    38: "day_night",
-    39: "day_in_week",
-    40: "traffic_light",
-    42: "engine_volume",
-    43: "vehicle_attribution",
-    44: "total_weight",
-    45: "vehicle_type",
-    46: "late_deceased",
-    47: "location_accuracy",
-    48: "vehicle_type",
-    50: "injured_type",
-    52: "injured_position",
-    60: "accident_month",
-    66: "population_type",
-    67: "sex",
-    68: "geo_area",
-    77: "region",
-    78: "municipal_status",
-    79: "district",
-    80: "natural_area",
-    81: "yishuv_shape",
-    92: "age_group",
-    93: "accident_hour_raw"
-}
 
 new_to_old_accident_columns = {
     "TeunaID_FKT": "pk_teuna_fikt",
@@ -454,7 +395,7 @@ def create_marker(provider_code, accident, streets, roads, non_urban_intersectio
         "provider_code": provider_code,
         "file_type_police": file_type_police,
         "title": "Accident",
-        "description": json.dumps(load_extra_data(accident, streets, roads)),
+        "description": "", #json.dumps(load_extra_data(accident, streets, roads)),
         "address": get_address(accident, streets),
         "latitude": lat,
         "longitude": lng,
@@ -847,102 +788,6 @@ def get_provider_code(directory_name=None):
             return int(ans)
 
 
-def read_dictionary(dictionary_file):
-    cbs_dictionary = defaultdict(dict)
-    dictionary = pd.read_csv(dictionary_file, encoding=CONTENT_ENCODING)
-    for _, dic in dictionary.iterrows():
-        cbs_dictionary[int(dic[DICTCOLUMN1])][int(dic[DICTCOLUMN2])] = dic[DICTCOLUMN3]
-    return cbs_dictionary
-
-
-def fill_dictionary_tables(cbs_dictionary, provider_code, year):
-    if year < 2008:
-        return
-    for k, v in cbs_dictionary.items():
-        if k == 97:
-            continue
-        try:
-            curr_table = TABLES_DICT[k]
-        except Exception as _:
-            logging.debug(
-                "A key " + str(k) + " was added to dictionary - update models, tables and classes"
-            )
-            continue
-        for inner_k, inner_v in v.items():
-            if inner_v is None or (isinstance(inner_v, float) and math.isnan(inner_v)):
-                continue
-            sql_delete = (
-                    "DELETE FROM "
-                    + curr_table
-                    + " WHERE provider_code="
-                    + str(provider_code)
-                    + " AND year="
-                    + str(year)
-                    + " AND id="
-                    + str(inner_k)
-            )
-            db.session.execute(sql_delete)
-            sql_insert = (
-                    "INSERT INTO "
-                    + curr_table
-                    + " VALUES ("
-                    + str(inner_k)
-                    + ","
-                    + str(year)
-                    + ","
-                    + str(provider_code)
-                    + ","
-                    + "'"
-                    + inner_v.replace("'", "")
-                    + "'"
-                    + ")"
-                    + " ON CONFLICT DO NOTHING"
-            )
-            db.session.execute(sql_insert)
-    try:
-        db.session.commit()
-    except Exception as e:
-        logging.error(f"Error updating Dictionary tables: {e}")
-        db.session.rollback()
-    logging.debug("Inserted/Updated dictionary values into table " + curr_table)
-    create_provider_code_table()
-
-
-def truncate_dictionary_tables(dictionary_file):
-    cbs_dictionary = read_dictionary(dictionary_file)
-    for k, _ in cbs_dictionary.items():
-        if k == 97:
-            continue
-        curr_table = TABLES_DICT[k]
-        sql_truncate = "TRUNCATE TABLE " + curr_table
-        db.session.execute(sql_truncate)
-        db.session.commit()
-        logging.debug("Truncated table " + curr_table)
-
-
-def create_provider_code_table():
-    provider_code_table = "provider_code"
-    provider_code_class = ProviderCode
-    table_entries = db.session.query(provider_code_class)
-    table_entries.delete()
-    provider_code_dict = {
-        1: "הלשכה המרכזית לסטטיסטיקה - סוג תיק 1",
-        2: "איחוד הצלה",
-        3: "הלשכה המרכזית לסטטיסטיקה - סוג תיק 3",
-        4: "שומרי הדרך",
-    }
-    for k, v in provider_code_dict.items():
-        sql_insert = (
-                "INSERT INTO " + provider_code_table + " VALUES (" + str(k) + "," + "'" + v + "'" + ")"
-        )
-        db.session.execute(sql_insert)
-    try:
-        db.session.commit()
-    except Exception as e:
-        logging.error(f"Error updating table {provider_code_table}: {e}")
-        db.session.rollback()
-
-
 def receive_rollback(conn, **kwargs):
     """listen for the 'rollback' event"""
     logging.debug(f"rollback in create_tables(). conn:{conn},kw:{kwargs}")
@@ -981,26 +826,6 @@ def create_tables():
     except Exception as e:
         logging.exception(f"Exception while creating hebrew tables, {e}", e)
         raise e
-
-
-def update_dictionary_tables(path):
-    import_ui = ImporterUI(path)
-    dir_name = import_ui.source_path()
-    dir_list = glob.glob("{0}/*/*".format(dir_name))
-
-    for directory in sorted(dir_list, reverse=True):
-        directory_name = os.path.basename(os.path.normpath(directory))
-        year = directory_name[1:5] if directory_name[0] == "H" else directory_name[0:4]
-        if int(year) < 2008:
-            continue
-        parent_directory = os.path.basename(os.path.dirname(os.path.join(os.pardir, directory)))
-        provider_code = get_provider_code(parent_directory)
-        logging.debug("Importing Directory " + directory)
-        files_from_cbs = dict(get_files(directory))
-        if len(files_from_cbs) == 0:
-            return 0
-        logging.debug("Filling dictionary for directory '{}'".format(directory))
-        fill_dictionary_tables(files_from_cbs[DICTIONARY], provider_code, int(year))
 
 
 def get_file_type_and_year(file_path):

@@ -424,7 +424,7 @@ def update_dictionary_tables():
 @update_dictionary_tables.command()
 @click.option("--path", type=str, default="static/data/cbs")
 def update_cbs(path):
-    from anyway.parsers.cbs.executor import update_dictionary_tables
+    from anyway.parsers.cbs.dictionary_tables import update_dictionary_tables
 
     return update_dictionary_tables(path)
 
@@ -437,7 +437,7 @@ def truncate_dictionary_tables():
 @truncate_dictionary_tables.command()
 @click.option("--path", type=str)
 def truncate_cbs(path):
-    from anyway.parsers.cbs.executor import truncate_dictionary_tables
+    from anyway.parsers.cbs.dictionary_tables import truncate_dictionary_tables
 
     return truncate_dictionary_tables(path)
 

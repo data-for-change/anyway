@@ -1137,6 +1137,8 @@ class City(CityFields, Base):
 
     @staticmethod
     def get_name_from_symbol_or_none(symbol: int, lang: str = 'he') -> Optional[str]:
+        if not symbol:
+            return None
         try:
             return City.get_name_from_symbol(symbol, lang)
         except ValueError:

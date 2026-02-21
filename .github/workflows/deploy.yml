@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - master
-      - dev
+      - new-cbs-format
 env:
   DOCKER_REPOSITORY_ANYWAY: "${{ github.repository }}/anyway"
   DOCKER_REPOSITORY_DB: "${{ github.repository }}/db"

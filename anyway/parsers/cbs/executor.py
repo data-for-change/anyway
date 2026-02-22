@@ -580,7 +580,7 @@ def get_files(directory):
     def read_streets(df):
         fields = field_names.streets_dict
         streets_map = {}
-        groups = df.groupby(field_names.settlement.upper())
+        groups = df.groupby(field_names.settlement())
         for key, settlement in groups:
             streets_map[key] = [
                 {
@@ -934,3 +934,4 @@ def main(batch_size, source, load_start_year=None):
         print("Traceback: {0}".format(traceback.format_exc()))
         raise CBSParsingFailed(message=str(ex))
         # Todo - send an email that an exception occured
+

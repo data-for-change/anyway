@@ -88,7 +88,7 @@ jobs:
         DFC_IAC_DEPLOY_KEY: ${{ secrets.DFC_IAC_DEPLOY_KEY }}
         ANYWAY_ETL_DEPLOY_KEY: ${{ secrets.ANYWAY_ETL_DEPLOY_KEY }}
       run: |
-        if [ "${GITHUB_REF}" == "refs/heads/master" ] || [ "${GITHUB_REF}" == "refs/heads/dev" ]; then
+        if [ "${GITHUB_REF}" == "refs/heads/master" ] || [ "${GITHUB_REF}" == "refs/heads/new-cbs-format" ]; then
           SHA_TAG=sha-`git rev-parse --short $GITHUB_SHA` &&\
           echo SHA_TAG=$SHA_TAG &&\
           ANYWAY_IMAGE="${DOCKER_REPOSITORY_ANYWAY}:${SHA_TAG}" &&\

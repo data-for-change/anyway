@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - master
-      - dev
+      - new-cbs-format
 env:
   DOCKER_REPOSITORY_ANYWAY: "${{ github.repository }}/anyway"
   DOCKER_REPOSITORY_DB: "${{ github.repository }}/db"
@@ -102,7 +102,7 @@ jobs:
           if ! git log -1 --pretty=format:"%s" | grep -- --no-deploy; then
             git config --global user.name "Anyway CI" &&\
             git config --global user.email "anyway-ci@localhost" &&\
-            if [ "${GITHUB_REF}" == "refs/heads/master" ] || [ "${GITHUB_REF}" == "refs/heads/dev" ]; then
+            if [ "${GITHUB_REF}" == "refs/heads/master" ] || [ "${GITHUB_REF}" == "refs/heads/new-cbs-format" ]; then
               cd `mktemp -d` &&\
               echo "${DFC_IAC_DEPLOY_KEY}" > dfc_iac_deploy_key &&\
               chmod 400 dfc_iac_deploy_key &&\

@@ -41,13 +41,14 @@ class InvolvedQuery:
     - The second element is the long representation, named 'vehicle_type_hebrew'"""
     VehicleTypeHebrew = namedtuple("VehicleTypeHebrew", ["short", "full"])
     # to support group by vcl (vehicle_vehicle_type)
-    vehicle_type_to_str: List[VehicleTypeHebrew] = [None for _ in range(1, 40)]
+    MAX_VEHICLE_TYPE = 37
+    vehicle_type_to_str: List[VehicleTypeHebrew] = [None] * (MAX_VEHICLE_TYPE + 1)
     vehicle_type_to_str[0] = VehicleTypeHebrew(None, PEDESTRIAN_HEBREW)
     vehicle_type_to_str[1] = VehicleTypeHebrew("רכב נוסעים פרטי", "רכב נוסעים פרטי")
     vehicle_type_to_str[2] = VehicleTypeHebrew("טרנזיט", "משא עד 3.5 טון - אחוד (טרנזיט)")
     vehicle_type_to_str[3] = VehicleTypeHebrew("טנדר", "משא עד 3.5 טון - לא אחוד (טנדר)")
-    vehicle_type_to_str[4] = VehicleTypeHebrew("משאית", "משא 3.6 טון עד 9.9 טון")
-    vehicle_type_to_str[5] = VehicleTypeHebrew("משאית", "משא 12.1 טון עד 15.9 טון")
+    vehicle_type_to_str[4] = VehicleTypeHebrew("משאית", "משא 3.6 עד 9.9 טון")
+    vehicle_type_to_str[5] = VehicleTypeHebrew("משאית", "משא 12.1 עד 15.9 טון")
     vehicle_type_to_str[6] = VehicleTypeHebrew("משאית", "משא 16.0 עד 33.9 טון")
     vehicle_type_to_str[7] = VehicleTypeHebrew("משאית", "משא 34.0+ טון")
     vehicle_type_to_str[8] = VehicleTypeHebrew("אופנוע", 'אופנוע עד 50 סמ"ק')
@@ -74,14 +75,18 @@ class InvolvedQuery:
     vehicle_type_to_str[29] = VehicleTypeHebrew(None, None)
     vehicle_type_to_str[30] = VehicleTypeHebrew("סגווי", "סגווי")
     vehicle_type_to_str[31] = VehicleTypeHebrew("גרור/נתמך", "גרור/נתמך")
-    vehicle_type_to_str[32] = VehicleTypeHebrew("אופניים חשמליים", "אופניים חשמליים")
-    vehicle_type_to_str[33] = VehicleTypeHebrew("קורקינט לא חשמלי", "קורקינט לא חשמלי")
-    vehicle_type_to_str[34] = VehicleTypeHebrew("טרקטורון", "טרקטורון")
-    vehicle_type_to_str[35] = VehicleTypeHebrew("קורקינט חשמלי", "קורקינט חשמלי")
-    vehicle_type_to_str[36] = VehicleTypeHebrew("קלנועית", "קלנועית")
-    vehicle_type_to_str[37] = VehicleTypeHebrew("אופניים חשמליים", "אופניים חשמליים")
-    vehicle_type_to_str[38] = VehicleTypeHebrew("משאית", "משא 10.0 עד 12.0 טון")
+    vehicle_type_to_str[32] = VehicleTypeHebrew("קורקינט לא חשמלי", "קורקינט לא חשמלי")
+    vehicle_type_to_str[33] = VehicleTypeHebrew("טרקטורון", "טרקטורון")
+    vehicle_type_to_str[34] = VehicleTypeHebrew("קורקינט חשמלי", "קורקינט חשמלי")
+    vehicle_type_to_str[35] = VehicleTypeHebrew("קלנועית", "קלנועית")
+    vehicle_type_to_str[36] = VehicleTypeHebrew("אופניים חשמליים", "אופניים חשמליים")
+    vehicle_type_to_str[37] = VehicleTypeHebrew("משאית", "משא 10.0 עד 12.0 טון")
     
+    vehicle_types_for_bit_map = [
+        index
+        for index, vehicle_type in enumerate(vehicle_type_to_str)
+        if vehicle_type.short is not None and vehicle_type.full is not None
+    ]
     PAGE_NUMBER_DEFAULT = 0
     PAGE_SIZE_DEFAULT = 8192
 
@@ -331,32 +336,7 @@ class InvolvedQuery:
             return ""
         res = [
             InvolvedQuery.vehicle_type_to_str[vehicle_type][0]
-            for vehicle_type in [
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15,
-                16,
-                17,
-                18,
-                19,
-                21,
-                22,
-                23,
-                24,
-                25,
-            ]
+            for vehicle_type in InvolvedQuery.vehicle_types_for_bit_map
             if bit_map & (1 << vehicle_type) != 0
         ]
         return ", ".join(res)
@@ -390,12 +370,18 @@ class InvolvedQuery:
             "הולך רגל",
             "נהג - רכב בעל 4 גלגלים ויותר",
             "נוסע - רכב בעל 4 גלגלים ויותר",
-            "נהג - אופנוע",
-            "נוסע - אופנוע (לא נהג)",
-            "נהג - אופניים",
-            "נוסע - אופניים (לא נהג)",
-            "נהג - רכב לא ידוע",
-            "נוסע - רכב לא ידוע",
+            "נהג אופנוע",
+            "נוסע אופנוע",
+            "נהג אופניים",
+            "נוסע אופניים",
+            "נהג רכב אחר ולא ידוע",
+            "נוסע רכב אחר ולא ידוע",
+            "נהג אופניים חשמליים",
+            "נוסע אופניים חשמליים ",
+            "נהג קורקינט חשמלי",
+            "נוסע קורקינט חשמלי",
+            "נהג קלנועית",
+            "נוסע קלנועית"
         ]
         self.population_type = ["0", "יהודים", "ערבים", "אחרים", "זרים"]
         self.day_in_week = ["0", "ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"]
@@ -406,7 +392,7 @@ class ParamFilterExp:
         1: {"val": sum([1 << x for x in [1]]), "name": "מכונית"},
         2: {"val": sum([1 << x for x in [2]]), "name": "טרנזיט"},
         3: {"val": sum([1 << x for x in [3]]), "name": "טנדר"},
-        5: {"val": sum([1 << x for x in [4, 5, 6, 7, 24, 25]]), "name": "משאית"},
+        5: {"val": sum([1 << x for x in [4, 5, 6, 7, 37]]), "name": "משאית"},
         8: {"val": sum([1 << x for x in [8, 9, 10, 19]]), "name": "אופנוע"},
         11: {"val": sum([1 << x for x in [11, 18]]), "name": "אוטובוס"},
         12: {"val": sum([1 << x for x in [12]]), "name": "מונית"},
@@ -415,9 +401,13 @@ class ParamFilterExp:
         15: {"val": sum([1 << x for x in [15]]), "name": "אופניים"},
         16: {"val": sum([1 << x for x in [16]]), "name": "רכבת"},
         17: {"val": sum([1 << x for x in [17]]), "name": "אחר"},
-        21: {"val": sum([1 << x for x in [21]]), "name": "קורקינט חשמלי"},
-        22: {"val": sum([1 << x for x in [22]]), "name": "קלנועית"},
-        23: {"val": sum([1 << x for x in [23]]), "name": "אופניים חשמליים"},
+        30: {"val": sum([1 << x for x in [30]]), "name": "סגווי"},
+        31: {"val": sum([1 << x for x in [31]]), "name": "גרור/נתמך"},
+        32: {"val": sum([1 << x for x in [32]]), "name": "קורקינט לא חשמלי"},
+        33: {"val": sum([1 << x for x in [33]]), "name": "טרקטורון"},
+        34: {"val": sum([1 << x for x in [34]]), "name": "קורקינט חשמלי"},
+        35: {"val": sum([1 << x for x in [35]]), "name": "קלנועית"},
+        36: {"val": sum([1 << x for x in [36]]), "name": "אופניים חשמליים"},
     }
 
     PFE = {

@@ -3143,7 +3143,7 @@ class SDAccident(Base):
     speed_limit = Column(Integer(), nullable=True)
     street1 = Column(Integer(), nullable=True)
     street2 = Column(Integer(), nullable=True)
-    vehicles = Column(Integer(), nullable=True)
+    vehicles = Column(BigInteger(), nullable=True)
     latitude = Column(Float(), nullable=True)
     longitude = Column(Float(), nullable=True)
 

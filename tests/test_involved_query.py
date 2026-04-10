@@ -57,7 +57,11 @@ class TestInvolvedQuery(unittest.TestCase):
         self.assertEqual("200 OK", actual.status, "3")
         self.maxDiff = None
         res = actual.json["data"][0]
+        self.assertEqual(2551, res["street1"])
+        self.assertIsNone(res["street2"])
         res.pop("street1_hebrew")
+        res.pop("street1")
+        res.pop("street2")
         self.assertEqual(self.involved_result, res, "4")
 
         actual = test_client.get("/involved/groupby?sy=2014&ey=2014&gb=year&gb2=lca&city=5000,1&sort=d")

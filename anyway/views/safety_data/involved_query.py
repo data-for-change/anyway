@@ -81,7 +81,7 @@ class InvolvedQuery:
     vehicle_type_to_str[35] = VehicleTypeHebrew("קלנועית", "קלנועית")
     vehicle_type_to_str[36] = VehicleTypeHebrew("אופניים חשמליים", "אופניים חשמליים")
     vehicle_type_to_str[37] = VehicleTypeHebrew("משאית", "משא 10.0 עד 12.0 טון")
-    
+
     vehicle_types_for_bit_map = [
         index
         for index, vehicle_type in enumerate(vehicle_type_to_str)
@@ -130,6 +130,8 @@ class InvolvedQuery:
                 OneLane.one_lane_hebrew,
                 SDAccident.road1.label("road1"),
                 SDAccident.road2.label("road2"),
+                SDAccident.street1.label("street1"),
+                SDAccident.street2.label("street2"),
                 (RoadSegments.from_name + " - " + RoadSegments.to_name).label("road_segment_name"),
                 RoadType.road_type_hebrew,
                 RoadWidth.road_width_hebrew,
@@ -313,7 +315,7 @@ class InvolvedQuery:
         for k in ["latitude", "longitude"]:
             v = d[k]
             d[k] = f"{v:.13f}" if not math.isnan(v) else ""
-        for k in ["TEST-vehicle_type", "road1", "road2"]:
+        for k in ["TEST-vehicle_type", "road1", "road2", "street1", "street2"]:
             d[k] = nan_to_none(d[k])
 
     def get_injured_type_enriched_hebrew(

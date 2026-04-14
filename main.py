@@ -94,10 +94,11 @@ def process():
 @click.option("--batch_size", type=int, default=5000)
 @click.option("--load_start_year", type=str, default=None)
 @click.option("--source", type=str, default="s3")
-def cbs(batch_size, load_start_year, source):
+@click.option("--allow_missing", is_flag=True, default=False)
+def cbs(batch_size, load_start_year, source, allow_missing):
     from anyway.parsers.cbs.executor import main
 
-    return main(batch_size=batch_size, load_start_year=load_start_year, source=source)
+    return main(batch_size=batch_size, load_start_year=load_start_year, source=source, allow_missing=allow_missing)
 
 
 @process.command()

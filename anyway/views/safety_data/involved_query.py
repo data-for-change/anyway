@@ -41,7 +41,7 @@ class InvolvedQuery:
     - The second element is the long representation, named 'vehicle_type_hebrew'"""
     VehicleTypeHebrew = namedtuple("VehicleTypeHebrew", ["short", "full"])
     # to support group by vcl (vehicle_vehicle_type)
-    MAX_VEHICLE_TYPE = 37
+    MAX_VEHICLE_TYPE = 38
     vehicle_type_to_str: List[VehicleTypeHebrew] = [None] * (MAX_VEHICLE_TYPE + 1)
     vehicle_type_to_str[0] = VehicleTypeHebrew(None, PEDESTRIAN_HEBREW)
     vehicle_type_to_str[1] = VehicleTypeHebrew("רכב נוסעים פרטי", "רכב נוסעים פרטי")
@@ -81,6 +81,7 @@ class InvolvedQuery:
     vehicle_type_to_str[35] = VehicleTypeHebrew("קלנועית", "קלנועית")
     vehicle_type_to_str[36] = VehicleTypeHebrew("אופניים חשמליים", "אופניים חשמליים")
     vehicle_type_to_str[37] = VehicleTypeHebrew("משאית", "משא 10.0 עד 12.0 טון")
+    vehicle_type_to_str[38] = VehicleTypeHebrew("אופנוע חשמלי", "אופנוע חשמלי")
 
     vehicle_types_for_bit_map = [
         index

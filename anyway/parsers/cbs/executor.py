@@ -858,7 +858,7 @@ def recreate_table_for_location_extraction():
     db.session.commit()
 
 
-def main(batch_size, source, load_start_year=None):
+def main(batch_size, source, load_start_year=None, allow_missing=False):
     try:
         total = 0
         started = datetime.now()
@@ -883,6 +883,10 @@ def main(batch_size, source, load_start_year=None):
                         ACCIDENTS_TYPE_PREFIX + "_" + str(provider_code),
                         str(year),
                     )
+
+                    if allow_missing and not os.path.exists(cbs_files_dir):
+                        continue
+                    
                     logging.debug("Importing Directory " + cbs_files_dir)
                     preprocessing_cbs_files.update_cbs_files_names(cbs_files_dir)
                     num_new = import_to_datastore(

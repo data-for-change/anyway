@@ -1,6 +1,7 @@
 import requests
 import json
 from typing import Iterable, Dict, Any, List
+from urllib.parse import quote
 from anyway.models import City
 from anyway.app_and_db import db
 import logging
@@ -30,7 +31,21 @@ NAPA = "Regional_Council_code"
 CHUNK_SIZE = 1000
 POP_CITY_CODE = "סמל_ישוב"
 POP_CITY_POP = "סהכ"
-OVERPASS_OSP_API_URL = "https://overpass-api.de/api/interpreter?data=%5Bout%3Ajson%5D%5Btimeout%3A100%5D%3B%0Aarea%28id%3A3601473946%29-%3E.searchArea%3B%0A%0A%2F%2F%20Fetch%20all%20relevant%20places%0A%28%0A%20%20node%5B%22place%22~%22village%7Ctown%7Ccity%7CRegional%20Council%7CLocal%20Council%22%5D%28area.searchArea%29%3B%0A%29%3B%0A%0A%2F%2F%20Output%20the%20results%20with%20specified%20fields%0Aout%20body%3B%0A%3E%3B%0Aout%20skel%20qt%3B%0A"
+OVERPASS_API_URL = "https://overpass-api.de/api/interpreter"
+OVERPASS_AREA_ID = 3601473946
+OVERPASS_PLACE_TYPES = ("village", "town", "city")
+OVERPASS_QUERY_TEMPLATE = """
+[out:json][timeout:100];
+area(id:{area_id})->.searchArea;
+
+(
+    node["place"="{place_type}"](area.searchArea);
+);
+
+out body;
+>;
+out skel qt;
+""".strip()
 CBS_OSM_FIELD_NAME_MAPPING = {
     "heb_name": ["name:he", "alt_name:he", "name:he1", "name:he2"],
     "eng_name": [
@@ -112,41 +127,85 @@ class UpdateCitiesFromDataGov:
         logging.debug(f"read {len(records)} records from {url}.")
         return res
 
-    def add_osm_data(self, heb_name_dict: Dict[str, Any], eng_name_dict: Dict[str, Any]) -> None:
+    def fetch_osm_data(self) -> List[Dict[str, Any]]:
         max_retries = 10
-        for attempt in range(max_retries):
-            try:
-                r = self.s.get(OVERPASS_OSP_API_URL)
-                if not r.ok:
-                    raise Exception(f"Could not get OSM data. reason:{r.reason}:{r.status_code}.")
-                break
-            except Exception as e:
-                if attempt == max_retries - 1:
-                    raise
-                logging.warning(f"Attempt {attempt + 1} failed: {e}. Retrying...")
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "User-Agent": "anyway-cities-parser/1.0 (+https://github.com/hasadna/anyway)",
+        }
+        all_records = []
+        for place_type in OVERPASS_PLACE_TYPES:
+            query = OVERPASS_QUERY_TEMPLATE.format(area_id=OVERPASS_AREA_ID, place_type=place_type)
+            encoded_query = quote(query, safe="")
+            payload = f"data={encoded_query}"
 
-        r.encoding = "utf-8"
-        data = json.loads(r.text)
-        records = data["elements"]
+            for attempt in range(max_retries):
+                try:
+                    response = self.s.post(
+                        OVERPASS_API_URL,
+                        data=payload,
+                        headers=headers,
+                        timeout=120,
+                    )
+                    if not response.ok:
+                        raise Exception(
+                            f"Could not get OSM data for {place_type}. "
+                            f"reason:{response.reason}:{response.status_code}. "
+                            f"body:{response.text[:500]}"
+                        )
+                    break
+                except Exception as e:
+                    if attempt == max_retries - 1:
+                        raise
+                    logging.warning(
+                        f"Attempt {attempt + 1} failed for {place_type}: {e}. Retrying..."
+                    )
+
+            response.encoding = "utf-8"
+            data = json.loads(response.text)
+            records = data["elements"]
+            all_records.extend(records)
+            logging.debug(f"read {len(records)} OSM records for place_type={place_type}.")
+
+        return all_records
+
+    def process_osm_data(
+        self, records: List[Dict[str, Any]], heb_name_dict: Dict[str, Any], eng_name_dict: Dict[str, Any]
+    ) -> None:
         self.len_cities_osm = len(records)
-        for r in records:
+        for record in records:
+            tags = record.get("tags", {})
             found = list(
                 filter(
-                    lambda x: x, [heb_name_dict.get(prep_for_comp(x)) for x in r["tags"].values()]
+                    lambda x: x,
+                    [
+                        heb_name_dict.get(prep_for_comp(x))
+                        for x in tags.values()
+                        if isinstance(x, str)
+                    ],
                 )
             ) or list(
                 filter(
-                    lambda x: x, [eng_name_dict.get(prep_for_comp(x)) for x in r["tags"].values()]
+                    lambda x: x,
+                    [
+                        eng_name_dict.get(prep_for_comp(x))
+                        for x in tags.values()
+                        if isinstance(x, str)
+                    ],
                 )
             )
             cbs_record = found[0] if found else None
             if cbs_record is not None:
-                cbs_record["id_osm"] = r["id"]
-                cbs_record["lat"] = r["lat"]
-                cbs_record["lon"] = r["lon"]
+                cbs_record["id_osm"] = record.get("id")
+                cbs_record["lat"] = record.get("lat")
+                cbs_record["lon"] = record.get("lon")
             else:
                 self.num_osm_mismatch += 1
-                logging.debug(f"Not found CBS record for OSM: {r['id']},{r['tags']}")
+                logging.debug(f"Not found CBS record for OSM: {record.get('id')},{tags}")
+
+    def add_osm_data(self, heb_name_dict: Dict[str, Any], eng_name_dict: Dict[str, Any]) -> None:
+        records = self.fetch_osm_data()
+        self.process_osm_data(records, heb_name_dict, eng_name_dict)
 
 
 def parse(chunk_size=CHUNK_SIZE):

@@ -9,7 +9,6 @@ except ImportError:
 
 
 class BackEndConstants(object):
-
     MARKER_TYPE_ACCIDENT = 1
     MARKER_TYPE_DISCUSSION = 2
 
@@ -155,6 +154,7 @@ class InjurySeverity(LabeledCode):
             InjurySeverity.LIGHT_INJURED: "light injured",
         }
 
+
 try:
     _("killed")
     _("severe injured")
@@ -177,6 +177,7 @@ class InjurySeverityExpanded(LabeledCode):
             InjurySeverityExpanded.LIGHT_INJURED: "light injured",
             InjurySeverityExpanded.NOT_INJURED: "not injured",
         }
+
 
 try:
     _("killed")

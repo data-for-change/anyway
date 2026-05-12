@@ -5,7 +5,7 @@ from anyway.parsers.cities import UpdateCitiesFromDataGov
 
 class TestUpdateCitiesFromDataGov(unittest.TestCase):
 
-    @patch('anyway.parsers.cities.requests.Session.get')
+    @patch('anyway.parsers.cities.requests.Session.post')
     def test_add_osm_data(self, mock_get):
         mock_response = Mock()
         mock_response.ok = True

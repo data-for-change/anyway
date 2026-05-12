@@ -9,7 +9,6 @@ except ImportError:
 
 
 class BackEndConstants(object):
-
     MARKER_TYPE_ACCIDENT = 1
     MARKER_TYPE_DISCUSSION = 2
 
@@ -56,6 +55,7 @@ class BackEndConstants(object):
         "https://media.anyway.co.il",
         "https://dev.anyway.co.il",
         "https://safety-data.anyway.co.il",
+        "https://safety-data.dfc2.anyway.co.il",
     ]
 
     ANYWAY_CORS_SITE_LIST_DEV = ANYWAY_CORS_SITE_LIST_PROD + [
@@ -154,6 +154,7 @@ class InjurySeverity(LabeledCode):
             InjurySeverity.LIGHT_INJURED: "light injured",
         }
 
+
 try:
     _("killed")
     _("severe injured")
@@ -176,6 +177,7 @@ class InjurySeverityExpanded(LabeledCode):
             InjurySeverityExpanded.LIGHT_INJURED: "light injured",
             InjurySeverityExpanded.NOT_INJURED: "not injured",
         }
+
 
 try:
     _("killed")

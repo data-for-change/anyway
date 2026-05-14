@@ -858,82 +858,97 @@ def recreate_table_for_location_extraction():
     db.session.commit()
 
 
+def _import_from_s3(batch_size, load_start_year, allow_missing):
+    if load_start_year is None:
+        load_start_year = datetime.now().year - 1
+    logging.debug("Importing data from s3...")
+    s3_data_retriever = S3DataRetriever()
+    s3_data_retriever.get_files_from_s3(start_year=load_start_year)
+    delete_cbs_entries(load_start_year, batch_size)
+
+    total = 0
+    for provider_code in [
+        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
+        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+    ]:
+        logging.info(
+            f"Loading min year {s3_data_retriever.min_year} Loading max year {s3_data_retriever.max_year}"
+        )
+        for year in range(s3_data_retriever.min_year, s3_data_retriever.max_year + 1):
+            cbs_files_dir = os.path.join(
+                s3_data_retriever.local_files_directory,
+                ACCIDENTS_TYPE_PREFIX + "_" + str(provider_code),
+                str(year),
+            )
+            if allow_missing and not os.path.exists(cbs_files_dir):
+                continue
+            logging.debug("Importing Directory " + cbs_files_dir)
+            preprocessing_cbs_files.update_cbs_files_names(cbs_files_dir)
+            total += import_to_datastore(cbs_files_dir, provider_code, year, batch_size)
+
+    shutil.rmtree(s3_data_retriever.local_temp_directory)
+    return total
+
+
+def _import_from_local_dir(batch_size):
+    path = "static/data/cbs"
+    import_ui = ImporterUI(path)
+    dir_name = import_ui.source_path()
+    dir_list = glob.glob("{0}/*/*".format(dir_name))
+
+    if import_ui.is_delete_all():
+        truncate_tables(db, (Vehicle, Involved, AccidentMarker))
+
+    total = 0
+    for directory in sorted(dir_list, reverse=False):
+        directory_name = os.path.basename(os.path.normpath(directory))
+        year = directory_name[1:5] if directory_name[0] == "H" else directory_name[0:4]
+        parent_directory = os.path.basename(
+            os.path.dirname(os.path.join(os.pardir, directory))
+        )
+        provider_code = get_provider_code(parent_directory)
+        logging.debug("Importing Directory " + directory)
+        total += import_to_datastore(directory, provider_code, int(year), batch_size)
+    return total
+
+
+def _log_import_summary(total, started):
+    failed = [
+        "\t'{0}' ({1})".format(directory, fail_reason)
+        for directory, fail_reason in failed_dirs.items()
+    ]
+    logging.debug(
+        "Finished processing all directories{0}{1}".format(
+            ", except:\n" if failed else "", "\n".join(failed)
+        )
+    )
+    logging.debug("Total: {0} items in {1}".format(total, time_delta(started)))
+
+
+def _build_hebrew_tables_and_derived_data():
+    fill_db_geo_data()
+    create_tables()
+    logging.debug("Finished Creating Hebrew DB Tables")
+    recreate_table_for_location_extraction()
+    logging.debug("Finished Recreating tables for location extraction")
+    logging.debug("Loading safety data tables")
+    sd_utils.load_data()
+    logging.debug("Completed load of safety data tables")
+
+
 def main(batch_size, source, load_start_year=None, allow_missing=False):
     try:
-        total = 0
         started = datetime.now()
+
         if source == "s3":
-            if load_start_year is None:
-                now = datetime.now()
-                load_start_year = now.year - 1
-            logging.debug("Importing data from s3...")
-            s3_data_retriever = S3DataRetriever()
-            s3_data_retriever.get_files_from_s3(start_year=load_start_year)
-            delete_cbs_entries(load_start_year, batch_size)
-            for provider_code in [
-                BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
-                BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
-            ]:
-                logging.info(
-                    f"Loading min year {s3_data_retriever.min_year} Loading max year {s3_data_retriever.max_year}"
-                )
-                for year in range(s3_data_retriever.min_year, s3_data_retriever.max_year + 1):
-                    cbs_files_dir = os.path.join(
-                        s3_data_retriever.local_files_directory,
-                        ACCIDENTS_TYPE_PREFIX + "_" + str(provider_code),
-                        str(year),
-                    )
-
-                    if allow_missing and not os.path.exists(cbs_files_dir):
-                        continue
-                    
-                    logging.debug("Importing Directory " + cbs_files_dir)
-                    preprocessing_cbs_files.update_cbs_files_names(cbs_files_dir)
-                    num_new = import_to_datastore(
-                        cbs_files_dir, provider_code, year, batch_size
-                    )
-                    total += num_new
-            shutil.rmtree(s3_data_retriever.local_temp_directory)
+            total = _import_from_s3(batch_size, load_start_year, allow_missing)
         elif source == "local_dir_for_tests_only":
-            path = "static/data/cbs"
-            import_ui = ImporterUI(path)
-            dir_name = import_ui.source_path()
-            dir_list = glob.glob("{0}/*/*".format(dir_name))
+            total = _import_from_local_dir(batch_size)
+        else:
+            raise ValueError(f"Unsupported source: {source}")
 
-            # wipe all the AccidentMarker and Vehicle and Involved data first
-            if import_ui.is_delete_all():
-                truncate_tables(db, (Vehicle, Involved, AccidentMarker))
-            for directory in sorted(dir_list, reverse=False):
-                directory_name = os.path.basename(os.path.normpath(directory))
-                year = directory_name[1:5] if directory_name[0] == "H" else directory_name[0:4]
-                parent_directory = os.path.basename(
-                    os.path.dirname(os.path.join(os.pardir, directory))
-                )
-                provider_code = get_provider_code(parent_directory)
-                logging.debug("Importing Directory " + directory)
-                num_new = import_to_datastore(
-                    directory, provider_code, int(year), batch_size
-                )
-                total += num_new
-
-        fill_db_geo_data()
-        failed = [
-            "\t'{0}' ({1})".format(directory, fail_reason)
-            for directory, fail_reason in failed_dirs.items()
-        ]
-        logging.debug(
-            "Finished processing all directories{0}{1}".format(
-                ", except:\n" if failed else "", "\n".join(failed)
-            )
-        )
-        logging.debug("Total: {0} items in {1}".format(total, time_delta(started)))
-        create_tables()
-        logging.debug("Finished Creating Hebrew DB Tables")
-        recreate_table_for_location_extraction()
-        logging.debug("Finished Recreating tables for location extraction")
-        logging.debug("Loading safety data tables")
-        sd_utils.load_data()
-        logging.debug("Completed load of safety data tables")
+        _log_import_summary(total, started)
+        _build_hebrew_tables_and_derived_data()
     except Exception as ex:
         print("Traceback: {0}".format(traceback.format_exc()))
         raise CBSParsingFailed(message=str(ex))

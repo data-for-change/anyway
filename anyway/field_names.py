@@ -1,5 +1,6 @@
 file_type_police = "SUG_TIK_MISHTARA"
 file_type = "SUG_TIK"
+new_file_type = "SemelSugTik"
 settlement = "SemelYeshuv"
 street1 = "REHOV1"
 street2 = "REHOV2"

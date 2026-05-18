@@ -832,7 +832,7 @@ def get_file_type_and_year(file_path):
     df = pd.read_csv(file_path, encoding=CONTENT_ENCODING)
     logging.debug(f"df: {df.columns}")
     provider_code = df.iloc[0][field_names.new_file_type]
-    year = df.loc[:, field_names.accident_year].mode().values[0]
+    year = df.loc[:, field_names.new_accident_year].mode().values[0]
     return int(provider_code), int(year)
 
 def recreate_table_for_location_extraction():

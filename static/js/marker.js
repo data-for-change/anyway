@@ -88,11 +88,9 @@ var MarkerView = Backbone.View.extend({
             this.$el.find(".provider_code").text(fields.PROVIDER_CODE + ": " + this.model.get("provider_code"));
             this.$el.find(".road_type").text(fields.SUG_DEREH + ": " + localization.SUG_DEREH[this.model.get("road_type")]);
             this.$el.find(".accident_type").text(fields.SUG_TEUNA + ": " + localization.SUG_TEUNA[this.model.get("accident_type")]);
-            this.$el.find(".road_shape").text(fields.ZURAT_DEREH + ": " + localization.ZURAT_DEREH[this.model.get("road_shape")]);
             this.$el.find(".accident_severity").text(fields.HUMRAT_TEUNA + ": " + localization.HUMRAT_TEUNA[this.model.get("accident_severity")]);
             this.$el.find(".day_type").text(fields.SUG_YOM + ": " + localization.SUG_YOM[this.model.get("day_type")]);
             this.$el.find(".location_accuracy").text(fields.STATUS_IGUN + ": " + localization.STATUS_IGUN[this.model.get("location_accuracy")]);
-            this.$el.find(".police_unit").text(fields.YEHIDA + ": " + localization.YEHIDA[this.model.get("police_unit")]);
             this.$el.find(".mainStreet").text(this.model.get("mainStreet"));
             this.$el.find(".secondaryStreet").text(this.model.get("secondaryStreet"));
             this.$el.find(".junction").text(this.model.get("junction"));
@@ -102,7 +100,6 @@ var MarkerView = Backbone.View.extend({
             this.localize("MEHIRUT_MUTERET", "speed_limit");
             this.localize("TKINUT", "road_intactness");
             this.localize("ROHAV", "road_width");
-            this.localize("SIMUN_TIMRUR", "road_sign");
             this.localize("TEURA", "road_light");
             this.localize("BAKARA", "road_control");
             this.localize("MEZEG_AVIR", "weather");
@@ -272,7 +269,6 @@ var MarkerView = Backbone.View.extend({
                         that.localize_data(data, "NEFAH", "engine_volume", "nums", "vehicles");
                         that.localize_data(data, "SHNAT_YITZUR", "manufacturing_year", "nums", "vehicles");
                         that.localize_data(data, "KIVUNE_NESIA", "driving_directions", "nums", "vehicles");
-                        that.localize_data(data, "MATZAV_REHEV", "vehicle_status", "vehs", "vehicles");
                         that.localize_data(data, "SHIYUH_REHEV_LMS", "vehicle_attribution", "vehs", "vehicles");
                         that.localize_data(data, "MEKOMOT_YESHIVA_LMS", "seats", "nums", "vehicles");
                         that.localize_data(data, "MISHKAL_KOLEL_LMS", "total_weight", "nums", "vehicles");

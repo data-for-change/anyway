@@ -392,6 +392,14 @@ components:
         road2:
           type: integer
           example: 2
+        street1:
+          type: integer
+          nullable: true
+          example: 2551
+        street2:
+          type: integer
+          nullable: true
+          example: 2552
         road_segment_name:
           type: string
           example: מחלף דרוריום - צמת קדימה

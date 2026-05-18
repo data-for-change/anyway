@@ -157,7 +157,7 @@ def set_vehicles_in_sd_acc_table(sess: Session):
              (SELECT DISTINCT vehicles.accident_id,
                               vehicles.provider_code,
                               vehicles.accident_year,
-                              1 << vehicle_type AS vt_power2
+                              1::bigint << vehicle_type AS vt_power2
               FROM vehicles
               LEFT JOIN vehicle_type ON vehicles.vehicle_type = vehicle_type.id
               AND vehicles.accident_year = vehicle_type.year

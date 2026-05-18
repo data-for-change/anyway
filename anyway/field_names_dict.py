@@ -30,14 +30,11 @@ field_names_dict = {
     "house_number": "BAYIT",
     "road_type": "SUG_DEREH",  # part of the desciption
     "day_type": "SUG_YOM",  # part of the desciption
-    "road_shape": "ZURAT_DEREH",  # part of the desciption
-    "police_unit": "YEHIDA",  # part of the desciption
     "one_lane": "HAD_MASLUL",
     "multi_lane": "RAV_MASLUL",
     "speed_limit": "MEHIRUT_MUTERET",
     "road_intactness": "TKINUT",
     "road_width": "ROHAV",
-    "road_sign": "SIMUN_TIMRUR",
     "road_light": "TEURA",
     "road_control": "BAKARA",
     "weather": "MEZEG_AVIR",
@@ -88,7 +85,6 @@ field_names_dict = {
     "engine_volume": "NEFAH",
     "manufacturing_year": "SHNAT_YITZUR",
     "driving_directions": "KIVUNE_NESIA",
-    "vehicle_status": "MATZAV_REHEV",
     "vehicle_attribution": "SHIYUH_REHEV_LMS",
     "vehicle_type_vehicles": "SUG_REHEV_LMS",
     "seats": "MEKOMOT_YESHIVA_LMS",

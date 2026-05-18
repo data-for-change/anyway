@@ -310,7 +310,6 @@ class NewsFlashApiTestCase(unittest.TestCase):
         fil = and_(a1, or_(a2, o))
         query = query.filter(fil)
         a = and_(True, True)
-        a = and_(a, AccidentMarker.road_shape == 3)
         query = query.filter(a)
         res = query.first()
         print(type(res))

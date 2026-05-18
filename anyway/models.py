@@ -305,9 +305,7 @@ class AccidentMarker(MarkerMixin, Base):
     address = Column(Text())
     location_accuracy = Column(Integer())
     road_type = Column(Integer())
-    road_shape = Column(Integer())
     day_type = Column(Integer())
-    police_unit = Column(Integer())
     mainStreet = Column(Text())
     secondaryStreet = Column(Text())
     junction = Column(Text())
@@ -316,17 +314,12 @@ class AccidentMarker(MarkerMixin, Base):
     speed_limit = Column(Integer())
     road_intactness = Column(Integer())
     road_width = Column(Integer())
-    road_sign = Column(Integer())
     road_light = Column(Integer())
     road_control = Column(Integer())
     weather = Column(Integer())
     road_surface = Column(Integer())
     road_object = Column(Integer())
     object_distance = Column(Integer())
-    didnt_cross = Column(Integer())
-    cross_mode = Column(Integer())
-    cross_location = Column(Integer())
-    cross_direction = Column(Integer())
     involved = relationship("Involved")
     vehicles = relationship("Vehicle")
     video_link = Column(Text())
@@ -337,6 +330,8 @@ class AccidentMarker(MarkerMixin, Base):
     km_accurate = Column(Boolean())
     yishuv_symbol = Column(Integer())
     yishuv_name = Column(Text())
+    yishuv2_symbol = Column(Integer())
+    yishuv2_name = Column(Text())
     geo_area = Column(Integer())
     day_night = Column(Integer())
     day_in_week = Column(Integer())
@@ -351,9 +346,8 @@ class AccidentMarker(MarkerMixin, Base):
     street2 = Column(Integer())
     street2_hebrew = Column(Text())
     house_number = Column(Integer())
-    urban_intersection = Column(Integer())
-    non_urban_intersection = Column(Integer())
-    non_urban_intersection_hebrew = Column(Text())
+    intersection = Column(Integer())
+    intersection_hebrew = Column(Text())
     accident_year = Column(Integer(), primary_key=True)
     accident_month = Column(Integer())
     accident_day = Column(Integer())
@@ -365,9 +359,12 @@ class AccidentMarker(MarkerMixin, Base):
     vehicle_type_rsa = Column(Text())
     violation_type_rsa = Column(Text())
     geom = Column(Geometry("POINT"))
-    non_urban_intersection_by_junction_number = Column(Text())
     rsa_severity = Column(Integer())
     rsa_license_plate = Column(Text())
+    entrance_exit = Column(Integer())
+    road_alignment = Column(Integer())
+    road_geometry = Column(Integer())
+    infrastructure_type = Column(Integer())
 
     @staticmethod
     def get_latest_marker_created_date():
@@ -415,9 +412,7 @@ class AccidentMarker(MarkerMixin, Base):
                     "type": self.type,
                     "accident_type": self.accident_type,
                     "road_type": self.road_type,
-                    "road_shape": self.road_shape,
                     "day_type": self.day_type,
-                    "police_unit": self.police_unit,
                     "mainStreet": self.mainStreet,
                     "secondaryStreet": self.secondaryStreet,
                     "junction": self.junction,
@@ -435,17 +430,12 @@ class AccidentMarker(MarkerMixin, Base):
                 "speed_limit": self.speed_limit,
                 "road_intactness": self.road_intactness,
                 "road_width": self.road_width,
-                "road_sign": self.road_sign,
                 "road_light": self.road_light,
                 "road_control": self.road_control,
                 "weather": self.weather,
                 "road_surface": self.road_surface,
                 "road_object": self.road_object,
                 "object_distance": self.object_distance,
-                "didnt_cross": self.didnt_cross,
-                "cross_mode": self.cross_mode,
-                "cross_location": self.cross_location,
-                "cross_direction": self.cross_direction,
                 "video_link": self.video_link,
                 "road1": self.road1,
                 "road2": self.road2,
@@ -618,8 +608,6 @@ class AccidentMarker(MarkerMixin, Base):
             ).filter(func.extract("hour", AccidentMarker.created) < kwargs["end_time"])
         if kwargs.get("weather", 0) != 0:
             markers = markers.filter(AccidentMarker.weather == kwargs["weather"])
-        if kwargs.get("road", 0) != 0:
-            markers = markers.filter(AccidentMarker.road_shape == kwargs["road"])
         if kwargs.get("separation", 0) != 0:
             markers = markers.filter(AccidentMarker.multi_lane == kwargs["separation"])
         if kwargs.get("surface", 0) != 0:
@@ -633,8 +621,6 @@ class AccidentMarker(MarkerMixin, Base):
                 )
         if kwargs.get("controlmeasure", 0) != 0:
             markers = markers.filter(AccidentMarker.road_control == kwargs["controlmeasure"])
-        if kwargs.get("district", 0) != 0:
-            markers = markers.filter(AccidentMarker.police_unit == kwargs["district"])
 
         if kwargs.get("case_type", 0) != 0:
             markers = markers.filter(AccidentMarker.provider_code == kwargs["case_type"])
@@ -834,6 +820,10 @@ class Involved(Base):
     accident_year = Column(Integer())
     accident_month = Column(Integer())
     injury_severity_mais = Column(Integer())
+    didnt_cross = Column(Integer())
+    cross_mode = Column(Integer())
+    cross_location = Column(Integer())
+    cross_direction = Column(Integer())
     __table_args__ = (
         ForeignKeyConstraint(
             [accident_id, provider_code, accident_year],
@@ -1147,6 +1137,8 @@ class City(CityFields, Base):
 
     @staticmethod
     def get_name_from_symbol_or_none(symbol: int, lang: str = 'he') -> Optional[str]:
+        if not symbol:
+            return None
         try:
             return City.get_name_from_symbol(symbol, lang)
         except ValueError:
@@ -1366,6 +1358,26 @@ class SuburbanJunction(Base):
             "roads": set(self.roads),
         }
 
+class Junction(Base):
+    __tablename__ = "junction"
+    MAX_NAME_LEN = 100
+    junction = Column(Integer(), primary_key=True, nullable=False)
+    junction_hebrew = Column(String(length=MAX_NAME_LEN), nullable=True)
+    x = Column(Float(), nullable=True)
+    y = Column(Float(), nullable=True)
+
+
+class JunctionArm(Base):
+    __tablename__ = "junction_arm"
+    arm_symbol = Column(Integer(), primary_key=True, index=True)
+    junction_symbol = Column(Integer())
+    is_suburban = Column(Boolean())
+    road_symbol = Column(Integer())
+    km = Column(Float())
+    yishuv_symbol = Column(Integer())
+    street_symbol = Column(Integer())
+    arm_name = Column(Text())
+
 
 class RoadJunctionKM(Base):
     __tablename__ = "road_junction_km"
@@ -1447,7 +1459,6 @@ class Vehicle(Base):
     engine_volume = Column(Integer())
     manufacturing_year = Column(Integer())
     driving_directions = Column(Integer())
-    vehicle_status = Column(Integer())
     vehicle_attribution = Column(Integer())
     vehicle_type = Column(Integer())
     seats = Column(Integer())
@@ -1475,7 +1486,6 @@ class Vehicle(Base):
             "engine_volume": self.engine_volume,
             "manufacturing_year": self.manufacturing_year,
             "driving_directions": self.driving_directions,
-            "vehicle_status": self.vehicle_status,
             "vehicle_attribution": self.vehicle_attribution,
             "vehicle_type": self.vehicle_type,
             "seats": self.seats,
@@ -1576,9 +1586,7 @@ class InjuredAroundSchoolAllData(Base):
     markers_address = Column(Text())
     markers_location_accuracy = Column(Float())
     markers_road_type = Column(Float())
-    markers_road_shape = Column(Float())
     markers_day_type = Column(Float())
-    markers_police_unit = Column(Float())
     markers_mainStreet = Column(Text())
     markers_secondaryStreet = Column(Text())
     markers_junction = Column(Text())
@@ -1587,7 +1595,6 @@ class InjuredAroundSchoolAllData(Base):
     markers_speed_limit = Column(Float())
     markers_road_intactness = Column(Float())
     markers_road_width = Column(Float())
-    markers_road_sign = Column(Float())
     markers_road_light = Column(Float())
     markers_road_control = Column(Float())
     markers_weather = Column(Float())
@@ -1688,14 +1695,6 @@ class TrafficVolume(Base):
     duplicate_count = Column(Integer())
 
 
-class PoliceUnit(Base):
-    __tablename__ = "police_unit"
-    id = Column(Integer(), primary_key=True, index=True)
-    year = Column(Integer(), primary_key=True, index=True)
-    provider_code = Column(Integer(), primary_key=True, index=True)
-    police_unit_hebrew = Column(Text(), nullable=True)
-
-
 class RoadType(Base):
     __tablename__ = "road_type"
     id = Column(Integer(), primary_key=True, index=True)
@@ -1718,14 +1717,6 @@ class AccidentType(Base):
     year = Column(Integer(), primary_key=True, index=True)
     provider_code = Column(Integer(), primary_key=True, index=True)
     accident_type_hebrew = Column(Text(), nullable=True)
-
-
-class RoadShape(Base):
-    __tablename__ = "road_shape"
-    id = Column(Integer(), primary_key=True, index=True)
-    year = Column(Integer(), primary_key=True, index=True)
-    provider_code = Column(Integer(), primary_key=True, index=True)
-    road_shape_hebrew = Column(Text(), nullable=True)
 
 
 class OneLane(Base):
@@ -1766,14 +1757,6 @@ class RoadWidth(Base):
     year = Column(Integer(), primary_key=True, index=True)
     provider_code = Column(Integer(), primary_key=True, index=True)
     road_width_hebrew = Column(Text(), nullable=True)
-
-
-class RoadSign(Base):
-    __tablename__ = "road_sign"
-    id = Column(Integer(), primary_key=True, index=True)
-    year = Column(Integer(), primary_key=True, index=True)
-    provider_code = Column(Integer(), primary_key=True, index=True)
-    road_sign_hebrew = Column(Text(), nullable=True)
 
 
 class RoadLight(Base):
@@ -1862,14 +1845,6 @@ class DrivingDirections(Base):
     year = Column(Integer(), primary_key=True, index=True)
     provider_code = Column(Integer(), primary_key=True, index=True)
     driving_directions_hebrew = Column(Text(), nullable=True)
-
-
-class VehicleStatus(Base):
-    __tablename__ = "vehicle_status"
-    id = Column(Integer(), primary_key=True, index=True)
-    year = Column(Integer(), primary_key=True, index=True)
-    provider_code = Column(Integer(), primary_key=True, index=True)
-    vehicle_status_hebrew = Column(Text(), nullable=True)
 
 
 class InvolvedType(Base):
@@ -2126,6 +2101,51 @@ class VehicleDamage(Base):
     vehicle_damage_hebrew = Column(Text(), nullable=True)
 
 
+#KodKnisaYetzia in cbs file
+class EntranceExit(Base):
+    __tablename__ = "entrance_exit"
+    id = Column(Integer(), primary_key=True, index=True)
+    year = Column(Integer(), primary_key=True, index=True)
+    provider_code = Column(Integer(), primary_key=True, index=True)
+    entrance_exit_hebrew = Column(Text(), nullable=True)
+
+
+#KodTvaiHaderech in cbs file
+class RoadAlignment(Base):
+    __tablename__ = "road_alignment"
+    id = Column(Integer(), primary_key=True, index=True)
+    year = Column(Integer(), primary_key=True, index=True)
+    provider_code = Column(Integer(), primary_key=True, index=True)
+    road_alignment_hebrew = Column(Text(), nullable=True)
+
+
+#KodNetuneiTashtitKlali in cbs file
+class InfrastructureType(Base):
+    __tablename__ = "infrastructure_type"
+    id = Column(Integer(), primary_key=True, index=True)
+    year = Column(Integer(), primary_key=True, index=True)
+    provider_code = Column(Integer(), primary_key=True, index=True)
+    infrastructure_type_hebrew = Column(Text(), nullable=True)
+
+
+#KodGeometria in cbs file
+class RoadGeometry(Base):
+    __tablename__ = "road_geometry"
+    id = Column(Integer(), primary_key=True, index=True)
+    year = Column(Integer(), primary_key=True, index=True)
+    provider_code = Column(Integer(), primary_key=True, index=True)
+    road_geometry_hebrew = Column(Text(), nullable=True)
+
+
+#KodYeudHarechev in cbs file
+class VehiclePurpose(Base):
+    __tablename__ = "vehicle_purpose"
+    id = Column(Integer(), primary_key=True, index=True)
+    year = Column(Integer(), primary_key=True, index=True)
+    provider_code = Column(Integer(), primary_key=True, index=True)
+    vehicle_purpose_hebrew = Column(Text(), nullable=True)
+
+
 class AccidentMarkerView(Base):
     __tablename__ = "markers_hebrew"
     id = Column(BigInteger(), primary_key=True)
@@ -2142,12 +2162,8 @@ class AccidentMarkerView(Base):
     location_accuracy_hebrew = Column(Text())
     road_type = Column(Integer())
     road_type_hebrew = Column(Text())
-    road_shape = Column(Integer())
-    road_shape_hebrew = Column(Text())
     day_type = Column(Integer())
     day_type_hebrew = Column(Text())
-    police_unit = Column(Integer())
-    police_unit_hebrew = Column(Text())
     one_lane = Column(Integer())
     one_lane_hebrew = Column(Text())
     multi_lane = Column(Integer())
@@ -2158,8 +2174,6 @@ class AccidentMarkerView(Base):
     road_intactness_hebrew = Column(Text())
     road_width = Column(Integer())
     road_width_hebrew = Column(Text())
-    road_sign = Column(Integer())
-    road_sign_hebrew = Column(Text())
     road_light = Column(Integer())
     road_light_hebrew = Column(Text())
     road_control = Column(Integer())
@@ -2172,14 +2186,6 @@ class AccidentMarkerView(Base):
     road_object_hebrew = Column(Text())
     object_distance = Column(Integer())
     object_distance_hebrew = Column(Text())
-    didnt_cross = Column(Integer())
-    didnt_cross_hebrew = Column(Text())
-    cross_mode = Column(Integer())
-    cross_mode_hebrew = Column(Text())
-    cross_location = Column(Integer())
-    cross_location_hebrew = Column(Text())
-    cross_direction = Column(Integer())
-    cross_direction_hebrew = Column(Text())
     road1 = Column(Integer(), index=True)
     road2 = Column(Integer(), index=True)
     km = Column(Float())
@@ -2193,6 +2199,8 @@ class AccidentMarkerView(Base):
     road_segment_length_km = Column(Float())
     yishuv_symbol = Column(Integer())
     yishuv_name = Column(Text(), index=True)
+    yishuv2_symbol = Column(Integer())
+    yishuv2_name = Column(Text())
     geo_area = Column(Integer())
     geo_area_hebrew = Column(Text())
     day_night = Column(Integer())
@@ -2216,10 +2224,8 @@ class AccidentMarkerView(Base):
     street2 = Column(Integer())
     street2_hebrew = Column(Text(), index=True)
     house_number = Column(Integer())
-    non_urban_intersection = Column(Integer())
-    non_urban_intersection_hebrew = Column(Text())
-    non_urban_intersection_by_junction_number = Column(Text())
-    urban_intersection = Column(Integer())
+    intersection = Column(Integer())
+    intersection_hebrew = Column(Text())
     accident_year = Column(Integer(), primary_key=True, index=True)
     accident_month = Column(Integer())
     accident_day = Column(Integer())
@@ -2232,6 +2238,14 @@ class AccidentMarkerView(Base):
     longitude = Column(Float())
     x = Column(Float())
     y = Column(Float())
+    entrance_exit = Column(Integer())
+    entrance_exit_hebrew = Column(Text())
+    road_alignment = Column(Integer())
+    road_alignment_hebrew = Column(Text())
+    road_geometry = Column(Integer())
+    road_geometry_hebrew = Column(Text())
+    infrastructure_type = Column(Integer())
+    infrastructure_type_hebrew = Column(Text())
 
     def serialize(self):
         return {
@@ -2246,12 +2260,8 @@ class AccidentMarkerView(Base):
             "location_accuracy_hebrew": self.location_accuracy_hebrew,
             "road_type": self.road_type,
             "road_type_hebrew": self.road_type_hebrew,
-            "road_shape": self.road_shape,
-            "road_shape_hebrew": self.road_shape_hebrew,
             "day_type": self.day_type,
             "day_type_hebrew": self.day_type_hebrew,
-            "police_unit": self.police_unit,
-            "police_unit_hebrew": self.police_unit_hebrew,
             "one_lane": self.one_lane,
             "one_lane_hebrew": self.one_lane_hebrew,
             "multi_lane": self.multi_lane,
@@ -2262,8 +2272,6 @@ class AccidentMarkerView(Base):
             "road_intactness_hebrew": self.road_intactness_hebrew,
             "road_width": self.road_width,
             "road_width_hebrew": self.road_width_hebrew,
-            "road_sign": self.road_sign,
-            "road_sign_hebrew": self.road_sign_hebrew,
             "road_light": self.road_light,
             "road_light_hebrew": self.road_light_hebrew,
             "road_control": self.road_control,
@@ -2276,14 +2284,6 @@ class AccidentMarkerView(Base):
             "road_object_hebrew": self.road_object_hebrew,
             "object_distance": self.object_distance,
             "object_distance_hebrew": self.object_distance_hebrew,
-            "didnt_cross": self.didnt_cross,
-            "didnt_cross_hebrew": self.didnt_cross_hebrew,
-            "cross_mode": self.cross_mode,
-            "cross_mode_hebrew": self.cross_mode_hebrew,
-            "cross_location": self.cross_location,
-            "cross_location_hebrew": self.cross_location_hebrew,
-            "cross_direction": self.cross_direction,
-            "cross_direction_hebrew": self.cross_direction_hebrew,
             "road1": self.road1,
             "road2": self.road2,
             "km": self.km,
@@ -2313,7 +2313,7 @@ class AccidentMarkerView(Base):
             "street1_hebrew": self.street1_hebrew,
             "street2": self.street2,
             "street2_hebrew": self.street2_hebrew,
-            "non_urban_intersection_hebrew": self.non_urban_intersection_hebrew,
+            "intersection_hebrew": self.intersection_hebrew,
             "accident_year": self.accident_year,
             "accident_month": self.accident_month,
             "accident_day": self.accident_day,
@@ -2499,12 +2499,8 @@ class InvolvedMarkerView(Base):
     location_accuracy_hebrew = Column(Text())
     road_type = Column(Integer(), index=True)
     road_type_hebrew = Column(Text(), index=True)
-    road_shape = Column(Integer())
-    road_shape_hebrew = Column(Text())
     day_type = Column(Integer())
     day_type_hebrew = Column(Text())
-    police_unit = Column(Integer())
-    police_unit_hebrew = Column(Text())
     one_lane = Column(Integer())
     one_lane_hebrew = Column(Text())
     multi_lane = Column(Integer())
@@ -2515,8 +2511,6 @@ class InvolvedMarkerView(Base):
     road_intactness_hebrew = Column(Text())
     road_width = Column(Integer())
     road_width_hebrew = Column(Text())
-    road_sign = Column(Integer())
-    road_sign_hebrew = Column(Text())
     road_light = Column(Integer())
     road_light_hebrew = Column(Text())
     road_control = Column(Integer())
@@ -2550,6 +2544,8 @@ class InvolvedMarkerView(Base):
     road_segment_length_km = Column(Float())
     accident_yishuv_symbol = Column(Integer())
     accident_yishuv_name = Column(Text(), index=True)
+    accident_yishuv2_symbol = Column(Integer())
+    accident_yishuv2_name = Column(Text())
     geo_area = Column(Integer())
     geo_area_hebrew = Column(Text())
     day_night = Column(Integer())
@@ -2573,10 +2569,6 @@ class InvolvedMarkerView(Base):
     street2 = Column(Integer())
     street2_hebrew = Column(Text(), index=True)
     house_number = Column(Integer())
-    non_urban_intersection = Column(Integer())
-    non_urban_intersection_hebrew = Column(Text())
-    non_urban_intersection_by_junction_number = Column(Text())
-    urban_intersection = Column(Integer())
     accident_day = Column(Integer())
     accident_hour_raw = Column(Integer())
     accident_hour_raw_hebrew = Column(Text())
@@ -2587,13 +2579,19 @@ class InvolvedMarkerView(Base):
     longitude = Column(Float())
     x = Column(Float())
     y = Column(Float())
+    entrance_exit = Column(Integer())
+    entrance_exit_hebrew = Column(Text())
+    road_alignment = Column(Integer())
+    road_alignment_hebrew = Column(Text())
+    road_geometry = Column(Integer())
+    road_geometry_hebrew = Column(Text())
+    infrastructure_type = Column(Integer())
+    infrastructure_type_hebrew = Column(Text())
     engine_volume = Column(Integer())
     engine_volume_hebrew = Column(Text())
     manufacturing_year = Column(Integer())
     driving_directions = Column(Integer())
     driving_directions_hebrew = Column(Text())
-    vehicle_status = Column(Integer())
-    vehicle_status_hebrew = Column(Text())
     vehicle_attribution = Column(Integer())
     vehicle_attribution_hebrew = Column(Text())
     seats = Column(Integer())
@@ -2656,6 +2654,14 @@ class InvolvedView(Base):
     involve_id = Column(Integer(), primary_key=True)
     accident_year = Column(Integer(), primary_key=True, index=True)
     accident_month = Column(Integer())
+    didnt_cross = Column(Integer())
+    didnt_cross_hebrew = Column(Text())
+    cross_mode = Column(Integer())
+    cross_mode_hebrew = Column(Text())
+    cross_location = Column(Integer())
+    cross_location_hebrew = Column(Text())
+    cross_direction = Column(Integer())
+    cross_direction_hebrew = Column(Text())
 
 
 class VehiclesView(Base):
@@ -2671,8 +2677,6 @@ class VehiclesView(Base):
     manufacturing_year = Column(Integer())
     driving_directions = Column(Integer())
     driving_directions_hebrew = Column(Text())
-    vehicle_status = Column(Integer())
-    vehicle_status_hebrew = Column(Text())
     vehicle_attribution = Column(Integer())
     vehicle_attribution_hebrew = Column(Text())
     seats = Column(Integer())
@@ -2697,12 +2701,8 @@ class VehicleMarkerView(Base):
     location_accuracy_hebrew = Column(Text())
     road_type = Column(Integer())
     road_type_hebrew = Column(Text())
-    road_shape = Column(Integer())
-    road_shape_hebrew = Column(Text())
     day_type = Column(Integer())
     day_type_hebrew = Column(Text())
-    police_unit = Column(Integer())
-    police_unit_hebrew = Column(Text())
     one_lane = Column(Integer())
     one_lane_hebrew = Column(Text())
     multi_lane = Column(Integer())
@@ -2713,8 +2713,6 @@ class VehicleMarkerView(Base):
     road_intactness_hebrew = Column(Text())
     road_width = Column(Integer())
     road_width_hebrew = Column(Text())
-    road_sign = Column(Integer())
-    road_sign_hebrew = Column(Text())
     road_light = Column(Integer())
     road_light_hebrew = Column(Text())
     road_control = Column(Integer())
@@ -2727,14 +2725,6 @@ class VehicleMarkerView(Base):
     road_object_hebrew = Column(Text())
     object_distance = Column(Integer())
     object_distance_hebrew = Column(Text())
-    didnt_cross = Column(Integer())
-    didnt_cross_hebrew = Column(Text())
-    cross_mode = Column(Integer())
-    cross_mode_hebrew = Column(Text())
-    cross_location = Column(Integer())
-    cross_location_hebrew = Column(Text())
-    cross_direction = Column(Integer())
-    cross_direction_hebrew = Column(Text())
     road1 = Column(Integer(), index=True)
     road2 = Column(Integer(), index=True)
     km = Column(Float())
@@ -2748,6 +2738,8 @@ class VehicleMarkerView(Base):
     road_segment_length_km = Column(Float())
     accident_yishuv_symbol = Column(Integer())
     accident_yishuv_name = Column(Text(), index=True)
+    accident_yishuv2_symbol = Column(Integer())
+    accident_yishuv2_name = Column(Text())
     geo_area = Column(Integer())
     geo_area_hebrew = Column(Text())
     day_night = Column(Integer())
@@ -2771,10 +2763,8 @@ class VehicleMarkerView(Base):
     street2 = Column(Integer())
     street2_hebrew = Column(Text(), index=True)
     house_number = Column(Integer())
-    non_urban_intersection = Column(Integer())
-    non_urban_intersection_hebrew = Column(Text())
-    non_urban_intersection_by_junction_number = Column(Text())
-    urban_intersection = Column(Integer())
+    intersection = Column(Integer())
+    intersection_hebrew = Column(Text())
     accident_month = Column(Integer())
     accident_day = Column(Integer())
     accident_hour_raw = Column(Integer())
@@ -2787,6 +2777,14 @@ class VehicleMarkerView(Base):
     longitude = Column(Float())
     x = Column(Float())
     y = Column(Float())
+    entrance_exit = Column(Integer())
+    entrance_exit_hebrew = Column(Text())
+    road_alignment = Column(Integer())
+    road_alignment_hebrew = Column(Text())
+    road_geometry = Column(Integer())
+    road_geometry_hebrew = Column(Text())
+    infrastructure_type = Column(Integer())
+    infrastructure_type_hebrew = Column(Text())
     id = Column(BigInteger(), primary_key=True)
     accident_id = Column(BigInteger(), primary_key=True)
     provider_and_id = Column(BigInteger())
@@ -2797,8 +2795,6 @@ class VehicleMarkerView(Base):
     manufacturing_year = Column(Integer())
     driving_directions = Column(Integer())
     driving_directions_hebrew = Column(Text())
-    vehicle_status = Column(Integer())
-    vehicle_status_hebrew = Column(Text())
     vehicle_attribution = Column(Integer())
     vehicle_attribution_hebrew = Column(Text())
     seats = Column(Integer())
@@ -3147,7 +3143,7 @@ class SDAccident(Base):
     speed_limit = Column(Integer(), nullable=True)
     street1 = Column(Integer(), nullable=True)
     street2 = Column(Integer(), nullable=True)
-    vehicles = Column(Integer(), nullable=True)
+    vehicles = Column(BigInteger(), nullable=True)
     latitude = Column(Float(), nullable=True)
     longitude = Column(Float(), nullable=True)
 

@@ -94,10 +94,11 @@ def process():
 @click.option("--batch_size", type=int, default=5000)
 @click.option("--load_start_year", type=str, default=None)
 @click.option("--source", type=str, default="s3")
-def cbs(batch_size, load_start_year, source):
+@click.option("--allow_missing", is_flag=True, default=False)
+def cbs(batch_size, load_start_year, source, allow_missing):
     from anyway.parsers.cbs.executor import main
 
-    return main(batch_size=batch_size, load_start_year=load_start_year, source=source)
+    return main(batch_size=batch_size, load_start_year=load_start_year, source=source, allow_missing=allow_missing)
 
 
 @process.command()
@@ -159,6 +160,20 @@ def suburban_junctions(filename):
     from anyway.parsers.suburban_junctions import parse
 
     return parse(filename)
+
+
+@process.command()
+@click.argument(
+    "junction_arms_filename", type=str, default="static/data/junctions/junction_arms.csv",
+)
+@click.argument(
+    "junctions_filename", type=str, default="static/data/junctions/junctions.csv",
+)
+def junctions(junction_arms_filename, junctions_filename):
+    """Update junction tables from csv files"""
+    from anyway.parsers.junctions import parse
+
+    return parse(junction_arms_filename, junctions_filename)
 
 
 @process.command()
@@ -410,7 +425,7 @@ def update_dictionary_tables():
 @update_dictionary_tables.command()
 @click.option("--path", type=str, default="static/data/cbs")
 def update_cbs(path):
-    from anyway.parsers.cbs.executor import update_dictionary_tables
+    from anyway.parsers.cbs.dictionary_tables import update_dictionary_tables
 
     return update_dictionary_tables(path)
 
@@ -423,7 +438,7 @@ def truncate_dictionary_tables():
 @truncate_dictionary_tables.command()
 @click.option("--path", type=str)
 def truncate_cbs(path):
-    from anyway.parsers.cbs.executor import truncate_dictionary_tables
+    from anyway.parsers.cbs.dictionary_tables import truncate_dictionary_tables
 
     return truncate_dictionary_tables(path)
 

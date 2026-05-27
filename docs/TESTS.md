@@ -22,7 +22,7 @@ Initialize the DB for tests:
 
 ```
 docker exec anyway-tests alembic upgrade head
-docker exec anyway-tests ./main.py process registered-vehicles
+docker exec anyway-tests ./main.py process registered-vehicles --delete_all
 docker exec anyway-tests ./main.py process cbs --source local_dir_for_tests_only
 ```
 

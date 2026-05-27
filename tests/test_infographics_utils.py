@@ -80,7 +80,7 @@ class TestInfographicsUtilsCase(unittest.TestCase):
             level1_vals=None,
             level2_vals=AccidentSeverity
         )
-        self.assertEqual(self.items1_res, actual, "leve 2 formatting")
+        self.assertEqual(self.items1_res, actual, "level 2 formatting")
 
     @patch("anyway.widgets.segment_junctions.db")
     def test_get_segment_junctions(self, db):

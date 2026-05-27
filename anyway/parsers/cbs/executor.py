@@ -579,16 +579,45 @@ def import_vehicles(provider_code, vehicles, **kwargs):
 def get_files(directory):
     def read_streets(df):
         fields = field_names.streets_dict
+        settlement_column = next(
+            (
+                candidate
+                for candidate in (
+                    field_names.settlement.upper(),
+                    field_names.yishuv_symbol,
+                    "ISHUV",
+                )
+                if candidate in df.columns
+            ),
+            None,
+        )
+        street_sign_column = (
+            fields.street_sign if fields.street_sign in df.columns else "SEMEL_RECHOV"
+        )
+        street_name_column = (
+            fields.street_name if fields.street_name in df.columns else "SHEM_RECHOV"
+        )
+        if settlement_column is None:
+            raise ValueError(
+                "Missing settlement column in streets CSV. Available columns: {}".format(
+                    ", ".join(df.columns)
+                )
+            )
+
         streets_map = {}
-        groups = df.groupby(field_names.settlement.upper())
+        groups = df.groupby(settlement_column)
         for key, settlement in groups:
             streets_map[key] = [
                 {
-                    fields.street_sign: x[fields.street_sign],
-                    fields.street_name: str(x[fields.street_name]),
+                    fields.street_sign: x[street_sign_column],
+                    fields.street_name: str(x[street_name_column]),
                 }
-                for _, x in settlement.iterrows() if isinstance(x[fields.street_name], str) \
-                    or ((isinstance(x[fields.street_name], int) or isinstance(x[fields.street_name], float)) and x[field_names.street_name] > 0)
+                for _, x in settlement.iterrows()
+                if isinstance(x[street_name_column], str)
+                or (
+                    (isinstance(x[street_name_column], int) or isinstance(x[street_name_column], float))
+                    and x[street_name_column] > 0
+                )
             ]
         return {STREETS: streets_map}
 
@@ -886,7 +915,7 @@ def main(batch_size, source, load_start_year=None, allow_missing=False):
 
                     if allow_missing and not os.path.exists(cbs_files_dir):
                         continue
-                    
+
                     logging.debug("Importing Directory " + cbs_files_dir)
                     preprocessing_cbs_files.update_cbs_files_names(cbs_files_dir)
                     num_new = import_to_datastore(
@@ -938,6 +967,3 @@ def main(batch_size, source, load_start_year=None, allow_missing=False):
         print("Traceback: {0}".format(traceback.format_exc()))
         raise CBSParsingFailed(message=str(ex))
         # Todo - send an email that an exception occured
-
-
-

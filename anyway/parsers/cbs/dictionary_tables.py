@@ -78,6 +78,7 @@ TABLES_DICT = {
 def read_dictionary(dictionary_file):
     cbs_dictionary = defaultdict(dict)
     dictionary = pd.read_csv(dictionary_file, encoding="cp1255")
+    dictionary.columns = [column.strip().lower() for column in dictionary.columns]
     for _, dic in dictionary.iterrows():
         cbs_dictionary[int(dic[DICTCOLUMN1])][int(dic[DICTCOLUMN2])] = dic[DICTCOLUMN3]
     return cbs_dictionary

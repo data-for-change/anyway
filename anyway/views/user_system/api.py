@@ -8,7 +8,6 @@ import copy
 from dataclasses import dataclass
 from functools import wraps
 from http import HTTPStatus
-from typing import List
 
 from flask import Response, request, Request, jsonify, current_app, redirect, g
 from flask_login import current_user, login_user, logout_user, LoginManager
@@ -336,7 +335,7 @@ def oauth_authorize(provider: str, callback_endpoint: str, app_id: int) -> Respo
         list(request.cookies.keys()),
         request.referrer,
     )
-    
+
     if provider != "google":
         return return_json_error(Es.BR_ONLY_SUPPORT_GOOGLE)
 
@@ -348,7 +347,7 @@ def oauth_authorize(provider: str, callback_endpoint: str, app_id: int) -> Respo
     # Allow login if user is anonymous OR logged into a different app
     if not current_user.is_anonymous and current_user.app == app_id:
         return redirect(redirect_url)
-        
+
     oauth = OAuthSignIn.get_provider(provider)
     return oauth.authorize(callback_endpoint=callback_endpoint, redirect_url=redirect_url)
 
@@ -451,9 +450,9 @@ def oauth_callback(provider: str, app_id: int, callback_endpoint: str) -> Respon
         getattr(current_user, "id", None),
         list(request.cookies.keys()),
     )
-    
+
     login_user(user, True)
-    
+
     logger.info(
         "oauth_callback after login_user host=%s path=%s user_id=%s user_app=%s current_is_anonymous=%s current_user_id=%s cookies=%s",
         request.host,

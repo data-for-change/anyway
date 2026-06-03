@@ -1,6 +1,5 @@
 from sqlalchemy import desc, and_, sql, func, or_
 from sqlalchemy.orm import load_only
-from typing import Any
 
 from anyway.app_and_db import db
 from anyway.backend_constants import BE_CONST, OneLane

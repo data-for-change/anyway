@@ -624,19 +624,27 @@ def get_files(directory):
     for name, filename in cbs_files.items():
         if name not in relevant_files:
             continue
-        file_path = get_single_file(filename)
-        if name == DICTIONARY:
-            output_files_dict[name] = read_dictionary(file_path)
-        else:
-            df = pd.read_csv(file_path, encoding=CONTENT_ENCODING)
-            if name in new_to_old_column_mapping:
-                df.rename(columns=new_to_old_column_mapping[name], inplace=True)
-            df.columns = [column.upper() for column in df.columns]
-            if name in custom_handlers:
-                output = custom_handlers[name](df)
-                output_files_dict.update(output)
+        file_path = None
+        try:
+            file_path = get_single_file(filename)
+            if name == DICTIONARY:
+                output_files_dict[name] = read_dictionary(file_path)
             else:
-                output_files_dict[name] = df
+                df = pd.read_csv(file_path, encoding=CONTENT_ENCODING)
+                if name in new_to_old_column_mapping:
+                    df.rename(columns=new_to_old_column_mapping[name], inplace=True)
+                df.columns = [column.upper() for column in df.columns]
+                if name in custom_handlers:
+                    output = custom_handlers[name](df)
+                    output_files_dict.update(output)
+                else:
+                    output_files_dict[name] = df
+        except Exception:
+            logging.exception(
+                "Exception while processing file '%s'",
+                file_path or filename,
+            )
+            raise
     return output_files_dict
 
 

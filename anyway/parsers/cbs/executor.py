@@ -5,6 +5,7 @@ import os
 import re
 import shutil
 import traceback
+import zipfile
 from collections import OrderedDict
 from datetime import datetime
 
@@ -42,6 +43,28 @@ failed_dirs = OrderedDict()
 
 # CBS Hebrew files are encoded in Windows-1255.
 CONTENT_ENCODING = "cp1255"
+
+
+def is_xlsx_file(file_path: str) -> bool:
+    if not zipfile.is_zipfile(file_path):
+        return False
+
+    with zipfile.ZipFile(file_path) as zf:
+        names = set(zf.namelist())
+
+    return (
+        "[Content_Types].xml" in names
+        and "xl/workbook.xml" in names
+    )
+
+
+def read_cbs_file(file_path: str) -> pd.DataFrame:
+    if is_xlsx_file(file_path):
+        return pd.read_excel(file_path)
+
+    return pd.read_csv(file_path, encoding=CONTENT_ENCODING)
+
+
 ACCIDENT_TYPE_REGEX = re.compile(r"accidents_type_(?P<type>\d)")
 ACCIDENTS_TYPE_PREFIX = "accidents_type"
 
@@ -630,7 +653,7 @@ def get_files(directory):
             if name == DICTIONARY:
                 output_files_dict[name] = read_dictionary(file_path)
             else:
-                df = pd.read_csv(file_path, encoding=CONTENT_ENCODING)
+                df = read_cbs_file(file_path)
                 if name in new_to_old_column_mapping:
                     df.rename(columns=new_to_old_column_mapping[name], inplace=True)
                 df.columns = [column.upper() for column in df.columns]
@@ -837,7 +860,7 @@ def create_tables():
 
 
 def get_file_type_and_year(file_path):
-    df = pd.read_csv(file_path, encoding=CONTENT_ENCODING)
+    df = read_cbs_file(file_path)
     logging.debug(f"df: {df.columns}")
     provider_code = df.iloc[0][field_names.new_file_type]
     year = df.loc[:, field_names.new_accident_year].mode().values[0]

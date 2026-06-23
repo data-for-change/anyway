@@ -294,6 +294,18 @@ def sd_oauth_authorize(provider: str) -> Response:
 
 
 def oauth_authorize(provider: str, callback_endpoint: str, app_id: int) -> Response:
+    logger.info(
+        "oauth_authorize host=%s path=%s app_id=%s is_anonymous=%s user_id=%s user_app=%s cookies=%s referrer=%s",
+        request.host,
+        request.path,
+        app_id,
+        current_user.is_anonymous,
+        getattr(current_user, "id", None),
+        getattr(current_user, "app", None),
+        list(request.cookies.keys()),
+        request.referrer,
+    )
+    
     if provider != "google":
         return return_json_error(Es.BR_ONLY_SUPPORT_GOOGLE)
 
@@ -398,8 +410,29 @@ def oauth_callback(provider: str, app_id: int, callback_endpoint: str) -> Respon
         if redirect_url_to_check and is_a_safe_redirect_url(redirect_url_to_check):
             redirect_url = redirect_url_to_check
 
+    logger.info(
+        "oauth_callback before login_user host=%s path=%s user_id=%s user_app=%s current_is_anonymous=%s current_user_id=%s cookies=%s",
+        request.host,
+        request.path,
+        user.id,
+        user.app,
+        current_user.is_anonymous,
+        getattr(current_user, "id", None),
+        list(request.cookies.keys()),
+    )
+    
     login_user(user, True)
-    identity_changed.send(current_app._get_current_object(), identity=Identity(user.id))
+    
+    logger.info(
+        "oauth_callback after login_user host=%s path=%s user_id=%s user_app=%s current_is_anonymous=%s current_user_id=%s cookies=%s",
+        request.host,
+        request.path,
+        user.id,
+        user.app,
+        current_user.is_anonymous,
+        getattr(current_user, "id", None),
+        list(request.cookies.keys()),
+    )
 
     return redirect(redirect_url, code=HTTPStatus.FOUND)
 
@@ -450,6 +483,17 @@ def is_user_logged_in(app_id: int) -> Response:
     is_logged_in = not current_user.is_anonymous
     if is_logged_in and hasattr(current_user, "app") and current_user.app != app_id:
         is_logged_in = False
+    logger.info(
+        "is_user_logged_in host=%s path=%s app_id=%s is_anonymous=%s user_id=%s user_app=%s cookies=%s res=%s",
+        request.host,
+        request.path,
+        app_id,
+        current_user.is_anonymous,
+        getattr(current_user, "id", None),
+        getattr(current_user, "app", None),
+        list(request.cookies.keys()),
+        is_logged_in,
+    )
     return jsonify({"is_user_logged_in": is_logged_in})
 
 

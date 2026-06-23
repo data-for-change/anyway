@@ -113,6 +113,8 @@ app.config["OAUTH_CREDENTIALS"] = {
         "secret": secrets.get("GOOGLE_LOGIN_CLIENT_SECRET"),
     },
 }
+app.config["SESSION_COOKIE_NAME"] = "anyway_session_v2"
+app.config["REMEMBER_COOKIE_NAME"] = "anyway_remember_v2"
 app.secret_key = secrets.get("APP_SECRET_KEY")
 assets = Environment()
 assets.init_app(app)

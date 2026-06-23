@@ -49,6 +49,9 @@ from anyway.views.user_system.user_functions import (
     get_current_user,
 )
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
 # Setup Flask-login
 login_manager = LoginManager()
 # Those 2 function hijack are a temporary fix - more info in base.py
@@ -294,7 +297,7 @@ def sd_oauth_authorize(provider: str) -> Response:
 
 
 def oauth_authorize(provider: str, callback_endpoint: str, app_id: int) -> Response:
-    logging.info(
+    logger.info(
         "oauth_authorize host=%s path=%s app_id=%s is_anonymous=%s user_id=%s user_app=%s cookies=%s referrer=%s",
         request.host,
         request.path,
@@ -410,7 +413,7 @@ def oauth_callback(provider: str, app_id: int, callback_endpoint: str) -> Respon
         if redirect_url_to_check and is_a_safe_redirect_url(redirect_url_to_check):
             redirect_url = redirect_url_to_check
 
-    logging.info(
+    logger.info(
         "oauth_callback before login_user host=%s path=%s user_id=%s user_app=%s current_is_anonymous=%s current_user_id=%s cookies=%s",
         request.host,
         request.path,
@@ -423,7 +426,7 @@ def oauth_callback(provider: str, app_id: int, callback_endpoint: str) -> Respon
     
     login_user(user, True)
     
-    logging.info(
+    logger.info(
         "oauth_callback after login_user host=%s path=%s user_id=%s user_app=%s current_is_anonymous=%s current_user_id=%s cookies=%s",
         request.host,
         request.path,
@@ -483,7 +486,7 @@ def is_user_logged_in(app_id: int) -> Response:
     is_logged_in = not current_user.is_anonymous
     if is_logged_in and hasattr(current_user, "app") and current_user.app != app_id:
         is_logged_in = False
-    logging.info(
+    logger.info(
         "is_user_logged_in host=%s path=%s app_id=%s is_anonymous=%s user_id=%s user_app=%s cookies=%s res=%s",
         request.host,
         request.path,

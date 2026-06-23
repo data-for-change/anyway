@@ -49,6 +49,10 @@ from anyway.views.user_system.user_functions import (
     get_current_user,
 )
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 # Setup Flask-login
 login_manager = LoginManager()
 # Those 2 function hijack are a temporary fix - more info in base.py

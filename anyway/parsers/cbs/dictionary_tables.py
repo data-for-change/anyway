@@ -76,8 +76,10 @@ TABLES_DICT = {
 
 
 def read_dictionary(dictionary_file):
+    from anyway.parsers.cbs.executor import read_cbs_file
+
     cbs_dictionary = defaultdict(dict)
-    dictionary = pd.read_csv(dictionary_file, encoding="cp1255")
+    dictionary = read_cbs_file(dictionary_file)
     for _, dic in dictionary.iterrows():
         cbs_dictionary[int(dic[DICTCOLUMN1])][int(dic[DICTCOLUMN2])] = dic[DICTCOLUMN3]
     return cbs_dictionary

@@ -5,6 +5,7 @@ CBS_FILES_HEBREW = {
     "zmatim_ironiim": "IntersectUrban",
     "zmatim_lo_ironiim": "IntersectNonUrban",
     "rehev": "VehData",
+    "rechev": "VehData",
     "milon": "Dictionary",
     "meoravim": "InvData",
     "klali": "AccData",

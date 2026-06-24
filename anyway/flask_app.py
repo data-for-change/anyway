@@ -93,6 +93,7 @@ from anyway.telegram_accident_notifications import send_infographics_to_telegram
 from anyway.views.safety_data import involved_query_gb
 from anyway.views.safety_data import involved_query
 from anyway.views.safety_data import city_query
+from anyway.views.safety_data_admin import safety_data_admin_page
 from anyway.request_params import get_latest_accident_date
 
 DEFAULT_MAPS_API_KEY = "AIzaSyANaM04RFXP3JjhIE-VlJVpLpJTU_SkE0c"
@@ -1409,6 +1410,7 @@ app.add_url_rule("/sd-user/get_grants_list", view_func=sd_get_grants_list, metho
 app.add_url_rule("/sd-user/test_grant_and_admin", view_func=sd_test_grant_and_admin_endpoint, methods=["GET"])
 app.add_url_rule("/sd-callback/<provider>", view_func=sd_oauth_callback, methods=["GET"])
 app.add_url_rule("/sd-authorize/<provider>", view_func=sd_oauth_authorize, methods=["GET"])
+app.add_url_rule("/admin", view_func=safety_data_admin_page, methods=["GET"])
 
 # A hack for Jinja template that is looking for /logout
 app.add_url_rule("/logout", view_func=logout, methods=["GET"])

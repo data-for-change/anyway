@@ -312,15 +312,15 @@ def oauth_authorize(provider: str, callback_endpoint: str, app_id: int) -> Respo
     if provider != "google":
         return return_json_error(Es.BR_ONLY_SUPPORT_GOOGLE)
 
-    # Allow login if user is anonymous OR logged into a different app
-    if not current_user.is_anonymous and current_user.app == app_id:
-        return return_json_error(Es.BR_USER_ALREADY_LOGGED_IN)
-
     redirect_url_from_url = request.args.get("redirect_url", type=str)
     redirect_url = BE_CONST.DEFAULT_REDIRECT_URL
     if redirect_url_from_url and is_a_safe_redirect_url(redirect_url_from_url):
         redirect_url = redirect_url_from_url
 
+    # Allow login if user is anonymous OR logged into a different app
+    if not current_user.is_anonymous and current_user.app == app_id:
+        return redirect(redirect_url)
+        
     oauth = OAuthSignIn.get_provider(provider)
     return oauth.authorize(callback_endpoint=callback_endpoint, redirect_url=redirect_url)
 

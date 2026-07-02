@@ -1639,7 +1639,7 @@ def test_roles_func():
 app.add_url_rule("/api/test_roles", endpoint=None, view_func=test_roles, methods=["GET"])
 
 
-@app.route("/involved", methods=["GET"])
+@app.route("/involved", methods=["GET", "POST"])
 def safety_involved():
     chunk_size = 4096
     iq = involved_query.InvolvedQuery()
@@ -1660,7 +1660,7 @@ def safety_involved():
         return Response(e.args[0], http_client.INTERNAL_SERVER_ERROR)
 
 
-@app.route("/involved/groupby", methods=["GET"])
+@app.route("/involved/groupby", methods=["GET", "POST"])
 def safety_involved_groupby():
     iq = involved_query_gb.InvolvedQuery_GB()
     try:

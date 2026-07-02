@@ -28,6 +28,7 @@ from anyway.models import (
 )
 from anyway.app_and_db import db
 from anyway.views.safety_data import sd_utils as sdu
+from anyway.views.safety_data.sd_geo import add_geo_filter
 
 
 class InvolvedQuery:
@@ -99,6 +100,9 @@ class InvolvedQuery:
     def get_data(self):
         vals = sdu.get_params()
         query = self.get_base_query()
+        geo = vals.pop(sdu.GEO_PARAM, None)
+        if geo:
+            query = add_geo_filter(query, geo)
         query, p_num, p_size, count = ParamFilterExp.add_params_filter(
             query, vals, add_pagination=True
         )

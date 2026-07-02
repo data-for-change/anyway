@@ -26,6 +26,7 @@ from anyway.app_and_db import db
 from anyway.widgets import widget_utils as wd
 from anyway.views.safety_data.involved_query import InvolvedQuery, ParamFilterExp
 from anyway.views.safety_data import sd_utils as sdu
+from anyway.views.safety_data.sd_geo import add_geo_filter
 
 GB = "gb"
 GB2 = "gb2"
@@ -42,6 +43,9 @@ class InvolvedQuery_GB(InvolvedQuery):
         vals = sdu.get_params()
         involved_vals, gb_vals = split_dict(vals, [GB, GB2, LIMIT, SORT])
         query = self.get_base_query()
+        geo = involved_vals.pop(sdu.GEO_PARAM, None)
+        if geo:
+            query = add_geo_filter(query, geo)
         query, _, _, count = ParamFilterExp.add_params_filter(query, involved_vals)
         if count:
             raise ValueError("count is not supported in group by. params: %s" % vals)

@@ -14,6 +14,8 @@ from anyway.models import (
 from anyway.app_and_db import db
 from anyway.utilities import chunked_generator
 
+GEO_PARAM = "geo"
+
 
 def load_data():
     conn = db.get_engine().connect()
@@ -197,5 +199,12 @@ def get_params() -> dict:
         return res
 
     params = request.values
-    vals = {k: f(params.getlist(key=k)) for k in params.keys()}
+    vals = {k: f(params.getlist(key=k)) for k in params.keys() if k != GEO_PARAM}
+
+    if request.is_json:
+        body = request.get_json(silent=True)
+        if isinstance(body, dict) and GEO_PARAM in body:
+            geo_val = body[GEO_PARAM]
+            vals[GEO_PARAM] = [json.dumps(geo_val) if not isinstance(geo_val, str) else geo_val]
+
     return vals

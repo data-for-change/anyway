@@ -3146,6 +3146,7 @@ class SDAccident(Base):
     vehicles = Column(BigInteger(), nullable=True)
     latitude = Column(Float(), nullable=True)
     longitude = Column(Float(), nullable=True)
+    geom = Column(Geometry("POINT", srid=4326), index=True)
 
 
 class SDInvolved(Base):

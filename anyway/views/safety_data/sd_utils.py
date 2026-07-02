@@ -2,7 +2,7 @@ import json
 import logging
 from typing import Iterable, Dict, Any, List
 from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy import and_
+from sqlalchemy import and_, func
 from flask import request, Response
 from anyway.models import (
     Involved,
@@ -80,6 +80,7 @@ def get_involved_data(sess: Session):
 def sd_load_accident(sess: Session):
     sd_load_accident_main(sess)
     set_vehicles_in_sd_acc_table(sess)
+    set_geom_in_sd_acc_table(sess)
 
 
 def sd_load_accident_main(sess: Session):
@@ -169,6 +170,23 @@ def set_vehicles_in_sd_acc_table(sess: Session):
           AND safety_data_accident.accident_year=subquery.accident_year
           AND safety_data_accident.provider_code=subquery.provider_code
         """
+    )
+
+
+def set_geom_in_sd_acc_table(sess: Session):
+    """
+    geom is a PostGIS point built from longitude/latitude, used for spatial queries.
+    """
+    sess.query(SDAccident).filter(
+        SDAccident.longitude.isnot(None),
+        SDAccident.latitude.isnot(None),
+    ).update(
+        {
+            SDAccident.geom: func.ST_SetSRID(
+                func.ST_MakePoint(SDAccident.longitude, SDAccident.latitude), 4326
+            )
+        },
+        synchronize_session=False,
     )
 
 

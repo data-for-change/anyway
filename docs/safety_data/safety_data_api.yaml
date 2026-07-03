@@ -23,12 +23,14 @@ tags:
     description: Combined streets junctions hotspots
 paths:
   /involved:
-    get:
+    post:
       tags:
         - involved
       summary: Retrieve involved data
       description: |
-        Retrieve involved data based on various filters.
+        Retrieve involved data based on various filters passed as query parameters.
+        Optionally include a `geo` polygon filter in the JSON request body
+        (`Content-Type: application/json`).
       operationId: getInvolvedData
       parameters:
         - $ref: '#/components/parameters/sy'
@@ -55,6 +57,15 @@ paths:
         - $ref: '#/components/parameters/pc'
         - $ref: '#/components/parameters/page_number'
         - $ref: '#/components/parameters/page_size'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                geo:
+                  $ref: '#/components/schemas/GeoFilter'
       responses:
         '200':
           description: |
@@ -63,18 +74,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Involved'
-
         '400':
-          description: Invalid input parameters or missing required `gb` parameter for groupby.
+          description: Invalid input parameters.
   /involved/groupby:
-    get:
+    post:
       tags:
         - involved_groupby
       summary: Retrieve grouped involved data
       description: |
-        Retrieve gropuped involved data based on various filters and groupby fields.
+        Retrieve grouped involved data based on various filters and groupby fields.
         The `gb` query parameter is mandatory to specify the field to group the results by.
-        The `gb2` query parameter for second level filtering is optional
+        The `gb2` query parameter for second-level grouping is optional.
+        Optionally include a `geo` polygon filter in the JSON request body
+        (`Content-Type: application/json`).
       operationId: getGroupedInvolvedData
       parameters:
         - in: query
@@ -110,6 +122,15 @@ paths:
         - $ref: '#/components/parameters/ol'
         - $ref: '#/components/parameters/lca'
         - $ref: '#/components/parameters/pc'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                geo:
+                  $ref: '#/components/schemas/GeoFilter'
       responses:
         '200':
           description: |
@@ -337,6 +358,24 @@ components:
         description: Number of recods, or less if end of data reached
 
   schemas:
+    GeoFilter:
+      type: array
+      description: |
+        POST JSON body field `geo` (not a query parameter). Array of geo objects; each
+        object must include `coordinates`: a closed polygon as `[lon, lat]` pairs.
+        Multiple polygons are combined with OR.
+      items:
+        type: object
+        properties:
+          coordinates:
+            type: array
+            minItems: 4
+            items:
+              type: array
+              items:
+                type: number
+              minItems: 2
+              maxItems: 2
     Involved:
       type: object
       properties:

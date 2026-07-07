@@ -93,6 +93,7 @@ from anyway.telegram_accident_notifications import send_infographics_to_telegram
 from anyway.views.safety_data import involved_query_gb
 from anyway.views.safety_data import involved_query
 from anyway.views.safety_data import city_query
+from anyway.views.safety_data import sd_utils as sdu
 from anyway.request_params import get_latest_accident_date
 
 DEFAULT_MAPS_API_KEY = "AIzaSyANaM04RFXP3JjhIE-VlJVpLpJTU_SkE0c"
@@ -1644,6 +1645,7 @@ def safety_involved():
     chunk_size = 4096
     iq = involved_query.InvolvedQuery()
     try:
+        sdu.require_polygon_filtering_grant_if_geo()
         res = iq.get_data()
         j = json.dumps(res, default=str)
         def generate():
@@ -1652,6 +1654,8 @@ def safety_involved():
                 yield c
 
         return Response(generate(), mimetype='application/json')
+    except sdu.MissingPermissionError as e:
+        return sdu.missing_grant_error_response(e.grant_name)
     except ValueError as e:
         logging.exception(e)
         return Response(e.args[0], http_client.BAD_REQUEST)
@@ -1664,8 +1668,11 @@ def safety_involved():
 def safety_involved_groupby():
     iq = involved_query_gb.InvolvedQuery_GB()
     try:
+        sdu.require_polygon_filtering_grant_if_geo()
         res = iq.get_data()
         return Response(json.dumps(res, default=str), mimetype="application/json")
+    except sdu.MissingPermissionError as e:
+        return sdu.missing_grant_error_response(e.grant_name)
     except ValueError as e:
         logging.exception(e)
         return Response(e.args[0], http_client.BAD_REQUEST)

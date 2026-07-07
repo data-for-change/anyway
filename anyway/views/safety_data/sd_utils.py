@@ -4,6 +4,13 @@ from typing import Iterable, Dict, Any, List
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy import and_, func
 from flask import request, Response
+from flask_login import current_user
+from anyway.error_code_and_strings import (
+    Errors as Es,
+    ERROR_TO_HTTP_CODE_DICT,
+    build_json_for_user_api_error,
+)
+from anyway.views.user_system.api import SAFETY_DATA_APP_ID
 from anyway.models import (
     Involved,
     SDAccident,
@@ -15,6 +22,50 @@ from anyway.app_and_db import db
 from anyway.utilities import chunked_generator
 
 GEO_PARAM = "geo"
+POLYGON_FILTERING_GRANT = "polygon-filtering"
+
+
+class MissingPermissionError(Exception):
+    error_code = Es.BR_MISSING_PERMISSION
+
+    def __init__(self, grant_name: str):
+        self.grant_name = grant_name
+        super().__init__(grant_name)
+
+
+def missing_grant_error_response(grant_name: str) -> Response:
+    body = build_json_for_user_api_error(Es.BR_MISSING_PERMISSION, None)
+    body["grant"] = grant_name
+    return Response(
+        response=json.dumps(body),
+        status=ERROR_TO_HTTP_CODE_DICT[Es.BR_MISSING_PERMISSION],
+        mimetype="application/json",
+    )
+
+
+def has_geo_param() -> bool:
+    if GEO_PARAM in request.values:
+        return True
+    if request.is_json:
+        body = request.get_json(silent=True)
+        return isinstance(body, dict) and GEO_PARAM in body
+    return False
+
+
+def user_has_safety_data_grant(grant_name: str) -> bool:
+    if current_user.is_anonymous:
+        return False
+    return any(
+        grant.name == grant_name and grant.app == SAFETY_DATA_APP_ID
+        for grant in current_user.grants
+    )
+
+
+def require_polygon_filtering_grant_if_geo() -> None:
+    if not has_geo_param():
+        return
+    if not user_has_safety_data_grant(POLYGON_FILTERING_GRANT):
+        raise MissingPermissionError(POLYGON_FILTERING_GRANT)
 
 
 def load_data():
@@ -200,6 +251,9 @@ def get_params() -> dict:
 
     params = request.values
     vals = {k: f(params.getlist(key=k)) for k in params.keys() if k != GEO_PARAM}
+
+    if GEO_PARAM in request.values:
+        vals[GEO_PARAM] = f(request.values.getlist(key=GEO_PARAM))
 
     if request.is_json:
         body = request.get_json(silent=True)

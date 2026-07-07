@@ -28,6 +28,9 @@ class GeoObject(BaseModel):
     class Config:
         extra = Extra.ignore
 
+    def as_polygon(self) -> Polygon:
+        return list(self.coordinates)
+
     @validator("coordinates")
     def validate_polygon(cls, coordinates: Coordinates) -> Coordinates:
         for point_index, point in enumerate(coordinates):
@@ -42,8 +45,9 @@ class GeoObject(BaseModel):
             raise ValueError("polygon must be closed")
         return coordinates
 
+
 class GeoFilter(BaseModel):
-    __root__: List[GeoObject] = Field(..., min_items=1)
+    polygons: List[GeoObject] = Field(..., min_items=1)
 
 
 def _validation_error_message(exc: ValidationError) -> str:
@@ -52,7 +56,7 @@ def _validation_error_message(exc: ValidationError) -> str:
 
 def parse_geo_param(values: List[str]) -> List[Polygon]:
     if len(values) != 1:
-        raise ValueError("geo must be a single JSON array")
+        raise ValueError("geo must be a single JSON object")
     try:
         data = json.loads(values[0])
     except json.JSONDecodeError as exc:
@@ -61,4 +65,4 @@ def parse_geo_param(values: List[str]) -> List[Polygon]:
         geo_filter = GeoFilter.parse_obj(data)
     except ValidationError as exc:
         raise ValueError(_validation_error_message(exc)) from exc
-    return [geo_object.coordinates for geo_object in geo_filter.__root__]
+    return [geo_object.as_polygon() for geo_object in geo_filter.polygons]

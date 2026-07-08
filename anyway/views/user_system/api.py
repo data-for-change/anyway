@@ -64,6 +64,25 @@ principals = Principal(app)
 ANYWAY_APP_ID = 0
 SAFETY_DATA_APP_ID = 1
 ADMIN_EMAIL = "anyway@anyway.co.il"
+POLYGON_FILTERING_GRANT = "polygon-filtering"
+
+
+class MissingPermissionError(Exception):
+    error_code = Es.BR_MISSING_PERMISSION
+
+    def __init__(self, grant_name: str):
+        self.grant_name = grant_name
+        super().__init__(grant_name)
+
+
+def get_current_user_safety_data_grants() -> typing.List[str]:
+    if current_user.is_anonymous:
+        return []
+    return [
+        grant.name
+        for grant in current_user.grants
+        if grant.app == SAFETY_DATA_APP_ID
+    ]
 
 
 # Copied and modified from flask-security

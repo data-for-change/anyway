@@ -2,6 +2,7 @@ from typing import List, Dict, Optional, Tuple, Any
 from collections import namedtuple
 import math
 import pandas as pd
+from anyway.views.user_system.api import MissingPermissionError, POLYGON_FILTERING_GRANT
 from sqlalchemy.orm import aliased
 from sqlalchemy import and_, or_
 from sqlalchemy.schema import Column
@@ -92,13 +93,24 @@ class InvolvedQuery:
     PAGE_NUMBER_DEFAULT = 0
     PAGE_SIZE_DEFAULT = 8192
 
+    filters_to_required_grants = {
+        sdu.GEO_PARAM: POLYGON_FILTERING_GRANT,
+    }
+
     def __init__(self):
         self.S1: Streets = aliased(Streets)
         self.S2: Streets = aliased(Streets)
         self.fill_text_tables()
 
-    def get_data(self):
+    def validate_grants_for_requested_filters(self, vals: Dict[str, Any], grants: List[str]) -> None:
+        user_grants = set(grants)
+        for filter_name, required_grant in self.filters_to_required_grants.items():
+            if vals.get(filter_name) and required_grant not in user_grants:
+                raise MissingPermissionError(required_grant)
+
+    def get_data(self, user_grants: List[str]):
         vals = sdu.get_params()
+        self.validate_grants_for_requested_filters(vals, user_grants)
         query = self.get_base_query()
         geo = vals.pop(sdu.GEO_PARAM, None)
         if geo:

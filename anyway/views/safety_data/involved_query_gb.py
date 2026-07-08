@@ -39,8 +39,9 @@ class InvolvedQuery_GB(InvolvedQuery):
         super().__init__()
         self.gb_filt = GBFilt2Col(self.S1)
 
-    def get_data(self) -> List[Dict[str, Optional[str]]]:
+    def get_data(self, user_grants: List[str]) -> List[Dict[str, Optional[str]]]:
         vals = sdu.get_params()
+        self.validate_grants_for_requested_filters(vals, user_grants)
         involved_vals, gb_vals = split_dict(vals, [GB, GB2, LIMIT, SORT])
         query = self.get_base_query()
         geo = involved_vals.pop(sdu.GEO_PARAM, None)

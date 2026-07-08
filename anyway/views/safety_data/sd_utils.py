@@ -201,6 +201,9 @@ def get_params() -> dict:
     params = request.values
     vals = {k: f(params.getlist(key=k)) for k in params.keys() if k != GEO_PARAM}
 
+    if GEO_PARAM in request.values:
+        vals[GEO_PARAM] = request.values.getlist(key=GEO_PARAM)
+
     if request.is_json:
         body = request.get_json(silent=True)
         if isinstance(body, dict) and GEO_PARAM in body:

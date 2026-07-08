@@ -8,7 +8,7 @@ from io import StringIO
 
 import jinja2
 import pandas as pd
-from flask import make_response, render_template, abort
+from flask import make_response, render_template, abort, request, Response
 from flask import session
 from flask_assets import Environment
 from flask_babel import Babel, gettext
@@ -86,6 +86,15 @@ from anyway.views.schools.api import (
     injured_around_schools_api,
 )
 from anyway.views.user_system.api import *
+from anyway.views.user_system.api import (
+    get_current_user_safety_data_grants,
+    MissingPermissionError,
+)
+from anyway.error_code_and_strings import (
+    Errors as Es,
+    ERROR_TO_HTTP_CODE_DICT,
+    build_json_for_user_api_error,
+)
 
 from anyway.views.comments.api import get_comments, create_comment
 from anyway.telegram_accident_notifications import send_infographics_to_telegram
@@ -93,6 +102,7 @@ from anyway.telegram_accident_notifications import send_infographics_to_telegram
 from anyway.views.safety_data import involved_query_gb
 from anyway.views.safety_data import involved_query
 from anyway.views.safety_data import city_query
+from anyway.views.safety_data import sd_utils as sdu
 from anyway.request_params import get_latest_accident_date
 
 DEFAULT_MAPS_API_KEY = "AIzaSyANaM04RFXP3JjhIE-VlJVpLpJTU_SkE0c"
@@ -1639,12 +1649,22 @@ def test_roles_func():
 app.add_url_rule("/api/test_roles", endpoint=None, view_func=test_roles, methods=["GET"])
 
 
+def missing_grant_error_response(grant_name: str) -> Response:
+    body = build_json_for_user_api_error(Es.BR_MISSING_PERMISSION, None)
+    body["grant"] = grant_name
+    return Response(
+        response=json.dumps(body),
+        status=ERROR_TO_HTTP_CODE_DICT[Es.BR_MISSING_PERMISSION],
+        mimetype="application/json",
+    )
+
+
 @app.route("/involved", methods=["GET", "POST"])
 def safety_involved():
     chunk_size = 4096
     iq = involved_query.InvolvedQuery()
     try:
-        res = iq.get_data()
+        res = iq.get_data(get_current_user_safety_data_grants())
         j = json.dumps(res, default=str)
         def generate():
             chunked = [j[i : i + chunk_size] for i in range(0, len(j), chunk_size)]
@@ -1652,6 +1672,8 @@ def safety_involved():
                 yield c
 
         return Response(generate(), mimetype='application/json')
+    except MissingPermissionError as e:
+        return missing_grant_error_response(e.grant_name)
     except ValueError as e:
         logging.exception(e)
         return Response(e.args[0], http_client.BAD_REQUEST)
@@ -1664,8 +1686,10 @@ def safety_involved():
 def safety_involved_groupby():
     iq = involved_query_gb.InvolvedQuery_GB()
     try:
-        res = iq.get_data()
+        res = iq.get_data(get_current_user_safety_data_grants())
         return Response(json.dumps(res, default=str), mimetype="application/json")
+    except MissingPermissionError as e:
+        return missing_grant_error_response(e.grant_name)
     except ValueError as e:
         logging.exception(e)
         return Response(e.args[0], http_client.BAD_REQUEST)

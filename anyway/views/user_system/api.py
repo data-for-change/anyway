@@ -64,7 +64,7 @@ principals = Principal(app)
 ANYWAY_APP_ID = 0
 SAFETY_DATA_APP_ID = 1
 ADMIN_EMAIL = "anyway@anyway.co.il"
-POLYGON_FILTERING_GRANT = "polygon-filtering"
+POLYGON_FILTERING_GRANT = "polygon_filtering"
 
 
 class MissingPermissionError(Exception):

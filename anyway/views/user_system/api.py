@@ -487,6 +487,27 @@ def sd_get_all_users_info() -> Response:
     return get_all_users_info(app_id=SAFETY_DATA_APP_ID)
 
 
+def get_user_info_by_email(email: str, app_id: int) -> Response:
+    if not email:
+        return return_json_error(Es.BR_NO_EMAIL)
+
+    user_obj = get_user_by_email(db, email, app_id)
+    if user_obj is None:
+        return return_json_error(Es.BR_USER_NOT_FOUND, email)
+
+    return jsonify(user_obj.serialize_exposed_to_user())
+
+
+@roles_and_grants_accepted(roles=[BE_CONST.Roles2Names.Admins.value], app_id=ANYWAY_APP_ID)
+def an_get_user_info_by_email() -> Response:
+    return get_user_info_by_email(request.args.get("email", type=str), app_id=ANYWAY_APP_ID)
+
+
+@roles_and_grants_accepted(roles=[BE_CONST.Roles2Names.Admins.value], app_id=SAFETY_DATA_APP_ID)
+def sd_get_user_info_by_email() -> Response:
+    return get_user_info_by_email(request.args.get("email", type=str), app_id=SAFETY_DATA_APP_ID)
+
+
 def get_user_info(app_id: int) -> Response:
     user_obj = get_current_user()
     if user_obj is None:

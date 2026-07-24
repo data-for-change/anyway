@@ -7,6 +7,13 @@ from anyway.models import MarkerResult, AccidentMarker, Vehicle, Involved
 from anyway.vehicle_type import VehicleType as BE_VehicleType
 
 
+def empty_result() -> MarkerResult:
+    return MarkerResult(
+        accident_markers=db.session.query(AccidentMarker).filter(sql.false()),
+        rsa_markers=db.session.query(AccidentMarker).filter(sql.false()),
+        total_records=0,
+    )
+
 def marker_bounding_box_query(
     is_thin=False, yield_per=None, involved_and_vehicles=False, query_entities=None, **kwargs
 ) -> MarkerResult:
@@ -16,11 +23,7 @@ def marker_bounding_box_query(
     per_page = kwargs.get("per_page")
 
     if not kwargs.get("show_markers", True):
-        return MarkerResult(
-            accident_markers=db.session.query(AccidentMarker).filter(sql.false()),
-            rsa_markers=db.session.query(AccidentMarker).filter(sql.false()),
-            total_records=0,
-        )
+        return empty_result()
 
     sw_lat = float(kwargs["sw_lat"])
     sw_lng = float(kwargs["sw_lng"])
@@ -86,11 +89,7 @@ def marker_bounding_box_query(
     elif approx and not accurate:
         markers = markers.filter(AccidentMarker.location_accuracy != 1)
     elif not accurate and not approx:
-        return MarkerResult(
-            accident_markers=db.session.query(AccidentMarker).filter(sql.false()),
-            rsa_markers=db.session.query(AccidentMarker).filter(sql.false()),
-            total_records=0,
-        )
+        return empty_result()
     if not kwargs.get("show_fatal", True):
         markers = markers.filter(AccidentMarker.accident_severity != 1)
     if not kwargs.get("show_severe", True):

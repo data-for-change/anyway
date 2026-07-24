@@ -94,7 +94,7 @@ class InvolvedQuery:
     PAGE_SIZE_DEFAULT = 8192
 
     filters_to_required_grants = {
-        #sdu.GEO_PARAM: POLYGON_FILTERING_GRANT,
+        sdu.GEO_PARAM: POLYGON_FILTERING_GRANT,
     }
 
     def __init__(self):

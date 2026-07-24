@@ -2,7 +2,7 @@ import datetime
 
 import pytest
 
-from anyway.models import AccidentMarker  # for AccidentMarker.bounding_box_query
+from anyway.marker_bounding_box_query import marker_bounding_box_query
 
 
 # This tests year 2014 accidents as this is the current example git data for testing
@@ -49,7 +49,7 @@ def base_kwargs():
 
 @pytest.mark.partial_db
 def test_location_filters(base_kwargs):
-    result = AccidentMarker.bounding_box_query(yield_per=50, **base_kwargs)
+    result = marker_bounding_box_query(yield_per=50, **base_kwargs)
     accident_markers = result.accident_markers
     rsa_markers = result.rsa_markers
     for marker in accident_markers:
@@ -63,7 +63,7 @@ def test_location_filters(base_kwargs):
 @pytest.mark.partial_db
 def test_accurate_filter(base_kwargs):
     base_kwargs["approx"] = False
-    result = AccidentMarker.bounding_box_query(yield_per=50, **base_kwargs)
+    result = marker_bounding_box_query(yield_per=50, **base_kwargs)
     accident_markers = result.accident_markers
     for marker in accident_markers:
         assert marker.location_accuracy == 1
@@ -72,7 +72,7 @@ def test_accurate_filter(base_kwargs):
 @pytest.mark.partial_db
 def test_approx_filter(base_kwargs):
     base_kwargs["accurate"] = False
-    result = AccidentMarker.bounding_box_query(yield_per=50, **base_kwargs)
+    result = marker_bounding_box_query(yield_per=50, **base_kwargs)
     accident_markers = result.accident_markers
     for marker in accident_markers:
         assert marker.location_accuracy != 1
@@ -81,7 +81,7 @@ def test_approx_filter(base_kwargs):
 @pytest.mark.partial_db
 def test_fatal_severity_filter(base_kwargs):
     base_kwargs["show_fatal"] = False
-    result = AccidentMarker.bounding_box_query(yield_per=50, **base_kwargs)
+    result = marker_bounding_box_query(yield_per=50, **base_kwargs)
     accident_markers = result.accident_markers
     for marker in accident_markers:
         assert marker.accident_severity != 1
@@ -90,7 +90,7 @@ def test_fatal_severity_filter(base_kwargs):
 @pytest.mark.partial_db
 def test_severe_severity_filter(base_kwargs):
     base_kwargs["show_severe"] = False
-    result = AccidentMarker.bounding_box_query(yield_per=50, **base_kwargs)
+    result = marker_bounding_box_query(yield_per=50, **base_kwargs)
     accident_markers = result.accident_markers
     for marker in accident_markers:
         assert marker.accident_severity != 2
@@ -99,7 +99,7 @@ def test_severe_severity_filter(base_kwargs):
 @pytest.mark.partial_db
 def test_light_severity_filter(base_kwargs):
     base_kwargs["show_light"] = False
-    result = AccidentMarker.bounding_box_query(yield_per=50, **base_kwargs)
+    result = marker_bounding_box_query(yield_per=50, **base_kwargs)
     accident_markers = result.accident_markers
     for marker in accident_markers:
         assert marker.accident_severity != 3

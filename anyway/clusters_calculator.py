@@ -1,12 +1,12 @@
 import logging
 import time
-from anyway.models import AccidentMarker
+from anyway.marker_bounding_box_query import marker_bounding_box_query
 from anyway.pymapcluster import calculate_clusters
 
 
 def retrieve_clusters(**kwargs):
     start_time = time.time()
-    result = AccidentMarker.bounding_box_query(is_thin=True, **kwargs)
+    result = marker_bounding_box_query(is_thin=True, **kwargs)
     accident_markers_in_box = result.accident_markers.all()
     rsa_markers_in_box = result.rsa_markers.all()
     logging.debug("getting cluster data from db took %f seconds" % (time.time() - start_time))

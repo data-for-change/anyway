@@ -8,6 +8,7 @@ import copy
 from dataclasses import dataclass
 from functools import wraps
 from http import HTTPStatus
+from typing import List
 
 from flask import Response, request, Request, jsonify, current_app, redirect, g
 from flask_login import current_user, login_user, logout_user, LoginManager

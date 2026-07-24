@@ -1288,7 +1288,7 @@ def sd_delete_grant() -> Response:
     return delete_grant(app_id=SAFETY_DATA_APP_ID)
 
 
-def _get_grants_list(app_id: int) -> list[Grant]:
+def _get_grants_list(app_id: int) -> list:
     return db.session.query(Grant).filter(Grant.app == app_id).all()
 
 

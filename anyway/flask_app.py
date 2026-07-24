@@ -27,6 +27,7 @@ from anyway.app_and_db import api, get_cors_config
 from anyway.clusters_calculator import retrieve_clusters
 from anyway.config import ENTRIES_PER_PAGE
 from anyway.constants import CONST
+from anyway.marker_bounding_box_query import marker_bounding_box_query
 from anyway.infographics_utils import (
     get_infographics_mock_data,
     get_infographics_data_for_location,
@@ -354,7 +355,7 @@ def markers():
     kwargs = get_kwargs()
     logging.debug("querying markers in bounding box: %s" % kwargs)
     is_thin = kwargs["zoom"] < CONST.MINIMAL_ZOOM
-    result = AccidentMarker.bounding_box_query(
+    result = marker_bounding_box_query(
         is_thin, yield_per=50, involved_and_vehicles=False, **kwargs
     )
     accident_markers = result.accident_markers
@@ -443,7 +444,7 @@ def yishuv_symbol_to_name():
 def charts_data():
     logging.debug("getting charts data")
     kwargs = get_kwargs()
-    accidents, vehicles, involved = AccidentMarker.bounding_box_query(
+    accidents, vehicles, involved = marker_bounding_box_query(
         is_thin=False, yield_per=50, involved_and_vehicles=True, **kwargs
     )
     accidents_list = [acc.serialize() for acc in accidents]

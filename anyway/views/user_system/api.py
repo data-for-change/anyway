@@ -5,6 +5,7 @@ import logging
 import re
 import typing
 import copy
+from dataclasses import dataclass
 from functools import wraps
 from http import HTTPStatus
 
@@ -73,6 +74,13 @@ class MissingPermissionError(Exception):
     def __init__(self, grant_name: str):
         self.grant_name = grant_name
         super().__init__(grant_name)
+
+
+class ApiError(Exception):
+    def __init__(self, error_code: int, *argv):
+        self.error_code = error_code
+        self.argv = argv
+        super().__init__(error_code, *argv)
 
 
 def get_current_user_safety_data_grants() -> typing.List[str]:
@@ -477,6 +485,27 @@ def an_get_all_users_info() -> Response:
 @roles_and_grants_accepted(roles=[BE_CONST.Roles2Names.Admins.value], app_id=SAFETY_DATA_APP_ID)
 def sd_get_all_users_info() -> Response:
     return get_all_users_info(app_id=SAFETY_DATA_APP_ID)
+
+
+def get_user_info_by_email(email: str, app_id: int) -> Response:
+    if not email:
+        return return_json_error(Es.BR_NO_EMAIL)
+
+    user_obj = get_user_by_email(db, email, app_id)
+    if user_obj is None:
+        return return_json_error(Es.BR_USER_NOT_FOUND, email)
+
+    return jsonify(user_obj.serialize_exposed_to_user())
+
+
+@roles_and_grants_accepted(roles=[BE_CONST.Roles2Names.Admins.value], app_id=ANYWAY_APP_ID)
+def an_get_user_info_by_email() -> Response:
+    return get_user_info_by_email(request.args.get("email", type=str), app_id=ANYWAY_APP_ID)
+
+
+@roles_and_grants_accepted(roles=[BE_CONST.Roles2Names.Admins.value], app_id=SAFETY_DATA_APP_ID)
+def sd_get_user_info_by_email() -> Response:
+    return get_user_info_by_email(request.args.get("email", type=str), app_id=SAFETY_DATA_APP_ID)
 
 
 def get_user_info(app_id: int) -> Response:
@@ -1258,8 +1287,12 @@ def sd_delete_grant() -> Response:
     return delete_grant(app_id=SAFETY_DATA_APP_ID)
 
 
+def _get_grants_list(app_id: int) -> list[Grant]:
+    return db.session.query(Grant).filter(Grant.app == app_id).all()
+
+
 def get_grants_list(app_id: int) -> Response:
-    grants_list = db.session.query(Grant).filter(Grant.app == app_id).all()
+    grants_list = _get_grants_list(app_id)
     send_list = [
         {"id": grant.id, "name": grant.name, "description": grant.description}
         for grant in grants_list
@@ -1273,6 +1306,96 @@ def get_grants_list(app_id: int) -> Response:
 @roles_and_grants_accepted(roles=[BE_CONST.Roles2Names.Admins.value], app_id=SAFETY_DATA_APP_ID)
 def sd_get_grants_list() -> Response:
     return get_grants_list(app_id=SAFETY_DATA_APP_ID)
+
+
+@dataclass(frozen=True)
+class SetUserGrantsParams:
+    email: str
+    grant_names: list
+
+
+def set_user_grants(app_id: int) -> Response:
+    try:
+        params = parse_set_user_grants_request()
+        user = get_user_by_email(db, params.email, app_id)
+        if user is None:
+            return return_json_error(Es.BR_USER_NOT_FOUND, params.email)
+
+        desired_grants = resolve_grants(app_id, params.grant_names)
+        replace_user_grants(user.id, app_id, desired_grants)
+        db.session.commit()
+        return Response(status=HTTPStatus.OK)
+    except ApiError as e:
+        return return_json_error(e.error_code, *e.argv)
+
+
+def parse_set_user_grants_request() -> SetUserGrantsParams:
+    req_dict = request.get_json(silent=True)
+    if not isinstance(req_dict, dict):
+        raise ApiError(Es.BR_FIELD_MISSING)
+
+    email = req_dict.get("email")
+    if not isinstance(email, str) or not email.strip():
+        raise ApiError(Es.BR_FIELD_MISSING, "email")
+
+    grant_names = req_dict.get("grants")
+    if not isinstance(grant_names, list):
+        raise ApiError(Es.BR_FIELD_MISSING, "grants")
+
+    if not all(isinstance(name, str) for name in grant_names):
+        raise ApiError(Es.BR_BAD_FIELD, "grants")
+
+    return SetUserGrantsParams(
+        email=email.strip(),
+        grant_names=list(dict.fromkeys(grant_names)),
+    )
+
+
+def resolve_grants(app_id: int, grant_names: list) -> list:
+    grants = _get_grants_list(app_id)
+    grants_by_name = {grant.name: grant for grant in grants}
+    desired_grants = []
+    for grant_name in grant_names:
+        grant = grants_by_name.get(grant_name)
+        if grant is None:
+            raise ApiError(Es.BR_NOT_EXIST, grant_name)
+        desired_grants.append(grant)
+    return desired_grants
+
+
+def replace_user_grants(user_id: int, app_id: int, desired_grants: list) -> None:
+    user_grants_filter = (users_to_grants.c.user_id == user_id) & (users_to_grants.c.app == app_id)
+    existing_create_dates = {
+        row.grant_id: row.create_date
+        for row in db.session.query(
+            users_to_grants.c.grant_id,
+            users_to_grants.c.create_date,
+        )
+        .filter(user_grants_filter)
+        .all()
+    }
+    db.session.execute(
+        users_to_grants.delete().where(user_grants_filter)  # pylint: disable=no-value-for-parameter
+    )
+    now = datetime.datetime.now()
+    rows = [
+        {
+            "user_id": user_id,
+            "grant_id": grant.id,
+            "app": app_id,
+            "create_date": existing_create_dates.get(grant.id, now),
+        }
+        for grant in desired_grants
+    ]
+    if rows:
+        db.session.execute(
+            users_to_grants.insert(), rows  # pylint: disable=no-value-for-parameter
+        )
+
+
+@roles_and_grants_accepted(roles=[BE_CONST.Roles2Names.Admins.value], app_id=SAFETY_DATA_APP_ID)
+def sd_set_user_grants() -> Response:
+    return set_user_grants(app_id=SAFETY_DATA_APP_ID)
 
 
 @roles_and_grants_accepted(

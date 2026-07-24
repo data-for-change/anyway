@@ -1394,6 +1394,9 @@ app.add_url_rule("/user/remove_from_role", view_func=an_remove_from_role, method
 app.add_url_rule("/user/info", view_func=an_get_user_info, methods=["GET"])
 app.add_url_rule("/user/is_user_logged_in", view_func=an_is_user_logged_in, methods=["GET"])
 app.add_url_rule("/user/get_all_users_info", view_func=an_get_all_users_info, methods=["GET"])
+app.add_url_rule(
+    "/user/get_user_info_by_email", view_func=an_get_user_info_by_email, methods=["GET"]
+)
 app.add_url_rule("/user/get_roles_list", view_func=an_get_roles_list, methods=["GET"])
 app.add_url_rule("/callback/<provider>", view_func=an_oauth_callback, methods=["GET"])
 app.add_url_rule("/authorize/<provider>", view_func=an_oauth_authorize, methods=["GET"])
@@ -1412,11 +1415,15 @@ app.add_url_rule("/sd-user/remove_from_role", view_func=sd_remove_from_role, met
 app.add_url_rule("/sd-user/info", view_func=sd_get_user_info, methods=["GET"])
 app.add_url_rule("/sd-user/is_user_logged_in", view_func=sd_is_user_logged_in, methods=["GET"])
 app.add_url_rule("/sd-user/get_all_users_info", view_func=sd_get_all_users_info, methods=["GET"])
+app.add_url_rule(
+    "/sd-user/get_user_info_by_email", view_func=sd_get_user_info_by_email, methods=["GET"]
+)
 app.add_url_rule("/sd-user/get_roles_list", view_func=sd_get_roles_list, methods=["GET"])
 app.add_url_rule("/sd-user/add_grant", view_func=sd_add_grant, methods=["POST"])
 app.add_url_rule("/sd-user/add_to_grant", view_func=sd_add_to_grant, methods=["POST"])
 app.add_url_rule("/sd-user/remove_from_grant", view_func=sd_remove_from_grant, methods=["POST"])
 app.add_url_rule("/sd-user/delete_grant", view_func=sd_delete_grant, methods=["POST"])
+app.add_url_rule("/sd-user/set_grants", view_func=sd_set_user_grants, methods=["POST"])
 app.add_url_rule("/sd-user/get_grants_list", view_func=sd_get_grants_list, methods=["GET"])
 app.add_url_rule("/sd-user/test_grant_and_admin", view_func=sd_test_grant_and_admin_endpoint, methods=["GET"])
 app.add_url_rule("/sd-callback/<provider>", view_func=sd_oauth_callback, methods=["GET"])

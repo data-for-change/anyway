@@ -5,7 +5,9 @@ import os
 import re
 import sys
 import threading
+import time
 import typing
+from contextlib import contextmanager
 from csv import DictReader
 from datetime import datetime
 from functools import partial
@@ -44,6 +46,23 @@ except (ValueError, ImportError):
 
 DATE_INPUT_FORMAT = "%d-%m-%Y"
 _PROJECT_ROOT = os.path.join(os.path.dirname(__file__), "..")
+
+
+@contextmanager
+def log_duration(operation):
+    started = time.perf_counter()
+    status = "failed"
+
+    try:
+        yield
+        status = "completed"
+    finally:
+        logging.info(
+            "%s %s in %.2f seconds",
+            operation,
+            status,
+            time.perf_counter() - started,
+        )
 
 
 def init_flask():
@@ -203,13 +222,11 @@ def delete_all_rows_from_table(conn, table):
 
 def split_query_to_chunks_by_column(base_select, column_to_chunk_by, chunk_size, conn):
     column_values = fetch_first_and_every_nth_value_for_column(conn, column_to_chunk_by, chunk_size)
-    logging.debug("after fetching every nth column")
     for index in range(len(column_values)):
         select = base_select.where(column_to_chunk_by >= column_values[index])
         if index + 1 < len(column_values):
             select = select.where(column_to_chunk_by < column_values[index + 1])
         chunk = conn.execute(select).fetchall()
-        logging.debug("after running query on chunk")
         yield [dict(row.items()) for row in chunk]
     logging.debug("after running query on all chunks")
 
@@ -377,3 +394,4 @@ def trigger_airflow_dag(dag_id, conf=None):
         dag_run_api_instance = dag_run_api.DAGRunApi(api_client)
         dag_run = DAGRun(conf=conf)
         return dag_run_api_instance.post_dag_run(dag_id, dag_run)
+

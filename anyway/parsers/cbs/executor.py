@@ -30,7 +30,7 @@ from anyway.models import (
 )
 from anyway.parsers.cbs.exceptions import CBSParsingFailed
 from anyway.utilities import ItmToWGS84, time_delta, ImporterUI, truncate_tables, delete_all_rows_from_table, \
-    chunks, run_query_and_insert_to_table_in_chunks
+    chunks, run_query_and_insert_to_table_in_chunks, log_duration
 from anyway.db_views import VIEWS
 from anyway.app_and_db import db
 from anyway.parsers.cbs.s3 import S3DataRetriever
@@ -702,14 +702,26 @@ def import_to_datastore(directory, provider_code, year, batch_size) -> int:
         started = datetime.now()
 
         # import dictionary
-        fill_dictionary_tables(files_from_cbs[DICTIONARY], provider_code, year)
+        with log_duration("Importing dictionary tables"):
+            fill_dictionary_tables(files_from_cbs[DICTIONARY], provider_code, year)
 
         new_items = 0
-        accidents_count = import_accidents(provider_code=provider_code, **files_from_cbs)
+        with log_duration(
+            "Importing table '{}'".format(AccidentMarker.__tablename__)
+        ):
+            accidents_count = import_accidents(
+                provider_code=provider_code, **files_from_cbs
+            )
         new_items += accidents_count
-        involved_count = import_involved(provider_code=provider_code, **files_from_cbs)
+        with log_duration("Importing table '{}'".format(Involved.__tablename__)):
+            involved_count = import_involved(
+                provider_code=provider_code, **files_from_cbs
+            )
         new_items += involved_count
-        vehicles_count = import_vehicles(provider_code=provider_code, **files_from_cbs)
+        with log_duration("Importing table '{}'".format(Vehicle.__tablename__)):
+            vehicles_count = import_vehicles(
+                provider_code=provider_code, **files_from_cbs
+            )
         new_items += vehicles_count
 
         logging.debug("\t{0} items in {1}".format(new_items, time_delta(started)))
@@ -846,28 +858,69 @@ def create_tables():
     try:
         with db.get_engine().begin() as conn:
             event.listen(conn, "rollback", receive_rollback)
-            delete_all_rows_from_table(conn, AccidentMarkerView)
-            run_query_and_insert_to_table_in_chunks(VIEWS.create_markers_hebrew_view(), AccidentMarkerView,
-                                                    AccidentMarker.id, chunk_size, conn)
+            with log_duration(
+                "Creating table '{}'".format(AccidentMarkerView.__tablename__)
+            ):
+                delete_all_rows_from_table(conn, AccidentMarkerView)
+                run_query_and_insert_to_table_in_chunks(
+                    VIEWS.create_markers_hebrew_view(),
+                    AccidentMarkerView,
+                    AccidentMarker.id,
+                    chunk_size,
+                    conn,
+                )
             logging.debug("after insertion to markers_hebrew ")
-            delete_all_rows_from_table(conn, InvolvedView)
-            run_query_and_insert_to_table_in_chunks(VIEWS.create_involved_hebrew_view(), InvolvedView,
-                                                    Involved.id, chunk_size, conn)
+
+            with log_duration(
+                "Creating table '{}'".format(InvolvedView.__tablename__)
+            ):
+                delete_all_rows_from_table(conn, InvolvedView)
+                run_query_and_insert_to_table_in_chunks(
+                    VIEWS.create_involved_hebrew_view(),
+                    InvolvedView,
+                    Involved.id,
+                    chunk_size,
+                    conn,
+                )
             logging.debug("after insertion to involved_hebrew ")
 
-            delete_all_rows_from_table(conn, VehiclesView)
-            run_query_and_insert_to_table_in_chunks(VIEWS.create_vehicles_hebrew_view(),
-                                                    VehiclesView, Vehicle.id, chunk_size, conn)
+            with log_duration(
+                "Creating table '{}'".format(VehiclesView.__tablename__)
+            ):
+                delete_all_rows_from_table(conn, VehiclesView)
+                run_query_and_insert_to_table_in_chunks(
+                    VIEWS.create_vehicles_hebrew_view(),
+                    VehiclesView,
+                    Vehicle.id,
+                    chunk_size,
+                    conn,
+                )
             logging.debug("after insertion to vehicles_hebrew ")
 
-            delete_all_rows_from_table(conn, VehicleMarkerView)
-            run_query_and_insert_to_table_in_chunks(VIEWS.create_vehicles_markers_hebrew_view(),
-                                                    VehicleMarkerView, VehiclesView.id, chunk_size, conn)
+            with log_duration(
+                "Creating table '{}'".format(VehicleMarkerView.__tablename__)
+            ):
+                delete_all_rows_from_table(conn, VehicleMarkerView)
+                run_query_and_insert_to_table_in_chunks(
+                    VIEWS.create_vehicles_markers_hebrew_view(),
+                    VehicleMarkerView,
+                    VehiclesView.id,
+                    chunk_size,
+                    conn,
+                )
             logging.debug("after insertion to vehicles_markers_hebrew ")
 
-            delete_all_rows_from_table(conn, InvolvedMarkerView)
-            run_query_and_insert_to_table_in_chunks(VIEWS.create_involved_hebrew_markers_hebrew_view(),
-                                                    InvolvedMarkerView, InvolvedView.accident_id, chunk_size, conn)
+            with log_duration(
+                "Creating table '{}'".format(InvolvedMarkerView.__tablename__)
+            ):
+                delete_all_rows_from_table(conn, InvolvedMarkerView)
+                run_query_and_insert_to_table_in_chunks(
+                    VIEWS.create_involved_hebrew_markers_hebrew_view(),
+                    InvolvedMarkerView,
+                    InvolvedView.accident_id,
+                    chunk_size,
+                    conn,
+                )
             logging.debug("after insertion to involved_markers_hebrew")
             logging.debug("Created DB Hebrew Tables")
     except Exception as e:
@@ -1105,10 +1158,12 @@ def _build_hebrew_tables_and_derived_data():
     fill_db_geo_data()
     create_tables()
     logging.debug("Finished Creating Hebrew DB Tables")
-    recreate_table_for_location_extraction()
+    with log_duration("Creating table 'cbs_locations'"):
+        recreate_table_for_location_extraction()
     logging.debug("Finished Recreating tables for location extraction")
     logging.debug("Loading safety data tables")
-    sd_utils.load_data()
+    with log_duration("Importing safety data tables"):
+        sd_utils.load_data()
     logging.debug("Completed load of safety data tables")
 
 

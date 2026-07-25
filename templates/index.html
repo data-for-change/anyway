@@ -764,8 +764,10 @@ ANYWAY מציגה על גבי מפה תאונות דרכים עם נפגעים �
                 <label for="checkbox-holi-eve" class="btn one">ערב חג</label>
                 <input type="radio" name="holiday" id="checkbox-holi-weekday" value=3 onclick="app.changeDate()" />
                 <label for="checkbox-holi-weekday" class="btn one">חול המועד</label>
-                <input type="radio" name="holiday" id="checkbox-weekday" value=4 onclick="app.changeDate()" />
-                <label for="checkbox-weekday" class="btn one">יום חול</label>
+                <input type="radio" name="holiday" id="checkbox-special-day" value=4 onclick="app.changeDate()" />
+                <label for="checkbox-special-day" class="btn one">יום מיוחד</label>
+                <input type="radio" name="holiday" id="checkbox-weekday" value=5 onclick="app.changeDate()" />
+                <label for="checkbox-weekday" class="btn one">יום רגיל</label>
             </div>
         </div>
 
@@ -863,48 +865,33 @@ ANYWAY מציגה על גבי מפה תאונות דרכים עם נפגעים �
 
             <div class="btn-label">סוג תאונה:</div>
             <div class="btn-wrap separator">
-                <input type="radio" name="acctype" id="checkbox-type-all" value=0 onclick="app.loadFilter('accident type', 'all')" checked />
-                <label for="checkbox-type-all" class="btn one">הכל</label>
-                <input type="radio" name="acctype" id="checkbox-front-side" value=2 onclick="app.loadFilter('accident type', 'front to side')" />
-                <label for="checkbox-front-side" class="btn one">חזית אל צד</label>
-                <input type="radio" name="acctype" id="checkbox-front-rear" value=3 onclick="app.loadFilter('accident type', 'rear')" />
-                <label for="checkbox-front-rear" class="btn one">חזית באחור</label>
-                <input type="radio" name="acctype" id="checkbox-side-side" value=4 onclick="app.loadFilter('accident type', 'side to side')" />
-                <label for="checkbox-side-side" class="btn one">צד בצד</label>
-                <input type="radio" name="acctype" id="checkbox-front-front" value=5 onclick="app.loadFilter('accident type', 'front to front')" />
-                <label for="checkbox-front-front" class="btn one">חזית אל חזית</label>
-                <input type="radio" name="acctype" id="checkbox-rear-front" value=17 onclick="app.loadFilter('accident type', 'rear to front')" />
-                <label for="checkbox-rear-front" class="btn one">אחור אל חזית</label>
-                <input type="radio" name="acctype" id="checkbox-rear-side" value=18 onclick="app.loadFilter('accident type', 'rear to side')" />
-                <label for="checkbox-rear-side" class="btn one">אחור אל צד</label>
-                <input type="radio" name="acctype" id="checkbox-standing" value=6 onclick="app.loadFilter('accident type', 'standing')" />
-                <label for="checkbox-standing" class="btn one">התנגשות ברכב עוצר</label>
-                <input type="radio" name="acctype" id="checkbox-parked" value=7 onclick="app.loadFilter('accident type', 'parked')" />
-                <label for="checkbox-parked" class="btn one">התנגשות ברכב חונה</label>
-                <input type="radio" name="acctype" id="checkbox-animal" value=19 onclick="app.loadFilter('accident type', 'animal')" />
-                <label for="checkbox-animal" class="btn one">התנגשות בבעל חיים</label>
-                <input type="radio" name="acctype" id="checkbox-still" value=8 onclick="app.loadFilter('accident type', 'still')" />
-                <label for="checkbox-still" class="btn one">התנגשות בעצם דומם</label>
-                <input type="radio" name="acctype" id="checkbox-sidewalk" value=9 onclick="app.loadFilter('accident type', 'sidewalk')" />
-                <label for="checkbox-sidewalk" class="btn one">ירידה מהכביש \ עלייה למדרכה</label>
-                <input type="radio" name="acctype" id="checkbox-flip" value=10 onclick="app.loadFilter('accident type', 'flip')" />
-                <label for="checkbox-flip" class="btn one">התהפכות</label>
-                <input type="radio" name="acctype" id="checkbox-slide" value=11 onclick="app.loadFilter('accident type', 'slide')" />
-                <label for="checkbox-slide" class="btn one">החלקה</label>
-                <input type="radio" name="acctype" id="checkbox-inside" value=12 onclick="app.loadFilter('accident type', 'inside')" />
-                <label for="checkbox-inside" class="btn one">פגיעה בנוסע בתוך כלי רכב</label>
-                <input type="radio" name="acctype" id="checkbox-fall" value=13 onclick="app.loadFilter('accident type', 'fall')" />
-                <label for="checkbox-fall" class="btn one">נפילה ברכב נע</label>
-                <input type="radio" name="acctype" id="checkbox-load" value=20 onclick="app.loadFilter('accident type', 'load')" />
-                <label for="checkbox-load" class="btn one">פגיעה ממטען של רכב</label>
-                <input type="radio" name="acctype" id="checkbox-fire" value=14 onclick="app.loadFilter('accident type', 'fire')" />
-                <label for="checkbox-fire" class="btn one">שריפה</label>
-                <input type="radio" name="acctype" id="checkbox-type-pedestrian" value=1 onclick="app.loadFilter('accident type', 'else')" />
-                <label for="checkbox-type-pedestrian" class="btn one">אחר</label>
-                <input type="radio" name="acctype" id="checkbox-type-else" value=1 onclick="app.loadFilter('accident type', 'else')" />
-                <label for="checkbox-type-else" class="btn one">פגיעה בהולך רגל</label>
-                <input type="radio" name="acctype" id="checkbox-type-bike-no-casualties" value=21 onclick="app.loadFilter('accident type', 'bike no casualties')" />
-                <label for="checkbox-type-bike-no-casualties" class="btn one">אופניים</label>
+                {% set accident_types = [
+                    ('checkbox-type-all', 0, 'all', 'הכל', true),
+                    ('checkbox-front-side', 2, 'front to side', 'חזית אל צד', false),
+                    ('checkbox-front-rear', 3, 'rear', 'חזית באחור', false),
+                    ('checkbox-side-side', 4, 'side to side', 'צד בצד', false),
+                    ('checkbox-front-front', 5, 'front to front', 'חזית אל חזית', false),
+                    ('checkbox-rear-front', 17, 'rear to front', 'אחור אל חזית', false),
+                    ('checkbox-rear-side', 18, 'rear to side', 'אחור אל צד', false),
+                    ('checkbox-standing', 6, 'standing', 'התנגשות ברכב עוצר', false),
+                    ('checkbox-parked', 7, 'parked', 'התנגשות ברכב חונה', false),
+                    ('checkbox-animal', 19, 'animal', 'התנגשות בבעל חיים', false),
+                    ('checkbox-still', 8, 'still', 'התנגשות בעצם דומם', false),
+                    ('checkbox-sidewalk', 9, 'sidewalk', 'ירידה מהכביש \ עלייה למדרכה', false),
+                    ('checkbox-flip', 10, 'flip', 'התהפכות', false),
+                    ('checkbox-slide', 11, 'slide', 'החלקה', false),
+                    ('checkbox-inside', 12, 'inside', 'פגיעה בנוסע בתוך כלי רכב', false),
+                    ('checkbox-fall', 13, 'fall', 'נפילה ברכב נע', false),
+                    ('checkbox-load', 20, 'load', 'פגיעה ממטען של רכב', false),
+                    ('checkbox-fire', 14, 'fire', 'שריפה', false),
+                    ('checkbox-type-pedestrian', 1, 'else', 'אחר', false),
+                    ('checkbox-type-else', 1, 'else', 'פגיעה בהולך רגל', false),
+                    ('checkbox-type-bike-no-casualties', 21, 'bike no casualties', 'אופניים', false)
+                ] %}
+                {% for id, value, filter_value, label, checked in accident_types %}
+                    <input type="radio" name="acctype" id="{{ id }}" value="{{ value }}" onclick="app.loadFilter('accident type', '{{ filter_value }}')"{% if checked %} checked{% endif %} />
+                    <label for="{{ id }}" class="btn one">{{ label }}</label>
+                {% endfor %}
             </div>
 
             <div class="btn-label">גילאי מעורכים</div>

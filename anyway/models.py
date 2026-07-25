@@ -381,7 +381,10 @@ class AccidentMarker(MarkerMixin, Base):
 
     @staticmethod
     def json_to_description(msg):
-        description = json.loads(msg, encoding=db_encoding)
+        try:
+            description = json.loads(msg, encoding=db_encoding)
+        except (TypeError, ValueError):
+            return ""
         return "\n".join(
             [
                 AccidentMarker.format_description(field, value)

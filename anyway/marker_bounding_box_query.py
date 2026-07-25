@@ -3,10 +3,22 @@ from sqlalchemy.orm import load_only
 from typing import Any
 
 from anyway.app_and_db import db
-from anyway.backend_constants import BE_CONST
+from anyway.backend_constants import BE_CONST, OneLane
+from anyway.backend_constants import AccidentSeverity as BE_AccidentSeverity
+from anyway.backend_constants import PlaceType
 from anyway.models import MarkerResult, AccidentMarker, Vehicle, Involved
-from anyway.vehicle_type import VehicleType as BE_VehicleType
 
+SHOW_ALL = 3
+SHOW_ALL_ACCIDENT_TYPES = 1
+SHOW_INTERSECTION = 2
+SHOW_NOT_IN_INTERSECTION = 1
+SHOW_URBAN = 2
+SHOW_SUBURBAN = 1
+SHOW_MULTI_LANE = 2
+SHOW_ONE_LANE = 1
+SHOW_ALL_DAYS = 7
+SHOW_TIME = 24
+SHOW_ALL_WEATHER = 0
 
 def empty_markers_query():
     return db.session.query(AccidentMarker).filter(sql.false())
@@ -67,61 +79,59 @@ def handle_location_accuracy(markers, accurate, approx):
 
 def handle_accident_severity(markers, kwargs):
     if not kwargs.get("show_fatal", True):
-        markers = markers.filter(AccidentMarker.accident_severity != 1)
+        markers = markers.filter(AccidentMarker.accident_severity != BE_AccidentSeverity.FATAL.value)
     if not kwargs.get("show_severe", True):
-        markers = markers.filter(AccidentMarker.accident_severity != 2)
+        markers = markers.filter(AccidentMarker.accident_severity != BE_AccidentSeverity.SEVERE.value)
     if not kwargs.get("show_light", True):
-        markers = markers.filter(AccidentMarker.accident_severity != 3)
+        markers = markers.filter(AccidentMarker.accident_severity != BE_AccidentSeverity.LIGHT.value)
     return markers
 
 def handle_urban_filter(markers, kwargs):
-    show_urban = kwargs.get("show_urban", 3)
-    if show_urban == 3:
+    urban_values = [PlaceType.URBAN_NOT_IN_JUNCTION.value, PlaceType.URBAN_IN_JUNCTION.value]
+    suburban_values = [PlaceType.SUBURBAN_NOT_IN_JUNCTION.value, PlaceType.SUBURBAN_IN_JUNCTION.value]
+
+    show_urban = kwargs.get("show_urban", SHOW_ALL)
+    if show_urban == SHOW_ALL:
         return markers, False
-    if show_urban == 2:
-        markers = markers.filter(AccidentMarker.road_type >= 1).filter(
-            AccidentMarker.road_type <= 2
-        )
-    elif show_urban == 1:
-        markers = markers.filter(AccidentMarker.road_type >= 3).filter(
-            AccidentMarker.road_type <= 4
-        )
+    if show_urban == SHOW_URBAN:
+        markers = markers.filter(AccidentMarker.road_type.in_(urban_values))
+    elif show_urban == SHOW_SUBURBAN:
+        markers = markers.filter(AccidentMarker.road_type.in_(suburban_values))
     else:
         return markers, True
     return markers, False
 
 def handle_intersection_filter(markers, kwargs):
-    show_intersection = kwargs.get("show_intersection", 3)
-    if show_intersection == 3:
+    in_junction_values = [PlaceType.URBAN_IN_JUNCTION.value, PlaceType.SUBURBAN_IN_JUNCTION.value]
+    not_in_junction_values = [PlaceType.URBAN_NOT_IN_JUNCTION.value, PlaceType.SUBURBAN_NOT_IN_JUNCTION.value]
+
+    show_intersection = kwargs.get("show_intersection", SHOW_ALL)
+    if show_intersection == SHOW_ALL:
         return markers, False
-    if show_intersection == 2:
-        markers = markers.filter(AccidentMarker.road_type != 2).filter(
-            AccidentMarker.road_type != 4
-        )
-    elif show_intersection == 1:
-        markers = markers.filter(AccidentMarker.road_type != 1).filter(
-            AccidentMarker.road_type != 3
-        )
+    if show_intersection == SHOW_INTERSECTION:
+        markers = markers.filter(AccidentMarker.road_type.in_(in_junction_values))
+    elif show_intersection == SHOW_NOT_IN_INTERSECTION:
+        markers = markers.filter(AccidentMarker.road_type.in_(not_in_junction_values))
     else:
         return markers, True
     return markers, False
 
 def handle_lane_filter(markers, kwargs):
-    show_lane = kwargs.get("show_lane", 3)
-    if show_lane == 3:
+    multi_lane_values = [OneLane.MULTI_LANE_WITH_DIVIDER.value, OneLane.MULTI_LANE_WITHOUT_DIVIDER.value]
+
+    show_lane = kwargs.get("show_lane", SHOW_ALL)
+    if show_lane == SHOW_ALL:
         return markers, False
-    if show_lane == 2:
-        markers = markers.filter(AccidentMarker.one_lane >= 2).filter(
-            AccidentMarker.one_lane <= 3
-        )
-    elif show_lane == 1:
-        markers = markers.filter(AccidentMarker.one_lane == 1)
+    if show_lane == SHOW_MULTI_LANE:
+        markers = markers.filter(AccidentMarker.one_lane.in_(multi_lane_values))
+    elif show_lane == SHOW_ONE_LANE:
+        markers = markers.filter(AccidentMarker.one_lane == OneLane.ONE_LANE.value)
     else:
         return markers, True
     return markers, False
 
 def handle_day_filter(markers, kwargs):
-    if kwargs.get("show_day", 7) != 7:
+    if kwargs.get("show_day", SHOW_ALL_DAYS) != SHOW_ALL_DAYS:
         markers = markers.filter(
             func.extract("dow", AccidentMarker.created) == kwargs["show_day"]
         )
@@ -170,16 +180,9 @@ def handle_surface_filter(markers, kwargs):
     return markers
 
 def handle_accident_type_filter(markers, kwargs):
-    accident_type = kwargs.get("acctype", 0)
-    if accident_type != 0:
-        if accident_type <= 20:
-            markers = markers.filter(AccidentMarker.accident_type == accident_type)
-        elif accident_type == BE_CONST.BIKE_ACCIDENTS:
-            markers = markers.filter(
-                AccidentMarker.vehicles.any(
-                    Vehicle.vehicle_type == BE_VehicleType.BIKE.value
-                )
-            )
+    accident_type = kwargs.get("acctype", SHOW_ALL_ACCIDENT_TYPES)
+    if accident_type != SHOW_ALL_ACCIDENT_TYPES:
+        markers = markers.filter(AccidentMarker.accident_type == accident_type)
     return markers
 
 def handle_control_measure_filter(markers, kwargs):
@@ -208,6 +211,7 @@ def handle_age_groups_filter(markers, kwargs):
         markers = empty_markers_query()
     return markers
 
+#not currently used
 def handle_light_transportation_filter(markers, kwargs):
     if kwargs.get("light_transportation", False):
         age_groups_list = kwargs.get("age_groups").split(",")
@@ -351,7 +355,9 @@ def marker_bounding_box_query(
         markers = markers.options(load_only("id", "longitude", "latitude"))
 
     markers = handle_age_groups_filter(markers, kwargs)
-    markers = handle_light_transportation_filter(markers, kwargs)
+
+    #no button for this filter
+    #markers = handle_light_transportation_filter(markers, kwargs)
 
     if page and per_page:
         markers = markers.offset((page - 1) * per_page).limit(per_page)

@@ -13,13 +13,23 @@ CBS_FILES_HEBREW = {
 }
 
 
+def get_updated_cbs_file_name(file_name):
+    for hebrew_file_name, english_file_name in CBS_FILES_HEBREW.items():
+        if (
+            hebrew_file_name in file_name.lower()
+            and english_file_name.lower() not in file_name.lower()
+        ):
+            return file_name.replace(".csv", "_" + english_file_name + ".csv")
+    return file_name
+
+
 def update_cbs_files_names(directory):
     files = sorted([path for path in os.listdir(directory)])
     for file in files:
         file_path = os.path.join(directory, file)
-        for hebrew_file_name, english_file_name in CBS_FILES_HEBREW.items():
-            if hebrew_file_name in file.lower() and english_file_name.lower() not in file.lower():
-                os.rename(file_path, file_path.replace(".csv", "_" + english_file_name + ".csv"))
+        updated_file_path = os.path.join(directory, get_updated_cbs_file_name(file))
+        if updated_file_path != file_path:
+            os.rename(file_path, updated_file_path)
 
 
 def get_accidents_file_data(directory):

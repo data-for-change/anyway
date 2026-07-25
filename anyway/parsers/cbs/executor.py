@@ -30,7 +30,7 @@ from anyway.models import (
 )
 from anyway.parsers.cbs.exceptions import CBSParsingFailed
 from anyway.utilities import ItmToWGS84, time_delta, ImporterUI, truncate_tables, delete_all_rows_from_table, \
-    chunks, run_query_and_insert_to_table_in_chunks
+    chunks, run_query_and_insert_to_table_in_chunks, log_duration
 from anyway.db_views import VIEWS
 from anyway.app_and_db import db
 from anyway.parsers.cbs.s3 import S3DataRetriever
@@ -88,6 +88,12 @@ cbs_files = {
     INVOLVED: "InvData.csv",
     VEHICLES: "VehData.csv",
 }
+
+REQUIRED_CBS_FILE_TYPES = (STREETS, ACCIDENTS, INVOLVED, VEHICLES, DICTIONARY)
+CBS_PROVIDER_CODES = (
+    BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
+    BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+)
 
 
 new_to_old_accident_columns = {
@@ -387,6 +393,27 @@ def get_data_value(value):
     return None if value is None or math.isnan(value) else int(value)
 
 
+def _get_single_cbs_filename(file_names, filename):
+    files = [
+        path
+        for path in file_names
+        if filename.lower() in path.lower() and not path.startswith(".")
+    ]
+    amount = len(files)
+    if amount == 0:
+        raise ValueError("Not found: '%s'" % filename)
+    if amount > 1:
+        raise ValueError("Ambiguous: '%s'" % filename)
+    return files[0]
+
+
+def _get_single_cbs_file(directory, filename):
+    return os.path.join(
+        directory,
+        _get_single_cbs_filename(os.listdir(directory), filename),
+    )
+
+
 def create_marker(provider_code, accident, streets, roads, non_urban_intersection):
     if field_names.x not in accident or field_names.y not in accident:
         raise ValueError("Missing x and y coordinates")
@@ -627,29 +654,18 @@ def get_files(directory):
         }
         return {ROADS: roads, NON_URBAN_INTERSECTION: non_urban_intersection}
 
-    def get_single_file(filename):
-        files = [path for path in os.listdir(directory) if filename.lower() in path.lower() and not path.startswith('.')]
-        amount = len(files)
-        if amount == 0:
-            raise ValueError("Not found: '%s'" % filename)
-        if amount > 1:
-            raise ValueError("Ambiguous: '%s'" % filename)
-        file_path = os.path.join(directory, files[0])
-        return file_path
-
     custom_handlers = {
         STREETS: read_streets,
         NON_URBAN_INTERSECTION: read_non_urban_intersection,
     }
     output_files_dict = {}
     #removed NON_URBAN_INTERSECTION
-    relevant_files = [STREETS, ACCIDENTS, INVOLVED, VEHICLES, DICTIONARY]
     for name, filename in cbs_files.items():
-        if name not in relevant_files:
+        if name not in REQUIRED_CBS_FILE_TYPES:
             continue
         file_path = None
         try:
-            file_path = get_single_file(filename)
+            file_path = _get_single_cbs_file(directory, filename)
             if name == DICTIONARY:
                 output_files_dict[name] = read_dictionary(file_path)
             else:
@@ -686,14 +702,34 @@ def import_to_datastore(directory, provider_code, year, batch_size) -> int:
         started = datetime.now()
 
         # import dictionary
-        fill_dictionary_tables(files_from_cbs[DICTIONARY], provider_code, year)
+        with log_duration("Importing dictionary tables"):
+            fill_dictionary_tables(files_from_cbs[DICTIONARY], provider_code, year)
 
         new_items = 0
-        accidents_count = import_accidents(provider_code=provider_code, **files_from_cbs)
+        with log_duration(
+            "Importing table '{}'".format(AccidentMarker.__tablename__)
+        ):
+            accidents_count = import_accidents(
+                provider_code=provider_code, **files_from_cbs
+            )
+        logging.info(
+            "Accident marker row counts: provider=%s year=%s "
+            "pandas_rows=%s committed_rows=%s",
+            provider_code,
+            year,
+            len(files_from_cbs[ACCIDENTS]),
+            accidents_count,
+        )
         new_items += accidents_count
-        involved_count = import_involved(provider_code=provider_code, **files_from_cbs)
+        with log_duration("Importing table '{}'".format(Involved.__tablename__)):
+            involved_count = import_involved(
+                provider_code=provider_code, **files_from_cbs
+            )
         new_items += involved_count
-        vehicles_count = import_vehicles(provider_code=provider_code, **files_from_cbs)
+        with log_duration("Importing table '{}'".format(Vehicle.__tablename__)):
+            vehicles_count = import_vehicles(
+                provider_code=provider_code, **files_from_cbs
+            )
         new_items += vehicles_count
 
         logging.debug("\t{0} items in {1}".format(new_items, time_delta(started)))
@@ -764,7 +800,7 @@ def delete_cbs_entries(start_year, batch_size):
 
     marker_ids_to_delete = [acc_id[0] for acc_id in marker_ids_to_delete]
 
-    logging.debug(
+    logging.info(
         "There are "
         + str(len(marker_ids_to_delete))
         + " accident ids to delete starting "
@@ -830,28 +866,69 @@ def create_tables():
     try:
         with db.get_engine().begin() as conn:
             event.listen(conn, "rollback", receive_rollback)
-            delete_all_rows_from_table(conn, AccidentMarkerView)
-            run_query_and_insert_to_table_in_chunks(VIEWS.create_markers_hebrew_view(), AccidentMarkerView,
-                                                    AccidentMarker.id, chunk_size, conn)
+            with log_duration(
+                "Creating table '{}'".format(AccidentMarkerView.__tablename__)
+            ):
+                delete_all_rows_from_table(conn, AccidentMarkerView)
+                run_query_and_insert_to_table_in_chunks(
+                    VIEWS.create_markers_hebrew_view(),
+                    AccidentMarkerView,
+                    AccidentMarker.id,
+                    chunk_size,
+                    conn,
+                )
             logging.debug("after insertion to markers_hebrew ")
-            delete_all_rows_from_table(conn, InvolvedView)
-            run_query_and_insert_to_table_in_chunks(VIEWS.create_involved_hebrew_view(), InvolvedView,
-                                                    Involved.id, chunk_size, conn)
+
+            with log_duration(
+                "Creating table '{}'".format(InvolvedView.__tablename__)
+            ):
+                delete_all_rows_from_table(conn, InvolvedView)
+                run_query_and_insert_to_table_in_chunks(
+                    VIEWS.create_involved_hebrew_view(),
+                    InvolvedView,
+                    Involved.id,
+                    chunk_size,
+                    conn,
+                )
             logging.debug("after insertion to involved_hebrew ")
 
-            delete_all_rows_from_table(conn, VehiclesView)
-            run_query_and_insert_to_table_in_chunks(VIEWS.create_vehicles_hebrew_view(),
-                                                    VehiclesView, Vehicle.id, chunk_size, conn)
+            with log_duration(
+                "Creating table '{}'".format(VehiclesView.__tablename__)
+            ):
+                delete_all_rows_from_table(conn, VehiclesView)
+                run_query_and_insert_to_table_in_chunks(
+                    VIEWS.create_vehicles_hebrew_view(),
+                    VehiclesView,
+                    Vehicle.id,
+                    chunk_size,
+                    conn,
+                )
             logging.debug("after insertion to vehicles_hebrew ")
 
-            delete_all_rows_from_table(conn, VehicleMarkerView)
-            run_query_and_insert_to_table_in_chunks(VIEWS.create_vehicles_markers_hebrew_view(),
-                                                    VehicleMarkerView, VehiclesView.id, chunk_size, conn)
+            with log_duration(
+                "Creating table '{}'".format(VehicleMarkerView.__tablename__)
+            ):
+                delete_all_rows_from_table(conn, VehicleMarkerView)
+                run_query_and_insert_to_table_in_chunks(
+                    VIEWS.create_vehicles_markers_hebrew_view(),
+                    VehicleMarkerView,
+                    VehiclesView.id,
+                    chunk_size,
+                    conn,
+                )
             logging.debug("after insertion to vehicles_markers_hebrew ")
 
-            delete_all_rows_from_table(conn, InvolvedMarkerView)
-            run_query_and_insert_to_table_in_chunks(VIEWS.create_involved_hebrew_markers_hebrew_view(),
-                                                    InvolvedMarkerView, InvolvedView.accident_id, chunk_size, conn)
+            with log_duration(
+                "Creating table '{}'".format(InvolvedMarkerView.__tablename__)
+            ):
+                delete_all_rows_from_table(conn, InvolvedMarkerView)
+                run_query_and_insert_to_table_in_chunks(
+                    VIEWS.create_involved_hebrew_markers_hebrew_view(),
+                    InvolvedMarkerView,
+                    InvolvedView.accident_id,
+                    chunk_size,
+                    conn,
+                )
             logging.debug("after insertion to involved_markers_hebrew")
             logging.debug("Created DB Hebrew Tables")
     except Exception as e:
@@ -890,19 +967,144 @@ def recreate_table_for_location_extraction():
     db.session.commit()
 
 
+def _validate_s3_files(s3_data_retriever, load_start_year, allow_missing):
+    if (
+        s3_data_retriever.min_year is None
+        or s3_data_retriever.max_year is None
+    ):
+        raise ValueError("No CBS files were downloaded from S3")
+
+    validation_errors = []
+    for provider_code in CBS_PROVIDER_CODES:
+        for year in range(int(load_start_year), s3_data_retriever.current_year + 1):
+            cbs_files_dir = os.path.join(
+                s3_data_retriever.local_files_directory,
+                ACCIDENTS_TYPE_PREFIX + "_" + str(provider_code),
+                str(year),
+            )
+            if not os.path.isdir(cbs_files_dir):
+                if allow_missing:
+                    logging.warning(
+                        "CBS files directory does not exist; skipping validation: %s",
+                        cbs_files_dir,
+                    )
+                else:
+                    validation_errors.append(
+                        "{}: directory not found".format(cbs_files_dir)
+                    )
+                continue
+
+            preprocessing_cbs_files.update_cbs_files_names(cbs_files_dir)
+            for file_type in REQUIRED_CBS_FILE_TYPES:
+                try:
+                    _get_single_cbs_file(cbs_files_dir, cbs_files[file_type])
+                except ValueError as error:
+                    validation_errors.append(
+                        "{}: {}".format(cbs_files_dir, error)
+                    )
+
+    if validation_errors:
+        raise ValueError(
+            "Required CBS files validation failed:\n{}".format(
+                "\n".join(validation_errors)
+            )
+        )
+
+
+def _validate_required_files_in_s3(
+    s3_data_retriever,
+    load_start_year,
+    load_end_year,
+    allow_missing=False,
+):
+    validation_errors = []
+    for provider_code in CBS_PROVIDER_CODES:
+        for year in range(load_start_year, load_end_year + 1):
+            s3_directory = (
+                f"{ACCIDENTS_TYPE_PREFIX}_{provider_code}/{year}/"
+            )
+            file_names = s3_data_retriever.get_file_names_from_s3(
+                provider_code,
+                year,
+            )
+            if not file_names:
+                if allow_missing:
+                    logging.warning(
+                        "CBS S3 directory does not exist or is empty; "
+                        "skipping validation: %s",
+                        s3_directory,
+                    )
+                else:
+                    validation_errors.append(
+                        "{}: directory not found or empty".format(s3_directory)
+                    )
+                continue
+
+            file_names = [
+                preprocessing_cbs_files.get_updated_cbs_file_name(file_name)
+                for file_name in file_names
+            ]
+            for file_type in REQUIRED_CBS_FILE_TYPES:
+                try:
+                    _get_single_cbs_filename(
+                        file_names,
+                        cbs_files[file_type],
+                    )
+                except ValueError as error:
+                    validation_errors.append(
+                        "{}: {}".format(s3_directory, error)
+                    )
+
+    if validation_errors:
+        raise ValueError(
+            "Required CBS files validation in S3 failed:\n{}".format(
+                "\n".join(validation_errors)
+            )
+        )
+
+    logging.info(
+        "Validated required CBS files in S3 for years %s-%s",
+        load_start_year,
+        load_end_year,
+    )
+
+
+def validate_required_files_in_s3(load_start_year=None, load_end_year=None):
+    s3_data_retriever = S3DataRetriever()
+    if load_start_year is None:
+        load_start_year = s3_data_retriever.current_year - 1
+    if load_end_year is None:
+        load_end_year = s3_data_retriever.current_year
+
+    load_start_year = int(load_start_year)
+    load_end_year = int(load_end_year)
+    if load_start_year > load_end_year:
+        raise ValueError("load_start_year must not be after load_end_year")
+
+    _validate_required_files_in_s3(
+        s3_data_retriever,
+        load_start_year,
+        load_end_year,
+    )
+
+
 def _import_from_s3(batch_size, load_start_year, allow_missing):
     if load_start_year is None:
         load_start_year = datetime.now().year - 1
     logging.debug("Importing data from s3...")
     s3_data_retriever = S3DataRetriever()
+    _validate_required_files_in_s3(
+        s3_data_retriever,
+        int(load_start_year),
+        s3_data_retriever.current_year,
+        allow_missing=allow_missing,
+    )
     s3_data_retriever.get_files_from_s3(start_year=load_start_year)
+    _validate_s3_files(s3_data_retriever, load_start_year, allow_missing)
     delete_cbs_entries(load_start_year, batch_size)
 
     total = 0
-    for provider_code in [
-        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
-        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
-    ]:
+    for provider_code in CBS_PROVIDER_CODES:
         logging.info(
             f"Loading min year {s3_data_retriever.min_year} Loading max year {s3_data_retriever.max_year}"
         )
@@ -913,6 +1115,9 @@ def _import_from_s3(batch_size, load_start_year, allow_missing):
                 str(year),
             )
             if allow_missing and not os.path.exists(cbs_files_dir):
+                logging.warning(
+                    "CBS files directory does not exist; skipping: %s", cbs_files_dir
+                )
                 continue
             logging.debug("Importing Directory " + cbs_files_dir)
             preprocessing_cbs_files.update_cbs_files_names(cbs_files_dir)
@@ -961,10 +1166,12 @@ def _build_hebrew_tables_and_derived_data():
     fill_db_geo_data()
     create_tables()
     logging.debug("Finished Creating Hebrew DB Tables")
-    recreate_table_for_location_extraction()
+    with log_duration("Creating table 'cbs_locations'"):
+        recreate_table_for_location_extraction()
     logging.debug("Finished Recreating tables for location extraction")
     logging.debug("Loading safety data tables")
-    sd_utils.load_data()
+    with log_duration("Importing safety data tables"):
+        sd_utils.load_data()
     logging.debug("Completed load of safety data tables")
 
 
@@ -973,6 +1180,11 @@ def main(batch_size, source, load_start_year=None, allow_missing=False):
         started = datetime.now()
 
         if source == "s3":
+            #Suppress excessive aws logging
+            logging.getLogger("boto3").setLevel(logging.WARNING)
+            logging.getLogger("botocore").setLevel(logging.WARNING)
+            logging.getLogger("s3transfer").setLevel(logging.WARNING)
+            
             total = _import_from_s3(batch_size, load_start_year, allow_missing)
         elif source == "local_dir_for_tests_only":
             total = _import_from_local_dir(batch_size)

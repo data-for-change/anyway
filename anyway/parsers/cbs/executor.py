@@ -712,6 +712,14 @@ def import_to_datastore(directory, provider_code, year, batch_size) -> int:
             accidents_count = import_accidents(
                 provider_code=provider_code, **files_from_cbs
             )
+        logging.info(
+            "Accident marker row counts: provider=%s year=%s "
+            "pandas_rows=%s committed_rows=%s",
+            provider_code,
+            year,
+            len(files_from_cbs[ACCIDENTS]),
+            accidents_count,
+        )
         new_items += accidents_count
         with log_duration("Importing table '{}'".format(Involved.__tablename__)):
             involved_count = import_involved(
@@ -792,7 +800,7 @@ def delete_cbs_entries(start_year, batch_size):
 
     marker_ids_to_delete = [acc_id[0] for acc_id in marker_ids_to_delete]
 
-    logging.debug(
+    logging.info(
         "There are "
         + str(len(marker_ids_to_delete))
         + " accident ids to delete starting "
@@ -1172,6 +1180,11 @@ def main(batch_size, source, load_start_year=None, allow_missing=False):
         started = datetime.now()
 
         if source == "s3":
+            #Suppress excessive aws logging
+            logging.getLogger("boto3").setLevel(logging.WARNING)
+            logging.getLogger("botocore").setLevel(logging.WARNING)
+            logging.getLogger("s3transfer").setLevel(logging.WARNING)
+            
             total = _import_from_s3(batch_size, load_start_year, allow_missing)
         elif source == "local_dir_for_tests_only":
             total = _import_from_local_dir(batch_size)

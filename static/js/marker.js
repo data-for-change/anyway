@@ -1,5 +1,14 @@
 var INACCURATE_MARKER_OPACITY = 0.5;
 
+function normalizeAccidentSeverity(severity) {
+    var severityMap = {
+        811: 1,
+        812: 2,
+        813: 3
+    };
+    return severityMap[severity] || severity;
+}
+
 var MarkerView = Backbone.View.extend({
     events: {
         "click .delete-button": "clickDelete",
@@ -17,7 +26,6 @@ var MarkerView = Backbone.View.extend({
             this.$el.find("." + value).text(fields[field] + ": " + localization[field][this.model.get(value)]);
         }
     },
-
     render: function () {
 
         var markerPosition = new google.maps.LatLng(this.model.get("latitude"),
@@ -88,12 +96,12 @@ var MarkerView = Backbone.View.extend({
             this.$el.find(".provider_code").text(fields.PROVIDER_CODE + ": " + this.model.get("provider_code"));
             this.$el.find(".road_type").text(fields.SUG_DEREH + ": " + localization.SUG_DEREH[this.model.get("road_type")]);
             this.$el.find(".accident_type").text(fields.SUG_TEUNA + ": " + localization.SUG_TEUNA[this.model.get("accident_type")]);
-            this.$el.find(".accident_severity").text(fields.HUMRAT_TEUNA + ": " + localization.HUMRAT_TEUNA[this.model.get("accident_severity")]);
+            this.$el.find(".accident_severity").text(fields.HUMRAT_TEUNA + ": " + localization.HUMRAT_TEUNA[normalizeAccidentSeverity(this.model.get("accident_severity"))]);
             this.$el.find(".day_type").text(fields.SUG_YOM + ": " + localization.SUG_YOM[this.model.get("day_type")]);
             this.$el.find(".location_accuracy").text(fields.STATUS_IGUN + ": " + localization.STATUS_IGUN[this.model.get("location_accuracy")]);
-            this.$el.find(".mainStreet").text(this.model.get("mainStreet"));
-            this.$el.find(".secondaryStreet").text(this.model.get("secondaryStreet"));
-            this.$el.find(".junction").text(this.model.get("junction"));
+            this.$el.find(".mainStreet").text(this.model.get("mainStreet") || "");
+            this.$el.find(".secondaryStreet").text(this.model.get("secondaryStreet") || "");
+            this.$el.find(".junction").text(this.model.get("junction") || "");
             // Non-mandatory fields:
             this.localize("HAD_MASLUL", "one_lane");
             this.localize("RAV_MASLUL", "multi_lane");
@@ -163,7 +171,7 @@ var MarkerView = Backbone.View.extend({
                 } else {
                     markerTitle = "ביום " + moment(this.model.get("created")).format("dddd") + ", ה-" +
                         moment(this.model.get("created")).format("LL") +
-                        " אירעה תאונה " + SEVERITY_MAP[this.model.get("accident_severity")] +
+                        " אירעה תאונה " + SEVERITY_MAP[normalizeAccidentSeverity(this.model.get("accident_severity"))] +
                         " מסוג " + localization.SUG_TEUNA[this.model.get("accident_type")] + " " +
                         loc;
                 }

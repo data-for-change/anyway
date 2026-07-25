@@ -142,9 +142,9 @@ class LabeledCode(Enum):
 
 # This is a type for the field 'injury_severity' in the table 'involved_markers_hebrew'
 class InjurySeverity(LabeledCode):
-    KILLED = 1
-    SEVERE_INJURED = 2
-    LIGHT_INJURED = 3
+    KILLED = 111
+    SEVERE_INJURED = 1194
+    LIGHT_INJURED = 108
 
     @classmethod
     def labels(cls):
@@ -165,9 +165,9 @@ except NameError:
 
 class InjurySeverityExpanded(LabeledCode):
     NOT_INJURED = 0
-    KILLED = 1
-    SEVERE_INJURED = 2
-    LIGHT_INJURED = 3
+    KILLED = 111
+    SEVERE_INJURED = 1194
+    LIGHT_INJURED = 108
 
     @classmethod
     def labels(cls):
@@ -190,9 +190,9 @@ except NameError:
 
 # This is a type for the 'accident_severity' table field name
 class AccidentSeverity(LabeledCode):
-    FATAL = 1
-    SEVERE = 2
-    LIGHT = 3
+    FATAL = 811
+    SEVERE = 812
+    LIGHT = 813
 
     @classmethod
     def labels(cls):
@@ -391,3 +391,14 @@ QUALIFICATION_TO_ENUM_VALUE = {
     "rejected": NewsflashLocationQualification.REJECTED.value,  # pylint: disable=no-member
     "manual": NewsflashLocationQualification.MANUAL.value,  # pylint: disable=no-member
 }
+
+class PlaceType(LabeledCode):
+    URBAN_NOT_IN_JUNCTION = 1
+    URBAN_IN_JUNCTION = 2
+    SUBURBAN_NOT_IN_JUNCTION = 3
+    SUBURBAN_IN_JUNCTION = 4
+
+class OneLane(LabeledCode):
+    ONE_LANE = 759
+    MULTI_LANE_WITH_DIVIDER = 760
+    MULTI_LANE_WITHOUT_DIVIDER = 761

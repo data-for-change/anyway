@@ -84,7 +84,7 @@ $(function() {
             this.road = 0;
             this.separation = 0;
             this.surface = 0;
-            this.acctype = 0;
+            this.acctype = 1;
             this.controlmeasure = 0;
             this.district = 0;
             this.case_type = 0;
@@ -342,7 +342,7 @@ $(function() {
                     firstMemberGroupId = groupID;
                     firstMemberIndex = firstMemberGroupId - 1;
                     firstMember.set("groupID", firstMemberGroupId);
-                    var groupSeverity = firstMember.get('accident_severity');
+                    var groupSeverity = normalizeAccidentSeverity(firstMember.get('accident_severity'));
                     var firstMemberOpacity = firstMember.get("location_accuracy") == 1 ? 'opaque' : 1;
                     groupsData.push({
                         accident_severity: groupSeverity,
@@ -354,7 +354,7 @@ $(function() {
                     _.each(this.oms.markersNearMarker(marker), function(markerNear) {
                         var markerNearModel = markerNear.view.model;
                         markerNearModel.set("groupID", firstMemberGroupId);
-                        var currentMarkerNearSeverity = markerNearModel.get('accident_severity');
+                        var currentMarkerNearSeverity = normalizeAccidentSeverity(markerNearModel.get('accident_severity'));
                         // accident_severity is an enum, when it's lower then it's more severe
                         if (currentMarkerNearSeverity < groupSeverity) {
                             if (currentMarkerNearSeverity != SEVERITY_IRRELEVANT_RSA) {
@@ -377,7 +377,7 @@ $(function() {
                     marker.setTitle(marker.view.getTitle("single"));
                 } else {
                     groupMarkersCount = groupsData[firstMemberIndex].quantity;
-                    groupSeverityString = SEVERITY_MAP[groupsData[firstMemberIndex].accident_severity];
+                    groupSeverityString = SEVERITY_MAP[normalizeAccidentSeverity(groupsData[firstMemberIndex].accident_severity)];
                     marker.setTitle(groupMarkersCount + " " + marker.view.getTitle("multiple") + " חומרה מירבית: " + groupSeverityString);
                 }
             }, this);
@@ -759,6 +759,7 @@ $(function() {
             });
         },
         initLayers: function(accident_severity) {
+            accident_severity = normalizeAccidentSeverity(accident_severity);
             var severities = [SEVERITY_IRRELEVANT_RSA, SEVERITY_FATAL, SEVERITY_SEVERE, SEVERITY_LIGHT];
             var self = this;
             severities.forEach(function(accident_severity) {
@@ -804,7 +805,7 @@ $(function() {
 
             // markers are loaded immediately as they are fetched
             if (!this.fitsFilters(model)) {
-                console.log(model + " doesn't fit");
+                console.log(JSON.stringify(model) + " doesn't fit");
             }
             if (this.clusterMode() || this.fitsFilters(model) ||
                 !this.clusterMode() && model.get("type") == MARKER_TYPE_DISCUSSION) {
@@ -841,7 +842,8 @@ $(function() {
         },
 
         fitsFilters: function(model) {
-            var layer = this.model.get(SEVERITY_ATTRIBUTES[model.get("accident_severity")]);
+            var severity = normalizeAccidentSeverity(model.get("accident_severity"));
+            var layer = this.model.get(SEVERITY_ATTRIBUTES[severity]);
             if (!layer) {
                 return false;
             }

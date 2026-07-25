@@ -89,6 +89,12 @@ cbs_files = {
     VEHICLES: "VehData.csv",
 }
 
+REQUIRED_CBS_FILE_TYPES = (STREETS, ACCIDENTS, INVOLVED, VEHICLES, DICTIONARY)
+CBS_PROVIDER_CODES = (
+    BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
+    BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
+)
+
 
 new_to_old_accident_columns = {
     "TeunaID_FKT": "pk_teuna_fikt",
@@ -387,6 +393,27 @@ def get_data_value(value):
     return None if value is None or math.isnan(value) else int(value)
 
 
+def _get_single_cbs_filename(file_names, filename):
+    files = [
+        path
+        for path in file_names
+        if filename.lower() in path.lower() and not path.startswith(".")
+    ]
+    amount = len(files)
+    if amount == 0:
+        raise ValueError("Not found: '%s'" % filename)
+    if amount > 1:
+        raise ValueError("Ambiguous: '%s'" % filename)
+    return files[0]
+
+
+def _get_single_cbs_file(directory, filename):
+    return os.path.join(
+        directory,
+        _get_single_cbs_filename(os.listdir(directory), filename),
+    )
+
+
 def create_marker(provider_code, accident, streets, roads, non_urban_intersection):
     if field_names.x not in accident or field_names.y not in accident:
         raise ValueError("Missing x and y coordinates")
@@ -627,29 +654,18 @@ def get_files(directory):
         }
         return {ROADS: roads, NON_URBAN_INTERSECTION: non_urban_intersection}
 
-    def get_single_file(filename):
-        files = [path for path in os.listdir(directory) if filename.lower() in path.lower() and not path.startswith('.')]
-        amount = len(files)
-        if amount == 0:
-            raise ValueError("Not found: '%s'" % filename)
-        if amount > 1:
-            raise ValueError("Ambiguous: '%s'" % filename)
-        file_path = os.path.join(directory, files[0])
-        return file_path
-
     custom_handlers = {
         STREETS: read_streets,
         NON_URBAN_INTERSECTION: read_non_urban_intersection,
     }
     output_files_dict = {}
     #removed NON_URBAN_INTERSECTION
-    relevant_files = [STREETS, ACCIDENTS, INVOLVED, VEHICLES, DICTIONARY]
     for name, filename in cbs_files.items():
-        if name not in relevant_files:
+        if name not in REQUIRED_CBS_FILE_TYPES:
             continue
         file_path = None
         try:
-            file_path = get_single_file(filename)
+            file_path = _get_single_cbs_file(directory, filename)
             if name == DICTIONARY:
                 output_files_dict[name] = read_dictionary(file_path)
             else:
@@ -890,19 +906,144 @@ def recreate_table_for_location_extraction():
     db.session.commit()
 
 
+def _validate_s3_files(s3_data_retriever, load_start_year, allow_missing):
+    if (
+        s3_data_retriever.min_year is None
+        or s3_data_retriever.max_year is None
+    ):
+        raise ValueError("No CBS files were downloaded from S3")
+
+    validation_errors = []
+    for provider_code in CBS_PROVIDER_CODES:
+        for year in range(int(load_start_year), s3_data_retriever.current_year + 1):
+            cbs_files_dir = os.path.join(
+                s3_data_retriever.local_files_directory,
+                ACCIDENTS_TYPE_PREFIX + "_" + str(provider_code),
+                str(year),
+            )
+            if not os.path.isdir(cbs_files_dir):
+                if allow_missing:
+                    logging.warning(
+                        "CBS files directory does not exist; skipping validation: %s",
+                        cbs_files_dir,
+                    )
+                else:
+                    validation_errors.append(
+                        "{}: directory not found".format(cbs_files_dir)
+                    )
+                continue
+
+            preprocessing_cbs_files.update_cbs_files_names(cbs_files_dir)
+            for file_type in REQUIRED_CBS_FILE_TYPES:
+                try:
+                    _get_single_cbs_file(cbs_files_dir, cbs_files[file_type])
+                except ValueError as error:
+                    validation_errors.append(
+                        "{}: {}".format(cbs_files_dir, error)
+                    )
+
+    if validation_errors:
+        raise ValueError(
+            "Required CBS files validation failed:\n{}".format(
+                "\n".join(validation_errors)
+            )
+        )
+
+
+def _validate_required_files_in_s3(
+    s3_data_retriever,
+    load_start_year,
+    load_end_year,
+    allow_missing=False,
+):
+    validation_errors = []
+    for provider_code in CBS_PROVIDER_CODES:
+        for year in range(load_start_year, load_end_year + 1):
+            s3_directory = (
+                f"{ACCIDENTS_TYPE_PREFIX}_{provider_code}/{year}/"
+            )
+            file_names = s3_data_retriever.get_file_names_from_s3(
+                provider_code,
+                year,
+            )
+            if not file_names:
+                if allow_missing:
+                    logging.warning(
+                        "CBS S3 directory does not exist or is empty; "
+                        "skipping validation: %s",
+                        s3_directory,
+                    )
+                else:
+                    validation_errors.append(
+                        "{}: directory not found or empty".format(s3_directory)
+                    )
+                continue
+
+            file_names = [
+                preprocessing_cbs_files.get_updated_cbs_file_name(file_name)
+                for file_name in file_names
+            ]
+            for file_type in REQUIRED_CBS_FILE_TYPES:
+                try:
+                    _get_single_cbs_filename(
+                        file_names,
+                        cbs_files[file_type],
+                    )
+                except ValueError as error:
+                    validation_errors.append(
+                        "{}: {}".format(s3_directory, error)
+                    )
+
+    if validation_errors:
+        raise ValueError(
+            "Required CBS files validation in S3 failed:\n{}".format(
+                "\n".join(validation_errors)
+            )
+        )
+
+    logging.info(
+        "Validated required CBS files in S3 for years %s-%s",
+        load_start_year,
+        load_end_year,
+    )
+
+
+def validate_required_files_in_s3(load_start_year=None, load_end_year=None):
+    s3_data_retriever = S3DataRetriever()
+    if load_start_year is None:
+        load_start_year = s3_data_retriever.current_year - 1
+    if load_end_year is None:
+        load_end_year = s3_data_retriever.current_year
+
+    load_start_year = int(load_start_year)
+    load_end_year = int(load_end_year)
+    if load_start_year > load_end_year:
+        raise ValueError("load_start_year must not be after load_end_year")
+
+    _validate_required_files_in_s3(
+        s3_data_retriever,
+        load_start_year,
+        load_end_year,
+    )
+
+
 def _import_from_s3(batch_size, load_start_year, allow_missing):
     if load_start_year is None:
         load_start_year = datetime.now().year - 1
     logging.debug("Importing data from s3...")
     s3_data_retriever = S3DataRetriever()
+    _validate_required_files_in_s3(
+        s3_data_retriever,
+        int(load_start_year),
+        s3_data_retriever.current_year,
+        allow_missing=allow_missing,
+    )
     s3_data_retriever.get_files_from_s3(start_year=load_start_year)
+    _validate_s3_files(s3_data_retriever, load_start_year, allow_missing)
     delete_cbs_entries(load_start_year, batch_size)
 
     total = 0
-    for provider_code in [
-        BE_CONST.CBS_ACCIDENT_TYPE_1_CODE,
-        BE_CONST.CBS_ACCIDENT_TYPE_3_CODE,
-    ]:
+    for provider_code in CBS_PROVIDER_CODES:
         logging.info(
             f"Loading min year {s3_data_retriever.min_year} Loading max year {s3_data_retriever.max_year}"
         )
@@ -913,6 +1054,9 @@ def _import_from_s3(batch_size, load_start_year, allow_missing):
                 str(year),
             )
             if allow_missing and not os.path.exists(cbs_files_dir):
+                logging.warning(
+                    "CBS files directory does not exist; skipping: %s", cbs_files_dir
+                )
                 continue
             logging.debug("Importing Directory " + cbs_files_dir)
             preprocessing_cbs_files.update_cbs_files_names(cbs_files_dir)

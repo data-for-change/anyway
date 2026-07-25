@@ -102,6 +102,19 @@ def cbs(batch_size, load_start_year, source, allow_missing):
 
 
 @process.command()
+@click.option("--load_start_year", type=int, default=None)
+@click.option("--load_end_year", type=int, default=None)
+def validate_cbs_s3_files(load_start_year, load_end_year):
+    """Validate that every required CBS file exists in S3."""
+    from anyway.parsers.cbs.executor import validate_required_files_in_s3
+
+    return validate_required_files_in_s3(
+        load_start_year=load_start_year,
+        load_end_year=load_end_year,
+    )
+
+
+@process.command()
 def safety_data_tables():
     """Update safety data tables"""
     from anyway.views.safety_data import sd_utils

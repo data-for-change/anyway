@@ -78,6 +78,15 @@ class S3DataRetriever(S3DataClass):
     def is_a_directory(s3_object):
         return s3_object.key[-1] == "/"
 
+    def get_file_names_from_s3(self, accidents_type, year):
+        accidents_type_directory = f"{ACCIDENTS_TYPE_PREFIX}_{accidents_type}"
+        prefix = f"{accidents_type_directory}/{year}/"
+        return [
+            basename(s3_object.key)
+            for s3_object in self.s3_bucket.objects.filter(Prefix=prefix)
+            if not self.is_a_directory(s3_object)
+        ]
+
     def __download_accidents_type_files(self, accidents_type, start_year):
         current_year, s3_bucket, local_directory = (
             self.current_year,

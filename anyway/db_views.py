@@ -159,8 +159,8 @@ class Views(object):
         from_clause = table \
             .join(RoadSegments,
                   and_(AccidentMarker.road1 == RoadSegments.road,
-                       RoadSegments.from_km <= AccidentMarker.km / 10,
-                       AccidentMarker.km / 10 < RoadSegments.to_km),
+                       RoadSegments.from_km <= AccidentMarker.km ,
+                       AccidentMarker.km < RoadSegments.to_km),
                   isouter=True) \
             .join(AccidentType,
                   and_(AccidentMarker.accident_type == AccidentType.id,

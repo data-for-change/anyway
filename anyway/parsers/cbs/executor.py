@@ -522,9 +522,8 @@ def import_accidents(provider_code, accidents, streets, roads=None, non_urban_in
         marker = create_marker(provider_code, accident, streets, roads, non_urban_intersection)
         accidents_result.append(marker)
     db.session.bulk_insert_mappings(AccidentMarker, accidents_result)
-    db.session.commit()
-    logging.debug("Finished Importing markers")
-    logging.debug("Inserted " + str(len(accidents_result)) + " new accident markers")
+    logging.debug("Finished Processing markers")
+    logging.debug("Added " + str(len(accidents_result)) + " new accident markers to transaction")
     fill_db_geo_data()
     return len(accidents_result)
 
@@ -585,8 +584,7 @@ def import_involved(provider_code, involved, **kwargs):
             }
         )
     db.session.bulk_insert_mappings(Involved, involved_result)
-    db.session.commit()
-    logging.debug("Finished Importing involved")
+    logging.debug("Finished Processing involved")
     return len(involved_result)
 
 
@@ -621,8 +619,7 @@ def import_vehicles(provider_code, vehicles, **kwargs):
             }
         )
     db.session.bulk_insert_mappings(Vehicle, vehicles_result)
-    db.session.commit()
-    logging.debug("Finished Importing vehicles")
+    logging.debug("Finished Processing vehicles")
     return len(vehicles_result)
 
 
@@ -703,7 +700,7 @@ def import_to_datastore(directory, provider_code, year, batch_size) -> int:
 
         # import dictionary
         with log_duration("Importing dictionary tables"):
-            fill_dictionary_tables(files_from_cbs[DICTIONARY], provider_code, year)
+            fill_dictionary_tables(files_from_cbs[DICTIONARY], provider_code, year, False)
 
         new_items = 0
         with log_duration(
@@ -714,7 +711,7 @@ def import_to_datastore(directory, provider_code, year, batch_size) -> int:
             )
         logging.info(
             "Accident marker row counts: provider=%s year=%s "
-            "pandas_rows=%s committed_rows=%s",
+            "pandas_rows=%s inserted_rows=%s",
             provider_code,
             year,
             len(files_from_cbs[ACCIDENTS]),
@@ -741,6 +738,7 @@ def import_to_datastore(directory, provider_code, year, batch_size) -> int:
         raise e
 
 
+#not in use
 def delete_invalid_entries(batch_size):
     """
     deletes all markers in the database with null latitude or longitude
@@ -765,19 +763,16 @@ def delete_invalid_entries(batch_size):
         if q.all():
             logging.debug("deleting invalid entries from Involved")
             q.delete(synchronize_session="fetch")
-            db.session.commit()
 
         q = db.session.query(Vehicle).filter(Vehicle.accident_id.in_(ids_chunk))
         if q.all():
             logging.debug("deleting invalid entries from Vehicle")
             q.delete(synchronize_session="fetch")
-            db.session.commit()
 
         q = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_(ids_chunk))
         if q.all():
             logging.debug("deleting invalid entries from AccidentMarker")
             q.delete(synchronize_session="fetch")
-            db.session.commit()
 
 
 def delete_cbs_entries(start_year, batch_size):
@@ -815,19 +810,16 @@ def delete_cbs_entries(start_year, batch_size):
         if q.all():
             logging.debug("deleting entries from Involved")
             q.delete(synchronize_session=False)
-            db.session.commit()
 
         q = db.session.query(Vehicle).filter(Vehicle.accident_id.in_(ids_chunk))
         if q.all():
             logging.debug("deleting entries from Vehicle")
             q.delete(synchronize_session=False)
-            db.session.commit()
 
         q = db.session.query(AccidentMarker).filter(AccidentMarker.id.in_(ids_chunk))
         if q.all():
             logging.debug("deleting entries from AccidentMarker")
             q.delete(synchronize_session=False)
-            db.session.commit()
 
 
 def fill_db_geo_data():
@@ -839,7 +831,6 @@ def fill_db_geo_data():
         "UPDATE markers SET geom = ST_SetSRID(ST_MakePoint(longitude,latitude),4326)\
                            WHERE geom IS NULL;"
     )
-    db.session.commit()
 
 
 def get_provider_code(directory_name=None):
@@ -964,8 +955,6 @@ def recreate_table_for_location_extraction():
                 AND (longitude is not null
                     AND latitude is not null)) LOCATIONS)"""
                             )
-    db.session.commit()
-
 
 def _validate_s3_files(s3_data_retriever, load_start_year, allow_missing):
     if (
@@ -1173,6 +1162,8 @@ def _build_hebrew_tables_and_derived_data():
     with log_duration("Importing safety data tables"):
         sd_utils.load_data()
     logging.debug("Completed load of safety data tables")
+    db.session.commit()
+    logging.debug("data commited successfully")
 
 
 def main(batch_size, source, load_start_year=None, allow_missing=False):

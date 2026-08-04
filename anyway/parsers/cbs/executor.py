@@ -1155,7 +1155,7 @@ def _build_hebrew_tables_and_derived_data():
     logging.debug("Finished Recreating tables for location extraction")
     logging.debug("Loading safety data tables")
     with log_duration("Importing safety data tables"):
-        sd_utils.load_data()
+        sd_utils.load_data(session=db.session)
     logging.debug("Completed load of safety data tables")
     db.session.commit()
     logging.debug("data commited successfully")

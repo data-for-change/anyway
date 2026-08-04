@@ -17,23 +17,33 @@ from anyway.utilities import chunked_generator
 GEO_PARAM = "geo"
 
 
-def load_data():
-    conn = db.get_engine().connect()
-    trans = conn.begin()
-    sess = sessionmaker()(bind=conn)
+def load_data(session=None):
+    own_resources = session is None
+    conn = None
+    trans = None
+    if own_resources:
+        conn = db.get_engine().connect()
+        trans = conn.begin()
+        sess = sessionmaker()(bind=conn)
+    else:
+        sess = session
     try:
         sess.query(SDInvolved).delete()
         sess.query(SDAccident).delete()
         sd_load_accident(sess)
         sd_load_involved(sess)
-        trans.commit()
+        if own_resources:
+            trans.commit()
         return Response(json.dumps("Tables loaded", default=str), mimetype="application/json")
     except Exception as e:
-        trans.rollback()
+        if own_resources:
+            trans.rollback()
         logging.exception("Error loading data: %s", e)
+        raise
     finally:
-        sess.close()
-        conn.close()
+        if own_resources:
+            sess.close()
+            conn.close()
 
 
 def sd_load_involved(sess: Session):

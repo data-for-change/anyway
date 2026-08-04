@@ -11,7 +11,7 @@ from datetime import datetime
 
 import math
 import pandas as pd
-from sqlalchemy import or_, event
+from sqlalchemy import or_
 from typing import Dict, List
 
 from anyway.parsers.cbs import preprocessing_cbs_files
@@ -846,82 +846,77 @@ def get_provider_code(directory_name=None):
             return int(ans)
 
 
-def receive_rollback(conn, **kwargs):
-    """listen for the 'rollback' event"""
-    logging.debug(f"rollback in create_tables(). conn:{conn},kw:{kwargs}")
-    print("---------------------------------------------")
-
-
-def create_tables():
+def create_tables(should_commit=True):
     chunk_size = 5000
     try:
-        with db.get_engine().begin() as conn:
-            event.listen(conn, "rollback", receive_rollback)
-            with log_duration(
-                "Creating table '{}'".format(AccidentMarkerView.__tablename__)
-            ):
-                delete_all_rows_from_table(conn, AccidentMarkerView)
-                run_query_and_insert_to_table_in_chunks(
-                    VIEWS.create_markers_hebrew_view(),
-                    AccidentMarkerView,
-                    AccidentMarker.id,
-                    chunk_size,
-                    conn,
-                )
-            logging.debug("after insertion to markers_hebrew ")
+        conn = db.session.connection()
+        with log_duration(
+            "Creating table '{}'".format(AccidentMarkerView.__tablename__)
+        ):
+            delete_all_rows_from_table(conn, AccidentMarkerView)
+            run_query_and_insert_to_table_in_chunks(
+                VIEWS.create_markers_hebrew_view(),
+                AccidentMarkerView,
+                AccidentMarker.id,
+                chunk_size,
+                conn,
+            )
+        logging.debug("after insertion to markers_hebrew ")
 
-            with log_duration(
-                "Creating table '{}'".format(InvolvedView.__tablename__)
-            ):
-                delete_all_rows_from_table(conn, InvolvedView)
-                run_query_and_insert_to_table_in_chunks(
-                    VIEWS.create_involved_hebrew_view(),
-                    InvolvedView,
-                    Involved.id,
-                    chunk_size,
-                    conn,
-                )
-            logging.debug("after insertion to involved_hebrew ")
+        with log_duration(
+            "Creating table '{}'".format(InvolvedView.__tablename__)
+        ):
+            delete_all_rows_from_table(conn, InvolvedView)
+            run_query_and_insert_to_table_in_chunks(
+                VIEWS.create_involved_hebrew_view(),
+                InvolvedView,
+                Involved.id,
+                chunk_size,
+                conn,
+            )
+        logging.debug("after insertion to involved_hebrew ")
 
-            with log_duration(
-                "Creating table '{}'".format(VehiclesView.__tablename__)
-            ):
-                delete_all_rows_from_table(conn, VehiclesView)
-                run_query_and_insert_to_table_in_chunks(
-                    VIEWS.create_vehicles_hebrew_view(),
-                    VehiclesView,
-                    Vehicle.id,
-                    chunk_size,
-                    conn,
-                )
-            logging.debug("after insertion to vehicles_hebrew ")
+        with log_duration(
+            "Creating table '{}'".format(VehiclesView.__tablename__)
+        ):
+            delete_all_rows_from_table(conn, VehiclesView)
+            run_query_and_insert_to_table_in_chunks(
+                VIEWS.create_vehicles_hebrew_view(),
+                VehiclesView,
+                Vehicle.id,
+                chunk_size,
+                conn,
+            )
+        logging.debug("after insertion to vehicles_hebrew ")
 
-            with log_duration(
-                "Creating table '{}'".format(VehicleMarkerView.__tablename__)
-            ):
-                delete_all_rows_from_table(conn, VehicleMarkerView)
-                run_query_and_insert_to_table_in_chunks(
-                    VIEWS.create_vehicles_markers_hebrew_view(),
-                    VehicleMarkerView,
-                    VehiclesView.id,
-                    chunk_size,
-                    conn,
-                )
-            logging.debug("after insertion to vehicles_markers_hebrew ")
+        with log_duration(
+            "Creating table '{}'".format(VehicleMarkerView.__tablename__)
+        ):
+            delete_all_rows_from_table(conn, VehicleMarkerView)
+            run_query_and_insert_to_table_in_chunks(
+                VIEWS.create_vehicles_markers_hebrew_view(),
+                VehicleMarkerView,
+                VehiclesView.id,
+                chunk_size,
+                conn,
+            )
+        logging.debug("after insertion to vehicles_markers_hebrew ")
 
-            with log_duration(
-                "Creating table '{}'".format(InvolvedMarkerView.__tablename__)
-            ):
-                delete_all_rows_from_table(conn, InvolvedMarkerView)
-                run_query_and_insert_to_table_in_chunks(
-                    VIEWS.create_involved_hebrew_markers_hebrew_view(),
-                    InvolvedMarkerView,
-                    InvolvedView.accident_id,
-                    chunk_size,
-                    conn,
-                )
-            logging.debug("after insertion to involved_markers_hebrew")
-            logging.debug("Created DB Hebrew Tables")
+        with log_duration(
+            "Creating table '{}'".format(InvolvedMarkerView.__tablename__)
+        ):
+            delete_all_rows_from_table(conn, InvolvedMarkerView)
+            run_query_and_insert_to_table_in_chunks(
+                VIEWS.create_involved_hebrew_markers_hebrew_view(),
+                InvolvedMarkerView,
+                InvolvedView.accident_id,
+                chunk_size,
+                conn,
+            )
+        logging.debug("after insertion to involved_markers_hebrew")
+        logging.debug("Created DB Hebrew Tables")
+        if should_commit:
+            db.session.commit()
     except Exception as e:
         logging.exception(f"Exception while creating hebrew tables, {e}", e)
         raise e
@@ -1153,7 +1148,7 @@ def _log_import_summary(total, started):
 
 def _build_hebrew_tables_and_derived_data():
     fill_db_geo_data()
-    create_tables()
+    create_tables(should_commit=False)
     logging.debug("Finished Creating Hebrew DB Tables")
     with log_duration("Creating table 'cbs_locations'"):
         recreate_table_for_location_extraction()

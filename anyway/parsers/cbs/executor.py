@@ -1157,8 +1157,6 @@ def _build_hebrew_tables_and_derived_data():
     with log_duration("Importing safety data tables"):
         sd_utils.load_data(session=db.session)
     logging.debug("Completed load of safety data tables")
-    db.session.commit()
-    logging.debug("data commited successfully")
 
 
 def main(batch_size, source, load_start_year=None, allow_missing=False):
@@ -1179,7 +1177,10 @@ def main(batch_size, source, load_start_year=None, allow_missing=False):
 
         _log_import_summary(total, started)
         _build_hebrew_tables_and_derived_data()
+        db.session.commit()
+        logging.debug("data committed successfully")
     except Exception as ex:
+        db.session.rollback()
         print("Traceback: {0}".format(traceback.format_exc()))
         raise CBSParsingFailed(message=str(ex))
         # Todo - send an email that an exception occured

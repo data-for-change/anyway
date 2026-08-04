@@ -1118,7 +1118,7 @@ def _import_from_local_dir(batch_size):
     dir_list = glob.glob("{0}/*/*".format(dir_name))
 
     if import_ui.is_delete_all():
-        truncate_tables(db, (Vehicle, Involved, AccidentMarker))
+        truncate_tables(db, (Vehicle, Involved, AccidentMarker), commit=False)
 
     total = 0
     for directory in sorted(dir_list, reverse=False):

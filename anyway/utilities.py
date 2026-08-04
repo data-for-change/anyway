@@ -207,11 +207,12 @@ def fetch_first_and_every_nth_value_for_column(conn, column_to_fetch, n):
     return ids
 
 
-def truncate_tables(db, tables):
+def truncate_tables(db, tables, commit=True):
     logging.info("Deleting tables: " + ", ".join(table.__name__ for table in tables))
     for table in tables:
         db.session.query(table).delete()
-        db.session.commit()
+        if commit:
+            db.session.commit()
 
 
 def delete_all_rows_from_table(conn, table):

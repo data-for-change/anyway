@@ -8,7 +8,7 @@ import pandas as pd
 
 # noinspection PyProtectedMember
 from flask_babel import _
-from sqlalchemy import func, distinct, between, or_, and_
+from sqlalchemy import func, distinct, between, or_, and_, false
 
 from anyway.app_and_db import db
 from anyway.backend_constants import BE_CONST, LabeledCode, InjurySeverity
@@ -100,9 +100,7 @@ def get_expression_for_segment_junctions(segment_id: int, table_obj):
     elif hasattr(table_obj, "intersection"):
         field = getattr(table_obj, "intersection")
     else:
-        raise AttributeError(
-            f"{table_obj}: has neither 'non_urban_intersection' nor 'intersection'"
-        )
+        return false()
     return field.in_(junctions)
 
 

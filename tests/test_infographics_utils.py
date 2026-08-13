@@ -122,6 +122,7 @@ class TestInfographicsUtilsCase(unittest.TestCase):
         actual = get_expression_for_segment_junctions(17, AccidentMarkerView)
         self.assertEqual("markers_hebrew.intersection", str(actual.left), "1")
         self.assertIn(" IN ", str(actual), "2")
+        self.assertEqual("false", str(get_expression_for_segment_junctions(17, InvolvedMarkerView)), "3")
 
     def test_add_resolution_location_accuracy_filter(self):
         f = {"1": 1}

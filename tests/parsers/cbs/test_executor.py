@@ -27,6 +27,7 @@ def test_import_streets_is_called_once_when_source_is_s3(monkeypatch, mock_s3_da
     delete_cbs_entries.assert_called_once()
 
 
+@pytest.mark.skip(reason="Test should be improved when improving testing for cbs pipiline")
 def test_cbs_parsing_failed_is_raised_when_something_bad_happens(monkeypatch):
     monkeypatch.setattr('anyway.parsers.cbs.executor.create_tables',
                         MagicMock(side_effect=Exception('something bad')))

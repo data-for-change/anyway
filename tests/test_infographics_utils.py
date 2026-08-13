@@ -20,14 +20,14 @@ RC = BE_CONST.ResolutionCategories
 class TestInfographicsUtilsCase(unittest.TestCase):
     item1 = {
         "2019": {
-            1: 0,
-            2: 3,
-            3: 22
+            AccidentSeverity.FATAL.value: 0,
+            AccidentSeverity.SEVERE.value: 3,
+            AccidentSeverity.LIGHT.value: 22
         },
         "2020": {
-            1: 1,
-            2: 1,
-            3: 22
+            AccidentSeverity.FATAL.value: 1,
+            AccidentSeverity.SEVERE.value: 1,
+            AccidentSeverity.LIGHT.value: 22
         }
     }
     items1_res = [
@@ -118,9 +118,11 @@ class TestInfographicsUtilsCase(unittest.TestCase):
     @patch("anyway.widgets.widget_utils.SegmentJunctions")
     def test_get_expression_for_segment_junctions(self, sg):
         sg.get_instance.return_value = sg
-        sg.get_segment_junctions.return_value = []
+        sg.get_segment_junctions.return_value = [1, 2]
         actual = get_expression_for_segment_junctions(17, AccidentMarkerView)
-        self.assertEqual('1 != 1', str(actual.expression), "1")
+        self.assertEqual("markers_hebrew.intersection", str(actual.left), "1")
+        self.assertIn(" IN ", str(actual), "2")
+        self.assertEqual("false", str(get_expression_for_segment_junctions(17, InvolvedMarkerView)), "3")
 
     def test_add_resolution_location_accuracy_filter(self):
         f = {"1": 1}

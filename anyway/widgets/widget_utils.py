@@ -8,7 +8,7 @@ import pandas as pd
 
 # noinspection PyProtectedMember
 from flask_babel import _
-from sqlalchemy import func, distinct, between, or_, and_
+from sqlalchemy import func, distinct, between, or_, and_, false
 
 from anyway.app_and_db import db
 from anyway.backend_constants import BE_CONST, LabeledCode, InjurySeverity
@@ -95,7 +95,15 @@ def get_expression_for_road_segment_location_fields(filters, table_obj):
 def get_expression_for_segment_junctions(segment_id: int, table_obj):
     sg = SegmentJunctions.get_instance()
     junctions = sg.get_segment_junctions(segment_id)
-    return getattr(table_obj, "non_urban_intersection").in_(junctions)
+    if not junctions:
+        return false()
+    if hasattr(table_obj, "non_urban_intersection"):
+        field = getattr(table_obj, "non_urban_intersection")
+    elif hasattr(table_obj, "intersection"):
+        field = getattr(table_obj, "intersection")
+    else:
+        return false()
+    return field.in_(junctions)
 
 
 def get_filter_expression(table_obj, field_name, value):
@@ -229,7 +237,7 @@ def get_injured_filters(location_info: dict):
             new_filters[new_filter_name] = curr_value
             new_filters.pop(curr_filter)
 
-    new_filters["injury_severity"] = [1, 2, 3]
+    new_filters["injury_severity"] = InjurySeverity.codes()
     return new_filters
 
 

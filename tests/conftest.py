@@ -6,7 +6,18 @@ import requests
 from urlobject import URLObject
 from werkzeug.serving import make_server
 
-from anyway.app_and_db import app
+from anyway.app_and_db import app, db
+from anyway.models import City
+
+# Minimal cbs_cities rows for tests that join City (name / cpop).
+DEFAULT_TEST_CITIES = [
+    {
+        "yishuv_symbol": 5000,
+        "heb_name": "תל אביב - יפו",
+        "eng_name": "Tel Aviv - Yafo",
+        "population": 500000,
+    },
+]
 
 
 class ServerThread(Thread):
@@ -36,3 +47,30 @@ def anyway_server():
     yield url
 
     server_thread.shutdown()
+
+
+@pytest.fixture
+def cbs_cities():
+    """Ensure default cbs_cities rows exist; only remove rows this fixture inserted."""
+    inserted_symbols = []
+    with app.app_context():
+        for city_data in DEFAULT_TEST_CITIES:
+            symbol = city_data["yishuv_symbol"]
+            exists = (
+                db.session.query(City.yishuv_symbol)
+                .filter(City.yishuv_symbol == symbol)
+                .first()
+            )
+            if exists:
+                continue
+            db.session.add(City(**city_data))
+            inserted_symbols.append(symbol)
+        db.session.commit()
+    yield DEFAULT_TEST_CITIES
+    if not inserted_symbols:
+        return
+    with app.app_context():
+        db.session.query(City).filter(City.yishuv_symbol.in_(inserted_symbols)).delete(
+            synchronize_session=False
+        )
+        db.session.commit()

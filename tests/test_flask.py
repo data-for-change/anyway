@@ -52,13 +52,13 @@ def test_markers_empty(app):
 def marker_counter():
     counter = Counter()
     yield counter
-    assert counter["markers"] == 1624
+    assert counter["markers"] == 16
 
 
 @pytest.mark.server
 def test_bad_date(app):
     rv = app.get(
-        "/markers?ne_lat=32.08656790211843&ne_lng=34.80611543655391&sw_lat=32.08003198103277&sw_lng=34.793884563446&zoom=17&thin_markers=false&start_date=a1104537600&end_date=1484697600&show_fatal=1&show_severe=1&show_light=1&approx=1&accurate=1&show_markers=1&show_discussions=1&show_urban=3&show_intersection=3&show_lane=3&show_day=7&show_holiday=0&show_time=24&start_time=25&end_time=25&weather=0&road=0&separation=0&surface=0&acctype=0&controlmeasure=0&district=0&case_type=0"
+        "/markers?ne_lat=32.08656790211843&ne_lng=34.80611543655391&sw_lat=32.08003198103277&sw_lng=34.793884563446&zoom=17&thin_markers=false&start_date=a1104537600&end_date=1577836800&show_fatal=1&show_severe=1&show_light=1&approx=1&accurate=1&show_markers=1&show_discussions=1&show_urban=3&show_intersection=3&show_lane=3&show_day=7&show_holiday=0&show_time=24&start_time=25&end_time=25&weather=0&road=0&separation=0&surface=0&acctype=1&controlmeasure=0&district=0&case_type=0"
     )
     assert rv.status_code == http_client.BAD_REQUEST
 
@@ -80,8 +80,8 @@ def test_markers(
             "sw_lng": "34.775548982620194",
             "zoom": "16",
             "thin_markers": "false",
-            "start_date": "1104537600",
-            "end_date": "1484697600",
+            "start_date": "1546300800",  # 2019-01-01 UTC
+            "end_date": "1577836800",  # 2020-01-01 UTC
             "show_fatal": show_fatal,
             "show_severe": show_severe,
             "show_light": show_light,
@@ -103,7 +103,7 @@ def test_markers(
             "road": "0",
             "separation": "0",
             "surface": "0",
-            "acctype": "0",
+            "acctype": "1",
             "controlmeasure": "0",
             "district": "0",
             "case_type": "0",

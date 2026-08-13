@@ -85,7 +85,7 @@ def read_dictionary(dictionary_file):
     return cbs_dictionary
 
 
-def fill_dictionary_tables(cbs_dictionary, provider_code, year):
+def fill_dictionary_tables(cbs_dictionary, provider_code, year, should_commit=True):
     if year < 2008:
         return
     for k, v in cbs_dictionary.items():
@@ -131,12 +131,13 @@ def fill_dictionary_tables(cbs_dictionary, provider_code, year):
             )
             db.session.execute(sql_insert)
     try:
-        db.session.commit()
+        if should_commit:
+            db.session.commit()
     except Exception as e:
         logging.error(f"Error updating Dictionary tables: {e}")
-        db.session.rollback()
+        raise e
     logging.debug("Inserted/Updated dictionary values into table " + curr_table)
-    create_provider_code_table()
+    create_provider_code_table(should_commit)
 
 
 def truncate_dictionary_tables(dictionary_file):
@@ -151,7 +152,7 @@ def truncate_dictionary_tables(dictionary_file):
         logging.debug("Truncated table " + curr_table)
 
 
-def create_provider_code_table():
+def create_provider_code_table(should_commit):
     provider_code_table = "provider_code"
     provider_code_class = ProviderCode
     table_entries = db.session.query(provider_code_class)
@@ -168,11 +169,11 @@ def create_provider_code_table():
         )
         db.session.execute(sql_insert)
     try:
-        db.session.commit()
+        if should_commit:
+            db.session.commit()
     except Exception as e:
         logging.error(f"Error updating table {provider_code_table}: {e}")
-        db.session.rollback()
-
+        raise e
 
 def get_provider_code(directory_name=None):
     if directory_name:

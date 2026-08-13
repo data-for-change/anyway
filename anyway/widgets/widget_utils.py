@@ -95,6 +95,8 @@ def get_expression_for_road_segment_location_fields(filters, table_obj):
 def get_expression_for_segment_junctions(segment_id: int, table_obj):
     sg = SegmentJunctions.get_instance()
     junctions = sg.get_segment_junctions(segment_id)
+    if not junctions:
+        return false()
     if hasattr(table_obj, "non_urban_intersection"):
         field = getattr(table_obj, "non_urban_intersection")
     elif hasattr(table_obj, "intersection"):

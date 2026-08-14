@@ -6,7 +6,6 @@ import pandas as pd
 from anyway.app_and_db import db
 from anyway.models import SuburbanJunction, RoadJunctionKM, JunctionArm, Junction
 
-
 SUBURBAN_JUNCTION = "suburban_junction"
 ACCIDENTS = "accidents"
 CITIES = "cities"
@@ -36,6 +35,7 @@ road_junction_km_dict: Dict[Tuple[int, int], int] = {}
 junction_arms: List[Dict] = []
 junctions: Dict[int, Dict] = {}
 
+
 def parse(junction_arms_filename, junctions_filename):
     read_junctions_from_file(junctions_filename)
     import_junctions_into_db()
@@ -44,13 +44,17 @@ def parse(junction_arms_filename, junctions_filename):
     import_suburban_junctions_into_db()
     import_road_junction_km_into_db()
 
+
 def is_empty_value(value) -> bool:
     return pd.isna(value) or value == ""
+
 
 def read_junctions_from_file(filename: str):
     expected_headers = ["kod", "teur"]
     df = pd.read_csv(filename, encoding="cp1255")
-    assert list(df.columns[:len(expected_headers)]) == expected_headers, "File does not have expected headers"
+    assert (
+        list(df.columns[: len(expected_headers)]) == expected_headers
+    ), "File does not have expected headers"
     first_col = expected_headers[0]
     for row in df.itertuples(index=False):
         # In order to ignore empty lines
@@ -63,6 +67,7 @@ def read_junctions_from_file(filename: str):
         }
     logging.debug(f"Read {len(junctions)} junctions from file")
 
+
 def import_junctions_into_db():
     logging.debug(f"Writing to db: {len(junctions)} junctions")
     db.session.query(Junction).delete()
@@ -70,12 +75,14 @@ def import_junctions_into_db():
     db.session.commit()
     logging.debug(f"Done writing Junction.")
 
+
 def import_junction_arms_into_db():
     logging.debug(f"Writing to db: {len(junction_arms)} junction arms")
     db.session.query(JunctionArm).delete()
     db.session.bulk_insert_mappings(JunctionArm, junction_arms)
     db.session.commit()
     logging.debug(f"Done writing JunctionArm.")
+
 
 def read_junction_arms_from_file(filename: str):
     for j in _iter_rows(filename):
@@ -85,7 +92,7 @@ def read_junction_arms_from_file(filename: str):
             add_suburban_junction(j)
             add_road_junction_km(j)
 
-    
+
 def _iter_rows(filename) -> Iterator[dict]:
     headers_to_fields = {
         "kod": ARM_SYMBOL,
@@ -99,20 +106,25 @@ def _iter_rows(filename) -> Iterator[dict]:
     }
     expected_headers = list(headers_to_fields.keys())
     df = pd.read_csv(filename, encoding="cp1255", usecols=expected_headers)
-    assert list(df.columns[:len(expected_headers)]) == expected_headers, "File does not have expected headers"
+    assert (
+        list(df.columns[: len(expected_headers)]) == expected_headers
+    ), "File does not have expected headers"
 
     first_col = expected_headers[0]
     rename_headers = lambda row: {headers_to_fields[col]: row[col] for col in expected_headers}
     row_nan_to_empty = lambda row: {k: (None if pd.isna(v) else v) for k, v in row_dict.items()}
 
     for row in df.itertuples(index=False):
-        if is_empty_value(getattr(row, first_col)): #skip empty lines
+        if is_empty_value(getattr(row, first_col)):  # skip empty lines
             continue
         row_dict = row._asdict()  # namedtuple -> dict
         yield rename_headers(row_nan_to_empty(row_dict))
 
+
 def add_road_junction_km(junction_arm: dict):
-    road_junction_km_dict[(junction_arm[ROAD_SYMBOL], junction_arm[JUNCTION_SYMBOL])] = junction_arm[KM]
+    road_junction_km_dict[(junction_arm[ROAD_SYMBOL], junction_arm[JUNCTION_SYMBOL])] = (
+        junction_arm[KM]
+    )
 
 
 def import_suburban_junctions_into_db():
@@ -152,6 +164,7 @@ def fix_name_len(name: str) -> str:
             f"{SuburbanJunction.MAX_NAME_LEN}):{name}."
         )
     return name[: SuburbanJunction.MAX_NAME_LEN]
+
 
 def add_junction_arm(junction_arm: dict):
     junction_arms.append(junction_arm)

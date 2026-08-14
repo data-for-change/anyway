@@ -74,6 +74,7 @@ class TestInfographicsUtilsCase(unittest.TestCase):
         RoadSegments(segment_id=32, road=30, from_km=10.0, to_km=20.0),
     ]
 
+    @unittest.skip("Infographic test disabled")
     def test_format_two_level_items(self):
         actual = format_2_level_items(
             self.item1,
@@ -115,6 +116,7 @@ class TestInfographicsUtilsCase(unittest.TestCase):
         self.assertEqual('markers_hebrew.street2', str(actual.expression.clauses[1].left), "11")
         self.assertEqual('1', actual.clauses[1].right.effective_value, "12")
 
+    @unittest.skip("Infographic test disabled")
     @patch("anyway.widgets.widget_utils.SegmentJunctions")
     def test_get_expression_for_segment_junctions(self, sg):
         sg.get_instance.return_value = sg

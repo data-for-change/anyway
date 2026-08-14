@@ -112,7 +112,9 @@ def _iter_rows(filename) -> Iterator[dict]:
 
     first_col = expected_headers[0]
     rename_headers = lambda row: {headers_to_fields[col]: row[col] for col in expected_headers}
-    row_nan_to_empty = lambda row: {k: (None if pd.isna(v) else v) for k, v in row_dict.items()}
+    row_nan_to_empty = lambda row_dict: {
+        k: (None if pd.isna(v) else v) for k, v in row_dict.items()
+    }
 
     for row in df.itertuples(index=False):
         if is_empty_value(getattr(row, first_col)):  # skip empty lines

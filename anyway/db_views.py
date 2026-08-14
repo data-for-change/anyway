@@ -475,7 +475,7 @@ class Views(object):
                   and_(Involved.cross_direction == CrossDirection.id,
                        Involved.accident_year == CrossDirection.year,
                        Involved.provider_code == CrossDirection.provider_code),
-                  isouter=True) 
+                  isouter=True)
         return select(selected_columns) \
             .select_from(from_clause)
 

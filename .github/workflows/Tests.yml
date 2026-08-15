@@ -5,10 +5,12 @@ on:
       branches:
         - master
         - dev
+        - new-cbs-format
   push:
     branches:
       - master
       - dev
+      - new-cbs-format
 jobs:
   #Eslint:
   #  runs-on: ubuntu-latest

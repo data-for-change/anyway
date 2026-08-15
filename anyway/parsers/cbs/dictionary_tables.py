@@ -5,8 +5,6 @@ import os
 import re
 from collections import defaultdict
 
-import pandas as pd
-
 from anyway.app_and_db import db
 from anyway.models import ProviderCode
 from anyway.utilities import ImporterUI

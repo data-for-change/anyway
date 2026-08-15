@@ -37,9 +37,8 @@ from sqlalchemy import (
     text,
 )
 import sqlalchemy
-from sqlalchemy.orm import relationship, load_only, backref
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy.dialects.postgresql import JSON
-from sqlalchemy import or_, and_
 from sqlalchemy.dialects import postgresql
 
 from anyway import localization

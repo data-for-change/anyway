@@ -1,5 +1,4 @@
 import glob
-import json
 import logging
 import os
 import re
@@ -1184,7 +1183,7 @@ def main(batch_size, source, load_start_year=None, allow_missing=False):
             logging.getLogger("boto3").setLevel(logging.WARNING)
             logging.getLogger("botocore").setLevel(logging.WARNING)
             logging.getLogger("s3transfer").setLevel(logging.WARNING)
-            
+
             total = _import_from_s3(batch_size, load_start_year, allow_missing)
         elif source == "local_dir_for_tests_only":
             total = _import_from_local_dir(batch_size)
@@ -1197,6 +1196,3 @@ def main(batch_size, source, load_start_year=None, allow_missing=False):
         print("Traceback: {0}".format(traceback.format_exc()))
         raise CBSParsingFailed(message=str(ex))
         # Todo - send an email that an exception occured
-
-
-

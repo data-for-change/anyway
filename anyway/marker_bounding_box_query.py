@@ -2,7 +2,7 @@ from sqlalchemy import desc, and_, sql, func, or_
 from sqlalchemy.orm import load_only
 
 from anyway.app_and_db import db
-from anyway.backend_constants import BE_CONST, OneLane
+from anyway.backend_constants import BE_CONST, OneLane, InjurySeverity
 from anyway.backend_constants import AccidentSeverity as BE_AccidentSeverity
 from anyway.backend_constants import PlaceType
 from anyway.models import MarkerResult, AccidentMarker, Vehicle, Involved
@@ -18,6 +18,9 @@ SHOW_ONE_LANE = 1
 SHOW_ALL_DAYS = 7
 SHOW_TIME = 24
 SHOW_ALL_WEATHER = 0
+LOCATION_ACCURACY_PRECISE_LIST = [1, 3, 4]
+LIGHT_TRANSPORTATION_INJURED_TYPES = [1, 6, 7, 10, 11, 12, 13]
+LIGHT_TRANSPORTATION_VEHICLE_TYPES = [15, 32, 34, 36]
 
 def empty_markers_query():
     return db.session.query(AccidentMarker).filter(sql.false())
@@ -210,47 +213,28 @@ def handle_age_groups_filter(markers, kwargs):
         markers = empty_markers_query()
     return markers
 
-#not currently used
 def handle_light_transportation_filter(markers, kwargs):
     if kwargs.get("light_transportation", False):
         age_groups_list = kwargs.get("age_groups").split(",")
-        LOCATION_ACCURACY_PRECISE_LIST = [1, 3, 4]
         markers = markers.filter(
             AccidentMarker.location_accuracy.in_(LOCATION_ACCURACY_PRECISE_LIST)
         )
-        INJURED_TYPES = [1, 6, 7]
+        injured_in_age_group = and_(
+            Involved.injury_severity.in_(InjurySeverity.codes()),
+            Involved.age_group.in_(age_groups_list),
+        )
         markers = markers.filter(
             or_(
                 AccidentMarker.involved.any(
                     and_(
-                        Involved.injured_type.in_(INJURED_TYPES),
-                        Involved.injury_severity >= 1,
-                        Involved.injury_severity <= 3,
-                        Involved.age_group.in_(age_groups_list),
+                        Involved.injured_type.in_(LIGHT_TRANSPORTATION_INJURED_TYPES),
+                        injured_in_age_group,
                     )
                 ),
                 AccidentMarker.involved.any(
                     and_(
-                        Involved.vehicle_type == 15,
-                        Involved.injury_severity >= 1,
-                        Involved.injury_severity <= 3,
-                        Involved.age_group.in_(age_groups_list),
-                    )
-                ),
-                AccidentMarker.involved.any(
-                    and_(
-                        Involved.vehicle_type == 21,
-                        Involved.injury_severity >= 1,
-                        Involved.injury_severity <= 3,
-                        Involved.age_group.in_(age_groups_list),
-                    )
-                ),
-                AccidentMarker.involved.any(
-                    and_(
-                        Involved.vehicle_type == 23,
-                        Involved.injury_severity >= 1,
-                        Involved.injury_severity <= 3,
-                        Involved.age_group.in_(age_groups_list),
+                        Involved.vehicle_type.in_(LIGHT_TRANSPORTATION_VEHICLE_TYPES),
+                        injured_in_age_group,
                     )
                 ),
             )
@@ -355,8 +339,8 @@ def marker_bounding_box_query(
 
     markers = handle_age_groups_filter(markers, kwargs)
 
-    #no button for this filter
-    #markers = handle_light_transportation_filter(markers, kwargs)
+    #used in injured around schools 2025 via api
+    markers = handle_light_transportation_filter(markers, kwargs)
 
     if page and per_page:
         markers = markers.offset((page - 1) * per_page).limit(per_page)

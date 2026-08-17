@@ -21,12 +21,12 @@ class SchoolsJsonFile(Enum):
     MAIN_FILE = ""
 
 
-SUBTYPE_ACCIDENT_WITH_PEDESTRIAN = 1
+SUBTYPE_ACCIDENT_WITH_PEDESTRIAN = 1369
 LOCATION_ACCURACY_PRECISE = False
 LOCATION_ACCURACY_PRECISE_LIST = [1, 3, 4]
 AGE_GROUPS = [2, 3, 4]
-INJURED_TYPES = [1, 6, 7]
-VEHICLE_TYPES = [15, 21, 23]
+INJURED_TYPES = [1, 6, 7, 10, 11, 12, 13]
+VEHICLE_TYPES = [15, 32, 34, 36]
 CONTENT_ENCODING = "utf-8"
 HEBREW_ENCODING = "cp1255"
 ANYWAY_UI_FORMAT_MAP_ONLY = "https://www.anyway.co.il/?zoom=17&start_date={start_date}&end_date={end_date}&lat={latitude}&lon={longitude}&show_fatal=1&show_severe=1&show_light=1&approx={location_approx}&accurate={location_accurate}&show_markers=1&show_discussions=0&show_urban=3&show_intersection=3&show_lane=3&show_day=7&show_holiday=0&show_time=24&start_time=25&end_time=25&weather=0&road=0&separation=0&surface=0&acctype={acc_type}&controlmeasure=0&district=0&case_type=0&show_rsa=0&age_groups=234&map_only=true"
@@ -35,7 +35,7 @@ DATE_INPUT_FORMAT = "%d-%m-%Y"
 DATE_URL_FORMAT = "%Y-%m-%d"
 SEVEN_AM_RAW = 29
 SEVEN_PM_RAW = 76
-INJURY_SEVERITIES = [1, 2, 3]
+INJURY_SEVERITIES = [111, 1194, 108]
 
 ALL_SCHOOLS_DATA_DIR = os.path.join(
     pathlib.Path(__file__).parent.parent.parent, "static", "data", "schools", "all_schools_data"

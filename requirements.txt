@@ -54,3 +54,7 @@ telebot==0.0.5
 selenium==4.11.2
 apache-airflow-client==2.6.2
 gevent==22.10.2
+matplotlib==3.5.3
+shapely==1.8.5
+holidays==0.19
+tqdm==4.64.1

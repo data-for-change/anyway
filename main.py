@@ -208,71 +208,14 @@ def cities(chunk_size):
 
 
 @process.command()
-@click.argument("filepath", type=str, default="static/data/schools/schools.csv")
 @click.option("--batch_size", type=int, default=5000)
-def schools(filepath, batch_size):
-    from anyway.parsers.schools import parse
-
-    return parse(filepath=filepath, batch_size=batch_size)
-
-
-@process.command()
-@click.argument(
-    "schools_description_filepath", type=str, default="static/data/schools/schools_description.xlsx"
-)
-@click.argument(
-    "schools_coordinates_filepath", type=str, default="static/data/schools/schools_coordinates.xlsx"
-)
-@click.option("--batch_size", type=int, default=5000)
-def schools_with_description(
-    schools_description_filepath, schools_coordinates_filepath, batch_size
-):
+def schools_with_description(batch_size):
     from anyway.parsers.schools_with_description import parse
 
     return parse(
-        schools_description_filepath=schools_description_filepath,
-        schools_coordinates_filepath=schools_coordinates_filepath,
         batch_size=batch_size,
     )
 
-
-@process.command()
-@click.argument(
-    "schools_description_filepath",
-    type=str,
-    default="static/data/schools/schools_description_2020.xlsx",
-)
-@click.argument(
-    "schools_coordinates_filepath",
-    type=str,
-    default="static/data/schools/schools_coordinates_2020.xlsx",
-)
-@click.option("--batch_size", type=int, default=5000)
-def schools_with_description_2020(
-    schools_description_filepath, schools_coordinates_filepath, batch_size
-):
-    from anyway.parsers.schools_with_description_2020 import parse
-
-    return parse(
-        schools_description_filepath=schools_description_filepath,
-        schools_coordinates_filepath=schools_coordinates_filepath,
-        batch_size=batch_size,
-    )
-
-
-@process.command()
-@click.option(
-    "--start_date", default="01-07-2017", type=valid_date, help="The Start Date - format DD-MM-YYYY"
-)
-@click.option(
-    "--end_date", default="30-06-2022", type=valid_date, help="The End Date - format DD-MM-YYYY"
-)
-@click.option("--distance", default=0.5, help="float In KM. Default is 0.5 (500m)", type=float)
-@click.option("--batch_size", type=int, default=5000)
-def injured_around_schools_2022(start_date, end_date, distance, batch_size):
-    from anyway.parsers.injured_around_schools_2022 import parse
-
-    return parse(start_date=start_date, end_date=end_date, distance=distance, batch_size=batch_size)
 
 
 @process.command()
@@ -284,8 +227,8 @@ def injured_around_schools_2022(start_date, end_date, distance, batch_size):
 )
 @click.option("--distance", default=0.5, help="float In KM. Default is 0.5 (500m)", type=float)
 @click.option("--batch_size", type=int, default=5000)
-def injured_around_schools_2023(start_date, end_date, distance, batch_size):
-    from anyway.parsers.injured_around_schools_2023 import parse
+def injured_around_schools(start_date, end_date, distance, batch_size):
+    from anyway.parsers.injured_around_schools import parse
 
     return parse(start_date=start_date, end_date=end_date, distance=distance, batch_size=batch_size)
 
@@ -506,25 +449,6 @@ def load_discussions(identifiers):
 @cli.group()
 def scripts():
     pass
-
-
-@scripts.command()
-@click.option(
-    "--start_date", default="01-01-2013", type=valid_date, help="The Start Date - format DD-MM-YYYY"
-)
-@click.option(
-    "--end_date", default="31-12-2017", type=valid_date, help="The End Date - format DD-MM-YYYY"
-)
-@click.option("--distance", default=0.5, help="float In KM. Default is 0.5 (500m)", type=float)
-@click.option(
-    "--output_path", default="output", help="output file of the results. Default is output.csv"
-)
-def accidents_around_schools(start_date, end_date, distance, output_path):
-    from anyway.accidents_around_schools import main
-
-    return main(
-        start_date=start_date, end_date=end_date, distance=distance, output_path=output_path
-    )
 
 
 @scripts.command()

@@ -58,3 +58,5 @@ matplotlib==3.5.3
 shapely==1.8.5
 holidays==0.19
 tqdm==4.64.1
+nbconvert==7.16.4
+ipykernel==6.29.5

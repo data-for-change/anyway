@@ -23,24 +23,24 @@ school_fields = {
 
 S3_BUCKET = "dfc-anyway"
 S3_SCHOOLS_FILE_PATH = "schools_report/schools/schools.xlsx"
-S3_OUTPUT_DIR = 'schools_report/output'
+S3_OUTPUT_DIR = "schools_report/output"
 INSTITUTION_TYPES = [
-            "בית ספר",
-            "תלמוד תורה",
-            "ישיבה קטנה",
-            'בי"ס תורני',
-            "ישיבה תיכונית",
-            'בי"ס חקלאי',
-            'בי"ס רפואי',
-            'בי"ס כנסייתי',
-            "אולפנה",
-            'בי"ס אקסטרני',
-            'בי"ס קיבוצי',
-            "תלמוד תורה ליד מעיין חינוך התורני",
-            'בי"ס מושבי',
-            'בי"ס - הילה חסות',
-            'מחוננים',
-        ]
+    "בית ספר",
+    "תלמוד תורה",
+    "ישיבה קטנה",
+    'בי"ס תורני',
+    "ישיבה תיכונית",
+    'בי"ס חקלאי',
+    'בי"ס רפואי',
+    'בי"ס כנסייתי',
+    "אולפנה",
+    'בי"ס אקסטרני',
+    'בי"ס קיבוצי',
+    "תלמוד תורה ליד מעיין חינוך התורני",
+    'בי"ס מושבי',
+    'בי"ס - הילה חסות',
+    "מחוננים",
+]
 
 app = init_flask()
 db = SQLAlchemy(app)
@@ -65,7 +65,9 @@ def get_schools_with_description():
     institution_types_seen = set()
     logging.info("\tReading schools description data from S3")
     s3_data_object = S3DataClass(s3_bucket_name=S3_BUCKET)
-    file_stream = BytesIO(s3_data_object.s3_bucket.Object(S3_SCHOOLS_FILE_PATH).get()['Body'].read())
+    file_stream = BytesIO(
+        s3_data_object.s3_bucket.Object(S3_SCHOOLS_FILE_PATH).get()["Body"].read()
+    )
     df_schools = pd.read_excel(file_stream, engine="openpyxl")
     logging.info("\tDone reading schools description data from S3")
     schools = []
@@ -85,10 +87,7 @@ def get_schools_with_description():
         if x_coord and not math.isnan(x_coord) and y_coord and not math.isnan(y_coord):
             longitude, latitude = coordinates_converter.convert(x_coord, y_coord)
         else:
-            longitude, latitude = (
-                None,
-                None,
-            )
+            longitude, latitude = (None, None)
         school_tuple = (school_name, x_coord, y_coord)
         if school_tuple in all_schools_tuples:
             continue
@@ -114,7 +113,9 @@ def get_schools_with_description():
     logging.info(f"Found {len(schools)} schools with description")
     logging.info(f"All institution types seen: {institution_types_seen}")
     logging.info(f"Expected institution types: {INSTITUTION_TYPES}")
-    logging.info(f"All institution types seen match expected: {len(institution_types_seen) == len(INSTITUTION_TYPES)}")
+    logging.info(
+        f"All institution types seen match expected: {len(institution_types_seen) == len(INSTITUTION_TYPES)}"
+    )
     return schools
 
 
@@ -141,7 +142,10 @@ def import_to_datastore(batch_size):
         logging.info(f"\t{new_items} items in {time_delta(started)}")
         return new_items
     except Exception as exception:
-        error = f"Schools import succeeded partially with {new_items} schools. Got exception : {exception}"
+        error = (
+            f"Schools import succeeded partially with {new_items} schools. "
+            f"Got exception : {exception}"
+        )
         raise Exception(error)
 
 
@@ -160,16 +164,14 @@ def export_schools_to_json():
             school_list.append(school_dict)
     s3_bucket = S3DataClass(s3_bucket_name=S3_BUCKET).s3_bucket
     with io.BytesIO() as json_buffer:
-        json_buffer.write(json.dumps(school_list, ensure_ascii=False, indent=2).encode('utf-8'))
+        json_buffer.write(json.dumps(school_list, ensure_ascii=False, indent=2).encode("utf-8"))
         json_buffer.seek(0)
-        s3_bucket.upload_fileobj(json_buffer, os.path.join(S3_OUTPUT_DIR,'schools_names.json'))
+        s3_bucket.upload_fileobj(json_buffer, os.path.join(S3_OUTPUT_DIR, "schools_names.json"))
 
 
 def parse(batch_size):
     started = datetime.now()
-    total = import_to_datastore(
-        batch_size=batch_size,
-    )
+    total = import_to_datastore(batch_size=batch_size)
     db.session.execute(
         "UPDATE schools_with_description2020 SET geom = ST_SetSRID(ST_MakePoint(longitude,latitude),4326)\
                            WHERE geom IS NULL;"

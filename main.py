@@ -208,18 +208,10 @@ def cities(chunk_size):
 
 
 @process.command()
-@click.argument("filepath", type=str, default="static/data/schools/schools.csv")
-@click.option("--batch_size", type=int, default=5000)
-def schools(filepath, batch_size):
-    from anyway.parsers.schools import parse
-
-    return parse(filepath=filepath, batch_size=batch_size)
-
-
-@process.command()
 @click.option("--batch_size", type=int, default=5000)
 def schools_with_description(batch_size):
     from anyway.parsers.schools_with_description import parse
+
     return parse(
         batch_size=batch_size,
     )
@@ -457,25 +449,6 @@ def load_discussions(identifiers):
 @cli.group()
 def scripts():
     pass
-
-
-@scripts.command()
-@click.option(
-    "--start_date", default="01-01-2013", type=valid_date, help="The Start Date - format DD-MM-YYYY"
-)
-@click.option(
-    "--end_date", default="31-12-2017", type=valid_date, help="The End Date - format DD-MM-YYYY"
-)
-@click.option("--distance", default=0.5, help="float In KM. Default is 0.5 (500m)", type=float)
-@click.option(
-    "--output_path", default="output", help="output file of the results. Default is output.csv"
-)
-def accidents_around_schools(start_date, end_date, distance, output_path):
-    from anyway.accidents_around_schools import main
-
-    return main(
-        start_date=start_date, end_date=end_date, distance=distance, output_path=output_path
-    )
 
 
 @scripts.command()

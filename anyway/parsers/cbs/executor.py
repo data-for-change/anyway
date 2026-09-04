@@ -677,10 +677,11 @@ def get_files(directory):
                     output_files_dict.update(output)
                 else:
                     output_files_dict[name] = df
-        except Exception:
+        except Exception as e:
             logging.exception(
-                "Exception while processing file '%s'",
+                "Exception while processing file '%s': %s",
                 file_path or filename,
+                e,
             )
             raise
     return output_files_dict

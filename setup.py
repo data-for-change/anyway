@@ -12,5 +12,6 @@ else:
 setup(
     name='anyway',
     version=version,
+    python_requires='>=3.10,<3.11',
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
 )

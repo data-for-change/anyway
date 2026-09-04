@@ -1,5 +1,4 @@
 FROM ghcr.io/data-for-change/anyway/anyway:latest AS builder
-RUN flask assets build
 
 FROM nginx:stable
 COPY --from=builder /anyway/static /opt/anyway/static

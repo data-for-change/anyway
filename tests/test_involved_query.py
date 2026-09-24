@@ -65,7 +65,6 @@ class TestInvolvedQuery(unittest.TestCase):
         actual = InvolvedQuery_GB.dictify_double_group_by(data)
         self.assertEqual(actual, expected)
 
-    @pytest.mark.skip(reason="Infographic test disabled")
     @pytest.mark.usefixtures("cbs_cities")
     def test_e2e(self):
         test_client = flask_app.test_client()

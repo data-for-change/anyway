@@ -49,7 +49,7 @@ def get_most_severe_accidents_table_title(
     if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
         return _("Severe accidents"), f'{_("in segment")} {_(segment_dictionary[location_info["road_segment_name"]])}'
     elif resolution == BE_CONST.ResolutionCategories.SUBURBAN_JUNCTION:
-        return _("Severe accidents"), f"{_('in')}{location_info['non_urban_intersection_hebrew']}"
+        return _("Severe accidents"), f"{_('in')}{location_info['intersection_hebrew']}"
     elif resolution == BE_CONST.ResolutionCategories.STREET:
         in_str = _("in")
         return _("Severe accidents"), f"{_('in street')} {location_info['street1_hebrew']} {in_str}{location_info['yishuv_name']}"

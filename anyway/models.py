@@ -1095,6 +1095,28 @@ class Junction(Base):
     x = Column(Float(), nullable=True)
     y = Column(Float(), nullable=True)
 
+    @staticmethod
+    def get_all_from_key_value(key: str, val: Iterable) -> dict:
+        if not isinstance(val, Iterable):
+            val = [val]
+        res = (
+            db.session.query(Junction)
+            .filter((getattr(Junction, key)).in_(val))
+            .first()
+        )
+        if res is None:
+            raise ValueError(f"{key}:{val}: could not find Junction")
+        return res.serialize()
+
+    def serialize(self):
+        return {
+            "junction": self.junction,
+            "junction_hebrew": self.junction_hebrew,
+            "x": self.x,
+            "y": self.y,
+        }
+
+
 
 class JunctionArm(Base):
     __tablename__ = "junction_arm"
@@ -1106,6 +1128,24 @@ class JunctionArm(Base):
     yishuv_symbol = Column(Integer())
     street_symbol = Column(Integer())
     arm_name = Column(Text())
+
+    @staticmethod
+    def get_junction_by_two_roads(road_symbol1: int, road_symbol2: int) -> int:
+        # junction shared by an arm of each road
+        road1_junctions = db.session.query(JunctionArm.junction_symbol).filter(
+            JunctionArm.road_symbol == road_symbol1
+        )
+        res = (
+            db.session.query(JunctionArm.junction_symbol)
+            .filter(JunctionArm.road_symbol == road_symbol2)
+            .filter(JunctionArm.junction_symbol.in_(road1_junctions))
+            .first()
+        )
+        if res is None:
+            raise ValueError(
+                f"{road_symbol1}, {road_symbol2}: could not find a shared JunctionArm junction"
+            )
+        return res.junction_symbol
 
 
 class RoadJunctionKM(Base):

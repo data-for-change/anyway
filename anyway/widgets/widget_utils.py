@@ -13,7 +13,7 @@ from sqlalchemy import func, distinct, between, or_, and_
 from anyway.app_and_db import db
 from anyway.backend_constants import BE_CONST, LabeledCode, InjurySeverity
 from anyway.models import InvolvedMarkerView
-from anyway.request_params import LocationInfo
+from anyway.request_params import LocationInfo, INTERSECTION
 from anyway.vehicle_type import VehicleType
 from anyway.parsers.resolution_fields import ResolutionFields as RF
 from anyway.models import NewsFlash
@@ -95,7 +95,7 @@ def get_expression_for_road_segment_location_fields(filters, table_obj):
 def get_expression_for_segment_junctions(segment_id: int, table_obj):
     sg = SegmentJunctions.get_instance()
     junctions = sg.get_segment_junctions(segment_id)
-    return getattr(table_obj, "non_urban_intersection").in_(junctions)
+    return getattr(table_obj, INTERSECTION).in_(junctions)
 
 
 def get_filter_expression(table_obj, field_name, value):

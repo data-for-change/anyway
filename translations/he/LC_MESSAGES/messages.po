@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-09-10 15:11+0000\n"
+"POT-Creation-Date: 2026-09-27 16:38+0300\n"
 "PO-Revision-Date: 2020-10-16 15:42+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: he\n"
@@ -16,65 +16,65 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.14.0\n"
+"Generated-By: Babel 2.18.0\n"
 
-#: anyway/backend_constants.py:155 anyway/backend_constants.py:178
+#: anyway/backend_constants.py:159 anyway/backend_constants.py:183
 msgid "killed"
 msgstr "הרוג/ה"
 
-#: anyway/backend_constants.py:156 anyway/backend_constants.py:179
+#: anyway/backend_constants.py:160 anyway/backend_constants.py:184
 msgid "severe injured"
 msgstr "פצוע/ה קשה"
 
-#: anyway/backend_constants.py:157 anyway/backend_constants.py:180
+#: anyway/backend_constants.py:161 anyway/backend_constants.py:185
 msgid "light injured"
 msgstr "פצוע/ה קל"
 
-#: anyway/backend_constants.py:181
+#: anyway/backend_constants.py:186
 msgid "not injured"
 msgstr "לא נפגע/ה"
 
-#: anyway/backend_constants.py:302
+#: anyway/backend_constants.py:323
 msgid "Pedestrian"
 msgstr "הולך רגל"
 
-#: anyway/backend_constants.py:303
+#: anyway/backend_constants.py:324
 msgid "Driver of a vehicle with 4 wheel or more"
 msgstr "נהג ברכב עם 4 גלגלים או יותר"
 
-#: anyway/backend_constants.py:304
+#: anyway/backend_constants.py:325
 msgid "Passenger of a vehicle with 4 wheel or more"
 msgstr "נוסע ברכב עם 4 גלגלים או יותר"
 
-#: anyway/backend_constants.py:305
+#: anyway/backend_constants.py:326
 msgid "Motorcycle driver"
 msgstr "נהג באופנוע"
 
-#: anyway/backend_constants.py:306
+#: anyway/backend_constants.py:327
 msgid "Motorcycle passenger"
 msgstr "נוסע באופנוע"
 
-#: anyway/backend_constants.py:307
+#: anyway/backend_constants.py:328
 msgid "Bicycle driver"
 msgstr "נהג אופניים"
 
-#: anyway/backend_constants.py:308
+#: anyway/backend_constants.py:329
 msgid "Bicycle passenger"
 msgstr "נוסע באופניים"
 
-#: anyway/backend_constants.py:309
+#: anyway/backend_constants.py:330
 msgid "Driver of an unknown vehicle"
 msgstr "נהג ברכב לא ידוע"
 
-#: anyway/backend_constants.py:310
+#: anyway/backend_constants.py:331
 msgid "Passenger of an unknown vehicle"
 msgstr "נוסע ברכב לא ידוע"
 
-#: anyway/flask_app.py:696 anyway/flask_app.py:800
+#: anyway/flask_app.py:711 anyway/flask_app.py:815
 msgid "Discussion not found:"
 msgstr ""
 
-#: anyway/flask_app.py:699
+#: anyway/flask_app.py:714
 msgid "Illegal Discussion"
 msgstr ""
 
@@ -186,127 +186,148 @@ msgstr "נהג רכב פרטי"
 msgid "other_driver"
 msgstr "אחר"
 
-#: anyway/vehicle_type.py:103 anyway/vehicle_type.py:236
+#: anyway/vehicle_type.py:111 anyway/vehicle_type.py:248
 msgid "private car"
 msgstr "רכב נוסעים פרטי"
 
-#: anyway/vehicle_type.py:104
+#: anyway/vehicle_type.py:112
 msgid "truck upto 3.5 tons"
 msgstr "טרנזיט עד 3.5 טון "
 
-#: anyway/vehicle_type.py:105
+#: anyway/vehicle_type.py:113
 msgid "pickup upto 3.5 tons"
 msgstr "פיקאפ עד 3.5 טון"
 
-#: anyway/vehicle_type.py:106
-msgid "truck 4 to 10 tons"
-msgstr "משאית 4 עד 10 טון"
-
-#: anyway/vehicle_type.py:107
-msgid "truck 12 to 16 tons"
-msgstr "משאית 12 עד 16 טון"
-
-#: anyway/vehicle_type.py:108
-msgid "truck 16 to 34 tons"
-msgstr "משאית 16 עד 34 טון"
-
-#: anyway/vehicle_type.py:109
-msgid "truck above 34 tons"
-msgstr "משאית מעל 34 טון"
-
-#: anyway/vehicle_type.py:110
-msgid "motorcycle upto 50 cc"
-msgstr "אופנוע עד 50 סמ\"ק"
-
-#: anyway/vehicle_type.py:111
-msgid "motorcycle 50 to 250 cc"
-msgstr "אופנוע 50 עד 250 סמ\"ק"
-
-#: anyway/vehicle_type.py:112
-msgid "motorcycle 250 to 400 cc"
-msgstr "אופנוע 250 עד 400 סמ\"ק"
-
-#: anyway/vehicle_type.py:113
-msgid "bus"
-msgstr "אוטובוס"
-
 #: anyway/vehicle_type.py:114
-msgid "taxi"
-msgstr "מונית"
-
-#: anyway/vehicle_type.py:115
-msgid "work vehicle"
-msgstr "רכב עבודה"
-
-#: anyway/vehicle_type.py:116
-msgid "tractor"
-msgstr "טרקטור"
-
-#: anyway/vehicle_type.py:117
-msgid "bike"
-msgstr "אופניים רגילים"
-
-#: anyway/vehicle_type.py:118
-msgid "train"
-msgstr "רכבת"
-
-#: anyway/vehicle_type.py:119
-msgid "other and unknown"
-msgstr "אחר ולא ידוע"
-
-#: anyway/vehicle_type.py:120
-msgid "minibus"
-msgstr "מיניבוס"
-
-#: anyway/vehicle_type.py:121
-msgid "motorcycle above 400 cc"
-msgstr "אופנוע מעל 400 סמ\"ק"
-
-#: anyway/vehicle_type.py:122
-msgid "electric scooter"
-msgstr "קורקינט חשמלי"
-
-#: anyway/vehicle_type.py:123
-msgid "mobility scooter"
-msgstr "קלנועית חשמלית"
-
-#: anyway/vehicle_type.py:124
-msgid "electric bike"
-msgstr "אופניים חשמליים"
-
-#: anyway/vehicle_type.py:125
 msgid "truck 3.5 to 10 tons"
 msgstr "משאית 3.5 עד 10 טון"
 
+#: anyway/vehicle_type.py:115
+msgid "truck 12 to 16 tons"
+msgstr "משאית 12 עד 16 טון"
+
+#: anyway/vehicle_type.py:116
+msgid "truck 16 to 34 tons"
+msgstr "משאית 16 עד 34 טון"
+
+#: anyway/vehicle_type.py:117
+msgid "truck above 34 tons"
+msgstr "משאית מעל 34 טון"
+
+#: anyway/vehicle_type.py:118
+msgid "motorcycle upto 50 cc"
+msgstr "אופנוע עד 50 סמ\"ק"
+
+#: anyway/vehicle_type.py:119
+#, fuzzy
+msgid "motorcycle 50 to 125 cc"
+msgstr "אופנוע 50 עד 125 סמ\"ק"
+
+#: anyway/vehicle_type.py:120
+#, fuzzy
+msgid "motorcycle 125 to 400 cc"
+msgstr "אופנוע 125 עד 400 סמ\"ק"
+
+#: anyway/vehicle_type.py:121
+msgid "bus"
+msgstr "אוטובוס"
+
+#: anyway/vehicle_type.py:122
+msgid "taxi"
+msgstr "מונית"
+
+#: anyway/vehicle_type.py:123
+msgid "work vehicle"
+msgstr "רכב עבודה"
+
+#: anyway/vehicle_type.py:124
+msgid "tractor"
+msgstr "טרקטור"
+
+#: anyway/vehicle_type.py:125
+msgid "bike"
+msgstr "אופניים רגילים"
+
 #: anyway/vehicle_type.py:126
+msgid "train"
+msgstr "רכבת"
+
+#: anyway/vehicle_type.py:127
+msgid "other and unknown"
+msgstr "אחר ולא ידוע"
+
+#: anyway/vehicle_type.py:128
+msgid "minibus"
+msgstr "מיניבוס"
+
+#: anyway/vehicle_type.py:129
+msgid "motorcycle above 400 cc"
+msgstr "אופנוע מעל 400 סמ\"ק"
+
+#: anyway/vehicle_type.py:130
+msgid "segway"
+msgstr "סגווי"
+
+#: anyway/vehicle_type.py:131
+msgid "semi full trailer"
+msgstr "גרור/נתמך"
+
+#: anyway/vehicle_type.py:132
+#, fuzzy
+msgid "non electric scooter"
+msgstr "קורקינט לא חשמלי"
+
+#: anyway/vehicle_type.py:133
+#, fuzzy
+msgid "all terrain vehicle"
+msgstr "טרקטורון"
+
+#: anyway/vehicle_type.py:134
+msgid "electric scooter"
+msgstr "קורקינט חשמלי"
+
+#: anyway/vehicle_type.py:135
+msgid "mobility scooter"
+msgstr "קלנועית"
+
+#: anyway/vehicle_type.py:136
+msgid "electric bike"
+msgstr "אופניים חשמליים"
+
+#: anyway/vehicle_type.py:137
 msgid "truck 10 to 12 tons"
 msgstr "משאית 10 עד 12 טון"
 
-#: anyway/vehicle_type.py:233
+#: anyway/vehicle_type.py:138
+#, fuzzy
+msgid "electric motorcycle"
+msgstr "אופנוע"
+
+#: anyway/vehicle_type.py:245
 msgid "professional driver"
 msgstr "נהג מקצועי"
 
-#: anyway/vehicle_type.py:234
+#: anyway/vehicle_type.py:246
 msgid "private driver"
 msgstr "נהג רכב פרטי"
 
-#: anyway/vehicle_type.py:235
+#: anyway/vehicle_type.py:247
 msgid "light electric vehicles"
 msgstr "רכבים חשמליים קלים"
 
-#: anyway/vehicle_type.py:237
+#: anyway/vehicle_type.py:249
 msgid "large vehicle"
 msgstr "מסחרי/משאית"
 
-#: anyway/vehicle_type.py:238
+#: anyway/vehicle_type.py:250
 msgid "motorcycle"
 msgstr "אופנוע"
 
-#: anyway/vehicle_type.py:239
+#: anyway/vehicle_type.py:251
 msgid "bicycle and small motor vehicles"
 msgstr "אופניים/קורקינט"
 
-#: anyway/vehicle_type.py:240
+#: anyway/vehicle_type.py:252
 msgid "other vehicle"
 msgstr "רכב אחר"
 
@@ -325,7 +346,7 @@ msgstr "מספר תאונות לפי סוג"
 msgid "Collision"
 msgstr "התנגשות"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_accident_type_widget.py:75
+#: anyway/widgets/all_locations_widgets/accident_count_by_accident_type_widget.py:76
 msgid ""
 "Distribution of accidents by type in the selected segment and time "
 "period. Three most common accident types are displayed"
@@ -353,7 +374,7 @@ msgstr "תאונות על פי זמן"
 msgid "day_night"
 msgstr ""
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_day_night_widget.py:50
+#: anyway/widgets/all_locations_widgets/accident_count_by_day_night_widget.py:51
 msgid ""
 "Distribution of accidents by day/night. Day/night are determined by "
 "sunrise and sunset at each day of the year."
@@ -362,32 +383,32 @@ msgstr ""
 "בכל יום בשנה"
 
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:74
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:182
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:187
 msgid "one light"
 msgstr "קלה אחת"
 
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:76
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:183
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:188
 msgid "light plural"
 msgstr "קלות"
 
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:81
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:184
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:189
 msgid "one severe"
 msgstr "קשה אחת"
 
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:83
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:185
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:190
 msgid "severe plural"
 msgstr "קשות"
 
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:88
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:186
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:191
 msgid "one fatal"
 msgstr "קטלנית אחת"
 
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:90
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:187
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:192
 msgid "fatal plural"
 msgstr "קטלניות"
 
@@ -398,103 +419,109 @@ msgid "in yishuv"
 msgstr "ביישוב"
 
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:95
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:189
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:194
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:112
 #: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:169
 msgid "in street"
 msgstr "ברחוב"
 
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:100
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:190
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:195
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:117
 #: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:174
 msgid "in road"
 msgstr "בכביש"
 
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:102
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:188
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:191
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:193
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:196
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:119
 #: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:176
 msgid "in segment"
 msgstr "במקטע"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:108
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:192
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:107
+#, fuzzy
+msgid "in junction"
+msgstr "צמת"
+
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:113
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:197
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:127
 #: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:182
 msgid "between the years"
 msgstr "בין השנים"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:111
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:154
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:193
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:116
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:159
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:198
 msgid "took place"
 msgstr "התרחשו"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:113
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:156
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:194
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:118
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:161
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:199
 msgid "accidents"
 msgstr "תאונות"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:114
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:119
 msgid "out of them (feminine)"
 msgstr "מתוכן"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:120
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:195
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:125
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:200
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:140
 msgid " and "
 msgstr " ו-"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:132
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:137
 msgid "Number of accidents by severity"
 msgstr "מספר תאונות לפי חומרה"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:133
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:138
 #: anyway/widgets/road_segment_widgets/accident_count_by_car_type_widget.py:148
 #: anyway/widgets/road_segment_widgets/accident_count_by_hour_widget.py:32
 #: anyway/widgets/road_segment_widgets/suburban_crosswalk_widget.py:77
 msgid "road_segment_name"
 msgstr ""
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:135
-msgid "non_urban_intersection_hebrew"
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:140
+msgid "intersection_hebrew"
 msgstr ""
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:143
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:174
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:148
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:179
 msgid "Fatal, severe and light accidents count in "
 msgstr "כמות התאונות הקטלניות, הקשות והקלות ב"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:144
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:149
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:160
 msgid "segment"
 msgstr "מקטע"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:144
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:181
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:149
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:186
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:160
 msgid "junction"
 msgstr "צמת"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:145
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:176
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:196
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:150
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:181
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:201
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:168
 msgid "in the selected time"
 msgstr "בפרק הזמן הנבחר"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:151
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:156
 msgid "in years"
 msgstr "בשנים"
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:159
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:164
+#, python-brace-format
 msgid "{street_name}, {yishuv_name}"
 msgstr ""
 
-#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:175
+#: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:180
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:162
 msgid "street"
 msgstr "רחוב"
@@ -609,7 +636,7 @@ msgstr ""
 msgid "unknown"
 msgstr "לא ידוע"
 
-#: anyway/widgets/all_locations_widgets/killed_injured_count_by_severity_vehicle_widget.py:79
+#: anyway/widgets/all_locations_widgets/killed_injured_count_by_severity_vehicle_widget.py:78
 msgid "Killed and injured stacked per vehicle type"
 msgstr "חומרת פגיעה לפי סוג הרכב"
 
@@ -704,10 +731,6 @@ msgstr "רוכבי אופניים וקורקינט שנפגעו קשה או נה
 msgid "Number of severely injured or killed in bike, e-bike, or scooter accidents"
 msgstr "מספר נפגעים שנפצעו קשה או נהרגו בתאונות אופנים, אופנים חשמליים וקורקינט"
 
-#: anyway/widgets/all_locations_widgets/test_widget.py:132
-msgid "Injured by severity and vehicle"
-msgstr ""
-
 #: anyway/widgets/no_location_widgets/vision_zero_bike_widget.py:32
 msgid "Bike transportation development solution"
 msgstr ""
@@ -720,7 +743,7 @@ msgstr "עקרונות עיקריים בפיתוח תחבורת אופניים �
 msgid "Comparing vehicle type in accidents relative to national average"
 msgstr "השוואת אחוז הרכבים בתאונות במקטע {} לעומת ממוצע ארצי"
 
-#: anyway/widgets/road_segment_widgets/accident_count_by_car_type_widget.py:150
+#: anyway/widgets/road_segment_widgets/accident_count_by_car_type_widget.py:151
 msgid ""
 "Vehicle accidents by type in specific segment, sorted by segment, "
 "compared to the national average"
@@ -734,7 +757,7 @@ msgstr "סוג נהג"
 msgid "Number of accidents by driver type"
 msgstr "מספר תאונות לפי סוג הנהג"
 
-#: anyway/widgets/road_segment_widgets/accident_count_by_driver_type_widget.py:87
+#: anyway/widgets/road_segment_widgets/accident_count_by_driver_type_widget.py:88
 msgid ""
 "Driver involvement in accident by driver type: professional - trucks, "
 "taxi, bus, work, minibus, tractor, private - private car, motorcycle, "
@@ -752,7 +775,7 @@ msgstr "מספר תאונות לפי שעה"
 msgid "Number of accidents by road light"
 msgstr "מספר תאונות לפי תאורה"
 
-#: anyway/widgets/road_segment_widgets/fatal_accident_yoy_same_month.py:48
+#: anyway/widgets/road_segment_widgets/fatal_accident_yoy_same_month.py:49
 msgid ""
 "Monthly killed in accidents on year over compared for current month in "
 "previous years"
@@ -771,7 +794,7 @@ msgstr "חזית-צד"
 msgid "Front-side vs other accidents"
 msgstr "תאונות חזית-צד מול סוגי תאונה אחרים"
 
-#: anyway/widgets/road_segment_widgets/front_to_side_accidents_by_severity.py:136
+#: anyway/widgets/road_segment_widgets/front_to_side_accidents_by_severity.py:137
 msgid "Fatal & severe accidents of type front-to-side in this road segment"
 msgstr "תאונה קטלנית או חמורה מסוג חזית-צד בקטע כביש זה"
 
@@ -890,7 +913,7 @@ msgid ""
 "pedestrians, citizens & decision makers, will fight car accidents."
 msgstr ""
 
-#: templates/index.html:38 templates/index.html:477
+#: templates/index.html:38 templates/index.html:474
 msgid "Hi"
 msgstr ""
 
@@ -898,23 +921,23 @@ msgstr ""
 msgid "Login"
 msgstr "התחבר"
 
-#: templates/index.html:466
+#: templates/index.html:463
 msgid "log out"
 msgstr ""
 
-#: templates/index.html:468
+#: templates/index.html:465
 msgid "log in"
 msgstr "התחבר"
 
-#: templates/index.html:478
+#: templates/index.html:475
 msgid "Logout"
 msgstr ""
 
-#: templates/index.html:483
+#: templates/index.html:480
 msgid "Login with Facebook"
 msgstr ""
 
-#: templates/index.html:490
+#: templates/index.html:487
 msgid "Login with Google"
 msgstr ""
 
@@ -925,5 +948,17 @@ msgstr ""
 #~ msgstr "כמות התאונות הקטלניות, הקשות והקלות במקטע בפרק הזמן הנבחר."
 
 #~ msgid "motorcycle 250 to 500 cc"
+#~ msgstr ""
+
+#~ msgid "truck 4 to 10 tons"
+#~ msgstr "משאית 4 עד 10 טון"
+
+#~ msgid "non_urban_intersection_hebrew"
+#~ msgstr ""
+
+#~ msgid "Injured by severity and vehicle"
+#~ msgstr ""
+
+#~ msgid "something else"
 #~ msgstr ""
 

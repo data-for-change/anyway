@@ -82,7 +82,7 @@ class BackEndConstants(object):
         ResolutionCategories.STREET,
         ResolutionCategories.SUBURBAN_ROAD,
         # TODO: add support for the following resolutions
-        # ResolutionCategories.SUBURBAN_JUNCTION,
+        ResolutionCategories.SUBURBAN_JUNCTION,
     ]
 
     RESOLUTION_ACCURACY_VALUES: dict = {

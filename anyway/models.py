@@ -2302,6 +2302,8 @@ class InvolvedMarkerView(Base):
     cross_direction_hebrew = Column(Text())
     road1 = Column(Integer(), index=True)
     road2 = Column(Integer(), index=True)
+    intersection = Column(Integer(), index=True)
+    intersection_hebrew = Column(Text())
     km = Column(Float())
     km_raw = Column(Text())
     km_accurate = Column(Boolean())

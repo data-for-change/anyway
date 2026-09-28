@@ -11,7 +11,6 @@ from anyway.utilities import chunks
 from anyway.utilities import time_delta
 from anyway.app_and_db import db
 
-
 dictionary = {
     "shana": "year",
     "kvish": "road",

@@ -9,7 +9,13 @@ class ResolutionFields:
         "נפה": ["district_hebrew"],
         "עיר": ["yishuv_name"],
         "רחוב": ["yishuv_name", "street1_hebrew"],
-        "צומת עירוני": ["yishuv_name", "street1_hebrew", "street2_hebrew", "intersection", "intersection_hebrew"],
+        "צומת עירוני": [
+            "yishuv_name",
+            "street1_hebrew",
+            "street2_hebrew",
+            "intersection",
+            "intersection_hebrew",
+        ],
         "כביש בינעירוני": ["road1", "road_segment_id"],
         "צומת בינעירוני": [
             "intersection",

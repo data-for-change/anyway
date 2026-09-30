@@ -61,7 +61,6 @@ class KilledInjuredCountPerVehicleStackedWidget(AllLocationsWidget):
             for item in items["data"]["items"]:
 
                 try:
-                    logging.debug(f"item before translation: {item}")
                     if item["label_key"] == UNKNOWN_VEHICLE_TYPE:
                         label = _(InjuredType.PEDESTRIAN.get_label())
                     else:

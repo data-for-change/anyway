@@ -76,8 +76,6 @@ def parse(filename):
     """
     Fills empty geometry object according to coordinates in database
     """
-    db.session.execute(
-        "UPDATE markers SET geom = ST_SetSRID(ST_MakePoint(longitude,latitude),4326)\
-                           WHERE geom IS NULL;"
-    )
+    db.session.execute("UPDATE markers SET geom = ST_SetSRID(ST_MakePoint(longitude,latitude),4326)\
+                           WHERE geom IS NULL;")
     db.session.commit()

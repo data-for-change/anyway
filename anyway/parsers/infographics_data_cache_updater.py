@@ -23,7 +23,6 @@ from anyway.utilities import chunked_generator
 import logging
 import json
 
-
 CACHE = "cache"
 TEMP = "temp"
 WIDGETS = "widgets"

@@ -102,6 +102,11 @@ class AccidentCountBySeverityWidget(AllLocationsWidget):
                 in_segment_keyword=_("in segment"),
                 segment_name=_(request_params.location_info.get("road_segment_name")),
             )
+        elif request_params.resolution == BE_CONST.ResolutionCategories.SUBURBAN_JUNCTION:
+            text = "{in_junction_keyword} {junction_name} ".format(
+                in_junction_keyword=_("in junction"),
+                junction_name=_(request_params.location_info.get("intersection_hebrew")),
+            )
         else:
             raise Exception(f"cannot convert to hebrew for resolution : {request_params.resolution.value}")
         text += "{between_years_keyword} {start_year} - {end_year}, {separator_keyword} {incidents_num} {incident_keyword}, {out_of_them_keywoard} ".format(
@@ -132,7 +137,7 @@ class AccidentCountBySeverityWidget(AllLocationsWidget):
                 "title": _("Number of accidents by severity"),
                 "subtitle": _(request_params.location_info["road_segment_name"])
                 if is_segment
-                else _(request_params.location_info["non_urban_intersection_hebrew"]),
+                else _(request_params.location_info["intersection_hebrew"]),
                 "transcription": AccidentCountBySeverityWidget.get_transcription(
                     request_params=request_params, items=items["data"]["items"]
                 ),
@@ -146,7 +151,7 @@ class AccidentCountBySeverityWidget(AllLocationsWidget):
             )
         elif request_params.resolution == BE_CONST.ResolutionCategories.STREET:
             # To have FE to treat it as a different widget
-            num_accidents = items["data"]["items"]["total_accidents_count"]
+            num_accidents = items["data"]["items"].get("total_accidents_count", 0)
             s = "{range_keyword} {start_year} - {end_year}, {separator_keyword} {incidents_num} {incident_keyword}".format(
                 range_keyword=_("in years"),
                 start_year=request_params.start_time.year,

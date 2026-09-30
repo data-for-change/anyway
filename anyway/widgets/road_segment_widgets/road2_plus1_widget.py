@@ -49,7 +49,7 @@ class Road2Plus1Widget(RoadSegmentWidget):
             road_sums = self.sum_count_of_accident_type(
                 # pylint: disable=no-member
                 road_data,
-                AccidentType.HEAD_ON_FRONTAL_COLLISION.value,
+                AccidentType.COLLISION_OF_FRONT_TO_FRONT.value,
             )
 
             return road_sums

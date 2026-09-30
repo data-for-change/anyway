@@ -62,12 +62,12 @@ class HeadOnCollisionsComparisonWidget(RoadSegmentWidget):
         road_sums = self.sum_count_of_accident_type(
             # pylint: disable=no-member
             road_data,
-            AccidentType.HEAD_ON_FRONTAL_COLLISION.value,
+            AccidentType.COLLISION_OF_FRONT_TO_FRONT.value,
         )
         all_roads_sums = self.sum_count_of_accident_type(
             # pylint: disable=no-member
             all_roads_data,
-            AccidentType.HEAD_ON_FRONTAL_COLLISION.value,
+            AccidentType.COLLISION_OF_FRONT_TO_FRONT.value,
         )
 
         res = {

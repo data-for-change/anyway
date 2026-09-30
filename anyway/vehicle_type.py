@@ -20,13 +20,13 @@ class VehicleType(LabeledCode):
     CAR = 1
     TRUCK_UPTO_3_5 = 2
     PICKUP_UPTO_3_5 = 3
-    TRUCK_4_TO_10 = 4  # from old dictionary, kept for backward compatibility
+    TRUCK_3_5_TO_10 = 4  # from old dictionary, kept for backward compatibility
     TRUCK_12_TO_16 = 5
     TRUCK_16_TO_34 = 6
     TRUCK_ABOVE_34 = 7
     MOTORCYCLE_UPTO_50 = 8
-    MOTORCYCLE_50_TO_250 = 9
-    MOTORCYCLE_250_TO_400 = 10
+    MOTORCYCLE_50_TO_125 = 9
+    MOTORCYCLE_125_TO_400 = 10
     BUS = 11
     TAXI = 12
     WORK = 13
@@ -36,11 +36,15 @@ class VehicleType(LabeledCode):
     OTHER_AND_UNKNOWN = 17
     MINIBUS = 18
     MOTORCYCLE_ABOVE_400 = 19
-    ELECTRIC_SCOOTER = 21
-    MOBILITY_SCOOTER = 22
-    ELECTRIC_BIKE = 23
-    TRUCK_3_5_TO_10 = 24
-    TRUCK_10_TO_12 = 25
+    SEGWAY = 30
+    SEMI_FULL_TRAILER = 31
+    NON_ELECTRIC_SCOOTER = 32
+    ALL_TERRAIN_VEHICLE = 33
+    ELECTRIC_SCOOTER = 34
+    MOBILITY_SCOOTER = 35
+    ELECTRIC_BIKE = 36
+    TRUCK_10_TO_12 = 37
+    ELECTRIC_MOTORCYCLE = 38
 
     def get_categories(self) -> List[int]:
         res = []
@@ -54,13 +58,13 @@ class VehicleType(LabeledCode):
             VehicleType.CAR: "private car",
             VehicleType.TRUCK_UPTO_3_5: "truck upto 3.5 tons",
             VehicleType.PICKUP_UPTO_3_5: "pickup upto 3.5 tons",
-            VehicleType.TRUCK_4_TO_10: "truck 4 to 10 tons",
+            VehicleType.TRUCK_3_5_TO_10: "truck 3.5 to 10 tons",
             VehicleType.TRUCK_12_TO_16: "truck 12 to 16 tons",
             VehicleType.TRUCK_16_TO_34: "truck 16 to 34 tons",
             VehicleType.TRUCK_ABOVE_34: "truck above 34 tons",
             VehicleType.MOTORCYCLE_UPTO_50: "motorcycle upto 50 cc",
-            VehicleType.MOTORCYCLE_50_TO_250: "motorcycle 50 to 250 cc",
-            VehicleType.MOTORCYCLE_250_TO_400: "motorcycle 250 to 400 cc",
+            VehicleType.MOTORCYCLE_50_TO_125: "motorcycle 50 to 125 cc",
+            VehicleType.MOTORCYCLE_125_TO_400: "motorcycle 125 to 400 cc",
             VehicleType.BUS: "bus",
             VehicleType.TAXI: "taxi",
             VehicleType.WORK: "work vehicle",
@@ -70,11 +74,15 @@ class VehicleType(LabeledCode):
             VehicleType.OTHER_AND_UNKNOWN: "other and unknown",
             VehicleType.MINIBUS: "minibus",
             VehicleType.MOTORCYCLE_ABOVE_400: "motorcycle above 400 cc",
+            VehicleType.SEGWAY: "segway",
+            VehicleType.SEMI_FULL_TRAILER: "semi full trailer",
+            VehicleType.NON_ELECTRIC_SCOOTER: "non electric scooter",
+            VehicleType.ALL_TERRAIN_VEHICLE: "all terrain vehicle",
             VehicleType.ELECTRIC_SCOOTER: "electric scooter",
             VehicleType.MOBILITY_SCOOTER: "mobility scooter",
             VehicleType.ELECTRIC_BIKE: "electric bike",
-            VehicleType.TRUCK_3_5_TO_10: "truck 3.5 to 10 tons",
             VehicleType.TRUCK_10_TO_12: "truck 10 to 12 tons",
+            VehicleType.ELECTRIC_MOTORCYCLE: "electric motorcycle",
         }
         try:
             return english_vehicle_type_display_names[self]
@@ -94,7 +102,7 @@ class VehicleType(LabeledCode):
             return db_val
         else:
             logging.error(
-                f"VehicleType.fo_type_code: unknown value: {db_val}({type(db_val)})"
+                f"VehicleType.to_type_code: unknown value: {db_val}({type(db_val)})"
                 ". returning OTHER_AND_UNKNOWN"
             )
             return VehicleType.OTHER_AND_UNKNOWN.value
@@ -103,13 +111,13 @@ try:
     _("private car")
     _("truck upto 3.5 tons")
     _("pickup upto 3.5 tons")
-    _("truck 4 to 10 tons")
+    _("truck 3.5 to 10 tons")
     _("truck 12 to 16 tons")
     _("truck 16 to 34 tons")
     _("truck above 34 tons")
     _("motorcycle upto 50 cc")
-    _("motorcycle 50 to 250 cc")
-    _("motorcycle 250 to 400 cc")
+    _("motorcycle 50 to 125 cc")
+    _("motorcycle 125 to 400 cc")
     _("bus")
     _("taxi")
     _("work vehicle")
@@ -119,11 +127,15 @@ try:
     _("other and unknown")
     _("minibus")
     _("motorcycle above 400 cc")
+    _("segway")
+    _("semi full trailer")
+    _("non electric scooter")
+    _("all terrain vehicle")
     _("electric scooter")
     _("mobility scooter")
     _("electric bike")
-    _("truck 3.5 to 10 tons")
     _("truck 10 to 12 tons")
+    _("electric motorcycle")
 except Exception:
     pass
 
@@ -147,7 +159,7 @@ class VehicleCategory(Enum):
             VehicleCategory.PROFESSIONAL_DRIVER: [
                 VehicleType.TRUCK_UPTO_3_5,
                 VehicleType.PICKUP_UPTO_3_5,
-                VehicleType.TRUCK_4_TO_10,
+                VehicleType.TRUCK_3_5_TO_10,
                 VehicleType.TRUCK_12_TO_16,
                 VehicleType.TRUCK_16_TO_34,
                 VehicleType.TRUCK_ABOVE_34,
@@ -162,8 +174,8 @@ class VehicleCategory(Enum):
             VehicleCategory.PRIVATE_DRIVER: [
                 VehicleType.CAR,
                 VehicleType.MOTORCYCLE_UPTO_50,
-                VehicleType.MOTORCYCLE_50_TO_250,
-                VehicleType.MOTORCYCLE_250_TO_400,
+                VehicleType.MOTORCYCLE_50_TO_125,
+                VehicleType.MOTORCYCLE_125_TO_400,
                 VehicleType.MOTORCYCLE_ABOVE_400,
             ],
             VehicleCategory.LIGHT_ELECTRIC: [
@@ -175,7 +187,7 @@ class VehicleCategory(Enum):
             VehicleCategory.LARGE: [
                 VehicleType.TRUCK_UPTO_3_5,
                 VehicleType.PICKUP_UPTO_3_5,
-                VehicleType.TRUCK_4_TO_10,
+                VehicleType.TRUCK_3_5_TO_10,
                 VehicleType.TRUCK_12_TO_16,
                 VehicleType.TRUCK_16_TO_34,
                 VehicleType.TRUCK_ABOVE_34,
@@ -188,8 +200,8 @@ class VehicleCategory(Enum):
             ],
             VehicleCategory.MOTORCYCLE: [
                 VehicleType.MOTORCYCLE_UPTO_50,
-                VehicleType.MOTORCYCLE_50_TO_250,
-                VehicleType.MOTORCYCLE_250_TO_400,
+                VehicleType.MOTORCYCLE_50_TO_125,
+                VehicleType.MOTORCYCLE_125_TO_400,
                 VehicleType.MOTORCYCLE_ABOVE_400,
             ],
             VehicleCategory.BICYCLE_AND_SMALL_MOTOR: [

@@ -5,7 +5,7 @@ import copy
 from sqlalchemy import func
 import pandas as pd
 
-from anyway.models import NewsFlash, AccidentMarkerView, City, Streets, SuburbanJunction
+from anyway.models import NewsFlash, AccidentMarkerView, City, Streets, Junction, JunctionArm
 from anyway.parsers.location_extraction import (
     get_road_segment_name_and_number,
     get_road_segment_by_name_and_road,
@@ -16,6 +16,10 @@ from anyway.parsers.resolution_fields import ResolutionFields as RF
 
 NON_URBAN_INTERSECTION_HEBREW = "non_urban_intersection_hebrew"
 NON_URBAN_INTERSECTION = "non_urban_intersection"
+INTERSECTION_HEBREW = "intersection_hebrew"
+INTERSECTION = "intersection"
+JUNCTION_HEBREW = "junction_hebrew"
+JUNCTION = "junction"
 
 LocationInfo = Dict[str, Any]
 
@@ -156,9 +160,13 @@ def get_location_from_news_flash_or_request_values(
         "street1" in vals or "street1_hebrew" in vals
     ):
         return extract_street_location(vals)
+    if NON_URBAN_INTERSECTION in vals:
+        vals[INTERSECTION] = vals.pop(NON_URBAN_INTERSECTION)
+    if NON_URBAN_INTERSECTION_HEBREW in vals:
+        vals[INTERSECTION_HEBREW] = vals.pop(NON_URBAN_INTERSECTION_HEBREW)
     if (
-        "non_urban_intersection" in vals
-        or "non_urban_intersection_hebrew" in vals
+        INTERSECTION in vals
+        or INTERSECTION_HEBREW in vals
         or ("road1" in vals and "road2" in vals)
     ):
         return extract_non_urban_intersection_location(vals)
@@ -268,12 +276,12 @@ def extract_non_urban_intersection_location(input_vals: dict):
     vals = fill_missing_non_urban_intersection_values(input_vals)
     # noinspection PyDictCreation
     data = {"resolution": BE_CONST.ResolutionCategories.SUBURBAN_JUNCTION}
-    for k in ["non_urban_intersection", "non_urban_intersection_hebrew", "road1", "road2"]:
+    for k in [INTERSECTION, INTERSECTION_HEBREW, "road1", "road2"]:
         data[k] = vals[k]
     return {
         "name": "location",
         "data": data,
-        "text": vals["non_urban_intersection_hebrew"],
+        "text": vals[INTERSECTION_HEBREW],
     }
 
 
@@ -283,36 +291,35 @@ def fill_missing_non_urban_intersection_values(vals: dict) -> dict:
     because of the order of road1 and
     """
     res = copy.copy(vals)
-    if "non_urban_intersection_hebrew" in res and "non_urban_intersection" not in res:
-        res.update(
-            SuburbanJunction.get_all_from_key_value(
-                "non_urban_intersection_hebrew", [res["non_urban_intersection_hebrew"]]
-            )
-        )
-    elif "non_urban_intersection" in res and "non_urban_intersection_hebrew" not in res:
-        res.update(
-            SuburbanJunction.get_all_from_key_value(
-                "non_urban_intersection", [res["non_urban_intersection"]]
-            )
-        )
+    if INTERSECTION_HEBREW in res and INTERSECTION not in res:
+        junction = Junction.get_all_from_key_value(
+                        INTERSECTION_HEBREW, [res[INTERSECTION_HEBREW]]
+                    )
+        res[INTERSECTION] = junction[JUNCTION]
+    elif INTERSECTION in res and INTERSECTION_HEBREW not in res:
+        junction = Junction.get_all_from_key_value(INTERSECTION, [res[INTERSECTION]])
+        res[INTERSECTION_HEBREW] = junction[JUNCTION_HEBREW]
     elif (
-        "non_urban_intersection" not in res
-        and "non_urban_intersection_hebrew" not in res
+        INTERSECTION not in res
+        and INTERSECTION_HEBREW not in res
         and "road1" in res
         and "road2" in res
     ):
-        res.update(SuburbanJunction.get_intersection_from_roads({int(res["road1"]), int(res["road2"])}))
+        junction_sym = JunctionArm.get_junction_by_two_roads(int(res["road1"]), int(res["road2"]))
+        res[INTERSECTION] = junction_sym
+        junction = Junction.get_all_from_key_value(JUNCTION, [junction_sym])
+        res[INTERSECTION_HEBREW] = junction[JUNCTION_HEBREW]
     else:
         raise ValueError(f"Cannot get non_urban_intersection from input: {vals}")
     #   TODO: temporarily removing "roads" field, as it is not used correctly in the filters.
-    if res.get("road1") is None or res.get("road2") is None:
-        roads = list(res["roads"])
-        if len(roads) > 0:
-            res["road1"] = roads[0]
-        if len(roads) > 1:
-            res["road2"] = roads[1]
-    if "roads" in res:
-        res.pop("roads")
+    # if res.get("road1") is None or res.get("road2") is None:
+    #     roads = list(res["roads"])
+    #     if len(roads) > 0:
+    #         res["road1"] = roads[0]
+    #     if len(roads) > 1:
+    #         res["road2"] = roads[1]
+    # if "roads" in res:
+    #     res.pop("roads")
     return res
 
 
@@ -356,6 +363,7 @@ def extract_news_flash_location(news_flash_obj: NewsFlash):
                 curr_field = int(curr_field)
             data[field] = curr_field
     gps = {"lat": news_flash_obj.lat, "lon": news_flash_obj.lon}
+    # TODO: handle non_urban_intersection fields
     return {"name": "location", "data": data, "gps": gps}
 
 

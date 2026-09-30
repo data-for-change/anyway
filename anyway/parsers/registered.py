@@ -9,7 +9,6 @@ from anyway.models import RegisteredVehicle, DeprecatedCity
 from anyway.utilities import time_delta, CsvReader, ImporterUI, truncate_tables, decode_hebrew
 from anyway.app_and_db import db
 
-
 COLUMN_CITY_NAME_ENG = 0
 COLUMN_CITY_TOTAL_MOTORCYCLE = 1
 COLUMN_CITY_TOTAL_SPECIAL = 2

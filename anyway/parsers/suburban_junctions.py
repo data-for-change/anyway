@@ -6,7 +6,6 @@ from openpyxl import load_workbook
 from anyway.app_and_db import db
 from anyway.models import SuburbanJunction, RoadJunctionKM
 
-
 SUBURBAN_JUNCTION = "suburban_junction"
 ACCIDENTS = "accidents"
 CITIES = "cities"

@@ -1,5 +1,5 @@
 import logging
-from typing import Dict
+from typing import Dict, Tuple
 
 import pandas as pd
 from flask_babel import _
@@ -45,7 +45,7 @@ def get_most_severe_accidents_with_entities(
 
 def get_most_severe_accidents_table_title(
     location_info: dict, resolution: BE_CONST.ResolutionCategories
-):
+) -> Tuple[str, str]:
     if resolution == BE_CONST.ResolutionCategories.SUBURBAN_ROAD:
         return _("Severe accidents"), f'{_("in segment")} {_(segment_dictionary[location_info["road_segment_name"]])}'
     elif resolution == BE_CONST.ResolutionCategories.SUBURBAN_JUNCTION:
@@ -53,6 +53,7 @@ def get_most_severe_accidents_table_title(
     elif resolution == BE_CONST.ResolutionCategories.STREET:
         in_str = _("in")
         return _("Severe accidents"), f"{_('in street')} {location_info['street1_hebrew']} {in_str}{location_info['yishuv_name']}"
+    return _("Severe accidents"), _(resolution.name)
 
 # count of dead and severely injured
 def get_casualties_count_in_accident(accident_id, provider_code, injury_severity, accident_year):

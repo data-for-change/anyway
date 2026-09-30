@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-27 16:38+0300\n"
+"POT-Creation-Date: 2026-09-30 16:23+0300\n"
 "PO-Revision-Date: 2020-10-16 15:42+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: he\n"
@@ -18,57 +18,87 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: anyway/backend_constants.py:159 anyway/backend_constants.py:183
+#: anyway/backend_constants.py:160 anyway/backend_constants.py:184
 msgid "killed"
 msgstr "הרוג/ה"
 
-#: anyway/backend_constants.py:160 anyway/backend_constants.py:184
+#: anyway/backend_constants.py:161 anyway/backend_constants.py:185
 msgid "severe injured"
 msgstr "פצוע/ה קשה"
 
-#: anyway/backend_constants.py:161 anyway/backend_constants.py:185
+#: anyway/backend_constants.py:162 anyway/backend_constants.py:186
 msgid "light injured"
 msgstr "פצוע/ה קל"
 
-#: anyway/backend_constants.py:186
+#: anyway/backend_constants.py:187
 msgid "not injured"
 msgstr "לא נפגע/ה"
 
-#: anyway/backend_constants.py:323
+#: anyway/backend_constants.py:329
 msgid "Pedestrian"
 msgstr "הולך רגל"
 
-#: anyway/backend_constants.py:324
+#: anyway/backend_constants.py:330
 msgid "Driver of a vehicle with 4 wheel or more"
 msgstr "נהג ברכב עם 4 גלגלים או יותר"
 
-#: anyway/backend_constants.py:325
+#: anyway/backend_constants.py:331
 msgid "Passenger of a vehicle with 4 wheel or more"
 msgstr "נוסע ברכב עם 4 גלגלים או יותר"
 
-#: anyway/backend_constants.py:326
+#: anyway/backend_constants.py:332
 msgid "Motorcycle driver"
 msgstr "נהג באופנוע"
 
-#: anyway/backend_constants.py:327
+#: anyway/backend_constants.py:333
 msgid "Motorcycle passenger"
 msgstr "נוסע באופנוע"
 
-#: anyway/backend_constants.py:328
+#: anyway/backend_constants.py:334
 msgid "Bicycle driver"
 msgstr "נהג אופניים"
 
-#: anyway/backend_constants.py:329
+#: anyway/backend_constants.py:335
 msgid "Bicycle passenger"
 msgstr "נוסע באופניים"
 
-#: anyway/backend_constants.py:330
+#: anyway/backend_constants.py:336
 msgid "Driver of an unknown vehicle"
 msgstr "נהג ברכב לא ידוע"
 
-#: anyway/backend_constants.py:331
+#: anyway/backend_constants.py:337
 msgid "Passenger of an unknown vehicle"
 msgstr "נוסע ברכב לא ידוע"
+
+#: anyway/backend_constants.py:338
+#, fuzzy
+msgid "Electric bike driver"
+msgstr "אופניים חשמליים"
+
+#: anyway/backend_constants.py:339
+#, fuzzy
+msgid "Electric bike passenger"
+msgstr "אופניים חשמליים"
+
+#: anyway/backend_constants.py:340
+#, fuzzy
+msgid "Electric scooter driver"
+msgstr "קורקינט חשמלי"
+
+#: anyway/backend_constants.py:341
+#, fuzzy
+msgid "Electric scooter passenger"
+msgstr "קורקינט חשמלי"
+
+#: anyway/backend_constants.py:342
+#, fuzzy
+msgid "Mobility scooter driver"
+msgstr "קלנועית"
+
+#: anyway/backend_constants.py:343
+#, fuzzy
+msgid "Mobility scooter passenger"
+msgstr "קלנועית"
 
 #: anyway/flask_app.py:711 anyway/flask_app.py:815
 msgid "Discussion not found:"
@@ -332,7 +362,7 @@ msgid "other vehicle"
 msgstr "רכב אחר"
 
 #: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:54
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:233
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:234
 #: anyway/widgets/all_locations_widgets/seriously_injured_killed_in_bicycles_scooter_widget.py:49
 #: anyway/widgets/widget_utils.py:345
 msgid "in"
@@ -414,21 +444,21 @@ msgstr "קטלניות"
 
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:93
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:110
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:167
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:168
 msgid "in yishuv"
 msgstr "ביישוב"
 
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:95
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:194
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:112
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:169
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:170
 msgid "in street"
 msgstr "ברחוב"
 
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:100
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:195
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:117
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:174
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:175
 msgid "in road"
 msgstr "בכביש"
 
@@ -436,7 +466,7 @@ msgstr "בכביש"
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:193
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:196
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:119
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:176
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:177
 msgid "in segment"
 msgstr "במקטע"
 
@@ -448,7 +478,7 @@ msgstr "צמת"
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:113
 #: anyway/widgets/all_locations_widgets/accident_count_by_severity_widget.py:197
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:127
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:182
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:183
 msgid "between the years"
 msgstr "בין השנים"
 
@@ -553,7 +583,7 @@ msgstr "פצוע/ה קל"
 
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:93
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:180
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:199
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:200
 msgid "light injured plural"
 msgstr "פצועים/ות קל"
 
@@ -564,7 +594,7 @@ msgstr "פצוע/ה קשה"
 
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:100
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:178
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:197
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:198
 msgid "severe injured plural"
 msgstr "פצועים קשה"
 
@@ -575,7 +605,7 @@ msgstr "הרוג"
 
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:107
 #: anyway/widgets/all_locations_widgets/injured_count_by_severity_widget.py:176
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:195
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:196
 msgid "killed plural"
 msgstr "הרוגים"
 
@@ -651,47 +681,48 @@ msgstr ""
 #: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:50
 #: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:52
 #: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:55
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:56
 msgid "Severe accidents"
 msgstr "תאונות חמורות"
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:161
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:234
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:162
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:235
 msgid "latest severe accident took place"
 msgstr "תאונה חמורה אחרונה התרחשה"
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:163
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:164
 msgid "latest severe accidents took place"
 msgstr "תאונות חמורות אחרונות התרחשו"
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:188
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:235
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:189
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:236
 msgid "in date"
 msgstr "בתאריך"
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:190
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:236
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:191
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:237
 msgid "in hour"
 msgstr "בשעה"
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:192
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:237
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:193
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:238
 msgid "occured accident"
 msgstr "התרחשה תאונה"
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:193
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:238
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:194
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:239
 msgid "of type"
 msgstr "מסוג"
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:211
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:212
 msgid "accident_severity"
 msgstr "חומרת תאונה"
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:212
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:213
 msgid "type"
 msgstr "סוג"
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:229
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:230
 msgid ""
 "Most recent fatal and severe accidents, ordered by date. Up to 10 "
 "accidents are presented."
@@ -699,19 +730,19 @@ msgstr ""
 "התאונות החמורות (קשות וקטלניות) האחרונות, מסודרות לפי תאריך בסדר יורד. "
 "מוצגות עד 10 תאונות."
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:230
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:231
 msgid "Severe accidents in suburban junction"
 msgstr "תאונות חמורות בצמת בינעירוני"
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:231
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:232
 msgid "Most severe accidents in segment"
 msgstr "תאונות חמורות במקטע"
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:232
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:233
 msgid "Severe accidents in street"
 msgstr "תאונות חמורות ברחוב"
 
-#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:239
+#: anyway/widgets/all_locations_widgets/most_severe_accidents_table_widget.py:240
 msgid "injured"
 msgstr "פצועים"
 

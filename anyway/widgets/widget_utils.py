@@ -133,7 +133,7 @@ def get_accidents_stats(
     start_time=None,
     end_time=None,
     resolution: Optional[RC] = None,
-):
+) -> Dict:
     filters = filters or {}
     filters = add_resolution_location_accuracy_filter(filters, resolution)
     provider_code_filters = [

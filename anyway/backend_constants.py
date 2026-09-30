@@ -268,7 +268,6 @@ class AccidentType(LabeledCode):
             self.COLLISION_OF_REAR_END_TO_SIDE,
             self.COLLISION_WITH_AN_ANIMAL,
             self.COLLISION_WITH_OTHER,
-            self.PEDESTRIAN_INJURY,
             self.COLLISION_OF_FRONT_TO_SIDE,
         ]
 
@@ -317,6 +316,12 @@ class InjuredType(LabeledCode):
             InjuredType.PASSENGER_BICYCLE: "Bicycle passenger",
             InjuredType.DRIVER_UNKNOWN_VEHICLE: "Driver of an unknown vehicle",
             InjuredType.PASSENGER_UNKNOWN_VEHICLE: "Passenger of an unknown vehicle",
+            InjuredType.DRIVER_ELECTRIC_BIKE: "Electric bike driver",
+            InjuredType.PASSENGER_ELECTRIC_BIKE: "Electric bike passenger",
+            InjuredType.DRIVER_ELECTRIC_SCOOTER: "Electric scooter driver",
+            InjuredType.PASSENGER_ELECTRIC_SCOOTER: "Electric scooter passenger",
+            InjuredType.DRIVER_MOBILITY_SCOOTER: "Mobility scooter driver",
+            InjuredType.PASSENGER_MOBILITY_SCOOTER: "Mobility scooter passenger",
         }
 
 
@@ -330,6 +335,12 @@ try:
     _("Bicycle passenger")
     _("Driver of an unknown vehicle")
     _("Passenger of an unknown vehicle")
+    _("Electric bike driver")
+    _("Electric bike passenger")
+    _("Electric scooter driver")
+    _("Electric scooter passenger")
+    _("Mobility scooter driver")
+    _("Mobility scooter passenger")
 except NameError:
     pass
 

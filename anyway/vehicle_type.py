@@ -44,7 +44,7 @@ class VehicleType(LabeledCode):
     MOBILITY_SCOOTER = 35
     ELECTRIC_BIKE = 36
     TRUCK_10_TO_12 = 37
-    ELECTRIC_MOTORCYCLE = 38
+    MOTORCYCLE_ELECTRIC = 38
 
     def get_categories(self) -> List[int]:
         res = []
@@ -82,7 +82,7 @@ class VehicleType(LabeledCode):
             VehicleType.MOBILITY_SCOOTER: "mobility scooter",
             VehicleType.ELECTRIC_BIKE: "electric bike",
             VehicleType.TRUCK_10_TO_12: "truck 10 to 12 tons",
-            VehicleType.ELECTRIC_MOTORCYCLE: "electric motorcycle",
+            VehicleType.MOTORCYCLE_ELECTRIC: "electric motorcycle",
         }
         try:
             return english_vehicle_type_display_names[self]
@@ -177,6 +177,7 @@ class VehicleCategory(Enum):
                 VehicleType.MOTORCYCLE_50_TO_125,
                 VehicleType.MOTORCYCLE_125_TO_400,
                 VehicleType.MOTORCYCLE_ABOVE_400,
+                VehicleType.MOTORCYCLE_ELECTRIC,
             ],
             VehicleCategory.LIGHT_ELECTRIC: [
                 VehicleType.ELECTRIC_SCOOTER,
@@ -203,6 +204,7 @@ class VehicleCategory(Enum):
                 VehicleType.MOTORCYCLE_50_TO_125,
                 VehicleType.MOTORCYCLE_125_TO_400,
                 VehicleType.MOTORCYCLE_ABOVE_400,
+                VehicleType.MOTORCYCLE_ELECTRIC,
             ],
             VehicleCategory.BICYCLE_AND_SMALL_MOTOR: [
                 VehicleType.BIKE,

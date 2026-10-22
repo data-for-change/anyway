@@ -16,17 +16,17 @@ from anyway.backend_constants import BE_CONST
 
 
 class TestRequestParams(unittest.TestCase):
-    junction_1277 = {"non_urban_intersection": 1277,
-                     "non_urban_intersection_hebrew": "צומת השיטה",
+    junction_1277 = {"intersection": 1277,
+                     "intersection_hebrew": "כניסה לחברת חשמל, אשדוד",
                      "road1": 669,
                      "road2": 71
                      }
-    junction_1277_roads = {"non_urban_intersection": 1277,
-                           "non_urban_intersection_hebrew": "צומת השיטה",
+    junction_1277_roads = {"intersection": 1277,
+                           "intersection_hebrew": "צומת השיטה",
                            "roads": {669, 71},
                            }
-    loc_1 = {'data': {'non_urban_intersection': 1277,
-                      'non_urban_intersection_hebrew': 'צומת השיטה',
+    loc_1 = {'data': {'intersection': 1277,
+                      'intersection_hebrew': 'צומת השיטה',
                       'resolution': BE_CONST.ResolutionCategories.SUBURBAN_JUNCTION,
                       'road1': 669,
                       'road2': 71},
@@ -39,7 +39,7 @@ class TestRequestParams(unittest.TestCase):
         resolution=BE_CONST.ResolutionCategories.SUBURBAN_JUNCTION,
         years_ago=5,
         location_text="צומת השיטה",
-        location_info={'non_urban_intersection': 1277, 'non_urban_intersection_hebrew': 'צומת השיטה', 'road1': 669, 'road2': 71},
+        location_info={'intersection': 1277, 'intersection_hebrew': 'צומת השיטה', 'road1': 669, 'road2': 71},
         start_time=date(2014, 1, 1),
         end_time=date(2018, 1, 2),
         lang='he',
@@ -51,7 +51,7 @@ class TestRequestParams(unittest.TestCase):
     @patch("anyway.request_params.fill_missing_non_urban_intersection_values")
     def test_extract_non_urban_intersection_location(self, fill_missing):
         fill_missing.return_value = self.junction_1277
-        input_params = {"non_urban_intersection": 1277}
+        input_params = {"intersection": 1277}
         res = extract_non_urban_intersection_location(input_params)
         # todo: until implementing accidents stats with roads
         self.assertEqual(self.loc_1, res, "1")  # add assertion here
@@ -64,12 +64,12 @@ class TestRequestParams(unittest.TestCase):
         actual = fill_missing_non_urban_intersection_values(input_params)
         self.assertEqual(self.junction_1277, actual, "1")  # add assertion here
 
-        input_params = {"non_urban_intersection": 1277}
+        input_params = {"intersection": 1277}
         from_key.return_value = self.junction_1277_roads
         actual = fill_missing_non_urban_intersection_values(input_params)
         self.assertEqual(self.junction_1277, actual, "2")  # add assertion here
 
-        input_params = {"non_urban_intersection_hebrew": "צומת השיטה"}
+        input_params = {"intersection_hebrew": "צומת השיטה"}
         from_key.return_value = self.junction_1277_roads
         actual = fill_missing_non_urban_intersection_values(input_params)
         self.assertEqual(self.junction_1277, actual, "2")  # add assertion here

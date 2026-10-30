@@ -1131,19 +1131,20 @@ class JunctionArm(Base):
 
     @staticmethod
     def get_junction_by_two_roads(road_symbol1: int, road_symbol2: int) -> int:
-        # junction shared by an arm of each road
-        road1_junctions = db.session.query(JunctionArm.junction_symbol).filter(
-            JunctionArm.road_symbol == road_symbol1
-        )
+        """Get a suburban junction that has arms on both roads"""
+        roads = {road_symbol1, road_symbol2}
         res = (
             db.session.query(JunctionArm.junction_symbol)
-            .filter(JunctionArm.road_symbol == road_symbol2)
-            .filter(JunctionArm.junction_symbol.in_(road1_junctions))
+            .filter(JunctionArm.is_suburban == True)
+            .filter(JunctionArm.road_symbol.in_(roads))
+            .group_by(JunctionArm.junction_symbol)
+            .having(func.count(func.distinct(JunctionArm.road_symbol)) == len(roads))
+            .order_by(JunctionArm.junction_symbol)
             .first()
         )
         if res is None:
             raise ValueError(
-                f"{road_symbol1}, {road_symbol2}: could not find a shared JunctionArm junction"
+                f"{road_symbol1}, {road_symbol2}: could not find a shared suburban JunctionArm junction"
             )
         return res.junction_symbol
 

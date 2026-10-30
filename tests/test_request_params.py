@@ -25,6 +25,9 @@ class TestRequestParams(unittest.TestCase):
                            "intersection_hebrew": "כניסה לחברת חשמל, אשדוד",
                            "roads": {669, 71},
                            }
+    junction_1277_junction = {"junction": 1277,
+                              "junction_hebrew": "כניסה לחברת חשמל, אשדוד",
+                              }
     loc_1 = {'data': {'intersection': 1277,
                       "intersection_hebrew": "כניסה לחברת חשמל, אשדוד",
                       'resolution': BE_CONST.ResolutionCategories.SUBURBAN_JUNCTION,
@@ -56,16 +59,19 @@ class TestRequestParams(unittest.TestCase):
         # todo: until implementing accidents stats with roads
         self.assertEqual(self.loc_1, res, "1")  # add assertion here
 
-    @patch("anyway.models.SuburbanJunction.get_all_from_key_value")
-    @patch("anyway.models.SuburbanJunction.get_intersection_from_roads")
-    def test_fill_missing_non_urban_intersection_values(self, from_roads, from_key):
-        from_roads.return_value = self.junction_1277_roads
+    @patch("anyway.models.JunctionArm.get_junction_roads")
+    @patch("anyway.models.Junction.get_all_from_key_value")
+    @patch("anyway.models.JunctionArm.get_junction_by_two_roads")
+    def test_fill_missing_non_urban_intersection_values(self, from_roads, from_key, junction_roads):
+        from_roads.return_value = 1277
+        from_key.return_value = self.junction_1277_junction
+        junction_roads.return_value = [669, 71]
         input_params = {"road1": 669, "road2": 71}
         actual = fill_missing_non_urban_intersection_values(input_params)
         self.assertEqual(self.junction_1277, actual, "1")  # add assertion here
+        from_roads.assert_called_once_with(669, 71)
 
         input_params = {"intersection": 1277}
-        from_key.return_value = self.junction_1277_roads
         actual = fill_missing_non_urban_intersection_values(input_params)
         self.assertEqual(self.junction_1277[INTERSECTION], actual[INTERSECTION], "2.1")
         self.assertEqual(self.junction_1277[INTERSECTION_HEBREW], actual[INTERSECTION_HEBREW], "2.2")
@@ -78,7 +84,6 @@ class TestRequestParams(unittest.TestCase):
                          "2.3")
 
         input_params = {"intersection_hebrew": "כניסה לחברת חשמל, אשדוד"}
-        from_key.return_value = self.junction_1277_roads
         actual = fill_missing_non_urban_intersection_values(input_params)
         self.assertEqual(self.junction_1277[INTERSECTION], actual[INTERSECTION], "3.1")
         self.assertEqual(self.junction_1277[INTERSECTION_HEBREW], actual[INTERSECTION_HEBREW], "3.2")

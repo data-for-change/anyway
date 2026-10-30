@@ -9,7 +9,7 @@ from anyway.request_params import (
     get_location_from_news_flash,
     fill_missing_non_urban_intersection_values,
 )
-from anyway.request_params import RequestParams
+from anyway.request_params import RequestParams, INTERSECTION, INTERSECTION_HEBREW
 from anyway.backend_constants import BE_CONST as BE
 from anyway.models import NewsFlash
 from anyway.backend_constants import BE_CONST
@@ -22,24 +22,24 @@ class TestRequestParams(unittest.TestCase):
                      "road2": 71
                      }
     junction_1277_roads = {"intersection": 1277,
-                           "intersection_hebrew": "צומת השיטה",
+                           "intersection_hebrew": "כניסה לחברת חשמל, אשדוד",
                            "roads": {669, 71},
                            }
     loc_1 = {'data': {'intersection': 1277,
-                      'intersection_hebrew': 'צומת השיטה',
+                      "intersection_hebrew": "כניסה לחברת חשמל, אשדוד",
                       'resolution': BE_CONST.ResolutionCategories.SUBURBAN_JUNCTION,
                       'road1': 669,
                       'road2': 71},
              'name': 'location',
-             'text': 'צומת השיטה'}
+             'text': 'כניסה לחברת חשמל, אשדוד'}
     nf = NewsFlash()
     nf.description = "description"
     nf.title = "title"
     rp_1 = RequestParams(
         resolution=BE_CONST.ResolutionCategories.SUBURBAN_JUNCTION,
         years_ago=5,
-        location_text="צומת השיטה",
-        location_info={'intersection': 1277, 'intersection_hebrew': 'צומת השיטה', 'road1': 669, 'road2': 71},
+        location_text="כניסה לחברת חשמל, אשדוד",
+        location_info={'intersection': 1277, 'intersection_hebrew': 'כניסה לחברת חשמל, אשדוד', 'road1': 669, 'road2': 71},
         start_time=date(2014, 1, 1),
         end_time=date(2018, 1, 2),
         lang='he',
@@ -67,12 +67,28 @@ class TestRequestParams(unittest.TestCase):
         input_params = {"intersection": 1277}
         from_key.return_value = self.junction_1277_roads
         actual = fill_missing_non_urban_intersection_values(input_params)
-        self.assertEqual(self.junction_1277, actual, "2")  # add assertion here
+        self.assertEqual(self.junction_1277[INTERSECTION], actual[INTERSECTION], "2.1")
+        self.assertEqual(self.junction_1277[INTERSECTION_HEBREW], actual[INTERSECTION_HEBREW], "2.2")
+        self.assertEqual(set([self.junction_1277["road1"],
+                             self.junction_1277["road2"],
+                             ]),
+                         set([actual["road1"],
+                              actual["road2"],
+                             ]),
+                         "2.3")
 
-        input_params = {"intersection_hebrew": "צומת השיטה"}
+        input_params = {"intersection_hebrew": "כניסה לחברת חשמל, אשדוד"}
         from_key.return_value = self.junction_1277_roads
         actual = fill_missing_non_urban_intersection_values(input_params)
-        self.assertEqual(self.junction_1277, actual, "2")  # add assertion here
+        self.assertEqual(self.junction_1277[INTERSECTION], actual[INTERSECTION], "3.1")
+        self.assertEqual(self.junction_1277[INTERSECTION_HEBREW], actual[INTERSECTION_HEBREW], "3.2")
+        self.assertEqual(set([self.junction_1277["road1"],
+                             self.junction_1277["road2"],
+                             ]),
+                         set([actual["road1"],
+                              actual["road2"],
+                             ]),
+                         "3.3")
 
     @patch("anyway.request_params.get_latest_accident_date")
     @patch("anyway.request_params.extract_news_flash_obj")

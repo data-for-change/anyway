@@ -18,6 +18,7 @@ services:
       - MAPS_API_KEY
       - BOT_TOKEN
       - SELENIUM_URL
+      - ALLOW_ALEMBIC_UPGRADE
     volumes:
       - .:/anyway
     restart: always

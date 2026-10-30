@@ -62,6 +62,8 @@ jobs:
         cd ../
         docker compose -f docker-compose.yml build db anyway-newsflash-infographics
     - name: Starting Server and DB
+      env:
+        ALLOW_ALEMBIC_UPGRADE: "no"
       run: |
         docker compose -f docker-compose.yml up -d --build anyway
     - name: Waiting for DB startup

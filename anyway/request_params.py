@@ -293,11 +293,11 @@ def fill_missing_non_urban_intersection_values(vals: dict) -> dict:
     res = copy.copy(vals)
     if INTERSECTION_HEBREW in res and INTERSECTION not in res:
         junction = Junction.get_all_from_key_value(
-                        INTERSECTION_HEBREW, [res[INTERSECTION_HEBREW]]
+                        JUNCTION_HEBREW, [res[INTERSECTION_HEBREW]]
                     )
         res[INTERSECTION] = junction[JUNCTION]
     elif INTERSECTION in res and INTERSECTION_HEBREW not in res:
-        junction = Junction.get_all_from_key_value(INTERSECTION, [res[INTERSECTION]])
+        junction = Junction.get_all_from_key_value(JUNCTION, [res[INTERSECTION]])
         res[INTERSECTION_HEBREW] = junction[JUNCTION_HEBREW]
     elif (
         INTERSECTION not in res
@@ -311,6 +311,12 @@ def fill_missing_non_urban_intersection_values(vals: dict) -> dict:
         res[INTERSECTION_HEBREW] = junction[JUNCTION_HEBREW]
     else:
         raise ValueError(f"Cannot get non_urban_intersection from input: {vals}")
+    # TODO currently set road 1 & 2 until suburban junction widgets are adapted to multiple junction arms
+    if not ("road1" in res or "road2" in res):
+        arms = JunctionArm.get_junction_roads(res[INTERSECTION])
+        if arms:
+            res["road1"] = arms[0] if arms else None
+            res["road2"] = arms[1] if arms and len(arms) > 1 else None
     #   TODO: temporarily removing "roads" field, as it is not used correctly in the filters.
     # if res.get("road1") is None or res.get("road2") is None:
     #     roads = list(res["roads"])

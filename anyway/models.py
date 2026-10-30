@@ -1147,6 +1147,20 @@ class JunctionArm(Base):
             )
         return res.junction_symbol
 
+    @staticmethod
+    def get_junction_roads(j_sym: int) -> List[int]:
+        """Get road arms of junction"""
+        arms = (db.session.query(JunctionArm.road_symbol)
+                .filter(JunctionArm.junction_symbol == j_sym)
+                .filter(JunctionArm.is_suburban == True)
+                .all()
+        )
+        if arms is None:
+            raise ValueError(
+                f"{j_sym}: could not find JunctionArm"
+            )
+        return [j.road_symbol for j in arms]
+
 
 class RoadJunctionKM(Base):
     __tablename__ = "road_junction_km"

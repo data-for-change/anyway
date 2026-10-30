@@ -36,23 +36,23 @@ query_flag = partial(pytest.mark.parametrize, argvalues=["1", ""])
 @pytest.mark.server
 def test_main(app):
     rv = app.get("/")
-    assert rv.status_code == http_client.OK
-    assert "<title>ANYWAY - משפיעים בכל דרך</title>" in rv.data.decode("utf-8")
+    assert rv.status_code == http_client.OK, "1"
+    assert "<title>ANYWAY - משפיעים בכל דרך</title>" in rv.data.decode("utf-8"), "2"
 
 
 # It requires parameters to know which markers you want.
 @pytest.mark.server
 def test_markers_empty(app):
     rv = app.get("/markers")
-    assert rv.status_code == http_client.BAD_REQUEST
-    assert "<title>400 Bad Request</title>" in rv.data.decode("utf-8")
+    assert rv.status_code == http_client.BAD_REQUEST, "3"
+    assert "<title>400 Bad Request</title>" in rv.data.decode("utf-8"), "4"
 
 
 @pytest.fixture(scope="module")
 def marker_counter():
     counter = Counter()
     yield counter
-    assert counter["markers"] == 16
+    assert counter["markers"] == 16, "5"
 
 
 @pytest.mark.server
@@ -60,7 +60,7 @@ def test_bad_date(app):
     rv = app.get(
         "/markers?ne_lat=32.08656790211843&ne_lng=34.80611543655391&sw_lat=32.08003198103277&sw_lng=34.793884563446&zoom=17&thin_markers=false&start_date=a1104537600&end_date=1577836800&show_fatal=1&show_severe=1&show_light=1&approx=1&accurate=1&show_markers=1&show_discussions=1&show_urban=3&show_intersection=3&show_lane=3&show_day=7&show_holiday=0&show_time=24&start_time=25&end_time=25&weather=0&road=0&separation=0&surface=0&acctype=1&controlmeasure=0&district=0&case_type=0"
     )
-    assert rv.status_code == http_client.BAD_REQUEST
+    assert rv.status_code == http_client.BAD_REQUEST, "6"
 
 
 @pytest.mark.partial_db
@@ -111,24 +111,24 @@ def test_markers(
     )
 
     rv = app.get(url)
-    assert rv.status_code == http_client.OK
-    assert rv.headers["Content-Type"] == "application/json"
+    assert rv.status_code == http_client.OK, "7"
+    assert rv.headers["Content-Type"] == "application/json", "8"
 
     resp = json.loads(rv.data.decode("utf-8"))
 
     marker_counter["markers"] += len(resp["markers"])
 
     for marker in resp["markers"]:
-        assert show_fatal or marker["accident_severity"] != 1
-        assert show_severe or marker["accident_severity"] != 2
-        assert show_light or marker["accident_severity"] != 3
-        assert show_accurate or marker["location_accuracy"] != 1
-        assert show_approx or marker["location_accuracy"] == 1
+        assert show_fatal or marker["accident_severity"] != 1, "9"
+        assert show_severe or marker["accident_severity"] != 2, "10"
+        assert show_light or marker["accident_severity"] != 3, "11"
+        assert show_accurate or marker["location_accuracy"] != 1, "12"
+        assert show_approx or marker["location_accuracy"] == 1, "13"
 
 
 def assert_return_code_for_user_update(error_code: int, rv: Response, extra: str = None, msg: str = "") -> None:
-    assert rv.status_code == ERROR_TO_HTTP_CODE_DICT[error_code], msg
-    assert rv.json == build_json_for_user_api_error(error_code, extra), msg
+    assert rv.status_code == ERROR_TO_HTTP_CODE_DICT[error_code], "14:" + msg
+    assert rv.json == build_json_for_user_api_error(error_code, extra), "15:" + msg
 
 
 def user_update_post_json(app: FlaskClient, json_data: typing.Optional[dict] = None) -> Response:
@@ -148,7 +148,7 @@ def test_user_update_not_logged_in(app):
     assert_return_code_for_user_update(Errors.BR_BAD_AUTH, rv)
 
     rv = app.get("/user/update", follow_redirects=True)
-    assert rv.status_code == HTTPStatus.METHOD_NOT_ALLOWED
+    assert rv.status_code == HTTPStatus.METHOD_NOT_ALLOWED, "16"
 
 
 @pytest.mark.user_system
@@ -157,17 +157,17 @@ def test_user_update_bad_json(app):
         set_current_user_mock(current_user)
 
         rv = user_update_post(app)
-        assert_return_code_for_user_update(Errors.BR_FIELD_MISSING, rv)
+        assert_return_code_for_user_update(Errors.BR_FIELD_MISSING, rv), "17"
 
         rv = user_update_post_json(app)
-        assert rv.status_code == HTTPStatus.BAD_REQUEST
-        assert b"Field is missing from json" in rv.data
+        assert rv.status_code == HTTPStatus.BAD_REQUEST, "18"
+        assert b"Field is missing from json" in rv.data, "19"
 
         rv = user_update_post_json(app, json_data={})
-        assert_return_code_for_user_update(Errors.BR_FIELD_MISSING, rv)
+        assert_return_code_for_user_update(Errors.BR_FIELD_MISSING, rv), "20"
 
         rv = user_update_post_json(app, json_data={"a": "a"})
-        assert_return_code_for_user_update(Errors.BR_FIELD_MISSING, rv)
+        assert_return_code_for_user_update(Errors.BR_FIELD_MISSING, rv), "21"
 
 
 @pytest.mark.user_system
@@ -176,10 +176,10 @@ def test_user_update_names(app):
         set_current_user_mock(current_user)
 
         rv = user_update_post_json(app, json_data={"first_name": "a"})
-        assert_return_code_for_user_update(Errors.BR_FIRST_NAME_OR_LAST_NAME_MISSING, rv)
+        assert_return_code_for_user_update(Errors.BR_FIRST_NAME_OR_LAST_NAME_MISSING, rv), "22"
 
         rv = user_update_post_json(app, json_data={"last_name": "a"})
-        assert_return_code_for_user_update(Errors.BR_FIRST_NAME_OR_LAST_NAME_MISSING, rv)
+        assert_return_code_for_user_update(Errors.BR_FIRST_NAME_OR_LAST_NAME_MISSING, rv), "22"
 
 
 @pytest.mark.user_system
@@ -225,17 +225,17 @@ def test_user_update_success(app):
                 rv = user_update_post_json(
                     app, json_data={"first_name": "a", "last_name": "a", "email": "aa@gmail.com"}
                 )
-                assert rv.status_code == HTTPStatus.OK, "1"
+                assert rv.status_code == HTTPStatus.OK, "31"
 
                 get_current_user_email.side_effect = lambda: "aa@bb.com"
 
                 rv = user_update_post_json(
                     app, json_data={"first_name": "a", "last_name": "a", "phone": "0541234567"}
                 )
-                assert rv.status_code == HTTPStatus.OK, "2"
+                assert rv.status_code == HTTPStatus.OK, "32"
 
                 rv = user_update_post_json(app, json_data={"first_name": "a", "last_name": "a"})
-                assert rv.status_code == HTTPStatus.OK, "3"
+                assert rv.status_code == HTTPStatus.OK, "33"
 
                 send_json = {
                     "first_name": "a",
@@ -247,7 +247,7 @@ def test_user_update_success(app):
                     "user_desc": "a",
                 }
                 rv = user_update_post_json(app, json_data=send_json)
-                assert rv.status_code == HTTPStatus.OK, "4"
+                assert rv.status_code == HTTPStatus.OK, "34"
 
 
 # Used in test_get_current_user

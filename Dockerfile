@@ -17,7 +17,7 @@ COPY requirements.txt /anyway
 # We create the venv inside a builder container to avoid pulling in build deps into final image
 RUN python -m venv /venv3
 RUN . /venv3/bin/activate && \
-                    pip install -U setuptools wheel && \
+                    pip install -U "setuptools<81" wheel && \
                     pip install --upgrade pip && \
                     pip install -r requirements.txt
 
@@ -45,6 +45,8 @@ ENV FLASK_ENV=development
 COPY . /anyway
 
 EXPOSE 5000
+
+RUN flask assets clean
 
 ENTRYPOINT ["/anyway/docker-entrypoint.sh"]
 CMD FLASK_APP=anyway flask run --host 0.0.0.0

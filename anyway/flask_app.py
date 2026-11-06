@@ -10,7 +10,7 @@ import jinja2
 import pandas as pd
 from flask import make_response, render_template, abort, request, Response
 from flask import session
-from flask_assets import Environment
+from flask_assets import Environment, assets as assets_cli
 from flask_babel import Babel, gettext
 from flask_compress import Compress
 from flask_cors import CORS
@@ -129,6 +129,9 @@ app.config["REMEMBER_COOKIE_NAME"] = "anyway_remember_v2"
 app.secret_key = secrets.get("APP_SECRET_KEY")
 assets = Environment()
 assets.init_app(app)
+# Register the `flask assets` CLI explicitly: Flask 2.0 discovers extension commands via
+# pkg_resources, which is missing in recent setuptools versions.
+app.cli.add_command(assets_cli, "assets")
 assets_env = AssetsEnvironment(os.path.join(utilities._PROJECT_ROOT, "static"), "/static")
 assets.register(
     "css_all",

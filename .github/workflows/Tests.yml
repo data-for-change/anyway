@@ -75,6 +75,7 @@ jobs:
         docker exec anyway ./main.py process registered-vehicles
         docker exec anyway ./main.py process cbs --source local_dir_for_tests_only
         docker exec anyway ./main.py process road-segments
+        docker exec anyway ./main.py process junctions
     - name: Tests
       env:
         TWITTER_CONSUMER_KEY: ${{ secrets.TWITTER_CONSUMER_KEY }}

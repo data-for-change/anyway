@@ -146,7 +146,7 @@ def main(input_csv_filename, start_date, end_date, distance, pedestrian_only, ou
     with io.open(input_csv_filename, "r", encoding="utf-8") as csvfile:
         i = 0
         for row in csvfile:
-            (city, name, lat, lon) = parse_csv_line(row.strip())
+            city, name, lat, lon = parse_csv_line(row.strip())
             i += 1
             if lat is None or lon is None:
                 continue

@@ -71,7 +71,7 @@ def convert_roads_fatal_accidents_to_frontend_view(data_dict):
     data_list = []
     for key, value in data_dict.items():
         # pylint: disable=no-member
-        if key == AccidentType.HEAD_ON_FRONTAL_COLLISION.value:
+        if key == AccidentType.COLLISION_OF_FRONT_TO_FRONT.value:
             data_list.append(
                 {"desc": head_on_collisions_comparison_dict["head_to_head"], "count": value}
             )

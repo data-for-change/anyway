@@ -577,6 +577,8 @@ class Views(object):
             AccidentMarkerView.km,
             AccidentMarkerView.km_raw,
             AccidentMarkerView.km_accurate,
+            AccidentMarkerView.intersection,
+            AccidentMarkerView.intersection_hebrew,
             AccidentMarkerView.road_segment_id,
             AccidentMarkerView.road_segment_number,
             AccidentMarkerView.road_segment_name,

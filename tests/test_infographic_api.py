@@ -96,13 +96,13 @@ class TestInfographicApi:
 
     def test_accident_count_by_car_type(self, app):
         test_involved_by_vehicle_type_data = [{"vehicle_type": 1, "count": 3},
-                                              {"vehicle_type": 25, "count": 2},
+                                              {"vehicle_type": 37, "count": 2},
                                               {"vehicle_type": 15, "count": 1}]
         output_tmp = AccidentCountByCarTypeWidget.percentage_accidents_by_car_type(test_involved_by_vehicle_type_data)
         assert len(output_tmp) == 3
-        assert output_tmp[VehicleCategory.CAR.value] == 51
-        assert output_tmp[VehicleCategory.LARGE.value] == 33
-        assert output_tmp[VehicleCategory.BICYCLE_AND_SMALL_MOTOR.value] == 16
+        assert output_tmp[VehicleCategory.CAR.value] == 51, "1"
+        assert output_tmp[VehicleCategory.LARGE.value] == 33, "2"
+        assert output_tmp[VehicleCategory.BICYCLE_AND_SMALL_MOTOR.value] == 16, "3"
 
         def mock_get_accidents_stats(table_obj, filters=None, group_by=None, count=None, start_time=None,
                                      end_time=None, resolution=None):

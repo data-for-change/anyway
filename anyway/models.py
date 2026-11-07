@@ -1095,6 +1095,28 @@ class Junction(Base):
     x = Column(Float(), nullable=True)
     y = Column(Float(), nullable=True)
 
+    @staticmethod
+    def get_all_from_key_value(key: str, val: Iterable) -> dict:
+        if not isinstance(val, Iterable):
+            val = [val]
+        res = (
+            db.session.query(Junction)
+            .filter((getattr(Junction, key)).in_(val))
+            .first()
+        )
+        if res is None:
+            raise ValueError(f"{key}:{val}: could not find Junction")
+        return res.serialize()
+
+    def serialize(self):
+        return {
+            "junction": self.junction,
+            "junction_hebrew": self.junction_hebrew,
+            "x": self.x,
+            "y": self.y,
+        }
+
+
 
 class JunctionArm(Base):
     __tablename__ = "junction_arm"
@@ -1106,6 +1128,39 @@ class JunctionArm(Base):
     yishuv_symbol = Column(Integer())
     street_symbol = Column(Integer())
     arm_name = Column(Text())
+
+    @staticmethod
+    def get_junction_by_two_roads(road_symbol1: int, road_symbol2: int) -> int:
+        """Get a suburban junction that has arms on both roads"""
+        roads = {road_symbol1, road_symbol2}
+        res = (
+            db.session.query(JunctionArm.junction_symbol)
+            .filter(JunctionArm.is_suburban == True)
+            .filter(JunctionArm.road_symbol.in_(roads))
+            .group_by(JunctionArm.junction_symbol)
+            .having(func.count(func.distinct(JunctionArm.road_symbol)) == len(roads))
+            .order_by(JunctionArm.junction_symbol)
+            .first()
+        )
+        if res is None:
+            raise ValueError(
+                f"{road_symbol1}, {road_symbol2}: could not find a shared suburban JunctionArm junction"
+            )
+        return res.junction_symbol
+
+    @staticmethod
+    def get_junction_roads(j_sym: int) -> List[int]:
+        """Get road arms of junction"""
+        arms = (db.session.query(JunctionArm.road_symbol)
+                .filter(JunctionArm.junction_symbol == j_sym)
+                .filter(JunctionArm.is_suburban == True)
+                .all()
+        )
+        if arms is None:
+            raise ValueError(
+                f"{j_sym}: could not find JunctionArm"
+            )
+        return [j.road_symbol for j in arms]
 
 
 class RoadJunctionKM(Base):
@@ -2262,6 +2317,8 @@ class InvolvedMarkerView(Base):
     cross_direction_hebrew = Column(Text())
     road1 = Column(Integer(), index=True)
     road2 = Column(Integer(), index=True)
+    intersection = Column(Integer(), index=True)
+    intersection_hebrew = Column(Text())
     km = Column(Float())
     km_raw = Column(Text())
     km_accurate = Column(Boolean())
